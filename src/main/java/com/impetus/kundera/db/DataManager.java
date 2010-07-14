@@ -68,11 +68,7 @@ public class DataManager {
 	}
 
 	public void remove(EntityMetadata metadata, Object entity, String key) throws Exception {
-		try {
-			getDataAccessor(metadata).delete(em.getClient(), metadata, key);
-		} catch (Exception e) {
-			throw new PersistenceException(e.getMessage());
-		}
+		getDataAccessor(metadata).delete(em.getClient(), metadata, key);
 	}
 
 	private DataAccessor getDataAccessor(EntityMetadata metadata ) {
