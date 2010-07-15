@@ -27,7 +27,8 @@ public interface Validator {
     /**
      * Validate.
      * 
-     * @param clazz  the clazz
+     * @param clazz
+     *            the clazz
      * 
      * @throws PersistenceException
      *             the illegal entity exception

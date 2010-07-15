@@ -41,14 +41,15 @@ public abstract class BasePropertyAccessor<T> implements PropertyAccessor<T> {
     public Map<String, byte[]> readAsByteArray(Object target, Field property, String alias) throws PropertyAccessException {
         // make sure that the property is accessible
         if (!property.isAccessible()) {
-        	property.setAccessible(true);
+            property.setAccessible(true);
         }
 
         try {
             T value = (T) property.get(target);
-            
-            if (null == value) throw new PropertyAccessException(target.getClass().getName() + "." + property.getName() + " is null.");
-            
+
+            if (null == value)
+                throw new PropertyAccessException(target.getClass().getName() + "." + property.getName() + " is null.");
+
             Map<String, byte[]> map = new HashMap<String, byte[]>();
             map.put(alias, toBytes(value));
             return map;
@@ -56,17 +57,24 @@ public abstract class BasePropertyAccessor<T> implements PropertyAccessor<T> {
             throw new PropertyAccessException(iarg.getMessage());
         } catch (IllegalAccessException iacc) {
             throw new PropertyAccessException(iacc.getMessage());
-        } 
+        }
     }
-    
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#readAsObject(java.lang.
+     * Object, java.lang.reflect.Field, java.lang.String)
+     */
     @Override
-    public Map<String, T> readAsObject (Object target, Field property, String alias) throws PropertyAccessException {
-    	Map<String, T> map = new HashMap<String, T>();
-    	for (Map.Entry<String, byte[]> entry : readAsByteArray(target, property, alias).entrySet()) {
-    		map.put(entry.getKey(), fromBytes(entry.getValue()));
-    	}
-    	return map;
-    }    
+    public Map<String, T> readAsObject(Object target, Field property, String alias) throws PropertyAccessException {
+        Map<String, T> map = new HashMap<String, T>();
+        for (Map.Entry<String, byte[]> entry : readAsByteArray(target, property, alias).entrySet()) {
+            map.put(entry.getKey(), fromBytes(entry.getValue()));
+        }
+        return map;
+    }
 
     /*
      * (non-Javadoc)

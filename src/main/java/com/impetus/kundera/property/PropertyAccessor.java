@@ -41,20 +41,29 @@ public interface PropertyAccessor<T> {
      * @throws IllegalArgumentException
      *             * @throws IllegalAccessException * @throws
      *             PropertyAccessException the property access exception
+     * @throws PropertyAccessException
+     *             the property access exception
      */
-    Map<String, byte[]> readAsByteArray (Object from, Field property, String alias) throws PropertyAccessException;
+    Map<String, byte[]> readAsByteArray(Object from, Field property, String alias) throws PropertyAccessException;
 
-	/**
-	 * @param target
-	 * @param property
-	 * @param alias
-	 * @return
-	 * @throws PropertyAccessException
-	 */
-	Map<String, T> readAsObject(Object target, Field property, String alias)
-			throws PropertyAccessException;
-	
-	/**
+    /**
+     * Read as object.
+     * 
+     * @param target
+     *            the target
+     * @param property
+     *            the property
+     * @param alias
+     *            the alias
+     * 
+     * @return the map< string, t>
+     * 
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    Map<String, T> readAsObject(Object target, Field property, String alias) throws PropertyAccessException;
+
+    /**
      * Sets the.
      * 
      * @param target
@@ -70,6 +79,8 @@ public interface PropertyAccessor<T> {
      * @throws IllegalArgumentException
      *             * @throws IllegalAccessException * @throws
      *             PropertyAccessException the property access exception
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     void set(Object target, Field property, byte[] bytes, String alias) throws PropertyAccessException;
 
@@ -98,7 +109,5 @@ public interface PropertyAccessor<T> {
      *             the property access exception
      */
     byte[] toBytes(T value) throws PropertyAccessException;
-
-
 
 }

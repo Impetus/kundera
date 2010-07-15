@@ -27,10 +27,13 @@ public interface MetadataProcessor {
     /**
      * Process.
      * 
-     * @param clazz	the clazz
-     * @param metadata  the metadata
+     * @param clazz
+     *            the clazz
+     * @param metadata
+     *            the metadata
      * 
-     * @throws PersistenceException  the illegal entity exception
+     * @throws PersistenceException
+     *             the illegal entity exception
      */
     void process(Class<?> clazz, EntityMetadata metadata) throws PersistenceException;
 }

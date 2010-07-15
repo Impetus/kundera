@@ -28,87 +28,95 @@ import com.impetus.kundera.api.ColumnFamily;
  * 
  * @author animesh.kumar
  */
-@Entity			// makes it an entity class
-@ColumnFamily ("Authors")	// assign ColumnFamily type and name
+@Entity
+// makes it an entity class
+@ColumnFamily("Authors")
+// assign ColumnFamily type and name
 public class Author {
 
     /** The username. */
-    @Id						// row identifier
+    @Id
+    // row identifier
     String username;
-    
+
     /** The email address. */
-    @Column (name="email")	// override column-name
+    @Column(name = "email")
+    // override column-name
     String emailAddress;
-    
+
     /** The country. */
     @Column
     String country;
-    
+
     /** The registered. */
-    @Column (name="registeredSince")
+    @Column(name = "registeredSince")
     Date registered;
-    
+
     /** The name. */
     String name;
-    
+
     /**
      * Instantiates a new author.
      */
-    public Author () {		// must have a default constructor
+    public Author() { // must have a default constructor
     }
-    
+
     // getters, setters etc.
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode() {
-	final int prime = 31;
-	int result = 1;
-	result = prime * result
-		+ ((username == null) ? 0 : username.hashCode());
-	return result;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((username == null) ? 0 : username.hashCode());
+        return result;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
     public boolean equals(Object obj) {
-	if (this == obj)
-	    return true;
-	if (obj == null)
-	    return false;
-	if (!(obj instanceof Author))
-	    return false;
-	Author other = (Author) obj;
-	if (username == null) {
-	    if (other.username != null)
-		return false;
-	} else if (!username.equals(other.username))
-	    return false;
-	return true;
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof Author))
+            return false;
+        Author other = (Author) obj;
+        if (username == null) {
+            if (other.username != null)
+                return false;
+        } else if (!username.equals(other.username))
+            return false;
+        return true;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-	StringBuilder builder = new StringBuilder();
-	builder.append("Author [username=");
-	builder.append(username);
-	builder.append(", emailAddress=");
-	builder.append(emailAddress);
-	builder.append(", country=");
-	builder.append(country);
-	builder.append(", registered=");
-	builder.append(registered);
-	builder.append("]");
-	return builder.toString();
+        StringBuilder builder = new StringBuilder();
+        builder.append("Author [username=");
+        builder.append(username);
+        builder.append(", emailAddress=");
+        builder.append(emailAddress);
+        builder.append(", country=");
+        builder.append(country);
+        builder.append(", registered=");
+        builder.append(registered);
+        builder.append("]");
+        return builder.toString();
     }
-
 
     /**
      * Gets the username.
@@ -119,16 +127,15 @@ public class Author {
         return username;
     }
 
-
     /**
      * Sets the username.
      * 
-     * @param username the username to set
+     * @param username
+     *            the username to set
      */
     public void setUsername(String username) {
         this.username = username;
     }
-
 
     /**
      * Gets the email address.
@@ -139,16 +146,15 @@ public class Author {
         return emailAddress;
     }
 
-
     /**
      * Sets the email address.
      * 
-     * @param emailAddress the emailAddress to set
+     * @param emailAddress
+     *            the emailAddress to set
      */
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
     }
-
 
     /**
      * Gets the country.
@@ -159,16 +165,15 @@ public class Author {
         return country;
     }
 
-
     /**
      * Sets the country.
      * 
-     * @param country the country to set
+     * @param country
+     *            the country to set
      */
     public void setCountry(String country) {
         this.country = country;
     }
-
 
     /**
      * Gets the registered.
@@ -179,15 +184,14 @@ public class Author {
         return registered;
     }
 
-
     /**
      * Sets the registered.
      * 
-     * @param registered the registered to set
+     * @param registered
+     *            the registered to set
      */
     public void setRegistered(Date registered) {
         this.registered = registered;
     }
-    
-    
+
 }

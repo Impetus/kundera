@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
 public @interface Index {
 
     /**
-     * defines if the column should be indexed?
+     * defines if the column should be indexed?.
      * 
      * @return boolean
      */

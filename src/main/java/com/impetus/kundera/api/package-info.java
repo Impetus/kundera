@@ -1,12 +1,16 @@
-/**
- * This package contains annotations necessary to qualify an entity object.
- * <br/>
- * <br/>
- * 1. Each entity class must be annotated with @CassandraEntity<br/>
- * 2. Entities of ColumnFamily must be annotated with @ColumnFamily("column-family-name")<br/>
- * 3. Entities of SuperColumnFamily must be annotated with @SuperColumnFamily("super-column-family-name")<br/>
- * 4. Each entity must have a String Field annotated with @Id
- *    
- * @since 0.1
+/*
+ * Copyright 2010 Impetus Infotech.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.impetus.kundera.api;

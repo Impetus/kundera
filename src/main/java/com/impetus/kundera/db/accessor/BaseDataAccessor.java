@@ -21,150 +21,173 @@ import java.util.List;
 import com.impetus.kundera.metadata.EntityMetadata;
 
 /**
+ * The Class BaseDataAccessor.
+ * 
+ * @param <TF>
+ *            represents cassandra data unit. could be, Column or SuperColumn
+ * 
  * @author animesh.kumar
- * @param <TF> represents cassandra data unit. could be, Column or SuperColumn
  */
 public abstract class BaseDataAccessor<TF> {
 
-	/**
-	 * converts Entity to CassandraRow
-	 * 
-	 * @param metadata		Entity metadata
-	 * @param entity		Entity	
-	 * @return				BaseDataAccessor<TF>.CassandraRow
-	 * @throws Exception
-	 */
-	protected abstract CassandraRow entityToCassandraRow(
-			EntityMetadata metadata, Object entity) throws Exception;
+    /**
+     * converts Entity to CassandraRow.
+     * 
+     * @param metadata
+     *            Entity metadata
+     * @param entity
+     *            Entity
+     * 
+     * @return BaseDataAccessor<TF>.CassandraRow
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    protected abstract CassandraRow entityToCassandraRow(EntityMetadata metadata, Object entity) throws Exception;
 
-	/**
-	 * converts CassandraRow to Entity
-	 * 
-	 * @param <C>			Entity class type
-	 * @param clazz			Entity class	
-	 * @param metadata		Entity metadata
-	 * @param cassandraRow	BaseDataAccessor<TF>.CassandraRow object
-	 * @return				Entity
-	 * @throws Exception
-	 */
-	protected abstract <C> C cassandraRowToEntity(Class<C> clazz,
-			EntityMetadata metadata,
-			CassandraRow cassandraRow) throws Exception;
+    /**
+     * converts CassandraRow to Entity.
+     * 
+     * @param clazz
+     *            Entity class
+     * @param metadata
+     *            Entity metadata
+     * @param cassandraRow
+     *            BaseDataAccessor<TF>.CassandraRow object
+     * 
+     * @return Entity
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    protected abstract <C> C cassandraRowToEntity(Class<C> clazz, EntityMetadata metadata, CassandraRow cassandraRow) throws Exception;
 
-	/**
-	 * utility class to bridge the gap between thrift and entity. It represents a row from of Columns 
-	 * or SuperColumns. 
-	 * 
-	 * @author animesh.kumar
-	 */
-	public class CassandraRow {
+    /**
+     * utility class to bridge the gap between thrift and entity. It represents
+     * a row from of Columns or SuperColumns.
+     * 
+     * @author animesh.kumar
+     */
+    public class CassandraRow {
 
-		/** key of the row. */
-		private String key;
+        /** key of the row. */
+        private String key;
 
-		/** name of the family. */
-		private String columnFamilyName;
+        /** name of the family. */
+        private String columnFamilyName;
 
-		/** list of thrift columns from the row. */
-		private List<TF> columns;
+        /** list of thrift columns from the row. */
+        private List<TF> columns;
 
-		/**
-		 * default constructor.
-		 */
-		public CassandraRow() {
-			columns = new ArrayList<TF>();
-		}
+        /**
+         * default constructor.
+         */
+        public CassandraRow() {
+            columns = new ArrayList<TF>();
+        }
 
-		/**
-		 * The Constructor.
-		 */
-		public CassandraRow(String key, String columnFamilyName,
-				List<TF> columns) {
-			super();
-			this.key = key;
-			this.columnFamilyName = columnFamilyName;
-			this.columns = columns;
-		}
+        /**
+         * The Constructor.
+         * 
+         * @param key
+         *            the key
+         * @param columnFamilyName
+         *            the column family name
+         * @param columns
+         *            the columns
+         */
+        public CassandraRow(String key, String columnFamilyName, List<TF> columns) {
+            super();
+            this.key = key;
+            this.columnFamilyName = columnFamilyName;
+            this.columns = columns;
+        }
 
-		/**
-		 * Gets the key.
-		 * 
-		 * @return the key
-		 */
-		public String getKey() {
-			return key;
-		}
+        /**
+         * Gets the key.
+         * 
+         * @return the key
+         */
+        public String getKey() {
+            return key;
+        }
 
-		/**
-		 * Sets the key.
-		 * 
-		 * @param key  the key to set
-		 */
-		public void setKey(String key) {
-			this.key = key;
-		}
+        /**
+         * Sets the key.
+         * 
+         * @param key
+         *            the key to set
+         */
+        public void setKey(String key) {
+            this.key = key;
+        }
 
-		/**
-		 * Gets the column family name.
-		 * 
-		 * @return the columnFamilyName
-		 */
-		public String getColumnFamilyName() {
-			return columnFamilyName;
-		}
+        /**
+         * Gets the column family name.
+         * 
+         * @return the columnFamilyName
+         */
+        public String getColumnFamilyName() {
+            return columnFamilyName;
+        }
 
-		/**
-		 * Sets the column family name.
-		 * 
-		 * @param columnFamilyName  the columnFamilyName to set
-		 */
-		public void setColumnFamilyName(String columnFamilyName) {
-			this.columnFamilyName = columnFamilyName;
-		}
+        /**
+         * Sets the column family name.
+         * 
+         * @param columnFamilyName
+         *            the columnFamilyName to set
+         */
+        public void setColumnFamilyName(String columnFamilyName) {
+            this.columnFamilyName = columnFamilyName;
+        }
 
-		/**
-		 * Gets the columns.
-		 * 
-		 * @return the columns
-		 */
-		public List<TF> getColumns() {
-			return columns;
-		}
+        /**
+         * Gets the columns.
+         * 
+         * @return the columns
+         */
+        public List<TF> getColumns() {
+            return columns;
+        }
 
-		/**
-		 * Sets the columns.
-		 * 
-		 * @param columns the columns to set
-		 */
-		public void setColumns(List<TF> columns) {
-			this.columns = columns;
-		}
+        /**
+         * Sets the columns.
+         * 
+         * @param columns
+         *            the columns to set
+         */
+        public void setColumns(List<TF> columns) {
+            this.columns = columns;
+        }
 
-		/**
-		 * Adds the column.
-		 * 
-		 * @param column  the column
-		 */
-		public void addColumn(TF column) {
-			columns.add(column);
-		}
+        /**
+         * Adds the column.
+         * 
+         * @param column
+         *            the column
+         */
+        public void addColumn(TF column) {
+            columns.add(column);
+        }
 
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			StringBuilder builder = new StringBuilder();
-			builder.append("CassandraRow [key=");
-			builder.append(key);
-			builder.append(", columnFamilyName=");
-			builder.append(columnFamilyName);
-			builder.append(", columns=");
-			builder.append(columns);
-			builder.append("]");
-			return builder.toString();
-		}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("CassandraRow [key=");
+            builder.append(key);
+            builder.append(", columnFamilyName=");
+            builder.append(columnFamilyName);
+            builder.append(", columns=");
+            builder.append(columns);
+            builder.append("]");
+            return builder.toString();
+        }
 
-	}
+    }
 
 }

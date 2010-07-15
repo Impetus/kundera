@@ -1,28 +1,17 @@
 /*
- * Copyright (c) 2010-2011, Animesh Kumar
- * All rights reserved.
+ * Copyright 2010 Impetus Infotech.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   - Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   - Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.impetus.kundera.classreading;
 
@@ -34,107 +23,207 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
 /**
- * Iterates through a Jar file for each file resource
+ * Iterates through a Jar file for each file resource.
  * 
  * @author animesh.kumar
- *
  */
 public class JarFileIterator implements ResourceIterator {
 
-	JarInputStream jar;
-	JarEntry next;
-	Filter filter;
-	boolean initial = true;
-	boolean closed = false;
+    /** The jar. */
+    JarInputStream jar;
 
-	public JarFileIterator(File file, Filter filter) throws IOException {
-		this(new FileInputStream(file), filter);
-	}
+    /** The next. */
+    JarEntry next;
 
-	
-	public JarFileIterator(InputStream is, Filter filter) throws IOException {
-		this.filter = filter;
-		jar = new JarInputStream(is);
-	}
+    /** The filter. */
+    Filter filter;
 
-	private void setNext() {
-		initial = true;
-		try {
-			if (next != null) {
-				jar.closeEntry();
-			}
-			next = null;
+    /** The initial. */
+    boolean initial = true;
 
-			do {
-				next = jar.getNextJarEntry();
-			} while (next != null && (next.isDirectory() || (filter == null || !filter.accepts(next.getName()))));
+    /** The closed. */
+    boolean closed = false;
 
-			if (next == null) {
-				close();
-			}
-		} catch (IOException e) {
-			throw new RuntimeException("failed to browse jar", e);
-		}
-	}
+    /**
+     * Instantiates a new jar file iterator.
+     * 
+     * @param file
+     *            the file
+     * @param filter
+     *            the filter
+     * 
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
+    public JarFileIterator(File file, Filter filter) throws IOException {
+        this(new FileInputStream(file), filter);
+    }
 
-	public InputStream next() {
-		if (closed || (next == null && !initial)) return null;
-		setNext();
-		if (next == null) return null;
-		return new InputStreamWrapper(jar);
-	}
+    /**
+     * Instantiates a new jar file iterator.
+     * 
+     * @param is
+     *            the is
+     * @param filter
+     *            the filter
+     * 
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
+    public JarFileIterator(InputStream is, Filter filter) throws IOException {
+        this.filter = filter;
+        jar = new JarInputStream(is);
+    }
 
-	public void close() {
-		try {
-			closed = true;
-			jar.close();
-		} catch (IOException ignored) {
+    /**
+     * Sets the next.
+     */
+    private void setNext() {
+        initial = true;
+        try {
+            if (next != null) {
+                jar.closeEntry();
+            }
+            next = null;
 
-		}
+            do {
+                next = jar.getNextJarEntry();
+            } while (next != null && (next.isDirectory() || (filter == null || !filter.accepts(next.getName()))));
 
-	}
+            if (next == null) {
+                close();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("failed to browse jar", e);
+        }
+    }
 
-	class InputStreamWrapper extends InputStream {
-		private InputStream delegate;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.classreading.ResourceIterator#next()
+     */
+    public InputStream next() {
+        if (closed || (next == null && !initial))
+            return null;
+        setNext();
+        if (next == null)
+            return null;
+        return new InputStreamWrapper(jar);
+    }
 
-		public InputStreamWrapper(InputStream delegate) {
-			this.delegate = delegate;
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.classreading.ResourceIterator#close()
+     */
+    public void close() {
+        try {
+            closed = true;
+            jar.close();
+        } catch (IOException ignored) {
 
-		public int read() throws IOException {
-			return delegate.read();
-		}
+        }
 
-		public int read(byte[] bytes) throws IOException {
-			return delegate.read(bytes);
-		}
+    }
 
-		public int read(byte[] bytes, int i, int i1) throws IOException {
-			return delegate.read(bytes, i, i1);
-		}
+    /**
+     * The Class InputStreamWrapper.
+     */
+    class InputStreamWrapper extends InputStream {
 
-		public long skip(long l) throws IOException {
-			return delegate.skip(l);
-		}
+        /** The delegate. */
+        private InputStream delegate;
 
-		public int available() throws IOException {
-			return delegate.available();
-		}
+        /**
+         * Instantiates a new input stream wrapper.
+         * 
+         * @param delegate
+         *            the delegate
+         */
+        public InputStreamWrapper(InputStream delegate) {
+            this.delegate = delegate;
+        }
 
-		public void close() throws IOException {
-			// ignored
-		}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.io.InputStream#read()
+         */
+        public int read() throws IOException {
+            return delegate.read();
+        }
 
-		public void mark(int i) {
-			delegate.mark(i);
-		}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.io.InputStream#read(byte[])
+         */
+        public int read(byte[] bytes) throws IOException {
+            return delegate.read(bytes);
+        }
 
-		public void reset() throws IOException {
-			delegate.reset();
-		}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.io.InputStream#read(byte[], int, int)
+         */
+        public int read(byte[] bytes, int i, int i1) throws IOException {
+            return delegate.read(bytes, i, i1);
+        }
 
-		public boolean markSupported() {
-			return delegate.markSupported();
-		}
-	}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.io.InputStream#skip(long)
+         */
+        public long skip(long l) throws IOException {
+            return delegate.skip(l);
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.io.InputStream#available()
+         */
+        public int available() throws IOException {
+            return delegate.available();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.io.InputStream#close()
+         */
+        public void close() throws IOException {
+            // ignored
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.io.InputStream#mark(int)
+         */
+        public void mark(int i) {
+            delegate.mark(i);
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.io.InputStream#reset()
+         */
+        public void reset() throws IOException {
+            delegate.reset();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.io.InputStream#markSupported()
+         */
+        public boolean markSupported() {
+            return delegate.markSupported();
+        }
+    }
 }

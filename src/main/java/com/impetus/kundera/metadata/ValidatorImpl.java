@@ -64,7 +64,7 @@ public class ValidatorImpl implements Validator {
 
         // Is Entity?
         if (!clazz.isAnnotationPresent(Entity.class)) {
-        	throw new PersistenceException(clazz.getName() + " is not annotated with @Entity");
+            throw new PersistenceException(clazz.getName() + " is not annotated with @Entity");
         }
 
         // must have a default no-argument constructor

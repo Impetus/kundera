@@ -24,319 +24,355 @@ import java.util.StringTokenizer;
  * 
  * <pre>
  * SELECT [ {result} ]
- *        [FROM {candidate-classes} ]
- *        [WHERE {filter}]
- *        [GROUP BY {grouping-clause} ]
- *        [HAVING {having-clause} ]
- *        [ORDER BY {ordering-clause}]
+ * [FROM {candidate-classes} ]
+ * [WHERE {filter}]
+ * [GROUP BY {grouping-clause} ]
+ * [HAVING {having-clause} ]
+ * [ORDER BY {ordering-clause}]
  * e.g SELECT c FROM Customer c INNER JOIN c.orders o WHERE c.status = 1
  * </pre>
  * 
- * 
  * @author animesh.kumar
- *
  */
 public class KunderaQueryParser {
-	/** The JPQL query to populate. */
-	private KunderaQuery query;
 
-	/** The single-string query string. */
-	private String queryString;
+    /** The JPQL query to populate. */
+    private KunderaQuery query;
 
-	/**
-	 * Record of the keyword currently being processed, so we can check for out
-	 * of order keywords.
-	 */
-	int keywordPosition = -1;
+    /** The single-string query string. */
+    private String queryString;
 
-	/**
-	 * Constructor for the Single-String parser.
-	 * 
-	 * @param query
-	 *            The query
-	 * @param queryString
-	 *            The Single-String query
-	 */
-	public KunderaQueryParser(KunderaQuery query, String queryString) {
-		this.query = query;
-		this.queryString = queryString;
-	}
+    /**
+     * Record of the keyword currently being processed, so we can check for out
+     * of order keywords.
+     */
+    int keywordPosition = -1;
 
-	/**
-	 * Method to parse the Single-String query
-	 */
-	public void parse() {
-		new Compiler(new Parser(queryString)).compile();
-	}
+    /**
+     * Constructor for the Single-String parser.
+     * 
+     * @param query
+     *            The query
+     * @param queryString
+     *            The Single-String query
+     */
+    public KunderaQueryParser(KunderaQuery query, String queryString) {
+        this.query = query;
+        this.queryString = queryString;
+    }
 
-	/**
-	 * Method to detect whether this token is a keyword for JPQL Single-String
-	 * 
-	 * @param token
-	 *            The token
-	 * @return Whether it is a keyword
-	 */
-	private boolean isKeyword(String token) {
-		// Compare the passed token against the provided keyword list, or their
-		// lowercase form
-		for (int i = 0; i < KunderaQuery.SINGLE_STRING_KEYWORDS.length; i++) {
-			if (token.equalsIgnoreCase(KunderaQuery.SINGLE_STRING_KEYWORDS[i])) {
-				return true;
-			}
-		}
-		return false;
-	}
+    /**
+     * Method to parse the Single-String query.
+     */
+    public void parse() {
+        new Compiler(new Parser(queryString)).compile();
+    }
 
-	/**
-	 * 
-	 * Compiler to process keywords contents. In the query the keywords often
-	 * have content values following them that represent the constituent parts
-	 * of the query. This takes the keyword and sets the constituent part
-	 * accordingly.
-	 */
-	private class Compiler {
-		Parser tokenizer;
+    /**
+     * Method to detect whether this token is a keyword for JPQL Single-String.
+     * 
+     * @param token
+     *            The token
+     * 
+     * @return Whether it is a keyword
+     */
+    private boolean isKeyword(String token) {
+        // Compare the passed token against the provided keyword list, or their
+        // lowercase form
+        for (int i = 0; i < KunderaQuery.SINGLE_STRING_KEYWORDS.length; i++) {
+            if (token.equalsIgnoreCase(KunderaQuery.SINGLE_STRING_KEYWORDS[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-		// Temporary variable since grouping clause is made up of GROUP BY ...
-		// HAVING ...
-		String groupingClause;
+    /**
+     * Compiler to process keywords contents. In the query the keywords often
+     * have content values following them that represent the constituent parts
+     * of the query. This takes the keyword and sets the constituent part
+     * accordingly.
+     */
+    private class Compiler {
 
-		Compiler(Parser tokenizer) {
-			this.tokenizer = tokenizer;
-		}
+        /** The tokenizer. */
+        Parser tokenizer;
 
-		private void compile() {
-			// TODO Query can start "SELECT", "DELETE" or "UPDATE"
-			compileSelect();
+        // Temporary variable since grouping clause is made up of GROUP BY ...
+        // HAVING ...
+        /** The grouping clause. */
+        String groupingClause;
 
-			// any keyword after compiling the SELECT is an error
-			String keyword = tokenizer.parseKeyword();
-			if (keyword != null) {
-				if (isKeyword(keyword)) {
-					throw new RuntimeException("out of order keyword: " + keyword);
-				} else {
-					// unexpected token
-				}
-			}
-		}
+        /**
+         * Instantiates a new compiler.
+         * 
+         * @param tokenizer
+         *            the tokenizer
+         */
+        Compiler(Parser tokenizer) {
+            this.tokenizer = tokenizer;
+        }
 
-		private void compileSelect() {
-			if (!tokenizer.parseKeywordIgnoreCase("SELECT")) {
-				throw new RuntimeException("no select to start");
-			}
-			compileResult();
-			if (tokenizer.parseKeywordIgnoreCase("FROM")) {
-				compileFrom();
-			}
-			if (tokenizer.parseKeywordIgnoreCase("WHERE")) {
-				compileWhere();
-			}
-			if (tokenizer.parseKeywordIgnoreCase("GROUP BY")) {
-				compileGroup();
-			}
-			if (tokenizer.parseKeywordIgnoreCase("HAVING")) {
-				compileHaving();
-			}
-			if (groupingClause != null) {
-				query.setGrouping(groupingClause);
-			}
+        /**
+         * Compile.
+         */
+        private void compile() {
+            // TODO Query can start "SELECT", "DELETE" or "UPDATE"
+            compileSelect();
 
-			if (tokenizer.parseKeywordIgnoreCase("ORDER BY")) {
-				compileOrder();
-			}
-		}
+            // any keyword after compiling the SELECT is an error
+            String keyword = tokenizer.parseKeyword();
+            if (keyword != null) {
+                if (isKeyword(keyword)) {
+                    throw new RuntimeException("out of order keyword: " + keyword);
+                } else {
+                    // unexpected token
+                }
+            }
+        }
 
-		private void compileResult() {
-			String content = tokenizer.parseContent();
-			// content may be empty
-			if (content.length() > 0) {
-				query.setResult(content);
-			}
-		}
+        /**
+         * Compile select.
+         */
+        private void compileSelect() {
+            if (!tokenizer.parseKeywordIgnoreCase("SELECT")) {
+                throw new RuntimeException("no select to start");
+            }
+            compileResult();
+            if (tokenizer.parseKeywordIgnoreCase("FROM")) {
+                compileFrom();
+            }
+            if (tokenizer.parseKeywordIgnoreCase("WHERE")) {
+                compileWhere();
+            }
+            if (tokenizer.parseKeywordIgnoreCase("GROUP BY")) {
+                compileGroup();
+            }
+            if (tokenizer.parseKeywordIgnoreCase("HAVING")) {
+                compileHaving();
+            }
+            if (groupingClause != null) {
+                query.setGrouping(groupingClause);
+            }
 
-		private void compileFrom() {
-			String content = tokenizer.parseContent();
-			// content may be empty
-			if (content.length() > 0) {
-				query.setFrom(content);
-			}
-		}
+            if (tokenizer.parseKeywordIgnoreCase("ORDER BY")) {
+                compileOrder();
+            }
+        }
 
-		private void compileWhere() {
-			String content = tokenizer.parseContent();
-			// content cannot be empty
-			if (content.length() == 0) {
-				throw new RuntimeException("keyword without value[WHERE]");
-			}
-			query.setFilter(content);
-		}
+        /**
+         * Compile result.
+         */
+        private void compileResult() {
+            String content = tokenizer.parseContent();
+            // content may be empty
+            if (content.length() > 0) {
+                query.setResult(content);
+            }
+        }
 
-		private void compileGroup() {
-			String content = tokenizer.parseContent();
-			// content cannot be empty
-			if (content.length() == 0) {
-				throw new RuntimeException("keyword without value: GROUP BY");
-			}
-			groupingClause = content;
-		}
+        /**
+         * Compile from.
+         */
+        private void compileFrom() {
+            String content = tokenizer.parseContent();
+            // content may be empty
+            if (content.length() > 0) {
+                query.setFrom(content);
+            }
+        }
 
-		private void compileHaving() {
-			String content = tokenizer.parseContent();
-			// content cannot be empty
-			if (content.length() == 0) {
-				throw new RuntimeException("keyword without value: HAVING");
-			}
-			if (groupingClause != null) {
-				groupingClause = groupingClause.trim() + content;
-			} else {
-				groupingClause = content;
-			}
-		}
+        /**
+         * Compile where.
+         */
+        private void compileWhere() {
+            String content = tokenizer.parseContent();
+            // content cannot be empty
+            if (content.length() == 0) {
+                throw new RuntimeException("keyword without value[WHERE]");
+            }
+            query.setFilter(content);
+        }
 
-		private void compileOrder() {
-			String content = tokenizer.parseContent();
-			// content cannot be empty
-			if (content.length() == 0) {
-				throw new RuntimeException("keyword without value: ORDER BY");
-			}
-			query.setOrdering(content);
-		}
-	}
+        /**
+         * Compile group.
+         */
+        private void compileGroup() {
+            String content = tokenizer.parseContent();
+            // content cannot be empty
+            if (content.length() == 0) {
+                throw new RuntimeException("keyword without value: GROUP BY");
+            }
+            groupingClause = content;
+        }
 
-	/**
-	 * Tokenizer that provides access to current token
-	 */
-	private class Parser {
-		/** tokens */
-		final String[] tokens;
+        /**
+         * Compile having.
+         */
+        private void compileHaving() {
+            String content = tokenizer.parseContent();
+            // content cannot be empty
+            if (content.length() == 0) {
+                throw new RuntimeException("keyword without value: HAVING");
+            }
+            if (groupingClause != null) {
+                groupingClause = groupingClause.trim() + content;
+            } else {
+                groupingClause = content;
+            }
+        }
 
-		/** keywords */
-		final String[] keywords;
+        /**
+         * Compile order.
+         */
+        private void compileOrder() {
+            String content = tokenizer.parseContent();
+            // content cannot be empty
+            if (content.length() == 0) {
+                throw new RuntimeException("keyword without value: ORDER BY");
+            }
+            query.setOrdering(content);
+        }
+    }
 
-		/** current token cursor position */
-		int pos = -1;
+    /**
+     * Tokenizer that provides access to current token.
+     */
+    private class Parser {
 
-		/**
-		 * Constructor
-		 * 
-		 * @param str
-		 */
-		public Parser(String str) {
-			StringTokenizer tokenizer = new StringTokenizer(str);
-			tokens = new String[tokenizer.countTokens()];
-			keywords = new String[tokenizer.countTokens()];
-			int i = 0;
-			while (tokenizer.hasMoreTokens()) {
-				tokens[i++] = tokenizer.nextToken();
-			}
-			for (i = 0; i < tokens.length; i++) {
-				if (isKeyword(tokens[i])) {
-					keywords[i] = tokens[i];
-				} else if (i < tokens.length - 1 && isKeyword(tokens[i] + ' ' + tokens[i + 1])) {
-					keywords[i] = tokens[i];
-					i++;
-					keywords[i] = tokens[i];
-				}
-			}
-		}
+        /** tokens. */
+        final String[] tokens;
 
-		/**
-		 * Parse the content until a keyword is found
-		 * 
-		 * @return the content
-		 */
-		public String parseContent() {
-			String content = "";
-			while (pos < tokens.length - 1) {
-				pos++;
-				if (isKeyword(tokens[pos])) {
-					pos--;
-					break;
-				} else if (pos < tokens.length - 1 && isKeyword(tokens[pos] + ' ' + tokens[pos + 1])) {
-					pos--;
-					break;
-				} else {
-					if (content.length() == 0) {
-						content = tokens[pos];
-					} else {
-						content += " " + tokens[pos];
-					}
-				}
-			}
-			return content;
-		}
+        /** keywords. */
+        final String[] keywords;
 
-		/**
-		 * Parse the next token looking for a keyword. The cursor position is
-		 * skipped in one tick if a keyword is found
-		 * 
-		 * @param keyword
-		 *            the searched keyword
-		 * @return true if the keyword
-		 */
-		public boolean parseKeyword(String keyword) {
-			if (pos < tokens.length - 1) {
-				pos++;
-				if (keywords[pos] != null) {
-					if (keywords[pos].equals(keyword)) {
-						return true;
-					}
-					if (keyword.indexOf(' ') > -1) {
-						if (pos < keywords.length - 1) {
-							if ((keywords[pos] + ' ' + keywords[pos + 1]).equals(keyword)) {
-								pos++;
-								return true;
-							}
-						}
-					}
-				}
-				pos--;
-			}
-			return false;
-		}
+        /** current token cursor position. */
+        int pos = -1;
 
-		/**
-		 * Parse the next token looking for a keyword. The cursor position is
-		 * skipped in one tick if a keyword is found
-		 * 
-		 * @param keyword
-		 *            the searched keyword
-		 * @return true if the keyword
-		 */
-		public boolean parseKeywordIgnoreCase(String keyword) {
-			if (pos < tokens.length - 1) {
-				pos++;
-				if (keywords[pos] != null) {
-					if (keywords[pos].equalsIgnoreCase(keyword)) {
-						return true;
-					}
-					if (keyword.indexOf(' ') > -1) {
-						if ((keywords[pos] + ' ' + keywords[pos + 1]).equalsIgnoreCase(keyword)) {
-							pos++;
-							return true;
-						}
-					}
-				}
-				pos--;
-			}
-			return false;
-		}
+        /**
+         * Constructor.
+         * 
+         * @param str
+         *            the str
+         */
+        public Parser(String str) {
+            StringTokenizer tokenizer = new StringTokenizer(str);
+            tokens = new String[tokenizer.countTokens()];
+            keywords = new String[tokenizer.countTokens()];
+            int i = 0;
+            while (tokenizer.hasMoreTokens()) {
+                tokens[i++] = tokenizer.nextToken();
+            }
+            for (i = 0; i < tokens.length; i++) {
+                if (isKeyword(tokens[i])) {
+                    keywords[i] = tokens[i];
+                } else if (i < tokens.length - 1 && isKeyword(tokens[i] + ' ' + tokens[i + 1])) {
+                    keywords[i] = tokens[i];
+                    i++;
+                    keywords[i] = tokens[i];
+                }
+            }
+        }
 
-		/**
-		 * Parse the next token looking for a keyword. The cursor position is
-		 * skipped in one tick if a keyword is found
-		 * 
-		 * @return the parsed keyword or null
-		 */
-		public String parseKeyword() {
-			if (pos < tokens.length - 1) {
-				pos++;
-				if (keywords[pos] != null) {
-					return keywords[pos];
-				}
-				pos--;
-			}
-			return null;
-		}
-	}
+        /**
+         * Parse the content until a keyword is found.
+         * 
+         * @return the content
+         */
+        public String parseContent() {
+            String content = "";
+            while (pos < tokens.length - 1) {
+                pos++;
+                if (isKeyword(tokens[pos])) {
+                    pos--;
+                    break;
+                } else if (pos < tokens.length - 1 && isKeyword(tokens[pos] + ' ' + tokens[pos + 1])) {
+                    pos--;
+                    break;
+                } else {
+                    if (content.length() == 0) {
+                        content = tokens[pos];
+                    } else {
+                        content += " " + tokens[pos];
+                    }
+                }
+            }
+            return content;
+        }
+
+        /**
+         * Parse the next token looking for a keyword. The cursor position is
+         * skipped in one tick if a keyword is found
+         * 
+         * @param keyword
+         *            the searched keyword
+         * 
+         * @return true if the keyword
+         */
+        public boolean parseKeyword(String keyword) {
+            if (pos < tokens.length - 1) {
+                pos++;
+                if (keywords[pos] != null) {
+                    if (keywords[pos].equals(keyword)) {
+                        return true;
+                    }
+                    if (keyword.indexOf(' ') > -1) {
+                        if (pos < keywords.length - 1) {
+                            if ((keywords[pos] + ' ' + keywords[pos + 1]).equals(keyword)) {
+                                pos++;
+                                return true;
+                            }
+                        }
+                    }
+                }
+                pos--;
+            }
+            return false;
+        }
+
+        /**
+         * Parse the next token looking for a keyword. The cursor position is
+         * skipped in one tick if a keyword is found
+         * 
+         * @param keyword
+         *            the searched keyword
+         * 
+         * @return true if the keyword
+         */
+        public boolean parseKeywordIgnoreCase(String keyword) {
+            if (pos < tokens.length - 1) {
+                pos++;
+                if (keywords[pos] != null) {
+                    if (keywords[pos].equalsIgnoreCase(keyword)) {
+                        return true;
+                    }
+                    if (keyword.indexOf(' ') > -1) {
+                        if ((keywords[pos] + ' ' + keywords[pos + 1]).equalsIgnoreCase(keyword)) {
+                            pos++;
+                            return true;
+                        }
+                    }
+                }
+                pos--;
+            }
+            return false;
+        }
+
+        /**
+         * Parse the next token looking for a keyword. The cursor position is
+         * skipped in one tick if a keyword is found
+         * 
+         * @return the parsed keyword or null
+         */
+        public String parseKeyword() {
+            if (pos < tokens.length - 1) {
+                pos++;
+                if (keywords[pos] != null) {
+                    return keywords[pos];
+                }
+                pos--;
+            }
+            return null;
+        }
+    }
 }

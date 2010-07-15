@@ -38,107 +38,190 @@ import com.impetus.kundera.metadata.processor.SuperColumnFamilyProcessor;
  */
 public class MetadataManager implements AnnotationDiscoveryListener {
 
-	/** the log used by this class. */
-	private static Log log = LogFactory.getLog(MetadataManager.class);
+    /** the log used by this class. */
+    private static Log log = LogFactory.getLog(MetadataManager.class);
 
-	/** cache for Metadata. */
-	private Map<Class<?>, EntityMetadata> metadataCache = new ConcurrentHashMap<Class<?>, EntityMetadata>();
-	
-	private Map<String, Class<?>> entityNameToClassMap = new ConcurrentHashMap<String, Class<?>>();
+    /** cache for Metadata. */
+    private Map<Class<?>, EntityMetadata> metadataCache = new ConcurrentHashMap<Class<?>, EntityMetadata>();
 
-	private List<MetadataProcessor> metadataProcessors;
+    /** The entity name to class map. */
+    private Map<String, Class<?>> entityNameToClassMap = new ConcurrentHashMap<String, Class<?>>();
 
-	/** The Validator. */
-	private Validator validator;
+    /** The metadata processors. */
+    private List<MetadataProcessor> metadataProcessors;
 
-	// intentionally unused!
-	@SuppressWarnings("unused")
-	private EntityManagerFactory factory;
-	
-	/**
-	 * Instantiates a new metadata manager.
-	 */
-	public MetadataManager(EntityManagerFactory factory) {
-		this.factory = factory; 
-		
-		validator = new ValidatorImpl();
+    /** The Validator. */
+    private Validator validator;
 
-		metadataProcessors = new ArrayList<MetadataProcessor>();
-		
-		// add processors to chain.
-		metadataProcessors.add(new SuperColumnFamilyProcessor());
-		metadataProcessors.add(new ColumnFamilyProcessor());
-		metadataProcessors.add(new IndexProcessor());
-	}
+    // intentionally unused!
+    /** The factory. */
+    @SuppressWarnings("unused")
+    private EntityManagerFactory factory;
 
-	public void validate(Class<?> clazz) throws PersistenceException {
-		validator.validate(clazz);
-	}
+    /**
+     * Instantiates a new metadata manager.
+     * 
+     * @param factory
+     *            the factory
+     */
+    public MetadataManager(EntityManagerFactory factory) {
+        this.factory = factory;
 
-	public boolean isColumnFamily(Class<?> clazz) throws PersistenceException {
-		return getEntityMetadata(clazz).getType().equals(EntityMetadata.Type.COLUMN_FAMILY);
-	}
+        validator = new ValidatorImpl();
 
-	public boolean isSuperColumnFamily(Class<?> clazz) throws PersistenceException {
-		return getEntityMetadata(clazz).getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY);
-	}
+        metadataProcessors = new ArrayList<MetadataProcessor>();
 
-	public EntityMetadata getEntityMetadata(Class<?> clazz) throws PersistenceException {
+        // add processors to chain.
+        metadataProcessors.add(new SuperColumnFamilyProcessor());
+        metadataProcessors.add(new ColumnFamilyProcessor());
+        metadataProcessors.add(new IndexProcessor());
+    }
 
-		EntityMetadata metadata = metadataCache.get(clazz);
-		if (null == metadata) {
-			log.debug("Metadata not found in cache for " + clazz.getName());
-			// double check locking.
-			synchronized (clazz) {
-				if (null == metadata) {
-					metadata = process(clazz);
-					cacheMetadata (clazz, metadata);
-				}
-			}
-		}
-		return metadata;
-	}
+    /**
+     * Validate.
+     * 
+     * @param clazz
+     *            the clazz
+     * 
+     * @throws PersistenceException
+     *             the persistence exception
+     */
+    public void validate(Class<?> clazz) throws PersistenceException {
+        validator.validate(clazz);
+    }
 
-	public EntityMetadata process(Class<?> clazz) throws PersistenceException {
+    /**
+     * Checks if is column family.
+     * 
+     * @param clazz
+     *            the clazz
+     * 
+     * @return true, if is column family
+     * 
+     * @throws PersistenceException
+     *             the persistence exception
+     */
+    public boolean isColumnFamily(Class<?> clazz) throws PersistenceException {
+        return getEntityMetadata(clazz).getType().equals(EntityMetadata.Type.COLUMN_FAMILY);
+    }
 
-		EntityMetadata metadata = new EntityMetadata(clazz);
-		validate(clazz);
-		
-		log.debug("Processing @Entity: " + clazz);
-		
-		for (MetadataProcessor processor : metadataProcessors) {
-			processor.process(clazz, metadata);
-		}
+    /**
+     * Checks if is super column family.
+     * 
+     * @param clazz
+     *            the clazz
+     * 
+     * @return true, if is super column family
+     * 
+     * @throws PersistenceException
+     *             the persistence exception
+     */
+    public boolean isSuperColumnFamily(Class<?> clazz) throws PersistenceException {
+        return getEntityMetadata(clazz).getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY);
+    }
 
-		return metadata;
-	}
-	
-	private void cacheMetadata (Class<?> clazz, EntityMetadata metadata) {
-		metadataCache.put(clazz, metadata);
-		
-		// save name to class map.
-		if (entityNameToClassMap.containsKey(clazz.getSimpleName())) { 
-			throw new PersistenceException("Name conflict between classes " + entityNameToClassMap.get(clazz.getSimpleName()).getName() + " and " + clazz.getName());
-		}
-		entityNameToClassMap.put(clazz.getSimpleName(), clazz);
-	}
-	
-	public Class<?> getEntityClassByName (String name) {
-		return entityNameToClassMap.get(name);
-	}
+    /**
+     * Gets the entity metadata.
+     * 
+     * @param clazz
+     *            the clazz
+     * 
+     * @return the entity metadata
+     * 
+     * @throws PersistenceException
+     *             the persistence exception
+     */
+    public EntityMetadata getEntityMetadata(Class<?> clazz) throws PersistenceException {
 
-	@Override
-	// called whenever a class with @Entity annotation is encountered in the classpath.
-	public void discovered(String className, String[] annotations) {
-		try {
-			Class<?> clazz = Class.forName(className);
-			
-			// process for Metadata
-			EntityMetadata metadata = process(clazz);
-			cacheMetadata (clazz, metadata);
-			log.info("Added @Entity " + clazz.getName());
-		} catch (ClassNotFoundException e) {
-			throw new PersistenceException(e.getMessage());
-		}
-	}
+        EntityMetadata metadata = metadataCache.get(clazz);
+        if (null == metadata) {
+            log.debug("Metadata not found in cache for " + clazz.getName());
+            // double check locking.
+            synchronized (clazz) {
+                if (null == metadata) {
+                    metadata = process(clazz);
+                    cacheMetadata(clazz, metadata);
+                }
+            }
+        }
+        return metadata;
+    }
+
+    /**
+     * Process.
+     * 
+     * @param clazz
+     *            the clazz
+     * 
+     * @return the entity metadata
+     * 
+     * @throws PersistenceException
+     *             the persistence exception
+     */
+    public EntityMetadata process(Class<?> clazz) throws PersistenceException {
+
+        EntityMetadata metadata = new EntityMetadata(clazz);
+        validate(clazz);
+
+        log.debug("Processing @Entity: " + clazz);
+
+        for (MetadataProcessor processor : metadataProcessors) {
+            processor.process(clazz, metadata);
+        }
+
+        return metadata;
+    }
+
+    /**
+     * Cache metadata.
+     * 
+     * @param clazz
+     *            the clazz
+     * @param metadata
+     *            the metadata
+     */
+    private void cacheMetadata(Class<?> clazz, EntityMetadata metadata) {
+        metadataCache.put(clazz, metadata);
+
+        // save name to class map.
+        if (entityNameToClassMap.containsKey(clazz.getSimpleName())) {
+            throw new PersistenceException("Name conflict between classes " + entityNameToClassMap.get(clazz.getSimpleName()).getName() + " and " + clazz.getName());
+        }
+        entityNameToClassMap.put(clazz.getSimpleName(), clazz);
+    }
+
+    /**
+     * Gets the entity class by name.
+     * 
+     * @param name
+     *            the name
+     * 
+     * @return the entity class by name
+     */
+    public Class<?> getEntityClassByName(String name) {
+        return entityNameToClassMap.get(name);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.classreading.AnnotationDiscoveryListener#discovered
+     * (java.lang.String, java.lang.String[])
+     */
+    @Override
+    // called whenever a class with @Entity annotation is encountered in the
+    // classpath.
+    public void discovered(String className, String[] annotations) {
+        try {
+            Class<?> clazz = Class.forName(className);
+
+            // process for Metadata
+            EntityMetadata metadata = process(clazz);
+            cacheMetadata(clazz, metadata);
+            log.info("Added @Entity " + clazz.getName());
+        } catch (ClassNotFoundException e) {
+            throw new PersistenceException(e.getMessage());
+        }
+    }
 }

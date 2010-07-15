@@ -83,69 +83,145 @@ public class ThriftClient implements CassandraClient {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#delete(java.lang.String,
+     * java.lang.String)
+     */
     @Override
     public void delete(String columnFamily, String rowId) throws Exception {
-    	throw new NotImplementedException("TODO");
+        throw new NotImplementedException("TODO");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#loadColumns(java.lang.String,
+     * java.lang.String)
+     */
     @Override
     public List<Column> loadColumns(String columnFamily, String rowId) throws Exception {
-    	throw new NotImplementedException("TODO");
+        throw new NotImplementedException("TODO");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#loadColumns(java.lang.String,
+     * java.lang.String[])
+     */
     @Override
     public Map<String, List<Column>> loadColumns(String columnFamily, String... rowIds) throws Exception {
-    	throw new NotImplementedException("TODO");
+        throw new NotImplementedException("TODO");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String,
+     * java.lang.String, java.lang.String[])
+     */
     @Override
     public List<SuperColumn> loadSuperColumns(String columnFamily, String key, String... superColumnNames) throws Exception {
-    	throw new NotImplementedException("TODO");
+        throw new NotImplementedException("TODO");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String,
+     * java.lang.String[])
+     */
     @Override
     public Map<String, List<SuperColumn>> loadSuperColumns(String columnFamily, String... rowIds) throws Exception {
-    	throw new NotImplementedException("TODO");
+        throw new NotImplementedException("TODO");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#writeColumns(java.lang.String,
+     * java.lang.String, org.apache.cassandra.thrift.Column[])
+     */
     @Override
     public void writeColumns(String columnFamily, String rowId, Column... columns) throws Exception {
-    	throw new NotImplementedException("TODO");
+        throw new NotImplementedException("TODO");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.CassandraClient#writeSuperColumns(java.lang.String,
+     * java.lang.String, org.apache.cassandra.thrift.SuperColumn[])
+     */
     @Override
     public void writeSuperColumns(String columnFamily, String rowId, SuperColumn... superColumns) throws Exception {
-    	throw new NotImplementedException("TODO");
+        throw new NotImplementedException("TODO");
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.CassandraClient#setContactNodes(java.lang.String[])
+     */
     @Override
     public void setContactNodes(String... contactNodes) {
         this.contactNode = contactNodes[0];
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#setDefaultPort(int)
+     */
     @Override
     public void setDefaultPort(int defaultPort) {
         this.defaultPort = defaultPort;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#setKeySpace(java.lang.String)
+     */
     @Override
     public void setKeySpace(String keySpace) {
         this.keySpace = keySpace;
     }
 
-	@Override
-	public Client getCassandraClient() throws Exception {
-		throw new NotImplementedException("TODO");
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#getCassandraClient()
+     */
+    @Override
+    public Client getCassandraClient() throws Exception {
+        throw new NotImplementedException("TODO");
+    }
 
-	@Override
-	public void shutdown() {
-		
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#shutdown()
+     */
+    @Override
+    public void shutdown() {
 
-	@Override
-	public void connect() {
-		throw new NotImplementedException("TODO");		
-	}
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#connect()
+     */
+    @Override
+    public void connect() {
+        throw new NotImplementedException("TODO");
+    }
 
 }

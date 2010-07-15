@@ -1,28 +1,17 @@
 /*
- * Copyright (c) 2010-2011, Animesh Kumar
- * All rights reserved.
+ * Copyright 2010 Impetus Infotech.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   - Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   - Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.impetus.kundera.ejb;
 
@@ -47,43 +36,53 @@ import com.impetus.kundera.classreading.Reader;
 import com.impetus.kundera.metadata.MetadataManager;
 
 /**
+ * The Class EntityManagerFactoryImpl.
+ * 
  * @author animesh.kumar
- *
  */
 public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
-	/** the log used by this class. */
-	private static Log log = LogFactory.getLog(EntityManagerFactoryImpl.class);
+    /** the log used by this class. */
+    private static Log log = LogFactory.getLog(EntityManagerFactoryImpl.class);
 
-	static final String propsFileName = "/kundera.properties";
-	
-    /**
-     * Whether or not the factory has been closed
-     */
+    /** The Constant propsFileName. */
+    static final String propsFileName = "/kundera.properties";
+
+    /** Whether or not the factory has been closed. */
     private boolean closed = false;
-    /**
-     * Also the prefix that will be applied to each Domain
-     */
+
+    /** Also the prefix that will be applied to each Domain. */
     private String persistenceUnitName;
-    /**
-     * properties file values
-     */
+
+    /** properties file values. */
     @SuppressWarnings("unchecked")
-	public Map props;    
-    
+    public Map props;
+
+    /** The sessionless. */
     private boolean sessionless;
+
+    /** The cassandra nodes. */
     private String[] cassandraNodes;
+
+    /** The cassandra port. */
     private int cassandraPort;
+
+    /** The cassandra keyspace. */
     private String cassandraKeyspace;
-    
+
+    /** The metadata manager. */
     private MetadataManager metadataManager;
-    
+
+    /** The client. */
     public CassandraClient client;
+
     /**
      * This one is generally called via the PersistenceProvider.
-     *
-     * @param persistenceUnitInfo only using persistenceUnitName for now
+     * 
+     * @param persistenceUnitInfo
+     *            only using persistenceUnitName for now
      * @param props
+     *            the props
      */
     public EntityManagerFactoryImpl(PersistenceUnitInfo persistenceUnitInfo, Map props) {
         this(persistenceUnitInfo != null ? persistenceUnitInfo.getPersistenceUnitName() : null, props);
@@ -91,23 +90,25 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
     /**
      * Use this if you want to construct this directly.
-     *
-     * @param persistenceUnitName used to prefix the SimpleDB domains
-     * @param props               should have accessKey and secretKey
+     * 
+     * @param persistenceUnitName
+     *            used to prefix the SimpleDB domains
+     * @param props
+     *            should have accessKey and secretKey
      */
     public EntityManagerFactoryImpl(String persistenceUnitName, Map props) {
         if (persistenceUnitName == null) {
             throw new IllegalArgumentException("Must have a persistenceUnitName!");
         }
-        
+
         long start = System.currentTimeMillis();
-        
+
         this.persistenceUnitName = persistenceUnitName;
         this.props = props;
         // if props is NULL or empty, look for kundera.properties and populate
         if (props == null || props.isEmpty()) {
             try {
-            	
+
                 loadProperties(propsFileName);
             } catch (IOException e) {
                 throw new PersistenceException(e);
@@ -115,16 +116,25 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         }
         init();
         metadataManager = new MetadataManager(this);
-        
+
         // scan classes for @Entity
         Reader reader = new ClasspathReader();
         reader.addValidAnnotations(Entity.class.getName());
         reader.addAnnotationDiscoveryListeners(metadataManager);
         reader.read();
-        
+
         log.info("EntityManagerFactoryImpl loaded in " + (System.currentTimeMillis() - start) + "ms.");
     }
-    
+
+    /**
+     * Load properties.
+     * 
+     * @param propsFileName
+     *            the props file name
+     * 
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
     private void loadProperties(String propsFileName) throws IOException {
         Properties props_ = new Properties();
         InputStream stream = this.getClass().getResourceAsStream(propsFileName);
@@ -135,61 +145,92 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         props = props_;
         stream.close();
     }
-    
+
+    /**
+     * Inits the.
+     */
     private void init() {
         cassandraNodes = ((String) props.get("kundera.nodes")).split(",");
         cassandraPort = Integer.parseInt((String) props.get("kundera.port"));
         cassandraKeyspace = (String) props.get("kundera.keyspace");
-        
+
         String sessionless_ = (String) props.get("sessionless");
         if (sessionless_ == null) {
             sessionless = true;
         } else {
             sessionless = Boolean.parseBoolean(sessionless_);
         }
-        
+
         String cassandraClient = (String) props.get("kundera.client");
         try {
-			client = (CassandraClient) Class.forName(cassandraClient).newInstance();
-	        client.setContactNodes(cassandraNodes);
-	        client.setDefaultPort(cassandraPort);
-	        client.setKeySpace(cassandraKeyspace);
-	        // connect to Cassandra DB
-	        client.connect();
-		} catch (Exception e) {
-			throw new IllegalArgumentException("Must define CassandraClient! " + e.getMessage());
-		}
+            client = (CassandraClient) Class.forName(cassandraClient).newInstance();
+            client.setContactNodes(cassandraNodes);
+            client.setDefaultPort(cassandraPort);
+            client.setKeySpace(cassandraKeyspace);
+            // connect to Cassandra DB
+            client.connect();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Must define CassandraClient! " + e.getMessage());
+        }
     }
 
-	/**
-	 * @return the metadataManager
-	 */
-	public MetadataManager getMetadataManager() {
-		return metadataManager;
-	}
+    /**
+     * Gets the metadata manager.
+     * 
+     * @return the metadataManager
+     */
+    public MetadataManager getMetadataManager() {
+        return metadataManager;
+    }
 
-	@Override
-	public void close() {
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManagerFactory#close()
+     */
+    @Override
+    public void close() {
         closed = true;
         client.shutdown();
-	}
+    }
 
-	@Override
-	public EntityManager createEntityManager() {
-		return new EntityManagerImpl(this, client, sessionless);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManagerFactory#createEntityManager()
+     */
+    @Override
+    public EntityManager createEntityManager() {
+        return new EntityManagerImpl(this, client, sessionless);
+    }
 
-	@Override
-	public EntityManager createEntityManager(Map map) {
-		return new EntityManagerImpl(this, client, sessionless);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+     */
+    @Override
+    public EntityManager createEntityManager(Map map) {
+        return new EntityManagerImpl(this, client, sessionless);
+    }
 
-	@Override
-	public boolean isOpen() {
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManagerFactory#isOpen()
+     */
+    @Override
+    public boolean isOpen() {
         return !closed;
-	}
+    }
 
-	public String getPersistenceUnitName() {
-		return persistenceUnitName;
-	}
+    /**
+     * Gets the persistence unit name.
+     * 
+     * @return the persistence unit name
+     */
+    public String getPersistenceUnitName() {
+        return persistenceUnitName;
+    }
 }

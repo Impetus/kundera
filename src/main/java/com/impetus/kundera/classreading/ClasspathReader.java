@@ -1,28 +1,17 @@
 /*
- * Copyright (c) 2010-2011, Animesh Kumar
- * All rights reserved.
+ * Copyright 2010 Impetus Infotech.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   - Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   - Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.impetus.kundera.classreading;
 
@@ -36,68 +25,91 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 /**
- * @author animesh.kumar
+ * The Class ClasspathReader.
  * 
+ * @author animesh.kumar
  */
 public class ClasspathReader extends Reader {
 
-	protected transient String[] ignoredPackages = { "javax", "java", "sun", "com.sun", "javassist" };
+    /** The ignored packages. */
+    protected transient String[] ignoredPackages = { "javax", "java", "sun", "com.sun", "javassist" };
 
-	Filter filter;
+    /** The filter. */
+    Filter filter;
 
-	public ClasspathReader() {
-		filter = new FilterImpl();
-	}
+    /**
+     * Instantiates a new classpath reader.
+     */
+    public ClasspathReader() {
+        filter = new FilterImpl();
+    }
 
-	@Override
-	public void read () {
-		URL[] resources = findResources ();
-		for (URL resource : resources) {
-			try {
-				ResourceIterator itr = getResourceIterator(resource, getFilter());
-				
-				InputStream is = null;
-				while ((is = itr.next()) != null) {
-					scanClass(is);
-				}
-			} catch (IOException e) {
-				// TODO: Do something with this exception
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	/**
-	 * Uses the java.class.path system property to obtain a list of URLs that
-	 * represent the CLASSPATH
-	 * 
-	 * @return
-	 */
-	@SuppressWarnings("deprecation")
-	public URL[] findResources() {
-		List<URL> list = new ArrayList<URL>();
-		String classpath = System.getProperty("java.class.path");
-		StringTokenizer tokenizer = new StringTokenizer(classpath, File.pathSeparator);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.classreading.Reader#read()
+     */
+    @Override
+    public void read() {
+        URL[] resources = findResources();
+        for (URL resource : resources) {
+            try {
+                ResourceIterator itr = getResourceIterator(resource, getFilter());
 
-		while (tokenizer.hasMoreTokens()) {
-			String path = tokenizer.nextToken();
+                InputStream is = null;
+                while ((is = itr.next()) != null) {
+                    scanClass(is);
+                }
+            } catch (IOException e) {
+                // TODO: Do something with this exception
+                e.printStackTrace();
+            }
+        }
+    }
 
-			File fp = new File(path);
-			if (!fp.exists()) throw new RuntimeException("File in java.class.path does not exist: " + fp);
-			try {
-				list.add(fp.toURL());
-			} catch (MalformedURLException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return list.toArray(new URL[list.size()]);
-	}
+    /**
+     * Uses the java.class.path system property to obtain a list of URLs that
+     * represent the CLASSPATH
+     * 
+     * @return the UR l[]
+     */
+    @SuppressWarnings("deprecation")
+    public URL[] findResources() {
+        List<URL> list = new ArrayList<URL>();
+        String classpath = System.getProperty("java.class.path");
+        StringTokenizer tokenizer = new StringTokenizer(classpath, File.pathSeparator);
 
-	public Filter getFilter() {
-		return filter;
-	}
+        while (tokenizer.hasMoreTokens()) {
+            String path = tokenizer.nextToken();
 
-	public void setFilter(Filter filter) {
-		this.filter = filter;
-	}
+            File fp = new File(path);
+            if (!fp.exists())
+                throw new RuntimeException("File in java.class.path does not exist: " + fp);
+            try {
+                list.add(fp.toURL());
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return list.toArray(new URL[list.size()]);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.classreading.Reader#getFilter()
+     */
+    public Filter getFilter() {
+        return filter;
+    }
+
+    /**
+     * Sets the filter.
+     * 
+     * @param filter
+     *            the new filter
+     */
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+    }
 }

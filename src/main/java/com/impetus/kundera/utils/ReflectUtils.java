@@ -27,10 +27,12 @@ import java.lang.reflect.Type;
 public class ReflectUtils {
 
     /**
-     * Checks for interface "has" in class "in"
+     * Checks for interface "has" in class "in".
      * 
-     * @param has  
+     * @param has
+     *            the has
      * @param in
+     *            the in
      * 
      * @return true, if exists?
      */
@@ -56,7 +58,9 @@ public class ReflectUtils {
     /**
      * Gets the type arguments.
      * 
-     * @param property 
+     * @param property
+     *            the property
+     * 
      * @return the type arguments
      */
     public static Type[] getTypeArguments(Field property) {

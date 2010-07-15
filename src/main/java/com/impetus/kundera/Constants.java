@@ -29,5 +29,6 @@ public class Constants {
     /** The Constant SEPARATOR. */
     public final static String SEPARATOR = "~";
 
+    /** The Constant INVALID. */
     public final static int INVALID = -1;
 }

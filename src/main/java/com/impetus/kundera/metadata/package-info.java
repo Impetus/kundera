@@ -1,19 +1,16 @@
-/**
- * Cassandra supports 2 types of data models: Column and SuperColumn. Broadly speaking,
- * Column is tuple that contains Name, Value and a Timestamp; and SuperColumn is a Column 
- * of Columns. Cassandra stores its data models in families: Column in ColumnFamily and 
- * SuperColumn in SuperColumnFamily. 
- * <br/>
- * <br/>
- * Kundera has @SuperColumnFamily annotation to bind the annotated entity to SuperColumnFamily, 
- * and @ColumnFamily to ColumnFamily. This package contains classes to pick up classes with 
- * these annotations. Kundera defines {@link ColumMetadata} to store meta information of entity classes annotated
- * with {@link ColumnFamily}, and {@link SuperColumnMetadata} for {@link SuperColumn}
- * <br/>
- * <br/>
- * Outside world can get a hold of @{link IMetadataManager}
- *  
- *    
- * @since 0.1
+/*
+ * Copyright 2010 Impetus Infotech.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.impetus.kundera.metadata;

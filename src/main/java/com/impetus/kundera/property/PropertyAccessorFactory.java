@@ -109,44 +109,63 @@ public class PropertyAccessorFactory {
     public static PropertyAccessor<?> getPropertyAccessor(Field property) {
         return getPropertyAccessor(property.getType());
     }
-    
-    
-	/**
-	 * Helper method to set string property.
-	 * 
-	 * @param target	the target
-	 * @param property  the property
-	 * @param key 		the key
-	 * 
-	 * @throws Exception   
-	 */
-	public static void setStringProperty(Object target, Field property, String key)
-			throws PropertyAccessException {
-		setProperty(target, property, STRING.toBytes(key), property
-				.getName(), null);
-	}
 
-	/**
-	 * Helper method to get string property.
-	 */
-	public static String getStringProperty(Object target, Field property)
-			throws PropertyAccessException {
-		byte[] idValue = PropertyAccessorFactory.getPropertyAccessor(property)
-				.readAsByteArray(target, property, "some-dummy-key-here###").get("some-dummy-key-here###");
-		return STRING.fromBytes(idValue);
-	}
+    /**
+     * Helper method to set string property.
+     * 
+     * @param target
+     *            the target
+     * @param property
+     *            the property
+     * @param key
+     *            the key
+     * 
+     * @throws Exception
+     *             * @throws PropertyAccessException the property access
+     *             exception
+     */
+    public static void setStringProperty(Object target, Field property, String key) throws PropertyAccessException {
+        setProperty(target, property, STRING.toBytes(key), property.getName(), null);
+    }
 
-	/**
-	 * Helper method to set property value.
-	 * 
-	 * @throws PropertyAccessException 
-	 */
-	public static void setProperty(Object target, Field property, byte[] value,
-			String propertyName, String alias) throws PropertyAccessException {
-		// set value of the field in the bean
-		PropertyAccessorFactory.getPropertyAccessor(property).set(target,
-					property, value, alias);
-	}
+    /**
+     * Helper method to get string property.
+     * 
+     * @param target
+     *            the target
+     * @param property
+     *            the property
+     * 
+     * @return the string property
+     * 
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    public static String getStringProperty(Object target, Field property) throws PropertyAccessException {
+        byte[] idValue = PropertyAccessorFactory.getPropertyAccessor(property).readAsByteArray(target, property, "some-dummy-key-here###").get("some-dummy-key-here###");
+        return STRING.fromBytes(idValue);
+    }
 
+    /**
+     * Helper method to set property value.
+     * 
+     * @param target
+     *            the target
+     * @param property
+     *            the property
+     * @param value
+     *            the value
+     * @param propertyName
+     *            the property name
+     * @param alias
+     *            the alias
+     * 
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    public static void setProperty(Object target, Field property, byte[] value, String propertyName, String alias) throws PropertyAccessException {
+        // set value of the field in the bean
+        PropertyAccessorFactory.getPropertyAccessor(property).set(target, property, value, alias);
+    }
 
 }

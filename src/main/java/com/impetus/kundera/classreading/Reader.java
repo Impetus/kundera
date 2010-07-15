@@ -1,28 +1,17 @@
 /*
- * Copyright (c) 2010-2011, Animesh Kumar
- * All rights reserved.
+ * Copyright 2010 Impetus Infotech.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   - Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   - Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.impetus.kundera.classreading;
 
@@ -40,99 +29,165 @@ import javassist.bytecode.ClassFile;
 import javassist.bytecode.annotation.Annotation;
 
 /**
- * Base class-reader
+ * Base class-reader.
  * 
  * @author animesh.kumar
- *
  */
 public abstract class Reader {
 
-	private List<String> validAnnotations = new ArrayList<String>();
-	private List<AnnotationDiscoveryListener> annotationDiscoveryListeners = new ArrayList<AnnotationDiscoveryListener>();
-	
-	public Reader () {
-	}
-	
-	public void scanClass(InputStream bits) throws IOException {
-		DataInputStream dstream = new DataInputStream(new BufferedInputStream(bits));
-		ClassFile cf = null;
-		try {
-			cf = new ClassFile(dstream);
-			
-			String className = cf.getName();
-			List<String> annotations = new ArrayList<String>();
-			
-			accumulateAnnotations(annotations, (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.visibleTag));
-			accumulateAnnotations(annotations, (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.invisibleTag));
-			
-			// iterate through all valid annotations
-			for (String validAnn : getValidAnnotations()) {
-				// check if the current class has one?
-				if (annotations.contains(validAnn)) {
-					// fire all listeners
-					for (AnnotationDiscoveryListener listener : getAnnotationDiscoveryListeners()) {
-						listener.discovered(className, annotations.toArray(new String[] {}));
-					}
-				}
-			}
-			
-		} finally {
-			dstream.close();
-			bits.close();
-		}
-	}
-	
-	// helper method to accumulate annotations.
-	private void accumulateAnnotations (List<String> annotations, AnnotationsAttribute annatt) {
-		if (null == annatt) return;
-		for (Annotation ann : annatt.getAnnotations()) {
-			annotations.add(ann.getTypeName());
-		}
-	}
-	
-	public ResourceIterator getResourceIterator(URL url, Filter filter) throws IOException {
-		String urlString = url.toString();
-		if (urlString.endsWith("!/")) {
-			urlString = urlString.substring(4);
-			urlString = urlString.substring(0, urlString.length() - 2);
-			url = new URL(urlString);
-		}
+    /** The valid annotations. */
+    private List<String> validAnnotations = new ArrayList<String>();
 
-		if (!urlString.endsWith("/")) {
-			return new JarFileIterator(url.openStream(), filter);
-		} else {
+    /** The annotation discovery listeners. */
+    private List<AnnotationDiscoveryListener> annotationDiscoveryListeners = new ArrayList<AnnotationDiscoveryListener>();
 
-			if (!url.getProtocol().equals("file")) {
-				throw new IOException("Unable to understand protocol: " + url.getProtocol());
-			}
+    /**
+     * Instantiates a new reader.
+     */
+    public Reader() {
+    }
 
-			File f = new File(url.getPath());
-			if (f.isDirectory()) {
-				return new ClassFileIterator(f, filter);
-			} else {
-				return new JarFileIterator(url.openStream(), filter);
-			}
-		}
-	}
-	
-	public List<String> getValidAnnotations () {
-		return validAnnotations;
-	}
+    /**
+     * Scan class.
+     * 
+     * @param bits
+     *            the bits
+     * 
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
+    public void scanClass(InputStream bits) throws IOException {
+        DataInputStream dstream = new DataInputStream(new BufferedInputStream(bits));
+        ClassFile cf = null;
+        try {
+            cf = new ClassFile(dstream);
 
-	public void addValidAnnotations (String annotation) {
-		this.validAnnotations.add(annotation);
-	}
+            String className = cf.getName();
+            List<String> annotations = new ArrayList<String>();
 
-	public List<AnnotationDiscoveryListener> getAnnotationDiscoveryListeners() {
-		return annotationDiscoveryListeners;
-	}
-	
-	public void addAnnotationDiscoveryListeners(AnnotationDiscoveryListener annotationDiscoveryListener) {
-		this.annotationDiscoveryListeners.add(annotationDiscoveryListener);
-	}
+            accumulateAnnotations(annotations, (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.visibleTag));
+            accumulateAnnotations(annotations, (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.invisibleTag));
 
-	public abstract void read();
-	
-	public abstract Filter getFilter();
+            // iterate through all valid annotations
+            for (String validAnn : getValidAnnotations()) {
+                // check if the current class has one?
+                if (annotations.contains(validAnn)) {
+                    // fire all listeners
+                    for (AnnotationDiscoveryListener listener : getAnnotationDiscoveryListeners()) {
+                        listener.discovered(className, annotations.toArray(new String[] {}));
+                    }
+                }
+            }
+
+        } finally {
+            dstream.close();
+            bits.close();
+        }
+    }
+
+    // helper method to accumulate annotations.
+    /**
+     * Accumulate annotations.
+     * 
+     * @param annotations
+     *            the annotations
+     * @param annatt
+     *            the annatt
+     */
+    private void accumulateAnnotations(List<String> annotations, AnnotationsAttribute annatt) {
+        if (null == annatt)
+            return;
+        for (Annotation ann : annatt.getAnnotations()) {
+            annotations.add(ann.getTypeName());
+        }
+    }
+
+    /**
+     * Gets the resource iterator.
+     * 
+     * @param url
+     *            the url
+     * @param filter
+     *            the filter
+     * 
+     * @return the resource iterator
+     * 
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
+    public ResourceIterator getResourceIterator(URL url, Filter filter) throws IOException {
+        String urlString = url.toString();
+        if (urlString.endsWith("!/")) {
+            urlString = urlString.substring(4);
+            urlString = urlString.substring(0, urlString.length() - 2);
+            url = new URL(urlString);
+        }
+
+        if (!urlString.endsWith("/")) {
+            return new JarFileIterator(url.openStream(), filter);
+        } else {
+
+            if (!url.getProtocol().equals("file")) {
+                throw new IOException("Unable to understand protocol: " + url.getProtocol());
+            }
+
+            File f = new File(url.getPath());
+            if (f.isDirectory()) {
+                return new ClassFileIterator(f, filter);
+            } else {
+                return new JarFileIterator(url.openStream(), filter);
+            }
+        }
+    }
+
+    /**
+     * Gets the valid annotations.
+     * 
+     * @return the valid annotations
+     */
+    public List<String> getValidAnnotations() {
+        return validAnnotations;
+    }
+
+    /**
+     * Adds the valid annotations.
+     * 
+     * @param annotation
+     *            the annotation
+     */
+    public void addValidAnnotations(String annotation) {
+        this.validAnnotations.add(annotation);
+    }
+
+    /**
+     * Gets the annotation discovery listeners.
+     * 
+     * @return the annotation discovery listeners
+     */
+    public List<AnnotationDiscoveryListener> getAnnotationDiscoveryListeners() {
+        return annotationDiscoveryListeners;
+    }
+
+    /**
+     * Adds the annotation discovery listeners.
+     * 
+     * @param annotationDiscoveryListener
+     *            the annotation discovery listener
+     */
+    public void addAnnotationDiscoveryListeners(AnnotationDiscoveryListener annotationDiscoveryListener) {
+        this.annotationDiscoveryListeners.add(annotationDiscoveryListener);
+    }
+
+    /**
+     * Read.
+     */
+    public abstract void read();
+
+    /**
+     * Gets the filter.
+     * 
+     * @return the filter
+     */
+    public abstract Filter getFilter();
 
 }

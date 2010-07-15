@@ -1,28 +1,17 @@
 /*
- * Copyright (c) 2010-2011, Animesh Kumar
- * All rights reserved.
+ * Copyright 2010 Impetus Infotech.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   - Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   - Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.impetus.kundera.query;
 
@@ -39,92 +28,178 @@ import org.apache.commons.lang.NotImplementedException;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 
 /**
- * @author animesh.kumar
+ * The Class QueryImpl.
  * 
+ * @author animesh.kumar
  */
 public abstract class QueryImpl extends KunderaQuery implements Query {
 
-	protected EntityManagerImpl cem;
-	protected String query;
-	
-	public QueryImpl(EntityManagerImpl cem, String query) {
-		super (cem);
-		this.cem = cem;
-		this.query = query;
-		
-		parse();
-	}
-	
-	protected void parse () {
-		KunderaQueryParser parser = new KunderaQueryParser(this, query);
-		parser.parse();
-		postParsingInit();
-	}
-	
-	@Override
-	public int executeUpdate() {
-		throw new NotImplementedException("TODO");
-	}
+    /** The cem. */
+    protected EntityManagerImpl cem;
 
-	@Override
-	public List<?> getResultList() {
-		throw new NotImplementedException("TODO");
-	}
+    /** The query. */
+    protected String query;
 
-	@Override
-	public Object getSingleResult() {
-		throw new NotImplementedException("TODO");
-	}
+    /**
+     * Instantiates a new query impl.
+     * 
+     * @param cem
+     *            the cem
+     * @param query
+     *            the query
+     */
+    public QueryImpl(EntityManagerImpl cem, String query) {
+        super(cem);
+        this.cem = cem;
+        this.query = query;
 
-	@Override
-	public Query setFirstResult(int startPosition) {
-		throw new NotImplementedException("TODO");
-	}
+        parse();
+    }
 
-	@Override
-	public Query setFlushMode(FlushModeType flushMode) {
-		throw new NotImplementedException("TODO");
-	}
+    /**
+     * Parses the.
+     */
+    protected void parse() {
+        KunderaQueryParser parser = new KunderaQueryParser(this, query);
+        parser.parse();
+        postParsingInit();
+    }
 
-	@Override
-	public Query setHint(String hintName, Object value) {
-		throw new NotImplementedException("TODO");
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#executeUpdate()
+     */
+    @Override
+    public int executeUpdate() {
+        throw new NotImplementedException("TODO");
+    }
 
-	@Override
-	public Query setMaxResults(int maxResult) {
-		throw new NotImplementedException("TODO");
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#getResultList()
+     */
+    @Override
+    public List<?> getResultList() {
+        throw new NotImplementedException("TODO");
+    }
 
-	@Override
-	public Query setParameter(String name, Object value) {
-		setParameter(name, value.toString());
-		return this;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#getSingleResult()
+     */
+    @Override
+    public Object getSingleResult() {
+        throw new NotImplementedException("TODO");
+    }
 
-	@Override
-	public Query setParameter(int position, Object value) {
-		throw new NotImplementedException("TODO");
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#setFirstResult(int)
+     */
+    @Override
+    public Query setFirstResult(int startPosition) {
+        throw new NotImplementedException("TODO");
+    }
 
-	@Override
-	public Query setParameter(String name, Date value, TemporalType temporalType) {
-		throw new NotImplementedException("TODO");
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.Query#setFlushMode(javax.persistence.FlushModeType)
+     */
+    @Override
+    public Query setFlushMode(FlushModeType flushMode) {
+        throw new NotImplementedException("TODO");
+    }
 
-	@Override
-	public Query setParameter(String name, Calendar value, TemporalType temporalType) {
-		throw new NotImplementedException("TODO");
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#setHint(java.lang.String, java.lang.Object)
+     */
+    @Override
+    public Query setHint(String hintName, Object value) {
+        throw new NotImplementedException("TODO");
+    }
 
-	@Override
-	public Query setParameter(int position, Date value, TemporalType temporalType) {
-		throw new NotImplementedException("TODO");
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#setMaxResults(int)
+     */
+    @Override
+    public Query setMaxResults(int maxResult) {
+        throw new NotImplementedException("TODO");
+    }
 
-	@Override
-	public Query setParameter(int position, Calendar value, TemporalType temporalType) {
-		throw new NotImplementedException("TODO");
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#setParameter(java.lang.String,
+     * java.lang.Object)
+     */
+    @Override
+    public Query setParameter(String name, Object value) {
+        setParameter(name, value.toString());
+        return this;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#setParameter(int, java.lang.Object)
+     */
+    @Override
+    public Query setParameter(int position, Object value) {
+        throw new NotImplementedException("TODO");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#setParameter(java.lang.String,
+     * java.util.Date, javax.persistence.TemporalType)
+     */
+    @Override
+    public Query setParameter(String name, Date value, TemporalType temporalType) {
+        throw new NotImplementedException("TODO");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#setParameter(java.lang.String,
+     * java.util.Calendar, javax.persistence.TemporalType)
+     */
+    @Override
+    public Query setParameter(String name, Calendar value, TemporalType temporalType) {
+        throw new NotImplementedException("TODO");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#setParameter(int, java.util.Date,
+     * javax.persistence.TemporalType)
+     */
+    @Override
+    public Query setParameter(int position, Date value, TemporalType temporalType) {
+        throw new NotImplementedException("TODO");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#setParameter(int, java.util.Calendar,
+     * javax.persistence.TemporalType)
+     */
+    @Override
+    public Query setParameter(int position, Calendar value, TemporalType temporalType) {
+        throw new NotImplementedException("TODO");
+    }
 
 }

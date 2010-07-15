@@ -65,19 +65,22 @@ public class MapAccessor implements PropertyAccessor<Object> {
 
         return map;
     }
-    
-	/* (non-Javadoc)
-	 * @see com.impetus.kundera.property.PropertyAccessor#readAsObject(java.lang.Object, java.lang.reflect.Field, java.lang.String)
-	 */
-	@Override
-	public Map<String, Object> readAsObject(Object target, Field property,
-			String alias) throws PropertyAccessException {
-    	Map<String, Object> map = new HashMap<String, Object>();
-    	for (Map.Entry<String, byte[]> entry : readAsByteArray(target, property, alias).entrySet()) {
-    		map.put(entry.getKey(), PropertyAccessorFactory.getPropertyAccessor(getArgumentType(property)).fromBytes(entry.getValue()));
-    	}
-    	return map;
-	}        
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#readAsObject(java.lang.
+     * Object, java.lang.reflect.Field, java.lang.String)
+     */
+    @Override
+    public Map<String, Object> readAsObject(Object target, Field property, String alias) throws PropertyAccessException {
+        Map<String, Object> map = new HashMap<String, Object>();
+        for (Map.Entry<String, byte[]> entry : readAsByteArray(target, property, alias).entrySet()) {
+            map.put(entry.getKey(), PropertyAccessorFactory.getPropertyAccessor(getArgumentType(property)).fromBytes(entry.getValue()));
+        }
+        return map;
+    }
 
     /*
      * (non-Javadoc)

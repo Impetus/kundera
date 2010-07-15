@@ -15,11 +15,11 @@
  */
 package com.impetus.kundera.junit;
 
+import junit.framework.TestCase;
+
 import com.impetus.kundera.entity.Author;
 import com.impetus.kundera.metadata.Validator;
 import com.impetus.kundera.metadata.ValidatorImpl;
-
-import junit.framework.TestCase;
 
 /**
  * The Class ValidatorTest.

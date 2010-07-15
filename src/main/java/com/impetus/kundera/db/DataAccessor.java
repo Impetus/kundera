@@ -28,43 +28,72 @@ import com.impetus.kundera.metadata.EntityMetadata;
  * @since 0.1
  */
 public interface DataAccessor {
+
     /**
+     * Write.
+     * 
      * @param client
+     *            the client
      * @param metadata
+     *            the metadata
      * @param object
+     *            the object
+     * 
      * @throws Exception
+     *             the exception
      */
-    void write(CassandraClient client, EntityMetadata metadata, Object object)
-	    throws Exception;
+    void write(CassandraClient client, EntityMetadata metadata, Object object) throws Exception;
 
     /**
+     * Read.
+     * 
      * @param client
+     *            the client
      * @param metadata
+     *            the metadata
      * @param clazz
+     *            the clazz
      * @param key
-     * @return
+     *            the key
+     * 
+     * @return the C
+     * 
      * @throws Exception
+     *             the exception
      */
-    <C> C read(CassandraClient client, EntityMetadata metadata, Class<C> clazz,
-	    String key) throws Exception;
+    <C> C read(CassandraClient client, EntityMetadata metadata, Class<C> clazz, String key) throws Exception;
 
     /**
+     * Read.
+     * 
      * @param client
+     *            the client
      * @param metadata
+     *            the metadata
      * @param clazz
+     *            the clazz
      * @param key
-     * @return
+     *            the key
+     * 
+     * @return the list< c>
+     * 
      * @throws Exception
+     *             the exception
      */
-    <C> List<C> read(CassandraClient client, EntityMetadata metadata, Class<C> clazz,
-	    String... key) throws Exception;
+    <C> List<C> read(CassandraClient client, EntityMetadata metadata, Class<C> clazz, String... key) throws Exception;
 
     /**
+     * Delete.
+     * 
      * @param client
+     *            the client
      * @param metadata
+     *            the metadata
      * @param key
+     *            the key
+     * 
      * @throws Exception
+     *             the exception
      */
-    void delete(CassandraClient client, EntityMetadata metadata, String key)
-	    throws Exception;
+    void delete(CassandraClient client, EntityMetadata metadata, String key) throws Exception;
 }

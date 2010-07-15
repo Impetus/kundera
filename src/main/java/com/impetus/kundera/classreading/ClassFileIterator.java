@@ -1,28 +1,17 @@
 /*
- * Copyright (c) 2010-2011, Animesh Kumar
- * All rights reserved.
+ * Copyright 2010 Impetus Infotech.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   - Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *   - Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.impetus.kundera.classreading;
 
@@ -34,48 +23,85 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author animesh.kumar
+ * The Class ClassFileIterator.
  * 
+ * @author animesh.kumar
  */
 public class ClassFileIterator implements ResourceIterator {
 
-	protected transient String[] ignoredPackages = { "javax", "java", "sun", "com.sun", "javassist" };
+    /** The ignored packages. */
+    protected transient String[] ignoredPackages = { "javax", "java", "sun", "com.sun", "javassist" };
 
-	private ArrayList<File> files;
-	private int index = 0;
+    /** The files. */
+    private ArrayList<File> files;
 
-	public ClassFileIterator(File file, Filter filter) {
-		files = new ArrayList<File>();
-		try {
-			create(files, file, filter);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+    /** The index. */
+    private int index = 0;
 
-	private static void create(List<File> list, File dir, Filter filter) throws Exception {
-		File[] files = dir.listFiles();
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].isDirectory()) {
-				create(list, files[i], filter);
-			} else {
-				if (filter == null || filter.accepts(files[i].getAbsolutePath())) {
-					list.add(files[i]);
-				}
-			}
-		}
-	}
+    /**
+     * Instantiates a new class file iterator.
+     * 
+     * @param file
+     *            the file
+     * @param filter
+     *            the filter
+     */
+    public ClassFileIterator(File file, Filter filter) {
+        files = new ArrayList<File>();
+        try {
+            create(files, file, filter);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	public InputStream next() {
-		if (index >= files.size()) return null;
-		File fp = (File) files.get(index++);
-		try {
-			return new FileInputStream(fp);
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    /**
+     * Creates the.
+     * 
+     * @param list
+     *            the list
+     * @param dir
+     *            the dir
+     * @param filter
+     *            the filter
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    private static void create(List<File> list, File dir, Filter filter) throws Exception {
+        File[] files = dir.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].isDirectory()) {
+                create(list, files[i], filter);
+            } else {
+                if (filter == null || filter.accepts(files[i].getAbsolutePath())) {
+                    list.add(files[i]);
+                }
+            }
+        }
+    }
 
-	public void close() {
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.classreading.ResourceIterator#next()
+     */
+    public InputStream next() {
+        if (index >= files.size())
+            return null;
+        File fp = (File) files.get(index++);
+        try {
+            return new FileInputStream(fp);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.classreading.ResourceIterator#close()
+     */
+    public void close() {
+    }
 }

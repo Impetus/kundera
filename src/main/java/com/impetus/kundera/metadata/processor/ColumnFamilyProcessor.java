@@ -35,42 +35,49 @@ import com.impetus.kundera.metadata.MetadataProcessor;
  */
 public class ColumnFamilyProcessor implements MetadataProcessor {
 
-	/** The Constant log. */
-	private static final Log LOG = LogFactory.getLog(ColumnFamilyProcessor.class);
+    /** The Constant log. */
+    private static final Log LOG = LogFactory.getLog(ColumnFamilyProcessor.class);
 
-	public void process(Class<?> clazz, EntityMetadata metadata) throws PersistenceException {
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
+     * com.impetus.kundera.metadata.EntityMetadata)
+     */
+    public void process(Class<?> clazz, EntityMetadata metadata) throws PersistenceException {
 
-		if (!clazz.isAnnotationPresent(ColumnFamily.class)) {
-			return;
-		}
+        if (!clazz.isAnnotationPresent(ColumnFamily.class)) {
+            return;
+        }
 
-		LOG.debug("Processing @Entity " + clazz.getName() + " for ColumnFamily.");
+        LOG.debug("Processing @Entity " + clazz.getName() + " for ColumnFamily.");
 
-		metadata.setType(EntityMetadata.Type.COLUMN_FAMILY);
+        metadata.setType(EntityMetadata.Type.COLUMN_FAMILY);
 
-		ColumnFamily cf = clazz.getAnnotation(ColumnFamily.class);
+        ColumnFamily cf = clazz.getAnnotation(ColumnFamily.class);
 
-		// set columnFamily
-		metadata.setColumnFamilyName(cf.value());
+        // set columnFamily
+        metadata.setColumnFamilyName(cf.value());
 
-		// scan for fields
-		for (Field f : clazz.getDeclaredFields()) {
-			if (f.isAnnotationPresent(Column.class)) {
+        // scan for fields
+        for (Field f : clazz.getDeclaredFields()) {
+            if (f.isAnnotationPresent(Column.class)) {
 
-				Column c = f.getAnnotation(Column.class);
-				String key = c.name().trim();
-				if (key.isEmpty()) {
-					key = f.getName();
-				}
+                Column c = f.getAnnotation(Column.class);
+                String key = c.name().trim();
+                if (key.isEmpty()) {
+                    key = f.getName();
+                }
 
-				LOG.debug(f.getName() + " => Column:" + key);
-				metadata.addColumn(key, metadata.new Column(key, f));
-			} else if (f.isAnnotationPresent(Id.class)) {
-				LOG.debug(f.getName() + " => Id");
-				metadata.setIdProperty(f);
-			} else {
-				LOG.debug(f.getName() + " => skipped!");
-			}
-		}
-	}
+                LOG.debug(f.getName() + " => Column:" + key);
+                metadata.addColumn(key, metadata.new Column(key, f));
+            } else if (f.isAnnotationPresent(Id.class)) {
+                LOG.debug(f.getName() + " => Id");
+                metadata.setIdProperty(f);
+            } else {
+                LOG.debug(f.getName() + " => skipped!");
+            }
+        }
+    }
 }

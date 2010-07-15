@@ -41,166 +41,235 @@ import com.impetus.kundera.CassandraClient;
  */
 public class PelopsClient implements CassandraClient {
 
-	private static final String poolName = "Main";
+    /** The Constant poolName. */
+    private static final String poolName = "Main";
 
-	/** array of cassandra hosts. */
-	private String[] contactNodes;
+    /** array of cassandra hosts. */
+    private String[] contactNodes;
 
-	/** default port. */
-	private int defaultPort;
+    /** default port. */
+    private int defaultPort;
 
-	/** keyspace. */
-	private String keySpace;
+    /** keyspace. */
+    private String keySpace;
 
-	private boolean closed = false;
+    /** The closed. */
+    private boolean closed = false;
 
-	/**
-	 * default constructor.
-	 */
-	public PelopsClient() {
-	}
-	
-	@Override
-	public void connect () {
-		Pelops.addPool(poolName, contactNodes, defaultPort, false, null, new Policy());
-	}
+    /**
+     * default constructor.
+     */
+    public PelopsClient() {
+    }
 
-	@Override
-	public void shutdown() {
-		Pelops.shutdown();
-		closed = true;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#connect()
+     */
+    @Override
+    public void connect() {
+        Pelops.addPool(poolName, contactNodes, defaultPort, false, null, new Policy());
+    }
 
-	public boolean isOpen() {
-		return !closed;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#shutdown()
+     */
+    @Override
+    public void shutdown() {
+        Pelops.shutdown();
+        closed = true;
+    }
 
-	@Override
-	public void writeColumns(String columnFamily, String rowId, Column... columns) throws Exception {
-		
-		if (!isOpen()) throw new PersistenceException("PelopsClient is closed.");
-		
-		Mutator mutator = Pelops.createMutator(poolName, keySpace);
-		mutator.writeColumns(rowId, columnFamily, Arrays.asList(columns));
-		mutator.execute(ConsistencyLevel.ONE);
-	}
+    /**
+     * Checks if is open.
+     * 
+     * @return true, if is open
+     */
+    public boolean isOpen() {
+        return !closed;
+    }
 
-	@Override
-	public void writeSuperColumns(String columnFamily, String rowId, SuperColumn... superColumns) throws Exception {
-		
-		if (!isOpen()) throw new PersistenceException("PelopsClient is closed.");
-		
-		Mutator mutator = Pelops.createMutator(poolName, keySpace);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#writeColumns(java.lang.String,
+     * java.lang.String, org.apache.cassandra.thrift.Column[])
+     */
+    @Override
+    public void writeColumns(String columnFamily, String rowId, Column... columns) throws Exception {
 
-		for (SuperColumn sc : superColumns) {
-			mutator.writeSubColumns(rowId, columnFamily, sc.getName(), sc.getColumns());
-		}
-		mutator.execute(ConsistencyLevel.ONE);
-	}
+        if (!isOpen()) {
+            throw new PersistenceException("PelopsClient is closed.");
+        }
+        Mutator mutator = Pelops.createMutator(poolName, keySpace);
+        mutator.writeColumns(rowId, columnFamily, Arrays.asList(columns));
+        mutator.execute(ConsistencyLevel.ONE);
+    }
 
-	@Override
-	public List<Column> loadColumns(String columnFamily, String rowId) throws Exception {
-		
-		if (!isOpen()) throw new PersistenceException("PelopsClient is closed.");
-		
-		Selector selector = Pelops.createSelector(poolName, keySpace);
-		List<Column> columns = selector.getColumnsFromRow(rowId, columnFamily, Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
-		return columns;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.CassandraClient#writeSuperColumns(java.lang.String,
+     * java.lang.String, org.apache.cassandra.thrift.SuperColumn[])
+     */
+    @Override
+    public void writeSuperColumns(String columnFamily, String rowId, SuperColumn... superColumns) throws Exception {
 
-	@Override
-	public Map<String, List<Column>> loadColumns(String columnFamily, String... rowIds) throws Exception {
-		
-		if (!isOpen()) throw new PersistenceException("PelopsClient is closed.");
-		
-		Selector selector = Pelops.createSelector(poolName, keySpace);
-		Map<String, List<Column>> map = selector.getColumnsFromRows(Arrays.asList(rowIds), columnFamily, Selector.newColumnsPredicateAll(false, 1000),
-				ConsistencyLevel.ONE);
-		return map;
-	}
+        if (!isOpen()) {
+            throw new PersistenceException("PelopsClient is closed.");
+        }
+        Mutator mutator = Pelops.createMutator(poolName, keySpace);
 
-	@Override
-	public void delete(String columnFamily, String rowId) throws Exception {
-		
-		if (!isOpen()) throw new PersistenceException("PelopsClient is closed.");
-		
-		KeyDeletor keyDeletor = Pelops.createKeyDeletor(poolName, keySpace);
-		keyDeletor.deleteColumnFamily(rowId, columnFamily, ConsistencyLevel.ONE);
-	}
+        for (SuperColumn sc : superColumns) {
+            mutator.writeSubColumns(rowId, columnFamily, sc.getName(), sc.getColumns());
+        }
+        mutator.execute(ConsistencyLevel.ONE);
+    }
 
-	@Override
-	public List<SuperColumn> loadSuperColumns(String columnFamily, String rowId, String... superColumnNames) throws Exception {
-		if (!isOpen()) throw new PersistenceException("PelopsClient is closed.");
-		Selector selector = Pelops.createSelector(poolName, keySpace);
-		List<SuperColumn> list = selector.getSuperColumnsFromRow(rowId, columnFamily, Selector.newColumnsPredicate(superColumnNames), ConsistencyLevel.ONE);
-		return list;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#loadColumns(java.lang.String,
+     * java.lang.String)
+     */
+    @Override
+    public List<Column> loadColumns(String columnFamily, String rowId) throws Exception {
 
-	@Override
-	public Map<String, List<SuperColumn>> loadSuperColumns(String columnFamily, String... rowIds) throws Exception {
-		
-		if (!isOpen()) throw new PersistenceException("PelopsClient is closed.");
-		
-		Selector selector = Pelops.createSelector(poolName, keySpace);
-		Map<String, List<SuperColumn>> map = selector.getSuperColumnsFromRows(Arrays.asList(rowIds), columnFamily,
-				Selector.newColumnsPredicateAll(false, 1000), ConsistencyLevel.ONE);
-		return map;
-	}
+        if (!isOpen()) {
+            throw new PersistenceException("PelopsClient is closed.");
+        }
+        Selector selector = Pelops.createSelector(poolName, keySpace);
+        return selector.getColumnsFromRow(rowId, columnFamily, Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
+    }
 
-	@Override
-	public Cassandra.Client getCassandraClient() throws Exception {
-		return Pelops.getDbConnPool(poolName).getConnection().getAPI();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#loadColumns(java.lang.String,
+     * java.lang.String[])
+     */
+    @Override
+    public Map<String, List<Column>> loadColumns(String columnFamily, String... rowIds) throws Exception {
 
-	/**
-	 * Sets the key space.
-	 * 
-	 * @param keySpace
-	 *            the keySpace to set
-	 */
-	@Override
-	public void setKeySpace(String keySpace) {
-		this.keySpace = keySpace;
-	}
+        if (!isOpen()) {
+            throw new PersistenceException("PelopsClient is closed.");
+        }
+        Selector selector = Pelops.createSelector(poolName, keySpace);
+        return selector.getColumnsFromRows(Arrays.asList(rowIds), columnFamily, Selector.newColumnsPredicateAll(false, 1000), ConsistencyLevel.ONE);
+    }
 
-	/**
-	 * Sets the contact nodes.
-	 * 
-	 * @param contactNodes
-	 *            the contactNodes to set
-	 */
-	@Override
-	public void setContactNodes(String... contactNodes) {
-		this.contactNodes = contactNodes;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#delete(java.lang.String,
+     * java.lang.String)
+     */
+    @Override
+    public void delete(String columnFamily, String rowId) throws Exception {
 
-	/**
-	 * Sets the default port.
-	 * 
-	 * @param defaultPort
-	 *            the defaultPort to set
-	 */
-	@Override
-	public void setDefaultPort(int defaultPort) {
-		this.defaultPort = defaultPort;
-	}
+        if (!isOpen()) {
+            throw new PersistenceException("PelopsClient is closed.");
+        }
+        KeyDeletor keyDeletor = Pelops.createKeyDeletor(poolName, keySpace);
+        keyDeletor.deleteColumnFamily(rowId, columnFamily, ConsistencyLevel.ONE);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("PelopsClient [contactNodes=");
-		builder.append(Arrays.toString(contactNodes));
-		builder.append(", defaultPort=");
-		builder.append(defaultPort);
-		builder.append(", keySpace=");
-		builder.append(keySpace);
-		builder.append(", closed=");
-		builder.append(closed);
-		builder.append("]");
-		return builder.toString();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String,
+     * java.lang.String, java.lang.String[])
+     */
+    @Override
+    public List<SuperColumn> loadSuperColumns(String columnFamily, String rowId, String... superColumnNames) throws Exception {
+        if (!isOpen())
+            throw new PersistenceException("PelopsClient is closed.");
+        Selector selector = Pelops.createSelector(poolName, keySpace);
+        return selector.getSuperColumnsFromRow(rowId, columnFamily, Selector.newColumnsPredicate(superColumnNames), ConsistencyLevel.ONE);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String,
+     * java.lang.String[])
+     */
+    @Override
+    public Map<String, List<SuperColumn>> loadSuperColumns(String columnFamily, String... rowIds) throws Exception {
+
+        if (!isOpen())
+            throw new PersistenceException("PelopsClient is closed.");
+
+        Selector selector = Pelops.createSelector(poolName, keySpace);
+        return selector.getSuperColumnsFromRows(Arrays.asList(rowIds), columnFamily, Selector.newColumnsPredicateAll(false, 1000), ConsistencyLevel.ONE);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.CassandraClient#getCassandraClient()
+     */
+    @Override
+    public Cassandra.Client getCassandraClient() throws Exception {
+        return Pelops.getDbConnPool(poolName).getConnection().getAPI();
+    }
+
+    /**
+     * Sets the key space.
+     * 
+     * @param keySpace
+     *            the keySpace to set
+     */
+    @Override
+    public void setKeySpace(String keySpace) {
+        this.keySpace = keySpace;
+    }
+
+    /**
+     * Sets the contact nodes.
+     * 
+     * @param contactNodes
+     *            the contactNodes to set
+     */
+    @Override
+    public void setContactNodes(String... contactNodes) {
+        this.contactNodes = contactNodes;
+    }
+
+    /**
+     * Sets the default port.
+     * 
+     * @param defaultPort
+     *            the defaultPort to set
+     */
+    @Override
+    public void setDefaultPort(int defaultPort) {
+        this.defaultPort = defaultPort;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("PelopsClient [contactNodes=");
+        builder.append(Arrays.toString(contactNodes));
+        builder.append(", defaultPort=");
+        builder.append(defaultPort);
+        builder.append(", keySpace=");
+        builder.append(keySpace);
+        builder.append(", closed=");
+        builder.append(closed);
+        builder.append("]");
+        return builder.toString();
+    }
 }
