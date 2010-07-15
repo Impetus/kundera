@@ -23,6 +23,10 @@ package com.impetus.kundera;
  */
 public class Constants {
 
+	private Constants () {
+		
+	}
+	
     /** The Constant ENCODING. */
     public static final String ENCODING = "utf-8";
 
