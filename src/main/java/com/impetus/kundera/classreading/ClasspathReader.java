@@ -31,11 +31,8 @@ import java.util.StringTokenizer;
  */
 public class ClasspathReader extends Reader {
 
-    /** The ignored packages. */
-    protected transient String[] ignoredPackages = { "javax", "java", "sun", "com.sun", "javassist" };
-
     /** The filter. */
-    Filter filter;
+    private Filter filter;
 
     /**
      * Instantiates a new classpath reader.
@@ -50,7 +47,7 @@ public class ClasspathReader extends Reader {
      * @see com.impetus.kundera.classreading.Reader#read()
      */
     @Override
-    public void read() {
+    public final void read() {
         URL[] resources = findResources();
         for (URL resource : resources) {
             try {
@@ -74,7 +71,8 @@ public class ClasspathReader extends Reader {
      * @return the UR l[]
      */
     @SuppressWarnings("deprecation")
-    public URL[] findResources() {
+    @Override
+    public final URL[] findResources() {
         List<URL> list = new ArrayList<URL>();
         String classpath = System.getProperty("java.class.path");
         StringTokenizer tokenizer = new StringTokenizer(classpath, File.pathSeparator);
@@ -99,7 +97,7 @@ public class ClasspathReader extends Reader {
      * 
      * @see com.impetus.kundera.classreading.Reader#getFilter()
      */
-    public Filter getFilter() {
+    public final Filter getFilter() {
         return filter;
     }
 
@@ -109,7 +107,7 @@ public class ClasspathReader extends Reader {
      * @param filter
      *            the new filter
      */
-    public void setFilter(Filter filter) {
+    public final void setFilter(Filter filter) {
         this.filter = filter;
     }
 }

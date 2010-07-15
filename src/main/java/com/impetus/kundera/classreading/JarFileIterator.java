@@ -27,22 +27,22 @@ import java.util.jar.JarInputStream;
  * 
  * @author animesh.kumar
  */
-public class JarFileIterator implements ResourceIterator {
+public final class JarFileIterator implements ResourceIterator {
 
     /** The jar. */
-    JarInputStream jar;
+    private JarInputStream jar;
 
     /** The next. */
-    JarEntry next;
+    private JarEntry next;
 
     /** The filter. */
-    Filter filter;
+    private Filter filter;
 
     /** The initial. */
-    boolean initial = true;
+    private boolean initial = true;
 
     /** The closed. */
-    boolean closed = false;
+    private boolean closed = false;
 
     /**
      * Instantiates a new jar file iterator.

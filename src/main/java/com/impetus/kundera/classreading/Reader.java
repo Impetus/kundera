@@ -95,8 +95,9 @@ public abstract class Reader {
      *            the annatt
      */
     private void accumulateAnnotations(List<String> annotations, AnnotationsAttribute annatt) {
-        if (null == annatt)
+        if (null == annatt) {
             return;
+        }
         for (Annotation ann : annatt.getAnnotations()) {
             annotations.add(ann.getTypeName());
         }
@@ -189,5 +190,7 @@ public abstract class Reader {
      * @return the filter
      */
     public abstract Filter getFilter();
+
+	public abstract URL[] findResources();
 
 }

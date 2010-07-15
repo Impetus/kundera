@@ -29,11 +29,8 @@ import java.util.List;
  */
 public class ClassFileIterator implements ResourceIterator {
 
-    /** The ignored packages. */
-    protected transient String[] ignoredPackages = { "javax", "java", "sun", "com.sun", "javassist" };
-
     /** The files. */
-    private ArrayList<File> files;
+    private List<File> files;
 
     /** The index. */
     private int index = 0;
@@ -49,7 +46,7 @@ public class ClassFileIterator implements ResourceIterator {
     public ClassFileIterator(File file, Filter filter) {
         files = new ArrayList<File>();
         try {
-            create(files, file, filter);
+        	init(files, file, filter);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -68,11 +65,11 @@ public class ClassFileIterator implements ResourceIterator {
      * @throws Exception
      *             the exception
      */
-    private static void create(List<File> list, File dir, Filter filter) throws Exception {
+    private static void init(List<File> list, File dir, Filter filter) throws Exception {
         File[] files = dir.listFiles();
         for (int i = 0; i < files.length; i++) {
             if (files[i].isDirectory()) {
-                create(list, files[i], filter);
+            	init(list, files[i], filter);
             } else {
                 if (filter == null || filter.accepts(files[i].getAbsolutePath())) {
                     list.add(files[i]);
@@ -86,7 +83,7 @@ public class ClassFileIterator implements ResourceIterator {
      * 
      * @see com.impetus.kundera.classreading.ResourceIterator#next()
      */
-    public InputStream next() {
+    public final InputStream next() {
         if (index >= files.size())
             return null;
         File fp = (File) files.get(index++);

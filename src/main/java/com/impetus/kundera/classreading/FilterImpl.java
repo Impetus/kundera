@@ -23,7 +23,7 @@ package com.impetus.kundera.classreading;
 public class FilterImpl implements Filter {
 
     /** The ignored packages. */
-    protected transient String[] ignoredPackages = { "javax", "java", "sun", "com.sun", "javassist" };
+    private transient String[] ignoredPackages = { "javax", "java", "sun", "com.sun", "javassist" };
 
     /*
      * (non-Javadoc)
@@ -31,7 +31,7 @@ public class FilterImpl implements Filter {
      * @see com.impetus.kundera.classreading.Filter#accepts(java.lang.String)
      */
     @Override
-    public boolean accepts(String filename) {
+    public final boolean accepts(String filename) {
         if (filename.endsWith(".class")) {
             if (filename.startsWith("/")) {
                 filename = filename.substring(1);
