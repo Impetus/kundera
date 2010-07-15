@@ -89,7 +89,7 @@ public class LucandraIndexer implements Indexer {
     private lucandra.IndexWriter indexWriter;
 
     /** The analyzer. */
-    Analyzer analyzer;
+    private Analyzer analyzer;
 
     /**
      * Instantiates a new lucandra indexer.
@@ -117,7 +117,7 @@ public class LucandraIndexer implements Indexer {
      * .EntityMetadata, java.lang.String)
      */
     @Override
-    public void unindex(EntityMetadata metadata, String id) {
+    public final void unindex(EntityMetadata metadata, String id) {
         log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
         try {
             indexWriter.deleteDocuments(new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));
@@ -136,7 +136,7 @@ public class LucandraIndexer implements Indexer {
      * EntityMetadata, java.lang.Object)
      */
     @Override
-    public void index(EntityMetadata metadata, Object object) {
+    public final void index(EntityMetadata metadata, Object object) {
 
         if (!metadata.isIndexable()) {
             return;
@@ -173,7 +173,6 @@ public class LucandraIndexer implements Indexer {
             document.add(luceneField);
 
         } catch (PropertyAccessException e) {
-            e.printStackTrace();
             throw new IllegalArgumentException("Id could not be read.");
         }
 
@@ -216,7 +215,7 @@ public class LucandraIndexer implements Indexer {
      */
     @SuppressWarnings("deprecation")
     @Override
-    public List<String> search(String luceneQuery, int start, int count) {
+    public final List<String> search(String luceneQuery, int start, int count) {
 
         if (Constants.INVALID == count) {
             count = 100;

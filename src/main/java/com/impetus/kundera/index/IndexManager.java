@@ -36,10 +36,10 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 public class IndexManager {
 
     /** The indexer. */
-    Indexer indexer;
+    private Indexer indexer;
 
     /** The manager. */
-    EntityManagerImpl manager;
+    private EntityManagerImpl manager;
 
     /**
      * The Constructor.
@@ -70,7 +70,7 @@ public class IndexManager {
      * @param key
      *            the key
      */
-    public void remove(EntityMetadata metadata, Object entity, String key) {
+    public final void remove(EntityMetadata metadata, Object entity, String key) {
         try {
             indexer.unindex(metadata, key);
         } catch (Exception e) {
@@ -86,7 +86,7 @@ public class IndexManager {
      * @param entity
      *            the entity
      */
-    public void update(EntityMetadata metadata, Object entity) {
+    public final void update(EntityMetadata metadata, Object entity) {
         try {
             String id = PropertyAccessorFactory.getStringProperty(entity, metadata.getIdProperty());
             indexer.unindex(metadata, id);
@@ -104,7 +104,7 @@ public class IndexManager {
      * @param entity
      *            the entity
      */
-    public void write(EntityMetadata metadata, Object entity) {
+    public final void write(EntityMetadata metadata, Object entity) {
         indexer.index(metadata, entity);
     }
 
@@ -117,7 +117,7 @@ public class IndexManager {
      * 
      * @return the list< string>
      */
-    public List<String> search(String query) {
+    public final List<String> search(String query) {
         return search(query, Constants.INVALID, Constants.INVALID);
     }
 
@@ -131,7 +131,7 @@ public class IndexManager {
      * 
      * @return the list< string>
      */
-    public List<String> search(String query, int count) {
+    public final List<String> search(String query, int count) {
         return search(query, Constants.INVALID, count);
     }
 
@@ -147,7 +147,7 @@ public class IndexManager {
      * 
      * @return the list< string>
      */
-    public List<String> search(String query, int start, int count) {
+    public final List<String> search(String query, int start, int count) {
         return indexer.search(query, start, count);
     }
 
