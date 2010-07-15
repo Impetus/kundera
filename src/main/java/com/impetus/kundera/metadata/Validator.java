@@ -15,7 +15,6 @@
  */
 package com.impetus.kundera.metadata;
 
-import javax.persistence.PersistenceException;
 
 /**
  * Interface to validate an entity.
@@ -29,10 +28,7 @@ public interface Validator {
      * 
      * @param clazz
      *            the clazz
-     * 
-     * @throws PersistenceException
-     *             the illegal entity exception
      */
-    void validate(Class<?> clazz) throws PersistenceException;
+    void validate(Class<?> clazz);
 
 }

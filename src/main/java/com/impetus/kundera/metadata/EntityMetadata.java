@@ -26,37 +26,37 @@ import java.util.Map;
  * 
  * @author animesh.kumar
  */
-public class EntityMetadata {
+public final class EntityMetadata {
 
     /** type. */
-    Type type;
+    private Type type;
 
     /** class corresponding to this meta. */
-    Class<?> entityClazz;
+    private Class<?> entityClazz;
 
     /** ColumnFamily. */
-    String columnFamilyName;
+    private String columnFamilyName;
 
     /** field that keeps row identifier. */
-    Field idProperty;
+    private Field idProperty;
 
     /** columnMeta map. */
-    Map<String, Column> columnsMap;
+    private Map<String, Column> columnsMap;
 
     /** supercolumn map. */
-    Map<String, SuperColumn> superColumnsMap;
+    private Map<String, SuperColumn> superColumnsMap;
 
     /** document index boost, lucene specific. */
-    float indexBoost = 1.0f;
+    private float indexBoost = 1.0f;
 
     /** The index name. */
-    String indexName;
+    private String indexName;
 
     /** The is indexable. */
-    boolean isIndexable = true; // default is indexable
+    private boolean isIndexable = true; // default is indexable
 
     /** The index prperties. */
-    List<PropertyIndex> indexPrperties;
+    private List<PropertyIndex> indexPrperties;
 
     /**
      * Instantiates a new metadata.
@@ -350,13 +350,13 @@ public class EntityMetadata {
      * 
      * @author animesh.kumar
      */
-    public class Column {
+    public final class Column {
 
         /** name of the column. */
-        String name;
+        private String name;
 
         /** field. */
-        Field field;
+        private Field field;
 
         /**
          * Instantiates a new column.
@@ -411,13 +411,13 @@ public class EntityMetadata {
      * 
      * @author animesh.kumar
      */
-    public class SuperColumn {
+    public final class SuperColumn {
 
         /** The name. */
-        String name;
+        private String name;
 
         /** The columns. */
-        List<Column> columns;
+        private List<Column> columns;
 
         /**
          * Instantiates a new super column.
@@ -482,16 +482,16 @@ public class EntityMetadata {
      * 
      * @author animesh.kumar
      */
-    public class PropertyIndex {
+    public final class PropertyIndex {
 
         /** The name. */
-        String name;
+        private String name;
 
         /** The property. */
-        Field property;
+        private Field property;
 
         /** The boost. */
-        float boost = 1.0f;
+        private float boost = 1.0f;
 
         /**
          * The Constructor.

@@ -15,7 +15,6 @@
  */
 package com.impetus.kundera.metadata;
 
-import javax.persistence.PersistenceException;
 
 /**
  * The Interface IMetadataProcessor.
@@ -32,8 +31,6 @@ public interface MetadataProcessor {
      * @param metadata
      *            the metadata
      * 
-     * @throws PersistenceException
-     *             the illegal entity exception
      */
-    void process(Class<?> clazz, EntityMetadata metadata) throws PersistenceException;
+    void process(Class<?> clazz, EntityMetadata metadata);
 }

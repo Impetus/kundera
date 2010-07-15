@@ -19,7 +19,6 @@ import java.lang.reflect.Field;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
-import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +46,7 @@ public class SuperColumnFamilyProcessor implements MetadataProcessor {
      * com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public void process(Class<?> clazz, EntityMetadata metadata) throws PersistenceException {
+    public final void process(Class<?> clazz, EntityMetadata metadata) {
 
         if (!clazz.isAnnotationPresent(SuperColumnFamily.class)) {
             return;

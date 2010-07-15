@@ -19,7 +19,6 @@ import java.lang.reflect.Field;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
-import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,7 +44,7 @@ public class ColumnFamilyProcessor implements MetadataProcessor {
      * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
      * com.impetus.kundera.metadata.EntityMetadata)
      */
-    public void process(Class<?> clazz, EntityMetadata metadata) throws PersistenceException {
+    public final void process(Class<?> clazz, EntityMetadata metadata) {
 
         if (!clazz.isAnnotationPresent(ColumnFamily.class)) {
             return;

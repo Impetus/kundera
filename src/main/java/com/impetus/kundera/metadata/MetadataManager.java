@@ -86,7 +86,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
      * @throws PersistenceException
      *             the persistence exception
      */
-    public void validate(Class<?> clazz) throws PersistenceException {
+    public final void validate(Class<?> clazz) throws PersistenceException {
         validator.validate(clazz);
     }
 
@@ -101,7 +101,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
      * @throws PersistenceException
      *             the persistence exception
      */
-    public boolean isColumnFamily(Class<?> clazz) throws PersistenceException {
+    public final boolean isColumnFamily(Class<?> clazz) throws PersistenceException {
         return getEntityMetadata(clazz).getType().equals(EntityMetadata.Type.COLUMN_FAMILY);
     }
 
@@ -116,7 +116,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
      * @throws PersistenceException
      *             the persistence exception
      */
-    public boolean isSuperColumnFamily(Class<?> clazz) throws PersistenceException {
+    public final boolean isSuperColumnFamily(Class<?> clazz) throws PersistenceException {
         return getEntityMetadata(clazz).getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY);
     }
 
@@ -131,7 +131,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
      * @throws PersistenceException
      *             the persistence exception
      */
-    public EntityMetadata getEntityMetadata(Class<?> clazz) throws PersistenceException {
+    public final EntityMetadata getEntityMetadata(Class<?> clazz) throws PersistenceException {
 
         EntityMetadata metadata = metadataCache.get(clazz);
         if (null == metadata) {
@@ -158,7 +158,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
      * @throws PersistenceException
      *             the persistence exception
      */
-    public EntityMetadata process(Class<?> clazz) throws PersistenceException {
+    private EntityMetadata process(Class<?> clazz) throws PersistenceException {
 
         EntityMetadata metadata = new EntityMetadata(clazz);
         validate(clazz);
@@ -198,7 +198,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
      * 
      * @return the entity class by name
      */
-    public Class<?> getEntityClassByName(String name) {
+    public final Class<?> getEntityClassByName(String name) {
         return entityNameToClassMap.get(name);
     }
 
@@ -212,7 +212,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
     @Override
     // called whenever a class with @Entity annotation is encountered in the
     // classpath.
-    public void discovered(String className, String[] annotations) {
+    public final void discovered(String className, String[] annotations) {
         try {
             Class<?> clazz = Class.forName(className);
 

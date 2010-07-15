@@ -49,12 +49,10 @@ public class ValidatorImpl implements Validator {
      *            validates this class
      * 
      * @return returns 'true' if valid
-     * 
-     * @throws PersistenceException
-     *             the illegal entity exception
      */
     @Override
-    public void validate(final Class<?> clazz) throws PersistenceException {
+    // TODO: reduce Cyclomatic complexity
+    public final void validate(final Class<?> clazz) {
 
         if (classes.contains(clazz)) {
             return;
