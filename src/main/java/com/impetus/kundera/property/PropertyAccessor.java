@@ -38,9 +38,6 @@ public interface PropertyAccessor<T> {
      * 
      * @return Map (alias->byte[] value)
      * 
-     * @throws IllegalArgumentException
-     *             * @throws IllegalAccessException * @throws
-     *             PropertyAccessException the property access exception
      * @throws PropertyAccessException
      *             the property access exception
      */
@@ -76,9 +73,6 @@ public interface PropertyAccessor<T> {
      *            Cassandra-column-name of this Field. By default, this is same
      *            as Field's name
      * 
-     * @throws IllegalArgumentException
-     *             * @throws IllegalAccessException * @throws
-     *             PropertyAccessException the property access exception
      * @throws PropertyAccessException
      *             the property access exception
      */

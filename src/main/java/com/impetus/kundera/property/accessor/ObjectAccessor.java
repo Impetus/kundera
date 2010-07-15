@@ -35,7 +35,7 @@ public class ObjectAccessor extends BasePropertyAccessor<Object> {
      * @see com.impetus.kundera.property.PropertyAccessor#decode(byte[])
      */
     @Override
-    public Object fromBytes(byte[] bytes) throws PropertyAccessException {
+    public final Object fromBytes(byte[] bytes) throws PropertyAccessException {
         try {
             ObjectInputStream ois;
             ois = new ObjectInputStream(new ByteArrayInputStream(bytes));

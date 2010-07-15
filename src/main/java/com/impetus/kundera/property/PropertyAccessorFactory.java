@@ -34,6 +34,10 @@ import com.impetus.kundera.utils.ReflectUtils;
  * 
  * @author animesh.kumar
  */
+/**
+ * @author animesh.kumar
+ *
+ */
 public class PropertyAccessorFactory {
 
     /** The Constant INTEGER. */
@@ -57,6 +61,10 @@ public class PropertyAccessorFactory {
     /** The Constant OBJECT. */
     public static final PropertyAccessor<Object> OBJECT = new ObjectAccessor();
 
+    private PropertyAccessorFactory () {
+    	
+    }
+    
     /**
      * Gets the property accessor for string.
      * 
@@ -70,9 +78,7 @@ public class PropertyAccessorFactory {
      * Gets the property accessor.
      * 
      * @param clazz
-     *            the clazz
-     * 
-     * @return the property accessor
+     * @return
      */
     @SuppressWarnings("unchecked")
     public static PropertyAccessor getPropertyAccessor(Class<?> clazz) {
@@ -102,9 +108,7 @@ public class PropertyAccessorFactory {
      * Gets the property accessor.
      * 
      * @param property
-     *            the property
-     * 
-     * @return the property accessor
+     * @return
      */
     public static PropertyAccessor<?> getPropertyAccessor(Field property) {
         return getPropertyAccessor(property.getType());
@@ -114,15 +118,9 @@ public class PropertyAccessorFactory {
      * Helper method to set string property.
      * 
      * @param target
-     *            the target
      * @param property
-     *            the property
      * @param key
-     *            the key
-     * 
-     * @throws Exception
-     *             * @throws PropertyAccessException the property access
-     *             exception
+     * @throws PropertyAccessException
      */
     public static void setStringProperty(Object target, Field property, String key) throws PropertyAccessException {
         setProperty(target, property, STRING.toBytes(key), property.getName(), null);
@@ -132,14 +130,9 @@ public class PropertyAccessorFactory {
      * Helper method to get string property.
      * 
      * @param target
-     *            the target
      * @param property
-     *            the property
-     * 
-     * @return the string property
-     * 
+     * @return
      * @throws PropertyAccessException
-     *             the property access exception
      */
     public static String getStringProperty(Object target, Field property) throws PropertyAccessException {
         byte[] idValue = PropertyAccessorFactory.getPropertyAccessor(property).readAsByteArray(target, property, "some-dummy-key-here###").get("some-dummy-key-here###");
@@ -150,18 +143,11 @@ public class PropertyAccessorFactory {
      * Helper method to set property value.
      * 
      * @param target
-     *            the target
      * @param property
-     *            the property
      * @param value
-     *            the value
      * @param propertyName
-     *            the property name
      * @param alias
-     *            the alias
-     * 
      * @throws PropertyAccessException
-     *             the property access exception
      */
     public static void setProperty(Object target, Field property, byte[] value, String propertyName, String alias) throws PropertyAccessException {
         // set value of the field in the bean

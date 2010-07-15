@@ -41,7 +41,7 @@ public class DateAccessor extends BasePropertyAccessor<Date> {
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Date fromBytes(byte[] bytes) throws PropertyAccessException {
+    public final Date fromBytes(byte[] bytes) throws PropertyAccessException {
         try {
             return DATE_FORMATTER.parse(new String(bytes, Constants.ENCODING));
         } catch (Exception e) {

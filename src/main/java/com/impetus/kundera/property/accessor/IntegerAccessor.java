@@ -28,7 +28,7 @@ public class IntegerAccessor extends BasePropertyAccessor<Integer> {
      * @see com.impetus.kundera.property.PropertyAccessor#decode(byte[])
      */
     @Override
-    public Integer fromBytes(byte[] b) {
+    public final Integer fromBytes(byte[] b) {
         return ((b[0] << 24) + ((b[1] & 0xFF) << 16) + ((b[2] & 0xFF) << 8) + (b[3] & 0xFF));
     }
 

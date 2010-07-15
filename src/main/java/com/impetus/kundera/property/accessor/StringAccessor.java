@@ -31,7 +31,7 @@ public class StringAccessor extends BasePropertyAccessor<String> {
      * @see com.impetus.kundera.property.PropertyAccessor#decode(byte[])
      */
     @Override
-    public String fromBytes(byte[] bytes) throws PropertyAccessException {
+    public final String fromBytes(byte[] bytes) throws PropertyAccessException {
         try {
             return new String(bytes, Constants.ENCODING);
         } catch (Exception e) {

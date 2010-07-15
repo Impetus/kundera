@@ -38,7 +38,7 @@ public abstract class BasePropertyAccessor<T> implements PropertyAccessor<T> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Map<String, byte[]> readAsByteArray(Object target, Field property, String alias) throws PropertyAccessException {
+    public final Map<String, byte[]> readAsByteArray(Object target, Field property, String alias) throws PropertyAccessException {
         // make sure that the property is accessible
         if (!property.isAccessible()) {
             property.setAccessible(true);
@@ -68,7 +68,7 @@ public abstract class BasePropertyAccessor<T> implements PropertyAccessor<T> {
      * Object, java.lang.reflect.Field, java.lang.String)
      */
     @Override
-    public Map<String, T> readAsObject(Object target, Field property, String alias) throws PropertyAccessException {
+    public final Map<String, T> readAsObject(Object target, Field property, String alias) throws PropertyAccessException {
         Map<String, T> map = new HashMap<String, T>();
         for (Map.Entry<String, byte[]> entry : readAsByteArray(target, property, alias).entrySet()) {
             map.put(entry.getKey(), fromBytes(entry.getValue()));
@@ -83,7 +83,7 @@ public abstract class BasePropertyAccessor<T> implements PropertyAccessor<T> {
      * java.lang.reflect.Field, byte[], java.lang.String)
      */
     @Override
-    public void set(Object target, Field property, byte[] bytes, String alias) throws PropertyAccessException {
+    public final void set(Object target, Field property, byte[] bytes, String alias) throws PropertyAccessException {
 
         // make sure that the property is accessible
         if (!property.isAccessible()) {

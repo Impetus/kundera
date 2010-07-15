@@ -32,7 +32,7 @@ public class LongAccessor extends BasePropertyAccessor<Long> {
      * @see com.impetus.kundera.property.PropertyAccessor#decode(byte[])
      */
     @Override
-    public Long fromBytes(byte[] bytes) throws PropertyAccessException {
+    public final Long fromBytes(byte[] bytes) throws PropertyAccessException {
         if (bytes.length != 8) {
             throw new PropertyAccessException("must be 8 bytes");
         }

@@ -40,7 +40,7 @@ public class MapAccessor implements PropertyAccessor<Object> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public Map<String, byte[]> readAsByteArray(Object target, Field property, String alias) throws PropertyAccessException {
+    public final Map<String, byte[]> readAsByteArray(Object target, Field property, String alias) throws PropertyAccessException {
 
         if (!property.isAccessible()) {
             property.setAccessible(true);
@@ -74,7 +74,7 @@ public class MapAccessor implements PropertyAccessor<Object> {
      * Object, java.lang.reflect.Field, java.lang.String)
      */
     @Override
-    public Map<String, Object> readAsObject(Object target, Field property, String alias) throws PropertyAccessException {
+    public final Map<String, Object> readAsObject(Object target, Field property, String alias) throws PropertyAccessException {
         Map<String, Object> map = new HashMap<String, Object>();
         for (Map.Entry<String, byte[]> entry : readAsByteArray(target, property, alias).entrySet()) {
             map.put(entry.getKey(), PropertyAccessorFactory.getPropertyAccessor(getArgumentType(property)).fromBytes(entry.getValue()));
@@ -90,7 +90,7 @@ public class MapAccessor implements PropertyAccessor<Object> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public void set(Object target, Field property, byte[] bytes, String alias) throws PropertyAccessException {
+    public final void set(Object target, Field property, byte[] bytes, String alias) throws PropertyAccessException {
 
         if (!property.isAccessible()) {
             property.setAccessible(true);
@@ -117,7 +117,7 @@ public class MapAccessor implements PropertyAccessor<Object> {
      * @return the argument type
      */
     @SuppressWarnings("unchecked")
-    public Class getArgumentType(Field property) {
+    public final Class getArgumentType(Field property) {
         try {
             return (Class) ReflectUtils.getTypeArguments(property)[1];
         } catch (Exception e) {
@@ -132,7 +132,7 @@ public class MapAccessor implements PropertyAccessor<Object> {
      * com.impetus.kundera.property.PropertyAccessor#encode(java.lang.Object)
      */
     @Override
-    public byte[] toBytes(Object value) throws PropertyAccessException {
+    public final byte[] toBytes(Object value) throws PropertyAccessException {
         return null;
     }
 
@@ -142,7 +142,7 @@ public class MapAccessor implements PropertyAccessor<Object> {
      * @see com.impetus.kundera.property.PropertyAccessor#decode(byte[])
      */
     @Override
-    public Object fromBytes(byte[] b) throws PropertyAccessException {
+    public final Object fromBytes(byte[] b) throws PropertyAccessException {
         return null;
     }
 
