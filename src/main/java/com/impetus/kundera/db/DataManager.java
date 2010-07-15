@@ -68,7 +68,7 @@ public class DataManager {
      * @throws Exception
      *             the exception
      */
-    public void persist(EntityMetadata metadata, Object entity) throws Exception {
+    public final void persist(EntityMetadata metadata, Object entity) throws Exception {
         getDataAccessor(metadata).write(em.getClient(), metadata, entity);
     }
 
@@ -87,7 +87,7 @@ public class DataManager {
      * @throws Exception
      *             the exception
      */
-    public <T> T find(EntityMetadata metadata, Class<T> clazz, String key) throws Exception {
+    public final <T> T find(EntityMetadata metadata, Class<T> clazz, String key) throws Exception {
         return getDataAccessor(metadata).read(em.getClient(), metadata, clazz, key);
     }
 
@@ -106,7 +106,7 @@ public class DataManager {
      * @throws Exception
      *             the exception
      */
-    public <T> List<T> find(EntityMetadata metadata, Class<T> clazz, String... keys) throws Exception {
+    public final <T> List<T> find(EntityMetadata metadata, Class<T> clazz, String... keys) throws Exception {
         return getDataAccessor(metadata).read(em.getClient(), metadata, clazz, keys);
     }
 
@@ -123,7 +123,7 @@ public class DataManager {
      * @throws Exception
      *             the exception
      */
-    public void remove(EntityMetadata metadata, Object entity, String key) throws Exception {
+    public final void remove(EntityMetadata metadata, Object entity, String key) throws Exception {
         getDataAccessor(metadata).delete(em.getClient(), metadata, key);
     }
 

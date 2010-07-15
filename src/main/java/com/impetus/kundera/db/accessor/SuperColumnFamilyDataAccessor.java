@@ -41,7 +41,7 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
  * 
  * @author animesh.kumar
  */
-public class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperColumn> implements DataAccessor {
+public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperColumn> implements DataAccessor {
 
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(SuperColumnFamilyDataAccessor.class);

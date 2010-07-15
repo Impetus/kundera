@@ -40,7 +40,7 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
  * @author animesh.kumar
  * @since 0.1
  */
-public class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> implements DataAccessor {
+public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> implements DataAccessor {
 
     /** log for this class. */
     private static Log log = LogFactory.getLog(ColumnFamilyDataAccessor.class);
