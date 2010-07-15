@@ -16,10 +16,14 @@
 package com.impetus.kundera.metadata;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.impetus.kundera.ejb.event.CallbackMethod;
 
 /**
  * The Class EntityMetadata.
@@ -41,10 +45,10 @@ public final class EntityMetadata {
     private Field idProperty;
 
     /** columnMeta map. */
-    private Map<String, Column> columnsMap;
+    private Map<String, Column> columnsMap = new HashMap<String, Column>();
 
     /** supercolumn map. */
-    private Map<String, SuperColumn> superColumnsMap;
+    private Map<String, SuperColumn> superColumnsMap = new HashMap<String, SuperColumn>();
 
     /** document index boost, lucene specific. */
     private float indexBoost = 1.0f;
@@ -56,8 +60,12 @@ public final class EntityMetadata {
     private boolean isIndexable = true; // default is indexable
 
     /** The index prperties. */
-    private List<PropertyIndex> indexPrperties;
+    private List<PropertyIndex> indexPrperties = new ArrayList<PropertyIndex>();
 
+	// entity listeners map
+	// key=>ListenerAnnotations, like @PrePersist, @PreUpdate etc.; 
+	// value=>EntityLisntener Class and method
+	private Map<Class<?>, List<? extends CallbackMethod>> callbackMethodsMap = new HashMap<Class<?>, List<? extends CallbackMethod>>();
     /**
      * Instantiates a new metadata.
      * 
@@ -66,9 +74,7 @@ public final class EntityMetadata {
      */
     public EntityMetadata(Class<?> entityClazz) {
         this.entityClazz = entityClazz;
-        columnsMap = new HashMap<String, Column>();
-        superColumnsMap = new HashMap<String, SuperColumn>();
-        indexPrperties = new ArrayList<PropertyIndex>();
+
     }
 
     /**
@@ -315,6 +321,18 @@ public final class EntityMetadata {
         this.isIndexable = isIndexable;
     }
 
+	public void setCallbackMethodsMap(Map<Class<?>, List<? extends CallbackMethod>> callbackMethodsMap) {
+		this.callbackMethodsMap = callbackMethodsMap;
+	}
+
+	public Map<Class<?>, List<? extends CallbackMethod>> getCallbackMethodsMap() {
+		return callbackMethodsMap;
+	}
+
+	public List<? extends CallbackMethod> getCallbackMethods(Class<?> event) {
+		return this.callbackMethodsMap.get(event);
+	}
+	
     /*
      * (non-Javadoc)
      * 
@@ -618,4 +636,63 @@ public final class EntityMetadata {
          */
         public abstract boolean isSuperColumnFamilyMetadata();
     }
+	/**
+	 * Class to hold class-method instances for EntityListeners
+	 * 
+	 * @author animesh.kumar
+	 */
+	public final class ExternalCallbackMethod implements CallbackMethod {
+		private Class<?> clazz;
+		private Method method;
+
+		public ExternalCallbackMethod(Class<?> clazz, Method method) {
+			this.clazz = clazz;
+			this.method = method;
+		}
+
+		public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InstantiationException {
+			if (!method.isAccessible()) method.setAccessible(true);
+			method.invoke(clazz.newInstance(), new Object[] {entity});
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("ExternalCallBackMethod [clazz=");
+			builder.append(clazz.getName());
+			builder.append(", method=");
+			builder.append(method.getName());
+			builder.append("]");
+			return builder.toString();
+		}
+	}
+
+	/**
+	 * @author animesh.kumar
+	 *
+	 */
+	public final class InternalCallbackMethod implements CallbackMethod {
+		private Method method;
+
+		public InternalCallbackMethod(Method method) {
+			this.method = method;
+		}
+
+		public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InstantiationException {
+			if (!method.isAccessible()) method.setAccessible(true);
+			method.invoke(entity, new Object[] {});
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("InternalCallBackMethod [clazz=");
+			builder.append(getEntityClazz().getName());
+			builder.append(", method=");
+			builder.append(method.getName());
+			builder.append("]");
+			return builder.toString();
+		}
+	}
+	
 }

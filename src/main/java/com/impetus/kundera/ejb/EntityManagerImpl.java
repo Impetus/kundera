@@ -24,6 +24,12 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceException;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
+import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
+import javax.persistence.PreUpdate;
 import javax.persistence.Query;
 
 import org.apache.commons.lang.NotImplementedException;
@@ -33,6 +39,7 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.CassandraClient;
 import com.impetus.kundera.CassandraEntityManager;
 import com.impetus.kundera.db.DataManager;
+import com.impetus.kundera.ejb.event.CallbackMethod;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataManager;
@@ -106,24 +113,30 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * 
      * @see javax.persistence.EntityManager#remove(java.lang.Object)
      */
-    @Override
-    public final void remove(Object entity) {
-        if (entity == null) {
-            throw new IllegalArgumentException("Entity must not be null.");
-        }
+	@Override
+	public void remove(Object entity) {
+		if (entity == null) {
+			throw new IllegalArgumentException("Entity must not be null.");
+		}
 
-        try {
-            EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
+		try {
+			EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
 
-            String id = PropertyAccessorFactory.getStringProperty(entity, metadata.getIdProperty());
+			String id = PropertyAccessorFactory.getStringProperty(entity, metadata.getIdProperty());
 
-            removeFromCache(entity.getClass(), id);
-            dataManager.remove(metadata, entity, id);
-            indexManager.remove(metadata, entity, id);
-        } catch (Exception e) {
-            throw new PersistenceException(e.getMessage());
-        }
-    }
+			// fire PreRemove events
+			fireJPAEventListeners(metadata, entity, PreRemove.class);
+
+			removeFromCache(entity.getClass(), id);
+			dataManager.remove(metadata, entity, id);
+			indexManager.remove(metadata, entity, id);
+
+			// fire PostRemove events
+			fireJPAEventListeners(metadata, entity, PostRemove.class);
+		} catch (Exception e) {
+			throw new PersistenceException(e.getMessage());
+		}
+	}
 
     /*
      * (non-Javadoc)
@@ -168,20 +181,26 @@ public class EntityManagerImpl implements CassandraEntityManager {
      */
     @Override
     public final <T> T merge(T entity) {
-        if (entity == null) {
-            throw new IllegalArgumentException("Entity must not be null.");
-        }
+		if (entity == null) {
+			throw new IllegalArgumentException("Entity must not be null.");
+		}
 
-        try {
-            EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
-            // TODO Improve this bit. should we not implement some merge on
-            // DataManager?
-            dataManager.persist(metadata, entity);
-            indexManager.update(metadata, entity);
-        } catch (Exception e) {
-            throw new PersistenceException(e.getMessage());
-        }
-        return entity;
+		try {
+			EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
+
+			// fire PreUpdate events
+			fireJPAEventListeners(metadata, entity, PreUpdate.class);
+
+			dataManager.merge(metadata, entity);
+			indexManager.update(metadata, entity);
+
+			// fire PostUpdate events
+			fireJPAEventListeners(metadata, entity, PostUpdate.class);
+
+		} catch (Exception e) {
+			throw new PersistenceException(e.getMessage());
+		}
+		return entity;
     }
 
     /*
@@ -196,9 +215,17 @@ public class EntityManagerImpl implements CassandraEntityManager {
         }
 
         try {
-            EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
-            dataManager.persist(metadata, entity);
-            indexManager.write(metadata, entity);
+        	
+			EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
+
+			// fire pre-persist events
+			fireJPAEventListeners(metadata, entity, PrePersist.class);
+
+			dataManager.persist(metadata, entity);
+			indexManager.write(metadata, entity);
+
+			// fire post-persist events			
+			fireJPAEventListeners(metadata, entity, PostPersist.class);
         } catch (Exception e) {
             throw new PersistenceException(e.getMessage());
         }
@@ -538,4 +565,20 @@ public class EntityManagerImpl implements CassandraEntityManager {
         return clazz.getName() + "_" + id;
     }
 
+	private void fireJPAEventListeners(EntityMetadata metadata, Object entity, Class<?> event) throws Exception {
+		log.debug("Firing Callback methods on @Entity(" + entity.getClass().getName() + ") for Event(" + event.getSimpleName() + ")");
+		// handler external listeners first
+		List<? extends CallbackMethod> callBackMethods = metadata.getCallbackMethods(event);
+		if (null != callBackMethods) {
+			for (CallbackMethod callback : callBackMethods) {
+				log.debug ("Firing (" + callback + ")");
+				try {
+					callback.invoke(entity);
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw e;
+				}
+			}
+		} 
+	}
 }

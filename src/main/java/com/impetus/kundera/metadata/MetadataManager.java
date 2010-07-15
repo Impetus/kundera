@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.classreading.AnnotationDiscoveryListener;
 import com.impetus.kundera.metadata.processor.ColumnFamilyProcessor;
+import com.impetus.kundera.metadata.processor.EntityListenersProcessor;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.processor.SuperColumnFamilyProcessor;
 
@@ -75,6 +76,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
         metadataProcessors.add(new SuperColumnFamilyProcessor());
         metadataProcessors.add(new ColumnFamilyProcessor());
         metadataProcessors.add(new IndexProcessor());
+        metadataProcessors.add(new EntityListenersProcessor());
     }
 
     /**
