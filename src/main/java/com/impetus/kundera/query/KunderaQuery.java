@@ -42,14 +42,14 @@ public abstract class KunderaQuery {
     /** The Constant INTRA_CLAUSE_OPERATORS. */
     public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE" };
 
-    /** The INTE r_ claus e_ pattern. */
-    private static Pattern INTER_CLAUSE_PATTERN = Pattern.compile("\\band\\b|\\bor\\b", Pattern.CASE_INSENSITIVE);
+    /** The INTER pattern. */
+    private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile("\\band\\b|\\bor\\b", Pattern.CASE_INSENSITIVE);
 
-    /** The INTR a_ claus e_ pattern. */
-    private static Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b", Pattern.CASE_INSENSITIVE);
+    /** The INTRA pattern. */
+    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b", Pattern.CASE_INSENSITIVE);
 
     /** The em. */
-    EntityManagerImpl em;
+    private EntityManagerImpl em;
 
     /** The result. */
     private String result;
@@ -75,7 +75,7 @@ public abstract class KunderaQuery {
     // contains a Queue of alternate FilterClause object and Logical Strings
     // (AND, OR etc.)
     /** The filters queue. */
-    public Queue filtersQueue = new LinkedList();
+    private Queue filtersQueue = new LinkedList();
 
     /**
      * Instantiates a new kundera query.
@@ -94,7 +94,6 @@ public abstract class KunderaQuery {
      *            the new grouping
      */
     public void setGrouping(String groupingClause) {
-
     }
 
     /**
@@ -103,7 +102,7 @@ public abstract class KunderaQuery {
      * @param result
      *            the new result
      */
-    public void setResult(String result) {
+    public final void setResult(String result) {
         this.result = result;
     }
 
@@ -113,7 +112,7 @@ public abstract class KunderaQuery {
      * @param from
      *            the new from
      */
-    public void setFrom(String from) {
+    public final void setFrom(String from) {
         this.from = from;
     }
 
@@ -123,7 +122,7 @@ public abstract class KunderaQuery {
      * @param filter
      *            the new filter
      */
-    public void setFilter(String filter) {
+    public final void setFilter(String filter) {
         this.filter = filter;
     }
 
@@ -133,7 +132,7 @@ public abstract class KunderaQuery {
      * @param ordering
      *            the new ordering
      */
-    public void setOrdering(String ordering) {
+    public final void setOrdering(String ordering) {
         this.ordering = ordering;
     }
 
@@ -142,7 +141,7 @@ public abstract class KunderaQuery {
      * 
      * @return the filter
      */
-    public String getFilter() {
+    public final String getFilter() {
         return filter;
     }
 
@@ -151,7 +150,7 @@ public abstract class KunderaQuery {
      * 
      * @return the from
      */
-    public String getFrom() {
+    public final String getFrom() {
         return from;
     }
 
@@ -160,7 +159,7 @@ public abstract class KunderaQuery {
      * 
      * @return the ordering
      */
-    public String getOrdering() {
+    public final String getOrdering() {
         return ordering;
     }
 
@@ -169,7 +168,7 @@ public abstract class KunderaQuery {
      * 
      * @return the result
      */
-    public String getResult() {
+    public final String getResult() {
         return result;
     }
 
@@ -187,25 +186,27 @@ public abstract class KunderaQuery {
      * Inits the entity class.
      */
     private void initEntityClass() {
-        String result = getResult();
-        String from = getFrom();
+//        String result = getResult();
+//        String from = getFrom();
 
         String fromArray[] = from.split(" ");
-        if (fromArray.length != 2)
+        if (fromArray.length != 2) {
             throw new PersistenceException("Bad query format: " + from);
-        if (!fromArray[1].equals(result))
+        }
+        if (!fromArray[1].equals(result)){
             throw new PersistenceException("Bad query format: " + from);
-
+        }
         this.entityName = fromArray[0];
         this.entityAlias = fromArray[1];
 
         entityClass = em.getMetadataManager().getEntityClassByName(entityName);
-        if (null == entityClass)
+        if (null == entityClass){
             throw new PersistenceException("No entity found by the name: " + entityName);
-
+        }
         EntityMetadata metadata = em.getMetadataManager().getEntityMetadata(entityClass);
-        if (!metadata.isIndexable())
+        if (!metadata.isIndexable()){
             throw new PersistenceException(entityClass + " is not indexed. What are you searching for dude?");
+        }
     }
 
     /**
@@ -215,10 +216,11 @@ public abstract class KunderaQuery {
         EntityMetadata metadata = em.getMetadataManager().getEntityMetadata(entityClass);
         String indexName = metadata.getIndexName();
 
-        String filter = getFilter();
+        //String filter = getFilter();
 
-        if (null == filter)
+        if (null == filter) {
             return;
+        }
 
         List<String> clauses = tokenize(filter, INTER_CLAUSE_PATTERN);
         // clauses must be alternate Inter and Intra conbination, starting with
@@ -266,7 +268,7 @@ public abstract class KunderaQuery {
      * @param value
      *            the value
      */
-    public void setParameter(String name, String value) {
+    public final void setParameter(String name, String value) {
         boolean found = false;
         for (Object object : getFilterClauseQueue()) {
             if (object instanceof FilterClause) {
@@ -279,8 +281,9 @@ public abstract class KunderaQuery {
                 }
             }
         }
-        if (!found)
+        if (!found) {
             throw new PersistenceException("invalid parameter: " + name);
+        }
     }
 
     /**
@@ -288,7 +291,7 @@ public abstract class KunderaQuery {
      * 
      * @return the entityClass
      */
-    public Class<?> getEntityClass() {
+    public final Class<?> getEntityClass() {
         return entityClass;
     }
 
@@ -297,7 +300,7 @@ public abstract class KunderaQuery {
      * 
      * @return the filters
      */
-    public Queue getFilterClauseQueue() {
+    public final Queue getFilterClauseQueue() {
         return filtersQueue;
     }
 
@@ -305,13 +308,13 @@ public abstract class KunderaQuery {
     /**
      * The Class FilterClause.
      */
-    public class FilterClause {
+    public final class FilterClause {
 
         /** The property. */
-        String property;
+        private String property;
 
         /** The condition. */
-        String condition;
+        private String condition;
 
         /** The value. */
         String value;
@@ -338,7 +341,7 @@ public abstract class KunderaQuery {
          * 
          * @return the property
          */
-        public String getProperty() {
+        public final String getProperty() {
             return property;
         }
 
@@ -347,7 +350,7 @@ public abstract class KunderaQuery {
          * 
          * @return the condition
          */
-        public String getCondition() {
+        public final String getCondition() {
             return condition;
         }
 
@@ -356,7 +359,7 @@ public abstract class KunderaQuery {
          * 
          * @return the value
          */
-        public String getValue() {
+        public final String getValue() {
             return value;
         }
 
@@ -395,7 +398,7 @@ public abstract class KunderaQuery {
      * @see java.lang.Object#clone()
      */
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public final Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
 
@@ -405,7 +408,7 @@ public abstract class KunderaQuery {
      * @see java.lang.Object#toString()
      */
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("KunderaQuery [entityName=");
         builder.append(entityName);
@@ -433,14 +436,14 @@ public abstract class KunderaQuery {
         Matcher matcher = pattern.matcher(where);
         int lastIndex = 0;
         String s;
-        int i = 0;
+        //int count = 0;
         while (matcher.find()) {
             s = where.substring(lastIndex, matcher.start()).trim();
             split.add(s);
             s = matcher.group();
             split.add(s);
             lastIndex = matcher.end();
-            i++;
+            //count++;
         }
         s = where.substring(lastIndex).trim();
         split.add(s);

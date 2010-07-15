@@ -82,10 +82,10 @@ public class LuceneQuery extends QueryImpl implements Query {
         log.debug("Lucene Query: " + q);
 
         // get entity ids from lucene index
-        List<String> entityIds = cem.getIndexManager().search(q, maxResult);
+        List<String> entityIds = getEntityManager().getIndexManager().search(q, maxResult);
 
         // lookup for corresponding entity classes
-        return cem.find(getEntityClass(), entityIds.toArray());
+        return getEntityManager().find(getEntityClass(), entityIds.toArray());
     }
 
     /*
@@ -106,8 +106,6 @@ public class LuceneQuery extends QueryImpl implements Query {
      */
     private String getLuceneQueryFromJPAQuery() {
         StringBuffer sb = new StringBuffer();
-
-        Queue filterClauseQueue = getFilterClauseQueue();
 
         for (Object object : getFilterClauseQueue()) {
             if (object instanceof FilterClause) {

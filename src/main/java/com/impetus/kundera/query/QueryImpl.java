@@ -35,10 +35,10 @@ import com.impetus.kundera.ejb.EntityManagerImpl;
 public abstract class QueryImpl extends KunderaQuery implements Query {
 
     /** The cem. */
-    protected EntityManagerImpl cem;
+    private EntityManagerImpl cem;
 
     /** The query. */
-    protected String query;
+    private String query;
 
     /**
      * Instantiates a new query impl.
@@ -56,10 +56,18 @@ public abstract class QueryImpl extends KunderaQuery implements Query {
         parse();
     }
 
-    /**
+    public EntityManagerImpl getEntityManager() {
+		return cem;
+	}
+
+	public String getJPAQuery() {
+		return query;
+	}
+
+	/**
      * Parses the.
      */
-    protected void parse() {
+    private void parse() {
         KunderaQueryParser parser = new KunderaQueryParser(this, query);
         parser.parse();
         postParsingInit();

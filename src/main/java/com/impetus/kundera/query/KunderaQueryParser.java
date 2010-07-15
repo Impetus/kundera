@@ -46,7 +46,7 @@ public class KunderaQueryParser {
      * Record of the keyword currently being processed, so we can check for out
      * of order keywords.
      */
-    int keywordPosition = -1;
+    private int keywordPosition = -1;
 
     /**
      * Constructor for the Single-String parser.
@@ -64,7 +64,7 @@ public class KunderaQueryParser {
     /**
      * Method to parse the Single-String query.
      */
-    public void parse() {
+    public final void parse() {
         new Compiler(new Parser(queryString)).compile();
     }
 
@@ -96,12 +96,12 @@ public class KunderaQueryParser {
     private class Compiler {
 
         /** The tokenizer. */
-        Parser tokenizer;
+        private Parser tokenizer;
 
         // Temporary variable since grouping clause is made up of GROUP BY ...
         // HAVING ...
         /** The grouping clause. */
-        String groupingClause;
+        private String groupingClause;
 
         /**
          * Instantiates a new compiler.
@@ -125,15 +125,14 @@ public class KunderaQueryParser {
             if (keyword != null) {
                 if (isKeyword(keyword)) {
                     throw new RuntimeException("out of order keyword: " + keyword);
-                } else {
-                    // unexpected token
-                }
+                } 
             }
         }
 
         /**
          * Compile select.
          */
+        // TODO: reduce Cyclomatic complexity
         private void compileSelect() {
             if (!tokenizer.parseKeywordIgnoreCase("SELECT")) {
                 throw new RuntimeException("no select to start");
@@ -241,13 +240,13 @@ public class KunderaQueryParser {
     private class Parser {
 
         /** tokens. */
-        final String[] tokens;
+        private final String[] tokens;
 
         /** keywords. */
-        final String[] keywords;
+        private final String[] keywords;
 
         /** current token cursor position. */
-        int pos = -1;
+        private int pos = -1;
 
         /**
          * Constructor.
