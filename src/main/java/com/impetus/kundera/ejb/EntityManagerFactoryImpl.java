@@ -46,7 +46,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     private static Log log = LogFactory.getLog(EntityManagerFactoryImpl.class);
 
     /** The Constant propsFileName. */
-    static final String propsFileName = "/kundera.properties";
+    private static final String propsFileName = "/kundera.properties";
 
     /** Whether or not the factory has been closed. */
     private boolean closed = false;
@@ -56,25 +56,16 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
     /** properties file values. */
     @SuppressWarnings("unchecked")
-    public Map props;
+    private Map props;
 
     /** The sessionless. */
     private boolean sessionless;
-
-    /** The cassandra nodes. */
-    private String[] cassandraNodes;
-
-    /** The cassandra port. */
-    private int cassandraPort;
-
-    /** The cassandra keyspace. */
-    private String cassandraKeyspace;
 
     /** The metadata manager. */
     private MetadataManager metadataManager;
 
     /** The client. */
-    public CassandraClient client;
+    private CassandraClient client;
 
     /**
      * This one is generally called via the PersistenceProvider.
@@ -150,9 +141,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      * Inits the.
      */
     private void init() {
-        cassandraNodes = ((String) props.get("kundera.nodes")).split(",");
-        cassandraPort = Integer.parseInt((String) props.get("kundera.port"));
-        cassandraKeyspace = (String) props.get("kundera.keyspace");
+        String[] cassandraNodes = ((String) props.get("kundera.nodes")).split(",");
+        int cassandraPort = Integer.parseInt((String) props.get("kundera.port"));
+        String cassandraKeyspace = (String) props.get("kundera.keyspace");
 
         String sessionless_ = (String) props.get("sessionless");
         if (sessionless_ == null) {
@@ -179,7 +170,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      * 
      * @return the metadataManager
      */
-    public MetadataManager getMetadataManager() {
+    public final MetadataManager getMetadataManager() {
         return metadataManager;
     }
 
@@ -189,7 +180,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      * @see javax.persistence.EntityManagerFactory#close()
      */
     @Override
-    public void close() {
+    public final void close() {
         closed = true;
         client.shutdown();
     }
@@ -200,7 +191,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      * @see javax.persistence.EntityManagerFactory#createEntityManager()
      */
     @Override
-    public EntityManager createEntityManager() {
+    public final EntityManager createEntityManager() {
         return new EntityManagerImpl(this, client, sessionless);
     }
 
@@ -211,7 +202,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      * javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
      */
     @Override
-    public EntityManager createEntityManager(Map map) {
+    public final EntityManager createEntityManager(Map map) {
         return new EntityManagerImpl(this, client, sessionless);
     }
 
@@ -221,7 +212,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      * @see javax.persistence.EntityManagerFactory#isOpen()
      */
     @Override
-    public boolean isOpen() {
+    public final boolean isOpen() {
         return !closed;
     }
 
@@ -230,7 +221,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      * 
      * @return the persistence unit name
      */
-    public String getPersistenceUnitName() {
+    public final String getPersistenceUnitName() {
         return persistenceUnitName;
     }
 }

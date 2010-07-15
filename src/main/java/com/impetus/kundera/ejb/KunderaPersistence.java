@@ -43,7 +43,7 @@ public class KunderaPersistence implements PersistenceProvider {
      * (javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
      */
     @Override
-    public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map) {
+    public final EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map) {
         return new EntityManagerFactoryImpl(info.getPersistenceUnitName(), map);
     }
 
@@ -55,7 +55,7 @@ public class KunderaPersistence implements PersistenceProvider {
      * java.lang.String, java.util.Map)
      */
     @Override
-    public EntityManagerFactory createEntityManagerFactory(String emName, Map map) {
+    public final EntityManagerFactory createEntityManagerFactory(String emName, Map map) {
         return new EntityManagerFactoryImpl(emName, map);
     }
 

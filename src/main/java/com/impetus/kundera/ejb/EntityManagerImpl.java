@@ -107,7 +107,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#remove(java.lang.Object)
      */
     @Override
-    public void remove(Object entity) {
+    public final void remove(Object entity) {
         if (entity == null) {
             throw new IllegalArgumentException("Entity must not be null.");
         }
@@ -132,7 +132,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * java.lang.Object)
      */
     @Override
-    public <T> T find(Class<T> entityClass, Object primaryKey) {
+    public final <T> T find(Class<T> entityClass, Object primaryKey) {
         if (!sessionless && closed) {
             throw new PersistenceException("EntityManager already closed.");
         }
@@ -167,7 +167,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#merge(java.lang.Object)
      */
     @Override
-    public <T> T merge(T entity) {
+    public final <T> T merge(T entity) {
         if (entity == null) {
             throw new IllegalArgumentException("Entity must not be null.");
         }
@@ -190,7 +190,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#persist(java.lang.Object)
      */
     @Override
-    public void persist(Object entity) {
+    public final void persist(Object entity) {
         if (entity == null) {
             throw new IllegalArgumentException("Entity must not be null.");
         }
@@ -211,7 +211,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * java.lang.Object[])
      */
     @Override
-    public <T> List<T> find(Class<T> entityClass, Object... primaryKeys) {
+    public final <T> List<T> find(Class<T> entityClass, Object... primaryKeys) {
         try {
             String[] ids = Arrays.asList(primaryKeys).toArray(new String[] {});
             EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entityClass);
@@ -227,7 +227,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#clear()
      */
     @Override
-    public void clear() {
+    public final void clear() {
         checkClosed();
         // this is really only useful with transactions
         if (sessionCache != null) {
@@ -241,7 +241,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#close()
      */
     @Override
-    public void close() {
+    public final void close() {
         closed = true;
         sessionCache = null;
     }
@@ -252,7 +252,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#contains(java.lang.Object)
      */
     @Override
-    public boolean contains(Object entity) {
+    public final boolean contains(Object entity) {
         return false;
     }
 
@@ -262,7 +262,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#createNamedQuery(java.lang.String)
      */
     @Override
-    public Query createNamedQuery(String name) {
+    public final Query createNamedQuery(String name) {
         throw new NotImplementedException("TODO");
     }
 
@@ -272,7 +272,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String)
      */
     @Override
-    public Query createNativeQuery(String sqlString) {
+    public final Query createNativeQuery(String sqlString) {
         throw new NotImplementedException("TODO");
     }
 
@@ -283,7 +283,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * java.lang.Class)
      */
     @Override
-    public Query createNativeQuery(String sqlString, Class resultClass) {
+    public final Query createNativeQuery(String sqlString, Class resultClass) {
         throw new NotImplementedException("TODO");
     }
 
@@ -294,7 +294,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * java.lang.String)
      */
     @Override
-    public Query createNativeQuery(String sqlString, String resultSetMapping) {
+    public final Query createNativeQuery(String sqlString, String resultSetMapping) {
         throw new NotImplementedException("TODO");
     }
 
@@ -304,7 +304,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#createQuery(java.lang.String)
      */
     @Override
-    public Query createQuery(String ejbqlString) {
+    public final Query createQuery(String ejbqlString) {
         return new LuceneQuery(this, ejbqlString);
     }
 
@@ -314,7 +314,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#flush()
      */
     @Override
-    public void flush() {
+    public final void flush() {
         // always flushed to cassandra anyway! relax.
     }
 
@@ -324,7 +324,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#getDelegate()
      */
     @Override
-    public Object getDelegate() {
+    public final Object getDelegate() {
         return null;
     }
 
@@ -334,7 +334,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#getFlushMode()
      */
     @Override
-    public FlushModeType getFlushMode() {
+    public final FlushModeType getFlushMode() {
         throw new NotImplementedException("TODO");
     }
 
@@ -345,7 +345,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * java.lang.Object)
      */
     @Override
-    public <T> T getReference(Class<T> entityClass, Object primaryKey) {
+    public final <T> T getReference(Class<T> entityClass, Object primaryKey) {
         throw new NotImplementedException("TODO");
     }
 
@@ -355,7 +355,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#getTransaction()
      */
     @Override
-    public EntityTransaction getTransaction() {
+    public final EntityTransaction getTransaction() {
         return new EntityTransactionImpl();
     }
 
@@ -365,7 +365,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#isOpen()
      */
     @Override
-    public boolean isOpen() {
+    public final boolean isOpen() {
         return sessionless || !closed;
     }
 
@@ -375,7 +375,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#joinTransaction()
      */
     @Override
-    public void joinTransaction() {
+    public final void joinTransaction() {
         // TODO Auto-generated method stub
 
     }
@@ -387,7 +387,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * javax.persistence.LockModeType)
      */
     @Override
-    public void lock(Object entity, LockModeType lockMode) {
+    public final void lock(Object entity, LockModeType lockMode) {
         throw new NotImplementedException("TODO");
     }
 
@@ -397,7 +397,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @see javax.persistence.EntityManager#refresh(java.lang.Object)
      */
     @Override
-    public void refresh(Object entity) {
+    public final void refresh(Object entity) {
         throw new NotImplementedException("TODO");
     }
 
@@ -409,7 +409,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * )
      */
     @Override
-    public void setFlushMode(FlushModeType flushMode) {
+    public final void setFlushMode(FlushModeType flushMode) {
         throw new NotImplementedException("TODO");
     }
 
@@ -428,7 +428,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @return the metadataManager
      */
     @Override
-    public MetadataManager getMetadataManager() {
+    public final MetadataManager getMetadataManager() {
         return metadataManager;
     }
 
@@ -437,7 +437,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * 
      * @return the dataManager
      */
-    public DataManager getDataManager() {
+    public final DataManager getDataManager() {
         return dataManager;
     }
 
@@ -446,7 +446,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * 
      * @return the indexManager
      */
-    public IndexManager getIndexManager() {
+    public final IndexManager getIndexManager() {
         return indexManager;
     }
 
@@ -456,7 +456,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * @return the client
      */
     @Override
-    public CassandraClient getClient() {
+    public final CassandraClient getClient() {
         return client;
     }
 
@@ -465,7 +465,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * 
      * @return the persistence unit name
      */
-    public String getPersistenceUnitName() {
+    public final String getPersistenceUnitName() {
         return persistenceUnitName;
     }
 
