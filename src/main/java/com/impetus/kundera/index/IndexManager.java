@@ -88,7 +88,7 @@ public class IndexManager {
      */
     public final void update(EntityMetadata metadata, Object entity) {
         try {
-            String id = (String)PropertyAccessorHelper.getObject(entity, metadata.getIdProperty());
+            String id = PropertyAccessorHelper.getId(entity, metadata);
             indexer.unindex(metadata, id);
             indexer.index(metadata, entity);
         } catch (Exception e) {
