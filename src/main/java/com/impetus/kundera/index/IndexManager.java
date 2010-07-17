@@ -25,7 +25,7 @@ import org.apache.lucene.util.Version;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
-import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Manager responsible to co-ordinate with an Indexer. It is bound with
@@ -88,7 +88,7 @@ public class IndexManager {
      */
     public final void update(EntityMetadata metadata, Object entity) {
         try {
-            String id = PropertyAccessorFactory.getStringProperty(entity, metadata.getIdProperty());
+            String id = (String)PropertyAccessorHelper.getObject(entity, metadata.getIdProperty());
             indexer.unindex(metadata, id);
             indexer.index(metadata, entity);
         } catch (Exception e) {
@@ -150,5 +150,4 @@ public class IndexManager {
     public final List<String> search(String query, int start, int count) {
         return indexer.search(query, start, count);
     }
-
 }

@@ -16,7 +16,6 @@
 package com.impetus.kundera.property;
 
 import java.lang.reflect.Field;
-import java.util.Map;
 
 /**
  * Interface to access {@link Field} property of a java class.
@@ -26,82 +25,25 @@ import java.util.Map;
 public interface PropertyAccessor<T> {
 
     /**
-     * Gets a byte array value of a Field.
-     * 
-     * @param from
-     *            Object to access the field from
-     * @param property
-     *            Field
-     * @param alias
-     *            Cassandra-column-name of this Field. By default, this is same
-     *            as Field's name
-     * 
-     * @return Map (alias->byte[] value)
-     * 
-     * @throws PropertyAccessException
-     *             the property access exception
-     */
-    Map<String, byte[]> readAsByteArray(Object from, Field property, String alias) throws PropertyAccessException;
-
-    /**
-     * Read as object.
-     * 
-     * @param target
-     *            the target
-     * @param property
-     *            the property
-     * @param alias
-     *            the alias
-     * 
-     * @return the map< string, t>
-     * 
-     * @throws PropertyAccessException
-     *             the property access exception
-     */
-    Map<String, T> readAsObject(Object target, Field property, String alias) throws PropertyAccessException;
-
-    /**
-     * Sets the.
-     * 
-     * @param target
-     *            Target object
-     * @param property
-     *            Field
-     * @param bytes
-     *            byte-array value to be set
-     * @param alias
-     *            Cassandra-column-name of this Field. By default, this is same
-     *            as Field's name
-     * 
-     * @throws PropertyAccessException
-     *             the property access exception
-     */
-    void set(Object target, Field property, byte[] bytes, String alias) throws PropertyAccessException;
-
-    /**
-     * Decode.
-     * 
      * @param b
-     *            the b
-     * 
-     * @return the T
-     * 
+     * @return
      * @throws PropertyAccessException
-     *             the property access exception
      */
     T fromBytes(byte[] b) throws PropertyAccessException;
 
     /**
-     * Encode.
+     * @param value
+     * @return
+     * @throws PropertyAccessException
+     */
+    byte[] toBytes(Object object) throws PropertyAccessException;
+
+    /**
+     * Converts Object to String. Normally, this will be object.toString()
+     * But in some cases, this might be different. 
      * 
      * @param value
-     *            the value
-     * 
-     * @return the byte[]
-     * 
-     * @throws PropertyAccessException
-     *             the property access exception
+     * @return
      */
-    byte[] toBytes(T value) throws PropertyAccessException;
-
+    String toString (Object object);
 }

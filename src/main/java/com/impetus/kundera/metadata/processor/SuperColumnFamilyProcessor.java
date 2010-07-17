@@ -26,25 +26,17 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.api.SuperColumn;
 import com.impetus.kundera.api.SuperColumnFamily;
 import com.impetus.kundera.metadata.EntityMetadata;
-import com.impetus.kundera.metadata.MetadataProcessor;
 
 /**
  * The Class SuperColumnFamilyMetadataProcessor.
  * 
  * @author animesh.kumar
  */
-public class SuperColumnFamilyProcessor implements MetadataProcessor {
+public class SuperColumnFamilyProcessor extends AbstractEntityFieldProcessor {
 
     /** The Constant log. */
     private static final Log LOG = LogFactory.getLog(SuperColumnFamilyProcessor.class);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-     * com.impetus.kundera.metadata.EntityMetadata)
-     */
     @Override
     public final void process(Class<?> clazz, EntityMetadata metadata) {
 
@@ -64,32 +56,26 @@ public class SuperColumnFamilyProcessor implements MetadataProcessor {
 
         // scan for fields
         for (Field f : clazz.getDeclaredFields()) {
-            if (f.isAnnotationPresent(SuperColumn.class) && f.isAnnotationPresent(Column.class)) {
-
-                SuperColumn sc = f.getAnnotation(SuperColumn.class);
-                Column c = f.getAnnotation(Column.class);
-                String superColumnName = sc.column();
-                String columnName = c.name().trim();
-                if (columnName.isEmpty()) {
-                    columnName = f.getName();
-                }
-
-                LOG.debug(f.getName() + " => Column:" + columnName + ", SuperColumn:" + superColumnName);
-
+        	
+        	if (f.isAnnotationPresent(Id.class)) {
+                LOG.debug(f.getName() + " => Id");
+                metadata.setIdProperty(f);
+            } 
+        	else if (f.isAnnotationPresent(SuperColumn.class)) { 
+        		SuperColumn sc = f.getAnnotation(SuperColumn.class);
+        		String superColumnName = sc.column();
+        		
+        		String columnName = getValidJPAColumn(clazz, f);
+        		LOG.debug(f.getName() + " => Column:" + columnName + ", SuperColumn:" + superColumnName);
+        			
                 EntityMetadata.SuperColumn superColumn = metadata.getSuperColumn(superColumnName);
                 if (null == superColumn) {
                     superColumn = metadata.new SuperColumn(superColumnName);
                 }
                 superColumn.addColumn(columnName, f);
                 metadata.addSuperColumn(superColumnName, superColumn);
-            } else if (f.isAnnotationPresent(Id.class)) {
-                LOG.debug(f.getName() + " => Id");
-
-                metadata.setIdProperty(f);
-            } else {
-                LOG.debug(f.getName() + " => skipped!");
-            }
+        		
+        	}
         }
     }
-
 }

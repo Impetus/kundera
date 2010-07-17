@@ -21,19 +21,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * The Class ObjectAccessor.
  * 
  * @author animesh.kumar
  */
-public class ObjectAccessor extends BasePropertyAccessor<Object> {
+public class ObjectAccessor implements PropertyAccessor<Object> {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.property.PropertyAccessor#decode(byte[])
-     */
     @Override
     public final Object fromBytes(byte[] bytes) throws PropertyAccessException {
         try {
@@ -47,12 +43,6 @@ public class ObjectAccessor extends BasePropertyAccessor<Object> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#encode(java.lang.Object)
-     */
     @Override
     public final byte[] toBytes(Object o) throws PropertyAccessException {
         try {
@@ -65,5 +55,10 @@ public class ObjectAccessor extends BasePropertyAccessor<Object> {
             throw new PropertyAccessException(ioe.getMessage());
         }
     }
+
+	@Override
+	public final String toString(Object object) {
+		return object.toString();
+	}
 
 }

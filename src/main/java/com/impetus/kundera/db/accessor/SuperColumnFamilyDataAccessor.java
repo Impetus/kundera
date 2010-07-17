@@ -30,11 +30,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.CassandraClient;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.DataAccessor;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * The Class SuperColumnDataAccessor.
@@ -46,27 +46,12 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(SuperColumnFamilyDataAccessor.class);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seecom.impetus.kundera.db.DataAccessor#delete(com.impetus.kundera.
-     * CassandraClient, com.impetus.kundera.metadata.EntityMetadata,
-     * java.lang.String)
-     */
     @Override
     public void delete(CassandraClient client, EntityMetadata metadata, String key) throws Exception {
         log.debug("Deleting from cassandra @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + key);
         client.delete(metadata.getColumnFamilyName(), key);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.db.DataAccessor#read(com.impetus.kundera.CassandraClient
-     * , com.impetus.kundera.metadata.EntityMetadata, java.lang.Class,
-     * java.lang.String)
-     */
     @Override
     public <C> C read(CassandraClient client, EntityMetadata metadata, Class<C> clazz, String key) throws Exception {
         log.debug("Reading from cassandra @Entity[" + clazz.getName() + "] for key:" + key);
@@ -79,14 +64,6 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
         return cassandraRowToEntity(clazz, metadata, tf);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.db.DataAccessor#read(com.impetus.kundera.CassandraClient
-     * , com.impetus.kundera.metadata.EntityMetadata, java.lang.Class,
-     * java.lang.String[])
-     */
     @Override
     public <C> List<C> read(CassandraClient client, EntityMetadata metadata, Class<C> clazz, String... keys) throws Exception {
         log.debug("Reading from cassandra @Entity[" + clazz.getName() + "] for keys:" + Arrays.asList(keys));
@@ -104,13 +81,6 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
         return entities;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.db.DataAccessor#write(com.impetus.kundera.CassandraClient
-     * , com.impetus.kundera.metadata.EntityMetadata, java.lang.Object)
-     */
     @Override
     public void write(CassandraClient client, EntityMetadata metadata, Object object) throws Exception {
         log.debug("Writing to cassandra @Entity[" + object.getClass().getName() + "] " + object);
@@ -122,24 +92,17 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
                 );
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.db.accessor.BaseDataAccessor#cassandraRowToEntity
-     * (java.lang.Class, com.impetus.kundera.metadata.EntityMetadata,
-     * com.impetus.kundera.db.accessor.BaseDataAccessor.CassandraRow)
-     */
     @Override
     protected <C> C cassandraRowToEntity(Class<C> clazz, EntityMetadata metadata, BaseDataAccessor<SuperColumn>.CassandraRow cassandraRow) throws Exception {
 
-        // instantiate a new instance
+        // Instantiate a new instance
         C target = clazz.newInstance();
 
-        // set row-key. Note: @Id is always String.
-        PropertyAccessorFactory.setStringProperty(target, metadata.getIdProperty(), cassandraRow.getKey());
+        // Set row-key. Note: @Id is always String.
+        PropertyAccessorHelper.set(target, metadata.getIdProperty(), cassandraRow.getKey());
+        
 
-        // get a name->field map for super-columns
+        // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
         for (Map.Entry<String, EntityMetadata.SuperColumn> entry : metadata.getSuperColumnsMap().entrySet()) {
             for (EntityMetadata.Column cMetadata : entry.getValue().getColumns()) {
@@ -150,49 +113,35 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
         for (SuperColumn sc : cassandraRow.getColumns()) {
 
             for (Column column : sc.getColumns()) {
-                String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
-                byte[] value = column.getValue();
-
-                String colName = name.split(Constants.SEPARATOR)[0];
+                String colName = PropertyAccessorFactory.STRING.fromBytes(column.getName());
+                byte[] bytes = column.getValue();
 
                 // set value of the field in the bean
                 try {
-                    if (null == value) {
-                        log.debug("Null value for name: " + name);
-                        continue;
+                    if (null != bytes) {
+                    	PropertyAccessorHelper.set(target, columnNameToFieldMap.get(colName), bytes);
                     }
-
-                    PropertyAccessorFactory.setProperty(target, columnNameToFieldMap.get(colName), value, colName, name);
                 } catch (Exception e) {
                     log.error(e);
-                    e.printStackTrace();
                 }
             }
         }
         return target;
-
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.db.accessor.BaseDataAccessor#entityToCassandraRow
-     * (com.impetus.kundera.metadata.EntityMetadata, java.lang.Object)
-     */
     @Override
     protected BaseDataAccessor<SuperColumn>.CassandraRow entityToCassandraRow(EntityMetadata metadata, Object bean) throws Exception {
 
-        // timestamp to use in thrift column objects
+        // Timestamp to use in thrift column objects
         long timestamp = System.currentTimeMillis();
 
         BaseDataAccessor<SuperColumn>.CassandraRow cassandraRow = this.new CassandraRow();
 
-        // set column-family name
+        // Set column-family name
         cassandraRow.setColumnFamilyName(metadata.getColumnFamilyName());
 
-        // set row key
-        cassandraRow.setKey(PropertyAccessorFactory.getStringProperty(bean, metadata.getIdProperty()));
+        // Set row key
+        cassandraRow.setKey(PropertyAccessorHelper.getId(bean, metadata));
 
         for (EntityMetadata.SuperColumn superColumn : metadata.getSuperColumnsAsList()) {
             String superColumnName = superColumn.getName();
@@ -203,17 +152,15 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
                 Field field = column.getField();
                 String name = column.getName();
 
-                Map<String, byte[]> map = PropertyAccessorFactory.getPropertyAccessor(field).readAsByteArray(bean, field, name);
-
-                for (Map.Entry<String, byte[]> entry : map.entrySet()) {
-                    try {
-                        columns.add(new Column(PropertyAccessorFactory.STRING.toBytes(entry.getKey()), entry.getValue(), timestamp));
-                    } catch (PropertyAccessException e) {
-                        log.warn("Property: " + field.getName() + " of Class " + bean.getClass().getName() + " could not be set.", e);
-                    }
-                }
+    			try {
+    				byte[] value = PropertyAccessorHelper.get(bean, field);
+    				if (null != value) {
+    					columns.add(new Column(PropertyAccessorFactory.STRING.toBytes(name), value, timestamp));
+    				}
+    			} catch (PropertyAccessException e) {
+    				log.warn(e.getMessage());
+    			}
             }
-
             cassandraRow.addColumn(new SuperColumn(PropertyAccessorFactory.STRING.toBytes(superColumnName), columns));
         }
 

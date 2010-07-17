@@ -43,7 +43,7 @@ import com.impetus.kundera.ejb.event.CallbackMethod;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataManager;
-import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.LuceneQuery;
 
 /**
@@ -122,7 +122,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 		try {
 			EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
 
-			String id = PropertyAccessorFactory.getStringProperty(entity, metadata.getIdProperty());
+			String id = PropertyAccessorHelper.getId(entity, metadata);
 
 			// fire PreRemove events
 			fireJPAEventListeners(metadata, entity, PreRemove.class);
@@ -227,6 +227,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 			// fire post-persist events			
 			fireJPAEventListeners(metadata, entity, PostPersist.class);
         } catch (Exception e) {
+        	e.printStackTrace();
             throw new PersistenceException(e.getMessage());
         }
     }

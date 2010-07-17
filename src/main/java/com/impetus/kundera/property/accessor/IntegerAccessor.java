@@ -15,33 +15,29 @@
  */
 package com.impetus.kundera.property.accessor;
 
+import com.impetus.kundera.property.PropertyAccessor;
+
 /**
  * The Class IntegerAccessor.
  * 
  * @author animesh.kumar
  */
-public class IntegerAccessor extends BasePropertyAccessor<Integer> {
+public class IntegerAccessor implements PropertyAccessor<Integer> {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.property.PropertyAccessor#decode(byte[])
-     */
     @Override
     public final Integer fromBytes(byte[] b) {
         return ((b[0] << 24) + ((b[1] & 0xFF) << 16) + ((b[2] & 0xFF) << 8) + (b[3] & 0xFF));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#encode(java.lang.Object)
-     */
     @Override
-    public final byte[] toBytes(Integer val) {
+    public final byte[] toBytes(Object val) {
         Integer value = (Integer) (val);
         return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value.intValue() };
     }
+
+	@Override
+	public String toString(Object object) {
+		return object.toString();
+	}
 
 }

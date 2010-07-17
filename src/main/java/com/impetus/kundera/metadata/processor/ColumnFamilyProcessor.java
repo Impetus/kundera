@@ -17,7 +17,6 @@ package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
 
-import javax.persistence.Column;
 import javax.persistence.Id;
 
 import org.apache.commons.logging.Log;
@@ -25,32 +24,25 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.api.ColumnFamily;
 import com.impetus.kundera.metadata.EntityMetadata;
-import com.impetus.kundera.metadata.MetadataProcessor;
 
 /**
  * The Class ColumnFamilyMetadataProcessor.
  * 
  * @author animesh.kumar
  */
-public class ColumnFamilyProcessor implements MetadataProcessor {
+public class ColumnFamilyProcessor extends AbstractEntityFieldProcessor {
 
     /** The Constant log. */
     private static final Log LOG = LogFactory.getLog(ColumnFamilyProcessor.class);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-     * com.impetus.kundera.metadata.EntityMetadata)
-     */
+    @Override
     public final void process(Class<?> clazz, EntityMetadata metadata) {
 
         if (!clazz.isAnnotationPresent(ColumnFamily.class)) {
             return;
         }
 
-        LOG.debug("Processing @Entity " + clazz.getName() + " for ColumnFamily.");
+        LOG.debug("Processing @Entity(" + clazz.getName() + ") for ColumnFamily.");
 
         metadata.setType(EntityMetadata.Type.COLUMN_FAMILY);
 
@@ -61,22 +53,19 @@ public class ColumnFamilyProcessor implements MetadataProcessor {
 
         // scan for fields
         for (Field f : clazz.getDeclaredFields()) {
-            if (f.isAnnotationPresent(Column.class)) {
+        	
+			if (f.isAnnotationPresent(Id.class)) {
+				LOG.debug(f.getName() + " => Id");
+				metadata.setIdProperty(f);
+			}
 
-                Column c = f.getAnnotation(Column.class);
-                String key = c.name().trim();
-                if (key.isEmpty()) {
-                    key = f.getName();
-                }
-
-                LOG.debug(f.getName() + " => Column:" + key);
-                metadata.addColumn(key, metadata.new Column(key, f));
-            } else if (f.isAnnotationPresent(Id.class)) {
-                LOG.debug(f.getName() + " => Id");
-                metadata.setIdProperty(f);
-            } else {
-                LOG.debug(f.getName() + " => skipped!");
-            }
+			else {
+				String name = getValidJPAColumn (clazz, f);
+				if (null != name) {
+					metadata.addColumn(name, metadata.new Column(name, f));
+				}
+			}
+ 
         }
-    }
+    }    
 }

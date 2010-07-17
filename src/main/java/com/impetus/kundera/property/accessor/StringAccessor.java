@@ -17,41 +17,37 @@ package com.impetus.kundera.property.accessor;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * The Class StringAccessor.
  * 
  * @author animesh.kumar
  */
-public class StringAccessor extends BasePropertyAccessor<String> {
+public class StringAccessor implements PropertyAccessor<String> {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.property.PropertyAccessor#decode(byte[])
-     */
     @Override
     public final String fromBytes(byte[] bytes) throws PropertyAccessException {
         try {
             return new String(bytes, Constants.ENCODING);
         } catch (Exception e) {
+        	e.printStackTrace();
             throw new PropertyAccessException(e.getMessage());
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#encode(java.lang.Object)
-     */
     @Override
-    public final byte[] toBytes(String s) throws PropertyAccessException {
+    public final byte[] toBytes(Object s) throws PropertyAccessException {
         try {
-            return s.getBytes(Constants.ENCODING);
+            return ((String)s).getBytes(Constants.ENCODING);
         } catch (Exception e) {
             throw new PropertyAccessException(e.getMessage());
         }
     }
+
+	@Override
+	public final String toString(Object object) {
+		return (String)object;
+	}
 
 }
