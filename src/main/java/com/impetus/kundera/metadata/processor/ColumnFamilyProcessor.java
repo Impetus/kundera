@@ -17,12 +17,14 @@ package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
 
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Id;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.api.ColumnFamily;
+import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 
 /**
@@ -35,6 +37,12 @@ public class ColumnFamilyProcessor extends AbstractEntityFieldProcessor {
     /** The Constant log. */
     private static final Log LOG = LogFactory.getLog(ColumnFamilyProcessor.class);
 
+    private EntityManagerFactoryImpl em;
+    
+    public ColumnFamilyProcessor (EntityManagerFactory em) {
+    	this.em = (EntityManagerFactoryImpl) em;
+    }
+    
     @Override
     public final void process(Class<?> clazz, EntityMetadata metadata) {
 
@@ -49,7 +57,11 @@ public class ColumnFamilyProcessor extends AbstractEntityFieldProcessor {
         ColumnFamily cf = clazz.getAnnotation(ColumnFamily.class);
 
         // set columnFamily
-        metadata.setColumnFamilyName(cf.value());
+        metadata.setColumnFamilyName(cf.family());
+        
+        // set keyspace
+        String keyspace = cf.keyspace().length() != 0 ? cf.keyspace() : em.getKeyspace();
+        metadata.setKeyspaceName(keyspace);
 
         // scan for fields
         for (Field f : clazz.getDeclaredFields()) {

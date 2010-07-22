@@ -37,5 +37,7 @@ public @interface ColumnFamily {
      * 
      * @return the string
      */
-    String value();
+    String family();
+    
+    String keyspace() default "";
 }

@@ -45,9 +45,6 @@ public class ThriftClient implements CassandraClient {
     /** default port. */
     private int defaultPort = 9160;
 
-    /** keyspace. */
-    private String keySpace;
-
     /** The tr. */
     private TTransport tr = null;
 
@@ -90,7 +87,7 @@ public class ThriftClient implements CassandraClient {
      * java.lang.String)
      */
     @Override
-    public void delete(String columnFamily, String rowId) throws Exception {
+    public void delete(String keyspace, String columnFamily, String rowId) throws Exception {
         throw new NotImplementedException("TODO");
     }
 
@@ -101,7 +98,7 @@ public class ThriftClient implements CassandraClient {
      * java.lang.String)
      */
     @Override
-    public List<Column> loadColumns(String columnFamily, String rowId) throws Exception {
+    public List<Column> loadColumns(String keyspace, String columnFamily, String rowId) throws Exception {
         throw new NotImplementedException("TODO");
     }
 
@@ -112,7 +109,7 @@ public class ThriftClient implements CassandraClient {
      * java.lang.String[])
      */
     @Override
-    public Map<String, List<Column>> loadColumns(String columnFamily, String... rowIds) throws Exception {
+    public Map<String, List<Column>> loadColumns(String keyspace, String columnFamily, String... rowIds) throws Exception {
         throw new NotImplementedException("TODO");
     }
 
@@ -124,7 +121,7 @@ public class ThriftClient implements CassandraClient {
      * java.lang.String, java.lang.String[])
      */
     @Override
-    public List<SuperColumn> loadSuperColumns(String columnFamily, String key, String... superColumnNames) throws Exception {
+    public List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String key, String... superColumnNames) throws Exception {
         throw new NotImplementedException("TODO");
     }
 
@@ -136,7 +133,7 @@ public class ThriftClient implements CassandraClient {
      * java.lang.String[])
      */
     @Override
-    public Map<String, List<SuperColumn>> loadSuperColumns(String columnFamily, String... rowIds) throws Exception {
+    public Map<String, List<SuperColumn>> loadSuperColumns(String keyspace, String columnFamily, String... rowIds) throws Exception {
         throw new NotImplementedException("TODO");
     }
 
@@ -147,7 +144,7 @@ public class ThriftClient implements CassandraClient {
      * java.lang.String, org.apache.cassandra.thrift.Column[])
      */
     @Override
-    public void writeColumns(String columnFamily, String rowId, Column... columns) throws Exception {
+    public void writeColumns(String keyspace, String columnFamily, String rowId, Column... columns) throws Exception {
         throw new NotImplementedException("TODO");
     }
 
@@ -159,7 +156,7 @@ public class ThriftClient implements CassandraClient {
      * java.lang.String, org.apache.cassandra.thrift.SuperColumn[])
      */
     @Override
-    public void writeSuperColumns(String columnFamily, String rowId, SuperColumn... superColumns) throws Exception {
+    public void writeSuperColumns(String keyspace, String columnFamily, String rowId, SuperColumn... superColumns) throws Exception {
         throw new NotImplementedException("TODO");
     }
 
@@ -182,16 +179,6 @@ public class ThriftClient implements CassandraClient {
     @Override
     public void setDefaultPort(int defaultPort) {
         this.defaultPort = defaultPort;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.CassandraClient#setKeySpace(java.lang.String)
-     */
-    @Override
-    public void setKeySpace(String keySpace) {
-        this.keySpace = keySpace;
     }
 
     /*

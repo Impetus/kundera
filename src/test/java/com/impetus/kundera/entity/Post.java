@@ -33,7 +33,7 @@ import com.impetus.kundera.api.SuperColumnFamily;
  */
 @Entity
 // makes it an entity class
-@SuperColumnFamily("Posts")
+@SuperColumnFamily(family="Posts", keyspace="Blog")
 // assign column-family type and name
 public class Post {
 

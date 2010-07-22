@@ -73,8 +73,8 @@ public class MetadataManager implements AnnotationDiscoveryListener {
         metadataProcessors = new ArrayList<MetadataProcessor>();
 
         // add processors to chain.
-        metadataProcessors.add(new SuperColumnFamilyProcessor());
-        metadataProcessors.add(new ColumnFamilyProcessor());
+        metadataProcessors.add(new SuperColumnFamilyProcessor(factory));
+        metadataProcessors.add(new ColumnFamilyProcessor(factory));
         metadataProcessors.add(new IndexProcessor());
         metadataProcessors.add(new EntityListenersProcessor());
     }
@@ -170,7 +170,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
         for (MetadataProcessor processor : metadataProcessors) {
             processor.process(clazz, metadata);
         }
-
+        
         return metadata;
     }
 

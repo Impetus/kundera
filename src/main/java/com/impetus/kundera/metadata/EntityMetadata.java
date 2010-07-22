@@ -40,6 +40,9 @@ public final class EntityMetadata {
 
     /** ColumnFamily. */
     private String columnFamilyName;
+    
+    /** keyspace */
+    private String keyspaceName;
 
     /** field that keeps row identifier. */
     private Field idProperty;
@@ -124,7 +127,15 @@ public final class EntityMetadata {
         this.columnFamilyName = columnFamilyName;
     }
 
-    /**
+    public String getKeyspaceName() {
+		return keyspaceName;
+	}
+
+	public void setKeyspaceName(String keyspaceName) {
+		this.keyspaceName = keyspaceName;
+	}
+
+	/**
      * Gets the id property.
      * 
      * @return the id property
@@ -347,6 +358,8 @@ public final class EntityMetadata {
         builder.append(type);
         builder.append(", columnFamilyName=");
         builder.append(columnFamilyName);
+        builder.append(", keyspaceName=");
+        builder.append(keyspaceName);
         builder.append(", indexName=");
         builder.append(indexName);
         builder.append(", idProperty=");

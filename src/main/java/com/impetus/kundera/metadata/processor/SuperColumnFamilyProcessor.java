@@ -17,7 +17,7 @@ package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
 
-import javax.persistence.Column;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Id;
 
 import org.apache.commons.logging.Log;
@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.api.SuperColumn;
 import com.impetus.kundera.api.SuperColumnFamily;
+import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 
 /**
@@ -36,7 +37,13 @@ public class SuperColumnFamilyProcessor extends AbstractEntityFieldProcessor {
 
     /** The Constant log. */
     private static final Log LOG = LogFactory.getLog(SuperColumnFamilyProcessor.class);
-
+    
+    private EntityManagerFactoryImpl em;
+    
+    public SuperColumnFamilyProcessor (EntityManagerFactory em) {
+    	this.em = (EntityManagerFactoryImpl) em;
+    }
+    
     @Override
     public final void process(Class<?> clazz, EntityMetadata metadata) {
 
@@ -51,8 +58,12 @@ public class SuperColumnFamilyProcessor extends AbstractEntityFieldProcessor {
         // check for SuperColumnFamily annotation.
         SuperColumnFamily scf = clazz.getAnnotation(SuperColumnFamily.class);
 
-        // Set ColumnFamily.
-        metadata.setColumnFamilyName(scf.value());
+        // set columnFamily
+        metadata.setColumnFamilyName(scf.family());
+        
+        // set keyspace
+        String keyspace = scf.keyspace().length() != 0 ? scf.keyspace() : em.getKeyspace();
+        metadata.setKeyspaceName(keyspace);
 
         // scan for fields
         for (Field f : clazz.getDeclaredFields()) {

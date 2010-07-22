@@ -50,9 +50,6 @@ public class PelopsClient implements CassandraClient {
     /** default port. */
     private int defaultPort;
 
-    /** keyspace. */
-    private String keySpace;
-
     /** The closed. */
     private boolean closed = false;
 
@@ -99,12 +96,12 @@ public class PelopsClient implements CassandraClient {
      * java.lang.String, org.apache.cassandra.thrift.Column[])
      */
     @Override
-    public final void writeColumns(String columnFamily, String rowId, Column... columns) throws Exception {
+    public final void writeColumns(String keyspace, String columnFamily, String rowId, Column... columns) throws Exception {
 
         if (!isOpen()) {
             throw new PersistenceException("PelopsClient is closed.");
         }
-        Mutator mutator = Pelops.createMutator(poolName, keySpace);
+        Mutator mutator = Pelops.createMutator(poolName, keyspace);
         mutator.writeColumns(rowId, columnFamily, Arrays.asList(columns));
         mutator.execute(ConsistencyLevel.ONE);
     }
@@ -117,12 +114,12 @@ public class PelopsClient implements CassandraClient {
      * java.lang.String, org.apache.cassandra.thrift.SuperColumn[])
      */
     @Override
-    public final void writeSuperColumns(String columnFamily, String rowId, SuperColumn... superColumns) throws Exception {
+    public final void writeSuperColumns(String keyspace, String columnFamily, String rowId, SuperColumn... superColumns) throws Exception {
 
         if (!isOpen()) {
             throw new PersistenceException("PelopsClient is closed.");
         }
-        Mutator mutator = Pelops.createMutator(poolName, keySpace);
+        Mutator mutator = Pelops.createMutator(poolName, keyspace);
 
         for (SuperColumn sc : superColumns) {
             mutator.writeSubColumns(rowId, columnFamily, sc.getName(), sc.getColumns());
@@ -137,12 +134,12 @@ public class PelopsClient implements CassandraClient {
      * java.lang.String)
      */
     @Override
-    public final List<Column> loadColumns(String columnFamily, String rowId) throws Exception {
+    public final List<Column> loadColumns(String keyspace, String columnFamily, String rowId) throws Exception {
 
         if (!isOpen()) {
             throw new PersistenceException("PelopsClient is closed.");
         }
-        Selector selector = Pelops.createSelector(poolName, keySpace);
+        Selector selector = Pelops.createSelector(poolName, keyspace);
         return selector.getColumnsFromRow(rowId, columnFamily, Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
     }
 
@@ -153,12 +150,12 @@ public class PelopsClient implements CassandraClient {
      * java.lang.String[])
      */
     @Override
-    public final Map<String, List<Column>> loadColumns(String columnFamily, String... rowIds) throws Exception {
+    public final Map<String, List<Column>> loadColumns(String keyspace, String columnFamily, String... rowIds) throws Exception {
 
         if (!isOpen()) {
             throw new PersistenceException("PelopsClient is closed.");
         }
-        Selector selector = Pelops.createSelector(poolName, keySpace);
+        Selector selector = Pelops.createSelector(poolName, keyspace);
         return selector.getColumnsFromRows(Arrays.asList(rowIds), columnFamily, Selector.newColumnsPredicateAll(false, 1000), ConsistencyLevel.ONE);
     }
 
@@ -169,12 +166,12 @@ public class PelopsClient implements CassandraClient {
      * java.lang.String)
      */
     @Override
-    public final void delete(String columnFamily, String rowId) throws Exception {
+    public final void delete(String keyspace, String columnFamily, String rowId) throws Exception {
 
         if (!isOpen()) {
             throw new PersistenceException("PelopsClient is closed.");
         }
-        KeyDeletor keyDeletor = Pelops.createKeyDeletor(poolName, keySpace);
+        KeyDeletor keyDeletor = Pelops.createKeyDeletor(poolName, keyspace);
         keyDeletor.deleteColumnFamily(rowId, columnFamily, ConsistencyLevel.ONE);
     }
 
@@ -186,10 +183,10 @@ public class PelopsClient implements CassandraClient {
      * java.lang.String, java.lang.String[])
      */
     @Override
-    public final List<SuperColumn> loadSuperColumns(String columnFamily, String rowId, String... superColumnNames) throws Exception {
+    public final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId, String... superColumnNames) throws Exception {
         if (!isOpen())
             throw new PersistenceException("PelopsClient is closed.");
-        Selector selector = Pelops.createSelector(poolName, keySpace);
+        Selector selector = Pelops.createSelector(poolName, keyspace);
         return selector.getSuperColumnsFromRow(rowId, columnFamily, Selector.newColumnsPredicate(superColumnNames), ConsistencyLevel.ONE);
     }
 
@@ -201,12 +198,12 @@ public class PelopsClient implements CassandraClient {
      * java.lang.String[])
      */
     @Override
-    public final Map<String, List<SuperColumn>> loadSuperColumns(String columnFamily, String... rowIds) throws Exception {
+    public final Map<String, List<SuperColumn>> loadSuperColumns(String keyspace, String columnFamily, String... rowIds) throws Exception {
 
         if (!isOpen())
             throw new PersistenceException("PelopsClient is closed.");
 
-        Selector selector = Pelops.createSelector(poolName, keySpace);
+        Selector selector = Pelops.createSelector(poolName, keyspace);
         return selector.getSuperColumnsFromRows(Arrays.asList(rowIds), columnFamily, Selector.newColumnsPredicateAll(false, 1000), ConsistencyLevel.ONE);
     }
 
@@ -218,17 +215,6 @@ public class PelopsClient implements CassandraClient {
     @Override
     public final Cassandra.Client getCassandraClient() throws Exception {
         return Pelops.getDbConnPool(poolName).getConnection().getAPI();
-    }
-
-    /**
-     * Sets the key space.
-     * 
-     * @param keySpace
-     *            the keySpace to set
-     */
-    @Override
-    public final void setKeySpace(String keySpace) {
-        this.keySpace = keySpace;
     }
 
     /**
@@ -265,8 +251,6 @@ public class PelopsClient implements CassandraClient {
         builder.append(Arrays.toString(contactNodes));
         builder.append(", defaultPort=");
         builder.append(defaultPort);
-        builder.append(", keySpace=");
-        builder.append(keySpace);
         builder.append(", closed=");
         builder.append(closed);
         builder.append("]");

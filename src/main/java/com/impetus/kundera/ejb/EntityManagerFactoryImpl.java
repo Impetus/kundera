@@ -64,6 +64,12 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     /** The metadata manager. */
     private MetadataManager metadataManager;
 
+    private String[] nodes;
+    
+    private int port;
+    
+    private String keyspace;
+    
     /** The client. */
     private CassandraClient client;
 
@@ -141,9 +147,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      * Inits the.
      */
     private void init() {
-        String[] cassandraNodes = ((String) props.get("kundera.nodes")).split(",");
-        int cassandraPort = Integer.parseInt((String) props.get("kundera.port"));
-        String cassandraKeyspace = (String) props.get("kundera.keyspace");
+        nodes = ((String) props.get("kundera.nodes")).split(",");
+        port = Integer.parseInt((String) props.get("kundera.port"));
+        keyspace = (String) props.get("kundera.keyspace");
 
         String sessionless_ = (String) props.get("sessionless");
         if (sessionless_ == null) {
@@ -155,9 +161,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         String cassandraClient = (String) props.get("kundera.client");
         try {
             client = (CassandraClient) Class.forName(cassandraClient).newInstance();
-            client.setContactNodes(cassandraNodes);
-            client.setDefaultPort(cassandraPort);
-            client.setKeySpace(cassandraKeyspace);
+            client.setContactNodes(nodes);
+            client.setDefaultPort(port);
+            // client.setKeySpace(keyspace);
             // connect to Cassandra DB
             client.connect();
         } catch (Exception e) {
@@ -224,4 +230,16 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     public final String getPersistenceUnitName() {
         return persistenceUnitName;
     }
+
+	public String[] getNodes() {
+		return nodes;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public String getKeyspace() {
+		return keyspace;
+	}
 }

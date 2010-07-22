@@ -15,11 +15,18 @@
  */
 package com.impetus.kundera.entity;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import com.impetus.kundera.api.ColumnFamily;
 
@@ -30,9 +37,9 @@ import com.impetus.kundera.api.ColumnFamily;
  */
 @Entity
 // makes it an entity class
-@ColumnFamily("Authors")
+@ColumnFamily(family="Authors", keyspace="Blog")
 // assign ColumnFamily type and name
-public class Author {
+public class Author implements Serializable{
 
     /** The username. */
     @Id
@@ -50,11 +57,17 @@ public class Author {
 
     /** The registered. */
     @Column(name = "registeredSince")
+    @Temporal(TemporalType.DATE)
+    @Basic
     Date registered;
 
     /** The name. */
     String name;
 
+    @OneToMany
+    List<Address> addresses = new ArrayList<Address>();
+    
+    
     /**
      * Instantiates a new author.
      */
@@ -98,27 +111,26 @@ public class Author {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Author [username=");
-        builder.append(username);
-        builder.append(", emailAddress=");
-        builder.append(emailAddress);
-        builder.append(", country=");
-        builder.append(country);
-        builder.append(", registered=");
-        builder.append(registered);
-        builder.append("]");
-        return builder.toString();
-    }
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Author [name=");
+		builder.append(name);
+		builder.append(", addresses=");
+		builder.append(addresses);
+		builder.append(", country=");
+		builder.append(country);
+		builder.append(", emailAddress=");
+		builder.append(emailAddress);
+		builder.append(", registered=");
+		builder.append(registered);
+		builder.append(", username=");
+		builder.append(username);
+		builder.append("]");
+		return builder.toString();
+	}
 
-    /**
+	/**
      * Gets the username.
      * 
      * @return the username
@@ -194,4 +206,13 @@ public class Author {
         this.registered = registered;
     }
 
+	public List<Address> getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(List<Address> addresses) {
+		this.addresses = addresses;
+	}
+    
+    
 }

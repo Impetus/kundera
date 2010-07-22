@@ -49,13 +49,13 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
     @Override
     public void delete(CassandraClient client, EntityMetadata metadata, String key) throws Exception {
         log.debug("Deleting from cassandra @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + key);
-        client.delete(metadata.getColumnFamilyName(), key);
+        client.delete(metadata.getKeyspaceName(), metadata.getColumnFamilyName(), key);
     }
 
     @Override
     public <C> C read(CassandraClient client, EntityMetadata metadata, Class<C> clazz, String key) throws Exception {
         log.debug("Reading from cassandra @Entity[" + clazz.getName() + "] for key:" + key);
-        List<SuperColumn> superColumns = client.loadSuperColumns(metadata.getColumnFamilyName(), key, metadata.getSuperColumnFieldNames().toArray(new String[0]));
+        List<SuperColumn> superColumns = client.loadSuperColumns(metadata.getKeyspaceName(), metadata.getColumnFamilyName(), key, metadata.getSuperColumnFieldNames().toArray(new String[0]));
         if (null == superColumns || superColumns.size() == 0) {
             throw new PersistenceException("Entity not found for key: " + key);
         }
@@ -69,7 +69,7 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
         log.debug("Reading from cassandra @Entity[" + clazz.getName() + "] for keys:" + Arrays.asList(keys));
         List<C> entities = new ArrayList<C>();
 
-        Map<String, List<SuperColumn>> map = client.loadSuperColumns(metadata.getColumnFamilyName(), keys);
+        Map<String, List<SuperColumn>> map = client.loadSuperColumns(metadata.getKeyspaceName(), metadata.getColumnFamilyName(), keys);
         for (Map.Entry<String, List<SuperColumn>> entry : map.entrySet()) {
             if (entry.getValue().size() == 0) {
                 continue;
@@ -85,7 +85,8 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
     public void write(CassandraClient client, EntityMetadata metadata, Object object) throws Exception {
         log.debug("Writing to cassandra @Entity[" + object.getClass().getName() + "] " + object);
         BaseDataAccessor<SuperColumn>.CassandraRow tf = entityToCassandraRow(metadata, object);
-        client.writeSuperColumns(tf.getColumnFamilyName(), // columnFamily
+        client.writeSuperColumns(metadata.getKeyspaceName(), 
+        		tf.getColumnFamilyName(), // columnFamily
                 tf.getKey(), // row id
                 tf.getColumns().toArray(new SuperColumn[0]) // list of
                 // supercolumns

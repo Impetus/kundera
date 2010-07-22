@@ -48,13 +48,13 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> imp
     @Override
     public void delete(CassandraClient client, EntityMetadata metadata, String key) throws Exception {
         log.debug("Deleting from cassandra @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + key);
-        client.delete(metadata.getColumnFamilyName(), key);
+        client.delete(metadata.getKeyspaceName(), metadata.getColumnFamilyName(), key);
     }
 
     @Override
     public <C> C read(CassandraClient client, EntityMetadata metadata, Class<C> clazz, String key) throws Exception {
         log.debug("Reading from cassandra @Entity[" + clazz.getName() + "] for key:" + key);
-        List<Column> columns = client.loadColumns(metadata.getColumnFamilyName(), key);
+        List<Column> columns = client.loadColumns(metadata.getKeyspaceName(), metadata.getColumnFamilyName(), key);
 
         if (null == columns || columns.size() == 0) {
             throw new PersistenceException("Entity not found for key: " + key);
@@ -69,7 +69,7 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> imp
         log.debug("Reading from cassandra @Entity[" + clazz.getName() + "] for keys:" + Arrays.asList(keys));
         List<C> entities = new ArrayList<C>();
 
-        Map<String, List<Column>> map = client.loadColumns(metadata.getColumnFamilyName(), keys);
+        Map<String, List<Column>> map = client.loadColumns(metadata.getKeyspaceName(), metadata.getColumnFamilyName(), keys);
         for (Map.Entry<String, List<Column>> entry : map.entrySet()) {
             if (entry.getValue().size() == 0) {
                 continue;
@@ -85,7 +85,8 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> imp
         log.debug("Writing to cassandra @Entity[" + object.getClass().getName() + "] " + object);
         BaseDataAccessor<Column>.CassandraRow tf = entityToCassandraRow(metadata, object);
 
-        client.writeColumns(tf.getColumnFamilyName(), // columnFamily
+        client.writeColumns(metadata.getKeyspaceName(), 
+        		tf.getColumnFamilyName(), // columnFamily
                 tf.getKey(), // row id
                 tf.getColumns().toArray(new Column[0]) // list of columns
                 );

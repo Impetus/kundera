@@ -37,5 +37,7 @@ public @interface SuperColumnFamily {
      * 
      * @return the string
      */
-    String value();
+    String family();
+    
+    String keyspace() default "";
 }
