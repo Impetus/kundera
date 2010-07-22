@@ -64,10 +64,7 @@ public class Author implements Serializable{
     /** The name. */
     String name;
 
-    @OneToMany
-    List<Address> addresses = new ArrayList<Address>();
-    
-    
+   
     /**
      * Instantiates a new author.
      */
@@ -116,8 +113,6 @@ public class Author implements Serializable{
 		StringBuilder builder = new StringBuilder();
 		builder.append("Author [name=");
 		builder.append(name);
-		builder.append(", addresses=");
-		builder.append(addresses);
 		builder.append(", country=");
 		builder.append(country);
 		builder.append(", emailAddress=");
@@ -205,14 +200,6 @@ public class Author implements Serializable{
     public void setRegistered(Date registered) {
         this.registered = registered;
     }
-
-	public List<Address> getAddresses() {
-		return addresses;
-	}
-
-	public void setAddresses(List<Address> addresses) {
-		this.addresses = addresses;
-	}
-    
+  
     
 }
