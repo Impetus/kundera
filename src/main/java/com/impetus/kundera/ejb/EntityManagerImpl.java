@@ -113,30 +113,30 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * 
      * @see javax.persistence.EntityManager#remove(java.lang.Object)
      */
-	@Override
-	public void remove(Object entity) {
-		if (entity == null) {
-			throw new IllegalArgumentException("Entity must not be null.");
-		}
+    @Override
+    public void remove(Object entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("Entity must not be null.");
+        }
 
-		try {
-			EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
+        try {
+            EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
 
-			String id = PropertyAccessorHelper.getId(entity, metadata);
+            String id = PropertyAccessorHelper.getId(entity, metadata);
 
-			// fire PreRemove events
-			fireJPAEventListeners(metadata, entity, PreRemove.class);
+            // fire PreRemove events
+            fireJPAEventListeners(metadata, entity, PreRemove.class);
 
-			removeFromCache(entity.getClass(), id);
-			dataManager.remove(metadata, entity, id);
-			indexManager.remove(metadata, entity, id);
+            removeFromCache(entity.getClass(), id);
+            dataManager.remove(metadata, entity, id);
+            indexManager.remove(metadata, entity, id);
 
-			// fire PostRemove events
-			fireJPAEventListeners(metadata, entity, PostRemove.class);
-		} catch (Exception e) {
-			throw new PersistenceException(e.getMessage());
-		}
-	}
+            // fire PostRemove events
+            fireJPAEventListeners(metadata, entity, PostRemove.class);
+        } catch (Exception e) {
+            throw new PersistenceException(e.getMessage());
+        }
+    }
 
     /*
      * (non-Javadoc)
@@ -181,26 +181,26 @@ public class EntityManagerImpl implements CassandraEntityManager {
      */
     @Override
     public final <T> T merge(T entity) {
-		if (entity == null) {
-			throw new IllegalArgumentException("Entity must not be null.");
-		}
+        if (entity == null) {
+            throw new IllegalArgumentException("Entity must not be null.");
+        }
 
-		try {
-			EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
+        try {
+            EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
 
-			// fire PreUpdate events
-			fireJPAEventListeners(metadata, entity, PreUpdate.class);
+            // fire PreUpdate events
+            fireJPAEventListeners(metadata, entity, PreUpdate.class);
 
-			dataManager.merge(metadata, entity);
-			indexManager.update(metadata, entity);
+            dataManager.merge(metadata, entity);
+            indexManager.update(metadata, entity);
 
-			// fire PostUpdate events
-			fireJPAEventListeners(metadata, entity, PostUpdate.class);
+            // fire PostUpdate events
+            fireJPAEventListeners(metadata, entity, PostUpdate.class);
 
-		} catch (Exception e) {
-			throw new PersistenceException(e.getMessage());
-		}
-		return entity;
+        } catch (Exception e) {
+            throw new PersistenceException(e.getMessage());
+        }
+        return entity;
     }
 
     /*
@@ -215,19 +215,19 @@ public class EntityManagerImpl implements CassandraEntityManager {
         }
 
         try {
-        	
-			EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
 
-			// fire pre-persist events
-			fireJPAEventListeners(metadata, entity, PrePersist.class);
+            EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
 
-			dataManager.persist(metadata, entity);
-			indexManager.write(metadata, entity);
+            // fire pre-persist events
+            fireJPAEventListeners(metadata, entity, PrePersist.class);
 
-			// fire post-persist events			
-			fireJPAEventListeners(metadata, entity, PostPersist.class);
+            dataManager.persist(metadata, entity);
+            indexManager.write(metadata, entity);
+
+            // fire post-persist events
+            fireJPAEventListeners(metadata, entity, PostPersist.class);
         } catch (Exception e) {
-        	e.printStackTrace();
+            e.printStackTrace();
             throw new PersistenceException(e.getMessage());
         }
     }
@@ -272,6 +272,10 @@ public class EntityManagerImpl implements CassandraEntityManager {
     public final void close() {
         closed = true;
         sessionCache = null;
+        if (factory != null) {
+            factory.close();
+            factory = null;
+        }
     }
 
     /*
@@ -566,20 +570,20 @@ public class EntityManagerImpl implements CassandraEntityManager {
         return clazz.getName() + "_" + id;
     }
 
-	private void fireJPAEventListeners(EntityMetadata metadata, Object entity, Class<?> event) throws Exception {
-		log.debug("Firing Callback methods on @Entity(" + entity.getClass().getName() + ") for Event(" + event.getSimpleName() + ")");
-		// handler external listeners first
-		List<? extends CallbackMethod> callBackMethods = metadata.getCallbackMethods(event);
-		if (null != callBackMethods) {
-			for (CallbackMethod callback : callBackMethods) {
-				log.debug ("Firing (" + callback + ")");
-				try {
-					callback.invoke(entity);
-				} catch (Exception e) {
-					e.printStackTrace();
-					throw e;
-				}
-			}
-		} 
-	}
+    private void fireJPAEventListeners(EntityMetadata metadata, Object entity, Class<?> event) throws Exception {
+        log.debug("Firing Callback methods on @Entity(" + entity.getClass().getName() + ") for Event(" + event.getSimpleName() + ")");
+        // handler external listeners first
+        List<? extends CallbackMethod> callBackMethods = metadata.getCallbackMethods(event);
+        if (null != callBackMethods) {
+            for (CallbackMethod callback : callBackMethods) {
+                log.debug("Firing (" + callback + ")");
+                try {
+                    callback.invoke(entity);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw e;
+                }
+            }
+        }
+    }
 }
