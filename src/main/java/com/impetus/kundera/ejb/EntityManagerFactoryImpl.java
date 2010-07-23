@@ -64,22 +64,33 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     /** The metadata manager. */
     private MetadataManager metadataManager;
 
+    /** The nodes. */
     private String[] nodes;
     
+    /** The port. */
     private int port;
     
+    /** The keyspace. */
     private String keyspace;
     
     /** The client. */
     private CassandraClient client;
 
     /**
+     * A convenience constructor.
+     * 
+     * @param persistenceUnitName used to prefix the Cassandra domains
+     */
+    public EntityManagerFactoryImpl(String persistenceUnitName) {
+        this(persistenceUnitName,null);
+    }
+
+        
+    /**
      * This one is generally called via the PersistenceProvider.
      * 
-     * @param persistenceUnitInfo
-     *            only using persistenceUnitName for now
-     * @param props
-     *            the props
+     * @param persistenceUnitInfo only using persistenceUnitName for now
+     * @param props the props
      */
     public EntityManagerFactoryImpl(PersistenceUnitInfo persistenceUnitInfo, Map props) {
         this(persistenceUnitInfo != null ? persistenceUnitInfo.getPersistenceUnitName() : null, props);
@@ -88,10 +99,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     /**
      * Use this if you want to construct this directly.
      * 
-     * @param persistenceUnitName
-     *            used to prefix the SimpleDB domains
-     * @param props
-     *            should have accessKey and secretKey
+     * @param persistenceUnitName used to prefix the Cassandra domains
+     * @param props should have accessKey and secretKey
      */
     public EntityManagerFactoryImpl(String persistenceUnitName, Map props) {
         if (persistenceUnitName == null) {
@@ -126,11 +135,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     /**
      * Load properties.
      * 
-     * @param propsFileName
-     *            the props file name
+     * @param propsFileName the props file name
      * 
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     private void loadProperties(String propsFileName) throws IOException {
         Properties props_ = new Properties();
@@ -231,14 +238,29 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         return persistenceUnitName;
     }
 
+	/**
+	 * Gets the nodes.
+	 * 
+	 * @return the nodes
+	 */
 	public String[] getNodes() {
 		return nodes;
 	}
 
+	/**
+	 * Gets the port.
+	 * 
+	 * @return the port
+	 */
 	public int getPort() {
 		return port;
 	}
 
+	/**
+	 * Gets the keyspace.
+	 * 
+	 * @return the keyspace
+	 */
 	public String getKeyspace() {
 		return keyspace;
 	}
