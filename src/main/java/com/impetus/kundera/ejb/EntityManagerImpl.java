@@ -570,6 +570,19 @@ public class EntityManagerImpl implements CassandraEntityManager {
         return clazz.getName() + "_" + id;
     }
 
+    /**
+     * Fire jpa event listeners.
+     * 
+     * @param metadata
+     *            the metadata
+     * @param entity
+     *            the entity
+     * @param event
+     *            the event
+     * 
+     * @throws Exception
+     *             the exception
+     */
     private void fireJPAEventListeners(EntityMetadata metadata, Object entity, Class<?> event) throws Exception {
         log.debug("Firing Callback methods on @Entity(" + entity.getClass().getName() + ") for Event(" + event.getSimpleName() + ")");
         // handler external listeners first

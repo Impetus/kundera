@@ -15,7 +15,6 @@
  */
 package com.impetus.kundera.metadata;
 
-
 /**
  * The Interface IMetadataProcessor.
  * 
@@ -30,7 +29,6 @@ public interface MetadataProcessor {
      *            the clazz
      * @param metadata
      *            the metadata
-     * 
      */
     void process(Class<?> clazz, EntityMetadata metadata);
 }

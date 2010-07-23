@@ -28,40 +28,50 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.metadata.MetadataProcessor;
 
 /**
+ * The Class AbstractEntityFieldProcessor.
+ * 
  * @author animesh.kumar
- *
  */
 public abstract class AbstractEntityFieldProcessor implements MetadataProcessor {
 
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(ColumnFamilyProcessor.class);
 
-    
-    public final String getValidJPAColumn (Class<?> entity, Field f) {
+    /**
+     * Gets the valid jpa column.
+     * 
+     * @param entity
+     *            the entity
+     * @param f
+     *            the f
+     * 
+     * @return the valid jpa column
+     */
+    public final String getValidJPAColumn(Class<?> entity, Field f) {
 
-    	String name = null;
+        String name = null;
 
-		if (f.isAnnotationPresent(Column.class)) {
-			Column c = f.getAnnotation(Column.class);
-			if (!c.name().isEmpty()) {
-				name = c.name();
-			} else {
-				name = f.getName();
-			}
-		} else if (f.isAnnotationPresent(Basic.class)) {
-			name = f.getName();
-		}
-		
-		if (f.isAnnotationPresent(Temporal.class)) {
-			if (!f.getType().equals(Date.class)) {
-				log.error("@Temporal must map to java.util.Date for @Entity(" + entity.getName() + "." + f.getName() + ")");
-				return name;
-			}
-			if (null == name) {
-				name = f.getName();
-			}
-		}
-		return name;
+        if (f.isAnnotationPresent(Column.class)) {
+            Column c = f.getAnnotation(Column.class);
+            if (!c.name().isEmpty()) {
+                name = c.name();
+            } else {
+                name = f.getName();
+            }
+        } else if (f.isAnnotationPresent(Basic.class)) {
+            name = f.getName();
+        }
+
+        if (f.isAnnotationPresent(Temporal.class)) {
+            if (!f.getType().equals(Date.class)) {
+                log.error("@Temporal must map to java.util.Date for @Entity(" + entity.getName() + "." + f.getName() + ")");
+                return name;
+            }
+            if (null == name) {
+                name = f.getName();
+            }
+        }
+        return name;
     }
 
 }

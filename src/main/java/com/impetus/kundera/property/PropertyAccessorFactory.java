@@ -33,54 +33,70 @@ import com.impetus.kundera.property.accessor.StringAccessor;
  */
 /**
  * @author animesh.kumar
- *
+ * 
  */
 public class PropertyAccessorFactory {
 
-	public static Map<Class<?>, PropertyAccessor<?>> map = new HashMap<Class<?>, PropertyAccessor<?>>();
-	static {
-		map.put(Integer.class, new IntegerAccessor());
-		map.put(Long.class, new LongAccessor());
-		map.put(String.class, new StringAccessor());
-		map.put(Date.class, new DateAccessor());
-		map.put(Object.class, new ObjectAccessor());
-	}
-	
-	/** Making String Accessor easy to access */
+    /** The map. */
+    public static Map<Class<?>, PropertyAccessor<?>> map = new HashMap<Class<?>, PropertyAccessor<?>>();
+    static {
+        map.put(Integer.class, new IntegerAccessor());
+        map.put(Long.class, new LongAccessor());
+        map.put(String.class, new StringAccessor());
+        map.put(Date.class, new DateAccessor());
+        map.put(Object.class, new ObjectAccessor());
+    }
+
+    /** Making String Accessor easy to access. */
     public static final PropertyAccessor<String> STRING = new StringAccessor();
 
-    private PropertyAccessorFactory () {
+    /**
+     * Instantiates a new property accessor factory.
+     */
+    private PropertyAccessorFactory() {
     }
-    
+
     /**
      * Gets the property accessor.
      * 
      * @param clazz
-     * @return
+     *            the clazz
+     * 
+     * @return the property accessor
      */
     @SuppressWarnings("unchecked")
     public static PropertyAccessor getPropertyAccessor(Class<?> clazz) {
-    	PropertyAccessor<?> accessor = map.get(clazz);
-    	
-    	// allow fall-back to Object streamer.
-    	if (null == accessor) {
-    		accessor = map.get(Object.class);
-    	}
-    	return accessor;
+        PropertyAccessor<?> accessor = map.get(clazz);
+
+        // allow fall-back to Object streamer.
+        if (null == accessor) {
+            accessor = map.get(Object.class);
+        }
+        return accessor;
     }
 
     /**
      * Gets the property accessor.
      * 
      * @param property
-     * @return
+     *            the property
+     * 
+     * @return the property accessor
      */
     public static PropertyAccessor<?> getPropertyAccessor(Field property) {
         return getPropertyAccessor(property.getType());
     }
 
-	public static void add (Class<?> key, PropertyAccessor<?> value) {
-		map.put(key, value);
-	}
-    
+    /**
+     * Adds the.
+     * 
+     * @param key
+     *            the key
+     * @param value
+     *            the value
+     */
+    public static void add(Class<?> key, PropertyAccessor<?> value) {
+        map.put(key, value);
+    }
+
 }

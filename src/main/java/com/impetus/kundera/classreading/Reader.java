@@ -191,6 +191,11 @@ public abstract class Reader {
      */
     public abstract Filter getFilter();
 
-	public abstract URL[] findResources();
+    /**
+     * Find resources.
+     * 
+     * @return the uR l[]
+     */
+    public abstract URL[] findResources();
 
 }

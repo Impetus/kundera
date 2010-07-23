@@ -37,12 +37,26 @@ public class ColumnFamilyProcessor extends AbstractEntityFieldProcessor {
     /** The Constant log. */
     private static final Log LOG = LogFactory.getLog(ColumnFamilyProcessor.class);
 
+    /** The em. */
     private EntityManagerFactoryImpl em;
-    
-    public ColumnFamilyProcessor (EntityManagerFactory em) {
-    	this.em = (EntityManagerFactoryImpl) em;
+
+    /**
+     * Instantiates a new column family processor.
+     * 
+     * @param em
+     *            the em
+     */
+    public ColumnFamilyProcessor(EntityManagerFactory em) {
+        this.em = (EntityManagerFactoryImpl) em;
     }
-    
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
+     * com.impetus.kundera.metadata.EntityMetadata)
+     */
     @Override
     public final void process(Class<?> clazz, EntityMetadata metadata) {
 
@@ -58,26 +72,26 @@ public class ColumnFamilyProcessor extends AbstractEntityFieldProcessor {
 
         // set columnFamily
         metadata.setColumnFamilyName(cf.family());
-        
+
         // set keyspace
         String keyspace = cf.keyspace().length() != 0 ? cf.keyspace() : em.getKeyspace();
         metadata.setKeyspaceName(keyspace);
 
         // scan for fields
         for (Field f : clazz.getDeclaredFields()) {
-        	
-			if (f.isAnnotationPresent(Id.class)) {
-				LOG.debug(f.getName() + " => Id");
-				metadata.setIdProperty(f);
-			}
 
-			else {
-				String name = getValidJPAColumn (clazz, f);
-				if (null != name) {
-					metadata.addColumn(name, metadata.new Column(name, f));
-				}
-			}
- 
+            if (f.isAnnotationPresent(Id.class)) {
+                LOG.debug(f.getName() + " => Id");
+                metadata.setIdProperty(f);
+            }
+
+            else {
+                String name = getValidJPAColumn(clazz, f);
+                if (null != name) {
+                    metadata.addColumn(name, metadata.new Column(name, f));
+                }
+            }
+
         }
-    }    
+    }
 }

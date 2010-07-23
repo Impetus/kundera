@@ -40,6 +40,8 @@ public interface CassandraClient {
      *            The key of the row to modify
      * @param columns
      *            Array of columns to write
+     * @param keyspace
+     *            the keyspace
      * 
      * @throws Exception
      *             The exception
@@ -55,6 +57,8 @@ public interface CassandraClient {
      *            The key of the row to modify
      * @param superColumns
      *            Array of super-columns to write
+     * @param keyspace
+     *            the keyspace
      * 
      * @throws Exception
      *             The exception
@@ -68,6 +72,8 @@ public interface CassandraClient {
      *            The name of the super column family to operate on
      * @param key
      *            The key of the row
+     * @param keyspace
+     *            the keyspace
      * 
      * @return A list of matching columns
      * 
@@ -83,6 +89,8 @@ public interface CassandraClient {
      *            The name of the super column family to operate on
      * @param keys
      *            Array of row keys
+     * @param keyspace
+     *            the keyspace
      * 
      * @return A Map of row and corresponding list of columns.
      * 
@@ -98,6 +106,8 @@ public interface CassandraClient {
      *            The name of the super column family to operate on
      * @param rowId
      *            the row id
+     * @param keyspace
+     *            the keyspace
      * 
      * @throws Exception
      *             the exception
@@ -113,6 +123,8 @@ public interface CassandraClient {
      *            The key of the row
      * @param superColumnNames
      *            Array of super-column names to fetch from the row
+     * @param keyspace
+     *            the keyspace
      * 
      * @return A list of matching super-columns
      * 
@@ -128,6 +140,8 @@ public interface CassandraClient {
      *            The name of the super column family to operate on
      * @param keys
      *            Array of row keys
+     * @param keyspace
+     *            the keyspace
      * 
      * @return A Map of row and corresponding list of super-columns.
      * 
@@ -139,10 +153,10 @@ public interface CassandraClient {
     /**
      * Set Cassandra KeySpace. Default is "localhost"
      * 
-     * @param keySpace
-     *            the key space
+     * @param contactNodes
+     *            the contact nodes
      */
-    //void setKeySpace(String keySpace);
+    // void setKeySpace(String keySpace);
 
     /**
      * Set Cassandra nodes.

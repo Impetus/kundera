@@ -152,14 +152,16 @@ public class LucandraIndexer implements Indexer {
 
         // index row
         try {
-        	String id = PropertyAccessorHelper.getId(object, metadata);
+            String id = PropertyAccessorHelper.getId(object, metadata);
             luceneField = new Field(ENTITY_ID_FIELD, id, // adding class
-                                                         // namespace
+                    // namespace
                     Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
             document.add(luceneField);
 
             // index namespace for unique deletion
-            luceneField = new Field(KUNDERA_ID_FIELD, getKunderaId(metadata, id), // adding class namespace
+            luceneField = new Field(KUNDERA_ID_FIELD, getKunderaId(metadata, id), // adding
+                                                                                  // class
+                                                                                  // namespace
                     Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
             document.add(luceneField);
 
@@ -180,9 +182,9 @@ public class LucandraIndexer implements Indexer {
 
             java.lang.reflect.Field property = index.getProperty();
             String propertyName = index.getName();
-            
+
             try {
-            	String value = PropertyAccessorHelper.getString(object, property).toString();
+                String value = PropertyAccessorHelper.getString(object, property).toString();
                 luceneField = new Field(getCannonicalPropertyName(indexName, propertyName), value, Field.Store.NO, Field.Index.ANALYZED);
                 document.add(luceneField);
             } catch (PropertyAccessException e) {

@@ -186,25 +186,25 @@ public abstract class KunderaQuery {
      * Inits the entity class.
      */
     private void initEntityClass() {
-//        String result = getResult();
-//        String from = getFrom();
+        // String result = getResult();
+        // String from = getFrom();
 
         String fromArray[] = from.split(" ");
         if (fromArray.length != 2) {
             throw new PersistenceException("Bad query format: " + from);
         }
-        if (!fromArray[1].equals(result)){
+        if (!fromArray[1].equals(result)) {
             throw new PersistenceException("Bad query format: " + from);
         }
         this.entityName = fromArray[0];
         this.entityAlias = fromArray[1];
 
         entityClass = em.getMetadataManager().getEntityClassByName(entityName);
-        if (null == entityClass){
+        if (null == entityClass) {
             throw new PersistenceException("No entity found by the name: " + entityName);
         }
         EntityMetadata metadata = em.getMetadataManager().getEntityMetadata(entityClass);
-        if (!metadata.isIndexable()){
+        if (!metadata.isIndexable()) {
             throw new PersistenceException(entityClass + " is not indexed. What are you searching for dude?");
         }
     }
@@ -216,7 +216,7 @@ public abstract class KunderaQuery {
         EntityMetadata metadata = em.getMetadataManager().getEntityMetadata(entityClass);
         String indexName = metadata.getIndexName();
 
-        //String filter = getFilter();
+        // String filter = getFilter();
 
         if (null == filter) {
             return;
@@ -436,14 +436,14 @@ public abstract class KunderaQuery {
         Matcher matcher = pattern.matcher(where);
         int lastIndex = 0;
         String s;
-        //int count = 0;
+        // int count = 0;
         while (matcher.find()) {
             s = where.substring(lastIndex, matcher.start()).trim();
             split.add(s);
             s = matcher.group();
             split.add(s);
             lastIndex = matcher.end();
-            //count++;
+            // count++;
         }
         s = where.substring(lastIndex).trim();
         split.add(s);

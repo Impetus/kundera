@@ -81,8 +81,7 @@ public class Post {
     /**
      * Sets the permalink.
      * 
-     * @param permalink
-     *            the permalink to set
+     * @param permalink the permalink to set
      */
     public void setPermalink(String permalink) {
         this.permalink = permalink;
@@ -100,8 +99,7 @@ public class Post {
     /**
      * Sets the title.
      * 
-     * @param title
-     *            the title to set
+     * @param title the title to set
      */
     public void setTitle(String title) {
         this.title = title;
@@ -119,8 +117,7 @@ public class Post {
     /**
      * Sets the body.
      * 
-     * @param body
-     *            the body to set
+     * @param body the body to set
      */
     public void setBody(String body) {
         this.body = body;
@@ -138,8 +135,7 @@ public class Post {
     /**
      * Sets the author.
      * 
-     * @param author
-     *            the author to set
+     * @param author the author to set
      */
     public void setAuthor(String author) {
         this.author = author;
@@ -157,8 +153,7 @@ public class Post {
     /**
      * Sets the created.
      * 
-     * @param created
-     *            the created to set
+     * @param created the created to set
      */
     public void setCreated(Date created) {
         this.created = created;
@@ -176,8 +171,7 @@ public class Post {
     /**
      * Sets the tags.
      * 
-     * @param tags
-     *            the tags to set
+     * @param tags the tags to set
      */
     public void setTags(List<String> tags) {
         this.tags = tags;

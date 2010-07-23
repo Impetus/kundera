@@ -125,7 +125,7 @@ public class KunderaQueryParser {
             if (keyword != null) {
                 if (isKeyword(keyword)) {
                     throw new RuntimeException("out of order keyword: " + keyword);
-                } 
+                }
             }
         }
 

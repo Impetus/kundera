@@ -170,7 +170,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
         for (MetadataProcessor processor : metadataProcessors) {
             processor.process(clazz, metadata);
         }
-        
+
         return metadata;
     }
 

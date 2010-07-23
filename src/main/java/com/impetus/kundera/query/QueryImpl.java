@@ -56,15 +56,25 @@ public abstract class QueryImpl extends KunderaQuery implements Query {
         parse();
     }
 
+    /**
+     * Gets the entity manager.
+     * 
+     * @return the entity manager
+     */
     public EntityManagerImpl getEntityManager() {
-		return cem;
-	}
+        return cem;
+    }
 
-	public String getJPAQuery() {
-		return query;
-	}
+    /**
+     * Gets the jPA query.
+     * 
+     * @return the jPA query
+     */
+    public String getJPAQuery() {
+        return query;
+    }
 
-	/**
+    /**
      * Parses the.
      */
     private void parse() {

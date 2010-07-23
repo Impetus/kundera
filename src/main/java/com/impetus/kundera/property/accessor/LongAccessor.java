@@ -27,7 +27,12 @@ import com.impetus.kundera.property.PropertyAccessor;
  */
 public class LongAccessor implements PropertyAccessor<Long> {
 
-	@Override
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
+     */
+    @Override
     public final Long fromBytes(byte[] bytes) throws PropertyAccessException {
         if (bytes.length != 8) {
             throw new PropertyAccessException("must be 8 bytes");
@@ -35,6 +40,12 @@ public class LongAccessor implements PropertyAccessor<Long> {
         return (ByteBuffer.wrap(bytes).getLong());
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+     */
     @Override
     public final byte[] toBytes(Object object) {
         Long l = (Long) object;
@@ -43,8 +54,14 @@ public class LongAccessor implements PropertyAccessor<Long> {
         return buffer.array();
     }
 
-	@Override
-	public final String toString(Object object) {
-		return object.toString();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+     */
+    @Override
+    public final String toString(Object object) {
+        return object.toString();
+    }
 }

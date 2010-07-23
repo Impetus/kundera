@@ -72,13 +72,27 @@ public class DataManager {
         getDataAccessor(metadata).write(em.getClient(), metadata, entity);
     }
 
-	public <T> T merge(EntityMetadata metadata, T entity) throws Exception {
-		// TODO Improve this bit. should we not implement some merge on client level?
-		getDataAccessor(metadata).write(em.getClient(), metadata, entity);
-		return entity;
-	}
+    /**
+     * Merge.
+     * 
+     * @param metadata
+     *            the metadata
+     * @param entity
+     *            the entity
+     * 
+     * @return the t
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    public <T> T merge(EntityMetadata metadata, T entity) throws Exception {
+        // TODO Improve this bit. should we not implement some merge on client
+        // level?
+        getDataAccessor(metadata).write(em.getClient(), metadata, entity);
+        return entity;
+    }
 
-	/**
+    /**
      * Find.
      * 
      * @param metadata

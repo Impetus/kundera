@@ -40,8 +40,8 @@ public final class EntityMetadata {
 
     /** ColumnFamily. */
     private String columnFamilyName;
-    
-    /** keyspace */
+
+    /** keyspace. */
     private String keyspaceName;
 
     /** field that keeps row identifier. */
@@ -65,10 +65,12 @@ public final class EntityMetadata {
     /** The index prperties. */
     private List<PropertyIndex> indexPrperties = new ArrayList<PropertyIndex>();
 
-	// entity listeners map
-	// key=>ListenerAnnotations, like @PrePersist, @PreUpdate etc.; 
-	// value=>EntityLisntener Class and method
-	private Map<Class<?>, List<? extends CallbackMethod>> callbackMethodsMap = new HashMap<Class<?>, List<? extends CallbackMethod>>();
+    // entity listeners map
+    // key=>ListenerAnnotations, like @PrePersist, @PreUpdate etc.;
+    // value=>EntityLisntener Class and method
+    /** The callback methods map. */
+    private Map<Class<?>, List<? extends CallbackMethod>> callbackMethodsMap = new HashMap<Class<?>, List<? extends CallbackMethod>>();
+
     /**
      * Instantiates a new metadata.
      * 
@@ -127,15 +129,26 @@ public final class EntityMetadata {
         this.columnFamilyName = columnFamilyName;
     }
 
+    /**
+     * Gets the keyspace name.
+     * 
+     * @return the keyspace name
+     */
     public String getKeyspaceName() {
-		return keyspaceName;
-	}
+        return keyspaceName;
+    }
 
-	public void setKeyspaceName(String keyspaceName) {
-		this.keyspaceName = keyspaceName;
-	}
+    /**
+     * Sets the keyspace name.
+     * 
+     * @param keyspaceName
+     *            the new keyspace name
+     */
+    public void setKeyspaceName(String keyspaceName) {
+        this.keyspaceName = keyspaceName;
+    }
 
-	/**
+    /**
      * Gets the id property.
      * 
      * @return the id property
@@ -332,18 +345,37 @@ public final class EntityMetadata {
         this.isIndexable = isIndexable;
     }
 
-	public void setCallbackMethodsMap(Map<Class<?>, List<? extends CallbackMethod>> callbackMethodsMap) {
-		this.callbackMethodsMap = callbackMethodsMap;
-	}
+    /**
+     * Sets the callback methods map.
+     * 
+     * @param callbackMethodsMap
+     *            the callback methods map
+     */
+    public void setCallbackMethodsMap(Map<Class<?>, List<? extends CallbackMethod>> callbackMethodsMap) {
+        this.callbackMethodsMap = callbackMethodsMap;
+    }
 
-	public Map<Class<?>, List<? extends CallbackMethod>> getCallbackMethodsMap() {
-		return callbackMethodsMap;
-	}
+    /**
+     * Gets the callback methods map.
+     * 
+     * @return the callback methods map
+     */
+    public Map<Class<?>, List<? extends CallbackMethod>> getCallbackMethodsMap() {
+        return callbackMethodsMap;
+    }
 
-	public List<? extends CallbackMethod> getCallbackMethods(Class<?> event) {
-		return this.callbackMethodsMap.get(event);
-	}
-	
+    /**
+     * Gets the callback methods.
+     * 
+     * @param event
+     *            the event
+     * 
+     * @return the callback methods
+     */
+    public List<? extends CallbackMethod> getCallbackMethods(Class<?> event) {
+        return this.callbackMethodsMap.get(event);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -649,63 +681,109 @@ public final class EntityMetadata {
          */
         public abstract boolean isSuperColumnFamilyMetadata();
     }
-	/**
-	 * Class to hold class-method instances for EntityListeners
-	 * 
-	 * @author animesh.kumar
-	 */
-	public final class ExternalCallbackMethod implements CallbackMethod {
-		private Class<?> clazz;
-		private Method method;
 
-		public ExternalCallbackMethod(Class<?> clazz, Method method) {
-			this.clazz = clazz;
-			this.method = method;
-		}
+    /**
+     * Class to hold class-method instances for EntityListeners.
+     * 
+     * @author animesh.kumar
+     */
+    public final class ExternalCallbackMethod implements CallbackMethod {
 
-		public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InstantiationException {
-			if (!method.isAccessible()) method.setAccessible(true);
-			method.invoke(clazz.newInstance(), new Object[] {entity});
-		}
+        /** The clazz. */
+        private Class<?> clazz;
 
-		@Override
-		public String toString() {
-			StringBuilder builder = new StringBuilder();
-			builder.append("ExternalCallBackMethod [clazz=");
-			builder.append(clazz.getName());
-			builder.append(", method=");
-			builder.append(method.getName());
-			builder.append("]");
-			return builder.toString();
-		}
-	}
+        /** The method. */
+        private Method method;
 
-	/**
-	 * @author animesh.kumar
-	 *
-	 */
-	public final class InternalCallbackMethod implements CallbackMethod {
-		private Method method;
+        /**
+         * Instantiates a new external callback method.
+         * 
+         * @param clazz
+         *            the clazz
+         * @param method
+         *            the method
+         */
+        public ExternalCallbackMethod(Class<?> clazz, Method method) {
+            this.clazz = clazz;
+            this.method = method;
+        }
 
-		public InternalCallbackMethod(Method method) {
-			this.method = method;
-		}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * com.impetus.kundera.ejb.event.CallbackMethod#invoke(java.lang.Object)
+         */
+        public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InstantiationException {
+            if (!method.isAccessible())
+                method.setAccessible(true);
+            method.invoke(clazz.newInstance(), new Object[] { entity });
+        }
 
-		public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InstantiationException {
-			if (!method.isAccessible()) method.setAccessible(true);
-			method.invoke(entity, new Object[] {});
-		}
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("ExternalCallBackMethod [clazz=");
+            builder.append(clazz.getName());
+            builder.append(", method=");
+            builder.append(method.getName());
+            builder.append("]");
+            return builder.toString();
+        }
+    }
 
-		@Override
-		public String toString() {
-			StringBuilder builder = new StringBuilder();
-			builder.append("InternalCallBackMethod [clazz=");
-			builder.append(getEntityClazz().getName());
-			builder.append(", method=");
-			builder.append(method.getName());
-			builder.append("]");
-			return builder.toString();
-		}
-	}
-	
+    /**
+     * The Class InternalCallbackMethod.
+     * 
+     * @author animesh.kumar
+     */
+    public final class InternalCallbackMethod implements CallbackMethod {
+
+        /** The method. */
+        private Method method;
+
+        /**
+         * Instantiates a new internal callback method.
+         * 
+         * @param method
+         *            the method
+         */
+        public InternalCallbackMethod(Method method) {
+            this.method = method;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * com.impetus.kundera.ejb.event.CallbackMethod#invoke(java.lang.Object)
+         */
+        public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InstantiationException {
+            if (!method.isAccessible())
+                method.setAccessible(true);
+            method.invoke(entity, new Object[] {});
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("InternalCallBackMethod [clazz=");
+            builder.append(getEntityClazz().getName());
+            builder.append(", method=");
+            builder.append(method.getName());
+            builder.append("]");
+            return builder.toString();
+        }
+    }
+
 }

@@ -26,10 +26,13 @@ import java.lang.reflect.Type;
  */
 public class ReflectUtils {
 
-	private ReflectUtils () {
-		
-	}
-	
+    /**
+     * Instantiates a new reflect utils.
+     */
+    private ReflectUtils() {
+
+    }
+
     /**
      * Checks for interface "has" in class "in".
      * 
@@ -75,23 +78,26 @@ public class ReflectUtils {
         return null;
     }
 
-	/**
-	 * Checks for super "has" in class "in"
-	 * 
-	 * @param has
-	 * @param in
-	 * @return true, if exists?
-	 */
-	public static boolean hasSuperClass(Class<?> has, Class<?> in) {
-		if (in.equals(has)) {
-			return true;
-		}
-		boolean match = false;
-		// stop if the superclass is Object
-		if (in.getSuperclass().equals(Object.class)) {
-			return match;
-		}
-		match = hasSuperClass(has, in.getSuperclass());
-		return match;
-	}
+    /**
+     * Checks for super "has" in class "in".
+     * 
+     * @param has
+     *            the has
+     * @param in
+     *            the in
+     * 
+     * @return true, if exists?
+     */
+    public static boolean hasSuperClass(Class<?> has, Class<?> in) {
+        if (in.equals(has)) {
+            return true;
+        }
+        boolean match = false;
+        // stop if the superclass is Object
+        if (in.getSuperclass().equals(Object.class)) {
+            return match;
+        }
+        match = hasSuperClass(has, in.getSuperclass());
+        return match;
+    }
 }

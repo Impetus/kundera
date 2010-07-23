@@ -25,25 +25,39 @@ import java.lang.reflect.Field;
 public interface PropertyAccessor<T> {
 
     /**
+     * From bytes.
+     * 
      * @param b
-     * @return
+     *            the b
+     * 
+     * @return the T
+     * 
      * @throws PropertyAccessException
+     *             the property access exception
      */
     T fromBytes(byte[] b) throws PropertyAccessException;
 
     /**
-     * @param value
-     * @return
+     * To bytes.
+     * 
+     * @param object
+     *            the object
+     * 
+     * @return the byte[]
+     * 
      * @throws PropertyAccessException
+     *             the property access exception
      */
     byte[] toBytes(Object object) throws PropertyAccessException;
 
     /**
-     * Converts Object to String. Normally, this will be object.toString()
-     * But in some cases, this might be different. 
+     * Converts Object to String. Normally, this will be object.toString() But
+     * in some cases, this might be different.
      * 
-     * @param value
-     * @return
+     * @param object
+     *            the object
+     * 
+     * @return the string
      */
-    String toString (Object object);
+    String toString(Object object);
 }

@@ -52,10 +52,8 @@ public class TestKundera extends TestCase {
     /**
      * Sets the up.
      * 
-     * @throws java.lang.Exception
-     *             * @throws Exception the exception
-     * @throws Exception
-     *             the exception
+     * @throws java.lang.Exception * @throws Exception the exception
+     * @throws Exception the exception
      */
     public void setUp() throws Exception {
         URL configURL = TestKundera.class.getClassLoader().getResource("storage-conf.xml");
@@ -88,10 +86,8 @@ public class TestKundera extends TestCase {
     /**
      * Tear down.
      * 
-     * @throws java.lang.Exception
-     *             * @throws Exception the exception
-     * @throws Exception
-     *             the exception
+     * @throws java.lang.Exception * @throws Exception the exception
+     * @throws Exception the exception
      */
     public void tearDown() throws Exception {
         manager.close();
@@ -101,8 +97,7 @@ public class TestKundera extends TestCase {
     /**
      * Test save authors.
      * 
-     * @throws Exception
-     *             the exception
+     * @throws Exception the exception
      */
     public void testSaveAuthors() throws Exception {
         String key = System.currentTimeMillis() + "-author";
@@ -117,8 +112,7 @@ public class TestKundera extends TestCase {
     /**
      * Test save posts.
      * 
-     * @throws Exception
-     *             the exception
+     * @throws Exception the exception
      */
     public void testSavePosts() throws Exception {
         String key = System.currentTimeMillis() + "-post";
@@ -134,8 +128,7 @@ public class TestKundera extends TestCase {
     /**
      * _test delete authors.
      * 
-     * @throws Exception
-     *             the exception
+     * @throws Exception the exception
      */
     public void testDeleteAuthors() throws Exception {
         String key = System.currentTimeMillis() + "-animesh";
@@ -160,14 +153,10 @@ public class TestKundera extends TestCase {
     /**
      * Creates the author.
      * 
-     * @param username
-     *            the username
-     * @param email
-     *            the email
-     * @param country
-     *            the country
-     * @param registeredSince
-     *            the registered since
+     * @param username the username
+     * @param email the email
+     * @param country the country
+     * @param registeredSince the registered since
      * 
      * @return the author
      */
@@ -183,18 +172,12 @@ public class TestKundera extends TestCase {
     /**
      * Creates the post.
      * 
-     * @param permalink
-     *            the permalink
-     * @param title
-     *            the title
-     * @param body
-     *            the body
-     * @param author
-     *            the author
-     * @param created
-     *            the created
-     * @param tags
-     *            the tags
+     * @param permalink the permalink
+     * @param title the title
+     * @param body the body
+     * @param author the author
+     * @param created the created
+     * @param tags the tags
      * 
      * @return the post
      */

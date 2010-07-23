@@ -23,107 +23,136 @@ import com.impetus.kundera.metadata.EntityMetadata;
  * Helper class to access fields.
  * 
  * @author animesh.kumar
- * 
  */
 public class PropertyAccessorHelper {
 
-	/**
-	 * Sets a byte-array onto a field
-	 * 
-	 * @param target
-	 * @param field
-	 * @param bytes
-	 * @throws PropertyAccessException
-	 */
-	public static void set(Object target, Field field, byte[] bytes)
-			throws PropertyAccessException {
+    /**
+     * Sets a byte-array onto a field.
+     * 
+     * @param target
+     *            the target
+     * @param field
+     *            the field
+     * @param bytes
+     *            the bytes
+     * 
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    public static void set(Object target, Field field, byte[] bytes) throws PropertyAccessException {
 
-		PropertyAccessor<?> accessor = PropertyAccessorFactory
-				.getPropertyAccessor(field);
-		Object value = accessor.fromBytes(bytes);
-		set(target, field, value);
-	}
+        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
+        Object value = accessor.fromBytes(bytes);
+        set(target, field, value);
+    }
 
-	/**
-	 * Sets an object onto a field.
-	 * 
-	 * @param target
-	 * @param field
-	 * @param value
-	 * @throws PropertyAccessException
-	 */
-	public static void set(Object target, Field field, Object value)
-			throws PropertyAccessException {
+    /**
+     * Sets an object onto a field.
+     * 
+     * @param target
+     *            the target
+     * @param field
+     *            the field
+     * @param value
+     *            the value
+     * 
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    public static void set(Object target, Field field, Object value) throws PropertyAccessException {
 
-		if (!field.isAccessible()) {
-			field.setAccessible(true);
-		}
-		try {
-			field.set(target, value);
-		} catch (IllegalArgumentException iarg) {
-			throw new PropertyAccessException(iarg);
-		} catch (IllegalAccessException iacc) {
-			throw new PropertyAccessException(iacc);
-		}
-	}
+        if (!field.isAccessible()) {
+            field.setAccessible(true);
+        }
+        try {
+            field.set(target, value);
+        } catch (IllegalArgumentException iarg) {
+            throw new PropertyAccessException(iarg);
+        } catch (IllegalAccessException iacc) {
+            throw new PropertyAccessException(iacc);
+        }
+    }
 
-	/**
-	 * Gets object from field
-	 * 
-	 * @param from
-	 * @param field
-	 * @return
-	 * @throws PropertyAccessException
-	 */
-	public static Object getObject(Object from, Field field)
-			throws PropertyAccessException {
+    /**
+     * Gets object from field.
+     * 
+     * @param from
+     *            the from
+     * @param field
+     *            the field
+     * 
+     * @return the object
+     * 
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    public static Object getObject(Object from, Field field) throws PropertyAccessException {
 
-		if (!field.isAccessible()) {
-			field.setAccessible(true);
-		}
+        if (!field.isAccessible()) {
+            field.setAccessible(true);
+        }
 
-		try {
-			return field.get(from);
-		} catch (IllegalArgumentException iarg) {
-			throw new PropertyAccessException(iarg);
-		} catch (IllegalAccessException iacc) {
-			throw new PropertyAccessException(iacc);
-		}
-	}
+        try {
+            return field.get(from);
+        } catch (IllegalArgumentException iarg) {
+            throw new PropertyAccessException(iarg);
+        } catch (IllegalAccessException iacc) {
+            throw new PropertyAccessException(iacc);
+        }
+    }
 
-	public static String getString(Object from, Field field)
-			throws PropertyAccessException {
-		
-		PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
-		return accessor.toString(getObject(from, field));
-		
-	}
+    /**
+     * Gets the string.
+     * 
+     * @param from
+     *            the from
+     * @param field
+     *            the field
+     * 
+     * @return the string
+     * 
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    public static String getString(Object from, Field field) throws PropertyAccessException {
 
-	/**
-	 * Gets field value as byte-array
-	 * 
-	 * @param from
-	 * @param field
-	 * @return
-	 * @throws PropertyAccessException
-	 */
-	public static byte[] get(Object from, Field field)
-			throws PropertyAccessException {
-		PropertyAccessor<?> accessor = PropertyAccessorFactory
-				.getPropertyAccessor(field);
-		return accessor.toBytes(getObject(from, field));
-	}
+        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
+        return accessor.toString(getObject(from, field));
 
-	/**
-	 * Gets id value of an entity class
-	 * 
-	 * @param entity
-	 * @param metadata
-	 * @return
-	 * @throws PropertyAccessException
-	 */
-	public static String getId(Object entity, EntityMetadata metadata)
-			throws PropertyAccessException {
-		return (String) getObject(entity, metadata.getIdProperty());
-	}
+    }
+
+    /**
+     * Gets field value as byte-array.
+     * 
+     * @param from
+     *            the from
+     * @param field
+     *            the field
+     * 
+     * @return the byte[]
+     * 
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    public static byte[] get(Object from, Field field) throws PropertyAccessException {
+        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
+        return accessor.toBytes(getObject(from, field));
+    }
+
+    /**
+     * Gets id value of an entity class.
+     * 
+     * @param entity
+     *            the entity
+     * @param metadata
+     *            the metadata
+     * 
+     * @return the id
+     * 
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    public static String getId(Object entity, EntityMetadata metadata) throws PropertyAccessException {
+        return (String) getObject(entity, metadata.getIdProperty());
+    }
 }

@@ -38,6 +38,11 @@ public @interface ColumnFamily {
      * @return the string
      */
     String family();
-    
+
+    /**
+     * Keyspace.
+     * 
+     * @return the string
+     */
     String keyspace() default "";
 }

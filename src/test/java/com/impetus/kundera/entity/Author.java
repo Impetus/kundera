@@ -108,6 +108,9 @@ public class Author implements Serializable{
         return true;
     }
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -126,10 +129,10 @@ public class Author implements Serializable{
 	}
 
 	/**
-     * Gets the username.
-     * 
-     * @return the username
-     */
+	 * Gets the username.
+	 * 
+	 * @return the username
+	 */
     public String getUsername() {
         return username;
     }
@@ -137,8 +140,7 @@ public class Author implements Serializable{
     /**
      * Sets the username.
      * 
-     * @param username
-     *            the username to set
+     * @param username the username to set
      */
     public void setUsername(String username) {
         this.username = username;
@@ -156,8 +158,7 @@ public class Author implements Serializable{
     /**
      * Sets the email address.
      * 
-     * @param emailAddress
-     *            the emailAddress to set
+     * @param emailAddress the emailAddress to set
      */
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
@@ -175,8 +176,7 @@ public class Author implements Serializable{
     /**
      * Sets the country.
      * 
-     * @param country
-     *            the country to set
+     * @param country the country to set
      */
     public void setCountry(String country) {
         this.country = country;
@@ -194,8 +194,7 @@ public class Author implements Serializable{
     /**
      * Sets the registered.
      * 
-     * @param registered
-     *            the registered to set
+     * @param registered the registered to set
      */
     public void setRegistered(Date registered) {
         this.registered = registered;

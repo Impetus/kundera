@@ -46,7 +46,7 @@ public class ClassFileIterator implements ResourceIterator {
     public ClassFileIterator(File file, Filter filter) {
         files = new ArrayList<File>();
         try {
-        	init(files, file, filter);
+            init(files, file, filter);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -69,7 +69,7 @@ public class ClassFileIterator implements ResourceIterator {
         File[] files = dir.listFiles();
         for (int i = 0; i < files.length; i++) {
             if (files[i].isDirectory()) {
-            	init(list, files[i], filter);
+                init(list, files[i], filter);
             } else {
                 if (filter == null || filter.accepts(files[i].getAbsolutePath())) {
                     list.add(files[i]);

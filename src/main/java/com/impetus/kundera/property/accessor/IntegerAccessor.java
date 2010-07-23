@@ -24,20 +24,37 @@ import com.impetus.kundera.property.PropertyAccessor;
  */
 public class IntegerAccessor implements PropertyAccessor<Integer> {
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
+     */
     @Override
     public final Integer fromBytes(byte[] b) {
         return ((b[0] << 24) + ((b[1] & 0xFF) << 16) + ((b[2] & 0xFF) << 8) + (b[3] & 0xFF));
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+     */
     @Override
     public final byte[] toBytes(Object val) {
         Integer value = (Integer) (val);
         return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value.intValue() };
     }
 
-	@Override
-	public String toString(Object object) {
-		return object.toString();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+     */
+    @Override
+    public String toString(Object object) {
+        return object.toString();
+    }
 
 }

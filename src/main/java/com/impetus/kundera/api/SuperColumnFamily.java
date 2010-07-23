@@ -38,6 +38,11 @@ public @interface SuperColumnFamily {
      * @return the string
      */
     String family();
-    
+
+    /**
+     * Keyspace.
+     * 
+     * @return the string
+     */
     String keyspace() default "";
 }
