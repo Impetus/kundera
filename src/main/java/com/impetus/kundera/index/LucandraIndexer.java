@@ -112,16 +112,14 @@ public class LucandraIndexer implements Indexer {
     @Override
     public final void unindex(EntityMetadata metadata, String id) {
         log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
-        try {
-        	lucandra.IndexWriter indexWriter = new lucandra.IndexWriter(INDEX_NAME, client.getCassandraClient());
-			indexWriter.deleteDocuments(new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));
-        } catch (CorruptIndexException e) {
-            throw new IndexingException(e.getMessage());
-        } catch (IOException e) {
-            throw new IndexingException(e.getMessage());
-        } catch (Exception e) { // :( just to catch thrift exceptions
-            throw new IndexingException(e.getMessage());
-        }
+		try {
+			getIndexWriter().deleteDocuments(
+					new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));
+		} catch (CorruptIndexException e) {
+			throw new IndexingException(e.getMessage());
+		} catch (IOException e) {
+			throw new IndexingException(e.getMessage());
+		}
     }
 
     /*
@@ -189,17 +187,14 @@ public class LucandraIndexer implements Indexer {
         }
 
         // flush the indexes
-        try {
-            log.debug("Flushing to Lucandra: " + document);
-        	lucandra.IndexWriter indexWriter = new lucandra.IndexWriter(INDEX_NAME, client.getCassandraClient());
-            indexWriter.addDocument(document, analyzer);
-        } catch (CorruptIndexException e) {
-            throw new IndexingException(e.getMessage());
-        } catch (IOException e) {
-            throw new IndexingException(e.getMessage());
-        } catch (Exception e) { // :( just to catch thrift exceptions
-            throw new IndexingException(e.getMessage());
-        }
+		try {
+			log.debug("Flushing to Lucandra: " + document);
+			getIndexWriter().addDocument(document, analyzer);
+		} catch (CorruptIndexException e) {
+			throw new IndexingException(e.getMessage());
+		} catch (IOException e) {
+			throw new IndexingException(e.getMessage());
+		}
     }
 
     // TODO: this is not the best implementation. need to improve!
@@ -274,5 +269,16 @@ public class LucandraIndexer implements Indexer {
     private String getCannonicalPropertyName(String indexName, String propertyName) {
         return indexName + "." + propertyName;
     }
+
+	// helper class to get Lucandra IndexWriter object
+    private lucandra.IndexWriter getIndexWriter() {
+		try {
+			return new lucandra.IndexWriter(INDEX_NAME, client
+					.getCassandraClient());
+		} catch (Exception e) {
+			throw new IndexingException(e.getMessage());
+		}
+	}
+
 
 }
