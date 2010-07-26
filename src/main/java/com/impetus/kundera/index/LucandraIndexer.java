@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import lucandra.IndexReader;
@@ -42,11 +41,9 @@ import org.apache.lucene.util.Version;
 import com.impetus.kundera.CassandraClient;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.accessor.ColumnFamilyDataAccessor;
-import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.PropertyIndex;
 import com.impetus.kundera.property.PropertyAccessException;
-import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -59,8 +56,8 @@ public class LucandraIndexer implements Indexer {
     /** log for this class. */
     private static Log log = LogFactory.getLog(ColumnFamilyDataAccessor.class);
 
-    /** The INDE x_ name. */
-    private static String INDEX_NAME; // is persistent-unit-name
+    /** The INDEX_NAME. */
+    private static String INDEX_NAME = "kundera-alpha";// is persistent-unit-name
 
     /** The Constant UUID. */
     private static final long UUID = 6077004083174677888L;
@@ -86,9 +83,6 @@ public class LucandraIndexer implements Indexer {
     /** The client. */
     private CassandraClient client;
 
-    /** The index writer. */
-    private lucandra.IndexWriter indexWriter;
-
     /** The analyzer. */
     private Analyzer analyzer;
 
@@ -103,11 +97,9 @@ public class LucandraIndexer implements Indexer {
      * @throws Exception
      *             the exception
      */
-    public LucandraIndexer(EntityManagerImpl em, Analyzer analyzer) throws Exception {
-        INDEX_NAME = em.getPersistenceUnitName();
-        this.client = em.getClient();
+    public LucandraIndexer(CassandraClient client, Analyzer analyzer) {
+        this.client = client;
         this.analyzer = analyzer;
-        this.indexWriter = new lucandra.IndexWriter(INDEX_NAME, client.getCassandraClient());
     }
 
     /*
@@ -121,10 +113,13 @@ public class LucandraIndexer implements Indexer {
     public final void unindex(EntityMetadata metadata, String id) {
         log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
         try {
-            indexWriter.deleteDocuments(new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));
+        	lucandra.IndexWriter indexWriter = new lucandra.IndexWriter(INDEX_NAME, client.getCassandraClient());
+			indexWriter.deleteDocuments(new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));
         } catch (CorruptIndexException e) {
             throw new IndexingException(e.getMessage());
         } catch (IOException e) {
+            throw new IndexingException(e.getMessage());
+        } catch (Exception e) { // :( just to catch thrift exceptions
             throw new IndexingException(e.getMessage());
         }
     }
@@ -196,10 +191,13 @@ public class LucandraIndexer implements Indexer {
         // flush the indexes
         try {
             log.debug("Flushing to Lucandra: " + document);
+        	lucandra.IndexWriter indexWriter = new lucandra.IndexWriter(INDEX_NAME, client.getCassandraClient());
             indexWriter.addDocument(document, analyzer);
         } catch (CorruptIndexException e) {
             throw new IndexingException(e.getMessage());
         } catch (IOException e) {
+            throw new IndexingException(e.getMessage());
+        } catch (Exception e) { // :( just to catch thrift exceptions
             throw new IndexingException(e.getMessage());
         }
     }

@@ -38,9 +38,6 @@ public class IndexManager {
     /** The indexer. */
     private Indexer indexer;
 
-    /** The manager. */
-    private EntityManagerImpl manager;
-
     /**
      * The Constructor.
      * 
@@ -51,13 +48,8 @@ public class IndexManager {
      */
     @SuppressWarnings("deprecation")
     public IndexManager(EntityManagerImpl manager) {
-        try {
-            indexer = new LucandraIndexer(manager, new StandardAnalyzer(Version.LUCENE_CURRENT));
-        } catch (Exception e) {
-            throw new IndexingException(e.getMessage());
-        }
-
-        this.manager = manager;
+        indexer = new LucandraIndexer(manager.getClient(), 
+        		new StandardAnalyzer(Version.LUCENE_CURRENT));
     }
 
     /**
