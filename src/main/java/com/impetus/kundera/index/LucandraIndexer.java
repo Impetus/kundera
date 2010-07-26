@@ -270,8 +270,8 @@ public class LucandraIndexer implements Indexer {
         return indexName + "." + propertyName;
     }
 
-	// helper class to get Lucandra IndexWriter object
-    private lucandra.IndexWriter getIndexWriter() {
+	// helper method to get Lucandra IndexWriter object
+	private lucandra.IndexWriter getIndexWriter() {
 		try {
 			return new lucandra.IndexWriter(INDEX_NAME, client
 					.getCassandraClient());
@@ -279,6 +279,5 @@ public class LucandraIndexer implements Indexer {
 			throw new IndexingException(e.getMessage());
 		}
 	}
-
 
 }
