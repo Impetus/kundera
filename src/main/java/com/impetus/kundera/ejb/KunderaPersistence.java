@@ -44,7 +44,7 @@ public class KunderaPersistence implements PersistenceProvider {
      */
     @Override
     public final EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map) {
-        return new EntityManagerFactoryImpl(info.getPersistenceUnitName(), map);
+    	return createEntityManagerFactory(info.getPersistenceUnitName(), map);
     }
 
     /*
@@ -56,7 +56,8 @@ public class KunderaPersistence implements PersistenceProvider {
      */
     @Override
     public final EntityManagerFactory createEntityManagerFactory(String emName, Map map) {
-        return new EntityManagerFactoryImpl(emName, map);
+    	EntityManagerFactoryBuilder conf = new EntityManagerFactoryBuilder();
+    	return conf.buildEntityManagerFactory(emName, map);
     }
 
 }

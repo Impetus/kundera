@@ -18,6 +18,7 @@ package com.impetus.kundera.ejb;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
 
@@ -68,7 +69,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     private String[] nodes;
 
     /** The port. */
-    private int port;
+    private Integer port;
 
     /** The keyspace. */
     private String keyspace;
@@ -118,7 +119,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         // if props is NULL or empty, look for kundera.properties and populate
         if (props == null || props.isEmpty()) {
             try {
-
+            	log.debug("Trying to load Kundera Properties from " + propsFileName);
                 loadProperties(propsFileName);
             } catch (IOException e) {
                 throw new PersistenceException(e);
@@ -160,28 +161,69 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      * Inits the.
      */
     private void init() {
-        nodes = ((String) props.get("kundera.nodes")).split(",");
-        port = Integer.parseInt((String) props.get("kundera.port"));
-        keyspace = (String) props.get("kundera.keyspace");
-
+    	// Look for kundera.nodes
+    	try {
+    		String kunderaNodes = (String)props.get("kundera.nodes");
+    		if (null == kunderaNodes || kunderaNodes.isEmpty()) {
+    			throw new IllegalArgumentException();
+    		}
+    		nodes = kunderaNodes.split(",");
+    	} catch (Exception e) {
+    		throw new IllegalArgumentException("Mandatory property missing 'kundera.nodes'");
+    	}
+        
+    	// kundera.port
+    	String kunderaPort = (String) props.get("kundera.port");
+		if (null == kunderaPort || kunderaPort.isEmpty()) {
+			throw new IllegalArgumentException("Mandatory property missing 'kundera.port'");
+		}
+    	try {
+    		port = Integer.parseInt(kunderaPort);
+    	} catch (Exception e) {
+    		throw new IllegalArgumentException("Invalid value for property 'kundera.port': " + kunderaPort + ". (Should it be 9160?)");
+    	}
+        
+    	// kundera.keyspace
+    	keyspace = (String) props.get("kundera.keyspace");
+		if (null == keyspace || keyspace.isEmpty()) {
+			throw new IllegalArgumentException("Mandatory property missing 'kundera.keyspace'");
+		}
+        
+		// sessionless
         String sessionless_ = (String) props.get("sessionless");
         if (sessionless_ == null) {
             sessionless = true;
         } else {
-            sessionless = Boolean.parseBoolean(sessionless_);
+        	try {
+        		sessionless = Boolean.parseBoolean(sessionless_);
+        	} catch (Exception e) {
+        		throw new IllegalArgumentException("Invalid value for property 'sessionless': " + kunderaPort + ". (It should be true/false)");
+        	}
         }
 
+        // kundera.client
         String cassandraClient = (String) props.get("kundera.client");
+		if (null == cassandraClient || cassandraClient.isEmpty()) {
+			throw new IllegalArgumentException("Mandatory property missing 'kundera.client'");
+		}
+		
+		// Instantiate the client
         try {
+    		if ( cassandraClient.endsWith( ".class" ) ) {
+    			cassandraClient = cassandraClient.substring( 0, cassandraClient.length() - 6 );
+    		}
+    		
             client = (CassandraClient) Class.forName(cassandraClient).newInstance();
             client.setContactNodes(nodes);
             client.setDefaultPort(port);
-            // client.setKeySpace(keyspace);
-            // connect to Cassandra DB
-            client.connect();
         } catch (Exception e) {
-            throw new IllegalArgumentException("Must define CassandraClient! " + e.getMessage());
+            throw new IllegalArgumentException("Invalid value for property 'kundera.client': " + cassandraClient + ". (Should it be com.impetus.kundera.client.PelopsClient?");
         }
+        
+        log.info("Connecting to Cassandra... (nodes:" + Arrays.asList(nodes) + ", port:" + port + ", keyspace:" + keyspace + ")");
+        
+        // connect to Cassandra DB
+        client.connect();
     }
 
     /**
