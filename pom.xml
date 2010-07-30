@@ -8,19 +8,48 @@
 	<packaging>jar</packaging>
 
 	<name>kundera</name>
-	<url>http://maven.apache.org</url>
+	<url>http://kundera.googlecode.com</url>
 
 	<scm>
 		<connection>scm:svn:http://kundera.googlecode.com/svn/trunk</connection>
 		<developerConnection>scm:svn:https://kundera.googlecode.com/svn/trunk</developerConnection>
 		<url>http://kundera.googlecode.com/svn/trunk</url>
 	</scm>
+	<issueManagement>
+		<system>Google Code</system>
+		<url>http://code.google.com/p/kundera/issues/list</url>
+	</issueManagement>
+
 	<distributionManagement>
 		<site>
 			<id>website</id>
 			<url>http://kundera.googlecode.com/svn/trunk</url>
 		</site>
+		<repository>
+			<id>googlecode.kundera.repo</id>
+			<url>dav:https://kundera.googlecode.com/svn/maven2/maven-repo-release/</url>
+		</repository>
+		<snapshotRepository>
+			<id>googlecode.kundera.snapshotrepo</id>
+			<url>dav:https://kundera.googlecode.com/svn/maven2/maven-repo-snapshot/</url>
+			<uniqueVersion>false</uniqueVersion>
+		</snapshotRepository>
+
 	</distributionManagement>
+	
+	<repositories>
+		<repository>
+			<id>kundera-missing</id>
+			<name>Kundera Public Missing Resources Repository</name>
+			<url>http://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 	<reporting>
 		<plugins>
 			<plugin>
@@ -157,57 +186,43 @@
 		
 		
 		<!--
-			system dependencies- to see if can be picked from some repository
+			Non public  dependencies- being picked from kundera svn  repository
 		-->
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
-			<artifactId>cassandra</artifactId>
+			<artifactId>apache-cassandra</artifactId>
 			<version>0.6.3</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/apache-cassandra-0.6.3.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>libthrift</groupId>
 			<artifactId>libthrift</artifactId>
-			<version>UNKNOWN</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/libthrift-r917130.jar</systemPath>
+			<version>r917130</version>
 		</dependency>
 		<dependency>
 			<groupId>pelops</groupId>
 			<artifactId>pelops</artifactId>
 			<version>UNKNOWN</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/pelops.jar</systemPath>
-		</dependency>
+			</dependency>
 		<!-- Required for running  tests  for embedded cassandra mode-->
 		<dependency>
 			<groupId>org.cliffc</groupId>
 			<artifactId>high-scale-lib</artifactId>
 			<version>UNKNOWN</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/high-scale-lib.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.reardencommerce</groupId>
 			<artifactId>clhm-production</artifactId>
 			<version>UNKNOWN</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/clhm-production.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>javassist</groupId>
 			<artifactId>javassist</artifactId>
-			<version>UNKNOWN</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/javassist-3.9.0.GA.jar</systemPath>
+			<version>3.9.0.GA</version>
 		</dependency>
 		<dependency>
 			<groupId>lucandra</groupId>
 			<artifactId>lucandra</artifactId>
 			<version>UNKNOWN</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/lucandra.jar</systemPath>
 		</dependency>
 		
 	</dependencies>
