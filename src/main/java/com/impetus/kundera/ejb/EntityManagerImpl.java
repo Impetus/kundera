@@ -272,10 +272,11 @@ public class EntityManagerImpl implements CassandraEntityManager {
     public final void close() {
         closed = true;
         sessionCache = null;
-        if (factory != null) {
-            factory.close();
-            factory = null;
-        }
+//		Factory must not be closed from here.         
+//        if (factory != null) {
+//            factory.close();
+//            factory = null;
+//        }
     }
 
     /*
