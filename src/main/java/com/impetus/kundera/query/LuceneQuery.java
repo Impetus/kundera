@@ -16,7 +16,6 @@
 package com.impetus.kundera.query;
 
 import java.util.List;
-import java.util.Queue;
 
 import javax.persistence.Query;
 
@@ -52,8 +51,8 @@ public class LuceneQuery extends QueryImpl implements Query {
      * @param jpaQuery
      *            the jpa query
      */
-    public LuceneQuery(EntityManagerImpl em, String jpaQuery) {
-        super(em, jpaQuery);
+    public LuceneQuery(EntityManagerImpl em, MetadataManager metadataManager, String jpaQuery) {
+        super(em, metadataManager, jpaQuery);
     }
 
     /**
@@ -73,7 +72,9 @@ public class LuceneQuery extends QueryImpl implements Query {
      */
     @Override
     public List<?> getResultList() {
-        // get luence query
+    	log.debug("JPA Query: " + query);
+    	
+    	// get luence query
         String q = luceneQuery;
         if (null == q) {
             q = getLuceneQueryFromJPAQuery();

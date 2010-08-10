@@ -19,6 +19,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import javax.persistence.PersistenceException;
+
 /**
  * The Class ReflectUtils.
  * 
@@ -100,4 +102,34 @@ public class ReflectUtils {
         match = hasSuperClass(has, in.getSuperclass());
         return match;
     }
+
+    /**
+     * Loads class with className using classLoader
+     * 
+     * @param className
+     * @param classLoader
+     * @return
+     */
+    public static Class<?> classForName (String className, ClassLoader classLoader) {
+        try {
+            Class<?> c = null;
+            try {
+                c = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+            } catch (ClassNotFoundException e) {
+                try {
+                    c = Class.forName(className);
+                } catch (ClassNotFoundException e1) {
+                    if(classLoader == null){
+                        throw e1;
+                    } else {
+                        c = classLoader.loadClass(className);
+                    }
+                }
+            }
+            return c;
+        } catch (ClassNotFoundException e) {
+            throw new PersistenceException(e);
+        }
+    }
+
 }

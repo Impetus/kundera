@@ -15,12 +15,20 @@
  */
 package com.impetus.kundera.ejb;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.persistence.CascadeType;
 import javax.persistence.EntityTransaction;
+import javax.persistence.FetchType;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceException;
@@ -38,12 +46,16 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.CassandraClient;
 import com.impetus.kundera.CassandraEntityManager;
+import com.impetus.kundera.Constants;
+import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.db.DataManager;
 import com.impetus.kundera.ejb.event.CallbackMethod;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataManager;
+import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.LuceneQuery;
 
 /**
@@ -62,12 +74,9 @@ public class EntityManagerImpl implements CassandraEntityManager {
     /** cache is used to store objects retrieved in this EntityManager session. */
     private Map<Object, Object> sessionCache;
 
-    /** The sessionless. */
-    private boolean sessionless;
-
     /** The closed. */
     private boolean closed = false;
-
+    
     /** The client. */
     private CassandraClient client;
 
@@ -82,7 +91,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 
     /** The persistence unit name. */
     private String persistenceUnitName;
-
+    
     /**
      * Instantiates a new entity manager impl.
      * 
@@ -90,146 +99,59 @@ public class EntityManagerImpl implements CassandraEntityManager {
      *            the factory
      * @param client
      *            the client
-     * @param sessionless
-     *            the sessionless
      */
-    public EntityManagerImpl(EntityManagerFactoryImpl factory, CassandraClient client, boolean sessionless) {
+    public EntityManagerImpl(EntityManagerFactoryImpl factory, CassandraClient client) {
         this.factory = factory;
         this.metadataManager = factory.getMetadataManager();
         this.client = client;
-        this.sessionless = sessionless;
-
-        if (!sessionless) {
-            sessionCache = new ConcurrentHashMap<Object, Object>();
-        }
+        this.sessionCache = new ConcurrentHashMap<Object, Object>();
         this.persistenceUnitName = factory.getPersistenceUnitName();
-
         dataManager = new DataManager(this);
         indexManager = new IndexManager(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#remove(java.lang.Object)
-     */
-    @Override
-    public void remove(Object entity) {
-        if (entity == null) {
-            throw new IllegalArgumentException("Entity must not be null.");
-        }
+    /**
+	 * @return the factory
+	 */
+	public EntityManagerFactoryImpl getFactory() {
+		return factory;
+	}
 
-        try {
-            EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
-
-            String id = PropertyAccessorHelper.getId(entity, metadata);
-
-            // fire PreRemove events
-            fireJPAEventListeners(metadata, entity, PreRemove.class);
-
-            removeFromCache(entity.getClass(), id);
-            dataManager.remove(metadata, entity, id);
-            indexManager.remove(metadata, entity, id);
-
-            // fire PostRemove events
-            fireJPAEventListeners(metadata, entity, PostRemove.class);
-        } catch (Exception e) {
-            throw new PersistenceException(e.getMessage());
-        }
-    }
-
-    /*
+	/*
      * (non-Javadoc)
      * 
      * @see javax.persistence.EntityManager#find(java.lang.Class,
      * java.lang.Object)
      */
     @Override
-    public final <T> T find(Class<T> entityClass, Object primaryKey) {
-        if (!sessionless && closed) {
+    public final <E> E find(Class<E> entityClass, Object primaryKey) {
+        if (closed) {
             throw new PersistenceException("EntityManager already closed.");
         }
         if (primaryKey == null) {
             throw new IllegalArgumentException("primaryKey value must not be null.");
         }
-
-        T t = null;
-        t = findInCache(entityClass, primaryKey);
-        if (null != t) {
-            log.debug("@Entity " + entityClass.getName() + " for id:" + primaryKey + " is found in cache.");
-            return t;
+        
+        E e = null;
+        e = findInCache(entityClass, primaryKey);
+        if (null != e) {
+            log.debug(entityClass.getName() + "_" + primaryKey + " is loaded from cache!");
+            return e;
         }
-
-        EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entityClass);
-        String id = primaryKey.toString();
-
-        try {
-            T entity = dataManager.find(metadata, entityClass, id);
-            if (null != entity) {
-                saveToCache(primaryKey, entity);
-            }
-            return entity;
-        } catch (Exception e) {
-            throw new PersistenceException(e.getMessage());
-        }
+        
+        return immediateLoadAndCache (entityClass, primaryKey);        
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#merge(java.lang.Object)
-     */
-    @Override
-    public final <T> T merge(T entity) {
-        if (entity == null) {
-            throw new IllegalArgumentException("Entity must not be null.");
-        }
-
+    
+    private <E> E immediateLoadAndCache (Class<E> entityClass, Object primaryKey) {
         try {
-            EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
-
-            // fire PreUpdate events
-            fireJPAEventListeners(metadata, entity, PreUpdate.class);
-
-            dataManager.merge(metadata, entity);
-            indexManager.update(metadata, entity);
-
-            // fire PostUpdate events
-            fireJPAEventListeners(metadata, entity, PostUpdate.class);
-
-        } catch (Exception e) {
-            throw new PersistenceException(e.getMessage());
-        }
-        return entity;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#persist(java.lang.Object)
-     */
-    @Override
-    public final void persist(Object entity) {
-        if (entity == null) {
-            throw new IllegalArgumentException("Entity must not be null.");
-        }
-
-        try {
-
-            EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entity.getClass());
-
-            // fire pre-persist events
-            fireJPAEventListeners(metadata, entity, PrePersist.class);
-
-            dataManager.persist(metadata, entity);
-            indexManager.write(metadata, entity);
-
-            // fire post-persist events
-            fireJPAEventListeners(metadata, entity, PostPersist.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new PersistenceException(e.getMessage());
-        }
+        	EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
+            E e = dataManager.find(entityClass, m, primaryKey.toString());
+        	saveToCache(primaryKey, e, m.isCacheable());
+            return e;
+        } catch (Exception exp) {
+        	exp.printStackTrace();
+        	throw new PersistenceException(exp.getMessage());        	
+        }        
     }
 
     /*
@@ -239,13 +161,146 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * java.lang.Object[])
      */
     @Override
-    public final <T> List<T> find(Class<T> entityClass, Object... primaryKeys) {
-        try {
+    public final <E> List<E> find(Class<E> entityClass, Object... primaryKeys) {
+        if (closed) {
+            throw new PersistenceException("EntityManager already closed.");
+        }
+        if (primaryKeys == null) {
+            throw new IllegalArgumentException("primaryKey value must not be null.");
+        }
+        
+        if (null == primaryKeys || primaryKeys.length == 0) {
+        	return new ArrayList<E>();
+        }
+        
+        // TODO: load from cache first
+        
+    	try {
             String[] ids = Arrays.asList(primaryKeys).toArray(new String[] {});
-            EntityMetadata metadata = factory.getMetadataManager().getEntityMetadata(entityClass);
-            return dataManager.find(metadata, entityClass, ids);
+            EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
+            
+            List<E> entities = dataManager.find(entityClass, m, ids);
+            
+            // TODO: cache entities for future lookup
+            
+            return entities;
         } catch (Exception e) {
+        	e.printStackTrace();
             throw new PersistenceException(e.getMessage());
+        }
+    }
+
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#persist(java.lang.Object)
+     */
+    @Override
+    public final void remove (Object e) {
+        if (e == null) {
+            throw new IllegalArgumentException("Entity must not be null.");
+        }
+
+        try {
+
+        	// get EntityMutators
+        	List<EnhancedEntity> reachableEntities = getAllReachableEntities (e, CascadeType.REMOVE);
+        	
+        	// save each one
+        	for (EnhancedEntity o : reachableEntities) {
+        		log.debug("Removing @Entity >> " + o);
+        		
+        		EntityMetadata m = metadataManager.getEntityMetadata(o.getEntity().getClass());
+
+                // fire pre-persist events
+                fireJPAEventListeners(m, o, PreRemove.class);
+                
+                removeFromCache(o.getEntity().getClass(), o.getId());
+        		dataManager.remove(o, m);
+        		indexManager.remove (m, o.getEntity(), o.getId());
+        		
+                // fire post-persist events
+                fireJPAEventListeners(m, o, PostRemove.class);        	
+             }
+        } catch (Exception exp) {
+        	exp.printStackTrace();
+            throw new PersistenceException(exp.getMessage());
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#persist(java.lang.Object)
+     */
+    @Override
+    public final <E> E merge (E e) {
+        if (e == null) {
+            throw new IllegalArgumentException("Entity must not be null.");
+        }
+
+        try {
+
+        	// get EntityMutators
+        	List<EnhancedEntity> reachableEntities = getAllReachableEntities (e, CascadeType.MERGE);
+        	
+        	// save each one
+        	for (EnhancedEntity o : reachableEntities) {
+        		log.debug("Merging @Entity >> " + o);
+        		
+        		EntityMetadata metadata = metadataManager.getEntityMetadata(o.getEntity().getClass());
+
+                // fire pre-persist events
+                fireJPAEventListeners(metadata, o, PreUpdate.class);
+
+        		dataManager.merge(o, metadata);
+        		indexManager.update(metadata, o.getEntity());
+        		
+                // fire post-persist events
+                fireJPAEventListeners(metadata, o, PostUpdate.class);        	
+             }
+        } catch (Exception exp) {
+        	exp.printStackTrace();
+            throw new PersistenceException(exp.getMessage());
+        }
+        
+        return e;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#persist(java.lang.Object)
+     */
+    @Override
+    public final void persist(Object e) {
+        if (e == null) {
+            throw new IllegalArgumentException("Entity must not be null.");
+        }
+
+        try {
+
+        	// get EntityMutators
+        	List<EnhancedEntity> reachableEntities = getAllReachableEntities (e, CascadeType.PERSIST);
+        	
+        	// save each one
+        	for (EnhancedEntity o : reachableEntities) {
+        		log.debug("Persisting @Entity >> " + o);
+        		
+        		EntityMetadata metadata = metadataManager.getEntityMetadata(o.getEntity().getClass());
+
+                // fire pre-persist events
+                fireJPAEventListeners(metadata, o, PrePersist.class);
+
+        		dataManager.persist(o, metadata);
+        		indexManager.write(metadata, o.getEntity());
+        		
+                // fire post-persist events
+                fireJPAEventListeners(metadata, o, PostPersist.class);        	
+             }
+        } catch (Exception exp) {
+            throw new PersistenceException(exp.getMessage());
         }
     }
 
@@ -272,11 +327,6 @@ public class EntityManagerImpl implements CassandraEntityManager {
     public final void close() {
         closed = true;
         sessionCache = null;
-//		Factory must not be closed from here.         
-//        if (factory != null) {
-//            factory.close();
-//            factory = null;
-//        }
     }
 
     /*
@@ -338,7 +388,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      */
     @Override
     public final Query createQuery(String ejbqlString) {
-        return new LuceneQuery(this, ejbqlString);
+        return new LuceneQuery(this, metadataManager, ejbqlString);
     }
 
     /*
@@ -399,7 +449,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      */
     @Override
     public final boolean isOpen() {
-        return sessionless || !closed;
+        return !closed;
     }
 
     /*
@@ -460,8 +510,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * 
      * @return the metadataManager
      */
-    @Override
-    public final MetadataManager getMetadataManager() {
+    protected final MetadataManager getMetadataManager() {
         return metadataManager;
     }
 
@@ -502,7 +551,42 @@ public class EntityManagerImpl implements CassandraEntityManager {
         return persistenceUnitName;
     }
 
-    // helper methods for session-level-cache
+    /**
+     * Fire jpa event listeners.
+     * 
+     * @param metadata
+     *            the metadata
+     * @param entity
+     *            the entity
+     * @param event
+     *            the event
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    private void fireJPAEventListeners(EntityMetadata metadata, Object entity, Class<?> event) throws Exception {
+        // handle external listeners first
+        List<? extends CallbackMethod> callBackMethods = metadata.getCallbackMethods(event);
+        if (null != callBackMethods) {
+        	log.debug("Callback >> " + event.getSimpleName() + " on " + metadata.getEntityClazz().getName());
+        	for (CallbackMethod callback : callBackMethods) {
+                log.debug("Firing >> " + callback);
+                try {
+                    callback.invoke(entity);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw e;
+                }
+            }
+        }
+    }
+    
+
+	// helper methods for session-level-cache
+    public Map<Object, Object> getSessionCache () {
+    	return sessionCache;
+    }
+    
     /**
      * Find in cache.
      * 
@@ -513,13 +597,22 @@ public class EntityManagerImpl implements CassandraEntityManager {
      * 
      * @return the t
      */
-    private <T> T findInCache(Class<T> entityClass, Object id) {
-        if (null == sessionCache)
-            return null;
-
+    @SuppressWarnings("unchecked")
+	private <T> T findInCache(Class<T> entityClass, Object id) {
         String key = cacheKey(entityClass, id);
-        log.debug("Looking @Entity from cache with cachekey: " + key);
+        log.debug("Cache >> Read >> " + key);
         T o = (T) sessionCache.get(key);
+
+        // go to second-level cache
+        if (o == null) {
+            Cache c = factory.getCache(entityClass);
+            if (c != null) {
+                o = (T) c.get (key);
+                if (o != null) {
+                	log.debug("Found item in second level cache!");
+                }
+            }
+        }
         return o;
     }
 
@@ -532,12 +625,21 @@ public class EntityManagerImpl implements CassandraEntityManager {
      *            the entity
      */
     private void saveToCache(Object id, Object entity) {
-        if (null == sessionCache)
-            return;
-
+    	saveToCache (id, entity, false);
+    }
+    
+    private void saveToCache(Object id, Object entity, boolean cacheToSecondLevel) {
         String key = cacheKey(entity.getClass(), id);
-        log.debug("Putting @Entity in cache with cachekey:" + key);
+        log.debug("Cache >> Save >> " + key);
         sessionCache.put(key, entity);
+        
+		if (cacheToSecondLevel) {
+			// save to second level cache
+			Cache c = factory.getCache(entity.getClass());
+			if (c != null) {
+				c.put(key, entity);
+			}
+		}
     }
 
     /**
@@ -549,12 +651,17 @@ public class EntityManagerImpl implements CassandraEntityManager {
      *            the id
      */
     private <T> void removeFromCache(Class<T> entityClass, Object id) {
-        if (null == sessionCache)
-            return;
-
         String key = cacheKey(entityClass, id);
-        log.debug("Removing @Entity from cache with cachekey:" + key);
-        sessionCache.remove(key);
+        log.debug("Cache >> Remove >> " + key);
+        Object o = sessionCache.remove(key);
+        
+        Cache c = factory.getCache(entityClass);
+        if (c != null) {
+            Object o2 = c.remove(key);
+            if(o == null) {
+            	o = o2;
+            }
+        }
     }
 
     /**
@@ -570,34 +677,218 @@ public class EntityManagerImpl implements CassandraEntityManager {
     private String cacheKey(Class<?> clazz, Object id) {
         return clazz.getName() + "_" + id;
     }
+    
+	/**
+	 * Creates a list of all reachable objects from object "o", so that
+	 * transaction-al lock can be acquired on all objects.
+	 * 
+	 * @param o
+	 * @param cascadeType
+	 * @return
+	 */
+	public List<EnhancedEntity> getAllReachableEntities (Object o,
+			CascadeType cascadeType) {
+		Map<String, EnhancedEntity> map = new HashMap<String, EnhancedEntity>();
+		try {
+			getAllReachableEntities(o, cascadeType, map);
+		} catch (PropertyAccessException e) {
+			throw new PersistenceException(e.getMessage());
+		}
+		return new ArrayList<EnhancedEntity>(map.values());
+	}
 
-    /**
-     * Fire jpa event listeners.
-     * 
-     * @param metadata
-     *            the metadata
-     * @param entity
-     *            the entity
-     * @param event
-     *            the event
-     * 
-     * @throws Exception
-     *             the exception
-     */
-    private void fireJPAEventListeners(EntityMetadata metadata, Object entity, Class<?> event) throws Exception {
-        log.debug("Firing Callback methods on @Entity(" + entity.getClass().getName() + ") for Event(" + event.getSimpleName() + ")");
-        // handler external listeners first
-        List<? extends CallbackMethod> callBackMethods = metadata.getCallbackMethods(event);
-        if (null != callBackMethods) {
-            for (CallbackMethod callback : callBackMethods) {
-                log.debug("Firing (" + callback + ")");
-                try {
-                    callback.invoke(entity);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw e;
-                }
-            }
-        }
-    }
+	// helper method to recursively build reachable object list.
+	private void getAllReachableEntities(Object o, CascadeType cascadeType,
+			Map<String, EnhancedEntity> entities)
+			throws PropertyAccessException {
+		
+		EntityMetadata m = metadataManager.getEntityMetadata(
+				o.getClass());
+		
+		String id = PropertyAccessorHelper.getId(o, m);
+
+		// Ensure that @Id is set
+		if (null == id || id.trim().isEmpty()) {
+			throw new PersistenceException("Missing primary key >> "
+					+ m.getEntityClazz().getName() + "#"
+					+ m.getIdProperty().getName());
+		}
+		
+		// dummy name, to check if this object was processed earlier.
+		String uniqueEntityName = o.getClass().getName() + Constants.SEPARATOR
+				+ id;
+
+		// return if this entity has already been processed!
+		if (entities.containsKey(uniqueEntityName)) {
+			return;
+		}
+		entities.put(uniqueEntityName, null);
+
+		// Map to hold property-name=>foreign-entity relations
+		Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+
+		// iterate over each ToOne entities mapped to this entity.
+		for (EntityMetadata.Relation relation : m.getRelations()) {
+
+			// check for cascade
+			if (!relation.getCascades().contains(CascadeType.ALL)
+					&& !relation.getCascades().contains(cascadeType)) {
+				continue;
+			}
+
+			// target-entity
+			Class<?> targetClass = relation.getTargetEntity();
+			// mapped to this property
+			Field targetField = relation.getProperty();
+			// is it optional?
+			boolean optional = relation.isOptional();
+
+			// read value
+			Object value = PropertyAccessorHelper.getObject(o, targetField);
+
+			// if object is not null, then proceed
+			if (null != value) {
+				
+				if (relation.isUnary()) {
+					// Now since this relationship is unary, there will be a 
+					// single target object.
+					String targetId = PropertyAccessorHelper.getId(value, 
+										metadataManager.getEntityMetadata(
+												targetClass
+										));
+					
+					Set<String> foreignKeys = new HashSet<String>();
+					foreignKeys.add(targetId);
+					// put to map
+					foreignKeysMap.put(targetField.getName(), foreignKeys);
+					
+					// get all other reachable objects from object "value"
+					getAllReachableEntities(value, cascadeType, entities);
+
+				} if (relation.isCollection()) {
+					// Now since this relationship is NOT unary, there could be 
+					// many target objects, so we will fetch all of them, and 
+					// combine their Ids together. 
+
+					// Value must map to Collection interface.
+					Collection collection = (Collection) value;
+					
+					Set<String> foreignKeys = new HashSet<String>();
+					
+					for (Object o_ : collection) {
+						String targetId = PropertyAccessorHelper.getId(o_, 
+								metadataManager.getEntityMetadata(targetClass));
+						
+						foreignKeys.add(targetId);
+						// get all other reachable objects from "o_"
+						getAllReachableEntities(o_, cascadeType, entities);
+					}
+					foreignKeysMap.put(targetField.getName(), foreignKeys);
+				}
+			}
+
+			// value is null
+			else {
+				// halt, if this was a non-optional property
+				if (!optional) {
+					throw new PersistenceException("Missing "
+							+ targetClass.getName() + "." + targetField.getName());
+				}
+			}
+		}
+
+		// put to map
+		entities.put(uniqueEntityName, factory.getEnhancedEntity(o, id, foreignKeysMap));
+	}
+    
+	
+	/**
+	 * @param parent
+	 * @param foreignKeys
+	 * @param relation
+	 * @throws PropertyAccessException
+	 */
+	public void populateForeignEntities(Object containingEntity, String containingEntityId,
+			EntityMetadata.Relation relation, String... foreignKeys)
+			throws PropertyAccessException {
+		
+		if (null == foreignKeys || foreignKeys.length == 0) {
+			return;
+		}
+		
+		// target entity class
+		Class<?> foreignEntityClass = relation.getTargetEntity();
+		String foreignEntityName = foreignEntityClass.getSimpleName();
+
+		// Eagerly Caching containing entity to avoid it's own loading, 
+		// in case of target contains a reference to it. 
+		saveToCache(containingEntityId, containingEntity);
+
+		if (relation.isUnary()) {
+			// there will is just one target object
+			String foreignKey = foreignKeys[0];
+			
+			Object foreignObject = getForeignEntityOrProxy(foreignEntityName,
+					foreignEntityClass, foreignKey, relation);
+			
+			PropertyAccessorHelper.set(containingEntity,
+					relation.getProperty(), foreignObject);
+		}
+
+		else if (relation.isCollection()) {
+			// there could be multiple objects
+
+			// Cast to Collection
+			Collection<Object> foreignObjects = null;
+			if (relation.getPropertyType().equals(Set.class)) {
+				foreignObjects = new HashSet<Object>();
+			} else if (relation.getPropertyType().equals(List.class)) {
+				foreignObjects = new ArrayList<Object>();
+			}
+
+			// Iterate over keys
+			for (String foreignKey : foreignKeys) {
+				Object foreignObject = getForeignEntityOrProxy(
+						foreignEntityName, foreignEntityClass, foreignKey,
+						relation);
+				foreignObjects.add(foreignObject);
+			}
+
+			PropertyAccessorHelper.set(containingEntity, relation.getProperty(),
+					foreignObjects);
+		}
+	}
+	
+	// Helper method to load Foreign Entity/Proxy
+	private Object getForeignEntityOrProxy(String entityName,
+			Class<?> persistentClass, String foreignKey,
+			EntityMetadata.Relation relation) {
+		
+		// Check in session cache!
+		Object cached = findInCache(persistentClass, foreignKey);
+		if (cached != null) {
+			return cached;
+		}
+		
+		
+		FetchType fetch = relation.getFetchType();
+		
+		if (fetch.equals(FetchType.EAGER)) {
+			log.debug("Eagerly loading "
+					+ persistentClass.getName() + "_" + foreignKey);
+			// load target eagerly!
+			return immediateLoadAndCache (persistentClass, foreignKey);
+		} else {
+			log.debug("Proxy >> Create >> " + persistentClass.getName() + "#"
+					+ relation.getProperty().getName() + "_" + foreignKey);
+		
+			// metadata
+			EntityMetadata m = metadataManager.getEntityMetadata(persistentClass);
+			
+			return factory.getLazyEntity(entityName, persistentClass, m
+					.getReadIdentifierMethod(), m.getWriteIdentifierMethod(), foreignKey,
+					this);
+		}
+	}
+
 }

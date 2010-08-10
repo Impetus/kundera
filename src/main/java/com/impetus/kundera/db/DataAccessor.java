@@ -17,12 +17,11 @@ package com.impetus.kundera.db;
 
 import java.util.List;
 
-import com.impetus.kundera.CassandraClient;
 import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
- * Interface used to interact with Cassandra Clients. This works as a bridge
- * between Entity objects and corresponding ThrftFamily objects.
+ * Interface to define contract between @Entity and Cassandra data units.
  * 
  * @author animesh.kumar
  * @since 0.1
@@ -30,70 +29,44 @@ import com.impetus.kundera.metadata.EntityMetadata;
 public interface DataAccessor {
 
     /**
-     * Write.
+     * Write an entity to Cassandra DB
      * 
-     * @param client
-     *            the client
-     * @param metadata
-     *            the metadata
-     * @param object
-     *            the object
-     * 
+     * @param e		EnhancedEntity
+     * @param m		Metadata
      * @throws Exception
-     *             the exception
      */
-    void write(CassandraClient client, EntityMetadata metadata, Object object) throws Exception;
+    void write(EnhancedEntity e, EntityMetadata m) throws Exception;
 
     /**
-     * Read.
+     * Read an entity of type clazz with primaryKey id from Cassandra DB
      * 
-     * @param client
-     *            the client
-     * @param metadata
-     *            the metadata
-     * @param clazz
-     *            the clazz
-     * @param key
-     *            the key
-     * 
-     * @return the C
-     * 
+     * @param <E>		Generic type of Entity
+     * @param clazz		Entity class
+     * @param m			Metadata
+     * @param id		Primary Key
+     * @return
      * @throws Exception
-     *             the exception
      */
-    <C> C read(CassandraClient client, EntityMetadata metadata, Class<C> clazz, String key) throws Exception;
+    <E> E read(Class<E> clazz, EntityMetadata m, String id) throws Exception;
 
     /**
-     * Read.
+     * Reads a list of entities of type clazz with primaryKeys ids from Cassandra DB
      * 
-     * @param client
-     *            the client
-     * @param metadata
-     *            the metadata
-     * @param clazz
-     *            the clazz
-     * @param key
-     *            the key
-     * 
-     * @return the list< c>
-     * 
+     * @param <E>		Generic type of Entity
+     * @param clazz		Entity class
+     * @param m			Metadata
+     * @param ids		Primary Keys
+     * @return
      * @throws Exception
-     *             the exception
      */
-    <C> List<C> read(CassandraClient client, EntityMetadata metadata, Class<C> clazz, String... key) throws Exception;
+    <E> List<E> read(Class<E> clazz, EntityMetadata m,  String... ids) throws Exception;
 
     /**
-     * Delete.
+     * Delete an entity from Cassandra  DB
      * 
-     * @param client
-     *            the client
-     * @param metadata
-     *            the metadata
-     * @param key
-     *            the key
-     * 
+     * @param e		EnhancedEntity
+     * @param m		Metadata
      * @throws Exception
-     *             the exception
      */
-    void delete(CassandraClient client, EntityMetadata metadata, String key) throws Exception;
+    void delete(EnhancedEntity e, EntityMetadata m) throws Exception;
 }

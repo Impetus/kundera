@@ -18,9 +18,11 @@ package com.impetus.kundera.ejb;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -32,9 +34,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.CassandraClient;
+import com.impetus.kundera.cache.Cache;
+import com.impetus.kundera.cache.CacheException;
+import com.impetus.kundera.cache.CacheProvider;
+import com.impetus.kundera.cache.NonOperationalCacheProvider;
 import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
 import com.impetus.kundera.metadata.MetadataManager;
+import com.impetus.kundera.proxy.CglibEntityEnhancerFactory;
+import com.impetus.kundera.proxy.CglibLazyInitializerFactory;
+import com.impetus.kundera.proxy.EnhancedEntity;
+import com.impetus.kundera.proxy.EntityEnhancerFactory;
+import com.impetus.kundera.proxy.KunderaProxy;
+import com.impetus.kundera.proxy.LazyInitializerFactory;
 
 /**
  * The Class EntityManagerFactoryImpl.
@@ -77,6 +89,13 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     /** The client. */
     private CassandraClient client;
 
+    /** The Cache provider */
+    private CacheProvider cacheProvider;
+    
+    private EntityEnhancerFactory enhancedProxyFactory;
+    
+    private LazyInitializerFactory lazyInitializerFactory;
+    
     /**
      * A convenience constructor.
      * 
@@ -134,9 +153,15 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         reader.addAnnotationDiscoveryListeners(metadataManager);
         reader.read();
 
+        metadataManager.build();
+        
+        enhancedProxyFactory = new CglibEntityEnhancerFactory();
+        lazyInitializerFactory = new CglibLazyInitializerFactory();
+        
         log.info("EntityManagerFactoryImpl loaded in " + (System.currentTimeMillis() - start) + "ms.");
     }
 
+    
     /**
      * Load properties.
      * 
@@ -189,23 +214,14 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
 			throw new IllegalArgumentException("Mandatory property missing 'kundera.keyspace'");
 		}
         
-		// sessionless
-        String sessionless_ = (String) props.get("sessionless");
-        if (sessionless_ == null) {
-            sessionless = true;
-        } else {
-        	try {
-        		sessionless = Boolean.parseBoolean(sessionless_);
-        	} catch (Exception e) {
-        		throw new IllegalArgumentException("Invalid value for property 'sessionless': " + kunderaPort + ". (It should be true/false)");
-        	}
-        }
-
         // kundera.client
         String cassandraClient = (String) props.get("kundera.client");
 		if (null == cassandraClient || cassandraClient.isEmpty()) {
 			throw new IllegalArgumentException("Mandatory property missing 'kundera.client'");
 		}
+		
+		// Second level cache
+		initSecondLevelCache();
 		
 		// Instantiate the client
         try {
@@ -226,6 +242,34 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         client.connect();
     }
 
+    @SuppressWarnings("unchecked")
+	private void initSecondLevelCache() {
+    	String cacheProviderClassName = (String) props.get("kundera.cache.provider_class");
+        if (cacheProviderClassName != null) {
+            try {
+                Class<CacheProvider> cacheProviderClass = (Class<CacheProvider>) Class.forName(cacheProviderClassName);
+                cacheProvider = cacheProviderClass.newInstance();
+                cacheProvider.init(props);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (cacheProvider == null) {
+        	cacheProvider = new NonOperationalCacheProvider();
+        }
+        log.info("Initialized second-level cache. Provider: " + cacheProvider.getClass());
+    }
+    
+    public Cache getCache(Class<?> entity) {
+        try {
+            String cacheName = metadataManager.getEntityMetadata(entity).getEntityClazz().getName();
+            return cacheProvider.createCache(cacheName);
+        } catch (CacheException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    
     /**
      * Gets the metadata manager.
      * 
@@ -244,6 +288,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     public final void close() {
         closed = true;
         client.shutdown();
+        cacheProvider.shutdown();
     }
 
     /*
@@ -253,7 +298,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      */
     @Override
     public final EntityManager createEntityManager() {
-        return new EntityManagerImpl(this, client, sessionless);
+        return new EntityManagerImpl(this, client);
     }
 
     /*
@@ -264,9 +309,28 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      */
     @Override
     public final EntityManager createEntityManager(Map map) {
-        return new EntityManagerImpl(this, client, sessionless);
+        return new EntityManagerImpl(this, client);
     }
 
+    public EnhancedEntity getEnhancedEntity (Object entity, String id, 
+			Map<String, Set<String>> foreignKeyMap) {
+    	return enhancedProxyFactory.getProxy(entity, id, foreignKeyMap);
+    }
+
+    public KunderaProxy getLazyEntity (String entityName,
+			Class<?> persistentClass,
+			Method getIdentifierMethod, Method setIdentifierMethod, String id,
+			EntityManagerImpl em) {
+    	return lazyInitializerFactory.getProxy(
+    			entityName, 
+    			persistentClass,  
+    			getIdentifierMethod, 
+    			setIdentifierMethod, 
+				id, 
+				em);
+    }
+
+    
     /*
      * (non-Javadoc)
      * 

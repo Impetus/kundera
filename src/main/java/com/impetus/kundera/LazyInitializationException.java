@@ -15,34 +15,9 @@
  */
 package com.impetus.kundera;
 
-import java.util.List;
+public class LazyInitializationException extends RuntimeException {
 
-import javax.persistence.EntityManager;
-
-/**
- * The Interface CassandraEntityManager.
- * 
- * @author animesh.kumar
- */
-public interface CassandraEntityManager extends EntityManager {
-
-    /**
-     * Find.
-     * 
-     * @param entityClass
-     *            the entity class
-     * @param primaryKey
-     *            the primary key
-     * 
-     * @return the list< t>
-     */
-    public <T> List<T> find(Class<T> entityClass, Object... primaryKey);
-
-    /**
-     * Gets the client.
-     * 
-     * @return the client
-     */
-    CassandraClient getClient();
-
+	public LazyInitializationException (String m) {
+		super(m);
+	}
 }

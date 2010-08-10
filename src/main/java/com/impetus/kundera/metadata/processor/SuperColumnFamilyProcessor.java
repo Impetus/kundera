@@ -82,14 +82,21 @@ public class SuperColumnFamilyProcessor extends AbstractEntityFieldProcessor {
         // scan for fields
         for (Field f : clazz.getDeclaredFields()) {
 
+        	// if @Id
             if (f.isAnnotationPresent(Id.class)) {
                 LOG.debug(f.getName() + " => Id");
                 metadata.setIdProperty(f);
-            } else if (f.isAnnotationPresent(SuperColumn.class)) {
+                populateIdAccessorMethods (metadata, clazz, f);
+            } 
+            // if @SuperColumn
+            else if (f.isAnnotationPresent(SuperColumn.class)) {
                 SuperColumn sc = f.getAnnotation(SuperColumn.class);
                 String superColumnName = sc.column();
-
-                String columnName = getValidJPAColumn(clazz, f);
+                
+                String columnName = getValidJPAColumnName(clazz, f);
+                if (null == columnName) {
+                	continue;
+                }
                 LOG.debug(f.getName() + " => Column:" + columnName + ", SuperColumn:" + superColumnName);
 
                 EntityMetadata.SuperColumn superColumn = metadata.getSuperColumn(superColumnName);

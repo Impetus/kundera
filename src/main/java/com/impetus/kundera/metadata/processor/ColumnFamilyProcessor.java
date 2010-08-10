@@ -80,18 +80,20 @@ public class ColumnFamilyProcessor extends AbstractEntityFieldProcessor {
         // scan for fields
         for (Field f : clazz.getDeclaredFields()) {
 
+        	// if @Id
             if (f.isAnnotationPresent(Id.class)) {
                 LOG.debug(f.getName() + " => Id");
                 metadata.setIdProperty(f);
+                populateIdAccessorMethods (metadata, clazz, f);
             }
 
+            // if any valid JPA annotation?
             else {
-                String name = getValidJPAColumn(clazz, f);
+                String name = getValidJPAColumnName(clazz, f);
                 if (null != name) {
                     metadata.addColumn(name, metadata.new Column(name, f));
                 }
             }
-
         }
     }
 }

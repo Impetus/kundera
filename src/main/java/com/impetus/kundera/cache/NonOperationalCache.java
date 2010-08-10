@@ -13,36 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera;
-
-import java.util.List;
-
-import javax.persistence.EntityManager;
+package com.impetus.kundera.cache;
 
 /**
- * The Interface CassandraEntityManager.
+ * NonOperational Cache implementation.
  * 
  * @author animesh.kumar
+ * 
  */
-public interface CassandraEntityManager extends EntityManager {
+public class NonOperationalCache implements Cache {
 
-    /**
-     * Find.
-     * 
-     * @param entityClass
-     *            the entity class
-     * @param primaryKey
-     *            the primary key
-     * 
-     * @return the list< t>
-     */
-    public <T> List<T> find(Class<T> entityClass, Object... primaryKey);
+	@Override
+	public int size() {
+		return 0;
+	}
 
-    /**
-     * Gets the client.
-     * 
-     * @return the client
-     */
-    CassandraClient getClient();
+	@Override
+	public void put(Object key, Object value) {
+	}
+
+	@Override
+	public boolean remove(Object key) {
+		return true;
+	}
+
+	@Override
+	public void clear() {
+
+	}
+
+	@Override
+	public Object get(Object key) {
+		return null;
+	}
 
 }

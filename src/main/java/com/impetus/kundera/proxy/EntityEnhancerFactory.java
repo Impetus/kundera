@@ -13,36 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera;
+package com.impetus.kundera.proxy;
 
-import java.util.List;
-
-import javax.persistence.EntityManager;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * The Interface CassandraEntityManager.
+ * Interface EntityEnhancerFactory
  * 
  * @author animesh.kumar
+ *
  */
-public interface CassandraEntityManager extends EntityManager {
+public interface EntityEnhancerFactory {
 
-    /**
-     * Find.
-     * 
-     * @param entityClass
-     *            the entity class
-     * @param primaryKey
-     *            the primary key
-     * 
-     * @return the list< t>
-     */
-    public <T> List<T> find(Class<T> entityClass, Object... primaryKey);
-
-    /**
-     * Gets the client.
-     * 
-     * @return the client
-     */
-    CassandraClient getClient();
-
+	/**
+	 * Get EnhancedEntity class which proxies @Entity object 
+	 * 
+	 * @param entity
+	 * @param id
+	 * @param foreignKeyMap
+	 * @return
+	 */
+	public EnhancedEntity getProxy(final Object entity, final String id,
+			final Map<String, Set<String>> foreignKeyMap);
 }

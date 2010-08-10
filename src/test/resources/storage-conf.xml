@@ -142,6 +142,12 @@
         
     </Keyspace>
 		<Keyspace Name="Blog">
+		<ColumnFamily CompareWith="UTF8Type" Name="Person"/>
+		<ColumnFamily CompareWith="UTF8Type" Name="Department"/>
+		<ColumnFamily CompareWith="UTF8Type" Name="Employee"/>
+		<ColumnFamily CompareWith="UTF8Type" Name="Profile"/>
+		<ColumnFamily CompareWith="UTF8Type" Name="Addresses"/>
+		
 		<ColumnFamily CompareWith="UTF8Type" Name="Authors"/>
 		<ColumnFamily ColumnType="Super" CompareWith="UTF8Type" CompareSubcolumnsWith="UTF8Type" Name="Posts"/>
 

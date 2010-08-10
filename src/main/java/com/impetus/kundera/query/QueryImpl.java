@@ -26,6 +26,7 @@ import javax.persistence.TemporalType;
 import org.apache.commons.lang.NotImplementedException;
 
 import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.metadata.MetadataManager;
 
 /**
  * The Class QueryImpl.
@@ -34,11 +35,8 @@ import com.impetus.kundera.ejb.EntityManagerImpl;
  */
 public abstract class QueryImpl extends KunderaQuery implements Query {
 
-    /** The cem. */
-    private EntityManagerImpl cem;
-
     /** The query. */
-    private String query;
+    protected String query;
 
     /**
      * Instantiates a new query impl.
@@ -48,21 +46,10 @@ public abstract class QueryImpl extends KunderaQuery implements Query {
      * @param query
      *            the query
      */
-    public QueryImpl(EntityManagerImpl cem, String query) {
-        super(cem);
-        this.cem = cem;
+    public QueryImpl(EntityManagerImpl em, MetadataManager metadataManager, String query) {
+        super(em, metadataManager);
         this.query = query;
-
         parse();
-    }
-
-    /**
-     * Gets the entity manager.
-     * 
-     * @return the entity manager
-     */
-    public EntityManagerImpl getEntityManager() {
-        return cem;
     }
 
     /**

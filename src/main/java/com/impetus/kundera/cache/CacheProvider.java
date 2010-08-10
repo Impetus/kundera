@@ -13,36 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera;
+package com.impetus.kundera.cache;
 
-import java.util.List;
-
-import javax.persistence.EntityManager;
+import java.util.Map;
 
 /**
- * The Interface CassandraEntityManager.
+ * CacheProvider
  * 
  * @author animesh.kumar
+ *
  */
-public interface CassandraEntityManager extends EntityManager {
+public interface CacheProvider {
 
     /**
-     * Find.
-     * 
-     * @param entityClass
-     *            the entity class
-     * @param primaryKey
-     *            the primary key
-     * 
-     * @return the list< t>
+     * Called once to load up the CacheManager.
      */
-    public <T> List<T> find(Class<T> entityClass, Object... primaryKey);
+    void init(Map<?, ?> properties) throws CacheException;
 
     /**
-     * Gets the client.
+     * Create cache for a given name
      * 
-     * @return the client
+     * @param name
+     * @return
+     * @throws CacheException
      */
-    CassandraClient getClient();
+    Cache createCache(String name) throws CacheException;
+
+    /**
+     * Shutdown cache
+     */
+    void shutdown();
 
 }

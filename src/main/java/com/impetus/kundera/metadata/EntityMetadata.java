@@ -23,6 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.CascadeType;
+import javax.persistence.FetchType;
+
 import com.impetus.kundera.ejb.event.CallbackMethod;
 
 /**
@@ -46,6 +49,9 @@ public final class EntityMetadata {
 
     /** field that keeps row identifier. */
     private Field idProperty;
+    
+    private Method readIdentifierMethod;
+    private Method writeIdentifierMethod;
 
     /** columnMeta map. */
     private Map<String, Column> columnsMap = new HashMap<String, Column>();
@@ -71,7 +77,17 @@ public final class EntityMetadata {
     /** The callback methods map. */
     private Map<Class<?>, List<? extends CallbackMethod>> callbackMethodsMap = new HashMap<Class<?>, List<? extends CallbackMethod>>();
 
-    /**
+    /** Relationship map, key=>property name, value=>relation*/
+    private Map<String, Relation> relationsMap = new HashMap<String, Relation>();
+    
+    /** Cacheable? */
+    private boolean cacheable = false; // default is to not set second-level cache
+    
+	public static enum ForeignKey {
+		ONE_TO_ONE, ONE_TO_MANY, MANY_TO_ONE, MANY_TO_MANY
+	};
+
+	/**
      * Instantiates a new metadata.
      * 
      * @param entityClazz
@@ -168,6 +184,34 @@ public final class EntityMetadata {
     }
 
     /**
+	 * @return the readIdentifierMethod
+	 */
+	public Method getReadIdentifierMethod() {
+		return readIdentifierMethod;
+	}
+
+	/**
+	 * @param readIdentifierMethod the readIdentifierMethod to set
+	 */
+	public void setReadIdentifierMethod(Method readIdentifierMethod) {
+		this.readIdentifierMethod = readIdentifierMethod;
+	}
+
+	/**
+	 * @return the writeIdentifierMethod
+	 */
+	public Method getWriteIdentifierMethod() {
+		return writeIdentifierMethod;
+	}
+
+	/**
+	 * @param writeIdentifierMethod the writeIdentifierMethod to set
+	 */
+	public void setWriteIdentifierMethod(Method writeIdentifierMethod) {
+		this.writeIdentifierMethod = writeIdentifierMethod;
+	}
+
+	/**
      * Gets the columns map.
      * 
      * @return the columns map
@@ -279,6 +323,18 @@ public final class EntityMetadata {
         indexPrperties.add(index);
     }
 
+    public void addRelation (String property, Relation relation) {
+    	relationsMap.put(property, relation);
+    }
+    
+    public Relation getRelation (String property) {
+        return relationsMap.get(property);
+    }
+
+    public List<Relation> getRelations () {
+    	return new ArrayList<Relation>(relationsMap.values());
+    }
+    
     /**
      * Gets the index properties.
      * 
@@ -375,36 +431,110 @@ public final class EntityMetadata {
     public List<? extends CallbackMethod> getCallbackMethods(Class<?> event) {
         return this.callbackMethodsMap.get(event);
     }
+    
+    /**
+	 * @return the cacheable
+	 */
+	public boolean isCacheable() {
+		return cacheable;
+	}
 
-    /*
+	/**
+	 * @param cacheable the cacheable to set
+	 */
+	public void setCacheable(boolean cacheable) {
+		this.cacheable = cacheable;
+	}
+
+	/*
      * (non-Javadoc)
      * 
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("EntityMetadata [entityClazz=");
-        builder.append(entityClazz);
-        builder.append(", type=");
-        builder.append(type);
-        builder.append(", columnFamilyName=");
-        builder.append(columnFamilyName);
-        builder.append(", keyspaceName=");
-        builder.append(keyspaceName);
-        builder.append(", indexName=");
-        builder.append(indexName);
-        builder.append(", idProperty=");
-        builder.append(idProperty);
-        builder.append(", indexBoost=");
-        builder.append(indexBoost);
-        builder.append(", columnsMap=");
-        builder.append(columnsMap);
-        builder.append(", superColumnsMap=");
-        builder.append(superColumnsMap);
-        builder.append(", indexPrperties=");
-        builder.append(indexPrperties);
-        builder.append("]");
+    	int start = 0;
+    	StringBuilder builder = new StringBuilder();
+    	builder.append(entityClazz.getName() + " (\n");
+    	//builder.append("EntityMetadata [\n");
+
+        //builder.append("\tentity:" + entityClazz.getName() + ",\n");
+        builder.append("\tType: " + type + ",\n");
+        builder.append("\tColumnFamily: " + columnFamilyName + ", \n" );
+        builder.append("\tKeyspace: " + keyspaceName + ",\n");
+        builder.append("\tId: " + idProperty.getName() + ",\n");
+        builder.append("\tReadIdMethod: " + readIdentifierMethod.getName() + ",\n");
+        builder.append("\tWriteIdMethod: " + writeIdentifierMethod.getName() + ",\n");
+        builder.append("\tCacheable: " + cacheable + ",\n");
+        
+        if (!columnsMap.isEmpty()) {
+			builder.append("\tColumns (");
+			for (Column col : columnsMap.values()) {
+				if (start++ != 0) {
+					builder.append(", ");
+				}
+				builder.append(col.getName());
+			}
+			builder.append("),\n");
+		}
+		
+		if (!superColumnsMap.isEmpty()) {
+			builder.append("\tSuperColumns (\n");
+			for (SuperColumn col : superColumnsMap.values()) {
+				builder.append("\t\t" + col.getName() + "(");
+
+				start = 0;
+				for (Column c : col.getColumns()) {
+					if (start++ != 0) {
+						builder.append(", ");
+					}
+					builder.append(c.getName());
+				}
+				builder.append(")\n");
+			}
+			builder.append("\t),\n");
+		}
+        
+		if (!indexPrperties.isEmpty()) {
+	        //builder.append("\tIndexName: " + indexName + ",\n");
+	        //builder.append("\tIndexBoost: " + indexBoost + ",\n");
+	        
+	        builder.append("\tIndexes (");
+			start = 0;
+			for (PropertyIndex index : indexPrperties) {
+				if (start++ != 0) {
+					builder.append(", ");
+				}
+				builder.append(index.getName());
+			}
+			builder.append("),\n");
+		}
+		
+		if (!callbackMethodsMap.isEmpty()) {
+			builder.append("\tListeners (\n");
+			for (Map.Entry<Class<?>, List<? extends CallbackMethod>> entry : 
+				callbackMethodsMap.entrySet()){
+				String key = entry.getKey().getSimpleName();
+				for (CallbackMethod cbm : entry.getValue()) {
+					builder.append("\t\t" + key + ": " + cbm + "\n");
+				}
+			}
+			builder.append("\t)\n");
+		}
+		
+		if (!relationsMap.isEmpty()) {
+			builder.append("\tRelation (\n");
+			for (Relation rel : relationsMap.values()) {
+				builder.append("\t\t" + rel.getTargetEntity().getName() + "#" + rel.getProperty().getName());
+				builder.append(" (" + rel.getCascades());
+				builder.append(", " + rel.getType());
+				builder.append(", " + rel.fetchType);
+				builder.append(")\n");
+			}
+			builder.append("\t)\n");
+		}
+        
+        builder.append(")");
         return builder.toString();
     }
 
@@ -450,22 +580,6 @@ public final class EntityMetadata {
          */
         public Field getField() {
             return field;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#toString()
-         */
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append("Column [field=");
-            builder.append(field);
-            builder.append(", name=");
-            builder.append(name);
-            builder.append("]");
-            return builder.toString();
         }
     }
 
@@ -521,22 +635,6 @@ public final class EntityMetadata {
          */
         public void addColumn(String name, Field field) {
             columns.add(new Column(name, field));
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#toString()
-         */
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append("SuperColumn [name=");
-            builder.append(name);
-            builder.append(", columns=");
-            builder.append(columns);
-            builder.append("]");
-            return builder.toString();
         }
     }
 
@@ -615,24 +713,6 @@ public final class EntityMetadata {
          */
         public void setBoost(float boost) {
             this.boost = boost;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#toString()
-         */
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append("PropertyIndex [name=");
-            builder.append(name);
-            builder.append(", property=");
-            builder.append(property);
-            builder.append(", boost=");
-            builder.append(boost);
-            builder.append("]");
-            return builder.toString();
         }
     }
 
@@ -720,21 +800,12 @@ public final class EntityMetadata {
             method.invoke(clazz.newInstance(), new Object[] { entity });
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#toString()
-         */
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append("ExternalCallBackMethod [clazz=");
-            builder.append(clazz.getName());
-            builder.append(", method=");
-            builder.append(method.getName());
-            builder.append("]");
-            return builder.toString();
-        }
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append(clazz.getName() + "." + method.getName());
+			return builder.toString();
+		}
     }
 
     /**
@@ -769,21 +840,103 @@ public final class EntityMetadata {
             method.invoke(entity, new Object[] {});
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#toString()
-         */
         @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append("InternalCallBackMethod [clazz=");
-            builder.append(getEntityClazz().getName());
-            builder.append(", method=");
-            builder.append(method.getName());
-            builder.append("]");
-            return builder.toString();
-        }
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append(entityClazz.getName() + "." + method.getName());
+			return builder.toString();
+		}
     }
+    
+	public final class Relation {
 
+		private Field property;
+		private Class<?> targetEntity;
+		private Class<?> propertyType;
+		private FetchType fetchType;
+		private List<CascadeType> cascades;
+		private boolean optional;
+		private String mappedBy;
+		private ForeignKey type;
+
+		public Relation(Field property, Class<?> targetEntity, Class<?> propertyType,
+				FetchType fetchType, List<CascadeType> cascades,
+				boolean optional, String mappedBy, ForeignKey type) {
+			super();
+			this.property = property;
+			this.targetEntity = targetEntity;
+			this.propertyType = propertyType;
+			this.fetchType = fetchType;
+			this.cascades = cascades;
+			this.optional = optional;
+			this.mappedBy = mappedBy;
+			this.type = type;
+		}
+
+		/**
+		 * @return the property
+		 */
+		public Field getProperty() {
+			return property;
+		}
+
+		/**
+		 * @return the targetEntity
+		 */
+		public Class<?> getTargetEntity() {
+			return targetEntity;
+		}
+
+		/**
+		 * @return the propertyType
+		 */
+		public Class<?> getPropertyType() {
+			return propertyType;
+		}
+
+		/**
+		 * @return the fetchType
+		 */
+		public FetchType getFetchType() {
+			return fetchType;
+		}
+
+		/**
+		 * @return the cascades
+		 */
+		public List<CascadeType> getCascades() {
+			return cascades;
+		}
+
+		/**
+		 * @return the optional
+		 */
+		public boolean isOptional() {
+			return optional;
+		}
+
+		/**
+		 * @return the mappedBy
+		 */
+		public String getMappedBy() {
+			return mappedBy;
+		}
+
+		/**
+		 * @return the type
+		 */
+		public ForeignKey getType() {
+			return type;
+		}
+		
+		public boolean isUnary() {
+			return type.equals(ForeignKey.ONE_TO_ONE)
+					|| type.equals(ForeignKey.MANY_TO_ONE);
+		}
+		
+		public boolean isCollection() {
+			return type.equals(ForeignKey.ONE_TO_MANY)
+					|| type.equals(ForeignKey.MANY_TO_MANY);
+		}
+	}
 }

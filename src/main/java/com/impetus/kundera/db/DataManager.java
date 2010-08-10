@@ -17,156 +17,112 @@ package com.impetus.kundera.db;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.impetus.kundera.db.accessor.ColumnFamilyDataAccessor;
 import com.impetus.kundera.db.accessor.SuperColumnFamilyDataAccessor;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
- * The Class DataManager.
+ * This class handles all DB related requests.
  * 
  * @author animesh.kumar
  */
 public class DataManager {
 
-    /** The Constant log. */
-    private static final Log log = LogFactory.getLog(EntityManagerImpl.class);
-
     /** instance of DataAccessors. */
-    private DataAccessor dataAccessorForColumnFamily;
+    private DataAccessor accessorCF;
 
     /** The data accessor for super column family. */
-    private DataAccessor dataAccessorForSuperColumnFamily;
-
-    /** The em. */
-    private EntityManagerImpl em;
+    private DataAccessor accessorSCF;
 
     /**
      * The Constructor.
      * 
      * @param em
-     *            the em
+     *            the EntityManager
      */
     public DataManager(EntityManagerImpl em) {
-        super();
-        this.em = em;
-        dataAccessorForColumnFamily = new ColumnFamilyDataAccessor();
-        dataAccessorForSuperColumnFamily = new SuperColumnFamilyDataAccessor();
+        accessorCF = new ColumnFamilyDataAccessor(em);
+        accessorSCF = new SuperColumnFamilyDataAccessor(em);
     }
 
     /**
-     * Persist.
+     * Persist an instance of EnhancedEntity
      * 
-     * @param metadata
-     *            the metadata
-     * @param entity
-     *            the entity
-     * 
+     * @param e		EnhancedEntity
+     * @param m		Metadata
      * @throws Exception
-     *             the exception
      */
-    public final void persist(EntityMetadata metadata, Object entity) throws Exception {
-        getDataAccessor(metadata).write(em.getClient(), metadata, entity);
+    public final void persist(EnhancedEntity e, EntityMetadata m) throws Exception {
+        getDataAccessor(m).write(e, m);
     }
 
     /**
-     * Merge.
+     * Merge an instance of EnhancedEntity
      * 
-     * @param metadata
-     *            the metadata
-     * @param entity
-     *            the entity
-     * 
-     * @return the t
-     * 
+     * @param e		EnhancedEntity
+     * @param m		Metadata
      * @throws Exception
-     *             the exception
      */
-    public <T> T merge(EntityMetadata metadata, T entity) throws Exception {
-        // TODO Improve this bit. should we not implement some merge on client
-        // level?
-        getDataAccessor(metadata).write(em.getClient(), metadata, entity);
-        return entity;
+    public EnhancedEntity merge(EnhancedEntity e, EntityMetadata m) throws Exception {
+        // 	TODO: improve this part. 
+    	//	Should we not implement some merge on client level?
+    	getDataAccessor(m).write(e, m);
+        return e;
     }
 
     /**
-     * Find.
+     * Remove an instance of EnhancedEntity
      * 
-     * @param metadata
-     *            the metadata
-     * @param clazz
-     *            the clazz
-     * @param key
-     *            the key
-     * 
-     * @return the t
-     * 
+     * @param e		EnhancedEntity
+     * @param m		Metadata
      * @throws Exception
-     *             the exception
      */
-    public final <T> T find(EntityMetadata metadata, Class<T> clazz, String key) throws Exception {
-        return getDataAccessor(metadata).read(em.getClient(), metadata, clazz, key);
+    public final void remove(EnhancedEntity e, EntityMetadata m) throws Exception {
+    	getDataAccessor(m).delete(e, m);
     }
 
     /**
-     * Find.
+     * Find entity of type clazz with primaryKey id
      * 
-     * @param metadata
-     *            the metadata
-     * @param clazz
-     *            the clazz
-     * @param keys
-     *            the keys
-     * 
-     * @return the list< t>
-     * 
+     * @param <E>		Generics of entity
+     * @param clazz		Entity class
+     * @param id		Entity primary key
+     * @param m			Metadata
+     * @return			Entity Object
      * @throws Exception
-     *             the exception
      */
-    public final <T> List<T> find(EntityMetadata metadata, Class<T> clazz, String... keys) throws Exception {
-        return getDataAccessor(metadata).read(em.getClient(), metadata, clazz, keys);
+    public final <E> E find(Class<E> clazz, EntityMetadata m, String id) throws Exception {
+    	return getDataAccessor(m).read(clazz, m, id);
     }
 
     /**
-     * Removes the.
+     * Find a list of entities of type clazz with primaryKeys ids
      * 
-     * @param metadata
-     *            the metadata
-     * @param entity
-     *            the entity
-     * @param key
-     *            the key
-     * 
+     * @param <E>		Generics of entity
+     * @param clazz		Entity class
+     * @param key		Entity primary keys
+     * @param m			Metadata
+     * @return			Entity Object
      * @throws Exception
-     *             the exception
      */
-    public final void remove(EntityMetadata metadata, Object entity, String key) throws Exception {
-        getDataAccessor(metadata).delete(em.getClient(), metadata, key);
+    public final <E> List<E> find(Class<E> clazz, EntityMetadata m, String... ids) throws Exception {
+        return getDataAccessor(m).read(clazz, m, ids);
     }
 
-    /**
-     * Gets the data accessor.
-     * 
-     * @param metadata
-     *            the metadata
-     * 
-     * @return the data accessor
-     */
-    private DataAccessor getDataAccessor(EntityMetadata metadata) {
-        EntityMetadata.Type type = metadata.getType();
-        if (type.equals(EntityMetadata.Type.COLUMN_FAMILY)) {
-            log.debug("DataAccessor for @Entity " + metadata.getEntityClazz().getName() + " is " + dataAccessorForColumnFamily.getClass().getName());
-            return dataAccessorForColumnFamily;
-        }
+    // Helper method to find appropriate DataAccessor
+	private DataAccessor getDataAccessor(EntityMetadata metadata) {
 
-        else if (type.equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY)) {
-            log.debug("DataAccessor for @Entity " + metadata.getEntityClazz().getName() + " is " + dataAccessorForSuperColumnFamily.getClass().getName());
-            return dataAccessorForSuperColumnFamily;
-        }
+		EntityMetadata.Type type = metadata.getType();
+		if (type.equals(EntityMetadata.Type.COLUMN_FAMILY)) {
+			return accessorCF;
+		}
 
-        return null;
-    }
+		else if (type.equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY)) {
+			return accessorSCF;
+		}
+
+		return null;
+	}
 }

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
@@ -27,172 +28,207 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.CassandraClient;
-import com.impetus.kundera.db.DataAccessor;
+import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
- * The Class ColumnDataAccessor.
+ * DataAccessor implementation for Cassandra's ColumnFamily
  * 
  * @author animesh.kumar
  * @since 0.1
  */
-public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> implements DataAccessor {
+public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 
-    /** log for this class. */
-    private static Log log = LogFactory.getLog(ColumnFamilyDataAccessor.class);
+	/** log for this class. */
+	private static Log log = LogFactory.getLog(ColumnFamilyDataAccessor.class);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seecom.impetus.kundera.db.DataAccessor#delete(com.impetus.kundera.
-     * CassandraClient, com.impetus.kundera.metadata.EntityMetadata,
-     * java.lang.String)
-     */
-    @Override
-    public void delete(CassandraClient client, EntityMetadata metadata, String key) throws Exception {
-        log.debug("Deleting from cassandra @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + key);
-        client.delete(metadata.getKeyspaceName(), metadata.getColumnFamilyName(), key);
-    }
+	public ColumnFamilyDataAccessor(EntityManagerImpl em) {
+		super(em);
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.db.DataAccessor#read(com.impetus.kundera.CassandraClient
-     * , com.impetus.kundera.metadata.EntityMetadata, java.lang.Class,
-     * java.lang.String)
-     */
-    @Override
-    public <C> C read(CassandraClient client, EntityMetadata metadata, Class<C> clazz, String key) throws Exception {
-        log.debug("Reading from cassandra @Entity[" + clazz.getName() + "] for key:" + key);
-        List<Column> columns = client.loadColumns(metadata.getKeyspaceName(), metadata.getColumnFamilyName(), key);
+	/*
+	 * @see com.impetus.kundera.db.DataAccessor#read(java.lang.Class,
+	 * com.impetus.kundera.metadata.EntityMetadata, java.lang.String)
+	 */
+	@Override
+	public <E> E read(Class<E> clazz, EntityMetadata m, String id)
+			throws Exception {
+		log.debug("Cassandra >> Read >> " + clazz.getName() + "_" + id);
 
-        if (null == columns || columns.size() == 0) {
-            throw new PersistenceException("Entity not found for key: " + key);
-        }
+		String keyspace = m.getKeyspaceName();
+		String family = m.getColumnFamilyName();
 
-        BaseDataAccessor<Column>.CassandraRow tf = this.new CassandraRow(key, metadata.getColumnFamilyName(), columns);
-        return cassandraRowToEntity(clazz, metadata, tf);
-    }
+		// load column from DB
+		List<Column> columns = getEntityManager().getClient().loadColumns(
+				keyspace, family, id);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.db.DataAccessor#read(com.impetus.kundera.CassandraClient
-     * , com.impetus.kundera.metadata.EntityMetadata, java.lang.Class,
-     * java.lang.String[])
-     */
-    @Override
-    public <C> List<C> read(CassandraClient client, EntityMetadata metadata, Class<C> clazz, String... keys) throws Exception {
-        log.debug("Reading from cassandra @Entity[" + clazz.getName() + "] for keys:" + Arrays.asList(keys));
-        List<C> entities = new ArrayList<C>();
+		// check for empty
+		if (null == columns || columns.size() == 0) {
+			throw new PersistenceException("Entity not found for id: " + id);
+		}
 
-        Map<String, List<Column>> map = client.loadColumns(metadata.getKeyspaceName(), metadata.getColumnFamilyName(), keys);
-        for (Map.Entry<String, List<Column>> entry : map.entrySet()) {
-            if (entry.getValue().size() == 0) {
-                continue;
-            }
-            BaseDataAccessor<Column>.CassandraRow tf = this.new CassandraRow(entry.getKey(), metadata.getColumnFamilyName(), entry.getValue());
-            entities.add(cassandraRowToEntity(clazz, metadata, tf));
-        }
-        return entities;
-    }
+		E e = fromThriftRow(clazz, m, this.new ThriftRow(id, family, columns));
+		return e;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.db.DataAccessor#write(com.impetus.kundera.CassandraClient
-     * , com.impetus.kundera.metadata.EntityMetadata, java.lang.Object)
-     */
-    @Override
-    public void write(CassandraClient client, EntityMetadata metadata, Object object) throws Exception {
-        log.debug("Writing to cassandra @Entity[" + object.getClass().getName() + "] " + object);
-        BaseDataAccessor<Column>.CassandraRow tf = entityToCassandraRow(metadata, object);
+	/*
+	 * @see com.impetus.kundera.db.DataAccessor#read(java.lang.Class,
+	 * com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
+	 */
+	@Override
+	public <E> List<E> read(Class<E> clazz, EntityMetadata m, String... ids)
+			throws Exception {
+		log.debug("Cassandra >> Read >> " + clazz.getName() + "_("
+				+ Arrays.asList(ids) + ")");
+		
+		String keyspace = m.getKeyspaceName();
+		String family = m.getColumnFamilyName();
 
-        client.writeColumns(metadata.getKeyspaceName(), tf.getColumnFamilyName(), // columnFamily
-                tf.getKey(), // row id
-                tf.getColumns().toArray(new Column[0]) // list of columns
-                );
-    }
+		List<E> entities = new ArrayList<E>();
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.db.accessor.BaseDataAccessor#cassandraRowToEntity
-     * (java.lang.Class, com.impetus.kundera.metadata.EntityMetadata,
-     * com.impetus.kundera.db.accessor.BaseDataAccessor.CassandraRow)
-     */
-    @Override
-    protected <C> C cassandraRowToEntity(Class<C> clazz, EntityMetadata metadata, BaseDataAccessor<Column>.CassandraRow cassandraRow) throws Exception {
+		// load columns from DB
+		Map<String, List<Column>> map = getEntityManager().getClient()
+				.loadColumns(keyspace, family, ids);
 
-        // Instantiate a new instance
-        C target = clazz.newInstance();
+		// Iterate and populate entities
+		for (Map.Entry<String, List<Column>> entry : map.entrySet()) {
 
-        // Set row-key. Note: @Id is always String.
-        PropertyAccessorHelper.set(target, metadata.getIdProperty(), cassandraRow.getKey());
+			String id = entry.getKey();
+			List<Column> columns = entry.getValue();
 
-        // Iterate through each column
-        for (Column thriftColumn : cassandraRow.getColumns()) {
-            String colName = PropertyAccessorFactory.STRING.fromBytes(thriftColumn.getName());
-            byte[] bytes = thriftColumn.getValue();
+			if (entry.getValue().size() == 0) {
+				log.debug("@Entity not found for id: " + id);
+				continue;
+			}
 
-            EntityMetadata.Column column = metadata.getColumn(colName);
-            try {
-                if (null != bytes) {
-                    PropertyAccessorHelper.set(target, column.getField(), bytes);
-                }
-            } catch (PropertyAccessException e) {
-                log.warn(e.getMessage());
-            }
-        }
-        return target;
+			E e = fromThriftRow(clazz, m, this.new ThriftRow(id, family,
+					columns));
+			entities.add(e);
+		}
 
-    }
+		return entities;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.db.accessor.BaseDataAccessor#entityToCassandraRow
-     * (com.impetus.kundera.metadata.EntityMetadata, java.lang.Object)
-     */
-    @Override
-    protected BaseDataAccessor<Column>.CassandraRow entityToCassandraRow(EntityMetadata metadata, Object bean) throws Exception {
+	/*
+	 * @seecom.impetus.kundera.db.DataAccessor#write(com.impetus.kundera.proxy.
+	 * EnhancedEntity, com.impetus.kundera.metadata.EntityMetadata)
+	 */
+	@Override
+	public void write(EnhancedEntity e, EntityMetadata m) throws Exception {
+		String entityName = e.getEntity().getClass().getName();
+		String id = e.getId();
 
-        // Timestamp to use in thrift column objects
-        long timestamp = System.currentTimeMillis();
+		log.debug("Cassandra >> Write >> " + entityName + "_" + id);
 
-        BaseDataAccessor<Column>.CassandraRow cassandraRow = this.new CassandraRow();
+		String keyspace = m.getKeyspaceName();
+		String family = m.getColumnFamilyName();
 
-        // Sets column-family name
-        cassandraRow.setColumnFamilyName(metadata.getColumnFamilyName());
+		BaseDataAccessor<Column>.ThriftRow tf = toThriftRow(e, m);
 
-        // Sets row key
-        cassandraRow.setKey(PropertyAccessorHelper.getId(bean, metadata));
+		getEntityManager().getClient().writeColumns(keyspace, family, // columnFamily
+				tf.getId(), // row id
+				tf.getColumns().toArray(new Column[0]) // list of columns
+				);
+	}
 
-        List<Column> columns = new ArrayList<Column>();
+	// Helper method to convert ThriftRow to @Entity
+	private <E> E fromThriftRow(Class<E> clazz, EntityMetadata m,
+			BaseDataAccessor<Column>.ThriftRow cr) throws Exception {
 
-        // Iterate through each column-meta and populate that with field values
-        for (EntityMetadata.Column column : metadata.getColumnsAsList()) {
-            Field field = column.getField();
-            String name = column.getName();
-            try {
-                byte[] value = PropertyAccessorHelper.get(bean, field);
-                columns.add(new Column(PropertyAccessorFactory.STRING.toBytes(name), value, timestamp));
-            } catch (PropertyAccessException e) {
-                log.warn(e.getMessage());
-            }
+		// Instantiate a new instance
+		E e = clazz.newInstance();
 
-        }
-        cassandraRow.setColumns(columns);
-        return cassandraRow;
-    }
+		// Set row-key. Note: @Id is always String.
+		PropertyAccessorHelper.set(e, m.getIdProperty(), cr.getId());
+
+		// Iterate through each column
+		for (Column c : cr.getColumns()) {
+			String name = PropertyAccessorFactory.STRING.fromBytes(c.getName());
+			byte[] value = c.getValue();
+
+			if (null == value) {
+				continue;
+			}
+
+			// check if this is a property?
+			EntityMetadata.Column column = m.getColumn(name);
+			if (null == column) {
+				// it could be some relational column
+				EntityMetadata.Relation relation = m.getRelation(name);
+
+				if (relation == null) {
+					continue;
+				}
+
+				String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
+				Set<String> keys = deserializeKeys (foreignKeys);
+				getEntityManager().populateForeignEntities(e, cr.getId(),
+						relation, keys.toArray(new String[0]));
+			}
+
+			else {
+				try {
+					PropertyAccessorHelper.set(e, column.getField(), value);
+				} catch (PropertyAccessException pae) {
+					log.warn(pae.getMessage());
+				}
+			}
+		}
+
+		return e;
+	}
+
+	// Helper method to convert @Entity to ThriftRow
+	private BaseDataAccessor<Column>.ThriftRow toThriftRow(EnhancedEntity e,
+			EntityMetadata m) throws Exception {
+
+		// timestamp to use in thrift column objects
+		long timestamp = System.currentTimeMillis();
+
+		BaseDataAccessor<Column>.ThriftRow cr = this.new ThriftRow();
+
+		// column-family name
+		cr.setColumnFamilyName(m.getColumnFamilyName());
+
+		// id
+		cr.setId(e.getId());
+
+		List<Column> columns = new ArrayList<Column>();
+
+		// Iterate through each column-meta and populate that with field values
+		for (EntityMetadata.Column column : m.getColumnsAsList()) {
+			Field field = column.getField();
+			String name = column.getName();
+			try {
+				byte[] value = PropertyAccessorHelper.get(e.getEntity(), field);
+				columns.add(new Column(PropertyAccessorFactory.STRING
+						.toBytes(name), value, timestamp));
+			} catch (PropertyAccessException exp) {
+				log.warn(exp.getMessage());
+			}
+
+		}
+
+		// add foreign keys
+		for (Map.Entry<String, Set<String>> entry : e.getForeignKeysMap()
+				.entrySet()) {
+			String property = entry.getKey();
+			Set<String> foreignKeys = entry.getValue();
+
+			String keys = serializeKeys (foreignKeys);
+			if (null != keys) {
+				columns.add(new Column(PropertyAccessorFactory.STRING
+						.toBytes(property), PropertyAccessorFactory.STRING
+						.toBytes(keys), timestamp));
+			}
+		}
+
+		cr.setColumns(columns);
+		return cr;
+	}
 
 }

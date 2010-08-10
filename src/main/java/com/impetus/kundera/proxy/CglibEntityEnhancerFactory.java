@@ -13,36 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera;
+package com.impetus.kundera.proxy;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import javax.persistence.EntityManager;
+import net.sf.cglib.proxy.Enhancer;
 
 /**
- * The Interface CassandraEntityManager.
+ * Implementation of EntityEnhancerFactory using cglib library
  * 
  * @author animesh.kumar
+ *
  */
-public interface CassandraEntityManager extends EntityManager {
+public class CglibEntityEnhancerFactory implements EntityEnhancerFactory {
 
-    /**
-     * Find.
-     * 
-     * @param entityClass
-     *            the entity class
-     * @param primaryKey
-     *            the primary key
-     * 
-     * @return the list< t>
-     */
-    public <T> List<T> find(Class<T> entityClass, Object... primaryKey);
+	@Override
+	public EnhancedEntity getProxy(Object entity, String id,
+			Map<String, Set<String>> foreignKeyMap) {
 
-    /**
-     * Gets the client.
-     * 
-     * @return the client
-     */
-    CassandraClient getClient();
+		Enhancer e = new Enhancer();
+		e.setSuperclass(entity.getClass());
+		e.setInterfaces(new Class[] { EnhancedEntity.class });
+		e.setCallback(new CglibEnhancedEntity(entity, id, foreignKeyMap));
+		return (EnhancedEntity) e.create();
+	}
 
 }
