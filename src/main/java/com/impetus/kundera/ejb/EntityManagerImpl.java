@@ -775,11 +775,11 @@ public class EntityManagerImpl implements CassandraEntityManager {
 		String foreignEntityName = foreignEntityClass.getSimpleName();
 
 		// Eagerly Caching containing entity to avoid it's own loading, 
-		// in case of target contains a reference to it. 
+		// in case the target contains a reference to containing entity. 
 		saveToCache(containingEntityId, containingEntity);
 
 		if (relation.isUnary()) {
-			// there will is just one target object
+			// there is just one target object
 			String foreignKey = foreignKeys[0];
 			
 			Object foreignObject = getForeignEntityOrProxy(foreignEntityName,
@@ -790,7 +790,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 		}
 
 		else if (relation.isCollection()) {
-			// there could be multiple objects
+			// there could be multiple target objects
 
 			// Cast to Collection
 			Collection<Object> foreignObjects = null;
