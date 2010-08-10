@@ -23,14 +23,34 @@ package com.impetus.kundera.cache;
  */
 public class CacheException extends Exception {
 	
+	/**
+	 * Instantiates a new cache exception.
+	 * 
+	 * @param s
+	 *            the s
+	 */
 	public CacheException(String s) {
 		super(s);
 	}
 
+	/**
+	 * Instantiates a new cache exception.
+	 * 
+	 * @param s
+	 *            the s
+	 * @param e
+	 *            the e
+	 */
 	public CacheException(String s, Throwable e) {
 		super(s, e);
 	}
 
+	/**
+	 * Instantiates a new cache exception.
+	 * 
+	 * @param e
+	 *            the e
+	 */
 	public CacheException(Throwable e) {
 		super(e);
 	}

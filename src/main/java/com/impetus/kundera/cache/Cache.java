@@ -24,34 +24,43 @@ package com.impetus.kundera.cache;
  */
 public interface Cache {
 
+	/**
+	 * Size.
+	 * 
+	 * @return the int
+	 */
 	int size();
 
     /**
-     * Get an item from the cache.
-     * 
-     * @param o
-     * @return
-     */
+	 * Get an item from the cache.
+	 * 
+	 * @param key
+	 *            the key
+	 * @return the object
+	 */
     Object get (Object key);
 
     /**
-     * Add an item to the cache
-     * 
-     * @param o
-     * @param o1
-     */
+	 * Add an item to the cache.
+	 * 
+	 * @param key
+	 *            the key
+	 * @param value
+	 *            the value
+	 */
     void put(Object key, Object value);
 
     /**
-     * Removes an item from cache
-     * 
-     * @param o
-     * @return
-     */
+	 * Removes an item from cache.
+	 * 
+	 * @param key
+	 *            the key
+	 * @return true, if successful
+	 */
     boolean remove(Object key);
 
     /**
-     * Clears cache 
-     */
+	 * Clears cache.
+	 */
     void clear();
 }

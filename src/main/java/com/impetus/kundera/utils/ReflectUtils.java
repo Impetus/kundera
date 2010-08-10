@@ -104,12 +104,14 @@ public class ReflectUtils {
     }
 
     /**
-     * Loads class with className using classLoader
-     * 
-     * @param className
-     * @param classLoader
-     * @return
-     */
+	 * Loads class with className using classLoader.
+	 * 
+	 * @param className
+	 *            the class name
+	 * @param classLoader
+	 *            the class loader
+	 * @return the class
+	 */
     public static Class<?> classForName (String className, ClassLoader classLoader) {
         try {
             Class<?> c = null;

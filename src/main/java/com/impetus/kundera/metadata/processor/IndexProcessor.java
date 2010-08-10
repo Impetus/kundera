@@ -34,47 +34,47 @@ import com.impetus.kundera.metadata.MetadataProcessor;
  */
 public class IndexProcessor implements MetadataProcessor {
 
-    /** the log used by this class. */
-    private static Log log = LogFactory.getLog(IndexProcessor.class);
+	/** the log used by this class. */
+	private static Log log = LogFactory.getLog(IndexProcessor.class);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-     * com.impetus.kundera.metadata.EntityMetadata)
-     */
-    public final void process(final Class<?> clazz, EntityMetadata metadata) {
+	/*
+	 * @see
+	 * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
+	 * com.impetus.kundera.metadata.EntityMetadata)
+	 */
+	public final void process(final Class<?> clazz, EntityMetadata metadata) {
 
-        metadata.setIndexName(clazz.getSimpleName());
+		metadata.setIndexName(clazz.getSimpleName());
 
-        Index idx = clazz.getAnnotation(Index.class);
-        if (null != idx) {
-            boolean isIndexable = idx.index();
-            metadata.setIndexable(isIndexable);
+		Index idx = clazz.getAnnotation(Index.class);
+		if (null != idx) {
+			boolean isIndexable = idx.index();
+			metadata.setIndexable(isIndexable);
 
-            if (!isIndexable) {
-                log.debug("@Entity " + clazz.getName() + " will not be indexed.");
-                return;
-            }
-        }
+			if (!isIndexable) {
+				log.debug("@Entity " + clazz.getName()
+						+ " will not be indexed.");
+				return;
+			}
+		}
 
-        log.debug("Processing @Entity " + clazz.getName() + " for Indexes.");
+		log.debug("Processing @Entity " + clazz.getName() + " for Indexes.");
 
-        // scan for fields
-        for (Field f : clazz.getDeclaredFields()) {
-            if (f.isAnnotationPresent(Column.class)) {
-                Column c = f.getAnnotation(Column.class);
-                String alias = c.name().trim();
-                if (alias.isEmpty()) {
-                    alias = f.getName();
-                }
+		// scan for fields
+		for (Field f : clazz.getDeclaredFields()) {
+			if (f.isAnnotationPresent(Column.class)) {
+				Column c = f.getAnnotation(Column.class);
+				String alias = c.name().trim();
+				if (alias.isEmpty()) {
+					alias = f.getName();
+				}
 
-                metadata.addIndexProperty(metadata.new PropertyIndex(f, alias));
+				metadata.addIndexProperty(metadata.new PropertyIndex(f, alias));
 
-            } else if (f.isAnnotationPresent(Id.class)) {
-                metadata.addIndexProperty(metadata.new PropertyIndex(f, f.getName()));
-            }
-        }
-    }
+			} else if (f.isAnnotationPresent(Id.class)) {
+				metadata.addIndexProperty(metadata.new PropertyIndex(f, f
+						.getName()));
+			}
+		}
+	}
 }

@@ -34,66 +34,67 @@ import com.impetus.kundera.metadata.EntityMetadata;
  */
 public class ColumnFamilyProcessor extends AbstractEntityFieldProcessor {
 
-    /** The Constant log. */
-    private static final Log LOG = LogFactory.getLog(ColumnFamilyProcessor.class);
+	/** The Constant log. */
+	private static final Log LOG = LogFactory
+			.getLog(ColumnFamilyProcessor.class);
 
-    /** The em. */
-    private EntityManagerFactoryImpl em;
+	/** The em. */
+	private EntityManagerFactoryImpl em;
 
-    /**
-     * Instantiates a new column family processor.
-     * 
-     * @param em
-     *            the em
-     */
-    public ColumnFamilyProcessor(EntityManagerFactory em) {
-        this.em = (EntityManagerFactoryImpl) em;
-    }
+	/**
+	 * Instantiates a new column family processor.
+	 * 
+	 * @param em
+	 *            the em
+	 */
+	public ColumnFamilyProcessor(EntityManagerFactory em) {
+		this.em = (EntityManagerFactoryImpl) em;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-     * com.impetus.kundera.metadata.EntityMetadata)
-     */
-    @Override
-    public final void process(Class<?> clazz, EntityMetadata metadata) {
+	/*
+	 * @see
+	 * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
+	 * com.impetus.kundera.metadata.EntityMetadata)
+	 */
+	@Override
+	public final void process(Class<?> clazz, EntityMetadata metadata) {
 
-        if (!clazz.isAnnotationPresent(ColumnFamily.class)) {
-            return;
-        }
+		if (!clazz.isAnnotationPresent(ColumnFamily.class)) {
+			return;
+		}
 
-        LOG.debug("Processing @Entity(" + clazz.getName() + ") for ColumnFamily.");
+		LOG.debug("Processing @Entity(" + clazz.getName()
+				+ ") for ColumnFamily.");
 
-        metadata.setType(EntityMetadata.Type.COLUMN_FAMILY);
+		metadata.setType(EntityMetadata.Type.COLUMN_FAMILY);
 
-        ColumnFamily cf = clazz.getAnnotation(ColumnFamily.class);
+		ColumnFamily cf = clazz.getAnnotation(ColumnFamily.class);
 
-        // set columnFamily
-        metadata.setColumnFamilyName(cf.family());
+		// set columnFamily
+		metadata.setColumnFamilyName(cf.family());
 
-        // set keyspace
-        String keyspace = cf.keyspace().length() != 0 ? cf.keyspace() : em.getKeyspace();
-        metadata.setKeyspaceName(keyspace);
+		// set keyspace
+		String keyspace = cf.keyspace().length() != 0 ? cf.keyspace() : em
+				.getKeyspace();
+		metadata.setKeyspaceName(keyspace);
 
-        // scan for fields
-        for (Field f : clazz.getDeclaredFields()) {
+		// scan for fields
+		for (Field f : clazz.getDeclaredFields()) {
 
-        	// if @Id
-            if (f.isAnnotationPresent(Id.class)) {
-                LOG.debug(f.getName() + " => Id");
-                metadata.setIdProperty(f);
-                populateIdAccessorMethods (metadata, clazz, f);
-            }
+			// if @Id
+			if (f.isAnnotationPresent(Id.class)) {
+				LOG.debug(f.getName() + " => Id");
+				metadata.setIdProperty(f);
+				populateIdAccessorMethods(metadata, clazz, f);
+			}
 
-            // if any valid JPA annotation?
-            else {
-                String name = getValidJPAColumnName(clazz, f);
-                if (null != name) {
-                    metadata.addColumn(name, metadata.new Column(name, f));
-                }
-            }
-        }
-    }
+			// if any valid JPA annotation?
+			else {
+				String name = getValidJPAColumnName(clazz, f);
+				if (null != name) {
+					metadata.addColumn(name, metadata.new Column(name, f));
+				}
+			}
+		}
+	}
 }

@@ -44,13 +44,15 @@ public class LuceneQuery extends QueryImpl implements Query {
     String luceneQuery;
 
     /**
-     * Instantiates a new lucene query.
-     * 
-     * @param em
-     *            the em
-     * @param jpaQuery
-     *            the jpa query
-     */
+	 * Instantiates a new lucene query.
+	 * 
+	 * @param em
+	 *            the em
+	 * @param metadataManager
+	 *            the metadata manager
+	 * @param jpaQuery
+	 *            the jpa query
+	 */
     public LuceneQuery(EntityManagerImpl em, MetadataManager metadataManager, String jpaQuery) {
         super(em, metadataManager, jpaQuery);
     }
@@ -65,11 +67,7 @@ public class LuceneQuery extends QueryImpl implements Query {
         this.luceneQuery = luceneQuery;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.query.QueryImpl#getResultList()
-     */
+    /* @see com.impetus.kundera.query.QueryImpl#getResultList() */
     @Override
     public List<?> getResultList() {
     	log.debug("JPA Query: " + query);
@@ -89,11 +87,7 @@ public class LuceneQuery extends QueryImpl implements Query {
         return getEntityManager().find(getEntityClass(), entityIds.toArray());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.query.QueryImpl#setMaxResults(int)
-     */
+    /* @see com.impetus.kundera.query.QueryImpl#setMaxResults(int) */
     @Override
     public Query setMaxResults(int maxResult) {
         this.maxResult = maxResult;

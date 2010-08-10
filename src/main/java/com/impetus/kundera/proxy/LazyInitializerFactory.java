@@ -24,24 +24,30 @@ import com.impetus.kundera.ejb.EntityManagerImpl;
 /**
  * Interface LazyInitializerFactory
  * 
- * Creates Lazily loadable proxies for @Entity classes
+ * Creates Lazily loadable proxies for @Entity classes.
  * 
  * @author animesh.kumar
- *
  */
 public interface LazyInitializerFactory {
 
 	/**
-	 * Get Lazily loadable @Entity proxy
+	 * Get Lazily loadable @Entity proxy.
 	 * 
 	 * @param entityName
+	 *            the entity name
 	 * @param persistentClass
+	 *            the persistent class
 	 * @param getIdentifierMethod
+	 *            the get identifier method
 	 * @param setIdentifierMethod
+	 *            the set identifier method
 	 * @param id
+	 *            the id
 	 * @param em
-	 * @return
+	 *            the em
+	 * @return the proxy
 	 * @throws PersistenceException
+	 *             the persistence exception
 	 */
 	KunderaProxy getProxy(final String entityName,
 			final Class<?> persistentClass, 

@@ -23,17 +23,31 @@ import java.util.Set;
 import net.sf.cglib.proxy.InvocationHandler;
 
 /**
- * Implementation of EnhancedEntity using cglib library
+ * Implementation of EnhancedEntity using cglib library.
  * 
  * @author animesh.kumar
- *
  */
 public class CglibEnhancedEntity implements InvocationHandler, EnhancedEntity {
 
+	/** The entity. */
 	private Object entity;
+
+	/** The id. */
 	private String id;
+
+	/** The map. */
 	private Map<String, Set<String>> map = new HashMap<String, Set<String>>();
 
+	/**
+	 * Instantiates a new cglib enhanced entity.
+	 * 
+	 * @param entity
+	 *            the entity
+	 * @param id
+	 *            the id
+	 * @param foreignKeysMap
+	 *            the foreign keys map
+	 */
 	public CglibEnhancedEntity(final Object entity, final String id,
 			final Map<String, Set<String>> foreignKeysMap) {
 		this.entity = entity;
@@ -41,39 +55,44 @@ public class CglibEnhancedEntity implements InvocationHandler, EnhancedEntity {
 		this.map = foreignKeysMap;
 	}
 
+	/*
+	 * @see net.sf.cglib.proxy.InvocationHandler#invoke(java.lang.Object,
+	 * java.lang.reflect.Method, java.lang.Object[])
+	 */
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args)
 			throws Throwable {
 
 		String methodName = method.getName();
 		int params = args.length;
-		
-		if ( params == 0 && "getForeignKeysMap".equals(methodName)) {
+
+		if (params == 0 && "getForeignKeysMap".equals(methodName)) {
 			return getForeignKeysMap();
-		}
-		else if ( params == 0 && "toString".equals(methodName)) {
+		} else if (params == 0 && "toString".equals(methodName)) {
 			return toString();
-		}
-		else if ( params == 0 && "getEntity".equals(methodName)) {
+		} else if (params == 0 && "getEntity".equals(methodName)) {
 			return getEntity();
-		}
-		else if ( params == 0 && "getId".equals(methodName)) {
+		} else if (params == 0 && "getId".equals(methodName)) {
 			return getId();
 		}
-		
+
 		return method.invoke(entity, args);
 	}
 
+	/* @see com.impetus.kundera.proxy.EnhancedEntity#getForeignKeysMap() */
 	public Map<String, Set<String>> getForeignKeysMap() {
 		return map;
 	}
 
+	/* @see com.impetus.kundera.proxy.EnhancedEntity#getEntity() */
 	@Override
 	public Object getEntity() {
 		return entity;
 	}
 
 	/**
+	 * Gets the id.
+	 * 
 	 * @return the id
 	 */
 	@Override
@@ -94,6 +113,5 @@ public class CglibEnhancedEntity implements InvocationHandler, EnhancedEntity {
 		builder.append("]");
 		return builder.toString();
 	}
-	
-	
+
 }

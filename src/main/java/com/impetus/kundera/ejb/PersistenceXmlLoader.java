@@ -44,11 +44,25 @@ import org.xml.sax.SAXParseException;
  *
  */
 public final class PersistenceXmlLoader {
+	
+	/** The log. */
 	private static Log log = LogFactory.getLog( PersistenceXmlLoader.class );
 
+	/**
+	 * Instantiates a new persistence xml loader.
+	 */
 	private PersistenceXmlLoader() {
 	}
 
+	/**
+	 * Gets the document.
+	 * 
+	 * @param configURL
+	 *            the config url
+	 * @return the document
+	 * @throws Exception
+	 *             the exception
+	 */
 	private static Document getDocument (URL configURL) throws Exception {
 		InputStream is = null;
 		if (configURL != null) {
@@ -88,10 +102,30 @@ public final class PersistenceXmlLoader {
 		return doc;
 	}
 
+	/**
+	 * Find persistence units.
+	 * 
+	 * @param url
+	 *            the url
+	 * @return the list
+	 * @throws Exception
+	 *             the exception
+	 */
 	public static List<PersistenceMetadata> findPersistenceUnits (URL url) throws Exception {
         return findPersistenceUnits (url, PersistenceUnitTransactionType.JTA);
     }
 
+    /**
+	 * Find persistence units.
+	 * 
+	 * @param url
+	 *            the url
+	 * @param defaultTransactionType
+	 *            the default transaction type
+	 * @return the list
+	 * @throws Exception
+	 *             the exception
+	 */
     public static List<PersistenceMetadata> findPersistenceUnits (URL url, 
     		PersistenceUnitTransactionType defaultTransactionType) throws Exception {
 		
@@ -114,6 +148,15 @@ public final class PersistenceXmlLoader {
 		return units;
 	}
 
+	/**
+	 * Parses the persistence unit.
+	 * 
+	 * @param top
+	 *            the top
+	 * @return the persistence metadata
+	 * @throws Exception
+	 *             the exception
+	 */
 	private static PersistenceMetadata parsePersistenceUnit(Element top)
 			throws Exception {
 		PersistenceMetadata metadata = new PersistenceMetadata();
@@ -173,6 +216,13 @@ public final class PersistenceXmlLoader {
 		return metadata;
 	}
 
+	/**
+	 * Gets the transaction type.
+	 * 
+	 * @param elementContent
+	 *            the element content
+	 * @return the transaction type
+	 */
 	public static PersistenceUnitTransactionType getTransactionType(String elementContent) {
 		
 		if ( elementContent == null || elementContent.isEmpty() )  {
@@ -189,34 +239,68 @@ public final class PersistenceXmlLoader {
 		}
 	}
 
+	/**
+	 * The Class ErrorLogger.
+	 */
 	public static class ErrorLogger implements ErrorHandler {
+		
+		/** The file. */
 		private String file;
+		
+		/** The errors. */
 		private List errors;
 
+		/**
+		 * Instantiates a new error logger.
+		 * 
+		 * @param file
+		 *            the file
+		 * @param errors
+		 *            the errors
+		 */
 		ErrorLogger(String file, List errors) {
 			this.file = file;
 			this.errors = errors;
 		}
 
+		/* @see org.xml.sax.ErrorHandler#error(org.xml.sax.SAXParseException) */
 		public void error(SAXParseException error) {
 			log.error( "Error parsing XML: " + file + '(' + error.getLineNumber() + ") " + error.getMessage() );
 			errors.add( error );
 		}
 
+		/* @see org.xml.sax.ErrorHandler#fatalError(org.xml.sax.SAXParseException) */
 		public void fatalError(SAXParseException error) {
 			log.error( "Error parsing XML: " + file + '(' + error.getLineNumber() + ") " + error.getMessage() );
 			errors.add( error );
 		}
 
+		/* @see org.xml.sax.ErrorHandler#warning(org.xml.sax.SAXParseException) */
 		public void warning(SAXParseException warn) {
 			log.warn( "Warning parsing XML: " + file + '(' + warn.getLineNumber() + ") " + warn.getMessage() );
 		}
 	}
 
+	/**
+	 * Checks if is empty.
+	 * 
+	 * @param str
+	 *            the str
+	 * @return true, if is empty
+	 */
 	private static boolean isEmpty (String str) {
 		return null == str || str.isEmpty();
 	}
 	
+	/**
+	 * Gets the element content.
+	 * 
+	 * @param element
+	 *            the element
+	 * @return the element content
+	 * @throws Exception
+	 *             the exception
+	 */
 	public static String getElementContent(final Element element)
 			throws Exception {
 		return getElementContent(element, null);
@@ -224,10 +308,14 @@ public final class PersistenceXmlLoader {
 	
 	/**
 	 * Get the content of the given element.
-	 *
-	 * @param element	The element to get the content for.
-	 * @param defaultStr The default to return when there is no content.
+	 * 
+	 * @param element
+	 *            The element to get the content for.
+	 * @param defaultStr
+	 *            The default to return when there is no content.
 	 * @return The content of the element or the default.
+	 * @throws Exception
+	 *             the exception
 	 */
 	private static String getElementContent(Element element, String defaultStr)
 			throws Exception {

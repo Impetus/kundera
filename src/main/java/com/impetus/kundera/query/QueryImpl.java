@@ -35,176 +35,142 @@ import com.impetus.kundera.metadata.MetadataManager;
  */
 public abstract class QueryImpl extends KunderaQuery implements Query {
 
-    /** The query. */
-    protected String query;
+	/** The query. */
+	protected String query;
 
-    /**
-     * Instantiates a new query impl.
-     * 
-     * @param cem
-     *            the cem
-     * @param query
-     *            the query
-     */
-    public QueryImpl(EntityManagerImpl em, MetadataManager metadataManager, String query) {
-        super(em, metadataManager);
-        this.query = query;
-        parse();
-    }
+	/**
+	 * Instantiates a new query impl.
+	 * 
+	 * @param em
+	 *            the em
+	 * @param metadataManager
+	 *            the metadata manager
+	 * @param query
+	 *            the query
+	 */
+	public QueryImpl(EntityManagerImpl em, MetadataManager metadataManager,
+			String query) {
+		super(em, metadataManager);
+		this.query = query;
+		parse();
+	}
 
-    /**
-     * Gets the jPA query.
-     * 
-     * @return the jPA query
-     */
-    public String getJPAQuery() {
-        return query;
-    }
+	/**
+	 * Gets the jPA query.
+	 * 
+	 * @return the jPA query
+	 */
+	public String getJPAQuery() {
+		return query;
+	}
 
-    /**
-     * Parses the.
-     */
-    private void parse() {
-        KunderaQueryParser parser = new KunderaQueryParser(this, query);
-        parser.parse();
-        postParsingInit();
-    }
+	/**
+	 * Parses the.
+	 */
+	private void parse() {
+		KunderaQueryParser parser = new KunderaQueryParser(this, query);
+		parser.parse();
+		postParsingInit();
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#executeUpdate()
-     */
-    @Override
-    public int executeUpdate() {
-        throw new NotImplementedException("TODO");
-    }
+	/* @see javax.persistence.Query#executeUpdate() */
+	@Override
+	public int executeUpdate() {
+		throw new NotImplementedException("TODO");
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#getResultList()
-     */
-    @Override
-    public List<?> getResultList() {
-        throw new NotImplementedException("TODO");
-    }
+	/* @see javax.persistence.Query#getResultList() */
+	@Override
+	public List<?> getResultList() {
+		throw new NotImplementedException("TODO");
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#getSingleResult()
-     */
-    @Override
-    public Object getSingleResult() {
-        throw new NotImplementedException("TODO");
-    }
+	/* @see javax.persistence.Query#getSingleResult() */
+	@Override
+	public Object getSingleResult() {
+		throw new NotImplementedException("TODO");
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#setFirstResult(int)
-     */
-    @Override
-    public Query setFirstResult(int startPosition) {
-        throw new NotImplementedException("TODO");
-    }
+	/* @see javax.persistence.Query#setFirstResult(int) */
+	@Override
+	public Query setFirstResult(int startPosition) {
+		throw new NotImplementedException("TODO");
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * javax.persistence.Query#setFlushMode(javax.persistence.FlushModeType)
-     */
-    @Override
-    public Query setFlushMode(FlushModeType flushMode) {
-        throw new NotImplementedException("TODO");
-    }
+	/*
+	 * @see
+	 * javax.persistence.Query#setFlushMode(javax.persistence.FlushModeType)
+	 */
+	@Override
+	public Query setFlushMode(FlushModeType flushMode) {
+		throw new NotImplementedException("TODO");
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#setHint(java.lang.String, java.lang.Object)
-     */
-    @Override
-    public Query setHint(String hintName, Object value) {
-        throw new NotImplementedException("TODO");
-    }
+	/* @see javax.persistence.Query#setHint(java.lang.String, java.lang.Object) */
+	@Override
+	public Query setHint(String hintName, Object value) {
+		throw new NotImplementedException("TODO");
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#setMaxResults(int)
-     */
-    @Override
-    public Query setMaxResults(int maxResult) {
-        throw new NotImplementedException("TODO");
-    }
+	/* @see javax.persistence.Query#setMaxResults(int) */
+	@Override
+	public Query setMaxResults(int maxResult) {
+		throw new NotImplementedException("TODO");
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#setParameter(java.lang.String,
-     * java.lang.Object)
-     */
-    @Override
-    public Query setParameter(String name, Object value) {
-        setParameter(name, value.toString());
-        return this;
-    }
+	/*
+	 * @see javax.persistence.Query#setParameter(java.lang.String,
+	 * java.lang.Object)
+	 */
+	@Override
+	public Query setParameter(String name, Object value) {
+		setParameter(name, value.toString());
+		return this;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#setParameter(int, java.lang.Object)
-     */
-    @Override
-    public Query setParameter(int position, Object value) {
-        throw new NotImplementedException("TODO");
-    }
+	/* @see javax.persistence.Query#setParameter(int, java.lang.Object) */
+	@Override
+	public Query setParameter(int position, Object value) {
+		throw new NotImplementedException("TODO");
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#setParameter(java.lang.String,
-     * java.util.Date, javax.persistence.TemporalType)
-     */
-    @Override
-    public Query setParameter(String name, Date value, TemporalType temporalType) {
-        throw new NotImplementedException("TODO");
-    }
+	/*
+	 * @see javax.persistence.Query#setParameter(java.lang.String,
+	 * java.util.Date, javax.persistence.TemporalType)
+	 */
+	@Override
+	public Query setParameter(String name, Date value, TemporalType temporalType) {
+		throw new NotImplementedException("TODO");
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#setParameter(java.lang.String,
-     * java.util.Calendar, javax.persistence.TemporalType)
-     */
-    @Override
-    public Query setParameter(String name, Calendar value, TemporalType temporalType) {
-        throw new NotImplementedException("TODO");
-    }
+	/*
+	 * @see javax.persistence.Query#setParameter(java.lang.String,
+	 * java.util.Calendar, javax.persistence.TemporalType)
+	 */
+	@Override
+	public Query setParameter(String name, Calendar value,
+			TemporalType temporalType) {
+		throw new NotImplementedException("TODO");
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#setParameter(int, java.util.Date,
-     * javax.persistence.TemporalType)
-     */
-    @Override
-    public Query setParameter(int position, Date value, TemporalType temporalType) {
-        throw new NotImplementedException("TODO");
-    }
+	/*
+	 * @see javax.persistence.Query#setParameter(int, java.util.Date,
+	 * javax.persistence.TemporalType)
+	 */
+	@Override
+	public Query setParameter(int position, Date value,
+			TemporalType temporalType) {
+		throw new NotImplementedException("TODO");
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#setParameter(int, java.util.Calendar,
-     * javax.persistence.TemporalType)
-     */
-    @Override
-    public Query setParameter(int position, Calendar value, TemporalType temporalType) {
-        throw new NotImplementedException("TODO");
-    }
+	/*
+	 * @see javax.persistence.Query#setParameter(int, java.util.Calendar,
+	 * javax.persistence.TemporalType)
+	 */
+	@Override
+	public Query setParameter(int position, Calendar value,
+			TemporalType temporalType) {
+		throw new NotImplementedException("TODO");
+	}
 
 }

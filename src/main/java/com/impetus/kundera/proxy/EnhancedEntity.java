@@ -28,25 +28,25 @@ import java.util.Set;
 public interface EnhancedEntity {
 
 	/**
-	 * Map to hold foreign relationships
-	 * Key=>property
-	 * Value=>Set of foreign @Entity ids
+	 * Map to hold foreign relationships Key=>property Value=>Set of foreign @Entity
+	 * ids.
 	 * 
-	 * @return
+	 * @return the foreign keys map
 	 */
 	Map<String, Set<String>> getForeignKeysMap();
 	
 	/**
-	 * @Entity that is proxied
+	 * Gets the entity.
 	 * 
-	 * @return
+	 * @return the entity
+	 * @Entity that is proxied
 	 */
 	Object getEntity ();
 
 	/**
-	 * Id of @Entity object
+	 * Id of @Entity object.
 	 * 
-	 * @return
+	 * @return the id
 	 */
 	String getId();
 }

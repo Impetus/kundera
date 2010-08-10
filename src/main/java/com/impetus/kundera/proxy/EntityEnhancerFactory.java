@@ -19,20 +19,22 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Interface EntityEnhancerFactory
+ * Interface EntityEnhancerFactory.
  * 
  * @author animesh.kumar
- *
  */
 public interface EntityEnhancerFactory {
 
 	/**
-	 * Get EnhancedEntity class which proxies @Entity object 
+	 * Get EnhancedEntity class which proxies @Entity object.
 	 * 
 	 * @param entity
+	 *            the entity
 	 * @param id
+	 *            the id
 	 * @param foreignKeyMap
-	 * @return
+	 *            the foreign key map
+	 * @return the proxy
 	 */
 	public EnhancedEntity getProxy(final Object entity, final String id,
 			final Map<String, Set<String>> foreignKeyMap);

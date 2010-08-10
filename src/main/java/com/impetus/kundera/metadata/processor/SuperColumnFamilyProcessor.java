@@ -35,78 +35,81 @@ import com.impetus.kundera.metadata.EntityMetadata;
  */
 public class SuperColumnFamilyProcessor extends AbstractEntityFieldProcessor {
 
-    /** The Constant log. */
-    private static final Log LOG = LogFactory.getLog(SuperColumnFamilyProcessor.class);
+	/** The Constant log. */
+	private static final Log LOG = LogFactory
+			.getLog(SuperColumnFamilyProcessor.class);
 
-    /** The em. */
-    private EntityManagerFactoryImpl em;
+	/** The em. */
+	private EntityManagerFactoryImpl em;
 
-    /**
-     * Instantiates a new super column family processor.
-     * 
-     * @param em
-     *            the em
-     */
-    public SuperColumnFamilyProcessor(EntityManagerFactory em) {
-        this.em = (EntityManagerFactoryImpl) em;
-    }
+	/**
+	 * Instantiates a new super column family processor.
+	 * 
+	 * @param em
+	 *            the em
+	 */
+	public SuperColumnFamilyProcessor(EntityManagerFactory em) {
+		this.em = (EntityManagerFactoryImpl) em;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-     * com.impetus.kundera.metadata.EntityMetadata)
-     */
-    @Override
-    public final void process(Class<?> clazz, EntityMetadata metadata) {
+	/*
+	 * @see
+	 * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
+	 * com.impetus.kundera.metadata.EntityMetadata)
+	 */
+	@Override
+	public final void process(Class<?> clazz, EntityMetadata metadata) {
 
-        if (!clazz.isAnnotationPresent(SuperColumnFamily.class)) {
-            return;
-        }
+		if (!clazz.isAnnotationPresent(SuperColumnFamily.class)) {
+			return;
+		}
 
-        LOG.debug("Processing @Entity " + clazz.getName() + " for SuperColumnFamily.");
+		LOG.debug("Processing @Entity " + clazz.getName()
+				+ " for SuperColumnFamily.");
 
-        metadata.setType(EntityMetadata.Type.SUPER_COLUMN_FAMILY);
+		metadata.setType(EntityMetadata.Type.SUPER_COLUMN_FAMILY);
 
-        // check for SuperColumnFamily annotation.
-        SuperColumnFamily scf = clazz.getAnnotation(SuperColumnFamily.class);
+		// check for SuperColumnFamily annotation.
+		SuperColumnFamily scf = clazz.getAnnotation(SuperColumnFamily.class);
 
-        // set columnFamily
-        metadata.setColumnFamilyName(scf.family());
+		// set columnFamily
+		metadata.setColumnFamilyName(scf.family());
 
-        // set keyspace
-        String keyspace = scf.keyspace().length() != 0 ? scf.keyspace() : em.getKeyspace();
-        metadata.setKeyspaceName(keyspace);
+		// set keyspace
+		String keyspace = scf.keyspace().length() != 0 ? scf.keyspace() : em
+				.getKeyspace();
+		metadata.setKeyspaceName(keyspace);
 
-        // scan for fields
-        for (Field f : clazz.getDeclaredFields()) {
+		// scan for fields
+		for (Field f : clazz.getDeclaredFields()) {
 
-        	// if @Id
-            if (f.isAnnotationPresent(Id.class)) {
-                LOG.debug(f.getName() + " => Id");
-                metadata.setIdProperty(f);
-                populateIdAccessorMethods (metadata, clazz, f);
-            } 
-            // if @SuperColumn
-            else if (f.isAnnotationPresent(SuperColumn.class)) {
-                SuperColumn sc = f.getAnnotation(SuperColumn.class);
-                String superColumnName = sc.column();
-                
-                String columnName = getValidJPAColumnName(clazz, f);
-                if (null == columnName) {
-                	continue;
-                }
-                LOG.debug(f.getName() + " => Column:" + columnName + ", SuperColumn:" + superColumnName);
+			// if @Id
+			if (f.isAnnotationPresent(Id.class)) {
+				LOG.debug(f.getName() + " => Id");
+				metadata.setIdProperty(f);
+				populateIdAccessorMethods(metadata, clazz, f);
+			}
+			// if @SuperColumn
+			else if (f.isAnnotationPresent(SuperColumn.class)) {
+				SuperColumn sc = f.getAnnotation(SuperColumn.class);
+				String superColumnName = sc.column();
 
-                EntityMetadata.SuperColumn superColumn = metadata.getSuperColumn(superColumnName);
-                if (null == superColumn) {
-                    superColumn = metadata.new SuperColumn(superColumnName);
-                }
-                superColumn.addColumn(columnName, f);
-                metadata.addSuperColumn(superColumnName, superColumn);
+				String columnName = getValidJPAColumnName(clazz, f);
+				if (null == columnName) {
+					continue;
+				}
+				LOG.debug(f.getName() + " => Column:" + columnName
+						+ ", SuperColumn:" + superColumnName);
 
-            }
-        }
-    }
+				EntityMetadata.SuperColumn superColumn = metadata
+						.getSuperColumn(superColumnName);
+				if (null == superColumn) {
+					superColumn = metadata.new SuperColumn(superColumnName);
+				}
+				superColumn.addColumn(columnName, f);
+				metadata.addSuperColumn(superColumnName, superColumn);
+
+			}
+		}
+	}
 }

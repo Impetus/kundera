@@ -78,11 +78,7 @@ public class ClassFileIterator implements ResourceIterator {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.classreading.ResourceIterator#next()
-     */
+    /* @see com.impetus.kundera.classreading.ResourceIterator#next() */
     public final InputStream next() {
         if (index >= files.size())
             return null;
@@ -94,11 +90,7 @@ public class ClassFileIterator implements ResourceIterator {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.classreading.ResourceIterator#close()
-     */
+    /* @see com.impetus.kundera.classreading.ResourceIterator#close() */
     public void close() {
     }
 }

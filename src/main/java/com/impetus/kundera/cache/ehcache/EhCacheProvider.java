@@ -34,22 +34,29 @@ import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 
 /**
- * Cache provider implementation using Ehcache
+ * Cache provider implementation using Ehcache.
  * 
  * @author animesh.kumar
- *
  */
 public class EhCacheProvider implements CacheProvider {
 
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(EntityManagerImpl.class);
 
+    /** The manager. */
     private CacheManager manager;
+    
+    /** The Constant NET_SF_EHCACHE_CONFIGURATION_RESOURCE_NAME. */
     private static final String NET_SF_EHCACHE_CONFIGURATION_RESOURCE_NAME = "net.sf.ehcache.configurationResourceName";
+    
+    /** The initializing. */
     private boolean initializing;
+    
+    /** The listeners. */
     private List<CacheEventListener> listeners = new ArrayList<CacheEventListener>();
 
 
+    /* @see com.impetus.kundera.cache.CacheProvider#init(java.util.Map) */
     public synchronized void init(Map properties) throws CacheException {
         if (manager != null) {
             log.warn ("Attempt to restart an already started CacheFactory. Using previously created EhCacheFactory.");
@@ -85,6 +92,13 @@ public class EhCacheProvider implements CacheProvider {
 
     }
 
+    /**
+	 * Load resource.
+	 * 
+	 * @param configurationResourceName
+	 *            the configuration resource name
+	 * @return the uRL
+	 */
     private URL loadResource(String configurationResourceName) {
         ClassLoader standardClassloader = ClassLoaderUtil.getStandardClassLoader();
         URL url = null;
@@ -105,6 +119,7 @@ public class EhCacheProvider implements CacheProvider {
         return url;
     }
     
+    /* @see com.impetus.kundera.cache.CacheProvider#createCache(java.lang.String) */
     @Override
 	public Cache createCache(String name) throws CacheException {
         if (manager == null) {
@@ -135,6 +150,7 @@ public class EhCacheProvider implements CacheProvider {
     
     }
 
+	/* @see com.impetus.kundera.cache.CacheProvider#shutdown() */
 	@Override
 	public void shutdown() {
         if (manager != null) {
@@ -143,14 +159,28 @@ public class EhCacheProvider implements CacheProvider {
         }
 	}
 
+    /**
+	 * Clear all.
+	 */
     public void clearAll() {
         manager.clearAll();
     }
 
+    /**
+	 * Gets the cache manager.
+	 * 
+	 * @return the cache manager
+	 */
     public CacheManager getCacheManager() {
         return manager;
     }
 
+    /**
+	 * Adds the default listener.
+	 * 
+	 * @param cacheEventListener
+	 *            the cache event listener
+	 */
     public void addDefaultListener(CacheEventListener cacheEventListener) {
         listeners.add(cacheEventListener);
     }

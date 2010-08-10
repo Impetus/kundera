@@ -49,10 +49,10 @@ public abstract class KunderaQuery {
     /** The INTRA pattern. */
     private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b", Pattern.CASE_INSENSITIVE);
 
-    /** The EntityManager */
+    /** The EntityManager. */
     private EntityManagerImpl em;
     
-    /** The MetadataManager */
+    /** The MetadataManager. */
     private MetadataManager metadataManager;
 
     /** The result. */
@@ -94,6 +94,8 @@ public abstract class KunderaQuery {
     }
     
     /**
+	 * Gets the entity manager.
+	 * 
 	 * @return the em
 	 */
 	public EntityManagerImpl getEntityManager () {
@@ -101,6 +103,8 @@ public abstract class KunderaQuery {
 	}
 
 	/**
+	 * Gets the metadata manager.
+	 * 
 	 * @return the metadataManager
 	 */
 	public MetadataManager getMetadataManager() {
@@ -393,11 +397,7 @@ public abstract class KunderaQuery {
             this.value = value;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#toString()
-         */
+        /* @see java.lang.Object#toString() */
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
@@ -412,21 +412,13 @@ public abstract class KunderaQuery {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#clone()
-     */
+    /* @see java.lang.Object#clone() */
     @Override
     public final Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
+    /* @see java.lang.Object#toString() */
     @Override
     public final String toString() {
         StringBuilder builder = new StringBuilder();
@@ -442,15 +434,14 @@ public abstract class KunderaQuery {
 
     // helper method
     /**
-     * Tokenize.
-     * 
-     * @param where
-     *            the where
-     * @param pattern
-     *            the pattern
-     * 
-     * @return the list< string>
-     */
+	 * Tokenize.
+	 * 
+	 * @param where
+	 *            the where
+	 * @param pattern
+	 *            the pattern
+	 * @return the list
+	 */
     private static List<String> tokenize(String where, Pattern pattern) {
         List<String> split = new ArrayList<String>();
         Matcher matcher = pattern.matcher(where);

@@ -89,11 +89,13 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     /** The client. */
     private CassandraClient client;
 
-    /** The Cache provider */
+    /** The Cache provider. */
     private CacheProvider cacheProvider;
     
+    /** The enhanced proxy factory. */
     private EntityEnhancerFactory enhancedProxyFactory;
     
+    /** The lazy initializer factory. */
     private LazyInitializerFactory lazyInitializerFactory;
     
     /**
@@ -242,6 +244,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         client.connect();
     }
 
+    /**
+	 * Inits the second level cache.
+	 */
     @SuppressWarnings("unchecked")
 	private void initSecondLevelCache() {
     	String cacheProviderClassName = (String) props.get("kundera.cache.provider_class");
@@ -260,6 +265,13 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         log.info("Initialized second-level cache. Provider: " + cacheProvider.getClass());
     }
     
+    /**
+	 * Gets the cache.
+	 * 
+	 * @param entity
+	 *            the entity
+	 * @return the cache
+	 */
     public Cache getCache(Class<?> entity) {
         try {
             String cacheName = metadataManager.getEntityMetadata(entity).getEntityClazz().getName();
@@ -279,11 +291,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         return metadataManager;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManagerFactory#close()
-     */
+    /* @see javax.persistence.EntityManagerFactory#close() */
     @Override
     public final void close() {
         closed = true;
@@ -291,32 +299,51 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         cacheProvider.shutdown();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManagerFactory#createEntityManager()
-     */
+    /* @see javax.persistence.EntityManagerFactory#createEntityManager() */
     @Override
     public final EntityManager createEntityManager() {
         return new EntityManagerImpl(this, client);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
-     */
+    /* @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map) */
     @Override
     public final EntityManager createEntityManager(Map map) {
         return new EntityManagerImpl(this, client);
     }
 
+    /**
+	 * Gets the enhanced entity.
+	 * 
+	 * @param entity
+	 *            the entity
+	 * @param id
+	 *            the id
+	 * @param foreignKeyMap
+	 *            the foreign key map
+	 * @return the enhanced entity
+	 */
     public EnhancedEntity getEnhancedEntity (Object entity, String id, 
 			Map<String, Set<String>> foreignKeyMap) {
     	return enhancedProxyFactory.getProxy(entity, id, foreignKeyMap);
     }
 
+    /**
+	 * Gets the lazy entity.
+	 * 
+	 * @param entityName
+	 *            the entity name
+	 * @param persistentClass
+	 *            the persistent class
+	 * @param getIdentifierMethod
+	 *            the get identifier method
+	 * @param setIdentifierMethod
+	 *            the set identifier method
+	 * @param id
+	 *            the id
+	 * @param em
+	 *            the em
+	 * @return the lazy entity
+	 */
     public KunderaProxy getLazyEntity (String entityName,
 			Class<?> persistentClass,
 			Method getIdentifierMethod, Method setIdentifierMethod, String id,
@@ -329,13 +356,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
 				id, 
 				em);
     }
-
     
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManagerFactory#isOpen()
-     */
+    /* @see javax.persistence.EntityManagerFactory#isOpen() */
     @Override
     public final boolean isOpen() {
         return !closed;

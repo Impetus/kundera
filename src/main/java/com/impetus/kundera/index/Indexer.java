@@ -47,18 +47,17 @@ public interface Indexer {
     void index(EntityMetadata metadata, Object object);
 
     /**
-     * Searches for an object. Note that the "query" must be in Indexer
-     * specified form.
-     * 
-     * @param start
-     *            the start
-     * @param count
-     *            the count
-     * @param query
-     *            the query
-     * 
-     * @return the list< string>
-     */
+	 * Searches for an object. Note that the "query" must be in Indexer
+	 * specified form.
+	 * 
+	 * @param query
+	 *            the query
+	 * @param start
+	 *            the start
+	 * @param count
+	 *            the count
+	 * @return the list
+	 */
     List<String> search(String query, int start, int count);
 
 }

@@ -23,25 +23,30 @@ package com.impetus.kundera.cache;
  */
 public class NonOperationalCache implements Cache {
 
+	/* @see com.impetus.kundera.cache.Cache#size() */
 	@Override
 	public int size() {
 		return 0;
 	}
 
+	/* @see com.impetus.kundera.cache.Cache#put(java.lang.Object, java.lang.Object) */
 	@Override
 	public void put(Object key, Object value) {
 	}
 
+	/* @see com.impetus.kundera.cache.Cache#remove(java.lang.Object) */
 	@Override
 	public boolean remove(Object key) {
 		return true;
 	}
 
+	/* @see com.impetus.kundera.cache.Cache#clear() */
 	@Override
 	public void clear() {
 
 	}
 
+	/* @see com.impetus.kundera.cache.Cache#get(java.lang.Object) */
 	@Override
 	public Object get(Object key) {
 		return null;

@@ -32,131 +32,112 @@ import org.apache.cassandra.thrift.Cassandra.Client;
 public interface CassandraClient {
 
     /**
-     * Write multiple columns into a column-family.
-     * 
-     * @param columnFamily
-     *            The name of the super column family to operate on
-     * @param key
-     *            The key of the row to modify
-     * @param columns
-     *            Array of columns to write
-     * @param keyspace
-     *            the keyspace
-     * 
-     * @throws Exception
-     *             The exception
-     */
+	 * Write multiple columns into a column-family.
+	 * 
+	 * @param keyspace
+	 *            the keyspace
+	 * @param columnFamily
+	 *            The name of the super column family to operate on
+	 * @param key
+	 *            The key of the row to modify
+	 * @param columns
+	 *            Array of columns to write
+	 * @throws Exception
+	 *             The exception
+	 */
     void writeColumns(String keyspace, String columnFamily, String key, Column... columns) throws Exception;
 
     /**
-     * Write multiple super-columns into a super-column-family.
-     * 
-     * @param columnFamily
-     *            The name of the super column family to operate on
-     * @param key
-     *            The key of the row to modify
-     * @param superColumns
-     *            Array of super-columns to write
-     * @param keyspace
-     *            the keyspace
-     * 
-     * @throws Exception
-     *             The exception
-     */
+	 * Write multiple super-columns into a super-column-family.
+	 * 
+	 * @param keyspace
+	 *            the keyspace
+	 * @param columnFamily
+	 *            The name of the super column family to operate on
+	 * @param key
+	 *            The key of the row to modify
+	 * @param superColumns
+	 *            Array of super-columns to write
+	 * @throws Exception
+	 *             The exception
+	 */
     void writeSuperColumns(String keyspace, String columnFamily, String key, SuperColumn... superColumns) throws Exception;
 
     /**
-     * Retrieve columns from a column-family row.
-     * 
-     * @param columnFamily
-     *            The name of the super column family to operate on
-     * @param key
-     *            The key of the row
-     * @param keyspace
-     *            the keyspace
-     * 
-     * @return A list of matching columns
-     * 
-     * @throws Exception
-     *             the exception
-     */
+	 * Retrieve columns from a column-family row.
+	 * 
+	 * @param keyspace
+	 *            the keyspace
+	 * @param columnFamily
+	 *            The name of the super column family to operate on
+	 * @param key
+	 *            The key of the row
+	 * @return A list of matching columns
+	 * @throws Exception
+	 *             the exception
+	 */
     List<Column> loadColumns(String keyspace, String columnFamily, String key) throws Exception;
 
     /**
-     * Retrieve columns from multiple rows of a column-family.
-     * 
-     * @param columnFamily
-     *            The name of the super column family to operate on
-     * @param keys
-     *            Array of row keys
-     * @param keyspace
-     *            the keyspace
-     * 
-     * @return A Map of row and corresponding list of columns.
-     * 
-     * @throws Exception
-     *             the exception
-     */
+	 * Retrieve columns from multiple rows of a column-family.
+	 * 
+	 * @param keyspace
+	 *            the keyspace
+	 * @param columnFamily
+	 *            The name of the super column family to operate on
+	 * @param keys
+	 *            Array of row keys
+	 * @return A Map of row and corresponding list of columns.
+	 * @throws Exception
+	 *             the exception
+	 */
     Map<String, List<Column>> loadColumns(String keyspace, String columnFamily, String... keys) throws Exception;
 
     /**
-     * Delete a row from either column-family or super-column-family.
-     * 
-     * @param columnFamily
-     *            The name of the super column family to operate on
-     * @param rowId
-     *            the row id
-     * @param keyspace
-     *            the keyspace
-     * 
-     * @throws Exception
-     *             the exception
-     */
+	 * Delete a row from either column-family or super-column-family.
+	 * 
+	 * @param keyspace
+	 *            the keyspace
+	 * @param columnFamily
+	 *            The name of the super column family to operate on
+	 * @param rowId
+	 *            the row id
+	 * @throws Exception
+	 *             the exception
+	 */
     void delete(String keyspace, String columnFamily, String rowId) throws Exception;
 
     /**
-     * Load super-columns from a super-column-family row.
-     * 
-     * @param columnFamily
-     *            The name of the super column family to operate on
-     * @param key
-     *            The key of the row
-     * @param superColumnNames
-     *            Array of super-column names to fetch from the row
-     * @param keyspace
-     *            the keyspace
-     * 
-     * @return A list of matching super-columns
-     * 
-     * @throws Exception
-     *             the exception
-     */
+	 * Load super-columns from a super-column-family row.
+	 * 
+	 * @param keyspace
+	 *            the keyspace
+	 * @param columnFamily
+	 *            The name of the super column family to operate on
+	 * @param key
+	 *            The key of the row
+	 * @param superColumnNames
+	 *            Array of super-column names to fetch from the row
+	 * @return A list of matching super-columns
+	 * @throws Exception
+	 *             the exception
+	 */
     List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String key, String... superColumnNames) throws Exception;
 
     /**
-     * Load super-columns from multiple rows of a super-column-family.
-     * 
-     * @param columnFamily
-     *            The name of the super column family to operate on
-     * @param keys
-     *            Array of row keys
-     * @param keyspace
-     *            the keyspace
-     * 
-     * @return A Map of row and corresponding list of super-columns.
-     * 
-     * @throws Exception
-     *             the exception
-     */
+	 * Load super-columns from multiple rows of a super-column-family.
+	 * 
+	 * @param keyspace
+	 *            the keyspace
+	 * @param columnFamily
+	 *            The name of the super column family to operate on
+	 * @param keys
+	 *            Array of row keys
+	 * @return A Map of row and corresponding list of super-columns.
+	 * @throws Exception
+	 *             the exception
+	 */
     Map<String, List<SuperColumn>> loadSuperColumns(String keyspace, String columnFamily, String... keys) throws Exception;
-
-    /**
-     * Set Cassandra KeySpace. Default is "localhost"
-     * 
-     * @param contactNodes
-     *            the contact nodes
-     */
-    // void setKeySpace(String keySpace);
 
     /**
      * Set Cassandra nodes.

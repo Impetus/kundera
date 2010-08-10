@@ -15,8 +15,17 @@
  */
 package com.impetus.kundera;
 
+/**
+ * The Class LazyInitializationException.
+ */
 public class LazyInitializationException extends RuntimeException {
 
+	/**
+	 * Instantiates a new lazy initialization exception.
+	 * 
+	 * @param m
+	 *            the m
+	 */
 	public LazyInitializationException (String m) {
 		super(m);
 	}

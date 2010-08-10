@@ -15,31 +15,12 @@
  */
 package com.impetus.kundera.metadata.processor;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.EntityListeners;
-import javax.persistence.PersistenceException;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PostRemove;
-import javax.persistence.PostUpdate;
-import javax.persistence.PrePersist;
-import javax.persistence.PreRemove;
-import javax.persistence.PreUpdate;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.api.Cacheable;
-import com.impetus.kundera.ejb.event.CallbackMethod;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataProcessor;
-import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * The MetadataProcessor implementation to scan for EntityListener class/method

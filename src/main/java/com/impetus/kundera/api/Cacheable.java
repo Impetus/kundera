@@ -35,5 +35,10 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Cacheable {
 
+	/**
+	 * Value.
+	 * 
+	 * @return true, if successful
+	 */
 	boolean value() default true;
 }

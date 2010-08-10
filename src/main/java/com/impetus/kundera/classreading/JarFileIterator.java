@@ -98,11 +98,7 @@ public final class JarFileIterator implements ResourceIterator {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.classreading.ResourceIterator#next()
-     */
+    /* @see com.impetus.kundera.classreading.ResourceIterator#next() */
     public InputStream next() {
         if (closed || (next == null && !initial))
             return null;
@@ -112,11 +108,7 @@ public final class JarFileIterator implements ResourceIterator {
         return new InputStreamWrapper(jar);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.classreading.ResourceIterator#close()
-     */
+    /* @see com.impetus.kundera.classreading.ResourceIterator#close() */
     public void close() {
         try {
             closed = true;
@@ -145,83 +137,47 @@ public final class JarFileIterator implements ResourceIterator {
             this.delegate = delegate;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.io.InputStream#read()
-         */
+        /* @see java.io.InputStream#read() */
         public int read() throws IOException {
             return delegate.read();
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.io.InputStream#read(byte[])
-         */
+        /* @see java.io.InputStream#read(byte[]) */
         public int read(byte[] bytes) throws IOException {
             return delegate.read(bytes);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.io.InputStream#read(byte[], int, int)
-         */
+        /* @see java.io.InputStream#read(byte[], int, int) */
         public int read(byte[] bytes, int i, int i1) throws IOException {
             return delegate.read(bytes, i, i1);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.io.InputStream#skip(long)
-         */
+        /* @see java.io.InputStream#skip(long) */
         public long skip(long l) throws IOException {
             return delegate.skip(l);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.io.InputStream#available()
-         */
+        /* @see java.io.InputStream#available() */
         public int available() throws IOException {
             return delegate.available();
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.io.InputStream#close()
-         */
+        /* @see java.io.InputStream#close() */
         public void close() throws IOException {
             // ignored
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.io.InputStream#mark(int)
-         */
+        /* @see java.io.InputStream#mark(int) */
         public void mark(int i) {
             delegate.mark(i);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.io.InputStream#reset()
-         */
+        /* @see java.io.InputStream#reset() */
         public void reset() throws IOException {
             delegate.reset();
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.io.InputStream#markSupported()
-         */
+        /* @see java.io.InputStream#markSupported() */
         public boolean markSupported() {
             return delegate.markSupported();
         }

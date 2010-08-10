@@ -33,26 +33,28 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Builds EmtityManagerFactory instances from classpath
+ * Builds EmtityManagerFactory instances from classpath.
  * 
  * @author animesh.kumar
- *
  */
 public class EntityManagerFactoryBuilder {
 
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(EntityManagerFactoryBuilder.class);
     
+    /** The Constant PROVIDER_IMPLEMENTATION_NAME. */
     private static final String PROVIDER_IMPLEMENTATION_NAME = KunderaPersistence.class.getName();
     
     /**
-     * Builds up EntityManagerFactory for a given persistenceUnitName and 
-     * overriding properties.
-     * 
-     * @param persistenceUnitName
-     * @param integration
-     * @return
-     */
+	 * Builds up EntityManagerFactory for a given persistenceUnitName and
+	 * overriding properties.
+	 * 
+	 * @param persistenceUnitName
+	 *            the persistence unit name
+	 * @param override
+	 *            the override
+	 * @return the entity manager factory
+	 */
     public EntityManagerFactory buildEntityManagerFactory (String persistenceUnitName, Map<Object, Object> override) {
     	PersistenceMetadata metadata = getPersistenceMetadata(persistenceUnitName);
     	
@@ -87,6 +89,13 @@ public class EntityManagerFactoryBuilder {
     	return new EntityManagerFactoryImpl(metadata.getName(), props);
     }
     
+	/**
+	 * Gets the persistence metadata.
+	 * 
+	 * @param persistenceUnitName
+	 *            the persistence unit name
+	 * @return the persistence metadata
+	 */
 	private PersistenceMetadata getPersistenceMetadata (String persistenceUnitName) {
 		log.info( "Look up for persistence unit: " + persistenceUnitName );
 		
@@ -112,6 +121,11 @@ public class EntityManagerFactoryBuilder {
 		throw new PersistenceException("Could not find persistence unit in the classpath for name: " + persistenceUnitName);
 	}
 	
+	/**
+	 * Find persistence metadatas.
+	 * 
+	 * @return the list
+	 */
 	private List<PersistenceMetadata> findPersistenceMetadatas () {
 		try {
 			Enumeration<URL> xmls = Thread.currentThread()
@@ -160,6 +174,13 @@ public class EntityManagerFactoryBuilder {
 	}
 	
 	// helper class
+	/**
+	 * Checks if is empty.
+	 * 
+	 * @param str
+	 *            the str
+	 * @return true, if is empty
+	 */
 	private static boolean isEmpty (String str) {
 		return null == str || str.isEmpty();
 	}	

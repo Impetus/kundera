@@ -36,7 +36,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
- * DataAccessor implementation for Cassandra's ColumnFamily
+ * DataAccessor implementation for Cassandra's ColumnFamily.
  * 
  * @author animesh.kumar
  * @since 0.1
@@ -46,6 +46,12 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 	/** log for this class. */
 	private static Log log = LogFactory.getLog(ColumnFamilyDataAccessor.class);
 
+	/**
+	 * Instantiates a new column family data accessor.
+	 * 
+	 * @param em
+	 *            the em
+	 */
 	public ColumnFamilyDataAccessor(EntityManagerImpl em) {
 		super(em);
 	}
@@ -84,7 +90,7 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 			throws Exception {
 		log.debug("Cassandra >> Read >> " + clazz.getName() + "_("
 				+ Arrays.asList(ids) + ")");
-		
+
 		String keyspace = m.getKeyspaceName();
 		String family = m.getColumnFamilyName();
 
@@ -136,6 +142,21 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 	}
 
 	// Helper method to convert ThriftRow to @Entity
+	/**
+	 * From thrift row.
+	 * 
+	 * @param <E>
+	 *            the element type
+	 * @param clazz
+	 *            the clazz
+	 * @param m
+	 *            the m
+	 * @param cr
+	 *            the cr
+	 * @return the e
+	 * @throws Exception
+	 *             the exception
+	 */
 	private <E> E fromThriftRow(Class<E> clazz, EntityMetadata m,
 			BaseDataAccessor<Column>.ThriftRow cr) throws Exception {
 
@@ -164,8 +185,9 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 					continue;
 				}
 
-				String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
-				Set<String> keys = deserializeKeys (foreignKeys);
+				String foreignKeys = PropertyAccessorFactory.STRING
+						.fromBytes(value);
+				Set<String> keys = deserializeKeys(foreignKeys);
 				getEntityManager().populateForeignEntities(e, cr.getId(),
 						relation, keys.toArray(new String[0]));
 			}
@@ -183,6 +205,17 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 	}
 
 	// Helper method to convert @Entity to ThriftRow
+	/**
+	 * To thrift row.
+	 * 
+	 * @param e
+	 *            the e
+	 * @param m
+	 *            the m
+	 * @return the base data accessor. thrift row
+	 * @throws Exception
+	 *             the exception
+	 */
 	private BaseDataAccessor<Column>.ThriftRow toThriftRow(EnhancedEntity e,
 			EntityMetadata m) throws Exception {
 
@@ -219,7 +252,7 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 			String property = entry.getKey();
 			Set<String> foreignKeys = entry.getValue();
 
-			String keys = serializeKeys (foreignKeys);
+			String keys = serializeKeys(foreignKeys);
 			if (null != keys) {
 				columns.add(new Column(PropertyAccessorFactory.STRING
 						.toBytes(property), PropertyAccessorFactory.STRING

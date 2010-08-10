@@ -41,11 +41,7 @@ public class ClasspathReader extends Reader {
         filter = new FilterImpl();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.classreading.Reader#read()
-     */
+    /* @see com.impetus.kundera.classreading.Reader#read() */
     @Override
     public final void read() {
         URL[] resources = findResources();
@@ -92,11 +88,7 @@ public class ClasspathReader extends Reader {
         return list.toArray(new URL[list.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.classreading.Reader#getFilter()
-     */
+    /* @see com.impetus.kundera.classreading.Reader#getFilter() */
     public final Filter getFilter() {
         return filter;
     }

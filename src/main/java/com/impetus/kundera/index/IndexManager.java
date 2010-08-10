@@ -39,13 +39,11 @@ public class IndexManager {
     private Indexer indexer;
 
     /**
-     * The Constructor.
-     * 
-     * @param manager
-     *            the manager
-     * 
-     * @throws Exception
-     */
+	 * The Constructor.
+	 * 
+	 * @param manager
+	 *            the manager
+	 */
     @SuppressWarnings("deprecation")
     public IndexManager(EntityManagerImpl manager) {
         indexer = new LucandraIndexer(manager.getClient(), 
@@ -101,44 +99,41 @@ public class IndexManager {
     }
 
     /**
-     * Searches on the index. Note: Query must be in Indexer's understandable
-     * format
-     * 
-     * @param query
-     *            the query
-     * 
-     * @return the list< string>
-     */
+	 * Searches on the index. Note: Query must be in Indexer's understandable
+	 * format
+	 * 
+	 * @param query
+	 *            the query
+	 * @return the list
+	 */
     public final List<String> search(String query) {
         return search(query, Constants.INVALID, Constants.INVALID);
     }
 
     /**
-     * Search.
-     * 
-     * @param query
-     *            the query
-     * @param count
-     *            the count
-     * 
-     * @return the list< string>
-     */
+	 * Search.
+	 * 
+	 * @param query
+	 *            the query
+	 * @param count
+	 *            the count
+	 * @return the list
+	 */
     public final List<String> search(String query, int count) {
         return search(query, Constants.INVALID, count);
     }
 
     /**
-     * Search.
-     * 
-     * @param query
-     *            the query
-     * @param start
-     *            the start
-     * @param count
-     *            the count
-     * 
-     * @return the list< string>
-     */
+	 * Search.
+	 * 
+	 * @param query
+	 *            the query
+	 * @param start
+	 *            the start
+	 * @param count
+	 *            the count
+	 * @return the list
+	 */
     public final List<String> search(String query, int start, int count) {
         return indexer.search(query, start, count);
     }

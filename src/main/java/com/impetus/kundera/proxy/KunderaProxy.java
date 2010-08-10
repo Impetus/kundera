@@ -16,10 +16,9 @@
 package com.impetus.kundera.proxy;
 
 /**
- * Marker interface for proxies
+ * Marker interface for proxies.
  * 
  * @author animesh.kumar
- *
  */
 public interface KunderaProxy {
 

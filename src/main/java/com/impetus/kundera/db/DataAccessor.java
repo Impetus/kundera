@@ -29,44 +29,61 @@ import com.impetus.kundera.proxy.EnhancedEntity;
 public interface DataAccessor {
 
     /**
-     * Write an entity to Cassandra DB
-     * 
-     * @param e		EnhancedEntity
-     * @param m		Metadata
-     * @throws Exception
-     */
+	 * Write an entity to Cassandra DB.
+	 * 
+	 * @param e
+	 *            EnhancedEntity
+	 * @param m
+	 *            Metadata
+	 * @throws Exception
+	 *             the exception
+	 */
     void write(EnhancedEntity e, EntityMetadata m) throws Exception;
 
     /**
-     * Read an entity of type clazz with primaryKey id from Cassandra DB
-     * 
-     * @param <E>		Generic type of Entity
-     * @param clazz		Entity class
-     * @param m			Metadata
-     * @param id		Primary Key
-     * @return
-     * @throws Exception
-     */
+	 * Read an entity of type clazz with primaryKey id from Cassandra DB.
+	 * 
+	 * @param <E>
+	 *            Generic type of Entity
+	 * @param clazz
+	 *            Entity class
+	 * @param m
+	 *            Metadata
+	 * @param id
+	 *            Primary Key
+	 * @return the e
+	 * @throws Exception
+	 *             the exception
+	 */
     <E> E read(Class<E> clazz, EntityMetadata m, String id) throws Exception;
 
     /**
-     * Reads a list of entities of type clazz with primaryKeys ids from Cassandra DB
-     * 
-     * @param <E>		Generic type of Entity
-     * @param clazz		Entity class
-     * @param m			Metadata
-     * @param ids		Primary Keys
-     * @return
-     * @throws Exception
-     */
+	 * Reads a list of entities of type clazz with primaryKeys ids from
+	 * Cassandra DB.
+	 * 
+	 * @param <E>
+	 *            Generic type of Entity
+	 * @param clazz
+	 *            Entity class
+	 * @param m
+	 *            Metadata
+	 * @param ids
+	 *            Primary Keys
+	 * @return the list
+	 * @throws Exception
+	 *             the exception
+	 */
     <E> List<E> read(Class<E> clazz, EntityMetadata m,  String... ids) throws Exception;
 
     /**
-     * Delete an entity from Cassandra  DB
-     * 
-     * @param e		EnhancedEntity
-     * @param m		Metadata
-     * @throws Exception
-     */
+	 * Delete an entity from Cassandra DB.
+	 * 
+	 * @param e
+	 *            EnhancedEntity
+	 * @param m
+	 *            Metadata
+	 * @throws Exception
+	 *             the exception
+	 */
     void delete(EnhancedEntity e, EntityMetadata m) throws Exception;
 }

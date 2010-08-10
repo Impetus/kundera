@@ -24,58 +24,33 @@ import javax.persistence.EntityTransaction;
  */
 public class EntityTransactionImpl implements EntityTransaction {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityTransaction#begin()
-     */
+    /* @see javax.persistence.EntityTransaction#begin() */
     public void begin() {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityTransaction#commit()
-     */
+    /* @see javax.persistence.EntityTransaction#commit() */
     public void commit() {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityTransaction#rollback()
-     */
+    /* @see javax.persistence.EntityTransaction#rollback() */
     public void rollback() {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityTransaction#setRollbackOnly()
-     */
+    /* @see javax.persistence.EntityTransaction#setRollbackOnly() */
     public void setRollbackOnly() {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityTransaction#getRollbackOnly()
-     */
+    /* @see javax.persistence.EntityTransaction#getRollbackOnly() */
     public boolean getRollbackOnly() {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityTransaction#isActive()
-     */
+    /* @see javax.persistence.EntityTransaction#isActive() */
     public boolean isActive() {
         return false;
     }
-
 }

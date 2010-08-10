@@ -25,11 +25,7 @@ public class FilterImpl implements Filter {
     /** The ignored packages. */
     private transient String[] ignoredPackages = { "javax", "java", "sun", "com.sun", "javassist" };
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.classreading.Filter#accepts(java.lang.String)
-     */
+    /* @see com.impetus.kundera.classreading.Filter#accepts(java.lang.String) */
     @Override
     public final boolean accepts(String filename) {
         if (filename.endsWith(".class")) {

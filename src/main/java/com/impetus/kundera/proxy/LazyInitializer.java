@@ -20,15 +20,18 @@ import javax.persistence.PersistenceException;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 
 /**
- * Handles fetching of the underlying entity for a proxy
+ * Handles fetching of the underlying entity for a proxy.
  * 
  * @author Gavin King
  * @author Steve Ebersole
  */
 public interface LazyInitializer {
+	
 	/**
 	 * Initialize the proxy, fetching the target entity if necessary.
 	 * 
+	 * @throws PersistenceException
+	 *             the persistence exception
 	 */
 	public void initialize() throws PersistenceException;
 
@@ -63,7 +66,7 @@ public interface LazyInitializer {
 	public Class<?> getPersistentClass();
 
 	/**
-	 * Is the proxy uninitialzed?
+	 * Is the proxy uninitialzed?.
 	 * 
 	 * @return True if uninitialized; false otherwise.
 	 */
@@ -84,7 +87,18 @@ public interface LazyInitializer {
 	 */
 	public void unsetEntityManager();
 
+	/**
+	 * Sets the unwrap.
+	 * 
+	 * @param unwrap
+	 *            the new unwrap
+	 */
 	public void setUnwrap(boolean unwrap);
 
+	/**
+	 * Checks if is unwrap.
+	 * 
+	 * @return true, if is unwrap
+	 */
 	public boolean isUnwrap();
 }

@@ -27,15 +27,16 @@ import javax.persistence.EntityManager;
 public interface CassandraEntityManager extends EntityManager {
 
     /**
-     * Find.
-     * 
-     * @param entityClass
-     *            the entity class
-     * @param primaryKey
-     *            the primary key
-     * 
-     * @return the list< t>
-     */
+	 * Find.
+	 * 
+	 * @param <T>
+	 *            the generic type
+	 * @param entityClass
+	 *            the entity class
+	 * @param primaryKey
+	 *            the primary key
+	 * @return the list
+	 */
     public <T> List<T> find(Class<T> entityClass, Object... primaryKey);
 
     /**

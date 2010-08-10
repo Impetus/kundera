@@ -22,23 +22,26 @@ import javax.persistence.PersistenceException;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 
 /**
- * Implementation of LazyInitializerFactory using cglib library 
+ * Implementation of LazyInitializerFactory using cglib library.
  * 
  * @author animesh.kumar
- *
  */
 public class CglibLazyInitializerFactory implements LazyInitializerFactory {
 
+	/*
+	 * @see
+	 * com.impetus.kundera.proxy.LazyInitializerFactory#getProxy(java.lang.String
+	 * , java.lang.Class, java.lang.reflect.Method, java.lang.reflect.Method,
+	 * java.lang.String, com.impetus.kundera.ejb.EntityManagerImpl)
+	 */
 	@Override
-	public KunderaProxy getProxy(String entityName,
-			Class<?> persistentClass,
+	public KunderaProxy getProxy(String entityName, Class<?> persistentClass,
 			Method getIdentifierMethod, Method setIdentifierMethod, String id,
 			EntityManagerImpl em) throws PersistenceException {
 
-		
-		return (KunderaProxy) CglibLazyInitializer.getProxy(entityName, persistentClass, 
-				new Class[] {KunderaProxy.class}, getIdentifierMethod, 
-				setIdentifierMethod, id, em);
+		return (KunderaProxy) CglibLazyInitializer.getProxy(entityName,
+				persistentClass, new Class[] { KunderaProxy.class },
+				getIdentifierMethod, setIdentifierMethod, id, em);
 
 	}
 

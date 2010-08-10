@@ -20,6 +20,8 @@ import java.lang.reflect.Field;
 /**
  * Interface to access {@link Field} property of a java class.
  * 
+ * @param <T>
+ *            the generic type
  * @author animesh.kumar
  */
 public interface PropertyAccessor<T> {

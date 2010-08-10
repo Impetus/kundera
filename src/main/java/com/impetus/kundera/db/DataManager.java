@@ -48,23 +48,30 @@ public class DataManager {
     }
 
     /**
-     * Persist an instance of EnhancedEntity
-     * 
-     * @param e		EnhancedEntity
-     * @param m		Metadata
-     * @throws Exception
-     */
+	 * Persist an instance of EnhancedEntity.
+	 * 
+	 * @param e
+	 *            EnhancedEntity
+	 * @param m
+	 *            Metadata
+	 * @throws Exception
+	 *             the exception
+	 */
     public final void persist(EnhancedEntity e, EntityMetadata m) throws Exception {
         getDataAccessor(m).write(e, m);
     }
 
     /**
-     * Merge an instance of EnhancedEntity
-     * 
-     * @param e		EnhancedEntity
-     * @param m		Metadata
-     * @throws Exception
-     */
+	 * Merge an instance of EnhancedEntity.
+	 * 
+	 * @param e
+	 *            EnhancedEntity
+	 * @param m
+	 *            Metadata
+	 * @return the enhanced entity
+	 * @throws Exception
+	 *             the exception
+	 */
     public EnhancedEntity merge(EnhancedEntity e, EntityMetadata m) throws Exception {
         // 	TODO: improve this part. 
     	//	Should we not implement some merge on client level?
@@ -73,46 +80,66 @@ public class DataManager {
     }
 
     /**
-     * Remove an instance of EnhancedEntity
-     * 
-     * @param e		EnhancedEntity
-     * @param m		Metadata
-     * @throws Exception
-     */
+	 * Remove an instance of EnhancedEntity.
+	 * 
+	 * @param e
+	 *            EnhancedEntity
+	 * @param m
+	 *            Metadata
+	 * @throws Exception
+	 *             the exception
+	 */
     public final void remove(EnhancedEntity e, EntityMetadata m) throws Exception {
     	getDataAccessor(m).delete(e, m);
     }
 
     /**
-     * Find entity of type clazz with primaryKey id
-     * 
-     * @param <E>		Generics of entity
-     * @param clazz		Entity class
-     * @param id		Entity primary key
-     * @param m			Metadata
-     * @return			Entity Object
-     * @throws Exception
-     */
+	 * Find entity of type clazz with primaryKey id.
+	 * 
+	 * @param <E>
+	 *            Generics of entity
+	 * @param clazz
+	 *            Entity class
+	 * @param m
+	 *            Metadata
+	 * @param id
+	 *            Entity primary key
+	 * @return Entity Object
+	 * @throws Exception
+	 *             the exception
+	 */
     public final <E> E find(Class<E> clazz, EntityMetadata m, String id) throws Exception {
     	return getDataAccessor(m).read(clazz, m, id);
     }
 
     /**
-     * Find a list of entities of type clazz with primaryKeys ids
-     * 
-     * @param <E>		Generics of entity
-     * @param clazz		Entity class
-     * @param key		Entity primary keys
-     * @param m			Metadata
-     * @return			Entity Object
-     * @throws Exception
-     */
+	 * Find a list of entities of type clazz with primaryKeys ids.
+	 * 
+	 * @param <E>
+	 *            Generics of entity
+	 * @param clazz
+	 *            Entity class
+	 * @param m
+	 *            Metadata
+	 * @param ids
+	 *            the ids
+	 * @return Entity Object
+	 * @throws Exception
+	 *             the exception
+	 */
     public final <E> List<E> find(Class<E> clazz, EntityMetadata m, String... ids) throws Exception {
         return getDataAccessor(m).read(clazz, m, ids);
     }
 
     // Helper method to find appropriate DataAccessor
-	private DataAccessor getDataAccessor(EntityMetadata metadata) {
+	/**
+	 * Gets the data accessor.
+	 * 
+	 * @param metadata
+	 *            the metadata
+	 * @return the data accessor
+	 */
+    private DataAccessor getDataAccessor(EntityMetadata metadata) {
 
 		EntityMetadata.Type type = metadata.getType();
 		if (type.equals(EntityMetadata.Type.COLUMN_FAMILY)) {

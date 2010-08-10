@@ -21,13 +21,17 @@ import java.util.Set;
 import net.sf.cglib.proxy.Enhancer;
 
 /**
- * Implementation of EntityEnhancerFactory using cglib library
+ * Implementation of EntityEnhancerFactory using cglib library.
  * 
  * @author animesh.kumar
- *
  */
 public class CglibEntityEnhancerFactory implements EntityEnhancerFactory {
 
+	/*
+	 * @see
+	 * com.impetus.kundera.proxy.EntityEnhancerFactory#getProxy(java.lang.Object
+	 * , java.lang.String, java.util.Map)
+	 */
 	@Override
 	public EnhancedEntity getProxy(Object entity, String id,
 			Map<String, Set<String>> foreignKeyMap) {

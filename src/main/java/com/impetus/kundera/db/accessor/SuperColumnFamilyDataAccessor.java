@@ -38,18 +38,27 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
- * DataAccessor implementation for Cassandra's SuperColumnFamily
+ * DataAccessor implementation for Cassandra's SuperColumnFamily.
  * 
  * @author animesh.kumar
  */
-public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperColumn> {
+public final class SuperColumnFamilyDataAccessor extends
+		BaseDataAccessor<SuperColumn> {
 
 	/** The Constant log. */
-    private static final Log log = LogFactory.getLog(SuperColumnFamilyDataAccessor.class);
+	private static final Log log = LogFactory
+			.getLog(SuperColumnFamilyDataAccessor.class);
 
-    private static final String TO_ONE_SUPER_COL_NAME = "FKey-TO";
+	/** The Constant TO_ONE_SUPER_COL_NAME. */
+	private static final String TO_ONE_SUPER_COL_NAME = "FKey-TO";
 
-    public SuperColumnFamilyDataAccessor(EntityManagerImpl em) {
+	/**
+	 * Instantiates a new super column family data accessor.
+	 * 
+	 * @param em
+	 *            the em
+	 */
+	public SuperColumnFamilyDataAccessor(EntityManagerImpl em) {
 		super(em);
 	}
 
@@ -66,20 +75,20 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
 		String family = m.getColumnFamilyName();
 
 		// get super column names for this entity
-        List<String> scNames = m.getSuperColumnFieldNames();
-        scNames.add(TO_ONE_SUPER_COL_NAME);
-        
-        // load column from DB
+		List<String> scNames = m.getSuperColumnFieldNames();
+		scNames.add(TO_ONE_SUPER_COL_NAME);
+
+		// load column from DB
 		List<SuperColumn> columns = getEntityManager().getClient()
 				.loadSuperColumns(keyspace, family, id, // row id
 						scNames.toArray(new String[0]) // array of names
 				);
-		
-        if (null == columns || columns.size() == 0) {
-            throw new PersistenceException("Entity not found for key: " + id);
-        }
 
-        E e = fromThriftRow(clazz, m, this.new ThriftRow(id, family, columns));
+		if (null == columns || columns.size() == 0) {
+			throw new PersistenceException("Entity not found for key: " + id);
+		}
+
+		E e = fromThriftRow(clazz, m, this.new ThriftRow(id, family, columns));
 		return e;
 	}
 
@@ -134,7 +143,7 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
 
 		String keyspace = m.getKeyspaceName();
 		String family = m.getColumnFamilyName();
-		
+
 		BaseDataAccessor<SuperColumn>.ThriftRow tf = toThriftRow(e, m);
 
 		getEntityManager().getClient().writeSuperColumns(keyspace, family, // columnFamily
@@ -144,111 +153,147 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
 	}
 
 	// Helper method to convert ThriftRow to @Entity
-    private <E> E fromThriftRow (Class<E> clazz, EntityMetadata m,
-    		BaseDataAccessor<SuperColumn>.ThriftRow cr) throws Exception {
+	/**
+	 * From thrift row.
+	 * 
+	 * @param <E>
+	 *            the element type
+	 * @param clazz
+	 *            the clazz
+	 * @param m
+	 *            the m
+	 * @param cr
+	 *            the cr
+	 * @return the e
+	 * @throws Exception
+	 *             the exception
+	 */
+	private <E> E fromThriftRow(Class<E> clazz, EntityMetadata m,
+			BaseDataAccessor<SuperColumn>.ThriftRow cr) throws Exception {
 
-        // Instantiate a new instance
-        E e = clazz.newInstance();
+		// Instantiate a new instance
+		E e = clazz.newInstance();
 
-        // Set row-key. Note: @Id is always String.
-        PropertyAccessorHelper.set(e, m.getIdProperty(), cr.getId());
+		// Set row-key. Note: @Id is always String.
+		PropertyAccessorHelper.set(e, m.getIdProperty(), cr.getId());
 
-        // Get a name->field map for super-columns
-        Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
-        for (Map.Entry<String, EntityMetadata.SuperColumn> entry : m.getSuperColumnsMap().entrySet()) {
-            for (EntityMetadata.Column cMetadata : entry.getValue().getColumns()) {
-                columnNameToFieldMap.put(cMetadata.getName(), cMetadata.getField());
-            }
-        }
+		// Get a name->field map for super-columns
+		Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
+		for (Map.Entry<String, EntityMetadata.SuperColumn> entry : m
+				.getSuperColumnsMap().entrySet()) {
+			for (EntityMetadata.Column cMetadata : entry.getValue()
+					.getColumns()) {
+				columnNameToFieldMap.put(cMetadata.getName(), cMetadata
+						.getField());
+			}
+		}
 
-        for (SuperColumn sc : cr.getColumns()) {
-        	
-        	String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
-        	boolean intoRelations = false;
-        	if (scName.equals(TO_ONE_SUPER_COL_NAME)) {
-        		intoRelations = true;
-        	}
-        	
-            for (Column column : sc.getColumns()) {
-                String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
-                byte[] value = column.getValue();
+		for (SuperColumn sc : cr.getColumns()) {
 
-                if (value == null) {
-                	continue;
-                }
-                
+			String scName = PropertyAccessorFactory.STRING.fromBytes(sc
+					.getName());
+			boolean intoRelations = false;
+			if (scName.equals(TO_ONE_SUPER_COL_NAME)) {
+				intoRelations = true;
+			}
+
+			for (Column column : sc.getColumns()) {
+				String name = PropertyAccessorFactory.STRING.fromBytes(column
+						.getName());
+				byte[] value = column.getValue();
+
+				if (value == null) {
+					continue;
+				}
+
 				if (intoRelations) {
 					EntityMetadata.Relation relation = m.getRelation(name);
-										
-					String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
-					Set<String> keys = deserializeKeys (foreignKeys);
+
+					String foreignKeys = PropertyAccessorFactory.STRING
+							.fromBytes(value);
+					Set<String> keys = deserializeKeys(foreignKeys);
 					getEntityManager().populateForeignEntities(e, cr.getId(),
 							relation, keys.toArray(new String[0]));
-
 
 				} else {
 					// set value of the field in the bean
 					Field field = columnNameToFieldMap.get(name);
 					PropertyAccessorHelper.set(e, field, value);
 				}
-            }
-        }
-        return e;
-    }
+			}
+		}
+		return e;
+	}
 
 	// Helper method to convert @Entity to ThriftRow
-    private BaseDataAccessor<SuperColumn>.ThriftRow toThriftRow(EnhancedEntity e, EntityMetadata m) throws Exception {
+	/**
+	 * To thrift row.
+	 * 
+	 * @param e
+	 *            the e
+	 * @param m
+	 *            the m
+	 * @return the base data accessor. thrift row
+	 * @throws Exception
+	 *             the exception
+	 */
+	private BaseDataAccessor<SuperColumn>.ThriftRow toThriftRow(
+			EnhancedEntity e, EntityMetadata m) throws Exception {
 
-    	// timestamp to use in thrift column objects
-        long timestamp = System.currentTimeMillis();
+		// timestamp to use in thrift column objects
+		long timestamp = System.currentTimeMillis();
 
-        BaseDataAccessor<SuperColumn>.ThriftRow cr = this.new ThriftRow();
+		BaseDataAccessor<SuperColumn>.ThriftRow cr = this.new ThriftRow();
 
-        // column-family name
-        cr.setColumnFamilyName(m.getColumnFamilyName());
+		// column-family name
+		cr.setColumnFamilyName(m.getColumnFamilyName());
 
-        // Set row key
-        cr.setId(e.getId());
+		// Set row key
+		cr.setId(e.getId());
 
-        for (EntityMetadata.SuperColumn superColumn : m.getSuperColumnsAsList()) {
-            String superColumnName = superColumn.getName();
+		for (EntityMetadata.SuperColumn superColumn : m.getSuperColumnsAsList()) {
+			String superColumnName = superColumn.getName();
 
-            List<Column> columns = new ArrayList<Column>();
+			List<Column> columns = new ArrayList<Column>();
 
-            for (EntityMetadata.Column column : superColumn.getColumns()) {
-                Field field = column.getField();
-                String name = column.getName();
+			for (EntityMetadata.Column column : superColumn.getColumns()) {
+				Field field = column.getField();
+				String name = column.getName();
 
-                try {
-                    byte[] value = PropertyAccessorHelper.get(e.getEntity(), field);
-                    if (null != value) {
-                        columns.add(new Column(PropertyAccessorFactory.STRING.toBytes(name), value, timestamp));
-                    }
-                } catch (PropertyAccessException exp) {
-                    log.warn(exp.getMessage());
-                }
-            }
-            cr.addColumn(new SuperColumn(PropertyAccessorFactory.STRING.toBytes(superColumnName), columns));
-        }
-        
-        
-        // add toOne relations
-        List<Column> columns = new ArrayList<Column>();
-        for (Map.Entry<String, Set<String>> entry : e.getForeignKeysMap().entrySet()) {
-        	String property = entry.getKey();
-        	Set<String> foreignKeys = entry.getValue();
+				try {
+					byte[] value = PropertyAccessorHelper.get(e.getEntity(),
+							field);
+					if (null != value) {
+						columns.add(new Column(PropertyAccessorFactory.STRING
+								.toBytes(name), value, timestamp));
+					}
+				} catch (PropertyAccessException exp) {
+					log.warn(exp.getMessage());
+				}
+			}
+			cr.addColumn(new SuperColumn(PropertyAccessorFactory.STRING
+					.toBytes(superColumnName), columns));
+		}
 
-			String keys = serializeKeys (foreignKeys);
+		// add toOne relations
+		List<Column> columns = new ArrayList<Column>();
+		for (Map.Entry<String, Set<String>> entry : e.getForeignKeysMap()
+				.entrySet()) {
+			String property = entry.getKey();
+			Set<String> foreignKeys = entry.getValue();
+
+			String keys = serializeKeys(foreignKeys);
 			if (null != keys) {
 				columns.add(new Column(PropertyAccessorFactory.STRING
 						.toBytes(property), PropertyAccessorFactory.STRING
 						.toBytes(keys), timestamp));
 			}
-        }
-        if (!columns.isEmpty()) {
-        	cr.addColumn(new SuperColumn(PropertyAccessorFactory.STRING.toBytes(TO_ONE_SUPER_COL_NAME), columns));
-        }
-        return cr;
-    }
+		}
+		if (!columns.isEmpty()) {
+			cr.addColumn(new SuperColumn(PropertyAccessorFactory.STRING
+					.toBytes(TO_ONE_SUPER_COL_NAME), columns));
+		}
+		return cr;
+	}
 
 }

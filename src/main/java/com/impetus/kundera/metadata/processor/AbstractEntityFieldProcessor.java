@@ -81,12 +81,16 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor 
 
     
     /**
-     * Populates @Id accesser methods like, getId and setId of clazz to metadata. 
-     * 
-     * @param metadata
-     * @param clazz
-     * @param f
-     */
+	 * Populates @Id accesser methods like, getId and setId of clazz to
+	 * metadata.
+	 * 
+	 * @param metadata
+	 *            the metadata
+	 * @param clazz
+	 *            the clazz
+	 * @param f
+	 *            the f
+	 */
     protected final void populateIdAccessorMethods (EntityMetadata metadata, Class<?> clazz, Field f) {
 		try {
 			BeanInfo info = Introspector.getBeanInfo(clazz);

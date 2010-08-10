@@ -18,27 +18,33 @@ package com.impetus.kundera.cache;
 import java.util.Map;
 
 /**
- * NonOperational cache provider
+ * NonOperational cache provider.
  * 
  * @author animesh.kumar
- *
  */
 public class NonOperationalCacheProvider implements CacheProvider {
 	
+	/** The cache. */
 	private Cache cache = new NonOperationalCache();
 
+	/**
+	 * Instantiates a new non operational cache provider.
+	 */
 	public NonOperationalCacheProvider () {
 	}
 	
+	/* @see com.impetus.kundera.cache.CacheProvider#init(java.util.Map) */
 	@Override
 	public void init(Map<?, ?> properties) {
 	}
 
+	/* @see com.impetus.kundera.cache.CacheProvider#createCache(java.lang.String) */
 	@Override
 	public Cache createCache(String name) {
 		return cache;
 	}
 
+	/* @see com.impetus.kundera.cache.CacheProvider#shutdown() */
 	@Override
 	public void shutdown() {
 	}

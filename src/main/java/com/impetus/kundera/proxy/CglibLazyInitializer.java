@@ -34,29 +34,49 @@ import com.impetus.kundera.ejb.EntityManagerImpl;
 
 /**
  * A <tt>LazyInitializer</tt> implemented using the CGLIB bytecode generation
- * library
+ * library.
  */
 public final class CglibLazyInitializer implements LazyInitializer,
 		InvocationHandler {
 
-    /** The Constant log. */
-    private static final Log log = LogFactory.getLog(CglibLazyInitializer.class);
+	/** The Constant log. */
+	private static final Log log = LogFactory
+			.getLog(CglibLazyInitializer.class);
 
+	/** The entity name. */
 	private String entityName;
+
+	/** The id. */
 	private String id;
+
+	/** The target. */
 	private Object target;
+
+	/** The initialized. */
 	private boolean initialized;
+
+	/** The unwrap. */
 	private boolean unwrap;
 
+	/** The persistent class. */
 	protected Class<?> persistentClass;
+
+	/** The get identifier method. */
 	protected Method getIdentifierMethod;
+
+	/** The set identifier method. */
 	protected Method setIdentifierMethod;
 
+	/** The interfaces. */
 	private Class<?>[] interfaces;
+
+	/** The constructed. */
 	private boolean constructed = false;
 
+	/** The em. */
 	private transient EntityManagerImpl em;
 
+	/** The Constant FINALIZE_FILTER. */
 	private static final CallbackFilter FINALIZE_FILTER = new CallbackFilter() {
 		public int accept(Method method) {
 			if (method.getParameterTypes().length == 0
@@ -68,6 +88,27 @@ public final class CglibLazyInitializer implements LazyInitializer,
 		}
 	};
 
+	/**
+	 * Gets the proxy.
+	 * 
+	 * @param entityName
+	 *            the entity name
+	 * @param persistentClass
+	 *            the persistent class
+	 * @param interfaces
+	 *            the interfaces
+	 * @param getIdentifierMethod
+	 *            the get identifier method
+	 * @param setIdentifierMethod
+	 *            the set identifier method
+	 * @param id
+	 *            the id
+	 * @param em
+	 *            the em
+	 * @return the proxy
+	 * @throws PersistenceException
+	 *             the persistence exception
+	 */
 	public static KunderaProxy getProxy(final String entityName,
 			final Class<?> persistentClass, final Class<?>[] interfaces,
 			final Method getIdentifierMethod, final Method setIdentifierMethod,
@@ -90,31 +131,76 @@ public final class CglibLazyInitializer implements LazyInitializer,
 		}
 	}
 
-    private static KunderaProxy getProxyInstance(Class factory, CglibLazyInitializer instance) 
-    throws InstantiationException, IllegalAccessException {
-    	KunderaProxy proxy;
+	/**
+	 * Gets the proxy instance.
+	 * 
+	 * @param factory
+	 *            the factory
+	 * @param instance
+	 *            the instance
+	 * @return the proxy instance
+	 * @throws InstantiationException
+	 *             the instantiation exception
+	 * @throws IllegalAccessException
+	 *             the illegal access exception
+	 */
+	private static KunderaProxy getProxyInstance(Class factory,
+			CglibLazyInitializer instance) throws InstantiationException,
+			IllegalAccessException {
+		KunderaProxy proxy;
 		try {
-			Enhancer.registerCallbacks(factory, new Callback[]{ instance, null });
-			proxy = (KunderaProxy)factory.newInstance();
+			Enhancer.registerCallbacks(factory,
+					new Callback[] { instance, null });
+			proxy = (KunderaProxy) factory.newInstance();
 		} finally {
-			// HHH-2481 make sure the callback gets cleared, otherwise the instance stays in a static thread local.
 			Enhancer.registerCallbacks(factory, null);
 		}
 		return proxy;
 	}
 
+	/**
+	 * Gets the proxy factory.
+	 * 
+	 * @param persistentClass
+	 *            the persistent class
+	 * @param interfaces
+	 *            the interfaces
+	 * @return the proxy factory
+	 * @throws PersistenceException
+	 *             the persistence exception
+	 */
 	public static Class getProxyFactory(Class persistentClass,
 			Class[] interfaces) throws PersistenceException {
 		Enhancer e = new Enhancer();
 		e.setSuperclass(interfaces.length == 1 ? persistentClass : null);
 		e.setInterfaces(interfaces);
-		e.setCallbackTypes(new Class[] { InvocationHandler.class, NoOp.class, });
+		e
+				.setCallbackTypes(new Class[] { InvocationHandler.class,
+						NoOp.class, });
 		e.setCallbackFilter(FINALIZE_FILTER);
 		e.setUseFactory(false);
 		e.setInterceptDuringConstruction(false);
 		return e.createClass();
 	}
 
+	/**
+	 * Instantiates a new cglib lazy initializer.
+	 * 
+	 * @param entityName
+	 *            the entity name
+	 * @param persistentClass
+	 *            the persistent class
+	 * @param interfaces
+	 *            the interfaces
+	 * @param id
+	 *            the id
+	 * @param getIdentifierMethod
+	 *            the get identifier method
+	 * @param setIdentifierMethod
+	 *            the set identifier method
+	 * @param em
+	 *            the em
+	 */
 	private CglibLazyInitializer(final String entityName,
 			final Class<?> persistentClass, final Class<?>[] interfaces,
 			final String id, final Method getIdentifierMethod,
@@ -129,6 +215,10 @@ public final class CglibLazyInitializer implements LazyInitializer,
 		this.interfaces = interfaces;
 	}
 
+	/*
+	 * @see net.sf.cglib.proxy.InvocationHandler#invoke(java.lang.Object,
+	 * java.lang.reflect.Method, java.lang.Object[])
+	 */
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args)
 			throws Throwable {
@@ -176,46 +266,60 @@ public final class CglibLazyInitializer implements LazyInitializer,
 
 	}
 
+	/* @see com.impetus.kundera.proxy.LazyInitializer#getPersistentClass() */
 	public final Class<?> getPersistentClass() {
 		return persistentClass;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Gets the entity name.
+	 * 
+	 * @return the entity name {@inheritDoc}
 	 */
 	public final String getEntityName() {
 		return entityName;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Gets the identifier.
+	 * 
+	 * @return the identifier {@inheritDoc}
 	 */
 	public final String getIdentifier() {
 		return id;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Sets the identifier.
+	 * 
+	 * @param id
+	 *            the new identifier {@inheritDoc}
 	 */
 	public final void setIdentifier(String id) {
 		this.id = id;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Checks if is uninitialized.
+	 * 
+	 * @return true, if is uninitialized {@inheritDoc}
 	 */
 	public final boolean isUninitialized() {
 		return !initialized;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Gets the entity manager.
+	 * 
+	 * @return the entity manager {@inheritDoc}
 	 */
 	public final EntityManagerImpl getEntityManager() {
 		return em;
 	}
 
 	/**
+	 * Unset entity manager.
+	 * 
 	 * {@inheritDoc}
 	 */
 	public void unsetEntityManager() {
@@ -223,20 +327,29 @@ public final class CglibLazyInitializer implements LazyInitializer,
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Initialize.
+	 * 
+	 * @throws PersistenceException
+	 *             the persistence exception {@inheritDoc}
 	 */
 	public final void initialize() throws PersistenceException {
 		if (!initialized) {
 			if (em == null) {
 				throw new LazyInitializationException(
-						"could not initialize proxy " + persistentClass.getName() + "_" + id + " - no EntityManager");
+						"could not initialize proxy "
+								+ persistentClass.getName() + "_" + id
+								+ " - no EntityManager");
 			} else if (!em.isOpen()) {
 				throw new LazyInitializationException(
-						"could not initialize proxy " + persistentClass.getName() + "_" + id + " - the owning Session was closed");
+						"could not initialize proxy "
+								+ persistentClass.getName() + "_" + id
+								+ " - the owning Session was closed");
 			} else {
-				log.debug("Proxy >> Initialization >> " + persistentClass.getName() + "_" + id);
+				log.debug("Proxy >> Initialization >> "
+						+ persistentClass.getName() + "_" + id);
 
-				// TODO: consider not calling em.find from here. Not sure 'why', but something
+				// TODO: consider not calling em.find from here. Not sure 'why',
+				// but something
 				// doesn't feel right.
 				target = em.find(persistentClass, id);
 				initialized = true;
@@ -245,7 +358,9 @@ public final class CglibLazyInitializer implements LazyInitializer,
 	}
 
 	/**
-	 * Return the underlying persistent object, initializing if necessary
+	 * Return the underlying persistent object, initializing if necessary.
+	 * 
+	 * @return the implementation
 	 */
 	public final Object getImplementation() {
 		initialize();
@@ -265,14 +380,19 @@ public final class CglibLazyInitializer implements LazyInitializer,
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Checks if is unwrap.
+	 * 
+	 * @return true, if is unwrap {@inheritDoc}
 	 */
 	public boolean isUnwrap() {
 		return unwrap;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Sets the unwrap.
+	 * 
+	 * @param unwrap
+	 *            the new unwrap {@inheritDoc}
 	 */
 	public void setUnwrap(boolean unwrap) {
 		this.unwrap = unwrap;

@@ -111,19 +111,16 @@ public class EntityManagerImpl implements CassandraEntityManager {
     }
 
     /**
+	 * Gets the factory.
+	 * 
 	 * @return the factory
 	 */
 	public EntityManagerFactoryImpl getFactory() {
 		return factory;
 	}
 
-	/*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#find(java.lang.Class,
-     * java.lang.Object)
-     */
-    @Override
+    /* @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object) */
+	@Override
     public final <E> E find(Class<E> entityClass, Object primaryKey) {
         if (closed) {
             throw new PersistenceException("EntityManager already closed.");
@@ -142,6 +139,17 @@ public class EntityManagerImpl implements CassandraEntityManager {
         return immediateLoadAndCache (entityClass, primaryKey);        
     }
     
+    /**
+	 * Immediate load and cache.
+	 * 
+	 * @param <E>
+	 *            the element type
+	 * @param entityClass
+	 *            the entity class
+	 * @param primaryKey
+	 *            the primary key
+	 * @return the e
+	 */
     private <E> E immediateLoadAndCache (Class<E> entityClass, Object primaryKey) {
         try {
         	EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
@@ -154,12 +162,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
         }        
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.CassandraEntityManager#find(java.lang.Class,
-     * java.lang.Object[])
-     */
+    /* @see com.impetus.kundera.CassandraEntityManager#find(java.lang.Class, java.lang.Object[]) */
     @Override
     public final <E> List<E> find(Class<E> entityClass, Object... primaryKeys) {
         if (closed) {
@@ -191,11 +194,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
     }
 
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#persist(java.lang.Object)
-     */
+    /* @see javax.persistence.EntityManager#remove(java.lang.Object) */
     @Override
     public final void remove (Object e) {
         if (e == null) {
@@ -229,11 +228,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#persist(java.lang.Object)
-     */
+    /* @see javax.persistence.EntityManager#merge(java.lang.Object) */
     @Override
     public final <E> E merge (E e) {
         if (e == null) {
@@ -268,11 +263,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
         return e;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#persist(java.lang.Object)
-     */
+    /* @see javax.persistence.EntityManager#persist(java.lang.Object) */
     @Override
     public final void persist(Object e) {
         if (e == null) {
@@ -304,11 +295,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#clear()
-     */
+    /* @see javax.persistence.EntityManager#clear() */
     @Override
     public final void clear() {
         checkClosed();
@@ -318,179 +305,105 @@ public class EntityManagerImpl implements CassandraEntityManager {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#close()
-     */
+    /* @see javax.persistence.EntityManager#close() */
     @Override
     public final void close() {
         closed = true;
         sessionCache = null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#contains(java.lang.Object)
-     */
+    /* @see javax.persistence.EntityManager#contains(java.lang.Object) */
     @Override
     public final boolean contains(Object entity) {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#createNamedQuery(java.lang.String)
-     */
+    /* @see javax.persistence.EntityManager#createNamedQuery(java.lang.String) */
     @Override
     public final Query createNamedQuery(String name) {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String)
-     */
+    /* @see javax.persistence.EntityManager#createNativeQuery(java.lang.String) */
     @Override
     public final Query createNativeQuery(String sqlString) {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String,
-     * java.lang.Class)
-     */
+    /* @see javax.persistence.EntityManager#createNativeQuery(java.lang.String, java.lang.Class) */
     @Override
     public final Query createNativeQuery(String sqlString, Class resultClass) {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String,
-     * java.lang.String)
-     */
+    /* @see javax.persistence.EntityManager#createNativeQuery(java.lang.String, java.lang.String) */
     @Override
     public final Query createNativeQuery(String sqlString, String resultSetMapping) {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#createQuery(java.lang.String)
-     */
+    /* @see javax.persistence.EntityManager#createQuery(java.lang.String) */
     @Override
     public final Query createQuery(String ejbqlString) {
         return new LuceneQuery(this, metadataManager, ejbqlString);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#flush()
-     */
+    /* @see javax.persistence.EntityManager#flush() */
     @Override
     public final void flush() {
         // always flushed to cassandra anyway! relax.
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#getDelegate()
-     */
+    /* @see javax.persistence.EntityManager#getDelegate() */
     @Override
     public final Object getDelegate() {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#getFlushMode()
-     */
+    /* @see javax.persistence.EntityManager#getFlushMode() */
     @Override
     public final FlushModeType getFlushMode() {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#getReference(java.lang.Class,
-     * java.lang.Object)
-     */
+    /* @see javax.persistence.EntityManager#getReference(java.lang.Class, java.lang.Object) */
     @Override
     public final <T> T getReference(Class<T> entityClass, Object primaryKey) {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#getTransaction()
-     */
+    /* @see javax.persistence.EntityManager#getTransaction() */
     @Override
     public final EntityTransaction getTransaction() {
         return new EntityTransactionImpl();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#isOpen()
-     */
+    /* @see javax.persistence.EntityManager#isOpen() */
     @Override
     public final boolean isOpen() {
         return !closed;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#joinTransaction()
-     */
+    /* @see javax.persistence.EntityManager#joinTransaction() */
     @Override
     public final void joinTransaction() {
         // TODO Auto-generated method stub
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#lock(java.lang.Object,
-     * javax.persistence.LockModeType)
-     */
+    /* @see javax.persistence.EntityManager#lock(java.lang.Object, javax.persistence.LockModeType) */
     @Override
     public final void lock(Object entity, LockModeType lockMode) {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#refresh(java.lang.Object)
-     */
+    /* @see javax.persistence.EntityManager#refresh(java.lang.Object) */
     @Override
     public final void refresh(Object entity) {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * javax.persistence.EntityManager#setFlushMode(javax.persistence.FlushModeType
-     * )
-     */
+    /* @see javax.persistence.EntityManager#setFlushMode(javax.persistence.FlushModeType) */
     @Override
     public final void setFlushMode(FlushModeType flushMode) {
         throw new NotImplementedException("TODO");
@@ -583,20 +496,26 @@ public class EntityManagerImpl implements CassandraEntityManager {
     
 
 	// helper methods for session-level-cache
-    public Map<Object, Object> getSessionCache () {
+    /**
+	 * Gets the session cache.
+	 * 
+	 * @return the session cache
+	 */
+	public Map<Object, Object> getSessionCache () {
     	return sessionCache;
     }
     
     /**
-     * Find in cache.
-     * 
-     * @param entityClass
-     *            the entity class
-     * @param id
-     *            the id
-     * 
-     * @return the t
-     */
+	 * Find in cache.
+	 * 
+	 * @param <T>
+	 *            the generic type
+	 * @param entityClass
+	 *            the entity class
+	 * @param id
+	 *            the id
+	 * @return the t
+	 */
     @SuppressWarnings("unchecked")
 	private <T> T findInCache(Class<T> entityClass, Object id) {
         String key = cacheKey(entityClass, id);
@@ -628,6 +547,16 @@ public class EntityManagerImpl implements CassandraEntityManager {
     	saveToCache (id, entity, false);
     }
     
+    /**
+	 * Save to cache.
+	 * 
+	 * @param id
+	 *            the id
+	 * @param entity
+	 *            the entity
+	 * @param cacheToSecondLevel
+	 *            the cache to second level
+	 */
     private void saveToCache(Object id, Object entity, boolean cacheToSecondLevel) {
         String key = cacheKey(entity.getClass(), id);
         log.debug("Cache >> Save >> " + key);
@@ -643,13 +572,15 @@ public class EntityManagerImpl implements CassandraEntityManager {
     }
 
     /**
-     * Removes the from cache.
-     * 
-     * @param entityClass
-     *            the entity class
-     * @param id
-     *            the id
-     */
+	 * Removes the from cache.
+	 * 
+	 * @param <T>
+	 *            the generic type
+	 * @param entityClass
+	 *            the entity class
+	 * @param id
+	 *            the id
+	 */
     private <T> void removeFromCache(Class<T> entityClass, Object id) {
         String key = cacheKey(entityClass, id);
         log.debug("Cache >> Remove >> " + key);
@@ -683,8 +614,10 @@ public class EntityManagerImpl implements CassandraEntityManager {
 	 * transaction-al lock can be acquired on all objects.
 	 * 
 	 * @param o
+	 *            the o
 	 * @param cascadeType
-	 * @return
+	 *            the cascade type
+	 * @return the all reachable entities
 	 */
 	public List<EnhancedEntity> getAllReachableEntities (Object o,
 			CascadeType cascadeType) {
@@ -698,6 +631,19 @@ public class EntityManagerImpl implements CassandraEntityManager {
 	}
 
 	// helper method to recursively build reachable object list.
+	/**
+	 * Gets the all reachable entities.
+	 * 
+	 * @param o
+	 *            the o
+	 * @param cascadeType
+	 *            the cascade type
+	 * @param entities
+	 *            the entities
+	 * @return the all reachable entities
+	 * @throws PropertyAccessException
+	 *             the property access exception
+	 */
 	private void getAllReachableEntities(Object o, CascadeType cascadeType,
 			Map<String, EnhancedEntity> entities)
 			throws PropertyAccessException {
@@ -803,10 +749,18 @@ public class EntityManagerImpl implements CassandraEntityManager {
     
 	
 	/**
-	 * @param parent
-	 * @param foreignKeys
+	 * Populate foreign entities.
+	 * 
+	 * @param containingEntity
+	 *            the containing entity
+	 * @param containingEntityId
+	 *            the containing entity id
 	 * @param relation
+	 *            the relation
+	 * @param foreignKeys
+	 *            the foreign keys
 	 * @throws PropertyAccessException
+	 *             the property access exception
 	 */
 	public void populateForeignEntities(Object containingEntity, String containingEntityId,
 			EntityMetadata.Relation relation, String... foreignKeys)
@@ -860,6 +814,19 @@ public class EntityManagerImpl implements CassandraEntityManager {
 	}
 	
 	// Helper method to load Foreign Entity/Proxy
+	/**
+	 * Gets the foreign entity or proxy.
+	 * 
+	 * @param entityName
+	 *            the entity name
+	 * @param persistentClass
+	 *            the persistent class
+	 * @param foreignKey
+	 *            the foreign key
+	 * @param relation
+	 *            the relation
+	 * @return the foreign entity or proxy
+	 */
 	private Object getForeignEntityOrProxy(String entityName,
 			Class<?> persistentClass, String foreignKey,
 			EntityMetadata.Relation relation) {

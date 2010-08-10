@@ -30,28 +30,36 @@ import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
- * BaseDataAccessor
+ * BaseDataAccessor.
  * 
+ * @param <TF>
+ *            Thrift data unit: Column or SuperColumn
  * @author animesh.kumar
- *
- * @param <TF>	Thrift data unit: Column or SuperColumn
  */
 public abstract class BaseDataAccessor<TF> implements DataAccessor {
 
 	/** log for this class. */
 	private static Log log = LogFactory.getLog(BaseDataAccessor.class);
 
-    /** The EntityManager */
-    private EntityManagerImpl em;
+	/** The EntityManager. */
+	private EntityManagerImpl em;
 
-    public BaseDataAccessor (EntityManagerImpl em) {
-    	this.em = em;
-    }
-	
 	/**
+	 * Instantiates a new base data accessor.
+	 * 
+	 * @param em
+	 *            the em
+	 */
+	public BaseDataAccessor(EntityManagerImpl em) {
+		this.em = em;
+	}
+
+	/**
+	 * Gets the entity manager.
+	 * 
 	 * @return EntityManager
 	 */
-	public EntityManagerImpl getEntityManager () {
+	public EntityManagerImpl getEntityManager() {
 		return em;
 	}
 
@@ -72,16 +80,17 @@ public abstract class BaseDataAccessor<TF> implements DataAccessor {
 	}
 
 	/**
-	 * Creates a string representation of a set of foreign keys by combining them 
-	 * together separated by "~" character. 
+	 * Creates a string representation of a set of foreign keys by combining
+	 * them together separated by "~" character.
 	 * 
-	 * Note: Assumption is that @Id will never contain "~" character. Checks for this 
-	 * are not added yet. 
+	 * Note: Assumption is that @Id will never contain "~" character. Checks for
+	 * this are not added yet.
 	 * 
 	 * @param foreignKeys
-	 * @return
+	 *            the foreign keys
+	 * @return the string
 	 */
-	protected String serializeKeys (Set<String> foreignKeys) {
+	protected String serializeKeys(Set<String> foreignKeys) {
 		if (null == foreignKeys || foreignKeys.isEmpty()) {
 			return null;
 		}
@@ -97,14 +106,15 @@ public abstract class BaseDataAccessor<TF> implements DataAccessor {
 	}
 
 	/**
-	 * Splits foreign keys into Set 
+	 * Splits foreign keys into Set.
 	 * 
 	 * @param foreignKeys
-	 * @return
+	 *            the foreign keys
+	 * @return the set
 	 */
-	protected Set<String> deserializeKeys (String foreignKeys) {
-		Set<String> keys = new HashSet<String>(); 
-		
+	protected Set<String> deserializeKeys(String foreignKeys) {
+		Set<String> keys = new HashSet<String>();
+
 		if (null == foreignKeys || foreignKeys.isEmpty()) {
 			return keys;
 		}
@@ -117,7 +127,7 @@ public abstract class BaseDataAccessor<TF> implements DataAccessor {
 	}
 
 	/**
-	 * Utility class that represents a row in Cassandra DB
+	 * Utility class that represents a row in Cassandra DB.
 	 * 
 	 * @author animesh.kumar
 	 */
@@ -142,8 +152,8 @@ public abstract class BaseDataAccessor<TF> implements DataAccessor {
 		/**
 		 * The Constructor.
 		 * 
-		 * @param key
-		 *            the key
+		 * @param id
+		 *            the id
 		 * @param columnFamilyName
 		 *            the column family name
 		 * @param columns
