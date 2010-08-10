@@ -81,11 +81,6 @@ public interface LazyInitializer {
 	 * Unset this initializer's reference to session. It is assumed that the
 	 * caller is also taking care or cleaning up the owning proxy's reference in
 	 * the persistence context.
-	 * <p/>
-	 * Generally speaking this is intended to be called only during
-	 * {@link org.hibernate.Session#evict} and
-	 * {@link org.hibernate.Session#clear} processing; most other use-cases
-	 * should call {@link #setSession} instead.
 	 */
 	public void unsetEntityManager();
 
