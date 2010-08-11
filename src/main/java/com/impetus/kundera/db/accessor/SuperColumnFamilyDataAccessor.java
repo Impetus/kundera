@@ -212,7 +212,7 @@ public final class SuperColumnFamilyDataAccessor extends
 					String foreignKeys = PropertyAccessorFactory.STRING
 							.fromBytes(value);
 					Set<String> keys = deserializeKeys(foreignKeys);
-					getEntityManager().populateForeignEntities(e, cr.getId(),
+					getEntityManager().getEntityResolver().populateForeignEntities(e, cr.getId(),
 							relation, keys.toArray(new String[0]));
 
 				} else {

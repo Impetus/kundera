@@ -141,7 +141,8 @@ public class PropertyAccessorHelper {
     }
 
     /**
-     * Gets id value of an entity class.
+     * Get identifier of an entity object by invoking getXXX() method.
+     * 
      * 
      * @param entity
      *            the entity
@@ -155,16 +156,15 @@ public class PropertyAccessorHelper {
      */
     public static String getId (Object entity, EntityMetadata metadata) throws PropertyAccessException {
         try {
-        	// always read from method!
+        	// Always read from method. that way, even LazyInitialized 
+        	// Proxy classes can be worked upon.
 			return (String) metadata.getReadIdentifierMethod().invoke(entity, new Object[] {});
         } catch (IllegalArgumentException iarg) {
             throw new PropertyAccessException(iarg);
         } catch (IllegalAccessException iacc) {
             throw new PropertyAccessException(iacc);
         } catch (InvocationTargetException ite) {
-        	throw new PropertyAccessException(ite);		}
-
-    
+        	throw new PropertyAccessException(ite);		
+        }
     }
-
 }

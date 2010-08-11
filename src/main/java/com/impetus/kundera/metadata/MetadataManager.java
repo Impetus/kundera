@@ -185,7 +185,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
 		EntityMetadata metadata = new EntityMetadata(clazz);
 		validate(clazz);
 
-		log.debug("Processing @Entity: " + clazz);
+		log.debug("Processing @Entity >> " + clazz);
 
 		for (MetadataProcessor processor : metadataProcessors) {
 			processor.process(clazz, metadata);
@@ -261,6 +261,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
 	 * Build Inter/Intra @Entity relationships.
 	 */
 	public void build() {
+		log.debug("Building @Entity's foreign relations.");
 		for (EntityMetadata metadata : getEntityMetadatasAsList()) {
 			processRelations(metadata.getEntityClazz());
 			log.debug("Metadata for @Entity " + metadata.getEntityClazz()
@@ -269,10 +270,8 @@ public class MetadataManager implements AnnotationDiscoveryListener {
 		instantiated = true;
 	}
 
-	// Helper class to scan each @Entity class and build various
-	// relational annotation.
 	/**
-	 * Process relations.
+	 * Helper class to scan each @Entity class and build various relational annotation.
 	 * 
 	 * @param entity
 	 *            the entity

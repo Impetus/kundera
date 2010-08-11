@@ -188,8 +188,8 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 				String foreignKeys = PropertyAccessorFactory.STRING
 						.fromBytes(value);
 				Set<String> keys = deserializeKeys(foreignKeys);
-				getEntityManager().populateForeignEntities(e, cr.getId(),
-						relation, keys.toArray(new String[0]));
+				getEntityManager().getEntityResolver().populateForeignEntities(
+						e, cr.getId(), relation, keys.toArray(new String[0]));
 			}
 
 			else {
@@ -204,9 +204,8 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 		return e;
 	}
 
-	// Helper method to convert @Entity to ThriftRow
 	/**
-	 * To thrift row.
+	 * Helper method to convert @Entity to ThriftRow
 	 * 
 	 * @param e
 	 *            the e
