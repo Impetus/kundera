@@ -16,6 +16,7 @@
 package com.impetus.kundera.property;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 
 import com.impetus.kundera.metadata.EntityMetadata;
 
@@ -152,7 +153,18 @@ public class PropertyAccessorHelper {
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static String getId(Object entity, EntityMetadata metadata) throws PropertyAccessException {
-        return (String) getObject(entity, metadata.getIdProperty());
+    public static String getId (Object entity, EntityMetadata metadata) throws PropertyAccessException {
+        try {
+        	// always read from method!
+			return (String) metadata.getReadIdentifierMethod().invoke(entity, new Object[] {});
+        } catch (IllegalArgumentException iarg) {
+            throw new PropertyAccessException(iarg);
+        } catch (IllegalAccessException iacc) {
+            throw new PropertyAccessException(iacc);
+        } catch (InvocationTargetException ite) {
+        	throw new PropertyAccessException(ite);		}
+
+    
     }
+
 }
