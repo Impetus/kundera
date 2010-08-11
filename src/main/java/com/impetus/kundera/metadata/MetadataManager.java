@@ -119,8 +119,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
 	 * @throws PersistenceException
 	 *             the persistence exception
 	 */
-	public final boolean isColumnFamily(Class<?> clazz)
-			throws PersistenceException {
+	public final boolean isColumnFamily(Class<?> clazz) {
 		return getEntityMetadata(clazz).getType().equals(
 				EntityMetadata.Type.COLUMN_FAMILY);
 	}
@@ -136,8 +135,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
 	 * @throws PersistenceException
 	 *             the persistence exception
 	 */
-	public final boolean isSuperColumnFamily(Class<?> clazz)
-			throws PersistenceException {
+	public final boolean isSuperColumnFamily(Class<?> clazz) {
 		return getEntityMetadata(clazz).getType().equals(
 				EntityMetadata.Type.SUPER_COLUMN_FAMILY);
 	}
@@ -153,11 +151,9 @@ public class MetadataManager implements AnnotationDiscoveryListener {
 	 * @throws PersistenceException
 	 *             the persistence exception
 	 */
-	public final EntityMetadata getEntityMetadata(Class<?> clazz)
-			throws PersistenceException {
+	public final EntityMetadata getEntityMetadata(Class<?> clazz) {
 
-		// clazz could very well be EnhancedEntity. Let's strip this.
-		EntityMetadata metadata = metadataCache.get(stripEnhancerClass(clazz));
+		EntityMetadata metadata = metadataCache.get(clazz);
 		if (null == metadata) {
 			log.debug("Metadata not found in cache for " + clazz.getName());
 			// double check locking.
@@ -172,29 +168,6 @@ public class MetadataManager implements AnnotationDiscoveryListener {
 	}
 
 	// helper methods to strip CGLIB from class
-	/**
-	 * Strip enhancer class.
-	 * 
-	 * @param c
-	 *            the c
-	 * @return the class
-	 */
-	private Class<?> stripEnhancerClass(Class<?> c) {
-		String className = c.getName();
-
-		// strip CGLIB from name
-		int enhancedIndex = className.indexOf("$$EnhancerByCGLIB");
-		if (enhancedIndex != -1) {
-			className = className.substring(0, enhancedIndex);
-		}
-
-		if (className.equals(c.getName())) {
-			return c;
-		} else {
-			c = ReflectUtils.classForName(className, c.getClassLoader());
-		}
-		return c;
-	}
 
 	/**
 	 * Process.
@@ -207,7 +180,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
 	 * @throws PersistenceException
 	 *             the persistence exception
 	 */
-	private EntityMetadata process(Class<?> clazz) throws PersistenceException {
+	private EntityMetadata process(Class<?> clazz) {
 
 		EntityMetadata metadata = new EntityMetadata(clazz);
 		validate(clazz);

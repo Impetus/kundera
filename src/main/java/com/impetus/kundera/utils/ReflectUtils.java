@@ -134,4 +134,29 @@ public class ReflectUtils {
         }
     }
 
+    
+	/**
+	 * Strip enhancer class.
+	 * 
+	 * @param c
+	 *            the c
+	 * @return the class
+	 */
+	public static Class<?> stripEnhancerClass(Class<?> c) {
+		String className = c.getName();
+
+		// strip CGLIB from name
+		int enhancedIndex = className.indexOf("$$EnhancerByCGLIB");
+		if (enhancedIndex != -1) {
+			className = className.substring(0, enhancedIndex);
+		}
+
+		if (className.equals(c.getName())) {
+			return c;
+		} else {
+			c = classForName(className, c.getClassLoader());
+		}
+		return c;
+	}
+
 }

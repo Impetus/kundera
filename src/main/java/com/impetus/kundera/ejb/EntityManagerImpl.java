@@ -648,8 +648,16 @@ public class EntityManagerImpl implements CassandraEntityManager {
 			Map<String, EnhancedEntity> entities)
 			throws PropertyAccessException {
 		
-		EntityMetadata m = metadataManager.getEntityMetadata(
-				o.getClass());
+		EntityMetadata m = null;
+		try {
+			// if Object "o" is already enhanced, then it getEntityMetadata() will throw an exception!
+			m = metadataManager.getEntityMetadata(o.getClass());
+		} catch (Exception e) {
+		}
+
+		if (m == null) {
+			return;
+		}
 		
 		String id = PropertyAccessorHelper.getId(o, m);
 
@@ -661,7 +669,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 		}
 		
 		// dummy name, to check if this object was processed earlier.
-		String uniqueEntityName = o.getClass().getName() + Constants.SEPARATOR
+		String uniqueEntityName = m.getEntityClazz().getName() + Constants.SEPARATOR
 				+ id;
 
 		// return if this entity has already been processed!
