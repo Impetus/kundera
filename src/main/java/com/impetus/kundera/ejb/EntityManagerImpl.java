@@ -39,6 +39,7 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.CassandraClient;
 import com.impetus.kundera.CassandraEntityManager;
 import com.impetus.kundera.db.DataManager;
+import com.impetus.kundera.ejb.event.EntityEventDispatcher;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataManager;

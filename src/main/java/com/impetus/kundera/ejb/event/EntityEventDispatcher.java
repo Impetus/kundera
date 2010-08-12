@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.ejb;
+package com.impetus.kundera.ejb.event;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import javax.persistence.PersistenceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.ejb.event.CallbackMethod;
+import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 
 /**
@@ -45,7 +45,7 @@ public class EntityEventDispatcher {
 	 * @throws PersistenceException
 	 *             the persistence exception
 	 */
-	protected void fireEventListeners(EntityMetadata metadata, Object entity,
+	public void fireEventListeners(EntityMetadata metadata, Object entity,
 			Class<?> event) throws PersistenceException {
 		
 		// handle external listeners first
