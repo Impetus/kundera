@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.proxy;
+package com.impetus.kundera.proxy.cglib;
 
 import java.lang.reflect.Method;
 
 import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.proxy.KunderaProxy;
+import com.impetus.kundera.proxy.LazyInitializerFactory;
 
 /**
  * Implementation of LazyInitializerFactory using cglib library.

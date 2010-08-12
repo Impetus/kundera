@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.proxy;
+package com.impetus.kundera.proxy.cglib;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -31,6 +31,8 @@ import net.sf.cglib.proxy.NoOp;
 
 import com.impetus.kundera.LazyInitializationException;
 import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.proxy.KunderaProxy;
+import com.impetus.kundera.proxy.LazyInitializer;
 
 /**
  * A <tt>LazyInitializer</tt> implemented using the CGLIB bytecode generation

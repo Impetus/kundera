@@ -41,12 +41,12 @@ import com.impetus.kundera.cache.NonOperationalCacheProvider;
 import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
 import com.impetus.kundera.metadata.MetadataManager;
-import com.impetus.kundera.proxy.CglibEntityEnhancerFactory;
-import com.impetus.kundera.proxy.CglibLazyInitializerFactory;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.proxy.EntityEnhancerFactory;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
+import com.impetus.kundera.proxy.cglib.CglibEntityEnhancerFactory;
+import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 
 /**
  * The Class EntityManagerFactoryImpl.
