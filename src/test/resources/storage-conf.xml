@@ -193,7 +193,7 @@
    ~ directories, since the partitioner can modify the sstable on-disk
    ~ format.
   -->
-  <Partitioner>org.apache.cassandra.dht.RandomPartitioner</Partitioner>
+  <Partitioner>org.apache.cassandra.dht.OrderPreservingPartitioner</Partitioner>
 
   <!--
    ~ If you are using an order-preserving partitioner and you know your key
