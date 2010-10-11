@@ -104,7 +104,7 @@ public class DataManager {
 	 *            Metadata
 	 * @param id
 	 *            Entity primary key
-	 * @return Entity Object
+	 * @return Entity Object or null if none found
 	 * @throws Exception
 	 *             the exception
 	 */

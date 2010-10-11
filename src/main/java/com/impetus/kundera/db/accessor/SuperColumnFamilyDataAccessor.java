@@ -84,11 +84,13 @@ public final class SuperColumnFamilyDataAccessor extends
 						scNames.toArray(new String[0]) // array of names
 				);
 
+		E e;
 		if (null == columns || columns.size() == 0) {
-			throw new PersistenceException("Entity not found for key: " + id);
+			e = null;
+		} else {
+		    e = fromThriftRow(clazz, m, this.new ThriftRow(id, family, columns));
 		}
 
-		E e = fromThriftRow(clazz, m, this.new ThriftRow(id, family, columns));
 		return e;
 	}
 

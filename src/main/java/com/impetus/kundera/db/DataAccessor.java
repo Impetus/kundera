@@ -51,7 +51,7 @@ public interface DataAccessor {
 	 *            Metadata
 	 * @param id
 	 *            Primary Key
-	 * @return the e
+	 * @return the entity or null if no such entity
 	 * @throws Exception
 	 *             the exception
 	 */

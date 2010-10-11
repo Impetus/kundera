@@ -159,11 +159,12 @@ public class EntityManagerImpl implements CassandraEntityManager {
 		try {
 			EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
 			E e = dataManager.find(entityClass, m, primaryKey.toString());
-			session.store(primaryKey, e, m.isCacheable());
+			if(e != null) {
+			    session.store(primaryKey, e, m.isCacheable());
+			}
 			return e;
 		} catch (Exception exp) {
-			exp.printStackTrace();
-			throw new PersistenceException(exp.getMessage());
+			throw new PersistenceException(exp);
 		}
 	}
 
@@ -199,8 +200,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 			// TODO: cache entities for future lookup
 			return entities;
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new PersistenceException(e.getMessage());
+			throw new PersistenceException(e);
 		}
 	}
 
@@ -237,8 +237,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 				eventDispatcher.fireEventListeners (m, o, PostRemove.class);
 			}
 		} catch (Exception exp) {
-			exp.printStackTrace();
-			throw new PersistenceException(exp.getMessage());
+			throw new PersistenceException(exp);
 		}
 	}
 
@@ -248,7 +247,10 @@ public class EntityManagerImpl implements CassandraEntityManager {
 		if (e == null) {
 			throw new IllegalArgumentException("Entity must not be null.");
 		}
-
+		
+		// Validate
+        metadataManager.validate(e.getClass());
+		
 		try {
 
 			List<EnhancedEntity> reachableEntities = entityResolver
@@ -260,6 +262,8 @@ public class EntityManagerImpl implements CassandraEntityManager {
 
 				EntityMetadata metadata = metadataManager.getEntityMetadata(o
 						.getEntity().getClass());
+				
+		        // TODO: throw OptisticLockException if wrong version and optimistic locking enabled
 
 				// fire PreUpdate events
 				eventDispatcher.fireEventListeners(metadata, o, PreUpdate.class);
@@ -271,8 +275,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 				eventDispatcher.fireEventListeners(metadata, o, PostUpdate.class);
 			}
 		} catch (Exception exp) {
-			exp.printStackTrace();
-			throw new PersistenceException(exp.getMessage());
+			throw new PersistenceException(exp);
 		}
 
 		return e;
@@ -298,6 +301,8 @@ public class EntityManagerImpl implements CassandraEntityManager {
 
 				EntityMetadata metadata = metadataManager.getEntityMetadata(o
 						.getEntity().getClass());
+				
+				// TODO: throw EntityExistsException if already exists
 
 				// fire pre-persist events
 				eventDispatcher.fireEventListeners(metadata, o, PrePersist.class);
@@ -309,7 +314,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 				eventDispatcher.fireEventListeners(metadata, o, PostPersist.class);
 			}
 		} catch (Exception exp) {
-			throw new PersistenceException(exp.getMessage());
+			throw new PersistenceException(exp);
 		}
 	}
 	

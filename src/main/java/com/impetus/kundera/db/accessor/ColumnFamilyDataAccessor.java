@@ -72,12 +72,14 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 		List<Column> columns = getEntityManager().getClient().loadColumns(
 				keyspace, family, id);
 
+		E e;
 		// check for empty
 		if (null == columns || columns.size() == 0) {
-			throw new PersistenceException("Entity not found for id: " + id);
+			e = null;
+		} else {
+		    e = fromThriftRow(clazz, m, this.new ThriftRow(id, family, columns));
 		}
-
-		E e = fromThriftRow(clazz, m, this.new ThriftRow(id, family, columns));
+		
 		return e;
 	}
 

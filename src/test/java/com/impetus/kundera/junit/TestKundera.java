@@ -147,13 +147,8 @@ public class TestKundera extends TestCase {
         manager.remove(animesh);
 
         // check if deleted?
-        try {
-
-            manager.find(Author.class, key);
-            fail("Gosh! Author was not deleted");
-        } catch (PersistenceException e) {
-            System.err.println(e.getMessage());
-        }
+        Author animesh_db = manager.find(Author.class, key);
+        assertEquals(null, animesh_db);
     }
 
     /**
