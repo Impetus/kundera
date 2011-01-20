@@ -33,6 +33,8 @@ public interface CacheProvider {
 	 *             the cache exception
 	 */
     void init(Map<?, ?> properties) throws CacheException;
+    
+    void init(String cacheResourceName) throws CacheException;
 
     /**
 	 * Create cache for a given name.

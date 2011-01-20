@@ -13,19 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.entity;
+package com.impetus.hbase.entity;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.PersistenceUnit;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -38,9 +34,9 @@ import com.impetus.kundera.api.ColumnFamily;
  */
 @Entity
 // makes it an entity class
-@ColumnFamily(family="Authors", keyspace="Blog")
+@ColumnFamily(family="hAuthor", keyspace="Blog")
 // assign ColumnFamily type and name
-public class Author implements Serializable{
+public class HAuthor implements Serializable{
 
     /** The username. */
     @Id
@@ -69,7 +65,7 @@ public class Author implements Serializable{
     /**
      * Instantiates a new author.
      */
-    public Author() { // must have a default constructor
+    public HAuthor() { // must have a default constructor
     }
 
     // getters, setters etc.
@@ -98,9 +94,9 @@ public class Author implements Serializable{
             return true;
         if (obj == null)
             return false;
-        if (!(obj instanceof Author))
+        if (!(obj instanceof HAuthor))
             return false;
-        Author other = (Author) obj;
+        HAuthor other = (HAuthor) obj;
         if (username == null) {
             if (other.username != null)
                 return false;

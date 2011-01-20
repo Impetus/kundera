@@ -18,20 +18,17 @@ package com.impetus.kundera.junit;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceException;
 
 import junit.framework.TestCase;
 
 import org.apache.cassandra.service.EmbeddedCassandraService;
 
-import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.entity.Author;
 import com.impetus.kundera.entity.Post;
+import com.impetus.kundera.loader.Configuration;
 
 /**
  * The Class TestKundera.
@@ -43,12 +40,9 @@ public class TestKundera extends TestCase {
     /** The manager. */
     private EntityManager manager;
 
-    /** The factory. */
-    EntityManagerFactory factory;
-
+    Configuration conf ;
     /** The embedded server cassandra. */
     private static EmbeddedCassandraService cassandra;
-
     
     public void startCassandraServer () throws Exception {
         URL configURL = TestKundera.class.getClassLoader().getResource("storage-conf.xml");
@@ -72,20 +66,22 @@ public class TestKundera extends TestCase {
      * @throws Exception the exception
      */
     public void setUp() throws Exception {
-
-    	startCassandraServer();
-    	
-        Map map = new HashMap();
-        map.put("kundera.nodes", "localhost");
-        // note : change it to 9160 if running in cassandra server mode the
-        // embedded one runs on 9165 port
-        map.put("kundera.port", "9165");
-        map.put("kundera.keyspace", "Blog");
-        map.put("sessionless", "false");
-        map.put("kundera.client", "com.impetus.kundera.client.PelopsClient");
-
-        factory = new EntityManagerFactoryImpl("test", map);
-        manager = factory.createEntityManager();
+        if(cassandra ==null) {
+        	startCassandraServer();
+        }
+//    	
+//        Map map = new HashMap();
+//        map.put("kundera.nodes", "localhost");
+//        // note : change it to 9160 if running in cassandra server mode the
+//        // embedded one runs on 9165 port
+//        map.put("kundera.port", "9165");
+//        map.put("kundera.keyspace", "Blog");
+//        map.put("sessionless", "false");
+//        map.put("kundera.client", "com.impetus.kundera.client.PelopsClient");
+//
+//        factory = new EntityManagerFactoryImpl("test", map);
+         conf = new Configuration();
+        manager = conf.getEntityManager("test-unit-1");
 
     }
 
@@ -96,8 +92,7 @@ public class TestKundera extends TestCase {
      * @throws Exception the exception
      */
     public void tearDown() throws Exception {
-    	manager.close();
-        factory.close();
+        conf.destroy();
     }
 
     /**
@@ -154,7 +149,7 @@ public class TestKundera extends TestCase {
     /**
      * Creates the author.
      * 
-     * @param username the username
+     * @param username the user name
      * @param email the email
      * @param country the country
      * @param registeredSince the registered since

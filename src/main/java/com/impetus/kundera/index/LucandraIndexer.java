@@ -15,6 +15,7 @@
  */
 package com.impetus.kundera.index;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,9 +27,11 @@ import lucandra.IndexReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
@@ -36,11 +39,16 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.Version;
 
 import com.impetus.kundera.CassandraClient;
+import com.impetus.kundera.Client;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.accessor.ColumnFamilyDataAccessor;
+import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.PropertyIndex;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -77,14 +85,14 @@ public class LucandraIndexer implements Indexer {
 			+ ".entity.indexname";
 
 	/** The Constant ENTITY_CLASS_FIELD. */
-	public static final String ENTITY_CLASS_FIELD = UUID + ".entity.class";
+	public static final String ENTITY_CLASS_FIELD = /*UUID +*/ "entity.class";
 
 	/** The Constant DEFAULT_SEARCHABLE_FIELD. */
 	private static final String DEFAULT_SEARCHABLE_FIELD = UUID
 			+ ".default_property";
 
 	/** The client. */
-	private CassandraClient client;
+	private Client client;
 
 	/** The analyzer. */
 	private Analyzer analyzer;
@@ -97,7 +105,7 @@ public class LucandraIndexer implements Indexer {
 	 * @param analyzer
 	 *            the analyzer
 	 */
-	public LucandraIndexer(CassandraClient client, Analyzer analyzer) {
+	public LucandraIndexer(Client client, Analyzer analyzer) {
 		this.client = client;
 		this.analyzer = analyzer;
 	}
@@ -159,7 +167,7 @@ public class LucandraIndexer implements Indexer {
 
 			// index entity class
 			luceneField = new Field(ENTITY_CLASS_FIELD, metadata
-					.getEntityClazz().getCanonicalName(), Field.Store.YES,
+					.getEntityClazz().getCanonicalName().toLowerCase(), Field.Store.YES,
 					Field.Index.NOT_ANALYZED_NO_NORMS);
 			document.add(luceneField);
 
@@ -195,7 +203,15 @@ public class LucandraIndexer implements Indexer {
 		// flush the indexes
 		try {
 			log.debug("Flushing to Lucandra: " + document);
-			getIndexWriter().addDocument(document, analyzer);
+			if(!metadata.getDBType().equals(DBType.CASSANDRA)) {
+				IndexWriter w = getDefaultIndexWriter();
+				w.addDocument(document, analyzer);
+				w.commit();
+				w.close();
+				
+			}else {
+				getIndexWriter().addDocument(document, analyzer);
+			}
 		} catch (CorruptIndexException e) {
 			throw new IndexingException(e.getMessage());
 		} catch (IOException e) {
@@ -218,10 +234,13 @@ public class LucandraIndexer implements Indexer {
 
 		Set<String> entityIds = new HashSet<String>();
 
-		IndexReader indexReader = null;
+		org.apache.lucene.index.IndexReader indexReader = null;
 		try {
-			indexReader = new IndexReader(INDEX_NAME, client
-					.getCassandraClient());
+			if(client.getType().equals(DBType.CASSANDRA)) {
+				indexReader = new IndexReader(INDEX_NAME, ((CassandraClient)client).getCassandraClient());
+			}else {
+				indexReader = getDefaultReader();
+			}
 		} catch (Exception e) {
 			throw new IndexingException(e.getMessage());
 		}
@@ -284,10 +303,59 @@ public class LucandraIndexer implements Indexer {
 	 */
 	private lucandra.IndexWriter getIndexWriter() {
 		try {
-			return new lucandra.IndexWriter(INDEX_NAME, client
-					.getCassandraClient());
+			return new lucandra.IndexWriter(INDEX_NAME, ((CassandraClient)client).getCassandraClient());
 		} catch (Exception e) {
 			throw new IndexingException(e.getMessage());
 		}
+	}
+	
+	/**
+	 * Added for HBase support.
+	 * @return default index writerl
+	 */
+	private IndexWriter getDefaultIndexWriter() {
+		StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
+		Directory index = null;
+		IndexWriter w=null;
+		try {
+			index = FSDirectory.open(getIndexDirectory());
+			w = new IndexWriter(index, analyzer, true, IndexWriter.MaxFieldLength.LIMITED);
+		} catch (CorruptIndexException e) {
+			throw new IndexingException(e.getMessage());
+		} catch (LockObtainFailedException e) {
+			throw new IndexingException(e.getMessage());
+		} catch (IOException e) {
+			throw new IndexingException(e.getMessage());
+		}
+         return w;
+	}
+	
+	/**
+	 * Returns default index reader.
+	 * @return  index reader.
+	 */
+	private org.apache.lucene.index.IndexReader getDefaultReader() {
+		org.apache.lucene.index.IndexReader reader = null;
+		try {
+				reader = IndexReader.open(FSDirectory.open(getIndexDirectory()));
+		      } catch (CorruptIndexException e) {
+		    	  		throw new IndexingException(e.getMessage());
+		      } catch (IOException e) {
+		    	  		throw new IndexingException(e.getMessage());
+		      }
+		return reader;
+	}
+	
+	/**
+	 * Creates a directory if it does not exist.
+	 * @return
+	 */
+	private File getIndexDirectory() {
+	    String filePath = System.getProperty("user.home")+"/lucene";
+	    File file = new File(filePath);
+	    if(!file.isDirectory()){
+	    	file.mkdir();
+	    }
+	    return file;
 	}
 }

@@ -44,6 +44,6 @@ public interface CassandraEntityManager extends EntityManager {
      * 
      * @return the client
      */
-    CassandraClient getClient();
+    Client getClient();
 
 }

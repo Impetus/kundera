@@ -34,12 +34,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.CassandraClient;
+import com.impetus.kundera.Client;
 import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.cache.NonOperationalCacheProvider;
 import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
+import com.impetus.kundera.hbase.client.HBaseClient;
 import com.impetus.kundera.metadata.MetadataManager;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.proxy.EntityEnhancerFactory;
@@ -86,11 +88,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     /** The keyspace. */
     private String keyspace;
 
-    /** The client. */
-    private CassandraClient client;
 
     /** The Cache provider. */
     private CacheProvider cacheProvider;
+    
+    private String cacheProviderClassName;
     
     /** The enhanced proxy factory. */
     private EntityEnhancerFactory enhancedProxyFactory;
@@ -107,6 +109,29 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     public EntityManagerFactoryImpl(String persistenceUnitName) {
         this(persistenceUnitName, null);
     }
+    
+//    /**
+//     * Parameterize constructor to load configuration for no sql databases other than Cassandra.  
+//     * @param persistenceUnitName
+//     * @param isCassandra
+//     */
+//    public EntityManagerFactoryImpl(String persistenceUnitName, boolean isCassandra){
+//          onLoad(persistenceUnitName);
+//        if(isCassandra) {
+//            loadCassandraProps();
+//            initCassandraClient();
+//        } else {
+//        	try{
+//        		loadProperties(propsFileName);
+//        	}catch(IOException ioex) {
+//        		throw new PersistenceException(ioex.getMessage());
+//        	}
+//        	loadHBase();
+//        }
+//        
+//    	// Second level cache
+//		initSecondLevelCache();
+//    }
 
     /**
      * This one is generally called via the PersistenceProvider.
@@ -129,24 +154,52 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      *            should have accessKey and secretKey
      */
     public EntityManagerFactoryImpl(String persistenceUnitName, Map props) {
-        if (persistenceUnitName == null) {
+       onLoad(persistenceUnitName);
+      this.props = props;
+//        // if props is NULL or empty, look for kundera.properties and populate
+//        if (props == null || props.isEmpty()) {
+//            loadCassandraProps();
+//            initCassandraClient();
+//        }
+//        //configure Cassandra client.
+    	// Second level cache
+//		initSecondLevelCache();
+    }
+
+
+//    /**
+//     * Loads cassandra properties.
+//     */
+//	private void loadCassandraProps() {
+//		try {
+//			log.debug("Trying to load Kundera Properties from " + propsFileName);
+//		    loadProperties(propsFileName);
+//		} catch (IOException e) {
+//		    throw new PersistenceException(e);
+//		}
+//	}
+	
+//	/**
+//	 * Loads HBase properties.
+//	 */
+//	private void loadHBase() {
+//		client = new HBaseClient();
+//		client.setContactNodes("localhost");
+//		client.setDefaultPort(6000);
+//		client.connect();
+//	}
+
+    /**
+     * Method to instantiate persistence entities and metadata.
+     * @param persistenceUnitName
+     */
+	private void onLoad(String persistenceUnitName) {
+		if (persistenceUnitName == null) {
             throw new IllegalArgumentException("Must have a persistenceUnitName!");
         }
-
         long start = System.currentTimeMillis();
 
         this.persistenceUnitName = persistenceUnitName;
-        this.props = props;
-        // if props is NULL or empty, look for kundera.properties and populate
-        if (props == null || props.isEmpty()) {
-            try {
-            	log.debug("Trying to load Kundera Properties from " + propsFileName);
-                loadProperties(propsFileName);
-            } catch (IOException e) {
-                throw new PersistenceException(e);
-            }
-        }
-        init();
         metadataManager = new MetadataManager(this);
 
         // scan classes for @Entity
@@ -161,109 +214,107 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         lazyInitializerFactory = new CglibLazyInitializerFactory();
         
         log.info("EntityManagerFactoryImpl loaded in " + (System.currentTimeMillis() - start) + "ms.");
-    }
+	}
 
     
-    /**
-     * Load properties.
-     * 
-     * @param propsFileName
-     *            the props file name
-     * 
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
-     */
-    private void loadProperties(String propsFileName) throws IOException {
-        Properties props_ = new Properties();
-        InputStream stream = this.getClass().getResourceAsStream(propsFileName);
-        if (stream == null) {
-            throw new FileNotFoundException(propsFileName + " not found on classpath. Could not initialize Kundera.");
-        }
-        props_.load(stream);
-        props = props_;
-        stream.close();
-    }
+//    /**
+//     * Load properties.
+//     * 
+//     * @param propsFileName
+//     *            the props file name
+//     * 
+//     * @throws IOException
+//     *             Signals that an I/O exception has occurred.
+//     */
+//    private void loadProperties(String propsFileName) throws IOException {
+//        Properties props_ = new Properties();
+//        InputStream stream = this.getClass().getResourceAsStream(propsFileName);
+//        if (stream == null) {
+//            throw new FileNotFoundException(propsFileName + " not found on classpath. Could not initialize Kundera.");
+//        }
+//        props_.load(stream);
+//        props = props_;
+//        stream.close();
+//    }
 
-    /**
-     * Inits the.
-     */
-    private void init() {
-    	// Look for kundera.nodes
-    	try {
-    		String kunderaNodes = (String)props.get("kundera.nodes");
-    		if (null == kunderaNodes || kunderaNodes.isEmpty()) {
-    			throw new IllegalArgumentException();
-    		}
-    		nodes = kunderaNodes.split(",");
-    	} catch (Exception e) {
-    		throw new IllegalArgumentException("Mandatory property missing 'kundera.nodes'");
-    	}
-        
-    	// kundera.port
-    	String kunderaPort = (String) props.get("kundera.port");
-		if (null == kunderaPort || kunderaPort.isEmpty()) {
-			throw new IllegalArgumentException("Mandatory property missing 'kundera.port'");
-		}
-    	try {
-    		port = Integer.parseInt(kunderaPort);
-    	} catch (Exception e) {
-    		throw new IllegalArgumentException("Invalid value for property 'kundera.port': " + kunderaPort + ". (Should it be 9160?)");
-    	}
-        
-    	// kundera.keyspace
-    	keyspace = (String) props.get("kundera.keyspace");
-		if (null == keyspace || keyspace.isEmpty()) {
-			throw new IllegalArgumentException("Mandatory property missing 'kundera.keyspace'");
-		}
-        
-        // kundera.client
-        String cassandraClient = (String) props.get("kundera.client");
-		if (null == cassandraClient || cassandraClient.isEmpty()) {
-			throw new IllegalArgumentException("Mandatory property missing 'kundera.client'");
-		}
-		
-		// Second level cache
-		initSecondLevelCache();
-		
-		// Instantiate the client
-        try {
-    		if ( cassandraClient.endsWith( ".class" ) ) {
-    			cassandraClient = cassandraClient.substring( 0, cassandraClient.length() - 6 );
-    		}
-    		
-            client = (CassandraClient) Class.forName(cassandraClient).newInstance();
-            client.setContactNodes(nodes);
-            client.setDefaultPort(port);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid value for property 'kundera.client': " + cassandraClient + ". (Should it be com.impetus.kundera.client.PelopsClient?");
-        }
-        
-        log.info("Connecting to Cassandra... (nodes:" + Arrays.asList(nodes) + ", port:" + port + ", keyspace:" + keyspace + ")");
-        
-        // connect to Cassandra DB
-        client.connect();
-    }
+//    /**
+//     * Inits the.
+//     */
+//    private void initCassandraClient() {
+//    	// Look for kundera.nodes
+//    	try {
+//    		String kunderaNodes = (String)props.get("kundera.nodes");
+//    		if (null == kunderaNodes || kunderaNodes.isEmpty()) {
+//    			throw new IllegalArgumentException();
+//    		}
+//    		nodes = kunderaNodes.split(",");
+//    	} catch (Exception e) {
+//    		throw new IllegalArgumentException("Mandatory property missing 'kundera.nodes'");
+//    	}
+//        
+//    	// kundera.port
+//    	String kunderaPort = (String) props.get("kundera.port");
+//		if (null == kunderaPort || kunderaPort.isEmpty()) {
+//			throw new IllegalArgumentException("Mandatory property missing 'kundera.port'");
+//		}
+//    	try {
+//    		port = Integer.parseInt(kunderaPort);
+//    	} catch (Exception e) {
+//    		throw new IllegalArgumentException("Invalid value for property 'kundera.port': " + kunderaPort + ". (Should it be 9160?)");
+//    	}
+//        
+//    	// kundera.keyspace
+//    	keyspace = (String) props.get("kundera.keyspace");
+//		if (null == keyspace || keyspace.isEmpty()) {
+//			throw new IllegalArgumentException("Mandatory property missing 'kundera.keyspace'");
+//		}
+//        
+//        // kundera.client
+//        String cassandraClient = (String) props.get("kundera.client");
+//		if (null == cassandraClient || cassandraClient.isEmpty()) {
+//			throw new IllegalArgumentException("Mandatory property missing 'kundera.client'");
+//		}
+//	
+//		
+//		// Instantiate the client
+//        try {
+//    		if ( cassandraClient.endsWith( ".class" ) ) {
+//    			cassandraClient = cassandraClient.substring( 0, cassandraClient.length() - 6 );
+//    		}
+//    		
+//            client = (CassandraClient) Class.forName(cassandraClient).newInstance();
+//            client.setContactNodes(nodes);
+//            client.setDefaultPort(port);
+//        } catch (Exception e) {
+//            throw new IllegalArgumentException("Invalid value for property 'kundera.client': " + cassandraClient + ". (Should it be com.impetus.kundera.client.PelopsClient?");
+//        }
+//        
+//        log.info("Connecting to Cassandra... (nodes:" + Arrays.asList(nodes) + ", port:" + port + ", keyspace:" + keyspace + ")");
+//        
+//        // connect to Cassandra DB
+//        client.connect();
+//    }
 
-    /**
-	 * Inits the second level cache.
-	 */
-    @SuppressWarnings("unchecked")
-	private void initSecondLevelCache() {
-    	String cacheProviderClassName = (String) props.get("kundera.cache.provider_class");
-        if (cacheProviderClassName != null) {
-            try {
-                Class<CacheProvider> cacheProviderClass = (Class<CacheProvider>) Class.forName(cacheProviderClassName);
-                cacheProvider = cacheProviderClass.newInstance();
-                cacheProvider.init(props);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        if (cacheProvider == null) {
-        	cacheProvider = new NonOperationalCacheProvider();
-        }
-        log.info("Initialized second-level cache. Provider: " + cacheProvider.getClass());
-    }
+//    /**
+//	 * Inits the second level cache.
+//	 */
+//    @SuppressWarnings("unchecked")
+//	private void initSecondLevelCache() {
+////    	String cacheProviderClassName = (String) props.get("kundera.cache.provider_class");
+//        if (cacheProviderClassName != null) {
+//            try {
+//                Class<CacheProvider> cacheProviderClass = (Class<CacheProvider>) Class.forName(cacheProviderClassName);
+//                cacheProvider = cacheProviderClass.newInstance();
+//                cacheProvider.init(props);
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+//        if (cacheProvider == null) {
+//        	cacheProvider = new NonOperationalCacheProvider();
+//        }
+//        log.info("Initialized second-level cache. Provider: " + cacheProvider.getClass());
+//    }
     
     /**
 	 * Gets the cache.
@@ -295,20 +346,20 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     @Override
     public final void close() {
         closed = true;
-        client.shutdown();
+//        client.shutdown();
         cacheProvider.shutdown();
     }
 
     /* @see javax.persistence.EntityManagerFactory#createEntityManager() */
     @Override
     public final EntityManager createEntityManager() {
-        return new EntityManagerImpl(this, client);
+        return new EntityManagerImpl(this);
     }
 
     /* @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map) */
     @Override
     public final EntityManager createEntityManager(Map map) {
-        return new EntityManagerImpl(this, client);
+        return new EntityManagerImpl(this);
     }
 
     /**

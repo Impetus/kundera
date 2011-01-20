@@ -8,20 +8,40 @@
 		
 		<properties>
 			<property name="kundera.nodes" value="localhost"/>
-			<!-- property name="kundera.port" value="9160"/ -->
+			<property name="kundera.port" value="9165"/>
 			<property name="kundera.keyspace" value="Blog"/>
-			<property name="kundera.client" value="com.impetus.kundera.client.PelopsClient.class"/>
+			<property name="kundera.dialect" value="cassandra"/>
+			<property name="kundera.client" value="Pelops"/>
+			<property name="kundera.cache.provider_class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider"/>
+            <property name="net.sf.ehcache.configurationResourceName" value="/ehcache-test.xml"/>			
+   			<!--  <property name="kundera.client.implementation" value="com.impetus.kundera.client.PelopsClient.class"/> -->
 		</properties>
+		
 	</persistence-unit>
 
-	<persistence-unit name="test-unit-2">
+	<persistence-unit name="hbase">
 		<provider>com.impetus.kundera.ejb.KunderaPersistence</provider>
 		
 		<properties>
 			<property name="kundera.nodes" value="localhost"/>
 			<property name="kundera.port" value="9165"/>
 			<property name="kundera.keyspace" value="Blog"/>
-			<property name="kundera.client" value="com.impetus.kundera.client.PelopsClient.class"/>
+			<property name="kundera.dialect" value="hbase"/>
+			<property name="kundera.client" value="Hbase"/>
+			<property name="kundera.cache.provider_class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider"/>
+            <property name="net.sf.ehcache.configurationResourceName" value="/ehcache-test.xml"/>			
+			<!--  <property name="kundera.client.implementation" value="com.impetus.kundera.hbase.client.HBaseClient.class"/> -->
 		</properties>
 	</persistence-unit>
+<!-- 	<persistence-unit name="test-unit-3">
+		<provider>com.impetus.kundera.ejb.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost"/>
+			<property name="kundera.port" value="9165"/>
+			<property name="kundera.keyspace" value="Blog"/>
+			<property name="kundera.dialect" value="mongodb"/>
+			<property name="kundera.client" value="com.impetus.kundera.client.MongoDefaultClient.class"/>
+		</properties>
+	</persistence-unit>
+-->
 </persistence>

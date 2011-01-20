@@ -93,6 +93,9 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-report-plugin</artifactId>
+				 <configuration>
+                                 <forkMode>always</forkMode>
+				 </configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -234,7 +237,22 @@
 			<artifactId>lucandra</artifactId>
 			<version>UNKNOWN</version>
 		</dependency>
-		
+              <!-- HBase depndencies-->
+		<dependency>
+		     <groupId>org.apache.hbase</groupId>
+		     <artifactId>hbase-core</artifactId>
+		     <version>0.20.6</version>
+		</dependency>
+		<dependency>
+		     <groupId>org.apache.hadoop</groupId>
+		     <artifactId>hadoop-core</artifactId>
+		     <version>0.20.2</version>
+		</dependency>
+		<dependency>
+		     <groupId>org.apache.hbase.zookeeper</groupId>
+		     <artifactId>zookeeper</artifactId>
+		     <version>3.2.2</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

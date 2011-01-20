@@ -27,6 +27,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
 
 import com.impetus.kundera.ejb.event.CallbackMethod;
+import com.impetus.kundera.loader.DBType;
 
 /**
  * The Class EntityMetadata.
@@ -86,6 +87,8 @@ public final class EntityMetadata {
 	/** Cacheable?. */
 	private boolean cacheable = false; // default is to not set second-level
 										// cache
+	
+	private DBType dbType;
 
 	/**
 	 * The Enum ForeignKey.
@@ -1047,5 +1050,13 @@ public final class EntityMetadata {
 			return type.equals(ForeignKey.ONE_TO_MANY)
 					|| type.equals(ForeignKey.MANY_TO_MANY);
 		}
+	}
+	
+	public DBType getDBType(){
+		return dbType;
+	}
+	
+	public void setDBType(DBType type) {
+		this.dbType = type;
 	}
 }

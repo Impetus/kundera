@@ -49,4 +49,10 @@ public class NonOperationalCacheProvider implements CacheProvider {
 	public void shutdown() {
 	}
 
+	@Override
+	public void init(String cacheResourceName) throws CacheException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

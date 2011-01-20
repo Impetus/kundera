@@ -56,8 +56,42 @@ public class EhCacheProvider implements CacheProvider {
     private List<CacheEventListener> listeners = new ArrayList<CacheEventListener>();
 
 
+	@Override
+	public void init(String cacheResourceName) throws CacheException {
+        if (manager != null) {
+            log.warn ("Attempt to restart an already started CacheFactory. Using previously created EhCacheFactory.");
+            return;
+        }
+        initializing = true;
+        try {
+            String configurationResourceName = cacheResourceName;
+            if (configurationResourceName == null || configurationResourceName.length() == 0) {
+                manager = new CacheManager();
+            } else {
+                if (!configurationResourceName.startsWith("/")) {
+                    configurationResourceName = "/" + configurationResourceName;
+                    	log.info ("prepending / to " + configurationResourceName + ". It should be placed in the root"
+                                + "of the classpath rather than in a package.");
+                }
+                URL url = loadResource(configurationResourceName);
+                manager = new CacheManager(url);
+            }
+        } catch (net.sf.ehcache.CacheException e) {
+            if (e.getMessage().startsWith("Cannot parseConfiguration CacheManager. Attempt to create a new instance of " +
+                    "CacheManager using the diskStorePath")) {
+                throw new CacheException("Could not init EhCacheFactory.", e);
+            } else {
+                throw e;
+            }
+        } finally {
+            initializing = false;
+        }
+
+    }
+
     /* @see com.impetus.kundera.cache.CacheProvider#init(java.util.Map) */
-    public synchronized void init(Map properties) throws CacheException {
+    @Override
+    public synchronized void init(Map<?, ?> properties) throws CacheException {
         if (manager != null) {
             log.warn ("Attempt to restart an already started CacheFactory. Using previously created EhCacheFactory.");
             return;
@@ -184,5 +218,6 @@ public class EhCacheProvider implements CacheProvider {
     public void addDefaultListener(CacheEventListener cacheEventListener) {
         listeners.add(cacheEventListener);
     }
+    
 
 }

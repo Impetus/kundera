@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.CassandraClient;
 import com.impetus.kundera.CassandraEntityManager;
+import com.impetus.kundera.Client;
 import com.impetus.kundera.db.DataManager;
 import com.impetus.kundera.ejb.event.EntityEventDispatcher;
 import com.impetus.kundera.index.IndexManager;
@@ -63,7 +64,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 	private boolean closed = false;
 
 	/** The client. */
-	private CassandraClient client;
+	private Client client;
 
 	/** The data manager. */
 	private DataManager dataManager;
@@ -94,14 +95,13 @@ public class EntityManagerImpl implements CassandraEntityManager {
 	 * @param client
 	 *            the client
 	 */
-	public EntityManagerImpl(EntityManagerFactoryImpl factory,
-			CassandraClient client) {
+	public EntityManagerImpl(EntityManagerFactoryImpl factory) {
 		this.factory = factory;
 		this.metadataManager = factory.getMetadataManager();
-		this.client = client;
+//		this.client = client;
 		this.persistenceUnitName = factory.getPersistenceUnitName();
 		dataManager = new DataManager(this);
-		indexManager = new IndexManager(this);
+		//indexManager = new IndexManager(this);
 		entityResolver = new EntityResolver(this);
 		session = new EntityManagerSession(this);
 		eventDispatcher = new EntityEventDispatcher();
@@ -158,6 +158,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 	protected <E> E immediateLoadAndCache(Class<E> entityClass, Object primaryKey) {
 		try {
 			EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
+			m.setDBType(this.client.getType());
 			E e = dataManager.find(entityClass, m, primaryKey.toString());
 			if(e != null) {
 			    session.store(primaryKey, e, m.isCacheable());
@@ -194,7 +195,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 		try {
 			String[] ids = Arrays.asList(primaryKeys).toArray(new String[] {});
 			EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
-
+			m.setDBType(this.client.getType());
 			List<E> entities = dataManager.find(entityClass, m, ids);
 
 			// TODO: cache entities for future lookup
@@ -225,13 +226,13 @@ public class EntityManagerImpl implements CassandraEntityManager {
 
 				EntityMetadata m = metadataManager.getEntityMetadata(o
 						.getEntity().getClass());
-
+				m.setDBType(this.client.getType());
 				// fire PreRemove events
 				eventDispatcher.fireEventListeners (m, o, PreRemove.class);
 
 				session.remove(o.getEntity().getClass(), o.getId());
 				dataManager.remove(o, m);
-				indexManager.remove(m, o.getEntity(), o.getId());
+				getIndexManager().remove(m, o.getEntity(), o.getId());
 
 				// fire PostRemove events
 				eventDispatcher.fireEventListeners (m, o, PostRemove.class);
@@ -262,14 +263,14 @@ public class EntityManagerImpl implements CassandraEntityManager {
 
 				EntityMetadata metadata = metadataManager.getEntityMetadata(o
 						.getEntity().getClass());
-				
+				metadata.setDBType(this.client.getType());
 		        // TODO: throw OptisticLockException if wrong version and optimistic locking enabled
 
 				// fire PreUpdate events
 				eventDispatcher.fireEventListeners(metadata, o, PreUpdate.class);
 
 				dataManager.merge(o, metadata);
-				indexManager.update(metadata, o.getEntity());
+				getIndexManager().update(metadata, o.getEntity());
 
 				// fire PreUpdate events
 				eventDispatcher.fireEventListeners(metadata, o, PostUpdate.class);
@@ -301,14 +302,15 @@ public class EntityManagerImpl implements CassandraEntityManager {
 
 				EntityMetadata metadata = metadataManager.getEntityMetadata(o
 						.getEntity().getClass());
-				
+				metadata.setDBType(this.client.getType());
 				// TODO: throw EntityExistsException if already exists
 
 				// fire pre-persist events
 				eventDispatcher.fireEventListeners(metadata, o, PrePersist.class);
 
+				//TODO uncomment
 				dataManager.persist(o, metadata);
-				indexManager.write(metadata, o.getEntity());
+				getIndexManager().write(metadata, o.getEntity());
 
 				// fire post-persist events
 				eventDispatcher.fireEventListeners(metadata, o, PostPersist.class);
@@ -323,6 +325,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 	public final void clear() {
 		checkClosed();
 		session.clear();
+		client.shutdown();
 	}
 
 	/* @see javax.persistence.EntityManager#close() */
@@ -480,6 +483,9 @@ public class EntityManagerImpl implements CassandraEntityManager {
 	 * @return the indexManager
 	 */
 	public final IndexManager getIndexManager() {
+		if(indexManager ==null) {
+			indexManager = new IndexManager(this);
+		}
 		return indexManager;
 	}
 
@@ -489,7 +495,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 	 * @return the client
 	 */
 	@Override
-	public final CassandraClient getClient() {
+	public final Client getClient() {
 		return client;
 	}
 

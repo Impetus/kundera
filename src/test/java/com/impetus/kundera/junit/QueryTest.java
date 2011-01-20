@@ -15,57 +15,31 @@
  */
 package com.impetus.kundera.junit;
 
-import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 
-import org.apache.cassandra.service.EmbeddedCassandraService;
-
-import junit.framework.TestCase;
-
-import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.entity.Author;
+import com.impetus.kundera.loader.Configuration;
 
-public class QueryTest extends TestCase {
+public class QueryTest extends BaseTest {
 
-	/** The factory. */
-	EntityManagerFactory factory;
+	private Configuration conf = new Configuration();
+     
 
-	private void startCassandraServer() throws Exception {
-		URL configURL = TestKundera.class.getClassLoader().getResource(
-				"storage-conf.xml");
-		try {
-			String storageConfigPath = configURL.getFile().substring(1)
-					.substring(0, configURL.getFile().lastIndexOf("/"));
-			System.setProperty("storage-config", storageConfigPath);
-		} catch (Exception e) {
-			fail("Could not find storage-config.xml sfile");
-		}
-		EmbeddedCassandraService cassandra = new EmbeddedCassandraService();
-		cassandra.init();
-		Thread t = new Thread(cassandra);
-		t.setDaemon(true);
-		t.start();
-	}
-
-	protected void setUp() throws Exception {
-		super.setUp();
+    protected void setUp() throws Exception {
 		startCassandraServer();
-		factory = new EntityManagerFactoryImpl("test-unit-2");// from META-INF/persistence.xml
 	}
 
 	protected void tearDown() throws Exception {
-		super.tearDown();
-		factory.close();
+		conf.destroy();
 	}
 
 	public void testQueryAccrossManagerSessions() throws Exception {
-		EntityManager firstManager = factory.createEntityManager();
+		EntityManager firstManager = getEntityManager();
 
 		int count = 10;
 		String msTestRan = Integer.toString(Calendar.getInstance().get(
@@ -80,7 +54,7 @@ public class QueryTest extends TestCase {
 		}
 		firstManager.close();
 
-		EntityManager secondManager = factory.createEntityManager();
+		EntityManager secondManager = getEntityManager();
 
 		Query q = secondManager
 				.createQuery("select a from Author a where a.country like :country");
@@ -93,7 +67,7 @@ public class QueryTest extends TestCase {
 			secondManager.remove(a);
 			System.out.println("removing " + a.getUsername());
 		}
-		secondManager.close();
+//		secondManager.close();
 
 		assertEquals(count, authors.size());
 	}
@@ -108,4 +82,7 @@ public class QueryTest extends TestCase {
 		return author;
 	}
 
+	private EntityManager getEntityManager() {
+		return conf.getEntityManager("test-unit-1");
+	}
 }

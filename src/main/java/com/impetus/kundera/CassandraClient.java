@@ -18,9 +18,13 @@ package com.impetus.kundera;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.cassandra.thrift.Cassandra.Client;
+
+import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * Interface used to interact with Cassandra Clients.
@@ -29,7 +33,7 @@ import org.apache.cassandra.thrift.Cassandra.Client;
  * @author animesh.kumar
  * @since 0.1
  */
-public interface CassandraClient {
+public interface CassandraClient  extends com.impetus.kundera.Client{
 
     /**
 	 * Write multiple columns into a column-family.
@@ -44,9 +48,9 @@ public interface CassandraClient {
 	 *            Array of columns to write
 	 * @throws Exception
 	 *             The exception
-	 */
-    void writeColumns(String keyspace, String columnFamily, String key, Column... columns) throws Exception;
-
+	 *//*
+    void writeColumns(String keyspace, String columnFamily, String key, List<EntityMetadata.Column> columns,EnhancedEntity e) throws Exception;
+*/
     /**
 	 * Write multiple super-columns into a super-column-family.
 	 * 
@@ -63,7 +67,7 @@ public interface CassandraClient {
 	 */
     void writeSuperColumns(String keyspace, String columnFamily, String key, SuperColumn... superColumns) throws Exception;
 
-    /**
+ /*   *//**
 	 * Retrieve columns from a column-family row.
 	 * 
 	 * @param keyspace
@@ -75,10 +79,10 @@ public interface CassandraClient {
 	 * @return A list of matching columns
 	 * @throws Exception
 	 *             the exception
-	 */
-    List<Column> loadColumns(String keyspace, String columnFamily, String key) throws Exception;
-
-    /**
+	 *//*
+    List<Column> <E> E  loadColumns(EntityManagerImpl em,Class<E> clazz, String keyspace, String columnFamily, String key, EntityMetadata m) throws Exception;
+*/
+   /* *//**
 	 * Retrieve columns from multiple rows of a column-family.
 	 * 
 	 * @param keyspace
@@ -90,23 +94,10 @@ public interface CassandraClient {
 	 * @return A Map of row and corresponding list of columns.
 	 * @throws Exception
 	 *             the exception
-	 */
-    Map<String, List<Column>> loadColumns(String keyspace, String columnFamily, String... keys) throws Exception;
-
-    /**
-	 * Delete a row from either column-family or super-column-family.
-	 * 
-	 * @param keyspace
-	 *            the keyspace
-	 * @param columnFamily
-	 *            The name of the super column family to operate on
-	 * @param rowId
-	 *            the row id
-	 * @throws Exception
-	 *             the exception
-	 */
-    void delete(String keyspace, String columnFamily, String rowId) throws Exception;
-
+	 *//*
+    Map<String, List<Column>> <E> List<E>  loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, EntityMetadata m,String... keys) throws Exception;
+*/
+   
     /**
 	 * Load super-columns from a super-column-family row.
 	 * 
@@ -138,22 +129,7 @@ public interface CassandraClient {
 	 *             the exception
 	 */
     Map<String, List<SuperColumn>> loadSuperColumns(String keyspace, String columnFamily, String... keys) throws Exception;
-
-    /**
-     * Set Cassandra nodes.
-     * 
-     * @param contactNodes
-     *            the contact nodes
-     */
-    void setContactNodes(String... contactNodes);
-
-    /**
-     * Set default port. Default is 9160
-     * 
-     * @param defaultPort
-     *            the default port
-     */
-    void setDefaultPort(int defaultPort);
+    
 
     /**
      * Gets the cassandra client.
@@ -164,15 +140,5 @@ public interface CassandraClient {
      *             the exception
      */
     Client getCassandraClient() throws Exception;
-
-    /**
-     * Shutdown.
-     */
-    void shutdown();
-
-    /**
-     * connects to Cassandra DB.
-     */
-    void connect();
 
 }

@@ -15,14 +15,8 @@
  */
 package com.impetus.kundera.db.accessor;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.PersistenceException;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.commons.logging.Log;
@@ -30,9 +24,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
-import com.impetus.kundera.property.PropertyAccessException;
-import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
@@ -68,19 +59,25 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 		String keyspace = m.getKeyspaceName();
 		String family = m.getColumnFamilyName();
 
+		 return getEntityManager().getClient().loadColumns(getEntityManager(),clazz,keyspace, family, id,m);
 		// load column from DB
-		List<Column> columns = getEntityManager().getClient().loadColumns(
-				keyspace, family, id);
+		//TODO uncomment
+//		List<Column> columns =
 
-		E e;
-		// check for empty
+//		E e;
+//		HBaseClient hBaseClient = new HBaseClient();
+//		HBaseData data = hBaseClient.read(m.getEntityClazz().getSimpleName().toLowerCase(), family, id, new String[0]);
+//
+//		e = onLoadFromHBase(clazz, data, m, id);
+		//TODO uncomment.
+		/*// check for empty
 		if (null == columns || columns.size() == 0) {
 			e = null;
 		} else {
 		    e = fromThriftRow(clazz, m, this.new ThriftRow(id, family, columns));
-		}
+		}*/
 		
-		return e;
+//		return e;
 	}
 
 	/*
@@ -95,30 +92,17 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 
 		String keyspace = m.getKeyspaceName();
 		String family = m.getColumnFamilyName();
+		
+		return getEntityManager().getClient().loadColumns(getEntityManager(), clazz, keyspace, family, m, ids);
 
-		List<E> entities = new ArrayList<E>();
-
-		// load columns from DB
-		Map<String, List<Column>> map = getEntityManager().getClient()
-				.loadColumns(keyspace, family, ids);
-
-		// Iterate and populate entities
-		for (Map.Entry<String, List<Column>> entry : map.entrySet()) {
-
-			String id = entry.getKey();
-			List<Column> columns = entry.getValue();
-
-			if (entry.getValue().size() == 0) {
-				log.debug("@Entity not found for id: " + id);
-				continue;
-			}
-
-			E e = fromThriftRow(clazz, m, this.new ThriftRow(id, family,
-					columns));
-			entities.add(e);
-		}
-
-		return entities;
+//		List<E> entities = new ArrayList<E>();
+//
+//		for(String id : ids) {
+//		HBaseClient hBaseClient = new HBaseClient();
+//		HBaseData data = hBaseClient.read(m.getEntityClazz().getSimpleName().toLowerCase(), family, id, new String[0]);
+//		   entities.add(onLoadFromHBase(clazz, data, m, id));
+//		return entities;
+//		}
 	}
 
 	/*
@@ -135,134 +119,13 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 		String keyspace = m.getKeyspaceName();
 		String family = m.getColumnFamilyName();
 
-		BaseDataAccessor<Column>.ThriftRow tf = toThriftRow(e, m);
-
+//		BaseDataAccessor<Column>.ThriftRow tf = toThriftRow(e, m);
 		getEntityManager().getClient().writeColumns(keyspace, family, // columnFamily
-				tf.getId(), // row id
-				tf.getColumns().toArray(new Column[0]) // list of columns
+				id, // row id
+				m.getColumnsAsList(), e// list of columns
 				);
-	}
-
-	// Helper method to convert ThriftRow to @Entity
-	/**
-	 * From thrift row.
-	 * 
-	 * @param <E>
-	 *            the element type
-	 * @param clazz
-	 *            the clazz
-	 * @param m
-	 *            the m
-	 * @param cr
-	 *            the cr
-	 * @return the e
-	 * @throws Exception
-	 *             the exception
-	 */
-	private <E> E fromThriftRow(Class<E> clazz, EntityMetadata m,
-			BaseDataAccessor<Column>.ThriftRow cr) throws Exception {
-
-		// Instantiate a new instance
-		E e = clazz.newInstance();
-
-		// Set row-key. Note: @Id is always String.
-		PropertyAccessorHelper.set(e, m.getIdProperty(), cr.getId());
-
-		// Iterate through each column
-		for (Column c : cr.getColumns()) {
-			String name = PropertyAccessorFactory.STRING.fromBytes(c.getName());
-			byte[] value = c.getValue();
-
-			if (null == value) {
-				continue;
-			}
-
-			// check if this is a property?
-			EntityMetadata.Column column = m.getColumn(name);
-			if (null == column) {
-				// it could be some relational column
-				EntityMetadata.Relation relation = m.getRelation(name);
-
-				if (relation == null) {
-					continue;
-				}
-
-				String foreignKeys = PropertyAccessorFactory.STRING
-						.fromBytes(value);
-				Set<String> keys = deserializeKeys(foreignKeys);
-				getEntityManager().getEntityResolver().populateForeignEntities(
-						e, cr.getId(), relation, keys.toArray(new String[0]));
-			}
-
-			else {
-				try {
-					PropertyAccessorHelper.set(e, column.getField(), value);
-				} catch (PropertyAccessException pae) {
-					log.warn(pae.getMessage());
-				}
-			}
-		}
-
-		return e;
-	}
-
-	/**
-	 * Helper method to convert @Entity to ThriftRow
-	 * 
-	 * @param e
-	 *            the e
-	 * @param m
-	 *            the m
-	 * @return the base data accessor. thrift row
-	 * @throws Exception
-	 *             the exception
-	 */
-	private BaseDataAccessor<Column>.ThriftRow toThriftRow(EnhancedEntity e,
-			EntityMetadata m) throws Exception {
-
-		// timestamp to use in thrift column objects
-		long timestamp = System.currentTimeMillis();
-
-		BaseDataAccessor<Column>.ThriftRow cr = this.new ThriftRow();
-
-		// column-family name
-		cr.setColumnFamilyName(m.getColumnFamilyName());
-
-		// id
-		cr.setId(e.getId());
-
-		List<Column> columns = new ArrayList<Column>();
-
-		// Iterate through each column-meta and populate that with field values
-		for (EntityMetadata.Column column : m.getColumnsAsList()) {
-			Field field = column.getField();
-			String name = column.getName();
-			try {
-				byte[] value = PropertyAccessorHelper.get(e.getEntity(), field);
-				columns.add(new Column(PropertyAccessorFactory.STRING
-						.toBytes(name), value, timestamp));
-			} catch (PropertyAccessException exp) {
-				log.warn(exp.getMessage());
-			}
-
-		}
-
-		// add foreign keys
-		for (Map.Entry<String, Set<String>> entry : e.getForeignKeysMap()
-				.entrySet()) {
-			String property = entry.getKey();
-			Set<String> foreignKeys = entry.getValue();
-
-			String keys = serializeKeys(foreignKeys);
-			if (null != keys) {
-				columns.add(new Column(PropertyAccessorFactory.STRING
-						.toBytes(property), PropertyAccessorFactory.STRING
-						.toBytes(keys), timestamp));
-			}
-		}
-
-		cr.setColumns(columns);
-		return cr;
+//		HBaseClient hBaseClient = new HBaseClient();
+//		hBaseClient.write(m.getEntityClazz().getSimpleName().toLowerCase(), family, id, m.getColumnsAsList(), e);
 	}
 
 }
