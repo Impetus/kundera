@@ -206,10 +206,11 @@ public class LucandraIndexer implements Indexer {
 			if(!metadata.getDBType().equals(DBType.CASSANDRA)) {
 				IndexWriter w = getDefaultIndexWriter();
 				w.addDocument(document, analyzer);
+				w.optimize();					
 				w.commit();
 				w.close();
 				
-			}else {
+			} else {
 				getIndexWriter().addDocument(document, analyzer);
 			}
 		} catch (CorruptIndexException e) {
@@ -311,7 +312,7 @@ public class LucandraIndexer implements Indexer {
 	
 	/**
 	 * Added for HBase support.
-	 * @return default index writerl
+	 * @return default index writer
 	 */
 	private IndexWriter getDefaultIndexWriter() {
 		StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
@@ -319,7 +320,13 @@ public class LucandraIndexer implements Indexer {
 		IndexWriter w=null;
 		try {
 			index = FSDirectory.open(getIndexDirectory());
-			w = new IndexWriter(index, analyzer, true, IndexWriter.MaxFieldLength.LIMITED);
+			if(index.listAll().length == 0) {
+				log.info("Creating fresh Index because it was empty");
+				w = new IndexWriter(index, analyzer, true, IndexWriter.MaxFieldLength.LIMITED);
+			} else {				
+				w = new IndexWriter(index, analyzer, false, IndexWriter.MaxFieldLength.LIMITED);
+			}
+			
 		} catch (CorruptIndexException e) {
 			throw new IndexingException(e.getMessage());
 		} catch (LockObtainFailedException e) {
@@ -336,7 +343,7 @@ public class LucandraIndexer implements Indexer {
 	 */
 	private org.apache.lucene.index.IndexReader getDefaultReader() {
 		org.apache.lucene.index.IndexReader reader = null;
-		try {
+		try {			
 				reader = IndexReader.open(FSDirectory.open(getIndexDirectory()));
 		      } catch (CorruptIndexException e) {
 		    	  		throw new IndexingException(e.getMessage());

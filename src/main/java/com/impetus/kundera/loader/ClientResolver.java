@@ -45,6 +45,10 @@ public final class ClientResolver {
 				proxy = (Client) Class.forName(
 						"com.impetus.kundera.client.ThriftClient")
 						.newInstance();
+			} else if(clientIdentifier.getClientType().equals(ClientType.MONGODB)) {
+				proxy = (Client) Class.forName(
+				"com.impetus.kundera.client.MongoDBClient")
+				.newInstance();
 			}
 		} catch (InstantiationException e) {
 				throw new ClientResolverException(e.getMessage());

@@ -114,7 +114,7 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 		String entityName = e.getEntity().getClass().getName();
 		String id = e.getId();
 
-		log.debug("Cassandra >> Write >> " + entityName + "_" + id);
+		log.debug("Column Family >> Write >> " + entityName + "_" + id);
 
 		String keyspace = m.getKeyspaceName();
 		String family = m.getColumnFamilyName();

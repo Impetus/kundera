@@ -50,6 +50,9 @@ public final class EntityMetadata {
 
 	/** field that keeps row identifier. */
 	private Field idProperty;
+	
+	/** Column that keeps row identifier. */
+	private Column idColumn;
 
 	/** The read identifier method. */
 	private Method readIdentifierMethod;
@@ -191,6 +194,20 @@ public final class EntityMetadata {
 	 */
 	public void setIdProperty(Field idProperty) {
 		this.idProperty = idProperty;
+	}	
+
+	/**
+	 * @return the idColumn
+	 */
+	public Column getIdColumn() {
+		return idColumn;
+	}
+
+	/**
+	 * @param idColumn the idColumn to set
+	 */
+	public void setIdColumn(Column idColumn) {
+		this.idColumn = idColumn;
 	}
 
 	/**
@@ -776,6 +793,10 @@ public final class EntityMetadata {
 			public boolean isSuperColumnFamilyMetadata() {
 				return false;
 			}
+			
+			public boolean isCollectionMetadata() {
+				return false;
+			}
 
 		},
 
@@ -787,6 +808,27 @@ public final class EntityMetadata {
 			}
 
 			public boolean isSuperColumnFamilyMetadata() {
+				return true;
+			}
+			
+			public boolean isCollectionMetadata() {
+				return false;
+			}
+
+		},
+		
+		/** Denotes that the Entity is related to a document based collection. */
+		COLLECTION {
+
+			public boolean isColumnFamilyMetadata() {
+				return false;
+			}
+
+			public boolean isSuperColumnFamilyMetadata() {
+				return false;
+			}
+			
+			public boolean isCollectionMetadata() {
 				return true;
 			}
 
@@ -805,6 +847,12 @@ public final class EntityMetadata {
 		 * @return true, if is super column family metadata
 		 */
 		public abstract boolean isSuperColumnFamilyMetadata();
+		
+		/**
+		 * Checks if is Collection metadata. 
+		 * @return true, if is Collection metadata
+		 */
+		public abstract boolean isCollectionMetadata();
 	}
 
 	/**

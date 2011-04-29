@@ -15,33 +15,23 @@
  */
 package com.impetus.kundera.ejb;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceUnitInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.CassandraClient;
-import com.impetus.kundera.Client;
 import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
-import com.impetus.kundera.cache.NonOperationalCacheProvider;
 import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
-import com.impetus.kundera.hbase.client.HBaseClient;
 import com.impetus.kundera.metadata.MetadataManager;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.proxy.EntityEnhancerFactory;

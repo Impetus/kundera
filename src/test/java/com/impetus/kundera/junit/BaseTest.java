@@ -16,7 +16,7 @@ public abstract class BaseTest extends TestCase {
 
 	 protected void startCassandraServer () throws Exception {
 	    	if (!checkIfServerRunning()) {
-		        URL configURL = TestKundera.class.getClassLoader().getResource("storage-conf.xml");
+		        URL configURL = TestCassandra.class.getClassLoader().getResource("storage-conf.xml");
 		        try {
 		            String storageConfigPath = configURL.getFile().substring(1).substring(0, configURL.getFile().lastIndexOf("/"));
 		            System.setProperty("storage-config", storageConfigPath);

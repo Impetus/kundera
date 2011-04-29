@@ -3,7 +3,7 @@
 	http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
 	version="1.0">
 
-	<persistence-unit name="test-unit-1">
+	<persistence-unit name="cassandra">
 		<provider>com.impetus.kundera.ejb.KunderaPersistence</provider>
 		
 		<properties>
@@ -33,15 +33,14 @@
 			<!--  <property name="kundera.client.implementation" value="com.impetus.kundera.hbase.client.HBaseClient.class"/> -->
 		</properties>
 	</persistence-unit>
-<!-- 	<persistence-unit name="test-unit-3">
+	<persistence-unit name="mongodb">
 		<provider>com.impetus.kundera.ejb.KunderaPersistence</provider>
 		<properties>
 			<property name="kundera.nodes" value="localhost"/>
-			<property name="kundera.port" value="9165"/>
-			<property name="kundera.keyspace" value="Blog"/>
+			<property name="kundera.port" value="27017"/>
+			<property name="kundera.keyspace" value="mongodbtest"/>
 			<property name="kundera.dialect" value="mongodb"/>
-			<property name="kundera.client" value="com.impetus.kundera.client.MongoDefaultClient.class"/>
+			<property name="kundera.client" value="MongoDB"/>
 		</properties>
-	</persistence-unit>
--->
+	</persistence-unit>	
 </persistence>

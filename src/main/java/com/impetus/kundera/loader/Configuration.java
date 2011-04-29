@@ -60,9 +60,8 @@ public class Configuration {
 				emfMap.put(identifier, emf);
 				 em = emf.createEntityManager();
 				setClient(em, clientType, persistenceUnit);
-				emMap.put(identifier, em);
-				System.out.println(propMap.get("kundera.client"));
-				System.out.println(props.getProperty("kundera.client"));
+				emMap.put(identifier, em);				
+				System.out.println("Kundera Client is: " + props.getProperty("kundera.client"));
 			} catch (SecurityException e) {
 				throw new PersistenceException(e.getMessage());
 			} catch (PropertyAccessException e) {
