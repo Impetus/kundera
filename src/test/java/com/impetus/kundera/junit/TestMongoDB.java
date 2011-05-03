@@ -15,13 +15,18 @@
  */
 package com.impetus.kundera.junit;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import junit.framework.TestCase;
 
 import com.impetus.kundera.entity.Attachment;
+import com.impetus.kundera.entity.Contact;
 import com.impetus.kundera.entity.Email;
 import com.impetus.kundera.loader.Configuration;
+
 
 /**
  * Test case for CRUD operations on MongoDB using Kundera
@@ -41,9 +46,9 @@ public class TestMongoDB extends TestCase {
 	
 	public void testSaveEmail() {
 		Email email = new Email();
-		email.setUniqueId("1");
-		email.setFrom("amresh.singh@impetus.co.in");
-		email.setTo("admin@impetus.co.in");
+		email.setMessageId("1");
+		email.setFrom(new Contact("1", "Amresh", "Singh", "amresh.singh@impetus.co.in"));
+		email.setTo(new Contact("2", "Admin", "", "admin@impetus.co.in"));
 		email.setSubject("Please Join Meeting");
 		email.setBody("Please Join Meeting");
 		
@@ -64,24 +69,24 @@ public class TestMongoDB extends TestCase {
 		em.persist(email);		
 	}
 	
-	/*public void testFindEmail() {
-		String uniqueId = "2";
+	public void testFindEmail() {
+		String uniqueId = "1";
 		System.out.println(em.find(Email.class, uniqueId));
-	}*/
+	}
 	
-	/*public void testDeleteEmail() {
+	public void testDeleteEmail() {
 		Email email = new Email();
-		email.setUniqueId("2");
+		email.setMessageId("1");
 		em.remove(email);
-	}*/
+	}
 	
-	/*public void testQuery() {
+	public void testQuery() {
 		Query q = em.createQuery("select e from Email e");		
 		List<Email> emails = q.getResultList();
 		
 		System.out.println("Emails:" + emails);
 		
-	}	*/
+	}
 	
 	/*public void testPersistEmployee() {
 		DBCollection employeeCollection = null;

@@ -22,17 +22,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Interface Collection for document based datastores
+ * Interface Document for document based data-stores
  * @author amresh.singh
  */
 
 @Target( { ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Collection {
+public @interface Document {
 	
 	/**
-	 * Collection name
+	 * Document name
 	 */
 	String name();
 	

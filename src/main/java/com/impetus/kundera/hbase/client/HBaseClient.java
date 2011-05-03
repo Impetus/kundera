@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.management.RuntimeErrorException;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -48,6 +49,12 @@ public class HBaseClient implements/* Client, */com.impetus.kundera.Client {
 //		em.persist(arg0)
 		handler.loadData(e.getEntity().getClass().getSimpleName().toLowerCase(), columnFamily, rowKey, columns,e);
 	}
+	
+	@Override
+	public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception {
+		throw new PersistenceException("Not yet implemented");
+	}
+
 
 	@Override
 	public <E> E loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, String rowKey, EntityMetadata m)	throws Exception {

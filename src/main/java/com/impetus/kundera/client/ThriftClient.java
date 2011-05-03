@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Cassandra.Client;
@@ -147,6 +148,12 @@ public class ThriftClient implements CassandraClient {
 			EnhancedEntity e) throws Exception {
 			throw new NotImplementedException("TODO");
 	}
+	
+	@Override
+	public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception {
+		throw new PersistenceException("Not yet implemented");
+	}
+
 	/*
 	 * @see
 	 * com.impetus.kundera.CassandraClient#writeSuperColumns(java.lang.String,

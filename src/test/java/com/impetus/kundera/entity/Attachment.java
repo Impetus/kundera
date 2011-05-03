@@ -19,7 +19,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-import com.impetus.kundera.api.Collection;
+import com.impetus.kundera.api.Document;
 
 /**
  * Entity class for Email attachment
@@ -27,7 +27,7 @@ import com.impetus.kundera.api.Collection;
  */
 
 @Entity
-@Collection(name="attachments", db="mongodbtest")
+@Document(name="attachments", db="mongodbtest")
 public class Attachment {
 	
 	@Id
@@ -42,6 +42,14 @@ public class Attachment {
 	
 	@Column(name="file_location")
 	private String fileLocation;
+	
+	
+	public String toString() {
+		return "ID: " + attachmentId
+			+ "\tName: " + fileName
+			+ "\tType: " + fileType 
+			+ "\tLocation: " + fileLocation;
+	}
 	
 	/**
 	 * @return the attachmentId

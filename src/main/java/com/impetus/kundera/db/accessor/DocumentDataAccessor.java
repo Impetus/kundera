@@ -22,21 +22,21 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.api.Collection;
+import com.impetus.kundera.api.Document;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Relation;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
- * DataAccessor implementation for Collection (documents based data stores like MongoDB and 
+ * DataAccessor implementation for Document (documents based data stores like MongoDB and 
  * CouchDB
  * @author amresh.singh
  */
-public final class CollectionDataAccessor extends BaseDataAccessor<Collection> {
-	private static Log log = LogFactory.getLog(CollectionDataAccessor.class);
+public final class DocumentDataAccessor extends BaseDataAccessor<Document> {
+	private static Log log = LogFactory.getLog(DocumentDataAccessor.class);
 	
-	public CollectionDataAccessor(EntityManagerImpl em) {
+	public DocumentDataAccessor(EntityManagerImpl em) {
 		super(em);
 	}
 
@@ -46,35 +46,23 @@ public final class CollectionDataAccessor extends BaseDataAccessor<Collection> {
 		String entityName = e.getEntity().getClass().getName();
 		String id = e.getId();
 
-		log.debug("Collection >> Write >> " + entityName + "_" + id);
-
-		String keyspace = m.getKeyspaceName();
-		String collectionName = m.getColumnFamilyName();
+		log.debug("Document >> Write >> " + entityName + "_" + id);		
 		
-		m.addColumn(m.getIdColumn().getName(), m.getIdColumn());	//Add PK column
-		
-		List<Relation> relations = m.getRelations();
-		for(Relation relation : relations) {
-			//m.addColumn(relation.get, column)
-		}
-		
-		getEntityManager().getClient().writeColumns(keyspace, collectionName, 
-				id, // row id
-				m.getColumnsAsList(), e// list of columns
-				);
+		m.addColumn(m.getIdColumn().getName(), m.getIdColumn());	//Add PK column		
+		getEntityManager().getClient().writeColumns(getEntityManager(), e, m);
 		
 	}
 	
 	@Override
 	public <E> E read(Class<E> clazz, EntityMetadata m, String id)
 			throws Exception {
-		log.debug("Collection >> Read >> " + clazz.getName() + "_" + id);
+		log.debug("Document >> Read >> " + clazz.getName() + "_" + id);
 
 		String dbName = m.getKeyspaceName();	//Database name
-		String collectionName = m.getColumnFamilyName();	//Collection name for document based data store
+		String documentName = m.getColumnFamilyName();	//Document name for document based data store
 		m.addColumn(m.getIdColumn().getName(), m.getIdColumn());
 		
-		return getEntityManager().getClient().loadColumns(getEntityManager(),clazz,dbName, collectionName, id,m);
+		return getEntityManager().getClient().loadColumns(getEntityManager(),clazz,dbName, documentName, id,m);
 	}
 
 	/* (non-Javadoc)
@@ -83,12 +71,12 @@ public final class CollectionDataAccessor extends BaseDataAccessor<Collection> {
 	@Override
 	public <E> List<E> read(Class<E> clazz, EntityMetadata m, String... ids)
 			throws Exception {
-		log.debug("Collection >> Read >> " + clazz.getName() + "_(" + Arrays.asList(ids) + ")");
+		log.debug("Document >> Read >> " + clazz.getName() + "_(" + Arrays.asList(ids) + ")");
 
 		String dbName = m.getKeyspaceName();
-		String collectionName = m.getColumnFamilyName();
+		String documentName = m.getColumnFamilyName();
 		m.addColumn(m.getIdColumn().getName(), m.getIdColumn());
-		return getEntityManager().getClient().loadColumns(getEntityManager(), clazz, dbName, collectionName, m, ids);
+		return getEntityManager().getClient().loadColumns(getEntityManager(), clazz, dbName, documentName, m, ids);
 	}
 	
 	@Override
@@ -96,7 +84,7 @@ public final class CollectionDataAccessor extends BaseDataAccessor<Collection> {
 		String entityName = e.getEntity().getClass().getName();
 		String id = e.getId();
 
-		log.debug("Collection >> Delete >> " + entityName + "_" + id);
+		log.debug("Document >> Delete >> " + entityName + "_" + id);
 
 		getEntityManager().getClient().delete(m.getIdColumn().getName(),
 				m.getColumnFamilyName(), id);

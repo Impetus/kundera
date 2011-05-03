@@ -5,8 +5,6 @@ package com.impetus.kundera;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
@@ -32,7 +30,18 @@ public interface Client {
 	 * @throws Exception
 	 *             The exception
 	 */
+	
+	@Deprecated
     void writeColumns(String keyspace, String columnFamily, String key, List<EntityMetadata.Column> columns,EnhancedEntity e) throws Exception;
+	
+	/**
+	 * Writes Multiple columns
+	 * @param em Entity Manager
+	 * @param e Ehanced Entity
+	 * @param m Entity Metadata
+	 * @throws Exception
+	 */
+	void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception;
 
     /**
 	 * Retrieve columns from a column-family row.

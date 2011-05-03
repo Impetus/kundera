@@ -36,7 +36,6 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.CassandraClient;
 import com.impetus.kundera.CassandraEntityManager;
 import com.impetus.kundera.Client;
 import com.impetus.kundera.db.DataManager;
@@ -218,7 +217,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 		try {
 
 			List<EnhancedEntity> reachableEntities = entityResolver
-					.resolve(e, CascadeType.REMOVE);
+					.resolve(e, CascadeType.REMOVE, this.client.getType());
 
 			// remove each one
 			for (EnhancedEntity o : reachableEntities) {
@@ -255,7 +254,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 		try {
 
 			List<EnhancedEntity> reachableEntities = entityResolver
-					.resolve(e, CascadeType.MERGE);
+					.resolve(e, CascadeType.MERGE, this.client.getType());
 
 			// save each one
 			for (EnhancedEntity o : reachableEntities) {
@@ -294,7 +293,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 			metadataManager.validate(e.getClass());
 
 			List<EnhancedEntity> reachableEntities = entityResolver
-					.resolve(e, CascadeType.PERSIST);
+					.resolve(e, CascadeType.PERSIST, this.client.getType());
 
 			// save each one
 			for (EnhancedEntity o : reachableEntities) {
@@ -464,7 +463,7 @@ public class EntityManagerImpl implements CassandraEntityManager {
 	 * 
 	 * @return the metadataManager
 	 */
-	protected final MetadataManager getMetadataManager() {
+	public final MetadataManager getMetadataManager() {
 		return metadataManager;
 	}
 

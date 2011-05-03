@@ -23,41 +23,41 @@ import javax.persistence.Id;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.api.Collection;
+import com.impetus.kundera.api.Document;
 import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 
 /**
- * Metadata processor for Collection 
+ * Metadata processor for Document 
  * @author amresh.singh
  */
-public class CollectionProcessor extends AbstractEntityFieldProcessor {
+public class DocumentProcessor extends AbstractEntityFieldProcessor {
 
 	/** The Constant log. */
-	private static final Log LOG = LogFactory.getLog(CollectionProcessor.class);
+	private static final Log LOG = LogFactory.getLog(DocumentProcessor.class);
 
 	private EntityManagerFactoryImpl em;
 
 	/**
-	 * Instantiates a new collection processor. 
+	 * Instantiates a new document processor. 
 	 * @param em the em
 	 */
-	public CollectionProcessor(EntityManagerFactory em) {
+	public DocumentProcessor(EntityManagerFactory em) {
 		this.em = (EntityManagerFactoryImpl) em;
 	}
 	
 	
 	@Override
 	public void process(Class<?> clazz, EntityMetadata metadata) {
-		if (!clazz.isAnnotationPresent(Collection.class)) {
+		if (!clazz.isAnnotationPresent(Document.class)) {
 			return;
 		}
 
-		LOG.debug("Processing @Entity(" + clazz.getName() + ") for Collection.");
+		LOG.debug("Processing @Entity(" + clazz.getName() + ") for Document.");
 
-		metadata.setType(EntityMetadata.Type.COLLECTION);
+		metadata.setType(EntityMetadata.Type.DOCUMENT);
 
-		Collection coll = clazz.getAnnotation(Collection.class);
+		Document coll = clazz.getAnnotation(Document.class);
 
 		// set columnFamily
 		//Name of collection for document based datastore

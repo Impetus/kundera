@@ -26,7 +26,7 @@ import javax.persistence.PersistenceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.api.Collection;
+import com.impetus.kundera.api.Document;
 import com.impetus.kundera.api.ColumnFamily;
 import com.impetus.kundera.api.SuperColumnFamily;
 
@@ -73,10 +73,10 @@ public class ValidatorImpl implements Validator {
             throw new PersistenceException(clazz.getName() + " must have a default no-argument constructor.");
         }
 
-        // what type is it? ColumnFamily or SuperColumnFamily, Collection or simply relational entity?
+        // what type is it? ColumnFamily or SuperColumnFamily, Document or simply relational entity?
         if (clazz.isAnnotationPresent(SuperColumnFamily.class) || clazz.isAnnotationPresent(ColumnFamily.class)) {
         	LOG.debug("Entity is for NoSQL database: " + clazz.getName());        	
-        } else if(!clazz.isAnnotationPresent(Collection.class)){
+        } else if(!clazz.isAnnotationPresent(Document.class)){
         	LOG.debug("Entity is for document based database: " + clazz.getName());
         } else {
         	LOG.debug("Entity is for relational database table: " + clazz.getName());

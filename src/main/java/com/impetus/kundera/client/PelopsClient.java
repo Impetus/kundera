@@ -117,6 +117,11 @@ public class PelopsClient implements CassandraClient {
 		mutator.writeColumns(tf.getId(), columnFamily, Arrays.asList(tf.getColumns().toArray(new Column[0])));
 		mutator.execute(ConsistencyLevel.ONE);
 	}
+	
+	@Override
+	public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception {
+		throw new PersistenceException("Not yet implemented");
+	}
 
 	/*
 	 * @see

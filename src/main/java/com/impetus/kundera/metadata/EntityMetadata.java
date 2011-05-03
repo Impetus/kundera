@@ -794,7 +794,7 @@ public final class EntityMetadata {
 				return false;
 			}
 			
-			public boolean isCollectionMetadata() {
+			public boolean isDocumentMetadata() {
 				return false;
 			}
 
@@ -811,14 +811,14 @@ public final class EntityMetadata {
 				return true;
 			}
 			
-			public boolean isCollectionMetadata() {
+			public boolean isDocumentMetadata() {
 				return false;
 			}
 
 		},
 		
-		/** Denotes that the Entity is related to a document based collection. */
-		COLLECTION {
+		/** Denotes that the Entity is related to a document based data-store. */
+		DOCUMENT {
 
 			public boolean isColumnFamilyMetadata() {
 				return false;
@@ -828,7 +828,7 @@ public final class EntityMetadata {
 				return false;
 			}
 			
-			public boolean isCollectionMetadata() {
+			public boolean isDocumentMetadata() {
 				return true;
 			}
 
@@ -849,10 +849,10 @@ public final class EntityMetadata {
 		public abstract boolean isSuperColumnFamilyMetadata();
 		
 		/**
-		 * Checks if is Collection metadata. 
-		 * @return true, if is Collection metadata
+		 * Checks if is Document metadata. 
+		 * @return true, if is Document metadata
 		 */
-		public abstract boolean isCollectionMetadata();
+		public abstract boolean isDocumentMetadata();
 	}
 
 	/**

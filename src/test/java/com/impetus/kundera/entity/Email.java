@@ -24,8 +24,9 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
-import com.impetus.kundera.api.Collection;
+import com.impetus.kundera.api.Document;
 
 /**
  * Entity class for Email
@@ -33,18 +34,18 @@ import com.impetus.kundera.api.Collection;
  */
 
 @Entity
-@Collection(name="emails", db="mongodbtest")
+@Document(name="emails", db="mongodbtest")
 public class Email {
 	
 	@Id
-	@Column(name="unique_id")
-	private String uniqueId;
+	@Column(name="message_id")
+	private String messageId;
 	
-	@Column(name="from_email")
-	private String from;
+	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	private Contact from;
 	
-	@Column(name="to_email")
-	private String to;
+	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	private Contact to;
 	
 	@Column(name="subject_email")
 	private String subject;
@@ -60,11 +61,12 @@ public class Email {
 	}
 	
 	public String toString() {
-		return "UniqueId: " + uniqueId
+		return "MessageId: " + messageId
 			+ "\tFrom:" + from 
 			+ "\tTo: " + to
 			+ "\tSubject: " + subject
-			+ "\tBody: " + body;
+			+ "\tBody: " + body
+			+ "\tAttachments: " + attachments;
 	}	
 	
 	public void addAttachment(Attachment attchment) {
@@ -75,43 +77,47 @@ public class Email {
 	}
 	
 	/**
-	 * @return the uniqueId
+	 * @return the messageId
 	 */
-	public String getUniqueId() {
-		return uniqueId;
+	public String getMessageId() {
+		return messageId;
 	}
 
 	/**
-	 * @param uniqueId the uniqueId to set
+	 * @param messageId the messageId to set
 	 */
-	public void setUniqueId(String uniqueId) {
-		this.uniqueId = uniqueId;
+	public void setMessageId(String messageId) {
+		this.messageId = messageId;
 	}
-
+	
 	/**
 	 * @return the from
 	 */
-	public String getFrom() {
+	public Contact getFrom() {
 		return from;
 	}
+
 	/**
 	 * @param from the from to set
 	 */
-	public void setFrom(String from) {
+	public void setFrom(Contact from) {
 		this.from = from;
 	}
+
 	/**
 	 * @return the to
 	 */
-	public String getTo() {
+	public Contact getTo() {
 		return to;
 	}
+
 	/**
 	 * @param to the to to set
 	 */
-	public void setTo(String to) {
+	public void setTo(Contact to) {
 		this.to = to;
 	}
+
 	/**
 	 * @return the subject
 	 */

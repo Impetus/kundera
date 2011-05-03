@@ -30,8 +30,7 @@ import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
-import com.impetus.kundera.property.PropertyAccessException;
-import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.mongodb.MongoDBDataHandler;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -48,6 +47,7 @@ import com.mongodb.MongoException;
 public class MongoDBClient implements Client {
 	String contactNode;
 	String defaultPort;	
+	String dbName;
 	private boolean isConnected;
 	 
 	private EntityManager em;
@@ -59,22 +59,31 @@ public class MongoDBClient implements Client {
 
 
 	@Override
-	public void writeColumns(String dbName, String collectionName, String key,
+	@Deprecated
+	public void writeColumns(String dbName, String documentName, String key,
 			List<Column> columns, EnhancedEntity e) throws Exception {
-		log.debug("Persisting data into " + dbName + "." + collectionName + " for " + key);
-		DBCollection dbCollection = mongoDb.getCollection(collectionName);	
+		throw new PersistenceException("Not yet implemented");
+	}	
+	
+	@Override
+	public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception {
+		String dbName = m.getKeyspaceName();
+		String documentName = m.getColumnFamilyName();
+		String key = e.getId();
+		log.debug("Persisting data into " + dbName + "." + documentName + " for " + key);
+		DBCollection dbCollection = mongoDb.getCollection(documentName);	
 		
-		BasicDBObject document = getDocumentObject(columns, e);	
+		BasicDBObject document = new MongoDBDataHandler().getDocumentFromEntity(em, m, e.getEntity());	
 		dbCollection.insert(document);	
 	}	
 
 	
 	@Override
 	public <E> E loadColumns(EntityManagerImpl em, Class<E> clazz,
-			String dbName, String collectionName, String key, EntityMetadata m)
+			String dbName, String documentName, String key, EntityMetadata m)
 			throws Exception {		
-		log.debug("Fetching data from " + collectionName + " for PK " + key);
-		DBCollection dbCollection = mongoDb.getCollection(collectionName);
+		log.debug("Fetching data from " + documentName + " for PK " + key);
+		DBCollection dbCollection = mongoDb.getCollection(documentName);
 		
 		BasicDBObject query = new BasicDBObject();
         query.put(m.getIdColumn().getName(), key);
@@ -88,46 +97,40 @@ public class MongoDBClient implements Client {
         	return null;
         }
         
-        E entity = clazz.newInstance();
-        List<Column> columns = m.getColumnsAsList();
-        for(Column column : columns) {
-        	PropertyAccessorHelper.set(entity, column.getField(), fetchedDocument.get(column.getName()));
-        }
-        return entity;
+        Object entity = new MongoDBDataHandler().getEntityFromDocument(em, clazz, m, fetchedDocument);      
+        
+        return (E)entity;
 	}
+	
+	
 
 	
 	@Override
 	public <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz,
-			String dbName, String collectionName, EntityMetadata m,
+			String dbName, String documentName, EntityMetadata m,
 			String... keys) throws Exception {
-		log.debug("Fetching data from " + collectionName + " for Keys " + keys);
+		log.debug("Fetching data from " + documentName + " for Keys " + keys);
 		
-		DBCollection dbCollection = mongoDb.getCollection(collectionName);
+		DBCollection dbCollection = mongoDb.getCollection(documentName);
 		
 		BasicDBObject query = new BasicDBObject();
         query.put(m.getIdColumn().getName(), new BasicDBObject("$in", keys));			
 
         DBCursor cursor = dbCollection.find(query);		
         
-        List<E> entities = new ArrayList<E>();
-        List<Column> columns = m.getColumnsAsList();
+        List entities = new ArrayList<E>();        
         while(cursor.hasNext()) {
 			DBObject fetchedDocument = cursor.next();
-			E entity = clazz.newInstance();
-			
-			for(Column column : columns) {
-	        	PropertyAccessorHelper.set(entity, column.getField(), fetchedDocument.get(column.getName()));
-	        }
+			Object entity = new MongoDBDataHandler().getEntityFromDocument(em, clazz, m, fetchedDocument); 
 			entities.add(entity);			
 		}       
 		return entities;
 	}
 	
 	@Override
-	public void delete(String idColumnName, String collectionName, String rowId)
+	public void delete(String idColumnName, String documentName, String rowId)
 			throws Exception {		
-		DBCollection dbCollection = mongoDb.getCollection(collectionName);		
+		DBCollection dbCollection = mongoDb.getCollection(documentName);		
 		
 		//Find the DBObject to remove first
 		BasicDBObject query = new BasicDBObject();
@@ -140,7 +143,7 @@ public class MongoDBClient implements Client {
             documentToRemove = cursor.next();
         } else {
         	throw new PersistenceException("Can't remove Row# " + rowId + " for "
-        			+ collectionName + " because record doesn't exist.");
+        			+ documentName + " because record doesn't exist.");
         }
 		
 		dbCollection.remove(documentToRemove);				
@@ -152,8 +155,8 @@ public class MongoDBClient implements Client {
 			log.info(">>> Connecting to MONGODB at " + contactNode + " on port " + defaultPort);
 			try {
 				mongo = new Mongo(contactNode, Integer.parseInt(defaultPort));
-				mongoDb = mongo.getDB("mongotest");
-				isConnected=true;
+				mongoDb = mongo.getDB(dbName);
+				isConnected = true;
 				log.info("CONNECTED to MONGODB at " + contactNode + " on port " + defaultPort);
 			} catch (NumberFormatException e) {
 				log.error("Invalid format for MONGODB port, Unale to connect!" + "; Details:" + e.getMessage());
@@ -173,23 +176,7 @@ public class MongoDBClient implements Client {
 		} else {
 			log.warn("Can't close connection to MONGODB, it was already disconnected");
 		}
-	}
-	
-	private BasicDBObject getDocumentObject(List<Column> columns, EnhancedEntity e) {
-		Object entity = e.getEntity();	
-		BasicDBObject dbObj = new BasicDBObject();	
-		
-		for(Column column : columns) {
-			try {
-				dbObj.put(column.getName(), PropertyAccessorHelper.getString(entity, column.getField()));
-			} catch (PropertyAccessException e1) {				
-				log.error("Can't access property " + column.getField().getName());
-			}
-		}		
-		return dbObj;
 	}	
-	
-
 	
 	@Override
 	public DBType getType() {		
@@ -207,9 +194,9 @@ public class MongoDBClient implements Client {
 		this.defaultPort = String.valueOf(defaultPort);		
 	}
 
-	
+	//For MongoDB, keyspace means DB name
 	@Override
 	public void setKeySpace(String keySpace) {	
-		//TODO: Not required at the moment
+		this.dbName = keySpace;
 	}
 }
