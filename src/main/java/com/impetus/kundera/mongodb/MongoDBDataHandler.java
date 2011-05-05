@@ -112,8 +112,8 @@ public class MongoDBDataHandler {
 		
 		//Populate columns
 		for(Column column : columns) {
-			try {
-				dbObj.put(column.getName(), PropertyAccessorHelper.getString(entity, column.getField()));
+			try {				
+				extractEntityField(entity, dbObj, column);						
 			} catch (PropertyAccessException e1) {				
 				log.error("Can't access property " + column.getField().getName());
 			}
@@ -153,6 +153,26 @@ public class MongoDBDataHandler {
 			}			
 		}		
 		return dbObj;
+	}
+
+	/**
+	 * @param entity
+	 * @param dbObj
+	 * @param column
+	 * @throws PropertyAccessException
+	 */
+	private void extractEntityField(Object entity, BasicDBObject dbObj, Column column) throws PropertyAccessException {
+		//A column field may be a collection(not defined as 1-to-M relationship)
+		if(column.getField().getType().equals(List.class) || column.getField().getType().equals(Set.class)) {
+			Collection collection = (Collection)PropertyAccessorHelper.getObject(entity, column.getField());								
+			BasicDBList basicDBList = new BasicDBList();
+			for(Object o : collection) {
+				basicDBList.add(o);
+			}			
+			dbObj.put(column.getName(), basicDBList);
+		} else {
+			dbObj.put(column.getName(), PropertyAccessorHelper.getString(entity, column.getField()));
+		}
 	}	
 
 

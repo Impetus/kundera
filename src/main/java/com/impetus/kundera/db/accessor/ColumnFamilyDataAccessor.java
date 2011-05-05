@@ -54,7 +54,7 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 	@Override
 	public <E> E read(Class<E> clazz, EntityMetadata m, String id)
 			throws Exception {
-		log.debug("Cassandra >> Read >> " + clazz.getName() + "_" + id);
+		log.debug("Column Family >> Read >> " + clazz.getName() + "_" + id);
 
 		String keyspace = m.getKeyspaceName();
 		String family = m.getColumnFamilyName();

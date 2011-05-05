@@ -41,17 +41,17 @@ public class Email {
 	@Column(name="message_id")
 	private String messageId;
 	
-	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
-	private Contact from;
-	
-	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
-	private Contact to;
-	
 	@Column(name="subject_email")
 	private String subject;
 	
 	@Column(name="body_email")
 	private String body;
+	
+	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	private Contact from;
+	
+	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	private Contact to;	
 	
 	@OneToMany (cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
 	private List<Attachment> attachments;	

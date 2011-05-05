@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -47,6 +49,9 @@ public final class DocumentDataAccessor extends BaseDataAccessor<Document> {
 		String id = e.getId();
 
 		log.debug("Document >> Write >> " + entityName + "_" + id);		
+		if(m.getIdColumn() == null) {
+			throw new PersistenceException("Primary key must be annotated with @Column");
+		}
 		
 		m.addColumn(m.getIdColumn().getName(), m.getIdColumn());	//Add PK column		
 		getEntityManager().getClient().writeColumns(getEntityManager(), e, m);
