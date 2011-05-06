@@ -133,7 +133,8 @@ public class LuceneQuery extends QueryImpl implements Query {
         sb.append("+");
         sb.append(LucandraIndexer.ENTITY_CLASS_FIELD);
         sb.append(":");
-        sb.append(getEntityClass().getName());
+//        sb.append(getEntityClass().getName());
+        sb.append(getEntityClass().getCanonicalName().toLowerCase());
 
         return sb.toString();
     }

@@ -106,5 +106,14 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor 
 			throw new RuntimeException(e);
 		}    	
     }
+    
+    protected final void populateIdColumn(EntityMetadata metadata, Class<?> clazz, Field f) {
+		if(f.isAnnotationPresent(Column.class)) {
+			Column c = f.getAnnotation(Column.class);
+            if (!c.name().isEmpty()) {                
+            	metadata.setIdColumn(metadata.new Column(c.name(), f));
+            } 
+		}    
+    }    
 
 }

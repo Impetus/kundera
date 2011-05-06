@@ -31,6 +31,7 @@ import javax.persistence.PersistenceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -68,13 +69,21 @@ public class EntityResolver {
 	 *            the cascade type
 	 * @return the all reachable entities
 	 */
-	public List<EnhancedEntity> resolve (Object entity, CascadeType cascadeType) {
+	public List<EnhancedEntity> resolve (Object entity, CascadeType cascadeType, DBType dbType) {
 		Map<String, EnhancedEntity> map = new HashMap<String, EnhancedEntity>();
 		try {
-			log
-					.debug("Resolving reachable entities for cascade "
-							+ cascadeType);
-			recursivelyResolveEntities(entity, cascadeType, map);
+			log.debug("Resolving reachable entities for cascade "
+							+ cascadeType);		
+			
+			//For Document-based data-stores, entities need to be embedded			
+			if(dbType.equals(DBType.MONGODB)) {
+				resolveEmbeddedEntities(entity, cascadeType, map);
+			} else {
+				recursivelyResolveEntities(entity, cascadeType, map);
+			}
+			
+			
+			
 		} catch (PropertyAccessException e) {
 			throw new PersistenceException(e.getMessage());
 		}
@@ -87,6 +96,31 @@ public class EntityResolver {
 		}
 
 		return new ArrayList<EnhancedEntity>(map.values());
+	}
+	
+	private void resolveEmbeddedEntities(Object o, CascadeType cascadeType,
+			Map<String, EnhancedEntity> entities)
+			throws PropertyAccessException {
+		EntityMetadata m =  em.getMetadataManager().getEntityMetadata(o.getClass());		
+
+		String id = PropertyAccessorHelper.getId(o, m);
+
+		// Ensure that @Id is set
+		if (null == id || id.trim().isEmpty()) {
+			throw new PersistenceException("Missing primary key >> " + m.getEntityClazz().getName() + "#"
+					+ m.getIdProperty().getName());
+		}
+
+
+		String mapKeyForEntity = m.getEntityClazz().getName() + "_" + id;
+		log.debug("Resolving >> " + mapKeyForEntity);
+
+		// Map to hold property-name=>foreign-entity relations
+		Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+
+		// Save to map
+		entities.put(mapKeyForEntity, em.getFactory().getEnhancedEntity(o, id,
+				foreignKeysMap));				
 	}
 
 	/**
@@ -105,7 +139,7 @@ public class EntityResolver {
 	private void recursivelyResolveEntities(Object o, CascadeType cascadeType,
 			Map<String, EnhancedEntity> entities)
 			throws PropertyAccessException {
-
+		
 		EntityMetadata m = null;
 		try {
 			m = em.getMetadataManager().getEntityMetadata(o.getClass());
@@ -115,7 +149,7 @@ public class EntityResolver {
 
 		if (m == null) {
 			return;
-		}
+		}	
 
 		String id = PropertyAccessorHelper.getId(o, m);
 
@@ -141,7 +175,7 @@ public class EntityResolver {
 		// Save to map
 		entities.put(mapKeyForEntity, em.getFactory().getEnhancedEntity(o, id,
 				foreignKeysMap));
-
+		
 		// Iterate over EntityMetata.Relation relations
 		for (EntityMetadata.Relation relation : m.getRelations()) {
 

@@ -27,6 +27,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.FetchType;
 
 import com.impetus.kundera.ejb.event.CallbackMethod;
+import com.impetus.kundera.loader.DBType;
 
 /**
  * The Class EntityMetadata.
@@ -49,6 +50,9 @@ public final class EntityMetadata {
 
 	/** field that keeps row identifier. */
 	private Field idProperty;
+	
+	/** Column that keeps row identifier. */
+	private Column idColumn;
 
 	/** The read identifier method. */
 	private Method readIdentifierMethod;
@@ -86,6 +90,8 @@ public final class EntityMetadata {
 	/** Cacheable?. */
 	private boolean cacheable = false; // default is to not set second-level
 										// cache
+	
+	private DBType dbType;
 
 	/**
 	 * The Enum ForeignKey.
@@ -188,6 +194,20 @@ public final class EntityMetadata {
 	 */
 	public void setIdProperty(Field idProperty) {
 		this.idProperty = idProperty;
+	}	
+
+	/**
+	 * @return the idColumn
+	 */
+	public Column getIdColumn() {
+		return idColumn;
+	}
+
+	/**
+	 * @param idColumn the idColumn to set
+	 */
+	public void setIdColumn(Column idColumn) {
+		this.idColumn = idColumn;
 	}
 
 	/**
@@ -773,6 +793,10 @@ public final class EntityMetadata {
 			public boolean isSuperColumnFamilyMetadata() {
 				return false;
 			}
+			
+			public boolean isDocumentMetadata() {
+				return false;
+			}
 
 		},
 
@@ -784,6 +808,27 @@ public final class EntityMetadata {
 			}
 
 			public boolean isSuperColumnFamilyMetadata() {
+				return true;
+			}
+			
+			public boolean isDocumentMetadata() {
+				return false;
+			}
+
+		},
+		
+		/** Denotes that the Entity is related to a document based data-store. */
+		DOCUMENT {
+
+			public boolean isColumnFamilyMetadata() {
+				return false;
+			}
+
+			public boolean isSuperColumnFamilyMetadata() {
+				return false;
+			}
+			
+			public boolean isDocumentMetadata() {
 				return true;
 			}
 
@@ -802,6 +847,12 @@ public final class EntityMetadata {
 		 * @return true, if is super column family metadata
 		 */
 		public abstract boolean isSuperColumnFamilyMetadata();
+		
+		/**
+		 * Checks if is Document metadata. 
+		 * @return true, if is Document metadata
+		 */
+		public abstract boolean isDocumentMetadata();
 	}
 
 	/**
@@ -1047,5 +1098,13 @@ public final class EntityMetadata {
 			return type.equals(ForeignKey.ONE_TO_MANY)
 					|| type.equals(ForeignKey.MANY_TO_MANY);
 		}
+	}
+	
+	public DBType getDBType(){
+		return dbType;
+	}
+	
+	public void setDBType(DBType type) {
+		this.dbType = type;
 	}
 }

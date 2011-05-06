@@ -25,11 +25,13 @@ import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
+import org.apache.cassandra.avro.Cassandra;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.CassandraClient;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -79,7 +81,7 @@ public final class SuperColumnFamilyDataAccessor extends
 		scNames.add(TO_ONE_SUPER_COL_NAME);
 
 		// load column from DB
-		List<SuperColumn> columns = getEntityManager().getClient()
+		List<SuperColumn> columns = ((CassandraClient) getEntityManager().getClient())
 				.loadSuperColumns(keyspace, family, id, // row id
 						scNames.toArray(new String[0]) // array of names
 				);
@@ -110,7 +112,7 @@ public final class SuperColumnFamilyDataAccessor extends
 		List<E> entities = new ArrayList<E>();
 
 		// load columns from DB
-		Map<String, List<SuperColumn>> map = getEntityManager().getClient()
+		Map<String, List<SuperColumn>> map = ((CassandraClient)getEntityManager().getClient())
 				.loadSuperColumns(keyspace, family, ids);
 
 		// Iterate and populate entities
@@ -148,7 +150,7 @@ public final class SuperColumnFamilyDataAccessor extends
 
 		BaseDataAccessor<SuperColumn>.ThriftRow tf = toThriftRow(e, m);
 
-		getEntityManager().getClient().writeSuperColumns(keyspace, family, // columnFamily
+		((CassandraClient)getEntityManager().getClient()).writeSuperColumns(keyspace, family, // columnFamily
 				tf.getId(), // row id
 				tf.getColumns().toArray(new SuperColumn[0]) // list of columns
 				);

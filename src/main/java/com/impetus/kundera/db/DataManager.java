@@ -17,6 +17,7 @@ package com.impetus.kundera.db;
 
 import java.util.List;
 
+import com.impetus.kundera.db.accessor.DocumentDataAccessor;
 import com.impetus.kundera.db.accessor.ColumnFamilyDataAccessor;
 import com.impetus.kundera.db.accessor.SuperColumnFamilyDataAccessor;
 import com.impetus.kundera.ejb.EntityManagerImpl;
@@ -35,6 +36,9 @@ public class DataManager {
 
     /** The data accessor for super column family. */
     private DataAccessor accessorSCF;
+    
+    /** The data accessor for Document(document based data store). */
+    private DataAccessor accessorDocument;
 
     /**
      * The Constructor.
@@ -45,6 +49,7 @@ public class DataManager {
     public DataManager(EntityManagerImpl em) {
         accessorCF = new ColumnFamilyDataAccessor(em);
         accessorSCF = new SuperColumnFamilyDataAccessor(em);
+        accessorDocument = new DocumentDataAccessor(em);
     }
 
     /**
@@ -144,10 +149,10 @@ public class DataManager {
 		EntityMetadata.Type type = metadata.getType();
 		if (type.equals(EntityMetadata.Type.COLUMN_FAMILY)) {
 			return accessorCF;
-		}
-
-		else if (type.equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY)) {
+		} else if (type.equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY)) {
 			return accessorSCF;
+		} else if (type.equals(EntityMetadata.Type.DOCUMENT)) {
+			return accessorDocument;
 		}
 
 		return null;
