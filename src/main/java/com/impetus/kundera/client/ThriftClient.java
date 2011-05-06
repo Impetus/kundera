@@ -18,10 +18,12 @@ package com.impetus.kundera.client;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+
 import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.Cassandra.Client;
+import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -30,6 +32,10 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 
 import com.impetus.kundera.CassandraClient;
+import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.loader.DBType;
+import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * The Class ThriftClient.
@@ -94,31 +100,30 @@ public class ThriftClient implements CassandraClient {
 	 * @see com.impetus.kundera.CassandraClient#loadColumns(java.lang.String,
 	 * java.lang.String, java.lang.String)
 	 */
+
 	@Override
-	public List<Column> loadColumns(String keyspace, String columnFamily,
-			String rowId) throws Exception {
+	public <E> E loadColumns(EntityManagerImpl em, Class<E> clazz,String keyspace, 
+													 String columnFamily, String key, EntityMetadata m) throws Exception {
 		throw new NotImplementedException("TODO");
 	}
-
 	/*
 	 * @see com.impetus.kundera.CassandraClient#loadColumns(java.lang.String,
 	 * java.lang.String, java.lang.String[])
 	 */
+
 	@Override
-	public Map<String, List<Column>> loadColumns(String keyspace,
-			String columnFamily, String... rowIds) throws Exception {
+	public <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz,
+																String keyspace, String columnFamily, EntityMetadata m, String... keys) throws Exception {
 		throw new NotImplementedException("TODO");
 	}
-
 	/*
 	 * @see
 	 * com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String,
 	 * java.lang.String, java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public List<SuperColumn> loadSuperColumns(String keyspace,
-			String columnFamily, String key, String... superColumnNames)
-			throws Exception {
+	public List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, 
+																					  String key, String... superColumnNames) 	throws Exception {
 		throw new NotImplementedException("TODO");
 	}
 
@@ -138,9 +143,15 @@ public class ThriftClient implements CassandraClient {
 	 * java.lang.String, java.lang.String, org.apache.cassandra.thrift.Column[])
 	 */
 	@Override
-	public void writeColumns(String keyspace, String columnFamily,
-			String rowId, Column... columns) throws Exception {
-		throw new NotImplementedException("TODO");
+	public void writeColumns(String keyspace, String columnFamily, String key,
+			List<com.impetus.kundera.metadata.EntityMetadata.Column> columns,
+			EnhancedEntity e) throws Exception {
+			throw new NotImplementedException("TODO");
+	}
+	
+	@Override
+	public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception {
+		throw new PersistenceException("Not yet implemented");
 	}
 
 	/*
@@ -179,7 +190,6 @@ public class ThriftClient implements CassandraClient {
 	/* @see com.impetus.kundera.CassandraClient#shutdown() */
 	@Override
 	public void shutdown() {
-
 	}
 
 	/* @see com.impetus.kundera.CassandraClient#connect() */
@@ -187,4 +197,16 @@ public class ThriftClient implements CassandraClient {
 	public void connect() {
 		throw new NotImplementedException("TODO");
 	}
+
+	@Override
+	public void setKeySpace(String keySpace) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public DBType getType() {
+		return DBType.CASSANDRA;
+	}
+
+	
 }
