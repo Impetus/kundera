@@ -1,0 +1,20 @@
+
+Annotation based java library for NoSQL databases
+=====================================================
+The idea behind Kundera is to make working with NoSQL Databases drop-dead simple and fun. Kundera does not reinvent the wheel by making another client library; rather it leverages the existing libraries and builds - on top of them - a wrap-around API to help developers do away with unnecessary boiler plate codes, and program a neater-and-cleaner code that reduces code-complexity and improves quality. And above all, improves productivity.
+
+Up and running in 5 minutes
+============================
+Understanding Kundera only takes 5 minutes. Please read the following introductory article http://anismiles.wordpress.com/2010/06/30/kundera-knight-in-the-shining-armor/
+
+Objectives
+===========
+To completely remove unnecessary details, such as Column lists, Super Column lists, byte arrays, Data encoding etc.
+To be able to work directly with Domain models just with the help of annotations
+To eliminate “code plumbing”, so as to keep the flow of data processing clear and obvious
+To completely separate out NoSQL Databases and their concerns from application-level logic for robust application development
+To include the latest NoSQL Databases without breaking anything
+
+About Us
+========
+Kundera is backed by Impetus Labs - iLabs. iLabs is a R&D consulting division of Impetus Technologies (http://www.impetus.com). iLabs focuses on innovations with next generation technologies and creates practice areas and new products around them. iLabs is actively involved working on High Performance computing technologies, ranging from distributed/parallel computing, Erlang, grid softwares, GPU based software, Hadoop, Hbase, Cassandra, CouchDB and related technologies. iLabs is also working on various other Open Source initiatives.
