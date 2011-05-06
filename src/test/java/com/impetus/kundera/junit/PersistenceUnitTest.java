@@ -15,50 +15,43 @@
  */
 package com.impetus.kundera.junit;
 
-import java.net.URL;
+import javax.persistence.EntityManager;
 
-import javax.persistence.Persistence;
-
-import junit.framework.TestCase;
-
-import org.apache.cassandra.service.EmbeddedCassandraService;
-
-import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
+import com.impetus.kundera.loader.Configuration;
+import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * @author animesh.kumar
- *
+ *l
  */
-public class PersistenceUnitTest extends TestCase {
-
-    /** The embedded server cassandra. */
-    private static EmbeddedCassandraService cassandra;
+public class PersistenceUnitTest extends BaseTest {
 
     
-    public void startCassandraServer () throws Exception {
-        URL configURL = TestKundera.class.getClassLoader().getResource("storage-conf.xml");
-        try {
-            String storageConfigPath = configURL.getFile().substring(1).substring(0, configURL.getFile().lastIndexOf("/"));
-            System.setProperty("storage-config", storageConfigPath);
-        } catch (Exception e) {
-            fail("Could not find storage-config.xml sfile");
-        }
-        cassandra = new EmbeddedCassandraService();
-        cassandra.init();
-        Thread t = new Thread(cassandra);
-        t.setDaemon(true);
-        t.start();   	
-    }
-    
-    public void setUp() throws Exception {
+    private EntityManager entityManager;
+    private Configuration conf;
+
+	public void setUp() throws Exception {
     	startCassandraServer();
+    	conf = new Configuration();
+    	entityManager = conf.getEntityManager("test-unit-1");
     }
     
-    public void testPersistenceUnit() {
-        EntityManagerFactoryImpl emf = (EntityManagerFactoryImpl)Persistence.createEntityManagerFactory("test-unit-2");
-        assertEquals(emf.getKeyspace(), "Blog");
-        assertEquals(emf.getPersistenceUnitName(), "test-unit-2");
-        assertEquals(emf.getPort(), 9165);
-        emf.close();
+    protected void tearDown() {
+    	conf.destroy();
+    	
     }
+    
+	public void testEntityManager() {
+		try {
+			assertNotNull(entityManager);
+				assertNotNull(PropertyAccessorHelper.getObject(entityManager, entityManager.getClass().getDeclaredField("client")));
+			} catch (SecurityException e) {
+				e.printStackTrace();
+			} catch (PropertyAccessException e) {
+				e.printStackTrace();
+			} catch (NoSuchFieldException e) {
+				e.printStackTrace();
+			}
+	}
 }
