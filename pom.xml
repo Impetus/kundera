@@ -1,4 +1,4 @@
- <?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -6,7 +6,6 @@
 	<artifactId>kundera</artifactId>
 	<version>1.1.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
-
 	<name>kundera</name>
 	<url>http://kundera.googlecode.com</url>
 
@@ -93,6 +92,9 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-report-plugin</artifactId>
+				 <configuration>
+                                 <forkMode>always</forkMode>
+				 </configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -234,7 +236,29 @@
 			<artifactId>lucandra</artifactId>
 			<version>UNKNOWN</version>
 		</dependency>
+              <!-- HBase depndencies-->
+		<dependency>
+		     <groupId>org.apache.hbase</groupId>
+		     <artifactId>hbase-core</artifactId>
+		     <version>0.20.6</version>
+		</dependency>
+		<dependency>
+		     <groupId>org.apache.hadoop</groupId>
+		     <artifactId>hadoop-core</artifactId>
+		     <version>0.20.2</version>
+		</dependency>
+		<dependency>
+		     <groupId>org.apache.hbase.zookeeper</groupId>
+		     <artifactId>zookeeper</artifactId>
+		     <version>3.2.2</version>
+		</dependency>
 		
+		<!-- MongoDB depndencies-->
+		<dependency>
+		     <groupId>com.mongodb</groupId>
+		     <artifactId>mongo</artifactId>
+		     <version>2.5.3</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
