@@ -51,6 +51,11 @@ public class ClassFileIterator implements ResourceIterator {
             throw new RuntimeException(e);
         }
     }
+    
+    public ClassFileIterator(File fileToAdd) {
+    	files = new ArrayList<File>();
+    	files.add(fileToAdd);
+    }
 
     /**
      * Creates the.

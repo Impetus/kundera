@@ -16,6 +16,7 @@
 package com.impetus.kundera.ejb;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -77,7 +78,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
     /** The keyspace. */
     private String keyspace;
-
+    
+    private List<String> classes;
 
     /** The Cache provider. */
     private CacheProvider cacheProvider;
@@ -100,6 +102,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         this(persistenceUnitName, null);
     }
     
+  
 //    /**
 //     * Parameterize constructor to load configuration for no sql databases other than Cassandra.  
 //     * @param persistenceUnitName
@@ -155,6 +158,12 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     	// Second level cache
 //		initSecondLevelCache();
     }
+    
+    public EntityManagerFactoryImpl(PersistenceMetadata metaData, Map props) {
+    	this.classes = metaData.getClasses();
+    	onLoad(metaData.getName());
+    	this.props = props;    	
+    }
 
 
 //    /**
@@ -193,7 +202,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         metadataManager = new MetadataManager(this);
 
         // scan classes for @Entity
-        Reader reader = new ClasspathReader();
+        Reader reader = new ClasspathReader(this.classes);
         reader.addValidAnnotations(Entity.class.getName());
         reader.addAnnotationDiscoveryListeners(metadataManager);
         reader.read();
@@ -439,4 +448,19 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     public String getKeyspace() {
         return keyspace;
     }
+
+	/**
+	 * @return the classes
+	 */
+	public List<String> getClasses() {
+		return classes;
+	}
+
+	/**
+	 * @param classes the classes to set
+	 */
+	public void setClasses(List<String> classes) {
+		this.classes = classes;
+	}  
+    
 }

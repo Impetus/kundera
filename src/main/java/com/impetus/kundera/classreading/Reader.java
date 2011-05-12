@@ -123,8 +123,11 @@ public abstract class Reader {
             urlString = urlString.substring(0, urlString.length() - 2);
             url = new URL(urlString);
         }
-
-        if (!urlString.endsWith("/")) {
+        
+        if(urlString.endsWith(".class")) {
+        	File f = new File(url.getPath());
+        	return new ClassFileIterator(f);        	
+        } else if (!urlString.endsWith("/")) {
             return new JarFileIterator(url.openStream(), filter);
         } else {
 

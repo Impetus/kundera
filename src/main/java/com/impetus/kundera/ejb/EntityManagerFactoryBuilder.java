@@ -86,7 +86,7 @@ public class EntityManagerFactoryBuilder {
     	}
     	
     	log.info("Building EntityManagerFactory for name: " + metadata.getName() + ", and Properties:" + props);
-    	return new EntityManagerFactoryImpl(metadata.getName(), props);
+    	return new EntityManagerFactoryImpl(metadata, props);
     }
     
 	/**
