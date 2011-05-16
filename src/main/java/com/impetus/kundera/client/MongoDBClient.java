@@ -70,11 +70,26 @@ public class MongoDBClient implements Client {
 		String dbName = m.getKeyspaceName();
 		String documentName = m.getColumnFamilyName();
 		String key = e.getId();
-		log.debug("Persisting data into " + dbName + "." + documentName + " for " + key);
-		DBCollection dbCollection = mongoDb.getCollection(documentName);	
 		
-		BasicDBObject document = new MongoDBDataHandler().getDocumentFromEntity(em, m, e.getEntity());	
-		dbCollection.insert(document);	
+		log.debug("Checking whether record already exist for " + dbName + "." + documentName + " for " + key);
+		Object entity = loadColumns(em, m.getEntityClazz(), dbName, documentName, key, m);
+		if(entity != null) {
+			log.debug("Updating data into " + dbName + "." + documentName + " for " + key);
+			DBCollection dbCollection = mongoDb.getCollection(documentName);
+			
+			BasicDBObject searchQuery = new BasicDBObject();
+			searchQuery.put(m.getIdColumn().getName(), key);
+			BasicDBObject updatedDocument = new MongoDBDataHandler().getDocumentFromEntity(em, m, e.getEntity());	
+			dbCollection.update(searchQuery, updatedDocument);
+			
+		} else {
+			log.debug("Inserting data into " + dbName + "." + documentName + " for " + key);
+			DBCollection dbCollection = mongoDb.getCollection(documentName);	
+			
+			BasicDBObject document = new MongoDBDataHandler().getDocumentFromEntity(em, m, e.getEntity());	
+			dbCollection.insert(document);
+		}		
+				
 	}	
 
 	

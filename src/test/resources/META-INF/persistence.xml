@@ -34,7 +34,7 @@
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="mongodb">
-		<provider>com.impetus.kundera.ejb.KunderaPersistence</provider>
+		<provider>com.impetus.kundera.ejb.KunderaPersistence</provider>		
 		<properties>
 			<property name="kundera.nodes" value="localhost"/>
 			<property name="kundera.port" value="27017"/>

@@ -46,6 +46,7 @@ public class ClasspathReader extends Reader {
     }
     
     public ClasspathReader(List<String> classesToScan) {
+    	this();
     	this.classesToScan = classesToScan;
     }
 
