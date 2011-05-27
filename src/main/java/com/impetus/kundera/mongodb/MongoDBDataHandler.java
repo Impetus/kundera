@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -130,27 +131,35 @@ public class MongoDBDataHandler {
 
 			Class<?> embeddedEntityClass = relation.getTargetEntity(); //Target entity
 			Field embeddedEntityField = relation.getProperty();	//Mapped to this property			
-			boolean optional = relation.isOptional();	// Is it optional? TODO: Where to use this?			
+			boolean optional = relation.isOptional();	// Is it optional			
 			Object embeddedObject = PropertyAccessorHelper.getObject(entity, embeddedEntityField); // Value			
 			
 			EntityMetadata relMetadata = em.getMetadataManager().getEntityMetadata(embeddedEntityClass);
 			relMetadata.addColumn(relMetadata.getIdColumn().getName(), relMetadata.getIdColumn());	//Add PK column
 			
-			if(relation.isUnary()) {				
+			if(embeddedObject == null) {
+				if(! optional) {
+					throw new PersistenceException("Field " + embeddedEntityField + " is not optional, and hence must be set.");
+				}			
 				
-				BasicDBObject relDBObj = getDocumentFromEntity(em, relMetadata, embeddedObject);
-				dbObj.put(embeddedEntityField.getName(), relDBObj);
+			} else {
+				if(relation.isUnary()) {				
+					BasicDBObject relDBObj = getDocumentFromEntity(em, relMetadata, embeddedObject);
+					dbObj.put(embeddedEntityField.getName(), relDBObj);
+					
+				} else if(relation.isCollection()) {
+					Collection collection = (Collection) embeddedObject;
+					BasicDBObject[] relDBObjects = new BasicDBObject[collection.size()];
+					int count = 0;
+					for(Object o : collection) {
+						relDBObjects[count] = getDocumentFromEntity(em, relMetadata, o);	
+						count++;
+					}
+					dbObj.put(embeddedEntityField.getName(), relDBObjects);
+				}	
 				
-			} else if(relation.isCollection()) {
-				Collection collection = (Collection) embeddedObject;
-				BasicDBObject[] relDBObjects = new BasicDBObject[collection.size()];
-				int count = 0;
-				for(Object o : collection) {
-					relDBObjects[count] = getDocumentFromEntity(em, relMetadata, o);	
-					count++;
-				}
-				dbObj.put(embeddedEntityField.getName(), relDBObjects);
 			}			
+					
 		}		
 		return dbObj;
 	}
