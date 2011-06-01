@@ -10,7 +10,7 @@ import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 
 
-// Class that has nothing but a main.
+// Class that has nothing but a main class.
 // Does a Put, Get and a Scan against an hbase table.
 public class HBaseClient {
   public static void main(String[] args) throws IOException {
