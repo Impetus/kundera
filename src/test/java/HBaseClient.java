@@ -21,7 +21,7 @@ public class HBaseClient {
     HBaseConfiguration config = new HBaseConfiguration();
     config.set("hbase.master", "localhost"+":"+"6000");
     // This instantiates an HTable object that connects you to
-    // the "myLittleHBaseTable" table.
+    // the "myLittleHBaseTable" table.   
     HTable table = new HTable(config, "myLittleHBaseTable");
 
     // To add to a row, use Put.  A Put constructor takes the name of the row
