@@ -69,29 +69,31 @@ public class MongoDBDataHandler {
 				
 				Object embeddedObject = document.get(embeddedPropertyField.getName());
 				
-				
-				if(relation.isUnary()) {			
-					BasicDBObject relDBObj = (BasicDBObject) embeddedObject;
-					Object embeddedEntity = new MongoDBDataHandler().getEntityFromDocument(em, embeddedEntityClass, relMetadata, relDBObj);
-					PropertyAccessorHelper.set(entity, embeddedPropertyField, embeddedEntity);				
-				} else if(relation.isCollection()) {
-					BasicDBList relList = (BasicDBList) embeddedObject;		//List of embedded objects
-					
-					Collection<Object> embeddedEntities = null;				//Collection of embedded entities
-					if (relation.getPropertyType().equals(Set.class)) {
-						embeddedEntities = new HashSet<Object>();
-					} else if (relation.getPropertyType().equals(List.class)) {
-						embeddedEntities = new ArrayList<Object>();
-					}				
-					
-					for(int i = 0; i < relList.size(); i++) {
-						BasicDBObject relObj = (BasicDBObject)relList.get(i);					
-						Object embeddedEntity = new MongoDBDataHandler().getEntityFromDocument(em, embeddedEntityClass, relMetadata, relObj);
-						embeddedEntities.add(embeddedEntity);						
-					}	
-					
-					PropertyAccessorHelper.set(entity, embeddedPropertyField, embeddedEntities);	
-				}				
+				if(embeddedObject != null) {					
+					if(relation.isUnary()) {			
+						BasicDBObject relDBObj = (BasicDBObject) embeddedObject;
+						Object embeddedEntity = new MongoDBDataHandler().getEntityFromDocument(em, embeddedEntityClass, relMetadata, relDBObj);
+						PropertyAccessorHelper.set(entity, embeddedPropertyField, embeddedEntity);				
+					} else if(relation.isCollection()) {
+						BasicDBList relList = (BasicDBList) embeddedObject;		//List of embedded objects
+						
+						Collection<Object> embeddedEntities = null;				//Collection of embedded entities
+						if (relation.getPropertyType().equals(Set.class)) {
+							embeddedEntities = new HashSet<Object>();
+						} else if (relation.getPropertyType().equals(List.class)) {
+							embeddedEntities = new ArrayList<Object>();
+						}				
+						
+						for(int i = 0; i < relList.size(); i++) {
+							BasicDBObject relObj = (BasicDBObject)relList.get(i);					
+							Object embeddedEntity = new MongoDBDataHandler().getEntityFromDocument(em, embeddedEntityClass, relMetadata, relObj);
+							embeddedEntities.add(embeddedEntity);						
+						}	
+						
+						PropertyAccessorHelper.set(entity, embeddedPropertyField, embeddedEntities);	
+					}						
+				}		
+							
 	        }
 			
 		} catch (InstantiationException e) {
