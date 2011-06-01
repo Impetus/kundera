@@ -14,7 +14,6 @@
 		<developerConnection>scm:svn:https://kundera.googlecode.com/svn/trunk</developerConnection>
 		<url>http://kundera.googlecode.com/svn/trunk</url>
 	</scm>
-	
 	<issueManagement>
 		<system>Google Code</system>
 		<url>http://code.google.com/p/kundera/issues/list</url>
@@ -200,22 +199,31 @@
 		
 		<!--
 			Non public  dependencies- being picked from kundera svn  repository
-		-->
+		
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>apache-cassandra</artifactId>
 			<version>0.6.3</version>
+		</dependency> -->
+
+		<dependency>
+			 <groupId>org.apache.cassandra</groupId>
+			 <artifactId>apache-cassandra</artifactId>
+		         <version>0.7.4</version>
 		</dependency>
+
+
 		<dependency>
 			<groupId>libthrift</groupId>
 			<artifactId>libthrift</artifactId>
 			<version>r917130</version>
 		</dependency>
 		<dependency>
-			<groupId>pelops</groupId>
-			<artifactId>pelops</artifactId>
-			<version>UNKNOWN</version>
-			</dependency>
+		    <groupId>com.github.stephenc.scale7</groupId>
+		    <artifactId>scale7-pelops</artifactId>
+		    <version>0.913</version>
+		</dependency>
+
 		<!-- Required for running  tests  for embedded cassandra mode-->
 		<dependency>
 			<groupId>org.cliffc</groupId>
@@ -232,12 +240,17 @@
 			<artifactId>javassist</artifactId>
 			<version>3.9.0.GA</version>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>lucandra</groupId>
 			<artifactId>lucandra</artifactId>
 			<version>UNKNOWN</version>
-		</dependency>
+		</dependency> -->
               <!-- HBase depndencies-->
+		<dependency>
+			<groupId>org.apache.solr</groupId>
+			<artifactId>solandra</artifactId>
+			<version>UNKNOWN</version>
+		</dependency>
 		<dependency>
 		     <groupId>org.apache.hbase</groupId>
 		     <artifactId>hbase-core</artifactId>

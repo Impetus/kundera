@@ -30,6 +30,7 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
+import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.kundera.CassandraClient;
 import com.impetus.kundera.ejb.EntityManagerImpl;
@@ -133,7 +134,7 @@ public class ThriftClient implements CassandraClient {
 	 * java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public Map<String, List<SuperColumn>> loadSuperColumns(String keyspace,
+	public Map<Bytes, List<SuperColumn>> loadSuperColumns(String keyspace,
 			String columnFamily, String... rowIds) throws Exception {
 		throw new NotImplementedException("TODO");
 	}

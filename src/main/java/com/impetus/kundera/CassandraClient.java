@@ -19,12 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.cassandra.thrift.Cassandra.Client;
-import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SuperColumn;
-
-import com.impetus.kundera.ejb.EntityManagerImpl;
-import com.impetus.kundera.metadata.EntityMetadata;
-import com.impetus.kundera.proxy.EnhancedEntity;
+import org.scale7.cassandra.pelops.Bytes;
 
 /**
  * Interface used to interact with Cassandra Clients.
@@ -128,7 +124,7 @@ public interface CassandraClient  extends com.impetus.kundera.Client{
 	 * @throws Exception
 	 *             the exception
 	 */
-    Map<String, List<SuperColumn>> loadSuperColumns(String keyspace, String columnFamily, String... keys) throws Exception;
+    Map<Bytes, List<SuperColumn>> loadSuperColumns(String keyspace, String columnFamily, String... keys) throws Exception;
     
 
     /**

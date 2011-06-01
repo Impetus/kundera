@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
 import org.apache.cassandra.thrift.Cassandra;
@@ -32,11 +31,14 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wyki.cassandra.pelops.KeyDeletor;
-import org.wyki.cassandra.pelops.Mutator;
-import org.wyki.cassandra.pelops.Pelops;
-import org.wyki.cassandra.pelops.Policy;
-import org.wyki.cassandra.pelops.Selector;
+import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.Cluster;
+import org.scale7.cassandra.pelops.ColumnFamilyManager;
+import org.scale7.cassandra.pelops.IConnection;
+import org.scale7.cassandra.pelops.Mutator;
+import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.Selector;
+import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
 
 import com.impetus.kundera.CassandraClient;
 import com.impetus.kundera.Constants;
@@ -80,10 +82,11 @@ public class PelopsClient implements CassandraClient {
 
 	/* @see com.impetus.kundera.CassandraClient#connect() */
 	@Override
-	public final void connect() {
-		Pelops.addPool(poolName, contactNodes, defaultPort, false, null,
-				new Policy());
-	}
+	public final void connect() {/*
+               Cluster cluster = new Cluster(contactNodes, new IConnection.Config(defaultPort, true, -1), false);
+//		Pelops.addPool(poolName, cluster, key 
+//				new Policy());
+	*/}
 
 	/* @see com.impetus.kundera.CassandraClient#shutdown() */
 	@Override
@@ -113,8 +116,13 @@ public class PelopsClient implements CassandraClient {
 			throw new PersistenceException("PelopsClient is closed.");
 		}
 		PelopsClient.ThriftRow tf = toThriftRow(e,columns,columnFamily);
-		Mutator mutator = Pelops.createMutator(poolName, keyspace);
-		mutator.writeColumns(tf.getId(), columnFamily, Arrays.asList(tf.getColumns().toArray(new Column[0])));
+
+                Cluster cluster = new Cluster(contactNodes, new IConnection.Config(defaultPort, true, -1), false);
+                Pelops.addPool(poolName, cluster, keyspace);
+
+		Mutator mutator = Pelops.createMutator(poolName);
+//                mutator.writeColumn(colFamily, rowKey, column)
+		mutator.writeColumns(columnFamily,new Bytes(tf.getId().getBytes()), Arrays.asList(tf.getColumns().toArray(new Column[0])));
 		mutator.execute(ConsistencyLevel.ONE);
 	}
 	
@@ -136,10 +144,16 @@ public class PelopsClient implements CassandraClient {
 		if (!isOpen()) {
 			throw new PersistenceException("PelopsClient is closed.");
 		}
-		Mutator mutator = Pelops.createMutator(poolName, keyspace);
+
+                Cluster cluster = new Cluster(contactNodes, new IConnection.Config(defaultPort, true, -1), false);
+                Pelops.addPool(poolName, cluster, keyspace);
+		Mutator mutator = Pelops.createMutator(poolName);
 
 		for (SuperColumn sc : superColumns) {
-			mutator.writeSubColumns(rowId, columnFamily, sc.getName(), sc
+              /**
+               * String colFamily, String rowKey, String colName, List<Column> subColumns
+               */
+			mutator.writeSubColumns(columnFamily, rowId, new String(sc.getName()), sc
 					.getColumns());
 		}
 		mutator.execute(ConsistencyLevel.ONE);
@@ -157,8 +171,15 @@ public class PelopsClient implements CassandraClient {
 		if (!isOpen()) {
 			throw new PersistenceException("PelopsClient is closed.");
 		}
-		Selector selector = Pelops.createSelector(poolName, keyspace);
-		List<Column> columns =  selector.getColumnsFromRow(rowId, columnFamily, Selector
+
+                  if(Pelops.getDbConnPool(poolName) == null) 
+                  {
+                       System.out.println("creating new connection pool");
+                       Cluster cluster = new Cluster(contactNodes, new IConnection.Config(defaultPort, true, -1), false);
+                       Pelops.addPool(poolName, cluster, keyspace);
+                  }
+		Selector selector = Pelops.createSelector(poolName);
+		List<Column> columns =  selector.getColumnsFromRow(columnFamily,new Bytes(rowId.getBytes()), Selector
 				.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
 		E e;
 		if (null == columns || columns.size() == 0) {
@@ -180,15 +201,30 @@ public class PelopsClient implements CassandraClient {
 		if (!isOpen()) {
 			throw new PersistenceException("PelopsClient is closed.");
 		}
-		Selector selector = Pelops.createSelector(poolName, keyspace);
-		Map<String, List<Column>> map = selector.getColumnsFromRows(Arrays.asList(rowIds), columnFamily,
-				Selector.newColumnsPredicateAll(false, 1000),
-				ConsistencyLevel.ONE);
+
+                Cluster cluster = new Cluster(contactNodes, new IConnection.Config(defaultPort, true, -1), false);
+                Pelops.addPool(poolName, cluster, keyspace);
+		Selector selector = Pelops.createSelector(poolName);
+                /**
+                 * String columnFamily, List<Bytes> rowKeys, SlicePredicate colPredicate, ConsistencyLevel cLevel
+                 */
+                    List<Bytes> bytesArr = new ArrayList<Bytes>();
+
+                    for(String rowkey: rowIds)
+                    {
+                        Bytes bytes =  new Bytes(PropertyAccessorFactory.STRING.toBytes(rowkey));
+                        bytesArr.add(bytes);
+                    }
+
+		Map<Bytes, List<Column>> map = selector.getColumnsFromRows(columnFamily,bytesArr ,
+				                                            Selector.newColumnsPredicateAll(false, 1000),
+				                                            ConsistencyLevel.ONE);
 		List<E> entities = new ArrayList<E>();
 		// Iterate and populate entities
-		for (Map.Entry<String, List<Column>> entry : map.entrySet()) {
+		for (Map.Entry<Bytes, List<Column>> entry : map.entrySet()) {
 
-			String id = entry.getKey();
+			String id = PropertyAccessorFactory.STRING.fromBytes(entry.getKey().toByteArray());
+                        
 			List<Column> columns = entry.getValue();
 
 			if (entry.getValue().size() == 0) {
@@ -214,9 +250,11 @@ public class PelopsClient implements CassandraClient {
 		if (!isOpen()) {
 			throw new PersistenceException("PelopsClient is closed.");
 		}
-		KeyDeletor keyDeletor = Pelops.createKeyDeletor(poolName, keyspace);
-		keyDeletor
-				.deleteColumnFamily(rowId, columnFamily, ConsistencyLevel.ONE);
+                
+                Cluster cluster = new Cluster(contactNodes, new IConnection.Config(defaultPort, true, -1), false);
+                Pelops.addPool(poolName, cluster, keyspace);
+		ColumnFamilyManager keyDeletor = Pelops.createColumnFamilyManager(cluster, keyspace);
+		keyDeletor.dropColumnFamily(columnFamily);
 	}
 
 	/*
@@ -230,7 +268,9 @@ public class PelopsClient implements CassandraClient {
 			throws Exception {
 		if (!isOpen())
 			throw new PersistenceException("PelopsClient is closed.");
-		Selector selector = Pelops.createSelector(poolName, keyspace);
+                Cluster cluster = new Cluster(contactNodes, new IConnection.Config(defaultPort, true, -1), false);
+                Pelops.addPool(poolName, cluster, keyspace);
+		Selector selector = Pelops.createSelector(poolName);
 		return selector.getSuperColumnsFromRow(rowId, columnFamily, Selector
 				.newColumnsPredicate(superColumnNames), ConsistencyLevel.ONE);
 	}
@@ -241,17 +281,30 @@ public class PelopsClient implements CassandraClient {
 	 * java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public final Map<String, List<SuperColumn>> loadSuperColumns(
+	public final Map<Bytes, List<SuperColumn>> loadSuperColumns(
 			String keyspace, String columnFamily, String... rowIds)
 			throws Exception {
 
 		if (!isOpen())
 			throw new PersistenceException("PelopsClient is closed.");
 
-		Selector selector = Pelops.createSelector(poolName, keyspace);
-		return selector.getSuperColumnsFromRows(Arrays.asList(rowIds),
-				columnFamily, Selector.newColumnsPredicateAll(false, 1000),
-				ConsistencyLevel.ONE);
+                Cluster cluster = new Cluster(contactNodes, new IConnection.Config(defaultPort, true, -1), false);
+                Pelops.addPool(poolName, cluster, keyspace);
+		Selector selector = Pelops.createSelector(poolName);
+                 
+                 List<Bytes> bytesArr = new ArrayList<Bytes>();
+                 
+                 for(String rowkey: rowIds)
+                 {
+                     Bytes bytes =  new Bytes(PropertyAccessorFactory.STRING.toBytes(rowkey));
+                     bytesArr.add(bytes);
+                 }
+                  /**
+                   * String columnFamily, List<Bytes> rowKeys, SlicePredicate colPredicate, ConsistencyLevel cLevel
+                   */
+		return  selector.getSuperColumnsFromRows(columnFamily,bytesArr,
+                                                        Selector.newColumnsPredicateAll(false, 1000),
+                                                        ConsistencyLevel.ONE);
 	}
 
 	/* @see com.impetus.kundera.CassandraClient#getCassandraClient() */
@@ -498,8 +551,11 @@ public class PelopsClient implements CassandraClient {
 			String name = column.getName();
 			try {
 				byte[] value = PropertyAccessorHelper.get(e.getEntity(), field);
-				columns.add(new Column(PropertyAccessorFactory.STRING
-						.toBytes(name), value, timestamp));
+                                Column col = new Column();
+                                col.setName(PropertyAccessorFactory.STRING.toBytes(name));
+                                col.setValue(value);
+                                col.setTimestamp(timestamp);
+				columns.add(col);
 			} catch (PropertyAccessException exp) {
 				log.warn(exp.getMessage());
 			}
@@ -514,9 +570,12 @@ public class PelopsClient implements CassandraClient {
 
 			String keys = serializeKeys(foreignKeys);
 			if (null != keys) {
-				columns.add(new Column(PropertyAccessorFactory.STRING
-						.toBytes(property), PropertyAccessorFactory.STRING
-						.toBytes(keys), timestamp));
+                                Column col = new Column();
+                                
+                                col.setName(PropertyAccessorFactory.STRING.toBytes(property));
+                                col.setValue( PropertyAccessorFactory.STRING.toBytes(keys));
+                                col.setTimestamp(timestamp);
+				columns.add(col);
 			}
 		}
 

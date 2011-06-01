@@ -24,6 +24,7 @@ import java.util.Set;
 
 import lucandra.IndexReader;
 
+import org.apache.cassandra.db.RowMutation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
@@ -120,8 +121,11 @@ public class LucandraIndexer implements Indexer {
 		log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName()
 				+ "] for key:" + id);
 		try {
-			getIndexWriter().deleteDocuments(
-					new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));
+                       /**
+                        * String indexName, Query query, boolean autoCommit
+                        */
+			getIndexWriter().deleteDocuments(INDEX_NAME,
+					new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)), true);
 		} catch (CorruptIndexException e) {
 			throw new IndexingException(e.getMessage());
 		} catch (IOException e) {
@@ -146,15 +150,16 @@ public class LucandraIndexer implements Indexer {
 
 		String indexName = metadata.getIndexName();
 
-		Document document = new Document();
+                Document document = new Document();
 		Field luceneField;
-
+                
+                String id =null;
 		// index row
 		try {
-			String id = PropertyAccessorHelper.getId(object, metadata);
+                        id = PropertyAccessorHelper.getId(object, metadata);
 			luceneField = new Field(ENTITY_ID_FIELD, id, // adding class
 					// namespace
-					Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
+					Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
 			document.add(luceneField);
 
 			// index namespace for unique deletion
@@ -162,19 +167,19 @@ public class LucandraIndexer implements Indexer {
 					getKunderaId(metadata, id), // adding
 					// class
 					// namespace
-					Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
+					Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
 			document.add(luceneField);
 
 			// index entity class
 			luceneField = new Field(ENTITY_CLASS_FIELD, metadata
 					.getEntityClazz().getCanonicalName().toLowerCase(), Field.Store.YES,
-					Field.Index.NOT_ANALYZED_NO_NORMS);
+					Field.Index.ANALYZED_NO_NORMS);
 			document.add(luceneField);
 
 			// index index name
 			luceneField = new Field(ENTITY_INDEXNAME_FIELD, metadata
 					.getIndexName(), Field.Store.YES,
-					Field.Index.NOT_ANALYZED_NO_NORMS);
+					Field.Index.ANALYZED_NO_NORMS);
 			document.add(luceneField);
 
 		} catch (PropertyAccessException e) {
@@ -211,7 +216,10 @@ public class LucandraIndexer implements Indexer {
 				w.close();
 				
 			} else {
-				getIndexWriter().addDocument(document, analyzer);
+                                 RowMutation[] rms = null;
+                                 lucandra.IndexWriter indexWriter = getIndexWriter();
+                                 indexWriter.addDocument(INDEX_NAME,document, analyzer,100, true, rms);
+    
 			}
 		} catch (CorruptIndexException e) {
 			throw new IndexingException(e.getMessage());
@@ -236,9 +244,10 @@ public class LucandraIndexer implements Indexer {
 		Set<String> entityIds = new HashSet<String>();
 
 		org.apache.lucene.index.IndexReader indexReader = null;
+                
 		try {
 			if(client.getType().equals(DBType.CASSANDRA)) {
-				indexReader = new IndexReader(INDEX_NAME, ((CassandraClient)client).getCassandraClient());
+				indexReader  = new IndexReader(INDEX_NAME);
 			}else {
 				indexReader = getDefaultReader();
 			}
@@ -255,7 +264,17 @@ public class LucandraIndexer implements Indexer {
 
 			for (ScoreDoc sc : docs.scoreDocs) {
 				Document doc = searcher.doc(sc.doc);
-				entityIds.add(doc.get(ENTITY_ID_FIELD));
+                                entityIds.add(doc.get(ENTITY_ID_FIELD));
+//                                Field[] fields = 
+//                                for(Field field : fields)
+//                                {
+//                                    if ((field.name().equals(ENTITY_ID_FIELD)) && (!(field.isBinary())))
+//                                    {
+//                                        //TODO .still it is not optimal solution, because it is fetching all the ids, irrespective of class.
+//                                        entityIds.add(field.stringValue());
+//                                    }
+//                                }
+//				entityIds.add(doc.get(ENTITY_ID_FIELD));
 			}
 		} catch (ParseException e) {
 			new IndexingException(e.getMessage());
@@ -304,7 +323,7 @@ public class LucandraIndexer implements Indexer {
 	 */
 	private lucandra.IndexWriter getIndexWriter() {
 		try {
-			return new lucandra.IndexWriter(INDEX_NAME, ((CassandraClient)client).getCassandraClient());
+			return new lucandra.IndexWriter();
 		} catch (Exception e) {
 			throw new IndexingException(e.getMessage());
 		}

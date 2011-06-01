@@ -15,6 +15,7 @@
  */
 package com.impetus.kundera.db.accessor;
 
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +31,7 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.kundera.CassandraClient;
 import com.impetus.kundera.ejb.EntityManagerImpl;
@@ -112,13 +114,13 @@ public final class SuperColumnFamilyDataAccessor extends
 		List<E> entities = new ArrayList<E>();
 
 		// load columns from DB
-		Map<String, List<SuperColumn>> map = ((CassandraClient)getEntityManager().getClient())
+		Map<Bytes, List<SuperColumn>> map = ((CassandraClient)getEntityManager().getClient())
 				.loadSuperColumns(keyspace, family, ids);
 
 		// Iterate and populate entities
-		for (Map.Entry<String, List<SuperColumn>> entry : map.entrySet()) {
+		for (Map.Entry<Bytes, List<SuperColumn>> entry : map.entrySet()) {
 
-			String id = entry.getKey();
+			String id = entry.getKey().toString();
 			List<SuperColumn> columns = entry.getValue();
 
 			if (entry.getValue().size() == 0) {
@@ -267,16 +269,24 @@ public final class SuperColumnFamilyDataAccessor extends
 				try {
 					byte[] value = PropertyAccessorHelper.get(e.getEntity(),
 							field);
-					if (null != value) {
-						columns.add(new Column(PropertyAccessorFactory.STRING
-								.toBytes(name), value, timestamp));
+					if (null != value) 
+                                         {
+                                            Column col = new Column();
+                                            col.setName(PropertyAccessorFactory.STRING
+                                                    .toBytes(name));
+                                            col.setValue(value);
+                                            col.setTimestamp(timestamp);
+    
+						columns.add(col);
 					}
 				} catch (PropertyAccessException exp) {
 					log.warn(exp.getMessage());
 				}
 			}
-			cr.addColumn(new SuperColumn(PropertyAccessorFactory.STRING
-					.toBytes(superColumnName), columns));
+                         SuperColumn superCol = new SuperColumn();
+                         superCol.setName(PropertyAccessorFactory.STRING.toBytes(superColumnName));
+                         superCol.setColumns(columns);
+			cr.addColumn(superCol);
 		}
 
 		// add toOne relations
@@ -288,14 +298,18 @@ public final class SuperColumnFamilyDataAccessor extends
 
 			String keys = serializeKeys(foreignKeys);
 			if (null != keys) {
-				columns.add(new Column(PropertyAccessorFactory.STRING
-						.toBytes(property), PropertyAccessorFactory.STRING
-						.toBytes(keys), timestamp));
+                                        Column col = new Column();
+                                        col.setName(PropertyAccessorFactory.STRING.toBytes(property));
+                                        col.setValue(PropertyAccessorFactory.STRING.toBytes(keys));
+                                        col.setTimestamp(timestamp);
+                                        columns.add(col);
 			}
 		}
 		if (!columns.isEmpty()) {
-			cr.addColumn(new SuperColumn(PropertyAccessorFactory.STRING
-					.toBytes(TO_ONE_SUPER_COL_NAME), columns));
+                                    SuperColumn superCol = new SuperColumn();
+                                    superCol.setName(PropertyAccessorFactory.STRING.toBytes(TO_ONE_SUPER_COL_NAME));
+                                    superCol.setColumns(columns);
+                                    cr.addColumn(superCol);
 		}
 		return cr;
 	}
