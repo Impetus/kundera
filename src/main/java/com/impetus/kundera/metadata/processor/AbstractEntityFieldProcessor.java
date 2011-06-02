@@ -112,8 +112,12 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor 
 			Column c = f.getAnnotation(Column.class);
             if (!c.name().isEmpty()) {                
             	metadata.setIdColumn(metadata.new Column(c.name(), f));
-            } 
-		}    
+            } else {
+            	metadata.setIdColumn(metadata.new Column(f.getName(), f));
+            }
+		} else {
+			metadata.setIdColumn(metadata.new Column(f.getName(), f));
+		}
     }    
 
 }
