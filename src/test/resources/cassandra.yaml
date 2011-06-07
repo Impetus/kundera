@@ -1,0 +1,217 @@
+# Cassandra storage config YAML
+# See http://wiki.apache.org/cassandra/StorageConfiguration for
+# explanations of configuration directives.
+
+# name of the cluster
+cluster_name: 'Solandra Cluster'
+
+# You should always specify InitialToken when setting up a production
+# cluster for the first time, and often when adding capacity later.
+# The principle is that each node should be given an equal slice of
+# the token ring; see http://wiki.apache.org/cassandra/Operations
+# for more details.
+#
+# If blank, Cassandra will request a token bisecting the range of
+# the heaviest-loaded existing node.  If there is no load information
+# available, such as is the case with a new cluster, it will pick
+# a random token, which will lead to hot spots.
+initial_token:
+
+# Set to true to make new [non-seed] nodes automatically migrate data
+# to themselves from the pre-existing nodes in the cluster.  Defaults
+# to false because you can only bootstrap N machines at a time from
+# an existing cluster of N, so if you are bringing up a cluster of
+# 10 machines with 3 seeds you would have to do it in stages.  Leaving
+# this off for the initial start simplifies that.
+auto_bootstrap: false
+
+# See http://wiki.apache.org/cassandra/HintedHandoff
+hinted_handoff_enabled: true
+
+# authentication backend, implementing IAuthenticator; used to limit keyspace access
+authenticator: org.apache.cassandra.auth.AllowAllAuthenticator
+
+# any IPartitioner may be used, including your own as long as it is on
+# the classpath.  Out of the box, Cassandra provides
+# org.apache.cassandra.dht.RandomPartitioner
+# org.apache.cassandra.dht.OrderPreservingPartitioner, and
+# org.apache.cassandra.dht.CollatingOrderPreservingPartitioner.
+partitioner: lucandra.dht.RandomPartitioner
+#partitioner: org.apache.cassandra.dht.RandomPartitioner
+
+# directories where Cassandra should store data on disk.
+data_file_directories:
+    - /tmp/cassandra-data/data
+
+# Addresses of hosts that are deemed contact points.
+# Cassandra nodes use this list of hosts to find each other and learn
+# the topology of the ring.  You must change this if you are running
+# multiple nodes!
+seeds:
+    - 127.0.0.1
+
+# Access mode.  mmapped i/o is substantially faster, but only practical on
+# a 64bit machine (which notably does not include EC2 "small" instances)
+# or relatively small datasets.  "auto", the safe choice, will enable
+# mmapping on a 64bit JVM.  Other values are "mmap", "mmap_index_only"
+# (which may allow you to get part of the benefits of mmap on a 32bit
+# machine by mmapping only index files) and "standard".
+# (The buffer size settings that follow only apply to standard,
+# non-mmapped i/o.)
+disk_access_mode: auto
+
+# Unlike most systems, in Cassandra writes are faster than reads, so
+# you can afford more of those in parallel.  A good rule of thumb is 2
+# concurrent reads per processor core.  Increase ConcurrentWrites to
+# the number of clients writing at once if you enable CommitLogSync +
+# CommitLogSyncDelay. -->
+concurrent_reads: 32
+concurrent_writes: 32
+
+# This sets the amount of memtable flush writer threads.  These will
+# be blocked by disk io, and each one will hold a memtable in memory
+# while blocked. If you have a large heap and many data directories,
+# you can increase this value for better flush performance.
+# By default this will be set to the amount of data directories defined.
+#memtable_flush_writers: 1
+
+# Buffer size to use when performing contiguous column slices.
+# Increase this to the size of the column slices you typically perform
+sliced_buffer_size_in_kb: 64
+
+# TCP port, for commands and data
+storage_port: 7000
+
+# Address to bind to and tell other nodes to connect to. You _must_
+# change this if you want multiple nodes to be able to communicate!
+listen_address: 127.0.0.1
+
+# The address to bind the Thrift RPC service to
+rpc_address: localhost
+# port for Thrift to listen on
+rpc_port: 9165
+
+# Frame size for thrift (maximum field length).
+# 0 disables TFramedTransport in favor of TSocket.
+thrift_framed_transport_size_in_mb: 15
+
+# The max length of a thrift message, including all fields and
+# internal thrift overhead.
+thrift_max_message_length_in_mb: 16
+
+# Whether or not to take a snapshot before each compaction.  Be
+# careful using this option, since Cassandra won't clean up the
+# snapshots for you.  Mostly useful if you're paranoid when there
+# is a data format change.
+snapshot_before_compaction: false
+
+# The threshold size in megabytes the binary memtable must grow to,
+# before it's submitted for flushing to disk.
+binary_memtable_throughput_in_mb: 256
+
+column_index_size_in_kb: 64
+in_memory_compaction_limit_in_mb: 128
+
+# commit log
+commitlog_directory: /tmp/cassandra-data/commitlog
+
+# saved caches
+saved_caches_directory: /tmp/cassandra-data/saved_caches
+
+# Size to allow commitlog to grow to before creating a new segment
+commitlog_rotation_threshold_in_mb: 128
+
+# commitlog_sync may be either "periodic" or "batch."
+# When in batch mode, Cassandra won't ack writes until the commit log
+# has been fsynced to disk.  It will wait up to
+# CommitLogSyncBatchWindowInMS milliseconds for other writes, before
+# performing the sync.
+commitlog_sync: periodic
+
+# the other option is "timed," where writes may be acked immediately
+# and the CommitLog is simply synced every commitlog_sync_period_in_ms
+# milliseconds.
+commitlog_sync_period_in_ms: 10000
+
+# Time to wait for a reply from other nodes before failing the command
+rpc_timeout_in_ms: 10000
+
+# phi value that must be reached for a host to be marked down.
+# most users should never need to adjust this.
+# phi_convict_threshold: 8
+
+# time to wait before garbage collecting tombstones (deletion markers)
+#gc_grace_seconds: 864000
+
+# endpoint_snitch -- Set this to a class that implements
+# IEndpointSnitch, which will let Cassandra know enough
+# about your network topology to route requests efficiently.
+# Out of the box, Cassandra provides
+# org.apache.cassandra.locator.SimpleSnitch,
+# org.apache.cassandra.locator.RackInferringSnitch, and
+# org.apache.cassandra.locator.PropertyFileSnitch.
+endpoint_snitch: org.apache.cassandra.locator.SimpleSnitch
+
+# dynamic_snitch -- This boolean controls whether the above snitch is
+# wrapped with a dynamic snitch, which will monitor read latencies
+# and avoid reading from hosts that have slowed (due to compaction,
+# for instance)
+dynamic_snitch: true
+# controls how often to perform the more expensive part of host score
+# calculation
+dynamic_snitch_update_interval_in_ms: 100
+# controls how often to reset all host scores, allowing a bad host to
+# possibly recover
+dynamic_snitch_reset_interval_in_ms: 600000
+# if set greater than zero and read_repair_chance is < 1.0, this will allow
+# 'pinning' of replicas to hosts in order to increase cache capacity.
+# The badness threshold will control how much worse the pinned host has to be
+# before the dynamic snitch will prefer other replicas over it.  This is
+# expressed as a double which represents a percentage.
+dynamic_snitch_badness_threshold: 0.0
+
+# request_scheduler -- Set this to a class that implements
+# RequestScheduler, which will schedule incoming client requests
+# according to the specific policy. This is useful for multi-tenancy
+# with a single Cassandra cluster.
+# NOTE: This is specifically for requests from the client and does
+# not affect inter node communication.
+# org.apache.cassandra.scheduler.NoScheduler - No scheduling takes place
+# org.apache.cassandra.scheduler.RoundRobinScheduler - Round robin of
+# client requests to a node with a separate queue for each
+# request_scheduler_id. The scheduler is further customized by
+# request_scheduler_options as described below.
+request_scheduler: org.apache.cassandra.scheduler.NoScheduler
+
+# Scheduler Options vary based on the type of scheduler
+# NoScheduler - Has no options
+# RoundRobin
+#  - throttle_limit -- The throttle_limit is the number of in-flight
+#                      requests per client.  Requests beyond
+#                      that limit are queued up until
+#                      running requests can complete.
+#                      The value of 80 here is twice the number of
+#                      concurrent_reads + concurrent_writes.
+#  - default_weight -- default_weight is optional and allows for
+#                      overriding the default which is 1.
+#  - weights -- Weights are optional and will default to 1 or the
+#               overridden default_weight. The weight translates into how
+#               many requests are handled during each turn of the
+#               RoundRobin, based on the scheduler id.
+#
+# request_scheduler_options:
+#    throttle_limit: 80
+#    default_weight: 5
+#    weights:
+#      Keyspace1: 1
+#      Keyspace2: 5
+
+# request_scheduler_id -- An identifer based on which to perform
+# the request scheduling. Currently the only valid option is keyspace.
+# request_scheduler_id: keyspace
+
+# The Index Interval determines how large the sampling of row keys
+#  is for a given SSTable. The larger the sampling, the more effective
+#  the index is at the cost of space.
+index_interval: 128
+

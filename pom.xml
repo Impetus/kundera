@@ -273,8 +273,32 @@
 		     <artifactId>mongo</artifactId>
 		     <version>2.5.3</version>
 		</dependency>
+
+               <!-- System dependencies -->
+		<dependency>
+		    <groupId>org.xerial</groupId>
+		    <artifactId>snappy</artifactId>
+		    <version>1.0.1-rc4</version>
+		    <scope>system</scope>
+		    <systemPath>${basedir}/lib/snappy-java-1.0.1-rc4.jar</systemPath>
+	       </dependency>
+		<dependency>
+		    <groupId>org.apache.lucene</groupId>
+		    <artifactId>index.IndexReader</artifactId>
+		    <version>3.1.0</version>
+		    <scope>system</scope>
+		    <systemPath>${basedir}/lib/lucene-core-3.1.0.jar</systemPath>
+	       </dependency>
+		<dependency>
+			<groupId>libthrift</groupId>
+			<artifactId>libthrift</artifactId>
+			<version>r917130</version>
+     		        <scope>system</scope>
+		        <systemPath>${basedir}/lib/libthrift-0.5.0.jar</systemPath>
+		</dependency>
+
 	</dependencies>
-	<build>
+<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -322,4 +346,5 @@
 			</plugin>
 		</plugins>
 	</build>
+	
 </project>
