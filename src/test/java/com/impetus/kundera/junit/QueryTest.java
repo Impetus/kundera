@@ -72,7 +72,7 @@ public class QueryTest extends BaseTest
         int count = 10;
         String msTestRan = Integer.toString(Calendar.getInstance().get(Calendar.MILLISECOND));
 
-        String country = msTestRan + "-India";
+        String country = msTestRan + "India";
 
         for (int i = 0; i < count; i++)
         {
@@ -84,13 +84,6 @@ public class QueryTest extends BaseTest
         
 
         EntityManager secondManager = getEntityManager();
-        /*
-        for (int i = 0; i < count; i++)
-        {
-            String key = msTestRan + "-author" + i;
-            logger.info(secondManager.find(Author.class, key) !=null);
-        }
-*/        
         Query q = secondManager.createQuery("select a from Author a where a.country like :country");
         q.setParameter("country", country);
 

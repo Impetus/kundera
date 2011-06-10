@@ -90,6 +90,8 @@ public class LucandraIndexer implements Indexer
 
     /** The Constant DEFAULT_SEARCHABLE_FIELD. */
     private static final String DEFAULT_SEARCHABLE_FIELD = UUID + ".default_property";
+    
+    private static int docNumber = 1;
 
     /** The client. */
     private Client client;
@@ -228,7 +230,8 @@ public class LucandraIndexer implements Indexer
             {
                 RowMutation[] rms = null;
                 lucandra.IndexWriter indexWriter = getIndexWriter();
-                indexWriter.addDocument(INDEX_NAME, document, analyzer, 100, true, rms);
+                System.out.println(docNumber);
+                indexWriter.addDocument(INDEX_NAME, document, analyzer, docNumber++, true, rms);
 
             }
         }
