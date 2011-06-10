@@ -226,7 +226,7 @@ public class LucandraIndexer implements Indexer
                 w.close();
 
             }
-            else
+            else 
             {
                 RowMutation[] rms = null;
                 lucandra.IndexWriter indexWriter = getIndexWriter();
