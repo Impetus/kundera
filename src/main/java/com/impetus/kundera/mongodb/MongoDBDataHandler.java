@@ -20,7 +20,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import javax.persistence.CascadeType;
 import javax.persistence.PersistenceException;
@@ -34,6 +37,7 @@ import com.impetus.kundera.metadata.EntityMetadata.Column;
 import com.impetus.kundera.metadata.EntityMetadata.Relation;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -55,6 +59,9 @@ public class MongoDBDataHandler {
 			for(Column column : columns) {
 				PropertyAccessorHelper.set(entity, column.getField(), document.get(column.getName()));
 			}
+			
+			//Populate primary key column
+			PropertyAccessorHelper.set(entity, m.getIdProperty(), document.get(m.getIdProperty().getName()));
 			
 			//Populate embedded relationship object
 	        List<Relation> relations = m.getRelations();
@@ -185,6 +192,44 @@ public class MongoDBDataHandler {
 			dbObj.put(column.getName(), PropertyAccessorHelper.getString(entity, column.getField()));
 		}
 	}	
-
-
+	
+	/**
+	 * Returns column name from the filter property which is in the form dbName.columnName
+	 * @param filterProperty
+	 * @return
+	 */
+	public String getColumnName(String filterProperty) {
+		StringTokenizer st = new StringTokenizer(filterProperty, ".");
+		String columnName = "";
+		while(st.hasMoreTokens()) {
+			columnName = st.nextToken();
+		}
+		return columnName;	
+	}
+	
+	/**
+	 * Creates MongoDB Query object from filterClauseQueue
+	 * @param filterClauseQueue
+	 * @return
+	 */
+	public BasicDBObject createMongoDBQuery(Queue filterClauseQueue) {
+		BasicDBObject query = new BasicDBObject();        
+        
+		for (Object object : filterClauseQueue) {
+            if (object instanceof FilterClause) {
+            	FilterClause filter = (FilterClause) object;
+            	String property = new MongoDBDataHandler().getColumnName(filter.getProperty());
+            	String condition = filter.getCondition();
+            	String value = filter.getValue();            	
+            	
+            	if(condition.equals("=")) {
+            		query.append(property, value);
+            	} else if(condition.equalsIgnoreCase("like")) {
+            		query.append(property,  Pattern.compile(value));
+            	}  
+            	//TODO: Add support for other operators like >, <, >=, <=, order by asc/ desc, limit, skip, count etc
+            }
+		}
+		return query;
+	}
 }

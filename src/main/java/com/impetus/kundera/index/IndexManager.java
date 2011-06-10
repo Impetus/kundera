@@ -24,6 +24,7 @@ import org.apache.lucene.util.Version;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -46,8 +47,14 @@ public class IndexManager {
 	 */
     @SuppressWarnings("deprecation")
     public IndexManager(EntityManagerImpl manager) {
-        indexer = new LucandraIndexer(manager.getClient(), 
-        		new StandardAnalyzer(Version.LUCENE_CURRENT));
+    	DBType dbType = manager.getClient().getType();
+    	if(dbType.MONGODB.equals(dbType)) {
+    		indexer = new MongoDBIndexer(manager.getClient());
+    	} else {
+    		indexer = new LucandraIndexer(manager.getClient(), 
+            		new StandardAnalyzer(Version.LUCENE_CURRENT));
+    	}
+        
     }
 
     /**

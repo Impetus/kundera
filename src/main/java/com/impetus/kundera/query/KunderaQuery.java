@@ -318,6 +318,10 @@ public abstract class KunderaQuery {
     public final Class<?> getEntityClass() {
         return entityClass;
     }
+    
+    public final EntityMetadata getEntityMetadata() {
+    	return metadataManager.getEntityMetadata(entityClass);
+    }
 
     /**
      * Gets the filter clause queue.
