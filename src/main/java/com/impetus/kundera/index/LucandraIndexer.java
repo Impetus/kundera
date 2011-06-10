@@ -64,7 +64,7 @@ public class LucandraIndexer implements Indexer
 {
 
     /** log for this class. */
-    private static Log log = LogFactory.getLog(ColumnFamilyDataAccessor.class);
+    private static Log log = LogFactory.getLog(LucandraIndexer.class);
 
     /** The INDEX_NAME. */
     private static String INDEX_NAME = "kundera-alpha";// is

@@ -16,6 +16,9 @@
 package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -43,38 +46,51 @@ public class IndexProcessor implements MetadataProcessor {
 	 * com.impetus.kundera.metadata.EntityMetadata)
 	 */
 	public final void process(final Class<?> clazz, EntityMetadata metadata) {
-
 		metadata.setIndexName(clazz.getSimpleName());
-
 		Index idx = clazz.getAnnotation(Index.class);
+		List<String> columnsToBeIndexed = new ArrayList<String>();
+		
 		if (null != idx) {
 			boolean isIndexable = idx.index();
 			metadata.setIndexable(isIndexable);
+			 
+			String indexName = idx.name();
+			if(indexName != null && ! indexName.isEmpty()) {
+				metadata.setIndexName(indexName);
+			} else {
+				metadata.setIndexName(clazz.getSimpleName());
+			}	
+			
+			if(idx.columns() != null && idx.columns().length != 0) {
+				columnsToBeIndexed = Arrays.asList(idx.columns());
+			}						
 
 			if (!isIndexable) {
-				log.debug("@Entity " + clazz.getName()
-						+ " will not be indexed.");
+				log.debug("@Entity " + clazz.getName() + " will not be indexed for " 
+						+ (columnsToBeIndexed.isEmpty() ? "all columns" : columnsToBeIndexed));
 				return;
 			}
-		}
+		}		
 
 		log.debug("Processing @Entity " + clazz.getName() + " for Indexes.");
 
 		// scan for fields
-		for (Field f : clazz.getDeclaredFields()) {
-			if (f.isAnnotationPresent(Column.class)) {
+		for (Field f : clazz.getDeclaredFields()) {			
+			if (f.isAnnotationPresent(Id.class)) {
+				metadata.addIndexProperty(metadata.new PropertyIndex(f, f
+						.getName()));
+			} else if (f.isAnnotationPresent(Column.class)) {
 				Column c = f.getAnnotation(Column.class);
 				String alias = c.name().trim();
 				if (alias.isEmpty()) {
 					alias = f.getName();
 				}
+				
+				if(columnsToBeIndexed.isEmpty() || columnsToBeIndexed.contains(alias)) {
+					metadata.addIndexProperty(metadata.new PropertyIndex(f, alias));
+				}				
 
-				metadata.addIndexProperty(metadata.new PropertyIndex(f, alias));
-
-			} else if (f.isAnnotationPresent(Id.class)) {
-				metadata.addIndexProperty(metadata.new PropertyIndex(f, f
-						.getName()));
-			}
+			} 
 		}
 	}
 }

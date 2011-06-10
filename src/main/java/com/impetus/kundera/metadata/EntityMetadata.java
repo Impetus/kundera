@@ -611,7 +611,7 @@ public final class EntityMetadata {
 		private String name;
 
 		/** field. */
-		private Field field;
+		private Field field;		
 
 		/**
 		 * Instantiates a new column.
@@ -642,7 +642,8 @@ public final class EntityMetadata {
 		 */
 		public Field getField() {
 			return field;
-		}
+		}	
+		
 	}
 
 	/**
