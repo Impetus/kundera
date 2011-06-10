@@ -30,8 +30,7 @@ import com.impetus.kundera.api.Document;
 @Document(name="attachments", db="mongodbtest")
 public class Attachment {
 	
-	@Id
-	@Column(name="attachment_id")
+	@Id	
 	private String attachmentId;
 	
 	@Column(name="file_name")

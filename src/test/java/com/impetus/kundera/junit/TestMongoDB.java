@@ -26,6 +26,7 @@ import com.impetus.kundera.entity.Attachment;
 import com.impetus.kundera.entity.Contact;
 import com.impetus.kundera.entity.Email;
 import com.impetus.kundera.loader.Configuration;
+import com.sun.org.apache.xalan.internal.xsltc.runtime.Parameter;
 
 
 /**
@@ -44,7 +45,7 @@ public class TestMongoDB extends TestCase {
         em = conf.getEntityManager("mongodb");
 	}
 	
-	public void testSaveEmail() {
+	public void saveEmail() {
 		Email email = new Email();
 		email.setMessageId("1");
 		email.setFrom(new Contact("1", "Amresh", "Singh", "amresh.singh@impetus.co.in"));
@@ -69,45 +70,38 @@ public class TestMongoDB extends TestCase {
 		em.persist(email);		
 	}
 	
-	public void testFindEmail() {
+	public void findEmail() {
 		String uniqueId = "1";
 		System.out.println(em.find(Email.class, uniqueId));
 	}
 	
-	public void testDeleteEmail() {
+	public void deleteEmail() {
 		Email email = new Email();
 		email.setMessageId("1");
 		em.remove(email);
 	}
 	
-	public void testQuery() {
+	public void query() {	
 		Query q = em.createQuery("select e from Email e");		
-		List<Email> emails = q.getResultList();
-		
-		System.out.println("Emails:" + emails);
-		
+		List<Email> emails = q.getResultList();		
+		System.out.println("Emails:" + emails);		
 	}
 	
-	/*public void testPersistEmployee() {
-		DBCollection employeeCollection = null;
-		BasicDBObject employee = new BasicDBObject();
+	public void parametiarizedQuery() {
+		Query q = em.createQuery("select e from Email e where e.subject_email like :subject");		
+		q.setParameter("subject", "Join");
+		//q.setParameter("body", "Please Join Meeting");		
+		List<Email> emails = q.getResultList();		
+		System.out.println("Emails:" + emails);
 		
-		employee.put("employeeId", "IIIPL-0002");
-		employee.put("name", "Ashish");
-		employee.put("type", "user");
-		
-		BasicDBObject address = new BasicDBObject();
-		address.put("street", "1/2 High street");
-		address.put("city", "Delhi");
-		
-		employee.put("address", address);
-		
-		employeeCollection.insert(employee);		
-		DBCursor cursor = employeeCollection.find();
-		while(cursor.hasNext()) {
-			System.out.println("Employee: " + cursor.next());
-		}		
-	}*/
+	}	
+	
+	public void test() {
+		//saveEmail();
+		//deleteEmail();
+		//query();
+		parametiarizedQuery();
+	}
 
 	
 	@Override
