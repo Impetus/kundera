@@ -232,14 +232,14 @@
 		    <groupId>org.scale7</groupId>
     		<artifactId>scale7-pelops</artifactId>
 		    <version>1.2-0.7.x-SNAPSHOT</version>
-		</dependency>
+		</dependency><!--
         <dependency>
             <groupId>org.safehaus.jug</groupId>
             <artifactId>jug-asl</artifactId>
             <version>2.0.0</version>
 			  <scope>test</scope>
         </dependency>
-		<!-- Required for running  tests  for embedded cassandra mode-->
+		--><!-- Required for running  tests  for embedded cassandra mode-->
 		<dependency>
 			<groupId>org.cliffc</groupId>
 			<artifactId>high-scale-lib</artifactId>
