@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
@@ -36,7 +35,6 @@ import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
 import com.impetus.kundera.mongodb.MongoDBDataHandler;
 import com.impetus.kundera.proxy.EnhancedEntity;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -246,8 +244,7 @@ public class MongoDBClient implements Client {
 	}
 	
 	public void createIndex(String collectionName, List<String> columnList, int order) {		
-		DBCollection coll = mongoDb.getCollection(collectionName);		
-		connect();
+		DBCollection coll = mongoDb.getCollection(collectionName);	
 		
 		List<DBObject> indexes = coll.getIndexInfo();	//List of all current indexes on collection
 		Set<String> indexNames = new HashSet<String>();	//List of all current index names
@@ -263,6 +260,5 @@ public class MongoDBClient implements Client {
 				coll.createIndex(new BasicDBObject(columnName, order));
 			}			
 		}		
-		shutdown();
 	}
 }
