@@ -230,7 +230,6 @@ public class LucandraIndexer implements Indexer
             {
                 RowMutation[] rms = null;
                 lucandra.IndexWriter indexWriter = getIndexWriter();
-                System.out.println(docNumber);
                 indexWriter.addDocument(INDEX_NAME, document, analyzer, docNumber++, true, rms);
 
             }
