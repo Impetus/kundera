@@ -17,6 +17,7 @@ package com.impetus.kundera.client;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
@@ -117,6 +118,11 @@ public class ThriftClient implements CassandraClient {
 																String keyspace, String columnFamily, EntityMetadata m, String... keys) throws Exception {
 		throw new NotImplementedException("TODO");
 	}
+	
+	public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception {
+    	throw new NotImplementedException("Not yet implemented");
+    }
+	
 	/*
 	 * @see
 	 * com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String,

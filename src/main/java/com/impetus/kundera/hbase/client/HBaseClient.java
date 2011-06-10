@@ -3,11 +3,13 @@ package com.impetus.kundera.hbase.client;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 
 import javax.management.RuntimeErrorException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -71,6 +73,10 @@ public class HBaseClient implements/* Client, */com.impetus.kundera.Client {
 		}
 		return entities;
 	}
+	
+	public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception {
+    	throw new NotImplementedException("Not yet implemented");
+    }
 
 
 	/**

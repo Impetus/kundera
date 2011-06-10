@@ -17,7 +17,11 @@ package com.impetus.kundera.client;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
@@ -32,6 +36,7 @@ import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
 import com.impetus.kundera.mongodb.MongoDBDataHandler;
 import com.impetus.kundera.proxy.EnhancedEntity;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -142,6 +147,31 @@ public class MongoDBClient implements Client {
 		return entities;
 	}
 	
+	/**
+	 * Loads columns from multiple rows restricting results to conditions stored in <code>filterClauseQueue</code>
+	 */
+	public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception {
+		String documentName = m.getColumnFamilyName();
+		String dbName = m.getKeyspaceName();
+		Class clazz = m.getEntityClazz();
+		log.debug("Fetching data from " + documentName + " for Filter " + filterClauseQueue);
+		
+		BasicDBObject query = new MongoDBDataHandler().createMongoDBQuery(filterClauseQueue);      
+		
+		List entities = new ArrayList<E>();   
+		DBCollection dbCollection = mongoDb.getCollection(documentName);			
+
+        DBCursor cursor = dbCollection.find(query);	       
+             
+        while(cursor.hasNext()) {
+			DBObject fetchedDocument = cursor.next();
+			Object entity = new MongoDBDataHandler().getEntityFromDocument(em, clazz, m, fetchedDocument); 
+			entities.add(entity);			
+		}       
+		return entities;
+	}	
+	
+	
 	@Override
 	public void delete(String idColumnName, String documentName, String rowId)
 			throws Exception {		
@@ -213,5 +243,26 @@ public class MongoDBClient implements Client {
 	@Override
 	public void setKeySpace(String keySpace) {	
 		this.dbName = keySpace;
+	}
+	
+	public void createIndex(String collectionName, List<String> columnList, int order) {		
+		DBCollection coll = mongoDb.getCollection(collectionName);		
+		connect();
+		
+		List<DBObject> indexes = coll.getIndexInfo();	//List of all current indexes on collection
+		Set<String> indexNames = new HashSet<String>();	//List of all current index names
+		for(DBObject index : indexes) {
+			BasicDBObject obj = (BasicDBObject)index.get("key");
+			Set<String> set = obj.keySet();		//Set containing index name which is key
+			indexNames.addAll(set);		
+		}
+		
+		//Create index if not already created
+		for(String columnName : columnList) {
+			if(! indexNames.contains(columnName)) {
+				coll.createIndex(new BasicDBObject(columnName, order));
+			}			
+		}		
+		shutdown();
 	}
 }

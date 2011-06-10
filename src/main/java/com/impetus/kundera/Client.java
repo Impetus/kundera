@@ -4,6 +4,7 @@
 package com.impetus.kundera;
 
 import java.util.List;
+import java.util.Queue;
 
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
@@ -73,7 +74,18 @@ public interface Client {
 	 */
      <E> List<E>  loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, EntityMetadata m,String... keys) throws Exception;
 
-
+     
+     /**
+      * Loads columns from multiple rows restricting results to conditions stored in <code>filterClauseQueue</code>
+      * @param <E>
+      * @param em
+      * @param m
+      * @param filterClauseQueue
+      * @return
+      * @throws Exception
+      */
+     <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception;
+     
      /**
       * Set Cassandra nodes.
       * 
