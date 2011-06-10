@@ -34,7 +34,7 @@ public class PersistenceUnitTest extends BaseTest {
 	public void setUp() throws Exception {
     	startCassandraServer();
     	conf = new Configuration();
-    	entityManager = conf.getEntityManager("test-unit-1");
+    	entityManager = conf.getEntityManager("cassandra");
     }
     
     protected void tearDown() {

@@ -62,12 +62,13 @@ public class Post {
     @Column
     @SuperColumn(column = "post")
     Date created;
+    
 
     /** The tags. */
-    @Column
-    @SuperColumn(column = "tags")
-    // column 'tag' will be stored under super-column 'tags'
-    List<String> tags = new ArrayList<String>();
+//    @Column
+////    @SuperColumn(column = "tags")
+//    // column 'tag' will be stored under super-column 'tags'
+//    List<String> tags = new ArrayList<String>();
 
     /**
      * Gets the permalink.
@@ -159,23 +160,23 @@ public class Post {
         this.created = created;
     }
 
-    /**
-     * Gets the tags.
-     * 
-     * @return the tags
-     */
-    public List<String> getTags() {
-        return tags;
-    }
-
-    /**
-     * Sets the tags.
-     * 
-     * @param tags the tags to set
-     */
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
+//    /**
+//     * Gets the tags.
+//     * 
+//     * @return the tags
+//     */
+//    public List<String> getTags() {
+//        return tags;
+//    }
+//
+//    /**
+//     * Sets the tags.
+//     * 
+//     * @param tags the tags to set
+//     */
+//    public void setTags(List<String> tags) {
+//        this.tags = tags;
+//    }
 
     /*
      * (non-Javadoc)
@@ -230,8 +231,8 @@ public class Post {
         builder.append(created);
         builder.append(", permalink=");
         builder.append(permalink);
-        builder.append(", tags=");
-        builder.append(tags);
+//        builder.append(", tags=");
+////        builder.append(tags);
         builder.append("]");
         return builder.toString();
     }

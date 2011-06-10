@@ -60,328 +60,371 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author animesh.kumar
  */
-public class LucandraIndexer implements Indexer {
+public class LucandraIndexer implements Indexer
+{
 
-	/** log for this class. */
-	private static Log log = LogFactory.getLog(ColumnFamilyDataAccessor.class);
+    /** log for this class. */
+    private static Log log = LogFactory.getLog(ColumnFamilyDataAccessor.class);
 
-	/** The INDEX_NAME. */
-	private static String INDEX_NAME = "kundera-alpha";// is
-														// persistent-unit-name
+    /** The INDEX_NAME. */
+    private static String INDEX_NAME = "kundera-alpha";// is
+                                                       // persistent-unit-name
 
-	/** The Constant UUID. */
-	private static final long UUID = 6077004083174677888L;
+    /** The Constant UUID. */
+    private static final long UUID = 6077004083174677888L;
 
-	/** The Constant DELIMETER. */
-	private static final String DELIMETER = "~";
+    /** The Constant DELIMETER. */
+    private static final String DELIMETER = "~";
 
-	/** The Constant ENTITY_ID_FIELD. */
-	public static final String ENTITY_ID_FIELD = UUID + ".entity.id";
+    /** The Constant ENTITY_ID_FIELD. */
+    public static final String ENTITY_ID_FIELD = UUID + ".entity.id";
 
-	/** The Constant KUNDERA_ID_FIELD. */
-	public static final String KUNDERA_ID_FIELD = UUID + ".kundera.id";
+    /** The Constant KUNDERA_ID_FIELD. */
+    public static final String KUNDERA_ID_FIELD = UUID + ".kundera.id";
 
-	/** The Constant ENTITY_INDEXNAME_FIELD. */
-	public static final String ENTITY_INDEXNAME_FIELD = UUID
-			+ ".entity.indexname";
+    /** The Constant ENTITY_INDEXNAME_FIELD. */
+    public static final String ENTITY_INDEXNAME_FIELD = UUID + ".entity.indexname";
 
-	/** The Constant ENTITY_CLASS_FIELD. */
-	public static final String ENTITY_CLASS_FIELD = /*UUID +*/ "entity.class";
+    /** The Constant ENTITY_CLASS_FIELD. */
+    public static final String ENTITY_CLASS_FIELD = /* UUID + */"entity.class";
 
-	/** The Constant DEFAULT_SEARCHABLE_FIELD. */
-	private static final String DEFAULT_SEARCHABLE_FIELD = UUID
-			+ ".default_property";
+    /** The Constant DEFAULT_SEARCHABLE_FIELD. */
+    private static final String DEFAULT_SEARCHABLE_FIELD = UUID + ".default_property";
 
-	/** The client. */
-	private Client client;
+    /** The client. */
+    private Client client;
 
-	/** The analyzer. */
-	private Analyzer analyzer;
+    /** The analyzer. */
+    private Analyzer analyzer;
 
-	/**
-	 * Instantiates a new lucandra indexer.
-	 * 
-	 * @param client
-	 *            the client
-	 * @param analyzer
-	 *            the analyzer
-	 */
-	public LucandraIndexer(Client client, Analyzer analyzer) {
-		this.client = client;
-		this.analyzer = analyzer;
-	}
+    /**
+     * Instantiates a new lucandra indexer.
+     * 
+     * @param client
+     *            the client
+     * @param analyzer
+     *            the analyzer
+     */
+    public LucandraIndexer(Client client, Analyzer analyzer)
+    {
+        this.client = client;
+        this.analyzer = analyzer;
+    }
 
-	/*
-	 * @see
-	 * com.impetus.kundera.index.Indexer#unindex(com.impetus.kundera.metadata
-	 * .EntityMetadata, java.lang.String)
-	 */
-	@Override
-	public final void unindex(EntityMetadata metadata, String id) {
-		log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName()
-				+ "] for key:" + id);
-		try {
-                       /**
-                        * String indexName, Query query, boolean autoCommit
-                        */
-			getIndexWriter().deleteDocuments(INDEX_NAME,
-					new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)), true);
-		} catch (CorruptIndexException e) {
-			throw new IndexingException(e.getMessage());
-		} catch (IOException e) {
-			throw new IndexingException(e.getMessage());
-		}
-	}
+    /*
+     * @see
+     * com.impetus.kundera.index.Indexer#unindex(com.impetus.kundera.metadata
+     * .EntityMetadata, java.lang.String)
+     */
+    @Override
+    public final void unindex(EntityMetadata metadata, String id)
+    {
+        log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
+        try
+        {
+            /* String indexName, Query query, boolean autoCommit */
 
-	/*
-	 * @see
-	 * com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.
-	 * EntityMetadata, java.lang.Object)
-	 */
-	@Override
-	public final void index(EntityMetadata metadata, Object object) {
+            getIndexWriter().deleteDocuments(INDEX_NAME, new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)), true);
+        }
+        catch (CorruptIndexException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        catch (IOException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+    }
 
-		if (!metadata.isIndexable()) {
-			return;
-		}
+    /*
+     * @see
+     * com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.
+     * EntityMetadata, java.lang.Object)
+     */
+    @Override
+    public final void index(EntityMetadata metadata, Object object)
+    {
 
-		log.debug("Indexing @Entity[" + metadata.getEntityClazz().getName()
-				+ "] " + object);
+        if (!metadata.isIndexable())
+        {
+            return;
+        }
 
-		String indexName = metadata.getIndexName();
+        log.debug("Indexing @Entity[" + metadata.getEntityClazz().getName() + "] " + object);
 
-                Document document = new Document();
-		Field luceneField;
-                
-                String id =null;
-		// index row
-		try {
-                        id = PropertyAccessorHelper.getId(object, metadata);
-			luceneField = new Field(ENTITY_ID_FIELD, id, // adding class
-					// namespace
-					Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
-			document.add(luceneField);
+        String indexName = metadata.getIndexName();
 
-			// index namespace for unique deletion
-			luceneField = new Field(KUNDERA_ID_FIELD,
-					getKunderaId(metadata, id), // adding
-					// class
-					// namespace
-					Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
-			document.add(luceneField);
+        Document document = new Document();
+        Field luceneField;
 
-			// index entity class
-			luceneField = new Field(ENTITY_CLASS_FIELD, metadata
-					.getEntityClazz().getCanonicalName().toLowerCase(), Field.Store.YES,
-					Field.Index.ANALYZED_NO_NORMS);
-			document.add(luceneField);
+        String id = null;
+        // index row
+        try
+        {
+            id = PropertyAccessorHelper.getId(object, metadata);
+            luceneField = new Field(ENTITY_ID_FIELD, id, // adding class
+                    // namespace
+                    Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
+            document.add(luceneField);
 
-			// index index name
-			luceneField = new Field(ENTITY_INDEXNAME_FIELD, metadata
-					.getIndexName(), Field.Store.YES,
-					Field.Index.ANALYZED_NO_NORMS);
-			document.add(luceneField);
+            // index namespace for unique deletion
+            luceneField = new Field(KUNDERA_ID_FIELD, getKunderaId(metadata, id), // adding
+                    // class
+                    // namespace
+                    Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
+            document.add(luceneField);
 
-		} catch (PropertyAccessException e) {
-			throw new IllegalArgumentException("Id could not be read.");
-		}
+            // index entity class
+            luceneField = new Field(ENTITY_CLASS_FIELD, metadata.getEntityClazz().getCanonicalName().toLowerCase(),
+                    Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
+            document.add(luceneField);
 
-		// now index all indexable properties
-		for (PropertyIndex index : metadata.getIndexProperties()) {
+            // index index name
+            luceneField = new Field(ENTITY_INDEXNAME_FIELD, metadata.getIndexName(), Field.Store.YES,
+                    Field.Index.ANALYZED_NO_NORMS);
+            document.add(luceneField);
 
-			java.lang.reflect.Field property = index.getProperty();
-			String propertyName = index.getName();
+        }
+        catch (PropertyAccessException e)
+        {
+            throw new IllegalArgumentException("Id could not be read.");
+        }
 
-			try {
-				String value = PropertyAccessorHelper.getString(object,
-						property).toString();
-				luceneField = new Field(getCannonicalPropertyName(indexName,
-						propertyName), value, Field.Store.NO,
-						Field.Index.ANALYZED);
-				document.add(luceneField);
-			} catch (PropertyAccessException e) {
-				// TODO: do something with the exceptions
-				// e.printStackTrace();
-			}
-		}
+        // now index all indexable properties
+        for (PropertyIndex index : metadata.getIndexProperties())
+        {
 
-		// flush the indexes
-		try {
-			log.debug("Flushing to Lucandra: " + document);
-			if(!metadata.getDBType().equals(DBType.CASSANDRA)) {
-				IndexWriter w = getDefaultIndexWriter();
-				w.addDocument(document, analyzer);
-				w.optimize();					
-				w.commit();
-				w.close();
-				
-			} else {
-                                 RowMutation[] rms = null;
-                                 lucandra.IndexWriter indexWriter = getIndexWriter();
-                                 indexWriter.addDocument(INDEX_NAME,document, analyzer,100, true, rms);
-    
-			}
-		} catch (CorruptIndexException e) {
-			throw new IndexingException(e.getMessage());
-		} catch (IOException e) {
-			throw new IndexingException(e.getMessage());
-		}
-	}
+            java.lang.reflect.Field property = index.getProperty();
+            String propertyName = index.getName();
 
-	// TODO: this is not the best implementation. need to improve!
-	/* @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int) */
-	@SuppressWarnings("deprecation")
-	@Override
-	public final List<String> search(String luceneQuery, int start, int count) {
+            try
+            {
+                String value = PropertyAccessorHelper.getString(object, property).toString();
+                luceneField = new Field(getCannonicalPropertyName(indexName, propertyName), value, Field.Store.NO,
+                        Field.Index.ANALYZED);
+                document.add(luceneField);
+            }
+            catch (PropertyAccessException e)
+            {
+                // TODO: do something with the exceptions
+                // e.printStackTrace();
+            }
+        }
 
-		if (Constants.INVALID == count) {
-			count = 100;
-		}
+        // flush the indexes
+        try
+        {
+            log.debug("Flushing to Lucandra: " + document);
+            if (!metadata.getDBType().equals(DBType.CASSANDRA))
+            {
+                IndexWriter w = getDefaultIndexWriter();
+                w.addDocument(document, analyzer);
+                w.optimize();
+                w.commit();
+                w.close();
 
-		log.debug("Searhcing index with query[" + luceneQuery + "], start:"
-				+ start + ", count:" + count);
+            }
+            else
+            {
+                RowMutation[] rms = null;
+                lucandra.IndexWriter indexWriter = getIndexWriter();
+                indexWriter.addDocument(INDEX_NAME, document, analyzer, 100, true, rms);
 
-		Set<String> entityIds = new HashSet<String>();
+            }
+        }
+        catch (CorruptIndexException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        catch (IOException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+    }
 
-		org.apache.lucene.index.IndexReader indexReader = null;
-                
-		try {
-			if(client.getType().equals(DBType.CASSANDRA)) {
-				indexReader  = new IndexReader(INDEX_NAME);
-			}else {
-				indexReader = getDefaultReader();
-			}
-		} catch (Exception e) {
-			throw new IndexingException(e.getMessage());
-		}
-		IndexSearcher searcher = new IndexSearcher(indexReader);
+    // TODO: this is not the best implementation. need to improve!
+    /* @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int) */
+    @SuppressWarnings("deprecation")
+    @Override
+    public final List<String> search(String luceneQuery, int start, int count)
+    {
 
-		QueryParser qp = new QueryParser(Version.LUCENE_CURRENT,
-				DEFAULT_SEARCHABLE_FIELD, analyzer);
-		try {
-			Query q = qp.parse(luceneQuery);
-			TopDocs docs = searcher.search(q, count);
+        if (Constants.INVALID == count)
+        {
+            count = 100;
+        }
 
-			for (ScoreDoc sc : docs.scoreDocs) {
-				Document doc = searcher.doc(sc.doc);
-                                entityIds.add(doc.get(ENTITY_ID_FIELD));
-//                                Field[] fields = 
-//                                for(Field field : fields)
-//                                {
-//                                    if ((field.name().equals(ENTITY_ID_FIELD)) && (!(field.isBinary())))
-//                                    {
-//                                        //TODO .still it is not optimal solution, because it is fetching all the ids, irrespective of class.
-//                                        entityIds.add(field.stringValue());
-//                                    }
-//                                }
-//				entityIds.add(doc.get(ENTITY_ID_FIELD));
-			}
-		} catch (ParseException e) {
-			new IndexingException(e.getMessage());
-		} catch (IOException e) {
-			new IndexingException(e.getMessage());
-		}
+        log.debug("Searhcing index with query[" + luceneQuery + "], start:" + start + ", count:" + count);
 
-		log.debug("Result[" + entityIds + "]");
-		return new ArrayList<String>(entityIds);
-	}
+        Set<String> entityIds = new HashSet<String>();
 
-	/**
-	 * Gets the kundera id.
-	 * 
-	 * @param metadata
-	 *            the metadata
-	 * @param id
-	 *            the id
-	 * 
-	 * @return the kundera id
-	 */
-	private String getKunderaId(EntityMetadata metadata, String id) {
-		return metadata.getEntityClazz().getCanonicalName() + DELIMETER + id;
-	}
+        org.apache.lucene.index.IndexReader indexReader = null;
 
-	/**
-	 * Gets the cannonical property name.
-	 * 
-	 * @param indexName
-	 *            the index name
-	 * @param propertyName
-	 *            the property name
-	 * 
-	 * @return the cannonical property name
-	 */
-	private String getCannonicalPropertyName(String indexName,
-			String propertyName) {
-		return indexName + "." + propertyName;
-	}
+        try
+        {
+            if (client.getType().equals(DBType.CASSANDRA))
+            {
+                indexReader = new IndexReader(INDEX_NAME);
+            }
+            else
+            {
+                indexReader = getDefaultReader();
+            }
+        }
+        catch (Exception e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        IndexSearcher searcher = new IndexSearcher(indexReader);
 
-	// helper method to get Lucandra IndexWriter object
-	/**
-	 * Gets the index writer.
-	 * 
-	 * @return the index writer
-	 */
-	private lucandra.IndexWriter getIndexWriter() {
-		try {
-			return new lucandra.IndexWriter();
-		} catch (Exception e) {
-			throw new IndexingException(e.getMessage());
-		}
-	}
-	
-	/**
-	 * Added for HBase support.
-	 * @return default index writer
-	 */
-	private IndexWriter getDefaultIndexWriter() {
-		StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
-		Directory index = null;
-		IndexWriter w=null;
-		try {
-			index = FSDirectory.open(getIndexDirectory());
-			if(index.listAll().length == 0) {
-				log.info("Creating fresh Index because it was empty");
-				w = new IndexWriter(index, analyzer, true, IndexWriter.MaxFieldLength.LIMITED);
-			} else {				
-				w = new IndexWriter(index, analyzer, false, IndexWriter.MaxFieldLength.LIMITED);
-			}
-			
-		} catch (CorruptIndexException e) {
-			throw new IndexingException(e.getMessage());
-		} catch (LockObtainFailedException e) {
-			throw new IndexingException(e.getMessage());
-		} catch (IOException e) {
-			throw new IndexingException(e.getMessage());
-		}
-         return w;
-	}
-	
-	/**
-	 * Returns default index reader.
-	 * @return  index reader.
-	 */
-	private org.apache.lucene.index.IndexReader getDefaultReader() {
-		org.apache.lucene.index.IndexReader reader = null;
-		try {			
-				reader = IndexReader.open(FSDirectory.open(getIndexDirectory()));
-		      } catch (CorruptIndexException e) {
-		    	  		throw new IndexingException(e.getMessage());
-		      } catch (IOException e) {
-		    	  		throw new IndexingException(e.getMessage());
-		      }
-		return reader;
-	}
-	
-	/**
-	 * Creates a directory if it does not exist.
-	 * @return
-	 */
-	private File getIndexDirectory() {
-	    String filePath = System.getProperty("user.home")+"/lucene";
-	    File file = new File(filePath);
-	    if(!file.isDirectory()){
-	    	file.mkdir();
-	    }
-	    return file;
-	}
+        QueryParser qp = new QueryParser(Version.LUCENE_CURRENT, DEFAULT_SEARCHABLE_FIELD, analyzer);
+        try
+        {
+            Query q = qp.parse(luceneQuery);
+            TopDocs docs = searcher.search(q, count);
+
+            for (ScoreDoc sc : docs.scoreDocs)
+            {
+                Document doc = searcher.doc(sc.doc);
+                entityIds.add(doc.get(ENTITY_ID_FIELD));
+            }
+        }
+        catch (ParseException e)
+        {
+            new IndexingException(e.getMessage());
+        }
+        catch (IOException e)
+        {
+            new IndexingException(e.getMessage());
+        }
+
+        log.debug("Result[" + entityIds + "]");
+        return new ArrayList<String>(entityIds);
+    }
+
+    /**
+     * Gets the kundera id.
+     * 
+     * @param metadata
+     *            the metadata
+     * @param id
+     *            the id
+     * 
+     * @return the kundera id
+     */
+    private String getKunderaId(EntityMetadata metadata, String id)
+    {
+        return metadata.getEntityClazz().getCanonicalName() + DELIMETER + id;
+    }
+
+    /**
+     * Gets the cannonical property name.
+     * 
+     * @param indexName
+     *            the index name
+     * @param propertyName
+     *            the property name
+     * 
+     * @return the cannonical property name
+     */
+    private String getCannonicalPropertyName(String indexName, String propertyName)
+    {
+        return indexName + "." + propertyName;
+    }
+
+    // helper method to get Lucandra IndexWriter object
+    /**
+     * Gets the index writer.
+     * 
+     * @return the index writer
+     */
+    private lucandra.IndexWriter getIndexWriter()
+    {
+        try
+        {
+            return new lucandra.IndexWriter();
+        }
+        catch (Exception e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+    }
+
+    /**
+     * Added for HBase support.
+     * 
+     * @return default index writer
+     */
+    private IndexWriter getDefaultIndexWriter()
+    {
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
+        Directory index = null;
+        IndexWriter w = null;
+        try
+        {
+            index = FSDirectory.open(getIndexDirectory());
+            if (index.listAll().length == 0)
+            {
+                log.info("Creating fresh Index because it was empty");
+                w = new IndexWriter(index, analyzer, true, IndexWriter.MaxFieldLength.LIMITED);
+            }
+            else
+            {
+                w = new IndexWriter(index, analyzer, false, IndexWriter.MaxFieldLength.LIMITED);
+            }
+
+        }
+        catch (CorruptIndexException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        catch (LockObtainFailedException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        catch (IOException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        return w;
+    }
+
+    /**
+     * Returns default index reader.
+     * 
+     * @return index reader.
+     */
+    private org.apache.lucene.index.IndexReader getDefaultReader()
+    {
+        org.apache.lucene.index.IndexReader reader = null;
+        try
+        {
+            reader = IndexReader.open(FSDirectory.open(getIndexDirectory()));
+        }
+        catch (CorruptIndexException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        catch (IOException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        return reader;
+    }
+
+    /**
+     * Creates a directory if it does not exist.
+     * 
+     * @return
+     */
+    private File getIndexDirectory()
+    {
+        String filePath = System.getProperty("user.home") + "/lucene";
+        File file = new File(filePath);
+        if (!file.isDirectory())
+        {
+            file.mkdir();
+        }
+        return file;
+    }
 }

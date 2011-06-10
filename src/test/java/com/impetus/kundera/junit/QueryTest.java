@@ -22,67 +22,121 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import org.apache.log4j.Logger;
+
 import com.impetus.kundera.entity.Author;
 import com.impetus.kundera.loader.Configuration;
 
-public class QueryTest extends BaseTest {
+/**
+ * The Class QueryTest.
+ */
+public class QueryTest extends BaseTest
+{
 
-	private Configuration conf = new Configuration();
-     
+    /** The conf. */
+    private Configuration conf = new Configuration();
 
-    protected void setUp() throws Exception {
-		startCassandraServer();
-	}
+    /** The logger. */
+    private static Logger logger = Logger.getLogger(QueryTest.class);
 
-	protected void tearDown() throws Exception {
-		conf.destroy();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see junit.framework.TestCase#setUp()
+     */
+    protected void setUp() throws Exception
+    {
+        startCassandraServer();
+    }
 
-	public void testQueryAccrossManagerSessions() throws Exception {
-		EntityManager firstManager = getEntityManager();
+    /*
+     * (non-Javadoc)
+     * 
+     * @see junit.framework.TestCase#tearDown()
+     */
+    protected void tearDown() throws Exception
+    {
+        conf.destroy();
+    }
 
-		int count = 10;
-		String msTestRan = Integer.toString(Calendar.getInstance().get(
-				Calendar.MILLISECOND));
-		
-		String country = msTestRan + "-India";
+    /**
+     * Test query accross manager sessions.
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    public void testQueryAccrossManagerSessions() throws Exception
+    {
+        EntityManager firstManager = getEntityManager();
 
-		for (int i = 0; i < count; i++) {
-			String key = msTestRan + "-author" + i;
-			Author author = createAuthor(key, "someEmail", country, new Date());
-			firstManager.persist(author);
-		}
-		firstManager.close();
+        int count = 10;
+        String msTestRan = Integer.toString(Calendar.getInstance().get(Calendar.MILLISECOND));
 
-		EntityManager secondManager = getEntityManager();
+        String country = msTestRan + "-India";
 
-		Query q = secondManager
-				.createQuery("select a from Author a where a.country like :country");
-		q.setParameter("country", country);
+        for (int i = 0; i < count; i++)
+        {
+            String key = msTestRan + "-author" + i;
+            Author author = createAuthor(key, "someEmail", country, new Date());
+            firstManager.persist(author);
+        }
+        firstManager.close();
+        
 
-		List<Author> authors = q.getResultList();
-		System.out.println(authors.size());
+        EntityManager secondManager = getEntityManager();
+        /*
+        for (int i = 0; i < count; i++)
+        {
+            String key = msTestRan + "-author" + i;
+            logger.info(secondManager.find(Author.class, key) !=null);
+        }
+*/        
+        Query q = secondManager.createQuery("select a from Author a where a.country like :country");
+        q.setParameter("country", country);
 
-		for (Author a : authors) {
-			secondManager.remove(a);
-			System.out.println("removing " + a.getUsername());
-		}
-//		secondManager.close();
+        List<Author> authors = q.getResultList();
+        logger.info(authors.size());
 
-		assertEquals(count, authors.size());
-	}
+        for (Author a : authors)
+        {
+            secondManager.remove(a);
+            logger.info("removing " + a.getUsername());
+        }
+        // secondManager.close();
 
-	private static Author createAuthor(String username, String email,
-			String country, Date registeredSince) {
-		Author author = new Author();
-		author.setUsername(username);
-		author.setCountry(country);
-		author.setEmailAddress(email);
-		author.setRegistered(registeredSince);
-		return author;
-	}
+        assertEquals(count, authors.size());
+    }
 
-	private EntityManager getEntityManager() {
-		return conf.getEntityManager("test-unit-1");
-	}
+    /**
+     * Creates the author.
+     * 
+     * @param username
+     *            the username
+     * @param email
+     *            the email
+     * @param country
+     *            the country
+     * @param registeredSince
+     *            the registered since
+     * @return the author
+     */
+    private static Author createAuthor(String username, String email, String country, Date registeredSince)
+    {
+        Author author = new Author();
+        author.setUsername(username);
+        author.setCountry(country);
+        author.setEmailAddress(email);
+        author.setRegistered(registeredSince);
+        return author;
+    }
+
+    /**
+     * Gets the entity manager.
+     * 
+     * @return the entity manager
+     */
+    private EntityManager getEntityManager()
+    {
+        return conf.getEntityManager("cassandra");
+    }
 }

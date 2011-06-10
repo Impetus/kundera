@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
+import lucandra.CassandraUtils;
 
 import org.apache.cassandra.config.CFMetaData;
 import org.apache.cassandra.config.ColumnDefinition;
 import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.config.KSMetaData;
 import org.apache.cassandra.db.ColumnFamilyType;
-import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.locator.AbstractReplicationStrategy;
 import org.apache.cassandra.locator.SimpleStrategy;
@@ -26,6 +26,7 @@ import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -34,25 +35,43 @@ import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 
+/**
+ * The Class BaseTest.
+ */
 public abstract class BaseTest extends TestCase
 {
 
     /** The embedded server cassandra. */
     private static EmbeddedCassandraService cassandra;
-    
-    private Cassandra.Client client;
 
+    /** The client. */
+    private Cassandra.Client client;
+    
+    private static Logger logger =  Logger.getLogger(BaseTest.class);
+
+    /**
+     * Start cassandra server.
+     *
+     * @throws Exception the exception
+     */
     protected void startCassandraServer() throws Exception
     {
         if (!checkIfServerRunning())
         {
             cassandra = new EmbeddedCassandraService();
             cassandra.start();
+            startSolandra();
+            initClient();
+            loadData();
+
         }
-        initClient();
-        loadData();
     }
 
+    /**
+     * Check if server running.
+     *
+     * @return true, if successful
+     */
     private boolean checkIfServerRunning()
     {
         try
@@ -69,7 +88,10 @@ public abstract class BaseTest extends TestCase
             return false;
         }
     }
-    
+
+    /**
+     * Inits the client.
+     */
     private void initClient()
     {
         TSocket socket = new TSocket("127.0.0.1", 9165);
@@ -81,41 +103,46 @@ public abstract class BaseTest extends TestCase
         {
             socket.open();
         }
-        catch (TTransportException e)
+        catch (TTransportException ttex)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error(ttex.getMessage());
         }
-        catch(Exception ex) 
+        catch (Exception ex)
         {
-            ex.printStackTrace();
+            logger.error(ex.getMessage());
         }
-        
-       
-    
+
     }
-    
+
+    /**
+     * Standard cfmd.
+     *
+     * @param ksName the ks name
+     * @param cfName the cf name
+     * @param columnType the column type
+     * @return the cF meta data
+     */
     private static CFMetaData standardCFMD(String ksName, String cfName, ColumnFamilyType columnType)
     {
-        /**
-         * String tableName, String cfName, ColumnFamilyType cfType,
-         *  AbstractType comparator, AbstractType subcolumnComparator,
-         *  String comment, double rowCacheSize, double keyCacheSize, 
-         *  double readRepairChance, int gcGraceSeconds, AbstractType defaultValidator, 
-         *  int minCompactionThreshold, int maxCompactionThreshold, int rowCacheSavePeriodInSeconds, 
-         *  int keyCacheSavePeriodInSeconds, int memTime, Integer memSize, Double memOps, 
-         *  Map<ByteBuffer, ColumnDefinition> column_metadata
-         */
-        return new CFMetaData(ksName, cfName, columnType, UTF8Type.instance, null,"colfamily",
-                              Double.valueOf("0"),Double.valueOf("0"),Double.valueOf("0"),0,
-                              UTF8Type.instance,0,0,0,0,0,Integer.valueOf(0),Double.valueOf("0"),new HashMap<ByteBuffer, ColumnDefinition>());
+        return new CFMetaData(ksName, cfName, columnType, UTF8Type.instance, null, "colfamily", Double.valueOf("0"),
+                Double.valueOf("0"), Double.valueOf("0"), 0, UTF8Type.instance, 0, 0, 0, 0, 0, Integer.valueOf(0),
+                Double.valueOf("0"), new HashMap<ByteBuffer, ColumnDefinition>());
     }
-    
-    private  void loadData() throws org.apache.cassandra.config.ConfigurationException, TException, NotFoundException, InvalidRequestException 
+
+    /**
+     * Load data.
+     *
+     * @throws ConfigurationException the configuration exception
+     * @throws TException the t exception
+     * @throws NotFoundException the not found exception
+     * @throws InvalidRequestException the invalid request exception
+     */
+    private void loadData() throws org.apache.cassandra.config.ConfigurationException, TException, NotFoundException,
+            InvalidRequestException
     {
-       
+
         Class<? extends AbstractReplicationStrategy> simple = SimpleStrategy.class;
-        Map<String, String> ret = new HashMap<String,String>();
+        Map<String, String> ret = new HashMap<String, String>();
         ret.put("replication_factor", "1");
         CfDef user_Def = new CfDef("Blog", "Person");
         CfDef userName_Def = new CfDef("Blog", "Department");
@@ -132,23 +159,42 @@ public abstract class BaseTest extends TestCase
         cfDefs.add(tweet_Def);
         cfDefs.add(userLine_Def);
         cfDefs.add(timeLine_Def);
-        
-        client.send_system_add_keyspace(new KsDef("Blog", simple.getCanonicalName(),1, cfDefs));
-        
-        KSMetaData metadata = new KSMetaData("Blog", simple, ret,1, standardCFMD("Blog", "Person", ColumnFamilyType.Standard),
-                                                                           standardCFMD("Blog", "Department", ColumnFamilyType.Standard),
-                                                                           standardCFMD("Blog", "Employee", ColumnFamilyType.Standard),
-                                                                           standardCFMD("Blog", "Profile", ColumnFamilyType.Standard),
-                                                                           standardCFMD("Blog", "Addresses", ColumnFamilyType.Standard),
-                                                                           standardCFMD("Blog", "Authors", ColumnFamilyType.Standard),
-                                                                           standardCFMD("Blog", "Posts", ColumnFamilyType.Super));
+
+        client.send_system_add_keyspace(new KsDef("Blog", simple.getCanonicalName(), 1, cfDefs));
+
+        KSMetaData metadata = new KSMetaData("Blog", simple, ret, 1, standardCFMD("Blog", "Person",
+                ColumnFamilyType.Standard), standardCFMD("Blog", "Department", ColumnFamilyType.Standard),
+                standardCFMD("Blog", "Employee", ColumnFamilyType.Standard), standardCFMD("Blog", "Profile",
+                        ColumnFamilyType.Standard), standardCFMD("Blog", "Addresses", ColumnFamilyType.Standard),
+                standardCFMD("Blog", "Authors", ColumnFamilyType.Standard), standardCFMD("Blog", "Posts",
+                        ColumnFamilyType.Super));
         for (CFMetaData cfm : metadata.cfMetaData().values())
         {
             CFMetaData.map(cfm);
         }
-          
+
         DatabaseDescriptor.setTableDefinition(metadata, DatabaseDescriptor.getDefsVersion());
     }
-    
-    
+
+    /**
+     * Start solandra.
+     */
+    private void startSolandra()
+    {
+
+        CassandraUtils.cacheInvalidationInterval = 0; // real-time
+
+        try
+        {
+            // Load solandra specific schema
+            CassandraUtils.setStartup();
+            CassandraUtils.createCassandraSchema();
+        }
+        catch (Throwable t)
+        {
+            logger.error("errror while starting solandra schema:", t);
+        }
+
+    }
+
 }

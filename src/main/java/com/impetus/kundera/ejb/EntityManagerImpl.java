@@ -51,477 +51,539 @@ import com.impetus.kundera.query.LuceneQuery;
  * 
  * @author animesh.kumar
  */
-public class EntityManagerImpl implements CassandraEntityManager {
+public class EntityManagerImpl implements CassandraEntityManager
+{
 
-	/** The Constant log. */
-	private static final Log log = LogFactory.getLog(EntityManagerImpl.class);
+    /** The Constant log. */
+    private static final Log log = LogFactory.getLog(EntityManagerImpl.class);
 
-	/** The factory. */
-	private EntityManagerFactoryImpl factory;
+    /** The factory. */
+    private EntityManagerFactoryImpl factory;
 
-	/** The closed. */
-	private boolean closed = false;
+    /** The closed. */
+    private boolean closed = false;
 
-	/** The client. */
-	private Client client;
+    /** The client. */
+    private Client client;
 
-	/** The data manager. */
-	private DataManager dataManager;
+    /** The data manager. */
+    private DataManager dataManager;
 
-	/** The index manager. */
-	private IndexManager indexManager;
+    /** The index manager. */
+    private IndexManager indexManager;
 
-	/** The metadata manager. */
-	private MetadataManager metadataManager;
+    /** The metadata manager. */
+    private MetadataManager metadataManager;
 
-	/** The persistence unit name. */
-	private String persistenceUnitName;
+    /** The persistence unit name. */
+    private String persistenceUnitName;
 
-	/** The entity resolver. */
-	private EntityResolver entityResolver;
+    /** The entity resolver. */
+    private EntityResolver entityResolver;
 
-	/** The session. */
-	private EntityManagerSession session;
-	
-	/** The event dispatcher. */
-	private EntityEventDispatcher eventDispatcher;
+    /** The session. */
+    private EntityManagerSession session;
 
-	/**
-	 * Instantiates a new entity manager impl.
-	 * 
-	 * @param factory
-	 *            the factory
-	 * @param client
-	 *            the client
-	 */
-	public EntityManagerImpl(EntityManagerFactoryImpl factory) {
-		this.factory = factory;
-		this.metadataManager = factory.getMetadataManager();
-//		this.client = client;
-		this.persistenceUnitName = factory.getPersistenceUnitName();
-		dataManager = new DataManager(this);
-		//indexManager = new IndexManager(this);
-		entityResolver = new EntityResolver(this);
-		session = new EntityManagerSession(this);
-		eventDispatcher = new EntityEventDispatcher();
-	}
+    /** The event dispatcher. */
+    private EntityEventDispatcher eventDispatcher;
 
-	/**
-	 * Gets the factory.
-	 * 
-	 * @return the factory
-	 */
-	public EntityManagerFactoryImpl getFactory() {
-		return factory;
-	}
+    /**
+     * Instantiates a new entity manager impl.
+     * 
+     * @param factory
+     *            the factory
+     * @param client
+     *            the client
+     */
+    public EntityManagerImpl(EntityManagerFactoryImpl factory)
+    {
+        this.factory = factory;
+        this.metadataManager = factory.getMetadataManager();
+        this.persistenceUnitName = factory.getPersistenceUnitName();
+        dataManager = new DataManager(this);
+        entityResolver = new EntityResolver(this);
+        session = new EntityManagerSession(this);
+        eventDispatcher = new EntityEventDispatcher();
+    }
 
-	/*
-	 * @see javax.persistence.EntityManager#find(java.lang.Class,
-	 * java.lang.Object)
-	 */
-	@Override
-	public final <E> E find(Class<E> entityClass, Object primaryKey) {
-		if (closed) {
-			throw new PersistenceException("EntityManager already closed.");
-		}
-		if (primaryKey == null) {
-			throw new IllegalArgumentException(
-					"primaryKey value must not be null.");
-		}
-		
-		// Validate
-		metadataManager.validate(entityClass);
-		
-		E e = null;
-		e = session.lookup(entityClass, primaryKey);
-		if (null != e) {
-			log.debug(entityClass.getName() + "_" + primaryKey
-					+ " is loaded from cache!");
-			return e;
-		}
+    /**
+     * Gets the factory.
+     * 
+     * @return the factory
+     */
+    public EntityManagerFactoryImpl getFactory()
+    {
+        return factory;
+    }
 
-		return immediateLoadAndCache(entityClass, primaryKey);
-	}
+    /*
+     * @see javax.persistence.EntityManager#find(java.lang.Class,
+     * java.lang.Object)
+     */
+    @Override
+    public final <E> E find(Class<E> entityClass, Object primaryKey)
+    {
+        if (closed)
+        {
+            throw new PersistenceException("EntityManager already closed.");
+        }
+        if (primaryKey == null)
+        {
+            throw new IllegalArgumentException("primaryKey value must not be null.");
+        }
 
-	/**
-	 * Immediate load and cache.
-	 * 
-	 * @param <E>
-	 *            the element type
-	 * @param entityClass
-	 *            the entity class
-	 * @param primaryKey
-	 *            the primary key
-	 * @return the e
-	 */
-	protected <E> E immediateLoadAndCache(Class<E> entityClass, Object primaryKey) {
-		try {
-			EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
-			m.setDBType(this.client.getType());
-			E e = dataManager.find(entityClass, m, primaryKey.toString());
-			if(e != null) {
-			    session.store(primaryKey, e, m.isCacheable());
-			}
-			return e;
-		} catch (Exception exp) {
-			throw new PersistenceException(exp);
-		}
-	}
+        // Validate
+        metadataManager.validate(entityClass);
 
-	/*
-	 * @see com.impetus.kundera.CassandraEntityManager#find(java.lang.Class,
-	 * java.lang.Object[])
-	 */
-	@Override
-	public final <E> List<E> find(Class<E> entityClass, Object... primaryKeys) {
-		if (closed) {
-			throw new PersistenceException("EntityManager already closed.");
-		}
-		if (primaryKeys == null) {
-			throw new IllegalArgumentException(
-					"primaryKey value must not be null.");
-		}
+        E e = null;
+        e = session.lookup(entityClass, primaryKey);
+        if (null != e)
+        {
+            log.debug(entityClass.getName() + "_" + primaryKey + " is loaded from cache!");
+            return e;
+        }
 
-		// Validate
-		metadataManager.validate(entityClass);
+        return immediateLoadAndCache(entityClass, primaryKey);
+    }
 
-		if (null == primaryKeys || primaryKeys.length == 0) {
-			return new ArrayList<E>();
-		}
+    /**
+     * Immediate load and cache.
+     * 
+     * @param <E>
+     *            the element type
+     * @param entityClass
+     *            the entity class
+     * @param primaryKey
+     *            the primary key
+     * @return the e
+     */
+    protected <E> E immediateLoadAndCache(Class<E> entityClass, Object primaryKey)
+    {
+        try
+        {
+            EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
+            m.setDBType(this.client.getType());
+            E e = dataManager.find(entityClass, m, primaryKey.toString());
+            if (e != null)
+            {
+                session.store(primaryKey, e, m.isCacheable());
+            }
+            return e;
+        }
+        catch (Exception exp)
+        {
+            throw new PersistenceException(exp);
+        }
+    }
 
-		// TODO: load from cache first
+    /*
+     * @see com.impetus.kundera.CassandraEntityManager#find(java.lang.Class,
+     * java.lang.Object[])
+     */
+    @Override
+    public final <E> List<E> find(Class<E> entityClass, Object... primaryKeys)
+    {
+        if (closed)
+        {
+            throw new PersistenceException("EntityManager already closed.");
+        }
+        if (primaryKeys == null)
+        {
+            throw new IllegalArgumentException("primaryKey value must not be null.");
+        }
 
-		try {
-			String[] ids = Arrays.asList(primaryKeys).toArray(new String[] {});
-			EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
-			m.setDBType(this.client.getType());
-			List<E> entities = dataManager.find(entityClass, m, ids);
+        // Validate
+        metadataManager.validate(entityClass);
 
-			// TODO: cache entities for future lookup
-			return entities;
-		} catch (Exception e) {
-			throw new PersistenceException(e);
-		}
-	}
+        if (null == primaryKeys || primaryKeys.length == 0)
+        {
+            return new ArrayList<E>();
+        }
 
-	/* @see javax.persistence.EntityManager#remove(java.lang.Object) */
-	@Override
-	public final void remove(Object e) {
-		if (e == null) {
-			throw new IllegalArgumentException("Entity must not be null.");
-		}
-		
-		// Validate
-		metadataManager.validate(e.getClass());
+        // TODO: load from cache first
 
-		try {
+        try
+        {
+            String[] ids = Arrays.asList(primaryKeys).toArray(new String[] {});
+            EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
+            m.setDBType(this.client.getType());
+            List<E> entities = dataManager.find(entityClass, m, ids);
 
-			List<EnhancedEntity> reachableEntities = entityResolver
-					.resolve(e, CascadeType.REMOVE, this.client.getType());
+            // TODO: cache entities for future lookup
+            return entities;
+        }
+        catch (Exception e)
+        {
+            throw new PersistenceException(e);
+        }
+    }
 
-			// remove each one
-			for (EnhancedEntity o : reachableEntities) {
-				log.debug("Removing @Entity >> " + o);
+    /* @see javax.persistence.EntityManager#remove(java.lang.Object) */
+    @Override
+    public final void remove(Object e)
+    {
+        if (e == null)
+        {
+            throw new IllegalArgumentException("Entity must not be null.");
+        }
 
-				EntityMetadata m = metadataManager.getEntityMetadata(o
-						.getEntity().getClass());
-				m.setDBType(this.client.getType());
-				// fire PreRemove events
-				eventDispatcher.fireEventListeners (m, o, PreRemove.class);
-
-				session.remove(o.getEntity().getClass(), o.getId());
-				dataManager.remove(o, m);
-				getIndexManager().remove(m, o.getEntity(), o.getId());
-
-				// fire PostRemove events
-				eventDispatcher.fireEventListeners (m, o, PostRemove.class);
-			}
-		} catch (Exception exp) {
-			throw new PersistenceException(exp);
-		}
-	}
-
-	/* @see javax.persistence.EntityManager#merge(java.lang.Object) */
-	@Override
-	public final <E> E merge(E e) {
-		if (e == null) {
-			throw new IllegalArgumentException("Entity must not be null.");
-		}
-		
-		// Validate
+        // Validate
         metadataManager.validate(e.getClass());
-		
-		try {
 
-			List<EnhancedEntity> reachableEntities = entityResolver
-					.resolve(e, CascadeType.MERGE, this.client.getType());
+        try
+        {
 
-			// save each one
-			for (EnhancedEntity o : reachableEntities) {
-				log.debug("Merging @Entity >> " + o);
+            List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.REMOVE,
+                    this.client.getType());
 
-				EntityMetadata metadata = metadataManager.getEntityMetadata(o
-						.getEntity().getClass());
-				metadata.setDBType(this.client.getType());
-		        // TODO: throw OptisticLockException if wrong version and optimistic locking enabled
+            // remove each one
+            for (EnhancedEntity o : reachableEntities)
+            {
+                log.debug("Removing @Entity >> " + o);
 
-				// fire PreUpdate events
-				eventDispatcher.fireEventListeners(metadata, o, PreUpdate.class);
+                EntityMetadata m = metadataManager.getEntityMetadata(o.getEntity().getClass());
+                m.setDBType(this.client.getType());
+                // fire PreRemove events
+                eventDispatcher.fireEventListeners(m, o, PreRemove.class);
 
-				dataManager.merge(o, metadata);
-				getIndexManager().update(metadata, o.getEntity());
+                session.remove(o.getEntity().getClass(), o.getId());
+                dataManager.remove(o, m);
+                getIndexManager().remove(m, o.getEntity(), o.getId());
 
-				// fire PreUpdate events
-				eventDispatcher.fireEventListeners(metadata, o, PostUpdate.class);
-			}
-		} catch (Exception exp) {
-			throw new PersistenceException(exp);
-		}
+                // fire PostRemove events
+                eventDispatcher.fireEventListeners(m, o, PostRemove.class);
+            }
+        }
+        catch (Exception exp)
+        {
+            throw new PersistenceException(exp);
+        }
+    }
 
-		return e;
-	}
+    /* @see javax.persistence.EntityManager#merge(java.lang.Object) */
+    @Override
+    public final <E> E merge(E e)
+    {
+        if (e == null)
+        {
+            throw new IllegalArgumentException("Entity must not be null.");
+        }
 
-	/* @see javax.persistence.EntityManager#persist(java.lang.Object) */
-	@Override
-	public final void persist(Object e) {
-		if (e == null) {
-			throw new IllegalArgumentException("Entity must not be null.");
-		}
+        // Validate
+        metadataManager.validate(e.getClass());
 
-		try {
-			// validate
-			metadataManager.validate(e.getClass());
+        try
+        {
 
-			List<EnhancedEntity> reachableEntities = entityResolver
-					.resolve(e, CascadeType.PERSIST, this.client.getType());
+            List<EnhancedEntity> reachableEntities = entityResolver
+                    .resolve(e, CascadeType.MERGE, this.client.getType());
 
-			// save each one
-			for (EnhancedEntity o : reachableEntities) {
-				log.debug("Persisting @Entity >> " + o);
+            // save each one
+            for (EnhancedEntity o : reachableEntities)
+            {
+                log.debug("Merging @Entity >> " + o);
 
-				EntityMetadata metadata = metadataManager.getEntityMetadata(o
-						.getEntity().getClass());
-				metadata.setDBType(this.client.getType());
-				// TODO: throw EntityExistsException if already exists
+                EntityMetadata metadata = metadataManager.getEntityMetadata(o.getEntity().getClass());
+                metadata.setDBType(this.client.getType());
+                // TODO: throw OptisticLockException if wrong version and
+                // optimistic locking enabled
 
-				// fire pre-persist events
-				eventDispatcher.fireEventListeners(metadata, o, PrePersist.class);
+                // fire PreUpdate events
+                eventDispatcher.fireEventListeners(metadata, o, PreUpdate.class);
 
-				//TODO uncomment
-				dataManager.persist(o, metadata);
-				getIndexManager().write(metadata, o.getEntity());
+                dataManager.merge(o, metadata);
+                getIndexManager().update(metadata, o.getEntity());
 
-				// fire post-persist events
-				eventDispatcher.fireEventListeners(metadata, o, PostPersist.class);
-			}
-		} catch (Exception exp) {
-			throw new PersistenceException(exp);
-		}
-	}
-	
-	/* @see javax.persistence.EntityManager#clear() */
-	@Override
-	public final void clear() {
-		checkClosed();
-		session.clear();
-		client.shutdown();
-	}
+                // fire PreUpdate events
+                eventDispatcher.fireEventListeners(metadata, o, PostUpdate.class);
+            }
+        }
+        catch (Exception exp)
+        {
+            throw new PersistenceException(exp);
+        }
 
-	/* @see javax.persistence.EntityManager#close() */
-	@Override
-	public final void close() {
-		closed = true;
-		session = null;
-	}
+        return e;
+    }
 
-	/* @see javax.persistence.EntityManager#contains(java.lang.Object) */
-	@Override
-	public final boolean contains(Object entity) {
-		return false;
-	}
+    /* @see javax.persistence.EntityManager#persist(java.lang.Object) */
+    @Override
+    public final void persist(Object e)
+    {
+        if (e == null)
+        {
+            throw new IllegalArgumentException("Entity must not be null.");
+        }
 
-	/* @see javax.persistence.EntityManager#createNamedQuery(java.lang.String) */
-	@Override
-	public final Query createNamedQuery(String name) {
-		throw new NotImplementedException("TODO");
-	}
+        try
+        {
+            // validate
+            metadataManager.validate(e.getClass());
 
-	/* @see javax.persistence.EntityManager#createNativeQuery(java.lang.String) */
-	@Override
-	public final Query createNativeQuery(String sqlString) {
-		throw new NotImplementedException("TODO");
-	}
+            List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.PERSIST,
+                    this.client.getType());
 
-	/*
-	 * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String,
-	 * java.lang.Class)
-	 */
-	@Override
-	public final Query createNativeQuery(String sqlString, Class resultClass) {
-		throw new NotImplementedException("TODO");
-	}
+            // save each one
+            for (EnhancedEntity o : reachableEntities)
+            {
+                log.debug("Persisting @Entity >> " + o);
 
-	/*
-	 * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String,
-	 * java.lang.String)
-	 */
-	@Override
-	public final Query createNativeQuery(String sqlString,
-			String resultSetMapping) {
-		throw new NotImplementedException("TODO");
-	}
+                EntityMetadata metadata = metadataManager.getEntityMetadata(o.getEntity().getClass());
+                metadata.setDBType(this.client.getType());
+                // TODO: throw EntityExistsException if already exists
 
-	/* @see javax.persistence.EntityManager#createQuery(java.lang.String) */
-	@Override
-	public final Query createQuery(String ejbqlString) {
-		return new LuceneQuery(this, metadataManager, ejbqlString);
-	}
+                // fire pre-persist events
+                eventDispatcher.fireEventListeners(metadata, o, PrePersist.class);
 
-	/* @see javax.persistence.EntityManager#flush() */
-	@Override
-	public final void flush() {
-		// always flushed to cassandra anyway! relax.
-	}
+                // TODO uncomment
+                dataManager.persist(o, metadata);
+                getIndexManager().write(metadata, o.getEntity());
 
-	/* @see javax.persistence.EntityManager#getDelegate() */
-	@Override
-	public final Object getDelegate() {
-		return null;
-	}
+                // fire post-persist events
+                eventDispatcher.fireEventListeners(metadata, o, PostPersist.class);
+            }
+        }
+        catch (Exception exp)
+        {
+            exp.printStackTrace();
+            throw new PersistenceException(exp);
+        }
+    }
 
-	/* @see javax.persistence.EntityManager#getFlushMode() */
-	@Override
-	public final FlushModeType getFlushMode() {
-		throw new NotImplementedException("TODO");
-	}
+    /* @see javax.persistence.EntityManager#clear() */
+    @Override
+    public final void clear()
+    {
+        checkClosed();
+        session.clear();
+        client.shutdown();
+    }
 
-	/*
-	 * @see javax.persistence.EntityManager#getReference(java.lang.Class,
-	 * java.lang.Object)
-	 */
-	@Override
-	public final <T> T getReference(Class<T> entityClass, Object primaryKey) {
-		throw new NotImplementedException("TODO");
-	}
+    /* @see javax.persistence.EntityManager#close() */
+    @Override
+    public final void close()
+    {
+        closed = true;
+        session = null;
+    }
 
-	/* @see javax.persistence.EntityManager#getTransaction() */
-	@Override
-	public final EntityTransaction getTransaction() {
-		return new EntityTransactionImpl();
-	}
+    /* @see javax.persistence.EntityManager#contains(java.lang.Object) */
+    @Override
+    public final boolean contains(Object entity)
+    {
+        return false;
+    }
 
-	/* @see javax.persistence.EntityManager#isOpen() */
-	@Override
-	public final boolean isOpen() {
-		return !closed;
-	}
+    /* @see javax.persistence.EntityManager#createNamedQuery(java.lang.String) */
+    @Override
+    public final Query createNamedQuery(String name)
+    {
+        throw new NotImplementedException("TODO");
+    }
 
-	/* @see javax.persistence.EntityManager#joinTransaction() */
-	@Override
-	public final void joinTransaction() {
-		// TODO Auto-generated method stub
+    /* @see javax.persistence.EntityManager#createNativeQuery(java.lang.String) */
+    @Override
+    public final Query createNativeQuery(String sqlString)
+    {
+        throw new NotImplementedException("TODO");
+    }
 
-	}
+    /*
+     * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String,
+     * java.lang.Class)
+     */
+    @Override
+    public final Query createNativeQuery(String sqlString, Class resultClass)
+    {
+        throw new NotImplementedException("TODO");
+    }
 
-	/*
-	 * @see javax.persistence.EntityManager#lock(java.lang.Object,
-	 * javax.persistence.LockModeType)
-	 */
-	@Override
-	public final void lock(Object entity, LockModeType lockMode) {
-		throw new NotImplementedException("TODO");
-	}
+    /*
+     * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String,
+     * java.lang.String)
+     */
+    @Override
+    public final Query createNativeQuery(String sqlString, String resultSetMapping)
+    {
+        throw new NotImplementedException("TODO");
+    }
 
-	/* @see javax.persistence.EntityManager#refresh(java.lang.Object) */
-	@Override
-	public final void refresh(Object entity) {
-		throw new NotImplementedException("TODO");
-	}
+    /* @see javax.persistence.EntityManager#createQuery(java.lang.String) */
+    @Override
+    public final Query createQuery(String ejbqlString)
+    {
+        return new LuceneQuery(this, metadataManager, ejbqlString);
+    }
 
-	/*
-	 * @see
-	 * javax.persistence.EntityManager#setFlushMode(javax.persistence.FlushModeType
-	 * )
-	 */
-	/* @see javax.persistence.EntityManager#setFlushMode(javax.persistence.FlushModeType) */
-	@Override
-	public final void setFlushMode(FlushModeType flushMode) {
-		throw new NotImplementedException("TODO");
-	}
+    /* @see javax.persistence.EntityManager#flush() */
+    @Override
+    public final void flush()
+    {
+        // always flushed to cassandra anyway! relax.
+    }
 
-	/**
-	 * Check closed.
-	 */
-	private void checkClosed() {
-		if (!isOpen()) {
-			throw new IllegalStateException("EntityManager has been closed.");
-		}
-	}
+    /* @see javax.persistence.EntityManager#getDelegate() */
+    @Override
+    public final Object getDelegate()
+    {
+        return null;
+    }
 
-	/**
-	 * Gets the metadata manager.
-	 * 
-	 * @return the metadataManager
-	 */
-	public final MetadataManager getMetadataManager() {
-		return metadataManager;
-	}
+    /* @see javax.persistence.EntityManager#getFlushMode() */
+    @Override
+    public final FlushModeType getFlushMode()
+    {
+        throw new NotImplementedException("TODO");
+    }
 
-	/**
-	 * Gets the data manager.
-	 * 
-	 * @return the dataManager
-	 */
-	public final DataManager getDataManager() {
-		return dataManager;
-	}
+    /*
+     * @see javax.persistence.EntityManager#getReference(java.lang.Class,
+     * java.lang.Object)
+     */
+    @Override
+    public final <T> T getReference(Class<T> entityClass, Object primaryKey)
+    {
+        throw new NotImplementedException("TODO");
+    }
 
-	/**
-	 * Gets the index manager.
-	 * 
-	 * @return the indexManager
-	 */
-	public final IndexManager getIndexManager() {
-		if(indexManager ==null) {
-			indexManager = new IndexManager(this);
-		}
-		return indexManager;
-	}
+    /* @see javax.persistence.EntityManager#getTransaction() */
+    @Override
+    public final EntityTransaction getTransaction()
+    {
+        return new EntityTransactionImpl();
+    }
 
-	/**
-	 * Gets the client.
-	 * 
-	 * @return the client
-	 */
-	@Override
-	public final Client getClient() {
-		return client;
-	}
+    /* @see javax.persistence.EntityManager#isOpen() */
+    @Override
+    public final boolean isOpen()
+    {
+        return !closed;
+    }
 
-	/**
-	 * Gets the persistence unit name.
-	 * 
-	 * @return the persistence unit name
-	 */
-	public final String getPersistenceUnitName() {
-		return persistenceUnitName;
-	}
+    /* @see javax.persistence.EntityManager#joinTransaction() */
+    @Override
+    public final void joinTransaction()
+    {
+        // TODO Auto-generated method stub
 
-	/**
-	 * Gets the session.
-	 * 
-	 * @return the session
-	 */
-	protected EntityManagerSession getSession() {
-		return session;
-	}
+    }
 
-	/**
-	 * Gets the entity resolver.
-	 * 
-	 * @return the reachabilityResolver
-	 */
-	public EntityResolver getEntityResolver() {
-		return entityResolver;
-	}
+    /*
+     * @see javax.persistence.EntityManager#lock(java.lang.Object,
+     * javax.persistence.LockModeType)
+     */
+    @Override
+    public final void lock(Object entity, LockModeType lockMode)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* @see javax.persistence.EntityManager#refresh(java.lang.Object) */
+    @Override
+    public final void refresh(Object entity)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /*
+     * @see
+     * javax.persistence.EntityManager#setFlushMode(javax.persistence.FlushModeType
+     * )
+     */
+    /*
+     * @see
+     * javax.persistence.EntityManager#setFlushMode(javax.persistence.FlushModeType
+     * )
+     */
+    @Override
+    public final void setFlushMode(FlushModeType flushMode)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /**
+     * Check closed.
+     */
+    private void checkClosed()
+    {
+        if (!isOpen())
+        {
+            throw new IllegalStateException("EntityManager has been closed.");
+        }
+    }
+
+    /**
+     * Gets the metadata manager.
+     * 
+     * @return the metadataManager
+     */
+    public final MetadataManager getMetadataManager()
+    {
+        return metadataManager;
+    }
+
+    /**
+     * Gets the data manager.
+     * 
+     * @return the dataManager
+     */
+    public final DataManager getDataManager()
+    {
+        return dataManager;
+    }
+
+    /**
+     * Gets the index manager.
+     * 
+     * @return the indexManager
+     */
+    public final IndexManager getIndexManager()
+    {
+        if (indexManager == null)
+        {
+            indexManager = new IndexManager(this);
+        }
+        return indexManager;
+    }
+
+    /**
+     * Gets the client.
+     * 
+     * @return the client
+     */
+    @Override
+    public final Client getClient()
+    {
+        return client;
+    }
+
+    /**
+     * Gets the persistence unit name.
+     * 
+     * @return the persistence unit name
+     */
+    public final String getPersistenceUnitName()
+    {
+        return persistenceUnitName;
+    }
+
+    /**
+     * Gets the session.
+     * 
+     * @return the session
+     */
+    protected EntityManagerSession getSession()
+    {
+        return session;
+    }
+
+    /**
+     * Gets the entity resolver.
+     * 
+     * @return the reachabilityResolver
+     */
+    public EntityResolver getEntityResolver()
+    {
+        return entityResolver;
+    }
 }

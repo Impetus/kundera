@@ -15,15 +15,12 @@
  */
 package com.impetus.kundera.junit;
 
-import java.net.URL;
-import java.util.Arrays;
 import java.util.Date;
 
 import javax.persistence.EntityManager;
 
-import junit.framework.TestCase;
-
 import org.apache.cassandra.service.EmbeddedCassandraService;
+import org.apache.log4j.Logger;
 
 import com.impetus.kundera.entity.Author;
 import com.impetus.kundera.entity.Post;
@@ -41,6 +38,9 @@ public class TestCassandra extends BaseTest
     private EntityManager manager;
 
     Configuration conf;
+    
+    private static Logger logger =  Logger.getLogger(TestCassandra.class);
+     
 
     /** The embedded server cassandra. */
     private static EmbeddedCassandraService cassandra;
@@ -60,12 +60,16 @@ public class TestCassandra extends BaseTest
      */
     public void setUp() throws Exception
     {
+        logger.info("starting server");
         if (cassandra == null)
         {
             startCassandraServer();
         }
-        conf = new Configuration();
-        manager = conf.getEntityManager("cassandra");
+        if (conf == null)
+        {
+            conf = new Configuration();
+            manager = conf.getEntityManager("cassandra");
+        }
 
     }
 
@@ -79,6 +83,7 @@ public class TestCassandra extends BaseTest
      */
     public void tearDown() throws Exception
     {
+        logger.info("destroying conf");
         conf.destroy();
     }
 
@@ -90,7 +95,7 @@ public class TestCassandra extends BaseTest
      */
     public void testSaveAuthors() throws Exception
     {
-        System.out.println("test save authors::::::::::::::::::::::::");
+        logger.info("onTestSaveAuthors");
         String key = System.currentTimeMillis() + "-author";
         Author animesh = createAuthor(key, "animesh@animesh.org", "India", new Date());
         manager.persist(animesh);
@@ -108,7 +113,7 @@ public class TestCassandra extends BaseTest
      */
     public void testSavePosts() throws Exception
     {
-        System.out.println("test save Posts::::::::::::::::::::::::");
+        logger.info("onTestSavePosts");
         String key = System.currentTimeMillis() + "-post";
         Post post = createPost(key, "I hate love stories", "I hate - Imran Khan, Sonal Kapoor", "Animesh", new Date(),
                 "movies", "hindi");
@@ -116,7 +121,6 @@ public class TestCassandra extends BaseTest
 
         // check if saved?
         Post post_db = manager.find(Post.class, key);
-        System.out.println(post_db);
         assertEquals(post, post_db);
     }
 
@@ -128,7 +132,7 @@ public class TestCassandra extends BaseTest
      */
     public void testDeleteAuthors() throws Exception
     {
-        System.out.println("test Delete authors::::::::::::::::::::::::");
+        logger.info("ontestDeleteAuthors");
 
         String key = System.currentTimeMillis() + "-animesh";
 
@@ -195,7 +199,7 @@ public class TestCassandra extends BaseTest
         post.setBody(body);
         post.setAuthor(author);
         post.setCreated(created);
-        // post.setTags(Arrays.asList(tags));
+//        post.setTags(Arrays.asList(tags));
         return post;
     }
 
