@@ -26,7 +26,6 @@ import com.impetus.kundera.entity.Attachment;
 import com.impetus.kundera.entity.Contact;
 import com.impetus.kundera.entity.Email;
 import com.impetus.kundera.loader.Configuration;
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Parameter;
 
 
 /**
@@ -81,7 +80,7 @@ public class TestMongoDB extends TestCase {
 		em.remove(email);
 	}
 	
-	public void query() {	
+	public void selectAllQuery() {	
 		Query q = em.createQuery("select e from Email e");		
 		List<Email> emails = q.getResultList();		
 		System.out.println("Emails:" + emails);		
@@ -97,10 +96,10 @@ public class TestMongoDB extends TestCase {
 	}	
 	
 	public void test() {
-		//saveEmail();
-		//deleteEmail();
-		//query();
+		saveEmail();		
+		selectAllQuery();
 		parametiarizedQuery();
+		deleteEmail();
 	}
 
 	

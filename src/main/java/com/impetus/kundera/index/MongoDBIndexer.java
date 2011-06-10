@@ -43,7 +43,7 @@ public class MongoDBIndexer implements Indexer {
 
 	@Override
 	public void unindex(EntityMetadata metadata, String id) {
-		throw new PersistenceException("Invalid method call! Index removal is handled automatically by MongoDB when document is dropped");		
+		log.debug("No need to remove data from Index. It's handled automatically by MongoDB when document is dropped");		
 	}
 
 
