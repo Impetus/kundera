@@ -38,5 +38,16 @@ public @interface Index {
      * @return boolean
      */
     boolean index() default true;
-
+    
+    /**
+     * Index name (if not provided, defualt is entity name)
+     * @return
+     */
+    String name() default "";
+    
+    /**
+     * List of columns to index
+     * @return
+     */
+    String[] columns() default {};
 }
