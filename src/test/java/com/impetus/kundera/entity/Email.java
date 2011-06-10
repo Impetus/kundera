@@ -37,8 +37,7 @@ import com.impetus.kundera.api.Document;
 @Document(name="emails", db="mongodbtest")
 public class Email {
 	
-	@Id
-	@Column(name="message_id")
+	@Id	
 	private String messageId;
 	
 	@Column(name="subject_email")
