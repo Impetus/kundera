@@ -20,13 +20,14 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
-import com.impetus.kundera.api.Document;
 
 /**
  * Entity class for Email
@@ -34,7 +35,7 @@ import com.impetus.kundera.api.Document;
  */
 
 @Entity
-@Document(name="emails", db="mongodbtest")
+@Table(name="emails", schema="mongodbtest")
 public class Email {
 	
 	@Id	
@@ -46,13 +47,16 @@ public class Email {
 	@Column(name="body_email")
 	private String body;
 	
-	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	//@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	@Embedded
 	private Contact from;
 	
-	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	//@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	@Embedded
 	private Contact to;	
 	
-	@OneToMany (cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	//@OneToMany (cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	@Embedded
 	private List<Attachment> attachments;	
 	
 	public Email() {

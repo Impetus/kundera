@@ -37,11 +37,9 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.classreading.AnnotationDiscoveryListener;
 import com.impetus.kundera.metadata.EntityMetadata.Relation;
 import com.impetus.kundera.metadata.processor.CacheableAnnotationProcessor;
-import com.impetus.kundera.metadata.processor.DocumentProcessor;
-import com.impetus.kundera.metadata.processor.ColumnFamilyProcessor;
 import com.impetus.kundera.metadata.processor.EntityListenersProcessor;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
-import com.impetus.kundera.metadata.processor.SuperColumnFamilyProcessor;
+import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
@@ -89,9 +87,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
 		metadataProcessors = new ArrayList<MetadataProcessor>();
 
 		// add processors to chain.
-		metadataProcessors.add(new SuperColumnFamilyProcessor(factory));
-		metadataProcessors.add(new ColumnFamilyProcessor(factory));
-		metadataProcessors.add(new DocumentProcessor(factory));
+		metadataProcessors.add(new TableProcessor(factory));
 		metadataProcessors.add(new CacheableAnnotationProcessor());
 		metadataProcessors.add(new IndexProcessor());
 		metadataProcessors.add(new EntityListenersProcessor());
@@ -110,37 +106,6 @@ public class MetadataManager implements AnnotationDiscoveryListener {
 		validator.validate(clazz);
 	}
 
-	/**
-	 * Checks if is column family.
-	 * 
-	 * @param clazz
-	 *            the clazz
-	 * 
-	 * @return true, if is column family
-	 * 
-	 * @throws PersistenceException
-	 *             the persistence exception
-	 */
-	public final boolean isColumnFamily(Class<?> clazz) {
-		return getEntityMetadata(clazz).getType().equals(
-				EntityMetadata.Type.COLUMN_FAMILY);
-	}
-
-	/**
-	 * Checks if is super column family.
-	 * 
-	 * @param clazz
-	 *            the clazz
-	 * 
-	 * @return true, if is super column family
-	 * 
-	 * @throws PersistenceException
-	 *             the persistence exception
-	 */
-	public final boolean isSuperColumnFamily(Class<?> clazz) {
-		return getEntityMetadata(clazz).getType().equals(
-				EntityMetadata.Type.SUPER_COLUMN_FAMILY);
-	}
 
 	/**
 	 * Gets the entity metadata.

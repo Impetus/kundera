@@ -23,7 +23,7 @@ import javax.persistence.Id;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.api.ColumnFamily;
+//import com.impetus.kundera.api.ColumnFamily;
 import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 
@@ -59,14 +59,14 @@ public class ColumnFamilyProcessor extends AbstractEntityFieldProcessor {
 	@Override
 	public final void process(Class<?> clazz, EntityMetadata metadata) {
 
-		if (!clazz.isAnnotationPresent(ColumnFamily.class)) {
+		/*if (!clazz.isAnnotationPresent(ColumnFamily.class)) {
 			return;
-		}
+		}*/
 
 		LOG.debug("Processing @Entity(" + clazz.getName()
 				+ ") for ColumnFamily.");
 
-		metadata.setType(EntityMetadata.Type.COLUMN_FAMILY);
+/*		metadata.setType(EntityMetadata.Type.COLUMN_FAMILY);
 
 		ColumnFamily cf = clazz.getAnnotation(ColumnFamily.class);
 
@@ -76,7 +76,7 @@ public class ColumnFamilyProcessor extends AbstractEntityFieldProcessor {
 		// set keyspace
 		String keyspace = cf.keyspace().length() != 0 ? cf.keyspace() : em
 				.getKeyspace();
-		metadata.setKeyspaceName(keyspace);
+		metadata.setKeyspaceName(keyspace);*/
 
 		// scan for fields
 		for (Field f : clazz.getDeclaredFields()) {

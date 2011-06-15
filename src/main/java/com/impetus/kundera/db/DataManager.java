@@ -39,7 +39,9 @@ public class DataManager {
     
     /** The data accessor for Document(document based data store). */
     private DataAccessor accessorDocument;
-
+    
+    /** The data accessor for all persistence objects. */
+    private DataAccessor accessorTable;
     /**
      * The Constructor.
      * 
@@ -47,9 +49,10 @@ public class DataManager {
      *            the EntityManager
      */
     public DataManager(EntityManagerImpl em) {
-        accessorCF = new ColumnFamilyDataAccessor(em);
-        accessorSCF = new SuperColumnFamilyDataAccessor(em);
-        accessorDocument = new DocumentDataAccessor(em);
+        //accessorCF = new ColumnFamilyDataAccessor(em);
+        //accessorSCF = new SuperColumnFamilyDataAccessor(em);
+        //accessorDocument = new DocumentDataAccessor(em);
+    	accessorTable =
     }
 
     /**
@@ -145,16 +148,6 @@ public class DataManager {
 	 * @return the data accessor
 	 */
     private DataAccessor getDataAccessor(EntityMetadata metadata) {
-
-		EntityMetadata.Type type = metadata.getType();
-		if (type.equals(EntityMetadata.Type.COLUMN_FAMILY)) {
-			return accessorCF;
-		} else if (type.equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY)) {
-			return accessorSCF;
-		} else if (type.equals(EntityMetadata.Type.DOCUMENT)) {
-			return accessorDocument;
-		}
-
-		return null;
+    	return accessorTable;		
 	}
 }

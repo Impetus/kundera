@@ -22,13 +22,10 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.PersistenceException;
+import javax.persistence.Table;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.impetus.kundera.api.Document;
-import com.impetus.kundera.api.ColumnFamily;
-import com.impetus.kundera.api.SuperColumnFamily;
 
 /**
  * The Class CassandraEntityValidator.
@@ -73,17 +70,12 @@ public class ValidatorImpl implements Validator {
             throw new PersistenceException(clazz.getName() + " must have a default no-argument constructor.");
         }
 
-        // what type is it? ColumnFamily or SuperColumnFamily, Document or simply relational entity?
-        if (clazz.isAnnotationPresent(SuperColumnFamily.class) || clazz.isAnnotationPresent(ColumnFamily.class)) {
-        	LOG.debug("Entity is for NoSQL database: " + clazz.getName());        	
-        } else if(!clazz.isAnnotationPresent(Document.class)){
-        	LOG.debug("Entity is for document based database: " + clazz.getName());
-        } else {
-        	LOG.debug("Entity is for relational database table: " + clazz.getName());
-        }
-
-        // check for @Key and ensure that there is just 1 @Key field of String
-        // type.
+        // Must be annotated with @Table
+        if (! clazz.isAnnotationPresent(Table.class)) {
+        	throw new PersistenceException(clazz.getName() + " must be annotated with @Table");        	
+        } 
+        
+        //Check for @Key and ensure that there is just 1 @Key field of String type.
         List<Field> keys = new ArrayList<Field>();
         for (Field field : clazz.getDeclaredFields()) {
             if (field.isAnnotationPresent(Id.class)) {

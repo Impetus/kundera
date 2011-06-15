@@ -71,8 +71,8 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
     {
         log.debug("Cassandra >> Read >> " + clazz.getName() + "_" + id);
 
-        String keyspace = m.getKeyspaceName();
-        String family = m.getColumnFamilyName();
+        String keyspace = m.getSchema();
+		String family = m.getTableName();
 
         // get super column names for this entity
         List<String> scNames = m.getSuperColumnFieldNames();
@@ -106,8 +106,8 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
     {
         log.debug("Cassandra >> Read >> " + clazz.getName() + "_(" + Arrays.asList(ids) + ")");
 
-        String keyspace = m.getKeyspaceName();
-        String family = m.getColumnFamilyName();
+        String keyspace = m.getSchema();
+		String family = m.getTableName();
 
         List<E> entities = new ArrayList<E>();
 
@@ -147,8 +147,8 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
 
         log.debug("Cassandra >> Write >> " + entityName + "_" + id);
 
-        String keyspace = m.getKeyspaceName();
-        String family = m.getColumnFamilyName();
+        String keyspace = m.getSchema();
+		String family = m.getTableName();
 
         BaseDataAccessor<SuperColumn>.ThriftRow tf = toThriftRow(e, m);
 
@@ -256,7 +256,7 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
         BaseDataAccessor<SuperColumn>.ThriftRow cr = this.new ThriftRow();
 
         // column-family name
-        cr.setColumnFamilyName(m.getColumnFamilyName());
+        cr.setColumnFamilyName(m.getTableName());
 
         // Set row key
         cr.setId(e.getId());

@@ -97,9 +97,9 @@ public class TestMongoDB extends TestCase {
 	
 	public void test() {
 		saveEmail();		
-		selectAllQuery();
-		parametiarizedQuery();
-		deleteEmail();
+		//selectAllQuery();
+		//parametiarizedQuery();
+		//deleteEmail();
 	}
 
 	

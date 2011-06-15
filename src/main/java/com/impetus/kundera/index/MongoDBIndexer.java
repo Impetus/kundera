@@ -64,7 +64,7 @@ public class MongoDBIndexer implements Indexer {
 			columnList.add(propertyIndex.getName());
 		}	
 		
-		client.createIndex(metadata.getColumnFamilyName(), columnList, 1);	//1=Ascending
+		client.createIndex(metadata.getTableName(), columnList, 1);	//1=Ascending
 				
 	}
 

@@ -15,16 +15,14 @@
  */
 package com.impetus.kundera.entity;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import com.impetus.kundera.api.SuperColumn;
-import com.impetus.kundera.api.SuperColumnFamily;
 
 /**
  * The Class Post.
@@ -33,7 +31,7 @@ import com.impetus.kundera.api.SuperColumnFamily;
  */
 @Entity
 // makes it an entity class
-@SuperColumnFamily(family="Posts", keyspace="Blog")
+@Table(name="Posts", schema="Blog")
 // assign column-family type and name
 public class Post {
 

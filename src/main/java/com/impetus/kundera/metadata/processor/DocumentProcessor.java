@@ -23,7 +23,7 @@ import javax.persistence.Id;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.api.Document;
+//import com.impetus.kundera.api.Document;
 import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 
@@ -49,11 +49,11 @@ public class DocumentProcessor extends AbstractEntityFieldProcessor {
 	
 	@Override
 	public void process(Class<?> clazz, EntityMetadata metadata) {
-		if (!clazz.isAnnotationPresent(Document.class)) {
+		/*if (!clazz.isAnnotationPresent(Document.class)) {
 			return;
-		}
+		}*/
 
-		LOG.debug("Processing @Entity(" + clazz.getName() + ") for Document.");
+/*		LOG.debug("Processing @Entity(" + clazz.getName() + ") for Document.");
 
 		metadata.setType(EntityMetadata.Type.DOCUMENT);
 
@@ -68,7 +68,7 @@ public class DocumentProcessor extends AbstractEntityFieldProcessor {
 		String keyspace = coll.db().length() != 0 ? coll.db() : em
 				.getKeyspace();
 		metadata.setKeyspaceName(keyspace);
-
+*/
 		// scan for fields
 		for (Field f : clazz.getDeclaredFields()) {
 

@@ -26,8 +26,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.Table;
 
-import com.impetus.kundera.api.ColumnFamily;
 import com.impetus.kundera.api.Index;
 
 /**
@@ -35,7 +35,7 @@ import com.impetus.kundera.api.Index;
  *
  */
 @Entity
-@ColumnFamily(family="Person")
+@Table(name="Person")
 @Index(index=false)
 public class Person implements Serializable {
 	

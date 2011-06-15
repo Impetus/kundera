@@ -26,11 +26,10 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-
-import com.impetus.kundera.api.ColumnFamily;
+import javax.persistence.Table;
 
 @Entity
-@ColumnFamily(family = "Employee")
+@Table(name = "Employee")
 public class Employee {
 
 	@Id

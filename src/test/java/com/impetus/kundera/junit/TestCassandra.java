@@ -23,7 +23,10 @@ import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.log4j.Logger;
 
 import com.impetus.kundera.entity.Author;
+import com.impetus.kundera.entity.PersonalDetail;
 import com.impetus.kundera.entity.Post;
+import com.impetus.kundera.entity.Tweet;
+import com.impetus.kundera.entity.User;
 import com.impetus.kundera.loader.Configuration;
 
 /**
@@ -63,7 +66,7 @@ public class TestCassandra extends BaseTest
         logger.info("starting server");
         if (cassandra == null)
         {
-            startCassandraServer();
+            //startCassandraServer();
         }
         if (conf == null)
         {
@@ -86,6 +89,23 @@ public class TestCassandra extends BaseTest
         logger.info("destroying conf");
         conf.destroy();
     }
+    
+    public void testSaveUser() {
+    	User user = new User();
+    	user.setUserId("IIIPL-0001");
+    	user.setPassword("password");
+    	
+    	PersonalDetail pd = new PersonalDetail();
+    	pd.setPersonalDetailId("1");
+    	pd.setName("Amresh");
+    	pd.setRelationshipStatus("single");
+    	user.setPersonalDetail(pd);
+    	
+    	user.addTweet(new Tweet("a", "Here it goes, my first tweet", "web"));
+    	user.addTweet(new Tweet("b", "Another one from me", "mobile"));
+    	
+    	manager.persist(user);
+    }
 
     /**
      * Test save authors.
@@ -93,7 +113,7 @@ public class TestCassandra extends BaseTest
      * @throws Exception
      *             the exception
      */
-    public void testSaveAuthors() throws Exception
+   /* public void testSaveAuthors() throws Exception
     {
         logger.info("onTestSaveAuthors");
         String key = System.currentTimeMillis() + "-author";
@@ -103,7 +123,7 @@ public class TestCassandra extends BaseTest
         // check if saved?
         Author animesh_db = manager.find(Author.class, key);
         assertEquals(animesh, animesh_db);
-    }
+    }*/
 
     /**
      * Test save posts.
@@ -111,7 +131,7 @@ public class TestCassandra extends BaseTest
      * @throws Exception
      *             the exception
      */
-    public void testSavePosts() throws Exception
+   /* public void testSavePosts() throws Exception
     {
         logger.info("onTestSavePosts");
         String key = System.currentTimeMillis() + "-post";
@@ -122,7 +142,7 @@ public class TestCassandra extends BaseTest
         // check if saved?
         Post post_db = manager.find(Post.class, key);
         assertEquals(post, post_db);
-    }
+    }*/
 
     /**
      * _test delete authors.
@@ -130,7 +150,7 @@ public class TestCassandra extends BaseTest
      * @throws Exception
      *             the exception
      */
-    public void testDeleteAuthors() throws Exception
+    /*public void testDeleteAuthors() throws Exception
     {
         logger.info("ontestDeleteAuthors");
 
@@ -146,7 +166,7 @@ public class TestCassandra extends BaseTest
         // check if deleted?
         Author animesh_db = manager.find(Author.class, key);
         assertEquals(null, animesh_db);
-    }
+    }*/
 
     /**
      * Creates the author.
@@ -162,7 +182,7 @@ public class TestCassandra extends BaseTest
      * 
      * @return the author
      */
-    private static Author createAuthor(String username, String email, String country, Date registeredSince)
+   /* private static Author createAuthor(String username, String email, String country, Date registeredSince)
     {
         Author author = new Author();
         author.setUsername(username);
@@ -170,7 +190,7 @@ public class TestCassandra extends BaseTest
         author.setEmailAddress(email);
         author.setRegistered(registeredSince);
         return author;
-    }
+    }*/
 
     /**
      * Creates the post.
@@ -190,7 +210,7 @@ public class TestCassandra extends BaseTest
      * 
      * @return the post
      */
-    private static Post createPost(String permalink, String title, String body, String author, Date created,
+    /*private static Post createPost(String permalink, String title, String body, String author, Date created,
             String... tags)
     {
         Post post = new Post();
@@ -201,6 +221,6 @@ public class TestCassandra extends BaseTest
         post.setCreated(created);
 //        post.setTags(Arrays.asList(tags));
         return post;
-    }
+    }*/
 
 }

@@ -24,12 +24,12 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.Table;
 
 import com.impetus.kundera.api.Cacheable;
-import com.impetus.kundera.api.ColumnFamily;
 
 @Entity
-@ColumnFamily (family="Department")
+@Table (name="Department")
 @Cacheable (true)
 public class Department {
 

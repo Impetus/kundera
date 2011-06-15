@@ -77,7 +77,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
     private Integer port;
 
     /** The keyspace. */
-    private String keyspace;
+    private String schema;
     
     private List<String> classes;
 
@@ -438,16 +438,24 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      */
     public int getPort() {
         return port;
-    }
+    } 
+    
 
-    /**
-     * Gets the keyspace.
-     * 
-     * @return the keyspace
-     */
-    public String getKeyspace() {
-        return keyspace;
-    }
+	/**
+	 * @return the schema
+	 */
+	public String getSchema() {
+		return schema;
+	}
+
+
+	/**
+	 * @param schema the schema to set
+	 */
+	public void setSchema(String schema) {
+		this.schema = schema;
+	}
+
 
 	/**
 	 * @return the classes

@@ -36,17 +36,14 @@ import com.impetus.kundera.loader.DBType;
  */
 public final class EntityMetadata {
 
-	/** type. */
-	private Type type;
-
 	/** class corresponding to this meta. */
 	private Class<?> entityClazz;
 
-	/** ColumnFamily. */
-	private String columnFamilyName;
+	/** Name of Persistence Object. */
+	private String tableName;
 
-	/** keyspace. */
-	private String keyspaceName;
+	/** database name */
+	private String schema;
 
 	/** field that keeps row identifier. */
 	private Field idProperty;
@@ -110,26 +107,7 @@ public final class EntityMetadata {
 		this.entityClazz = entityClazz;
 
 	}
-
-	/**
-	 * Gets the type.
-	 * 
-	 * @return the type
-	 */
-	public Type getType() {
-		return type;
-	}
-
-	/**
-	 * Sets the type.
-	 * 
-	 * @param type
-	 *            the new type
-	 */
-	public void setType(Type type) {
-		this.type = type;
-	}
-
+	
 	/**
 	 * Gets the entity clazz.
 	 * 
@@ -137,44 +115,34 @@ public final class EntityMetadata {
 	 */
 	public Class<?> getEntityClazz() {
 		return entityClazz;
+	}	
+	
+	/**
+	 * @return the tableName
+	 */
+	public String getTableName() {
+		return tableName;
 	}
 
 	/**
-	 * Gets the column family name.
-	 * 
-	 * @return the column family name
+	 * @param tableName the tableName to set
 	 */
-	public String getColumnFamilyName() {
-		return columnFamilyName;
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
 	}
 
 	/**
-	 * Sets the column family name.
-	 * 
-	 * @param columnFamilyName
-	 *            the new column family name
+	 * @return the schema
 	 */
-	public void setColumnFamilyName(String columnFamilyName) {
-		this.columnFamilyName = columnFamilyName;
+	public String getSchema() {
+		return schema;
 	}
 
 	/**
-	 * Gets the keyspace name.
-	 * 
-	 * @return the keyspace name
+	 * @param schema the schema to set
 	 */
-	public String getKeyspaceName() {
-		return keyspaceName;
-	}
-
-	/**
-	 * Sets the keyspace name.
-	 * 
-	 * @param keyspaceName
-	 *            the new keyspace name
-	 */
-	public void setKeyspaceName(String keyspaceName) {
-		this.keyspaceName = keyspaceName;
+	public void setSchema(String schema) {
+		this.schema = schema;
 	}
 
 	/**
@@ -517,10 +485,9 @@ public final class EntityMetadata {
 		builder.append(entityClazz.getName() + " (\n");
 		// builder.append("EntityMetadata [\n");
 
-		// builder.append("\tentity:" + entityClazz.getName() + ",\n");
-		builder.append("\tType: " + type + ",\n");
-		builder.append("\tColumnFamily: " + columnFamilyName + ", \n");
-		builder.append("\tKeyspace: " + keyspaceName + ",\n");
+		// builder.append("\tentity:" + entityClazz.getName() + ",\n");		
+		builder.append("\tTable: " + tableName + ", \n");
+		builder.append("\tKeyspace: " + schema + ",\n");
 		builder.append("\tId: " + idProperty.getName() + ",\n");
 		builder.append("\tReadIdMethod: " + readIdentifierMethod.getName()
 				+ ",\n");
@@ -777,84 +744,7 @@ public final class EntityMetadata {
 		public void setBoost(float boost) {
 			this.boost = boost;
 		}
-	}
-
-	/**
-	 * Specifies the type of the metadata.
-	 */
-	public static enum Type {
-
-		/** Denotes that the Entity is related to a ColumnFamily. */
-		COLUMN_FAMILY {
-
-			public boolean isColumnFamilyMetadata() {
-				return true;
-			}
-
-			public boolean isSuperColumnFamilyMetadata() {
-				return false;
-			}
-			
-			public boolean isDocumentMetadata() {
-				return false;
-			}
-
-		},
-
-		/** Denotes that the Entity is related to a SuperColumnFamily. */
-		SUPER_COLUMN_FAMILY {
-
-			public boolean isColumnFamilyMetadata() {
-				return false;
-			}
-
-			public boolean isSuperColumnFamilyMetadata() {
-				return true;
-			}
-			
-			public boolean isDocumentMetadata() {
-				return false;
-			}
-
-		},
-		
-		/** Denotes that the Entity is related to a document based data-store. */
-		DOCUMENT {
-
-			public boolean isColumnFamilyMetadata() {
-				return false;
-			}
-
-			public boolean isSuperColumnFamilyMetadata() {
-				return false;
-			}
-			
-			public boolean isDocumentMetadata() {
-				return true;
-			}
-
-		};
-
-		/**
-		 * Checks if is column family metadata.
-		 * 
-		 * @return true, if is column family metadata
-		 */
-		public abstract boolean isColumnFamilyMetadata();
-
-		/**
-		 * Checks if is super column family metadata.
-		 * 
-		 * @return true, if is super column family metadata
-		 */
-		public abstract boolean isSuperColumnFamilyMetadata();
-		
-		/**
-		 * Checks if is Document metadata. 
-		 * @return true, if is Document metadata
-		 */
-		public abstract boolean isDocumentMetadata();
-	}
+	}	
 
 	/**
 	 * Class to hold class-method instances for EntityListeners.

@@ -21,11 +21,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.Table;
 
-import com.impetus.kundera.api.ColumnFamily;
 
 @Entity
-@ColumnFamily(family = "Profile")
+@Table(name = "Profile")
 public class Profile {
 
 	@Id

@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.Table;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.api.Document;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Relation;
@@ -35,7 +35,7 @@ import com.impetus.kundera.proxy.EnhancedEntity;
  * CouchDB
  * @author amresh.singh
  */
-public final class DocumentDataAccessor extends BaseDataAccessor<Document> {
+public final class DocumentDataAccessor extends BaseDataAccessor<Table> {
 	private static Log log = LogFactory.getLog(DocumentDataAccessor.class);
 	
 	public DocumentDataAccessor(EntityManagerImpl em) {
@@ -63,8 +63,8 @@ public final class DocumentDataAccessor extends BaseDataAccessor<Document> {
 			throws Exception {
 		log.debug("Document >> Read >> " + clazz.getName() + "_" + id);
 
-		String dbName = m.getKeyspaceName();	//Database name
-		String documentName = m.getColumnFamilyName();	//Document name for document based data store
+		String dbName = m.getSchema();	//Database name
+		String documentName = m.getTableName();	//Document name for document based data store
 		m.addColumn(m.getIdColumn().getName(), m.getIdColumn());
 		
 		return getEntityManager().getClient().loadColumns(getEntityManager(),clazz,dbName, documentName, id,m);
@@ -78,8 +78,8 @@ public final class DocumentDataAccessor extends BaseDataAccessor<Document> {
 			throws Exception {
 		log.debug("Document >> Read >> " + clazz.getName() + "_(" + Arrays.asList(ids) + ")");
 
-		String dbName = m.getKeyspaceName();
-		String documentName = m.getColumnFamilyName();
+		String dbName = m.getSchema();
+		String documentName = m.getTableName();
 		m.addColumn(m.getIdColumn().getName(), m.getIdColumn());
 		return getEntityManager().getClient().loadColumns(getEntityManager(), clazz, dbName, documentName, m, ids);
 	}
@@ -92,7 +92,7 @@ public final class DocumentDataAccessor extends BaseDataAccessor<Document> {
 		log.debug("Document >> Delete >> " + entityName + "_" + id);
 
 		getEntityManager().getClient().delete(m.getIdColumn().getName(),
-				m.getColumnFamilyName(), id);
+				m.getTableName(), id);
 	}
 
 	@Override

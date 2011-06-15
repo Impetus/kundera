@@ -56,8 +56,8 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 			throws Exception {
 		log.debug("Column Family >> Read >> " + clazz.getName() + "_" + id);
 
-		String keyspace = m.getKeyspaceName();
-		String family = m.getColumnFamilyName();
+		String keyspace = m.getSchema();
+		String family = m.getTableName();
 
 		 return getEntityManager().getClient().loadColumns(getEntityManager(),clazz,keyspace, family, id,m);
 		// load column from DB
@@ -90,8 +90,8 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 		log.debug("Cassandra >> Read >> " + clazz.getName() + "_("
 				+ Arrays.asList(ids) + ")");
 
-		String keyspace = m.getKeyspaceName();
-		String family = m.getColumnFamilyName();
+		String keyspace = m.getSchema();
+		String family = m.getTableName();
 		
 		return getEntityManager().getClient().loadColumns(getEntityManager(), clazz, keyspace, family, m, ids);
 
@@ -116,8 +116,8 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 
 		log.debug("Column Family >> Write >> " + entityName + "_" + id);
 
-		String keyspace = m.getKeyspaceName();
-		String family = m.getColumnFamilyName();
+		String keyspace = m.getSchema();
+		String family = m.getTableName();
 
 //		BaseDataAccessor<Column>.ThriftRow tf = toThriftRow(e, m);
 		getEntityManager().getClient().writeColumns(keyspace, family, // columnFamily

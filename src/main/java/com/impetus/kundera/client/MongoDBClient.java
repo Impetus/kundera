@@ -70,8 +70,8 @@ public class MongoDBClient implements Client {
 	
 	@Override
 	public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception {
-		String dbName = m.getKeyspaceName();
-		String documentName = m.getColumnFamilyName();
+		String dbName = m.getSchema();
+		String documentName = m.getTableName();
 		String key = e.getId();
 		
 		log.debug("Checking whether record already exist for " + dbName + "." + documentName + " for " + key);
@@ -149,8 +149,8 @@ public class MongoDBClient implements Client {
 	 * Loads columns from multiple rows restricting results to conditions stored in <code>filterClauseQueue</code>
 	 */
 	public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception {
-		String documentName = m.getColumnFamilyName();
-		String dbName = m.getKeyspaceName();
+		String documentName = m.getTableName();
+		String dbName = m.getSchema();
 		Class clazz = m.getEntityClazz();
 		log.debug("Fetching data from " + documentName + " for Filter " + filterClauseQueue);
 		

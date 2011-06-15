@@ -67,18 +67,18 @@ public class SuperColumnFamilyProcessor extends AbstractEntityFieldProcessor {
 		LOG.debug("Processing @Entity " + clazz.getName()
 				+ " for SuperColumnFamily.");
 
-		metadata.setType(EntityMetadata.Type.SUPER_COLUMN_FAMILY);
-
-		// check for SuperColumnFamily annotation.
-		SuperColumnFamily scf = clazz.getAnnotation(SuperColumnFamily.class);
-
-		// set columnFamily
-		metadata.setColumnFamilyName(scf.family());
-
-		// set keyspace
-		String keyspace = scf.keyspace().length() != 0 ? scf.keyspace() : em
-				.getKeyspace();
-		metadata.setKeyspaceName(keyspace);
+//		metadata.setType(EntityMetadata.Type.SUPER_COLUMN_FAMILY);
+//
+//		// check for SuperColumnFamily annotation.
+//		SuperColumnFamily scf = clazz.getAnnotation(SuperColumnFamily.class);
+//
+//		// set columnFamily
+//		metadata.setColumnFamilyName(scf.family());
+//
+//		// set keyspace
+//		String keyspace = scf.keyspace().length() != 0 ? scf.keyspace() : em
+//				.getKeyspace();
+//		metadata.setKeyspaceName(keyspace);
 
 		// scan for fields
 		for (Field f : clazz.getDeclaredFields()) {

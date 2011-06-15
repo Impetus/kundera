@@ -18,8 +18,8 @@ package com.impetus.kundera.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
-import com.impetus.kundera.api.Document;
 
 /**
  * Entity class for Email attachment
@@ -27,7 +27,7 @@ import com.impetus.kundera.api.Document;
  */
 
 @Entity
-@Document(name="attachments", db="mongodbtest")
+@Table(name="attachments", schema="mongodbtest")
 public class Attachment {
 	
 	@Id	

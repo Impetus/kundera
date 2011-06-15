@@ -18,8 +18,7 @@ package com.impetus.kundera.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-
-import com.impetus.kundera.api.Document;
+import javax.persistence.Table;
 
 /**
  * The Contact Entity Class
@@ -27,7 +26,7 @@ import com.impetus.kundera.api.Document;
  */
 
 @Entity
-@Document(name="contact", db="mongodbtest")
+@Table(name="contact", schema="mongodbtest")
 public class Contact {
 	@Id
 	@Column(name="contact_id")

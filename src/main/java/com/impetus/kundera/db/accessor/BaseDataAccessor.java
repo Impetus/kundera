@@ -75,8 +75,7 @@ public abstract class BaseDataAccessor<TF> implements DataAccessor {
 
 		log.debug("Cassandra >> Delete >> " + entityName + "_" + id);
 
-		getEntityManager().getClient().delete(m.getKeyspaceName(),
-				m.getColumnFamilyName(), id);
+		getEntityManager().getClient().delete(m.getSchema(), m.getTableName(), id);
 	}
 
 	/**

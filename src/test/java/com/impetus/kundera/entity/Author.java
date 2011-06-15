@@ -26,10 +26,10 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.PersistenceUnit;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.impetus.kundera.api.ColumnFamily;
 
 /**
  * The Class Author.
@@ -38,7 +38,7 @@ import com.impetus.kundera.api.ColumnFamily;
  */
 @Entity
 // makes it an entity class
-@ColumnFamily(family="Authors", keyspace="Blog")
+@Table(name="Authors", schema="Blog")
 // assign ColumnFamily type and name
 public class Author implements Serializable{
 
