@@ -66,7 +66,7 @@ public class TestCassandra extends BaseTest
         logger.info("starting server");
         if (cassandra == null)
         {
-            //startCassandraServer();
+            startCassandraServer();
         }
         if (conf == null)
         {

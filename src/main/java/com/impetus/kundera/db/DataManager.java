@@ -17,10 +17,13 @@ package com.impetus.kundera.db;
 
 import java.util.List;
 
+import javax.persistence.PersistenceException;
+
 import com.impetus.kundera.db.accessor.DocumentDataAccessor;
 import com.impetus.kundera.db.accessor.ColumnFamilyDataAccessor;
 import com.impetus.kundera.db.accessor.SuperColumnFamilyDataAccessor;
 import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
@@ -49,10 +52,10 @@ public class DataManager {
      *            the EntityManager
      */
     public DataManager(EntityManagerImpl em) {
-        //accessorCF = new ColumnFamilyDataAccessor(em);
+        accessorCF = new ColumnFamilyDataAccessor(em);
         //accessorSCF = new SuperColumnFamilyDataAccessor(em);
-        //accessorDocument = new DocumentDataAccessor(em);
-    	accessorTable =
+        accessorDocument = new DocumentDataAccessor(em);
+    	
     }
 
     /**
@@ -147,7 +150,16 @@ public class DataManager {
 	 *            the metadata
 	 * @return the data accessor
 	 */
-    private DataAccessor getDataAccessor(EntityMetadata metadata) {
-    	return accessorTable;		
+    private DataAccessor getDataAccessor(EntityMetadata metadata) {   	
+    	if(DBType.CASSANDRA.equals(metadata.getDBType())) {
+    		return accessorCF;
+    	} else if(DBType.HBASE.equals(metadata.getDBType())) {
+    		return accessorCF;
+    	} else if(DBType.MONGODB.equals(metadata.getDBType())){
+    		return accessorDocument;
+    	} else {
+    		throw new PersistenceException("Can't determine Data Accessor for DB Type " + metadata.getDBType());
+    	}
+    			
 	}
 }
