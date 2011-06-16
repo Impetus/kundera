@@ -116,16 +116,7 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 
 		log.debug("Column Family >> Write >> " + entityName + "_" + id);
 
-		String keyspace = m.getSchema();
-		String family = m.getTableName();
-
-//		BaseDataAccessor<Column>.ThriftRow tf = toThriftRow(e, m);
-		getEntityManager().getClient().writeColumns(keyspace, family, // columnFamily
-				id, // row id
-				m.getColumnsAsList(), e// list of columns
-				);
-//		HBaseClient hBaseClient = new HBaseClient();
-//		hBaseClient.write(m.getEntityClazz().getSimpleName().toLowerCase(), family, id, m.getColumnsAsList(), e);
+		getEntityManager().getClient().writeColumns(getEntityManager(), e, m);
 	}
 
 }

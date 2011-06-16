@@ -114,39 +114,35 @@ public class PelopsClient implements CassandraClient
         return !closed;
     }
 
-    /*
-     * @see com.impetus.kundera.CassandraClient#writeColumns(java.lang.String,
-     * java.lang.String, java.lang.String, org.apache.cassandra.thrift.Column[])
-     */
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.Client#writeColumns(java.lang.String, java.lang.String, java.lang.String, java.util.List, com.impetus.kundera.proxy.EnhancedEntity)
-     */
+    @Deprecated
     @Override
     public final void writeColumns(String keyspace, String columnFamily, String rowId,
             List<EntityMetadata.Column> columns, EnhancedEntity e) throws Exception
-    {
+    {	
+    	throw new PersistenceException("Not yet implemented");
+        
+    }
 
-        if (!isOpen())
-        {
+
+    @Override
+    public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) 
+    	throws Exception {
+    	
+		String keyspace = m.getSchema();
+		String columnFamily = m.getTableName();
+		
+		if (!isOpen()) {
             throw new PersistenceException("PelopsClient is closed.");
         }
-        PelopsClient.ThriftRow tf = toThriftRow(e, columns, columnFamily);
+		
+        PelopsClient.ThriftRow tf = toThriftRow(e, m, columnFamily);
         configurePool(keyspace);
 
         Mutator mutator = Pelops.createMutator(poolName);
         mutator.writeColumns(columnFamily, new Bytes(tf.getId().getBytes()),
                 Arrays.asList(tf.getColumns().toArray(new Column[0])));
         mutator.execute(ConsistencyLevel.ONE);
-    }
-
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.Client#writeColumns(com.impetus.kundera.ejb.EntityManagerImpl, com.impetus.kundera.proxy.EnhancedEntity, com.impetus.kundera.metadata.EntityMetadata)
-     */
-    @Override
-    public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
-    {
-        throw new PersistenceException("Not yet implemented");
+        
     }
 
     /*
@@ -417,6 +413,10 @@ public class PelopsClient implements CassandraClient
 
         /** list of thrift columns from the row. */
         private List<Column> columns;
+        
+        /** list of thrift super columns columns from the row. */
+        private List<SuperColumn> superColumns;      
+        
 
         /**
          * default constructor.
@@ -424,6 +424,7 @@ public class PelopsClient implements CassandraClient
         public ThriftRow()
         {
             columns = new ArrayList<Column>();
+            superColumns = new ArrayList<SuperColumn>();
         }
 
         /**
@@ -516,6 +517,28 @@ public class PelopsClient implements CassandraClient
         {
             columns.add(column);
         }
+
+		/**
+		 * @return the superColumns
+		 */
+		public List<SuperColumn> getSuperColumns() {
+			return superColumns;
+		}
+
+		/**
+		 * @param superColumns the superColumns to set
+		 */
+		public void setSuperColumns(List<SuperColumn> superColumns) {
+			this.superColumns = superColumns;
+		}
+		
+		/**
+		 * @param superColumns the superColumns to set
+		 */
+		public void addSuperColumn(SuperColumn superColumn) {
+			this.superColumns.add(superColumn);
+		}    
+        
     }
 
     /**
@@ -588,57 +611,52 @@ public class PelopsClient implements CassandraClient
      *
      * @param e the e
      * @param columnsLst the columns lst
-     * @param colmunFamily the colmun family
+     * @param columnFamily the colmun family
      * @return the base data accessor. thrift row
      * @throws Exception the exception
      */
-    private PelopsClient.ThriftRow toThriftRow(EnhancedEntity e, List<EntityMetadata.Column> columnsLst,
-            String colmunFamily) throws Exception
-    {
-
-        // timestamp to use in thrift column objects
+    private PelopsClient.ThriftRow toThriftRow(EnhancedEntity e, EntityMetadata m, String columnFamily) 
+    	throws Exception {    	
+    	// timestamp to use in thrift column objects
         long timestamp = System.currentTimeMillis();
 
-        PelopsClient.ThriftRow cr = this.new ThriftRow();
+        PelopsClient.ThriftRow tr = this.new ThriftRow();
 
-        // column-family name
-        cr.setColumnFamilyName(colmunFamily);
+        tr.setColumnFamilyName(columnFamily);	        		// column-family name       
+        tr.setId(e.getId());									// Id
+        addColumnsToThriftRow(timestamp, tr, m, e);				//Columns 
+        addSuperColumnsToThriftRow(timestamp, tr, m, e);		//Super columns      
 
-        // id
-        cr.setId(e.getId());
-
-        List<Column> columns = new ArrayList<Column>();
-
+        return tr;
+    }
+        
+    private void addColumnsToThriftRow(long timestamp, PelopsClient.ThriftRow tr, EntityMetadata m, EnhancedEntity e) throws Exception {
+    	List<Column> columns = new ArrayList<Column>();
+    	
         // Iterate through each column-meta and populate that with field values
-        for (EntityMetadata.Column column : columnsLst)
-        {
+        for (EntityMetadata.Column column : m.getColumnsAsList()) {
             Field field = column.getField();
             String name = column.getName();
-            try
-            {
+            try {
                 byte[] value = PropertyAccessorHelper.get(e.getEntity(), field);
                 Column col = new Column();
                 col.setName(PropertyAccessorFactory.STRING.toBytes(name));
                 col.setValue(value);
                 col.setTimestamp(timestamp);
                 columns.add(col);
-            }
-            catch (PropertyAccessException exp)
-            {
+            } catch (PropertyAccessException exp) {
                 log.warn(exp.getMessage());
             }
 
         }
 
         // add foreign keys
-        for (Map.Entry<String, Set<String>> entry : e.getForeignKeysMap().entrySet())
-        {
+        for (Map.Entry<String, Set<String>> entry : e.getForeignKeysMap().entrySet()) {
             String property = entry.getKey();
             Set<String> foreignKeys = entry.getValue();
 
             String keys = serializeKeys(foreignKeys);
-            if (null != keys)
-            {
+            if (null != keys) {
                 Column col = new Column();
 
                 col.setName(PropertyAccessorFactory.STRING.toBytes(property));
@@ -647,9 +665,39 @@ public class PelopsClient implements CassandraClient
                 columns.add(col);
             }
         }
+        tr.setColumns(columns);			//Columns
+    }
+    
+    private void addSuperColumnsToThriftRow(long timestamp, PelopsClient.ThriftRow tr, EntityMetadata m, EnhancedEntity e) throws Exception {
+    	 //Iterate through Super columns
+        for (EntityMetadata.SuperColumn superColumn : m.getSuperColumnsAsList()) {
+            String superColumnName = superColumn.getName();
+            Field superColumnField = superColumn.getField();
+            Object superColumnObject = PropertyAccessorHelper.getObject(e.getEntity(), superColumnField);
+            List<Column> columns = new ArrayList<Column>();           
+            
+            for (EntityMetadata.Column column : superColumn.getColumns()) {
+                Field field = column.getField();
+                String name = column.getName();
 
-        cr.setColumns(columns);
-        return cr;
+                try {
+                    byte[] value = PropertyAccessorHelper.get(superColumnObject, field);
+                    if (null != value) {
+                        Column col = new Column();
+                        col.setName(PropertyAccessorFactory.STRING.toBytes(name));
+                        col.setValue(value);
+                        col.setTimestamp(timestamp);
+                        columns.add(col);
+                    }
+                } catch (PropertyAccessException exp) {
+                    log.warn(exp.getMessage());
+                }
+            }
+            SuperColumn superCol = new SuperColumn();
+            superCol.setName(PropertyAccessorFactory.STRING.toBytes(superColumnName));
+            superCol.setColumns(columns);
+            tr.addSuperColumn(superCol);
+        }
     }
 
     /**

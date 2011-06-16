@@ -622,6 +622,9 @@ public final class EntityMetadata {
 
 		/** The name. */
 		private String name;
+		
+		/** Super column field */
+		private Field field;
 
 		/** The columns. */
 		private List<Column> columns;
@@ -632,8 +635,9 @@ public final class EntityMetadata {
 		 * @param name
 		 *            the name
 		 */
-		public SuperColumn(String name) {
+		public SuperColumn(String name, Field f) {
 			this.name = name;
+			this.field = f;
 			columns = new ArrayList<Column>();
 		}
 
@@ -644,6 +648,27 @@ public final class EntityMetadata {
 		 */
 		public String getName() {
 			return name;
+		}	
+
+		/**
+		 * @param name the name to set
+		 */
+		public void setName(String name) {
+			this.name = name;
+		}		
+
+		/**
+		 * @return the field
+		 */
+		public Field getField() {
+			return field;
+		}
+
+		/**
+		 * @param field the field to set
+		 */
+		public void setField(Field field) {
+			this.field = field;
 		}
 
 		/**
@@ -665,7 +690,7 @@ public final class EntityMetadata {
 		 */
 		public void addColumn(String name, Field field) {
 			columns.add(new Column(name, field));
-		}
+		}				
 	}
 
 	/**

@@ -151,6 +151,7 @@ public abstract class BaseTest extends TestCase
         CfDef tweet_Def = new CfDef("Blog", "Addresses");
         CfDef userLine_Def = new CfDef("Blog", "Authors");
         CfDef timeLine_Def = new CfDef("Blog", "Posts");
+        CfDef users_Def = new CfDef("Blog", "users");
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(user_Def);
         cfDefs.add(userName_Def);
@@ -159,6 +160,7 @@ public abstract class BaseTest extends TestCase
         cfDefs.add(tweet_Def);
         cfDefs.add(userLine_Def);
         cfDefs.add(timeLine_Def);
+        cfDefs.add(users_Def);        
 
         client.send_system_add_keyspace(new KsDef("Blog", simple.getCanonicalName(), 1, cfDefs));
 
@@ -167,7 +169,7 @@ public abstract class BaseTest extends TestCase
                 standardCFMD("Blog", "Employee", ColumnFamilyType.Standard), standardCFMD("Blog", "Profile",
                         ColumnFamilyType.Standard), standardCFMD("Blog", "Addresses", ColumnFamilyType.Standard),
                 standardCFMD("Blog", "Authors", ColumnFamilyType.Standard), standardCFMD("Blog", "Posts",
-                        ColumnFamilyType.Super));
+                        ColumnFamilyType.Super), standardCFMD("Blog", "users", ColumnFamilyType.Super));
         for (CFMetaData cfm : metadata.cfMetaData().values())
         {
             CFMetaData.map(cfm);

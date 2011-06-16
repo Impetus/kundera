@@ -104,7 +104,7 @@ public class SuperColumnFamilyProcessor extends AbstractEntityFieldProcessor {
 				EntityMetadata.SuperColumn superColumn = metadata
 						.getSuperColumn(superColumnName);
 				if (null == superColumn) {
-					superColumn = metadata.new SuperColumn(superColumnName);
+					//superColumn = metadata.new SuperColumn(superColumnName);
 				}
 				superColumn.addColumn(columnName, f);
 				metadata.addSuperColumn(superColumnName, superColumn);
