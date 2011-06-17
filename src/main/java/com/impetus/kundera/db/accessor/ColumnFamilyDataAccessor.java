@@ -59,25 +59,7 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor<Column> {
 		String keyspace = m.getSchema();
 		String family = m.getTableName();
 
-		 return getEntityManager().getClient().loadColumns(getEntityManager(),clazz,keyspace, family, id,m);
-		// load column from DB
-		//TODO uncomment
-//		List<Column> columns =
-
-//		E e;
-//		HBaseClient hBaseClient = new HBaseClient();
-//		HBaseData data = hBaseClient.read(m.getEntityClazz().getSimpleName().toLowerCase(), family, id, new String[0]);
-//
-//		e = onLoadFromHBase(clazz, data, m, id);
-		//TODO uncomment.
-		/*// check for empty
-		if (null == columns || columns.size() == 0) {
-			e = null;
-		} else {
-		    e = fromThriftRow(clazz, m, this.new ThriftRow(id, family, columns));
-		}*/
-		
-//		return e;
+		return getEntityManager().getClient().loadColumns(getEntityManager(),clazz,keyspace, family, id,m);		
 	}
 
 	/*

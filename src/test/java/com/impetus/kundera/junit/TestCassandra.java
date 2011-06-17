@@ -90,7 +90,7 @@ public class TestCassandra extends BaseTest
         conf.destroy();
     }
     
-    public void testSaveUser() {
+    /*public void testSaveUser() {
     	User user = new User();
     	user.setUserId("IIIPL-0006");
     	user.setPassword("password1");
@@ -105,6 +105,11 @@ public class TestCassandra extends BaseTest
     	user.addTweet(new Tweet("b", "Another one from me", "mobile"));
     	
     	manager.persist(user);
+    }*/
+    
+    public void testFindUser() {
+    	User user = manager.find(User.class, "IIIPL-0001");
+    	System.out.println(user);
     }
 
     /**
