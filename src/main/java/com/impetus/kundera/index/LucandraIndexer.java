@@ -45,10 +45,8 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.Version;
 
-import com.impetus.kundera.CassandraClient;
 import com.impetus.kundera.Client;
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.db.accessor.ColumnFamilyDataAccessor;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.PropertyIndex;

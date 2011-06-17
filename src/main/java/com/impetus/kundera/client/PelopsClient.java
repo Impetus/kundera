@@ -18,11 +18,13 @@ package com.impetus.kundera.client;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.PersistenceException;
 
@@ -139,22 +141,27 @@ public class PelopsClient implements CassandraClient
         configurePool(keyspace);
 
         Mutator mutator = Pelops.createMutator(poolName);
-        mutator.writeColumns(columnFamily, new Bytes(tf.getId().getBytes()),
-                Arrays.asList(tf.getColumns().toArray(new Column[0])));
+        
+        List<Column> thriftColumns = tf.getColumns();
+        List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
+        if(thriftColumns != null && ! thriftColumns.isEmpty()) {
+        	mutator.writeColumns(columnFamily, new Bytes(tf.getId().getBytes()),
+                    Arrays.asList(tf.getColumns().toArray(new Column[0])));
+        }
+        
+        if(thriftSuperColumns != null && ! thriftSuperColumns.isEmpty()) {
+        	for (SuperColumn sc : thriftSuperColumns) {
+                Bytes.toUTF8(sc.getColumns().get(0).getValue());
+                mutator.writeSubColumns(columnFamily, tf.getId(), Bytes.toUTF8(sc.getName()), sc.getColumns());
+            }
+        }        
+        
         mutator.execute(ConsistencyLevel.ONE);
         
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.CassandraClient#writeSuperColumns(java.lang.String,
-     * java.lang.String, java.lang.String,
-     * org.apache.cassandra.thrift.SuperColumn[])
-     */
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.CassandraClient#writeSuperColumns(java.lang.String, java.lang.String, java.lang.String, org.apache.cassandra.thrift.SuperColumn[])
-     */
     @Override
+    @Deprecated
     public final void writeSuperColumns(String keyspace, String columnFamily, String rowId, SuperColumn... superColumns)
             throws Exception
     {
@@ -624,8 +631,12 @@ public class PelopsClient implements CassandraClient
 
         tr.setColumnFamilyName(columnFamily);	        		// column-family name       
         tr.setId(e.getId());									// Id
-        addColumnsToThriftRow(timestamp, tr, m, e);				//Columns 
-        addSuperColumnsToThriftRow(timestamp, tr, m, e);		//Super columns      
+        
+        addSuperColumnsToThriftRow(timestamp, tr, m, e);		//Super columns  
+        
+        if(m.getSuperColumnsAsList().isEmpty()) {
+        	addColumnsToThriftRow(timestamp, tr, m, e);				//Columns
+        }        
 
         return tr;
     }
@@ -670,34 +681,54 @@ public class PelopsClient implements CassandraClient
     
     private void addSuperColumnsToThriftRow(long timestamp, PelopsClient.ThriftRow tr, EntityMetadata m, EnhancedEntity e) throws Exception {
     	 //Iterate through Super columns
-        for (EntityMetadata.SuperColumn superColumn : m.getSuperColumnsAsList()) {
-            String superColumnName = superColumn.getName();
+        for (EntityMetadata.SuperColumn superColumn : m.getSuperColumnsAsList()) {            
             Field superColumnField = superColumn.getField();
             Object superColumnObject = PropertyAccessorHelper.getObject(e.getEntity(), superColumnField);
-            List<Column> columns = new ArrayList<Column>();           
+             
             
-            for (EntityMetadata.Column column : superColumn.getColumns()) {
-                Field field = column.getField();
-                String name = column.getName();
-
-                try {
-                    byte[] value = PropertyAccessorHelper.get(superColumnObject, field);
-                    if (null != value) {
-                        Column col = new Column();
-                        col.setName(PropertyAccessorFactory.STRING.toBytes(name));
-                        col.setValue(value);
-                        col.setTimestamp(timestamp);
-                        columns.add(col);
-                    }
-                } catch (PropertyAccessException exp) {
-                    log.warn(exp.getMessage());
-                }
-            }
-            SuperColumn superCol = new SuperColumn();
-            superCol.setName(PropertyAccessorFactory.STRING.toBytes(superColumnName));
-            superCol.setColumns(columns);
-            tr.addSuperColumn(superCol);
+            //If Embedded object is a Collection, there will be variable number of super columns one for each object in collection.
+            //Key for each super column will be of the format "<Embedded object field name>#<Unique sequence number>
+            
+            //On the other hand, if embedded object is not a Collection, it would simply be embedded as ONE super column.
+            if(superColumnObject instanceof Collection) {
+            	for(Object obj : (Collection)superColumnObject) {
+            		superColumn.setName(UUID.randomUUID().toString());		//Change this to correct format
+            		SuperColumn thriftSuperColumn = buildThriftSuperColumn(timestamp, superColumn, obj);
+            		tr.addSuperColumn(thriftSuperColumn);
+            	}
+            	
+            } else {
+            	SuperColumn thriftSuperColumn = buildThriftSuperColumn(timestamp, superColumn, superColumnObject);
+                tr.addSuperColumn(thriftSuperColumn);            	
+            }         
+            
         }
+    }
+    
+    private SuperColumn buildThriftSuperColumn(long timestamp, EntityMetadata.SuperColumn superColumn, Object superColumnObject) throws PropertyAccessException {
+    	List<Column> thriftColumns = new ArrayList<Column>();  
+    	for (EntityMetadata.Column column : superColumn.getColumns()) {
+            Field field = column.getField();
+            String name = column.getName();
+
+            try {
+                byte[] value = PropertyAccessorHelper.get(superColumnObject, field);
+                if (null != value) {
+                    Column thriftColumn = new Column();
+                    thriftColumn.setName(PropertyAccessorFactory.STRING.toBytes(name));
+                    thriftColumn.setValue(value);
+                    thriftColumn.setTimestamp(timestamp);
+                    thriftColumns.add(thriftColumn);
+                }
+            } catch (PropertyAccessException exp) {
+                log.warn(exp.getMessage());
+            }
+        }
+        SuperColumn thriftSuperColumn = new SuperColumn();        
+        thriftSuperColumn.setName(PropertyAccessorFactory.STRING.toBytes(superColumn.getName()));
+        thriftSuperColumn.setColumns(thriftColumns);      
+        
+        return thriftSuperColumn;
     }
 
     /**

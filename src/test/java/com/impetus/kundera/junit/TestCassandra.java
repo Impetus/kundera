@@ -50,7 +50,7 @@ public class TestCassandra extends BaseTest
 
     public void startCassandraServer() throws Exception
     {
-        super.startCassandraServer();
+        //super.startCassandraServer();
     }
 
     /**
@@ -92,8 +92,8 @@ public class TestCassandra extends BaseTest
     
     public void testSaveUser() {
     	User user = new User();
-    	user.setUserId("IIIPL-0001");
-    	user.setPassword("password");
+    	user.setUserId("IIIPL-0006");
+    	user.setPassword("password1");
     	
     	PersonalDetail pd = new PersonalDetail();
     	pd.setPersonalDetailId("1");
