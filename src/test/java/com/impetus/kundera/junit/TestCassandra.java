@@ -92,12 +92,12 @@ public class TestCassandra extends BaseTest
     
     /*public void testSaveUser() {
     	User user = new User();
-    	user.setUserId("IIIPL-0006");
-    	user.setPassword("password1");
+    	user.setUserId("IIIPL-0001");   	
     	
     	PersonalDetail pd = new PersonalDetail();
     	pd.setPersonalDetailId("1");
     	pd.setName("Amresh");
+    	pd.setPassword("password1");
     	pd.setRelationshipStatus("single");
     	user.setPersonalDetail(pd);
     	
@@ -108,7 +108,7 @@ public class TestCassandra extends BaseTest
     }*/
     
     public void testFindUser() {
-    	User user = manager.find(User.class, "IIIPL-0001");
+    	User user = manager.find(User.class, "IIIPL-0006");
     	System.out.println(user);
     }
 

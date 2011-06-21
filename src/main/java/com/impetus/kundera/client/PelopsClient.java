@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,8 @@ import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.kundera.CassandraClient;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.db.accessor.BaseDataAccessor;
+import com.impetus.kundera.db.accessor.BaseDataAccessor.ThriftRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
@@ -76,6 +79,9 @@ public class PelopsClient implements CassandraClient
 
     /** log for this class. */
     private static Log log = LogFactory.getLog(PelopsClient.class);
+    
+    /** The Constant TO_ONE_SUPER_COL_NAME. */
+    private static final String TO_ONE_SUPER_COL_NAME = "FKey-TO";
 
     /**
      * default constructor.
@@ -201,23 +207,23 @@ public class PelopsClient implements CassandraClient
         Selector selector = Pelops.createSelector(poolName);
         
         List<EntityMetadata.SuperColumn> superColumns = m.getSuperColumnsAsList();
-        List<String> superColumnNames = m.getSuperColumnFieldNames();
-        List<SuperColumn> thriftSuperColumns = null;
+        List<String> superColumnNames = m.getSuperColumnFieldNames();        
+        
+        E e = null;
         if(! superColumnNames.isEmpty()) {
-        	thriftSuperColumns = selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames.toArray(new String[0])),
+        	List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames.toArray(new String[0])),
                     ConsistencyLevel.ONE);
         	System.out.println(thriftSuperColumns);
-        }
-        
-        
-        List<Column> columns = selector.getColumnsFromRow(columnFamily, new Bytes(rowId.getBytes()),
-                Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
-        E e;
-        if (null == columns || columns.size() == 0) {
-            e = null;
+        	e = fromSuperColumnThriftRow(em, clazz, m, this.new ThriftRow(rowId, columnFamily, null, thriftSuperColumns));
+        	
         } else {
-            e = fromThriftRow(em, clazz, m, this.new ThriftRow(rowId, columnFamily, columns));
-        }
+        	List<Column> columns = selector.getColumnsFromRow(columnFamily, new Bytes(rowId.getBytes()),
+                    Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);           
+           
+            e = fromColumnThriftRow(em, clazz, m, this.new ThriftRow(rowId, columnFamily, columns, null));
+                 	
+        }     
+        
         return e;
     }
 
@@ -268,7 +274,7 @@ public class PelopsClient implements CassandraClient
                 continue;
             }
 
-            E e = fromThriftRow(em, clazz, m, this.new ThriftRow(id, columnFamily, columns));
+            E e = fromColumnThriftRow(em, clazz, m, this.new ThriftRow(id, columnFamily, columns, null));
             entities.add(e);
         }
         return entities;
@@ -438,12 +444,19 @@ public class PelopsClient implements CassandraClient
          * @param columns
          *            the columns
          */
-        public ThriftRow(String id, String columnFamilyName, List<Column> columns)
-        {
+        public ThriftRow(String id, String columnFamilyName, List<Column> columns, List<SuperColumn> superColumns) {
             this.id = id;
             this.columnFamilyName = columnFamilyName;
-            this.columns = columns;
-        }
+            if(columns != null) {
+            	this.columns = columns;
+            }
+            
+            if(superColumns != null) {
+            	this.superColumns = superColumns;
+            }
+            
+        }        
+        
 
         /**
          * Gets the id.
@@ -553,7 +566,7 @@ public class PelopsClient implements CassandraClient
      * @return the e
      * @throws Exception the exception
      */
-    private <E> E fromThriftRow(EntityManagerImpl em, Class<E> clazz, EntityMetadata m, PelopsClient.ThriftRow cr)
+    private <E> E fromColumnThriftRow(EntityManagerImpl em, Class<E> clazz, EntityMetadata m, PelopsClient.ThriftRow cr)
             throws Exception
     {
 
@@ -606,6 +619,71 @@ public class PelopsClient implements CassandraClient
 
         return e;
     }
+    
+	private <E> E fromSuperColumnThriftRow(EntityManagerImpl em, Class<E> clazz, EntityMetadata m, ThriftRow tr) throws Exception {
+
+		// Instantiate a new instance
+		E e = clazz.newInstance();
+
+		// Set row-key. Note: @Id is always String.
+		PropertyAccessorHelper.set(e, m.getIdProperty(), tr.getId());
+
+		// Get a name->field map for super-columns
+		Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
+		Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
+		
+		for (Map.Entry<String, EntityMetadata.SuperColumn> entry : m
+				.getSuperColumnsMap().entrySet()) {
+			EntityMetadata.SuperColumn scMetadata = entry.getValue();
+			superColumnNameToFieldMap.put(scMetadata.getName(), scMetadata.getField());
+			for (EntityMetadata.Column cMetadata : entry.getValue()
+					.getColumns()) {
+				columnNameToFieldMap.put(cMetadata.getName(),
+						cMetadata.getField());
+			}
+		}
+
+		for (SuperColumn sc : tr.getSuperColumns()) {
+			String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
+			Field superColumnField = superColumnNameToFieldMap.get(scName);
+			Class superColumnClass = superColumnField.getType();
+			Object superColumnObj = superColumnClass.newInstance();
+			
+			boolean intoRelations = false;
+			if (scName.equals(TO_ONE_SUPER_COL_NAME)) {
+				intoRelations = true;
+			}
+
+			for (Column column : sc.getColumns()) {
+				String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
+				byte[] value = column.getValue();
+
+				if (value == null) {
+					continue;
+				}
+
+				if (intoRelations) {
+					EntityMetadata.Relation relation = m.getRelation(name);
+
+					String foreignKeys = PropertyAccessorFactory.STRING
+							.fromBytes(value);
+					Set<String> keys = deserializeKeys(foreignKeys);
+					em.getEntityResolver()
+							.populateForeignEntities(e, tr.getId(), relation,
+									keys.toArray(new String[0]));
+
+				} else {
+					// set value of the field in the bean
+					Field columnField = columnNameToFieldMap.get(name);
+					
+					
+					PropertyAccessorHelper.set(superColumnObj, columnField, value);
+				}
+			}
+			PropertyAccessorHelper.set(e, superColumnField, superColumnObj);
+		}
+		return e;
+	}
 
     /**
      * Helper method to convert @Entity to ThriftRow.
@@ -686,7 +764,7 @@ public class PelopsClient implements CassandraClient
             //On the other hand, if embedded object is not a Collection, it would simply be embedded as ONE super column.
             if(superColumnObject instanceof Collection) {
             	for(Object obj : (Collection)superColumnObject) {
-            		superColumn.setName(UUID.randomUUID().toString());		//Change this to correct format
+            		superColumn.setName(superColumnField.getName() + "#" + UUID.randomUUID().toString());		//TODO: Change this to correct format
             		SuperColumn thriftSuperColumn = buildThriftSuperColumn(timestamp, superColumn, obj);
             		tr.addSuperColumn(thriftSuperColumn);
             	}
