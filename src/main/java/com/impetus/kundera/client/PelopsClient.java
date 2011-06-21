@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.UUID;
 
 import javax.persistence.PersistenceException;
@@ -211,8 +212,8 @@ public class PelopsClient implements CassandraClient
         
         E e = null;
         if(! superColumnNames.isEmpty()) {
-        	List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames.toArray(new String[0])),
-                    ConsistencyLevel.ONE);
+        	//List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames.toArray(new String[0])), ConsistencyLevel.ONE);
+        	List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
         	System.out.println(thriftSuperColumns);
         	e = fromSuperColumnThriftRow(em, clazz, m, this.new ThriftRow(rowId, columnFamily, null, thriftSuperColumns));
         	
@@ -227,13 +228,6 @@ public class PelopsClient implements CassandraClient
         return e;
     }
 
-    /*
-     * @see com.impetus.kundera.CassandraClient#loadColumns(java.lang.String,
-     * java.lang.String, java.lang.String[])
-     */
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String, com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
-     */
     @Override
     public final/* Map<String, List<Column>> */<E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz,
             String keyspace, String columnFamily, EntityMetadata m, String... rowIds) throws Exception
@@ -645,42 +639,68 @@ public class PelopsClient implements CassandraClient
 
 		for (SuperColumn sc : tr.getSuperColumns()) {
 			String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
-			Field superColumnField = superColumnNameToFieldMap.get(scName);
-			Class superColumnClass = superColumnField.getType();
-			Object superColumnObj = superColumnClass.newInstance();
-			
-			boolean intoRelations = false;
-			if (scName.equals(TO_ONE_SUPER_COL_NAME)) {
-				intoRelations = true;
-			}
-
-			for (Column column : sc.getColumns()) {
-				String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
-				byte[] value = column.getValue();
-
-				if (value == null) {
-					continue;
+			String scNamePrefix = null;
+			//If this super column is variable in number (name#sequence format)
+			if(scName.indexOf("#") != -1) {
+				StringTokenizer st = new StringTokenizer(scName, "#");
+				if(st.hasMoreTokens()) {
+					scNamePrefix = st.nextToken();
 				}
-
-				if (intoRelations) {
-					EntityMetadata.Relation relation = m.getRelation(name);
-
-					String foreignKeys = PropertyAccessorFactory.STRING
-							.fromBytes(value);
-					Set<String> keys = deserializeKeys(foreignKeys);
-					em.getEntityResolver()
-							.populateForeignEntities(e, tr.getId(), relation,
-									keys.toArray(new String[0]));
-
+				
+				Field superColumnField = superColumnNameToFieldMap.get(scNamePrefix);
+				Class superColumnFieldClass = superColumnField.getType();
+				Object superColumnCollectionObj = superColumnFieldClass.newInstance();
+				if(superColumnCollectionObj instanceof Collection) {
+					
+					
+					
+					
+					
+					
+					
 				} else {
-					// set value of the field in the bean
-					Field columnField = columnNameToFieldMap.get(name);
-					
-					
-					PropertyAccessorHelper.set(superColumnObj, columnField, value);
+					throw new PersistenceException("Super Column " + scName + " doesn't match with entity which should have been a Collection");
+				}			
+				
+			} else {
+				Field superColumnField = superColumnNameToFieldMap.get(scName);
+				Class superColumnClass = superColumnField.getType();
+				Object superColumnObj = superColumnClass.newInstance();
+				
+				boolean intoRelations = false;
+				if (scName.equals(TO_ONE_SUPER_COL_NAME)) {
+					intoRelations = true;
 				}
-			}
-			PropertyAccessorHelper.set(e, superColumnField, superColumnObj);
+
+				for (Column column : sc.getColumns()) {
+					String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
+					byte[] value = column.getValue();
+
+					if (value == null) {
+						continue;
+					}
+
+					if (intoRelations) {
+						EntityMetadata.Relation relation = m.getRelation(name);
+
+						String foreignKeys = PropertyAccessorFactory.STRING
+								.fromBytes(value);
+						Set<String> keys = deserializeKeys(foreignKeys);
+						em.getEntityResolver()
+								.populateForeignEntities(e, tr.getId(), relation,
+										keys.toArray(new String[0]));
+
+					} else {
+						// set value of the field in the bean
+						Field columnField = columnNameToFieldMap.get(name);
+						
+						
+						PropertyAccessorHelper.set(superColumnObj, columnField, value);
+					}
+				}
+				PropertyAccessorHelper.set(e, superColumnField, superColumnObj);			
+			}	
+			
 		}
 		return e;
 	}

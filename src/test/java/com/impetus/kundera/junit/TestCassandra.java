@@ -108,7 +108,7 @@ public class TestCassandra extends BaseTest
     }*/
     
     public void testFindUser() {
-    	User user = manager.find(User.class, "IIIPL-0006");
+    	User user = manager.find(User.class, "IIIPL-0001");
     	System.out.println(user);
     }
 
