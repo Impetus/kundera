@@ -16,6 +16,7 @@
 package com.impetus.kundera.client;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -57,6 +58,7 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Client implementation using Pelops. http://code.google.com/p/pelops/ 
@@ -641,26 +643,37 @@ public class PelopsClient implements CassandraClient
 			String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
 			String scNamePrefix = null;
 			//If this super column is variable in number (name#sequence format)
-			if(scName.indexOf("#") != -1) {
-				StringTokenizer st = new StringTokenizer(scName, "#");
+			if(scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER) != -1) {
+				StringTokenizer st = new StringTokenizer(scName, Constants.SUPER_COLUMN_NAME_DELIMITER);
 				if(st.hasMoreTokens()) {
 					scNamePrefix = st.nextToken();
 				}
 				
 				Field superColumnField = superColumnNameToFieldMap.get(scNamePrefix);
 				Class superColumnFieldClass = superColumnField.getType();
-				Object superColumnCollectionObj = superColumnFieldClass.newInstance();
-				if(superColumnCollectionObj instanceof Collection) {
-					
-					
-					
-					
-					
-					
-					
+				Collection embeddedCollection = null;
+				if(superColumnFieldClass.equals(List.class)) {
+					embeddedCollection = new ArrayList<Object>();
+				} else if(superColumnFieldClass.equals(Set.class)) {					
+					embeddedCollection = new HashSet<Object>();
 				} else {
 					throw new PersistenceException("Super Column " + scName + " doesn't match with entity which should have been a Collection");
-				}			
+				}
+				
+				
+				Class<?> embeddedClass = null;
+				Type[] parameters = ReflectUtils.getTypeArguments(superColumnField);
+				if (parameters != null) {
+					if (parameters.length == 1) {
+						embeddedClass = (Class<?>) parameters[0];
+					} else {
+						throw new PersistenceException("How many parameters man?");
+					}
+				}
+				
+				System.out.println(embeddedClass);
+				
+				
 				
 			} else {
 				Field superColumnField = superColumnNameToFieldMap.get(scName);
@@ -784,7 +797,7 @@ public class PelopsClient implements CassandraClient
             //On the other hand, if embedded object is not a Collection, it would simply be embedded as ONE super column.
             if(superColumnObject instanceof Collection) {
             	for(Object obj : (Collection)superColumnObject) {
-            		superColumn.setName(superColumnField.getName() + "#" + UUID.randomUUID().toString());		//TODO: Change this to correct format
+            		superColumn.setName(superColumnField.getName() + Constants.SUPER_COLUMN_NAME_DELIMITER + UUID.randomUUID().toString());		//TODO: Change this to correct format
             		SuperColumn thriftSuperColumn = buildThriftSuperColumn(timestamp, superColumn, obj);
             		tr.addSuperColumn(thriftSuperColumn);
             	}

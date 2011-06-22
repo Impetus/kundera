@@ -38,4 +38,8 @@ public class Constants {
 
     /** The Constant INVALID. */
     public final static int INVALID = -1;
+    
+    public final static String SUPER_COLUMN_NAME_DELIMITER = "#";
+    
+    
 }
