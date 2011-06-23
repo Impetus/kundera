@@ -54,6 +54,7 @@ import com.impetus.kundera.db.accessor.BaseDataAccessor.ThriftRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.pelops.PelopsDataHandler;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -65,8 +66,7 @@ import com.impetus.kundera.utils.ReflectUtils;
  * @author animesh.kumar
  * @since 0.1
  */
-public class PelopsClient implements CassandraClient
-{
+public class PelopsClient implements CassandraClient {
 
     /** The Constant poolName. */
     private static final String poolName = "Main";
@@ -83,8 +83,9 @@ public class PelopsClient implements CassandraClient
     /** log for this class. */
     private static Log log = LogFactory.getLog(PelopsClient.class);
     
-    /** The Constant TO_ONE_SUPER_COL_NAME. */
-    private static final String TO_ONE_SUPER_COL_NAME = "FKey-TO";
+    PelopsDataHandler dataHandler = new PelopsDataHandler();
+    
+    
 
     /**
      * default constructor.
@@ -124,8 +125,7 @@ public class PelopsClient implements CassandraClient
     @Deprecated
     @Override
     public final void writeColumns(String keyspace, String columnFamily, String rowId,
-            List<EntityMetadata.Column> columns, EnhancedEntity e) throws Exception
-    {	
+            List<EntityMetadata.Column> columns, EnhancedEntity e) throws Exception {	
     	throw new PersistenceException("Not yet implemented");
         
     }
@@ -142,7 +142,7 @@ public class PelopsClient implements CassandraClient
             throw new PersistenceException("PelopsClient is closed.");
         }
 		
-        PelopsClient.ThriftRow tf = toThriftRow(e, m, columnFamily);
+        PelopsClient.ThriftRow tf = dataHandler.toThriftRow(e, m, columnFamily);
         configurePool(keyspace);
 
         Mutator mutator = Pelops.createMutator(poolName);
@@ -217,13 +217,13 @@ public class PelopsClient implements CassandraClient
         	//List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames.toArray(new String[0])), ConsistencyLevel.ONE);
         	List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
         	System.out.println(thriftSuperColumns);
-        	e = fromSuperColumnThriftRow(em, clazz, m, this.new ThriftRow(rowId, columnFamily, null, thriftSuperColumns));
+        	e = dataHandler.fromSuperColumnThriftRow(em, clazz, m, this.new ThriftRow(rowId, columnFamily, null, thriftSuperColumns));
         	
         } else {
         	List<Column> columns = selector.getColumnsFromRow(columnFamily, new Bytes(rowId.getBytes()),
                     Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);           
            
-            e = fromColumnThriftRow(em, clazz, m, this.new ThriftRow(rowId, columnFamily, columns, null));
+            e = dataHandler.fromColumnThriftRow(em, clazz, m, this.new ThriftRow(rowId, columnFamily, columns, null));
                  	
         }     
         
@@ -231,9 +231,8 @@ public class PelopsClient implements CassandraClient
     }
 
     @Override
-    public final/* Map<String, List<Column>> */<E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz,
-            String keyspace, String columnFamily, EntityMetadata m, String... rowIds) throws Exception
-    {
+    public final <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz,
+            String keyspace, String columnFamily, EntityMetadata m, String... rowIds) throws Exception {
 
         if (!isOpen())
         {
@@ -270,7 +269,7 @@ public class PelopsClient implements CassandraClient
                 continue;
             }
 
-            E e = fromColumnThriftRow(em, clazz, m, this.new ThriftRow(id, columnFamily, columns, null));
+            E e = dataHandler.fromColumnThriftRow(em, clazz, m, this.new ThriftRow(id, columnFamily, columns, null));
             entities.add(e);
         }
         return entities;
@@ -348,10 +347,7 @@ public class PelopsClient implements CassandraClient
                 ConsistencyLevel.ONE);
     }
 
-    /* @see com.impetus.kundera.CassandraClient#getCassandraClient() */
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.CassandraClient#getCassandraClient()
-     */
+    
     @Override
     public final Cassandra.Client getCassandraClient() throws Exception
     {
@@ -405,8 +401,7 @@ public class PelopsClient implements CassandraClient
      * 
      * @author animesh.kumar
      */
-    public class ThriftRow
-    {
+    public class ThriftRow {
 
         /** Id of the row. */
         private String id;
@@ -551,344 +546,9 @@ public class PelopsClient implements CassandraClient
         
     }
 
-    /**
-     * From thrift row.
-     *
-     * @param <E> the element type
-     * @param em the em
-     * @param clazz the clazz
-     * @param m the m
-     * @param cr the cr
-     * @return the e
-     * @throws Exception the exception
-     */
-    private <E> E fromColumnThriftRow(EntityManagerImpl em, Class<E> clazz, EntityMetadata m, PelopsClient.ThriftRow cr)
-            throws Exception
-    {
-
-        // Instantiate a new instance
-        E e = clazz.newInstance();
-
-        // Set row-key. Note: @Id is always String.
-        PropertyAccessorHelper.set(e, m.getIdProperty(), cr.getId());
-
-        // Iterate through each column
-        for (Column c : cr.getColumns())
-        {
-            String name = PropertyAccessorFactory.STRING.fromBytes(c.getName());
-            byte[] value = c.getValue();
-
-            if (null == value)
-            {
-                continue;
-            }
-
-            // check if this is a property?
-            EntityMetadata.Column column = m.getColumn(name);
-            if (null == column)
-            {
-                // it could be some relational column
-                EntityMetadata.Relation relation = m.getRelation(name);
-
-                if (relation == null)
-                {
-                    continue;
-                }
-
-                String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
-                Set<String> keys = deserializeKeys(foreignKeys);
-                em.getEntityResolver().populateForeignEntities(e, cr.getId(), relation, keys.toArray(new String[0]));
-            }
-
-            else
-            {
-                try
-                {
-                    PropertyAccessorHelper.set(e, column.getField(), value);
-                }
-                catch (PropertyAccessException pae)
-                {
-                    log.warn(pae.getMessage());
-                }
-            }
-        }
-
-        return e;
-    }
     
-	private <E> E fromSuperColumnThriftRow(EntityManagerImpl em, Class<E> clazz, EntityMetadata m, ThriftRow tr) throws Exception {
 
-		// Instantiate a new instance
-		E e = clazz.newInstance();
-
-		// Set row-key. Note: @Id is always String.
-		PropertyAccessorHelper.set(e, m.getIdProperty(), tr.getId());
-
-		// Get a name->field map for super-columns
-		Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
-		Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
-		
-		for (Map.Entry<String, EntityMetadata.SuperColumn> entry : m
-				.getSuperColumnsMap().entrySet()) {
-			EntityMetadata.SuperColumn scMetadata = entry.getValue();
-			superColumnNameToFieldMap.put(scMetadata.getName(), scMetadata.getField());
-			for (EntityMetadata.Column cMetadata : entry.getValue()
-					.getColumns()) {
-				columnNameToFieldMap.put(cMetadata.getName(),
-						cMetadata.getField());
-			}
-		}
-
-		for (SuperColumn sc : tr.getSuperColumns()) {
-			String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
-			String scNamePrefix = null;
-			//If this super column is variable in number (name#sequence format)
-			if(scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER) != -1) {
-				StringTokenizer st = new StringTokenizer(scName, Constants.SUPER_COLUMN_NAME_DELIMITER);
-				if(st.hasMoreTokens()) {
-					scNamePrefix = st.nextToken();
-				}
-				
-				Field superColumnField = superColumnNameToFieldMap.get(scNamePrefix);
-				Class superColumnFieldClass = superColumnField.getType();
-				Collection embeddedCollection = null;
-				if(superColumnFieldClass.equals(List.class)) {
-					embeddedCollection = new ArrayList<Object>();
-				} else if(superColumnFieldClass.equals(Set.class)) {					
-					embeddedCollection = new HashSet<Object>();
-				} else {
-					throw new PersistenceException("Super Column " + scName + " doesn't match with entity which should have been a Collection");
-				}
-				
-				
-				Class<?> embeddedClass = null;
-				Type[] parameters = ReflectUtils.getTypeArguments(superColumnField);
-				if (parameters != null) {
-					if (parameters.length == 1) {
-						embeddedClass = (Class<?>) parameters[0];
-					} else {
-						throw new PersistenceException("How many parameters man?");
-					}
-				}
-				
-				System.out.println(embeddedClass);
-				
-				
-				
-			} else {
-				Field superColumnField = superColumnNameToFieldMap.get(scName);
-				Class superColumnClass = superColumnField.getType();
-				Object superColumnObj = superColumnClass.newInstance();
-				
-				boolean intoRelations = false;
-				if (scName.equals(TO_ONE_SUPER_COL_NAME)) {
-					intoRelations = true;
-				}
-
-				for (Column column : sc.getColumns()) {
-					String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
-					byte[] value = column.getValue();
-
-					if (value == null) {
-						continue;
-					}
-
-					if (intoRelations) {
-						EntityMetadata.Relation relation = m.getRelation(name);
-
-						String foreignKeys = PropertyAccessorFactory.STRING
-								.fromBytes(value);
-						Set<String> keys = deserializeKeys(foreignKeys);
-						em.getEntityResolver()
-								.populateForeignEntities(e, tr.getId(), relation,
-										keys.toArray(new String[0]));
-
-					} else {
-						// set value of the field in the bean
-						Field columnField = columnNameToFieldMap.get(name);
-						
-						
-						PropertyAccessorHelper.set(superColumnObj, columnField, value);
-					}
-				}
-				PropertyAccessorHelper.set(e, superColumnField, superColumnObj);			
-			}	
-			
-		}
-		return e;
-	}
-
-    /**
-     * Helper method to convert @Entity to ThriftRow.
-     *
-     * @param e the e
-     * @param columnsLst the columns lst
-     * @param columnFamily the colmun family
-     * @return the base data accessor. thrift row
-     * @throws Exception the exception
-     */
-    private PelopsClient.ThriftRow toThriftRow(EnhancedEntity e, EntityMetadata m, String columnFamily) 
-    	throws Exception {    	
-    	// timestamp to use in thrift column objects
-        long timestamp = System.currentTimeMillis();
-
-        PelopsClient.ThriftRow tr = this.new ThriftRow();
-
-        tr.setColumnFamilyName(columnFamily);	        		// column-family name       
-        tr.setId(e.getId());									// Id
-        
-        addSuperColumnsToThriftRow(timestamp, tr, m, e);		//Super columns  
-        
-        if(m.getSuperColumnsAsList().isEmpty()) {
-        	addColumnsToThriftRow(timestamp, tr, m, e);				//Columns
-        }        
-
-        return tr;
-    }
-        
-    private void addColumnsToThriftRow(long timestamp, PelopsClient.ThriftRow tr, EntityMetadata m, EnhancedEntity e) throws Exception {
-    	List<Column> columns = new ArrayList<Column>();
-    	
-        // Iterate through each column-meta and populate that with field values
-        for (EntityMetadata.Column column : m.getColumnsAsList()) {
-            Field field = column.getField();
-            String name = column.getName();
-            try {
-                byte[] value = PropertyAccessorHelper.get(e.getEntity(), field);
-                Column col = new Column();
-                col.setName(PropertyAccessorFactory.STRING.toBytes(name));
-                col.setValue(value);
-                col.setTimestamp(timestamp);
-                columns.add(col);
-            } catch (PropertyAccessException exp) {
-                log.warn(exp.getMessage());
-            }
-
-        }
-
-        // add foreign keys
-        for (Map.Entry<String, Set<String>> entry : e.getForeignKeysMap().entrySet()) {
-            String property = entry.getKey();
-            Set<String> foreignKeys = entry.getValue();
-
-            String keys = serializeKeys(foreignKeys);
-            if (null != keys) {
-                Column col = new Column();
-
-                col.setName(PropertyAccessorFactory.STRING.toBytes(property));
-                col.setValue(PropertyAccessorFactory.STRING.toBytes(keys));
-                col.setTimestamp(timestamp);
-                columns.add(col);
-            }
-        }
-        tr.setColumns(columns);			//Columns
-    }
-    
-    private void addSuperColumnsToThriftRow(long timestamp, PelopsClient.ThriftRow tr, EntityMetadata m, EnhancedEntity e) throws Exception {
-    	 //Iterate through Super columns
-        for (EntityMetadata.SuperColumn superColumn : m.getSuperColumnsAsList()) {            
-            Field superColumnField = superColumn.getField();
-            Object superColumnObject = PropertyAccessorHelper.getObject(e.getEntity(), superColumnField);
-             
-            
-            //If Embedded object is a Collection, there will be variable number of super columns one for each object in collection.
-            //Key for each super column will be of the format "<Embedded object field name>#<Unique sequence number>
-            
-            //On the other hand, if embedded object is not a Collection, it would simply be embedded as ONE super column.
-            if(superColumnObject instanceof Collection) {
-            	for(Object obj : (Collection)superColumnObject) {
-            		superColumn.setName(superColumnField.getName() + Constants.SUPER_COLUMN_NAME_DELIMITER + UUID.randomUUID().toString());		//TODO: Change this to correct format
-            		SuperColumn thriftSuperColumn = buildThriftSuperColumn(timestamp, superColumn, obj);
-            		tr.addSuperColumn(thriftSuperColumn);
-            	}
-            	
-            } else {
-            	SuperColumn thriftSuperColumn = buildThriftSuperColumn(timestamp, superColumn, superColumnObject);
-                tr.addSuperColumn(thriftSuperColumn);            	
-            }         
-            
-        }
-    }
-    
-    private SuperColumn buildThriftSuperColumn(long timestamp, EntityMetadata.SuperColumn superColumn, Object superColumnObject) throws PropertyAccessException {
-    	List<Column> thriftColumns = new ArrayList<Column>();  
-    	for (EntityMetadata.Column column : superColumn.getColumns()) {
-            Field field = column.getField();
-            String name = column.getName();
-
-            try {
-                byte[] value = PropertyAccessorHelper.get(superColumnObject, field);
-                if (null != value) {
-                    Column thriftColumn = new Column();
-                    thriftColumn.setName(PropertyAccessorFactory.STRING.toBytes(name));
-                    thriftColumn.setValue(value);
-                    thriftColumn.setTimestamp(timestamp);
-                    thriftColumns.add(thriftColumn);
-                }
-            } catch (PropertyAccessException exp) {
-                log.warn(exp.getMessage());
-            }
-        }
-        SuperColumn thriftSuperColumn = new SuperColumn();        
-        thriftSuperColumn.setName(PropertyAccessorFactory.STRING.toBytes(superColumn.getName()));
-        thriftSuperColumn.setColumns(thriftColumns);      
-        
-        return thriftSuperColumn;
-    }
-
-    /**
-     * Splits foreign keys into Set.
-     * 
-     * @param foreignKeys
-     *            the foreign keys
-     * @return the set
-     */
-    private Set<String> deserializeKeys(String foreignKeys)
-    {
-        Set<String> keys = new HashSet<String>();
-
-        if (null == foreignKeys || foreignKeys.isEmpty())
-        {
-            return keys;
-        }
-
-        String array[] = foreignKeys.split(Constants.SEPARATOR);
-        for (String element : array)
-        {
-            keys.add(element);
-        }
-        return keys;
-    }
-
-    /**
-     * Creates a string representation of a set of foreign keys by combining
-     * them together separated by "~" character.
-     * 
-     * Note: Assumption is that @Id will never contain "~" character. Checks for
-     * this are not added yet.
-     * 
-     * @param foreignKeys
-     *            the foreign keys
-     * @return the string
-     */
-    protected String serializeKeys(Set<String> foreignKeys)
-    {
-        if (null == foreignKeys || foreignKeys.isEmpty())
-        {
-            return null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (String key : foreignKeys)
-        {
-            if (sb.length() > 0)
-            {
-                sb.append(Constants.SEPARATOR);
-            }
-            sb.append(key);
-        }
-        return sb.toString();
-    }
+   
 
     /* (non-Javadoc)
      * @see com.impetus.kundera.Client#setKeySpace(java.lang.String)
@@ -911,11 +571,9 @@ public class PelopsClient implements CassandraClient
    
     /**
      * Configure pool.
-     *
      * @param keyspace the keyspace
      */
-    private void configurePool(String keyspace)
-    {
+    private void configurePool(String keyspace) {
         Cluster cluster = new Cluster(contactNodes, new IConnection.Config(defaultPort, true, -1), false);
         Pelops.addPool(poolName, cluster, keyspace);
     }
