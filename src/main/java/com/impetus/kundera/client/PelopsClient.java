@@ -15,19 +15,11 @@
  */
 package com.impetus.kundera.client;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.UUID;
 
 import javax.persistence.PersistenceException;
 
@@ -46,20 +38,14 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 
-
 import com.impetus.kundera.CassandraClient;
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.db.accessor.BaseDataAccessor;
-import com.impetus.kundera.db.accessor.BaseDataAccessor.ThriftRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.metadata.SuperColumnCacheHandler;
 import com.impetus.kundera.pelops.PelopsDataHandler;
-import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
-import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Client implementation using Pelops. http://code.google.com/p/pelops/ 
@@ -83,8 +69,7 @@ public class PelopsClient implements CassandraClient {
     /** log for this class. */
     private static Log log = LogFactory.getLog(PelopsClient.class);
     
-    PelopsDataHandler dataHandler = new PelopsDataHandler();
-    
+    PelopsDataHandler dataHandler = new PelopsDataHandler();    
     
 
     /**
@@ -94,18 +79,12 @@ public class PelopsClient implements CassandraClient {
     	
     }
 
-    /* @see com.impetus.kundera.CassandraClient#connect() */
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.Client#connect()
-     */
+
     @Override
     public final void connect() {
     }
 
-    /* @see com.impetus.kundera.CassandraClient#shutdown() */
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.Client#shutdown()
-     */
+
     @Override
     public final void shutdown()
     {
@@ -126,8 +105,7 @@ public class PelopsClient implements CassandraClient {
     @Override
     public final void writeColumns(String keyspace, String columnFamily, String rowId,
             List<EntityMetadata.Column> columns, EnhancedEntity e) throws Exception {	
-    	throw new PersistenceException("Not yet implemented");
-        
+    	throw new PersistenceException("Not yet implemented");        
     }
 
 
@@ -158,8 +136,18 @@ public class PelopsClient implements CassandraClient {
         	for (SuperColumn sc : thriftSuperColumns) {
                 Bytes.toUTF8(sc.getColumns().get(0).getValue());
                 mutator.writeSubColumns(columnFamily, tf.getId(), Bytes.toUTF8(sc.getName()), sc.getColumns());
+                
+                //Put super columns in cache
+                SuperColumnCacheHandler.addSuperColumnMapping(e.getId(), 
+                		PropertyAccessorFactory.STRING.fromBytes(sc.getName()), null
+                		);
             }
-        }        
+        	
+        	
+        }
+        
+        
+       
         
         mutator.execute(ConsistencyLevel.ONE);
         
@@ -207,25 +195,11 @@ public class PelopsClient implements CassandraClient {
         }
 
         configurePool(keyspace);
-        Selector selector = Pelops.createSelector(poolName);
+        Selector selector = Pelops.createSelector(poolName);        
         
-        List<EntityMetadata.SuperColumn> superColumns = m.getSuperColumnsAsList();
         List<String> superColumnNames = m.getSuperColumnFieldNames();        
         
-        E e = null;
-        if(! superColumnNames.isEmpty()) {
-        	//List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames.toArray(new String[0])), ConsistencyLevel.ONE);
-        	List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
-        	System.out.println(thriftSuperColumns);
-        	e = dataHandler.fromSuperColumnThriftRow(em, clazz, m, this.new ThriftRow(rowId, columnFamily, null, thriftSuperColumns));
-        	
-        } else {
-        	List<Column> columns = selector.getColumnsFromRow(columnFamily, new Bytes(rowId.getBytes()),
-                    Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);           
-           
-            e = dataHandler.fromColumnThriftRow(em, clazz, m, this.new ThriftRow(rowId, columnFamily, columns, null));
-                 	
-        }     
+        E e = dataHandler.fromThriftRow(selector, em, clazz, m, rowId);         
         
         return e;
     }
@@ -234,10 +208,9 @@ public class PelopsClient implements CassandraClient {
     public final <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz,
             String keyspace, String columnFamily, EntityMetadata m, String... rowIds) throws Exception {
 
-        if (!isOpen())
-        {
-            throw new PersistenceException("PelopsClient is closed.");
-        }
+		if (!isOpen()) {
+			throw new PersistenceException("PelopsClient is closed.");
+		}
 
         configurePool(keyspace);
         Selector selector = Pelops.createSelector(poolName); 

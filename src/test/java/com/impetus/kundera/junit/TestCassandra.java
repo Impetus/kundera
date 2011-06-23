@@ -107,9 +107,15 @@ public class TestCassandra extends BaseTest
     	manager.persist(user);
     }*/
     
-    public void testFindUser() {
+    /*public void testFindUser() {
     	User user = manager.find(User.class, "IIIPL-0001");
     	System.out.println(user);
+    }*/
+    
+    
+    public void testDeleteUser() {
+    	User user = manager.find(User.class, "IIIPL-0001");
+    	manager.remove(user);
     }
 
     /**
