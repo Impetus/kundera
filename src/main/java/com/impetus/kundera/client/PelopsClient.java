@@ -71,6 +71,8 @@ public class PelopsClient implements CassandraClient {
     
     PelopsDataHandler dataHandler = new PelopsDataHandler();    
     
+    SuperColumnCacheHandler scCacheHandler = new SuperColumnCacheHandler();
+    
 
     /**
      * default constructor.
@@ -137,17 +139,13 @@ public class PelopsClient implements CassandraClient {
                 Bytes.toUTF8(sc.getColumns().get(0).getValue());
                 mutator.writeSubColumns(columnFamily, tf.getId(), Bytes.toUTF8(sc.getName()), sc.getColumns());
                 
+                
+                String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
                 //Put super columns in cache
-                SuperColumnCacheHandler.addSuperColumnMapping(e.getId(), 
-                		PropertyAccessorFactory.STRING.fromBytes(sc.getName()), null
-                		);
-            }
+                scCacheHandler.addSuperColumnMapping(e.getId(), scName, dataHandler.populateEmbeddedObject(sc, m));
+            }       	
         	
-        	
-        }
-        
-        
-       
+        }      
         
         mutator.execute(ConsistencyLevel.ONE);
         

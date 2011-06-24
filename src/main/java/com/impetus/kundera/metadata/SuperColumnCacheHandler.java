@@ -33,19 +33,19 @@ public class SuperColumnCacheHandler {
 	/**
 	 * Mapping betwwen Row Key and (Map of super column name and super column object)  
 	 */
-	private static Map<String, Map<String, Object>> superColumnCache;
+	private Map<String, Map<String, Object>> superColumnCache;
 
 	/**
 	 * @return the superColumnMaps
 	 */
-	public static Map<String, Map<String, Object>> getSuperColumnCache() {
-		if(superColumnCache == null) {
-			superColumnCache = new HashMap<String, Map<String,Object>>();
+	public Map<String, Map<String, Object>> getSuperColumnCache() {
+		if(this.superColumnCache == null) {
+			this.superColumnCache = new HashMap<String, Map<String,Object>>();
 		}
-		return superColumnCache;
+		return this.superColumnCache;
 	}	
 	
-	public static void addSuperColumnMapping(String rowKey, String superColumnName, String superColumnObject) {
+	public void addSuperColumnMapping(String rowKey, String superColumnName, Object superColumnObject) {
 		Map superColumnMap = new HashMap<String, Object>();
 		if(getSuperColumnCache().get(rowKey) == null) {			
 			superColumnMap.put(superColumnName, superColumnObject);			
@@ -55,7 +55,7 @@ public class SuperColumnCacheHandler {
 		}
 	}
 	
-	public static Object getSuperColumnObject(String rowKey, String superColumnName) {
+	public Object getSuperColumnObject(String rowKey, String superColumnName) {
 		if(getSuperColumnCache().get(rowKey) == null) {
 			log.debug("No super column object found in cache for Row key " + rowKey);
 			return null;

@@ -90,22 +90,22 @@ public class TestCassandra extends BaseTest
         conf.destroy();
     }
     
-    /*public void testSaveUser() {
+    public void testSaveUser() {
     	User user = new User();
     	user.setUserId("IIIPL-0001");   	
     	
     	PersonalDetail pd = new PersonalDetail();
     	pd.setPersonalDetailId("1");
-    	pd.setName("Amresh");
+    	pd.setName("Amresh3");
     	pd.setPassword("password1");
     	pd.setRelationshipStatus("single");
     	user.setPersonalDetail(pd);
     	
-    	user.addTweet(new Tweet("a", "Here it goes, my first tweet", "web"));
-    	user.addTweet(new Tweet("b", "Another one from me", "mobile"));
+    	user.addTweet(new Tweet("a", "Here it goes, my first tweet, modified one", "web"));
+    	user.addTweet(new Tweet("b", "Another one from me, sorry", "mobile"));
     	
     	manager.persist(user);
-    }*/
+    }
     
     /*public void testFindUser() {
     	User user = manager.find(User.class, "IIIPL-0001");
@@ -113,10 +113,11 @@ public class TestCassandra extends BaseTest
     }*/
     
     
-    public void testDeleteUser() {
-    	User user = manager.find(User.class, "IIIPL-0001");
+   /* public void testDeleteUser() {
+    	User user = manager.find(User.class, "IIIPL-0006");
+    	System.out.println(user);
     	manager.remove(user);
-    }
+    }*/
 
     /**
      * Test save authors.
