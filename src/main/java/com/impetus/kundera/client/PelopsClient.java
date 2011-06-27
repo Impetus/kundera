@@ -42,7 +42,7 @@ import com.impetus.kundera.CassandraClient;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
-import com.impetus.kundera.metadata.SuperColumnCacheHandler;
+import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.pelops.PelopsDataHandler;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.proxy.EnhancedEntity;
@@ -72,7 +72,7 @@ public class PelopsClient implements CassandraClient {
     PelopsDataHandler dataHandler = new PelopsDataHandler();  
    
     
-    SuperColumnCacheHandler scCacheHandler = new SuperColumnCacheHandler();
+    EmbeddedCollectionCacheHandler ecCacheHandler = new EmbeddedCollectionCacheHandler();
     
 
     /**
@@ -123,10 +123,11 @@ public class PelopsClient implements CassandraClient {
             throw new PersistenceException("PelopsClient is closed.");
         }
 		
-        PelopsClient.ThriftRow tf = dataHandler.toThriftRow(e, m, columnFamily);
+        PelopsClient.ThriftRow tf = dataHandler.toThriftRow(this, e, m, columnFamily);
         configurePool(keyspace);
 
         Mutator mutator = Pelops.createMutator(poolName);
+        
         
         List<Column> thriftColumns = tf.getColumns();
         List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
@@ -138,12 +139,10 @@ public class PelopsClient implements CassandraClient {
         if(thriftSuperColumns != null && ! thriftSuperColumns.isEmpty()) {
         	for (SuperColumn sc : thriftSuperColumns) {
                 Bytes.toUTF8(sc.getColumns().get(0).getValue());
-                mutator.writeSubColumns(columnFamily, tf.getId(), Bytes.toUTF8(sc.getName()), sc.getColumns());
+                mutator.writeSubColumns(columnFamily, tf.getId(), Bytes.toUTF8(sc.getName()), sc.getColumns());            
                 
                 
-                String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
-                //Put super columns in cache
-                scCacheHandler.addSuperColumnMapping(e.getId(), dataHandler.populateEmbeddedObject(sc, m), scName);
+                
             }       	
         	
         }      
@@ -553,10 +552,8 @@ public class PelopsClient implements CassandraClient {
 	/**
 	 * @return the scCacheHandler
 	 */
-	public SuperColumnCacheHandler getScCacheHandler() {
-		return scCacheHandler;
-	}
-    
-    
+	public EmbeddedCollectionCacheHandler getEcCacheHandler() {
+		return ecCacheHandler;
+	}    
     
 }

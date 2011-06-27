@@ -40,6 +40,7 @@ import org.scale7.cassandra.pelops.Selector;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.PelopsClient;
 import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -210,7 +211,7 @@ public class PelopsDataHandler {
 				embeddedCollection.add(embeddedObject);	
 				
 				//Add this embedded object to cache
-				((PelopsClient)em.getClient()).getScCacheHandler().addSuperColumnMapping(tr.getId(), embeddedObject, scName);
+				((PelopsClient)em.getClient()).getEcCacheHandler().addEmbeddedCollectionCacheMapping(tr.getId(), embeddedObject, scName);
 				
 				
 			} else {
@@ -342,7 +343,7 @@ public class PelopsDataHandler {
      * @return the base data accessor. thrift row
      * @throws Exception the exception
      */
-    public PelopsClient.ThriftRow toThriftRow(EnhancedEntity e, EntityMetadata m, String columnFamily) 
+    public PelopsClient.ThriftRow toThriftRow(PelopsClient client, EnhancedEntity e, EntityMetadata m, String columnFamily) 
     	throws Exception {    	
     	// timestamp to use in thrift column objects
         long timestamp = System.currentTimeMillis();
@@ -352,7 +353,7 @@ public class PelopsDataHandler {
         tr.setColumnFamilyName(columnFamily);	        		// column-family name       
         tr.setId(e.getId());									// Id
         
-        addSuperColumnsToThriftRow(timestamp, tr, m, e);		//Super columns  
+        addSuperColumnsToThriftRow(timestamp, client, tr, m, e);		//Super columns  
         
         if(m.getSuperColumnsAsList().isEmpty()) {
         	addColumnsToThriftRow(timestamp, tr, m, e);				//Columns
@@ -399,7 +400,7 @@ public class PelopsDataHandler {
         tr.setColumns(columns);			//Columns
     }
     
-    private void addSuperColumnsToThriftRow(long timestamp, PelopsClient.ThriftRow tr, EntityMetadata m, EnhancedEntity e) throws Exception {
+    private void addSuperColumnsToThriftRow(long timestamp, PelopsClient client, PelopsClient.ThriftRow tr, EntityMetadata m, EnhancedEntity e) throws Exception {
     	 //Iterate through Super columns
         for (EntityMetadata.SuperColumn superColumn : m.getSuperColumnsAsList()) {            
             Field superColumnField = superColumn.getField();
@@ -414,15 +415,33 @@ public class PelopsDataHandler {
             if(superColumnObject == null) {
             	return;
             }
-            if(superColumnObject instanceof Collection) {
-            	int i = 0;
-            	for(Object obj : (Collection)superColumnObject) {  
-            		//superColumnName = superColumn.getName() + Constants.SUPER_COLUMN_NAME_DELIMITER + UUID.randomUUID().toString();
-            		superColumnName = superColumn.getName() + Constants.SUPER_COLUMN_NAME_DELIMITER + i;
-            		SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp, superColumn, obj);
-            		tr.addSuperColumn(thriftSuperColumn);
-            		i++;
-            	}
+            if(superColumnObject instanceof Collection) {   
+            	
+            	EmbeddedCollectionCacheHandler ecCacheHandler = client.getEcCacheHandler();           	
+    		
+				// Check whether it's first time insert or updation
+				if (ecCacheHandler.isCacheEmpty()) { // First time insert
+					int count = 0;	            	
+					for (Object obj : (Collection) superColumnObject) {
+						superColumnName = superColumn.getName() + Constants.SUPER_COLUMN_NAME_DELIMITER + count;
+						SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp, superColumn, obj);
+						tr.addSuperColumn(thriftSuperColumn);
+						
+						count++;
+					}
+				} else { // Updation
+					// Check whether this object is already in cache, which means we already have a super column
+					// Otherwise we need to generate a fresh super column name					
+					int lastEmbeddedObjectCount = ecCacheHandler.getLastEmbeddedObjectCount(e.getId());
+					for (Object obj : (Collection) superColumnObject) {							
+						superColumnName = ecCacheHandler.getEmbeddedObjectName(e.getId(), obj);						
+						if (superColumnName == null) { // Fresh row
+							superColumnName = superColumn.getName() + Constants.SUPER_COLUMN_NAME_DELIMITER + (++lastEmbeddedObjectCount);							
+						}
+						SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp, superColumn, obj);
+						tr.addSuperColumn(thriftSuperColumn);
+					}			
+				}           	
             	
             } else {
             	superColumnName = superColumn.getName();
