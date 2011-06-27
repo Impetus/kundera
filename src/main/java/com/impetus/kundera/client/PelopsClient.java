@@ -69,7 +69,8 @@ public class PelopsClient implements CassandraClient {
     /** log for this class. */
     private static Log log = LogFactory.getLog(PelopsClient.class);
     
-    PelopsDataHandler dataHandler = new PelopsDataHandler();    
+    PelopsDataHandler dataHandler = new PelopsDataHandler();  
+   
     
     SuperColumnCacheHandler scCacheHandler = new SuperColumnCacheHandler();
     
@@ -142,7 +143,7 @@ public class PelopsClient implements CassandraClient {
                 
                 String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
                 //Put super columns in cache
-                scCacheHandler.addSuperColumnMapping(e.getId(), scName, dataHandler.populateEmbeddedObject(sc, m));
+                scCacheHandler.addSuperColumnMapping(e.getId(), dataHandler.populateEmbeddedObject(sc, m), scName);
             }       	
         	
         }      
@@ -193,9 +194,8 @@ public class PelopsClient implements CassandraClient {
         }
 
         configurePool(keyspace);
-        Selector selector = Pelops.createSelector(poolName);        
-        
-        List<String> superColumnNames = m.getSuperColumnFieldNames();        
+        Selector selector = Pelops.createSelector(poolName);      
+               
         
         E e = dataHandler.fromThriftRow(selector, em, clazz, m, rowId);         
         
@@ -548,5 +548,15 @@ public class PelopsClient implements CassandraClient {
         Cluster cluster = new Cluster(contactNodes, new IConnection.Config(defaultPort, true, -1), false);
         Pelops.addPool(poolName, cluster, keyspace);
     }
+
+
+	/**
+	 * @return the scCacheHandler
+	 */
+	public SuperColumnCacheHandler getScCacheHandler() {
+		return scCacheHandler;
+	}
+    
+    
     
 }

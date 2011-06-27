@@ -16,6 +16,7 @@
 package com.impetus.kundera.junit;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
@@ -90,21 +91,38 @@ public class TestCassandra extends BaseTest
         conf.destroy();
     }
     
-    public void testSaveUser() {
+    /*public void testInsertUser() {
     	User user = new User();
     	user.setUserId("IIIPL-0001");   	
     	
     	PersonalDetail pd = new PersonalDetail();
     	pd.setPersonalDetailId("1");
-    	pd.setName("Amresh3");
+    	pd.setName("Amresh");
     	pd.setPassword("password1");
     	pd.setRelationshipStatus("single");
     	user.setPersonalDetail(pd);
     	
-    	user.addTweet(new Tweet("a", "Here it goes, my first tweet, modified one", "web"));
-    	user.addTweet(new Tweet("b", "Another one from me, sorry", "mobile"));
+    	user.addTweet(new Tweet("a", "Here it goes, my first tweet", "web"));
+    	user.addTweet(new Tweet("b", "Another one from me", "mobile"));
     	
     	manager.persist(user);
+    }*/
+    
+    public void testUpdateUser() {
+    	User user = manager.find(User.class, "IIIPL-0001");	
+    	
+    	/*PersonalDetail pd = new PersonalDetail();   	
+    	
+    	pd.setPassword("password2");
+    	pd.setRelationshipStatus("married");
+    	
+    	List<Tweet> tweets = user.getTweets();
+    	tweets.get(0).setBody("My first tweet is now modified");
+    	tweets.get(1).setBody("My second tweet is now modified");   
+    	
+    	tweets.add(new Tweet("c", "My Third tweet", "iPhone"));
+    	
+    	manager.persist(user);*/
     }
     
     /*public void testFindUser() {

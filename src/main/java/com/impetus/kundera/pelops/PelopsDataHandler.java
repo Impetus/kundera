@@ -207,7 +207,11 @@ public class PelopsDataHandler {
 					Field columnField = columnNameToFieldMap.get(name);
 					PropertyAccessorHelper.set(embeddedObject, columnField, value);
 				}
-				embeddedCollection.add(embeddedObject);			
+				embeddedCollection.add(embeddedObject);	
+				
+				//Add this embedded object to cache
+				((PelopsClient)em.getClient()).getScCacheHandler().addSuperColumnMapping(tr.getId(), embeddedObject, scName);
+				
 				
 			} else {
 				Field superColumnField = superColumnNameToFieldMap.get(scName);
@@ -239,8 +243,7 @@ public class PelopsDataHandler {
 
 					} else {
 						// set value of the field in the bean
-						Field columnField = columnNameToFieldMap.get(name);
-						
+						Field columnField = columnNameToFieldMap.get(name);						
 						
 						PropertyAccessorHelper.set(superColumnObj, columnField, value);
 					}
@@ -256,8 +259,6 @@ public class PelopsDataHandler {
 		}
 		return e;
 	}
-
-	
 	
 	
 	public Object populateEmbeddedObject(SuperColumn sc, EntityMetadata m) throws Exception {		
