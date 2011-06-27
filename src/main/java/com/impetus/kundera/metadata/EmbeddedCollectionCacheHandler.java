@@ -25,7 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.entity.Tweet;
+
 
 
 /**
@@ -110,7 +110,7 @@ public class EmbeddedCollectionCacheHandler {
 	public void clearCache() {
 		this.embeddedCollectionCache = null;
 	}
-	
+	/*
 	public static void main(String args[]) {
 		EmbeddedCollectionCacheHandler h = new EmbeddedCollectionCacheHandler();
 		Tweet t1 = new Tweet("1", "Tweet 1111", "web");
@@ -126,6 +126,6 @@ public class EmbeddedCollectionCacheHandler {
 		System.out.println(h.getLastEmbeddedObjectCount("IIIPL-0001"));
 		
 		
-	}
+	}*/
 
 }
