@@ -40,6 +40,9 @@ public class Configuration
     /** The em map. */
     private Map<ClientIdentifier, EntityManager> emMap = new HashMap<ClientIdentifier, EntityManager>();
 
+    /**  Full path of  Server config file */
+    private String serverConfig;
+    
     /** The node. */
     private String node;
 
@@ -73,9 +76,11 @@ public class Configuration
             Properties props = new Properties();
             props.putAll(propMap);
             String client = props.getProperty("kundera.client");
+            serverConfig = "file://" + props.getProperty("server.config");
             node = props.getProperty("kundera.nodes");
             port = props.getProperty("kundera.port");
             keyspace = props.getProperty("kundera.keyspace");
+            System.setProperty("cassandra.config", serverConfig);
             String resourceName = "net.sf.ehcache.configurationResourceName";
             ClientType clientType = ClientType.getValue(client.toUpperCase());
             createIdentifier(clientType, persistenceUnit);
@@ -86,6 +91,7 @@ public class Configuration
             setClient(em, clientType, persistenceUnit);
             emMap.put(identifier, em);
             logger.info("Kundera Client is: " + props.getProperty("kundera.client"));
+            
         }
         catch (SecurityException e)
         {

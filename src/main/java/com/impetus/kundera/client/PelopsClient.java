@@ -23,6 +23,8 @@ import java.util.Queue;
 
 import javax.persistence.PersistenceException;
 
+import lucandra.CassandraUtils;
+
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
@@ -85,6 +87,7 @@ public class PelopsClient implements CassandraClient {
 
     @Override
     public final void connect() {
+    	//new SolandraUtils().startSolandraServer();
     }
 
 
@@ -554,6 +557,24 @@ public class PelopsClient implements CassandraClient {
 	 */
 	public EmbeddedCollectionCacheHandler getEcCacheHandler() {
 		return ecCacheHandler;
-	}    
+	}
+	
+	
+	private class SolandraUtils {
+		public void startSolandraServer() {
+			log.info("Starting Solandra Server.");
+			CassandraUtils.cacheInvalidationInterval = 0; // real-time
+
+			try {
+				// Load solandra specific schema
+				CassandraUtils.setStartup();				
+				CassandraUtils.createCassandraSchema();
+				
+			} catch (Throwable t) {
+				log.error("errror while starting solandra schema:", t);
+			}
+
+		}
+	}
     
 }
