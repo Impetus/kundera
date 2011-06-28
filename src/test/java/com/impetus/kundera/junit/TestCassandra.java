@@ -91,7 +91,7 @@ public class TestCassandra extends BaseTest
         conf.destroy();
     }
     
-  /* public void testInsertUser() {
+   public void testInsertUser() {
     	User user = new User();
     	user.setUserId("IIIPL-0001");   	
     	
@@ -106,7 +106,7 @@ public class TestCassandra extends BaseTest
     	user.addTweet(new Tweet("b", "Another one from me", "mobile"));
     	
     	manager.persist(user);
-    }*/
+    }
     
    /*public void testUpdateUser() {
     	User user = manager.find(User.class, "IIIPL-0001");	
@@ -131,24 +131,24 @@ public class TestCassandra extends BaseTest
     	manager.persist(user);
     }*/
     
-    /*public void testFindUser() {
+  /* public void testFindUser() {
     	User user = manager.find(User.class, "IIIPL-0001");
-    	System.out.println(user);
+    	System.out.println(user.getUserId() + "(Personal Data): " + user.getPersonalDetail().getName() + "/Tweets:" + user.getTweets());
     }*/
     
     
-    /*public void testDeleteUser() {
+   /* public void testDeleteUser() {
     	User user = manager.find(User.class, "IIIPL-0001");
     	System.out.println(user);
     	manager.remove(user);
     }*/
    
-   public void testQuery() {
+   /*public void testQuery() {
 	   Query q = manager.createQuery("select u from User u");		
 		//q.setParameter("subject", "Join");
 		//q.setParameter("body", "Please Join Meeting");		
 		List<User> users = q.getResultList();		
 		System.out.println("Users:" + users);
-   }
+   }*/
 
 }

@@ -80,14 +80,14 @@ public class PelopsClient implements CassandraClient {
     /**
      * default constructor.
      */
-    public PelopsClient() {
-    	
+    public PelopsClient() {    		
     }
 
 
     @Override
     public final void connect() {
-    	//new SolandraUtils().startSolandraServer();
+    	//Start Solandra Service
+    	new SolandraUtils().startSolandraServer();    
     }
 
 
