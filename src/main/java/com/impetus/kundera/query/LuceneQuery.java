@@ -16,6 +16,7 @@
 package com.impetus.kundera.query;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Query;
 
@@ -79,12 +80,15 @@ public class LuceneQuery extends QueryImpl implements Query {
         }
 
         log.debug("Lucene Query: " + q);
-
-        // get entity ids from lucene index
-        List<String> entityIds = getEntityManager().getIndexManager().search(q, maxResult);
-
-        // lookup for corresponding entity classes
-        return getEntityManager().find(getEntityClass(), entityIds.toArray());
+        Map<String, String> searchFilter = getEntityManager().getIndexManager().search(q,-1, maxResult);
+        if(isAliasOnly())
+        {
+            return getEntityManager().find(getEntityClass(), searchFilter.values().toArray());
+        }else 
+        {
+            return getEntityManager().find(getEntityClass(), searchFilter);    
+        }
+        
     }
 
     /* @see com.impetus.kundera.query.QueryImpl#setMaxResults(int) */
@@ -137,5 +141,15 @@ public class LuceneQuery extends QueryImpl implements Query {
         sb.append(getEntityClass().getCanonicalName().toLowerCase());
 
         return sb.toString();
+    }
+    
+    private class SearchInterpretor 
+    {
+        
+        void getSearchType()
+        {
+            
+        }
+        
     }
 }

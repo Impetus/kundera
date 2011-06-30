@@ -16,6 +16,7 @@
 package com.impetus.kundera;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -38,6 +39,16 @@ public interface CassandraEntityManager extends EntityManager {
 	 * @return the list
 	 */
     public <T> List<T> find(Class<T> entityClass, Object... primaryKey);
+
+    /**
+     * Find.
+     *
+     * @param <T> the generic type
+     * @param entityClass the entity class
+     * @param primaryKeys the primary keys
+     * @return the list
+     */
+    public <T> List<T> find(Class<T> entityClass, Map<String, String> primaryKeys);
 
     /**
      * Gets the client.

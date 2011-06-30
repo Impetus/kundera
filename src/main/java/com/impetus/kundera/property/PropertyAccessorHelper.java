@@ -25,7 +25,8 @@ import com.impetus.kundera.metadata.EntityMetadata;
  * 
  * @author animesh.kumar
  */
-public class PropertyAccessorHelper {
+public class PropertyAccessorHelper
+{
 
     /**
      * Sets a byte-array onto a field.
@@ -40,7 +41,8 @@ public class PropertyAccessorHelper {
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static void set(Object target, Field field, byte[] bytes) throws PropertyAccessException {
+    public static void set(Object target, Field field, byte[] bytes) throws PropertyAccessException
+    {
 
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
         Object value = accessor.fromBytes(bytes);
@@ -60,16 +62,23 @@ public class PropertyAccessorHelper {
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static void set(Object target, Field field, Object value) throws PropertyAccessException {
+    public static void set(Object target, Field field, Object value) throws PropertyAccessException
+    {
 
-        if (!field.isAccessible()) {
+        if (!field.isAccessible())
+        {
             field.setAccessible(true);
         }
-        try {
+        try
+        {
             field.set(target, value);
-        } catch (IllegalArgumentException iarg) {
+        }
+        catch (IllegalArgumentException iarg)
+        {
             throw new PropertyAccessException(iarg);
-        } catch (IllegalAccessException iacc) {
+        }
+        catch (IllegalAccessException iacc)
+        {
             throw new PropertyAccessException(iacc);
         }
     }
@@ -87,17 +96,24 @@ public class PropertyAccessorHelper {
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static Object getObject(Object from, Field field) throws PropertyAccessException {
+    public static Object getObject(Object from, Field field) throws PropertyAccessException
+    {
 
-        if (!field.isAccessible()) {
+        if (!field.isAccessible())
+        {
             field.setAccessible(true);
         }
 
-        try {
+        try
+        {
             return field.get(from);
-        } catch (IllegalArgumentException iarg) {
+        }
+        catch (IllegalArgumentException iarg)
+        {
             throw new PropertyAccessException(iarg);
-        } catch (IllegalAccessException iacc) {
+        }
+        catch (IllegalAccessException iacc)
+        {
             throw new PropertyAccessException(iacc);
         }
     }
@@ -115,7 +131,8 @@ public class PropertyAccessorHelper {
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static String getString(Object from, Field field) throws PropertyAccessException {
+    public static String getString(Object from, Field field) throws PropertyAccessException
+    {
 
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
         return accessor.toString(getObject(from, field));
@@ -135,7 +152,8 @@ public class PropertyAccessorHelper {
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static byte[] get(Object from, Field field) throws PropertyAccessException {
+    public static byte[] get(Object from, Field field) throws PropertyAccessException
+    {
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
         return accessor.toBytes(getObject(from, field));
     }
@@ -154,17 +172,72 @@ public class PropertyAccessorHelper {
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static String getId (Object entity, EntityMetadata metadata) throws PropertyAccessException {
-        try {
-        	// Always read from method. that way, even LazyInitialized 
-        	// Proxy classes can be worked upon.
-			return (String) metadata.getReadIdentifierMethod().invoke(entity, new Object[] {});
-        } catch (IllegalArgumentException iarg) {
+    public static String getId(Object entity, EntityMetadata metadata) throws PropertyAccessException
+    {
+        try
+        {
+            // Always read from method. that way, even LazyInitialized
+            // Proxy classes can be worked upon.
+            return (String) metadata.getReadIdentifierMethod().invoke(entity, new Object[] {});
+        }
+        catch (IllegalArgumentException iarg)
+        {
             throw new PropertyAccessException(iarg);
-        } catch (IllegalAccessException iacc) {
+        }
+        catch (IllegalAccessException iacc)
+        {
             throw new PropertyAccessException(iacc);
-        } catch (InvocationTargetException ite) {
-        	throw new PropertyAccessException(ite);		
+        }
+        catch (InvocationTargetException ite)
+        {
+            throw new PropertyAccessException(ite);
+        }
+    }
+
+    /**
+     * Gets the embedded object.
+     * 
+     * @param obj
+     *            the obj
+     * @param fieldName
+     *            the field name
+     * @return the embedded object
+     */
+    public static final Object getEmbeddedObject(Object obj, String fieldName) throws PropertyAccessException
+    {
+        Field embeddedField;
+        try
+        {
+            embeddedField = obj.getClass().getDeclaredField(fieldName);
+            if (embeddedField != null)
+            {
+                if (!embeddedField.isAccessible())
+                {
+                    embeddedField.setAccessible(true);
+                }
+                return embeddedField.get(obj);
+            }
+            else
+            {
+                throw new RuntimeException("Embedded object not found: " + fieldName);
+            }
+
+        }
+        catch (SecurityException e)
+        {
+            throw new PropertyAccessException(e);
+        }
+        catch (NoSuchFieldException e)
+        {
+            throw new PropertyAccessException(e);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new PropertyAccessException(e);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw new PropertyAccessException(e);
         }
     }
 }

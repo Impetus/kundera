@@ -42,30 +42,31 @@ import com.impetus.kundera.proxy.EnhancedEntity;
  * 
  * @author animesh.kumar
  */
-public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperColumn>
+@Deprecated
+public final class SuperColumnFamilyDataAccessor {/*extends BaseDataAccessor<SuperColumn>
 {
 
-    /** The Constant log. */
+    *//** The Constant log. *//*
     private static final Log log = LogFactory.getLog(SuperColumnFamilyDataAccessor.class);
 
-    /** The Constant TO_ONE_SUPER_COL_NAME. */
+    *//** The Constant TO_ONE_SUPER_COL_NAME. *//*
     private static final String TO_ONE_SUPER_COL_NAME = "FKey-TO";
 
-    /**
+    *//**
      * Instantiates a new super column family data accessor.
      * 
      * @param em
      *            the em
-     */
+     *//*
     public SuperColumnFamilyDataAccessor(EntityManagerImpl em)
     {
         super(em);
     }
 
-    /*
+    
      * @see com.impetus.kundera.db.DataAccessor#read(java.lang.Class,
      * com.impetus.kundera.metadata.EntityMetadata, java.lang.String)
-     */
+     
     @Override
     public <E> E read(Class<E> clazz, EntityMetadata m, String id) throws Exception
     {
@@ -97,10 +98,10 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
         return e;
     }
 
-    /*
+    
      * @see com.impetus.kundera.db.DataAccessor#read(java.lang.Class,
      * com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
-     */
+     
     @Override
     public <E> List<E> read(Class<E> clazz, EntityMetadata m, String... ids) throws Exception
     {
@@ -135,10 +136,10 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
         return entities;
     }
 
-    /*
+    
      * @seecom.impetus.kundera.db.DataAccessor#write(com.impetus.kundera.proxy.
      * EnhancedEntity, com.impetus.kundera.metadata.EntityMetadata)
-     */
+     
     @Override
     public void write(EnhancedEntity e, EntityMetadata m) throws Exception
     {
@@ -159,7 +160,7 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
     }
 
     // Helper method to convert ThriftRow to @Entity
-    /**
+    *//**
      * From thrift row.
      * 
      * @param <E>
@@ -173,7 +174,7 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
      * @return the e
      * @throws Exception
      *             the exception
-     */
+     *//*
     private <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, BaseDataAccessor<SuperColumn>.ThriftRow cr)
             throws Exception
     {
@@ -236,7 +237,7 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
     }
 
     // Helper method to convert @Entity to ThriftRow
-    /**
+    *//**
      * To thrift row.
      * 
      * @param e
@@ -246,7 +247,7 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
      * @return the base data accessor. thrift row
      * @throws Exception
      *             the exception
-     */
+     *//*
     private BaseDataAccessor<SuperColumn>.ThriftRow toThriftRow(EnhancedEntity e, EntityMetadata m) throws Exception
     {
 
@@ -322,4 +323,11 @@ public final class SuperColumnFamilyDataAccessor extends BaseDataAccessor<SuperC
         return cr;
     }
 
-}
+    @Override
+    public <E> List<E> read(Class<E> clazz, EntityMetadata m, Map<String, String> col) throws Exception
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+*/}

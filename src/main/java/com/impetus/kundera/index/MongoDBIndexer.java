@@ -17,6 +17,7 @@ package com.impetus.kundera.index;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.PersistenceException;
 
@@ -70,7 +71,7 @@ public class MongoDBIndexer implements Indexer {
 
 
 	@Override
-	public List<String> search(String query, int start, int count) {
+	public Map<String, String> search(String query, int start, int count) {
 		throw new PersistenceException("Invalid method call! When you search on a column, MongoDB will automatically search in index if that exists.");		
 	}
 	

@@ -35,7 +35,8 @@ import com.impetus.kundera.proxy.EnhancedEntity;
  * CouchDB
  * @author amresh.singh
  */
-public final class DocumentDataAccessor extends BaseDataAccessor<Table> {
+@Deprecated
+public final class DocumentDataAccessor {/*extends BaseDataAccessor<Table> {
 	private static Log log = LogFactory.getLog(DocumentDataAccessor.class);
 	
 	public DocumentDataAccessor(EntityManagerImpl em) {
@@ -70,9 +71,9 @@ public final class DocumentDataAccessor extends BaseDataAccessor<Table> {
 		return getEntityManager().getClient().loadColumns(getEntityManager(),clazz,dbName, documentName, id,m);
 	}
 
-	/* (non-Javadoc)
+	 (non-Javadoc)
 	 * @see com.impetus.kundera.db.DataAccessor#read(java.lang.Class, com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
-	 */
+	 
 	@Override
 	public <E> List<E> read(Class<E> clazz, EntityMetadata m, String... ids)
 			throws Exception {
@@ -113,4 +114,4 @@ public final class DocumentDataAccessor extends BaseDataAccessor<Table> {
 	
 	
 	
-}
+*/}

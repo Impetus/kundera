@@ -18,6 +18,7 @@ package com.impetus.kundera.ejb;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.EntityTransaction;
@@ -592,4 +593,45 @@ public class EntityManagerImpl implements CassandraEntityManager
     {
         return entityResolver;
     }
+
+    @Override
+    public <T> List<T> find(Class<T> entityClass, Map<String, String> primaryKeys)
+    {
+
+        if (closed)
+        {
+            throw new PersistenceException("EntityManager already closed.");
+        }
+        if (primaryKeys == null)
+        {
+            throw new IllegalArgumentException("primaryKey value must not be null.");
+        }
+
+        // Validate
+        metadataManager.validate(entityClass);
+
+        if (null == primaryKeys || primaryKeys.isEmpty())
+        {
+            return new ArrayList<T>();
+        }
+
+        // TODO: load from cache first
+
+        try
+        {
+            // String[] ids = Arrays.asList(primaryKeys).toArray(new String[]
+            // {});
+            EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
+            m.setDBType(this.client.getType());
+            List<T> entities = dataManager.find(entityClass, m, primaryKeys);
+
+            // TODO: cache entities for future lookup
+            return entities;
+        }
+        catch (Exception e)
+        {
+            throw new PersistenceException(e);
+        }
+    }
+
 }

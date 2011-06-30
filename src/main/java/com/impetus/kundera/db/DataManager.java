@@ -16,12 +16,12 @@
 package com.impetus.kundera.db;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.PersistenceException;
 
-import com.impetus.kundera.db.accessor.DocumentDataAccessor;
 import com.impetus.kundera.db.accessor.ColumnFamilyDataAccessor;
-import com.impetus.kundera.db.accessor.SuperColumnFamilyDataAccessor;
+import com.impetus.kundera.db.accessor.DocumentDataAccessor;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
@@ -54,7 +54,8 @@ public class DataManager {
     public DataManager(EntityManagerImpl em) {
         accessorCF = new ColumnFamilyDataAccessor(em);
         //accessorSCF = new SuperColumnFamilyDataAccessor(em);
-        accessorDocument = new DocumentDataAccessor(em);
+        //TODO commented out as we do not need it anymore.
+//        accessorDocument = new DocumentDataAccessor(em);
     	
     }
 
@@ -140,6 +141,13 @@ public class DataManager {
 	 */
     public final <E> List<E> find(Class<E> clazz, EntityMetadata m, String... ids) throws Exception {
         return getDataAccessor(m).read(clazz, m, ids);
+    }
+
+
+    
+    public final <E> List<E> find(Class<E> clazz, EntityMetadata m, Map<String, String> col) throws Exception
+    {
+        return getDataAccessor(m).read(clazz, m, col);
     }
 
     // Helper method to find appropriate DataAccessor

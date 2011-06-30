@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Impetus Infotech.
+ * Copyright 2011 Impetus Infotech.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,11 @@ package com.impetus.kundera.entity;
 
 import java.util.Date;
 
-import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.impetus.kundera.api.SuperColumn;
 
 /**
  * The Class Post.
@@ -30,9 +29,7 @@ import com.impetus.kundera.api.SuperColumn;
  * @author animesh.kumar
  */
 @Entity
-// makes it an entity class
 @Table(name="Posts", schema="Blog")
-// assign column-family type and name
 public class Post {
 
     /** The permalink. */
@@ -40,33 +37,12 @@ public class Post {
     // row identifier
     String permalink;
 
-    /** The title. */
-    @Column
-    @SuperColumn(column = "post")
-    // column 'title' will be stored under super-column 'post'
-    String title;
+    @Embedded
+    private PostData data = new PostData();
 
-    /** The body. */
-    @Column
-    @SuperColumn(column = "post")
-    String body;
+    @Embedded
+    private AuthorDetail author = new AuthorDetail();
 
-    /** The author. */
-    @Column
-    @SuperColumn(column = "post")
-    String author;
-
-    /** The created. */
-    @Column
-    @SuperColumn(column = "post")
-    Date created;
-    
-
-    /** The tags. */
-//    @Column
-////    @SuperColumn(column = "tags")
-//    // column 'tag' will be stored under super-column 'tags'
-//    List<String> tags = new ArrayList<String>();
 
     /**
      * Gets the permalink.
@@ -86,77 +62,77 @@ public class Post {
         this.permalink = permalink;
     }
 
-    /**
+  /*  *//**
      * Gets the title.
      * 
      * @return the title
-     */
+     *//*
     public String getTitle() {
-        return title;
+        return data.title;
     }
 
-    /**
+    *//**
      * Sets the title.
      * 
      * @param title the title to set
-     */
+     *//*
     public void setTitle(String title) {
-        this.title = title;
+        this.data.title = title;
     }
 
-    /**
+    *//**
      * Gets the body.
      * 
      * @return the body
-     */
+     *//*
     public String getBody() {
-        return body;
+        return data.body;
     }
 
-    /**
+    *//**
      * Sets the body.
      * 
      * @param body the body to set
-     */
+     *//*
     public void setBody(String body) {
-        this.body = body;
+        this.data.body = body;
     }
 
-    /**
+    *//**
      * Gets the author.
      * 
      * @return the author
-     */
+     *//*
     public String getAuthor() {
-        return author;
+        return author.name;
     }
 
-    /**
+    *//**
      * Sets the author.
      * 
      * @param author the author to set
-     */
+     *//*
     public void setAuthor(String author) {
-        this.author = author;
+        this.author.name = author;
     }
 
-    /**
+    *//**
      * Gets the created.
      * 
      * @return the created
-     */
+     *//*
     public Date getCreated() {
-        return created;
+        return data.created;
     }
 
-    /**
+    *//**
      * Sets the created.
      * 
      * @param created the created to set
-     */
+     *//*
     public void setCreated(Date created) {
-        this.created = created;
-    }
+        this.data.created = created;
+    }*/
 
 //    /**
 //     * Gets the tags.
@@ -220,19 +196,51 @@ public class Post {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("Post [title=");
-        builder.append(title);
+        builder.append(data.title);
         builder.append(", author=");
-        builder.append(author);
+        builder.append(author.name);
         builder.append(", body=");
-        builder.append(body);
+        builder.append(data.body);
         builder.append(", created=");
-        builder.append(created);
+        builder.append(data.created);
         builder.append(", permalink=");
         builder.append(permalink);
 //        builder.append(", tags=");
 ////        builder.append(tags);
         builder.append("]");
         return builder.toString();
+    }
+
+    /**
+     * @return the data
+     */
+    public PostData getData()
+    {
+        return data;
+    }
+
+    /**
+     * @param data the data to set
+     */
+    public void setData(PostData data)
+    {
+        this.data = data;
+    }
+
+    /**
+     * @return the author
+     */
+    public AuthorDetail getAuthor()
+    {
+        return author;
+    }
+
+    /**
+     * @param author the author to set
+     */
+    public void setAuthor(AuthorDetail author)
+    {
+        this.author = author;
     }
 
 }

@@ -16,10 +16,12 @@
 package com.impetus.kundera.db;
 
 import java.util.List;
+import java.util.Map;
 
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
+// TODO: Auto-generated Javadoc
 /**
  * Interface to define contract between @Entity and Cassandra data units.
  * 
@@ -56,6 +58,18 @@ public interface DataAccessor {
 	 *             the exception
 	 */
     <E> E read(Class<E> clazz, EntityMetadata m, String id) throws Exception;
+    
+    /**
+     * Read.
+     *
+     * @param <E> the element type
+     * @param clazz the clazz
+     * @param m the m
+     * @param col the col
+     * @return the list
+     * @throws Exception the exception
+     */
+    <E> List<E>  read(Class<E> clazz, EntityMetadata m, Map<String, String> col) throws Exception;
 
     /**
 	 * Reads a list of entities of type clazz with primaryKeys ids from

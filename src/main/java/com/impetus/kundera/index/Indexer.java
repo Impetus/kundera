@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Impetus Infotech.
+ * Copyright 2011 Impetus Infotech.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package com.impetus.kundera.index;
 
-import java.util.List;
+import java.util.Map;
 
 import com.impetus.kundera.metadata.EntityMetadata;
 
@@ -58,6 +58,7 @@ public interface Indexer {
 	 *            the count
 	 * @return the list
 	 */
-    List<String> search(String query, int start, int count);
+//    List<String> search(String query, int start, int count);
 
+    Map<String, String> search(String luceneQuery, int start, int count);
 }

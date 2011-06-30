@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -196,6 +197,16 @@ public abstract class KunderaQuery {
         return result;
     }
 
+    /**
+     * Method to check if required result is to get complete entity or a select scalar value.
+     * @return true, if it result is for complete alias.
+     *  
+     */
+    protected final boolean isAliasOnly()
+    {
+        return result != null && (result.indexOf(".") == -1);
+    }
+
     // must be executed after parse(). it verifies and populated the query
     // predicates.
     /**
@@ -217,9 +228,19 @@ public abstract class KunderaQuery {
         if (fromArray.length != 2) {
             throw new PersistenceException("Bad query format: " + from);
         }
-        if (!fromArray[1].equals(result)) {
-            throw new PersistenceException("Bad query format: " + from);
+
+        StringTokenizer tokenizer = new StringTokenizer(getResult(), ",");
+        while (tokenizer.hasMoreTokens())
+        {
+            String token = tokenizer.nextToken();
+            if (!token.startsWith(fromArray[1] + "."))
+            {
+                throw new RuntimeException("bad query format with invalid alias:" + token);
+            }
         }
+        /* if (!fromArray[1].equals(result)) {
+            throw new PersistenceException("Bad query format: " + from);
+        }*/
         this.entityName = fromArray[0];
         this.entityAlias = fromArray[1];
 

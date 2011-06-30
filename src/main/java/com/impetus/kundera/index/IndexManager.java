@@ -15,7 +15,7 @@
  */
 package com.impetus.kundera.index;
 
-import java.util.List;
+import java.util.Map;
 
 import javax.persistence.PersistenceException;
 
@@ -113,7 +113,7 @@ public class IndexManager {
 	 *            the query
 	 * @return the list
 	 */
-    public final List<String> search(String query) {
+    public final Map<String, String> search(String query) {
         return search(query, Constants.INVALID, Constants.INVALID);
     }
 
@@ -126,7 +126,7 @@ public class IndexManager {
 	 *            the count
 	 * @return the list
 	 */
-    public final List<String> search(String query, int count) {
+    public final Map<String, String> search(String query, int count) {
         return search(query, Constants.INVALID, count);
     }
 
@@ -141,7 +141,12 @@ public class IndexManager {
 	 *            the count
 	 * @return the list
 	 */
-    public final List<String> search(String query, int start, int count) {
+/*    public final List<String> search(String query, int start, int count) {
         return indexer.search(query, start, count);
     }
+*/    
+    public final Map<String, String> search(String query, int start, int count) {
+        return indexer.search(query, start, count);
+    }
+    
 }
