@@ -90,7 +90,89 @@ public final class EntityMetadata {
 	
 	private DBType dbType;
 
-	/**
+/** type. */
+private Type type;
+	
+
+public static enum Type {
+
+    /** Denotes that the Entity is related to a ColumnFamily. */
+    COLUMN_FAMILY {
+
+    public boolean isColumnFamilyMetadata() {
+    return true;
+    }
+
+    public boolean isSuperColumnFamilyMetadata() {
+    return false;
+    }
+
+    public boolean isDocumentMetadata() {
+    return false;
+    }
+
+    },
+
+    /** Denotes that the Entity is related to a SuperColumnFamily. */
+    SUPER_COLUMN_FAMILY {
+
+    public boolean isColumnFamilyMetadata() {
+    return false;
+    }
+
+    public boolean isSuperColumnFamilyMetadata() {
+    return true;
+    }
+
+    public boolean isDocumentMetadata() {
+    return false;
+    }
+
+    };
+    
+    /**
+     * Checks if is column family metadata.
+     * 
+     * @return true, if is column family metadata
+     */
+    public abstract boolean isColumnFamilyMetadata();
+
+    /**
+     * Checks if is super column family metadata.
+     * 
+     * @return true, if is super column family metadata
+     */
+    public abstract boolean isSuperColumnFamilyMetadata();
+
+    /**
+     * Checks if is Document metadata. 
+     * @return true, if is Document metadata
+     */
+    public abstract boolean isDocumentMetadata();
+    }
+
+
+/**
+ * Gets the type.
+ * 
+ * @return the type
+ */
+public Type getType() {
+return type;
+}
+
+/**
+ * Sets the type.
+ * 
+ * @param type
+ *            the new type
+ */
+public void setType(Type type) {
+this.type = type;
+}
+
+/**
+ * 
 	 * The Enum ForeignKey.
 	 */
 	public static enum ForeignKey {
@@ -908,6 +990,11 @@ public final class EntityMetadata {
 		 * @param type
 		 *            the type
 		 */
+
+/**
+ * Specifies the type of the metadata.
+ */
+
 		public Relation(Field property, Class<?> targetEntity,
 				Class<?> propertyType, FetchType fetchType,
 				List<CascadeType> cascades, boolean optional, String mappedBy,

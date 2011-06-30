@@ -7,14 +7,14 @@
 		<provider>com.impetus.kundera.ejb.KunderaPersistence</provider>
 		
 		<properties>
+			<property name="server.config" value="/usr/local/cassandra/conf/cassandra.yaml"/>
 			<property name="kundera.nodes" value="localhost"/>
 			<property name="kundera.port" value="9165"/>
 			<property name="kundera.keyspace" value="Blog"/>
 			<property name="kundera.dialect" value="cassandra"/>
 			<property name="kundera.client" value="Pelops"/>
 			<property name="kundera.cache.provider_class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider"/>
-            <property name="net.sf.ehcache.configurationResourceName" value="/ehcache-test.xml"/>			
-   			<!--  <property name="kundera.client.implementation" value="com.impetus.kundera.client.PelopsClient.class"/> -->
+            <property name="net.sf.ehcache.configurationResourceName" value="/ehcache-test.xml"/>   			
 		</properties>
 		
 	</persistence-unit>
@@ -30,7 +30,6 @@
 			<property name="kundera.client" value="Hbase"/>
 			<property name="kundera.cache.provider_class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider"/>
             <property name="net.sf.ehcache.configurationResourceName" value="/ehcache-test.xml"/>			
-			<!--  <property name="kundera.client.implementation" value="com.impetus.kundera.hbase.client.HBaseClient.class"/> -->
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="mongodb">

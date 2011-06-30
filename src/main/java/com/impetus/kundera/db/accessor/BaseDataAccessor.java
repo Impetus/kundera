@@ -36,7 +36,7 @@ import com.impetus.kundera.proxy.EnhancedEntity;
  *            Thrift data unit: Column or SuperColumn
  * @author animesh.kumar
  */
-public abstract class BaseDataAccessor<TF> implements DataAccessor {
+public abstract class BaseDataAccessor implements DataAccessor {
 
 	/** log for this class. */
 	private static Log log = LogFactory.getLog(BaseDataAccessor.class);
@@ -130,7 +130,7 @@ public abstract class BaseDataAccessor<TF> implements DataAccessor {
 	 * 
 	 * @author animesh.kumar
 	 */
-	public class ThriftRow {
+	public class ThriftRow<TF> {
 
 		/** Id of the row. */
 		private String id;
