@@ -9,7 +9,7 @@
 		<properties>
 			<property name="server.config" value="/usr/local/cassandra/conf/cassandra.yaml"/>
 			<property name="kundera.nodes" value="localhost"/>
-			<property name="kundera.port" value="9165"/>
+			<property name="kundera.port" value="9160"/>
 			<property name="kundera.keyspace" value="Blog"/>
 			<property name="kundera.dialect" value="cassandra"/>
 			<property name="kundera.client" value="Pelops"/>
