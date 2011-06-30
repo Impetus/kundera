@@ -176,20 +176,10 @@ public class PelopsDataHandler {
 					} else {
 						throw new PersistenceException("Super Column " + scName + " doesn't match with entity which should have been a Collection");
 					}
-				}		
+				}						
 				
+				Class<?> embeddedClass = PropertyAccessorHelper.getGenericClass(embeddedCollectionField);		
 				
-				Class<?> embeddedClass = null;
-				Type[] parameters = ReflectUtils.getTypeArguments(embeddedCollectionField);
-				if (parameters != null) {
-					if (parameters.length == 1) {
-						embeddedClass = (Class<?>) parameters[0];
-					} else {
-						throw new PersistenceException("How many parameters man?");
-					}
-				}
-				
-				System.out.println(embeddedClass);
 				// must have a default no-argument constructor
 		        try {
 		        	embeddedClass.getConstructor();
@@ -281,17 +271,8 @@ public class PelopsDataHandler {
 				scNamePrefix = st.nextToken();
 			}			
 			
-			embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);				
-			
-			Class<?> embeddedClass = null;
-			Type[] parameters = ReflectUtils.getTypeArguments(embeddedCollectionField);
-			if (parameters != null) {
-				if (parameters.length == 1) {
-					embeddedClass = (Class<?>) parameters[0];
-				} else {
-					throw new PersistenceException("How many parameters man?");
-				}
-			}		
+			embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);			
+			Class<?> embeddedClass = PropertyAccessorHelper.getGenericClass(embeddedCollectionField);				
 			
 			// must have a default no-argument constructor
 	        try {

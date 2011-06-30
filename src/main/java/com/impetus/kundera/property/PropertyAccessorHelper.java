@@ -17,8 +17,12 @@ package com.impetus.kundera.property;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
+
+import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Helper class to access fields.
@@ -240,4 +244,22 @@ public class PropertyAccessorHelper
             throw new PropertyAccessException(e);
         }
     }
-}
+    
+    /**
+     * Retrieves Generic class from a collection field
+     * @param collectionField
+     * @return
+     */
+    public static Class<?> getGenericClass(Field collectionField) {
+    	Class<?> genericClass = null;
+		Type[] parameters = ReflectUtils.getTypeArguments(collectionField);
+		if (parameters != null) {
+			if (parameters.length == 1) {
+				genericClass = (Class<?>) parameters[0];
+			} else {
+				throw new PersistenceException("Can't determine generic class from a field that has two parameters.");
+			}
+		}
+		return genericClass;
+    }
+ }
