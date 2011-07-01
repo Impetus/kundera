@@ -118,7 +118,8 @@ public class TestMongoDB extends TestCase {
 	
      public void findUser() { 
     	 User user = em.find(User.class, "IIIPL-0001");
-    	 System.out.println(user.getUserId() + "(Personal Data): " + user.getPersonalDetail().getName() + "/Tweets:" + user.getTweets()); }
+    	 System.out.println(user.getUserId() + "(Personal Data): " + user.getPersonalDetail().getName() + "/Tweets:" + user.getTweets()); 
+     }
     
 	
 	public void test() {
@@ -126,8 +127,8 @@ public class TestMongoDB extends TestCase {
 		//selectAllQuery();
 		//parametiarizedQuery();
 		//deleteEmail();
-		//insertUser();
-		findUser();
+		insertUser();
+		//findUser();
 	}
 
 	

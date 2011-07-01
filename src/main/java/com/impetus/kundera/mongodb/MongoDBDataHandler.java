@@ -69,7 +69,22 @@ public class MongoDBDataHandler {
 			List<SuperColumn> superColumns = m.getSuperColumnsAsList();
 			for(SuperColumn superColumn : superColumns) {
 				Field superColumnField = superColumn.getField();
-				
+				Object embeddedDocumentObject = document.get(superColumnField.getName());	//Can be a BasicDBObject or a list of it.
+				if(embeddedDocumentObject != null) {
+					if(embeddedDocumentObject instanceof BasicDBList) {
+						Class embeddedObjectClass = PropertyAccessorHelper.getGenericClass(superColumnField);
+						Collection embeddedCollection = DocumentObjectMapper.getCollectionFromDocumentList((BasicDBList)embeddedDocumentObject, superColumnField.getType(), embeddedObjectClass, superColumn.getColumns());
+						PropertyAccessorHelper.set(entity, superColumnField, embeddedCollection);						
+					} else if(embeddedDocumentObject instanceof BasicDBObject){
+						 Object embeddedObject = DocumentObjectMapper.getObjectFromDocument((BasicDBObject)embeddedDocumentObject,
+								 superColumn.getField().getType(), superColumn.getColumns());
+						 PropertyAccessorHelper.set(entity, superColumnField, embeddedObject);			
+						
+					} else {
+						throw new PersistenceException("Can't retrieve embedded object from MONGODB document coz " +
+								"it wasn't stored as BasicDBObject, possible problem in format.");
+					}
+				}
 			}
 			
 			//Populate relationship objects
@@ -146,9 +161,9 @@ public class MongoDBDataHandler {
 			if(embeddedObject != null) {
 				if(embeddedObject instanceof Collection) {
 					Collection embeddedCollection = (Collection) embeddedObject;					
-					dbObj.put(superColumnField.getName(), DocumentObjectMapper.getDocumentListFromCollection(embeddedCollection));						
+					dbObj.put(superColumnField.getName(), DocumentObjectMapper.getDocumentListFromCollection(embeddedCollection, superColumn.getColumns()));						
 				} else {					
-					dbObj.put(superColumnField.getName(), DocumentObjectMapper.getDocumentFromObject(embeddedObject));
+					dbObj.put(superColumnField.getName(), DocumentObjectMapper.getDocumentFromObject(embeddedObject, superColumn.getColumns()));
 				}
 			}
 		}

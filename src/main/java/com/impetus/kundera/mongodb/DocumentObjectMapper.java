@@ -15,14 +15,21 @@
  */
 package com.impetus.kundera.mongodb;
 
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.metadata.EntityMetadata.Column;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 /**
@@ -34,33 +41,77 @@ public class DocumentObjectMapper {
 	private static Log log = LogFactory.getLog(DocumentObjectMapper.class);
 	
 	/**
-	 * Creates a MongoDB document list from a given java collection. 
-	 * columns in the documents correspond to field names of java objects in collection.  
+	 * Creates a MongoDB document object wrt a given Java object. columns in the document correspond Columns provided as List. 
 	 * @throws PropertyAccessException
 	 */
-	public static BasicDBObject[] getDocumentListFromCollection(Collection coll) throws PropertyAccessException {
+	public static BasicDBObject getDocumentFromObject(Object obj, List<Column> columns) throws PropertyAccessException {
+		BasicDBObject dBObj = new BasicDBObject();
+		
+		for(Column column : columns) {
+			Object val = PropertyAccessorHelper.getObject(obj, column.getField());
+			dBObj.put(column.getName(), val);
+		}		
+		return dBObj;		
+	}
+	
+	/**
+	 * Creates a MongoDB document list from a given java collection. 
+	 * columns in the document correspond Columns provided as List. 
+	 * @throws PropertyAccessException
+	 */
+	public static BasicDBObject[] getDocumentListFromCollection(Collection coll, List<Column> columns) throws PropertyAccessException {
 		BasicDBObject[] dBObjects = new BasicDBObject[coll.size()];
 		int count = 0;
 		for(Object o : coll) {		
-			dBObjects[count] = getDocumentFromObject(o);
+			dBObjects[count] = getDocumentFromObject(o, columns);
 			count++;
 		}
 		return dBObjects;
 	}
 	
 	/**
-	 * Creates a MongoDB document object wrt a given Java object. columns in the document correspond to field names in java object. 
-	 * @throws PropertyAccessException
+	 * Creates an instance of <code>clazz</code> and populates fields fetched from MongoDB document object.
+	 * Field names are determined from <code>columns</code>
 	 */
-	public static BasicDBObject getDocumentFromObject(Object obj) throws PropertyAccessException {
-		BasicDBObject dBObj = new BasicDBObject();
-		Field[] fieldsInObject = obj.getClass().getDeclaredFields();
-		for(int i = 0; i < fieldsInObject.length; i++) {
-			Field f = fieldsInObject[i];
-			Object val = PropertyAccessorHelper.getObject(obj, f);
-			dBObj.put(f.getName(), val);
+	public static Object getObjectFromDocument(BasicDBObject documentObj, Class clazz, List<Column> columns) {		
+		try {
+			Object obj = clazz.newInstance();
+			for(Column column : columns) {
+				Object val = documentObj.get(column.getName());
+				PropertyAccessorHelper.set(obj, column.getField(), val);
+			}
+			return obj;			
+			
+		} catch (InstantiationException e) {
+			throw new PersistenceException(e.getMessage());
+		} catch (IllegalAccessException e) {
+			throw new PersistenceException(e.getMessage());
+		} catch(PropertyAccessException e) {
+			throw new PersistenceException(e.getMessage());
+		}		
+	}
+	
+	
+	/**
+	 * Creates a collection of <code>embeddedObjectClass</code> instances wherein each element is java object representation
+	 * of MongoDB document object contained in <code>documentList</code>. 
+	 * Field names are determined from <code>columns</code>. 
+	 */
+	public static Collection<?> getCollectionFromDocumentList(BasicDBList documentList, Class embeddedCollectionClass, Class embeddedObjectClass, List<Column> columns) {
+		Collection<Object> embeddedCollection = null;
+		if(embeddedCollectionClass.equals(Set.class)) {
+			embeddedCollection = new HashSet<Object>();
+		} else if(embeddedCollectionClass.equals(List.class)) {
+			embeddedCollection = new ArrayList<Object>();
+		} else {
+			throw new PersistenceException("Invalid collection class " + embeddedCollectionClass + "; only Set and List allowed");
 		}
-		return dBObj;		
+		
+		for(Object dbObj : documentList) {
+			embeddedCollection.add(getObjectFromDocument((BasicDBObject)dbObj, embeddedObjectClass, columns));
+		}
+		
+		return embeddedCollection;
 	}
 
 }
