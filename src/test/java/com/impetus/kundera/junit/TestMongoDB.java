@@ -25,6 +25,9 @@ import junit.framework.TestCase;
 import com.impetus.kundera.entity.Attachment;
 import com.impetus.kundera.entity.Contact;
 import com.impetus.kundera.entity.Email;
+import com.impetus.kundera.entity.PersonalDetail;
+import com.impetus.kundera.entity.Tweet;
+import com.impetus.kundera.entity.User;
 import com.impetus.kundera.loader.Configuration;
 
 
@@ -95,11 +98,36 @@ public class TestMongoDB extends TestCase {
 		
 	}	
 	
+	public void insertUser() {
+		User user = new User();
+		user.setUserId("IIIPL-0001");
+
+		PersonalDetail pd = new PersonalDetail();
+		pd.setPersonalDetailId("1");
+		pd.setName("Amresh");
+		pd.setPassword("password1");
+		pd.setRelationshipStatus("single");
+		user.setPersonalDetail(pd);
+
+		user.addTweet(new Tweet("a", "Here it goes, my first tweet", "web"));
+		user.addTweet(new Tweet("b", "Another one from me", "mobile"));
+
+		em.persist(user);
+	}
+	
+	
+     public void findUser() { 
+    	 User user = em.find(User.class, "IIIPL-0001");
+    	 System.out.println(user.getUserId() + "(Personal Data): " + user.getPersonalDetail().getName() + "/Tweets:" + user.getTweets()); }
+    
+	
 	public void test() {
-		saveEmail();		
+		//saveEmail();		
 		//selectAllQuery();
 		//parametiarizedQuery();
 		//deleteEmail();
+		//insertUser();
+		findUser();
 	}
 
 	

@@ -53,10 +53,11 @@ public class DataManager {
      */
     public DataManager(EntityManagerImpl em) {
         accessorCF = new ColumnFamilyDataAccessor(em);
-        //accessorSCF = new SuperColumnFamilyDataAccessor(em);
         //TODO commented out as we do not need it anymore.
-//        accessorDocument = new DocumentDataAccessor(em);
+        //accessorSCF = new SuperColumnFamilyDataAccessor(em);
+        accessorDocument = new DocumentDataAccessor(em);
     	
+        //Add more accessors for different kinds of data-stores (eg. graph based)
     }
 
     /**

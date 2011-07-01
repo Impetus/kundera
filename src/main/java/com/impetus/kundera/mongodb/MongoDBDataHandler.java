@@ -35,6 +35,7 @@ import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
 import com.impetus.kundera.metadata.EntityMetadata.Relation;
+import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
@@ -63,7 +64,15 @@ public class MongoDBDataHandler {
 			//Populate primary key column
 			PropertyAccessorHelper.set(entity, m.getIdProperty(), document.get(m.getIdProperty().getName()));
 			
-			//Populate embedded relationship object
+			
+			//Populate @Embedded objects and collections
+			List<SuperColumn> superColumns = m.getSuperColumnsAsList();
+			for(SuperColumn superColumn : superColumns) {
+				Field superColumnField = superColumn.getField();
+				
+			}
+			
+			//Populate relationship objects
 	        List<Relation> relations = m.getRelations();
 	        
 	        for(Relation relation : relations) {
@@ -129,6 +138,21 @@ public class MongoDBDataHandler {
 			}
 		}		
 		
+		//Populate @Embedded objects and collections
+		List<SuperColumn> superColumns = m.getSuperColumnsAsList();
+		for(SuperColumn superColumn : superColumns) {
+			Field superColumnField = superColumn.getField();
+			Object embeddedObject = PropertyAccessorHelper.getObject(entity, superColumnField);
+			if(embeddedObject != null) {
+				if(embeddedObject instanceof Collection) {
+					Collection embeddedCollection = (Collection) embeddedObject;					
+					dbObj.put(superColumnField.getName(), DocumentObjectMapper.getDocumentListFromCollection(embeddedCollection));						
+				} else {					
+					dbObj.put(superColumnField.getName(), DocumentObjectMapper.getDocumentFromObject(embeddedObject));
+				}
+			}
+		}
+		
 		//Populate Relationship fields
 		List<Relation> relations = m.getRelations();
 		for(Relation relation : relations) {
@@ -172,6 +196,8 @@ public class MongoDBDataHandler {
 		}		
 		return dbObj;
 	}
+	
+	
 
 	/**
 	 * @param entity

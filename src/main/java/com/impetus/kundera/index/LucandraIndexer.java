@@ -202,7 +202,7 @@ public class LucandraIndexer implements Indexer
                     String indexName = metadata.getIndexName();
                     try
                     {
-                        indexField(PropertyAccessorHelper.getEmbeddedObject(object, superColumnName), currentDoc, field, colName, indexName);
+                        indexField(PropertyAccessorHelper.getObject(object, superColumnName), currentDoc, field, colName, indexName);
                     }
                     catch (PropertyAccessException e)
                     {
