@@ -33,6 +33,7 @@ import org.apache.jasper.tagplugins.jstl.core.Set;
 
 import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
@@ -102,18 +103,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                 // An embedded attribute can be either Collection or another DTO
                 if (superColumnFieldClass.equals(List.class) || superColumnFieldClass.equals(Set.class))
                 {
-                    Type[] parameters = ReflectUtils.getTypeArguments(f);
-                    if (parameters != null)
-                    {
-                        if (parameters.length == 1)
-                        {
-                            superColumnFieldClass = (Class<?>) parameters[0];
-                        }
-                        else
-                        {
-                            throw new PersistenceException("Only one parameter allowed in List/Set for embedded object");
-                        }
-                    }
+                    superColumnFieldClass = PropertyAccessorHelper.getGenericClass(f);                	
                     populateSuperColumnInMetadata(metadata, f, superColumnFieldClass);
 
                 }

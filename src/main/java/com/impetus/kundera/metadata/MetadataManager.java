@@ -328,18 +328,7 @@ public class MetadataManager implements AnnotationDiscoveryListener {
 
 				ManyToMany ann = f.getAnnotation(ManyToMany.class);
 
-				Class<?> targetEntity = null;
-
-				// resolve from generic parameters
-				Type[] parameters = ReflectUtils.getTypeArguments(f);
-				if (parameters != null) {
-					if (parameters.length == 1) {
-						targetEntity = (Class<?>) parameters[0];
-					} else {
-						throw new PersistenceException(
-								"How many parameters man?");
-					}
-				}
+				Class<?> targetEntity = PropertyAccessorHelper.getGenericClass(f);				
 				// now, check annotations
 				if (null != ann.targetEntity()
 						&& !ann.targetEntity().getSimpleName().equals("void")) {
