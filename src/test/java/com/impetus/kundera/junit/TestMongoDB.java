@@ -118,7 +118,7 @@ public class TestMongoDB extends TestCase {
 		
 		user.addImDetail(new IMDetail("1", "Yahoo", "xamry"));
 		user.addImDetail(new IMDetail("2", "GTalk", "amry_4u"));
-		user.addImDetail(new IMDetail("2", "MSN", "itsmeamry"));
+		user.addImDetail(new IMDetail("3", "MSN", "itsmeamry"));
 
 		em.persist(user);
 	}
@@ -135,8 +135,8 @@ public class TestMongoDB extends TestCase {
 		//selectAllQuery();
 		//parametiarizedQuery();
 		//deleteEmail();
-		insertUser();
-		//findUser();
+		//insertUser();
+		findUser();
 	}
 
 	

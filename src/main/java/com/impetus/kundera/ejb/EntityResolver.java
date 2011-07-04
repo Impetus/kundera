@@ -73,15 +73,9 @@ public class EntityResolver {
 		Map<String, EnhancedEntity> map = new HashMap<String, EnhancedEntity>();
 		try {
 			log.debug("Resolving reachable entities for cascade "
-							+ cascadeType);		
+							+ cascadeType);				
 			
-			//For Document-based data-stores, entities need to be embedded			
-			if(dbType.equals(DBType.MONGODB)) {
-				resolveEmbeddedEntities(entity, cascadeType, map);
-			} else {
-				recursivelyResolveEntities(entity, cascadeType, map);
-			}
-			
+			recursivelyResolveEntities(entity, cascadeType, map);
 			
 			
 		} catch (PropertyAccessException e) {
@@ -98,30 +92,6 @@ public class EntityResolver {
 		return new ArrayList<EnhancedEntity>(map.values());
 	}
 	
-	private void resolveEmbeddedEntities(Object o, CascadeType cascadeType,
-			Map<String, EnhancedEntity> entities)
-			throws PropertyAccessException {
-		EntityMetadata m =  em.getMetadataManager().getEntityMetadata(o.getClass());		
-
-		String id = PropertyAccessorHelper.getId(o, m);
-
-		// Ensure that @Id is set
-		if (null == id || id.trim().isEmpty()) {
-			throw new PersistenceException("Missing primary key >> " + m.getEntityClazz().getName() + "#"
-					+ m.getIdProperty().getName());
-		}
-
-
-		String mapKeyForEntity = m.getEntityClazz().getName() + "_" + id;
-		log.debug("Resolving >> " + mapKeyForEntity);
-
-		// Map to hold property-name=>foreign-entity relations
-		Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
-
-		// Save to map
-		entities.put(mapKeyForEntity, em.getFactory().getEnhancedEntity(o, id,
-				foreignKeysMap));				
-	}
 
 	/**
 	 * helper method to recursively build reachable object list.

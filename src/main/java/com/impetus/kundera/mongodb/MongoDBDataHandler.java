@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -27,6 +28,7 @@ import java.util.regex.Pattern;
 
 import javax.persistence.CascadeType;
 import javax.persistence.PersistenceException;
+import javax.swing.text.StyledEditorKit.ForegroundAction;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,9 +40,12 @@ import com.impetus.kundera.metadata.EntityMetadata.Relation;
 import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
 /**
@@ -87,43 +92,58 @@ public class MongoDBDataHandler {
 				}
 			}
 			
-			//Populate relationship objects
-	        List<Relation> relations = m.getRelations();
-	        
+			//Check relations and fetch data from foreign keys list column
+			List<Relation> relations = m.getRelations();	        
 	        for(Relation relation : relations) {
 	        	Class<?> embeddedEntityClass = relation.getTargetEntity(); 	//Embedded entity class
-				Field embeddedPropertyField = relation.getProperty();		//Mapped to this property					
-				boolean optional = relation.isOptional();					// Is it optional? TODO: Where to use this?									
+				Field embeddedPropertyField = relation.getProperty();		//Mapped to this property			
+													
 				
-				EntityMetadata relMetadata = em.getMetadataManager().getEntityMetadata(embeddedEntityClass);
-				relMetadata.addColumn(relMetadata.getIdColumn().getName(), relMetadata.getIdColumn());	//Add PK column
+				EntityMetadata relMetadata = em.getMetadataManager().getEntityMetadata(embeddedEntityClass);			
+				BasicDBList relList = (BasicDBList) document.get(embeddedPropertyField.getName());;		//List foreign keys	
 				
-				Object embeddedObject = document.get(embeddedPropertyField.getName());
-				
-				if(embeddedObject != null) {					
-					if(relation.isUnary()) {			
-						BasicDBObject relDBObj = (BasicDBObject) embeddedObject;
-						Object embeddedEntity = new MongoDBDataHandler().getEntityFromDocument(em, embeddedEntityClass, relMetadata, relDBObj);
-						PropertyAccessorHelper.set(entity, embeddedPropertyField, embeddedEntity);				
+				if(relList != null) {
+					if(relation.isUnary()) {
+						String foreignKey = (String)relList.get(0);
+						
+						Object embeddedEntity = null;
+						try {
+							embeddedEntity = em.getClient().loadColumns(em, embeddedEntityClass, relMetadata.getSchema(), 
+									relMetadata.getTableName(), foreignKey, relMetadata);
+						} catch (Exception e) {
+							throw new PersistenceException("Error while fetching relationship entity " + relMetadata.getTableName()
+									+ " from " + m.getTableName());
+						}
+						PropertyAccessorHelper.set(entity, embeddedPropertyField, embeddedEntity);	
 					} else if(relation.isCollection()) {
-						BasicDBList relList = (BasicDBList) embeddedObject;		//List of embedded objects
+						List<String> foreignKeys = new ArrayList<String>();
+						for(Object o : relList) {
+							foreignKeys.add((String) o);
+						}					
 						
-						Collection<Object> embeddedEntities = null;				//Collection of embedded entities
+						Collection embeddedEntityList = null;				//Collection of embedded entities			
+						
+						try {
+							embeddedEntityList = em.getClient().loadColumns(em, embeddedEntityClass, relMetadata.getSchema(),
+									relMetadata.getTableName(), relMetadata, foreignKeys.toArray(new String[0]));
+						} catch (Exception e) {
+							throw new PersistenceException("Error while fetching relationship entity collection  " + relMetadata.getTableName()
+									+ " from " + m.getTableName());
+						}
+						
+						Collection<Object> embeddedObjects = null;				//Collection of embedded entities
 						if (relation.getPropertyType().equals(Set.class)) {
-							embeddedEntities = new HashSet<Object>();
+							embeddedObjects = new HashSet<Object>();
 						} else if (relation.getPropertyType().equals(List.class)) {
-							embeddedEntities = new ArrayList<Object>();
-						}				
+							embeddedObjects = new ArrayList<Object>();
+						}		
 						
-						for(int i = 0; i < relList.size(); i++) {
-							BasicDBObject relObj = (BasicDBObject)relList.get(i);					
-							Object embeddedEntity = new MongoDBDataHandler().getEntityFromDocument(em, embeddedEntityClass, relMetadata, relObj);
-							embeddedEntities.add(embeddedEntity);						
-						}	
+						embeddedObjects.addAll(embeddedEntityList);
+						PropertyAccessorHelper.set(entity, embeddedPropertyField, embeddedObjects);
 						
-						PropertyAccessorHelper.set(entity, embeddedPropertyField, embeddedEntities);	
-					}						
-				}		
+					}
+					
+				}			
 							
 	        }
 			
@@ -140,14 +160,14 @@ public class MongoDBDataHandler {
         return entity;
 	}
 	
-	public BasicDBObject getDocumentFromEntity(EntityManagerImpl em, EntityMetadata m, Object entity) throws PropertyAccessException {		
+	public BasicDBObject getDocumentFromEntity(EntityManagerImpl em, EntityMetadata m, EnhancedEntity e) throws PropertyAccessException {		
 		List<Column> columns = m.getColumnsAsList();
 		BasicDBObject dbObj = new BasicDBObject();	
 		
 		//Populate columns
 		for(Column column : columns) {
 			try {				
-				extractEntityField(entity, dbObj, column);						
+				extractEntityField(e.getEntity(), dbObj, column);						
 			} catch (PropertyAccessException e1) {				
 				log.error("Can't access property " + column.getField().getName());
 			}
@@ -157,7 +177,7 @@ public class MongoDBDataHandler {
 		List<SuperColumn> superColumns = m.getSuperColumnsAsList();
 		for(SuperColumn superColumn : superColumns) {
 			Field superColumnField = superColumn.getField();
-			Object embeddedObject = PropertyAccessorHelper.getObject(entity, superColumnField);
+			Object embeddedObject = PropertyAccessorHelper.getObject(e.getEntity(), superColumnField);
 			if(embeddedObject != null) {
 				if(embeddedObject instanceof Collection) {
 					Collection embeddedCollection = (Collection) embeddedObject;					
@@ -168,50 +188,20 @@ public class MongoDBDataHandler {
 			}
 		}
 		
-		//Populate Relationship fields
-		List<Relation> relations = m.getRelations();
-		for(Relation relation : relations) {
-			// Cascade?
-			if (!relation.getCascades().contains(CascadeType.ALL)
-					&& !relation.getCascades().contains(CascadeType.PERSIST)) {
-				continue;
+		//Check foreign keys and set as list column on document object
+		Map<String, Set<String>> foreignKeyMap = e.getForeignKeysMap();
+		Set foreignKeyNameSet = foreignKeyMap.keySet();
+		for(Object foreignKeyName : foreignKeyNameSet) {
+			Set valueSet = foreignKeyMap.get(foreignKeyName);
+			BasicDBList foreignKeyValueList = new BasicDBList();
+			for(Object o : valueSet) {
+				foreignKeyValueList.add(o);
 			}			
-
-			Class<?> embeddedEntityClass = relation.getTargetEntity(); //Target entity
-			Field embeddedEntityField = relation.getProperty();	//Mapped to this property			
-			boolean optional = relation.isOptional();	// Is it optional			
-			Object embeddedObject = PropertyAccessorHelper.getObject(entity, embeddedEntityField); // Value			
-			
-			EntityMetadata relMetadata = em.getMetadataManager().getEntityMetadata(embeddedEntityClass);
-			relMetadata.addColumn(relMetadata.getIdColumn().getName(), relMetadata.getIdColumn());	//Add PK column
-			
-			if(embeddedObject == null) {
-				if(! optional) {
-					throw new PersistenceException("Field " + embeddedEntityField + " is not optional, and hence must be set.");
-				}			
-				
-			} else {
-				if(relation.isUnary()) {				
-					BasicDBObject relDBObj = getDocumentFromEntity(em, relMetadata, embeddedObject);
-					dbObj.put(embeddedEntityField.getName(), relDBObj);
-					
-				} else if(relation.isCollection()) {
-					Collection collection = (Collection) embeddedObject;
-					BasicDBObject[] relDBObjects = new BasicDBObject[collection.size()];
-					int count = 0;
-					for(Object o : collection) {
-						relDBObjects[count] = getDocumentFromEntity(em, relMetadata, o);	
-						count++;
-					}
-					dbObj.put(embeddedEntityField.getName(), relDBObjects);
-				}	
-				
-			}			
-					
-		}		
+			dbObj.put((String)foreignKeyName, foreignKeyValueList);
+		}
+		
 		return dbObj;
-	}
-	
+	}	
 	
 
 	/**
