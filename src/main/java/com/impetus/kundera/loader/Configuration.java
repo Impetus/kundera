@@ -80,7 +80,9 @@ public class Configuration
             node = props.getProperty("kundera.nodes");
             port = props.getProperty("kundera.port");
             keyspace = props.getProperty("kundera.keyspace");
-            System.setProperty("cassandra.config", serverConfig);
+            if("Pelops".equals(client)) {
+            	System.setProperty("cassandra.config", serverConfig);
+            }            
             String resourceName = "net.sf.ehcache.configurationResourceName";
             ClientType clientType = ClientType.getValue(client.toUpperCase());
             createIdentifier(clientType, persistenceUnit);

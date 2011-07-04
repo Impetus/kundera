@@ -25,10 +25,12 @@ import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.log4j.Logger;
 
 import com.impetus.kundera.entity.AuthorDetail;
+import com.impetus.kundera.entity.IMDetail;
 import com.impetus.kundera.entity.Post;
 import com.impetus.kundera.entity.PostData;
 import com.impetus.kundera.entity.Email;
 import com.impetus.kundera.entity.PersonalDetail;
+import com.impetus.kundera.entity.Preference;
 import com.impetus.kundera.entity.Tweet;
 import com.impetus.kundera.entity.User;
 import com.impetus.kundera.loader.Configuration;
@@ -53,7 +55,7 @@ public class TestCassandra extends BaseTest
 
     public void startCassandraServer() throws Exception
     {
-        super.startCassandraServer();
+        //super.startCassandraServer();
     }
 
     /**
@@ -107,6 +109,12 @@ public class TestCassandra extends BaseTest
 
         user.addTweet(new Tweet("a", "Here it goes, my first tweet", "web"));
         user.addTweet(new Tweet("b", "Another one from me", "mobile"));
+        
+        user.setPreference(new Preference("1", "Serene", "5"));
+		
+		user.addImDetail(new IMDetail("1", "Yahoo", "xamry"));
+		user.addImDetail(new IMDetail("2", "GTalk", "amry_4u"));
+		user.addImDetail(new IMDetail("3", "MSN", "itsmeamry"));
 
         manager.persist(user);
     }

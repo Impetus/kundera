@@ -88,7 +88,7 @@ public class PelopsClient implements CassandraClient
     public final void connect()
     {
         // Start Solandra Service
-        // new SolandraUtils().startSolandraServer();
+        new SolandraUtils().startSolandraServer();
     }
 
     @Override
