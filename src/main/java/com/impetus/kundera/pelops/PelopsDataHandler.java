@@ -110,15 +110,8 @@ public class PelopsDataHandler {
             EntityMetadata.Column column = m.getColumn(name);
 			if (null == column) {
                 // it could be some relational column
-                EntityMetadata.Relation relation = m.getRelation(name);
+				populateRelationshipEntities(em, m, thriftRow, e, name, value);               
 
-				if (relation == null) {
-					continue;
-				}
-
-                String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
-                Set<String> keys = deserializeKeys(foreignKeys);
-                em.getEntityResolver().populateForeignEntities(e, thriftRow.getId(), relation, keys.toArray(new String[0]));
 			} else {
 				try {
 					PropertyAccessorHelper.set(e, column.getField(), value);
@@ -559,14 +552,13 @@ public class PelopsDataHandler {
 	}
 	
 	/**
-	 * 
+	 * Populates foreign key relationship entities into their parent entity
 	 * @throws PropertyAccessException
 	 */
-	public <E> void populateRelationshipEntities(EntityManagerImpl em,
-			EntityMetadata m, PelopsClient.ThriftRow tr, E e, String name,
+	public <E> void populateRelationshipEntities(EntityManagerImpl em, EntityMetadata m, PelopsClient.ThriftRow tr, E e, String relationName,
 			byte[] value) throws PropertyAccessException {
-		EntityMetadata.Relation relation = m.getRelation(name);
-
+		EntityMetadata.Relation relation = m.getRelation(relationName);	
+		
 		String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
 		Set<String> keys = deserializeKeys(foreignKeys);
 		em.getEntityResolver().populateForeignEntities(e, tr.getId(), relation,
