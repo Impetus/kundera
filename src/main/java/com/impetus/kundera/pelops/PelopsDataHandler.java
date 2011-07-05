@@ -205,35 +205,41 @@ public class PelopsDataHandler {
 				((PelopsClient)em.getClient()).getEcCacheHandler().addEmbeddedCollectionCacheMapping(tr.getId(), embeddedObject, scName);
 				
 				
-			} else {
-				Field superColumnField = superColumnNameToFieldMap.get(scName);
-				Class superColumnClass = superColumnField.getType();
-				Object superColumnObj = superColumnClass.newInstance();
-				
+			} else {				
 				boolean intoRelations = false;
 				if (scName.equals(TO_ONE_SUPER_COL_NAME)) {
 					intoRelations = true;
 				}
-
-				for (Column column : sc.getColumns()) {
-					String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
-					byte[] value = column.getValue();
-
-					if (value == null) {
-						continue;
-					}
-
-					if (intoRelations) {
+				
+				//For relations, fetch foreign keys from foreign key super column and populate related entities into parent entity
+				if(intoRelations) {
+					for (Column column : sc.getColumns()) {
+						String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
+						byte[] value = column.getValue();
+						
+						if (value == null) {
+							continue;
+						}
 						populateRelationshipEntities(em, m, tr, e, name, value);
-					} else {
-						// set value of the field in the bean
+					}
+				} else {
+					//For embedded super columns, create embedded entities and add them to parent entity
+					Field superColumnField = superColumnNameToFieldMap.get(scName);
+					Class superColumnClass = superColumnField.getType();
+					Object superColumnObj = superColumnClass.newInstance();
+					
+					for (Column column : sc.getColumns()) {
+						String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
+						byte[] value = column.getValue();
+						
+						
 						Field columnField = columnNameToFieldMap.get(name);								
 						PropertyAccessorHelper.set(superColumnObj, columnField, value);
 					}
-				}
-				PropertyAccessorHelper.set(e, superColumnField, superColumnObj);			
+					PropertyAccessorHelper.set(e, superColumnField, superColumnObj);
+					
+				}							
 			}
-			
 			
 		}
 		
@@ -354,7 +360,10 @@ public class PelopsDataHandler {
 
         }
         
-        addForeignkeysToColumns(timestamp, e, columns);	
+        if(! m.getColumnsAsList().isEmpty()) {
+        	addForeignkeysToColumns(timestamp, e, columns);	
+        }
+        
         tr.setColumns(columns);			
     }
 
