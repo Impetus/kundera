@@ -25,10 +25,9 @@ import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.log4j.Logger;
 
 import com.impetus.kundera.entity.AuthorDetail;
+import com.impetus.kundera.entity.PersonalDetail;
 import com.impetus.kundera.entity.Post;
 import com.impetus.kundera.entity.PostData;
-import com.impetus.kundera.entity.Email;
-import com.impetus.kundera.entity.PersonalDetail;
 import com.impetus.kundera.entity.Tweet;
 import com.impetus.kundera.entity.User;
 import com.impetus.kundera.loader.Configuration;
@@ -69,12 +68,14 @@ public class TestCassandra extends BaseTest
         logger.info("starting server");
         if (cassandra == null)
         {
-            startCassandraServer();
+//            startCassandraServer();
         }
         if (conf == null)
         {
             conf = new Configuration();
             manager = conf.getEntityManager("cassandra");
+            Thread.sleep(10000);
+            startCassandraServer();
         }
 
     }
@@ -168,6 +169,7 @@ public class TestCassandra extends BaseTest
     {
         logger.info("onTestSavePosts");
         String key = System.currentTimeMillis() + "-post";
+        Thread.sleep(5000);
         Post post = createPost(key, "I hate love stories", "I hate - Imran Khan, Sonal Kapoor", "Animesh", new Date(),
                 "movies", "hindi");
         manager.persist(post);

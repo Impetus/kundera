@@ -76,7 +76,7 @@ public class Configuration
             Properties props = new Properties();
             props.putAll(propMap);
             String client = props.getProperty("kundera.client");
-            serverConfig = "file://" + props.getProperty("server.config");
+            serverConfig = "file:///" + props.getProperty("server.config");
             node = props.getProperty("kundera.nodes");
             port = props.getProperty("kundera.port");
             keyspace = props.getProperty("kundera.keyspace");
