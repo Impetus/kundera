@@ -610,6 +610,7 @@ public class PelopsClient implements CassandraClient
 
     private class SolandraUtils
     {
+//        private TSocket socket;
 
         public void startSolandraServer()
         {
@@ -621,6 +622,7 @@ public class PelopsClient implements CassandraClient
             {
 
                 createCassSchema();
+                Thread.sleep(10000);
                 CassandraUtils.startupServer();
             }
             catch (Throwable t)
@@ -725,6 +727,7 @@ public class PelopsClient implements CassandraClient
             Class<? extends AbstractReplicationStrategy> simple = SimpleStrategy.class;
             KsDef solandraKS = new KsDef(keySpace, simple.getCanonicalName(), 1, cfs);
             Cassandra.Client client = getClient();
+            
 
             try
             {
@@ -757,6 +760,7 @@ public class PelopsClient implements CassandraClient
                 if (!socket.isOpen())
                 {
                     socket.open();
+                    
                 }
             }
             catch (TTransportException ttex)

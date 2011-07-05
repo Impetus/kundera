@@ -4,28 +4,17 @@ package com.impetus.kundera.junit;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import junit.framework.TestCase;
-import lucandra.CassandraUtils;
 
-import org.apache.cassandra.config.CFMetaData;
-import org.apache.cassandra.config.ColumnDefinition;
-import org.apache.cassandra.config.DatabaseDescriptor;
-import org.apache.cassandra.config.KSMetaData;
-import org.apache.cassandra.db.ColumnFamilyType;
-import org.apache.cassandra.db.marshal.UTF8Type;
+import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.locator.AbstractReplicationStrategy;
 import org.apache.cassandra.locator.SimpleStrategy;
-import org.apache.cassandra.service.EmbeddedCassandraService;
-import org.apache.cassandra.service.StorageService;
 import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.CassandraServer;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
@@ -38,9 +27,6 @@ import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
-import org.scale7.cassandra.pelops.Cluster;
-import org.scale7.cassandra.pelops.IConnection;
-import org.scale7.cassandra.pelops.Pelops;
 
 /**
  * The Class BaseTest.
@@ -49,7 +35,7 @@ public abstract class BaseTest extends TestCase
 {
 
     /** The embedded server cassandra. */
-    private static EmbeddedCassandraService cassandra;
+//    private static EmbeddedCassandraService cassandra;
 
     /** The client. */
     private Cassandra.Client client;
@@ -63,14 +49,15 @@ public abstract class BaseTest extends TestCase
      */
     protected void startCassandraServer() throws Exception
     {
-        if (!checkIfServerRunning())
+/*        if (!checkIfServerRunning())
         {
 //            cassandra = new EmbeddedCassandraService();
 //            cassandra.start();
 //            startSolandra();
 
-        }
+        }*/
         initClient();
+        logger.info("Loading Data:");
         loadData();
     }
 
@@ -122,21 +109,6 @@ public abstract class BaseTest extends TestCase
     }
 
     /**
-     * Standard cfmd.
-     *
-     * @param ksName the ks name
-     * @param cfName the cf name
-     * @param columnType the column type
-     * @return the cF meta data
-     */
-    private static CFMetaData standardCFMD(String ksName, String cfName, ColumnFamilyType columnType)
-    {
-        return new CFMetaData(ksName, cfName, columnType, UTF8Type.instance, null, "colfamily", Double.valueOf("0"),
-                Double.valueOf("0"), Double.valueOf("0"), 0, UTF8Type.instance, 0, 0, 0, 0, 0, Integer.valueOf(0),
-                Double.valueOf("0"), new HashMap<ByteBuffer, ColumnDefinition>());
-    }
-
-    /**
      * Load data.
      *
      * @throws ConfigurationException the configuration exception
@@ -172,15 +144,16 @@ public abstract class BaseTest extends TestCase
         cfDefs.add(userLine_Def);
         cfDefs.add(timeLine_Def);
         cfDefs.add(users_Def);        
-        List<KsDef> ksDefs = client.describe_keyspaces();
-        System.out.println(ksDefs.size());
+/*        List<KsDef> ksDefs = client.describe_keyspaces();
+        System.out.println("Size is : " + ksDefs.size());
         for(KsDef ksDef : ksDefs)
         {
             System.out.println(ksDef.getName());
         }
-//        client.send_system_drop_keyspace("Blog");
+*///        client.send_system_drop_keyspace("Blog");
         KsDef ksDef = new KsDef("Blog", simple.getCanonicalName(), 1, cfDefs);
         client.send_system_add_keyspace(ksDef);
+        logger.info("Data loaded");
      
     }
 

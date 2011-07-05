@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 
 import com.impetus.kundera.entity.AuthorDetail;
 import com.impetus.kundera.entity.IMDetail;
+import com.impetus.kundera.entity.PersonalDetail;
 import com.impetus.kundera.entity.Post;
 import com.impetus.kundera.entity.PostData;
 import com.impetus.kundera.entity.Preference;
@@ -53,7 +54,7 @@ public class TestCassandra extends BaseTest
 
     public void startCassandraServer() throws Exception
     {
-        //super.startCassandraServer();
+        super.startCassandraServer();
     }
 
     /**
