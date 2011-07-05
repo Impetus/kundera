@@ -26,10 +26,9 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name="contact", schema="mongodbtest")
+@Table(name="contact", schema="Blog")
 public class Contact {
-	@Id
-	@Column(name="contact_id")
+	@Id	
 	String contactId;
 	
 	@Column(name="last_name")

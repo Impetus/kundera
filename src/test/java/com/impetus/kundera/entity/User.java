@@ -16,12 +16,17 @@
 package com.impetus.kundera.entity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import javax.persistence.Column;
+import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 /**
@@ -33,13 +38,23 @@ import javax.persistence.Table;
 @Table(name="users", schema="Blog")
 public class User {
 	@Id
-	private String userId;
+	private String userId;		//PK
 	
+	//Embedded object, will persist co-located
 	@Embedded
-	private PersonalDetail personalDetail;
+	private PersonalDetail personalDetail;  
 	
+	//Embedded collection, will persist co-located
 	@Embedded
-	private List<Tweet> tweets;
+	private List<Tweet> tweets;				
+	
+	//One-to-one, will be persisted separately
+	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	private Preference preference;			
+	
+	//One to many, will be persisted separately
+	@OneToMany (cascade={CascadeType.ALL}, fetch=FetchType.LAZY)	
+	private Set<IMDetail> imDetails;
     
 	/**
 	 * @return the userId
@@ -84,5 +99,38 @@ public class User {
 			this.tweets = new ArrayList<Tweet>();
 		}
 		this.tweets.add(tweet);
+	}	
+
+	/**
+	 * @return the preference
+	 */
+	public Preference getPreference() {
+		return preference;
 	}
+
+	/**
+	 * @param preference the preference to set
+	 */
+	public void setPreference(Preference preference) {
+		this.preference = preference;
+	}
+
+	/**
+	 * @return the imDetails
+	 */
+	public Set<IMDetail> getImDetails() {
+		return imDetails;
+	}
+
+	/**
+	 * @param imDetails the imDetails to set
+	 */
+	public void addImDetail(IMDetail imDetail) {
+		if(this.imDetails == null || this.imDetails.isEmpty()) {
+			this.imDetails = new HashSet<IMDetail>();
+		}
+		
+		this.imDetails.add(imDetail);		
+	}
+	
 }

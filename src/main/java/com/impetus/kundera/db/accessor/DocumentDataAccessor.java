@@ -17,6 +17,7 @@ package com.impetus.kundera.db.accessor;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
@@ -35,8 +36,7 @@ import com.impetus.kundera.proxy.EnhancedEntity;
  * CouchDB
  * @author amresh.singh
  */
-@Deprecated
-public final class DocumentDataAccessor {/*extends BaseDataAccessor<Table> {
+public final class DocumentDataAccessor extends BaseDataAccessor {
 	private static Log log = LogFactory.getLog(DocumentDataAccessor.class);
 	
 	public DocumentDataAccessor(EntityManagerImpl em) {
@@ -71,8 +71,6 @@ public final class DocumentDataAccessor {/*extends BaseDataAccessor<Table> {
 		return getEntityManager().getClient().loadColumns(getEntityManager(),clazz,dbName, documentName, id,m);
 	}
 
-	 (non-Javadoc)
-	 * @see com.impetus.kundera.db.DataAccessor#read(java.lang.Class, com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
 	 
 	@Override
 	public <E> List<E> read(Class<E> clazz, EntityMetadata m, String... ids)
@@ -83,8 +81,14 @@ public final class DocumentDataAccessor {/*extends BaseDataAccessor<Table> {
 		String documentName = m.getTableName();
 		m.addColumn(m.getIdColumn().getName(), m.getIdColumn());
 		return getEntityManager().getClient().loadColumns(getEntityManager(), clazz, dbName, documentName, m, ids);
-	}
+	}	
 	
+	@Override
+	public <E> List<E> read(Class<E> clazz, EntityMetadata m, Map<String, String> col) throws Exception {
+		throw new PersistenceException("Not implemented for Document based data stores");
+	}
+
+
 	@Override
 	public void delete(EnhancedEntity e, EntityMetadata m) throws Exception {
 		String entityName = e.getEntity().getClass().getName();
@@ -114,4 +118,4 @@ public final class DocumentDataAccessor {/*extends BaseDataAccessor<Table> {
 	
 	
 	
-*/}
+}

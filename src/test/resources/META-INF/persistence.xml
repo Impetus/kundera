@@ -37,7 +37,7 @@
 		<properties>
 			<property name="kundera.nodes" value="localhost"/>
 			<property name="kundera.port" value="27017"/>
-			<property name="kundera.keyspace" value="mongodbtest"/>
+			<property name="kundera.keyspace" value="Blog"/>
 			<property name="kundera.dialect" value="mongodb"/>
 			<property name="kundera.client" value="MongoDB"/>
 		</properties>

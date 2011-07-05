@@ -119,9 +119,7 @@ public class PelopsDataHandler {
                 String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
                 Set<String> keys = deserializeKeys(foreignKeys);
                 em.getEntityResolver().populateForeignEntities(e, thriftRow.getId(), relation, keys.toArray(new String[0]));
-			}
-
-			else {
+			} else {
 				try {
 					PropertyAccessorHelper.set(e, column.getField(), value);
 				} catch (PropertyAccessException pae) {
@@ -176,20 +174,10 @@ public class PelopsDataHandler {
 					} else {
 						throw new PersistenceException("Super Column " + scName + " doesn't match with entity which should have been a Collection");
 					}
-				}		
+				}						
 				
+				Class<?> embeddedClass = PropertyAccessorHelper.getGenericClass(embeddedCollectionField);		
 				
-				Class<?> embeddedClass = null;
-				Type[] parameters = ReflectUtils.getTypeArguments(embeddedCollectionField);
-				if (parameters != null) {
-					if (parameters.length == 1) {
-						embeddedClass = (Class<?>) parameters[0];
-					} else {
-						throw new PersistenceException("How many parameters man?");
-					}
-				}
-				
-				System.out.println(embeddedClass);
 				// must have a default no-argument constructor
 		        try {
 		        	embeddedClass.getConstructor();
@@ -198,6 +186,10 @@ public class PelopsDataHandler {
 		        }
 				Object embeddedObject = embeddedClass.newInstance();
 				
+				boolean intoRelations = false;
+				if (scName.equals(TO_ONE_SUPER_COL_NAME)) {
+					intoRelations = true;
+				}
 				
 				for(Column column : sc.getColumns()) {
 					String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
@@ -205,8 +197,14 @@ public class PelopsDataHandler {
 					if (value == null) {
 						continue;
 					}
-					Field columnField = columnNameToFieldMap.get(name);
-					PropertyAccessorHelper.set(embeddedObject, columnField, value);
+					
+					if (intoRelations) {
+						populateRelationshipEntities(em, m, tr, e, name, value);
+					} else {
+						Field columnField = columnNameToFieldMap.get(name);
+						PropertyAccessorHelper.set(embeddedObject, columnField, value);
+					}
+					
 				}
 				embeddedCollection.add(embeddedObject);	
 				
@@ -233,19 +231,10 @@ public class PelopsDataHandler {
 					}
 
 					if (intoRelations) {
-						EntityMetadata.Relation relation = m.getRelation(name);
-
-						String foreignKeys = PropertyAccessorFactory.STRING
-								.fromBytes(value);
-						Set<String> keys = deserializeKeys(foreignKeys);
-						em.getEntityResolver()
-								.populateForeignEntities(e, tr.getId(), relation,
-										keys.toArray(new String[0]));
-
+						populateRelationshipEntities(em, m, tr, e, name, value);
 					} else {
 						// set value of the field in the bean
-						Field columnField = columnNameToFieldMap.get(name);						
-						
+						Field columnField = columnNameToFieldMap.get(name);								
 						PropertyAccessorHelper.set(superColumnObj, columnField, value);
 					}
 				}
@@ -260,6 +249,8 @@ public class PelopsDataHandler {
 		}
 		return e;
 	}
+
+	
 	
 	
 	public Object populateEmbeddedObject(SuperColumn sc, EntityMetadata m) throws Exception {		
@@ -281,17 +272,8 @@ public class PelopsDataHandler {
 				scNamePrefix = st.nextToken();
 			}			
 			
-			embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);				
-			
-			Class<?> embeddedClass = null;
-			Type[] parameters = ReflectUtils.getTypeArguments(embeddedCollectionField);
-			if (parameters != null) {
-				if (parameters.length == 1) {
-					embeddedClass = (Class<?>) parameters[0];
-				} else {
-					throw new PersistenceException("How many parameters man?");
-				}
-			}		
+			embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);			
+			Class<?> embeddedClass = PropertyAccessorHelper.getGenericClass(embeddedCollectionField);				
 			
 			// must have a default no-argument constructor
 	        try {
@@ -350,16 +332,13 @@ public class PelopsDataHandler {
 
         PelopsClient.ThriftRow tr = new PelopsClient(). new ThriftRow();
 
-        tr.setColumnFamilyName(columnFamily);	        		// column-family name       
-        tr.setId(e.getId());									// Id
+        tr.setColumnFamilyName(columnFamily);	        			// column-family name       
+        tr.setId(e.getId());										// Id
         
-        addSuperColumnsToThriftRow(timestamp, client, tr, m, e);		//Super columns  
+        addSuperColumnsToThriftRow(timestamp, client, tr, m, e);	//Super columns        
+        addColumnsToThriftRow(timestamp, tr, m, e);				//Columns              
         
-        if(m.getSuperColumnsAsList().isEmpty()) {
-        	addColumnsToThriftRow(timestamp, tr, m, e);				//Columns
-        }        
-
-        return tr;
+		return tr;
     }
         
     private void addColumnsToThriftRow(long timestamp, PelopsClient.ThriftRow tr, EntityMetadata m, EnhancedEntity e) throws Exception {
@@ -381,24 +360,12 @@ public class PelopsDataHandler {
             }
 
         }
-
-        // add foreign keys
-        for (Map.Entry<String, Set<String>> entry : e.getForeignKeysMap().entrySet()) {
-            String property = entry.getKey();
-            Set<String> foreignKeys = entry.getValue();
-
-            String keys = serializeKeys(foreignKeys);
-            if (null != keys) {
-                Column col = new Column();
-
-                col.setName(PropertyAccessorFactory.STRING.toBytes(property));
-                col.setValue(PropertyAccessorFactory.STRING.toBytes(keys));
-                col.setTimestamp(timestamp);
-                columns.add(col);
-            }
-        }
-        tr.setColumns(columns);			//Columns
+        
+        addForeignkeysToColumns(timestamp, e, columns);	
+        tr.setColumns(columns);			
     }
+
+	
     
     private void addSuperColumnsToThriftRow(long timestamp, PelopsClient client, PelopsClient.ThriftRow tr, EntityMetadata m, EnhancedEntity e) throws Exception {
     	 //Iterate through Super columns
@@ -450,7 +417,15 @@ public class PelopsDataHandler {
             }         
             
         }
+        
+		// Add relations entities as Foreign keys to a new super column
+		if(! m.getSuperColumnsAsList().isEmpty()) {
+			createForeignKeySuperColumn(timestamp, tr, e);
+		}
+        
     }
+
+	
     
     private SuperColumn buildThriftSuperColumn(String superColumnName, long timestamp, EntityMetadata.SuperColumn superColumn, Object superColumnObject) throws PropertyAccessException {
     	List<Column> thriftColumns = new ArrayList<Column>();  
@@ -539,6 +514,63 @@ public class PelopsDataHandler {
 						cMetadata.getField());
 			}
 		}
+	}
+	
+	/**
+	 * All relationships in a column family are saved as additional column internally, one for each relationship entity.
+     * Columns value is row key of relationship entity for 1-to-1 relationship
+     * and ~ delimited row keys of relationship entities for 1-M relationship	 
+	 * @throws PropertyAccessException
+	 */
+	public void addForeignkeysToColumns(long timestamp, EnhancedEntity e,
+			List<Column> columns) throws PropertyAccessException {
+		// Add relationships as foreign keys 
+        for (Map.Entry<String, Set<String>> entry : e.getForeignKeysMap().entrySet()) {
+            String property = entry.getKey();
+            Set<String> foreignKeys = entry.getValue();
+
+            String keys = serializeKeys(foreignKeys);
+            if (null != keys) {
+                Column col = new Column();
+
+                col.setName(PropertyAccessorFactory.STRING.toBytes(property));
+                col.setValue(PropertyAccessorFactory.STRING.toBytes(keys));
+                col.setTimestamp(timestamp);
+                columns.add(col);
+            }
+        }
+	}
+	
+	/**
+	 * For super column families, all relationships are saved as columns, in one additional super column 
+	 * used internally.
+	 * @throws PropertyAccessException
+	 */
+	public void createForeignKeySuperColumn(long timestamp, PelopsClient.ThriftRow tr, EnhancedEntity e)
+			throws PropertyAccessException {
+		List<Column> columns = new ArrayList<Column>();
+		addForeignkeysToColumns(timestamp, e, columns);
+		if (!columns.isEmpty()) {
+			SuperColumn superCol = new SuperColumn();
+			superCol.setName(PropertyAccessorFactory.STRING.toBytes(TO_ONE_SUPER_COL_NAME));
+			superCol.setColumns(columns);
+			tr.addSuperColumn(superCol);
+		}
+	}
+	
+	/**
+	 * 
+	 * @throws PropertyAccessException
+	 */
+	public <E> void populateRelationshipEntities(EntityManagerImpl em,
+			EntityMetadata m, PelopsClient.ThriftRow tr, E e, String name,
+			byte[] value) throws PropertyAccessException {
+		EntityMetadata.Relation relation = m.getRelation(name);
+
+		String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
+		Set<String> keys = deserializeKeys(foreignKeys);
+		em.getEntityResolver().populateForeignEntities(e, tr.getId(), relation,
+						keys.toArray(new String[0]));
 	}
 
 }

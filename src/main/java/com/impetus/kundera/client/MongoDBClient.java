@@ -15,13 +15,16 @@
  */
 package com.impetus.kundera.client;
 
+import java.lang.reflect.Field;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
@@ -33,7 +36,10 @@ import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
+import com.impetus.kundera.metadata.EntityMetadata.Relation;
 import com.impetus.kundera.mongodb.MongoDBDataHandler;
+import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -82,17 +88,16 @@ public class MongoDBClient implements Client {
 			
 			BasicDBObject searchQuery = new BasicDBObject();
 			searchQuery.put(m.getIdColumn().getName(), key);
-			BasicDBObject updatedDocument = new MongoDBDataHandler().getDocumentFromEntity(em, m, e.getEntity());	
+			BasicDBObject updatedDocument = new MongoDBDataHandler().getDocumentFromEntity(em, m, e);	
 			dbCollection.update(searchQuery, updatedDocument);
 			
 		} else {
 			log.debug("Inserting data into " + dbName + "." + documentName + " for " + key);
 			DBCollection dbCollection = mongoDb.getCollection(documentName);	
 			
-			BasicDBObject document = new MongoDBDataHandler().getDocumentFromEntity(em, m, e.getEntity());	
-			dbCollection.insert(document);
-		}		
-				
+			BasicDBObject document = new MongoDBDataHandler().getDocumentFromEntity(em, m, e);	
+			dbCollection.insert(document);			
+		}						
 	}	
 
 	
@@ -119,8 +124,6 @@ public class MongoDBClient implements Client {
         
         return (E)entity;
 	}
-	
-	
 
 	
 	@Override

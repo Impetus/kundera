@@ -198,7 +198,7 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor
                 {
                     // set value of the field in the bean
                     Field field = columnNameToFieldMap.get(name);
-                    PropertyAccessorHelper.set(PropertyAccessorHelper.getEmbeddedObject(e, scName), field, value);
+                    PropertyAccessorHelper.set(PropertyAccessorHelper.getObject(e, scName), field, value);
                 }
             }
         }
