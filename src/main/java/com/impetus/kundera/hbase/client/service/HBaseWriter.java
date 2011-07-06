@@ -1,5 +1,17 @@
-/**
- * 
+/*
+ * Copyright 2011 Impetus Infotech.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.impetus.kundera.hbase.client.service;
 
@@ -17,28 +29,37 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
- * @author impetus
+ * The Class HBaseWriter.
  *
+ * @author impetus
  */
-public class HBaseWriter implements Writer {
+public class HBaseWriter implements Writer
+{
 
-	@Override
-	public void writeColumns(HTable htable, String columnFamily, String rowKey,List<Column> columns, EnhancedEntity e) throws IOException {
-		Put p = new Put(Bytes.toBytes(rowKey));
-		
-		for(Column col:columns) {
-//		Set<String> keys = columnValues.keySet();
-//		Iterator<String> iter = keys.iterator();
-//	    while(iter.hasNext()){
-			String qualifier = col.getName();
-	    	try {
-	    		PropertyAccessorHelper.getObject(e.getEntity(), col.getField());
-				p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), PropertyAccessorHelper.get(e.getEntity(), col.getField()));
-			} catch (PropertyAccessException e1) {
-				throw new IOException(e1.getMessage());
-			}
-	    }
-	    htable.put(p);
-	}
-	
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.hbase.client.Writer#writeColumns(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.lang.String, java.util.List, com.impetus.kundera.proxy.EnhancedEntity)
+     */
+    @Override
+    public void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns, EnhancedEntity e)
+            throws IOException
+    {
+        Put p = new Put(Bytes.toBytes(rowKey));
+
+        for (Column col : columns)
+        {
+            String qualifier = col.getName();
+            try
+            {
+                PropertyAccessorHelper.getObject(e.getEntity(), col.getField());
+                p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), PropertyAccessorHelper.get(e.getEntity(),
+                        col.getField()));
+            }
+            catch (PropertyAccessException e1)
+            {
+                throw new IOException(e1.getMessage());
+            }
+        }
+        htable.put(p);
+    }
+
 }

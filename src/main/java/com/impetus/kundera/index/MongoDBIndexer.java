@@ -30,49 +30,73 @@ import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.PropertyIndex;
 
 /**
- * Provides indexing functionality for MongoDB database 
+ * Provides indexing functionality for MongoDB database.
+ *
  * @author amresh.singh
  */
-public class MongoDBIndexer implements Indexer {
-	/** log for this class. */
-	private static Log log = LogFactory.getLog(MongoDBIndexer.class);
-	MongoDBClient client;
-	
-	public MongoDBIndexer(Client client) {
-		this.client = (MongoDBClient) client;
-	}
+public class MongoDBIndexer implements Indexer
+{
+    /** log for this class. */
+    private static Log LOG = LogFactory.getLog(MongoDBIndexer.class);
 
-	@Override
-	public void unindex(EntityMetadata metadata, String id) {
-		log.debug("No need to remove data from Index. It's handled automatically by MongoDB when document is dropped");		
-	}
+    /** The client. */
+    MongoDBClient client;
 
+    /**
+     * Instantiates a new mongo db indexer.
+     *
+     * @param client the client
+     */
+    public MongoDBIndexer(Client client)
+    {
+        this.client = (MongoDBClient) client;
+    }
 
-	@Override
-	public void index(EntityMetadata metadata, Object object) {
-		if (!metadata.isIndexable()) {
-			return;
-		}
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.index.Indexer#unindex(com.impetus.kundera.metadata.EntityMetadata, java.lang.String)
+     */
+    @Override
+    public void unindex(EntityMetadata metadata, String id)
+    {
+        LOG.debug("No need to remove data from Index. It's handled automatically by MongoDB when document is dropped");
+    }
 
-		log.debug("Indexing @Entity[" + metadata.getEntityClazz().getName() + "] " + object);
-		String indexName = metadata.getIndexName();	//Index Name=Collection name, not required
-		
-		List<PropertyIndex> indexProperties = metadata.getIndexProperties();
-		
-		List<String> columnList = new ArrayList<String>();
-		
-		for(PropertyIndex propertyIndex : indexProperties) {			
-			columnList.add(propertyIndex.getName());
-		}	
-		
-		client.createIndex(metadata.getTableName(), columnList, 1);	//1=Ascending
-				
-	}
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.EntityMetadata, java.lang.Object)
+     */
+    @Override
+    public void index(EntityMetadata metadata, Object object)
+    {
+        if (!metadata.isIndexable())
+        {
+            return;
+        }
 
+        LOG.debug("Indexing @Entity[" + metadata.getEntityClazz().getName() + "] " + object);
+        String indexName = metadata.getIndexName(); // Index Name=Collection
+                                                    // name, not required
 
-	@Override
-	public Map<String, String> search(String query, int start, int count) {
-		throw new PersistenceException("Invalid method call! When you search on a column, MongoDB will automatically search in index if that exists.");		
-	}
-	
+        List<PropertyIndex> indexProperties = metadata.getIndexProperties();
+
+        List<String> columnList = new ArrayList<String>();
+
+        for (PropertyIndex propertyIndex : indexProperties)
+        {
+            columnList.add(propertyIndex.getName());
+        }
+
+        client.createIndex(metadata.getTableName(), columnList, 1); // 1=Ascending
+
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int)
+     */
+    @Override
+    public Map<String, String> search(String query, int start, int count)
+    {
+        throw new PersistenceException(
+                "Invalid method call! When you search on a column, MongoDB will automatically search in index if that exists.");
+    }
+
 }

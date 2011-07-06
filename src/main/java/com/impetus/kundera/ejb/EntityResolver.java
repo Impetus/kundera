@@ -42,294 +42,308 @@ import com.impetus.kundera.proxy.EnhancedEntity;
  * 
  * @author animesh.kumar
  */
-public class EntityResolver {
+public class EntityResolver
+{
 
-	/** The Constant log. */
-	private static final Log log = LogFactory.getLog(EntityResolver.class);
+    /** The Constant log. */
+    private static final Log LOG = LogFactory.getLog(EntityResolver.class);
 
-	/** The em. */
-	private EntityManagerImpl em;
+    /** The em. */
+    private EntityManagerImpl em;
 
-	/**
-	 * Instantiates a new entity resolver.
-	 * 
-	 * @param em
-	 *            the em
-	 */
-	public EntityResolver(EntityManagerImpl em) {
-		this.em = em;
-	}
+    /**
+     * Instantiates a new entity resolver.
+     * 
+     * @param em
+     *            the em
+     */
+    public EntityResolver(EntityManagerImpl em)
+    {
+        this.em = em;
+    }
 
-	/**
-	 * Resolve all reachable entities from entity
-	 * 
-	 * @param entity
-	 *            the entity
-	 * @param cascadeType
-	 *            the cascade type
-	 * @return the all reachable entities
-	 */
-	public List<EnhancedEntity> resolve (Object entity, CascadeType cascadeType, DBType dbType) {
-		Map<String, EnhancedEntity> map = new HashMap<String, EnhancedEntity>();
-		try {
-			log.debug("Resolving reachable entities for cascade "
-							+ cascadeType);				
-			
-			recursivelyResolveEntities(entity, cascadeType, map);
-			
-			
-		} catch (PropertyAccessException e) {
-			throw new PersistenceException(e.getMessage());
-		}
+    /**
+     * Resolve all reachable entities from entity
+     * 
+     * @param entity
+     *            the entity
+     * @param cascadeType
+     *            the cascade type
+     * @return the all reachable entities
+     */
+    public List<EnhancedEntity> resolve(Object entity, CascadeType cascadeType, DBType dbType)
+    {
+        Map<String, EnhancedEntity> map = new HashMap<String, EnhancedEntity>();
+        try
+        {
+            LOG.debug("Resolving reachable entities for cascade " + cascadeType);
 
-		if (log.isDebugEnabled()) {
-			for (Map.Entry<String, EnhancedEntity> entry : map.entrySet()) {
-				log.debug("Entity => " + entry.getKey() + ", ForeignKeys => "
-						+ entry.getValue().getForeignKeysMap());
-			}
-		}
+            recursivelyResolveEntities(entity, cascadeType, map);
 
-		return new ArrayList<EnhancedEntity>(map.values());
-	}
-	
+        }
+        catch (PropertyAccessException e)
+        {
+            throw new PersistenceException(e.getMessage());
+        }
 
-	/**
-	 * helper method to recursively build reachable object list.
-	 * 
-	 * @param o
-	 *            the o
-	 * @param cascadeType
-	 *            the cascade type
-	 * @param entities
-	 *            the entities
-	 * @return the all reachable entities
-	 * @throws PropertyAccessException
-	 *             the property access exception
-	 */
-	private void recursivelyResolveEntities(Object o, CascadeType cascadeType,
-			Map<String, EnhancedEntity> entities)
-			throws PropertyAccessException {
-		
-		EntityMetadata m = null;
-		try {
-			m = em.getMetadataManager().getEntityMetadata(o.getClass());
-		} catch (Exception e) {
-			// Object might already be an enhanced entity
-		}
+        if (LOG.isDebugEnabled())
+        {
+            for (Map.Entry<String, EnhancedEntity> entry : map.entrySet())
+            {
+                LOG.debug("Entity => " + entry.getKey() + ", ForeignKeys => " + entry.getValue().getForeignKeysMap());
+            }
+        }
 
-		if (m == null) {
-			return;
-		}	
+        return new ArrayList<EnhancedEntity>(map.values());
+    }
 
-		String id = PropertyAccessorHelper.getId(o, m);
+    /**
+     * helper method to recursively build reachable object list.
+     * 
+     * @param o
+     *            the o
+     * @param cascadeType
+     *            the cascade type
+     * @param entities
+     *            the entities
+     * @return the all reachable entities
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    private void recursivelyResolveEntities(Object o, CascadeType cascadeType, Map<String, EnhancedEntity> entities)
+            throws PropertyAccessException
+    {
 
-		// Ensure that @Id is set
-		if (null == id || id.trim().isEmpty()) {
-			throw new PersistenceException("Missing primary key >> "
-					+ m.getEntityClazz().getName() + "#"
-					+ m.getIdProperty().getName());
-		}
+        EntityMetadata m = null;
+        try
+        {
+            m = em.getMetadataManager().getEntityMetadata(o.getClass());
+        }
+        catch (Exception e)
+        {
+            // Object might already be an enhanced entity
+        }
 
-		// Dummy name to check if the object is already processed
-		String mapKeyForEntity = m.getEntityClazz().getName() + "_" + id;
+        if (m == null)
+        {
+            return;
+        }
 
-		if (entities.containsKey(mapKeyForEntity)) {
-			return;
-		}
+        String id = PropertyAccessorHelper.getId(o, m);
 
-		log.debug("Resolving >> " + mapKeyForEntity);
+        // Ensure that @Id is set
+        if (null == id || id.trim().isEmpty())
+        {
+            throw new PersistenceException("Missing primary key >> " + m.getEntityClazz().getName() + "#"
+                    + m.getIdProperty().getName());
+        }
 
-		// Map to hold property-name=>foreign-entity relations
-		Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+        // Dummy name to check if the object is already processed
+        String mapKeyForEntity = m.getEntityClazz().getName() + "_" + id;
 
-		// Save to map
-		entities.put(mapKeyForEntity, em.getFactory().getEnhancedEntity(o, id,
-				foreignKeysMap));
-		
-		// Iterate over EntityMetata.Relation relations
-		for (EntityMetadata.Relation relation : m.getRelations()) {
+        if (entities.containsKey(mapKeyForEntity))
+        {
+            return;
+        }
 
-			// Cascade?
-			if (!relation.getCascades().contains(CascadeType.ALL)
-					&& !relation.getCascades().contains(cascadeType)) {
-				continue;
-			}
+        LOG.debug("Resolving >> " + mapKeyForEntity);
 
-			// Target entity
-			Class<?> targetClass = relation.getTargetEntity();
-			// Mapped to this property
-			Field targetField = relation.getProperty();
-			// Is it optional?
-			boolean optional = relation.isOptional();
+        // Map to hold property-name=>foreign-entity relations
+        Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
-			// Value
-			Object value = PropertyAccessorHelper.getObject(o, targetField);
+        // Save to map
+        entities.put(mapKeyForEntity, em.getFactory().getEnhancedEntity(o, id, foreignKeysMap));
 
-			// if object is not null, then proceed
-			if (null != value) {
+        // Iterate over EntityMetata.Relation relations
+        for (EntityMetadata.Relation relation : m.getRelations())
+        {
 
-				if (relation.isUnary()) {
-					// Unary relation will have single target object.
-					String targetId = PropertyAccessorHelper.getId(value, em
-							.getMetadataManager()
-							.getEntityMetadata(targetClass));
+            // Cascade?
+            if (!relation.getCascades().contains(CascadeType.ALL) && !relation.getCascades().contains(cascadeType))
+            {
+                continue;
+            }
 
-					Set<String> foreignKeys = new HashSet<String>();
+            // Target entity
+            Class<?> targetClass = relation.getTargetEntity();
+            // Mapped to this property
+            Field targetField = relation.getProperty();
+            // Is it optional?
+            boolean optional = relation.isOptional();
 
-					foreignKeys.add(targetId);
-					// put to map
-					foreignKeysMap.put(targetField.getName(), foreignKeys);
+            // Value
+            Object value = PropertyAccessorHelper.getObject(o, targetField);
 
-					// get all other reachable objects from object "value"
-					recursivelyResolveEntities(value, cascadeType, entities);
+            // if object is not null, then proceed
+            if (null != value)
+            {
 
-				}
-				if (relation.isCollection()) {
-					// Collection relation can have many target objects.
+                if (relation.isUnary())
+                {
+                    // Unary relation will have single target object.
+                    String targetId = PropertyAccessorHelper.getId(value, em.getMetadataManager().getEntityMetadata(
+                            targetClass));
 
-					// Value must map to Collection interface.
-					@SuppressWarnings("unchecked")
-					Collection collection = (Collection) value;
+                    Set<String> foreignKeys = new HashSet<String>();
 
-					Set<String> foreignKeys = new HashSet<String>();
+                    foreignKeys.add(targetId);
+                    // put to map
+                    foreignKeysMap.put(targetField.getName(), foreignKeys);
 
-					// Iterate over each Object and get the @Id
-					for (Object o_ : collection) {
-						String targetId = PropertyAccessorHelper.getId(o_, em
-								.getMetadataManager().getEntityMetadata(
-										targetClass));
+                    // get all other reachable objects from object "value"
+                    recursivelyResolveEntities(value, cascadeType, entities);
 
-						foreignKeys.add(targetId);
+                }
+                if (relation.isCollection())
+                {
+                    // Collection relation can have many target objects.
 
-						// Get all other reachable objects from "o_"
-						recursivelyResolveEntities(o_, cascadeType, entities);
-					}
-					foreignKeysMap.put(targetField.getName(), foreignKeys);
-				}
-			}
+                    // Value must map to Collection interface.
+                    @SuppressWarnings("unchecked")
+                    Collection collection = (Collection) value;
 
-			// if the value is null
-			else {
-				// halt, if this was a non-optional property
-				if (!optional) {
-					throw new PersistenceException("Missing "
-							+ targetClass.getName() + "."
-							+ targetField.getName());
-				}
-			}
-		}
-	}
+                    Set<String> foreignKeys = new HashSet<String>();
 
-	/**
-	 * Populate foreign entities.
-	 * 
-	 * @param containingEntity
-	 *            the containing entity
-	 * @param containingEntityId
-	 *            the containing entity id
-	 * @param relation
-	 *            the relation
-	 * @param foreignKeys
-	 *            the foreign keys
-	 * @throws PropertyAccessException
-	 *             the property access exception
-	 */
-	public void populateForeignEntities (Object entity, String entityId,
-			EntityMetadata.Relation relation, String... foreignKeys)
-			throws PropertyAccessException {
+                    // Iterate over each Object and get the @Id
+                    for (Object o_ : collection)
+                    {
+                        String targetId = PropertyAccessorHelper.getId(o_, em.getMetadataManager().getEntityMetadata(
+                                targetClass));
 
-		if (null == foreignKeys || foreignKeys.length == 0) {
-			return;
-		}
+                        foreignKeys.add(targetId);
 
-		String entityName = entity.getClass().getName() + "_" + entityId + "#"
-				+ relation.getProperty().getName();
+                        // Get all other reachable objects from "o_"
+                        recursivelyResolveEntities(o_, cascadeType, entities);
+                    }
+                    foreignKeysMap.put(targetField.getName(), foreignKeys);
+                }
+            }
 
-		log.debug("Populating foreign entities for " + entityName);
+            // if the value is null
+            else
+            {
+                // halt, if this was a non-optional property
+                if (!optional)
+                {
+                    throw new PersistenceException("Missing " + targetClass.getName() + "." + targetField.getName());
+                }
+            }
+        }
+    }
 
-		// foreignEntityClass
-		Class<?> foreignEntityClass = relation.getTargetEntity();
+    /**
+     * Populate foreign entities.
+     * 
+     * @param containingEntity
+     *            the containing entity
+     * @param containingEntityId
+     *            the containing entity id
+     * @param relation
+     *            the relation
+     * @param foreignKeys
+     *            the foreign keys
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    public void populateForeignEntities(Object entity, String entityId, EntityMetadata.Relation relation,
+            String... foreignKeys) throws PropertyAccessException
+    {
 
-		// Eagerly Caching containing entity to avoid it's own loading,
-		// in case the target contains a reference to containing entity.
-		em.getSession().store(entity, entityId, Boolean.FALSE);
+        if (null == foreignKeys || foreignKeys.length == 0)
+        {
+            return;
+        }
 
-		if (relation.isUnary()) {
-			// there is just one target object
-			String foreignKey = foreignKeys[0];
+        String entityName = entity.getClass().getName() + "_" + entityId + "#" + relation.getProperty().getName();
 
-			Object foreignObject = getForeignEntityOrProxy(entityName,
-					foreignEntityClass, foreignKey, relation);
+        LOG.debug("Populating foreign entities for " + entityName);
 
-			PropertyAccessorHelper.set(entity, relation.getProperty(),
-					foreignObject);
-		}
+        // foreignEntityClass
+        Class<?> foreignEntityClass = relation.getTargetEntity();
 
-		else if (relation.isCollection()) {
-			// there could be multiple target objects
+        // Eagerly Caching containing entity to avoid it's own loading,
+        // in case the target contains a reference to containing entity.
+        em.getSession().store(entity, entityId, Boolean.FALSE);
 
-			// Cast to Collection
-			Collection<Object> foreignObjects = null;
-			if (relation.getPropertyType().equals(Set.class)) {
-				foreignObjects = new HashSet<Object>();
-			} else if (relation.getPropertyType().equals(List.class)) {
-				foreignObjects = new ArrayList<Object>();
-			}
+        if (relation.isUnary())
+        {
+            // there is just one target object
+            String foreignKey = foreignKeys[0];
 
-			// Iterate over keys
-			for (String foreignKey : foreignKeys) {
-				Object foreignObject = getForeignEntityOrProxy(entityName,
-						foreignEntityClass, foreignKey, relation);
-				foreignObjects.add(foreignObject);
-			}
+            Object foreignObject = getForeignEntityOrProxy(entityName, foreignEntityClass, foreignKey, relation);
 
-			PropertyAccessorHelper.set(entity, relation.getProperty(),
-					foreignObjects);
-		}
-	}
+            PropertyAccessorHelper.set(entity, relation.getProperty(), foreignObject);
+        }
 
-	/**
-	 * Helper method to load Foreign Entity/Proxy
-	 * 
-	 * @param entityName
-	 *            the entity name
-	 * @param persistentClass
-	 *            the persistent class
-	 * @param foreignKey
-	 *            the foreign key
-	 * @param relation
-	 *            the relation
-	 * @return the foreign entity or proxy
-	 */
-	private Object getForeignEntityOrProxy(String entityName,
-			Class<?> persistentClass, String foreignKey,
-			EntityMetadata.Relation relation) {
+        else if (relation.isCollection())
+        {
+            // there could be multiple target objects
 
-		// Check in session cache!
-		Object cached = em.getSession().lookup(persistentClass, foreignKey);
-		if (cached != null) {
-			return cached;
-		}
+            // Cast to Collection
+            Collection<Object> foreignObjects = null;
+            if (relation.getPropertyType().equals(Set.class))
+            {
+                foreignObjects = new HashSet<Object>();
+            }
+            else if (relation.getPropertyType().equals(List.class))
+            {
+                foreignObjects = new ArrayList<Object>();
+            }
 
-		FetchType fetch = relation.getFetchType();
+            // Iterate over keys
+            for (String foreignKey : foreignKeys)
+            {
+                Object foreignObject = getForeignEntityOrProxy(entityName, foreignEntityClass, foreignKey, relation);
+                foreignObjects.add(foreignObject);
+            }
 
-		if (fetch.equals(FetchType.EAGER)) {
-			log.debug("Eagerly loading >> " + persistentClass.getName() + "_"
-					+ foreignKey);
-			// load target eagerly!
-			return em.immediateLoadAndCache(persistentClass, foreignKey);
-		} else {
-			log.debug("Creating proxy for >> " + persistentClass.getName() + "#"
-					+ relation.getProperty().getName() + "_" + foreignKey);
+            PropertyAccessorHelper.set(entity, relation.getProperty(), foreignObjects);
+        }
+    }
 
-			// metadata
-			EntityMetadata m = em.getMetadataManager().getEntityMetadata(
-					persistentClass);
+    /**
+     * Helper method to load Foreign Entity/Proxy
+     * 
+     * @param entityName
+     *            the entity name
+     * @param persistentClass
+     *            the persistent class
+     * @param foreignKey
+     *            the foreign key
+     * @param relation
+     *            the relation
+     * @return the foreign entity or proxy
+     */
+    private Object getForeignEntityOrProxy(String entityName, Class<?> persistentClass, String foreignKey,
+            EntityMetadata.Relation relation)
+    {
 
-			return em.getFactory().getLazyEntity(entityName, persistentClass,
-					m.getReadIdentifierMethod(), m.getWriteIdentifierMethod(),
-					foreignKey, em);
-		}
-	}
+        // Check in session cache!
+        Object cached = em.getSession().lookup(persistentClass, foreignKey);
+        if (cached != null)
+        {
+            return cached;
+        }
+
+        FetchType fetch = relation.getFetchType();
+
+        if (fetch.equals(FetchType.EAGER))
+        {
+            LOG.debug("Eagerly loading >> " + persistentClass.getName() + "_" + foreignKey);
+            // load target eagerly!
+            return em.immediateLoadAndCache(persistentClass, foreignKey);
+        }
+        else
+        {
+            LOG.debug("Creating proxy for >> " + persistentClass.getName() + "#" + relation.getProperty().getName()
+                    + "_" + foreignKey);
+
+            // metadata
+            EntityMetadata m = em.getMetadataManager().getEntityMetadata(persistentClass);
+
+            return em.getFactory().getLazyEntity(entityName, persistentClass, m.getReadIdentifierMethod(),
+                    m.getWriteIdentifierMethod(), foreignKey, em);
+        }
+    }
 
 }

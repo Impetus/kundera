@@ -82,7 +82,7 @@ public class PelopsClient implements CassandraClient
 {
 
     /** The Constant poolName. */
-    private static final String poolName = "Main";
+    private static final String POOL_NAME = "Main";
 
     /** array of cassandra hosts. */
     private String[] contactNodes;
@@ -96,8 +96,10 @@ public class PelopsClient implements CassandraClient
     /** log for this class. */
     private static Log log = LogFactory.getLog(PelopsClient.class);
 
+    /** The data handler. */
     PelopsDataHandler dataHandler = new PelopsDataHandler();
 
+    /** The ec cache handler. */
     EmbeddedCollectionCacheHandler ecCacheHandler = new EmbeddedCollectionCacheHandler();
 
     /**
@@ -107,6 +109,9 @@ public class PelopsClient implements CassandraClient
     {
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.Client#connect()
+     */
     @Override
     public final void connect()
     {
@@ -114,6 +119,9 @@ public class PelopsClient implements CassandraClient
         new SolandraUtils().startSolandraServer();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.Client#shutdown()
+     */
     @Override
     public final void shutdown()
     {
@@ -131,6 +139,9 @@ public class PelopsClient implements CassandraClient
         return !closed;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.Client#writeColumns(java.lang.String, java.lang.String, java.lang.String, java.util.List, com.impetus.kundera.proxy.EnhancedEntity)
+     */
     @Deprecated
     @Override
     public final void writeColumns(String keyspace, String columnFamily, String rowId,
@@ -139,6 +150,9 @@ public class PelopsClient implements CassandraClient
         throw new PersistenceException("Not yet implemented");
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.Client#writeColumns(com.impetus.kundera.ejb.EntityManagerImpl, com.impetus.kundera.proxy.EnhancedEntity, com.impetus.kundera.metadata.EntityMetadata)
+     */
     @Override
     public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
     {
@@ -154,8 +168,8 @@ public class PelopsClient implements CassandraClient
         PelopsClient.ThriftRow tf = dataHandler.toThriftRow(this, e, m, columnFamily);
         configurePool(keyspace);
 
-        Mutator mutator = Pelops.createMutator(poolName);
-        System.out.println(Pelops.getDbConnPool(poolName).getKeyspace());
+        Mutator mutator = Pelops.createMutator(POOL_NAME);
+        System.out.println(Pelops.getDbConnPool(POOL_NAME).getKeyspace());
 
         List<Column> thriftColumns = tf.getColumns();
         List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
@@ -179,6 +193,9 @@ public class PelopsClient implements CassandraClient
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.CassandraClient#writeSuperColumns(java.lang.String, java.lang.String, java.lang.String, org.apache.cassandra.thrift.SuperColumn[])
+     */
     @Override
     @Deprecated
     public final void writeSuperColumns(String keyspace, String columnFamily, String rowId, SuperColumn... superColumns)
@@ -191,7 +208,7 @@ public class PelopsClient implements CassandraClient
         }
 
         configurePool(keyspace);
-        Mutator mutator = Pelops.createMutator(poolName);
+        Mutator mutator = Pelops.createMutator(POOL_NAME);
 
         for (SuperColumn sc : superColumns)
         {
@@ -227,13 +244,16 @@ public class PelopsClient implements CassandraClient
         }
 
         configurePool(keyspace);
-        Selector selector = Pelops.createSelector(poolName);
+        Selector selector = Pelops.createSelector(POOL_NAME);
 
         E e = dataHandler.fromThriftRow(selector, em, clazz, m, rowId);
 
         return e;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String, com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
+     */
     @Override
     // TODO we need to refactor/reimplement this.
     public final <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
@@ -246,7 +266,7 @@ public class PelopsClient implements CassandraClient
         }
 
         configurePool(keyspace);
-        Selector selector = Pelops.createSelector(poolName);
+        Selector selector = Pelops.createSelector(POOL_NAME);
 
         List<Bytes> bytesArr = new ArrayList<Bytes>();
 
@@ -279,6 +299,9 @@ public class PelopsClient implements CassandraClient
         return entities;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
+     */
     @Override
     public final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
             String... superColumnNames) throws Exception
@@ -286,11 +309,14 @@ public class PelopsClient implements CassandraClient
         if (!isOpen())
             throw new PersistenceException("PelopsClient is closed.");
         configurePool(keyspace);
-        Selector selector = Pelops.createSelector(poolName);
+        Selector selector = Pelops.createSelector(POOL_NAME);
         return selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames),
                 ConsistencyLevel.ONE);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.EntityManagerImpl, com.impetus.kundera.metadata.EntityMetadata, java.util.Queue)
+     */
     public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");
@@ -316,7 +342,7 @@ public class PelopsClient implements CassandraClient
         }
 
         configurePool(keyspace);
-        RowDeletor rowDeletor = Pelops.createRowDeletor(poolName);
+        RowDeletor rowDeletor = Pelops.createRowDeletor(POOL_NAME);
         rowDeletor.deleteRow(columnFamily, rowId, ConsistencyLevel.ONE);
     }
 
@@ -341,7 +367,7 @@ public class PelopsClient implements CassandraClient
             throw new PersistenceException("PelopsClient is closed.");
 
         configurePool(keyspace);
-        Selector selector = Pelops.createSelector(poolName);
+        Selector selector = Pelops.createSelector(POOL_NAME);
 
         List<Bytes> bytesArr = new ArrayList<Bytes>();
 
@@ -358,10 +384,13 @@ public class PelopsClient implements CassandraClient
                 ConsistencyLevel.ONE);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.CassandraClient#getCassandraClient()
+     */
     @Override
     public final Cassandra.Client getCassandraClient() throws Exception
     {
-        return Pelops.getDbConnPool(poolName).getConnection().getAPI();
+        return Pelops.getDbConnPool(POOL_NAME).getConnection().getAPI();
     }
 
     /**
@@ -439,13 +468,11 @@ public class PelopsClient implements CassandraClient
 
         /**
          * The Constructor.
-         * 
-         * @param id
-         *            the id
-         * @param columnFamilyName
-         *            the column family name
-         * @param columns
-         *            the columns
+         *
+         * @param id the id
+         * @param columnFamilyName the column family name
+         * @param columns the columns
+         * @param superColumns the super columns
          */
         public ThriftRow(String id, String columnFamilyName, List<Column> columns, List<SuperColumn> superColumns)
         {
@@ -538,6 +565,8 @@ public class PelopsClient implements CassandraClient
         }
 
         /**
+         * Gets the super columns.
+         *
          * @return the superColumns
          */
         public List<SuperColumn> getSuperColumns()
@@ -546,8 +575,9 @@ public class PelopsClient implements CassandraClient
         }
 
         /**
-         * @param superColumns
-         *            the superColumns to set
+         * Sets the super columns.
+         *
+         * @param superColumns the superColumns to set
          */
         public void setSuperColumns(List<SuperColumn> superColumns)
         {
@@ -555,8 +585,9 @@ public class PelopsClient implements CassandraClient
         }
 
         /**
-         * @param superColumns
-         *            the superColumns to set
+         * Adds the super column.
+         *
+         * @param superColumn the super column
          */
         public void addSuperColumn(SuperColumn superColumn)
         {
@@ -596,11 +627,13 @@ public class PelopsClient implements CassandraClient
     private void configurePool(String keyspace)
     {
         Cluster cluster = new Cluster(contactNodes, new IConnection.Config(defaultPort, true, -1), false);
-        Pelops.addPool(poolName, cluster, keyspace);
+        Pelops.addPool(POOL_NAME, cluster, keyspace);
 
     }
 
     /**
+     * Gets the ec cache handler.
+     *
      * @return the scCacheHandler
      */
     public EmbeddedCollectionCacheHandler getEcCacheHandler()
@@ -608,11 +641,16 @@ public class PelopsClient implements CassandraClient
         return ecCacheHandler;
     }
 
+    /**
+     * The Class SolandraUtils.
+     */
     private class SolandraUtils
     {
-//        private TSocket socket;
 
-        public void startSolandraServer()
+        /**
+ * Start solandra server.
+ */
+public void startSolandraServer()
         {
             log.info("Starting Solandra Server.");
             new CassandraUtils();
@@ -632,6 +670,11 @@ public class PelopsClient implements CassandraClient
 
         }
 
+        /**
+         * Creates the cass schema.
+         *
+         * @throws IOException Signals that an I/O exception has occurred.
+         */
         private void createCassSchema() throws IOException
         {
 
@@ -747,10 +790,12 @@ public class PelopsClient implements CassandraClient
 
         /**
          * Inits the client.
+         *
+         * @return the client
          */
         private Cassandra.Client getClient()
         {
-            TSocket socket = new TSocket("127.0.0.1", 9160);
+            TSocket socket = new TSocket(contactNodes[0], defaultPort);
             TTransport transport = new TFramedTransport(socket);
             TProtocol protocol = new TBinaryProtocol(transport);
             Cassandra.Client client = new Cassandra.Client(protocol);

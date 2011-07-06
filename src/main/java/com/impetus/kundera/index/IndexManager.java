@@ -141,10 +141,6 @@ public class IndexManager {
 	 *            the count
 	 * @return the list
 	 */
-/*    public final List<String> search(String query, int start, int count) {
-        return indexer.search(query, start, count);
-    }
-*/    
     public final Map<String, String> search(String query, int start, int count) {
         return indexer.search(query, start, count);
     }

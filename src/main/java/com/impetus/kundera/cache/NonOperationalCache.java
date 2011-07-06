@@ -31,12 +31,12 @@ public class NonOperationalCache implements Cache {
 
 	/* @see com.impetus.kundera.cache.Cache#put(java.lang.Object, java.lang.Object) */
 	@Override
-	public void put(Object key, Object value) {
+	public void put(final Object key, final Object value) {
 	}
 
 	/* @see com.impetus.kundera.cache.Cache#remove(java.lang.Object) */
 	@Override
-	public boolean remove(Object key) {
+	public boolean remove(final Object key) {
 		return true;
 	}
 
@@ -48,7 +48,7 @@ public class NonOperationalCache implements Cache {
 
 	/* @see com.impetus.kundera.cache.Cache#get(java.lang.Object) */
 	@Override
-	public Object get(Object key) {
+	public Object get(final Object key) {
 		return null;
 	}
 

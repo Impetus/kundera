@@ -32,22 +32,6 @@ import org.scale7.cassandra.pelops.Bytes;
 public interface CassandraClient  extends com.impetus.kundera.Client{
 
     /**
-	 * Write multiple columns into a column-family.
-	 * 
-	 * @param keyspace
-	 *            the keyspace
-	 * @param columnFamily
-	 *            The name of the super column family to operate on
-	 * @param key
-	 *            The key of the row to modify
-	 * @param columns
-	 *            Array of columns to write
-	 * @throws Exception
-	 *             The exception
-	 *//*
-    void writeColumns(String keyspace, String columnFamily, String key, List<EntityMetadata.Column> columns,EnhancedEntity e) throws Exception;
-*/
-    /**
 	 * Write multiple super-columns into a super-column-family.
 	 * 
 	 * @param keyspace
@@ -62,38 +46,7 @@ public interface CassandraClient  extends com.impetus.kundera.Client{
 	 *             The exception
 	 */
     void writeSuperColumns(String keyspace, String columnFamily, String key, SuperColumn... superColumns) throws Exception;
-
- /*   *//**
-	 * Retrieve columns from a column-family row.
-	 * 
-	 * @param keyspace
-	 *            the keyspace
-	 * @param columnFamily
-	 *            The name of the super column family to operate on
-	 * @param key
-	 *            The key of the row
-	 * @return A list of matching columns
-	 * @throws Exception
-	 *             the exception
-	 *//*
-    List<Column> <E> E  loadColumns(EntityManagerImpl em,Class<E> clazz, String keyspace, String columnFamily, String key, EntityMetadata m) throws Exception;
-*/
-   /* *//**
-	 * Retrieve columns from multiple rows of a column-family.
-	 * 
-	 * @param keyspace
-	 *            the keyspace
-	 * @param columnFamily
-	 *            The name of the super column family to operate on
-	 * @param keys
-	 *            Array of row keys
-	 * @return A Map of row and corresponding list of columns.
-	 * @throws Exception
-	 *             the exception
-	 *//*
-    Map<String, List<Column>> <E> List<E>  loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, EntityMetadata m,String... keys) throws Exception;
-*/
-   
+ 
     /**
 	 * Load super-columns from a super-column-family row.
 	 * 

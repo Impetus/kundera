@@ -31,7 +31,6 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
-import com.impetus.kundera.ejb.EntityManagerImpl;
 
 /**
  * Cache provider implementation using Ehcache.
@@ -41,7 +40,7 @@ import com.impetus.kundera.ejb.EntityManagerImpl;
 public class EhCacheProvider implements CacheProvider {
 
     /** The Constant log. */
-    private static final Log log = LogFactory.getLog(EntityManagerImpl.class);
+    private static final Log log = LogFactory.getLog(EhCacheProvider.class);
 
     /** The manager. */
     private CacheManager manager;

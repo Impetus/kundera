@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Impetus Infotech.
+ * Copyright 2011 Impetus Infotech.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,22 @@ package com.impetus.kundera;
 /**
  * The Class LazyInitializationException.
  */
-public class LazyInitializationException extends RuntimeException {
+public class LazyInitializationException extends RuntimeException
+{
 
-	/**
-	 * Instantiates a new lazy initialization exception.
-	 * 
-	 * @param m
-	 *            the m
-	 */
-	public LazyInitializationException (String m) {
-		super(m);
-	}
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Instantiates a new lazy initialization exception.
+     * 
+     * @param m
+     *            the m
+     */
+    public LazyInitializationException(String m)
+    {
+        super(m);
+    }
 }

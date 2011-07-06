@@ -47,7 +47,7 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor
 {
 
     /** log for this class. */
-    private static Log log = LogFactory.getLog(ColumnFamilyDataAccessor.class);
+    private static final Log log = LogFactory.getLog(ColumnFamilyDataAccessor.class);
 
     /** The Constant TO_ONE_SUPER_COL_NAME. */
     private static final String TO_ONE_SUPER_COL_NAME = "FKey-TO";

@@ -46,13 +46,11 @@ import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
  * 
  * @author animesh.kumar
  */
-public class EntityManagerFactoryImpl implements EntityManagerFactory {
+public class EntityManagerFactoryImpl implements EntityManagerFactory
+{
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(EntityManagerFactoryImpl.class);
-
-    /** The Constant propsFileName. */
-    private static final String propsFileName = "/kundera.properties";
+    private static Log LOG = LogFactory.getLog(EntityManagerFactoryImpl.class);
 
     /** Whether or not the factory has been closed. */
     private boolean closed = false;
@@ -78,53 +76,32 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
     /** The keyspace. */
     private String schema;
-    
+
+    /** The classes. */
     private List<String> classes;
 
     /** The Cache provider. */
     private CacheProvider cacheProvider;
-    
+
+    /** The cache provider class name. */
     private String cacheProviderClassName;
-    
+
     /** The enhanced proxy factory. */
     private EntityEnhancerFactory enhancedProxyFactory;
-    
+
     /** The lazy initializer factory. */
     private LazyInitializerFactory lazyInitializerFactory;
-    
+
     /**
      * A convenience constructor.
      * 
      * @param persistenceUnitName
      *            used to prefix the Cassandra domains
      */
-    public EntityManagerFactoryImpl(String persistenceUnitName) {
+    public EntityManagerFactoryImpl(String persistenceUnitName)
+    {
         this(persistenceUnitName, null);
     }
-    
-  
-//    /**
-//     * Parameterize constructor to load configuration for no sql databases other than Cassandra.  
-//     * @param persistenceUnitName
-//     * @param isCassandra
-//     */
-//    public EntityManagerFactoryImpl(String persistenceUnitName, boolean isCassandra){
-//          onLoad(persistenceUnitName);
-//        if(isCassandra) {
-//            loadCassandraProps();
-//            initCassandraClient();
-//        } else {
-//        	try{
-//        		loadProperties(propsFileName);
-//        	}catch(IOException ioex) {
-//        		throw new PersistenceException(ioex.getMessage());
-//        	}
-//        	loadHBase();
-//        }
-//        
-//    	// Second level cache
-//		initSecondLevelCache();
-//    }
 
     /**
      * This one is generally called via the PersistenceProvider.
@@ -134,7 +111,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      * @param props
      *            the props
      */
-    public EntityManagerFactoryImpl(PersistenceUnitInfo persistenceUnitInfo, Map props) {
+    public EntityManagerFactoryImpl(PersistenceUnitInfo persistenceUnitInfo, Map props)
+    {
         this(persistenceUnitInfo != null ? persistenceUnitInfo.getPersistenceUnitName() : null, props);
     }
 
@@ -146,54 +124,37 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      * @param props
      *            should have accessKey and secretKey
      */
-    public EntityManagerFactoryImpl(String persistenceUnitName, Map props) {
-       onLoad(persistenceUnitName);
-      this.props = props;
-//        // if props is NULL or empty, look for kundera.properties and populate
-//        if (props == null || props.isEmpty()) {
-//            loadCassandraProps();
-//            initCassandraClient();
-//        }
-//        //configure Cassandra client.
-    	// Second level cache
-//		initSecondLevelCache();
-    }
-    
-    public EntityManagerFactoryImpl(PersistenceMetadata metaData, Map props) {
-    	this.classes = metaData.getClasses();
-    	onLoad(metaData.getName());
-    	this.props = props;    	
+    public EntityManagerFactoryImpl(String persistenceUnitName, Map props)
+    {
+        onLoad(persistenceUnitName);
+        this.props = props;
     }
 
-
-//    /**
-//     * Loads cassandra properties.
-//     */
-//	private void loadCassandraProps() {
-//		try {
-//			log.debug("Trying to load Kundera Properties from " + propsFileName);
-//		    loadProperties(propsFileName);
-//		} catch (IOException e) {
-//		    throw new PersistenceException(e);
-//		}
-//	}
-	
-//	/**
-//	 * Loads HBase properties.
-//	 */
-//	private void loadHBase() {
-//		client = new HBaseClient();
-//		client.setContactNodes("localhost");
-//		client.setDefaultPort(6000);
-//		client.connect();
-//	}
+    /**
+     * Instantiates a new entity manager factory impl.
+     * 
+     * @param metaData
+     *            the meta data
+     * @param props
+     *            the props
+     */
+    public EntityManagerFactoryImpl(PersistenceMetadata metaData, Map props)
+    {
+        this.classes = metaData.getClasses();
+        onLoad(metaData.getName());
+        this.props = props;
+    }
 
     /**
      * Method to instantiate persistence entities and metadata.
+     * 
      * @param persistenceUnitName
+     *            the persistence unit name
      */
-	private void onLoad(String persistenceUnitName) {
-		if (persistenceUnitName == null) {
+    private void onLoad(String persistenceUnitName)
+    {
+        if (persistenceUnitName == null)
+        {
             throw new IllegalArgumentException("Must have a persistenceUnitName!");
         }
         long start = System.currentTimeMillis();
@@ -208,208 +169,133 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
         reader.read();
 
         metadataManager.build();
-        
+
         enhancedProxyFactory = new CglibEntityEnhancerFactory();
         lazyInitializerFactory = new CglibLazyInitializerFactory();
-        
-        log.info("EntityManagerFactoryImpl loaded in " + (System.currentTimeMillis() - start) + "ms.");
-	}
 
-    
-//    /**
-//     * Load properties.
-//     * 
-//     * @param propsFileName
-//     *            the props file name
-//     * 
-//     * @throws IOException
-//     *             Signals that an I/O exception has occurred.
-//     */
-//    private void loadProperties(String propsFileName) throws IOException {
-//        Properties props_ = new Properties();
-//        InputStream stream = this.getClass().getResourceAsStream(propsFileName);
-//        if (stream == null) {
-//            throw new FileNotFoundException(propsFileName + " not found on classpath. Could not initialize Kundera.");
-//        }
-//        props_.load(stream);
-//        props = props_;
-//        stream.close();
-//    }
+        LOG.info("EntityManagerFactoryImpl loaded in " + (System.currentTimeMillis() - start) + "ms.");
+    }
 
-//    /**
-//     * Inits the.
-//     */
-//    private void initCassandraClient() {
-//    	// Look for kundera.nodes
-//    	try {
-//    		String kunderaNodes = (String)props.get("kundera.nodes");
-//    		if (null == kunderaNodes || kunderaNodes.isEmpty()) {
-//    			throw new IllegalArgumentException();
-//    		}
-//    		nodes = kunderaNodes.split(",");
-//    	} catch (Exception e) {
-//    		throw new IllegalArgumentException("Mandatory property missing 'kundera.nodes'");
-//    	}
-//        
-//    	// kundera.port
-//    	String kunderaPort = (String) props.get("kundera.port");
-//		if (null == kunderaPort || kunderaPort.isEmpty()) {
-//			throw new IllegalArgumentException("Mandatory property missing 'kundera.port'");
-//		}
-//    	try {
-//    		port = Integer.parseInt(kunderaPort);
-//    	} catch (Exception e) {
-//    		throw new IllegalArgumentException("Invalid value for property 'kundera.port': " + kunderaPort + ". (Should it be 9160?)");
-//    	}
-//        
-//    	// kundera.keyspace
-//    	keyspace = (String) props.get("kundera.keyspace");
-//		if (null == keyspace || keyspace.isEmpty()) {
-//			throw new IllegalArgumentException("Mandatory property missing 'kundera.keyspace'");
-//		}
-//        
-//        // kundera.client
-//        String cassandraClient = (String) props.get("kundera.client");
-//		if (null == cassandraClient || cassandraClient.isEmpty()) {
-//			throw new IllegalArgumentException("Mandatory property missing 'kundera.client'");
-//		}
-//	
-//		
-//		// Instantiate the client
-//        try {
-//    		if ( cassandraClient.endsWith( ".class" ) ) {
-//    			cassandraClient = cassandraClient.substring( 0, cassandraClient.length() - 6 );
-//    		}
-//    		
-//            client = (CassandraClient) Class.forName(cassandraClient).newInstance();
-//            client.setContactNodes(nodes);
-//            client.setDefaultPort(port);
-//        } catch (Exception e) {
-//            throw new IllegalArgumentException("Invalid value for property 'kundera.client': " + cassandraClient + ". (Should it be com.impetus.kundera.client.PelopsClient?");
-//        }
-//        
-//        log.info("Connecting to Cassandra... (nodes:" + Arrays.asList(nodes) + ", port:" + port + ", keyspace:" + keyspace + ")");
-//        
-//        // connect to Cassandra DB
-//        client.connect();
-//    }
-
-//    /**
-//	 * Inits the second level cache.
-//	 */
-//    @SuppressWarnings("unchecked")
-//	private void initSecondLevelCache() {
-////    	String cacheProviderClassName = (String) props.get("kundera.cache.provider_class");
-//        if (cacheProviderClassName != null) {
-//            try {
-//                Class<CacheProvider> cacheProviderClass = (Class<CacheProvider>) Class.forName(cacheProviderClassName);
-//                cacheProvider = cacheProviderClass.newInstance();
-//                cacheProvider.init(props);
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
-//        if (cacheProvider == null) {
-//        	cacheProvider = new NonOperationalCacheProvider();
-//        }
-//        log.info("Initialized second-level cache. Provider: " + cacheProvider.getClass());
-//    }
-    
     /**
-	 * Gets the cache.
-	 * 
-	 * @param entity
-	 *            the entity
-	 * @return the cache
-	 */
-    public Cache getCache(Class<?> entity) {
-        try {
+     * Gets the cache.
+     * 
+     * @param entity
+     *            the entity
+     * @return the cache
+     */
+    public Cache getCache(Class<?> entity)
+    {
+        try
+        {
             String cacheName = metadataManager.getEntityMetadata(entity).getEntityClazz().getName();
             return cacheProvider.createCache(cacheName);
-        } catch (CacheException e) {
+        }
+        catch (CacheException e)
+        {
             throw new RuntimeException(e);
         }
     }
 
-    
     /**
      * Gets the metadata manager.
      * 
      * @return the metadataManager
      */
-    public final MetadataManager getMetadataManager() {
+    public final MetadataManager getMetadataManager()
+    {
         return metadataManager;
     }
 
     /* @see javax.persistence.EntityManagerFactory#close() */
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManagerFactory#close()
+     */
     @Override
-    public final void close() {
+    public final void close()
+    {
         closed = true;
-//        client.shutdown();
+        // client.shutdown();
         cacheProvider.shutdown();
     }
 
     /* @see javax.persistence.EntityManagerFactory#createEntityManager() */
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManagerFactory#createEntityManager()
+     */
     @Override
-    public final EntityManager createEntityManager() {
+    public final EntityManager createEntityManager()
+    {
         return new EntityManagerImpl(this);
     }
 
-    /* @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map) */
+    /*
+     * @see
+     * javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+     */
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+     */
     @Override
-    public final EntityManager createEntityManager(Map map) {
+    public final EntityManager createEntityManager(Map map)
+    {
         return new EntityManagerImpl(this);
     }
 
     /**
-	 * Gets the enhanced entity.
-	 * 
-	 * @param entity
-	 *            the entity
-	 * @param id
-	 *            the id
-	 * @param foreignKeyMap
-	 *            the foreign key map
-	 * @return the enhanced entity
-	 */
-    public EnhancedEntity getEnhancedEntity (Object entity, String id, 
-			Map<String, Set<String>> foreignKeyMap) {
-    	return enhancedProxyFactory.getProxy(entity, id, foreignKeyMap);
+     * Gets the enhanced entity.
+     * 
+     * @param entity
+     *            the entity
+     * @param id
+     *            the id
+     * @param foreignKeyMap
+     *            the foreign key map
+     * @return the enhanced entity
+     */
+    public EnhancedEntity getEnhancedEntity(Object entity, String id, Map<String, Set<String>> foreignKeyMap)
+    {
+        return enhancedProxyFactory.getProxy(entity, id, foreignKeyMap);
     }
 
     /**
-	 * Gets the lazy entity.
-	 * 
-	 * @param entityName
-	 *            the entity name
-	 * @param persistentClass
-	 *            the persistent class
-	 * @param getIdentifierMethod
-	 *            the get identifier method
-	 * @param setIdentifierMethod
-	 *            the set identifier method
-	 * @param id
-	 *            the id
-	 * @param em
-	 *            the em
-	 * @return the lazy entity
-	 */
-    public KunderaProxy getLazyEntity (String entityName,
-			Class<?> persistentClass,
-			Method getIdentifierMethod, Method setIdentifierMethod, String id,
-			EntityManagerImpl em) {
-    	return lazyInitializerFactory.getProxy(
-    			entityName, 
-    			persistentClass,  
-    			getIdentifierMethod, 
-    			setIdentifierMethod, 
-				id, 
-				em);
+     * Gets the lazy entity.
+     * 
+     * @param entityName
+     *            the entity name
+     * @param persistentClass
+     *            the persistent class
+     * @param getIdentifierMethod
+     *            the get identifier method
+     * @param setIdentifierMethod
+     *            the set identifier method
+     * @param id
+     *            the id
+     * @param em
+     *            the em
+     * @return the lazy entity
+     */
+    public KunderaProxy getLazyEntity(String entityName, Class<?> persistentClass, Method getIdentifierMethod,
+            Method setIdentifierMethod, String id, EntityManagerImpl em)
+    {
+        return lazyInitializerFactory.getProxy(entityName, persistentClass, getIdentifierMethod, setIdentifierMethod,
+                id, em);
     }
-    
-    /* @see javax.persistence.EntityManagerFactory#isOpen() */
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManagerFactory#isOpen()
+     */
     @Override
-    public final boolean isOpen() {
+    public final boolean isOpen()
+    {
         return !closed;
     }
 
@@ -418,7 +304,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      * 
      * @return the persistence unit name
      */
-    public final String getPersistenceUnitName() {
+    public final String getPersistenceUnitName()
+    {
         return persistenceUnitName;
     }
 
@@ -427,7 +314,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      * 
      * @return the nodes
      */
-    public String[] getNodes() {
+    public String[] getNodes()
+    {
         return nodes;
     }
 
@@ -436,39 +324,51 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
      * 
      * @return the port
      */
-    public int getPort() {
+    public int getPort()
+    {
         return port;
-    } 
-    
+    }
 
-	/**
-	 * @return the schema
-	 */
-	public String getSchema() {
-		return schema;
-	}
+    /**
+     * Gets the schema.
+     * 
+     * @return the schema
+     */
+    public String getSchema()
+    {
+        return schema;
+    }
 
+    /**
+     * Sets the schema.
+     * 
+     * @param schema
+     *            the schema to set
+     */
+    public void setSchema(String schema)
+    {
+        this.schema = schema;
+    }
 
-	/**
-	 * @param schema the schema to set
-	 */
-	public void setSchema(String schema) {
-		this.schema = schema;
-	}
+    /**
+     * Gets the classes.
+     * 
+     * @return the classes
+     */
+    public List<String> getClasses()
+    {
+        return classes;
+    }
 
+    /**
+     * Sets the classes.
+     * 
+     * @param classes
+     *            the classes to set
+     */
+    public void setClasses(List<String> classes)
+    {
+        this.classes = classes;
+    }
 
-	/**
-	 * @return the classes
-	 */
-	public List<String> getClasses() {
-		return classes;
-	}
-
-	/**
-	 * @param classes the classes to set
-	 */
-	public void setClasses(List<String> classes) {
-		this.classes = classes;
-	}  
-    
 }

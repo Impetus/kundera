@@ -37,28 +37,31 @@ import javax.persistence.TemporalType;
 // assign ColumnFamily type and name
 public class HAuthor implements Serializable{
 
+    /** The Constant serialVersionUID. */
+    private static final long serialVersionUID = 1L;
+
     /** The username. */
     @Id
     // row identifier
-    String username;
+    private String username;
 
     /** The email address. */
     @Column(name = "email")
     // override column-name
-    String emailAddress;
+    private String emailAddress;
 
+    /** The PRIME. */
+    private static final int PRIME = 31;
+    
     /** The country. */
     @Column
-    String country;
+    private String country;
 
     /** The registered. */
     @Column(name = "registeredSince")
     @Temporal(TemporalType.DATE)
     @Basic
-    Date registered;
-
-    /** The name. */
-    String name;
+    private Date registered;
 
    
     /**
@@ -75,10 +78,10 @@ public class HAuthor implements Serializable{
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode() {
-        final int prime = 31;
+    public int hashCode()
+    {
         int result = 1;
-        result = prime * result + ((username == null) ? 0 : username.hashCode());
+        result = PRIME * result + ((username == null) ? 0 : username.hashCode());
         return result;
     }
 
@@ -88,41 +91,54 @@ public class HAuthor implements Serializable{
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj)
+    {
+        boolean ret = false;
         if (this == obj)
-            return true;
+        {
+            ret = true;
+        }
         if (obj == null)
-            return false;
+        {
+            ret = false;
+        }
         if (!(obj instanceof HAuthor))
-            return false;
-        HAuthor other = (HAuthor) obj;
-        if (username == null) {
+        {
+            ret = false;
+        }
+        final HAuthor other = (HAuthor) obj;
+        if (username == null)
+        {
             if (other.username != null)
-                return false;
-        } else if (!username.equals(other.username))
-            return false;
-        return true;
+            {
+                ret = false;
+            }
+        }
+        else if (!username.equals(other.username))
+        {
+            ret = false;
+        }
+        return ret;
     }
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("Author [name=");
-		builder.append(name);
-		builder.append(", country=");
-		builder.append(country);
-		builder.append(", emailAddress=");
-		builder.append(emailAddress);
-		builder.append(", registered=");
-		builder.append(registered);
-		builder.append(", username=");
-		builder.append(username);
-		builder.append("]");
-		return builder.toString();
-	}
+    public String toString()
+    {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("Author [country=");
+        builder.append(country);
+        builder.append(", emailAddress=");
+        builder.append(emailAddress);
+        builder.append(", registered=");
+        builder.append(registered);
+        builder.append(", username=");
+        builder.append(username);
+        builder.append("]");
+        return builder.toString();
+    }
 
 	/**
 	 * Gets the username.
@@ -138,7 +154,7 @@ public class HAuthor implements Serializable{
      * 
      * @param username the username to set
      */
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 
@@ -156,7 +172,7 @@ public class HAuthor implements Serializable{
      * 
      * @param emailAddress the emailAddress to set
      */
-    public void setEmailAddress(String emailAddress) {
+    public void setEmailAddress(final String emailAddress) {
         this.emailAddress = emailAddress;
     }
 
@@ -174,7 +190,7 @@ public class HAuthor implements Serializable{
      * 
      * @param country the country to set
      */
-    public void setCountry(String country) {
+    public void setCountry(final String country) {
         this.country = country;
     }
 
@@ -192,7 +208,7 @@ public class HAuthor implements Serializable{
      * 
      * @param registered the registered to set
      */
-    public void setRegistered(Date registered) {
+    public void setRegistered(final Date registered) {
         this.registered = registered;
     }
   

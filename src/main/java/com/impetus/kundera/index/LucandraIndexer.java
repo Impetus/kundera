@@ -51,7 +51,6 @@ import com.impetus.kundera.metadata.EntityMetadata.PropertyIndex;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class LucandraIndexer.
  * 
@@ -61,10 +60,10 @@ public class LucandraIndexer implements Indexer
 {
 
     /** log for this class. */
-    private static Log log = LogFactory.getLog(LucandraIndexer.class);
+    private static final Log LOG = LogFactory.getLog(LucandraIndexer.class);
 
     /** The INDEX_NAME. */
-    private static String INDEX_NAME = "kundera-alpha";// is
+    private static final String INDEX_NAME = "kundera-alpha";// is
 
     // persistent-unit-name
 
@@ -88,7 +87,8 @@ public class LucandraIndexer implements Indexer
 
     /** The Constant DEFAULT_SEARCHABLE_FIELD. */
     private static final String DEFAULT_SEARCHABLE_FIELD = UUID + ".default_property";
-    
+
+    /** The Constant SUPERCOLUMN_INDEX. */
     private static final String SUPERCOLUMN_INDEX = UUID + ".entity.super.indexname";
 
     /** The doc number. */
@@ -129,7 +129,7 @@ public class LucandraIndexer implements Indexer
     @Override
     public final void unindex(EntityMetadata metadata, String id)
     {
-        log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
+        LOG.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
         try
         {
             /* String indexName, Query query, boolean autoCommit */
@@ -167,7 +167,7 @@ public class LucandraIndexer implements Indexer
             return;
         }
 
-        log.debug("Indexing @Entity[" + metadata.getEntityClazz().getName() + "] " + object);
+        LOG.debug("Indexing @Entity[" + metadata.getEntityClazz().getName() + "] " + object);
 
         performIndexing(metadata, object);
     }
@@ -183,8 +183,8 @@ public class LucandraIndexer implements Indexer
     private void performIndexing(EntityMetadata metadata, Object object)
     {
         Document currentDoc = null;
-        //In case defined entity is Super column family. 
-        //we need to create seperate lucene document for indexing.
+        // In case defined entity is Super column family.
+        // we need to create seperate lucene document for indexing.
         if (metadata.getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY))
         {
             Map<String, EntityMetadata.SuperColumn> superColMap = metadata.getSuperColumnsMap();
@@ -202,11 +202,12 @@ public class LucandraIndexer implements Indexer
                     String indexName = metadata.getIndexName();
                     try
                     {
-                        indexField(PropertyAccessorHelper.getObject(object, superColumnName), currentDoc, field, colName, indexName);
+                        indexField(PropertyAccessorHelper.getObject(object, superColumnName), currentDoc, field,
+                                colName, indexName);
                     }
                     catch (PropertyAccessException e)
                     {
-                        log.error("Error while accesing embedded Object:"+ superColumnName);
+                        LOG.error("Error while accesing embedded Object:" + superColumnName);
                     }
                 }
                 // add document.
@@ -226,17 +227,18 @@ public class LucandraIndexer implements Indexer
 
     /**
      * Index super column name.
-     *
-     * @param metadata the metadata
-     * @param superColumnName the super column name
-     * @param currentDoc the current doc
+     * 
+     * @param superColumnName
+     *            the super column name
+     * @param currentDoc
+     *            the current doc
      */
     private void indexSuperColumnName(String superColumnName, Document currentDoc)
     {
         Field luceneField = new Field(SUPERCOLUMN_INDEX, superColumnName, Field.Store.YES,
                 Field.Index.ANALYZED_NO_NORMS);
         currentDoc.add(luceneField);
-        
+
     }
 
     /**
@@ -251,7 +253,7 @@ public class LucandraIndexer implements Indexer
     {
         try
         {
-            log.debug("Flushing to Lucandra: " + document);
+            LOG.debug("Flushing to Lucandra: " + document);
             if (!metadata.getDBType().equals(DBType.CASSANDRA))
             {
                 IndexWriter w = getDefaultIndexWriter();
@@ -394,80 +396,15 @@ public class LucandraIndexer implements Indexer
         }
         catch (PropertyAccessException e)
         {
-            log.error("Error in accessing field:"+ e.getMessage());
+            LOG.error("Error in accessing field:" + e.getMessage());
         }
     }
 
-    // TODO: this is not the best implementation. need to improve!
-    /* @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int) */
     /*
      * (non-Javadoc)
      * 
      * @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int)
      */
-
-   /* @SuppressWarnings("deprecation")
-    @Override
-    public final List<String> search(String luceneQuery, int start, int count)
-    {
-
-        if (Constants.INVALID == count)
-        {
-            count = 100;
-        }
-
-        log.debug("Searhcing index with query[" + luceneQuery + "], start:" + start + ", count:" + count);
-
-        Set<String> entityIds = new HashSet<String>();
-
-        org.apache.lucene.index.IndexReader indexReader = null;
-
-        try
-        {
-            if (client.getType().equals(DBType.CASSANDRA))
-            {
-                indexReader = new IndexReader(INDEX_NAME);
-            }
-            else
-            {
-                indexReader = getDefaultReader();
-            }
-        }
-        catch (Exception e)
-        {
-            throw new IndexingException(e.getMessage());
-        }
-        IndexSearcher searcher = new IndexSearcher(indexReader);
-
-        QueryParser qp = new QueryParser(Version.LUCENE_CURRENT, DEFAULT_SEARCHABLE_FIELD, analyzer);
-        try
-        {
-            Query q = qp.parse(luceneQuery);
-            TopDocs docs = searcher.search(q, count);
-
-            for (ScoreDoc sc : docs.scoreDocs)
-            {
-                Document doc = searcher.doc(sc.doc);
-                entityIds.add(doc.get(ENTITY_ID_FIELD));
-                
-            }
-        }
-        catch (ParseException e)
-        {
-            new IndexingException(e.getMessage());
-        }
-        catch (IOException e)
-        {
-            new IndexingException(e.getMessage());
-        }
-
-        log.debug("Result[" + entityIds + "]");
-        return new ArrayList<String>(entityIds);
-    }
-    */
-    
-    
-
     @SuppressWarnings("deprecation")
     @Override
     public final Map<String, String> search(String luceneQuery, int start, int count)
@@ -478,9 +415,9 @@ public class LucandraIndexer implements Indexer
             count = 100;
         }
 
-        log.debug("Searhcing index with query[" + luceneQuery + "], start:" + start + ", count:" + count);
+        LOG.debug("Searhcing index with query[" + luceneQuery + "], start:" + start + ", count:" + count);
 
-//        Set<String> entityIds = new HashSet<String>();
+        // Set<String> entityIds = new HashSet<String>();
         Map<String, String> indexCol = new HashMap<String, String>();
 
         org.apache.lucene.index.IndexReader indexReader = null;
@@ -514,7 +451,7 @@ public class LucandraIndexer implements Indexer
                 String entityId = doc.get(ENTITY_ID_FIELD);
                 String superCol = doc.get(SUPERCOLUMN_INDEX);
                 indexCol.put(superCol, entityId);
-                
+
             }
         }
         catch (ParseException e)
@@ -526,7 +463,7 @@ public class LucandraIndexer implements Indexer
             new IndexingException(e.getMessage());
         }
 
-//        log.debug("Result[" + entityIds + "]");
+        // log.debug("Result[" + entityIds + "]");
         return indexCol;
     }
 
@@ -593,7 +530,7 @@ public class LucandraIndexer implements Indexer
             index = FSDirectory.open(getIndexDirectory());
             if (index.listAll().length == 0)
             {
-                log.info("Creating fresh Index because it was empty");
+                LOG.info("Creating fresh Index because it was empty");
                 w = new IndexWriter(index, analyzer, true, IndexWriter.MaxFieldLength.LIMITED);
             }
             else

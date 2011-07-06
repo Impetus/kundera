@@ -38,7 +38,7 @@ public interface CassandraEntityManager extends EntityManager {
 	 *            the primary key
 	 * @return the list
 	 */
-    public <T> List<T> find(Class<T> entityClass, Object... primaryKey);
+    <T> List<T> find(Class<T> entityClass, Object... primaryKey);
 
     /**
      * Find.
@@ -48,7 +48,7 @@ public interface CassandraEntityManager extends EntityManager {
      * @param primaryKeys the primary keys
      * @return the list
      */
-    public <T> List<T> find(Class<T> entityClass, Map<String, String> primaryKeys);
+    <T> List<T> find(Class<T> entityClass, Map<String, String> primaryKeys);
 
     /**
      * Gets the client.

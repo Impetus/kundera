@@ -471,8 +471,6 @@ public class EntityManagerImpl implements CassandraEntityManager
     @Override
     public final void joinTransaction()
     {
-        // TODO Auto-generated method stub
-
     }
 
     /*

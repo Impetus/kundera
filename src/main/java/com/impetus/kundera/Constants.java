@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Impetus Infotech.
+ * Copyright 2011 Impetus Infotech.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package com.impetus.kundera;
  * @author animesh.kumar
  * @since 0.1
  */
-public class Constants {
+public final class Constants {
 
     /**
      * Instantiates a new constants.
@@ -39,6 +39,7 @@ public class Constants {
     /** The Constant INVALID. */
     public final static int INVALID = -1;
     
+    /** The Constant SUPER_COLUMN_NAME_DELIMITER. */
     public final static String SUPER_COLUMN_NAME_DELIMITER = "#";
     
     

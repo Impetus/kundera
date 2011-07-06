@@ -21,7 +21,6 @@ import java.util.Map;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
-// TODO: Auto-generated Javadoc
 /**
  * Interface to define contract between @Entity and Cassandra data units.
  * 
