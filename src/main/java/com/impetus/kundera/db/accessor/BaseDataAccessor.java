@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.db.accessor;
 
 import java.util.ArrayList;
@@ -46,7 +31,7 @@ import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * BaseDataAccessor.
- * 
+ *
  * @param <TF>
  *            Thrift data unit: Column or SuperColumn
  * @author animesh.kumar
@@ -62,7 +47,7 @@ public abstract class BaseDataAccessor implements DataAccessor
 
     /**
      * Instantiates a new base data accessor.
-     * 
+     *
      * @param em
      *            the em
      */
@@ -73,7 +58,7 @@ public abstract class BaseDataAccessor implements DataAccessor
 
     /**
      * Gets the entity manager.
-     * 
+     *
      * @return EntityManager
      */
     public EntityManagerImpl getEntityManager()
@@ -100,10 +85,10 @@ public abstract class BaseDataAccessor implements DataAccessor
     /**
      * Creates a string representation of a set of foreign keys by combining
      * them together separated by "~" character.
-     * 
+     *
      * Note: Assumption is that @Id will never contain "~" character. Checks for
      * this are not added yet.
-     * 
+     *
      * @param foreignKeys
      *            the foreign keys
      * @return the string
@@ -129,7 +114,7 @@ public abstract class BaseDataAccessor implements DataAccessor
 
     /**
      * Splits foreign keys into Set.
-     * 
+     *
      * @param foreignKeys
      *            the foreign keys
      * @return the set
@@ -153,7 +138,7 @@ public abstract class BaseDataAccessor implements DataAccessor
 
     /**
      * Utility class that represents a row in Cassandra DB.
-     * 
+     *
      * @author animesh.kumar
      */
     public class ThriftRow<TF>
@@ -178,7 +163,7 @@ public abstract class BaseDataAccessor implements DataAccessor
 
         /**
          * The Constructor.
-         * 
+         *
          * @param id
          *            the id
          * @param columnFamilyName
@@ -195,7 +180,7 @@ public abstract class BaseDataAccessor implements DataAccessor
 
         /**
          * Gets the id.
-         * 
+         *
          * @return the id
          */
         public String getId()
@@ -205,7 +190,7 @@ public abstract class BaseDataAccessor implements DataAccessor
 
         /**
          * Sets the id.
-         * 
+         *
          * @param id
          *            the key to set
          */
@@ -216,7 +201,7 @@ public abstract class BaseDataAccessor implements DataAccessor
 
         /**
          * Gets the column family name.
-         * 
+         *
          * @return the columnFamilyName
          */
         public String getColumnFamilyName()
@@ -226,7 +211,7 @@ public abstract class BaseDataAccessor implements DataAccessor
 
         /**
          * Sets the column family name.
-         * 
+         *
          * @param columnFamilyName
          *            the columnFamilyName to set
          */
@@ -237,7 +222,7 @@ public abstract class BaseDataAccessor implements DataAccessor
 
         /**
          * Gets the columns.
-         * 
+         *
          * @return the columns
          */
         public List<TF> getColumns()
@@ -247,7 +232,7 @@ public abstract class BaseDataAccessor implements DataAccessor
 
         /**
          * Sets the columns.
-         * 
+         *
          * @param columns
          *            the columns to set
          */
@@ -258,7 +243,7 @@ public abstract class BaseDataAccessor implements DataAccessor
 
         /**
          * Adds the column.;
-         * 
+         *
          * @param column
          *            the column
          */

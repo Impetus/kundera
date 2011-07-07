@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2011 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.metadata;
 
 import java.util.Collection;
@@ -43,7 +28,7 @@ import com.impetus.kundera.Constants;
 
 /**
  * Cache for holding super column name and object
- * 
+ *
  * @author amresh.singh
  */
 public class EmbeddedCollectionCacheHandler
@@ -155,16 +140,16 @@ public class EmbeddedCollectionCacheHandler
      * = new EmbeddedCollectionCacheHandler(); Tweet t1 = new Tweet("1",
      * "Tweet 1111", "web"); Tweet t2 = new Tweet("2", "Tweet 2222", "mobile");
      * Tweet t3 = new Tweet("3", "Tweet 3333", "iPhone");
-     * 
+     *
      * h.addEmbeddedCollectionCacheMapping("IIIPL-0001", t1, "tweet#1");
      * h.addEmbeddedCollectionCacheMapping("IIIPL-0001", t2, "tweet#2");
      * h.addEmbeddedCollectionCacheMapping("IIIPL-0002", t3, "tweet#a");
      * System.out.println(h.getEmbeddedCollectionCache());
-     * 
+     *
      * System.out.println(h.getEmbeddedObjectName("IIIPL-0001", t3));
      * System.out.println(h.getLastEmbeddedObjectCount("IIIPL-0001"));
-     * 
-     * 
+     *
+     *
      * }
      */
 

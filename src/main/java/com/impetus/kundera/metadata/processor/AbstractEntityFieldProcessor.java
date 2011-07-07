@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.metadata.processor;
 
 import java.beans.BeanInfo;
@@ -49,7 +34,7 @@ import com.impetus.kundera.metadata.MetadataProcessor;
 
 /**
  * The Class AbstractEntityFieldProcessor.
- * 
+ *
  * @author animesh.kumar
  */
 public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
@@ -60,12 +45,12 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
 
     /**
      * Gets the valid jpa column.
-     * 
+     *
      * @param entity
      *            the entity
      * @param f
      *            the f
-     * 
+     *
      * @return the valid jpa column
      */
     protected final String getValidJPAColumnName(Class<?> entity, Field f)
@@ -109,7 +94,7 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
     /**
      * Populates @Id accesser methods like, getId and setId of clazz to
      * metadata.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @param clazz

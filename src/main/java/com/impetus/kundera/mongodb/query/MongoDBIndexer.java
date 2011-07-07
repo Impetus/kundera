@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2011 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.mongodb.query;
 
 import java.util.ArrayList;
@@ -47,7 +32,7 @@ import com.impetus.kundera.mongodb.client.MongoDBClient;
 
 /**
  * Provides indexing functionality for MongoDB database.
- * 
+ *
  * @author amresh.singh
  */
 public class MongoDBIndexer implements Indexer
@@ -60,7 +45,7 @@ public class MongoDBIndexer implements Indexer
 
     /**
      * Instantiates a new mongo db indexer.
-     * 
+     *
      * @param client
      *            the client
      */
@@ -71,7 +56,7 @@ public class MongoDBIndexer implements Indexer
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.impetus.kundera.index.Indexer#unindex(com.impetus.kundera.metadata
      * .EntityMetadata, java.lang.String)
@@ -84,7 +69,7 @@ public class MongoDBIndexer implements Indexer
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.
      * EntityMetadata, java.lang.Object)
@@ -116,7 +101,7 @@ public class MongoDBIndexer implements Indexer
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int)
      */
     @Override

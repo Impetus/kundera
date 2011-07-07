@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.ejb;
 
 import java.lang.reflect.Method;
@@ -58,7 +43,7 @@ import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 
 /**
  * The Class EntityManagerFactoryImpl.
- * 
+ *
  * @author animesh.kumar
  */
 public class EntityManagerFactoryImpl implements EntityManagerFactory
@@ -109,7 +94,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * A convenience constructor.
-     * 
+     *
      * @param persistenceUnitName
      *            used to prefix the Cassandra domains
      */
@@ -120,7 +105,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * This one is generally called via the PersistenceProvider.
-     * 
+     *
      * @param persistenceUnitInfo
      *            only using persistenceUnitName for now
      * @param props
@@ -133,7 +118,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Use this if you want to construct this directly.
-     * 
+     *
      * @param persistenceUnitName
      *            used to prefix the Cassandra domains
      * @param props
@@ -147,7 +132,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Instantiates a new entity manager factory impl.
-     * 
+     *
      * @param metaData
      *            the meta data
      * @param props
@@ -162,7 +147,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Method to instantiate persistence entities and metadata.
-     * 
+     *
      * @param persistenceUnitName
      *            the persistence unit name
      */
@@ -193,7 +178,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Gets the cache.
-     * 
+     *
      * @param entity
      *            the entity
      * @return the cache
@@ -213,7 +198,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Gets the metadata manager.
-     * 
+     *
      * @return the metadataManager
      */
     public final MetadataManager getMetadataManager()
@@ -224,7 +209,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     /* @see javax.persistence.EntityManagerFactory#close() */
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.persistence.EntityManagerFactory#close()
      */
     @Override
@@ -238,7 +223,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     /* @see javax.persistence.EntityManagerFactory#createEntityManager() */
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.persistence.EntityManagerFactory#createEntityManager()
      */
     @Override
@@ -253,7 +238,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      */
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
      */
@@ -265,7 +250,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Gets the enhanced entity.
-     * 
+     *
      * @param entity
      *            the entity
      * @param id
@@ -281,7 +266,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Gets the lazy entity.
-     * 
+     *
      * @param entityName
      *            the entity name
      * @param persistentClass
@@ -305,7 +290,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.persistence.EntityManagerFactory#isOpen()
      */
     @Override
@@ -316,7 +301,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Gets the persistence unit name.
-     * 
+     *
      * @return the persistence unit name
      */
     public final String getPersistenceUnitName()
@@ -326,7 +311,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Gets the nodes.
-     * 
+     *
      * @return the nodes
      */
     public String[] getNodes()
@@ -336,7 +321,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Gets the port.
-     * 
+     *
      * @return the port
      */
     public int getPort()
@@ -346,7 +331,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Gets the schema.
-     * 
+     *
      * @return the schema
      */
     public String getSchema()
@@ -356,7 +341,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Sets the schema.
-     * 
+     *
      * @param schema
      *            the schema to set
      */
@@ -367,7 +352,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Gets the classes.
-     * 
+     *
      * @return the classes
      */
     public List<String> getClasses()
@@ -377,7 +362,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Sets the classes.
-     * 
+     *
      * @param classes
      *            the classes to set
      */

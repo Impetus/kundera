@@ -13,9 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/**
- * 
- */
 package com.impetus.kundera.hbase.admin;
 
 import java.io.IOException;
@@ -27,7 +24,7 @@ import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * Data handler for HBase queries.
- * 
+ *
  * @author impetus
  */
 public interface DataHandler
@@ -35,7 +32,7 @@ public interface DataHandler
 
     /**
      * Creates a HBase table.
-     * 
+     *
      * @param tableName
      *            table name.
      * @param colFamily
@@ -55,7 +52,7 @@ public interface DataHandler
 
     /**
      * Populates data for give column family, column name, and HBase table name.
-     * 
+     *
      * @param tableName
      *            HBase table name
      * @param columnFamily

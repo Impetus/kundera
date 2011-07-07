@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 
+ *
  * @author impetus
- * 
+ *
  */
 public enum ClientType
 {
@@ -41,7 +41,7 @@ public enum ClientType
 
     /**
      * Returns value of clientType
-     * 
+     *
      * @param clientType
      *            client type
      * @return clientType enum value.

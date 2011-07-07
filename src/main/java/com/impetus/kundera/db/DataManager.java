@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.db;
 
 import java.util.List;
@@ -44,7 +29,7 @@ import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * This class handles all DB related requests.
- * 
+ *
  * @author animesh.kumar
  */
 public class DataManager
@@ -64,7 +49,7 @@ public class DataManager
 
     /**
      * The Constructor.
-     * 
+     *
      * @param em
      *            the EntityManager
      */
@@ -81,7 +66,7 @@ public class DataManager
 
     /**
      * Persist an instance of EnhancedEntity.
-     * 
+     *
      * @param e
      *            EnhancedEntity
      * @param m
@@ -96,7 +81,7 @@ public class DataManager
 
     /**
      * Merge an instance of EnhancedEntity.
-     * 
+     *
      * @param e
      *            EnhancedEntity
      * @param m
@@ -115,7 +100,7 @@ public class DataManager
 
     /**
      * Remove an instance of EnhancedEntity.
-     * 
+     *
      * @param e
      *            EnhancedEntity
      * @param m
@@ -130,7 +115,7 @@ public class DataManager
 
     /**
      * Find entity of type clazz with primaryKey id.
-     * 
+     *
      * @param <E>
      *            Generics of entity
      * @param clazz
@@ -150,7 +135,7 @@ public class DataManager
 
     /**
      * Find a list of entities of type clazz with primaryKeys ids.
-     * 
+     *
      * @param <E>
      *            Generics of entity
      * @param clazz
@@ -176,7 +161,7 @@ public class DataManager
     // Helper method to find appropriate DataAccessor
     /**
      * Gets the data accessor.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @return the data accessor

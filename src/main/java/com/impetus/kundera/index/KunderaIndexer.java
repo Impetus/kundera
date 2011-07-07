@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.index;
 
 import java.io.File;
@@ -68,7 +53,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * The Class KunderaIndexer.
- * 
+ *
  * @author animesh.kumar
  */
 public class KunderaIndexer implements Indexer
@@ -117,7 +102,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Instantiates a new lucandra indexer.
-     * 
+     *
      * @param client
      *            the client
      * @param analyzer
@@ -136,7 +121,7 @@ public class KunderaIndexer implements Indexer
      */
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.impetus.kundera.index.Indexer#unindex(com.impetus.kundera.metadata
      * .EntityMetadata, java.lang.String)
@@ -168,7 +153,7 @@ public class KunderaIndexer implements Indexer
      */
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.
      * EntityMetadata, java.lang.Object)
@@ -189,7 +174,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Perform indexing.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @param object
@@ -242,7 +227,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Index super column name.
-     * 
+     *
      * @param superColumnName
      *            the super column name
      * @param currentDoc
@@ -258,7 +243,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * On persist.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @param document
@@ -295,7 +280,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Adds the index properties.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @param object
@@ -317,7 +302,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Prepare index document.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @param object
@@ -363,7 +348,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Index document.
-     * 
+     *
      * @param document
      *            the document
      */
@@ -387,7 +372,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Index field.
-     * 
+     *
      * @param object
      *            the object
      * @param document
@@ -417,7 +402,7 @@ public class KunderaIndexer implements Indexer
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int)
      */
     @SuppressWarnings("deprecation")
@@ -484,12 +469,12 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Gets the kundera id.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @param id
      *            the id
-     * 
+     *
      * @return the kundera id
      */
     private String getKunderaId(EntityMetadata metadata, String id)
@@ -499,12 +484,12 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Gets the cannonical property name.
-     * 
+     *
      * @param indexName
      *            the index name
      * @param propertyName
      *            the property name
-     * 
+     *
      * @return the cannonical property name
      */
     private String getCannonicalPropertyName(String indexName, String propertyName)
@@ -515,7 +500,7 @@ public class KunderaIndexer implements Indexer
     // helper method to get Lucandra IndexWriter object
     /**
      * Gets the index writer.
-     * 
+     *
      * @return the index writer
      */
     private lucandra.IndexWriter getIndexWriter()
@@ -532,7 +517,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Added for HBase support.
-     * 
+     *
      * @return default index writer
      */
     private IndexWriter getDefaultIndexWriter()
@@ -571,7 +556,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Returns default index reader.
-     * 
+     *
      * @return index reader.
      */
     private org.apache.lucene.index.IndexReader getDefaultReader()
@@ -594,7 +579,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Creates a directory if it does not exist.
-     * 
+     *
      * @return the index directory
      */
     private File getIndexDirectory()

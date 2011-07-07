@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.cache.ehcache;
 
 import java.net.URL;
@@ -49,7 +34,7 @@ import com.impetus.kundera.cache.CacheProvider;
 
 /**
  * Cache provider implementation using Ehcache.
- * 
+ *
  * @author animesh.kumar
  */
 public class EhCacheProvider implements CacheProvider
@@ -173,7 +158,7 @@ public class EhCacheProvider implements CacheProvider
 
     /**
      * Load resource.
-     * 
+     *
      * @param configurationResourceName
      *            the configuration resource name
      * @return the uRL
@@ -271,7 +256,7 @@ public class EhCacheProvider implements CacheProvider
 
     /**
      * Gets the cache manager.
-     * 
+     *
      * @return the cache manager
      */
     public CacheManager getCacheManager()
@@ -281,7 +266,7 @@ public class EhCacheProvider implements CacheProvider
 
     /**
      * Adds the default listener.
-     * 
+     *
      * @param cacheEventListener
      *            the cache event listener
      */

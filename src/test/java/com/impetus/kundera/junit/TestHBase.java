@@ -13,9 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/**
- * 
- */
 package com.impetus.kundera.junit;
 
 import java.util.Date;
@@ -28,7 +25,7 @@ import com.impetus.hbase.entity.HAuthor;
 
 /**
  * @author impetus
- * 
+ *
  */
 public class TestHBase extends TestCase
 {
@@ -66,7 +63,7 @@ public class TestHBase extends TestCase
 
     /**
      * Creates the author.
-     * 
+     *
      * @param username
      *            the user name
      * @param email
@@ -75,7 +72,7 @@ public class TestHBase extends TestCase
      *            the country
      * @param registeredSince
      *            the registered since
-     * 
+     *
      * @return the author
      */
     private static HAuthor createAuthor(String username, String email, String country, Date registeredSince)

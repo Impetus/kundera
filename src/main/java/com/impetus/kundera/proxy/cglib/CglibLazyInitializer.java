@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.proxy.cglib;
 
 import java.lang.reflect.InvocationTargetException;
@@ -110,7 +95,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Gets the proxy.
-     * 
+     *
      * @param entityName
      *            the entity name
      * @param persistentClass
@@ -153,7 +138,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Gets the proxy instance.
-     * 
+     *
      * @param factory
      *            the factory
      * @param instance
@@ -182,7 +167,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Gets the proxy factory.
-     * 
+     *
      * @param persistentClass
      *            the persistent class
      * @param interfaces
@@ -205,7 +190,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Instantiates a new cglib lazy initializer.
-     * 
+     *
      * @param entityName
      *            the entity name
      * @param persistentClass
@@ -306,7 +291,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Gets the entity name.
-     * 
+     *
      * @return the entity name {@inheritDoc}
      */
     public final String getEntityName()
@@ -316,7 +301,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Gets the identifier.
-     * 
+     *
      * @return the identifier {@inheritDoc}
      */
     public final String getIdentifier()
@@ -326,7 +311,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Sets the identifier.
-     * 
+     *
      * @param id
      *            the new identifier {@inheritDoc}
      */
@@ -337,7 +322,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Checks if is uninitialized.
-     * 
+     *
      * @return true, if is uninitialized {@inheritDoc}
      */
     public final boolean isUninitialized()
@@ -347,7 +332,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Gets the entity manager.
-     * 
+     *
      * @return the entity manager {@inheritDoc}
      */
     public final EntityManagerImpl getEntityManager()
@@ -357,7 +342,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Unset entity manager.
-     * 
+     *
      * {@inheritDoc}
      */
     public void unsetEntityManager()
@@ -367,7 +352,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Initialize.
-     * 
+     *
      * @throws PersistenceException
      *             the persistence exception {@inheritDoc}
      */
@@ -400,7 +385,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Return the underlying persistent object, initializing if necessary.
-     * 
+     *
      * @return the implementation
      */
     public final Object getImplementation()
@@ -414,7 +399,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
      * <p/>
      * Same as {@link #getImplementation()} except that this method will not
      * force initialization.
-     * 
+     *
      * @return Value for property 'target'.
      */
     protected final Object getTarget()
@@ -424,7 +409,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Checks if is unwrap.
-     * 
+     *
      * @return true, if is unwrap {@inheritDoc}
      */
     public boolean isUnwrap()
@@ -434,7 +419,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Sets the unwrap.
-     * 
+     *
      * @param unwrap
      *            the new unwrap {@inheritDoc}
      */

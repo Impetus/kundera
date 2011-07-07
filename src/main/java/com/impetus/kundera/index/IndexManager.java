@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.index;
 
 import java.util.Map;
@@ -47,7 +32,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 /**
  * Manager responsible to co-ordinate with an Indexer. It is bound with
  * EntityManager.
- * 
+ *
  * @author animesh.kumar
  */
 public class IndexManager
@@ -58,7 +43,7 @@ public class IndexManager
 
     /**
      * The Constructor.
-     * 
+     *
      * @param manager
      *            the manager
      */
@@ -79,7 +64,7 @@ public class IndexManager
 
     /**
      * Removes an object from Index.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @param entity
@@ -101,7 +86,7 @@ public class IndexManager
 
     /**
      * Updates the index for an object.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @param entity
@@ -123,7 +108,7 @@ public class IndexManager
 
     /**
      * Indexes an object.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @param entity
@@ -137,7 +122,7 @@ public class IndexManager
     /**
      * Searches on the index. Note: Query must be in Indexer's understandable
      * format
-     * 
+     *
      * @param query
      *            the query
      * @return the list
@@ -149,7 +134,7 @@ public class IndexManager
 
     /**
      * Search.
-     * 
+     *
      * @param query
      *            the query
      * @param count
@@ -163,7 +148,7 @@ public class IndexManager
 
     /**
      * Search.
-     * 
+     *
      * @param query
      *            the query
      * @param start

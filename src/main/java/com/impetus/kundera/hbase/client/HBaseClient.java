@@ -13,22 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2011 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.impetus.kundera.hbase.client;
 
 import java.util.ArrayList;
@@ -54,7 +38,7 @@ import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * HBase client.
- * 
+ *
  * @author impetus
  */
 public class HBaseClient implements com.impetus.kundera.Client
@@ -77,7 +61,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.impetus.kundera.Client#writeColumns(java.lang.String,
      * java.lang.String, java.lang.String, java.util.List,
      * com.impetus.kundera.proxy.EnhancedEntity)
@@ -91,7 +75,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @seecom.impetus.kundera.Client#writeColumns(com.impetus.kundera.ejb.
      * EntityManagerImpl, com.impetus.kundera.proxy.EnhancedEntity,
      * com.impetus.kundera.metadata.EntityMetadata)
@@ -104,7 +88,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
      * EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String,
      * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
@@ -119,7 +103,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
      * EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String,
      * com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
@@ -139,7 +123,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
      * EntityManagerImpl, com.impetus.kundera.metadata.EntityMetadata,
      * java.util.Queue)
@@ -151,7 +135,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /**
      * On load from h base.
-     * 
+     *
      * @param <E>
      *            the element type
      * @param clazz
@@ -203,7 +187,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.impetus.kundera.Client#shutdown()
      */
     @Override
@@ -214,7 +198,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.impetus.kundera.Client#connect()
      */
     @Override
@@ -229,7 +213,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.impetus.kundera.Client#setContactNodes(java.lang.String[])
      */
     @Override
@@ -240,7 +224,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.impetus.kundera.Client#setDefaultPort(int)
      */
     @Override
@@ -251,7 +235,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.impetus.kundera.Client#delete(java.lang.String,
      * java.lang.String, java.lang.String)
      */
@@ -264,7 +248,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.impetus.kundera.Client#setKeySpace(java.lang.String)
      */
     @Override
@@ -275,7 +259,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.impetus.kundera.Client#getType()
      */
     @Override

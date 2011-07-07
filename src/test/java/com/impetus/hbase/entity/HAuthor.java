@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.hbase.entity;
 
 import java.io.Serializable;
@@ -43,7 +28,7 @@ import javax.persistence.TemporalType;
 
 /**
  * The Class Author.
- * 
+ *
  * @author animesh.kumar
  */
 @Entity
@@ -90,7 +75,7 @@ public class HAuthor implements Serializable
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -103,7 +88,7 @@ public class HAuthor implements Serializable
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -139,7 +124,7 @@ public class HAuthor implements Serializable
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
@@ -160,7 +145,7 @@ public class HAuthor implements Serializable
 
     /**
      * Gets the username.
-     * 
+     *
      * @return the username
      */
     public String getUsername()
@@ -170,7 +155,7 @@ public class HAuthor implements Serializable
 
     /**
      * Sets the username.
-     * 
+     *
      * @param username
      *            the username to set
      */
@@ -181,7 +166,7 @@ public class HAuthor implements Serializable
 
     /**
      * Gets the email address.
-     * 
+     *
      * @return the emailAddress
      */
     public String getEmailAddress()
@@ -191,7 +176,7 @@ public class HAuthor implements Serializable
 
     /**
      * Sets the email address.
-     * 
+     *
      * @param emailAddress
      *            the emailAddress to set
      */
@@ -202,7 +187,7 @@ public class HAuthor implements Serializable
 
     /**
      * Gets the country.
-     * 
+     *
      * @return the country
      */
     public String getCountry()
@@ -212,7 +197,7 @@ public class HAuthor implements Serializable
 
     /**
      * Sets the country.
-     * 
+     *
      * @param country
      *            the country to set
      */
@@ -223,7 +208,7 @@ public class HAuthor implements Serializable
 
     /**
      * Gets the registered.
-     * 
+     *
      * @return the registered
      */
     public Date getRegistered()
@@ -233,7 +218,7 @@ public class HAuthor implements Serializable
 
     /**
      * Sets the registered.
-     * 
+     *
      * @param registered
      *            the registered to set
      */

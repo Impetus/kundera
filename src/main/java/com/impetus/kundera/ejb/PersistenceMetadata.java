@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.ejb;
 
 import java.util.ArrayList;
@@ -40,7 +25,7 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 
 /**
  * PersistenceMetadata class.
- * 
+ *
  * @author animesh.kumar
  */
 public class PersistenceMetadata
@@ -72,7 +57,7 @@ public class PersistenceMetadata
 
     /**
      * Gets the name.
-     * 
+     *
      * @return the name
      */
     public String getName()
@@ -82,7 +67,7 @@ public class PersistenceMetadata
 
     /**
      * Sets the name.
-     * 
+     *
      * @param name
      *            the new name
      */
@@ -93,7 +78,7 @@ public class PersistenceMetadata
 
     /**
      * Gets the transaction type.
-     * 
+     *
      * @return the transaction type
      */
     public PersistenceUnitTransactionType getTransactionType()
@@ -103,7 +88,7 @@ public class PersistenceMetadata
 
     /**
      * Sets the transaction type.
-     * 
+     *
      * @param transactionType
      *            the new transaction type
      */
@@ -114,7 +99,7 @@ public class PersistenceMetadata
 
     /**
      * Gets the provider.
-     * 
+     *
      * @return the provider
      */
     public String getProvider()
@@ -124,7 +109,7 @@ public class PersistenceMetadata
 
     /**
      * Sets the provider.
-     * 
+     *
      * @param provider
      *            the new provider
      */
@@ -139,7 +124,7 @@ public class PersistenceMetadata
 
     /**
      * Gets the classes.
-     * 
+     *
      * @return the classes
      */
     public List<String> getClasses()
@@ -149,7 +134,7 @@ public class PersistenceMetadata
 
     /**
      * Sets the classes.
-     * 
+     *
      * @param classes
      *            the new classes
      */
@@ -160,7 +145,7 @@ public class PersistenceMetadata
 
     /**
      * Gets the packages.
-     * 
+     *
      * @return the packages
      */
     public List<String> getPackages()
@@ -170,7 +155,7 @@ public class PersistenceMetadata
 
     /**
      * Sets the packages.
-     * 
+     *
      * @param packages
      *            the new packages
      */
@@ -181,7 +166,7 @@ public class PersistenceMetadata
 
     /**
      * Gets the jar files.
-     * 
+     *
      * @return the jar files
      */
     public Set<String> getJarFiles()
@@ -191,7 +176,7 @@ public class PersistenceMetadata
 
     /**
      * Sets the jar files.
-     * 
+     *
      * @param jarFiles
      *            the new jar files
      */
@@ -202,7 +187,7 @@ public class PersistenceMetadata
 
     /**
      * Gets the props.
-     * 
+     *
      * @return the props
      */
     public Properties getProps()
@@ -212,7 +197,7 @@ public class PersistenceMetadata
 
     /**
      * Sets the props.
-     * 
+     *
      * @param props
      *            the new props
      */
@@ -223,7 +208,7 @@ public class PersistenceMetadata
 
     /**
      * Gets the exclude unlisted classes.
-     * 
+     *
      * @return the exclude unlisted classes
      */
     public boolean getExcludeUnlistedClasses()
@@ -233,7 +218,7 @@ public class PersistenceMetadata
 
     /**
      * Sets the exclude unlisted classes.
-     * 
+     *
      * @param excludeUnlistedClasses
      *            the new exclude unlisted classes
      */
