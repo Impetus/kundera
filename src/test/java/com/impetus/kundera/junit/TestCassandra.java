@@ -70,7 +70,7 @@ public class TestCassandra extends BaseTest
         logger.info("starting server");
         if (cassandra == null)
         {
-//            startCassandraServer();
+            // startCassandraServer();
         }
         if (conf == null)
         {
@@ -109,12 +109,12 @@ public class TestCassandra extends BaseTest
 
         user.addTweet(new Tweet("a", "Here it goes, my first tweet", "web"));
         user.addTweet(new Tweet("b", "Another one from me", "mobile"));
-        
+
         user.setPreference(new Preference("1", "Serene", "5"));
-		
-		user.addImDetail(new IMDetail("1", "Yahoo", "xamry"));
-		user.addImDetail(new IMDetail("2", "GTalk", "amry_4u"));
-		user.addImDetail(new IMDetail("3", "MSN", "itsmeamry"));
+
+        user.addImDetail(new IMDetail("1", "Yahoo", "xamry"));
+        user.addImDetail(new IMDetail("2", "GTalk", "amry_4u"));
+        user.addImDetail(new IMDetail("3", "MSN", "itsmeamry"));
 
         manager.persist(user);
     }

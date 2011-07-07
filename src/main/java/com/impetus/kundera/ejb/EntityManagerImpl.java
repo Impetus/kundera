@@ -236,8 +236,8 @@ public class EntityManagerImpl implements CassandraEntityManager
         try
         {
 
-            List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.REMOVE,
-                    this.client.getType());
+            List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.REMOVE, this.client
+                    .getType());
 
             // remove each one
             for (EnhancedEntity o : reachableEntities)
@@ -323,8 +323,8 @@ public class EntityManagerImpl implements CassandraEntityManager
             // validate
             metadataManager.validate(e.getClass());
 
-            List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.PERSIST,
-                    this.client.getType());
+            List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.PERSIST, this.client
+                    .getType());
 
             // save each one
             for (EnhancedEntity o : reachableEntities)
@@ -415,11 +415,14 @@ public class EntityManagerImpl implements CassandraEntityManager
     @Override
     public final Query createQuery(String ejbqlString)
     {
-    	if(this.client.getType().equals(DBType.MONGODB)) {
-			return new MongoDBQuery(this, metadataManager, ejbqlString);
-		} else {
-			return new LuceneQuery(this, metadataManager, ejbqlString);
-		}	
+        if (this.client.getType().equals(DBType.MONGODB))
+        {
+            return new MongoDBQuery(this, metadataManager, ejbqlString);
+        }
+        else
+        {
+            return new LuceneQuery(this, metadataManager, ejbqlString);
+        }
     }
 
     /* @see javax.persistence.EntityManager#flush() */

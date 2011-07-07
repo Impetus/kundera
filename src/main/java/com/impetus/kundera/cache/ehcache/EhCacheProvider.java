@@ -37,52 +37,67 @@ import com.impetus.kundera.cache.CacheProvider;
  * 
  * @author animesh.kumar
  */
-public class EhCacheProvider implements CacheProvider {
+public class EhCacheProvider implements CacheProvider
+{
 
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(EhCacheProvider.class);
 
     /** The manager. */
     private CacheManager manager;
-    
+
     /** The Constant NET_SF_EHCACHE_CONFIGURATION_RESOURCE_NAME. */
     private static final String NET_SF_EHCACHE_CONFIGURATION_RESOURCE_NAME = "net.sf.ehcache.configurationResourceName";
-    
+
     /** The initializing. */
     private boolean initializing;
-    
+
     /** The listeners. */
     private List<CacheEventListener> listeners = new ArrayList<CacheEventListener>();
 
-
-	@Override
-	public void init(String cacheResourceName) throws CacheException {
-        if (manager != null) {
-            log.warn ("Attempt to restart an already started CacheFactory. Using previously created EhCacheFactory.");
+    @Override
+    public void init(String cacheResourceName) throws CacheException
+    {
+        if (manager != null)
+        {
+            log.warn("Attempt to restart an already started CacheFactory. Using previously created EhCacheFactory.");
             return;
         }
         initializing = true;
-        try {
+        try
+        {
             String configurationResourceName = cacheResourceName;
-            if (configurationResourceName == null || configurationResourceName.length() == 0) {
+            if (configurationResourceName == null || configurationResourceName.length() == 0)
+            {
                 manager = new CacheManager();
-            } else {
-                if (!configurationResourceName.startsWith("/")) {
+            }
+            else
+            {
+                if (!configurationResourceName.startsWith("/"))
+                {
                     configurationResourceName = "/" + configurationResourceName;
-                    	log.info ("prepending / to " + configurationResourceName + ". It should be placed in the root"
-                                + "of the classpath rather than in a package.");
+                    log.info("prepending / to " + configurationResourceName + ". It should be placed in the root"
+                            + "of the classpath rather than in a package.");
                 }
                 URL url = loadResource(configurationResourceName);
                 manager = new CacheManager(url);
             }
-        } catch (net.sf.ehcache.CacheException e) {
-            if (e.getMessage().startsWith("Cannot parseConfiguration CacheManager. Attempt to create a new instance of " +
-                    "CacheManager using the diskStorePath")) {
+        }
+        catch (net.sf.ehcache.CacheException e)
+        {
+            if (e.getMessage().startsWith(
+                    "Cannot parseConfiguration CacheManager. Attempt to create a new instance of "
+                            + "CacheManager using the diskStorePath"))
+            {
                 throw new CacheException("Could not init EhCacheFactory.", e);
-            } else {
+            }
+            else
+            {
                 throw e;
             }
-        } finally {
+        }
+        finally
+        {
             initializing = false;
         }
 
@@ -90,133 +105,174 @@ public class EhCacheProvider implements CacheProvider {
 
     /* @see com.impetus.kundera.cache.CacheProvider#init(java.util.Map) */
     @Override
-    public synchronized void init(Map<?, ?> properties) throws CacheException {
-        if (manager != null) {
-            log.warn ("Attempt to restart an already started CacheFactory. Using previously created EhCacheFactory.");
+    public synchronized void init(Map<?, ?> properties) throws CacheException
+    {
+        if (manager != null)
+        {
+            log.warn("Attempt to restart an already started CacheFactory. Using previously created EhCacheFactory.");
             return;
         }
         initializing = true;
-        try {
+        try
+        {
             String configurationResourceName = null;
-            if (properties != null) {
+            if (properties != null)
+            {
                 configurationResourceName = (String) properties.get(NET_SF_EHCACHE_CONFIGURATION_RESOURCE_NAME);
             }
-            if (configurationResourceName == null || configurationResourceName.length() == 0) {
+            if (configurationResourceName == null || configurationResourceName.length() == 0)
+            {
                 manager = new CacheManager();
-            } else {
-                if (!configurationResourceName.startsWith("/")) {
+            }
+            else
+            {
+                if (!configurationResourceName.startsWith("/"))
+                {
                     configurationResourceName = "/" + configurationResourceName;
-                    	log.info ("prepending / to " + configurationResourceName + ". It should be placed in the root"
-                                + "of the classpath rather than in a package.");
+                    log.info("prepending / to " + configurationResourceName + ". It should be placed in the root"
+                            + "of the classpath rather than in a package.");
                 }
                 URL url = loadResource(configurationResourceName);
                 manager = new CacheManager(url);
             }
-        } catch (net.sf.ehcache.CacheException e) {
-            if (e.getMessage().startsWith("Cannot parseConfiguration CacheManager. Attempt to create a new instance of " +
-                    "CacheManager using the diskStorePath")) {
+        }
+        catch (net.sf.ehcache.CacheException e)
+        {
+            if (e.getMessage().startsWith(
+                    "Cannot parseConfiguration CacheManager. Attempt to create a new instance of "
+                            + "CacheManager using the diskStorePath"))
+            {
                 throw new CacheException("Could not init EhCacheFactory.", e);
-            } else {
+            }
+            else
+            {
                 throw e;
             }
-        } finally {
+        }
+        finally
+        {
             initializing = false;
         }
 
     }
 
     /**
-	 * Load resource.
-	 * 
-	 * @param configurationResourceName
-	 *            the configuration resource name
-	 * @return the uRL
-	 */
-    private URL loadResource(String configurationResourceName) {
+     * Load resource.
+     * 
+     * @param configurationResourceName
+     *            the configuration resource name
+     * @return the uRL
+     */
+    private URL loadResource(String configurationResourceName)
+    {
         ClassLoader standardClassloader = ClassLoaderUtil.getStandardClassLoader();
         URL url = null;
-        if (standardClassloader != null) {
+        if (standardClassloader != null)
+        {
             url = standardClassloader.getResource(configurationResourceName);
         }
-        if (url == null) {
+        if (url == null)
+        {
             url = this.getClass().getResource(configurationResourceName);
         }
-            log.info ("Creating EhCacheFactory from a specified resource: "
-                    + configurationResourceName + " Resolved to URL: " + url);
+        log.info("Creating EhCacheFactory from a specified resource: " + configurationResourceName
+                + " Resolved to URL: " + url);
 
-    	if (url == null) {
-            log.warn ("A configurationResourceName was set to " + configurationResourceName +
-                    " but the resource could not be loaded from the classpath." +
-                    "Ehcache will configure itself using defaults.");
+        if (url == null)
+        {
+            log.warn("A configurationResourceName was set to " + configurationResourceName
+                    + " but the resource could not be loaded from the classpath."
+                    + "Ehcache will configure itself using defaults.");
         }
         return url;
     }
-    
-    /* @see com.impetus.kundera.cache.CacheProvider#createCache(java.lang.String) */
+
+    /*
+     * @see
+     * com.impetus.kundera.cache.CacheProvider#createCache(java.lang.String)
+     */
     @Override
-	public Cache createCache(String name) throws CacheException {
-        if (manager == null) {
+    public Cache createCache(String name) throws CacheException
+    {
+        if (manager == null)
+        {
             throw new CacheException("CacheFactory was not initialized. Call init() before creating a cache.");
         }
-        try {
+        try
+        {
             net.sf.ehcache.Cache cache = manager.getCache(name);
-            if (cache == null) {
-                log.warn ("Could not find a specific ehcache configuration for cache named [" + name + "]; using defaults.");
+            if (cache == null)
+            {
+                log.warn("Could not find a specific ehcache configuration for cache named [" + name
+                        + "]; using defaults.");
                 manager.addCache(name);
                 cache = manager.getCache(name);
             }
             Ehcache backingCache = cache;
-            if (!backingCache.getCacheEventNotificationService().hasCacheEventListeners()) {
-                if (listeners.size() > 0) {
-                    for (CacheEventListener listener : listeners) {
-                        if (!backingCache.getCacheEventNotificationService().getCacheEventListeners().contains(listener)) {
+            if (!backingCache.getCacheEventNotificationService().hasCacheEventListeners())
+            {
+                if (listeners.size() > 0)
+                {
+                    for (CacheEventListener listener : listeners)
+                    {
+                        if (!backingCache.getCacheEventNotificationService().getCacheEventListeners()
+                                .contains(listener))
+                        {
                             backingCache.getCacheEventNotificationService().registerListener(listener);
-                        } else {
+                        }
+                        else
+                        {
                         }
                     }
                 }
             }
             return new EhCacheWrapper(cache);
-        } catch (net.sf.ehcache.CacheException e) {
+        }
+        catch (net.sf.ehcache.CacheException e)
+        {
             throw new CacheException("Could not create cache: " + name, e);
         }
-    
+
     }
 
-	/* @see com.impetus.kundera.cache.CacheProvider#shutdown() */
-	@Override
-	public void shutdown() {
-        if (manager != null) {
+    /* @see com.impetus.kundera.cache.CacheProvider#shutdown() */
+    @Override
+    public void shutdown()
+    {
+        if (manager != null)
+        {
             manager.shutdown();
             manager = null;
         }
-	}
+    }
 
     /**
-	 * Clear all.
-	 */
-    public void clearAll() {
+     * Clear all.
+     */
+    public void clearAll()
+    {
         manager.clearAll();
     }
 
     /**
-	 * Gets the cache manager.
-	 * 
-	 * @return the cache manager
-	 */
-    public CacheManager getCacheManager() {
+     * Gets the cache manager.
+     * 
+     * @return the cache manager
+     */
+    public CacheManager getCacheManager()
+    {
         return manager;
     }
 
     /**
-	 * Adds the default listener.
-	 * 
-	 * @param cacheEventListener
-	 *            the cache event listener
-	 */
-    public void addDefaultListener(CacheEventListener cacheEventListener) {
+     * Adds the default listener.
+     * 
+     * @param cacheEventListener
+     *            the cache event listener
+     */
+    public void addDefaultListener(CacheEventListener cacheEventListener)
+    {
         listeners.add(cacheEventListener);
     }
-    
 
 }

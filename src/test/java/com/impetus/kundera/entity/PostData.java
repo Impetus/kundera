@@ -27,21 +27,23 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 public class PostData
 {
     /** The title. */
-    @Column(name="title")
+    @Column(name = "title")
     public String title;
 
     /** The body. */
-    @Column(name="body")
+    @Column(name = "body")
     public String body;
 
     /** The created. */
-    @Column(name="created")
+    @Column(name = "created")
     public Date created;
 
     /**
      * 
      */
-    public PostData(){}
+    public PostData()
+    {
+    }
 
     /**
      * @return the title
@@ -52,7 +54,8 @@ public class PostData
     }
 
     /**
-     * @param title the title to set
+     * @param title
+     *            the title to set
      */
     public void setTitle(String title)
     {
@@ -68,7 +71,8 @@ public class PostData
     }
 
     /**
-     * @param body the body to set
+     * @param body
+     *            the body to set
      */
     public void setBody(String body)
     {
@@ -84,19 +88,19 @@ public class PostData
     }
 
     /**
-     * @param created the created to set
+     * @param created
+     *            the created to set
      */
     public void setCreated(Date created)
     {
         this.created = created;
     }
-    
- 
+
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         return HashCodeBuilder.reflectionHashCode(this);
     }
-
 
     /*
      * (non-Javadoc)
@@ -104,7 +108,8 @@ public class PostData
      * @see java.lang.Object#toString()
      */
     @Override
-    public String toString() {
+    public String toString()
+    {
         StringBuilder builder = new StringBuilder();
         builder.append("Post [title=");
         builder.append(title);

@@ -28,41 +28,45 @@ import com.impetus.kundera.metadata.EntityMetadata;
 /**
  * The Class EntityEventDispatcher.
  */
-public class EntityEventDispatcher {
+public class EntityEventDispatcher
+{
 
-	/** The Constant log. */
-	private static final Log log = LogFactory.getLog(EntityManagerImpl.class);
+    /** The Constant log. */
+    private static final Log log = LogFactory.getLog(EntityManagerImpl.class);
 
-	/**
-	 * Fire event listeners.
-	 * 
-	 * @param metadata
-	 *            the metadata
-	 * @param entity
-	 *            the entity
-	 * @param event
-	 *            the event
-	 * @throws PersistenceException
-	 *             the persistence exception
-	 */
-	public void fireEventListeners(EntityMetadata metadata, Object entity,
-			Class<?> event) throws PersistenceException {
-		
-		// handle external listeners first
-		List<? extends CallbackMethod> callBackMethods = metadata
-				.getCallbackMethods(event);
-		
-		if (null != callBackMethods && !callBackMethods.isEmpty()) {
-			log.debug("Callback >> " + event.getSimpleName() + " on "
-					+ metadata.getEntityClazz().getName());
-			for (CallbackMethod callback : callBackMethods) {
-				log.debug("Firing >> " + callback);
-				try {
-					callback.invoke(entity);
-				} catch (Exception e) {
-					throw new PersistenceException(e);
-				}
-			}
-		}
-	}
+    /**
+     * Fire event listeners.
+     * 
+     * @param metadata
+     *            the metadata
+     * @param entity
+     *            the entity
+     * @param event
+     *            the event
+     * @throws PersistenceException
+     *             the persistence exception
+     */
+    public void fireEventListeners(EntityMetadata metadata, Object entity, Class<?> event) throws PersistenceException
+    {
+
+        // handle external listeners first
+        List<? extends CallbackMethod> callBackMethods = metadata.getCallbackMethods(event);
+
+        if (null != callBackMethods && !callBackMethods.isEmpty())
+        {
+            log.debug("Callback >> " + event.getSimpleName() + " on " + metadata.getEntityClazz().getName());
+            for (CallbackMethod callback : callBackMethods)
+            {
+                log.debug("Firing >> " + callback);
+                try
+                {
+                    callback.invoke(entity);
+                }
+                catch (Exception e)
+                {
+                    throw new PersistenceException(e);
+                }
+            }
+        }
+    }
 }

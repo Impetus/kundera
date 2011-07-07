@@ -24,7 +24,8 @@ import java.lang.reflect.Field;
  *            the generic type
  * @author animesh.kumar
  */
-public interface PropertyAccessor<T> {
+public interface PropertyAccessor<T>
+{
 
     /**
      * From bytes.

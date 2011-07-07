@@ -25,80 +25,81 @@ import com.impetus.kundera.ejb.EntityManagerImpl;
  * @author Gavin King
  * @author Steve Ebersole
  */
-public interface LazyInitializer {
-	
-	/**
-	 * Initialize the proxy, fetching the target entity if necessary.
-	 * 
-	 * @throws PersistenceException
-	 *             the persistence exception
-	 */
-	public void initialize() throws PersistenceException;
+public interface LazyInitializer
+{
 
-	/**
-	 * Retrieve the identifier value for the enity our owning proxy represents.
-	 * 
-	 * @return The identifier value.
-	 */
-	public String getIdentifier();
+    /**
+     * Initialize the proxy, fetching the target entity if necessary.
+     * 
+     * @throws PersistenceException
+     *             the persistence exception
+     */
+    public void initialize() throws PersistenceException;
 
-	/**
-	 * Set the identifier value for the enity our owning proxy represents.
-	 * 
-	 * @param id
-	 *            The identifier value.
-	 */
-	public void setIdentifier(String id);
+    /**
+     * Retrieve the identifier value for the enity our owning proxy represents.
+     * 
+     * @return The identifier value.
+     */
+    public String getIdentifier();
 
-	/**
-	 * The entity-name of the entity our owning proxy represents.
-	 * 
-	 * @return The entity-name.
-	 */
-	public String getEntityName();
+    /**
+     * Set the identifier value for the enity our owning proxy represents.
+     * 
+     * @param id
+     *            The identifier value.
+     */
+    public void setIdentifier(String id);
 
-	/**
-	 * Get the actual class of the entity. Generally, {@link #getEntityName()}
-	 * should be used instead.
-	 * 
-	 * @return The actual entity class.
-	 */
-	public Class<?> getPersistentClass();
+    /**
+     * The entity-name of the entity our owning proxy represents.
+     * 
+     * @return The entity-name.
+     */
+    public String getEntityName();
 
-	/**
-	 * Is the proxy uninitialzed?.
-	 * 
-	 * @return True if uninitialized; false otherwise.
-	 */
-	public boolean isUninitialized();
+    /**
+     * Get the actual class of the entity. Generally, {@link #getEntityName()}
+     * should be used instead.
+     * 
+     * @return The actual entity class.
+     */
+    public Class<?> getPersistentClass();
 
-	/**
-	 * Get the session to which this proxy is associated, or null if it is not
-	 * attached.
-	 * 
-	 * @return The associated session.
-	 */
-	public EntityManagerImpl getEntityManager ();
+    /**
+     * Is the proxy uninitialzed?.
+     * 
+     * @return True if uninitialized; false otherwise.
+     */
+    public boolean isUninitialized();
 
-	/**
-	 * Unset this initializer's reference to session. It is assumed that the
-	 * caller is also taking care or cleaning up the owning proxy's reference in
-	 * the persistence context.
-	 */
-	public void unsetEntityManager();
+    /**
+     * Get the session to which this proxy is associated, or null if it is not
+     * attached.
+     * 
+     * @return The associated session.
+     */
+    public EntityManagerImpl getEntityManager();
 
-	/**
-	 * Sets the unwrap.
-	 * 
-	 * @param unwrap
-	 *            the new unwrap
-	 */
-	public void setUnwrap(boolean unwrap);
+    /**
+     * Unset this initializer's reference to session. It is assumed that the
+     * caller is also taking care or cleaning up the owning proxy's reference in
+     * the persistence context.
+     */
+    public void unsetEntityManager();
 
-	/**
-	 * Checks if is unwrap.
-	 * 
-	 * @return true, if is unwrap
-	 */
-	public boolean isUnwrap();
+    /**
+     * Sets the unwrap.
+     * 
+     * @param unwrap
+     *            the new unwrap
+     */
+    public void setUnwrap(boolean unwrap);
+
+    /**
+     * Checks if is unwrap.
+     * 
+     * @return true, if is unwrap
+     */
+    public boolean isUnwrap();
 }

@@ -30,107 +30,126 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 /**
- * Entity Class for User object 
+ * Entity Class for User object
+ * 
  * @author amresh.singh
  */
 
 @Entity
-@Table(name="users", schema="Blog")
-public class User {
-	@Id
-	private String userId;		//PK
-	
-	//Embedded object, will persist co-located
-	@Embedded
-	private PersonalDetail personalDetail;  
-	
-	//Embedded collection, will persist co-located
-	@Embedded
-	private List<Tweet> tweets;				
-	
-	//One-to-one, will be persisted separately
-	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
-	private Preference preference;			
-	
-	//One to many, will be persisted separately
-	@OneToMany (cascade={CascadeType.ALL}, fetch=FetchType.LAZY)	
-	private Set<IMDetail> imDetails;
-    
-	/**
-	 * @return the userId
-	 */
-	public String getUserId() {
-		return userId;
-	}
+@Table(name = "users", schema = "Blog")
+public class User
+{
+    @Id
+    private String userId; // PK
 
-	/**
-	 * @param userId the userId to set
-	 */
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
-	
-	/**
-	 * @return the personalDetail
-	 */
-	public PersonalDetail getPersonalDetail() {
-		return personalDetail;
-	}
+    // Embedded object, will persist co-located
+    @Embedded
+    private PersonalDetail personalDetail;
 
-	/**
-	 * @param personalDetail the personalDetail to set
-	 */
-	public void setPersonalDetail(PersonalDetail personalDetail) {
-		this.personalDetail = personalDetail;
-	}
+    // Embedded collection, will persist co-located
+    @Embedded
+    private List<Tweet> tweets;
 
-	/**
-	 * @return the tweets
-	 */
-	public List<Tweet> getTweets() {
-		return tweets;
-	}
+    // One-to-one, will be persisted separately
+    @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
+    private Preference preference;
 
-	/**
-	 * @param tweets the tweets to set
-	 */
-	public void addTweet(Tweet tweet) {
-		if(this.tweets == null || this.tweets.isEmpty()) {
-			this.tweets = new ArrayList<Tweet>();
-		}
-		this.tweets.add(tweet);
-	}	
+    // One to many, will be persisted separately
+    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
+    private Set<IMDetail> imDetails;
 
-	/**
-	 * @return the preference
-	 */
-	public Preference getPreference() {
-		return preference;
-	}
+    /**
+     * @return the userId
+     */
+    public String getUserId()
+    {
+        return userId;
+    }
 
-	/**
-	 * @param preference the preference to set
-	 */
-	public void setPreference(Preference preference) {
-		this.preference = preference;
-	}
+    /**
+     * @param userId
+     *            the userId to set
+     */
+    public void setUserId(String userId)
+    {
+        this.userId = userId;
+    }
 
-	/**
-	 * @return the imDetails
-	 */
-	public Set<IMDetail> getImDetails() {
-		return imDetails;
-	}
+    /**
+     * @return the personalDetail
+     */
+    public PersonalDetail getPersonalDetail()
+    {
+        return personalDetail;
+    }
 
-	/**
-	 * @param imDetails the imDetails to set
-	 */
-	public void addImDetail(IMDetail imDetail) {
-		if(this.imDetails == null || this.imDetails.isEmpty()) {
-			this.imDetails = new HashSet<IMDetail>();
-		}
-		
-		this.imDetails.add(imDetail);		
-	}
-	
+    /**
+     * @param personalDetail
+     *            the personalDetail to set
+     */
+    public void setPersonalDetail(PersonalDetail personalDetail)
+    {
+        this.personalDetail = personalDetail;
+    }
+
+    /**
+     * @return the tweets
+     */
+    public List<Tweet> getTweets()
+    {
+        return tweets;
+    }
+
+    /**
+     * @param tweets
+     *            the tweets to set
+     */
+    public void addTweet(Tweet tweet)
+    {
+        if (this.tweets == null || this.tweets.isEmpty())
+        {
+            this.tweets = new ArrayList<Tweet>();
+        }
+        this.tweets.add(tweet);
+    }
+
+    /**
+     * @return the preference
+     */
+    public Preference getPreference()
+    {
+        return preference;
+    }
+
+    /**
+     * @param preference
+     *            the preference to set
+     */
+    public void setPreference(Preference preference)
+    {
+        this.preference = preference;
+    }
+
+    /**
+     * @return the imDetails
+     */
+    public Set<IMDetail> getImDetails()
+    {
+        return imDetails;
+    }
+
+    /**
+     * @param imDetails
+     *            the imDetails to set
+     */
+    public void addImDetail(IMDetail imDetail)
+    {
+        if (this.imDetails == null || this.imDetails.isEmpty())
+        {
+            this.imDetails = new HashSet<IMDetail>();
+        }
+
+        this.imDetails.add(imDetail);
+    }
+
 }

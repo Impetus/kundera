@@ -109,7 +109,9 @@ public class PelopsClient implements CassandraClient
     {
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.Client#connect()
      */
     @Override
@@ -119,7 +121,9 @@ public class PelopsClient implements CassandraClient
         new SolandraUtils().startSolandraServer();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.Client#shutdown()
      */
     @Override
@@ -139,8 +143,12 @@ public class PelopsClient implements CassandraClient
         return !closed;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.Client#writeColumns(java.lang.String, java.lang.String, java.lang.String, java.util.List, com.impetus.kundera.proxy.EnhancedEntity)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.Client#writeColumns(java.lang.String,
+     * java.lang.String, java.lang.String, java.util.List,
+     * com.impetus.kundera.proxy.EnhancedEntity)
      */
     @Deprecated
     @Override
@@ -150,8 +158,12 @@ public class PelopsClient implements CassandraClient
         throw new PersistenceException("Not yet implemented");
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.Client#writeColumns(com.impetus.kundera.ejb.EntityManagerImpl, com.impetus.kundera.proxy.EnhancedEntity, com.impetus.kundera.metadata.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @seecom.impetus.kundera.Client#writeColumns(com.impetus.kundera.ejb.
+     * EntityManagerImpl, com.impetus.kundera.proxy.EnhancedEntity,
+     * com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
     public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
@@ -193,8 +205,13 @@ public class PelopsClient implements CassandraClient
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.CassandraClient#writeSuperColumns(java.lang.String, java.lang.String, java.lang.String, org.apache.cassandra.thrift.SuperColumn[])
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.CassandraClient#writeSuperColumns(java.lang.String,
+     * java.lang.String, java.lang.String,
+     * org.apache.cassandra.thrift.SuperColumn[])
      */
     @Override
     @Deprecated
@@ -251,8 +268,12 @@ public class PelopsClient implements CassandraClient
         return e;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String, com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
+    /*
+     * (non-Javadoc)
+     * 
+     * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
+     * EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String,
+     * com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
      */
     @Override
     // TODO we need to refactor/reimplement this.
@@ -299,8 +320,12 @@ public class PelopsClient implements CassandraClient
         return entities;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String[])
      */
     @Override
     public final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
@@ -314,8 +339,12 @@ public class PelopsClient implements CassandraClient
                 ConsistencyLevel.ONE);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.EntityManagerImpl, com.impetus.kundera.metadata.EntityMetadata, java.util.Queue)
+    /*
+     * (non-Javadoc)
+     * 
+     * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
+     * EntityManagerImpl, com.impetus.kundera.metadata.EntityMetadata,
+     * java.util.Queue)
      */
     public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception
     {
@@ -384,7 +413,9 @@ public class PelopsClient implements CassandraClient
                 ConsistencyLevel.ONE);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.CassandraClient#getCassandraClient()
      */
     @Override
@@ -468,11 +499,15 @@ public class PelopsClient implements CassandraClient
 
         /**
          * The Constructor.
-         *
-         * @param id the id
-         * @param columnFamilyName the column family name
-         * @param columns the columns
-         * @param superColumns the super columns
+         * 
+         * @param id
+         *            the id
+         * @param columnFamilyName
+         *            the column family name
+         * @param columns
+         *            the columns
+         * @param superColumns
+         *            the super columns
          */
         public ThriftRow(String id, String columnFamilyName, List<Column> columns, List<SuperColumn> superColumns)
         {
@@ -566,7 +601,7 @@ public class PelopsClient implements CassandraClient
 
         /**
          * Gets the super columns.
-         *
+         * 
          * @return the superColumns
          */
         public List<SuperColumn> getSuperColumns()
@@ -576,8 +611,9 @@ public class PelopsClient implements CassandraClient
 
         /**
          * Sets the super columns.
-         *
-         * @param superColumns the superColumns to set
+         * 
+         * @param superColumns
+         *            the superColumns to set
          */
         public void setSuperColumns(List<SuperColumn> superColumns)
         {
@@ -586,8 +622,9 @@ public class PelopsClient implements CassandraClient
 
         /**
          * Adds the super column.
-         *
-         * @param superColumn the super column
+         * 
+         * @param superColumn
+         *            the super column
          */
         public void addSuperColumn(SuperColumn superColumn)
         {
@@ -633,7 +670,7 @@ public class PelopsClient implements CassandraClient
 
     /**
      * Gets the ec cache handler.
-     *
+     * 
      * @return the scCacheHandler
      */
     public EmbeddedCollectionCacheHandler getEcCacheHandler()
@@ -648,9 +685,9 @@ public class PelopsClient implements CassandraClient
     {
 
         /**
- * Start solandra server.
- */
-public void startSolandraServer()
+         * Start solandra server.
+         */
+        public void startSolandraServer()
         {
             log.info("Starting Solandra Server.");
             new CassandraUtils();
@@ -672,8 +709,9 @@ public void startSolandraServer()
 
         /**
          * Creates the cass schema.
-         *
-         * @throws IOException Signals that an I/O exception has occurred.
+         * 
+         * @throws IOException
+         *             Signals that an I/O exception has occurred.
          */
         private void createCassSchema() throws IOException
         {
@@ -770,7 +808,6 @@ public void startSolandraServer()
             Class<? extends AbstractReplicationStrategy> simple = SimpleStrategy.class;
             KsDef solandraKS = new KsDef(keySpace, simple.getCanonicalName(), 1, cfs);
             Cassandra.Client client = getClient();
-            
 
             try
             {
@@ -790,7 +827,7 @@ public void startSolandraServer()
 
         /**
          * Inits the client.
-         *
+         * 
          * @return the client
          */
         private Cassandra.Client getClient()
@@ -805,7 +842,7 @@ public void startSolandraServer()
                 if (!socket.isOpen())
                 {
                     socket.open();
-                    
+
                 }
             }
             catch (TTransportException ttex)

@@ -34,7 +34,8 @@ import java.util.StringTokenizer;
  * 
  * @author animesh.kumar
  */
-public class KunderaQueryParser {
+public class KunderaQueryParser
+{
 
     /** The JPQL query to populate. */
     private KunderaQuery query;
@@ -56,7 +57,8 @@ public class KunderaQueryParser {
      * @param queryString
      *            The Single-String query
      */
-    public KunderaQueryParser(KunderaQuery query, String queryString) {
+    public KunderaQueryParser(KunderaQuery query, String queryString)
+    {
         this.query = query;
         this.queryString = queryString;
     }
@@ -64,7 +66,8 @@ public class KunderaQueryParser {
     /**
      * Method to parse the Single-String query.
      */
-    public final void parse() {
+    public final void parse()
+    {
         new Compiler(new Parser(queryString)).compile();
     }
 
@@ -76,11 +79,14 @@ public class KunderaQueryParser {
      * 
      * @return Whether it is a keyword
      */
-    private boolean isKeyword(String token) {
+    private boolean isKeyword(String token)
+    {
         // Compare the passed token against the provided keyword list, or their
         // lowercase form
-        for (int i = 0; i < KunderaQuery.SINGLE_STRING_KEYWORDS.length; i++) {
-            if (token.equalsIgnoreCase(KunderaQuery.SINGLE_STRING_KEYWORDS[i])) {
+        for (int i = 0; i < KunderaQuery.SINGLE_STRING_KEYWORDS.length; i++)
+        {
+            if (token.equalsIgnoreCase(KunderaQuery.SINGLE_STRING_KEYWORDS[i]))
+            {
                 return true;
             }
         }
@@ -93,7 +99,8 @@ public class KunderaQueryParser {
      * of the query. This takes the keyword and sets the constituent part
      * accordingly.
      */
-    private class Compiler {
+    private class Compiler
+    {
 
         /** The tokenizer. */
         private Parser tokenizer;
@@ -109,21 +116,25 @@ public class KunderaQueryParser {
          * @param tokenizer
          *            the tokenizer
          */
-        Compiler(Parser tokenizer) {
+        Compiler(Parser tokenizer)
+        {
             this.tokenizer = tokenizer;
         }
 
         /**
          * Compile.
          */
-        private void compile() {
+        private void compile()
+        {
             // TODO Query can start "SELECT", "DELETE" or "UPDATE"
             compileSelect();
 
             // any keyword after compiling the SELECT is an error
             String keyword = tokenizer.parseKeyword();
-            if (keyword != null) {
-                if (isKeyword(keyword)) {
+            if (keyword != null)
+            {
+                if (isKeyword(keyword))
+                {
                     throw new RuntimeException("out of order keyword: " + keyword);
                 }
             }
@@ -133,28 +144,36 @@ public class KunderaQueryParser {
          * Compile select.
          */
         // TODO: reduce Cyclomatic complexity
-        private void compileSelect() {
-            if (!tokenizer.parseKeywordIgnoreCase("SELECT")) {
+        private void compileSelect()
+        {
+            if (!tokenizer.parseKeywordIgnoreCase("SELECT"))
+            {
                 throw new RuntimeException("no select to start");
             }
             compileResult();
-            if (tokenizer.parseKeywordIgnoreCase("FROM")) {
+            if (tokenizer.parseKeywordIgnoreCase("FROM"))
+            {
                 compileFrom();
             }
-            if (tokenizer.parseKeywordIgnoreCase("WHERE")) {
+            if (tokenizer.parseKeywordIgnoreCase("WHERE"))
+            {
                 compileWhere();
             }
-            if (tokenizer.parseKeywordIgnoreCase("GROUP BY")) {
+            if (tokenizer.parseKeywordIgnoreCase("GROUP BY"))
+            {
                 compileGroup();
             }
-            if (tokenizer.parseKeywordIgnoreCase("HAVING")) {
+            if (tokenizer.parseKeywordIgnoreCase("HAVING"))
+            {
                 compileHaving();
             }
-            if (groupingClause != null) {
+            if (groupingClause != null)
+            {
                 query.setGrouping(groupingClause);
             }
 
-            if (tokenizer.parseKeywordIgnoreCase("ORDER BY")) {
+            if (tokenizer.parseKeywordIgnoreCase("ORDER BY"))
+            {
                 compileOrder();
             }
         }
@@ -162,10 +181,12 @@ public class KunderaQueryParser {
         /**
          * Compile result.
          */
-        private void compileResult() {
+        private void compileResult()
+        {
             String content = tokenizer.parseContent();
             // content may be empty
-            if (content.length() > 0) {
+            if (content.length() > 0)
+            {
                 query.setResult(content);
             }
         }
@@ -173,10 +194,12 @@ public class KunderaQueryParser {
         /**
          * Compile from.
          */
-        private void compileFrom() {
+        private void compileFrom()
+        {
             String content = tokenizer.parseContent();
             // content may be empty
-            if (content.length() > 0) {
+            if (content.length() > 0)
+            {
                 query.setFrom(content);
             }
         }
@@ -184,10 +207,12 @@ public class KunderaQueryParser {
         /**
          * Compile where.
          */
-        private void compileWhere() {
+        private void compileWhere()
+        {
             String content = tokenizer.parseContent();
             // content cannot be empty
-            if (content.length() == 0) {
+            if (content.length() == 0)
+            {
                 throw new RuntimeException("keyword without value[WHERE]");
             }
             query.setFilter(content);
@@ -196,10 +221,12 @@ public class KunderaQueryParser {
         /**
          * Compile group.
          */
-        private void compileGroup() {
+        private void compileGroup()
+        {
             String content = tokenizer.parseContent();
             // content cannot be empty
-            if (content.length() == 0) {
+            if (content.length() == 0)
+            {
                 throw new RuntimeException("keyword without value: GROUP BY");
             }
             groupingClause = content;
@@ -208,15 +235,20 @@ public class KunderaQueryParser {
         /**
          * Compile having.
          */
-        private void compileHaving() {
+        private void compileHaving()
+        {
             String content = tokenizer.parseContent();
             // content cannot be empty
-            if (content.length() == 0) {
+            if (content.length() == 0)
+            {
                 throw new RuntimeException("keyword without value: HAVING");
             }
-            if (groupingClause != null) {
+            if (groupingClause != null)
+            {
                 groupingClause = groupingClause.trim() + content;
-            } else {
+            }
+            else
+            {
                 groupingClause = content;
             }
         }
@@ -224,10 +256,12 @@ public class KunderaQueryParser {
         /**
          * Compile order.
          */
-        private void compileOrder() {
+        private void compileOrder()
+        {
             String content = tokenizer.parseContent();
             // content cannot be empty
-            if (content.length() == 0) {
+            if (content.length() == 0)
+            {
                 throw new RuntimeException("keyword without value: ORDER BY");
             }
             query.setOrdering(content);
@@ -237,7 +271,8 @@ public class KunderaQueryParser {
     /**
      * Tokenizer that provides access to current token.
      */
-    private class Parser {
+    private class Parser
+    {
 
         /** tokens. */
         private final String[] tokens;
@@ -254,18 +289,24 @@ public class KunderaQueryParser {
          * @param str
          *            the str
          */
-        public Parser(String str) {
+        public Parser(String str)
+        {
             StringTokenizer tokenizer = new StringTokenizer(str);
             tokens = new String[tokenizer.countTokens()];
             keywords = new String[tokenizer.countTokens()];
             int i = 0;
-            while (tokenizer.hasMoreTokens()) {
+            while (tokenizer.hasMoreTokens())
+            {
                 tokens[i++] = tokenizer.nextToken();
             }
-            for (i = 0; i < tokens.length; i++) {
-                if (isKeyword(tokens[i])) {
+            for (i = 0; i < tokens.length; i++)
+            {
+                if (isKeyword(tokens[i]))
+                {
                     keywords[i] = tokens[i];
-                } else if (i < tokens.length - 1 && isKeyword(tokens[i] + ' ' + tokens[i + 1])) {
+                }
+                else if (i < tokens.length - 1 && isKeyword(tokens[i] + ' ' + tokens[i + 1]))
+                {
                     keywords[i] = tokens[i];
                     i++;
                     keywords[i] = tokens[i];
@@ -278,20 +319,30 @@ public class KunderaQueryParser {
          * 
          * @return the content
          */
-        public String parseContent() {
+        public String parseContent()
+        {
             String content = "";
-            while (pos < tokens.length - 1) {
+            while (pos < tokens.length - 1)
+            {
                 pos++;
-                if (isKeyword(tokens[pos])) {
+                if (isKeyword(tokens[pos]))
+                {
                     pos--;
                     break;
-                } else if (pos < tokens.length - 1 && isKeyword(tokens[pos] + ' ' + tokens[pos + 1])) {
+                }
+                else if (pos < tokens.length - 1 && isKeyword(tokens[pos] + ' ' + tokens[pos + 1]))
+                {
                     pos--;
                     break;
-                } else {
-                    if (content.length() == 0) {
+                }
+                else
+                {
+                    if (content.length() == 0)
+                    {
                         content = tokens[pos];
-                    } else {
+                    }
+                    else
+                    {
                         content += " " + tokens[pos];
                     }
                 }
@@ -308,16 +359,23 @@ public class KunderaQueryParser {
          * 
          * @return true if the keyword
          */
-        public boolean parseKeyword(String keyword) {
-            if (pos < tokens.length - 1) {
+        public boolean parseKeyword(String keyword)
+        {
+            if (pos < tokens.length - 1)
+            {
                 pos++;
-                if (keywords[pos] != null) {
-                    if (keywords[pos].equals(keyword)) {
+                if (keywords[pos] != null)
+                {
+                    if (keywords[pos].equals(keyword))
+                    {
                         return true;
                     }
-                    if (keyword.indexOf(' ') > -1) {
-                        if (pos < keywords.length - 1) {
-                            if ((keywords[pos] + ' ' + keywords[pos + 1]).equals(keyword)) {
+                    if (keyword.indexOf(' ') > -1)
+                    {
+                        if (pos < keywords.length - 1)
+                        {
+                            if ((keywords[pos] + ' ' + keywords[pos + 1]).equals(keyword))
+                            {
                                 pos++;
                                 return true;
                             }
@@ -338,15 +396,21 @@ public class KunderaQueryParser {
          * 
          * @return true if the keyword
          */
-        public boolean parseKeywordIgnoreCase(String keyword) {
-            if (pos < tokens.length - 1) {
+        public boolean parseKeywordIgnoreCase(String keyword)
+        {
+            if (pos < tokens.length - 1)
+            {
                 pos++;
-                if (keywords[pos] != null) {
-                    if (keywords[pos].equalsIgnoreCase(keyword)) {
+                if (keywords[pos] != null)
+                {
+                    if (keywords[pos].equalsIgnoreCase(keyword))
+                    {
                         return true;
                     }
-                    if (keyword.indexOf(' ') > -1) {
-                        if ((keywords[pos] + ' ' + keywords[pos + 1]).equalsIgnoreCase(keyword)) {
+                    if (keyword.indexOf(' ') > -1)
+                    {
+                        if ((keywords[pos] + ' ' + keywords[pos + 1]).equalsIgnoreCase(keyword))
+                        {
                             pos++;
                             return true;
                         }
@@ -363,10 +427,13 @@ public class KunderaQueryParser {
          * 
          * @return the parsed keyword or null
          */
-        public String parseKeyword() {
-            if (pos < tokens.length - 1) {
+        public String parseKeyword()
+        {
+            if (pos < tokens.length - 1)
+            {
                 pos++;
-                if (keywords[pos] != null) {
+                if (keywords[pos] != null)
+                {
                     return keywords[pos];
                 }
                 pos--;

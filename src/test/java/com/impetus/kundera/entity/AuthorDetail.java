@@ -24,13 +24,15 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 public class AuthorDetail
 {
     /** The author. */
-    @Column(name="authorname")
+    @Column(name = "authorname")
     public String name;
 
-    @Column(name="email")
+    @Column(name = "email")
     public String email;
 
-    public AuthorDetail(){}
+    public AuthorDetail()
+    {
+    }
 
     /**
      * @return the author
@@ -41,7 +43,8 @@ public class AuthorDetail
     }
 
     /**
-     * @param author the author to set
+     * @param author
+     *            the author to set
      */
     public void setAuthor(String author)
     {
@@ -57,16 +60,17 @@ public class AuthorDetail
     }
 
     /**
-     * @param email the email to set
+     * @param email
+     *            the email to set
      */
     public void setEmail(String email)
     {
         this.email = email;
     }
-    
- 
+
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         return HashCodeBuilder.reflectionHashCode(this);
     }
 
@@ -76,7 +80,8 @@ public class AuthorDetail
      * @see java.lang.Object#toString()
      */
     @Override
-    public String toString() {
+    public String toString()
+    {
         StringBuilder builder = new StringBuilder();
         builder.append(", [author=");
         builder.append(name);

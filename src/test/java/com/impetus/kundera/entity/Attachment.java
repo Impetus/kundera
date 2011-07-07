@@ -20,82 +20,99 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * Entity class for Email attachment
+ * 
  * @author amresh.singh
  */
 
 @Entity
-@Table(name="attachments", schema="mongodbtest")
-public class Attachment {
-	
-	@Id	
-	private String attachmentId;
-	
-	@Column(name="file_name")
-	private String fileName;
-	
-	@Column(name="file_type")
-	private String fileType;
-	
-	@Column(name="file_location")
-	private String fileLocation;
-	
-	
-	public String toString() {
-		return "ID: " + attachmentId
-			+ "\tName: " + fileName
-			+ "\tType: " + fileType 
-			+ "\tLocation: " + fileLocation;
-	}
-	
-	/**
-	 * @return the attachmentId
-	 */
-	public String getAttachmentId() {
-		return attachmentId;
-	}
-	/**
-	 * @param attachmentId the attachmentId to set
-	 */
-	public void setAttachmentId(String attachmentId) {
-		this.attachmentId = attachmentId;
-	}
-	/**
-	 * @return the fileName
-	 */
-	public String getFileName() {
-		return fileName;
-	}
-	/**
-	 * @param fileName the fileName to set
-	 */
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
-	/**
-	 * @return the fileType
-	 */
-	public String getFileType() {
-		return fileType;
-	}
-	/**
-	 * @param fileType the fileType to set
-	 */
-	public void setFileType(String fileType) {
-		this.fileType = fileType;
-	}
-	/**
-	 * @return the fileLocation
-	 */
-	public String getFileLocation() {
-		return fileLocation;
-	}
-	/**
-	 * @param fileLocation the fileLocation to set
-	 */
-	public void setFileLocation(String fileLocation) {
-		this.fileLocation = fileLocation;
-	}	
+@Table(name = "attachments", schema = "mongodbtest")
+public class Attachment
+{
+
+    @Id
+    private String attachmentId;
+
+    @Column(name = "file_name")
+    private String fileName;
+
+    @Column(name = "file_type")
+    private String fileType;
+
+    @Column(name = "file_location")
+    private String fileLocation;
+
+    public String toString()
+    {
+        return "ID: " + attachmentId + "\tName: " + fileName + "\tType: " + fileType + "\tLocation: " + fileLocation;
+    }
+
+    /**
+     * @return the attachmentId
+     */
+    public String getAttachmentId()
+    {
+        return attachmentId;
+    }
+
+    /**
+     * @param attachmentId
+     *            the attachmentId to set
+     */
+    public void setAttachmentId(String attachmentId)
+    {
+        this.attachmentId = attachmentId;
+    }
+
+    /**
+     * @return the fileName
+     */
+    public String getFileName()
+    {
+        return fileName;
+    }
+
+    /**
+     * @param fileName
+     *            the fileName to set
+     */
+    public void setFileName(String fileName)
+    {
+        this.fileName = fileName;
+    }
+
+    /**
+     * @return the fileType
+     */
+    public String getFileType()
+    {
+        return fileType;
+    }
+
+    /**
+     * @param fileType
+     *            the fileType to set
+     */
+    public void setFileType(String fileType)
+    {
+        this.fileType = fileType;
+    }
+
+    /**
+     * @return the fileLocation
+     */
+    public String getFileLocation()
+    {
+        return fileLocation;
+    }
+
+    /**
+     * @param fileLocation
+     *            the fileLocation to set
+     */
+    public void setFileLocation(String fileLocation)
+    {
+        this.fileLocation = fileLocation;
+    }
 }

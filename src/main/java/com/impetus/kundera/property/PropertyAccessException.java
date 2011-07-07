@@ -20,7 +20,8 @@ package com.impetus.kundera.property;
  * 
  * @author animesh.kumar
  */
-public class PropertyAccessException extends Exception {
+public class PropertyAccessException extends Exception
+{
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 2920598132353417557L;
@@ -28,7 +29,8 @@ public class PropertyAccessException extends Exception {
     /**
      * Instantiates a new property access exception.
      */
-    public PropertyAccessException() {
+    public PropertyAccessException()
+    {
     }
 
     /**
@@ -37,7 +39,8 @@ public class PropertyAccessException extends Exception {
      * @param message
      *            the message
      */
-    public PropertyAccessException(String message) {
+    public PropertyAccessException(String message)
+    {
         super(message);
     }
 
@@ -47,7 +50,8 @@ public class PropertyAccessException extends Exception {
      * @param cause
      *            the cause
      */
-    public PropertyAccessException(Throwable cause) {
+    public PropertyAccessException(Throwable cause)
+    {
         super(cause);
     }
 

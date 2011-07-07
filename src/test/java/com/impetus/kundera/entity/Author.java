@@ -30,7 +30,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-
 /**
  * The Class Author.
  * 
@@ -38,9 +37,10 @@ import javax.persistence.TemporalType;
  */
 @Entity
 // makes it an entity class
-@Table(name="Authors", schema="Blog")
+@Table(name = "Authors", schema = "Blog")
 // assign ColumnFamily type and name
-public class Author implements Serializable{
+public class Author implements Serializable
+{
 
     /** The username. */
     @Id
@@ -65,11 +65,11 @@ public class Author implements Serializable{
     /** The name. */
     String name;
 
-   
     /**
      * Instantiates a new author.
      */
-    public Author() { // must have a default constructor
+    public Author()
+    { // must have a default constructor
     }
 
     // getters, setters etc.
@@ -80,7 +80,8 @@ public class Author implements Serializable{
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((username == null) ? 0 : username.hashCode());
@@ -93,7 +94,8 @@ public class Author implements Serializable{
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
         if (this == obj)
             return true;
         if (obj == null)
@@ -101,49 +103,57 @@ public class Author implements Serializable{
         if (!(obj instanceof Author))
             return false;
         Author other = (Author) obj;
-        if (username == null) {
+        if (username == null)
+        {
             if (other.username != null)
                 return false;
-        } else if (!username.equals(other.username))
+        }
+        else if (!username.equals(other.username))
             return false;
         return true;
     }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("Author [name=");
-		builder.append(name);
-		builder.append(", country=");
-		builder.append(country);
-		builder.append(", emailAddress=");
-		builder.append(emailAddress);
-		builder.append(", registered=");
-		builder.append(registered);
-		builder.append(", username=");
-		builder.append(username);
-		builder.append("]");
-		return builder.toString();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Author [name=");
+        builder.append(name);
+        builder.append(", country=");
+        builder.append(country);
+        builder.append(", emailAddress=");
+        builder.append(emailAddress);
+        builder.append(", registered=");
+        builder.append(registered);
+        builder.append(", username=");
+        builder.append(username);
+        builder.append("]");
+        return builder.toString();
+    }
 
-	/**
-	 * Gets the username.
-	 * 
-	 * @return the username
-	 */
-    public String getUsername() {
+    /**
+     * Gets the username.
+     * 
+     * @return the username
+     */
+    public String getUsername()
+    {
         return username;
     }
 
     /**
      * Sets the username.
      * 
-     * @param username the username to set
+     * @param username
+     *            the username to set
      */
-    public void setUsername(String username) {
+    public void setUsername(String username)
+    {
         this.username = username;
     }
 
@@ -152,16 +162,19 @@ public class Author implements Serializable{
      * 
      * @return the emailAddress
      */
-    public String getEmailAddress() {
+    public String getEmailAddress()
+    {
         return emailAddress;
     }
 
     /**
      * Sets the email address.
      * 
-     * @param emailAddress the emailAddress to set
+     * @param emailAddress
+     *            the emailAddress to set
      */
-    public void setEmailAddress(String emailAddress) {
+    public void setEmailAddress(String emailAddress)
+    {
         this.emailAddress = emailAddress;
     }
 
@@ -170,16 +183,19 @@ public class Author implements Serializable{
      * 
      * @return the country
      */
-    public String getCountry() {
+    public String getCountry()
+    {
         return country;
     }
 
     /**
      * Sets the country.
      * 
-     * @param country the country to set
+     * @param country
+     *            the country to set
      */
-    public void setCountry(String country) {
+    public void setCountry(String country)
+    {
         this.country = country;
     }
 
@@ -188,18 +204,20 @@ public class Author implements Serializable{
      * 
      * @return the registered
      */
-    public Date getRegistered() {
+    public Date getRegistered()
+    {
         return registered;
     }
 
     /**
      * Sets the registered.
      * 
-     * @param registered the registered to set
+     * @param registered
+     *            the registered to set
      */
-    public void setRegistered(Date registered) {
+    public void setRegistered(Date registered)
+    {
         this.registered = registered;
     }
-  
-    
+
 }

@@ -33,9 +33,10 @@ import javax.persistence.TemporalType;
  */
 @Entity
 // makes it an entity class
-@Table(name="hAuthor", schema="Blog")
+@Table(name = "hAuthor", schema = "Blog")
 // assign ColumnFamily type and name
-public class HAuthor implements Serializable{
+public class HAuthor implements Serializable
+{
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 1L;
@@ -52,7 +53,7 @@ public class HAuthor implements Serializable{
 
     /** The PRIME. */
     private static final int PRIME = 31;
-    
+
     /** The country. */
     @Column
     private String country;
@@ -63,11 +64,11 @@ public class HAuthor implements Serializable{
     @Basic
     private Date registered;
 
-   
     /**
      * Instantiates a new author.
      */
-    public HAuthor() { // must have a default constructor
+    public HAuthor()
+    { // must have a default constructor
     }
 
     // getters, setters etc.
@@ -121,10 +122,12 @@ public class HAuthor implements Serializable{
         return ret;
     }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
     public String toString()
     {
         final StringBuilder builder = new StringBuilder();
@@ -140,21 +143,24 @@ public class HAuthor implements Serializable{
         return builder.toString();
     }
 
-	/**
-	 * Gets the username.
-	 * 
-	 * @return the username
-	 */
-    public String getUsername() {
+    /**
+     * Gets the username.
+     * 
+     * @return the username
+     */
+    public String getUsername()
+    {
         return username;
     }
 
     /**
      * Sets the username.
      * 
-     * @param username the username to set
+     * @param username
+     *            the username to set
      */
-    public void setUsername(final String username) {
+    public void setUsername(final String username)
+    {
         this.username = username;
     }
 
@@ -163,16 +169,19 @@ public class HAuthor implements Serializable{
      * 
      * @return the emailAddress
      */
-    public String getEmailAddress() {
+    public String getEmailAddress()
+    {
         return emailAddress;
     }
 
     /**
      * Sets the email address.
      * 
-     * @param emailAddress the emailAddress to set
+     * @param emailAddress
+     *            the emailAddress to set
      */
-    public void setEmailAddress(final String emailAddress) {
+    public void setEmailAddress(final String emailAddress)
+    {
         this.emailAddress = emailAddress;
     }
 
@@ -181,16 +190,19 @@ public class HAuthor implements Serializable{
      * 
      * @return the country
      */
-    public String getCountry() {
+    public String getCountry()
+    {
         return country;
     }
 
     /**
      * Sets the country.
      * 
-     * @param country the country to set
+     * @param country
+     *            the country to set
      */
-    public void setCountry(final String country) {
+    public void setCountry(final String country)
+    {
         this.country = country;
     }
 
@@ -199,18 +211,20 @@ public class HAuthor implements Serializable{
      * 
      * @return the registered
      */
-    public Date getRegistered() {
+    public Date getRegistered()
+    {
         return registered;
     }
 
     /**
      * Sets the registered.
      * 
-     * @param registered the registered to set
+     * @param registered
+     *            the registered to set
      */
-    public void setRegistered(final Date registered) {
+    public void setRegistered(final Date registered)
+    {
         this.registered = registered;
     }
-  
-    
+
 }

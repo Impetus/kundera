@@ -29,91 +29,103 @@ import net.sf.cglib.proxy.InvocationHandler;
  * 
  * @author animesh.kumar
  */
-public class CglibEnhancedEntity implements InvocationHandler, EnhancedEntity {
+public class CglibEnhancedEntity implements InvocationHandler, EnhancedEntity
+{
 
-	/** The entity. */
-	private Object entity;
+    /** The entity. */
+    private Object entity;
 
-	/** The id. */
-	private String id;
+    /** The id. */
+    private String id;
 
-	/** The map. */
-	private Map<String, Set<String>> map = new HashMap<String, Set<String>>();
+    /** The map. */
+    private Map<String, Set<String>> map = new HashMap<String, Set<String>>();
 
-	/**
-	 * Instantiates a new cglib enhanced entity.
-	 * 
-	 * @param entity
-	 *            the entity
-	 * @param id
-	 *            the id
-	 * @param foreignKeysMap
-	 *            the foreign keys map
-	 */
-	public CglibEnhancedEntity(final Object entity, final String id,
-			final Map<String, Set<String>> foreignKeysMap) {
-		this.entity = entity;
-		this.id = id;
-		this.map = foreignKeysMap;
-	}
+    /**
+     * Instantiates a new cglib enhanced entity.
+     * 
+     * @param entity
+     *            the entity
+     * @param id
+     *            the id
+     * @param foreignKeysMap
+     *            the foreign keys map
+     */
+    public CglibEnhancedEntity(final Object entity, final String id, final Map<String, Set<String>> foreignKeysMap)
+    {
+        this.entity = entity;
+        this.id = id;
+        this.map = foreignKeysMap;
+    }
 
-	/*
-	 * @see net.sf.cglib.proxy.InvocationHandler#invoke(java.lang.Object,
-	 * java.lang.reflect.Method, java.lang.Object[])
-	 */
-	@Override
-	public Object invoke(Object proxy, Method method, Object[] args)
-			throws Throwable {
+    /*
+     * @see net.sf.cglib.proxy.InvocationHandler#invoke(java.lang.Object,
+     * java.lang.reflect.Method, java.lang.Object[])
+     */
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+    {
 
-		String methodName = method.getName();
-		int params = args.length;
+        String methodName = method.getName();
+        int params = args.length;
 
-		if (params == 0 && "getForeignKeysMap".equals(methodName)) {
-			return getForeignKeysMap();
-		} else if (params == 0 && "toString".equals(methodName)) {
-			return toString();
-		} else if (params == 0 && "getEntity".equals(methodName)) {
-			return getEntity();
-		} else if (params == 0 && "getId".equals(methodName)) {
-			return getId();
-		}
+        if (params == 0 && "getForeignKeysMap".equals(methodName))
+        {
+            return getForeignKeysMap();
+        }
+        else if (params == 0 && "toString".equals(methodName))
+        {
+            return toString();
+        }
+        else if (params == 0 && "getEntity".equals(methodName))
+        {
+            return getEntity();
+        }
+        else if (params == 0 && "getId".equals(methodName))
+        {
+            return getId();
+        }
 
-		return method.invoke(entity, args);
-	}
+        return method.invoke(entity, args);
+    }
 
-	/* @see com.impetus.kundera.proxy.EnhancedEntity#getForeignKeysMap() */
-	public Map<String, Set<String>> getForeignKeysMap() {
-		return map;
-	}
+    /* @see com.impetus.kundera.proxy.EnhancedEntity#getForeignKeysMap() */
+    public Map<String, Set<String>> getForeignKeysMap()
+    {
+        return map;
+    }
 
-	/* @see com.impetus.kundera.proxy.EnhancedEntity#getEntity() */
-	@Override
-	public Object getEntity() {
-		return entity;
-	}
+    /* @see com.impetus.kundera.proxy.EnhancedEntity#getEntity() */
+    @Override
+    public Object getEntity()
+    {
+        return entity;
+    }
 
-	/**
-	 * Gets the id.
-	 * 
-	 * @return the id
-	 */
-	@Override
-	public String getId() {
-		return id;
-	}
+    /**
+     * Gets the id.
+     * 
+     * @return the id
+     */
+    @Override
+    public String getId()
+    {
+        return id;
+    }
 
-	/* @see java.lang.Object#toString() */
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("Proxy [id=");
-		builder.append(id);
-		builder.append(", entity=");
-		builder.append(entity);
-		builder.append(", foreignKeys=");
-		builder.append(map);
-		builder.append("]");
-		return builder.toString();
-	}
+    /* @see java.lang.Object#toString() */
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Proxy [id=");
+        builder.append(id);
+        builder.append(", entity=");
+        builder.append(entity);
+        builder.append(", foreignKeys=");
+        builder.append(map);
+        builder.append("]");
+        return builder.toString();
+    }
 
 }

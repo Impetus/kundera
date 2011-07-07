@@ -24,12 +24,14 @@ import com.impetus.kundera.metadata.ValidatorImpl;
 /**
  * The Class ValidatorTest.
  */
-public class ValidatorTest extends TestCase {
+public class ValidatorTest extends TestCase
+{
 
     /**
      * Test validate.
      */
-    public void testValidate() {
+    public void testValidate()
+    {
         Validator validator = new ValidatorImpl();
         validator.validate(Author.class);
     }

@@ -22,7 +22,8 @@ import java.lang.reflect.InvocationTargetException;
  * 
  * @author animesh.kumar
  */
-public interface CallbackMethod {
+public interface CallbackMethod
+{
 
     /**
      * Invokes the method with entity object.
@@ -39,5 +40,6 @@ public interface CallbackMethod {
      * @throws InstantiationException
      *             the instantiation exception
      */
-    public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, InstantiationException;
+    public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException,
+            InvocationTargetException, InstantiationException;
 }

@@ -45,12 +45,12 @@ import com.mongodb.MongoException;
 
 /**
  * CLient class for MongoDB database.
- *
+ * 
  * @author impetusopensource
  */
 public class MongoDBClient implements Client
 {
-    
+
     /** The contact node. */
     private String contactNode;
 
@@ -75,8 +75,12 @@ public class MongoDBClient implements Client
     /** The log. */
     private static Log log = LogFactory.getLog(MongoDBClient.class);
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.Client#writeColumns(java.lang.String, java.lang.String, java.lang.String, java.util.List, com.impetus.kundera.proxy.EnhancedEntity)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.Client#writeColumns(java.lang.String,
+     * java.lang.String, java.lang.String, java.util.List,
+     * com.impetus.kundera.proxy.EnhancedEntity)
      */
     @Override
     @Deprecated
@@ -86,8 +90,12 @@ public class MongoDBClient implements Client
         throw new PersistenceException("Not yet implemented");
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.Client#writeColumns(com.impetus.kundera.ejb.EntityManagerImpl, com.impetus.kundera.proxy.EnhancedEntity, com.impetus.kundera.metadata.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @seecom.impetus.kundera.Client#writeColumns(com.impetus.kundera.ejb.
+     * EntityManagerImpl, com.impetus.kundera.proxy.EnhancedEntity,
+     * com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
     public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
@@ -119,8 +127,12 @@ public class MongoDBClient implements Client
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
+     * EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String,
+     * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
     public <E> E loadColumns(EntityManagerImpl em, Class<E> clazz, String dbName, String documentName, String key,
@@ -149,8 +161,12 @@ public class MongoDBClient implements Client
         return (E) entity;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String, com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
+    /*
+     * (non-Javadoc)
+     * 
+     * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
+     * EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String,
+     * com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
      */
     @Override
     public <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz, String dbName, String documentName,
@@ -178,13 +194,18 @@ public class MongoDBClient implements Client
     /**
      * Loads columns from multiple rows restricting results to conditions stored
      * in <code>filterClauseQueue</code>.
-     *
-     * @param <E> the element type
-     * @param em the em
-     * @param m the m
-     * @param filterClauseQueue the filter clause queue
+     * 
+     * @param <E>
+     *            the element type
+     * @param em
+     *            the em
+     * @param m
+     *            the m
+     * @param filterClauseQueue
+     *            the filter clause queue
      * @return the list
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception
     {
@@ -209,8 +230,11 @@ public class MongoDBClient implements Client
         return entities;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.Client#delete(java.lang.String, java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.Client#delete(java.lang.String,
+     * java.lang.String, java.lang.String)
      */
     @Override
     public void delete(String idColumnName, String documentName, String rowId) throws Exception
@@ -237,7 +261,9 @@ public class MongoDBClient implements Client
         dbCollection.remove(documentToRemove);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.Client#connect()
      */
     @Override
@@ -268,7 +294,9 @@ public class MongoDBClient implements Client
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.Client#shutdown()
      */
     @Override
@@ -285,7 +313,9 @@ public class MongoDBClient implements Client
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.Client#getType()
      */
     @Override
@@ -294,7 +324,9 @@ public class MongoDBClient implements Client
         return DBType.MONGODB;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.Client#setContactNodes(java.lang.String[])
      */
     @Override
@@ -303,7 +335,9 @@ public class MongoDBClient implements Client
         this.contactNode = contactNodes[0];
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.Client#setDefaultPort(int)
      */
     @Override
@@ -313,7 +347,9 @@ public class MongoDBClient implements Client
     }
 
     // For MongoDB, keyspace means DB name
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.Client#setKeySpace(java.lang.String)
      */
     @Override
@@ -324,24 +360,27 @@ public class MongoDBClient implements Client
 
     /**
      * Creates the index.
-     *
-     * @param collectionName the collection name
-     * @param columnList the column list
-     * @param order the order
+     * 
+     * @param collectionName
+     *            the collection name
+     * @param columnList
+     *            the column list
+     * @param order
+     *            the order
      */
     public void createIndex(String collectionName, List<String> columnList, int order)
     {
         DBCollection coll = mongoDb.getCollection(collectionName);
 
         List<DBObject> indexes = coll.getIndexInfo(); // List of all current
-                                                      // indexes on collection
+        // indexes on collection
         Set<String> indexNames = new HashSet<String>(); // List of all current
-                                                        // index names
+        // index names
         for (DBObject index : indexes)
         {
             BasicDBObject obj = (BasicDBObject) index.get("key");
             Set<String> set = obj.keySet(); // Set containing index name which
-                                            // is key
+            // is key
             indexNames.addAll(set);
         }
 

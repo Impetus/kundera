@@ -28,39 +28,55 @@ import com.impetus.kundera.property.PropertyAccessor;
  * 
  * @author animesh.kumar
  */
-public class ObjectAccessor implements PropertyAccessor<Object> {
+public class ObjectAccessor implements PropertyAccessor<Object>
+{
 
     /* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
     @Override
-    public final Object fromBytes(byte[] bytes) throws PropertyAccessException {
-        try {
+    public final Object fromBytes(byte[] bytes) throws PropertyAccessException
+    {
+        try
+        {
             ObjectInputStream ois;
             ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
             Object o = ois.readObject();
             ois.close();
             return o;
-        } catch (Exception ioe) {
+        }
+        catch (Exception ioe)
+        {
             throw new PropertyAccessException(ioe.getMessage());
         }
     }
 
-    /* @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object) */
+    /*
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+     */
     @Override
-    public final byte[] toBytes(Object o) throws PropertyAccessException {
-        try {
+    public final byte[] toBytes(Object o) throws PropertyAccessException
+    {
+        try
+        {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(o);
             oos.close();
             return baos.toByteArray();
-        } catch (Exception ioe) {
+        }
+        catch (Exception ioe)
+        {
             throw new PropertyAccessException(ioe.getMessage());
         }
     }
 
-    /* @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object) */
+    /*
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+     */
     @Override
-    public final String toString(Object object) {
+    public final String toString(Object object)
+    {
         return object.toString();
     }
 

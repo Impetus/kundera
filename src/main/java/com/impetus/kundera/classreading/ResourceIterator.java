@@ -22,7 +22,8 @@ import java.io.InputStream;
  * 
  * @author animesh.kumar
  */
-public interface ResourceIterator {
+public interface ResourceIterator
+{
 
     /**
      * Please close after use.

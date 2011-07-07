@@ -32,90 +32,95 @@ import com.impetus.kundera.metadata.EntityMetadata.Relation;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
- * DataAccessor implementation for Document (documents based data stores like MongoDB and 
- * CouchDB
+ * DataAccessor implementation for Document (documents based data stores like
+ * MongoDB and CouchDB
+ * 
  * @author amresh.singh
  */
-public final class DocumentDataAccessor extends BaseDataAccessor {
-	private static Log log = LogFactory.getLog(DocumentDataAccessor.class);
-	
-	public DocumentDataAccessor(EntityManagerImpl em) {
-		super(em);
-	}
+public final class DocumentDataAccessor extends BaseDataAccessor
+{
+    private static Log log = LogFactory.getLog(DocumentDataAccessor.class);
 
-	
-	@Override
-	public void write(EnhancedEntity e, EntityMetadata m) throws Exception {
-		String entityName = e.getEntity().getClass().getName();
-		String id = e.getId();
+    public DocumentDataAccessor(EntityManagerImpl em)
+    {
+        super(em);
+    }
 
-		log.debug("Document >> Write >> " + entityName + "_" + id);		
-		if(m.getIdColumn() == null) {
-			throw new PersistenceException("Primary key must be annotated with @Column");
-		}
-		
-		m.addColumn(m.getIdColumn().getName(), m.getIdColumn());	//Add PK column		
-		getEntityManager().getClient().writeColumns(getEntityManager(), e, m);
-		
-	}
-	
-	@Override
-	public <E> E read(Class<E> clazz, EntityMetadata m, String id)
-			throws Exception {
-		log.debug("Document >> Read >> " + clazz.getName() + "_" + id);
+    @Override
+    public void write(EnhancedEntity e, EntityMetadata m) throws Exception
+    {
+        String entityName = e.getEntity().getClass().getName();
+        String id = e.getId();
 
-		String dbName = m.getSchema();	//Database name
-		String documentName = m.getTableName();	//Document name for document based data store
-		m.addColumn(m.getIdColumn().getName(), m.getIdColumn());
-		
-		return getEntityManager().getClient().loadColumns(getEntityManager(),clazz,dbName, documentName, id,m);
-	}
+        log.debug("Document >> Write >> " + entityName + "_" + id);
+        if (m.getIdColumn() == null)
+        {
+            throw new PersistenceException("Primary key must be annotated with @Column");
+        }
 
-	 
-	@Override
-	public <E> List<E> read(Class<E> clazz, EntityMetadata m, String... ids)
-			throws Exception {
-		log.debug("Document >> Read >> " + clazz.getName() + "_(" + Arrays.asList(ids) + ")");
+        m.addColumn(m.getIdColumn().getName(), m.getIdColumn()); // Add PK
+                                                                 // column
+        getEntityManager().getClient().writeColumns(getEntityManager(), e, m);
 
-		String dbName = m.getSchema();
-		String documentName = m.getTableName();
-		m.addColumn(m.getIdColumn().getName(), m.getIdColumn());
-		return getEntityManager().getClient().loadColumns(getEntityManager(), clazz, dbName, documentName, m, ids);
-	}	
-	
-	@Override
-	public <E> List<E> read(Class<E> clazz, EntityMetadata m, Map<String, String> col) throws Exception {
-		throw new PersistenceException("Not implemented for Document based data stores");
-	}
+    }
 
+    @Override
+    public <E> E read(Class<E> clazz, EntityMetadata m, String id) throws Exception
+    {
+        log.debug("Document >> Read >> " + clazz.getName() + "_" + id);
 
-	@Override
-	public void delete(EnhancedEntity e, EntityMetadata m) throws Exception {
-		String entityName = e.getEntity().getClass().getName();
-		String id = e.getId();
+        String dbName = m.getSchema(); // Database name
+        String documentName = m.getTableName(); // Document name for document
+                                                // based data store
+        m.addColumn(m.getIdColumn().getName(), m.getIdColumn());
 
-		log.debug("Document >> Delete >> " + entityName + "_" + id);
+        return getEntityManager().getClient().loadColumns(getEntityManager(), clazz, dbName, documentName, id, m);
+    }
 
-		getEntityManager().getClient().delete(m.getIdColumn().getName(),
-				m.getTableName(), id);
-	}
+    @Override
+    public <E> List<E> read(Class<E> clazz, EntityMetadata m, String... ids) throws Exception
+    {
+        log.debug("Document >> Read >> " + clazz.getName() + "_(" + Arrays.asList(ids) + ")");
 
-	@Override
-	public EntityManagerImpl getEntityManager() {		
-		return super.getEntityManager();
-	}	
+        String dbName = m.getSchema();
+        String documentName = m.getTableName();
+        m.addColumn(m.getIdColumn().getName(), m.getIdColumn());
+        return getEntityManager().getClient().loadColumns(getEntityManager(), clazz, dbName, documentName, m, ids);
+    }
 
-	
-	@Override
-	protected String serializeKeys(Set<String> foreignKeys) {		
-		return super.serializeKeys(foreignKeys);
-	}
-	
-	@Override
-	protected Set<String> deserializeKeys(String foreignKeys) {		
-		return super.deserializeKeys(foreignKeys);
-	}
-	
-	
-	
+    @Override
+    public <E> List<E> read(Class<E> clazz, EntityMetadata m, Map<String, String> col) throws Exception
+    {
+        throw new PersistenceException("Not implemented for Document based data stores");
+    }
+
+    @Override
+    public void delete(EnhancedEntity e, EntityMetadata m) throws Exception
+    {
+        String entityName = e.getEntity().getClass().getName();
+        String id = e.getId();
+
+        log.debug("Document >> Delete >> " + entityName + "_" + id);
+
+        getEntityManager().getClient().delete(m.getIdColumn().getName(), m.getTableName(), id);
+    }
+
+    @Override
+    public EntityManagerImpl getEntityManager()
+    {
+        return super.getEntityManager();
+    }
+
+    @Override
+    protected String serializeKeys(Set<String> foreignKeys)
+    {
+        return super.serializeKeys(foreignKeys);
+    }
+
+    @Override
+    protected Set<String> deserializeKeys(String foreignKeys)
+    {
+        return super.deserializeKeys(foreignKeys);
+    }
+
 }

@@ -28,66 +28,74 @@ import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 
 /**
- * Metadata processor for Document 
+ * Metadata processor for Document
+ * 
  * @author amresh.singh
  */
-public class DocumentProcessor extends AbstractEntityFieldProcessor {
+public class DocumentProcessor extends AbstractEntityFieldProcessor
+{
 
-	/** The Constant log. */
-	private static final Log LOG = LogFactory.getLog(DocumentProcessor.class);
+    /** The Constant log. */
+    private static final Log LOG = LogFactory.getLog(DocumentProcessor.class);
 
-	private EntityManagerFactoryImpl em;
+    private EntityManagerFactoryImpl em;
 
-	/**
-	 * Instantiates a new document processor. 
-	 * @param em the em
-	 */
-	public DocumentProcessor(EntityManagerFactory em) {
-		this.em = (EntityManagerFactoryImpl) em;
-	}
-	
-	
-	@Override
-	public void process(Class<?> clazz, EntityMetadata metadata) {
-		/*if (!clazz.isAnnotationPresent(Document.class)) {
-			return;
-		}*/
+    /**
+     * Instantiates a new document processor.
+     * 
+     * @param em
+     *            the em
+     */
+    public DocumentProcessor(EntityManagerFactory em)
+    {
+        this.em = (EntityManagerFactoryImpl) em;
+    }
 
-/*		LOG.debug("Processing @Entity(" + clazz.getName() + ") for Document.");
+    @Override
+    public void process(Class<?> clazz, EntityMetadata metadata)
+    {
+        /*
+         * if (!clazz.isAnnotationPresent(Document.class)) { return; }
+         */
 
-		metadata.setType(EntityMetadata.Type.DOCUMENT);
+        /*
+         * LOG.debug("Processing @Entity(" + clazz.getName() +
+         * ") for Document.");
+         * 
+         * metadata.setType(EntityMetadata.Type.DOCUMENT);
+         * 
+         * Document coll = clazz.getAnnotation(Document.class);
+         * 
+         * // set columnFamily //Name of collection for document based datastore
+         * metadata.setColumnFamilyName(coll.name());
+         * 
+         * // set keyspace //DB name for document based datastore String
+         * keyspace = coll.db().length() != 0 ? coll.db() : em .getKeyspace();
+         * metadata.setKeyspaceName(keyspace);
+         */
+        // scan for fields
+        for (Field f : clazz.getDeclaredFields())
+        {
 
-		Document coll = clazz.getAnnotation(Document.class);
+            // if @Id
+            if (f.isAnnotationPresent(Id.class))
+            {
+                LOG.debug(f.getName() + " => Id");
+                metadata.setIdProperty(f);
+                populateIdAccessorMethods(metadata, clazz, f);
+                populateIdColumn(metadata, clazz, f);
+            }
 
-		// set columnFamily
-		//Name of collection for document based datastore
-		metadata.setColumnFamilyName(coll.name());	
-
-		// set keyspace
-		//DB name for document based datastore
-		String keyspace = coll.db().length() != 0 ? coll.db() : em
-				.getKeyspace();
-		metadata.setKeyspaceName(keyspace);
-*/
-		// scan for fields
-		for (Field f : clazz.getDeclaredFields()) {
-
-			// if @Id
-			if (f.isAnnotationPresent(Id.class)) {
-				LOG.debug(f.getName() + " => Id");
-				metadata.setIdProperty(f);
-				populateIdAccessorMethods(metadata, clazz, f);
-				populateIdColumn(metadata, clazz, f);
-			}
-
-			// if any valid JPA annotation?
-			else {
-				String name = getValidJPAColumnName(clazz, f);
-				if (null != name) {
-					metadata.addColumn(name, metadata.new Column(name, f));
-				}
-			}
-		}	
-	}	
+            // if any valid JPA annotation?
+            else
+            {
+                String name = getValidJPAColumnName(clazz, f);
+                if (null != name)
+                {
+                    metadata.addColumn(name, metadata.new Column(name, f));
+                }
+            }
+        }
+    }
 
 }

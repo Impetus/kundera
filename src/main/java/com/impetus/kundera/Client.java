@@ -46,8 +46,8 @@ public interface Client
      */
 
     @Deprecated
-    void writeColumns(String keyspace, String columnFamily, String key, 
-                      List<EntityMetadata.Column> columns, EnhancedEntity e) throws Exception;
+    void writeColumns(String keyspace, String columnFamily, String key, List<EntityMetadata.Column> columns,
+            EnhancedEntity e) throws Exception;
 
     /**
      * Writes Multiple columns
@@ -75,8 +75,8 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    <E> E loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, 
-                      String columnFamily, String key, EntityMetadata m) throws Exception;
+    <E> E loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, String key,
+            EntityMetadata m) throws Exception;
 
     /**
      * Retrieve columns from multiple rows of a column-family.
@@ -91,8 +91,8 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, 
-                            String columnFamily,EntityMetadata m, String... keys) throws Exception;
+    <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
+            EntityMetadata m, String... keys) throws Exception;
 
     /**
      * Loads columns from multiple rows restricting results to conditions stored

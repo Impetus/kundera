@@ -31,7 +31,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Deprecated
-public @interface SuperColumn {
+public @interface SuperColumn
+{
 
     /**
      * Name of the super-column.

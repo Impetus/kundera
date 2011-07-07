@@ -20,7 +20,8 @@ package com.impetus.kundera.classreading;
  * 
  * @author animesh.kumar
  */
-public interface AnnotationDiscoveryListener {
+public interface AnnotationDiscoveryListener
+{
 
     /**
      * Discovered.

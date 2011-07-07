@@ -103,7 +103,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                 // An embedded attribute can be either Collection or another DTO
                 if (superColumnFieldClass.equals(List.class) || superColumnFieldClass.equals(Set.class))
                 {
-                    superColumnFieldClass = PropertyAccessorHelper.getGenericClass(f);                	
+                    superColumnFieldClass = PropertyAccessorHelper.getGenericClass(f);
                     populateSuperColumnInMetadata(metadata, f, superColumnFieldClass);
 
                 }

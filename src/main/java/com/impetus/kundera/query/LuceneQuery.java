@@ -33,7 +33,8 @@ import com.impetus.kundera.metadata.MetadataManager;
  * 
  * @author animesh.kumar
  */
-public class LuceneQuery extends QueryImpl implements Query {
+public class LuceneQuery extends QueryImpl implements Query
+{
 
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(MetadataManager.class);
@@ -45,16 +46,17 @@ public class LuceneQuery extends QueryImpl implements Query {
     String luceneQuery;
 
     /**
-	 * Instantiates a new lucene query.
-	 * 
-	 * @param em
-	 *            the em
-	 * @param metadataManager
-	 *            the metadata manager
-	 * @param jpaQuery
-	 *            the jpa query
-	 */
-    public LuceneQuery(EntityManagerImpl em, MetadataManager metadataManager, String jpaQuery) {
+     * Instantiates a new lucene query.
+     * 
+     * @param em
+     *            the em
+     * @param metadataManager
+     *            the metadata manager
+     * @param jpaQuery
+     *            the jpa query
+     */
+    public LuceneQuery(EntityManagerImpl em, MetadataManager metadataManager, String jpaQuery)
+    {
         super(em, metadataManager, jpaQuery);
     }
 
@@ -64,36 +66,41 @@ public class LuceneQuery extends QueryImpl implements Query {
      * @param luceneQuery
      *            the new lucene query
      */
-    public void setLuceneQuery(String luceneQuery) {
+    public void setLuceneQuery(String luceneQuery)
+    {
         this.luceneQuery = luceneQuery;
     }
 
     /* @see com.impetus.kundera.query.QueryImpl#getResultList() */
     @Override
-    public List<?> getResultList() {
-    	log.debug("JPA Query: " + query);
-    	
-    	// get luence query
+    public List<?> getResultList()
+    {
+        log.debug("JPA Query: " + query);
+
+        // get luence query
         String q = luceneQuery;
-        if (null == q) {
+        if (null == q)
+        {
             q = getLuceneQueryFromJPAQuery();
         }
 
         log.debug("Lucene Query: " + q);
-        Map<String, String> searchFilter = getEntityManager().getIndexManager().search(q,-1, maxResult);
-        if(isAliasOnly())
+        Map<String, String> searchFilter = getEntityManager().getIndexManager().search(q, -1, maxResult);
+        if (isAliasOnly())
         {
             return getEntityManager().find(getEntityClass(), searchFilter.values().toArray());
-        }else 
-        {
-            return getEntityManager().find(getEntityClass(), searchFilter);    
         }
-        
+        else
+        {
+            return getEntityManager().find(getEntityClass(), searchFilter);
+        }
+
     }
 
     /* @see com.impetus.kundera.query.QueryImpl#setMaxResults(int) */
     @Override
-    public Query setMaxResults(int maxResult) {
+    public Query setMaxResults(int maxResult)
+    {
         this.maxResult = maxResult;
         return this;
     }
@@ -103,11 +110,14 @@ public class LuceneQuery extends QueryImpl implements Query {
      * 
      * @return the lucene query from jpa query
      */
-    private String getLuceneQueryFromJPAQuery() {
+    private String getLuceneQueryFromJPAQuery()
+    {
         StringBuffer sb = new StringBuffer();
 
-        for (Object object : getFilterClauseQueue()) {
-            if (object instanceof FilterClause) {
+        for (Object object : getFilterClauseQueue())
+        {
+            if (object instanceof FilterClause)
+            {
                 FilterClause filter = (FilterClause) object;
                 sb.append("+");
                 // property
@@ -115,9 +125,12 @@ public class LuceneQuery extends QueryImpl implements Query {
 
                 // joiner
                 String appender = "";
-                if (filter.getCondition().equals("=")) {
+                if (filter.getCondition().equals("="))
+                {
                     sb.append(":");
-                } else if (filter.getCondition().equalsIgnoreCase("like")) {
+                }
+                else if (filter.getCondition().equalsIgnoreCase("like"))
+                {
                     sb.append(":");
                     appender = "*";
                 }
@@ -125,31 +138,34 @@ public class LuceneQuery extends QueryImpl implements Query {
                 // value
                 sb.append(filter.getValue());
                 sb.append(appender);
-            } else {
+            }
+            else
+            {
                 sb.append(" " + object + " ");
             }
         }
 
         // add Entity_CLASS field too.
-        if (sb.length() > 0) {
+        if (sb.length() > 0)
+        {
             sb.append(" AND ");
         }
         sb.append("+");
         sb.append(LucandraIndexer.ENTITY_CLASS_FIELD);
         sb.append(":");
-//        sb.append(getEntityClass().getName());
+        // sb.append(getEntityClass().getName());
         sb.append(getEntityClass().getCanonicalName().toLowerCase());
 
         return sb.toString();
     }
-    
-    private class SearchInterpretor 
+
+    private class SearchInterpretor
     {
-        
+
         void getSearchType()
         {
-            
+
         }
-        
+
     }
 }

@@ -22,72 +22,85 @@ import javax.persistence.Table;
 
 /**
  * Entity class for user's IM details
+ * 
  * @author amresh.singh
  */
 
 @Entity
-@Table(name="imDetails", schema="Blog")
-public class IMDetail {
-	
-	@Id
-	private String imDetailId;
-	
-	@Column(name="im_type")
-	private String imType;
-	
-	@Column(name="im_detail")
-	private String imDetail;
-	
-	public IMDetail() {
-		
-	}
-	
-	public IMDetail(String id, String type, String detail) {
-		this.imDetailId = id;
-		this.imType = type;
-		this.imDetail = detail;
-	}
+@Table(name = "imDetails", schema = "Blog")
+public class IMDetail
+{
 
-	/**
-	 * @return the imDetailId
-	 */
-	public String getImDetailId() {
-		return imDetailId;
-	}
+    @Id
+    private String imDetailId;
 
-	/**
-	 * @param imDetailId the imDetailId to set
-	 */
-	public void setImDetailId(String imDetailId) {
-		this.imDetailId = imDetailId;
-	}
+    @Column(name = "im_type")
+    private String imType;
 
-	/**
-	 * @return the imType
-	 */
-	public String getImType() {
-		return imType;
-	}
+    @Column(name = "im_detail")
+    private String imDetail;
 
-	/**
-	 * @param imType the imType to set
-	 */
-	public void setImType(String imType) {
-		this.imType = imType;
-	}
+    public IMDetail()
+    {
 
-	/**
-	 * @return the imDetail
-	 */
-	public String getImDetail() {
-		return imDetail;
-	}
+    }
 
-	/**
-	 * @param imDetail the imDetail to set
-	 */
-	public void setImDetail(String imDetail) {
-		this.imDetail = imDetail;
-	}
-	
+    public IMDetail(String id, String type, String detail)
+    {
+        this.imDetailId = id;
+        this.imType = type;
+        this.imDetail = detail;
+    }
+
+    /**
+     * @return the imDetailId
+     */
+    public String getImDetailId()
+    {
+        return imDetailId;
+    }
+
+    /**
+     * @param imDetailId
+     *            the imDetailId to set
+     */
+    public void setImDetailId(String imDetailId)
+    {
+        this.imDetailId = imDetailId;
+    }
+
+    /**
+     * @return the imType
+     */
+    public String getImType()
+    {
+        return imType;
+    }
+
+    /**
+     * @param imType
+     *            the imType to set
+     */
+    public void setImType(String imType)
+    {
+        this.imType = imType;
+    }
+
+    /**
+     * @return the imDetail
+     */
+    public String getImDetail()
+    {
+        return imDetail;
+    }
+
+    /**
+     * @param imDetail
+     *            the imDetail to set
+     */
+    public void setImDetail(String imDetail)
+    {
+        this.imDetail = imDetail;
+    }
+
 }

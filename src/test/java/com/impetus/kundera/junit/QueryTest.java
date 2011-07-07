@@ -81,7 +81,6 @@ public class QueryTest extends BaseTest
             firstManager.persist(author);
         }
         firstManager.close();
-        
 
         EntityManager secondManager = getEntityManager();
         Query q = secondManager.createQuery("select a from Author a where a.country like :country");

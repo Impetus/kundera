@@ -35,62 +35,75 @@ import com.impetus.kundera.metadata.MetadataProcessor;
  * 
  * @author animesh.kumar
  */
-public class IndexProcessor implements MetadataProcessor {
+public class IndexProcessor implements MetadataProcessor
+{
 
-	/** the log used by this class. */
-	private static Log log = LogFactory.getLog(IndexProcessor.class);
+    /** the log used by this class. */
+    private static Log log = LogFactory.getLog(IndexProcessor.class);
 
-	/*
-	 * @see
-	 * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-	 * com.impetus.kundera.metadata.EntityMetadata)
-	 */
-	public final void process(final Class<?> clazz, EntityMetadata metadata) {
-		metadata.setIndexName(clazz.getSimpleName());
-		Index idx = clazz.getAnnotation(Index.class);
-		List<String> columnsToBeIndexed = new ArrayList<String>();
-		
-		if (null != idx) {
-			boolean isIndexable = idx.index();
-			metadata.setIndexable(isIndexable);
-			 
-			String indexName = idx.name();
-			if(indexName != null && ! indexName.isEmpty()) {
-				metadata.setIndexName(indexName);
-			} else {
-				metadata.setIndexName(clazz.getSimpleName());
-			}	
-			
-			if(idx.columns() != null && idx.columns().length != 0) {
-				columnsToBeIndexed = Arrays.asList(idx.columns());
-			}						
+    /*
+     * @see
+     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
+     * com.impetus.kundera.metadata.EntityMetadata)
+     */
+    public final void process(final Class<?> clazz, EntityMetadata metadata)
+    {
+        metadata.setIndexName(clazz.getSimpleName());
+        Index idx = clazz.getAnnotation(Index.class);
+        List<String> columnsToBeIndexed = new ArrayList<String>();
 
-			if (!isIndexable) {
-				log.debug("@Entity " + clazz.getName() + " will not be indexed for " 
-						+ (columnsToBeIndexed.isEmpty() ? "all columns" : columnsToBeIndexed));
-				return;
-			}
-		}		
+        if (null != idx)
+        {
+            boolean isIndexable = idx.index();
+            metadata.setIndexable(isIndexable);
 
-		log.debug("Processing @Entity " + clazz.getName() + " for Indexes.");
+            String indexName = idx.name();
+            if (indexName != null && !indexName.isEmpty())
+            {
+                metadata.setIndexName(indexName);
+            }
+            else
+            {
+                metadata.setIndexName(clazz.getSimpleName());
+            }
 
-		// scan for fields
-		for (Field f : clazz.getDeclaredFields()) {			
-			if (f.isAnnotationPresent(Id.class)) {
-				metadata.addIndexProperty(metadata.new PropertyIndex(f, f
-						.getName()));
-			} else if (f.isAnnotationPresent(Column.class)) {
-				Column c = f.getAnnotation(Column.class);
-				String alias = c.name().trim();
-				if (alias.isEmpty()) {
-					alias = f.getName();
-				}
-				
-				if(columnsToBeIndexed.isEmpty() || columnsToBeIndexed.contains(alias)) {
-					metadata.addIndexProperty(metadata.new PropertyIndex(f, alias));
-				}				
+            if (idx.columns() != null && idx.columns().length != 0)
+            {
+                columnsToBeIndexed = Arrays.asList(idx.columns());
+            }
 
-			} 
-		}
-	}
+            if (!isIndexable)
+            {
+                log.debug("@Entity " + clazz.getName() + " will not be indexed for "
+                        + (columnsToBeIndexed.isEmpty() ? "all columns" : columnsToBeIndexed));
+                return;
+            }
+        }
+
+        log.debug("Processing @Entity " + clazz.getName() + " for Indexes.");
+
+        // scan for fields
+        for (Field f : clazz.getDeclaredFields())
+        {
+            if (f.isAnnotationPresent(Id.class))
+            {
+                metadata.addIndexProperty(metadata.new PropertyIndex(f, f.getName()));
+            }
+            else if (f.isAnnotationPresent(Column.class))
+            {
+                Column c = f.getAnnotation(Column.class);
+                String alias = c.name().trim();
+                if (alias.isEmpty())
+                {
+                    alias = f.getName();
+                }
+
+                if (columnsToBeIndexed.isEmpty() || columnsToBeIndexed.contains(alias))
+                {
+                    metadata.addIndexProperty(metadata.new PropertyIndex(f, alias));
+                }
+
+            }
+        }
+    }
 }

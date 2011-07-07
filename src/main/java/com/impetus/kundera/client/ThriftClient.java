@@ -45,175 +45,198 @@ import com.impetus.kundera.proxy.EnhancedEntity;
  * @author animesh.kumar
  * @since 0.1
  */
-public class ThriftClient implements CassandraClient {
+public class ThriftClient implements CassandraClient
+{
 
-	/** cassandra host. */
-	private String contactNode = "localhost";
+    /** cassandra host. */
+    private String contactNode = "localhost";
 
-	/** default port. */
-	private int defaultPort = 9160;
+    /** default port. */
+    private int defaultPort = 9160;
 
-	/** The tr. */
-	private TTransport tr = null;
+    /** The tr. */
+    private TTransport tr = null;
 
-	/**
-	 * Open up a new connection to the Cassandra Database.
-	 * 
-	 * @return the Cassandra Client
-	 */
-	protected Cassandra.Client setupConnection() {
-		try {
-			tr = new TSocket(contactNode, defaultPort);
-			TProtocol proto = new TBinaryProtocol(tr);
-			Cassandra.Client client = new Cassandra.Client(proto);
-			tr.open();
+    /**
+     * Open up a new connection to the Cassandra Database.
+     * 
+     * @return the Cassandra Client
+     */
+    protected Cassandra.Client setupConnection()
+    {
+        try
+        {
+            tr = new TSocket(contactNode, defaultPort);
+            TProtocol proto = new TBinaryProtocol(tr);
+            Cassandra.Client client = new Cassandra.Client(proto);
+            tr.open();
 
-			return client;
-		} catch (TTransportException exception) {
-			exception.printStackTrace();
-		}
+            return client;
+        }
+        catch (TTransportException exception)
+        {
+            exception.printStackTrace();
+        }
 
-		return null;
-	}
-
-	/**
-	 * Close the connection to the Cassandra Database.
-	 */
-	protected void closeConnection() {
-		try {
-			tr.flush();
-			tr.close();
-		} catch (TTransportException exception) {
-			exception.printStackTrace();
-		}
-	}
-
-	/*
-	 * @see com.impetus.kundera.CassandraClient#delete(java.lang.String,
-	 * java.lang.String, java.lang.String)
-	 */
-	@Override
-	public void delete(String keyspace, String columnFamily, String rowId)
-			throws Exception {
-		throw new NotImplementedException("TODO");
-	}
-
-	/*
-	 * @see com.impetus.kundera.CassandraClient#loadColumns(java.lang.String,
-	 * java.lang.String, java.lang.String)
-	 */
-
-	@Override
-	public <E> E loadColumns(EntityManagerImpl em, Class<E> clazz,String keyspace, 
-													 String columnFamily, String key, EntityMetadata m) throws Exception {
-		throw new NotImplementedException("TODO");
-	}
-	/*
-	 * @see com.impetus.kundera.CassandraClient#loadColumns(java.lang.String,
-	 * java.lang.String, java.lang.String[])
-	 */
-
-	@Override
-	public <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz,
-																String keyspace, String columnFamily, EntityMetadata m, String... keys) throws Exception {
-		throw new NotImplementedException("TODO");
-	}
-	
-	public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception {
-    	throw new NotImplementedException("Not yet implemented");
+        return null;
     }
-	
-	/*
-	 * @see
-	 * com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String,
-	 * java.lang.String, java.lang.String, java.lang.String[])
-	 */
-	@Override
-	public List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, 
-																					  String key, String... superColumnNames) 	throws Exception {
-		throw new NotImplementedException("TODO");
-	}
 
-	/*
-	 * @see
-	 * com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String,
-	 * java.lang.String, java.lang.String[])
-	 */
-	@Override
-	public Map<Bytes, List<SuperColumn>> loadSuperColumns(String keyspace,
-			String columnFamily, String... rowIds) throws Exception {
-		throw new NotImplementedException("TODO");
-	}
+    /**
+     * Close the connection to the Cassandra Database.
+     */
+    protected void closeConnection()
+    {
+        try
+        {
+            tr.flush();
+            tr.close();
+        }
+        catch (TTransportException exception)
+        {
+            exception.printStackTrace();
+        }
+    }
 
-	/*
-	 * @see com.impetus.kundera.CassandraClient#writeColumns(java.lang.String,
-	 * java.lang.String, java.lang.String, org.apache.cassandra.thrift.Column[])
-	 */
-	@Override
-	public void writeColumns(String keyspace, String columnFamily, String key,
-			List<com.impetus.kundera.metadata.EntityMetadata.Column> columns,
-			EnhancedEntity e) throws Exception {
-			throw new NotImplementedException("TODO");
-	}
-	
-	@Override
-	public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception {
-		throw new PersistenceException("Not yet implemented");
-	}
+    /*
+     * @see com.impetus.kundera.CassandraClient#delete(java.lang.String,
+     * java.lang.String, java.lang.String)
+     */
+    @Override
+    public void delete(String keyspace, String columnFamily, String rowId) throws Exception
+    {
+        throw new NotImplementedException("TODO");
+    }
 
-	/*
-	 * @see
-	 * com.impetus.kundera.CassandraClient#writeSuperColumns(java.lang.String,
-	 * java.lang.String, java.lang.String,
-	 * org.apache.cassandra.thrift.SuperColumn[])
-	 */
-	@Override
-	public void writeSuperColumns(String keyspace, String columnFamily,
-			String rowId, SuperColumn... superColumns) throws Exception {
-		throw new NotImplementedException("TODO");
-	}
+    /*
+     * @see com.impetus.kundera.CassandraClient#loadColumns(java.lang.String,
+     * java.lang.String, java.lang.String)
+     */
 
-	/*
-	 * @see
-	 * com.impetus.kundera.CassandraClient#setContactNodes(java.lang.String[])
-	 */
-	@Override
-	public void setContactNodes(String... contactNodes) {
-		this.contactNode = contactNodes[0];
-	}
+    @Override
+    public <E> E loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, String key,
+            EntityMetadata m) throws Exception
+    {
+        throw new NotImplementedException("TODO");
+    }
 
-	/* @see com.impetus.kundera.CassandraClient#setDefaultPort(int) */
-	@Override
-	public void setDefaultPort(int defaultPort) {
-		this.defaultPort = defaultPort;
-	}
+    /*
+     * @see com.impetus.kundera.CassandraClient#loadColumns(java.lang.String,
+     * java.lang.String, java.lang.String[])
+     */
 
-	/* @see com.impetus.kundera.CassandraClient#getCassandraClient() */
-	@Override
-	public Client getCassandraClient() throws Exception {
-		throw new NotImplementedException("TODO");
-	}
+    @Override
+    public <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
+            EntityMetadata m, String... keys) throws Exception
+    {
+        throw new NotImplementedException("TODO");
+    }
 
-	/* @see com.impetus.kundera.CassandraClient#shutdown() */
-	@Override
-	public void shutdown() {
-	}
+    public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception
+    {
+        throw new NotImplementedException("Not yet implemented");
+    }
 
-	/* @see com.impetus.kundera.CassandraClient#connect() */
-	@Override
-	public void connect() {
-		throw new NotImplementedException("TODO");
-	}
+    /*
+     * @see
+     * com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.String[])
+     */
+    @Override
+    public List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String key,
+            String... superColumnNames) throws Exception
+    {
+        throw new NotImplementedException("TODO");
+    }
 
-	@Override
-	public void setKeySpace(String keySpace) {
-		// TODO Auto-generated method stub
-	}
+    /*
+     * @see
+     * com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String,
+     * java.lang.String, java.lang.String[])
+     */
+    @Override
+    public Map<Bytes, List<SuperColumn>> loadSuperColumns(String keyspace, String columnFamily, String... rowIds)
+            throws Exception
+    {
+        throw new NotImplementedException("TODO");
+    }
 
-	@Override
-	public DBType getType() {
-		return DBType.CASSANDRA;
-	}
+    /*
+     * @see com.impetus.kundera.CassandraClient#writeColumns(java.lang.String,
+     * java.lang.String, java.lang.String, org.apache.cassandra.thrift.Column[])
+     */
+    @Override
+    public void writeColumns(String keyspace, String columnFamily, String key,
+            List<com.impetus.kundera.metadata.EntityMetadata.Column> columns, EnhancedEntity e) throws Exception
+    {
+        throw new NotImplementedException("TODO");
+    }
 
-	
+    @Override
+    public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
+    {
+        throw new PersistenceException("Not yet implemented");
+    }
+
+    /*
+     * @see
+     * com.impetus.kundera.CassandraClient#writeSuperColumns(java.lang.String,
+     * java.lang.String, java.lang.String,
+     * org.apache.cassandra.thrift.SuperColumn[])
+     */
+    @Override
+    public void writeSuperColumns(String keyspace, String columnFamily, String rowId, SuperColumn... superColumns)
+            throws Exception
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /*
+     * @see
+     * com.impetus.kundera.CassandraClient#setContactNodes(java.lang.String[])
+     */
+    @Override
+    public void setContactNodes(String... contactNodes)
+    {
+        this.contactNode = contactNodes[0];
+    }
+
+    /* @see com.impetus.kundera.CassandraClient#setDefaultPort(int) */
+    @Override
+    public void setDefaultPort(int defaultPort)
+    {
+        this.defaultPort = defaultPort;
+    }
+
+    /* @see com.impetus.kundera.CassandraClient#getCassandraClient() */
+    @Override
+    public Client getCassandraClient() throws Exception
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* @see com.impetus.kundera.CassandraClient#shutdown() */
+    @Override
+    public void shutdown()
+    {
+    }
+
+    /* @see com.impetus.kundera.CassandraClient#connect() */
+    @Override
+    public void connect()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    @Override
+    public void setKeySpace(String keySpace)
+    {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public DBType getType()
+    {
+        return DBType.CASSANDRA;
+    }
+
 }

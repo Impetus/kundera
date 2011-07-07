@@ -23,90 +23,103 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
-
 @Entity
 @Table(name = "Profile")
-public class Profile {
+public class Profile
+{
 
-	@Id
-	private String profileId;
+    @Id
+    private String profileId;
 
-	@Column
-	private String address;
+    @Column
+    private String address;
 
-	@Column
-	private String website;
+    @Column
+    private String website;
 
-	@Column
-	private String blog;
+    @Column
+    private String blog;
 
-	@OneToOne (cascade={CascadeType.ALL})
-	private Person person;
+    @OneToOne(cascade = { CascadeType.ALL })
+    private Person person;
 
-	public Profile() {
+    public Profile()
+    {
 
-	}
+    }
 
-	public Person getPerson() {
-		return person;
-	}
+    public Person getPerson()
+    {
+        return person;
+    }
 
-	public void setPerson(Person person) {
-		this.person = person;
-	}
+    public void setPerson(Person person)
+    {
+        this.person = person;
+    }
 
-	public String getProfileId() {
-		return profileId;
-	}
+    public String getProfileId()
+    {
+        return profileId;
+    }
 
-	public void setProfileId(String profileId) {
-		this.profileId = profileId;
-	}
+    public void setProfileId(String profileId)
+    {
+        this.profileId = profileId;
+    }
 
-	public String getAddress() {
-		return address;
-	}
+    public String getAddress()
+    {
+        return address;
+    }
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
+    public void setAddress(String address)
+    {
+        this.address = address;
+    }
 
-	public String getWebsite() {
-		return website;
-	}
+    public String getWebsite()
+    {
+        return website;
+    }
 
-	public void setWebsite(String website) {
-		this.website = website;
-	}
+    public void setWebsite(String website)
+    {
+        this.website = website;
+    }
 
-	public String getBlog() {
-		return blog;
-	}
+    public String getBlog()
+    {
+        return blog;
+    }
 
-	public void setBlog(String blog) {
-		this.blog = blog;
-	}
+    public void setBlog(String blog)
+    {
+        this.blog = blog;
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("Profile [profileId=");
-		builder.append(profileId);
-		builder.append(", address=");
-		builder.append(address);
-		builder.append(", blog=");
-		builder.append(blog);
-		builder.append(", person=");
-//		builder.append(person.getUsername());
-		builder.append(", website=");
-		builder.append(website);
-		builder.append("]");
-		return builder.toString();
-	}
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Profile [profileId=");
+        builder.append(profileId);
+        builder.append(", address=");
+        builder.append(address);
+        builder.append(", blog=");
+        builder.append(blog);
+        builder.append(", person=");
+        // builder.append(person.getUsername());
+        builder.append(", website=");
+        builder.append(website);
+        builder.append("]");
+        return builder.toString();
+    }
 
-	@PrePersist
-	public void pre () {
-		System.out.println ("PRE PERSIST >> " + this);
-	}
+    @PrePersist
+    public void pre()
+    {
+        System.out.println("PRE PERSIST >> " + this);
+    }
 
 }

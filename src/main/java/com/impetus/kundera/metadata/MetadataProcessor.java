@@ -20,7 +20,8 @@ package com.impetus.kundera.metadata;
  * 
  * @author animesh.kumar
  */
-public interface MetadataProcessor {
+public interface MetadataProcessor
+{
 
     /**
      * Process.

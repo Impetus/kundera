@@ -21,12 +21,14 @@ package com.impetus.kundera;
  * @author animesh.kumar
  * @since 0.1
  */
-public final class Constants {
+public final class Constants
+{
 
     /**
      * Instantiates a new constants.
      */
-    private Constants() {
+    private Constants()
+    {
 
     }
 
@@ -38,9 +40,8 @@ public final class Constants {
 
     /** The Constant INVALID. */
     public final static int INVALID = -1;
-    
+
     /** The Constant SUPER_COLUMN_NAME_DELIMITER. */
     public final static String SUPER_COLUMN_NAME_DELIMITER = "#";
-    
-    
+
 }

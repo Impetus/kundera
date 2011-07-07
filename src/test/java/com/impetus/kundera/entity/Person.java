@@ -32,99 +32,111 @@ import com.impetus.kundera.api.Index;
 
 /**
  * @author animesh.kumar
- *
+ * 
  */
 @Entity
-@Table(name="Person")
-@Index(index=false)
-public class Person implements Serializable {
-	
-	@Id
-	private String username;
-	
-	@Column
-	private String password;
-	
-	@OneToOne (cascade={CascadeType.PERSIST, CascadeType.REMOVE})
-	private Profile profile;
-	
-	@OneToOne (cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
-	private Profile publicProfile;
+@Table(name = "Person")
+@Index(index = false)
+public class Person implements Serializable
+{
 
-	
-	@OneToMany (cascade={CascadeType.ALL}) //(targetEntity=Post.class)
-	private Set<Post> post = new HashSet<Post>();
-	
+    @Id
+    private String username;
 
-	public Person() {
+    @Column
+    private String password;
 
-	}
+    @OneToOne(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
+    private Profile profile;
 
-	public String getUsername() {
-		return username;
-	}
+    @OneToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
+    private Profile publicProfile;
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    @OneToMany(cascade = { CascadeType.ALL })
+    // (targetEntity=Post.class)
+    private Set<Post> post = new HashSet<Post>();
 
-	public String getPassword() {
-		return password;
-	}
+    public Person()
+    {
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    }
 
-	public Profile getProfile() {
-		return profile;
-	}
+    public String getUsername()
+    {
+        return username;
+    }
 
-	public void setProfile(Profile profile) {
-		this.profile = profile;
-	}
+    public void setUsername(String username)
+    {
+        this.username = username;
+    }
 
-	public Profile getPublicProfile() {
-		return publicProfile;
-	}
+    public String getPassword()
+    {
+        return password;
+    }
 
-	public void setPublicProfile(Profile publicProfile) {
-		this.publicProfile = publicProfile;
-	}
+    public void setPassword(String password)
+    {
+        this.password = password;
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("Person [username=");
-		builder.append(username);
-		builder.append(", password=");
-		builder.append(password);
-		builder.append(", post=");
-		builder.append(post);
-		builder.append(", profile=");
-		builder.append(profile);
-		builder.append(", publicProfile=");
-		builder.append(publicProfile);
-		builder.append("]");
-		return builder.toString();
-	}
+    public Profile getProfile()
+    {
+        return profile;
+    }
 
+    public void setProfile(Profile profile)
+    {
+        this.profile = profile;
+    }
 
-	@PrePersist
-	public void pre () {
-		System.out.println ("PRE PERSIST >> " + this);
-	}
+    public Profile getPublicProfile()
+    {
+        return publicProfile;
+    }
 
-	/**
-	 * @param e
-	 * @return
-	 * @see java.util.Set#add(java.lang.Object)
-	 */
-	public boolean addPost(Post e) {
-		return post.add(e);
-	}
-	
-	public int size() {
-		return post.size();
-	}
+    public void setPublicProfile(Profile publicProfile)
+    {
+        this.publicProfile = publicProfile;
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Person [username=");
+        builder.append(username);
+        builder.append(", password=");
+        builder.append(password);
+        builder.append(", post=");
+        builder.append(post);
+        builder.append(", profile=");
+        builder.append(profile);
+        builder.append(", publicProfile=");
+        builder.append(publicProfile);
+        builder.append("]");
+        return builder.toString();
+    }
+
+    @PrePersist
+    public void pre()
+    {
+        System.out.println("PRE PERSIST >> " + this);
+    }
+
+    /**
+     * @param e
+     * @return
+     * @see java.util.Set#add(java.lang.Object)
+     */
+    public boolean addPost(Post e)
+    {
+        return post.add(e);
+    }
+
+    public int size()
+    {
+        return post.size();
+    }
 }

@@ -22,15 +22,15 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * The Class Post.
  * 
  * @author animesh.kumar
  */
 @Entity
-@Table(name="Posts", schema="Blog")
-public class Post {
+@Table(name = "Posts", schema = "Blog")
+public class Post
+{
 
     /** The permalink. */
     @Id
@@ -43,114 +43,106 @@ public class Post {
     @Embedded
     private AuthorDetail author = new AuthorDetail();
 
-
     /**
      * Gets the permalink.
      * 
      * @return the permalink
      */
-    public String getPermalink() {
+    public String getPermalink()
+    {
         return permalink;
     }
 
     /**
      * Sets the permalink.
      * 
-     * @param permalink the permalink to set
+     * @param permalink
+     *            the permalink to set
      */
-    public void setPermalink(String permalink) {
+    public void setPermalink(String permalink)
+    {
         this.permalink = permalink;
     }
 
-  /*  *//**
+    /*  *//**
      * Gets the title.
      * 
      * @return the title
-     *//*
-    public String getTitle() {
-        return data.title;
-    }
-
-    *//**
+     */
+    /*
+     * public String getTitle() { return data.title; }
+     *//**
      * Sets the title.
      * 
-     * @param title the title to set
-     *//*
-    public void setTitle(String title) {
-        this.data.title = title;
-    }
-
-    *//**
+     * @param title
+     *            the title to set
+     */
+    /*
+     * public void setTitle(String title) { this.data.title = title; }
+     *//**
      * Gets the body.
      * 
      * @return the body
-     *//*
-    public String getBody() {
-        return data.body;
-    }
-
-    *//**
+     */
+    /*
+     * public String getBody() { return data.body; }
+     *//**
      * Sets the body.
      * 
-     * @param body the body to set
-     *//*
-    public void setBody(String body) {
-        this.data.body = body;
-    }
-
-    *//**
+     * @param body
+     *            the body to set
+     */
+    /*
+     * public void setBody(String body) { this.data.body = body; }
+     *//**
      * Gets the author.
      * 
      * @return the author
-     *//*
-    public String getAuthor() {
-        return author.name;
-    }
-
-    *//**
+     */
+    /*
+     * public String getAuthor() { return author.name; }
+     *//**
      * Sets the author.
      * 
-     * @param author the author to set
-     *//*
-    public void setAuthor(String author) {
-        this.author.name = author;
-    }
-
-    *//**
+     * @param author
+     *            the author to set
+     */
+    /*
+     * public void setAuthor(String author) { this.author.name = author; }
+     *//**
      * Gets the created.
      * 
      * @return the created
-     *//*
-    public Date getCreated() {
-        return data.created;
-    }
-
-    *//**
+     */
+    /*
+     * public Date getCreated() { return data.created; }
+     *//**
      * Sets the created.
      * 
-     * @param created the created to set
-     *//*
-    public void setCreated(Date created) {
-        this.data.created = created;
-    }*/
+     * @param created
+     *            the created to set
+     */
+    /*
+     * public void setCreated(Date created) { this.data.created = created; }
+     */
 
-//    /**
-//     * Gets the tags.
-//     * 
-//     * @return the tags
-//     */
-//    public List<String> getTags() {
-//        return tags;
-//    }
-//
-//    /**
-//     * Sets the tags.
-//     * 
-//     * @param tags the tags to set
-//     */
-//    public void setTags(List<String> tags) {
-//        this.tags = tags;
-//    }
+    // /**
+    // * Gets the tags.
+    // *
+    // * @return the tags
+    // */
+    // public List<String> getTags() {
+    // return tags;
+    // }
+    //
+    // /**
+    // * Sets the tags.
+    // *
+    // * @param tags the tags to set
+    // */
+    // public void setTags(List<String> tags) {
+    // this.tags = tags;
+    // }
 
     /*
      * (non-Javadoc)
@@ -158,7 +150,8 @@ public class Post {
      * @see java.lang.Object#hashCode()
      */
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((permalink == null) ? 0 : permalink.hashCode());
@@ -171,7 +164,8 @@ public class Post {
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
         if (this == obj)
             return true;
         if (obj == null)
@@ -179,10 +173,12 @@ public class Post {
         if (!(obj instanceof Post))
             return false;
         Post other = (Post) obj;
-        if (permalink == null) {
+        if (permalink == null)
+        {
             if (other.permalink != null)
                 return false;
-        } else if (!permalink.equals(other.permalink))
+        }
+        else if (!permalink.equals(other.permalink))
             return false;
         return true;
     }
@@ -193,7 +189,8 @@ public class Post {
      * @see java.lang.Object#toString()
      */
     @Override
-    public String toString() {
+    public String toString()
+    {
         StringBuilder builder = new StringBuilder();
         builder.append("Post [title=");
         builder.append(data.title);
@@ -205,8 +202,8 @@ public class Post {
         builder.append(data.created);
         builder.append(", permalink=");
         builder.append(permalink);
-//        builder.append(", tags=");
-////        builder.append(tags);
+        // builder.append(", tags=");
+        // // builder.append(tags);
         builder.append("]");
         return builder.toString();
     }
@@ -220,7 +217,8 @@ public class Post {
     }
 
     /**
-     * @param data the data to set
+     * @param data
+     *            the data to set
      */
     public void setData(PostData data)
     {
@@ -236,7 +234,8 @@ public class Post {
     }
 
     /**
-     * @param author the author to set
+     * @param author
+     *            the author to set
      */
     public void setAuthor(AuthorDetail author)
     {

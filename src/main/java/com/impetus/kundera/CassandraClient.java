@@ -29,56 +29,59 @@ import org.scale7.cassandra.pelops.Bytes;
  * @author animesh.kumar
  * @since 0.1
  */
-public interface CassandraClient  extends com.impetus.kundera.Client{
+public interface CassandraClient extends com.impetus.kundera.Client
+{
 
     /**
-	 * Write multiple super-columns into a super-column-family.
-	 * 
-	 * @param keyspace
-	 *            the keyspace
-	 * @param columnFamily
-	 *            The name of the super column family to operate on
-	 * @param key
-	 *            The key of the row to modify
-	 * @param superColumns
-	 *            Array of super-columns to write
-	 * @throws Exception
-	 *             The exception
-	 */
-    void writeSuperColumns(String keyspace, String columnFamily, String key, SuperColumn... superColumns) throws Exception;
- 
-    /**
-	 * Load super-columns from a super-column-family row.
-	 * 
-	 * @param keyspace
-	 *            the keyspace
-	 * @param columnFamily
-	 *            The name of the super column family to operate on
-	 * @param key
-	 *            The key of the row
-	 * @param superColumnNames
-	 *            Array of super-column names to fetch from the row
-	 * @return A list of matching super-columns
-	 * @throws Exception
-	 *             the exception
-	 */
-    List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String key, String... superColumnNames) throws Exception;
+     * Write multiple super-columns into a super-column-family.
+     * 
+     * @param keyspace
+     *            the keyspace
+     * @param columnFamily
+     *            The name of the super column family to operate on
+     * @param key
+     *            The key of the row to modify
+     * @param superColumns
+     *            Array of super-columns to write
+     * @throws Exception
+     *             The exception
+     */
+    void writeSuperColumns(String keyspace, String columnFamily, String key, SuperColumn... superColumns)
+            throws Exception;
 
     /**
-	 * Load super-columns from multiple rows of a super-column-family.
-	 * 
-	 * @param keyspace
-	 *            the keyspace
-	 * @param columnFamily
-	 *            The name of the super column family to operate on
-	 * @param keys
-	 *            Array of row keys
-	 * @return A Map of row and corresponding list of super-columns.
-	 * @throws Exception
-	 *             the exception
-	 */
-    Map<Bytes, List<SuperColumn>> loadSuperColumns(String keyspace, String columnFamily, String... keys) throws Exception;
-    
+     * Load super-columns from a super-column-family row.
+     * 
+     * @param keyspace
+     *            the keyspace
+     * @param columnFamily
+     *            The name of the super column family to operate on
+     * @param key
+     *            The key of the row
+     * @param superColumnNames
+     *            Array of super-column names to fetch from the row
+     * @return A list of matching super-columns
+     * @throws Exception
+     *             the exception
+     */
+    List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String key, String... superColumnNames)
+            throws Exception;
+
+    /**
+     * Load super-columns from multiple rows of a super-column-family.
+     * 
+     * @param keyspace
+     *            the keyspace
+     * @param columnFamily
+     *            The name of the super column family to operate on
+     * @param keys
+     *            Array of row keys
+     * @return A Map of row and corresponding list of super-columns.
+     * @throws Exception
+     *             the exception
+     */
+    Map<Bytes, List<SuperColumn>> loadSuperColumns(String keyspace, String columnFamily, String... keys)
+            throws Exception;
 
     /**
      * Gets the cassandra client.

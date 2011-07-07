@@ -15,7 +15,6 @@
  */
 package com.impetus.kundera.junit;
 
-
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -43,7 +42,6 @@ import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 
-
 /**
  * The Class BaseTest.
  */
@@ -51,28 +49,28 @@ public abstract class BaseTest extends TestCase
 {
 
     /** The embedded server cassandra. */
-//    private static EmbeddedCassandraService cassandra;
+    // private static EmbeddedCassandraService cassandra;
 
     /** The client. */
     private Cassandra.Client client;
-    
+
     /** The logger. */
-    private static Logger logger =  Logger.getLogger(BaseTest.class);
+    private static Logger logger = Logger.getLogger(BaseTest.class);
 
     /**
      * Start cassandra server.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     protected void startCassandraServer() throws Exception
     {
-/*        if (!checkIfServerRunning())
-        {
-//            cassandra = new EmbeddedCassandraService();
-//            cassandra.start();
-//            startSolandra();
-
-        }*/
+        /*
+         * if (!checkIfServerRunning()) { // cassandra = new
+         * EmbeddedCassandraService(); // cassandra.start(); // startSolandra();
+         * 
+         * }
+         */
         initClient();
         logger.info("Loading Data:");
         loadData();
@@ -80,7 +78,7 @@ public abstract class BaseTest extends TestCase
 
     /**
      * Check if server running.
-     *
+     * 
      * @return true, if successful
      */
     private boolean checkIfServerRunning()
@@ -127,11 +125,15 @@ public abstract class BaseTest extends TestCase
 
     /**
      * Load data.
-     *
-     * @throws ConfigurationException the configuration exception
-     * @throws TException the t exception
-     * @throws NotFoundException the not found exception
-     * @throws InvalidRequestException the invalid request exception
+     * 
+     * @throws ConfigurationException
+     *             the configuration exception
+     * @throws TException
+     *             the t exception
+     * @throws NotFoundException
+     *             the not found exception
+     * @throws InvalidRequestException
+     *             the invalid request exception
      */
     private void loadData() throws org.apache.cassandra.config.ConfigurationException, TException, NotFoundException,
             InvalidRequestException
@@ -160,20 +162,16 @@ public abstract class BaseTest extends TestCase
         cfDefs.add(tweet_Def);
         cfDefs.add(userLine_Def);
         cfDefs.add(timeLine_Def);
-        cfDefs.add(users_Def);        
-/*        List<KsDef> ksDefs = client.describe_keyspaces();
-        System.out.println("Size is : " + ksDefs.size());
-        for(KsDef ksDef : ksDefs)
-        {
-            System.out.println(ksDef.getName());
-        }
-*///        client.send_system_drop_keyspace("Blog");
+        cfDefs.add(users_Def);
+        /*
+         * List<KsDef> ksDefs = client.describe_keyspaces();
+         * System.out.println("Size is : " + ksDefs.size()); for(KsDef ksDef :
+         * ksDefs) { System.out.println(ksDef.getName()); }
+         */// client.send_system_drop_keyspace("Blog");
         KsDef ksDef = new KsDef("Blog", simple.getCanonicalName(), 1, cfDefs);
         client.send_system_add_keyspace(ksDef);
         logger.info("Data loaded");
-     
+
     }
 
-    
-    
 }

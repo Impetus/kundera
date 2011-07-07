@@ -20,7 +20,8 @@ package com.impetus.kundera.metadata;
  * 
  * @author animesh.kumar
  */
-public interface Validator {
+public interface Validator
+{
 
     /**
      * Validate.

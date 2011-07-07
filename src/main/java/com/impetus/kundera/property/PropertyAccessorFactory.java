@@ -35,11 +35,13 @@ import com.impetus.kundera.property.accessor.StringAccessor;
  * @author animesh.kumar
  * 
  */
-public class PropertyAccessorFactory {
+public class PropertyAccessorFactory
+{
 
     /** The map. */
     public static Map<Class<?>, PropertyAccessor<?>> map = new HashMap<Class<?>, PropertyAccessor<?>>();
-    static {
+    static
+    {
         map.put(Integer.class, new IntegerAccessor());
         map.put(Long.class, new LongAccessor());
         map.put(String.class, new StringAccessor());
@@ -53,7 +55,8 @@ public class PropertyAccessorFactory {
     /**
      * Instantiates a new property accessor factory.
      */
-    private PropertyAccessorFactory() {
+    private PropertyAccessorFactory()
+    {
     }
 
     /**
@@ -65,11 +68,13 @@ public class PropertyAccessorFactory {
      * @return the property accessor
      */
     @SuppressWarnings("unchecked")
-    public static PropertyAccessor getPropertyAccessor(Class<?> clazz) {
+    public static PropertyAccessor getPropertyAccessor(Class<?> clazz)
+    {
         PropertyAccessor<?> accessor = map.get(clazz);
 
         // allow fall-back to Object streamer.
-        if (null == accessor) {
+        if (null == accessor)
+        {
             accessor = map.get(Object.class);
         }
         return accessor;
@@ -83,7 +88,8 @@ public class PropertyAccessorFactory {
      * 
      * @return the property accessor
      */
-    public static PropertyAccessor<?> getPropertyAccessor(Field property) {
+    public static PropertyAccessor<?> getPropertyAccessor(Field property)
+    {
         return getPropertyAccessor(property.getType());
     }
 
@@ -95,7 +101,8 @@ public class PropertyAccessorFactory {
      * @param value
      *            the value
      */
-    public static void add(Class<?> key, PropertyAccessor<?> value) {
+    public static void add(Class<?> key, PropertyAccessor<?> value)
+    {
         map.put(key, value);
     }
 

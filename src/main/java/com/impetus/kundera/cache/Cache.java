@@ -15,52 +15,52 @@
  */
 package com.impetus.kundera.cache;
 
-
 /**
- * Implementors define a caching algorithm. All implementors
- * <b>must</b> be threadsafe.
+ * Implementors define a caching algorithm. All implementors <b>must</b> be
+ * threadsafe.
  * 
  * @author animesh.kumar
  */
-public interface Cache {
-
-	/**
-	 * Size.
-	 * 
-	 * @return the int
-	 */
-	int size();
+public interface Cache
+{
 
     /**
-	 * Get an item from the cache.
-	 * 
-	 * @param key
-	 *            the key
-	 * @return the object
-	 */
-    Object get (Object key);
+     * Size.
+     * 
+     * @return the int
+     */
+    int size();
 
     /**
-	 * Add an item to the cache.
-	 * 
-	 * @param key
-	 *            the key
-	 * @param value
-	 *            the value
-	 */
+     * Get an item from the cache.
+     * 
+     * @param key
+     *            the key
+     * @return the object
+     */
+    Object get(Object key);
+
+    /**
+     * Add an item to the cache.
+     * 
+     * @param key
+     *            the key
+     * @param value
+     *            the value
+     */
     void put(Object key, Object value);
 
     /**
-	 * Removes an item from cache.
-	 * 
-	 * @param key
-	 *            the key
-	 * @return true, if successful
-	 */
+     * Removes an item from cache.
+     * 
+     * @param key
+     *            the key
+     * @return true, if successful
+     */
     boolean remove(Object key);
 
     /**
-	 * Clears cache.
-	 */
+     * Clears cache.
+     */
     void clear();
 }

@@ -27,34 +27,36 @@ import javax.persistence.spi.PersistenceUnitInfo;
  * @author animesh.kumar
  */
 @SuppressWarnings("unchecked")
-public class KunderaPersistence implements PersistenceProvider {
+public class KunderaPersistence implements PersistenceProvider
+{
 
-	/**
-	 * Instantiates a new kundera persistence.
-	 */
-	public KunderaPersistence() {
-	}
+    /**
+     * Instantiates a new kundera persistence.
+     */
+    public KunderaPersistence()
+    {
+    }
 
-	/*
-	 * @see
-	 * javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
-	 * (javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
-	 */
-	@Override
-	public final EntityManagerFactory createContainerEntityManagerFactory(
-			PersistenceUnitInfo info, Map map) {
-		return createEntityManagerFactory(info.getPersistenceUnitName(), map);
-	}
+    /*
+     * @see
+     * javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
+     * (javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
+     */
+    @Override
+    public final EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map)
+    {
+        return createEntityManagerFactory(info.getPersistenceUnitName(), map);
+    }
 
-	/*
-	 * @see
-	 * javax.persistence.spi.PersistenceProvider#createEntityManagerFactory(
-	 * java.lang.String, java.util.Map)
-	 */
-	@Override
-	public final EntityManagerFactory createEntityManagerFactory(String emName,
-			Map map) {
-		EntityManagerFactoryBuilder conf = new EntityManagerFactoryBuilder();
-		return conf.buildEntityManagerFactory(emName, map);
-	}
+    /*
+     * @see
+     * javax.persistence.spi.PersistenceProvider#createEntityManagerFactory(
+     * java.lang.String, java.util.Map)
+     */
+    @Override
+    public final EntityManagerFactory createEntityManagerFactory(String emName, Map map)
+    {
+        EntityManagerFactoryBuilder conf = new EntityManagerFactoryBuilder();
+        return conf.buildEntityManagerFactory(emName, map);
+    }
 }

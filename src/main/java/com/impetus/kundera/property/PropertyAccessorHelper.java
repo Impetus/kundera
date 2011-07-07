@@ -100,20 +100,27 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static Object getObject(Object from, Field field) throws PropertyAccessException {
+    public static Object getObject(Object from, Field field) throws PropertyAccessException
+    {
 
-		if (!field.isAccessible()) {
-			field.setAccessible(true);
-		}
+        if (!field.isAccessible())
+        {
+            field.setAccessible(true);
+        }
 
-		try {
-			return field.get(from);
-		} catch (IllegalArgumentException iarg) {
-			throw new PropertyAccessException(iarg);
-		} catch (IllegalAccessException iacc) {
-			throw new PropertyAccessException(iacc);
-		}
-	}
+        try
+        {
+            return field.get(from);
+        }
+        catch (IllegalArgumentException iarg)
+        {
+            throw new PropertyAccessException(iarg);
+        }
+        catch (IllegalAccessException iacc)
+        {
+            throw new PropertyAccessException(iacc);
+        }
+    }
 
     /**
      * Gets the string.
@@ -200,47 +207,65 @@ public class PropertyAccessorHelper
      *            the field name
      * @return the embedded object
      */
-	public static final Object getObject(Object obj, String fieldName)
-			throws PropertyAccessException {
-		Field embeddedField;
-		try {
-			embeddedField = obj.getClass().getDeclaredField(fieldName);
-			if (embeddedField != null) {
-				if (!embeddedField.isAccessible()) {
-					embeddedField.setAccessible(true);
-				}
-				return embeddedField.get(obj);
-			} else {
-				throw new RuntimeException("Embedded object not found: " + fieldName);
-			}
+    public static final Object getObject(Object obj, String fieldName) throws PropertyAccessException
+    {
+        Field embeddedField;
+        try
+        {
+            embeddedField = obj.getClass().getDeclaredField(fieldName);
+            if (embeddedField != null)
+            {
+                if (!embeddedField.isAccessible())
+                {
+                    embeddedField.setAccessible(true);
+                }
+                return embeddedField.get(obj);
+            }
+            else
+            {
+                throw new RuntimeException("Embedded object not found: " + fieldName);
+            }
 
-		} catch (SecurityException e) {
-			throw new PropertyAccessException(e);
-		} catch (NoSuchFieldException e) {
-			throw new PropertyAccessException(e);
-		} catch (IllegalArgumentException e) {
-			throw new PropertyAccessException(e);
-		} catch (IllegalAccessException e) {
-			throw new PropertyAccessException(e);
-		}
-	}	
-	
-    
+        }
+        catch (SecurityException e)
+        {
+            throw new PropertyAccessException(e);
+        }
+        catch (NoSuchFieldException e)
+        {
+            throw new PropertyAccessException(e);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new PropertyAccessException(e);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw new PropertyAccessException(e);
+        }
+    }
+
     /**
      * Retrieves Generic class from a collection field
+     * 
      * @param collectionField
      * @return
      */
-    public static Class<?> getGenericClass(Field collectionField) {
-    	Class<?> genericClass = null;
-		Type[] parameters = ReflectUtils.getTypeArguments(collectionField);
-		if (parameters != null) {
-			if (parameters.length == 1) {
-				genericClass = (Class<?>) parameters[0];
-			} else {
-				throw new PersistenceException("Can't determine generic class from a field that has two parameters.");
-			}
-		}
-		return genericClass;
+    public static Class<?> getGenericClass(Field collectionField)
+    {
+        Class<?> genericClass = null;
+        Type[] parameters = ReflectUtils.getTypeArguments(collectionField);
+        if (parameters != null)
+        {
+            if (parameters.length == 1)
+            {
+                genericClass = (Class<?>) parameters[0];
+            }
+            else
+            {
+                throw new PersistenceException("Can't determine generic class from a field that has two parameters.");
+            }
+        }
+        return genericClass;
     }
- }
+}

@@ -1,3 +1,20 @@
+/*******************************************************************************
+ * /*
+ *  * Copyright 2010 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *  */
+ ******************************************************************************/
 package com.impetus.kundera.loader;
 
 import java.lang.reflect.Field;
@@ -40,9 +57,9 @@ public class Configuration
     /** The em map. */
     private Map<ClientIdentifier, EntityManager> emMap = new HashMap<ClientIdentifier, EntityManager>();
 
-    /**  Full path of  Server config file */
+    /** Full path of Server config file */
     private String serverConfig;
-    
+
     /** The node. */
     private String node;
 
@@ -60,11 +77,12 @@ public class Configuration
 
     /**
      * Gets the entity manager.
-     *
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
      * @return the entity manager
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings( { "rawtypes", "unchecked" })
     public EntityManager getEntityManager(String persistenceUnit)
     {
         EntityManager em;
@@ -80,20 +98,21 @@ public class Configuration
             node = props.getProperty("kundera.nodes");
             port = props.getProperty("kundera.port");
             keyspace = props.getProperty("kundera.keyspace");
-            if("Pelops".equals(client)) {
-            	System.setProperty("cassandra.config", serverConfig);
-            }            
+            if ("Pelops".equals(client))
+            {
+                System.setProperty("cassandra.config", serverConfig);
+            }
             String resourceName = "net.sf.ehcache.configurationResourceName";
             ClientType clientType = ClientType.getValue(client.toUpperCase());
             createIdentifier(clientType, persistenceUnit);
-            setField(emf, emf.getClass().getDeclaredField("cacheProvider"),
-                    initSecondLevelCache(props.getProperty("kundera.cache.provider_class"), resourceName));
+            setField(emf, emf.getClass().getDeclaredField("cacheProvider"), initSecondLevelCache(props
+                    .getProperty("kundera.cache.provider_class"), resourceName));
             emfMap.put(identifier, emf);
             em = emf.createEntityManager();
             setClient(em, clientType, persistenceUnit);
             emMap.put(identifier, em);
             logger.info("Kundera Client is: " + props.getProperty("kundera.client"));
-            
+
         }
         catch (SecurityException e)
         {
@@ -112,8 +131,9 @@ public class Configuration
 
     /**
      * Initialises.
-     *
-     * @param url the url
+     * 
+     * @param url
+     *            the url
      */
     public void init(URL url)
     {
@@ -134,8 +154,8 @@ public class Configuration
                 if (!emfMap.containsKey(identifier))
                 {
                     EntityManagerFactory emf = Persistence.createEntityManagerFactory(metadata.getName());
-                    setField(emf, emf.getClass().getDeclaredField("cacheProvider"),
-                            initSecondLevelCache(props.getProperty("kundera.cache.provider_class"), resourceName));
+                    setField(emf, emf.getClass().getDeclaredField("cacheProvider"), initSecondLevelCache(props
+                            .getProperty("kundera.cache.provider_class"), resourceName));
                     emfMap.put(identifier, emf);
                     EntityManager em = emf.createEntityManager();
                     setClient(em, clientType, metadata.getName());
@@ -186,10 +206,13 @@ public class Configuration
 
     /**
      * Set client to entity manager.
-     *
-     * @param em the em
-     * @param clientType the client type
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param em
+     *            the em
+     * @param clientType
+     *            the client type
+     * @param persistenceUnit
+     *            the persistence unit
      */
     private void setClient(EntityManager em, ClientType clientType, String persistenceUnit)
     {
@@ -205,10 +228,13 @@ public class Configuration
 
     /**
      * Sets the field.
-     *
-     * @param obj the obj
-     * @param f the f
-     * @param value the value
+     * 
+     * @param obj
+     *            the obj
+     * @param f
+     *            the f
+     * @param value
+     *            the value
      */
     private void setField(Object obj, Field f, Object value)
     {
@@ -228,9 +254,11 @@ public class Configuration
 
     /**
      * Gets the client.
-     *
-     * @param clientType the client type
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param clientType
+     *            the client type
+     * @param persistenceUnit
+     *            the persistence unit
      * @return the client
      */
     private Client getClient(ClientType clientType, String persistenceUnit)
@@ -242,9 +270,11 @@ public class Configuration
 
     /**
      * Creates the identifier.
-     *
-     * @param clientType the client type
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param clientType
+     *            the client type
+     * @param persistenceUnit
+     *            the persistence unit
      */
     private void createIdentifier(ClientType clientType, String persistenceUnit)
     {
@@ -254,9 +284,11 @@ public class Configuration
 
     /**
      * Inits the second level cache.
-     *
-     * @param cacheProviderClassName the cache provider class name
-     * @param classResourceName the class resource name
+     * 
+     * @param cacheProviderClassName
+     *            the cache provider class name
+     * @param classResourceName
+     *            the class resource name
      * @return the cache provider
      */
     @SuppressWarnings("unchecked")

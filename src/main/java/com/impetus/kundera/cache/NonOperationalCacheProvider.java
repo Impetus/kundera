@@ -22,36 +22,45 @@ import java.util.Map;
  * 
  * @author animesh.kumar
  */
-public class NonOperationalCacheProvider implements CacheProvider {
-	
-	/** The cache. */
-	private Cache cache = new NonOperationalCache();
+public class NonOperationalCacheProvider implements CacheProvider
+{
 
-	/**
-	 * Instantiates a new non operational cache provider.
-	 */
-	public NonOperationalCacheProvider () {
-	}
-	
-	/* @see com.impetus.kundera.cache.CacheProvider#init(java.util.Map) */
-	@Override
-	public void init(Map<?, ?> properties) {
-	}
+    /** The cache. */
+    private Cache cache = new NonOperationalCache();
 
-	/* @see com.impetus.kundera.cache.CacheProvider#createCache(java.lang.String) */
-	@Override
-	public Cache createCache(String name) {
-		return cache;
-	}
+    /**
+     * Instantiates a new non operational cache provider.
+     */
+    public NonOperationalCacheProvider()
+    {
+    }
 
-	/* @see com.impetus.kundera.cache.CacheProvider#shutdown() */
-	@Override
-	public void shutdown() {
-	}
+    /* @see com.impetus.kundera.cache.CacheProvider#init(java.util.Map) */
+    @Override
+    public void init(Map<?, ?> properties)
+    {
+    }
 
-	@Override
-	public void init(String cacheResourceName) throws CacheException {
-		
-	}
+    /*
+     * @see
+     * com.impetus.kundera.cache.CacheProvider#createCache(java.lang.String)
+     */
+    @Override
+    public Cache createCache(String name)
+    {
+        return cache;
+    }
+
+    /* @see com.impetus.kundera.cache.CacheProvider#shutdown() */
+    @Override
+    public void shutdown()
+    {
+    }
+
+    @Override
+    public void init(String cacheResourceName) throws CacheException
+    {
+
+    }
 
 }

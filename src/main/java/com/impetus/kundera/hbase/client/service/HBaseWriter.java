@@ -30,14 +30,19 @@ import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * The Class HBaseWriter.
- *
+ * 
  * @author impetus
  */
 public class HBaseWriter implements Writer
 {
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.hbase.client.Writer#writeColumns(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.lang.String, java.util.List, com.impetus.kundera.proxy.EnhancedEntity)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.hbase.client.Writer#writeColumns(org.apache.hadoop
+     * .hbase.client.HTable, java.lang.String, java.lang.String, java.util.List,
+     * com.impetus.kundera.proxy.EnhancedEntity)
      */
     @Override
     public void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns, EnhancedEntity e)

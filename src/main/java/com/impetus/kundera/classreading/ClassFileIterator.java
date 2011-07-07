@@ -27,7 +27,8 @@ import java.util.List;
  * 
  * @author animesh.kumar
  */
-public class ClassFileIterator implements ResourceIterator {
+public class ClassFileIterator implements ResourceIterator
+{
 
     /** The files. */
     private List<File> files;
@@ -43,18 +44,23 @@ public class ClassFileIterator implements ResourceIterator {
      * @param filter
      *            the filter
      */
-    public ClassFileIterator(File file, Filter filter) {
+    public ClassFileIterator(File file, Filter filter)
+    {
         files = new ArrayList<File>();
-        try {
+        try
+        {
             init(files, file, filter);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new RuntimeException(e);
         }
     }
-    
-    public ClassFileIterator(File fileToAdd) {
-    	files = new ArrayList<File>();
-    	files.add(fileToAdd);
+
+    public ClassFileIterator(File fileToAdd)
+    {
+        files = new ArrayList<File>();
+        files.add(fileToAdd);
     }
 
     /**
@@ -70,13 +76,19 @@ public class ClassFileIterator implements ResourceIterator {
      * @throws Exception
      *             the exception
      */
-    private static void init(List<File> list, File dir, Filter filter) throws Exception {
+    private static void init(List<File> list, File dir, Filter filter) throws Exception
+    {
         File[] files = dir.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            if (files[i].isDirectory()) {
+        for (int i = 0; i < files.length; i++)
+        {
+            if (files[i].isDirectory())
+            {
                 init(list, files[i], filter);
-            } else {
-                if (filter == null || filter.accepts(files[i].getAbsolutePath())) {
+            }
+            else
+            {
+                if (filter == null || filter.accepts(files[i].getAbsolutePath()))
+                {
                     list.add(files[i]);
                 }
             }
@@ -84,18 +96,23 @@ public class ClassFileIterator implements ResourceIterator {
     }
 
     /* @see com.impetus.kundera.classreading.ResourceIterator#next() */
-    public final InputStream next() {
+    public final InputStream next()
+    {
         if (index >= files.size())
             return null;
         File fp = (File) files.get(index++);
-        try {
+        try
+        {
             return new FileInputStream(fp);
-        } catch (FileNotFoundException e) {
+        }
+        catch (FileNotFoundException e)
+        {
             throw new RuntimeException(e);
         }
     }
 
     /* @see com.impetus.kundera.classreading.ResourceIterator#close() */
-    public void close() {
+    public void close()
+    {
     }
 }

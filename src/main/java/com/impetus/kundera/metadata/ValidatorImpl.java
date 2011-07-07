@@ -32,7 +32,8 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author animesh.kumar
  */
-public class ValidatorImpl implements Validator {
+public class ValidatorImpl implements Validator
+{
 
     /** The Constant log. */
     private static final Log LOG = LogFactory.getLog(ValidatorImpl.class);
@@ -50,46 +51,60 @@ public class ValidatorImpl implements Validator {
      */
     @Override
     // TODO: reduce Cyclomatic complexity
-    public final void validate(final Class<?> clazz) {
+    public final void validate(final Class<?> clazz)
+    {
 
-        if (classes.contains(clazz)) {
+        if (classes.contains(clazz))
+        {
             return;
         }
 
         LOG.debug("Validating " + clazz.getName());
 
         // Is Entity?
-        if (!clazz.isAnnotationPresent(Entity.class)) {
+        if (!clazz.isAnnotationPresent(Entity.class))
+        {
             throw new PersistenceException(clazz.getName() + " is not annotated with @Entity");
         }
 
         // must have a default no-argument constructor
-        try {
+        try
+        {
             clazz.getConstructor();
-        } catch (NoSuchMethodException nsme) {
+        }
+        catch (NoSuchMethodException nsme)
+        {
             throw new PersistenceException(clazz.getName() + " must have a default no-argument constructor.");
         }
 
         // Must be annotated with @Table
-        if (! clazz.isAnnotationPresent(Table.class)) {
-        	throw new PersistenceException(clazz.getName() + " must be annotated with @Table");        	
-        } 
-        
-        //Check for @Key and ensure that there is just 1 @Key field of String type.
+        if (!clazz.isAnnotationPresent(Table.class))
+        {
+            throw new PersistenceException(clazz.getName() + " must be annotated with @Table");
+        }
+
+        // Check for @Key and ensure that there is just 1 @Key field of String
+        // type.
         List<Field> keys = new ArrayList<Field>();
-        for (Field field : clazz.getDeclaredFields()) {
-            if (field.isAnnotationPresent(Id.class)) {
+        for (Field field : clazz.getDeclaredFields())
+        {
+            if (field.isAnnotationPresent(Id.class))
+            {
                 keys.add(field);
             }
         }
 
-        if (keys.size() == 0) {
+        if (keys.size() == 0)
+        {
             throw new PersistenceException(clazz.getName() + " must have an @Id field.");
-        } else if (keys.size() > 1) {
+        }
+        else if (keys.size() > 1)
+        {
             throw new PersistenceException(clazz.getName() + " can only have 1 @Id field.");
         }
 
-        if (!keys.get(0).getType().equals(String.class)) {
+        if (!keys.get(0).getType().equals(String.class))
+        {
             throw new PersistenceException(clazz.getName() + " @Id must be of String type.");
         }
 

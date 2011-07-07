@@ -28,209 +28,228 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
  * 
  * @author animesh.kumar
  */
-public class PersistenceMetadata {
-	
-	/** The name. */
-	private String name;
-	
-	/** The provider. */
-	private String provider;
-	
-	/** The transaction type. */
-	private PersistenceUnitTransactionType transactionType;
-	
-	/** The classes. */
-	private List<String> classes = new ArrayList<String>();
-	
-	/** The packages. */
-	private List<String> packages = new ArrayList<String>();
-	
-	/** The jar files. */
-	private Set<String> jarFiles = new HashSet<String>();
-	
-	/** The props. */
-	private Properties props = new Properties();
-	
-	/** The exclude unlisted classes. */
-	private boolean excludeUnlistedClasses = false;
+public class PersistenceMetadata
+{
 
-	/**
-	 * Gets the name.
-	 * 
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /** The name. */
+    private String name;
 
-	/**
-	 * Sets the name.
-	 * 
-	 * @param name
-	 *            the new name
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /** The provider. */
+    private String provider;
 
-	/**
-	 * Gets the transaction type.
-	 * 
-	 * @return the transaction type
-	 */
-	public PersistenceUnitTransactionType getTransactionType() {
-		return transactionType;
-	}
+    /** The transaction type. */
+    private PersistenceUnitTransactionType transactionType;
 
-	/**
-	 * Sets the transaction type.
-	 * 
-	 * @param transactionType
-	 *            the new transaction type
-	 */
-	public void setTransactionType(PersistenceUnitTransactionType transactionType) {
-		this.transactionType = transactionType;
-	}
+    /** The classes. */
+    private List<String> classes = new ArrayList<String>();
 
-	/**
-	 * Gets the provider.
-	 * 
-	 * @return the provider
-	 */
-	public String getProvider() {
-		return provider;
-	}
+    /** The packages. */
+    private List<String> packages = new ArrayList<String>();
 
-	/**
-	 * Sets the provider.
-	 * 
-	 * @param provider
-	 *            the new provider
-	 */
-	public void setProvider(String provider) {
-		if ( provider != null && provider.endsWith( ".class" ) ) {
-			this.provider = provider.substring( 0, provider.length() - 6 );
-		}
-		this.provider = provider;
-	}
+    /** The jar files. */
+    private Set<String> jarFiles = new HashSet<String>();
 
-	/**
-	 * Gets the classes.
-	 * 
-	 * @return the classes
-	 */
-	public List<String> getClasses() {
-		return classes;
-	}
+    /** The props. */
+    private Properties props = new Properties();
 
-	/**
-	 * Sets the classes.
-	 * 
-	 * @param classes
-	 *            the new classes
-	 */
-	public void setClasses(List<String> classes) {
-		this.classes = classes;
-	}
+    /** The exclude unlisted classes. */
+    private boolean excludeUnlistedClasses = false;
 
-	/**
-	 * Gets the packages.
-	 * 
-	 * @return the packages
-	 */
-	public List<String> getPackages() {
-		return packages;
-	}
+    /**
+     * Gets the name.
+     * 
+     * @return the name
+     */
+    public String getName()
+    {
+        return name;
+    }
 
-	/**
-	 * Sets the packages.
-	 * 
-	 * @param packages
-	 *            the new packages
-	 */
-	public void setPackages(List<String> packages) {
-		this.packages = packages;
-	}
+    /**
+     * Sets the name.
+     * 
+     * @param name
+     *            the new name
+     */
+    public void setName(String name)
+    {
+        this.name = name;
+    }
 
-	/**
-	 * Gets the jar files.
-	 * 
-	 * @return the jar files
-	 */
-	public Set<String> getJarFiles() {
-		return jarFiles;
-	}
+    /**
+     * Gets the transaction type.
+     * 
+     * @return the transaction type
+     */
+    public PersistenceUnitTransactionType getTransactionType()
+    {
+        return transactionType;
+    }
 
-	/**
-	 * Sets the jar files.
-	 * 
-	 * @param jarFiles
-	 *            the new jar files
-	 */
-	public void setJarFiles(Set<String> jarFiles) {
-		this.jarFiles = jarFiles;
-	}
+    /**
+     * Sets the transaction type.
+     * 
+     * @param transactionType
+     *            the new transaction type
+     */
+    public void setTransactionType(PersistenceUnitTransactionType transactionType)
+    {
+        this.transactionType = transactionType;
+    }
 
-	/**
-	 * Gets the props.
-	 * 
-	 * @return the props
-	 */
-	public Properties getProps() {
-		return props;
-	}
+    /**
+     * Gets the provider.
+     * 
+     * @return the provider
+     */
+    public String getProvider()
+    {
+        return provider;
+    }
 
-	/**
-	 * Sets the props.
-	 * 
-	 * @param props
-	 *            the new props
-	 */
-	public void setProps(Properties props) {
-		this.props = props;
-	}
+    /**
+     * Sets the provider.
+     * 
+     * @param provider
+     *            the new provider
+     */
+    public void setProvider(String provider)
+    {
+        if (provider != null && provider.endsWith(".class"))
+        {
+            this.provider = provider.substring(0, provider.length() - 6);
+        }
+        this.provider = provider;
+    }
 
-	/**
-	 * Gets the exclude unlisted classes.
-	 * 
-	 * @return the exclude unlisted classes
-	 */
-	public boolean getExcludeUnlistedClasses() {
-		return excludeUnlistedClasses;
-	}
+    /**
+     * Gets the classes.
+     * 
+     * @return the classes
+     */
+    public List<String> getClasses()
+    {
+        return classes;
+    }
 
-	/**
-	 * Sets the exclude unlisted classes.
-	 * 
-	 * @param excludeUnlistedClasses
-	 *            the new exclude unlisted classes
-	 */
-	public void setExcludeUnlistedClasses(boolean excludeUnlistedClasses) {
-		this.excludeUnlistedClasses = excludeUnlistedClasses;
-	}
+    /**
+     * Sets the classes.
+     * 
+     * @param classes
+     *            the new classes
+     */
+    public void setClasses(List<String> classes)
+    {
+        this.classes = classes;
+    }
 
-	/* @see java.lang.Object#toString() */
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("PersistenceMetadata [name=");
-		builder.append(name);
-		builder.append(", provider=");
-		builder.append(provider);
-		builder.append(", transactionType=");
-		builder.append(transactionType);
-		builder.append(", classes=");
-		builder.append(classes);
-		builder.append(", excludeUnlistedClasses=");
-		builder.append(excludeUnlistedClasses);
-		builder.append(", jarFiles=");
-		builder.append(jarFiles);
-		builder.append(", packages=");
-		builder.append(packages);
-		builder.append(", props=");
-		builder.append(props);
-		builder.append("]");
-		return builder.toString();
-	}
+    /**
+     * Gets the packages.
+     * 
+     * @return the packages
+     */
+    public List<String> getPackages()
+    {
+        return packages;
+    }
+
+    /**
+     * Sets the packages.
+     * 
+     * @param packages
+     *            the new packages
+     */
+    public void setPackages(List<String> packages)
+    {
+        this.packages = packages;
+    }
+
+    /**
+     * Gets the jar files.
+     * 
+     * @return the jar files
+     */
+    public Set<String> getJarFiles()
+    {
+        return jarFiles;
+    }
+
+    /**
+     * Sets the jar files.
+     * 
+     * @param jarFiles
+     *            the new jar files
+     */
+    public void setJarFiles(Set<String> jarFiles)
+    {
+        this.jarFiles = jarFiles;
+    }
+
+    /**
+     * Gets the props.
+     * 
+     * @return the props
+     */
+    public Properties getProps()
+    {
+        return props;
+    }
+
+    /**
+     * Sets the props.
+     * 
+     * @param props
+     *            the new props
+     */
+    public void setProps(Properties props)
+    {
+        this.props = props;
+    }
+
+    /**
+     * Gets the exclude unlisted classes.
+     * 
+     * @return the exclude unlisted classes
+     */
+    public boolean getExcludeUnlistedClasses()
+    {
+        return excludeUnlistedClasses;
+    }
+
+    /**
+     * Sets the exclude unlisted classes.
+     * 
+     * @param excludeUnlistedClasses
+     *            the new exclude unlisted classes
+     */
+    public void setExcludeUnlistedClasses(boolean excludeUnlistedClasses)
+    {
+        this.excludeUnlistedClasses = excludeUnlistedClasses;
+    }
+
+    /* @see java.lang.Object#toString() */
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("PersistenceMetadata [name=");
+        builder.append(name);
+        builder.append(", provider=");
+        builder.append(provider);
+        builder.append(", transactionType=");
+        builder.append(transactionType);
+        builder.append(", classes=");
+        builder.append(classes);
+        builder.append(", excludeUnlistedClasses=");
+        builder.append(excludeUnlistedClasses);
+        builder.append(", jarFiles=");
+        builder.append(jarFiles);
+        builder.append(", packages=");
+        builder.append(packages);
+        builder.append(", props=");
+        builder.append(props);
+        builder.append("]");
+        return builder.toString();
+    }
 
 }

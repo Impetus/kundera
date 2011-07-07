@@ -22,36 +22,47 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
- * @author animesh.kumar
- *l
+ * @author animesh.kumar l
  */
-public class PersistenceUnitTest extends BaseTest {
+public class PersistenceUnitTest extends BaseTest
+{
 
-    
     private EntityManager entityManager;
+
     private Configuration conf;
 
-	public void setUp() throws Exception {
-    	startCassandraServer();
-    	conf = new Configuration();
-    	entityManager = conf.getEntityManager("cassandra");
+    public void setUp() throws Exception
+    {
+        startCassandraServer();
+        conf = new Configuration();
+        entityManager = conf.getEntityManager("cassandra");
     }
-    
-    protected void tearDown() {
-    	conf.destroy();
-    	
+
+    protected void tearDown()
+    {
+        conf.destroy();
+
     }
-    
-	public void testEntityManager() {
-		try {
-			assertNotNull(entityManager);
-				assertNotNull(PropertyAccessorHelper.getObject(entityManager, entityManager.getClass().getDeclaredField("client")));
-			} catch (SecurityException e) {
-				e.printStackTrace();
-			} catch (PropertyAccessException e) {
-				e.printStackTrace();
-			} catch (NoSuchFieldException e) {
-				e.printStackTrace();
-			}
-	}
+
+    public void testEntityManager()
+    {
+        try
+        {
+            assertNotNull(entityManager);
+            assertNotNull(PropertyAccessorHelper.getObject(entityManager, entityManager.getClass().getDeclaredField(
+                    "client")));
+        }
+        catch (SecurityException e)
+        {
+            e.printStackTrace();
+        }
+        catch (PropertyAccessException e)
+        {
+            e.printStackTrace();
+        }
+        catch (NoSuchFieldException e)
+        {
+            e.printStackTrace();
+        }
+    }
 }

@@ -31,7 +31,7 @@ import com.impetus.kundera.metadata.EntityMetadata.PropertyIndex;
 
 /**
  * Provides indexing functionality for MongoDB database.
- *
+ * 
  * @author amresh.singh
  */
 public class MongoDBIndexer implements Indexer
@@ -44,16 +44,21 @@ public class MongoDBIndexer implements Indexer
 
     /**
      * Instantiates a new mongo db indexer.
-     *
-     * @param client the client
+     * 
+     * @param client
+     *            the client
      */
     public MongoDBIndexer(Client client)
     {
         this.client = (MongoDBClient) client;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.index.Indexer#unindex(com.impetus.kundera.metadata.EntityMetadata, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.index.Indexer#unindex(com.impetus.kundera.metadata
+     * .EntityMetadata, java.lang.String)
      */
     @Override
     public void unindex(EntityMetadata metadata, String id)
@@ -61,8 +66,12 @@ public class MongoDBIndexer implements Indexer
         LOG.debug("No need to remove data from Index. It's handled automatically by MongoDB when document is dropped");
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.EntityMetadata, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.
+     * EntityMetadata, java.lang.Object)
      */
     @Override
     public void index(EntityMetadata metadata, Object object)
@@ -74,7 +83,7 @@ public class MongoDBIndexer implements Indexer
 
         LOG.debug("Indexing @Entity[" + metadata.getEntityClazz().getName() + "] " + object);
         String indexName = metadata.getIndexName(); // Index Name=Collection
-                                                    // name, not required
+        // name, not required
 
         List<PropertyIndex> indexProperties = metadata.getIndexProperties();
 
@@ -89,7 +98,9 @@ public class MongoDBIndexer implements Indexer
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int)
      */
     @Override

@@ -33,10 +33,12 @@ import com.impetus.kundera.metadata.MetadataManager;
 /**
  * The Class KunderaQuery.
  */
-public abstract class KunderaQuery {
+public abstract class KunderaQuery
+{
 
     /** The Constant SINGLE_STRING_KEYWORDS. */
-    public static final String[] SINGLE_STRING_KEYWORDS = { "SELECT", "UPDATE", "DELETE", "UNIQUE", "FROM", "WHERE", "GROUP BY", "HAVING", "ORDER BY" };
+    public static final String[] SINGLE_STRING_KEYWORDS = { "SELECT", "UPDATE", "DELETE", "UNIQUE", "FROM", "WHERE",
+            "GROUP BY", "HAVING", "ORDER BY" };
 
     /** The Constant INTER_CLAUSE_OPERATORS. */
     public static final String[] INTER_CLAUSE_OPERATORS = { "AND", "OR" };
@@ -52,7 +54,7 @@ public abstract class KunderaQuery {
 
     /** The EntityManager. */
     private EntityManagerImpl em;
-    
+
     /** The MetadataManager. */
     private MetadataManager metadataManager;
 
@@ -82,43 +84,48 @@ public abstract class KunderaQuery {
     /** The filters queue. */
     private Queue filtersQueue = new LinkedList();
 
-    
     /**
      * Instantiates a new kundera query.
      * 
-     * @param em				EntityManager
-     * @param metadataManager	MetadataManager
+     * @param em
+     *            EntityManager
+     * @param metadataManager
+     *            MetadataManager
      */
-    public KunderaQuery(EntityManagerImpl em, MetadataManager metadataManager) {
+    public KunderaQuery(EntityManagerImpl em, MetadataManager metadataManager)
+    {
         this.em = em;
         this.metadataManager = metadataManager;
     }
-    
+
     /**
-	 * Gets the entity manager.
-	 * 
-	 * @return the em
-	 */
-	public EntityManagerImpl getEntityManager () {
-		return em;
-	}
+     * Gets the entity manager.
+     * 
+     * @return the em
+     */
+    public EntityManagerImpl getEntityManager()
+    {
+        return em;
+    }
 
-	/**
-	 * Gets the metadata manager.
-	 * 
-	 * @return the metadataManager
-	 */
-	public MetadataManager getMetadataManager() {
-		return metadataManager;
-	}
+    /**
+     * Gets the metadata manager.
+     * 
+     * @return the metadataManager
+     */
+    public MetadataManager getMetadataManager()
+    {
+        return metadataManager;
+    }
 
-	/**
+    /**
      * Sets the grouping.
      * 
      * @param groupingClause
      *            the new grouping
      */
-    public void setGrouping(String groupingClause) {
+    public void setGrouping(String groupingClause)
+    {
     }
 
     /**
@@ -127,7 +134,8 @@ public abstract class KunderaQuery {
      * @param result
      *            the new result
      */
-    public final void setResult(String result) {
+    public final void setResult(String result)
+    {
         this.result = result;
     }
 
@@ -137,7 +145,8 @@ public abstract class KunderaQuery {
      * @param from
      *            the new from
      */
-    public final void setFrom(String from) {
+    public final void setFrom(String from)
+    {
         this.from = from;
     }
 
@@ -147,7 +156,8 @@ public abstract class KunderaQuery {
      * @param filter
      *            the new filter
      */
-    public final void setFilter(String filter) {
+    public final void setFilter(String filter)
+    {
         this.filter = filter;
     }
 
@@ -157,7 +167,8 @@ public abstract class KunderaQuery {
      * @param ordering
      *            the new ordering
      */
-    public final void setOrdering(String ordering) {
+    public final void setOrdering(String ordering)
+    {
         this.ordering = ordering;
     }
 
@@ -166,7 +177,8 @@ public abstract class KunderaQuery {
      * 
      * @return the filter
      */
-    public final String getFilter() {
+    public final String getFilter()
+    {
         return filter;
     }
 
@@ -175,7 +187,8 @@ public abstract class KunderaQuery {
      * 
      * @return the from
      */
-    public final String getFrom() {
+    public final String getFrom()
+    {
         return from;
     }
 
@@ -184,7 +197,8 @@ public abstract class KunderaQuery {
      * 
      * @return the ordering
      */
-    public final String getOrdering() {
+    public final String getOrdering()
+    {
         return ordering;
     }
 
@@ -193,14 +207,17 @@ public abstract class KunderaQuery {
      * 
      * @return the result
      */
-    public final String getResult() {
+    public final String getResult()
+    {
         return result;
     }
 
     /**
-     * Method to check if required result is to get complete entity or a select scalar value.
+     * Method to check if required result is to get complete entity or a select
+     * scalar value.
+     * 
      * @return true, if it result is for complete alias.
-     *  
+     * 
      */
     protected final boolean isAliasOnly()
     {
@@ -212,7 +229,8 @@ public abstract class KunderaQuery {
     /**
      * Post parsing init.
      */
-    protected void postParsingInit() {
+    protected void postParsingInit()
+    {
         initEntityClass();
         initFilter();
     }
@@ -220,12 +238,14 @@ public abstract class KunderaQuery {
     /**
      * Inits the entity class.
      */
-    private void initEntityClass() {
+    private void initEntityClass()
+    {
         // String result = getResult();
         // String from = getFrom();
 
         String fromArray[] = from.split(" ");
-        if (fromArray.length != 2) {
+        if (fromArray.length != 2)
+        {
             throw new PersistenceException("Bad query format: " + from);
         }
 
@@ -238,18 +258,21 @@ public abstract class KunderaQuery {
                 throw new RuntimeException("bad query format with invalid alias:" + token);
             }
         }
-        /* if (!fromArray[1].equals(result)) {
-            throw new PersistenceException("Bad query format: " + from);
-        }*/
+        /*
+         * if (!fromArray[1].equals(result)) { throw new
+         * PersistenceException("Bad query format: " + from); }
+         */
         this.entityName = fromArray[0];
         this.entityAlias = fromArray[1];
 
         entityClass = metadataManager.getEntityClassByName(entityName);
-        if (null == entityClass) {
+        if (null == entityClass)
+        {
             throw new PersistenceException("No entity found by the name: " + entityName);
         }
         EntityMetadata metadata = metadataManager.getEntityMetadata(entityClass);
-        if (!metadata.isIndexable()) {
+        if (!metadata.isIndexable())
+        {
             throw new PersistenceException(entityClass + " is not indexed. What are you searching for dude?");
         }
     }
@@ -257,13 +280,15 @@ public abstract class KunderaQuery {
     /**
      * Inits the filter.
      */
-    private void initFilter() {
+    private void initFilter()
+    {
         EntityMetadata metadata = metadataManager.getEntityMetadata(entityClass);
         String indexName = metadata.getIndexName();
 
         // String filter = getFilter();
 
-        if (null == filter) {
+        if (null == filter)
+        {
             return;
         }
 
@@ -271,12 +296,15 @@ public abstract class KunderaQuery {
         // clauses must be alternate Inter and Intra conbination, starting with
         // Intra.
         boolean newClause = true;
-        for (String clause : clauses) {
+        for (String clause : clauses)
+        {
 
-            if (newClause) {
+            if (newClause)
+            {
                 List<String> tokens = tokenize(clause, INTRA_CLAUSE_PATTERN);
 
-                if (tokens.size() != 3) {
+                if (tokens.size() != 3)
+                {
                     throw new PersistenceException("bad jpa query: " + clause);
                 }
 
@@ -286,7 +314,8 @@ public abstract class KunderaQuery {
                 property = indexName + "." + property;
                 // verify condition
                 String condition = tokens.get(1);
-                if (!Arrays.asList(INTRA_CLAUSE_OPERATORS).contains(condition.toUpperCase())) {
+                if (!Arrays.asList(INTRA_CLAUSE_OPERATORS).contains(condition.toUpperCase()))
+                {
                     throw new PersistenceException("bad jpa query: " + clause);
                 }
 
@@ -294,11 +323,15 @@ public abstract class KunderaQuery {
                 newClause = false;
             }
 
-            else {
-                if (Arrays.asList(INTER_CLAUSE_OPERATORS).contains(clause.toUpperCase())) {
+            else
+            {
+                if (Arrays.asList(INTER_CLAUSE_OPERATORS).contains(clause.toUpperCase()))
+                {
                     filtersQueue.add(clause.toUpperCase());
                     newClause = true;
-                } else {
+                }
+                else
+                {
                     throw new PersistenceException("bad jpa query: " + clause);
                 }
             }
@@ -313,20 +346,25 @@ public abstract class KunderaQuery {
      * @param value
      *            the value
      */
-    public final void setParameter(String name, String value) {
+    public final void setParameter(String name, String value)
+    {
         boolean found = false;
-        for (Object object : getFilterClauseQueue()) {
-            if (object instanceof FilterClause) {
+        for (Object object : getFilterClauseQueue())
+        {
+            if (object instanceof FilterClause)
+            {
                 FilterClause filter = (FilterClause) object;
                 // key
-                if (filter.getValue().equals(":" + name)) {
+                if (filter.getValue().equals(":" + name))
+                {
                     filter.setValue(value);
                     found = true;
                     return;
                 }
             }
         }
-        if (!found) {
+        if (!found)
+        {
             throw new PersistenceException("invalid parameter: " + name);
         }
     }
@@ -336,12 +374,14 @@ public abstract class KunderaQuery {
      * 
      * @return the entityClass
      */
-    public final Class<?> getEntityClass() {
+    public final Class<?> getEntityClass()
+    {
         return entityClass;
     }
-    
-    public final EntityMetadata getEntityMetadata() {
-    	return metadataManager.getEntityMetadata(entityClass);
+
+    public final EntityMetadata getEntityMetadata()
+    {
+        return metadataManager.getEntityMetadata(entityClass);
     }
 
     /**
@@ -349,7 +389,8 @@ public abstract class KunderaQuery {
      * 
      * @return the filters
      */
-    public final Queue getFilterClauseQueue() {
+    public final Queue getFilterClauseQueue()
+    {
         return filtersQueue;
     }
 
@@ -357,7 +398,8 @@ public abstract class KunderaQuery {
     /**
      * The Class FilterClause.
      */
-    public final class FilterClause {
+    public final class FilterClause
+    {
 
         /** The property. */
         private String property;
@@ -378,7 +420,8 @@ public abstract class KunderaQuery {
          * @param value
          *            the value
          */
-        public FilterClause(String property, String condition, String value) {
+        public FilterClause(String property, String condition, String value)
+        {
             super();
             this.property = property;
             this.condition = condition;
@@ -390,7 +433,8 @@ public abstract class KunderaQuery {
          * 
          * @return the property
          */
-        public final String getProperty() {
+        public final String getProperty()
+        {
             return property;
         }
 
@@ -399,7 +443,8 @@ public abstract class KunderaQuery {
          * 
          * @return the condition
          */
-        public final String getCondition() {
+        public final String getCondition()
+        {
             return condition;
         }
 
@@ -408,7 +453,8 @@ public abstract class KunderaQuery {
          * 
          * @return the value
          */
-        public final String getValue() {
+        public final String getValue()
+        {
             return value;
         }
 
@@ -418,13 +464,15 @@ public abstract class KunderaQuery {
          * @param value
          *            the value to set
          */
-        protected void setValue(String value) {
+        protected void setValue(String value)
+        {
             this.value = value;
         }
 
         /* @see java.lang.Object#toString() */
         @Override
-        public String toString() {
+        public String toString()
+        {
             StringBuilder builder = new StringBuilder();
             builder.append("FilterClause [property=");
             builder.append(property);
@@ -439,13 +487,15 @@ public abstract class KunderaQuery {
 
     /* @see java.lang.Object#clone() */
     @Override
-    public final Object clone() throws CloneNotSupportedException {
+    public final Object clone() throws CloneNotSupportedException
+    {
         return super.clone();
     }
 
     /* @see java.lang.Object#toString() */
     @Override
-    public final String toString() {
+    public final String toString()
+    {
         StringBuilder builder = new StringBuilder();
         builder.append("KunderaQuery [entityName=");
         builder.append(entityName);
@@ -459,21 +509,23 @@ public abstract class KunderaQuery {
 
     // helper method
     /**
-	 * Tokenize.
-	 * 
-	 * @param where
-	 *            the where
-	 * @param pattern
-	 *            the pattern
-	 * @return the list
-	 */
-    private static List<String> tokenize(String where, Pattern pattern) {
+     * Tokenize.
+     * 
+     * @param where
+     *            the where
+     * @param pattern
+     *            the pattern
+     * @return the list
+     */
+    private static List<String> tokenize(String where, Pattern pattern)
+    {
         List<String> split = new ArrayList<String>();
         Matcher matcher = pattern.matcher(where);
         int lastIndex = 0;
         String s;
         // int count = 0;
-        while (matcher.find()) {
+        while (matcher.find())
+        {
             s = where.substring(lastIndex, matcher.start()).trim();
             split.add(s);
             s = matcher.group();

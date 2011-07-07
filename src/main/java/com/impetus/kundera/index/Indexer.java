@@ -24,7 +24,8 @@ import com.impetus.kundera.metadata.EntityMetadata;
  * 
  * @author animesh.kumar
  */
-public interface Indexer {
+public interface Indexer
+{
 
     /**
      * Unindexed an entity with key:id.
@@ -47,18 +48,18 @@ public interface Indexer {
     void index(EntityMetadata metadata, Object object);
 
     /**
-	 * Searches for an object. Note that the "query" must be in Indexer
-	 * specified form.
-	 * 
-	 * @param query
-	 *            the query
-	 * @param start
-	 *            the start
-	 * @param count
-	 *            the count
-	 * @return the list
-	 */
-//    List<String> search(String query, int start, int count);
+     * Searches for an object. Note that the "query" must be in Indexer
+     * specified form.
+     * 
+     * @param query
+     *            the query
+     * @param start
+     *            the start
+     * @param count
+     *            the count
+     * @return the list
+     */
+    // List<String> search(String query, int start, int count);
 
     Map<String, String> search(String luceneQuery, int start, int count);
 }

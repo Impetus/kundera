@@ -22,34 +22,35 @@ import java.util.Map;
  * 
  * @author animesh.kumar
  */
-public interface CacheProvider {
+public interface CacheProvider
+{
 
     /**
-	 * Called once to load up the CacheManager.
-	 * 
-	 * @param properties
-	 *            the properties
-	 * @throws CacheException
-	 *             the cache exception
-	 */
+     * Called once to load up the CacheManager.
+     * 
+     * @param properties
+     *            the properties
+     * @throws CacheException
+     *             the cache exception
+     */
     void init(Map<?, ?> properties) throws CacheException;
-    
+
     void init(String cacheResourceName) throws CacheException;
 
     /**
-	 * Create cache for a given name.
-	 * 
-	 * @param name
-	 *            the name
-	 * @return the cache
-	 * @throws CacheException
-	 *             the cache exception
-	 */
+     * Create cache for a given name.
+     * 
+     * @param name
+     *            the name
+     * @return the cache
+     * @throws CacheException
+     *             the cache exception
+     */
     Cache createCache(String name) throws CacheException;
 
     /**
-	 * Shutdown cache.
-	 */
+     * Shutdown cache.
+     */
     void shutdown();
 
 }

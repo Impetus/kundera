@@ -28,38 +28,46 @@ import com.impetus.kundera.metadata.MetadataManager;
 
 /**
  * Query class for MongoDB data store
+ * 
  * @author amresh.singh
  */
-public class MongoDBQuery extends QueryImpl {
-	 /** the log used by this class. */
+public class MongoDBQuery extends QueryImpl
+{
+    /** the log used by this class. */
     private static Log log = LogFactory.getLog(MongoDBQuery.class);
-    
-    public MongoDBQuery(EntityManagerImpl em, MetadataManager metadataManager, String jpaQuery) {
+
+    public MongoDBQuery(EntityManagerImpl em, MetadataManager metadataManager, String jpaQuery)
+    {
         super(em, metadataManager, jpaQuery);
     }
-    
+
     @Override
-	public List<?> getResultList() {
-		log.debug("JPA Query is: " + query);
-		
-		EntityMetadata m = getEntityMetadata();
-		
-		try {
-			return getEntityManager().getClient().loadColumns(getEntityManager(), m, getFilterClauseQueue());
-		} catch (Exception e) {
-			return null;
-		}		
-	}
+    public List<?> getResultList()
+    {
+        log.debug("JPA Query is: " + query);
 
-	@Override
-	public int executeUpdate() {		
-		return super.executeUpdate();
-	}
+        EntityMetadata m = getEntityMetadata();
 
+        try
+        {
+            return getEntityManager().getClient().loadColumns(getEntityManager(), m, getFilterClauseQueue());
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
 
-	@Override
-	public Query setMaxResults(int maxResult) {		
-		return super.setMaxResults(maxResult);
-	}   
+    @Override
+    public int executeUpdate()
+    {
+        return super.executeUpdate();
+    }
+
+    @Override
+    public Query setMaxResults(int maxResult)
+    {
+        return super.setMaxResults(maxResult);
+    }
 
 }

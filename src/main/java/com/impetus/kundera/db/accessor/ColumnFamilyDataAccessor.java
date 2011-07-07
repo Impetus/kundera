@@ -114,18 +114,17 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor
         String keyspace = m.getSchema();
         String family = m.getTableName();
         List<E> entities = new ArrayList<E>();
-        for(String superColName: col.keySet())
+        for (String superColName : col.keySet())
         {
             String entityId = col.get(superColName);
-            List<SuperColumn> map = ((CassandraClient) getEntityManager().
-                                                       getClient()).
-                                                       loadSuperColumns(keyspace,family, entityId, new String[]{superColName});
+            List<SuperColumn> map = ((CassandraClient) getEntityManager().getClient()).loadSuperColumns(keyspace,
+                    family, entityId, new String[] { superColName });
             E e = fromThriftRow(clazz, m, this.new ThriftRow<SuperColumn>(entityId, family, map));
             entities.add(e);
         }
-        
+
         return entities;
-        
+
     }
 
     /**
@@ -143,7 +142,8 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor
      * @throws Exception
      *             the exception
      */
-    //TODO: this is a duplicate code snippet and we need to refactor this.(Same is with PelopsDataHandler)
+    // TODO: this is a duplicate code snippet and we need to refactor this.(Same
+    // is with PelopsDataHandler)
     private <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, BaseDataAccessor.ThriftRow<SuperColumn> cr)
             throws Exception
     {
@@ -204,8 +204,6 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor
         }
         return e;
     }
-
-    
 
     // Helper method to convert @Entity to ThriftRow
     /**
@@ -294,5 +292,4 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor
         return cr;
     }
 
-    
 }

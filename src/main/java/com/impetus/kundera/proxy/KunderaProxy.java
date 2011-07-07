@@ -20,6 +20,7 @@ package com.impetus.kundera.proxy;
  * 
  * @author animesh.kumar
  */
-public interface KunderaProxy {
+public interface KunderaProxy
+{
 
 }

@@ -33,7 +33,8 @@ import javassist.bytecode.annotation.Annotation;
  * 
  * @author animesh.kumar
  */
-public abstract class Reader {
+public abstract class Reader
+{
 
     /** The valid annotations. */
     private List<String> validAnnotations = new ArrayList<String>();
@@ -44,7 +45,8 @@ public abstract class Reader {
     /**
      * Instantiates a new reader.
      */
-    public Reader() {
+    public Reader()
+    {
     }
 
     /**
@@ -56,30 +58,38 @@ public abstract class Reader {
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    public void scanClass(InputStream bits) throws IOException {
+    public void scanClass(InputStream bits) throws IOException
+    {
         DataInputStream dstream = new DataInputStream(new BufferedInputStream(bits));
         ClassFile cf = null;
-        try {
+        try
+        {
             cf = new ClassFile(dstream);
 
             String className = cf.getName();
             List<String> annotations = new ArrayList<String>();
 
             accumulateAnnotations(annotations, (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.visibleTag));
-            accumulateAnnotations(annotations, (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.invisibleTag));
+            accumulateAnnotations(annotations, (AnnotationsAttribute) cf
+                    .getAttribute(AnnotationsAttribute.invisibleTag));
 
             // iterate through all valid annotations
-            for (String validAnn : getValidAnnotations()) {
+            for (String validAnn : getValidAnnotations())
+            {
                 // check if the current class has one?
-                if (annotations.contains(validAnn)) {
+                if (annotations.contains(validAnn))
+                {
                     // fire all listeners
-                    for (AnnotationDiscoveryListener listener : getAnnotationDiscoveryListeners()) {
+                    for (AnnotationDiscoveryListener listener : getAnnotationDiscoveryListeners())
+                    {
                         listener.discovered(className, annotations.toArray(new String[] {}));
                     }
                 }
             }
 
-        } finally {
+        }
+        finally
+        {
             dstream.close();
             bits.close();
         }
@@ -94,11 +104,14 @@ public abstract class Reader {
      * @param annatt
      *            the annatt
      */
-    private void accumulateAnnotations(List<String> annotations, AnnotationsAttribute annatt) {
-        if (null == annatt) {
+    private void accumulateAnnotations(List<String> annotations, AnnotationsAttribute annatt)
+    {
+        if (null == annatt)
+        {
             return;
         }
-        for (Annotation ann : annatt.getAnnotations()) {
+        for (Annotation ann : annatt.getAnnotations())
+        {
             annotations.add(ann.getTypeName());
         }
     }
@@ -116,29 +129,40 @@ public abstract class Reader {
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    public ResourceIterator getResourceIterator(URL url, Filter filter) throws IOException {
+    public ResourceIterator getResourceIterator(URL url, Filter filter) throws IOException
+    {
         String urlString = url.toString();
-        if (urlString.endsWith("!/")) {
+        if (urlString.endsWith("!/"))
+        {
             urlString = urlString.substring(4);
             urlString = urlString.substring(0, urlString.length() - 2);
             url = new URL(urlString);
         }
-        
-        if(urlString.endsWith(".class")) {
-        	File f = new File(url.getPath());
-        	return new ClassFileIterator(f);        	
-        } else if (!urlString.endsWith("/")) {
-            return new JarFileIterator(url.openStream(), filter);
-        } else {
 
-            if (!url.getProtocol().equals("file")) {
+        if (urlString.endsWith(".class"))
+        {
+            File f = new File(url.getPath());
+            return new ClassFileIterator(f);
+        }
+        else if (!urlString.endsWith("/"))
+        {
+            return new JarFileIterator(url.openStream(), filter);
+        }
+        else
+        {
+
+            if (!url.getProtocol().equals("file"))
+            {
                 throw new IOException("Unable to understand protocol: " + url.getProtocol());
             }
 
             File f = new File(url.getPath());
-            if (f.isDirectory()) {
+            if (f.isDirectory())
+            {
                 return new ClassFileIterator(f, filter);
-            } else {
+            }
+            else
+            {
                 return new JarFileIterator(url.openStream(), filter);
             }
         }
@@ -149,7 +173,8 @@ public abstract class Reader {
      * 
      * @return the valid annotations
      */
-    public List<String> getValidAnnotations() {
+    public List<String> getValidAnnotations()
+    {
         return validAnnotations;
     }
 
@@ -159,7 +184,8 @@ public abstract class Reader {
      * @param annotation
      *            the annotation
      */
-    public void addValidAnnotations(String annotation) {
+    public void addValidAnnotations(String annotation)
+    {
         this.validAnnotations.add(annotation);
     }
 
@@ -168,7 +194,8 @@ public abstract class Reader {
      * 
      * @return the annotation discovery listeners
      */
-    public List<AnnotationDiscoveryListener> getAnnotationDiscoveryListeners() {
+    public List<AnnotationDiscoveryListener> getAnnotationDiscoveryListeners()
+    {
         return annotationDiscoveryListeners;
     }
 
@@ -178,7 +205,8 @@ public abstract class Reader {
      * @param annotationDiscoveryListener
      *            the annotation discovery listener
      */
-    public void addAnnotationDiscoveryListeners(AnnotationDiscoveryListener annotationDiscoveryListener) {
+    public void addAnnotationDiscoveryListeners(AnnotationDiscoveryListener annotationDiscoveryListener)
+    {
         this.annotationDiscoveryListeners.add(annotationDiscoveryListener);
     }
 
