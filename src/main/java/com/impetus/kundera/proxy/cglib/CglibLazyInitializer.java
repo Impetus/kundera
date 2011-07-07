@@ -35,14 +35,14 @@ import java.lang.reflect.Method;
 
 import javax.persistence.PersistenceException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.InvocationHandler;
 import net.sf.cglib.proxy.NoOp;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.LazyInitializationException;
 import com.impetus.kundera.ejb.EntityManagerImpl;

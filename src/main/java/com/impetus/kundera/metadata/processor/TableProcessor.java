@@ -32,14 +32,12 @@ package com.impetus.kundera.metadata.processor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.List;
 
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Id;
-import javax.persistence.PersistenceException;
 import javax.persistence.Table;
 
 import org.apache.commons.logging.Log;
@@ -49,7 +47,6 @@ import org.apache.jasper.tagplugins.jstl.core.Set;
 import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Metadata processor class for persistent entities

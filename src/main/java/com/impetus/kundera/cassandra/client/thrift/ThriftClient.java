@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
 import org.apache.cassandra.thrift.Cassandra;

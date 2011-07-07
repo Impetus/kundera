@@ -45,7 +45,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.cassandra.client.CassandraClient;
 import com.impetus.kundera.db.accessor.BaseDataAccessor;
-import com.impetus.kundera.db.accessor.BaseDataAccessor.ThriftRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;

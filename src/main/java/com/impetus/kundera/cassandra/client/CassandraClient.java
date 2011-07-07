@@ -37,8 +37,6 @@ import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.scale7.cassandra.pelops.Bytes;
 
-import com.impetus.kundera.cassandra.client.pelops.PelopsClient;
-
 /**
  * Interface used to interact with Cassandra Clients.
  * 

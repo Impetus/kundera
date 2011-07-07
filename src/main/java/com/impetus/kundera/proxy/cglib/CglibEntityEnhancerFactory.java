@@ -33,10 +33,10 @@ package com.impetus.kundera.proxy.cglib;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.cglib.proxy.Enhancer;
+
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.proxy.EntityEnhancerFactory;
-
-import net.sf.cglib.proxy.Enhancer;
 
 /**
  * Implementation of EntityEnhancerFactory using cglib library.

@@ -18,8 +18,6 @@ package com.impetus.kundera.loader;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.impetus.kundera.Client;
-
 /**
  * 
  * @author impetus

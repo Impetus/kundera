@@ -31,7 +31,6 @@
 package com.impetus.kundera.metadata;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,7 +55,6 @@ import com.impetus.kundera.metadata.processor.EntityListenersProcessor;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Concrete implementation of IMetadataManager.

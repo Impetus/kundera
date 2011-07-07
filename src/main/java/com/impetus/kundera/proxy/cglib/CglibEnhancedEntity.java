@@ -35,9 +35,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.impetus.kundera.proxy.EnhancedEntity;
-
 import net.sf.cglib.proxy.InvocationHandler;
+
+import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * Implementation of EnhancedEntity using cglib library.

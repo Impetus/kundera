@@ -31,7 +31,6 @@
 package com.impetus.kundera.cassandra.client.pelops;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.UUID;
 
 import javax.persistence.PersistenceException;
 
@@ -60,7 +58,6 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
-import com.impetus.kundera.utils.ReflectUtils;
 
 /**
  * Provides Pelops utility methods for data held in Column family based stores

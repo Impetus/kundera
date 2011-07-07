@@ -41,9 +41,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
-import javax.persistence.CascadeType;
 import javax.persistence.PersistenceException;
-import javax.swing.text.StyledEditorKit.ForegroundAction;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,8 +58,6 @@ import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
 /**
