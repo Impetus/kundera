@@ -59,15 +59,15 @@ public final class ClientResolver
             }
             else if (clientIdentifier.getClientType().equals(ClientType.PELOPS))
             {
-                proxy = (Client) Class.forName("com.impetus.kundera.client.PelopsClient").newInstance();
+                proxy = (Client) Class.forName("com.impetus.kundera.cassandra.client.pelops.PelopsClient").newInstance();
             }
             else if (clientIdentifier.getClientType().equals(ClientType.THRIFT))
             {
-                proxy = (Client) Class.forName("com.impetus.kundera.client.ThriftClient").newInstance();
+                proxy = (Client) Class.forName("com.impetus.kundera.cassandra.client.thrift.ThriftClient").newInstance();
             }
             else if (clientIdentifier.getClientType().equals(ClientType.MONGODB))
             {
-                proxy = (Client) Class.forName("com.impetus.kundera.client.MongoDBClient").newInstance();
+                proxy = (Client) Class.forName("com.impetus.kundera.mongodb.client.MongoDBClient").newInstance();
             }
         }
         catch (InstantiationException e)
