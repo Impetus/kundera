@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.classreading;
 
 import java.io.BufferedInputStream;
@@ -45,7 +30,7 @@ import javassist.bytecode.annotation.Annotation;
 
 /**
  * Base class-reader.
- * 
+ *
  * @author animesh.kumar
  */
 public abstract class Reader
@@ -66,10 +51,10 @@ public abstract class Reader
 
     /**
      * Scan class.
-     * 
+     *
      * @param bits
      *            the bits
-     * 
+     *
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
@@ -113,7 +98,7 @@ public abstract class Reader
     // helper method to accumulate annotations.
     /**
      * Accumulate annotations.
-     * 
+     *
      * @param annotations
      *            the annotations
      * @param annatt
@@ -133,14 +118,14 @@ public abstract class Reader
 
     /**
      * Gets the resource iterator.
-     * 
+     *
      * @param url
      *            the url
      * @param filter
      *            the filter
-     * 
+     *
      * @return the resource iterator
-     * 
+     *
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
@@ -185,7 +170,7 @@ public abstract class Reader
 
     /**
      * Gets the valid annotations.
-     * 
+     *
      * @return the valid annotations
      */
     public List<String> getValidAnnotations()
@@ -195,7 +180,7 @@ public abstract class Reader
 
     /**
      * Adds the valid annotations.
-     * 
+     *
      * @param annotation
      *            the annotation
      */
@@ -206,7 +191,7 @@ public abstract class Reader
 
     /**
      * Gets the annotation discovery listeners.
-     * 
+     *
      * @return the annotation discovery listeners
      */
     public List<AnnotationDiscoveryListener> getAnnotationDiscoveryListeners()
@@ -216,7 +201,7 @@ public abstract class Reader
 
     /**
      * Adds the annotation discovery listeners.
-     * 
+     *
      * @param annotationDiscoveryListener
      *            the annotation discovery listener
      */
@@ -232,14 +217,14 @@ public abstract class Reader
 
     /**
      * Gets the filter.
-     * 
+     *
      * @return the filter
      */
     public abstract Filter getFilter();
 
     /**
      * Find resources.
-     * 
+     *
      * @return the uR l[]
      */
     public abstract URL[] findResources();

@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 
+ *
  * @author impetus
- * 
+ *
  */
 public enum DBType
 {

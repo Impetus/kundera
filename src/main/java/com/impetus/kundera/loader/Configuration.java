@@ -42,9 +42,9 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 // TODO: Auto-generated Javadoc
 /**
  * Configuration loader.
- * 
+ *
  * @author impetus
- * 
+ *
  */
 public class Configuration
 {
@@ -75,7 +75,7 @@ public class Configuration
 
     /**
      * Gets the entity manager.
-     * 
+     *
      * @param persistenceUnit
      *            the persistence unit
      * @return the entity manager
@@ -129,7 +129,7 @@ public class Configuration
 
     /**
      * Initialises.
-     * 
+     *
      * @param url
      *            the url
      */
@@ -170,7 +170,7 @@ public class Configuration
 
     /**
      * Returns entityManager.
-     * 
+     *
      * @param clientType
      *            client type.
      * @return em entityManager.
@@ -204,7 +204,7 @@ public class Configuration
 
     /**
      * Set client to entity manager.
-     * 
+     *
      * @param em
      *            the em
      * @param clientType
@@ -226,7 +226,7 @@ public class Configuration
 
     /**
      * Sets the field.
-     * 
+     *
      * @param obj
      *            the obj
      * @param f
@@ -252,7 +252,7 @@ public class Configuration
 
     /**
      * Gets the client.
-     * 
+     *
      * @param clientType
      *            the client type
      * @param persistenceUnit
@@ -268,7 +268,7 @@ public class Configuration
 
     /**
      * Creates the identifier.
-     * 
+     *
      * @param clientType
      *            the client type
      * @param persistenceUnit
@@ -282,7 +282,7 @@ public class Configuration
 
     /**
      * Inits the second level cache.
-     * 
+     *
      * @param cacheProviderClassName
      *            the cache provider class name
      * @param classResourceName

@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.metadata;
 
 import java.lang.reflect.Field;
@@ -58,7 +43,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Concrete implementation of IMetadataManager.
- * 
+ *
  * @author animesh.kumar
  */
 public class MetadataManager implements AnnotationDiscoveryListener
@@ -90,7 +75,7 @@ public class MetadataManager implements AnnotationDiscoveryListener
 
     /**
      * Instantiates a new metadata manager.
-     * 
+     *
      * @param factory
      *            the factory
      */
@@ -111,10 +96,10 @@ public class MetadataManager implements AnnotationDiscoveryListener
 
     /**
      * Validate.
-     * 
+     *
      * @param clazz
      *            the clazz
-     * 
+     *
      * @throws PersistenceException
      *             the persistence exception
      */
@@ -125,12 +110,12 @@ public class MetadataManager implements AnnotationDiscoveryListener
 
     /**
      * Gets the entity metadata.
-     * 
+     *
      * @param clazz
      *            the clazz
-     * 
+     *
      * @return the entity metadata
-     * 
+     *
      * @throws PersistenceException
      *             the persistence exception
      */
@@ -158,12 +143,12 @@ public class MetadataManager implements AnnotationDiscoveryListener
 
     /**
      * Process.
-     * 
+     *
      * @param clazz
      *            the clazz
-     * 
+     *
      * @return the entity metadata
-     * 
+     *
      * @throws PersistenceException
      *             the persistence exception
      */
@@ -185,7 +170,7 @@ public class MetadataManager implements AnnotationDiscoveryListener
 
     /**
      * Cache metadata.
-     * 
+     *
      * @param clazz
      *            the clazz
      * @param metadata
@@ -206,10 +191,10 @@ public class MetadataManager implements AnnotationDiscoveryListener
 
     /**
      * Gets the entity class by name.
-     * 
+     *
      * @param name
      *            the name
-     * 
+     *
      * @return the entity class by name
      */
     public final Class<?> getEntityClassByName(String name)
@@ -219,7 +204,7 @@ public class MetadataManager implements AnnotationDiscoveryListener
 
     /**
      * Gets the entity metadatas as list.
-     * 
+     *
      * @return the entity metadatas as list
      */
     public final List<EntityMetadata> getEntityMetadatasAsList()
@@ -269,7 +254,7 @@ public class MetadataManager implements AnnotationDiscoveryListener
     /**
      * Helper class to scan each @Entity class and build various relational
      * annotation.
-     * 
+     *
      * @param entity
      *            the entity
      */

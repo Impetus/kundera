@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2011 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera;
 
 import java.util.List;
@@ -40,14 +25,14 @@ import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * @author impetus
- * 
+ *
  */
 public interface Client
 {
 
     /**
      * Write multiple columns into a column-family.
-     * 
+     *
      * @param keyspace
      *            the keyspace
      * @param columnFamily
@@ -66,7 +51,7 @@ public interface Client
 
     /**
      * Writes Multiple columns
-     * 
+     *
      * @param em
      *            Entity Manager
      * @param e
@@ -79,7 +64,7 @@ public interface Client
 
     /**
      * Retrieve columns from a column-family row.
-     * 
+     *
      * @param keyspace
      *            the keyspace
      * @param columnFamily
@@ -95,7 +80,7 @@ public interface Client
 
     /**
      * Retrieve columns from multiple rows of a column-family.
-     * 
+     *
      * @param keyspace
      *            the keyspace
      * @param columnFamily
@@ -112,7 +97,7 @@ public interface Client
     /**
      * Loads columns from multiple rows restricting results to conditions stored
      * in <code>filterClauseQueue</code>
-     * 
+     *
      * @param <E>
      * @param em
      * @param m
@@ -125,7 +110,7 @@ public interface Client
 
     /**
      * Set Cassandra nodes.
-     * 
+     *
      * @param contactNodes
      *            the contact nodes
      */
@@ -133,7 +118,7 @@ public interface Client
 
     /**
      * Set default port. Default is 9160
-     * 
+     *
      * @param defaultPort
      *            the default port
      */
@@ -141,7 +126,7 @@ public interface Client
 
     /**
      * Set key space.
-     * 
+     *
      * @param keySpace
      *            key space.
      */
@@ -159,7 +144,7 @@ public interface Client
 
     /**
      * Delete a row from either column-family or super-column-family.
-     * 
+     *
      * @param keyspace
      *            the keyspace
      * @param columnFamily
@@ -173,7 +158,7 @@ public interface Client
 
     /**
      * Returns type of nosql database
-     * 
+     *
      * @return dbType database type.
      */
     DBType getType();

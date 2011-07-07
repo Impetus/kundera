@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.query;
 
 import java.util.ArrayList;
@@ -101,7 +86,7 @@ public abstract class KunderaQuery
 
     /**
      * Instantiates a new kundera query.
-     * 
+     *
      * @param em
      *            EntityManager
      * @param metadataManager
@@ -115,7 +100,7 @@ public abstract class KunderaQuery
 
     /**
      * Gets the entity manager.
-     * 
+     *
      * @return the em
      */
     public EntityManagerImpl getEntityManager()
@@ -125,7 +110,7 @@ public abstract class KunderaQuery
 
     /**
      * Gets the metadata manager.
-     * 
+     *
      * @return the metadataManager
      */
     public MetadataManager getMetadataManager()
@@ -135,7 +120,7 @@ public abstract class KunderaQuery
 
     /**
      * Sets the grouping.
-     * 
+     *
      * @param groupingClause
      *            the new grouping
      */
@@ -145,7 +130,7 @@ public abstract class KunderaQuery
 
     /**
      * Sets the result.
-     * 
+     *
      * @param result
      *            the new result
      */
@@ -156,7 +141,7 @@ public abstract class KunderaQuery
 
     /**
      * Sets the from.
-     * 
+     *
      * @param from
      *            the new from
      */
@@ -167,7 +152,7 @@ public abstract class KunderaQuery
 
     /**
      * Sets the filter.
-     * 
+     *
      * @param filter
      *            the new filter
      */
@@ -178,7 +163,7 @@ public abstract class KunderaQuery
 
     /**
      * Sets the ordering.
-     * 
+     *
      * @param ordering
      *            the new ordering
      */
@@ -189,7 +174,7 @@ public abstract class KunderaQuery
 
     /**
      * Gets the filter.
-     * 
+     *
      * @return the filter
      */
     public final String getFilter()
@@ -199,7 +184,7 @@ public abstract class KunderaQuery
 
     /**
      * Gets the from.
-     * 
+     *
      * @return the from
      */
     public final String getFrom()
@@ -209,7 +194,7 @@ public abstract class KunderaQuery
 
     /**
      * Gets the ordering.
-     * 
+     *
      * @return the ordering
      */
     public final String getOrdering()
@@ -219,7 +204,7 @@ public abstract class KunderaQuery
 
     /**
      * Gets the result.
-     * 
+     *
      * @return the result
      */
     public final String getResult()
@@ -230,9 +215,9 @@ public abstract class KunderaQuery
     /**
      * Method to check if required result is to get complete entity or a select
      * scalar value.
-     * 
+     *
      * @return true, if it result is for complete alias.
-     * 
+     *
      */
     protected final boolean isAliasOnly()
     {
@@ -355,7 +340,7 @@ public abstract class KunderaQuery
 
     /**
      * Sets the parameter.
-     * 
+     *
      * @param name
      *            the name
      * @param value
@@ -386,7 +371,7 @@ public abstract class KunderaQuery
 
     /**
      * Gets the entity class.
-     * 
+     *
      * @return the entityClass
      */
     public final Class<?> getEntityClass()
@@ -401,7 +386,7 @@ public abstract class KunderaQuery
 
     /**
      * Gets the filter clause queue.
-     * 
+     *
      * @return the filters
      */
     public final Queue getFilterClauseQueue()
@@ -427,7 +412,7 @@ public abstract class KunderaQuery
 
         /**
          * The Constructor.
-         * 
+         *
          * @param property
          *            the property
          * @param condition
@@ -445,7 +430,7 @@ public abstract class KunderaQuery
 
         /**
          * Gets the property.
-         * 
+         *
          * @return the property
          */
         public final String getProperty()
@@ -455,7 +440,7 @@ public abstract class KunderaQuery
 
         /**
          * Gets the condition.
-         * 
+         *
          * @return the condition
          */
         public final String getCondition()
@@ -465,7 +450,7 @@ public abstract class KunderaQuery
 
         /**
          * Gets the value.
-         * 
+         *
          * @return the value
          */
         public final String getValue()
@@ -475,7 +460,7 @@ public abstract class KunderaQuery
 
         /**
          * Sets the value.
-         * 
+         *
          * @param value
          *            the value to set
          */
@@ -525,7 +510,7 @@ public abstract class KunderaQuery
     // helper method
     /**
      * Tokenize.
-     * 
+     *
      * @param where
      *            the where
      * @param pattern

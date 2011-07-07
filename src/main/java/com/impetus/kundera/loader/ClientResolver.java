@@ -13,9 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/**
- * 
- */
 package com.impetus.kundera.loader;
 
 import java.util.HashMap;
@@ -32,7 +29,7 @@ public final class ClientResolver
     static Map<ClientIdentifier, Client> clientsNew = new HashMap<ClientIdentifier, Client>();
 
     /**
-     * 
+     *
      * @param clientIdentifier
      * @return
      */

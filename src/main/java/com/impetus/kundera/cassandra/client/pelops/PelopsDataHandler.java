@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2011 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.cassandra.client.pelops;
 
 import java.lang.reflect.Field;
@@ -61,7 +46,7 @@ import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * Provides Pelops utility methods for data held in Column family based stores
- * 
+ *
  * @author amresh.singh
  */
 public class PelopsDataHandler
@@ -99,7 +84,7 @@ public class PelopsDataHandler
 
     /**
      * Fetches data held in Thrift row columns and populates to Entity objects
-     * 
+     *
      * @param <E>
      *            the element type
      * @param em
@@ -391,7 +376,7 @@ public class PelopsDataHandler
 
     /**
      * Helper method to convert @Entity to ThriftRow.
-     * 
+     *
      * @param e
      *            the e
      * @param columnsLst
@@ -568,7 +553,7 @@ public class PelopsDataHandler
 
     /**
      * Splits foreign keys into Set.
-     * 
+     *
      * @param foreignKeys
      *            the foreign keys
      * @return the set
@@ -594,7 +579,7 @@ public class PelopsDataHandler
      * Creates a string representation of a set of foreign keys by combining
      * them together separated by "~" character. Note: Assumption is that @Id
      * will never contain "~" character. Checks for this are not added yet.
-     * 
+     *
      * @param foreignKeys
      *            the foreign keys
      * @return the string
@@ -642,7 +627,7 @@ public class PelopsDataHandler
      * internally, one for each relationship entity. Columns value is row key of
      * relationship entity for 1-to-1 relationship and ~ delimited row keys of
      * relationship entities for 1-M relationship
-     * 
+     *
      * @throws PropertyAccessException
      */
     public void addForeignkeysToColumns(long timestamp, EnhancedEntity e, List<Column> columns)
@@ -670,7 +655,7 @@ public class PelopsDataHandler
     /**
      * For super column families, all relationships are saved as columns, in one
      * additional super column used internally.
-     * 
+     *
      * @throws PropertyAccessException
      */
     public void createForeignKeySuperColumn(long timestamp, PelopsClient.ThriftRow tr, EnhancedEntity e)
@@ -689,7 +674,7 @@ public class PelopsDataHandler
 
     /**
      * Populates foreign key relationship entities into their parent entity
-     * 
+     *
      * @throws PropertyAccessException
      */
     public <E> void populateRelationshipEntities(EntityManagerImpl em, EntityMetadata m, PelopsClient.ThriftRow tr,

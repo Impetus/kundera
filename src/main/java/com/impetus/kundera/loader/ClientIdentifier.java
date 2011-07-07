@@ -13,9 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/**
- * 
- */
 package com.impetus.kundera.loader;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -23,7 +20,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * @author impetus
- * 
+ *
  */
 public class ClientIdentifier
 {

@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.junit;
 
 import java.util.Date;
@@ -51,7 +36,7 @@ import com.impetus.kundera.loader.Configuration;
 
 /**
  * Test case for CRUD operations on Cassandra database using Kundera.
- * 
+ *
  * @author animesh.kumar
  */
 public class TestCassandra extends BaseTest
@@ -74,7 +59,7 @@ public class TestCassandra extends BaseTest
 
     /**
      * Sets the up.
-     * 
+     *
      * @throws java.lang.Exception
      *             * @throws Exception the exception
      * @throws Exception
@@ -98,7 +83,7 @@ public class TestCassandra extends BaseTest
 
     /**
      * Tear down.
-     * 
+     *
      * @throws java.lang.Exception
      *             * @throws Exception the exception
      * @throws Exception
@@ -137,20 +122,20 @@ public class TestCassandra extends BaseTest
     /*
      * public void testUpdateUser() { User user = manager.find(User.class,
      * "IIIPL-0001");
-     * 
+     *
      * PersonalDetail pd = new PersonalDetail();
-     * 
+     *
      * pd.setPassword("password2"); pd.setRelationshipStatus("married");
-     * 
+     *
      * List<Tweet> tweets = user.getTweets();
-     * 
+     *
      * for(Tweet tweet : tweets) { if(tweet.getTweetId().equals("a")) {
      * tweet.setBody("My first tweet is now modified"); } else
      * if(tweet.getTweetId().equals("b")) {
      * tweet.setBody("My second tweet is now modified"); } }
-     * 
+     *
      * tweets.add(new Tweet("c", "My Third tweet", "iPhone"));
-     * 
+     *
      * manager.persist(user); }
      */
 
@@ -167,7 +152,7 @@ public class TestCassandra extends BaseTest
 
     /**
      * Test save authors.
-     * 
+     *
      * @throws Exception
      *             the exception
      */
@@ -176,14 +161,14 @@ public class TestCassandra extends BaseTest
      * logger.info("onTestSaveAuthors"); String key = System.currentTimeMillis()
      * + "-author"; Author animesh = createAuthor(key, "animesh@animesh.org",
      * "India", new Date()); manager.persist(animesh);
-     * 
+     *
      * // check if saved? Author animesh_db = manager.find(Author.class, key);
      * assertEquals(animesh, animesh_db); }
      */
 
     /**
      * Test save posts.
-     * 
+     *
      * @throws Exception
      *             the exception
      */
@@ -219,28 +204,28 @@ public class TestCassandra extends BaseTest
 
     /**
      * _test delete authors.
-     * 
+     *
      * @throws Exception
      *             the exception
      */
     /*
      * public void testDeleteAuthors() throws Exception {
      * logger.info("ontestDeleteAuthors");
-     * 
+     *
      * String key = System.currentTimeMillis() + "-animesh";
-     * 
+     *
      * // save new author Author animesh = createAuthor(key,
      * "animesh@animesh.org", "India", new Date()); manager.persist(animesh);
-     * 
+     *
      * // delete this author manager.remove(animesh);
-     * 
+     *
      * // check if deleted? Author animesh_db = manager.find(Author.class, key);
      * assertEquals(null, animesh_db); }
      */
 
     /**
      * Creates the author.
-     * 
+     *
      * @param username
      *            the user name
      * @param email
@@ -249,7 +234,7 @@ public class TestCassandra extends BaseTest
      *            the country
      * @param registeredSince
      *            the registered since
-     * 
+     *
      * @return the author
      */
     /*
@@ -262,7 +247,7 @@ public class TestCassandra extends BaseTest
 
     /**
      * Creates the post.
-     * 
+     *
      * @param permalink
      *            the permalink
      * @param title
@@ -275,7 +260,7 @@ public class TestCassandra extends BaseTest
      *            the created
      * @param tags
      *            the tags
-     * 
+     *
      * @return the post
      */
     private static Post createPost(String permalink, String title, String body, String author, Date created,

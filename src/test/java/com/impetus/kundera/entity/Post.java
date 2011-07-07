@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2011 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.entity;
 
 import javax.persistence.Embedded;
@@ -37,7 +22,7 @@ import javax.persistence.Table;
 
 /**
  * The Class Post.
- * 
+ *
  * @author animesh.kumar
  */
 @Entity
@@ -58,7 +43,7 @@ public class Post
 
     /**
      * Gets the permalink.
-     * 
+     *
      * @return the permalink
      */
     public String getPermalink()
@@ -68,7 +53,7 @@ public class Post
 
     /**
      * Sets the permalink.
-     * 
+     *
      * @param permalink
      *            the permalink to set
      */
@@ -79,14 +64,14 @@ public class Post
 
     /*  *//**
      * Gets the title.
-     * 
+     *
      * @return the title
      */
     /*
      * public String getTitle() { return data.title; }
      *//**
      * Sets the title.
-     * 
+     *
      * @param title
      *            the title to set
      */
@@ -94,14 +79,14 @@ public class Post
      * public void setTitle(String title) { this.data.title = title; }
      *//**
      * Gets the body.
-     * 
+     *
      * @return the body
      */
     /*
      * public String getBody() { return data.body; }
      *//**
      * Sets the body.
-     * 
+     *
      * @param body
      *            the body to set
      */
@@ -109,14 +94,14 @@ public class Post
      * public void setBody(String body) { this.data.body = body; }
      *//**
      * Gets the author.
-     * 
+     *
      * @return the author
      */
     /*
      * public String getAuthor() { return author.name; }
      *//**
      * Sets the author.
-     * 
+     *
      * @param author
      *            the author to set
      */
@@ -124,14 +109,14 @@ public class Post
      * public void setAuthor(String author) { this.author.name = author; }
      *//**
      * Gets the created.
-     * 
+     *
      * @return the created
      */
     /*
      * public Date getCreated() { return data.created; }
      *//**
      * Sets the created.
-     * 
+     *
      * @param created
      *            the created to set
      */
@@ -159,7 +144,7 @@ public class Post
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -173,7 +158,7 @@ public class Post
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -198,7 +183,7 @@ public class Post
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

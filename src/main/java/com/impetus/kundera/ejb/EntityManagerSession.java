@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.ejb;
 
 import java.util.Map;
@@ -55,7 +40,7 @@ public class EntityManagerSession
 
     /**
      * Instantiates a new entity manager cache.
-     * 
+     *
      * @param em
      *            the em
      */
@@ -67,7 +52,7 @@ public class EntityManagerSession
 
     /**
      * Find in cache.
-     * 
+     *
      * @param <T>
      *            the generic type
      * @param entityClass
@@ -102,7 +87,7 @@ public class EntityManagerSession
 
     /**
      * Store in L1 only.
-     * 
+     *
      * @param id
      *            the id
      * @param entity
@@ -115,7 +100,7 @@ public class EntityManagerSession
 
     /**
      * Save to cache.
-     * 
+     *
      * @param id
      *            the id
      * @param entity
@@ -143,7 +128,7 @@ public class EntityManagerSession
 
     /**
      * Removes the.
-     * 
+     *
      * @param <T>
      *            the generic type
      * @param entityClass
@@ -158,7 +143,7 @@ public class EntityManagerSession
 
     /**
      * Removes the from cache.
-     * 
+     *
      * @param <T>
      *            the generic type
      * @param entityClass
@@ -191,12 +176,12 @@ public class EntityManagerSession
 
     /**
      * Cache key.
-     * 
+     *
      * @param clazz
      *            the clazz
      * @param id
      *            the id
-     * 
+     *
      * @return the string
      */
     private String cacheKey(Class<?> clazz, Object id)

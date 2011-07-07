@@ -13,21 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */package com.impetus.kundera.query;
+package com.impetus.kundera.query;
 
 import java.util.StringTokenizer;
 
@@ -36,7 +22,7 @@ import java.util.StringTokenizer;
  * query string and parses it into its constituent parts, updating the JPQLQuery
  * accordingly with the result that after calling the parse() method the
  * JPQLQuery is populated.
- * 
+ *
  * <pre>
  * SELECT [ {result} ]
  * [FROM {candidate-classes} ]
@@ -46,7 +32,7 @@ import java.util.StringTokenizer;
  * [ORDER BY {ordering-clause}]
  * e.g SELECT c FROM Customer c INNER JOIN c.orders o WHERE c.status = 1
  * </pre>
- * 
+ *
  * @author animesh.kumar
  */
 public class KunderaQueryParser
@@ -66,7 +52,7 @@ public class KunderaQueryParser
 
     /**
      * Constructor for the Single-String parser.
-     * 
+     *
      * @param query
      *            The query
      * @param queryString
@@ -88,10 +74,10 @@ public class KunderaQueryParser
 
     /**
      * Method to detect whether this token is a keyword for JPQL Single-String.
-     * 
+     *
      * @param token
      *            The token
-     * 
+     *
      * @return Whether it is a keyword
      */
     private boolean isKeyword(String token)
@@ -127,7 +113,7 @@ public class KunderaQueryParser
 
         /**
          * Instantiates a new compiler.
-         * 
+         *
          * @param tokenizer
          *            the tokenizer
          */
@@ -300,7 +286,7 @@ public class KunderaQueryParser
 
         /**
          * Constructor.
-         * 
+         *
          * @param str
          *            the str
          */
@@ -331,7 +317,7 @@ public class KunderaQueryParser
 
         /**
          * Parse the content until a keyword is found.
-         * 
+         *
          * @return the content
          */
         public String parseContent()
@@ -368,10 +354,10 @@ public class KunderaQueryParser
         /**
          * Parse the next token looking for a keyword. The cursor position is
          * skipped in one tick if a keyword is found
-         * 
+         *
          * @param keyword
          *            the searched keyword
-         * 
+         *
          * @return true if the keyword
          */
         public boolean parseKeyword(String keyword)
@@ -405,10 +391,10 @@ public class KunderaQueryParser
         /**
          * Parse the next token looking for a keyword. The cursor position is
          * skipped in one tick if a keyword is found
-         * 
+         *
          * @param keyword
          *            the searched keyword
-         * 
+         *
          * @return true if the keyword
          */
         public boolean parseKeywordIgnoreCase(String keyword)
@@ -439,7 +425,7 @@ public class KunderaQueryParser
         /**
          * Parse the next token looking for a keyword. The cursor position is
          * skipped in one tick if a keyword is found
-         * 
+         *
          * @return the parsed keyword or null
          */
         public String parseKeyword()

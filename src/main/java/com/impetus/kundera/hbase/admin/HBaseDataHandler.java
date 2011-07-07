@@ -13,9 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/**
- * 
- */
 package com.impetus.kundera.hbase.admin;
 
 import java.io.IOException;
@@ -101,7 +98,7 @@ public class HBaseDataHandler implements DataHandler
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.impetus.kundera.hbase.admin.Loader#loadConfiguration(java.lang.String
      * , java.lang.String)
@@ -115,7 +112,7 @@ public class HBaseDataHandler implements DataHandler
     }
 
     /**
-     * 
+     *
      * @param hostName
      * @param port
      * @throws MasterNotRunningException

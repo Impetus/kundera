@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.ejb;
 
 import java.util.ArrayList;
@@ -65,7 +50,7 @@ import com.impetus.kundera.query.LuceneQuery;
 
 /**
  * The Class EntityManagerImpl.
- * 
+ *
  * @author animesh.kumar
  */
 public class EntityManagerImpl implements KunderaEntityManager
@@ -106,7 +91,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Instantiates a new entity manager impl.
-     * 
+     *
      * @param factory
      *            the factory
      * @param client
@@ -125,7 +110,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the factory.
-     * 
+     *
      * @return the factory
      */
     public EntityManagerFactoryImpl getFactory()
@@ -165,7 +150,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Immediate load and cache.
-     * 
+     *
      * @param <E>
      *            the element type
      * @param entityClass
@@ -536,7 +521,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the metadata manager.
-     * 
+     *
      * @return the metadataManager
      */
     public final MetadataManager getMetadataManager()
@@ -546,7 +531,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the data manager.
-     * 
+     *
      * @return the dataManager
      */
     public final DataManager getDataManager()
@@ -556,7 +541,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the index manager.
-     * 
+     *
      * @return the indexManager
      */
     public final IndexManager getIndexManager()
@@ -570,7 +555,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the client.
-     * 
+     *
      * @return the client
      */
     @Override
@@ -581,7 +566,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the persistence unit name.
-     * 
+     *
      * @return the persistence unit name
      */
     public final String getPersistenceUnitName()
@@ -591,7 +576,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the session.
-     * 
+     *
      * @return the session
      */
     protected EntityManagerSession getSession()
@@ -601,7 +586,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the entity resolver.
-     * 
+     *
      * @return the reachabilityResolver
      */
     public EntityResolver getEntityResolver()

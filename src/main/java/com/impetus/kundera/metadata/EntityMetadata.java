@@ -13,21 +13,6 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.impetus.kundera.metadata;
 
 import java.lang.reflect.Field;
@@ -46,7 +31,7 @@ import com.impetus.kundera.loader.DBType;
 
 /**
  * The Class EntityMetadata.
- * 
+ *
  * @author animesh.kumar
  */
 public final class EntityMetadata
@@ -157,21 +142,21 @@ public final class EntityMetadata
 
         /**
          * Checks if is column family metadata.
-         * 
+         *
          * @return true, if is column family metadata
          */
         public abstract boolean isColumnFamilyMetadata();
 
         /**
          * Checks if is super column family metadata.
-         * 
+         *
          * @return true, if is super column family metadata
          */
         public abstract boolean isSuperColumnFamilyMetadata();
 
         /**
          * Checks if is Document metadata.
-         * 
+         *
          * @return true, if is Document metadata
          */
         public abstract boolean isDocumentMetadata();
@@ -179,7 +164,7 @@ public final class EntityMetadata
 
     /**
      * Gets the type.
-     * 
+     *
      * @return the type
      */
     public Type getType()
@@ -189,7 +174,7 @@ public final class EntityMetadata
 
     /**
      * Sets the type.
-     * 
+     *
      * @param type
      *            the new type
      */
@@ -199,7 +184,7 @@ public final class EntityMetadata
     }
 
     /**
-     * 
+     *
      * The Enum ForeignKey.
      */
     public static enum ForeignKey
@@ -209,7 +194,7 @@ public final class EntityMetadata
 
     /**
      * Instantiates a new metadata.
-     * 
+     *
      * @param entityClazz
      *            the entity clazz
      */
@@ -221,7 +206,7 @@ public final class EntityMetadata
 
     /**
      * Gets the entity clazz.
-     * 
+     *
      * @return the entity clazz
      */
     public Class<?> getEntityClazz()
@@ -265,7 +250,7 @@ public final class EntityMetadata
 
     /**
      * Gets the id property.
-     * 
+     *
      * @return the id property
      */
     public Field getIdProperty()
@@ -275,7 +260,7 @@ public final class EntityMetadata
 
     /**
      * Sets the id property.
-     * 
+     *
      * @param idProperty
      *            the new id property
      */
@@ -303,7 +288,7 @@ public final class EntityMetadata
 
     /**
      * Gets the read identifier method.
-     * 
+     *
      * @return the readIdentifierMethod
      */
     public Method getReadIdentifierMethod()
@@ -313,7 +298,7 @@ public final class EntityMetadata
 
     /**
      * Sets the read identifier method.
-     * 
+     *
      * @param readIdentifierMethod
      *            the readIdentifierMethod to set
      */
@@ -324,7 +309,7 @@ public final class EntityMetadata
 
     /**
      * Gets the write identifier method.
-     * 
+     *
      * @return the writeIdentifierMethod
      */
     public Method getWriteIdentifierMethod()
@@ -334,7 +319,7 @@ public final class EntityMetadata
 
     /**
      * Sets the write identifier method.
-     * 
+     *
      * @param writeIdentifierMethod
      *            the writeIdentifierMethod to set
      */
@@ -345,7 +330,7 @@ public final class EntityMetadata
 
     /**
      * Gets the columns map.
-     * 
+     *
      * @return the columns map
      */
     public Map<String, Column> getColumnsMap()
@@ -355,7 +340,7 @@ public final class EntityMetadata
 
     /**
      * Gets the super columns map.
-     * 
+     *
      * @return the super columns map
      */
     public Map<String, SuperColumn> getSuperColumnsMap()
@@ -365,10 +350,10 @@ public final class EntityMetadata
 
     /**
      * Gets the column.
-     * 
+     *
      * @param key
      *            the key
-     * 
+     *
      * @return the column
      */
     public Column getColumn(String key)
@@ -378,10 +363,10 @@ public final class EntityMetadata
 
     /**
      * Gets the super column.
-     * 
+     *
      * @param key
      *            the key
-     * 
+     *
      * @return the super column
      */
     public SuperColumn getSuperColumn(String key)
@@ -391,7 +376,7 @@ public final class EntityMetadata
 
     /**
      * Gets the columns as list.
-     * 
+     *
      * @return the columns as list
      */
     public List<Column> getColumnsAsList()
@@ -401,7 +386,7 @@ public final class EntityMetadata
 
     /**
      * Gets the super columns as list.
-     * 
+     *
      * @return the super columns as list
      */
     public List<SuperColumn> getSuperColumnsAsList()
@@ -411,7 +396,7 @@ public final class EntityMetadata
 
     /**
      * Gets the column field names.
-     * 
+     *
      * @return the column field names
      */
     public List<String> getColumnFieldNames()
@@ -421,7 +406,7 @@ public final class EntityMetadata
 
     /**
      * Gets the super column field names.
-     * 
+     *
      * @return the super column field names
      */
     public List<String> getSuperColumnFieldNames()
@@ -431,7 +416,7 @@ public final class EntityMetadata
 
     /**
      * Adds the column.
-     * 
+     *
      * @param key
      *            the key
      * @param column
@@ -444,7 +429,7 @@ public final class EntityMetadata
 
     /**
      * Adds the super column.
-     * 
+     *
      * @param key
      *            the key
      * @param superColumn
@@ -457,7 +442,7 @@ public final class EntityMetadata
 
     /**
      * Adds the index property.
-     * 
+     *
      * @param index
      *            the index
      */
@@ -468,7 +453,7 @@ public final class EntityMetadata
 
     /**
      * Adds the relation.
-     * 
+     *
      * @param property
      *            the property
      * @param relation
@@ -481,7 +466,7 @@ public final class EntityMetadata
 
     /**
      * Gets the relation.
-     * 
+     *
      * @param property
      *            the property
      * @return the relation
@@ -493,7 +478,7 @@ public final class EntityMetadata
 
     /**
      * Gets the relations.
-     * 
+     *
      * @return the relations
      */
     public List<Relation> getRelations()
@@ -503,7 +488,7 @@ public final class EntityMetadata
 
     /**
      * Gets the index properties.
-     * 
+     *
      * @return the index properties
      */
     public List<PropertyIndex> getIndexProperties()
@@ -513,7 +498,7 @@ public final class EntityMetadata
 
     /**
      * Gets the index boost.
-     * 
+     *
      * @return the index boost
      */
     public float getIndexBoost()
@@ -523,7 +508,7 @@ public final class EntityMetadata
 
     /**
      * Sets the index boost.
-     * 
+     *
      * @param indexBoost
      *            the new index boost
      */
@@ -534,7 +519,7 @@ public final class EntityMetadata
 
     /**
      * Gets the index name.
-     * 
+     *
      * @return the index name
      */
     public String getIndexName()
@@ -544,7 +529,7 @@ public final class EntityMetadata
 
     /**
      * Sets the index name.
-     * 
+     *
      * @param indexName
      *            the new index name
      */
@@ -555,7 +540,7 @@ public final class EntityMetadata
 
     /**
      * Checks if is indexable.
-     * 
+     *
      * @return true, if is indexable
      */
     public boolean isIndexable()
@@ -565,7 +550,7 @@ public final class EntityMetadata
 
     /**
      * Sets the indexable.
-     * 
+     *
      * @param isIndexable
      *            the new indexable
      */
@@ -576,7 +561,7 @@ public final class EntityMetadata
 
     /**
      * Sets the callback methods map.
-     * 
+     *
      * @param callbackMethodsMap
      *            the callback methods map
      */
@@ -587,7 +572,7 @@ public final class EntityMetadata
 
     /**
      * Gets the callback methods map.
-     * 
+     *
      * @return the callback methods map
      */
     public Map<Class<?>, List<? extends CallbackMethod>> getCallbackMethodsMap()
@@ -597,10 +582,10 @@ public final class EntityMetadata
 
     /**
      * Gets the callback methods.
-     * 
+     *
      * @param event
      *            the event
-     * 
+     *
      * @return the callback methods
      */
     public List<? extends CallbackMethod> getCallbackMethods(Class<?> event)
@@ -610,7 +595,7 @@ public final class EntityMetadata
 
     /**
      * Checks if is cacheable.
-     * 
+     *
      * @return the cacheable
      */
     public boolean isCacheable()
@@ -620,7 +605,7 @@ public final class EntityMetadata
 
     /**
      * Sets the cacheable.
-     * 
+     *
      * @param cacheable
      *            the cacheable to set
      */
@@ -733,7 +718,7 @@ public final class EntityMetadata
 
     /**
      * Represents Thrift Column.
-     * 
+     *
      * @author animesh.kumar
      */
     public final class Column
@@ -747,7 +732,7 @@ public final class EntityMetadata
 
         /**
          * Instantiates a new column.
-         * 
+         *
          * @param name
          *            the name
          * @param field
@@ -761,7 +746,7 @@ public final class EntityMetadata
 
         /**
          * Gets the name.
-         * 
+         *
          * @return the name
          */
         public String getName()
@@ -771,7 +756,7 @@ public final class EntityMetadata
 
         /**
          * Gets the field.
-         * 
+         *
          * @return the field
          */
         public Field getField()
@@ -783,7 +768,7 @@ public final class EntityMetadata
 
     /**
      * Represents Thrift SuperColumn.
-     * 
+     *
      * @author animesh.kumar
      */
     public final class SuperColumn
@@ -800,7 +785,7 @@ public final class EntityMetadata
 
         /**
          * Instantiates a new super column.
-         * 
+         *
          * @param name
          *            the name
          */
@@ -813,7 +798,7 @@ public final class EntityMetadata
 
         /**
          * Gets the name.
-         * 
+         *
          * @return the name
          */
         public String getName()
@@ -849,7 +834,7 @@ public final class EntityMetadata
 
         /**
          * Gets the columns.
-         * 
+         *
          * @return the columns
          */
         public List<Column> getColumns()
@@ -859,7 +844,7 @@ public final class EntityMetadata
 
         /**
          * Adds the column.
-         * 
+         *
          * @param name
          *            the name
          * @param field
@@ -873,7 +858,7 @@ public final class EntityMetadata
 
     /**
      * Contains Index information of a field.
-     * 
+     *
      * @author animesh.kumar
      */
     public final class PropertyIndex
@@ -890,7 +875,7 @@ public final class EntityMetadata
 
         /**
          * The Constructor.
-         * 
+         *
          * @param property
          *            the property
          */
@@ -902,7 +887,7 @@ public final class EntityMetadata
 
         /**
          * Instantiates a new property index.
-         * 
+         *
          * @param property
          *            the property
          * @param name
@@ -916,7 +901,7 @@ public final class EntityMetadata
 
         /**
          * Gets the name.
-         * 
+         *
          * @return the name
          */
         public String getName()
@@ -926,7 +911,7 @@ public final class EntityMetadata
 
         /**
          * Gets the property.
-         * 
+         *
          * @return the property
          */
         public Field getProperty()
@@ -936,7 +921,7 @@ public final class EntityMetadata
 
         /**
          * Gets the boost.
-         * 
+         *
          * @return the boost
          */
         public float getBoost()
@@ -946,7 +931,7 @@ public final class EntityMetadata
 
         /**
          * Sets the boost.
-         * 
+         *
          * @param boost
          *            the new boost
          */
@@ -958,7 +943,7 @@ public final class EntityMetadata
 
     /**
      * Class to hold class-method instances for EntityListeners.
-     * 
+     *
      * @author animesh.kumar
      */
     public final class ExternalCallbackMethod implements CallbackMethod
@@ -972,7 +957,7 @@ public final class EntityMetadata
 
         /**
          * Instantiates a new external callback method.
-         * 
+         *
          * @param clazz
          *            the clazz
          * @param method
@@ -1008,7 +993,7 @@ public final class EntityMetadata
 
     /**
      * The Class InternalCallbackMethod.
-     * 
+     *
      * @author animesh.kumar
      */
     public final class InternalCallbackMethod implements CallbackMethod
@@ -1019,7 +1004,7 @@ public final class EntityMetadata
 
         /**
          * Instantiates a new internal callback method.
-         * 
+         *
          * @param method
          *            the method
          */
@@ -1082,7 +1067,7 @@ public final class EntityMetadata
 
         /**
          * Instantiates a new relation.
-         * 
+         *
          * @param property
          *            the property
          * @param targetEntity
@@ -1121,7 +1106,7 @@ public final class EntityMetadata
 
         /**
          * Gets the property.
-         * 
+         *
          * @return the property
          */
         public Field getProperty()
@@ -1131,7 +1116,7 @@ public final class EntityMetadata
 
         /**
          * Gets the target entity.
-         * 
+         *
          * @return the targetEntity
          */
         public Class<?> getTargetEntity()
@@ -1141,7 +1126,7 @@ public final class EntityMetadata
 
         /**
          * Gets the property type.
-         * 
+         *
          * @return the propertyType
          */
         public Class<?> getPropertyType()
@@ -1151,7 +1136,7 @@ public final class EntityMetadata
 
         /**
          * Gets the fetch type.
-         * 
+         *
          * @return the fetchType
          */
         public FetchType getFetchType()
@@ -1161,7 +1146,7 @@ public final class EntityMetadata
 
         /**
          * Gets the cascades.
-         * 
+         *
          * @return the cascades
          */
         public List<CascadeType> getCascades()
@@ -1171,7 +1156,7 @@ public final class EntityMetadata
 
         /**
          * Checks if is optional.
-         * 
+         *
          * @return the optional
          */
         public boolean isOptional()
@@ -1181,7 +1166,7 @@ public final class EntityMetadata
 
         /**
          * Gets the mapped by.
-         * 
+         *
          * @return the mappedBy
          */
         public String getMappedBy()
@@ -1191,7 +1176,7 @@ public final class EntityMetadata
 
         /**
          * Gets the type.
-         * 
+         *
          * @return the type
          */
         public ForeignKey getType()
@@ -1201,7 +1186,7 @@ public final class EntityMetadata
 
         /**
          * Checks if is unary.
-         * 
+         *
          * @return true, if is unary
          */
         public boolean isUnary()
@@ -1211,7 +1196,7 @@ public final class EntityMetadata
 
         /**
          * Checks if is collection.
-         * 
+         *
          * @return true, if is collection
          */
         public boolean isCollection()
