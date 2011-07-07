@@ -28,7 +28,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.mongodb;
+package com.impetus.kundera.mongodb.client;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -53,6 +53,7 @@ import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
 import com.impetus.kundera.metadata.EntityMetadata.Relation;
 import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
+import com.impetus.kundera.mongodb.DocumentObjectMapper;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;

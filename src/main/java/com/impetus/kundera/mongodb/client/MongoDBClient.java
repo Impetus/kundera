@@ -28,7 +28,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.client;
+package com.impetus.kundera.mongodb.client;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -48,7 +48,6 @@ import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
-import com.impetus.kundera.mongodb.MongoDBDataHandler;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;

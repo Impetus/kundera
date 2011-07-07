@@ -28,7 +28,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.pelops;
+package com.impetus.kundera.cassandra.client.pelops;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -53,7 +53,6 @@ import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.client.PelopsClient;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.metadata.EntityMetadata;

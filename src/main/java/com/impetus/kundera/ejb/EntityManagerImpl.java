@@ -52,7 +52,6 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.CassandraEntityManager;
 import com.impetus.kundera.Client;
 import com.impetus.kundera.db.DataManager;
 import com.impetus.kundera.ejb.event.EntityEventDispatcher;
@@ -60,16 +59,16 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataManager;
+import com.impetus.kundera.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.LuceneQuery;
-import com.impetus.kundera.query.MongoDBQuery;
 
 /**
  * The Class EntityManagerImpl.
  * 
  * @author animesh.kumar
  */
-public class EntityManagerImpl implements CassandraEntityManager
+public class EntityManagerImpl implements KunderaEntityManager
 {
 
     /** The Constant log. */

@@ -28,7 +28,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.db.accessor;
+package com.impetus.kundera.cassandra;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -43,7 +43,8 @@ import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.CassandraClient;
+import com.impetus.kundera.cassandra.client.CassandraClient;
+import com.impetus.kundera.db.accessor.BaseDataAccessor;
 import com.impetus.kundera.db.accessor.BaseDataAccessor.ThriftRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EntityMetadata;

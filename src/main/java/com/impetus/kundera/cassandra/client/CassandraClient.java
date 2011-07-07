@@ -28,7 +28,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera;
+package com.impetus.kundera.cassandra.client;
 
 import java.util.List;
 import java.util.Map;
@@ -37,10 +37,12 @@ import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.scale7.cassandra.pelops.Bytes;
 
+import com.impetus.kundera.cassandra.client.pelops.PelopsClient;
+
 /**
  * Interface used to interact with Cassandra Clients.
  * 
- * @see com.impetus.kundera.client.PelopsClient
+ * @see com.impetus.kundera.cassandra.client.pelops.PelopsClient
  * @author animesh.kumar
  * @since 0.1
  */

@@ -14,7 +14,7 @@
  *  * limitations under the License.
  ******************************************************************************/
 /*
- * Copyright 2010 Impetus Infotech.
+ * Copyright 2011 Impetus Infotech.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,52 +28,62 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera;
+package com.impetus.kundera.mongodb.query;
 
 import java.util.List;
-import java.util.Map;
 
-import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.metadata.MetadataManager;
+import com.impetus.kundera.query.QueryImpl;
 
 /**
- * The Interface CassandraEntityManager.
+ * Query class for MongoDB data store
  * 
- * @author animesh.kumar
+ * @author amresh.singh
  */
-public interface CassandraEntityManager extends EntityManager
+public class MongoDBQuery extends QueryImpl
 {
+    /** the log used by this class. */
+    private static Log log = LogFactory.getLog(MongoDBQuery.class);
 
-    /**
-     * Find.
-     * 
-     * @param <T>
-     *            the generic type
-     * @param entityClass
-     *            the entity class
-     * @param primaryKey
-     *            the primary key
-     * @return the list
-     */
-    <T> List<T> find(Class<T> entityClass, Object... primaryKey);
+    public MongoDBQuery(EntityManagerImpl em, MetadataManager metadataManager, String jpaQuery)
+    {
+        super(em, metadataManager, jpaQuery);
+    }
 
-    /**
-     * Find.
-     * 
-     * @param <T>
-     *            the generic type
-     * @param entityClass
-     *            the entity class
-     * @param primaryKeys
-     *            the primary keys
-     * @return the list
-     */
-    <T> List<T> find(Class<T> entityClass, Map<String, String> primaryKeys);
+    @Override
+    public List<?> getResultList()
+    {
+        log.debug("JPA Query is: " + query);
 
-    /**
-     * Gets the client.
-     * 
-     * @return the client
-     */
-    Client getClient();
+        EntityMetadata m = getEntityMetadata();
+
+        try
+        {
+            return getEntityManager().getClient().loadColumns(getEntityManager(), m, getFilterClauseQueue());
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+
+    @Override
+    public int executeUpdate()
+    {
+        return super.executeUpdate();
+    }
+
+    @Override
+    public Query setMaxResults(int maxResult)
+    {
+        return super.setMaxResults(maxResult);
+    }
 
 }

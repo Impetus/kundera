@@ -40,7 +40,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.ejb.EntityManagerImpl;
-import com.impetus.kundera.index.LucandraIndexer;
+import com.impetus.kundera.index.KunderaIndexer;
 import com.impetus.kundera.metadata.MetadataManager;
 
 /**
@@ -166,7 +166,7 @@ public class LuceneQuery extends QueryImpl implements Query
             sb.append(" AND ");
         }
         sb.append("+");
-        sb.append(LucandraIndexer.ENTITY_CLASS_FIELD);
+        sb.append(KunderaIndexer.ENTITY_CLASS_FIELD);
         sb.append(":");
         // sb.append(getEntityClass().getName());
         sb.append(getEntityClass().getCanonicalName().toLowerCase());

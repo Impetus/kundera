@@ -35,11 +35,11 @@ import java.util.Map;
 
 import javax.persistence.PersistenceException;
 
-import com.impetus.kundera.db.accessor.ColumnFamilyDataAccessor;
-import com.impetus.kundera.db.accessor.DocumentDataAccessor;
+import com.impetus.kundera.cassandra.ColumnFamilyDataAccessor;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.mongodb.DocumentDataAccessor;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**

@@ -28,7 +28,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.client;
+package com.impetus.kundera.cassandra.client.thrift;
 
 import java.util.List;
 import java.util.Map;
@@ -48,7 +48,7 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.scale7.cassandra.pelops.Bytes;
 
-import com.impetus.kundera.CassandraClient;
+import com.impetus.kundera.cassandra.client.CassandraClient;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;

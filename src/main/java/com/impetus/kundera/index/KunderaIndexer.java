@@ -67,15 +67,15 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
- * The Class LucandraIndexer.
+ * The Class KunderaIndexer.
  * 
  * @author animesh.kumar
  */
-public class LucandraIndexer implements Indexer
+public class KunderaIndexer implements Indexer
 {
 
     /** log for this class. */
-    private static final Log LOG = LogFactory.getLog(LucandraIndexer.class);
+    private static final Log LOG = LogFactory.getLog(KunderaIndexer.class);
 
     /** The INDEX_NAME. */
     private static final String INDEX_NAME = "kundera-alpha";// is
@@ -123,7 +123,7 @@ public class LucandraIndexer implements Indexer
      * @param analyzer
      *            the analyzer
      */
-    public LucandraIndexer(Client client, Analyzer analyzer)
+    public KunderaIndexer(Client client, Analyzer analyzer)
     {
         this.client = client;
         this.analyzer = analyzer;

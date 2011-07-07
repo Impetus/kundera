@@ -28,38 +28,54 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.api;
+package com.impetus.kundera.ejb;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+
+import com.impetus.kundera.Client;
 
 /**
- * The Interface SuperColumnFamily.
+ * The Interface KunderaEntityManager.
  * 
  * @author animesh.kumar
- * @since 0.1
  */
-@Target( { ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Deprecated
-public @interface SuperColumnFamily
+public interface KunderaEntityManager extends EntityManager
 {
 
     /**
-     * Value.
+     * Find.
      * 
-     * @return the string
+     * @param <T>
+     *            the generic type
+     * @param entityClass
+     *            the entity class
+     * @param primaryKey
+     *            the primary key
+     * @return the list
      */
-    String family();
+    <T> List<T> find(Class<T> entityClass, Object... primaryKey);
 
     /**
-     * Keyspace.
+     * Find.
      * 
-     * @return the string
+     * @param <T>
+     *            the generic type
+     * @param entityClass
+     *            the entity class
+     * @param primaryKeys
+     *            the primary keys
+     * @return the list
      */
-    String keyspace() default "";
+    <T> List<T> find(Class<T> entityClass, Map<String, String> primaryKeys);
+
+    /**
+     * Gets the client.
+     * 
+     * @return the client
+     */
+    Client getClient();
+
 }

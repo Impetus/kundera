@@ -28,7 +28,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.db.accessor;
+package com.impetus.kundera.mongodb;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,6 +41,7 @@ import javax.persistence.Table;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.db.accessor.BaseDataAccessor;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Relation;

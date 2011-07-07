@@ -56,7 +56,7 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
 {
 
     /** The Constant log. */
-    private static final Log log = LogFactory.getLog(ColumnFamilyProcessor.class);
+    private static final Log log = LogFactory.getLog(AbstractEntityFieldProcessor.class);
 
     /**
      * Gets the valid jpa column.

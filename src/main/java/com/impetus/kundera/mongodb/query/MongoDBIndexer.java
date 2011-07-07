@@ -28,7 +28,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.index;
+package com.impetus.kundera.mongodb.query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +40,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Client;
-import com.impetus.kundera.client.MongoDBClient;
+import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.PropertyIndex;
+import com.impetus.kundera.mongodb.client.MongoDBClient;
 
 /**
  * Provides indexing functionality for MongoDB database.

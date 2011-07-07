@@ -28,7 +28,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.client;
+package com.impetus.kundera.cassandra.client.pelops;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -78,12 +78,11 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 
-import com.impetus.kundera.CassandraClient;
+import com.impetus.kundera.cassandra.client.CassandraClient;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.metadata.EntityMetadata;
-import com.impetus.kundera.pelops.PelopsDataHandler;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
