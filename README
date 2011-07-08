@@ -1,6 +1,7 @@
 Overview
 =========
 The idea behind Kundera is to make working with NoSQL Databases drop-dead simple and fun. Kundera is being developed with following objectives:
+
 o	To make working with NoSQL as simple as working with SQL
 o	To serve as JPA Compliant mapping solution for NoSQL Datastores.
 o	To help developers, forget the complexity of NoSQL stores and focus on Domain Model.
