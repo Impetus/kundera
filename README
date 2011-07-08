@@ -13,9 +13,9 @@ Up and running in 5 minutes
 If you have worked upon Hibernate or any JPA Compliant ORM Solution, then the whole process, right from learning to coming up with first sample implementation will not take more than 5 minutes. Please follow wiki pages in following sequence:
 
 o	Get Kundera
-o	Go thru the Basic Concepts
-o	Go thru the Let’s start
-o	Get the latest code and run the Suite
+o	Go through the Basic Concepts
+o	Go through the Examples
+
 
 
 Currently Supported Datasources
