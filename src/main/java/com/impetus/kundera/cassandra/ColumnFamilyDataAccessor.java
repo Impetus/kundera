@@ -18,7 +18,9 @@ package com.impetus.kundera.cassandra;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,10 +29,15 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.scale7.cassandra.pelops.Bytes;
 
+import com.impetus.kundera.Client;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.cassandra.client.CassandraClient;
+import com.impetus.kundera.cassandra.client.pelops.PelopsDataHandler;
 import com.impetus.kundera.db.accessor.BaseDataAccessor;
 import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -85,12 +92,29 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor
     @Override
     public <E> List<E> read(Class<E> clazz, EntityMetadata m, String... ids) throws Exception
     {
+        Client client =null;
         log.debug("Cassandra >> Read >> " + clazz.getName() + "_(" + Arrays.asList(ids) + ")");
 
         String keyspace = m.getSchema();
         String family = m.getTableName();
 
-        return getEntityManager().getClient().loadColumns(getEntityManager(), clazz, keyspace, family, m, ids);
+        return m.getSuperColumnsAsList().isEmpty()?getEntityManager().getClient().loadColumns(getEntityManager(), clazz, keyspace, family, m, ids):
+            readSuperColumn(clazz, m, keyspace, family, ids);
+    }
+
+    private <E> List<E> readSuperColumn(Class<E> clazz, EntityMetadata m, String keyspace, String family, String... ids)
+            throws Exception
+    {
+        List<E> entities = new ArrayList<E>();
+        Map<Bytes, List<SuperColumn>> map = ((CassandraClient)getEntityManager().getClient()).loadSuperColumns(keyspace, family,ids);
+        for (Map.Entry<Bytes, List<SuperColumn>> entry : map.entrySet())
+        {
+            String entityId = PropertyAccessorFactory.STRING.fromBytes(entry.getKey().toByteArray());
+            List<SuperColumn> superColumn = entry.getValue();
+            E e = fromThriftRow(clazz, m, this.new ThriftRow<SuperColumn>(entityId, family, superColumn));
+            entities.add(e);
+        }
+        return entities;
     }
 
     /*
@@ -168,6 +192,24 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor
         {
 
             String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
+            if (scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER) != -1)
+            {
+                   String scFieldName = scName.substring(0,scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER));
+                   Field superColumnField = e.getClass().getDeclaredField(scFieldName);
+                   Collection embeddedCollection = null;
+                   if(superColumnField.getType().equals(List.class))
+                   {
+                       embeddedCollection = new ArrayList();
+                   }else if(superColumnField.getType().equals(Set.class))
+                   {
+                       embeddedCollection = new HashSet();
+                   }
+                   PelopsDataHandler handler = new PelopsDataHandler();
+                   Object embeddedObject = handler.populateEmbeddedObject(sc, m);
+                   embeddedCollection.add(embeddedObject);
+            }
+            else
+            {
             boolean intoRelations = false;
             if (scName.equals(TO_ONE_SUPER_COL_NAME))
             {
@@ -198,12 +240,15 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor
                 {
                     // set value of the field in the bean
                     Field field = columnNameToFieldMap.get(name);
-                    PropertyAccessorHelper.set(PropertyAccessorHelper.getObject(e, scName), field, value);
+                    Object embeddedObject = PropertyAccessorHelper.getObject(e, scName);
+                    PropertyAccessorHelper.set(embeddedObject, field, value);
                 }
             }
+          }
         }
         return e;
     }
+
 
     // Helper method to convert @Entity to ThriftRow
     /**

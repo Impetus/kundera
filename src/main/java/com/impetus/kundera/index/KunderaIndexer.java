@@ -17,6 +17,7 @@ package com.impetus.kundera.index;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,9 +52,10 @@ import com.impetus.kundera.metadata.EntityMetadata.PropertyIndex;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class KunderaIndexer.
- *
+ * 
  * @author animesh.kumar
  */
 public class KunderaIndexer implements Indexer
@@ -102,7 +104,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Instantiates a new lucandra indexer.
-     *
+     * 
      * @param client
      *            the client
      * @param analyzer
@@ -121,7 +123,7 @@ public class KunderaIndexer implements Indexer
      */
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * com.impetus.kundera.index.Indexer#unindex(com.impetus.kundera.metadata
      * .EntityMetadata, java.lang.String)
@@ -153,7 +155,7 @@ public class KunderaIndexer implements Indexer
      */
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.
      * EntityMetadata, java.lang.Object)
@@ -174,7 +176,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Perform indexing.
-     *
+     * 
      * @param metadata
      *            the metadata
      * @param object
@@ -183,6 +185,7 @@ public class KunderaIndexer implements Indexer
     private void performIndexing(EntityMetadata metadata, Object object)
     {
         Document currentDoc = null;
+        Object embeddedObject = null;
         // In case defined entity is Super column family.
         // we need to create seperate lucene document for indexing.
         if (metadata.getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY))
@@ -192,27 +195,32 @@ public class KunderaIndexer implements Indexer
             for (String superColumnName : superColMap.keySet())
             {
                 EntityMetadata.SuperColumn superColumn = superColMap.get(superColumnName);
-                currentDoc = new Document();
-                prepareIndexDocument(metadata, object, currentDoc);
-                indexSuperColumnName(superColumnName, currentDoc);
-                for (EntityMetadata.Column col : superColumn.getColumns())
+                try
                 {
-                    java.lang.reflect.Field field = col.getField();
-                    String colName = col.getName();
-                    String indexName = metadata.getIndexName();
-                    try
+                    embeddedObject = PropertyAccessorHelper.getObject(object, superColumnName);
+                    //if embeddedObject is not set.
+                    if(embeddedObject ==null)
                     {
-                        indexField(PropertyAccessorHelper.getObject(object, superColumnName), currentDoc, field,
-                                colName, indexName);
+                        return;
                     }
-                    catch (PropertyAccessException e)
+                    if(embeddedObject instanceof Collection<?>)
                     {
-                        LOG.error("Error while accesing embedded Object:" + superColumnName);
+                        for(Object obj : (Collection<?>)embeddedObject)
+                        {
+                            currentDoc = prepareDocument(metadata, object, superColumnName);
+                            indexSuperColumn(metadata, object, currentDoc, obj, superColumn);
+                        }
+                        return;
+                    }else
+                    {
+                        currentDoc = prepareDocument(metadata, object, superColumnName);
                     }
                 }
-                // add document.
-                addIndexProperties(metadata, object, currentDoc);
-                onPersist(metadata, currentDoc);
+                catch (PropertyAccessException e)
+                {
+                    LOG.error("Error while accesing embedded Object:" + superColumnName);
+                }
+                indexSuperColumn(metadata, object, currentDoc, embeddedObject, superColumn);
             }
         }
         else
@@ -226,8 +234,49 @@ public class KunderaIndexer implements Indexer
     }
 
     /**
-     * Index super column name.
+     * Prepare document.
+     * @param metadata the metadata
+     * @param object the object
+     * @param superColumnName the super column name
+     * @return the document
+     */
+    private Document prepareDocument(EntityMetadata metadata, Object object, String superColumnName)
+    {
+        Document currentDoc;
+        currentDoc = new Document();
+        prepareIndexDocument(metadata, object, currentDoc);
+        indexSuperColumnName(superColumnName, currentDoc);
+        return currentDoc;
+    }
+
+    
+    /**
+     * Index super column.
      *
+     * @param metadata the metadata
+     * @param object the object
+     * @param currentDoc the current doc
+     * @param embeddedObject the embedded object
+     * @param superColumn the super column
+     */
+    private void indexSuperColumn(EntityMetadata metadata, Object object, Document currentDoc, Object embeddedObject,
+            EntityMetadata.SuperColumn superColumn)
+    {
+        for (EntityMetadata.Column col : superColumn.getColumns())
+        {
+            java.lang.reflect.Field field = col.getField();
+            String colName = col.getName();
+            String indexName = metadata.getIndexName();
+            indexField(embeddedObject, currentDoc, field, colName, indexName);
+        }
+        // add document.
+        addIndexProperties(metadata, object, currentDoc);
+        onPersist(metadata, currentDoc);
+    }
+
+    /**
+     * Index super column name.
+     * 
      * @param superColumnName
      *            the super column name
      * @param currentDoc
@@ -243,7 +292,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * On persist.
-     *
+     * 
      * @param metadata
      *            the metadata
      * @param document
@@ -280,7 +329,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Adds the index properties.
-     *
+     * 
      * @param metadata
      *            the metadata
      * @param object
@@ -302,7 +351,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Prepare index document.
-     *
+     * 
      * @param metadata
      *            the metadata
      * @param object
@@ -348,7 +397,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Index document.
-     *
+     * 
      * @param document
      *            the document
      */
@@ -372,7 +421,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Index field.
-     *
+     * 
      * @param object
      *            the object
      * @param document
@@ -402,7 +451,7 @@ public class KunderaIndexer implements Indexer
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int)
      */
     @SuppressWarnings("deprecation")
@@ -469,12 +518,12 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Gets the kundera id.
-     *
+     * 
      * @param metadata
      *            the metadata
      * @param id
      *            the id
-     *
+     * 
      * @return the kundera id
      */
     private String getKunderaId(EntityMetadata metadata, String id)
@@ -484,12 +533,12 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Gets the cannonical property name.
-     *
+     * 
      * @param indexName
      *            the index name
      * @param propertyName
      *            the property name
-     *
+     * 
      * @return the cannonical property name
      */
     private String getCannonicalPropertyName(String indexName, String propertyName)
@@ -500,7 +549,7 @@ public class KunderaIndexer implements Indexer
     // helper method to get Lucandra IndexWriter object
     /**
      * Gets the index writer.
-     *
+     * 
      * @return the index writer
      */
     private lucandra.IndexWriter getIndexWriter()
@@ -517,7 +566,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Added for HBase support.
-     *
+     * 
      * @return default index writer
      */
     private IndexWriter getDefaultIndexWriter()
@@ -556,7 +605,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Returns default index reader.
-     *
+     * 
      * @return index reader.
      */
     private org.apache.lucene.index.IndexReader getDefaultReader()
@@ -579,7 +628,7 @@ public class KunderaIndexer implements Indexer
 
     /**
      * Creates a directory if it does not exist.
-     *
+     * 
      * @return the index directory
      */
     private File getIndexDirectory()

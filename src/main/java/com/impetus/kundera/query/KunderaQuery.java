@@ -26,6 +26,8 @@ import java.util.regex.Pattern;
 
 import javax.persistence.PersistenceException;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataManager;
@@ -253,7 +255,7 @@ public abstract class KunderaQuery
         while (tokenizer.hasMoreTokens())
         {
             String token = tokenizer.nextToken();
-            if (!token.startsWith(fromArray[1]))
+            if (!StringUtils.contains(fromArray[1]+".", token))
             {
                 throw new RuntimeException("bad query format with invalid alias:" + token);
             }

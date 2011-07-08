@@ -207,6 +207,7 @@ public class PropertyAccessorHelper
      *            the field name
      * @return the embedded object
      */
+    @SuppressWarnings("null")
     public static final Object getObject(Object obj, String fieldName) throws PropertyAccessException
     {
         Field embeddedField;
@@ -219,7 +220,13 @@ public class PropertyAccessorHelper
                 {
                     embeddedField.setAccessible(true);
                 }
-                return embeddedField.get(obj);
+                Object embededObject = embeddedField.get(obj);
+                if(embededObject == null)
+                {
+                    embededObject = embeddedField.getType().newInstance();
+                    embeddedField.set(obj, embededObject);
+                }
+                return embededObject;
             }
             else
             {
@@ -240,6 +247,10 @@ public class PropertyAccessorHelper
             throw new PropertyAccessException(e);
         }
         catch (IllegalAccessException e)
+        {
+            throw new PropertyAccessException(e);
+        }
+        catch (InstantiationException e)
         {
             throw new PropertyAccessException(e);
         }
