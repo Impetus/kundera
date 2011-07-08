@@ -255,7 +255,7 @@ public abstract class KunderaQuery
         while (tokenizer.hasMoreTokens())
         {
             String token = tokenizer.nextToken();
-            if (!StringUtils.contains(fromArray[1]+".", token))
+            if (!StringUtils.contains(token,fromArray[1]+"."))
             {
                 throw new RuntimeException("bad query format with invalid alias:" + token);
             }
