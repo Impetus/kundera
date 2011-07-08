@@ -94,7 +94,6 @@ public class QueryTest extends BaseTest
             secondManager.remove(a);
             logger.info("removing " + a.getUsername());
         }
-        // secondManager.close();
 
         assertEquals(count, authors.size());
     }

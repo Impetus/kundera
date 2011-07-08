@@ -154,6 +154,14 @@ public abstract class BaseTest extends TestCase
         timeLine_Def.setSubcomparator_type("UTF8Type");
         timeLine_Def.setDefault_validation_class("UTF8Type");
         CfDef users_Def = new CfDef("Blog", "users");
+        users_Def.setComparator_type("UTF8Type");
+        users_Def.setColumn_type("Super");
+        users_Def.setSubcomparator_type("UTF8Type");
+        users_Def.setDefault_validation_class("UTF8Type");
+        CfDef preference_Def = new CfDef("Blog", "preference");
+        CfDef external_Def = new CfDef("Blog", "externalLinks");
+        CfDef imDetails_Def = new CfDef("Blog", "imDetails");
+
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(user_Def);
         cfDefs.add(userName_Def);
@@ -163,11 +171,11 @@ public abstract class BaseTest extends TestCase
         cfDefs.add(userLine_Def);
         cfDefs.add(timeLine_Def);
         cfDefs.add(users_Def);
-        /*
-         * List<KsDef> ksDefs = client.describe_keyspaces();
-         * System.out.println("Size is : " + ksDefs.size()); for(KsDef ksDef :
-         * ksDefs) { System.out.println(ksDef.getName()); }
-         */// client.send_system_drop_keyspace("Blog");
+        cfDefs.add(user_Def);
+        cfDefs.add(preference_Def);
+        cfDefs.add(external_Def);
+        cfDefs.add(imDetails_Def);
+
         KsDef ksDef = new KsDef("Blog", simple.getCanonicalName(), 1, cfDefs);
         client.send_system_add_keyspace(ksDef);
         logger.info("Data loaded");

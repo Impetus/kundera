@@ -186,7 +186,6 @@ public class PelopsClient implements CassandraClient
         configurePool(keyspace);
 
         Mutator mutator = Pelops.createMutator(POOL_NAME);
-        System.out.println(Pelops.getDbConnPool(POOL_NAME).getKeyspace());
 
         List<Column> thriftColumns = tf.getColumns();
         List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
@@ -703,7 +702,7 @@ public class PelopsClient implements CassandraClient
 
                 createCassSchema();
                 Thread.sleep(10000);
-//                CassandraUtils.startupServer();
+                CassandraUtils.startupServer();
             }
             catch (Throwable t)
             {

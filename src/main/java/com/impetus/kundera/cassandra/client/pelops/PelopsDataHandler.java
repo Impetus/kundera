@@ -65,7 +65,6 @@ public class PelopsDataHandler
         {
             List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(), rowKey, Selector
                     .newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
-            System.out.println(thriftSuperColumns);
             e = fromSuperColumnThriftRow(em, clazz, m, new PelopsClient().new ThriftRow(rowKey, m.getTableName(), null,
                     thriftSuperColumns));
 

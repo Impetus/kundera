@@ -494,13 +494,19 @@ public class KunderaIndexer implements Indexer
             Query q = qp.parse(luceneQuery);
             TopDocs docs = searcher.search(q, count);
 
+            int nullCount=0;
+            //Assuming Supercol will be null in case if alias only.
+            //This is a quick fix
             for (ScoreDoc sc : docs.scoreDocs)
             {
                 Document doc = searcher.doc(sc.doc);
                 String entityId = doc.get(ENTITY_ID_FIELD);
                 String superCol = doc.get(SUPERCOLUMN_INDEX);
+                if(superCol ==null)
+                {
+                    superCol= "SuperCol"+nullCount++;
+                }
                 indexCol.put(superCol, entityId);
-
             }
         }
         catch (ParseException e)
