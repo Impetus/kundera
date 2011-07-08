@@ -1,19 +1,36 @@
+Overview
+=========
+The idea behind Kundera is to make working with NoSQL Databases drop-dead simple and fun. Kundera is being developed with following objectives:
+To make working with NoSQL as simple as working with SQL
+To serve as JPA Compliant mapping solution for NoSQL Datastores.
+To help developers, forget the complexity of NoSQL stores and focus on Domain Model.
+To make switching across data-stores as easy as changing a configuration.
 
-Annotation based java library for NoSQL databases
-=====================================================
-The idea behind Kundera is to make working with NoSQL Databases drop-dead simple and fun. Kundera does not reinvent the wheel by making another client library; rather it leverages the existing libraries and builds - on top of them - a wrap-around API to help developers do away with unnecessary boiler plate codes, and program a neater-and-cleaner code that reduces code-complexity and improves quality. And above all, improves productivity.
 
 Up and running in 5 minutes
-============================
-Understanding Kundera only takes 5 minutes. Please read the following introductory article http://anismiles.wordpress.com/2010/06/30/kundera-knight-in-the-shining-armor/
+=============================
+If you have worked upon Hibernate or any JPA Compliant ORM Solution, then the whole process, right from learning to coming up with first sample implementation will not take more than 5 minutes. Please follow wiki pages in following sequence:
 
-Objectives
-===========
-To completely remove unnecessary details, such as Column lists, Super Column lists, byte arrays, Data encoding etc.
-To be able to work directly with Domain models just with the help of annotations
-To eliminate “code plumbing”, so as to keep the flow of data processing clear and obvious
-To completely separate out NoSQL Databases and their concerns from application-level logic for robust application development
-To include the latest NoSQL Databases without breaking anything
+Get Kundera
+Go thru the Basic Concepts
+Go thru the Let’s start
+Get the latest code and run the Suite
+
+
+Currently Supported Datasources
+================================
+Cassandra
+MongoDB
+HBase
+
+
+Downloads
+==========
+o	installation guide: 
+https://github.com/impetus-opensource/Kundera/wiki/Build-Steps
+o	maven repo: 
+https://github.com/impetus-opensource/Kundera/wiki/Maven-Usage
+o	snapshot repo: 
 
 About Us
 ========
