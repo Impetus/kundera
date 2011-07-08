@@ -703,7 +703,7 @@ public class PelopsClient implements CassandraClient
 
                 createCassSchema();
                 Thread.sleep(10000);
-                CassandraUtils.startupServer();
+//                CassandraUtils.startupServer();
             }
             catch (Throwable t)
             {
