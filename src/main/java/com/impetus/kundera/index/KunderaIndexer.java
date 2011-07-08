@@ -17,6 +17,7 @@ package com.impetus.kundera.index;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,6 +52,7 @@ import com.impetus.kundera.metadata.EntityMetadata.PropertyIndex;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class KunderaIndexer.
  * 
@@ -193,31 +195,32 @@ public class KunderaIndexer implements Indexer
             for (String superColumnName : superColMap.keySet())
             {
                 EntityMetadata.SuperColumn superColumn = superColMap.get(superColumnName);
-                currentDoc = new Document();
-                prepareIndexDocument(metadata, object, currentDoc);
-                indexSuperColumnName(superColumnName, currentDoc);
                 try
                 {
                     embeddedObject = PropertyAccessorHelper.getObject(object, superColumnName);
+                    //if embeddedObject is not set.
                     if(embeddedObject ==null)
                     {
                         return;
+                    }
+                    if(embeddedObject instanceof Collection<?>)
+                    {
+                        for(Object obj : (Collection<?>)embeddedObject)
+                        {
+                            currentDoc = prepareDocument(metadata, object, superColumnName);
+                            indexSuperColumn(metadata, object, currentDoc, obj, superColumn);
+                        }
+                        return;
+                    }else
+                    {
+                        currentDoc = prepareDocument(metadata, object, superColumnName);
                     }
                 }
                 catch (PropertyAccessException e)
                 {
                     LOG.error("Error while accesing embedded Object:" + superColumnName);
                 }
-                for (EntityMetadata.Column col : superColumn.getColumns())
-                {
-                    java.lang.reflect.Field field = col.getField();
-                    String colName = col.getName();
-                    String indexName = metadata.getIndexName();
-                    indexField(embeddedObject, currentDoc, field, colName, indexName);
-                }
-                // add document.
-                addIndexProperties(metadata, object, currentDoc);
-                onPersist(metadata, currentDoc);
+                indexSuperColumn(metadata, object, currentDoc, embeddedObject, superColumn);
             }
         }
         else
@@ -228,6 +231,47 @@ public class KunderaIndexer implements Indexer
             onPersist(metadata, currentDoc);
         }
 
+    }
+
+    /**
+     * Prepare document.
+     * @param metadata the metadata
+     * @param object the object
+     * @param superColumnName the super column name
+     * @return the document
+     */
+    private Document prepareDocument(EntityMetadata metadata, Object object, String superColumnName)
+    {
+        Document currentDoc;
+        currentDoc = new Document();
+        prepareIndexDocument(metadata, object, currentDoc);
+        indexSuperColumnName(superColumnName, currentDoc);
+        return currentDoc;
+    }
+
+    
+    /**
+     * Index super column.
+     *
+     * @param metadata the metadata
+     * @param object the object
+     * @param currentDoc the current doc
+     * @param embeddedObject the embedded object
+     * @param superColumn the super column
+     */
+    private void indexSuperColumn(EntityMetadata metadata, Object object, Document currentDoc, Object embeddedObject,
+            EntityMetadata.SuperColumn superColumn)
+    {
+        for (EntityMetadata.Column col : superColumn.getColumns())
+        {
+            java.lang.reflect.Field field = col.getField();
+            String colName = col.getName();
+            String indexName = metadata.getIndexName();
+            indexField(embeddedObject, currentDoc, field, colName, indexName);
+        }
+        // add document.
+        addIndexProperties(metadata, object, currentDoc);
+        onPersist(metadata, currentDoc);
     }
 
     /**
