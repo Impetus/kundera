@@ -196,6 +196,10 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor
             {
                    String scFieldName = scName.substring(0,scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER));
                    Field superColumnField = e.getClass().getDeclaredField(scFieldName);
+                   if(!superColumnField.isAccessible())
+                   {
+                       superColumnField.setAccessible(true);
+                   }
                    Collection embeddedCollection = null;
                    if(superColumnField.getType().equals(List.class))
                    {
@@ -207,6 +211,7 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor
                    PelopsDataHandler handler = new PelopsDataHandler();
                    Object embeddedObject = handler.populateEmbeddedObject(sc, m);
                    embeddedCollection.add(embeddedObject);
+                   superColumnField.set(e, embeddedCollection);
             }
             else
             {
