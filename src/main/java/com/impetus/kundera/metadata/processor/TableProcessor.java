@@ -130,7 +130,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         {
             LOG.warn(superColumnClass
                     + " will not be persisted as Super Column because you didn't annotate it with @Embeddable");
-            return;
+            //return;
         }
 
         // TODO: Provide user an option to specify this in entity class rather

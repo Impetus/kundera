@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.mongodb;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -53,9 +54,18 @@ public class DocumentObjectMapper
         BasicDBObject dBObj = new BasicDBObject();
 
         for (Column column : columns)
-        {
-            Object val = PropertyAccessorHelper.getObject(obj, column.getField());
-            dBObj.put(column.getName(), val);
+        {   
+            Field f = column.getField();
+            //TODO: This is not a good logic and need to be modified
+            if(f.getType().isPrimitive() || f.getType().equals(String.class) || f.getType().equals(Integer.class)
+                    || f.getType().equals(Long.class) || f.getType().equals(Short.class) || f.getType().equals(Float.class)
+                    || f.getType().equals(Double.class)) {
+                Object val = PropertyAccessorHelper.getObject(obj, column.getField());
+                dBObj.put(column.getName(), val);
+            } else {
+                log.warn("Field " + f.getName() + " is not a premitive, String or Wrapper object, and hence, won't be part of persistence");
+            }
+            
         }
         return dBObj;
     }
