@@ -76,15 +76,8 @@ public class MongoDBDataHandler
             for (SuperColumn superColumn : superColumns)
             {
                 Field superColumnField = superColumn.getField();
-                Object embeddedDocumentObject = document.get(superColumnField.getName()); // Can
-                                                                                          // be
-                                                                                          // a
-                                                                                          // BasicDBObject
-                                                                                          // or
-                                                                                          // a
-                                                                                          // list
-                                                                                          // of
-                                                                                          // it.
+                // Can be a BasicDBObject or a list of it.
+                Object embeddedDocumentObject = document.get(superColumnField.getName()); 
                 if (embeddedDocumentObject != null)
                 {
                     if (embeddedDocumentObject instanceof BasicDBList)
@@ -235,11 +228,14 @@ public class MongoDBDataHandler
         {
             Field superColumnField = superColumn.getField();
             Object embeddedObject = PropertyAccessorHelper.getObject(e.getEntity(), superColumnField);
+            
             if (embeddedObject != null)
             {
                 if (embeddedObject instanceof Collection)
                 {
-                    Collection embeddedCollection = (Collection) embeddedObject;
+                    
+                    Collection embeddedCollection = (Collection) embeddedObject;         
+                    
                     dbObj.put(superColumnField.getName(), DocumentObjectMapper.getDocumentListFromCollection(
                             embeddedCollection, superColumn.getColumns()));
                 }
