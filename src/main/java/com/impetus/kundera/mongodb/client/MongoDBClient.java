@@ -213,7 +213,7 @@ public class MongoDBClient implements Client
         Class clazz = m.getEntityClazz();
         log.debug("Fetching data from " + documentName + " for Filter " + filterClauseQueue);
 
-        BasicDBObject query = new MongoDBDataHandler().createMongoDBQuery(filterClauseQueue);
+        BasicDBObject query = new MongoDBDataHandler().createMongoDBQuery(m, filterClauseQueue);
 
         List entities = new ArrayList<E>();
         DBCollection dbCollection = mongoDb.getCollection(documentName);

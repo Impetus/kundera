@@ -304,7 +304,8 @@ public class MongoDBDataHandler
         while (st.hasMoreTokens())
         {
             columnName = st.nextToken();
-        }
+        }       
+        
         return columnName;
     }
 
@@ -314,7 +315,7 @@ public class MongoDBDataHandler
      * @param filterClauseQueue
      * @return
      */
-    public BasicDBObject createMongoDBQuery(Queue filterClauseQueue)
+    public BasicDBObject createMongoDBQuery(EntityMetadata m, Queue filterClauseQueue)
     {
         BasicDBObject query = new BasicDBObject();
 
@@ -326,6 +327,22 @@ public class MongoDBDataHandler
                 String property = new MongoDBDataHandler().getColumnName(filter.getProperty());
                 String condition = filter.getCondition();
                 String value = filter.getValue();
+                
+                //Property, if doesn't exist in entity, may be there in a document embedded within it, so we have to check that
+                //TODO: Query should actually be in a format documentName.embeddedDocumentName.column, remove below if block once this is decided
+                if(!m.getColumnFieldNames().contains(property)) {
+                    String embeddedDocumentName = null;
+                    for(SuperColumn superColumn : m.getSuperColumnsAsList()) {
+                        List<Column> columns = superColumn.getColumns();
+                        for(Column column : columns) {
+                            if(column.getName().equals(property)) {
+                                embeddedDocumentName = superColumn.getName();
+                                break;
+                            }
+                        }
+                    }
+                    property = embeddedDocumentName + "." + property;
+                }
 
                 if (condition.equals("="))
                 {
