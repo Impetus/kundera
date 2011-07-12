@@ -18,6 +18,8 @@ package com.impetus.kundera;
 import java.util.List;
 import java.util.Queue;
 
+import javax.persistence.Query;
+
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
@@ -106,7 +108,7 @@ public interface Client
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception;
+    <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception;
 
     /**
      * Set Cassandra nodes.

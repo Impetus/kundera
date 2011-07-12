@@ -17,10 +17,10 @@ package com.impetus.kundera.hbase.client;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.hbase.KeyValue;
@@ -38,7 +38,7 @@ import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * HBase client.
- *
+ * 
  * @author impetus
  */
 public class HBaseClient implements com.impetus.kundera.Client
@@ -61,7 +61,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.Client#writeColumns(java.lang.String,
      * java.lang.String, java.lang.String, java.util.List,
      * com.impetus.kundera.proxy.EnhancedEntity)
@@ -75,7 +75,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @seecom.impetus.kundera.Client#writeColumns(com.impetus.kundera.ejb.
      * EntityManagerImpl, com.impetus.kundera.proxy.EnhancedEntity,
      * com.impetus.kundera.metadata.EntityMetadata)
@@ -88,7 +88,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
      * EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String,
      * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
@@ -103,7 +103,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
      * EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String,
      * com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
@@ -123,19 +123,19 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
      * EntityManagerImpl, com.impetus.kundera.metadata.EntityMetadata,
      * java.util.Queue)
      */
-    public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception
+    public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");
     }
 
     /**
      * On load from h base.
-     *
+     * 
      * @param <E>
      *            the element type
      * @param clazz
@@ -187,7 +187,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.Client#shutdown()
      */
     @Override
@@ -198,7 +198,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.Client#connect()
      */
     @Override
@@ -213,7 +213,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.Client#setContactNodes(java.lang.String[])
      */
     @Override
@@ -224,7 +224,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.Client#setDefaultPort(int)
      */
     @Override
@@ -235,7 +235,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.Client#delete(java.lang.String,
      * java.lang.String, java.lang.String)
      */
@@ -248,7 +248,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.Client#setKeySpace(java.lang.String)
      */
     @Override
@@ -259,7 +259,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.Client#getType()
      */
     @Override

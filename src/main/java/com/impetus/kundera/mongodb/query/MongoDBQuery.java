@@ -51,7 +51,7 @@ public class MongoDBQuery extends QueryImpl
 
         try
         {
-            return getEntityManager().getClient().loadColumns(getEntityManager(), m, getFilterClauseQueue());
+            return getEntityManager().getClient().loadColumns(getEntityManager(), m, this);
         }
         catch (Exception e)
         {

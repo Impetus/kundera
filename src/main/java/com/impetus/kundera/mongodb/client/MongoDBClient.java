@@ -15,8 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.mongodb.client;
 
+import java.lang.reflect.Field;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
@@ -24,6 +26,7 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,7 +36,14 @@ import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
+import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
+import com.impetus.kundera.mongodb.DocumentObjectMapper;
+import com.impetus.kundera.mongodb.query.MongoDBQuery;
+import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -206,28 +216,47 @@ public class MongoDBClient implements Client
      * @throws Exception
      *             the exception
      */
-    public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception
+    public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
     {
         String documentName = m.getTableName();
         String dbName = m.getSchema();
         Class clazz = m.getEntityClazz();
-        log.debug("Fetching data from " + documentName + " for Filter " + filterClauseQueue);
-
-        BasicDBObject query = new MongoDBDataHandler().createMongoDBQuery(m, filterClauseQueue);
-
-        List entities = new ArrayList<E>();
+        
         DBCollection dbCollection = mongoDb.getCollection(documentName);
+        
+        MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
+        Queue filterClauseQueue = mongoDBQuery.getFilterClauseQueue();
+        String result = mongoDBQuery.getResult();
+        
+        
+        List entities = new ArrayList<E>();
+        
+        //If User wants search on a column within a particular super column, fetch that embedded object collection only
+        //otherwise retrieve whole entity
+        //TODO: improve code
+        if(result.indexOf(".") >= 0) {    
+            
+            entities.addAll(new MongoDBDataHandler().getEmbeddedObjectList(dbCollection, m, documentName, query));
+            
+        } else {
+            log.debug("Fetching data from " + documentName + " for Filter " + filterClauseQueue);
 
-        DBCursor cursor = dbCollection.find(query);
+            BasicDBObject mongoQuery = new MongoDBDataHandler().createMongoQuery(m, filterClauseQueue);            
 
-        while (cursor.hasNext())
-        {
-            DBObject fetchedDocument = cursor.next();
-            Object entity = new MongoDBDataHandler().getEntityFromDocument(em, clazz, m, fetchedDocument);
-            entities.add(entity);
-        }
+            DBCursor cursor = dbCollection.find(mongoQuery);
+
+            while (cursor.hasNext())
+            {
+                DBObject fetchedDocument = cursor.next();
+                Object entity = new MongoDBDataHandler().getEntityFromDocument(em, clazz, m, fetchedDocument);
+                entities.add(entity);
+            }
+        }      
+        
         return entities;
     }
+
+
 
     /*
      * (non-Javadoc)

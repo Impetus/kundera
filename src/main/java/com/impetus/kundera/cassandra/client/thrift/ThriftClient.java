@@ -17,9 +17,9 @@ package com.impetus.kundera.cassandra.client.thrift;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Cassandra.Client;
@@ -40,7 +40,7 @@ import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * The Class ThriftClient.
- *
+ * 
  * @author animesh.kumar
  * @since 0.1
  */
@@ -58,7 +58,7 @@ public class ThriftClient implements CassandraClient
 
     /**
      * Open up a new connection to the Cassandra Database.
-     *
+     * 
      * @return the Cassandra Client
      */
     protected Cassandra.Client setupConnection()
@@ -130,7 +130,7 @@ public class ThriftClient implements CassandraClient
         throw new NotImplementedException("TODO");
     }
 
-    public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception
+    public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");
     }

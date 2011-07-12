@@ -35,10 +35,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Random;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 
 import lucandra.CassandraUtils;
 
@@ -350,7 +350,7 @@ public class PelopsClient implements CassandraClient
      * EntityManagerImpl, com.impetus.kundera.metadata.EntityMetadata,
      * java.util.Queue)
      */
-    public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Queue filterClauseQueue) throws Exception
+    public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");
     }
