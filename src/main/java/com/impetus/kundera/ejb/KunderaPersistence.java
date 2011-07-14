@@ -20,6 +20,9 @@ import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.ProviderUtil;
+
+import org.apache.commons.lang.NotImplementedException;
 
 /**
  * The Class KunderaPersistence.
@@ -59,4 +62,14 @@ public class KunderaPersistence implements PersistenceProvider
         EntityManagerFactoryBuilder conf = new EntityManagerFactoryBuilder();
         return conf.buildEntityManagerFactory(emName, map);
     }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.spi.PersistenceProvider#getProviderUtil()
+     */
+    @Override
+    public ProviderUtil getProviderUtil()
+    {
+        throw new NotImplementedException("TODO");
+    }   
+    
 }
