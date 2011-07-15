@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
@@ -32,6 +33,10 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
@@ -490,13 +495,177 @@ public class EntityManagerImpl implements KunderaEntityManager
     public final void refresh(Object entity)
     {
         throw new NotImplementedException("TODO");
+    }   
+    
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object, java.util.Map)
+     */
+    @Override
+    public <T> T find(Class<T> paramClass, Object paramObject, Map<String, Object> paramMap)
+    {
+        throw new NotImplementedException("TODO");
     }
 
-    /*
-     * @see
-     * javax.persistence.EntityManager#setFlushMode(javax.persistence.FlushModeType
-     * )
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object, javax.persistence.LockModeType)
      */
+    @Override
+    public <T> T find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object, javax.persistence.LockModeType, java.util.Map)
+     */
+    @Override
+    public <T> T find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType,
+            Map<String, Object> paramMap)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#lock(java.lang.Object, javax.persistence.LockModeType, java.util.Map)
+     */
+    @Override
+    public void lock(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
+    {
+        throw new NotImplementedException("TODO");        
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#refresh(java.lang.Object, java.util.Map)
+     */
+    @Override
+    public void refresh(Object paramObject, Map<String, Object> paramMap)
+    {
+        throw new NotImplementedException("TODO");
+        
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#refresh(java.lang.Object, javax.persistence.LockModeType)
+     */
+    @Override
+    public void refresh(Object paramObject, LockModeType paramLockModeType)
+    {
+        throw new NotImplementedException("TODO");
+        
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#refresh(java.lang.Object, javax.persistence.LockModeType, java.util.Map)
+     */
+    @Override
+    public void refresh(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
+    {
+        throw new NotImplementedException("TODO");        
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#detach(java.lang.Object)
+     */
+    @Override
+    public void detach(Object paramObject)
+    {
+        throw new NotImplementedException("TODO");
+        
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#getLockMode(java.lang.Object)
+     */
+    @Override
+    public LockModeType getLockMode(Object paramObject)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#setProperty(java.lang.String, java.lang.Object)
+     */
+    @Override
+    public void setProperty(String paramString, Object paramObject)
+    {
+        throw new NotImplementedException("TODO");
+        
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#getProperties()
+     */
+    @Override
+    public Map<String, Object> getProperties()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#createQuery(javax.persistence.criteria.CriteriaQuery)
+     */
+    @Override
+    public <T> TypedQuery<T> createQuery(CriteriaQuery<T> paramCriteriaQuery)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#createQuery(java.lang.String, java.lang.Class)
+     */
+    @Override
+    public <T> TypedQuery<T> createQuery(String paramString, Class<T> paramClass)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#createNamedQuery(java.lang.String, java.lang.Class)
+     */
+    @Override
+    public <T> TypedQuery<T> createNamedQuery(String paramString, Class<T> paramClass)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#unwrap(java.lang.Class)
+     */
+    @Override
+    public <T> T unwrap(Class<T> paramClass)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#getEntityManagerFactory()
+     */
+    @Override
+    public EntityManagerFactory getEntityManagerFactory()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#getCriteriaBuilder()
+     */
+    @Override
+    public CriteriaBuilder getCriteriaBuilder()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManager#getMetamodel()
+     */
+    @Override
+    public Metamodel getMetamodel()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+
     /*
      * @see
      * javax.persistence.EntityManager#setFlushMode(javax.persistence.FlushModeType

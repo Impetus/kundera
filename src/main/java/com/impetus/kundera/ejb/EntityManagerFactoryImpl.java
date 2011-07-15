@@ -23,8 +23,12 @@ import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnitUtil;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.metamodel.Metamodel;
 import javax.persistence.spi.PersistenceUnitInfo;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -370,5 +374,51 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     {
         this.classes = classes;
     }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManagerFactory#getCriteriaBuilder()
+     */
+    @Override
+    public CriteriaBuilder getCriteriaBuilder()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManagerFactory#getMetamodel()
+     */
+    @Override
+    public Metamodel getMetamodel()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManagerFactory#getProperties()
+     */
+    @Override
+    public Map<String, Object> getProperties()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManagerFactory#getCache()
+     */
+    @Override
+    public javax.persistence.Cache getCache()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.EntityManagerFactory#getPersistenceUnitUtil()
+     */
+    @Override
+    public PersistenceUnitUtil getPersistenceUnitUtil()
+    {
+        throw new NotImplementedException("TODO");
+    }  
+    
 
 }

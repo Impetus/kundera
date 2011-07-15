@@ -18,8 +18,12 @@ package com.impetus.kundera.query;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.FlushModeType;
+import javax.persistence.LockModeType;
+import javax.persistence.Parameter;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 
@@ -186,4 +190,174 @@ public abstract class QueryImpl extends KunderaQuery implements Query
         throw new NotImplementedException("TODO");
     }
 
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#getMaxResults()
+     */
+    @Override
+    public int getMaxResults()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#getFirstResult()
+     */
+    @Override
+    public int getFirstResult()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#getHints()
+     */
+    @Override
+    public Map<String, Object> getHints()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#setParameter(javax.persistence.Parameter, java.lang.Object)
+     */
+    @Override
+    public <T> Query setParameter(Parameter<T> paramParameter, T paramT)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#setParameter(javax.persistence.Parameter, java.util.Calendar, javax.persistence.TemporalType)
+     */
+    @Override
+    public Query setParameter(Parameter<Calendar> paramParameter, Calendar paramCalendar, TemporalType paramTemporalType)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#setParameter(javax.persistence.Parameter, java.util.Date, javax.persistence.TemporalType)
+     */
+    @Override
+    public Query setParameter(Parameter<Date> paramParameter, Date paramDate, TemporalType paramTemporalType)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#getParameters()
+     */
+    @Override
+    public Set<Parameter<?>> getParameters()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#getParameter(java.lang.String)
+     */
+    @Override
+    public Parameter<?> getParameter(String paramString)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#getParameter(java.lang.String, java.lang.Class)
+     */
+    @Override
+    public <T> Parameter<T> getParameter(String paramString, Class<T> paramClass)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#getParameter(int)
+     */
+    @Override
+    public Parameter<?> getParameter(int paramInt)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#getParameter(int, java.lang.Class)
+     */
+    @Override
+    public <T> Parameter<T> getParameter(int paramInt, Class<T> paramClass)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#isBound(javax.persistence.Parameter)
+     */
+    @Override
+    public boolean isBound(Parameter<?> paramParameter)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#getParameterValue(javax.persistence.Parameter)
+     */
+    @Override
+    public <T> T getParameterValue(Parameter<T> paramParameter)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#getParameterValue(java.lang.String)
+     */
+    @Override
+    public Object getParameterValue(String paramString)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#getParameterValue(int)
+     */
+    @Override
+    public Object getParameterValue(int paramInt)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#getFlushMode()
+     */
+    @Override
+    public FlushModeType getFlushMode()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#setLockMode(javax.persistence.LockModeType)
+     */
+    @Override
+    public Query setLockMode(LockModeType paramLockModeType)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#getLockMode()
+     */
+    @Override
+    public LockModeType getLockMode()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.persistence.Query#unwrap(java.lang.Class)
+     */
+    @Override
+    public <T> T unwrap(Class<T> paramClass)
+    {
+        throw new NotImplementedException("TODO");
+    }
 }
