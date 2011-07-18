@@ -38,7 +38,7 @@ public interface DataHandler
      * @param colFamily
      *            column family.
      */
-    void createTable(String tableName, String... colFamily) throws IOException;
+    void createTableIfDoesNotExist(String tableName, String... colFamily) throws IOException;
 
     /**
      * @param tableName
@@ -47,7 +47,7 @@ public interface DataHandler
      * @param columns
      * @throws IOException
      */
-    void loadData(String tableName, String columnFamily, String rowKey, List<Column> columns, EnhancedEntity e)
+    void writeData(String tableName, String columnFamily, String rowKey, List<Column> columns, EnhancedEntity e)
             throws IOException;
 
     /**
@@ -62,7 +62,7 @@ public interface DataHandler
      * @param rowKey
      *            HBase row key
      */
-    HBaseData populateData(String tableName, String columnFamily, String[] columnName, String rowKey)
+    HBaseData readData(String tableName, String columnFamily, String[] columnName, String rowKey)
             throws IOException;
 
     /**

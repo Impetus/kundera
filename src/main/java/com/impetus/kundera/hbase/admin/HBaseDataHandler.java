@@ -62,47 +62,38 @@ public class HBaseDataHandler implements DataHandler
     }
 
     @Override
-    public void createTable(final String tableName, final String... colFamily) throws IOException
+    public void createTableIfDoesNotExist(final String tableName, final String... colFamily)
+            throws MasterNotRunningException, IOException
     {
-        HTableDescriptor htDescriptor = new HTableDescriptor(tableName);
-        for (String columnFamily : colFamily)
+        if (!admin.tableExists(Bytes.toBytes(tableName)))
         {
-            HColumnDescriptor familyMetadata = new HColumnDescriptor(columnFamily);
-            htDescriptor.addFamily(familyMetadata);
+            HTableDescriptor htDescriptor = new HTableDescriptor(tableName);
+            for (String columnFamily : colFamily)
+            {
+                HColumnDescriptor familyMetadata = new HColumnDescriptor(columnFamily);
+                htDescriptor.addFamily(familyMetadata);
+            }
+
+            admin.createTable(htDescriptor);
         }
-        admin.createTable(htDescriptor);
     }
 
     @Override
-    public HBaseData populateData(final String tableName, final String columnFamily, final String[] columnName,
+    public HBaseData readData(final String tableName, final String columnFamily, final String[] columnName,
             final String rowKey) throws IOException
     {
         return hbaseReader.LoadData(gethTable(tableName), columnFamily, columnName, rowKey);
     }
 
     @Override
-    public void loadData(String tableName, String columnFamily, String rowKey, List<Column> columns, EnhancedEntity e)
+    public void writeData(String tableName, String columnFamily, String rowKey, List<Column> columns, EnhancedEntity e)
             throws IOException
     {
-        onLoad(tableName, columnFamily);
+
         hbaseWriter.writeColumns(gethTable(tableName), columnFamily, rowKey, columns, e);
-    }
+    }    
 
-    private void onLoad(String tableName, String columnFamily) throws MasterNotRunningException, IOException
-    {
-        if (!admin.tableExists(Bytes.toBytes(tableName)))
-        {
-            createTable(tableName, columnFamily);
-        }
-    }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * com.impetus.kundera.hbase.admin.Loader#loadConfiguration(java.lang.String
-     * , java.lang.String)
-     */
     private void loadConfiguration(final String hostName, final String port) throws MasterNotRunningException
     {
         Configuration hadoopConf = new Configuration();
@@ -112,7 +103,7 @@ public class HBaseDataHandler implements DataHandler
     }
 
     /**
-     *
+     * 
      * @param hostName
      * @param port
      * @throws MasterNotRunningException

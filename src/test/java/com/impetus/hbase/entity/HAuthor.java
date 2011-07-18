@@ -33,7 +33,7 @@ import javax.persistence.TemporalType;
  */
 @Entity
 // makes it an entity class
-@Table(name = "hAuthor", schema = "Blog")
+@Table(name = "author", schema = "Blog")
 // assign ColumnFamily type and name
 public class HAuthor implements Serializable
 {

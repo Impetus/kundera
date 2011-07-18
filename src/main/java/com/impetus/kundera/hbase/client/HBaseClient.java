@@ -32,6 +32,7 @@ import com.impetus.kundera.hbase.admin.HBaseDataHandler;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
+import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
@@ -59,18 +60,12 @@ public class HBaseClient implements com.impetus.kundera.Client
     /** The em. */
     private EntityManager em;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#writeColumns(java.lang.String,
-     * java.lang.String, java.lang.String, java.util.List,
-     * com.impetus.kundera.proxy.EnhancedEntity)
-     */
     @Override
+    @Deprecated
     public void writeColumns(String keyspace, String columnFamily, String rowKey, List<Column> columns, EnhancedEntity e)
             throws Exception
     {
-        handler.loadData(e.getEntity().getClass().getSimpleName().toLowerCase(), columnFamily, rowKey, columns, e);
+        throw new NotImplementedException("Not yet implemented, Deprecated");
     }
 
     /*
@@ -83,7 +78,25 @@ public class HBaseClient implements com.impetus.kundera.Client
     @Override
     public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
     {
-        throw new PersistenceException("Not yet implemented");
+        String dbName = m.getSchema();          //Has no meaning for HBase, no used
+        String tableName = m.getTableName();
+        String rowKey = e.getId();
+        //List<Column> columns = m.getColumnsAsList();   TODO: See how to handle this   
+        
+        
+        //Check whether this table exists, if not create it
+        List<String> columnFamilyNames = m.getSuperColumnFieldNames();
+        handler.createTableIfDoesNotExist(tableName, columnFamilyNames.toArray(new String[0]));
+        
+        //Now persist column families in the table
+        List<SuperColumn> columnFamilies = m.getSuperColumnsAsList();  //Yes, for HBase they are called column families
+        for(SuperColumn columnFamily : columnFamilies) {
+            String columnFamilyName = columnFamily.getName();
+            List<Column> columns = columnFamily.getColumns();
+            handler.writeData(tableName, columnFamilyName, rowKey, columns, e);
+        }   
+        
+        
     }
 
     /*
@@ -97,8 +110,8 @@ public class HBaseClient implements com.impetus.kundera.Client
     public <E> E loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, String rowKey,
             EntityMetadata m) throws Exception
     {
-        HBaseData data = handler.populateData(clazz.getSimpleName().toLowerCase(), columnFamily, new String[0], rowKey);
-        return onLoadFromHBase(clazz, data, m, rowKey);
+        HBaseData data = handler.readData(clazz.getSimpleName().toLowerCase(), columnFamily, new String[0], rowKey);
+        return loadFromHBase(clazz, data, m, rowKey);
     }
 
     /*
@@ -115,8 +128,8 @@ public class HBaseClient implements com.impetus.kundera.Client
         List<E> entities = new ArrayList<E>();
         for (String rowKey : keys)
         {
-            HBaseData data = handler.populateData(clazz.getSimpleName().toLowerCase(), columnFamily, keys, rowKey);
-            entities.add(onLoadFromHBase(clazz, data, m, rowKey));
+            HBaseData data = handler.readData(clazz.getSimpleName().toLowerCase(), columnFamily, keys, rowKey);
+            entities.add(loadFromHBase(clazz, data, m, rowKey));
         }
         return entities;
     }
@@ -148,7 +161,7 @@ public class HBaseClient implements com.impetus.kundera.Client
      *            the id
      * @return the e
      */
-    private <E> E onLoadFromHBase(Class<E> clazz, HBaseData data, EntityMetadata m, String id)
+    private <E> E loadFromHBase(Class<E> clazz, HBaseData data, EntityMetadata m, String id)
     {
         // Instantiate a new instance
         E e = null;

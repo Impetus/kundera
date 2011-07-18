@@ -16,12 +16,17 @@
 package com.impetus.kundera.junit;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import junit.framework.TestCase;
 
 import com.impetus.hbase.entity.HAuthor;
+import com.impetus.hbase.entity.HUser;
+import com.impetus.kundera.entity.PersonalDetail;
+import com.impetus.kundera.loader.Configuration;
 
 /**
  * @author impetus
@@ -33,33 +38,54 @@ public class TestHBase extends TestCase
     /** The manager. */
     private EntityManager manager;
 
-    //
-    // /**
-    // * Sets the up.
-    // *
-    // * @throws java.lang.Exception * @throws Exception the exception
-    // * @throws Exception the exception
-    // */
-    // public void setUp() throws Exception {
-    // Configuration conf = new Configuration();
-    // manager = conf.getEntityManager("hbase");
-    //
-    // }
+    
+     /**
+     * Sets the up.
+     *
+     * @throws java.lang.Exception * @throws Exception the exception
+     * @throws Exception the exception
+     */
+     public void setUp() throws Exception {
+     Configuration conf = new Configuration();
+     manager = conf.getEntityManager("hbase");
+    
+     }
 
-    @SuppressWarnings("unchecked")
+    /*@SuppressWarnings("unchecked")
     public void testOnPersist()
-    {/*
-      * HAuthor animesh = createAuthor("vivek", "vivek@vivek.com", "India", new
-      * Date()); manager.persist(animesh); HAuthor animesh_db =
-      * manager.find(HAuthor.class, "vivek"); assertEquals(animesh, animesh_db);
-      * Query query=
-      * manager.createQuery("select a from HAuthor a where a.country like :country"
-      * ); query.setParameter("country", "India"); List<HAuthor> list =
-      * query.getResultList(); assertNotNull(list); for(HAuthor auth : list) {
-      * System.out.println("called"); assertEquals("vivek", auth.getUsername());
-      * assertEquals("vivek@vivek.com", auth.getEmailAddress()); }
-      */
-    }
+    {
+        HAuthor author = createAuthor("vivek", "vivek@vivek.com", "India", new Date());
+        manager.persist(author);
+        HAuthor animesh_db = manager.find(HAuthor.class, "vivek");
+        assertEquals(animesh, animesh_db);
+        Query query = manager.createQuery("select a from HAuthor a where a.country like :country");
+        query.setParameter("country", "India");
+        List<HAuthor> list = query.getResultList();
+        assertNotNull(list);
+        for (HAuthor auth : list)
+        {
+            System.out.println("called");
+            assertEquals("vivek", auth.getUsername());
+            assertEquals("vivek@vivek.com", auth.getEmailAddress());
+        }
+        System.out.println(author);
+     
+    }*/
+    
+    public void testSaveUser() {
+        HUser user = new HUser();
+        user.setUserId("0001");
+        
+        PersonalDetail pd = new PersonalDetail();
+        pd.setPersonalDetailId("a");
+        pd.setName("Amresh");
+        pd.setPassword("password1");
+        pd.setRelationshipStatus("Single");
+        
+        user.setPersonalDetail(pd);
+        manager.persist(user);
+    }  
+    
 
     /**
      * Creates the author.
@@ -75,7 +101,7 @@ public class TestHBase extends TestCase
      *
      * @return the author
      */
-    private static HAuthor createAuthor(String username, String email, String country, Date registeredSince)
+    /*private static HAuthor createAuthor(String username, String email, String country, Date registeredSince)
     {
         HAuthor author = new HAuthor();
         author.setUsername(username);
@@ -83,6 +109,6 @@ public class TestHBase extends TestCase
         author.setEmailAddress(email);
         author.setRegistered(registeredSince);
         return author;
-    }
+    }*/
 
 }

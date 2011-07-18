@@ -840,7 +840,9 @@ public final class EntityMetadata
         public List<Column> getColumns()
         {
             return columns;
-        }
+        }    
+        
+        
 
         /**
          * Adds the column.
