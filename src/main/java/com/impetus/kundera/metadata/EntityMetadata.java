@@ -29,6 +29,7 @@ import javax.persistence.FetchType;
 import com.impetus.kundera.ejb.event.CallbackMethod;
 import com.impetus.kundera.loader.DBType;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class EntityMetadata.
  *
@@ -43,7 +44,7 @@ public final class EntityMetadata
     /** Name of Persistence Object. */
     private String tableName;
 
-    /** database name */
+    /** database name. */
     private String schema;
 
     /** field that keeps row identifier. */
@@ -81,6 +82,9 @@ public final class EntityMetadata
     // value=>EntityLisntener Class and method
     /** The callback methods map. */
     private Map<Class<?>, List<? extends CallbackMethod>> callbackMethodsMap = new HashMap<Class<?>, List<? extends CallbackMethod>>();
+    
+    /** The embeddable collection. */
+    private List<Class<?>> embeddableCollection = new ArrayList<Class<?>>();
 
     /** Relationship map, key=>property name, value=>relation. */
     private Map<String, Relation> relationsMap = new HashMap<String, Relation>();
@@ -90,11 +94,15 @@ public final class EntityMetadata
 
     // cache
 
+    /** The db type. */
     private DBType dbType;
 
     /** type. */
     private Type type;
 
+    /**
+     * The Enum Type.
+     */
     public static enum Type
     {
 
@@ -189,7 +197,15 @@ public final class EntityMetadata
      */
     public static enum ForeignKey
     {
-        ONE_TO_ONE, ONE_TO_MANY, MANY_TO_ONE, MANY_TO_MANY
+        
+        /** The ON e_ t o_ one. */
+        ONE_TO_ONE, 
+ /** The ON e_ t o_ many. */
+ ONE_TO_MANY, 
+ /** The MAN y_ t o_ one. */
+ MANY_TO_ONE, 
+ /** The MAN y_ t o_ many. */
+ MANY_TO_MANY
     };
 
     /**
@@ -215,6 +231,8 @@ public final class EntityMetadata
     }
 
     /**
+     * Gets the table name.
+     *
      * @return the tableName
      */
     public String getTableName()
@@ -223,8 +241,9 @@ public final class EntityMetadata
     }
 
     /**
-     * @param tableName
-     *            the tableName to set
+     * Sets the table name.
+     *
+     * @param tableName the tableName to set
      */
     public void setTableName(String tableName)
     {
@@ -232,6 +251,8 @@ public final class EntityMetadata
     }
 
     /**
+     * Gets the schema.
+     *
      * @return the schema
      */
     public String getSchema()
@@ -240,8 +261,9 @@ public final class EntityMetadata
     }
 
     /**
-     * @param schema
-     *            the schema to set
+     * Sets the schema.
+     *
+     * @param schema the schema to set
      */
     public void setSchema(String schema)
     {
@@ -270,6 +292,8 @@ public final class EntityMetadata
     }
 
     /**
+     * Gets the id column.
+     *
      * @return the idColumn
      */
     public Column getIdColumn()
@@ -278,8 +302,9 @@ public final class EntityMetadata
     }
 
     /**
-     * @param idColumn
-     *            the idColumn to set
+     * Sets the id column.
+     *
+     * @param idColumn the idColumn to set
      */
     public void setIdColumn(Column idColumn)
     {
@@ -594,6 +619,30 @@ public final class EntityMetadata
     }
 
     /**
+     * Checks if is embeddable.
+     *
+     * @param fieldClass the field class
+     * @return true, if is embeddable
+     */
+    public boolean isEmbeddable(Class<?> fieldClass)
+    {
+    	return embeddableCollection.contains(fieldClass);
+    	
+    }
+    
+    /**
+     * Adds the to embed collection.
+     *
+     * @param fieldClass the field class
+     */
+    public void addToEmbedCollection(Class<?> fieldClass)
+    {
+    	if(!embeddableCollection.contains(fieldClass))
+    	{
+    		embeddableCollection.add(fieldClass);
+    	}
+    }
+    /**
      * Checks if is cacheable.
      *
      * @return the cacheable
@@ -615,6 +664,9 @@ public final class EntityMetadata
     }
 
     /* @see java.lang.Object#toString() */
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString()
     {
@@ -777,7 +829,7 @@ public final class EntityMetadata
         /** The name. */
         private String name;
 
-        /** Super column field */
+        /** Super column field. */
         private Field field;
 
         /** The columns. */
@@ -786,8 +838,8 @@ public final class EntityMetadata
         /**
          * Instantiates a new super column.
          *
-         * @param name
-         *            the name
+         * @param name the name
+         * @param f the f
          */
         public SuperColumn(String name, Field f)
         {
@@ -807,8 +859,9 @@ public final class EntityMetadata
         }
 
         /**
-         * @param name
-         *            the name to set
+         * Sets the name.
+         *
+         * @param name the name to set
          */
         public void setName(String name)
         {
@@ -816,6 +869,8 @@ public final class EntityMetadata
         }
 
         /**
+         * Gets the field.
+         *
          * @return the field
          */
         public Field getField()
@@ -824,8 +879,9 @@ public final class EntityMetadata
         }
 
         /**
-         * @param field
-         *            the field to set
+         * Sets the field.
+         *
+         * @param field the field to set
          */
         public void setField(Field field)
         {
@@ -975,6 +1031,9 @@ public final class EntityMetadata
          * @see
          * com.impetus.kundera.ejb.event.CallbackMethod#invoke(java.lang.Object)
          */
+        /* (non-Javadoc)
+         * @see com.impetus.kundera.ejb.event.CallbackMethod#invoke(java.lang.Object)
+         */
         public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException,
                 InvocationTargetException, InstantiationException
         {
@@ -984,6 +1043,9 @@ public final class EntityMetadata
         }
 
         /* @see java.lang.Object#toString() */
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         @Override
         public String toString()
         {
@@ -1019,6 +1081,9 @@ public final class EntityMetadata
          * @see
          * com.impetus.kundera.ejb.event.CallbackMethod#invoke(java.lang.Object)
          */
+        /* (non-Javadoc)
+         * @see com.impetus.kundera.ejb.event.CallbackMethod#invoke(java.lang.Object)
+         */
         public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException,
                 InvocationTargetException, InstantiationException
         {
@@ -1028,6 +1093,9 @@ public final class EntityMetadata
         }
 
         /* @see java.lang.Object#toString() */
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
         @Override
         public String toString()
         {
@@ -1207,11 +1275,21 @@ public final class EntityMetadata
         }
     }
 
+    /**
+     * Gets the dB type.
+     *
+     * @return the dB type
+     */
     public DBType getDBType()
     {
         return dbType;
     }
 
+    /**
+     * Sets the dB type.
+     *
+     * @param type the new dB type
+     */
     public void setDBType(DBType type)
     {
         this.dbType = type;

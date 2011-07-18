@@ -18,6 +18,7 @@ package com.impetus.kundera.metadata.processor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
@@ -31,6 +32,8 @@ import org.apache.jasper.tagplugins.jstl.core.Set;
 
 import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
+import com.impetus.kundera.metadata.EntityMetadata.Type;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -96,6 +99,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                 metadata.setType(com.impetus.kundera.metadata.EntityMetadata.Type.SUPER_COLUMN_FAMILY);
                 String superColumnName = f.getName();
                 Class superColumnFieldClass = f.getType();
+                isEmbeddable = true;
 
                 // An embedded attribute can be either Collection or another DTO
                 if (superColumnFieldClass.equals(List.class) || superColumnFieldClass.equals(Set.class))
@@ -108,6 +112,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                 {
                     populateSuperColumnInMetadata(metadata, f, superColumnFieldClass);
                 }
+                metadata.addToEmbedCollection(superColumnFieldClass);
             }
             else
             {
@@ -115,9 +120,31 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                 String name = getValidJPAColumnName(clazz, f);
                 if (null != name)
                 {
-                    metadata.addColumn(name, metadata.new Column(name, f));
+                	//additional check for not to load Unnecessary column objects in JVM. 
+                	if(!isEmbeddable)
+                	{
+                		metadata.addColumn(name, metadata.new Column(name, f));
+                	}
+                	SuperColumn superColumn =  metadata.new SuperColumn(name, f);
+                    metadata.addSuperColumn(name, superColumn);
+                    
+                    superColumn.addColumn(name, f);
                 }
             }
+        }
+        
+        if(isEmbeddable && !metadata.getColumnsMap().isEmpty())
+        {
+        	Map<String, EntityMetadata.Column> cols = metadata.getColumnsMap();
+        	cols.clear();
+        	cols=null;
+        	metadata.setType(Type.SUPER_COLUMN_FAMILY);
+        }else 
+        {
+        	Map<String, EntityMetadata.SuperColumn> superColumns = metadata.getSuperColumnsMap();
+        	superColumns.clear();
+        	superColumns = null;
+        	metadata.setType(Type.COLUMN_FAMILY);
         }
 
     }
