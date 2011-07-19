@@ -15,12 +15,16 @@
  */
 package com.impetus.hbase.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.impetus.kundera.entity.PersonalDetail;
+import com.impetus.kundera.entity.Tweet;
 
 /**
  * Entity class for User
@@ -38,6 +42,10 @@ public class HUser
     //Embedded object, will persist co-located
     @Embedded
     private PersonalDetail personalDetail;
+    
+    // Embedded collection, will persist co-located
+    @Embedded
+    private List<Tweet> tweets;
 
     /**
      * @return the userId
@@ -70,5 +78,26 @@ public class HUser
     {
         this.personalDetail = personalDetail;
     }       
+    
+    /**
+     * @return the tweets
+     */
+    public List<Tweet> getTweets()
+    {
+        return tweets;
+    }
+
+    /**
+     * @param tweets
+     *            the tweets to set
+     */
+    public void addTweet(Tweet tweet)
+    {
+        if (this.tweets == null || this.tweets.isEmpty())
+        {
+            this.tweets = new ArrayList<Tweet>();
+        }
+        this.tweets.add(tweet);
+    }
 
 }

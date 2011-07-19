@@ -26,89 +26,63 @@ import junit.framework.TestCase;
 import com.impetus.hbase.entity.HAuthor;
 import com.impetus.hbase.entity.HUser;
 import com.impetus.kundera.entity.PersonalDetail;
+import com.impetus.kundera.entity.Tweet;
 import com.impetus.kundera.loader.Configuration;
 
 /**
  * @author impetus
- *
+ * 
  */
 public class TestHBase extends TestCase
 {
 
+    Configuration conf;
     /** The manager. */
     private EntityManager manager;
 
-    
-     /**
+    /**
      * Sets the up.
-     *
-     * @throws java.lang.Exception * @throws Exception the exception
-     * @throws Exception the exception
+     * 
+     * @throws java.lang.Exception
+     *             * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
-     public void setUp() throws Exception {
-     Configuration conf = new Configuration();
-     manager = conf.getEntityManager("hbase");
-    
-     }
-
-    /*@SuppressWarnings("unchecked")
-    public void testOnPersist()
+    @Override
+    public void setUp() throws Exception
     {
-        HAuthor author = createAuthor("vivek", "vivek@vivek.com", "India", new Date());
-        manager.persist(author);
-        HAuthor animesh_db = manager.find(HAuthor.class, "vivek");
-        assertEquals(animesh, animesh_db);
-        Query query = manager.createQuery("select a from HAuthor a where a.country like :country");
-        query.setParameter("country", "India");
-        List<HAuthor> list = query.getResultList();
-        assertNotNull(list);
-        for (HAuthor auth : list)
-        {
-            System.out.println("called");
-            assertEquals("vivek", auth.getUsername());
-            assertEquals("vivek@vivek.com", auth.getEmailAddress());
-        }
-        System.out.println(author);
-     
-    }*/
-    
-    public void testSaveUser() {
+        conf = new Configuration();
+        manager = conf.getEntityManager("hbase");
+
+    }
+
+    public void testSaveUser()
+    {
         HUser user = new HUser();
         user.setUserId("0001");
-        
+
         PersonalDetail pd = new PersonalDetail();
         pd.setPersonalDetailId("a");
         pd.setName("Amresh");
         pd.setPassword("password1");
         pd.setRelationshipStatus("Single");
-        
-        user.setPersonalDetail(pd);
-        manager.persist(user);
-    }  
-    
 
-    /**
-     * Creates the author.
-     *
-     * @param username
-     *            the user name
-     * @param email
-     *            the email
-     * @param country
-     *            the country
-     * @param registeredSince
-     *            the registered since
-     *
-     * @return the author
-     */
-    /*private static HAuthor createAuthor(String username, String email, String country, Date registeredSince)
-    {
-        HAuthor author = new HAuthor();
-        author.setUsername(username);
-        author.setCountry(country);
-        author.setEmailAddress(email);
-        author.setRegistered(registeredSince);
-        return author;
-    }*/
+        user.setPersonalDetail(pd);
+        
+        user.addTweet(new Tweet("1", "My first tweet", "Web"));
+        user.addTweet(new Tweet("2", "My second tweet", "Mobile"));
+        
+        manager.persist(user);
+    }
+
+    
+    @Override
+    protected void tearDown() throws Exception
+    {        
+        super.tearDown();
+        conf.destroy();
+    }
+    
+    
 
 }

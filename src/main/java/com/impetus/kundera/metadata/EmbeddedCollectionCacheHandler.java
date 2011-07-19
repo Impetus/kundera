@@ -134,6 +134,14 @@ public class EmbeddedCollectionCacheHandler
     public void clearCache()
     {
         this.embeddedCollectionCache = null;
+        try
+        {
+            finalize();
+        }
+        catch (Throwable e)
+        {
+            log.warn("Unable to reclaim memory while clearing EmbeddedCollection cahche. Nothing to worry, will be taken care of by GC");
+        }
     }
     /*
      * public static void main(String args[]) { EmbeddedCollectionCacheHandler h

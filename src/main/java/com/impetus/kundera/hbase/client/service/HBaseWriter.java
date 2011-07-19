@@ -65,13 +65,14 @@ public class HBaseWriter implements Writer
             return;
         }
         
+        
         for (Column column : columns)
         {
-            String columnName = column.getName();
+            String qualifier = column.getName();
             try
             {
                 
-                p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName), PropertyAccessorHelper.get(columnFamilyObj,
+                p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), PropertyAccessorHelper.get(columnFamilyObj,
                         column.getField()));
             }
             catch (PropertyAccessException e1)

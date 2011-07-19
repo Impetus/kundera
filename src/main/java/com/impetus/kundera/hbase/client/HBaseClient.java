@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.hbase.client;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,11 +26,13 @@ import javax.persistence.Query;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.jasper.tagplugins.jstl.core.Set;
 
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.hbase.admin.DataHandler;
 import com.impetus.kundera.hbase.admin.HBaseDataHandler;
 import com.impetus.kundera.loader.DBType;
+import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
 import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
@@ -92,8 +95,34 @@ public class HBaseClient implements com.impetus.kundera.Client
         List<SuperColumn> columnFamilies = m.getSuperColumnsAsList();  //Yes, for HBase they are called column families
         for(SuperColumn columnFamily : columnFamilies) {
             String columnFamilyName = columnFamily.getName();
-            List<Column> columns = columnFamily.getColumns();
-            handler.writeData(tableName, columnFamilyName, rowKey, columns, e);
+            Field columnFamilyField = columnFamily.getField();
+            Class columnFamilyClass = columnFamilyField.getType();
+            
+            //TODO: Handle Embedded collections differently
+            if(columnFamilyClass.equals(List.class) || columnFamilyClass.equals(Set.class)) {
+                Class embeddedObjectClass = PropertyAccessorHelper.getGenericClass(columnFamilyField);
+                EmbeddedCollectionCacheHandler ecCacheHandler = m.getEcCacheHandler();
+                // Check whether it's first time insert or updation
+                if (ecCacheHandler.isCacheEmpty())
+                { // First time insert
+                    int count = 0;
+                    
+                } else {
+                    // Updation
+                    // Check whether this object is already in cache, which
+                    // means we already have a column family with that name
+                    // Otherwise we need to generate a fresh column family name
+                    int lastEmbeddedObjectCount = ecCacheHandler.getLastEmbeddedObjectCount(e.getId());
+                }
+                
+                
+                
+                System.out.println(embeddedObjectClass);
+            } else {
+                List<Column> columns = columnFamily.getColumns();
+                handler.writeData(tableName, columnFamilyName, rowKey, columns, e);
+            }
+            
         }          
         
     }

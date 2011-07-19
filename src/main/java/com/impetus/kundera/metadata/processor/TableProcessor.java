@@ -102,6 +102,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                 isEmbeddable = true;
 
                 // An embedded attribute can be either Collection or another DTO
+                //TODO: Derive this from @EmbeddedCollection annotation, to be introduced later
                 if (superColumnFieldClass.equals(List.class) || superColumnFieldClass.equals(Set.class))
                 {
                     superColumnFieldClass = PropertyAccessorHelper.getGenericClass(f);

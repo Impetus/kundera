@@ -105,6 +105,7 @@ public class PelopsClient implements CassandraClient
     PelopsDataHandler dataHandler = new PelopsDataHandler();
 
     /** The ec cache handler. */
+    //TODO: This has been moved to EntityMetadata, refactor cassandra code to pick it from meta data
     EmbeddedCollectionCacheHandler ecCacheHandler = new EmbeddedCollectionCacheHandler();
 
     /**

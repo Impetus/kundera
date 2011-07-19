@@ -64,6 +64,9 @@ public final class EntityMetadata
 
     /** supercolumn map. */
     private Map<String, SuperColumn> superColumnsMap = new HashMap<String, SuperColumn>();
+    
+    /** The ec cache handler. */
+    EmbeddedCollectionCacheHandler ecCacheHandler = new EmbeddedCollectionCacheHandler();
 
     /** document index boost, lucene specific. */
     private float indexBoost = 1.0f;
@@ -1293,5 +1296,15 @@ public final class EntityMetadata
     public void setDBType(DBType type)
     {
         this.dbType = type;
+    }
+    
+    /**
+     * Gets the ec cache handler.
+     * 
+     * @return the scCacheHandler
+     */
+    public EmbeddedCollectionCacheHandler getEcCacheHandler()
+    {
+        return ecCacheHandler;
     }
 }
