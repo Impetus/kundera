@@ -133,7 +133,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
             }
         }
         
-        if(isEmbeddable && !metadata.getColumnsMap().isEmpty())
+        if(isEmbeddable)
         {
         	Map<String, EntityMetadata.Column> cols = metadata.getColumnsMap();
         	cols.clear();

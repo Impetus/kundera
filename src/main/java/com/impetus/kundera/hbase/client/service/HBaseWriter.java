@@ -18,11 +18,14 @@ package com.impetus.kundera.hbase.client.service;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.kundera.hbase.client.Writer;
+import com.impetus.kundera.metadata.MetadataManager;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -35,6 +38,8 @@ import com.impetus.kundera.proxy.EnhancedEntity;
  */
 public class HBaseWriter implements Writer
 {
+    /** the log used by this class. */
+    private static Log log = LogFactory.getLog(HBaseWriter.class);
 
     /*
      * (non-Javadoc)
@@ -49,15 +54,25 @@ public class HBaseWriter implements Writer
             throws IOException
     {
         Put p = new Put(Bytes.toBytes(rowKey));
-
-        for (Column col : columns)
+        Object columnFamilyObj = null;
+        try
         {
-            String qualifier = col.getName();
+            columnFamilyObj = PropertyAccessorHelper.getObject(e.getEntity(), columnFamily);
+        }
+        catch (PropertyAccessException e2)
+        {
+            log.error("Can't fetch column family object " + columnFamily + " from entity");
+            return;
+        }
+        
+        for (Column column : columns)
+        {
+            String columnName = column.getName();
             try
             {
-                PropertyAccessorHelper.getObject(e.getEntity(), col.getField());
-                p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), PropertyAccessorHelper.get(e.getEntity(),
-                        col.getField()));
+                
+                p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(columnName), PropertyAccessorHelper.get(columnFamilyObj,
+                        column.getField()));
             }
             catch (PropertyAccessException e1)
             {

@@ -94,8 +94,7 @@ public class HBaseClient implements com.impetus.kundera.Client
             String columnFamilyName = columnFamily.getName();
             List<Column> columns = columnFamily.getColumns();
             handler.writeData(tableName, columnFamilyName, rowKey, columns, e);
-        }   
-        
+        }          
         
     }
 
