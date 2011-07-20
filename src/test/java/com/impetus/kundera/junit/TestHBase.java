@@ -15,15 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.junit;
 
-import java.util.Date;
-import java.util.List;
-
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 
 import junit.framework.TestCase;
 
-import com.impetus.hbase.entity.HAuthor;
 import com.impetus.hbase.entity.HUser;
 import com.impetus.kundera.entity.PersonalDetail;
 import com.impetus.kundera.entity.Tweet;
@@ -37,6 +32,7 @@ public class TestHBase extends TestCase
 {
 
     Configuration conf;
+
     /** The manager. */
     private EntityManager manager;
 
@@ -68,21 +64,18 @@ public class TestHBase extends TestCase
         pd.setRelationshipStatus("Single");
 
         user.setPersonalDetail(pd);
-        
+
         user.addTweet(new Tweet("1", "My first tweet", "Web"));
         user.addTweet(new Tweet("2", "My second tweet", "Mobile"));
-        
+
         manager.persist(user);
     }
 
-    
     @Override
     protected void tearDown() throws Exception
-    {        
+    {
         super.tearDown();
         conf.destroy();
     }
-    
-    
 
 }

@@ -37,6 +37,6 @@ public interface Writer
      * @param rowKey
      * @param columns
      */
-    void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns, EnhancedEntity e)
+    void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns, Object columnFamilyObj)
             throws IOException;
 }

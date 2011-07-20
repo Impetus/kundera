@@ -50,21 +50,10 @@ public class HBaseWriter implements Writer
      * com.impetus.kundera.proxy.EnhancedEntity)
      */
     @Override
-    public void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns, EnhancedEntity e)
+    public void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns, Object columnFamilyObj)
             throws IOException
     {
-        Put p = new Put(Bytes.toBytes(rowKey));
-        Object columnFamilyObj = null;
-        try
-        {
-            columnFamilyObj = PropertyAccessorHelper.getObject(e.getEntity(), columnFamily);
-        }
-        catch (PropertyAccessException e2)
-        {
-            log.error("Can't fetch column family object " + columnFamily + " from entity");
-            return;
-        }
-        
+        Put p = new Put(Bytes.toBytes(rowKey));       
         
         for (Column column : columns)
         {
