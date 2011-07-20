@@ -39,6 +39,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -160,7 +161,7 @@ public class PelopsDataHandler
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
         Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
-        createColumnsToFieldMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
+        MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
 
         // Add all super columns to entity
         Collection embeddedCollection = null;
@@ -310,7 +311,7 @@ public class PelopsDataHandler
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
         Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
-        createColumnsToFieldMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
+        MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
 
         // If this super column is variable in number (name#sequence format)
         if (scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER) != -1)
@@ -601,25 +602,7 @@ public class PelopsDataHandler
         }
         return sb.toString();
     }
-
-    /**
-     * @param m
-     * @param columnNameToFieldMap
-     * @param superColumnNameToFieldMap
-     */
-    private void createColumnsToFieldMaps(EntityMetadata m, Map<String, Field> columnNameToFieldMap,
-            Map<String, Field> superColumnNameToFieldMap)
-    {
-        for (Map.Entry<String, EntityMetadata.SuperColumn> entry : m.getSuperColumnsMap().entrySet())
-        {
-            EntityMetadata.SuperColumn scMetadata = entry.getValue();
-            superColumnNameToFieldMap.put(scMetadata.getName(), scMetadata.getField());
-            for (EntityMetadata.Column cMetadata : entry.getValue().getColumns())
-            {
-                columnNameToFieldMap.put(cMetadata.getName(), cMetadata.getField());
-            }
-        }
-    }
+    
 
     /**
      * All relationships in a column family are saved as additional column

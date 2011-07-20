@@ -113,8 +113,10 @@ public class HBaseClient implements com.impetus.kundera.Client
     public <E> E loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, String rowKey,
             EntityMetadata m) throws Exception
     {
-        HBaseData data = handler.readData(clazz.getSimpleName().toLowerCase(), columnFamily, new String[0], rowKey);
-        return loadFromHBase(clazz, data, m, rowKey);
+        //columnFamily has a different meaning for HBase, so it won't be used here
+        String tableName = m.getTableName();
+        E e = handler.readData(tableName, clazz, m, rowKey);
+        return e;
     }
 
     /*
@@ -131,8 +133,8 @@ public class HBaseClient implements com.impetus.kundera.Client
         List<E> entities = new ArrayList<E>();
         for (String rowKey : keys)
         {
-            HBaseData data = handler.readData(clazz.getSimpleName().toLowerCase(), columnFamily, keys, rowKey);
-            entities.add(loadFromHBase(clazz, data, m, rowKey));
+            E e = handler.readData(m.getTableName(), clazz, m, rowKey);
+            entities.add(e);
         }
         return entities;
     }
@@ -149,57 +151,7 @@ public class HBaseClient implements com.impetus.kundera.Client
         throw new NotImplementedException("Not yet implemented");
     }
 
-    /**
-     * On load from h base.
-     * 
-     * @param <E>
-     *            the element type
-     * @param clazz
-     *            the clazz
-     * @param data
-     *            the data
-     * @param m
-     *            the m
-     * @param id
-     *            the id
-     * @return the e
-     */
-    private <E> E loadFromHBase(Class<E> clazz, HBaseData data, EntityMetadata m, String id)
-    {
-        // Instantiate a new instance
-        E e = null;
-        try
-        {
-            e = clazz.newInstance();
-            String colName = null;
-            byte[] columnValue = null;
-            PropertyAccessorHelper.set(e, m.getIdProperty(), id);
-            List<KeyValue> values = data.getColumns();
-            for (KeyValue colData : values)
-            {
-                colName = Bytes.toString(colData.getQualifier());
-                columnValue = colData.getValue();
-
-                // Get Column from metadata
-                com.impetus.kundera.metadata.EntityMetadata.Column column = m.getColumn(colName);
-                PropertyAccessorHelper.set(e, column.getField(), columnValue);
-            }
-        }
-        catch (InstantiationException e1)
-        {
-            throw new RuntimeException(e1.getMessage());
-        }
-        catch (IllegalAccessException e1)
-        {
-            throw new RuntimeException(e1.getMessage());
-        }
-        catch (PropertyAccessException e1)
-        {
-            throw new RuntimeException(e1.getMessage());
-        }
-
-        return e;
-    }
+    
 
     /*
      * (non-Javadoc)
@@ -258,7 +210,7 @@ public class HBaseClient implements com.impetus.kundera.Client
     @Override
     public void delete(String keyspace, String columnFamily, String rowId) throws Exception
     {
-        throw new RuntimeException("TODO:not yet supprot");
+        throw new RuntimeException("TODO:not yet supported");
 
     }
 
@@ -270,7 +222,7 @@ public class HBaseClient implements com.impetus.kundera.Client
     @Override
     public void setKeySpace(String keySpace)
     {
-        // TODO not required.
+        // TODO not required, Keyspace not applicable to Hbase
     }
 
     /*

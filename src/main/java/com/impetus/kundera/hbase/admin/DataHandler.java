@@ -53,18 +53,8 @@ public interface DataHandler
 
     /**
      * Populates data for give column family, column name, and HBase table name.
-     *
-     * @param tableName
-     *            HBase table name
-     * @param columnFamily
-     *            column family name
-     * @param columnName
-     *            column name
-     * @param rowKey
-     *            HBase row key
      */
-    HBaseData readData(String tableName, String columnFamily, String[] columnName, String rowKey)
-            throws IOException;
+    <E> E readData(String tableName, Class<E> clazz, EntityMetadata m, String rowKey) throws IOException;
 
     /**
      * Shutdown.

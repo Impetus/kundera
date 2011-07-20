@@ -47,12 +47,16 @@ public class HBaseReader implements Reader
      */
     @SuppressWarnings("unused")
     @Override
-    public HBaseData LoadData(HTable hTable, String columnFamily, String[] columnName, String rowKey)
+    public HBaseData LoadData(HTable hTable, String columnFamily, String rowKey)
             throws IOException
     {
         HBaseData data = new HBaseData(columnFamily, rowKey);
+        
         Get g = new Get(Bytes.toBytes(rowKey));
+        
         Result r = hTable.get(g);
+        
+        
         // TODO initially targeting to get all values on the basis for give row
         // key and column family.
         RowResult rwResult = r.getRowResult();
