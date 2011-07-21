@@ -336,10 +336,7 @@ public class HBaseDataHandler implements DataHandler
                         
                         //Save embedded object into Cache, needed while updation and deletion
                         m.getEcCacheHandler().addEmbeddedCollectionCacheMapping(rowKey, embeddedObject, cfInHbase);
-                    }     
-                    
-                    
-                    
+                    }             
                     
                     //Collection to hold column family objects
                     Collection embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);

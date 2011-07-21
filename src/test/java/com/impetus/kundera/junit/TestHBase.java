@@ -15,10 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.junit;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 
 import junit.framework.TestCase;
 
@@ -55,7 +52,7 @@ public class TestHBase extends TestCase
 
     }
 
-    public void testSaveUser()
+    public void testSaveAndFindUser()
     {
         HUser user = new HUser();
         user.setUserId("0001");
@@ -72,18 +69,25 @@ public class TestHBase extends TestCase
         user.addTweet(new Tweet("2", "My second tweet", "Mobile"));
 
         manager.persist(user);
+        
+        HUser user2 = manager.find(HUser.class, "0001");
+        assertNotNull(user2);
+        assertEquals("0001", user2.getUserId());
+        assertEquals("Amresh", user2.getPersonalDetail().getName());  
+        
     }
     
-    public void testFindUser() {
-        HUser user = manager.find(HUser.class, "0001");
-        assertNotNull(user);
-    }  
     
     /*public void testQuery() {
         Query q = manager.createQuery("select u from HUser u");
         List<HUser> users = q.getResultList();
         System.out.println(users);
         
-    }*/   
-
+    }*/ 
+    
+    @Override
+    protected void tearDown() throws Exception
+    {    
+        super.tearDown();
+    }   
 }
