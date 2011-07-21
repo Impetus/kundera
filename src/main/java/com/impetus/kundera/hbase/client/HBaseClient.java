@@ -15,34 +15,25 @@
  ******************************************************************************/
 package com.impetus.kundera.hbase.client;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
+import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.jasper.tagplugins.jstl.core.Set;
+import org.scale7.cassandra.pelops.Bytes;
 
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.hbase.admin.DataHandler;
 import com.impetus.kundera.hbase.admin.HBaseDataHandler;
-import com.impetus.kundera.hbase.client.service.HBaseWriter;
 import com.impetus.kundera.loader.DBType;
-import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
-import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
-import com.impetus.kundera.property.PropertyAccessException;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
@@ -98,7 +89,8 @@ public class HBaseClient implements com.impetus.kundera.Client
         List<String> columnFamilyNames = m.getSuperColumnFieldNames();
         handler.createTableIfDoesNotExist(tableName, columnFamilyNames.toArray(new String[0]));
         
-        handler.writeData(tableName, m, e);
+        //Write data to HBase
+        handler.writeData(tableName, m, e);     
         
     }
 
@@ -149,9 +141,17 @@ public class HBaseClient implements com.impetus.kundera.Client
     public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");
-    }
+    }    
 
-    
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.Client#loadEmbeddedObjects(java.lang.String, java.lang.String, java.lang.String[])
+     */
+    @Override
+    public Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String keyspace, String columnFamily, String... keys)
+            throws Exception
+    {
+        throw new NotImplementedException("Not yet implemented");
+    }
 
     /*
      * (non-Javadoc)

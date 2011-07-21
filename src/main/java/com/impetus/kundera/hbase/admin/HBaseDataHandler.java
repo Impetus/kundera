@@ -206,6 +206,9 @@ public class HBaseDataHandler implements DataHandler
                                     + (++lastEmbeddedObjectCount);
                         }
                     }
+                    
+                    //Clear embedded collection cache for GC
+                    ecCacheHandler.clearCache();
                 }         
                 
                 
@@ -330,7 +333,13 @@ public class HBaseDataHandler implements DataHandler
                         setHBaseDataIntoObject(colData, columnNameToFieldMap, embeddedObject);              
                         
                         embeddedObjectArr[cfNameCounter] = embeddedObject;                        
+                        
+                        //Save embedded object into Cache, needed while updation and deletion
+                        m.getEcCacheHandler().addEmbeddedCollectionCacheMapping(rowKey, embeddedObject, cfInHbase);
                     }     
+                    
+                    
+                    
                     
                     //Collection to hold column family objects
                     Collection embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);

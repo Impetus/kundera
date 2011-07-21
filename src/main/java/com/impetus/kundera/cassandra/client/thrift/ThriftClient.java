@@ -153,7 +153,7 @@ public class ThriftClient implements CassandraClient
      * java.lang.String, java.lang.String[])
      */
     @Override
-    public Map<Bytes, List<SuperColumn>> loadSuperColumns(String keyspace, String columnFamily, String... rowIds)
+    public Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String keyspace, String columnFamily, String... rowIds)
             throws Exception
     {
         throw new NotImplementedException("TODO");

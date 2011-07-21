@@ -37,7 +37,6 @@ import com.impetus.kundera.cassandra.client.CassandraClient;
 import com.impetus.kundera.cassandra.client.pelops.PelopsDataHandler;
 import com.impetus.kundera.db.accessor.BaseDataAccessor;
 import com.impetus.kundera.ejb.EntityManagerImpl;
-import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -98,15 +97,16 @@ public final class ColumnFamilyDataAccessor extends BaseDataAccessor
         String keyspace = m.getSchema();
         String family = m.getTableName();
 
-        return m.getSuperColumnsAsList().isEmpty()?getEntityManager().getClient().loadColumns(getEntityManager(), clazz, keyspace, family, m, ids):
-            readSuperColumn(clazz, m, keyspace, family, ids);
+        return m.getSuperColumnsAsList().isEmpty()?
+                getEntityManager().getClient().loadColumns(getEntityManager(), clazz, keyspace, family, m, ids)
+                : loadEmbeddedObjects(clazz, m, keyspace, family, ids);
     }
 
-    private <E> List<E> readSuperColumn(Class<E> clazz, EntityMetadata m, String keyspace, String family, String... ids)
+    private <E> List<E> loadEmbeddedObjects(Class<E> clazz, EntityMetadata m, String keyspace, String family, String... ids)
             throws Exception
     {
         List<E> entities = new ArrayList<E>();
-        Map<Bytes, List<SuperColumn>> map = ((CassandraClient)getEntityManager().getClient()).loadSuperColumns(keyspace, family,ids);
+        Map<Bytes, List<SuperColumn>> map = getEntityManager().getClient().loadEmbeddedObjects(keyspace, family,ids);
         for (Map.Entry<Bytes, List<SuperColumn>> entry : map.entrySet())
         {
             String entityId = PropertyAccessorFactory.STRING.fromBytes(entry.getKey().toByteArray());

@@ -381,11 +381,6 @@ public class PelopsClient implements CassandraClient
     }
 
     /*
-     * @see
-     * com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String,
-     * java.lang.String, java.lang.String[])
-     */
-    /*
      * (non-Javadoc)
      * 
      * @see
@@ -393,7 +388,7 @@ public class PelopsClient implements CassandraClient
      * java.lang.String, java.lang.String[])
      */
     @Override
-    public final Map<Bytes, List<SuperColumn>> loadSuperColumns(String keyspace, String columnFamily, String... rowIds)
+    public final Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String keyspace, String columnFamily, String... rowIds)
             throws Exception
     {
 

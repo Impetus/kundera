@@ -16,9 +16,12 @@
 package com.impetus.kundera;
 
 import java.util.List;
-import java.util.Queue;
+import java.util.Map;
 
 import javax.persistence.Query;
+
+import org.apache.cassandra.thrift.SuperColumn;
+import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
@@ -95,6 +98,22 @@ public interface Client
      */
     <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
             EntityMetadata m, String... keys) throws Exception;
+    
+    /**
+     * Load super-columns from multiple rows of a super-column-family.
+     *
+     * @param keyspace
+     *            the keyspace
+     * @param columnFamily
+     *            The name of the super column family to operate on
+     * @param keys
+     *            Array of row keys
+     * @return A Map of row and corresponding list of super-columns.
+     * @throws Exception
+     *             the exception
+     */
+    Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String keyspace, String columnFamily, String... keys)
+            throws Exception;
 
     /**
      * Loads columns from multiple rows restricting results to conditions stored

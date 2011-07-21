@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
@@ -28,8 +29,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.kundera.Client;
 import com.impetus.kundera.ejb.EntityManagerImpl;
@@ -257,6 +260,12 @@ public class MongoDBClient implements Client
     }
 
 
+    @Override
+    public Map<Bytes, List<org.apache.cassandra.thrift.SuperColumn>> loadEmbeddedObjects(String keyspace,
+            String columnFamily, String... keys) throws Exception
+    {
+        throw new NotImplementedException("Method not applicable for MongoDB. Invalid method call");
+    }
 
     /*
      * (non-Javadoc)

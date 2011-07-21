@@ -16,11 +16,9 @@
 package com.impetus.kundera.cassandra.client;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.scale7.cassandra.pelops.Bytes;
 
 /**
  * Interface used to interact with Cassandra Clients.
@@ -67,21 +65,7 @@ public interface CassandraClient extends com.impetus.kundera.Client
     List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String key, String... superColumnNames)
             throws Exception;
 
-    /**
-     * Load super-columns from multiple rows of a super-column-family.
-     *
-     * @param keyspace
-     *            the keyspace
-     * @param columnFamily
-     *            The name of the super column family to operate on
-     * @param keys
-     *            Array of row keys
-     * @return A Map of row and corresponding list of super-columns.
-     * @throws Exception
-     *             the exception
-     */
-    Map<Bytes, List<SuperColumn>> loadSuperColumns(String keyspace, String columnFamily, String... keys)
-            throws Exception;
+    
 
     /**
      * Gets the cassandra client.
