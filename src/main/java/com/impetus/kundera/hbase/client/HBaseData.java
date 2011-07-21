@@ -47,6 +47,11 @@ public class HBaseData implements DataWrapper
         this.columnFamily = columnFamily;
         this.rowKey = rowKey;
     }
+    
+    public HBaseData(String rowKey)
+    {        
+        this.rowKey = rowKey;
+    }
 
     /**
      * Getter column family

@@ -17,8 +17,8 @@ package com.impetus.kundera.hbase.admin;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +33,7 @@ import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.jasper.tagplugins.jstl.core.Set;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.hbase.client.HBaseData;
@@ -42,9 +43,9 @@ import com.impetus.kundera.hbase.client.service.HBaseReader;
 import com.impetus.kundera.hbase.client.service.HBaseWriter;
 import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.metadata.EntityMetadata;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
 import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
@@ -129,13 +130,13 @@ public class HBaseDataHandler implements DataHandler
         E e = null;
         try
         {
-            e = clazz.newInstance();
-            List<SuperColumn> columnFamilies = m.getSuperColumnsAsList();  //Yes, for HBase they are called column families
-            for(SuperColumn columnFamily : columnFamilies) {
-                String columnFamilyName = columnFamily.getName();
-                HBaseData data = hbaseReader.LoadData(gethTable(tableName), columnFamilyName, rowKey); 
-                populateEntityFromHbaseData(e, data, m, rowKey);
-            }
+            e = clazz.newInstance();    
+            
+            //Load raw data from HBase 
+            HBaseData data = hbaseReader.LoadData(gethTable(tableName), rowKey);                          
+            
+            //Populate raw data from HBase into entity
+            populateEntityFromHbaseData(e, data, m, rowKey);           
         }
         catch (InstantiationException e1)
         {
@@ -278,38 +279,88 @@ public class HBaseDataHandler implements DataHandler
         }
     }
     
-
+    //TODO: Scope of performance improvement in this method
     private void populateEntityFromHbaseData(Object entity, HBaseData data, EntityMetadata m, String rowKey)
     {       
         try
-        {            
-            String colName = null;
-            byte[] columnValue = null;
+        {  
+            /*Set Row Key*/
+            PropertyAccessorHelper.set(entity, m.getIdProperty(), rowKey);  
             
-            //Set Row Key
-            PropertyAccessorHelper.set(entity, m.getIdProperty(), rowKey);
+            /*Set each column families*/
+            List<SuperColumn> columnFamilies = m.getSuperColumnsAsList();  //Yes, for HBase they are called column families
+            for(SuperColumn columnFamily : columnFamilies) {            
+                Field columnFamilyFieldInEntity = columnFamily.getField();
+                Class<?> columnFamilyClass = columnFamilyFieldInEntity.getType();
+                
+                //Get a name->field map for columns in this column family
+                Map<String, Field> columnNameToFieldMap = MetadataUtils.createColumnsFieldMap(m, columnFamily);  
+                
+                //Raw data retrieved from HBase for a particular row key (contains all column families)
+                List<KeyValue> hbaseValues = data.getColumns();  
+                
+                //Column family can be either @Embedded or @EmbeddedCollection
+                if(columnFamilyClass.equals(List.class) || columnFamilyClass.equals(Set.class)) {
+                    
+                    Field embeddedCollectionField = columnFamily.getField();                                    
+                    Object[] embeddedObjectArr = new Object[hbaseValues.size()];  //Array to hold column family objects
+                    
+                    
+                    Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
+                    int prevCFNameCounter = 0;    //Previous CF name counter
+                    for (KeyValue colData : hbaseValues)
+                    {
+                        String cfInHbase = Bytes.toString(colData.getFamily());                   
+                        //Only populate those data from Hbase into entity that matches with column family name 
+                        // in the format <Collection field name>#<sequence count>
+                        if(! cfInHbase.startsWith(columnFamily.getName())) {
+                            continue;
+                        }
+                        
+                        String cfNamePostfix = MetadataUtils.getEmbeddedCollectionPostfix(cfInHbase);                        
+                        int cfNameCounter = Integer.parseInt(cfNamePostfix);
+                        if(cfNameCounter != prevCFNameCounter) {
+                            prevCFNameCounter = cfNameCounter;
+                            
+                            //Fresh embedded object for the next column family in collection
+                            embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
+                        }                        
+                        
+                        //Set Hbase data into the embedded object
+                        setHBaseDataIntoObject(colData, columnNameToFieldMap, embeddedObject);              
+                        
+                        embeddedObjectArr[cfNameCounter] = embeddedObject;                        
+                    }     
+                    
+                    //Collection to hold column family objects
+                    Collection embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
+                    embeddedCollection.addAll(Arrays.asList(embeddedObjectArr));
+                    embeddedObjectArr = null;    //Eligible for GC
+                    
+                    //Now, set the embedded collection into entity
+                    if(embeddedCollection != null && ! embeddedCollection.isEmpty()) {
+                        PropertyAccessorHelper.set(entity, embeddedCollectionField, embeddedCollection);
+                    }
+                    
+                } else {
+                    Object columnFamilyObj = columnFamilyClass.newInstance();                                      
+                    
+                    for (KeyValue colData : hbaseValues)
+                    {
+                        String cfInHbase = Bytes.toString(colData.getFamily());
+                        
+                        if(!cfInHbase.equals(columnFamily.getName())) {
+                            continue;
+                        }                        
+                        
+                        //Set Hbase data into the column family object
+                        setHBaseDataIntoObject(colData, columnNameToFieldMap, columnFamilyObj);                                
+                    }
+                    PropertyAccessorHelper.set(entity, columnFamilyFieldInEntity, columnFamilyObj);   
+                }               
+                             
+            }         
             
-            String columnFamilyName = data.getColumnFamily();
-            SuperColumn columnFamily = m.getSuperColumn(columnFamilyName);            
-            Field columnFamilyFieldInEntity = columnFamily.getField();
-            Class columnFamilyClass = columnFamilyFieldInEntity.getType();
-            Object columnFamilyObj = columnFamilyClass.newInstance();
-            
-            List<KeyValue> values = data.getColumns();  
-            
-            //Get a name->field map for columns in this column family
-            Map<String, Field> columnNameToFieldMap = MetadataUtils.createColumnsFieldMap(m, columnFamily);
-            
-            for (KeyValue colData : values)
-            {
-                colName = Bytes.toString(colData.getQualifier());
-                columnValue = colData.getValue();                 
-
-                // Get Column from metadata
-                Field columnField = columnNameToFieldMap.get(colName);
-                PropertyAccessorHelper.set(columnFamilyObj, columnField, columnValue);              
-            }
-            PropertyAccessorHelper.set(entity, columnFamilyFieldInEntity, columnFamilyObj);
         }        
         catch (PropertyAccessException e1)
         {
@@ -323,6 +374,19 @@ public class HBaseDataHandler implements DataHandler
         {
             throw new RuntimeException(e1.getMessage());
         }
+    }
+    
+    private void setHBaseDataIntoObject(KeyValue colData, Map<String, Field> columnNameToFieldMap, Object columnFamilyObj) 
+        throws PropertyAccessException {      
+        
+        String colName = Bytes.toString(colData.getQualifier());
+        byte[] columnValue = colData.getValue();                 
+
+        // Get Column from metadata
+        Field columnField = columnNameToFieldMap.get(colName);
+        if(columnField != null) {
+            PropertyAccessorHelper.set(columnFamilyObj, columnField, columnValue);
+        }                        
     }
 
 }

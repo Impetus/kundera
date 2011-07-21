@@ -74,13 +74,6 @@ public class TestHBase extends TestCase
     public void testFindUser() {
         HUser user = manager.find(HUser.class, "0001");
         System.out.println(user);
-    }
-
-    @Override
-    protected void tearDown() throws Exception
-    {
-        super.tearDown();
-        conf.destroy();
-    }
+    }  
 
 }

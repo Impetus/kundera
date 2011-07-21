@@ -16,11 +16,20 @@
 package com.impetus.kundera.metadata;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
 import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Utility class for entity metadata related funcntionality
@@ -41,9 +50,9 @@ public class MetadataUtils
         {
             EntityMetadata.SuperColumn scMetadata = entry.getValue();
             superColumnNameToFieldMap.put(scMetadata.getName(), scMetadata.getField());
-            for (EntityMetadata.Column cMetadata : entry.getValue().getColumns())
+            for (EntityMetadata.Column column : entry.getValue().getColumns())
             {                
-                columnNameToFieldMap.put(cMetadata.getName(), cMetadata.getField());
+                columnNameToFieldMap.put(column.getName(), column.getField());
             }
         }
     }
@@ -63,5 +72,79 @@ public class MetadataUtils
         return columnNameToFieldMap;
 
     }
+    
+    /**
+     * @param m
+     * @param columnNameToFieldMap
+     * @param superColumnNameToFieldMap
+     */
+    public static Map<String, Field> createSuperColumnsFieldMap(EntityMetadata m)
+    {
+        Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
+        for (Map.Entry<String, EntityMetadata.SuperColumn> entry : m.getSuperColumnsMap().entrySet())
+        {
+            EntityMetadata.SuperColumn scMetadata = entry.getValue();
+            superColumnNameToFieldMap.put(scMetadata.getName(), scMetadata.getField());
+            
+        }
+        return superColumnNameToFieldMap;
+
+    }
+    
+    public static Collection getEmbeddedCollectionInstance(Field embeddedCollectionField) {
+        Collection embeddedCollection = null;
+        Class embeddedCollectionFieldClass = embeddedCollectionField.getType();
+
+        if (embeddedCollection == null || embeddedCollection.isEmpty())
+        {
+            if (embeddedCollectionFieldClass.equals(List.class))
+            {
+                embeddedCollection = new ArrayList<Object>();
+            }
+            else if (embeddedCollectionFieldClass.equals(Set.class))
+            {
+                embeddedCollection = new HashSet<Object>();
+            }
+            else
+            {
+                throw new PersistenceException("Field " + embeddedCollectionField.getName() + " must be either instance of List or Set");
+            }
+        }
+        return embeddedCollection;
+    }
+    
+    public static Object getEmbeddedGenericObjectInstance(Field embeddedCollectionField) {
+        Class<?> embeddedClass = PropertyAccessorHelper.getGenericClass(embeddedCollectionField);
+        Object embeddedObject = null;
+        // must have a default no-argument constructor
+        try
+        {
+            embeddedClass.getConstructor();
+            embeddedObject = embeddedClass.newInstance();
+        }
+        catch (NoSuchMethodException nsme)
+        {
+            throw new PersistenceException(embeddedClass.getName()
+                    + " is @Embeddable and must have a default no-argument constructor.");
+        } 
+        catch(InstantiationException e)
+        {
+            throw new PersistenceException(embeddedClass.getName() + " could not be instantiated");
+        }
+        
+        catch(IllegalAccessException e)
+        {
+            throw new PersistenceException(embeddedClass.getName() + " could not be accessed");
+        }
+        return embeddedObject;        
+    }
+    
+    public static String getEmbeddedCollectionPrefix(String embeddedCollectionName) {
+        return embeddedCollectionName.substring(0, embeddedCollectionName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER));
+    }
+    
+    public static String getEmbeddedCollectionPostfix(String embeddedCollectionName) {
+        return embeddedCollectionName.substring(embeddedCollectionName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER) + 1, embeddedCollectionName.length());
+    }  
 
 }

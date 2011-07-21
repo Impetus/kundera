@@ -174,45 +174,10 @@ public class PelopsDataHandler
             // If this super column is variable in number (name#sequence format)
             if (scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER) != -1)
             {
-                StringTokenizer st = new StringTokenizer(scName, Constants.SUPER_COLUMN_NAME_DELIMITER);
-                if (st.hasMoreTokens())
-                {
-                    scNamePrefix = st.nextToken();
-                }
-
-                embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
-                Class embeddedCollectionFieldClass = embeddedCollectionField.getType();
-
-                if (embeddedCollection == null || embeddedCollection.isEmpty())
-                {
-                    if (embeddedCollectionFieldClass.equals(List.class))
-                    {
-                        embeddedCollection = new ArrayList<Object>();
-                    }
-                    else if (embeddedCollectionFieldClass.equals(Set.class))
-                    {
-                        embeddedCollection = new HashSet<Object>();
-                    }
-                    else
-                    {
-                        throw new PersistenceException("Super Column " + scName
-                                + " doesn't match with entity which should have been a Collection");
-                    }
-                }
-
-                Class<?> embeddedClass = PropertyAccessorHelper.getGenericClass(embeddedCollectionField);
-
-                // must have a default no-argument constructor
-                try
-                {
-                    embeddedClass.getConstructor();
-                }
-                catch (NoSuchMethodException nsme)
-                {
-                    throw new PersistenceException(embeddedClass.getName()
-                            + " is @Embeddable and must have a default no-argument constructor.");
-                }
-                Object embeddedObject = embeddedClass.newInstance();
+                scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
+                embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);                
+                embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);            
+                Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
 
                 boolean intoRelations = false;
                 if (scName.equals(TO_ONE_SUPER_COL_NAME))

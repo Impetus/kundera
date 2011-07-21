@@ -36,6 +36,8 @@ public interface Reader
      * @return HBase data wrapper containing all column names along with values.
      */
     HBaseData LoadData(HTable hTable, String columnFamily, String rowKey) throws IOException;
+    
+    HBaseData LoadData(HTable hTable, String rowKey) throws IOException;
 
     /**
      *

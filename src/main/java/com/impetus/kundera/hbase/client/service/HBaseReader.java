@@ -54,12 +54,28 @@ public class HBaseReader implements Reader
         
         Get g = new Get(Bytes.toBytes(rowKey));
         
-        Result r = hTable.get(g);
+        Result r = hTable.get(g);      
         
         
         // TODO initially targeting to get all values on the basis for give row
         // key and column family.
-        RowResult rwResult = r.getRowResult();
+        //RowResult rwResult = r.getRowResult();
+        List<KeyValue> values = r.list();
+        data.setColumns(values);
+        return data;
+    }
+    
+    @Override
+    public HBaseData LoadData(HTable hTable, String rowKey)
+            throws IOException
+    {
+        HBaseData data = new HBaseData(rowKey);
+        
+        Get g = new Get(Bytes.toBytes(rowKey));
+        
+        Result r = hTable.get(g);
+        
+
         List<KeyValue> values = r.list();
         data.setColumns(values);
         return data;
