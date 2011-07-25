@@ -146,5 +146,59 @@ public class MetadataUtils
     public static String getEmbeddedCollectionPostfix(String embeddedCollectionName) {
         return embeddedCollectionName.substring(embeddedCollectionName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER) + 1, embeddedCollectionName.length());
     }  
+    
+    /**
+     * Creates a string representation of a set of foreign keys by combining
+     * them together separated by "~" character.
+     *
+     * Note: Assumption is that @Id will never contain "~" character. Checks for
+     * this are not added yet.
+     *
+     * @param foreignKeys
+     *            the foreign keys
+     * @return the string
+     */
+    public static String serializeKeys(Set<String> foreignKeys)
+    {
+        if (null == foreignKeys || foreignKeys.isEmpty())
+        {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String key : foreignKeys)
+        {
+            if (sb.length() > 0)
+            {
+                sb.append(Constants.SEPARATOR);
+            }
+            sb.append(key);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Splits foreign keys into Set.
+     *
+     * @param foreignKeys
+     *            the foreign keys
+     * @return the set
+     */
+    public static Set<String> deserializeKeys(String foreignKeys)
+    {
+        Set<String> keys = new HashSet<String>();
+
+        if (null == foreignKeys || foreignKeys.isEmpty())
+        {
+            return keys;
+        }
+
+        String array[] = foreignKeys.split(Constants.SEPARATOR);
+        for (String element : array)
+        {
+            keys.add(element);
+        }
+        return keys;
+    }  
 
 }

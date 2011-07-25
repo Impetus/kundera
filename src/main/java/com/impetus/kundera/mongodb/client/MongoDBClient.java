@@ -15,10 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.mongodb.client;
 
-import java.lang.reflect.Field;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,14 +37,8 @@ import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
-import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
-import com.impetus.kundera.mongodb.DocumentObjectMapper;
 import com.impetus.kundera.mongodb.query.MongoDBQuery;
-import com.impetus.kundera.property.PropertyAccessException;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -96,7 +88,7 @@ public class MongoDBClient implements Client
      */
     @Override
     @Deprecated
-    public void writeColumns(String dbName, String documentName, String key, List<Column> columns, EnhancedEntity e)
+    public void writeData(String dbName, String documentName, String key, List<Column> columns, EnhancedEntity e)
             throws Exception
     {
         throw new PersistenceException("Not yet implemented");
@@ -110,14 +102,14 @@ public class MongoDBClient implements Client
      * com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
+    public void writeData(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
     {
         String dbName = m.getSchema();
         String documentName = m.getTableName();
         String key = e.getId();
 
         log.debug("Checking whether record already exist for " + dbName + "." + documentName + " for " + key);
-        Object entity = loadColumns(em, m.getEntityClazz(), dbName, documentName, key, m);
+        Object entity = loadData(em, m.getEntityClazz(), dbName, documentName, key, m);
         if (entity != null)
         {
             log.debug("Updating data into " + dbName + "." + documentName + " for " + key);
@@ -147,7 +139,7 @@ public class MongoDBClient implements Client
      * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public <E> E loadColumns(EntityManagerImpl em, Class<E> clazz, String dbName, String documentName, String key,
+    public <E> E loadData(EntityManagerImpl em, Class<E> clazz, String dbName, String documentName, String key,
             EntityMetadata m) throws Exception
     {
         log.debug("Fetching data from " + documentName + " for PK " + key);
@@ -181,7 +173,7 @@ public class MongoDBClient implements Client
      * com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
      */
     @Override
-    public <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz, String dbName, String documentName,
+    public <E> List<E> loadData(EntityManagerImpl em, Class<E> clazz, String dbName, String documentName,
             EntityMetadata m, String... keys) throws Exception
     {
         log.debug("Fetching data from " + documentName + " for Keys " + keys);
@@ -219,7 +211,7 @@ public class MongoDBClient implements Client
      * @throws Exception
      *             the exception
      */
-    public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
+    public <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
     {
         String documentName = m.getTableName();
         String dbName = m.getSchema();
@@ -257,6 +249,13 @@ public class MongoDBClient implements Client
         }      
         
         return entities;
+    }
+    
+    @Override
+    public <E> List<E> loadData(EntityManager em, Class<E> clazz, EntityMetadata m, Map<String, String> col,
+            String keyspace, String family) throws Exception
+    {
+        throw new NotImplementedException("Not yet implemented");
     }
 
 
@@ -343,6 +342,7 @@ public class MongoDBClient implements Client
         {
             log.info("Closing connection to MONGODB at " + contactNode + " on port " + defaultPort);
             mongo.close();
+            log.info("Connection to MONGODB at " + contactNode + " on port " + defaultPort + " closed");
         }
         else
         {

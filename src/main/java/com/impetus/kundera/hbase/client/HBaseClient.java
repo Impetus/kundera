@@ -63,7 +63,7 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     @Override
     @Deprecated
-    public void writeColumns(String keyspace, String columnFamily, String rowKey, List<Column> columns, EnhancedEntity e)
+    public void writeData(String keyspace, String columnFamily, String rowKey, List<Column> columns, EnhancedEntity e)
             throws Exception
     {
         throw new NotImplementedException("Not yet implemented, Deprecated");
@@ -77,7 +77,7 @@ public class HBaseClient implements com.impetus.kundera.Client
      * com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
+    public void writeData(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
     {
         String dbName = m.getSchema();          //Has no meaning for HBase, no used
         String tableName = m.getTableName();
@@ -102,7 +102,7 @@ public class HBaseClient implements com.impetus.kundera.Client
      * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public <E> E loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, String rowKey,
+    public <E> E loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, String rowKey,
             EntityMetadata m) throws Exception
     {
         //columnFamily has a different meaning for HBase, so it won't be used here
@@ -119,7 +119,7 @@ public class HBaseClient implements com.impetus.kundera.Client
      * com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
      */
     @Override
-    public <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
+    public <E> List<E> loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
             EntityMetadata m, String... keys) throws Exception
     {
         List<E> entities = new ArrayList<E>();
@@ -138,10 +138,18 @@ public class HBaseClient implements com.impetus.kundera.Client
      * EntityManagerImpl, com.impetus.kundera.metadata.EntityMetadata,
      * java.util.Queue)
      */
-    public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
+    public <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");
-    }    
+    } 
+
+    
+    @Override
+    public <E> List<E> loadData(EntityManager em, Class<E> clazz, EntityMetadata m, Map<String, String> col,
+            String keyspace, String family) throws Exception
+    {
+        throw new NotImplementedException("Not yet implemented");
+    }
 
     /* (non-Javadoc)
      * @see com.impetus.kundera.Client#loadEmbeddedObjects(java.lang.String, java.lang.String, java.lang.String[])

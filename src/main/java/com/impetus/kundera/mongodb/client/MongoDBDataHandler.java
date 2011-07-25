@@ -134,7 +134,7 @@ public class MongoDBDataHandler
                         Object embeddedEntity = null;
                         try
                         {
-                            embeddedEntity = em.getClient().loadColumns(em, embeddedEntityClass,
+                            embeddedEntity = em.getClient().loadData(em, embeddedEntityClass,
                                     relMetadata.getSchema(), relMetadata.getTableName(), foreignKey, relMetadata);
                         }
                         catch (Exception e)
@@ -158,7 +158,7 @@ public class MongoDBDataHandler
 
                         try
                         {
-                            embeddedEntityList = em.getClient().loadColumns(em, embeddedEntityClass,
+                            embeddedEntityList = em.getClient().loadData(em, embeddedEntityClass,
                                     relMetadata.getSchema(), relMetadata.getTableName(), relMetadata,
                                     foreignKeys.toArray(new String[0]));
                         }

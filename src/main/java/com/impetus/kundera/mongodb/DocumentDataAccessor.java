@@ -59,7 +59,7 @@ public final class DocumentDataAccessor extends BaseDataAccessor
 
         m.addColumn(m.getIdColumn().getName(), m.getIdColumn()); // Add PK
                                                                  // column
-        getEntityManager().getClient().writeColumns(getEntityManager(), e, m);
+        getEntityManager().getClient().writeData(getEntityManager(), e, m);
 
     }
 
@@ -73,7 +73,7 @@ public final class DocumentDataAccessor extends BaseDataAccessor
                                                 // based data store
         m.addColumn(m.getIdColumn().getName(), m.getIdColumn());
 
-        return getEntityManager().getClient().loadColumns(getEntityManager(), clazz, dbName, documentName, id, m);
+        return getEntityManager().getClient().loadData(getEntityManager(), clazz, dbName, documentName, id, m);
     }
 
     @Override
@@ -84,7 +84,7 @@ public final class DocumentDataAccessor extends BaseDataAccessor
         String dbName = m.getSchema();
         String documentName = m.getTableName();
         m.addColumn(m.getIdColumn().getName(), m.getIdColumn());
-        return getEntityManager().getClient().loadColumns(getEntityManager(), clazz, dbName, documentName, m, ids);
+        return getEntityManager().getClient().loadData(getEntityManager(), clazz, dbName, documentName, m, ids);
     }
 
     @Override

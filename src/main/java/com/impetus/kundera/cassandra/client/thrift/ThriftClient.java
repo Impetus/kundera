@@ -18,6 +18,7 @@ package com.impetus.kundera.cassandra.client.thrift;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
@@ -112,7 +113,7 @@ public class ThriftClient implements CassandraClient
      */
 
     @Override
-    public <E> E loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, String key,
+    public <E> E loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, String key,
             EntityMetadata m) throws Exception
     {
         throw new NotImplementedException("TODO");
@@ -124,13 +125,20 @@ public class ThriftClient implements CassandraClient
      */
 
     @Override
-    public <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
+    public <E> List<E> loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
             EntityMetadata m, String... keys) throws Exception
     {
         throw new NotImplementedException("TODO");
     }
+    
+    @Override
+    public <E> List<E> loadData(EntityManager em, Class<E> clazz, EntityMetadata m, Map<String, String> col,
+            String keyspace, String family) throws Exception
+    {
+        throw new NotImplementedException("Not yet implemented");
+    }
 
-    public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
+    public <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");
     }
@@ -164,14 +172,14 @@ public class ThriftClient implements CassandraClient
      * java.lang.String, java.lang.String, org.apache.cassandra.thrift.Column[])
      */
     @Override
-    public void writeColumns(String keyspace, String columnFamily, String key,
+    public void writeData(String keyspace, String columnFamily, String key,
             List<com.impetus.kundera.metadata.EntityMetadata.Column> columns, EnhancedEntity e) throws Exception
     {
         throw new NotImplementedException("TODO");
     }
 
     @Override
-    public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
+    public void writeData(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
     {
         throw new PersistenceException("Not yet implemented");
     }

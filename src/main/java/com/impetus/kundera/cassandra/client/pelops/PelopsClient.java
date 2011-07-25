@@ -13,30 +13,22 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-/*
- * Copyright 2010 Impetus Infotech.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 package com.impetus.kundera.cassandra.client.pelops;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
+import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
@@ -69,12 +61,17 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.cassandra.client.CassandraClient;
+import com.impetus.kundera.db.accessor.DataRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
@@ -158,7 +155,7 @@ public class PelopsClient implements CassandraClient
      */
     @Deprecated
     @Override
-    public final void writeColumns(String keyspace, String columnFamily, String rowId,
+    public final void writeData(String keyspace, String columnFamily, String rowId,
             List<EntityMetadata.Column> columns, EnhancedEntity e) throws Exception
     {
         throw new PersistenceException("Not yet implemented");
@@ -172,7 +169,7 @@ public class PelopsClient implements CassandraClient
      * com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
+    public void writeData(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
     {
 
         String keyspace = m.getSchema();
@@ -256,7 +253,7 @@ public class PelopsClient implements CassandraClient
      * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public final <E> E loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
+    public final <E> E loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
             String rowId, EntityMetadata m) throws Exception
     {
 
@@ -282,10 +279,55 @@ public class PelopsClient implements CassandraClient
      */
     @Override
     // TODO we need to refactor/reimplement this.
-    public final <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
+    public final <E> List<E> loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
             EntityMetadata m, String... rowIds) throws Exception
     {
+        
+        return m.getSuperColumnsAsList().isEmpty()?
+                loadColumns(em, clazz, keyspace, columnFamily, m, rowIds)
+                : loadEmbeddedObjects(em, clazz, m, keyspace, columnFamily, rowIds);
+        
+    }
+    
+    /**
+     * @param <E>
+     * @param clazz
+     * @param m
+     * @param col
+     * @param keyspace
+     * @param family
+     * @return
+     * @throws Exception
+     */
+    public <E> List<E> loadData(EntityManager em, Class<E> clazz, EntityMetadata m, Map<String, String> col, String keyspace,
+            String family) throws Exception
+    {
+        List<E> entities = new ArrayList<E>();
+        for (String superColName : col.keySet())
+        {
+            String entityId = col.get(superColName);
+            List<SuperColumn> map = loadSuperColumns(keyspace, family, entityId, new String[] { superColName });
+            E e = fromThriftRow(em, clazz, m, new DataRow<SuperColumn>(entityId, family, map));
+            entities.add(e);
+        }
+        return entities;
+    }
 
+    /**
+     * @param <E>
+     * @param em
+     * @param clazz
+     * @param keyspace
+     * @param columnFamily
+     * @param m
+     * @param rowIds
+     * @return
+     * @throws PropertyAccessException
+     * @throws Exception
+     */
+    private <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
+            EntityMetadata m, String... rowIds) throws PropertyAccessException, Exception
+    {
         if (!isOpen())
         {
             throw new PersistenceException("PelopsClient is closed.");
@@ -324,6 +366,25 @@ public class PelopsClient implements CassandraClient
         }
         return entities;
     }
+    
+    private <E> List<E> loadEmbeddedObjects(EntityManager em, Class<E> clazz, EntityMetadata m, String keyspace,
+            String family, String... ids) throws Exception
+    {
+        List<E> entities = new ArrayList<E>();
+        Map<Bytes, List<SuperColumn>> map = loadEmbeddedObjects(keyspace, family, ids);
+        for (Map.Entry<Bytes, List<SuperColumn>> entry : map.entrySet())
+        {
+            String entityId = PropertyAccessorFactory.STRING.fromBytes(entry.getKey().toByteArray());
+            List<SuperColumn> superColumn = entry.getValue();
+            E e = fromThriftRow(em, clazz, m, new DataRow<SuperColumn>(entityId, family, superColumn));
+            entities.add(e);
+        }
+        return entities;
+    }
+    
+    
+    
+    
 
     /*
      * (non-Javadoc)
@@ -342,7 +403,8 @@ public class PelopsClient implements CassandraClient
         Selector selector = Pelops.createSelector(POOL_NAME);
         return selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames),
                 ConsistencyLevel.ONE);
-    }
+    } 
+    
 
     /*
      * (non-Javadoc)
@@ -351,7 +413,7 @@ public class PelopsClient implements CassandraClient
      * EntityManagerImpl, com.impetus.kundera.metadata.EntityMetadata,
      * java.util.Queue)
      */
-    public <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
+    public <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");
     }
@@ -857,5 +919,108 @@ public class PelopsClient implements CassandraClient
 
         }
     }
+    
+    /**
+     * From thrift row.
+     *
+     * @param <E>
+     *            the element type
+     * @param clazz
+     *            the clazz
+     * @param m
+     *            the m
+     * @param cr
+     *            the cr
+     * @return the e
+     * @throws Exception
+     *             the exception
+     */
+    // TODO: this is a duplicate code snippet and we need to refactor this.(it should be moved to PelopsDataHandler)
+    private <E> E fromThriftRow(EntityManager em, Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> cr)
+            throws Exception
+    {
+
+        // Instantiate a new instance
+        E e = clazz.newInstance();
+
+        // Set row-key. Note: @Id is always String.
+        PropertyAccessorHelper.set(e, m.getIdProperty(), cr.getId());
+
+        // Get a name->field map for super-columns
+        Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
+        for (Map.Entry<String, EntityMetadata.SuperColumn> entry : m.getSuperColumnsMap().entrySet())
+        {
+            for (EntityMetadata.Column cMetadata : entry.getValue().getColumns())
+            {
+                columnNameToFieldMap.put(cMetadata.getName(), cMetadata.getField());
+            }
+        }
+
+        for (SuperColumn sc : cr.getColumns())
+        {
+
+            String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
+            if (scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER) != -1)
+            {
+                   String scFieldName = scName.substring(0,scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER));
+                   Field superColumnField = e.getClass().getDeclaredField(scFieldName);
+                   if(!superColumnField.isAccessible())
+                   {
+                       superColumnField.setAccessible(true);
+                   }
+                   Collection embeddedCollection = null;
+                   if(superColumnField.getType().equals(List.class))
+                   {
+                       embeddedCollection = new ArrayList();
+                   }else if(superColumnField.getType().equals(Set.class))
+                   {
+                       embeddedCollection = new HashSet();
+                   }
+                   PelopsDataHandler handler = new PelopsDataHandler();
+                   Object embeddedObject = handler.populateEmbeddedObject(sc, m);
+                   embeddedCollection.add(embeddedObject);
+                   superColumnField.set(e, embeddedCollection);
+            }
+            else
+            {
+            boolean intoRelations = false;
+            if (scName.equals(Constants.TO_ONE_SUPER_COL_NAME))
+            {
+                intoRelations = true;
+            }
+
+            for (Column column : sc.getColumns())
+            {
+                String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
+                byte[] value = column.getValue();
+
+                if (value == null)
+                {
+                    continue;
+                }
+
+                if (intoRelations)
+                {
+                    EntityMetadata.Relation relation = m.getRelation(name);
+
+                    String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
+                    Set<String> keys = MetadataUtils.deserializeKeys(foreignKeys);
+                    ((EntityManagerImpl)em).getEntityResolver().populateForeignEntities(e, cr.getId(), relation,
+                            keys.toArray(new String[0]));
+
+                }
+                else
+                {
+                    // set value of the field in the bean
+                    Field field = columnNameToFieldMap.get(name);
+                    Object embeddedObject = PropertyAccessorHelper.getObject(e, scName);
+                    PropertyAccessorHelper.set(embeddedObject, field, value);
+                }
+            }
+          }
+        }
+        return e;
+    }
+
 
 }

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -87,8 +88,8 @@ public class LuceneQuery extends QueryImpl implements Query
         log.debug("Lucene Query: " + q);
         Map<String, String> searchFilter = getEntityManager().getIndexManager().search(q, -1, maxResult);
         if (isAliasOnly())
-        {
-            return getEntityManager().find(getEntityClass(), searchFilter.values().toArray());
+        {            
+            return getEntityManager().find(getEntityClass(), new HashSet(searchFilter.values()).toArray());
         }
         else
         {

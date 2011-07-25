@@ -43,5 +43,8 @@ public final class Constants
 
     /** The Constant SUPER_COLUMN_NAME_DELIMITER. */
     public final static String SUPER_COLUMN_NAME_DELIMITER = "#";
+    
+    /** The Constant TO_ONE_SUPER_COL_NAME. */
+    public static final String TO_ONE_SUPER_COL_NAME = "FKey-TO";
 
 }

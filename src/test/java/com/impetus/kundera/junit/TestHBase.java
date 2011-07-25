@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.junit;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import junit.framework.TestCase;
 
@@ -73,17 +76,16 @@ public class TestHBase extends TestCase
         HUser user2 = manager.find(HUser.class, "0001");
         assertNotNull(user2);
         assertEquals("0001", user2.getUserId());
-        assertEquals("Amresh", user2.getPersonalDetail().getName());  
+        assertEquals("Amresh", user2.getPersonalDetail().getName()); 
         
-    }
-    
-    
-    /*public void testQuery() {
         Query q = manager.createQuery("select u from HUser u");
         List<HUser> users = q.getResultList();
-        System.out.println(users);
+        assertNotNull(users);
+        assertFalse(users.isEmpty());
+        assertEquals(1, users.size());
         
-    }*/ 
+    }   
+    
     
     @Override
     protected void tearDown() throws Exception

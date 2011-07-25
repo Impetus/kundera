@@ -15,9 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.db.accessor;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -134,122 +132,6 @@ public abstract class BaseDataAccessor implements DataAccessor
             keys.add(element);
         }
         return keys;
-    }
-
-    /**
-     * Utility class that represents a row in Cassandra DB.
-     *
-     * @author animesh.kumar
-     */
-    public class ThriftRow<TF>
-    {
-
-        /** Id of the row. */
-        private String id;
-
-        /** name of the family. */
-        private String columnFamilyName;
-
-        /** list of thrift columns from the row. */
-        private List<TF> columns;
-
-        /**
-         * default constructor.
-         */
-        public ThriftRow()
-        {
-            columns = new ArrayList<TF>();
-        }
-
-        /**
-         * The Constructor.
-         *
-         * @param id
-         *            the id
-         * @param columnFamilyName
-         *            the column family name
-         * @param columns
-         *            the columns
-         */
-        public ThriftRow(String id, String columnFamilyName, List<TF> columns)
-        {
-            this.id = id;
-            this.columnFamilyName = columnFamilyName;
-            this.columns = columns;
-        }
-
-        /**
-         * Gets the id.
-         *
-         * @return the id
-         */
-        public String getId()
-        {
-            return id;
-        }
-
-        /**
-         * Sets the id.
-         *
-         * @param id
-         *            the key to set
-         */
-        public void setId(String id)
-        {
-            this.id = id;
-        }
-
-        /**
-         * Gets the column family name.
-         *
-         * @return the columnFamilyName
-         */
-        public String getColumnFamilyName()
-        {
-            return columnFamilyName;
-        }
-
-        /**
-         * Sets the column family name.
-         *
-         * @param columnFamilyName
-         *            the columnFamilyName to set
-         */
-        public void setColumnFamilyName(String columnFamilyName)
-        {
-            this.columnFamilyName = columnFamilyName;
-        }
-
-        /**
-         * Gets the columns.
-         *
-         * @return the columns
-         */
-        public List<TF> getColumns()
-        {
-            return columns;
-        }
-
-        /**
-         * Sets the columns.
-         *
-         * @param columns
-         *            the columns to set
-         */
-        public void setColumns(List<TF> columns)
-        {
-            this.columns = columns;
-        }
-
-        /**
-         * Adds the column.;
-         *
-         * @param column
-         *            the column
-         */
-        public void addColumn(TF column)
-        {
-            columns.add(column);
-        }
-    }
+    }  
+    
 }

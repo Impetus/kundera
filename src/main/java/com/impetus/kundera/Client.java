@@ -18,6 +18,7 @@ package com.impetus.kundera;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import org.apache.cassandra.thrift.SuperColumn;
@@ -51,7 +52,7 @@ public interface Client
      */
 
     @Deprecated
-    void writeColumns(String keyspace, String columnFamily, String key, List<EntityMetadata.Column> columns,
+    void writeData(String keyspace, String columnFamily, String key, List<EntityMetadata.Column> columns,
             EnhancedEntity e) throws Exception;
 
     /**
@@ -65,7 +66,7 @@ public interface Client
      *            Entity Metadata
      * @throws Exception
      */
-    void writeColumns(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception;
+    void writeData(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception;
 
     /**
      * Retrieve columns from a column-family row.
@@ -80,7 +81,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    <E> E loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, String key,
+    <E> E loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, String key,
             EntityMetadata m) throws Exception;
 
     /**
@@ -96,8 +97,11 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
+    <E> List<E> loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
             EntityMetadata m, String... keys) throws Exception;
+    
+    public <E> List<E> loadData(EntityManager em, Class<E> clazz, EntityMetadata m, Map<String, String> col, String keyspace,
+            String family) throws Exception;
     
     /**
      * Load super-columns from multiple rows of a super-column-family.
@@ -127,7 +131,7 @@ public interface Client
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    <E> List<E> loadColumns(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception;
+    <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception;
 
     /**
      * Set Cassandra nodes.
