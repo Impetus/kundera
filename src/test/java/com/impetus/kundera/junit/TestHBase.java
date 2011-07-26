@@ -78,12 +78,31 @@ public class TestHBase extends TestCase
         assertEquals("0001", user2.getUserId());
         assertEquals("Amresh", user2.getPersonalDetail().getName()); 
         
+        //Select all query
         Query q = manager.createQuery("select u from HUser u");
         List<HUser> users = q.getResultList();
         assertNotNull(users);
         assertFalse(users.isEmpty());
         assertEquals(1, users.size());
+        assertEquals(2, users.get(0).getTweets().size());
         
+        //Search by parameter
+        Query q2 = manager.createQuery("select u from HUser u where u.userId = :userId");
+        q2.setParameter("userId", "0001");
+        List<HUser> users2 = q2.getResultList();
+        assertNotNull(users2);
+        assertFalse(users2.isEmpty());
+        assertEquals(1, users2.size());
+        
+        //Search within embedded object        
+        Query q3 = manager.createQuery("select u from HUser u where u.body like :body");
+        q3.setParameter("body", "My");
+        //q3.setParameter("userId", "0001");
+        List<HUser> users3 = q3.getResultList();
+        assertNotNull(users3);
+        assertFalse(users3.isEmpty());
+        assertEquals(1, users3.size());
+        assertEquals(2, users3.get(0).getTweets().size());
     }   
     
     

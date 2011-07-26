@@ -466,7 +466,7 @@ public class KunderaIndexer implements Indexer
             count = 100;
         }
 
-        LOG.debug("Searhcing index with query[" + luceneQuery + "], start:" + start + ", count:" + count);
+        LOG.debug("Searching index with query[" + luceneQuery + "], start:" + start + ", count:" + count);
 
         // Set<String> entityIds = new HashSet<String>();
         Map<String, String> indexCol = new HashMap<String, String>();

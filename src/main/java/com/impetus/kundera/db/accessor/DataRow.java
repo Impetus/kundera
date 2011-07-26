@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Utility class that represents a row in Cassandra DB. 
+ * Utility class that represents a row in Column family based datastores like cassandra and HBase. 
  * @author amresh.singh
  */
 public class DataRow<TF>

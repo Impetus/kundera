@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -341,6 +342,7 @@ public class HBaseDataHandler implements DataHandler
                     //Collection to hold column family objects
                     Collection embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
                     embeddedCollection.addAll(Arrays.asList(embeddedObjectArr));
+                    embeddedCollection.removeAll(Collections.singletonList(null));
                     embeddedObjectArr = null;    //Eligible for GC
                     
                     //Now, set the embedded collection into entity
