@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.hbase.client;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -28,12 +31,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 
+import com.impetus.kundera.db.accessor.DataRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.hbase.admin.DataHandler;
 import com.impetus.kundera.hbase.admin.HBaseDataHandler;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
+import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
@@ -82,11 +88,17 @@ public class HBaseClient implements com.impetus.kundera.Client
         String dbName = m.getSchema();          //Has no meaning for HBase, no used
         String tableName = m.getTableName();
         String rowKey = e.getId();
-        //List<Column> columns = m.getColumnsAsList();   TODO: See how to handle this   
         
+        List<String> columnFamilyNames = new ArrayList<String>();
+        
+        //If this entity has columns(apart from embedded objects, they will be treated as column family)
+        List<Column> columns = m.getColumnsAsList();     
+        if(columns != null && ! columns.isEmpty()) {
+            columnFamilyNames.addAll(m.getColumnFieldNames());
+        }
         
         //Check whether this table exists, if not create it
-        List<String> columnFamilyNames = m.getSuperColumnFieldNames();
+        columnFamilyNames.addAll(m.getSuperColumnFieldNames());
         handler.createTableIfDoesNotExist(tableName, columnFamilyNames.toArray(new String[0]));
         
         //Write data to HBase
@@ -148,7 +160,22 @@ public class HBaseClient implements com.impetus.kundera.Client
     public <E> List<E> loadData(EntityManager em, Class<E> clazz, EntityMetadata m, Map<String, String> col,
             String keyspace, String family) throws Exception
     {
-        throw new NotImplementedException("Not yet implemented");
+        List<E> entities = new ArrayList<E>();
+        Map<String, Field> columnFamilyNameToFieldMap = MetadataUtils.createSuperColumnsFieldMap(m);
+        for (String columnFamilyName : col.keySet())
+        {
+            String entityId = col.get(columnFamilyName);
+            E e = handler.readData(m.getTableName(), clazz, m, entityId);
+            
+            Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName);
+            Object columnFamilyValue = PropertyAccessorHelper.getObject(e, columnFamilyField);
+            if(Collection.class.isAssignableFrom(columnFamilyField.getType())) {
+                entities.addAll((Collection)columnFamilyValue);
+            } else {
+                entities.add((E)columnFamilyValue);
+            }           
+        }
+        return entities;
     }
 
     /* (non-Javadoc)

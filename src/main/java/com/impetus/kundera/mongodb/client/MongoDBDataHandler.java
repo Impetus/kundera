@@ -392,7 +392,7 @@ public class MongoDBDataHandler
 
     /**
      * Retrieves A collection of embedded object within a document that match a
-     * criteria specified in <code></code> TODO: This code requires a serious
+     * criteria specified in <code>query</code> TODO: This code requires a serious
      * overhawl. Currently it assumes that user query is in the form
      * "Select alias.columnName from EntityName alias". However, correct query
      * to be supported is

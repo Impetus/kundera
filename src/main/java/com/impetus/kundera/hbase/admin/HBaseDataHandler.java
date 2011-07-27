@@ -226,6 +226,11 @@ public class HBaseDataHandler implements DataHandler
         }  
         
         
+        List<Column> columns = m.getColumnsAsList();    //HBase tables may have columns alongwith column families
+        if(columns != null && ! columns.isEmpty()) {
+            hbaseWriter.writeColumns(gethTable(tableName), e.getId(), columns, e.getEntity());
+        }
+                
     }    
 
 

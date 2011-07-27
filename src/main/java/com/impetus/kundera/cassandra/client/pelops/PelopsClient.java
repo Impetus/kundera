@@ -306,8 +306,8 @@ public class PelopsClient implements CassandraClient
         for (String superColName : col.keySet())
         {
             String entityId = col.get(superColName);
-            List<SuperColumn> map = loadSuperColumns(keyspace, family, entityId, new String[] { superColName });
-            E e = fromThriftRow(em, clazz, m, new DataRow<SuperColumn>(entityId, family, map));
+            List<SuperColumn> superColumnList = loadSuperColumns(keyspace, family, entityId, new String[] { superColName });
+            E e = fromThriftRow(em, clazz, m, new DataRow<SuperColumn>(entityId, family, superColumnList));
             entities.add(e);
         }
         return entities;

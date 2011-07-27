@@ -39,4 +39,7 @@ public interface Writer
      */
     void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns, Object columnFamilyObj)
             throws IOException;
+    
+    public void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity)
+    throws IOException;
 }
