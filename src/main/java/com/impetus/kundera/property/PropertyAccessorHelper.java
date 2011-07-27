@@ -18,8 +18,15 @@ package com.impetus.kundera.property;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
 
 import javax.persistence.PersistenceException;
+
+import org.hsqldb.lib.HashSet;
+
+import antlr.collections.List;
 
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.utils.ReflectUtils;
@@ -208,6 +215,7 @@ public class PropertyAccessorHelper
      * @return the embedded object
      */
     @SuppressWarnings("null")
+    //TODO: Too much code, improve this, possibly by breaking it
     public static final Object getObject(Object obj, String fieldName) throws PropertyAccessException
     {
         Field embeddedField;
@@ -223,8 +231,18 @@ public class PropertyAccessorHelper
                 Object embededObject = embeddedField.get(obj);
                 if(embededObject == null)
                 {
-                    embededObject = embeddedField.getType().newInstance();
-                    embeddedField.set(obj, embededObject);
+                    Class embeddedObjectClass = embeddedField.getType();
+                    if(Collection.class.isAssignableFrom(embeddedObjectClass)) {
+                       if(embeddedObjectClass.equals(List.class)) {
+                           return new ArrayList();
+                       } else if(embeddedObjectClass.equals(Set.class)) {
+                           return new HashSet();
+                       }
+                    } else {
+                        embededObject = embeddedField.getType().newInstance();
+                        embeddedField.set(obj, embededObject);
+                    }          
+                    
                 }
                 return embededObject;
             }

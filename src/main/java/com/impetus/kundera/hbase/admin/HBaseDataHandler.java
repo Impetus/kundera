@@ -172,9 +172,15 @@ public class HBaseDataHandler implements DataHandler
                 log.error("Error while getting " + columnFamilyName + " field from entity " + e.getEntity());
                 return;
             }
+            
+            if(columnFamilyObject == null) {
+                return;
+            }
+            
             List<Column> columns = columnFamily.getColumns();
             
             //TODO: Handle Embedded collections differently
+            //Write Column family which was Embedded collection in entity
             if(columnFamilyObject instanceof Collection) {
                 String dynamicCFName = null;        
                 
@@ -210,23 +216,11 @@ public class HBaseDataHandler implements DataHandler
                     
                     //Clear embedded collection cache for GC
                     ecCacheHandler.clearCache();
-                }         
+                }                
                 
-                
-            } else {       
-                
-                Object columnFamilyObj = null;
-                try
-                {
-                    columnFamilyObj = PropertyAccessorHelper.getObject(e.getEntity(), columnFamilyName);
-                }
-                catch (PropertyAccessException e2)
-                {
-                    log.error("Can't fetch column family object " + columnFamily + " from entity");
-                    return;
-                }               
-                
-                hbaseWriter.writeColumns(gethTable(tableName), columnFamilyName, e.getId(), columns, columnFamilyObj);
+            } else {
+                //Write Column family which was Embedded object in entity
+                hbaseWriter.writeColumns(gethTable(tableName), columnFamilyName, e.getId(), columns, columnFamilyObject);
             }
             
         }  
