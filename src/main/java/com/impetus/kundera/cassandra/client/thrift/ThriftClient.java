@@ -167,16 +167,6 @@ public class ThriftClient implements CassandraClient
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * @see com.impetus.kundera.CassandraClient#writeColumns(java.lang.String,
-     * java.lang.String, java.lang.String, org.apache.cassandra.thrift.Column[])
-     */
-    @Override
-    public void writeData(String keyspace, String columnFamily, String key,
-            List<com.impetus.kundera.metadata.EntityMetadata.Column> columns, EnhancedEntity e) throws Exception
-    {
-        throw new NotImplementedException("TODO");
-    }
 
     @Override
     public void writeData(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception

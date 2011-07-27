@@ -37,25 +37,6 @@ public interface Client
 {
 
     /**
-     * Write multiple columns into a column-family.
-     *
-     * @param keyspace
-     *            the keyspace
-     * @param columnFamily
-     *            The name of the super column family to operate on
-     * @param key
-     *            The key of the row to modify
-     * @param columns
-     *            Array of columns to write
-     * @throws Exception
-     *             The exception
-     */
-
-    @Deprecated
-    void writeData(String keyspace, String columnFamily, String key, List<EntityMetadata.Column> columns,
-            EnhancedEntity e) throws Exception;
-
-    /**
      * Writes Multiple columns
      *
      * @param em

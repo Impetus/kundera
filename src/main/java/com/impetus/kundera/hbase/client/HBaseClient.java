@@ -18,7 +18,6 @@ package com.impetus.kundera.hbase.client;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -31,13 +30,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 
-import com.impetus.kundera.db.accessor.DataRow;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.hbase.admin.DataHandler;
 import com.impetus.kundera.hbase.admin.HBaseDataHandler;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
+import com.impetus.kundera.metadata.EntityMetadata.Relation;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
@@ -67,27 +67,15 @@ public class HBaseClient implements com.impetus.kundera.Client
     /** The em. */
     private EntityManager em;
 
-    @Override
-    @Deprecated
-    public void writeData(String keyspace, String columnFamily, String rowKey, List<Column> columns, EnhancedEntity e)
-            throws Exception
-    {
-        throw new NotImplementedException("Not yet implemented, Deprecated");
-    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seecom.impetus.kundera.Client#writeColumns(com.impetus.kundera.ejb.
-     * EntityManagerImpl, com.impetus.kundera.proxy.EnhancedEntity,
-     * com.impetus.kundera.metadata.EntityMetadata)
+    /**
+     * Writes an entity data into HBase store
      */
     @Override
     public void writeData(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
     {
-        String dbName = m.getSchema();          //Has no meaning for HBase, no used
-        String tableName = m.getTableName();
-        String rowKey = e.getId();
+        String dbName = m.getSchema();          //Has no meaning for HBase, not used
+        String tableName = m.getTableName();        
         
         List<String> columnFamilyNames = new ArrayList<String>();
         
@@ -95,6 +83,12 @@ public class HBaseClient implements com.impetus.kundera.Client
         List<Column> columns = m.getColumnsAsList();     
         if(columns != null && ! columns.isEmpty()) {
             columnFamilyNames.addAll(m.getColumnFieldNames());
+        }
+        
+        //All relationships are maintained as special Foreign key column by Kundera in a newly created column family 
+        List<Relation> relations = m.getRelations();  
+        if(!relations.isEmpty()) {
+            columnFamilyNames.add(Constants.TO_ONE_SUPER_COL_NAME);
         }
         
         //Check whether this table exists, if not create it

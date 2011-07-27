@@ -36,7 +36,6 @@ import com.impetus.kundera.Client;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
-import com.impetus.kundera.metadata.EntityMetadata.Column;
 import com.impetus.kundera.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.mongodb.BasicDBObject;
@@ -78,21 +77,6 @@ public class MongoDBClient implements Client
 
     /** The log. */
     private static Log log = LogFactory.getLog(MongoDBClient.class);
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.impetus.kundera.Client#writeColumns(java.lang.String,
-     * java.lang.String, java.lang.String, java.util.List,
-     * com.impetus.kundera.proxy.EnhancedEntity)
-     */
-    @Override
-    @Deprecated
-    public void writeData(String dbName, String documentName, String key, List<Column> columns, EnhancedEntity e)
-            throws Exception
-    {
-        throw new PersistenceException("Not yet implemented");
-    }
 
     /*
      * (non-Javadoc)

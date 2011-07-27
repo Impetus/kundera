@@ -52,10 +52,8 @@ import com.impetus.kundera.proxy.EnhancedEntity;
  */
 public class PelopsDataHandler
 {
-    private static Log log = LogFactory.getLog(PelopsDataHandler.class);
-
-    /** The Constant TO_ONE_SUPER_COL_NAME. */
-    private static final String TO_ONE_SUPER_COL_NAME = "FKey-TO";
+    private static Log log = LogFactory.getLog(PelopsDataHandler.class);   
+    
 
     public <E> E fromThriftRow(Selector selector, EntityManagerImpl em, Class<E> clazz, EntityMetadata m, String rowKey)
             throws Exception
@@ -180,7 +178,7 @@ public class PelopsDataHandler
                 Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
 
                 boolean intoRelations = false;
-                if (scName.equals(TO_ONE_SUPER_COL_NAME))
+                if (scName.equals(Constants.TO_ONE_SUPER_COL_NAME))
                 {
                     intoRelations = true;
                 }
@@ -215,7 +213,7 @@ public class PelopsDataHandler
             else
             {
                 boolean intoRelations = false;
-                if (scName.equals(TO_ONE_SUPER_COL_NAME))
+                if (scName.equals(Constants.TO_ONE_SUPER_COL_NAME))
                 {
                     intoRelations = true;
                 }
@@ -514,60 +512,7 @@ public class PelopsDataHandler
         thriftSuperColumn.setColumns(thriftColumns);
 
         return thriftSuperColumn;
-    }
-
-    /**
-     * Splits foreign keys into Set.
-     *
-     * @param foreignKeys
-     *            the foreign keys
-     * @return the set
-     */
-    private Set<String> deserializeKeys(String foreignKeys)
-    {
-        Set<String> keys = new HashSet<String>();
-
-        if (null == foreignKeys || foreignKeys.isEmpty())
-        {
-            return keys;
-        }
-
-        String array[] = foreignKeys.split(Constants.SEPARATOR);
-        for (String element : array)
-        {
-            keys.add(element);
-        }
-        return keys;
-    }
-
-    /**
-     * Creates a string representation of a set of foreign keys by combining
-     * them together separated by "~" character. Note: Assumption is that @Id
-     * will never contain "~" character. Checks for this are not added yet.
-     *
-     * @param foreignKeys
-     *            the foreign keys
-     * @return the string
-     */
-    private String serializeKeys(Set<String> foreignKeys)
-    {
-        if (null == foreignKeys || foreignKeys.isEmpty())
-        {
-            return null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (String key : foreignKeys)
-        {
-            if (sb.length() > 0)
-            {
-                sb.append(Constants.SEPARATOR);
-            }
-            sb.append(key);
-        }
-        return sb.toString();
-    }
-    
+    }   
 
     /**
      * All relationships in a column family are saved as additional column
@@ -586,7 +531,7 @@ public class PelopsDataHandler
             String property = entry.getKey();
             Set<String> foreignKeys = entry.getValue();
 
-            String keys = serializeKeys(foreignKeys);
+            String keys = MetadataUtils.serializeKeys(foreignKeys);
             if (null != keys)
             {
                 Column col = new Column();
@@ -613,7 +558,7 @@ public class PelopsDataHandler
         if (!columns.isEmpty())
         {
             SuperColumn superCol = new SuperColumn();
-            superCol.setName(PropertyAccessorFactory.STRING.toBytes(TO_ONE_SUPER_COL_NAME));
+            superCol.setName(PropertyAccessorFactory.STRING.toBytes(Constants.TO_ONE_SUPER_COL_NAME));
             superCol.setColumns(columns);
             tr.addSuperColumn(superCol);
         }
@@ -630,7 +575,7 @@ public class PelopsDataHandler
         EntityMetadata.Relation relation = m.getRelation(relationName);
 
         String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
-        Set<String> keys = deserializeKeys(foreignKeys);
+        Set<String> keys = MetadataUtils.deserializeKeys(foreignKeys);
         em.getEntityResolver().populateForeignEntities(e, tr.getId(), relation, keys.toArray(new String[0]));
     }
 

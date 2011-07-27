@@ -146,22 +146,7 @@ public class PelopsClient implements CassandraClient
         return !closed;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#writeColumns(java.lang.String,
-     * java.lang.String, java.lang.String, java.util.List,
-     * com.impetus.kundera.proxy.EnhancedEntity)
-     */
-    @Deprecated
-    @Override
-    public final void writeData(String keyspace, String columnFamily, String rowId,
-            List<EntityMetadata.Column> columns, EnhancedEntity e) throws Exception
-    {
-        throw new PersistenceException("Not yet implemented");
-    }
-
-    /*
+   /*
      * (non-Javadoc)
      * 
      * @seecom.impetus.kundera.Client#writeColumns(com.impetus.kundera.ejb.

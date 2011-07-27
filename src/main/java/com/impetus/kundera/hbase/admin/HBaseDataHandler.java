@@ -17,11 +17,13 @@ package com.impetus.kundera.hbase.admin;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,7 +36,6 @@ import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.jasper.tagplugins.jstl.core.Set;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.hbase.client.HBaseData;
@@ -45,9 +46,11 @@ import com.impetus.kundera.hbase.client.service.HBaseWriter;
 import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.Column;
+import com.impetus.kundera.metadata.EntityMetadata.Relation;
 import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
@@ -157,7 +160,7 @@ public class HBaseDataHandler implements DataHandler
             throws IOException
     {        
         
-      //Now persist column families in the table
+        //Now persist column families in the table
         List<SuperColumn> columnFamilies = m.getSuperColumnsAsList();  //Yes, for HBase they are called column families
         for(SuperColumn columnFamily : columnFamilies) {
             String columnFamilyName = columnFamily.getName();
@@ -226,10 +229,30 @@ public class HBaseDataHandler implements DataHandler
         }  
         
         
-        List<Column> columns = m.getColumnsAsList();    //HBase tables may have columns alongwith column families
+        //HBase tables may have columns alongwith column families
+        List<Column> columns = m.getColumnsAsList();    
         if(columns != null && ! columns.isEmpty()) {
             hbaseWriter.writeColumns(gethTable(tableName), e.getId(), columns, e.getEntity());
         }
+        
+        //Persist relationships as a column in newly created Column family by Kundera
+        List<Relation> relations = m.getRelations();
+        for (Map.Entry<String, Set<String>> entry : e.getForeignKeysMap().entrySet())
+        {
+            String property = entry.getKey();
+            Set<String> foreignKeys = entry.getValue();
+
+            String keys = MetadataUtils.serializeKeys(foreignKeys);
+            if (null != keys)
+            {   //EntityMetadata.Column col = new EntityMetadata().Column(property, null);
+
+
+                List<Column> columns2 = new ArrayList<EntityMetadata.Column>();
+                //columns.add(col);
+            }
+            hbaseWriter.writeColumns(gethTable(tableName), Constants.TO_ONE_SUPER_COL_NAME, e.getId(), columns, keys);
+        }
+        
                 
     }    
 
@@ -303,7 +326,7 @@ public class HBaseDataHandler implements DataHandler
                 List<KeyValue> hbaseValues = data.getColumns();  
                 
                 //Column family can be either @Embedded or @EmbeddedCollection
-                if(columnFamilyClass.equals(List.class) || columnFamilyClass.equals(Set.class)) {
+                if(Collection.class.isAssignableFrom(columnFamilyClass)) {
                     
                     Field embeddedCollectionField = columnFamily.getField();                                    
                     Object[] embeddedObjectArr = new Object[hbaseValues.size()];  //Array to hold column family objects
