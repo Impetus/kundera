@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.impetus</groupId>
 	<artifactId>kundera</artifactId>
-	<version>2.0.1-SNAPSHOT</version>
+	<version>2.0.3</version>
 	<packaging>jar</packaging>
 	<name>kundera</name>
 	<url>http://kundera.googlecode.com</url>
@@ -222,14 +222,8 @@
 			<groupId>libthrift</groupId>
 			<artifactId>libthrift</artifactId>
 			<version>r917130</version>
-		</dependency><!--
-		<dependency>
-		    <groupId>com.github.stephenc.scale7</groupId>
-		    <artifactId>scale7-pelops</artifactId>
-		    <version>0.913</version>
 		</dependency>
-		
-		--><dependency>
+		<dependency>
 		    <groupId>org.scale7</groupId>
     		<artifactId>scale7-pelops</artifactId>
 		    <version>1.2-0.7.x-SNAPSHOT</version>
@@ -256,18 +250,13 @@
 			<artifactId>javassist</artifactId>
 			<version>3.9.0.GA</version>
 		</dependency>
-		<!--<dependency>
-			<groupId>lucandra</groupId>
-			<artifactId>lucandra</artifactId>
-			<version>UNKNOWN</version>
-		</dependency> 
-		--><dependency>
+		<dependency>
 			<groupId>org.apache.solr</groupId>
 			<artifactId>solandra</artifactId>
 			<version>UNKNOWN</version>
 		</dependency>
 		
-              <!-- HBase depndencies-->
+        <!-- HBase depndencies-->
 		<dependency>
 		     <groupId>org.apache.hbase</groupId>
 		     <artifactId>hbase-core</artifactId>
@@ -309,7 +298,7 @@
 		</dependency>
 
 	</dependencies>
-<build>
+	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -326,8 +315,7 @@
         <version>2.2.1</version>
         <configuration>
           <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-            
+            <descriptorRef>jar-with-dependencies</descriptorRef>            
           </descriptorRefs>
         </configuration>
         </plugin>
@@ -369,6 +357,5 @@
 				</configuration>
 			</plugin>
 		</plugins>
-	</build>
-	
+	</build>	
 </project>

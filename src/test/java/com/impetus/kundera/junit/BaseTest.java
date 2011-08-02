@@ -176,7 +176,9 @@ public abstract class BaseTest extends TestCase
         cfDefs.add(external_Def);
         cfDefs.add(imDetails_Def);
 
-        KsDef ksDef = new KsDef("Blog", simple.getCanonicalName(), 1, cfDefs);
+        KsDef ksDef = new KsDef("Blog", simple.getCanonicalName(),  cfDefs);
+        ksDef.setReplication_factor(1);
+        
         client.send_system_add_keyspace(ksDef);
         logger.info("Data loaded");
 

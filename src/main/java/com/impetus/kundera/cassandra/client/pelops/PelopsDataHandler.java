@@ -79,6 +79,16 @@ public class PelopsDataHandler
         }
         return e;
     }
+    
+	public <E> List<E> fromThriftRow(Selector selector, EntityManagerImpl em,
+			Class<E> clazz, EntityMetadata m, String... rowIds) throws Exception {		
+		List<E> entities = new ArrayList<E>();
+		for(String rowKey : rowIds) {
+			E e = fromThriftRow(selector, em, clazz, m, rowKey);
+			entities.add(e);
+		}
+		return entities;
+	}
 
     /**
      * Fetches data held in Thrift row columns and populates to Entity objects
@@ -174,9 +184,12 @@ public class PelopsDataHandler
             {
                 scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
                 embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);                
-                embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);            
+                
+                if(embeddedCollection == null) {
+                	embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField); 
+                }                
+                           
                 Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
-
                 boolean intoRelations = false;
                 if (scName.equals(Constants.TO_ONE_SUPER_COL_NAME))
                 {
