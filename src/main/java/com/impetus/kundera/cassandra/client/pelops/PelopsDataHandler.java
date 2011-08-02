@@ -19,7 +19,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,13 +46,12 @@ import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * Provides Pelops utility methods for data held in Column family based stores
- *
+ * 
  * @author amresh.singh
  */
 public class PelopsDataHandler
 {
-    private static Log log = LogFactory.getLog(PelopsDataHandler.class);   
-    
+    private static Log log = LogFactory.getLog(PelopsDataHandler.class);
 
     public <E> E fromThriftRow(Selector selector, EntityManagerImpl em, Class<E> clazz, EntityMetadata m, String rowKey)
             throws Exception
@@ -62,16 +60,16 @@ public class PelopsDataHandler
         E e = null;
         if (!superColumnNames.isEmpty())
         {
-            List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(), rowKey, Selector
-                    .newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
+            List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(), rowKey,
+                    Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
             e = fromSuperColumnThriftRow(em, clazz, m, new PelopsClient().new ThriftRow(rowKey, m.getTableName(), null,
                     thriftSuperColumns));
 
         }
         else
         {
-            List<Column> columns = selector.getColumnsFromRow(m.getTableName(), new Bytes(rowKey.getBytes()), Selector
-                    .newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
+            List<Column> columns = selector.getColumnsFromRow(m.getTableName(), new Bytes(rowKey.getBytes()),
+                    Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
 
             e = fromColumnThriftRow(em, clazz, m, new PelopsClient().new ThriftRow(rowKey, m.getTableName(), columns,
                     null));
@@ -79,20 +77,22 @@ public class PelopsDataHandler
         }
         return e;
     }
-    
-	public <E> List<E> fromThriftRow(Selector selector, EntityManagerImpl em,
-			Class<E> clazz, EntityMetadata m, String... rowIds) throws Exception {		
-		List<E> entities = new ArrayList<E>();
-		for(String rowKey : rowIds) {
-			E e = fromThriftRow(selector, em, clazz, m, rowKey);
-			entities.add(e);
-		}
-		return entities;
-	}
+
+    public <E> List<E> fromThriftRow(Selector selector, EntityManagerImpl em, Class<E> clazz, EntityMetadata m,
+            String... rowIds) throws Exception
+    {
+        List<E> entities = new ArrayList<E>();
+        for (String rowKey : rowIds)
+        {
+            E e = fromThriftRow(selector, em, clazz, m, rowKey);
+            entities.add(e);
+        }
+        return entities;
+    }
 
     /**
      * Fetches data held in Thrift row columns and populates to Entity objects
-     *
+     * 
      * @param <E>
      *            the element type
      * @param em
@@ -183,12 +183,13 @@ public class PelopsDataHandler
             if (scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER) != -1)
             {
                 scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
-                embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);                
-                
-                if(embeddedCollection == null) {
-                	embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField); 
-                }                
-                           
+                embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
+
+                if (embeddedCollection == null)
+                {
+                    embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
+                }
+
                 Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
                 boolean intoRelations = false;
                 if (scName.equals(Constants.TO_ONE_SUPER_COL_NAME))
@@ -352,7 +353,7 @@ public class PelopsDataHandler
 
     /**
      * Helper method to convert @Entity to ThriftRow.
-     *
+     * 
      * @param e
      *            the e
      * @param columnsLst
@@ -457,9 +458,9 @@ public class PelopsDataHandler
                 }
                 else
                 { // Updation
-                    // Check whether this object is already in cache, which
-                    // means we already have a super column
-                    // Otherwise we need to generate a fresh super column name
+                  // Check whether this object is already in cache, which
+                  // means we already have a super column
+                  // Otherwise we need to generate a fresh super column name
                     int lastEmbeddedObjectCount = ecCacheHandler.getLastEmbeddedObjectCount(e.getId());
                     for (Object obj : (Collection) superColumnObject)
                     {
@@ -525,14 +526,14 @@ public class PelopsDataHandler
         thriftSuperColumn.setColumns(thriftColumns);
 
         return thriftSuperColumn;
-    }   
+    }
 
     /**
      * All relationships in a column family are saved as additional column
      * internally, one for each relationship entity. Columns value is row key of
      * relationship entity for 1-to-1 relationship and ~ delimited row keys of
      * relationship entities for 1-M relationship
-     *
+     * 
      * @throws PropertyAccessException
      */
     public void addForeignkeysToColumns(long timestamp, EnhancedEntity e, List<Column> columns)
@@ -560,7 +561,7 @@ public class PelopsDataHandler
     /**
      * For super column families, all relationships are saved as columns, in one
      * additional super column used internally.
-     *
+     * 
      * @throws PropertyAccessException
      */
     public void createForeignKeySuperColumn(long timestamp, PelopsClient.ThriftRow tr, EnhancedEntity e)
@@ -579,7 +580,7 @@ public class PelopsDataHandler
 
     /**
      * Populates foreign key relationship entities into their parent entity
-     *
+     * 
      * @throws PropertyAccessException
      */
     public <E> void populateRelationshipEntities(EntityManagerImpl em, EntityMetadata m, PelopsClient.ThriftRow tr,
