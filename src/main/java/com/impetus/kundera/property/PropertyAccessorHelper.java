@@ -24,9 +24,9 @@ import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
-import org.hsqldb.lib.HashSet;
+import java.util.HashSet;
 
-import antlr.collections.List;
+import java.util.List;
 
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.utils.ReflectUtils;

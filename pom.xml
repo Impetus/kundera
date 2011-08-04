@@ -168,11 +168,21 @@
 			<groupId>javax.persistence</groupId>
 			<artifactId>persistence-api</artifactId>
 			<version>2.0</version>
+		</dependency>		
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>3.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-analyzers</artifactId>
 			<version>3.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.xerial</groupId>
+			<artifactId>snappy</artifactId>
+			<version>1.0.1-rc4</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
@@ -269,24 +279,12 @@
 			<version>3.2.2</version>
 		</dependency>
 
-		<!-- MongoDB depndencies -->
 		<dependency>
 			<groupId>com.mongodb</groupId>
 			<artifactId>mongo</artifactId>
 			<version>2.5.3</version>
 		</dependency>
-
-		<!-- System dependencies -->
-		<dependency>
-			<groupId>org.xerial</groupId>
-			<artifactId>snappy</artifactId>
-			<version>1.0.1-rc4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-core</artifactId>
-			<version>3.2.0</version>
-		</dependency>
+		
 	</dependencies>
 	<build>
 		<plugins>
