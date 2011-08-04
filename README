@@ -8,12 +8,10 @@ o	To help developers, forget the complexity of NoSQL stores and focus on Domain 
 o	To make switching across data-stores as easy as changing a configuration.
 
 
-<b>
 The latest release is 2.0.1. If you're just starting out, download this one.
 Development Branch is 2.0.3
-</b>
- 
 Check out the examples site! https://github.com/impetus-opensource/Kundera-Examples
+
 
 Up and running in 5 minutes
 ============================
