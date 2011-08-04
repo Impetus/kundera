@@ -198,14 +198,7 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>r08</version>
-		</dependency>
-		<!-- Required for running tests for embedded cassandra mode -->
-		<dependency>
-			<groupId>com.google.collections</groupId>
-			<artifactId>google-collections</artifactId>
-			<version>1.0</version>
-			<scope>test</scope>
-		</dependency>
+		</dependency>		
 		<dependency>
 			<groupId>com.github.stephenc</groupId>
 			<artifactId>jamm</artifactId>
