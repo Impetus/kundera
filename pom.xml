@@ -35,7 +35,7 @@
 		</snapshotRepository>
 
 	</distributionManagement>
-	
+
 	<repositories>
 		<repository>
 			<id>kundera-missing</id>
@@ -48,12 +48,12 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-        <repository>
-            <id>riptano</id>
-            <name>riptano</name>
-            <url>http://mvn.riptano.com/content/repositories/public</url>
-        </repository>
-		
+		<repository>
+			<id>riptano</id>
+			<name>riptano</name>
+			<url>http://mvn.riptano.com/content/repositories/public</url>
+		</repository>
+
 	</repositories>
 	<reporting>
 		<plugins>
@@ -98,9 +98,9 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				 <configuration>
-                                 <forkMode>always</forkMode>
-				 </configuration>
+				<configuration>
+					<forkMode>always</forkMode>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -110,14 +110,10 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>javancss-maven-plugin</artifactId>
 			</plugin>
-			<!--
-				<plugin> <groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>1.2</version> <configuration> <effort>Max</effort>
-				<threshold>Low</threshold> <debug>true</debug>
-				<includeFilterFile>findbugs_include.xml</includeFilterFile>
-				</configuration> </plugin>
-			-->
+			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>findbugs-maven-plugin</artifactId> 
+				<version>1.2</version> <configuration> <effort>Max</effort> <threshold>Low</threshold> 
+				<debug>true</debug> <includeFilterFile>findbugs_include.xml</includeFilterFile> 
+				</configuration> </plugin> -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>dashboard-maven-plugin</artifactId>
@@ -167,11 +163,11 @@
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<version>1.2</version>
-		</dependency>		
+		</dependency>
 		<dependency>
-		    <groupId>javax.persistence</groupId>
-		    <artifactId>persistence-api</artifactId>
-		    <version>2.0</version>
+			<groupId>javax.persistence</groupId>
+			<artifactId>persistence-api</artifactId>
+			<version>2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
@@ -190,51 +186,51 @@
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
-  			<artifactId>guava</artifactId>
-			<version>r06</version>
-	   </dependency>							
-		<!-- Required for running  tests  for embedded cassandra mode-->
+			<artifactId>guava</artifactId>
+			<version>r08</version>
+		</dependency>
+		<!-- Required for running tests for embedded cassandra mode -->
 		<dependency>
 			<groupId>com.google.collections</groupId>
 			<artifactId>google-collections</artifactId>
 			<version>1.0</version>
 			<scope>test</scope>
 		</dependency>
-		
-		
-		<!--
-			Non public  dependencies- being picked from kundera svn  repository
-		
+		<dependency>
+			<groupId>com.github.stephenc</groupId>
+			<artifactId>jamm</artifactId>
+			<version>0.2.2</version>
+		</dependency>
+
+		<!-- Non public dependencies- being picked from kundera svn repository -->
+
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>apache-cassandra</artifactId>
-			<version>0.6.3</version>
-		</dependency> -->
-
-	<dependency>
-		<groupId>org.apache.cassandra</groupId>
-		<artifactId>cassandra-all</artifactId>
-		<version>0.7.6</version>
-	</dependency>
-
-
+			<version>0.8.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cassandra</groupId>
+			<artifactId>apache-cassandra-thrift</artifactId>
+			<version>0.8.2</version>
+		</dependency>
 		<dependency>
 			<groupId>libthrift</groupId>
 			<artifactId>libthrift</artifactId>
-			<version>r917130</version>
+			<version>0.6</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.scale7</groupId>
-    		<artifactId>scale7-pelops</artifactId>
-		    <version>1.2-0.7.x-SNAPSHOT</version>
+			<groupId>org.scale7</groupId>
+			<artifactId>scale7-pelops</artifactId>
+			<version>1.2-0.7.x-SNAPSHOT</version>
 		</dependency>
-        <dependency>
-            <groupId>org.safehaus.jug</groupId>
-            <artifactId>jug-asl</artifactId>
-            <version>2.0.0</version>
-			  <scope>test</scope>
-        </dependency>
-		<!-- Required for running  tests  for embedded cassandra mode-->
+		<dependency>
+			<groupId>org.safehaus.jug</groupId>
+			<artifactId>jug-asl</artifactId>
+			<version>2.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Required for running tests for embedded cassandra mode -->
 		<dependency>
 			<groupId>org.cliffc</groupId>
 			<artifactId>high-scale-lib</artifactId>
@@ -255,48 +251,42 @@
 			<artifactId>solandra</artifactId>
 			<version>UNKNOWN</version>
 		</dependency>
-		
-        <!-- HBase depndencies-->
+
+		<!-- HBase depndencies -->
 		<dependency>
-		     <groupId>org.apache.hbase</groupId>
-		     <artifactId>hbase-core</artifactId>
-		     <version>0.20.6</version>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-core</artifactId>
+			<version>0.20.6</version>
 		</dependency>
 		<dependency>
-		     <groupId>org.apache.hadoop</groupId>
-		     <artifactId>hadoop-core</artifactId>
-		     <version>0.20.2</version>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-core</artifactId>
+			<version>0.20.2</version>
 		</dependency>
 		<dependency>
-		     <groupId>org.apache.hbase.zookeeper</groupId>
-		     <artifactId>zookeeper</artifactId>
-		     <version>3.2.2</version>
-		</dependency>
-		
-		<!-- MongoDB depndencies-->
-		<dependency>
-		     <groupId>com.mongodb</groupId>
-		     <artifactId>mongo</artifactId>
-		     <version>2.5.3</version>
+			<groupId>org.apache.hbase.zookeeper</groupId>
+			<artifactId>zookeeper</artifactId>
+			<version>3.2.2</version>
 		</dependency>
 
-               <!-- System dependencies -->
+		<!-- MongoDB depndencies -->
 		<dependency>
-		    <groupId>org.xerial</groupId>
-		    <artifactId>snappy</artifactId>
-		    <version>1.0.1-rc4</version>
-	       </dependency>
-	    <dependency>
+			<groupId>com.mongodb</groupId>
+			<artifactId>mongo</artifactId>
+			<version>2.5.3</version>
+		</dependency>
+
+		<!-- System dependencies -->
+		<dependency>
+			<groupId>org.xerial</groupId>
+			<artifactId>snappy</artifactId>
+			<version>1.0.1-rc4</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-core</artifactId>
 			<version>3.2.0</version>
 		</dependency>
-		<dependency>
-			<groupId>libthrift</groupId>
-			<artifactId>libthrift</artifactId>
-			<version>r917130</version>
-		</dependency>
-
 	</dependencies>
 	<build>
 		<plugins>
@@ -308,17 +298,16 @@
 				</configuration>
 			</plugin>
 			<plugin>
-        <!-- NOTE: We don't need a groupId specification because the group is
-             org.apache.maven.plugins ...which is assumed by default.
-         -->
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2.1</version>
-        <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>            
-          </descriptorRefs>
-        </configuration>
-        </plugin>
+				<!-- NOTE: We don't need a groupId specification because the group is 
+					org.apache.maven.plugins ...which is assumed by default. -->
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
@@ -357,5 +346,5 @@
 				</configuration>
 			</plugin>
 		</plugins>
-	</build>	
+	</build>
 </project>
