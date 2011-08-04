@@ -8,6 +8,11 @@ o	To help developers, forget the complexity of NoSQL stores and focus on Domain 
 o	To make switching across data-stores as easy as changing a configuration.
 
 
+The latest release is 2.0.1. If you're just starting out, download this one.
+Development Branch is 2.0.3
+ 
+Check out the examples site! https://github.com/impetus-opensource/Kundera-Examples
+
 Up and running in 5 minutes
 ============================
 If you have worked upon Hibernate or any JPA Compliant ORM Solution, then the whole process, right from learning to coming up with first sample implementation will not take more than 5 minutes. Please follow wiki pages in following sequence:
