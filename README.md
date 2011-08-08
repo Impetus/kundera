@@ -32,6 +32,26 @@ Currently Supported Datasources
 *	MongoDB
 *	HBase
 
+Recent Releases
+================================
+08-Aug-2011 - Kundera 2.0.3 released
+-------------------------------------
+This release includes bug fixes and the following new features compared to version 2.0.2:
+* Cassandra 0.8.x support added
+
+31-July-2011 - Kundera 2.0.2 released
+-------------------------------------
+This release includes bug fixes and the following new features compared to version 2.0.1:
+* Kundera is now JPA 2.0 compliant. 
+* Embedded objects/ collections support for HBase.
+
+12-July-2011 - Kundera 2.0.1 released
+-------------------------------------
+This release includes bug fixes and the following new features compared to initial revision:
+* Cassandra 0.7.x support added
+* @Embedded annotation fields persisted co located with parent entity
+* Search within embedded objects.
+* Selective index.
 
 About Us
 ========
