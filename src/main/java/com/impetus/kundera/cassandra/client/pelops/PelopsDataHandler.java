@@ -133,7 +133,7 @@ public class PelopsDataHandler
             if (null == column)
             {
                 // it could be some relational column
-                populateRelationshipEntities(em, m, thriftRow, e, name, value);
+                populateRelationshipEntities(em, thriftRow, e, m.getRelation(name), value);
 
             }
             else
@@ -208,7 +208,7 @@ public class PelopsDataHandler
 
                     if (intoRelations)
                     {
-                        populateRelationshipEntities(em, m, tr, e, name, value);
+                        populateRelationshipEntities(em, tr, e, m.getRelation(name), value);
                     }
                     else
                     {
@@ -235,7 +235,8 @@ public class PelopsDataHandler
                 // For relations, fetch foreign keys from foreign key super
                 // column and populate related entities into parent entity
                 if (intoRelations)
-                {
+                {                    
+                    
                     for (Column column : sc.getColumns())
                     {
                         String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
@@ -245,7 +246,12 @@ public class PelopsDataHandler
                         {
                             continue;
                         }
-                        populateRelationshipEntities(em, m, tr, e, name, value);
+                        
+                        EntityMetadata.Relation relation = m.getRelation(name);
+                        if(relation.getTargetEntity().equals(clazz)) {
+                            continue;
+                        }
+                        populateRelationshipEntities(em, tr, e, relation, value);
                     }
                 }
                 else
@@ -375,9 +381,15 @@ public class PelopsDataHandler
         tr.setColumnFamilyName(columnFamily); // column-family name
         tr.setId(e.getId()); // Id
 
-        addSuperColumnsToThriftRow(timestamp, client, tr, m, e); // Super
-                                                                 // columns
-        addColumnsToThriftRow(timestamp, tr, m, e); // Columns
+        //Add super columns to thrift row
+        addSuperColumnsToThriftRow(timestamp, client, tr, m, e); 
+        
+        //Add columns to thrift row
+        addColumnsToThriftRow(timestamp, tr, m, e); 
+        
+        //Add relations entities as Foreign keys to a new super column created internally
+        addRelationshipsToThriftRow(timestamp, tr, e, m);
+        
 
         return tr;
     }
@@ -407,13 +419,8 @@ public class PelopsDataHandler
             }
 
         }
-
-        if (!m.getColumnsAsList().isEmpty())
-        {
-            addForeignkeysToColumns(timestamp, e, columns);
-        }
-
         tr.setColumns(columns);
+        
     }
 
     private void addSuperColumnsToThriftRow(long timestamp, PelopsClient client, PelopsClient.ThriftRow tr,
@@ -485,14 +492,40 @@ public class PelopsDataHandler
                 tr.addSuperColumn(thriftSuperColumn);
             }
 
-        }
+        }       
 
-        // Add relations entities as Foreign keys to a new super column
+    }
+    
+    /**
+     * For super column families, all relationships are saved as columns, in one
+     * additional super column used internally.
+     * 
+     * @throws PropertyAccessException
+     */
+    public void addRelationshipsToThriftRow(long timestamp, PelopsClient.ThriftRow tr, EnhancedEntity e, EntityMetadata m)
+            throws PropertyAccessException
+    {        
         if (!m.getSuperColumnsAsList().isEmpty())
         {
-            createForeignKeySuperColumn(timestamp, tr, e);
+            List<Column> columns = new ArrayList<Column>();
+            addForeignkeysToColumns(timestamp, e, columns);
+            if (!columns.isEmpty())
+            {
+                SuperColumn superCol = new SuperColumn();
+                superCol.setName(PropertyAccessorFactory.STRING.toBytes(Constants.TO_ONE_SUPER_COL_NAME));
+                superCol.setColumns(columns);
+                tr.addSuperColumn(superCol);
+            }
         }
-
+        
+        if (!m.getColumnsAsList().isEmpty())
+        {
+            List<Column> columns = tr.getColumns();
+            addForeignkeysToColumns(timestamp, e, columns);
+            tr.setColumns(columns);
+        }
+        
+        
     }
 
     private SuperColumn buildThriftSuperColumn(String superColumnName, long timestamp,
@@ -558,35 +591,16 @@ public class PelopsDataHandler
         }
     }
 
-    /**
-     * For super column families, all relationships are saved as columns, in one
-     * additional super column used internally.
-     * 
-     * @throws PropertyAccessException
-     */
-    public void createForeignKeySuperColumn(long timestamp, PelopsClient.ThriftRow tr, EnhancedEntity e)
-            throws PropertyAccessException
-    {
-        List<Column> columns = new ArrayList<Column>();
-        addForeignkeysToColumns(timestamp, e, columns);
-        if (!columns.isEmpty())
-        {
-            SuperColumn superCol = new SuperColumn();
-            superCol.setName(PropertyAccessorFactory.STRING.toBytes(Constants.TO_ONE_SUPER_COL_NAME));
-            superCol.setColumns(columns);
-            tr.addSuperColumn(superCol);
-        }
-    }
+    
 
     /**
      * Populates foreign key relationship entities into their parent entity
      * 
      * @throws PropertyAccessException
      */
-    public <E> void populateRelationshipEntities(EntityManagerImpl em, EntityMetadata m, PelopsClient.ThriftRow tr,
-            E e, String relationName, byte[] value) throws PropertyAccessException
-    {
-        EntityMetadata.Relation relation = m.getRelation(relationName);
+    public <E> void populateRelationshipEntities(EntityManagerImpl em, PelopsClient.ThriftRow tr,
+            E e, EntityMetadata.Relation relation, byte[] value) throws PropertyAccessException
+    { 
 
         String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
         Set<String> keys = MetadataUtils.deserializeKeys(foreignKeys);

@@ -220,8 +220,8 @@ public class KunderaIndexer implements Indexer
                 {
                     LOG.error("Error while accesing embedded Object:" + superColumnName);
                 }
-				indexSuperColumn(metadata,object,currentDoc,
-								 metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject: object, superColumn);
+                indexSuperColumn(metadata, object, currentDoc,
+                        metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object, superColumn);
             }
         }
         else
@@ -434,22 +434,28 @@ public class KunderaIndexer implements Indexer
      * @param indexName
      *            the index name
      */
-	private void indexField(Object object, Document document,
-			java.lang.reflect.Field field, String colName, String indexName) {
-		try {
-			String value = PropertyAccessorHelper.getString(object, field);
-			if (value != null) {
-				Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), value, Field.Store.NO,
-																		Field.Index.ANALYZED);
-				document.add(luceneField);
-			}else
-			{
-				LOG.warn("value is null for field"+ field.getName());
-			}
-		} catch (PropertyAccessException e) {
-			LOG.error("Error in accessing field:" + e.getMessage());
-		}
-	}
+    private void indexField(Object object, Document document, java.lang.reflect.Field field, String colName,
+            String indexName)
+    {
+        try
+        {
+            String value = PropertyAccessorHelper.getString(object, field);
+            if (value != null)
+            {
+                Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), value, Field.Store.NO,
+                        Field.Index.ANALYZED);
+                document.add(luceneField);
+            }
+            else
+            {
+                LOG.warn("value is null for field" + field.getName());
+            }
+        }
+        catch (PropertyAccessException e)
+        {
+            LOG.error("Error in accessing field:" + e.getMessage());
+        }
+    }
 
     /*
      * (non-Javadoc)
