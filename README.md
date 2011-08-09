@@ -8,12 +8,7 @@ The idea behind Kundera is to make working with NoSQL Databases drop-dead simple
 *	To make switching across data-stores as easy as changing a configuration.
 
 
-The latest release is 2.0.3. If you're just starting out, download the jar from https://github.com/downloads/impetus-opensource/Kundera/kundera-2.0.3-jar-with-dependencies.jar.
-
-If you want to build from source pull the branch 2.0.3 from https://github.com/impetus-opensource/Kundera
-
-Development Branch is 2.0.3
-Check out the examples site! https://github.com/impetus-opensource/Kundera-Examples
+[Downloads] (https://github.com/impetus-opensource/Kundera/wiki/Kundera-releases "Downloads")
 
 
 Up and running in 5 minutes
