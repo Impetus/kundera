@@ -17,9 +17,10 @@ package com.impetus.kundera.metadata.processor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
+import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.EntityManagerFactory;
@@ -28,7 +29,6 @@ import javax.persistence.Table;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.jasper.tagplugins.jstl.core.Set;
 
 import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
@@ -95,25 +95,35 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                 populateIdColumn(metadata, clazz, f);
             }
             else if (f.isAnnotationPresent(Embedded.class))
-            { // Whether @Embedded (only for Cassandra)
-                metadata.setType(com.impetus.kundera.metadata.EntityMetadata.Type.SUPER_COLUMN_FAMILY);
-                String superColumnName = f.getName();
-                Class superColumnFieldClass = f.getType();
+            { // Whether @Embedded 
+                metadata.setType(com.impetus.kundera.metadata.EntityMetadata.Type.SUPER_COLUMN_FAMILY);                
+                Class embeddedFieldClass = f.getType();
                 isEmbeddable = true;
-
-                // An embedded attribute can be either Collection or another DTO
-                //TODO: Derive this from @EmbeddedCollection annotation, to be introduced later
-                if (superColumnFieldClass.equals(List.class) || superColumnFieldClass.equals(Set.class))
-                {
-                    superColumnFieldClass = PropertyAccessorHelper.getGenericClass(f);
-                    populateSuperColumnInMetadata(metadata, f, superColumnFieldClass);
-
+                
+                if(Collection.class.isAssignableFrom(embeddedFieldClass)) {
+                    LOG.warn(f.getName() + " was annotated with @Embedded, and shouldn't have been a java Collection field, it won't be persisted");
+                } else {
+                 // An @Embedded attribute will be a DTO (@Embeddable)                     
+                    populateEmbeddedFieldIntoMetadata(metadata, f, embeddedFieldClass);                   
+                    metadata.addToEmbedCollection(embeddedFieldClass);  //TODO: Bad code, see how to remove this
                 }
-                else
-                {
-                    populateSuperColumnInMetadata(metadata, f, superColumnFieldClass);
+                
+            }
+            else if (f.isAnnotationPresent(ElementCollection.class))
+            {
+                //Whether a collection of embeddable objects
+                metadata.setType(com.impetus.kundera.metadata.EntityMetadata.Type.SUPER_COLUMN_FAMILY);                
+                Class elementCollectionFieldClass = f.getType();
+                isEmbeddable = true;
+                
+                //An @ElementCollection must be a java collection, a generic class must be declared (@Embeddable)    
+                if(Collection.class.isAssignableFrom(elementCollectionFieldClass)) {
+                    Class elementCollectionGenericClass = PropertyAccessorHelper.getGenericClass(f);
+                    populateEmbeddedFieldIntoMetadata(metadata, f, elementCollectionGenericClass);
+                    metadata.addToEmbedCollection(elementCollectionGenericClass);  //TODO: Bad code, see how to remove this
+                } else {
+                    LOG.warn(f.getName() + " was annotated with @ElementCollection but wasn't a java Collection field, it won't be persisted");
                 }
-                metadata.addToEmbedCollection(superColumnFieldClass);
             }
             else
             {
@@ -121,61 +131,65 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                 String name = getValidJPAColumnName(clazz, f);
                 if (null != name)
                 {
-                	//additional check for not to load Unnecessary column objects in JVM. 
-                	if(!isEmbeddable)
-                	{
-                		metadata.addColumn(name, metadata.new Column(name, f));
-                	}
-                	SuperColumn superColumn =  metadata.new SuperColumn(name, f);
+                    // additional check for not to load Unnecessary column
+                    // objects in JVM.
+                    if (!isEmbeddable)
+                    {
+                        metadata.addColumn(name, metadata.new Column(name, f));
+                    }
+                    SuperColumn superColumn = metadata.new SuperColumn(name, f);
                     metadata.addSuperColumn(name, superColumn);
-                    
+
                     superColumn.addColumn(name, f);
                 }
             }
         }
         
-        if(isEmbeddable)
+        if (isEmbeddable)
         {
-        	Map<String, EntityMetadata.Column> cols = metadata.getColumnsMap();
-        	cols.clear();
-        	cols=null;
-        	metadata.setType(Type.SUPER_COLUMN_FAMILY);
-        }else 
+            Map<String, EntityMetadata.Column> cols = metadata.getColumnsMap();
+            cols.clear();
+            cols = null;
+            metadata.setType(Type.SUPER_COLUMN_FAMILY);
+        }
+        else
         {
-        	Map<String, EntityMetadata.SuperColumn> superColumns = metadata.getSuperColumnsMap();
-        	superColumns.clear();
-        	superColumns = null;
-        	metadata.setType(Type.COLUMN_FAMILY);
+            Map<String, EntityMetadata.SuperColumn> superColumns = metadata.getSuperColumnsMap();
+            superColumns.clear();
+            superColumns = null;
+            metadata.setType(Type.COLUMN_FAMILY);
         }
 
     }
 
-    private void populateSuperColumnInMetadata(EntityMetadata metadata, Field superColumnField, Class superColumnClass)
+    private void populateEmbeddedFieldIntoMetadata(EntityMetadata metadata, Field embeddedField, Class embeddedFieldClass)
     {
         // If not annotated with @Embeddable, discard.
-        Annotation ann = superColumnClass.getAnnotation(Embeddable.class);
+        Annotation ann = embeddedFieldClass.getAnnotation(Embeddable.class);
         if (ann == null)
         {
-            LOG.warn(superColumnClass
-                    + " will not be persisted as Super Column because you didn't annotate it with @Embeddable");
+            LOG.warn(embeddedField.getName() + " was declared @Embedded/ @ElementCollection but wasn't annotated with @Embeddable. "
+                    + " It won't be persisted co-located.");
             //return;
         }
 
         // TODO: Provide user an option to specify this in entity class rather
         // than default field name
-        String superColumnName = superColumnField.getName();
-        EntityMetadata.SuperColumn superColumn = metadata.getSuperColumn(superColumnName);
+        String embeddedFieldName = embeddedField.getName();
+        EntityMetadata.SuperColumn superColumn = metadata.getSuperColumn(embeddedFieldName);
         if (null == superColumn)
         {
-
-            superColumn = metadata.new SuperColumn(superColumnName, superColumnField);
+            superColumn = metadata.new SuperColumn(embeddedFieldName, embeddedField);
         }
         // Iterate over all fields of this super column class
-        for (Field columnField : superColumnClass.getDeclaredFields())
-        {
-            String columnName = columnField.getName();
+        for (Field columnField : embeddedFieldClass.getDeclaredFields())
+        {    
+            String columnName = getValidJPAColumnName(embeddedFieldClass, columnField);
+            if(columnName == null) {
+                columnName = columnField.getName();
+            }             
             superColumn.addColumn(columnName, columnField);
         }
-        metadata.addSuperColumn(superColumnName, superColumn);
+        metadata.addSuperColumn(embeddedFieldName, superColumn);
     }
 }
