@@ -197,7 +197,8 @@ public class KunderaIndexer implements Indexer
                 EntityMetadata.SuperColumn superColumn = superColMap.get(superColumnName);
                 try
                 {
-                    embeddedObject = PropertyAccessorHelper.getObject(object, superColumnName);
+                    
+                    embeddedObject = PropertyAccessorHelper.getObject(object, superColumn.getField());
                     //if embeddedObject is not set.
                     if(embeddedObject ==null)
                     {

@@ -20,6 +20,8 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
@@ -103,7 +105,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                 if(Collection.class.isAssignableFrom(embeddedFieldClass)) {
                     LOG.warn(f.getName() + " was annotated with @Embedded, and shouldn't have been a java Collection field, it won't be persisted");
                 } else {
-                 // An @Embedded attribute will be a DTO (@Embeddable)                     
+                    // An @Embedded attribute will be a DTO (@Embeddable)                     
                     populateEmbeddedFieldIntoMetadata(metadata, f, embeddedFieldClass);                   
                     metadata.addToEmbedCollection(embeddedFieldClass);  //TODO: Bad code, see how to remove this
                 }
@@ -119,7 +121,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                 //An @ElementCollection must be a java collection, a generic class must be declared (@Embeddable)    
                 if(Collection.class.isAssignableFrom(elementCollectionFieldClass)) {
                     Class elementCollectionGenericClass = PropertyAccessorHelper.getGenericClass(f);
-                    populateEmbeddedFieldIntoMetadata(metadata, f, elementCollectionGenericClass);
+                    populateElementCollectionIntoMetadata(metadata, f, elementCollectionGenericClass);
                     metadata.addToEmbedCollection(elementCollectionGenericClass);  //TODO: Bad code, see how to remove this
                 } else {
                     LOG.warn(f.getName() + " was annotated with @ElementCollection but wasn't a java Collection field, it won't be persisted");
@@ -168,7 +170,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         Annotation ann = embeddedFieldClass.getAnnotation(Embeddable.class);
         if (ann == null)
         {
-            LOG.warn(embeddedField.getName() + " was declared @Embedded/ @ElementCollection but wasn't annotated with @Embeddable. "
+            LOG.warn(embeddedField.getName() + " was declared @Embedded but wasn't annotated with @Embeddable. "
                     + " It won't be persisted co-located.");
             //return;
         }
@@ -176,6 +178,48 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         // TODO: Provide user an option to specify this in entity class rather
         // than default field name
         String embeddedFieldName = embeddedField.getName();
+        addSuperColumnInMetadata(metadata, embeddedField, embeddedFieldClass, embeddedFieldName);
+    }
+    
+    private void populateElementCollectionIntoMetadata(EntityMetadata metadata, Field embeddedField, Class embeddedFieldClass)
+    {
+        // If not annotated with @Embeddable, discard.
+        Annotation ann = embeddedFieldClass.getAnnotation(Embeddable.class);
+        if (ann == null)
+        {
+            LOG.warn(embeddedField.getName() + " was declared @ElementCollection but wasn't annotated with @Embeddable. "
+                    + " It won't be persisted co-located.");
+            //return;
+        }
+        
+        String embeddedFieldName = null;
+        
+        //Embedded object name should be the one provided with @CollectionTable annotation, if not, should be 
+        //equal to field name
+        if(embeddedField.isAnnotationPresent(CollectionTable.class)) {
+            CollectionTable ct = embeddedField.getAnnotation(CollectionTable.class);
+            if(!ct.name().isEmpty()) {
+                embeddedFieldName = ct.name();
+            } else {
+                embeddedFieldName = embeddedField.getName();
+            }
+        } else {
+            embeddedFieldName = embeddedField.getName();
+        }       
+        
+        addSuperColumnInMetadata(metadata, embeddedField, embeddedFieldClass, embeddedFieldName);
+    }
+
+    /**
+     * TODO: Change method name once we change the name "Super Column" in entity metadata
+     * @param metadata
+     * @param embeddedField
+     * @param embeddedFieldClass
+     * @param embeddedFieldName
+     */
+    private void addSuperColumnInMetadata(EntityMetadata metadata, Field embeddedField, Class embeddedFieldClass,
+            String embeddedFieldName)
+    {
         EntityMetadata.SuperColumn superColumn = metadata.getSuperColumn(embeddedFieldName);
         if (null == superColumn)
         {
