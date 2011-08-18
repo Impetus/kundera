@@ -102,7 +102,8 @@ public class PelopsClient implements CassandraClient
     PelopsDataHandler dataHandler = new PelopsDataHandler();
 
     /** The ec cache handler. */
-    //TODO: This has been moved to EntityMetadata, refactor cassandra code to pick it from meta data
+    // TODO: This has been moved to EntityMetadata, refactor cassandra code to
+    // pick it from meta data
     EmbeddedCollectionCacheHandler ecCacheHandler = new EmbeddedCollectionCacheHandler();
 
     /**
@@ -121,7 +122,7 @@ public class PelopsClient implements CassandraClient
     public final void connect()
     {
         // Start Solandra Service
-        new SolandraUtils().startSolandraServer();
+        SolandraUtils.startSolandraServer(contactNodes[0], defaultPort);
     }
 
     /*
@@ -146,7 +147,7 @@ public class PelopsClient implements CassandraClient
         return !closed;
     }
 
-   /*
+    /*
      * (non-Javadoc)
      * 
      * @seecom.impetus.kundera.Client#writeColumns(com.impetus.kundera.ejb.
@@ -267,13 +268,12 @@ public class PelopsClient implements CassandraClient
     public final <E> List<E> loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
             EntityMetadata m, String... rowIds) throws Exception
     {
-        
-        return m.getSuperColumnsAsList().isEmpty()?
-                loadColumns(em, clazz, keyspace, columnFamily, m, rowIds)
+
+        return m.getSuperColumnsAsList().isEmpty() ? loadColumns(em, clazz, keyspace, columnFamily, m, rowIds)
                 : loadEmbeddedObjects(em, clazz, m, keyspace, columnFamily, rowIds);
-        
+
     }
-    
+
     /**
      * @param <E>
      * @param clazz
@@ -284,14 +284,15 @@ public class PelopsClient implements CassandraClient
      * @return
      * @throws Exception
      */
-    public <E> List<E> loadData(EntityManager em, Class<E> clazz, EntityMetadata m, Map<String, String> col, String keyspace,
-            String family) throws Exception
+    public <E> List<E> loadData(EntityManager em, Class<E> clazz, EntityMetadata m, Map<String, String> col,
+            String keyspace, String family) throws Exception
     {
         List<E> entities = new ArrayList<E>();
         for (String superColName : col.keySet())
         {
             String entityId = col.get(superColName);
-            List<SuperColumn> superColumnList = loadSuperColumns(keyspace, family, entityId, new String[] { superColName });
+            List<SuperColumn> superColumnList = loadSuperColumns(keyspace, family, entityId,
+                    new String[] { superColName });
             E e = fromThriftRow(em, clazz, m, new DataRow<SuperColumn>(entityId, family, superColumnList));
             entities.add(e);
         }
@@ -351,7 +352,7 @@ public class PelopsClient implements CassandraClient
         }
         return entities;
     }
-    
+
     private <E> List<E> loadEmbeddedObjects(EntityManager em, Class<E> clazz, EntityMetadata m, String keyspace,
             String family, String... ids) throws Exception
     {
@@ -366,10 +367,6 @@ public class PelopsClient implements CassandraClient
         }
         return entities;
     }
-    
-    
-    
-    
 
     /*
      * (non-Javadoc)
@@ -388,8 +385,7 @@ public class PelopsClient implements CassandraClient
         Selector selector = Pelops.createSelector(POOL_NAME);
         return selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames),
                 ConsistencyLevel.ONE);
-    } 
-    
+    }
 
     /*
      * (non-Javadoc)
@@ -435,8 +431,8 @@ public class PelopsClient implements CassandraClient
      * java.lang.String, java.lang.String[])
      */
     @Override
-    public final Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String keyspace, String columnFamily, String... rowIds)
-            throws Exception
+    public final Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String keyspace, String columnFamily,
+            String... rowIds) throws Exception
     {
 
         if (!isOpen())
@@ -728,13 +724,13 @@ public class PelopsClient implements CassandraClient
     /**
      * The Class SolandraUtils.
      */
-    private class SolandraUtils
+    private static class SolandraUtils
     {
 
         /**
          * Start solandra server.
          */
-        public void startSolandraServer()
+        public static void startSolandraServer(String contactNode, int port)
         {
             log.info("Starting Solandra Server.");
             new CassandraUtils();
@@ -743,7 +739,7 @@ public class PelopsClient implements CassandraClient
             try
             {
 
-                createCassSchema();
+                createCassSchema(contactNode, port);
                 Thread.sleep(10000);
                 CassandraUtils.startupServer();
             }
@@ -760,116 +756,119 @@ public class PelopsClient implements CassandraClient
          * @throws IOException
          *             Signals that an I/O exception has occurred.
          */
-        private void createCassSchema() throws IOException
+        private static void createCassSchema(String contactNode, int port) throws IOException
         {
-
-            final String keySpace = "L";
-            final String termVecColumnFamily = "TI";
-            final String docColumnFamily = "Docs";
-            final String metaInfoColumnFamily = "TL";
-            final String fieldCacheColumnFamily = "FC";
-
-            final String schemaInfoColumnFamily = "SI";
-
-            if (DatabaseDescriptor.getNonSystemTables().contains(keySpace))
+            synchronized (contactNode)
             {
-                log.info("Found Solandra specific schema");
-                return;
+
+                final String keySpace = "L";
+                final String termVecColumnFamily = "TI";
+                final String docColumnFamily = "Docs";
+                final String metaInfoColumnFamily = "TL";
+                final String fieldCacheColumnFamily = "FC";
+
+                final String schemaInfoColumnFamily = "SI";
+
+                if (DatabaseDescriptor.getNonSystemTables().contains(keySpace))
+                {
+                    log.info("Found Solandra specific schema");
+                    return;
+                }
+
+                try
+                {
+                    Thread.sleep(1000);
+
+                    int sleep = new Random().nextInt(6000);
+
+                    log.info("\nSleeping " + sleep + "ms to stagger solandra schema creation\n");
+
+                    Thread.sleep(sleep);
+                }
+                catch (InterruptedException e1)
+                {
+                    e1.printStackTrace();
+                    System.exit(2);
+                }
+
+                if (DatabaseDescriptor.getNonSystemTables().contains(keySpace))
+                {
+                    log.info("Found Solandra specific schema");
+                    return;
+                }
+
+                List<CfDef> cfs = new ArrayList<CfDef>();
+
+                CfDef cf = new CfDef();
+                cf.setName(docColumnFamily);
+                cf.setComparator_type("BytesType");
+                cf.setKey_cache_size(0);
+                cf.setRow_cache_size(0);
+                cf.setComment("Stores the document and field data for each doc with docId as key");
+                cf.setKeyspace(keySpace);
+
+                cfs.add(cf);
+
+                cf = new CfDef();
+                cf.setName(termVecColumnFamily);
+                cf.setComparator_type("lucandra.VIntType");
+                cf.setKey_cache_size(0);
+                cf.setRow_cache_size(0);
+                cf.setComment("Stores term information with indexName/field/term as composite key");
+                cf.setKeyspace(keySpace);
+
+                cfs.add(cf);
+
+                cf = new CfDef();
+                cf.setName(fieldCacheColumnFamily);
+                cf.setComparator_type("lucandra.VIntType");
+                cf.setKey_cache_size(0);
+                cf.setRow_cache_size(0);
+                cf.setComment("Stores term per doc per field");
+                cf.setKeyspace(keySpace);
+
+                cfs.add(cf);
+
+                cf = new CfDef();
+                cf.setName(metaInfoColumnFamily);
+                cf.setComparator_type("BytesType");
+                cf.setKey_cache_size(0);
+                cf.setRow_cache_size(0);
+                cf.setComment("Stores ordered list of terms for a given field with indexName/field as composite key");
+                cf.setKeyspace(keySpace);
+
+                cfs.add(cf);
+
+                cf = new CfDef();
+                cf.setName(schemaInfoColumnFamily);
+                cf.setColumn_type("Super");
+                cf.setComparator_type("BytesType");
+                cf.setKey_cache_size(0);
+                cf.setRow_cache_size(0);
+                cf.setComment("Stores solr and index id information");
+                cf.setKeyspace(keySpace);
+
+                cfs.add(cf);
+
+                Class<? extends AbstractReplicationStrategy> simple = SimpleStrategy.class;
+                KsDef solandraKS = new KsDef(keySpace, simple.getCanonicalName(), 1, cfs);
+                Cassandra.Client client = getClient(contactNode, port);
+
+                try
+                {
+                    client.send_system_add_keyspace(solandraKS);
+                }
+                catch (TException e)
+                {
+                    throw new IOException(e);
+                }
+                catch (Exception e)
+                {
+                    throw new IOException(e);
+                }
+
+                log.info("Added Solandra specific schema");
             }
-
-            try
-            {
-                Thread.sleep(1000);
-
-                int sleep = new Random().nextInt(6000);
-
-                log.info("\nSleeping " + sleep + "ms to stagger solandra schema creation\n");
-
-                Thread.sleep(sleep);
-            }
-            catch (InterruptedException e1)
-            {
-                e1.printStackTrace();
-                System.exit(2);
-            }
-
-            if (DatabaseDescriptor.getNonSystemTables().contains(keySpace))
-            {
-                log.info("Found Solandra specific schema");
-                return;
-            }
-
-            List<CfDef> cfs = new ArrayList<CfDef>();
-
-            CfDef cf = new CfDef();
-            cf.setName(docColumnFamily);
-            cf.setComparator_type("BytesType");
-            cf.setKey_cache_size(0);
-            cf.setRow_cache_size(0);
-            cf.setComment("Stores the document and field data for each doc with docId as key");
-            cf.setKeyspace(keySpace);
-
-            cfs.add(cf);
-
-            cf = new CfDef();
-            cf.setName(termVecColumnFamily);
-            cf.setComparator_type("lucandra.VIntType");
-            cf.setKey_cache_size(0);
-            cf.setRow_cache_size(0);
-            cf.setComment("Stores term information with indexName/field/term as composite key");
-            cf.setKeyspace(keySpace);
-
-            cfs.add(cf);
-
-            cf = new CfDef();
-            cf.setName(fieldCacheColumnFamily);
-            cf.setComparator_type("lucandra.VIntType");
-            cf.setKey_cache_size(0);
-            cf.setRow_cache_size(0);
-            cf.setComment("Stores term per doc per field");
-            cf.setKeyspace(keySpace);
-
-            cfs.add(cf);
-
-            cf = new CfDef();
-            cf.setName(metaInfoColumnFamily);
-            cf.setComparator_type("BytesType");
-            cf.setKey_cache_size(0);
-            cf.setRow_cache_size(0);
-            cf.setComment("Stores ordered list of terms for a given field with indexName/field as composite key");
-            cf.setKeyspace(keySpace);
-
-            cfs.add(cf);
-
-            cf = new CfDef();
-            cf.setName(schemaInfoColumnFamily);
-            cf.setColumn_type("Super");
-            cf.setComparator_type("BytesType");
-            cf.setKey_cache_size(0);
-            cf.setRow_cache_size(0);
-            cf.setComment("Stores solr and index id information");
-            cf.setKeyspace(keySpace);
-
-            cfs.add(cf);
-
-            Class<? extends AbstractReplicationStrategy> simple = SimpleStrategy.class;
-            KsDef solandraKS = new KsDef(keySpace, simple.getCanonicalName(), 1, cfs);
-            Cassandra.Client client = getClient();
-
-            try
-            {
-                client.send_system_add_keyspace(solandraKS);
-            }
-            catch (TException e)
-            {
-                throw new IOException(e);
-            }
-            catch (Exception e)
-            {
-                throw new IOException(e);
-            }
-
-            log.info("Added Solandra specific schema");
         }
 
         /**
@@ -877,9 +876,9 @@ public class PelopsClient implements CassandraClient
          * 
          * @return the client
          */
-        private Cassandra.Client getClient()
+        private static Cassandra.Client getClient(String contactNode, int defaultPort)
         {
-            TSocket socket = new TSocket(contactNodes[0], defaultPort);
+            TSocket socket = new TSocket(contactNode, defaultPort);
             TTransport transport = new TFramedTransport(socket);
             TProtocol protocol = new TBinaryProtocol(transport);
             Cassandra.Client client = new Cassandra.Client(protocol);
@@ -904,10 +903,10 @@ public class PelopsClient implements CassandraClient
 
         }
     }
-    
+
     /**
      * From thrift row.
-     *
+     * 
      * @param <E>
      *            the element type
      * @param clazz
@@ -920,7 +919,8 @@ public class PelopsClient implements CassandraClient
      * @throws Exception
      *             the exception
      */
-    // TODO: this is a duplicate code snippet and we need to refactor this.(it should be moved to PelopsDataHandler)
+    // TODO: this is a duplicate code snippet and we need to refactor this.(it
+    // should be moved to PelopsDataHandler)
     private <E> E fromThriftRow(EntityManager em, Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> cr)
             throws Exception
     {
@@ -947,65 +947,65 @@ public class PelopsClient implements CassandraClient
             String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
             if (scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER) != -1)
             {
-                   String scFieldName = scName.substring(0,scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER));
-                   Field superColumnField = e.getClass().getDeclaredField(scFieldName);
-                   if(!superColumnField.isAccessible())
-                   {
-                       superColumnField.setAccessible(true);
-                   }
-                   Collection embeddedCollection = null;
-                   if(superColumnField.getType().equals(List.class))
-                   {
-                       embeddedCollection = new ArrayList();
-                   }else if(superColumnField.getType().equals(Set.class))
-                   {
-                       embeddedCollection = new HashSet();
-                   }
-                   PelopsDataHandler handler = new PelopsDataHandler();
-                   Object embeddedObject = handler.populateEmbeddedObject(sc, m);
-                   embeddedCollection.add(embeddedObject);
-                   superColumnField.set(e, embeddedCollection);
+                String scFieldName = scName.substring(0, scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER));
+                Field superColumnField = e.getClass().getDeclaredField(scFieldName);
+                if (!superColumnField.isAccessible())
+                {
+                    superColumnField.setAccessible(true);
+                }
+                Collection embeddedCollection = null;
+                if (superColumnField.getType().equals(List.class))
+                {
+                    embeddedCollection = new ArrayList();
+                }
+                else if (superColumnField.getType().equals(Set.class))
+                {
+                    embeddedCollection = new HashSet();
+                }
+                PelopsDataHandler handler = new PelopsDataHandler();
+                Object embeddedObject = handler.populateEmbeddedObject(sc, m);
+                embeddedCollection.add(embeddedObject);
+                superColumnField.set(e, embeddedCollection);
             }
             else
             {
-            boolean intoRelations = false;
-            if (scName.equals(Constants.TO_ONE_SUPER_COL_NAME))
-            {
-                intoRelations = true;
+                boolean intoRelations = false;
+                if (scName.equals(Constants.TO_ONE_SUPER_COL_NAME))
+                {
+                    intoRelations = true;
+                }
+
+                for (Column column : sc.getColumns())
+                {
+                    String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
+                    byte[] value = column.getValue();
+
+                    if (value == null)
+                    {
+                        continue;
+                    }
+
+                    if (intoRelations)
+                    {
+                        EntityMetadata.Relation relation = m.getRelation(name);
+
+                        String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
+                        Set<String> keys = MetadataUtils.deserializeKeys(foreignKeys);
+                        ((EntityManagerImpl) em).getEntityResolver().populateForeignEntities(e, cr.getId(), relation,
+                                keys.toArray(new String[0]));
+
+                    }
+                    else
+                    {
+                        // set value of the field in the bean
+                        Field field = columnNameToFieldMap.get(name);
+                        Object embeddedObject = PropertyAccessorHelper.getObject(e, scName);
+                        PropertyAccessorHelper.set(embeddedObject, field, value);
+                    }
+                }
             }
-
-            for (Column column : sc.getColumns())
-            {
-                String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
-                byte[] value = column.getValue();
-
-                if (value == null)
-                {
-                    continue;
-                }
-
-                if (intoRelations)
-                {
-                    EntityMetadata.Relation relation = m.getRelation(name);
-
-                    String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
-                    Set<String> keys = MetadataUtils.deserializeKeys(foreignKeys);
-                    ((EntityManagerImpl)em).getEntityResolver().populateForeignEntities(e, cr.getId(), relation,
-                            keys.toArray(new String[0]));
-
-                }
-                else
-                {
-                    // set value of the field in the bean
-                    Field field = columnNameToFieldMap.get(name);
-                    Object embeddedObject = PropertyAccessorHelper.getObject(e, scName);
-                    PropertyAccessorHelper.set(embeddedObject, field, value);
-                }
-            }
-          }
         }
         return e;
     }
-
 
 }
