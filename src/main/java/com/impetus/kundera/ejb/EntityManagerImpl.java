@@ -46,6 +46,7 @@ import com.impetus.kundera.Client;
 import com.impetus.kundera.db.DataManager;
 import com.impetus.kundera.ejb.event.EntityEventDispatcher;
 import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.loader.Configuration;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataManager;
@@ -336,6 +337,13 @@ public class EntityManagerImpl implements KunderaEntityManager
                 log.debug("Persisting @Entity >> " + o);
 
                 EntityMetadata metadata = metadataManager.getEntityMetadata(o.getEntity().getClass());
+                
+                //Check if persistenceUnit name is same as the parent entity, if not, it's a case of cross-store persistence
+                String persistenceUnit = metadata.getPersistenceUnit();
+                if(persistenceUnit != null && ! persistenceUnit.equals(persistenceUnitName)) {
+                    this.client = new Configuration().getClient(persistenceUnit);
+                }
+                
                 metadata.setDBType(this.client.getType());
                 // TODO: throw EntityExistsException if already exists
 

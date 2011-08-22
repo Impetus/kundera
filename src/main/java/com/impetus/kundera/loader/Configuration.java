@@ -84,34 +84,55 @@ public class Configuration
     public EntityManager getEntityManager(String persistenceUnit)
     {
         EntityManager em;
-        // for(String persistenceUnit:persistenceUnits) {
-        EntityManagerFactory emf = (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory(persistenceUnit);
+        EntityManagerFactory emf;
+        if(emfMap.get(identifier) == null) {
+            emf = (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory(persistenceUnit);
+        } else {
+            emf = emfMap.get(identifier);
+        }        
+        
         try
         {
             Map propMap = (Map) PropertyAccessorHelper.getObject(emf, emf.getClass().getDeclaredField("props"));
+            
             Properties props = new Properties();
             props.putAll(propMap);
-            String client = props.getProperty("kundera.client");
+            
+            String client = props.getProperty("kundera.client");   //Kundera Client
+            
+            //Server configuration path
             String serverConfig = props.getProperty("server.config");
-            if(serverConfig !=null) 
+            if(serverConfig != null) 
             {
                 serverConfig = "file:///" + props.getProperty("server.config");
                 System.setProperty("cassandra.config", serverConfig);
             }
-            node = props.getProperty("kundera.nodes");
+            node = props.getProperty("kundera.nodes");     //Node on which datastore is running
             port = props.getProperty("kundera.port");
-            keyspace = props.getProperty("kundera.keyspace");
+            keyspace = props.getProperty("kundera.keyspace"); 
             
             String resourceName = "net.sf.ehcache.configurationResourceName";
-            ClientType clientType = ClientType.getValue(client.toUpperCase());
-            createIdentifier(clientType, persistenceUnit);
             setField(emf, emf.getClass().getDeclaredField("cacheProvider"), initSecondLevelCache(props
                     .getProperty("kundera.cache.provider_class"), resourceName));
-            emfMap.put(identifier, emf);
-            em = emf.createEntityManager();
-            setClient(em, clientType, persistenceUnit);
-            emMap.put(identifier, em);
-            logger.info("Kundera Client is: " + props.getProperty("kundera.client"));
+            
+            //Client Type (Pelops/ Thrift/ HBase/ MongoDB etc)
+            ClientType clientType = ClientType.getValue(client.toUpperCase());
+            
+            createIdentifier(clientType, persistenceUnit);    
+            
+            
+            emfMap.put(identifier, emf);       
+            
+            if(! emMap.containsKey(identifier) || emMap.get(identifier) == null) {
+                em = emf.createEntityManager();
+                emMap.put(identifier, em);
+            } else {
+                em = emMap.get(identifier);
+            }                    
+            
+            //Set and connect to client
+            setClient(em, persistenceUnit);            
+            logger.info("Kundera Client is: " + client);
 
         }
         catch (SecurityException e)
@@ -158,7 +179,7 @@ public class Configuration
                             .getProperty("kundera.cache.provider_class"), resourceName));
                     emfMap.put(identifier, emf);
                     EntityManager em = emf.createEntityManager();
-                    setClient(em, clientType, metadata.getName());
+                    setClient(em, metadata.getName());
                     emMap.put(identifier, em);
                     logger.info((emf.getClass().getDeclaredField("cacheProvider")));
                 }
@@ -214,11 +235,11 @@ public class Configuration
      * @param persistenceUnit
      *            the persistence unit
      */
-    private void setClient(EntityManager em, ClientType clientType, String persistenceUnit)
+    public void setClient(EntityManager em, String persistenceUnit)
     {
         try
         {
-            setField(em, em.getClass().getDeclaredField("client"), getClient(clientType, persistenceUnit));
+            setField(em, em.getClass().getDeclaredField("client"), getClient(persistenceUnit));
         }
         catch (NoSuchFieldException e)
         {
@@ -261,7 +282,7 @@ public class Configuration
      *            the persistence unit
      * @return the client
      */
-    private Client getClient(ClientType clientType, String persistenceUnit)
+    public Client getClient(String persistenceUnit)
     {
         Client client = ClientResolver.getClient(identifier);
         client.connect();

@@ -200,5 +200,26 @@ public class MetadataUtils
         }
         return keys;
     }  
+    
+    public static void setSchemaAndPersistenceUnit(EntityMetadata m, String schemaStr) {
+        
+        if(schemaStr.indexOf("@") > 0) {
+            m.setSchema(schemaStr.substring(0, schemaStr.indexOf("@")));
+            m.setPersistenceUnit(schemaStr.substring(schemaStr.indexOf("@") + 1, schemaStr.length()));
+        } else {
+            m.setSchema(schemaStr);            
+        }
+    }
+    
+    public static void main(String[] args)
+    {
+        String schemaStr = "KunderaExamples@twibase";
+        if(schemaStr.indexOf("@") > 0) {
+            System.out.println(schemaStr.substring(0, schemaStr.indexOf("@")));
+            System.out.println(schemaStr.substring(schemaStr.indexOf("@") + 1, schemaStr.length()));
+        } else {
+            System.out.println(schemaStr);
+        }        
+    }
 
 }

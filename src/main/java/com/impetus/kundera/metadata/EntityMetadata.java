@@ -42,10 +42,13 @@ public final class EntityMetadata
     private Class<?> entityClazz;
 
     /** Name of Persistence Object. */
-    private String tableName;
+    private String tableName;   
 
     /** database name. */
     private String schema;
+    
+    /** Persistence unit of database this entity is to be persisted */
+    private String persistenceUnit;
 
     /** field that keeps row identifier. */
     private Field idProperty;
@@ -271,6 +274,22 @@ public final class EntityMetadata
     public void setSchema(String schema)
     {
         this.schema = schema;
+    }   
+
+    /**
+     * @return the persistenceUnit
+     */
+    public String getPersistenceUnit()
+    {
+        return persistenceUnit;
+    }
+
+    /**
+     * @param persistenceUnit the persistenceUnit to set
+     */
+    public void setPersistenceUnit(String persistenceUnit)
+    {
+        this.persistenceUnit = persistenceUnit;
     }
 
     /**
