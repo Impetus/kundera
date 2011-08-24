@@ -341,7 +341,7 @@ public class EntityManagerImpl implements KunderaEntityManager
                 //Check if persistenceUnit name is same as the parent entity, if not, it's a case of cross-store persistence
                 String persistenceUnit = metadata.getPersistenceUnit();
                 if(persistenceUnit != null && ! persistenceUnit.equals(persistenceUnitName)) {
-                    this.client = new Configuration().getClient(persistenceUnit);
+                    this.client = ((EntityManagerImpl)new Configuration().getEntityManager(persistenceUnit)).getClient();
                 }
                 
                 metadata.setDBType(this.client.getType());

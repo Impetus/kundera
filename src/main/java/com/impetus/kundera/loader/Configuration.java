@@ -50,10 +50,10 @@ public class Configuration
 {
 
     /** The emf map. */
-    private Map<ClientIdentifier, EntityManagerFactory> emfMap = new HashMap<ClientIdentifier, EntityManagerFactory>();
+    private static Map<String, EntityManagerFactory> emfMap = new HashMap<String, EntityManagerFactory>();
 
     /** The em map. */
-    private Map<ClientIdentifier, EntityManager> emMap = new HashMap<ClientIdentifier, EntityManager>();
+    private static Map<ClientIdentifier, EntityManager> emMap = new HashMap<ClientIdentifier, EntityManager>();
 
     /** Full path of Server config file */
     private String serverConfig;
@@ -85,10 +85,12 @@ public class Configuration
     {
         EntityManager em;
         EntityManagerFactory emf;
-        if(emfMap.get(identifier) == null) {
+        
+        if(emfMap.get(persistenceUnit) == null) {
             emf = (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory(persistenceUnit);
+            emfMap.put(persistenceUnit, emf); 
         } else {
-            emf = emfMap.get(identifier);
+            emf = emfMap.get(persistenceUnit);
         }        
         
         try
@@ -121,7 +123,7 @@ public class Configuration
             createIdentifier(clientType, persistenceUnit);    
             
             
-            emfMap.put(identifier, emf);       
+                  
             
             if(! emMap.containsKey(identifier) || emMap.get(identifier) == null) {
                 em = emf.createEntityManager();
@@ -149,6 +151,10 @@ public class Configuration
         }
         return em;
     }
+    
+    public void setConfigurationFields(Properties props) {
+        
+    }
 
     /**
      * Initialises.
@@ -156,30 +162,34 @@ public class Configuration
      * @param url
      *            the url
      */
-    public void init(URL url)
+    /*public void init(URL url)
     {
         try
         {
             List<PersistenceMetadata> metadataCol = PersistenceXmlLoader.findPersistenceUnits(url,
                     PersistenceUnitTransactionType.JTA);
-            for (PersistenceMetadata metadata : metadataCol)
+            for (PersistenceMetadata pMetaData : metadataCol)
             {
-                Properties props = metadata.getProps();
+                Properties props = pMetaData.getProps();
                 String client = props.getProperty("kundera.client");
+                
                 node = props.getProperty("kundera.nodes");
                 port = props.getProperty("kundera.port");
                 keyspace = props.getProperty("kundera.keyspace");
                 String resourceName = "net.sf.ehcache.configurationResourceName";
+                
                 ClientType clientType = ClientType.getValue(client.toUpperCase());
-                createIdentifier(clientType, metadata.getName());
+                createIdentifier(clientType, pMetaData.getName());
+                
                 if (!emfMap.containsKey(identifier))
                 {
-                    EntityManagerFactory emf = Persistence.createEntityManagerFactory(metadata.getName());
+                    EntityManagerFactory emf = Persistence.createEntityManagerFactory(pMetaData.getName());
                     setField(emf, emf.getClass().getDeclaredField("cacheProvider"), initSecondLevelCache(props
                             .getProperty("kundera.cache.provider_class"), resourceName));
                     emfMap.put(identifier, emf);
+                    
                     EntityManager em = emf.createEntityManager();
-                    setClient(em, metadata.getName());
+                    setClient(em, pMetaData.getName());
                     emMap.put(identifier, em);
                     logger.info((emf.getClass().getDeclaredField("cacheProvider")));
                 }
@@ -189,7 +199,7 @@ public class Configuration
         {
             throw new PersistenceException(e.getMessage());
         }
-    }
+    }*/
 
     /**
      * Returns entityManager.
