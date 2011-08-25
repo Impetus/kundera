@@ -134,7 +134,7 @@ public class Configuration
             
             //Set and connect to client
             setClient(em, persistenceUnit);            
-            logger.info("Kundera Client is: " + client);
+            logger.info("Kundera Client for Persistence Unit " + persistenceUnit + " is: " + client);
 
         }
         catch (SecurityException e)
@@ -233,7 +233,8 @@ public class Configuration
             emf.close();
             emf = null;
         }
-    }
+    }   
+
 
     /**
      * Set client to entity manager.

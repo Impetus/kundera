@@ -331,31 +331,16 @@ public class EntityManagerImpl implements KunderaEntityManager
             List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.PERSIST, this.client
                     .getType());
 
-            // save each one
+            // Save each one
+            PersistThreadPoolExecutor ptpe = new PersistThreadPoolExecutor();
+            
             for (EnhancedEntity o : reachableEntities)
             {
                 log.debug("Persisting @Entity >> " + o);
 
-                EntityMetadata metadata = metadataManager.getEntityMetadata(o.getEntity().getClass());
-                
-                //Check if persistenceUnit name is same as the parent entity, if not, it's a case of cross-store persistence
-                String persistenceUnit = metadata.getPersistenceUnit();
-                if(persistenceUnit != null && ! persistenceUnit.equals(persistenceUnitName)) {
-                    this.client = ((EntityManagerImpl)new Configuration().getEntityManager(persistenceUnit)).getClient();
-                }
-                
-                metadata.setDBType(this.client.getType());
-                // TODO: throw EntityExistsException if already exists
+                PersistTask persistTask = new PersistTask(o, this);
+                ptpe.runPersistTask(persistTask);
 
-                // fire pre-persist events
-                eventDispatcher.fireEventListeners(metadata, o, PrePersist.class);
-
-                // TODO uncomment
-                dataManager.persist(o, metadata);
-                getIndexManager().write(metadata, o.getEntity());
-
-                // fire post-persist events
-                eventDispatcher.fireEventListeners(metadata, o, PostPersist.class);
             }
         }
         catch (Exception exp)
@@ -378,7 +363,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     @Override
     public final void close()
     {
-        closed = true;
+        closed = true;        
         session = null;
     }
 
@@ -739,6 +724,14 @@ public class EntityManagerImpl implements KunderaEntityManager
     public final Client getClient()
     {
         return client;
+    }   
+
+    /**
+     * @param client the client to set
+     */
+    public void setClient(Client client)
+    {
+        this.client = client;
     }
 
     /**
@@ -769,6 +762,23 @@ public class EntityManagerImpl implements KunderaEntityManager
     public EntityResolver getEntityResolver()
     {
         return entityResolver;
+    }
+    
+
+    /**
+     * @return the eventDispatcher
+     */
+    public EntityEventDispatcher getEventDispatcher()
+    {
+        return eventDispatcher;
+    }
+
+    /**
+     * @param eventDispatcher the eventDispatcher to set
+     */
+    public void setEventDispatcher(EntityEventDispatcher eventDispatcher)
+    {
+        this.eventDispatcher = eventDispatcher;
     }
 
     @Override
@@ -810,5 +820,7 @@ public class EntityManagerImpl implements KunderaEntityManager
             throw new PersistenceException(e);
         }
     }
+    
+    
 
 }
