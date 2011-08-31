@@ -211,7 +211,7 @@ public class MetadataUtils
         }
     }
     
-    public static void main(String[] args)
+    /*public static void main(String[] args)
     {
         String schemaStr = "KunderaExamples@twibase";
         if(schemaStr.indexOf("@") > 0) {
@@ -220,6 +220,6 @@ public class MetadataUtils
         } else {
             System.out.println(schemaStr);
         }        
-    }
+    }*/
 
 }
