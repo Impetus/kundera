@@ -37,7 +37,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "users", schema = "Blog")
-public class User
+public class TwitterUser
 {
     @Id
     private String userId; // PK
@@ -48,11 +48,11 @@ public class User
 
     // Embedded collection, will persist co-located
     @Embedded
-    private List<Tweet> tweets;
+    private List<UserTweet> tweets;
 
     // One-to-one, will be persisted separately
     @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
-    private Preference preference;
+    private UserPreference preference;
 
     // One to many, will be persisted separately
     @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
@@ -95,7 +95,7 @@ public class User
     /**
      * @return the tweets
      */
-    public List<Tweet> getTweets()
+    public List<UserTweet> getTweets()
     {
         return tweets;
     }
@@ -104,11 +104,11 @@ public class User
      * @param tweets
      *            the tweets to set
      */
-    public void addTweet(Tweet tweet)
+    public void addTweet(UserTweet tweet)
     {
         if (this.tweets == null || this.tweets.isEmpty())
         {
-            this.tweets = new ArrayList<Tweet>();
+            this.tweets = new ArrayList<UserTweet>();
         }
         this.tweets.add(tweet);
     }
@@ -116,7 +116,7 @@ public class User
     /**
      * @return the preference
      */
-    public Preference getPreference()
+    public UserPreference getPreference()
     {
         return preference;
     }
@@ -125,7 +125,7 @@ public class User
      * @param preference
      *            the preference to set
      */
-    public void setPreference(Preference preference)
+    public void setPreference(UserPreference preference)
     {
         this.preference = preference;
     }

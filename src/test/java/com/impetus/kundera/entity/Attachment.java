@@ -27,7 +27,7 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "attachments", schema = "mongodbtest")
+@Table(name = "attachments", schema = "Blog")
 public class Attachment
 {
 

@@ -32,6 +32,7 @@ import javax.persistence.PersistenceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.loader.Configuration;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -40,7 +41,7 @@ import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * The Class EntityReachabilityResolver.
- *
+ * 
  * @author animesh.kumar
  */
 public class EntityResolver
@@ -54,7 +55,7 @@ public class EntityResolver
 
     /**
      * Instantiates a new entity resolver.
-     *
+     * 
      * @param em
      *            the em
      */
@@ -65,7 +66,7 @@ public class EntityResolver
 
     /**
      * Resolve all reachable entities from entity
-     *
+     * 
      * @param entity
      *            the entity
      * @param cascadeType
@@ -100,7 +101,7 @@ public class EntityResolver
 
     /**
      * helper method to recursively build reachable object list.
-     *
+     * 
      * @param o
      *            the o
      * @param cascadeType
@@ -182,8 +183,8 @@ public class EntityResolver
                 if (relation.isUnary())
                 {
                     // Unary relation will have single target object.
-                    String targetId = PropertyAccessorHelper.getId(value, em.getMetadataManager().getEntityMetadata(
-                            targetClass));
+                    String targetId = PropertyAccessorHelper.getId(value,
+                            em.getMetadataManager().getEntityMetadata(targetClass));
 
                     Set<String> foreignKeys = new HashSet<String>();
 
@@ -208,8 +209,8 @@ public class EntityResolver
                     // Iterate over each Object and get the @Id
                     for (Object o_ : collection)
                     {
-                        String targetId = PropertyAccessorHelper.getId(o_, em.getMetadataManager().getEntityMetadata(
-                                targetClass));
+                        String targetId = PropertyAccessorHelper.getId(o_,
+                                em.getMetadataManager().getEntityMetadata(targetClass));
 
                         foreignKeys.add(targetId);
 
@@ -234,7 +235,7 @@ public class EntityResolver
 
     /**
      * Populate foreign entities.
-     *
+     * 
      * @param containingEntity
      *            the containing entity
      * @param containingEntityId
@@ -265,6 +266,72 @@ public class EntityResolver
         // Eagerly Caching containing entity to avoid it's own loading,
         // in case the target contains a reference to containing entity.
         em.getSession().store(entity, entityId, Boolean.FALSE);
+
+        EntityMetadata relMetadata = em.getMetadataManager().getEntityMetadata(foreignEntityClass);
+
+        // Check for cross-store persistence
+        if (em.getPersistenceUnitName().equals(relMetadata.getPersistenceUnit()))
+        {
+            populateForeignEntityFromSameDatastore(entity, relation, entityName, foreignEntityClass, foreignKeys);
+        }
+        else
+        {
+            LOG.debug("Relationship entity is for a different database, only PKs will be set");
+            populateForeignEntityFromDifferentDatastore(entity, relation, entityName, foreignEntityClass, foreignKeys);
+        }
+    }
+
+    /**
+     * Populates entire foreign entity object (Because parent entity and foreign
+     * entity are in the same datastore)
+     */
+    private void populateForeignEntityFromSameDatastore(Object entity, EntityMetadata.Relation relation,
+            String entityName, Class<?> foreignEntityClass, String... foreignKeys) throws PropertyAccessException
+    {
+        if (relation.isUnary())
+        {
+            // there is just one target object
+            String foreignKey = foreignKeys[0];
+
+            Object foreignObject = getForeignEntityOrProxy(entityName, foreignEntityClass, foreignKey, relation);
+
+            PropertyAccessorHelper.set(entity, relation.getProperty(), foreignObject);
+        }
+
+        else if (relation.isCollection())
+        {
+            // there could be multiple target objects Cast to Collection
+            Collection<Object> foreignObjects = null;
+            if (relation.getPropertyType().equals(Set.class))
+            {
+                foreignObjects = new HashSet<Object>();
+            }
+            else if (relation.getPropertyType().equals(List.class))
+            {
+                foreignObjects = new ArrayList<Object>();
+            }
+
+            // Iterate over keys
+            for (String foreignKey : foreignKeys)
+            {
+                Object foreignObject = getForeignEntityOrProxy(entityName, foreignEntityClass, foreignKey, relation);
+                foreignObjects.add(foreignObject);
+            }
+
+            PropertyAccessorHelper.set(entity, relation.getProperty(), foreignObjects);
+        }
+    }
+
+    /**
+     * Populates only row key in the foreign entity object (Because foreign
+     * entity is in different datastore vis-a-vis parent entity)
+     */
+    private void populateForeignEntityFromDifferentDatastore(Object entity, EntityMetadata.Relation relation,
+            String entityName, Class<?> foreignEntityClass, String... foreignKeys) throws PropertyAccessException
+    {
+
+        EntityMetadata relMetadata = em.getMetadataManager().getEntityMetadata(foreignEntityClass);
+        this.em = (EntityManagerImpl) new Configuration().getEntityManager(relMetadata.getPersistenceUnit());
 
         if (relation.isUnary())
         {
@@ -304,7 +371,7 @@ public class EntityResolver
 
     /**
      * Helper method to load Foreign Entity/Proxy
-     *
+     * 
      * @param entityName
      *            the entity name
      * @param persistentClass

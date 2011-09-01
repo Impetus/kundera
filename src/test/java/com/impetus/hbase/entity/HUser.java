@@ -24,7 +24,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.impetus.kundera.entity.PersonalDetail;
-import com.impetus.kundera.entity.Tweet;
+import com.impetus.kundera.entity.UserTweet;
 
 /**
  * Entity class for User
@@ -45,7 +45,7 @@ public class HUser
     
     // Embedded collection, will persist co-located
     @Embedded
-    private List<Tweet> tweets;
+    private List<UserTweet> tweets;
 
     /**
      * @return the userId
@@ -82,7 +82,7 @@ public class HUser
     /**
      * @return the tweets
      */
-    public List<Tweet> getTweets()
+    public List<UserTweet> getTweets()
     {
         return tweets;
     }
@@ -91,11 +91,11 @@ public class HUser
      * @param tweets
      *            the tweets to set
      */
-    public void addTweet(Tweet tweet)
+    public void addTweet(UserTweet tweet)
     {
         if (this.tweets == null || this.tweets.isEmpty())
         {
-            this.tweets = new ArrayList<Tweet>();
+            this.tweets = new ArrayList<UserTweet>();
         }
         this.tweets.add(tweet);
     }

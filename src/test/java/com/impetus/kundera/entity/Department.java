@@ -29,7 +29,7 @@ import javax.persistence.Table;
 import com.impetus.kundera.api.Cacheable;
 
 @Entity
-@Table(name = "Department")
+@Table(name = "Department", schema="Blog")
 @Cacheable(true)
 public class Department
 {

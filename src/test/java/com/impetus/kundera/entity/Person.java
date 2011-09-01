@@ -35,7 +35,7 @@ import com.impetus.kundera.api.Index;
  *
  */
 @Entity
-@Table(name = "Person")
+@Table(name = "Person", schema="Blog")
 @Index(index = false)
 public class Person implements Serializable
 {

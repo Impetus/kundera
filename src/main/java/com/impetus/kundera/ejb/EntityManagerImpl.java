@@ -26,8 +26,10 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceException;
+import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Query;
@@ -44,6 +46,7 @@ import com.impetus.kundera.Client;
 import com.impetus.kundera.db.DataManager;
 import com.impetus.kundera.ejb.event.EntityEventDispatcher;
 import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.loader.Configuration;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataManager;
@@ -53,7 +56,7 @@ import com.impetus.kundera.query.LuceneQuery;
 
 /**
  * The Class EntityManagerImpl.
- *
+ * 
  * @author animesh.kumar
  */
 public class EntityManagerImpl implements KunderaEntityManager
@@ -94,7 +97,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Instantiates a new entity manager impl.
-     *
+     * 
      * @param factory
      *            the factory
      * @param client
@@ -113,7 +116,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the factory.
-     *
+     * 
      * @return the factory
      */
     public EntityManagerFactoryImpl getFactory()
@@ -153,7 +156,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Immediate load and cache.
-     *
+     * 
      * @param <E>
      *            the element type
      * @param entityClass
@@ -238,8 +241,8 @@ public class EntityManagerImpl implements KunderaEntityManager
         try
         {
 
-            List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.REMOVE, this.client
-                    .getType());
+            List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.REMOVE,
+                    this.client.getType());
 
             // remove each one
             for (EnhancedEntity o : reachableEntities)
@@ -325,18 +328,19 @@ public class EntityManagerImpl implements KunderaEntityManager
             // validate
             metadataManager.validate(e.getClass());
 
-            List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.PERSIST, this.client
-                    .getType());
+            List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.PERSIST,
+                    this.client.getType());
 
             // Save each one
-            PersistThreadPoolExecutor ptpe = new PersistThreadPoolExecutor();
-            
+            // PersistThreadPoolExecutor ptpe = new PersistThreadPoolExecutor();
+
             for (EnhancedEntity o : reachableEntities)
             {
                 log.debug("Persisting @Entity >> " + o);
 
-                PersistTask persistTask = new PersistTask(o, this);
-                ptpe.runPersistTask(persistTask);
+                // PersistTask persistTask = new PersistTask(o, this);
+                // ptpe.runPersistTask(persistTask);
+                persistData(o);
 
             }
         }
@@ -345,6 +349,47 @@ public class EntityManagerImpl implements KunderaEntityManager
             exp.printStackTrace();
             throw new PersistenceException(exp);
         }
+    }
+
+    public void persistData(EnhancedEntity e)
+    {
+        try
+        {
+            EntityMetadata metadata = getMetadataManager().getEntityMetadata(e.getEntity().getClass());
+
+            // Check if persistenceUnit name is same as the parent entity, if
+            // not, it's a case of cross-store persistence
+            String persistenceUnit = metadata.getPersistenceUnit();
+            if (persistenceUnit != null && !persistenceUnit.equals(getPersistenceUnitName()))
+            {
+                // TODO: Required to set client in EM, check?
+                setClient(((EntityManagerImpl) new Configuration().getEntityManager(persistenceUnit)).getClient());
+            }
+
+            metadata.setDBType(getClient().getType());
+            // TODO: throw EntityExistsException if already exists
+
+            // fire pre-persist events
+            getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
+
+            // TODO uncomment
+            getDataManager().persist(e, metadata);
+            getIndexManager().write(metadata, e.getEntity());
+
+            // fire post-persist events
+            getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
+        }
+        catch (PersistenceException ex)
+        {
+            log.error("Error while persisting entity into datastore, Details: " + ex.getMessage());
+            throw ex;
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+            throw new PersistenceException(ex.getMessage());
+        }
+
     }
 
     /* @see javax.persistence.EntityManager#clear() */
@@ -360,7 +405,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     @Override
     public final void close()
     {
-        closed = true;        
+        closed = true;
         session = null;
     }
 
@@ -485,11 +530,13 @@ public class EntityManagerImpl implements KunderaEntityManager
     public final void refresh(Object entity)
     {
         throw new NotImplementedException("TODO");
-    }   
-    
+    }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#find(java.lang.Class,
+     * java.lang.Object, java.util.Map)
      */
     @Override
     public <T> T find(Class<T> paramClass, Object paramObject, Map<String, Object> paramMap)
@@ -497,8 +544,11 @@ public class EntityManagerImpl implements KunderaEntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object, javax.persistence.LockModeType)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#find(java.lang.Class,
+     * java.lang.Object, javax.persistence.LockModeType)
      */
     @Override
     public <T> T find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType)
@@ -506,8 +556,11 @@ public class EntityManagerImpl implements KunderaEntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object, javax.persistence.LockModeType, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#find(java.lang.Class,
+     * java.lang.Object, javax.persistence.LockModeType, java.util.Map)
      */
     @Override
     public <T> T find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType,
@@ -516,55 +569,71 @@ public class EntityManagerImpl implements KunderaEntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#lock(java.lang.Object, javax.persistence.LockModeType, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#lock(java.lang.Object,
+     * javax.persistence.LockModeType, java.util.Map)
      */
     @Override
     public void lock(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
     {
-        throw new NotImplementedException("TODO");        
+        throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#refresh(java.lang.Object, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#refresh(java.lang.Object,
+     * java.util.Map)
      */
     @Override
     public void refresh(Object paramObject, Map<String, Object> paramMap)
     {
         throw new NotImplementedException("TODO");
-        
+
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#refresh(java.lang.Object, javax.persistence.LockModeType)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#refresh(java.lang.Object,
+     * javax.persistence.LockModeType)
      */
     @Override
     public void refresh(Object paramObject, LockModeType paramLockModeType)
     {
         throw new NotImplementedException("TODO");
-        
+
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#refresh(java.lang.Object, javax.persistence.LockModeType, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#refresh(java.lang.Object,
+     * javax.persistence.LockModeType, java.util.Map)
      */
     @Override
     public void refresh(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
     {
-        throw new NotImplementedException("TODO");        
+        throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#detach(java.lang.Object)
      */
     @Override
     public void detach(Object paramObject)
     {
         throw new NotImplementedException("TODO");
-        
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#getLockMode(java.lang.Object)
      */
     @Override
@@ -573,17 +642,22 @@ public class EntityManagerImpl implements KunderaEntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#setProperty(java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#setProperty(java.lang.String,
+     * java.lang.Object)
      */
     @Override
     public void setProperty(String paramString, Object paramObject)
     {
         throw new NotImplementedException("TODO");
-        
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#getProperties()
      */
     @Override
@@ -592,8 +666,12 @@ public class EntityManagerImpl implements KunderaEntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#createQuery(javax.persistence.criteria.CriteriaQuery)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.EntityManager#createQuery(javax.persistence.criteria
+     * .CriteriaQuery)
      */
     @Override
     public <T> TypedQuery<T> createQuery(CriteriaQuery<T> paramCriteriaQuery)
@@ -601,8 +679,11 @@ public class EntityManagerImpl implements KunderaEntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#createQuery(java.lang.String, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#createQuery(java.lang.String,
+     * java.lang.Class)
      */
     @Override
     public <T> TypedQuery<T> createQuery(String paramString, Class<T> paramClass)
@@ -610,8 +691,11 @@ public class EntityManagerImpl implements KunderaEntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#createNamedQuery(java.lang.String, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#createNamedQuery(java.lang.String,
+     * java.lang.Class)
      */
     @Override
     public <T> TypedQuery<T> createNamedQuery(String paramString, Class<T> paramClass)
@@ -619,7 +703,9 @@ public class EntityManagerImpl implements KunderaEntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#unwrap(java.lang.Class)
      */
     @Override
@@ -628,7 +714,9 @@ public class EntityManagerImpl implements KunderaEntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#getEntityManagerFactory()
      */
     @Override
@@ -637,7 +725,9 @@ public class EntityManagerImpl implements KunderaEntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#getCriteriaBuilder()
      */
     @Override
@@ -646,7 +736,9 @@ public class EntityManagerImpl implements KunderaEntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#getMetamodel()
      */
     @Override
@@ -654,7 +746,6 @@ public class EntityManagerImpl implements KunderaEntityManager
     {
         throw new NotImplementedException("TODO");
     }
-
 
     /*
      * @see
@@ -680,7 +771,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the metadata manager.
-     *
+     * 
      * @return the metadataManager
      */
     public final MetadataManager getMetadataManager()
@@ -690,7 +781,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the data manager.
-     *
+     * 
      * @return the dataManager
      */
     public final DataManager getDataManager()
@@ -700,7 +791,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the index manager.
-     *
+     * 
      * @return the indexManager
      */
     public final IndexManager getIndexManager()
@@ -714,17 +805,18 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the client.
-     *
+     * 
      * @return the client
      */
     @Override
     public final Client getClient()
     {
         return client;
-    }   
+    }
 
     /**
-     * @param client the client to set
+     * @param client
+     *            the client to set
      */
     public void setClient(Client client)
     {
@@ -733,7 +825,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the persistence unit name.
-     *
+     * 
      * @return the persistence unit name
      */
     public final String getPersistenceUnitName()
@@ -743,7 +835,7 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the session.
-     *
+     * 
      * @return the session
      */
     protected EntityManagerSession getSession()
@@ -753,14 +845,13 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /**
      * Gets the entity resolver.
-     *
+     * 
      * @return the reachabilityResolver
      */
     public EntityResolver getEntityResolver()
     {
         return entityResolver;
     }
-    
 
     /**
      * @return the eventDispatcher
@@ -771,7 +862,8 @@ public class EntityManagerImpl implements KunderaEntityManager
     }
 
     /**
-     * @param eventDispatcher the eventDispatcher to set
+     * @param eventDispatcher
+     *            the eventDispatcher to set
      */
     public void setEventDispatcher(EntityEventDispatcher eventDispatcher)
     {
@@ -817,7 +909,5 @@ public class EntityManagerImpl implements KunderaEntityManager
             throw new PersistenceException(e);
         }
     }
-    
-    
 
 }

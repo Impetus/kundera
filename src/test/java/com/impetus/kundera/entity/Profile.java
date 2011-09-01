@@ -24,7 +24,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "Profile")
+@Table(name = "Profile", schema="Blog")
 public class Profile
 {
 

@@ -31,7 +31,7 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "emails", schema = "mongodbtest")
+@Table(name = "emails", schema = "Blog")
 public class Email
 {
 

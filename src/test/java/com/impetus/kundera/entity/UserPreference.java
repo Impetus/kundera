@@ -28,7 +28,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "preference", schema = "Blog")
-public class Preference
+public class UserPreference
 {
 
     @Id
@@ -40,12 +40,12 @@ public class Preference
     @Column(name = "privacy_level")
     String privacyLevel; // 1, 2, 3
 
-    public Preference()
+    public UserPreference()
     {
 
     }
 
-    public Preference(String prefId, String theme, String privacyLevel)
+    public UserPreference(String prefId, String theme, String privacyLevel)
     {
         this.preferenceId = prefId;
         this.websiteTheme = theme;

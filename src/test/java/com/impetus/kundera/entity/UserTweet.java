@@ -24,7 +24,7 @@ import javax.persistence.Embeddable;
  */
 
 @Embeddable
-public class Tweet
+public class UserTweet
 {
 
     private String tweetId;
@@ -33,14 +33,14 @@ public class Tweet
 
     private String device;
 
-    public Tweet(String tweetId, String body, String device)
+    public UserTweet(String tweetId, String body, String device)
     {
         this.tweetId = tweetId;
         this.body = body;
         this.device = device;
     }
 
-    public Tweet()
+    public UserTweet()
     {
 
     }
