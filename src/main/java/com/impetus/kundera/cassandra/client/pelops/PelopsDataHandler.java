@@ -442,7 +442,7 @@ public class PelopsDataHandler
             String superColumnName = null;
             if (superColumnObject == null)
             {
-                continue;
+                return;
             }
             if (superColumnObject instanceof Collection)
             {

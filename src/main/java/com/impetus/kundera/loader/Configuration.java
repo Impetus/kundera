@@ -50,10 +50,10 @@ public class Configuration
 {
 
     /** The emf map. */
-    private static Map<String, EntityManagerFactory> emfMap = new HashMap<String, EntityManagerFactory>();
+    private Map<ClientIdentifier, EntityManagerFactory> emfMap = new HashMap<ClientIdentifier, EntityManagerFactory>();
 
     /** The em map. */
-    private static Map<ClientIdentifier, EntityManager> emMap = new HashMap<ClientIdentifier, EntityManager>();
+    private Map<ClientIdentifier, EntityManager> emMap = new HashMap<ClientIdentifier, EntityManager>();
 
     /** Full path of Server config file */
     private String serverConfig;
@@ -84,57 +84,34 @@ public class Configuration
     public EntityManager getEntityManager(String persistenceUnit)
     {
         EntityManager em;
-        EntityManagerFactory emf;
-        
-        if(emfMap.get(persistenceUnit) == null) {
-            emf = (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory(persistenceUnit);
-            emfMap.put(persistenceUnit, emf); 
-        } else {
-            emf = emfMap.get(persistenceUnit);
-        }        
-        
+        // for(String persistenceUnit:persistenceUnits) {
+        EntityManagerFactory emf = (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory(persistenceUnit);
         try
         {
             Map propMap = (Map) PropertyAccessorHelper.getObject(emf, emf.getClass().getDeclaredField("props"));
-            
             Properties props = new Properties();
             props.putAll(propMap);
-            
-            String client = props.getProperty("kundera.client");   //Kundera Client
-            
-            //Server configuration path
+            String client = props.getProperty("kundera.client");
             String serverConfig = props.getProperty("server.config");
-            if(serverConfig != null) 
+            if(serverConfig !=null) 
             {
                 serverConfig = "file:///" + props.getProperty("server.config");
                 System.setProperty("cassandra.config", serverConfig);
             }
-            node = props.getProperty("kundera.nodes");     //Node on which datastore is running
+            node = props.getProperty("kundera.nodes");
             port = props.getProperty("kundera.port");
-            keyspace = props.getProperty("kundera.keyspace"); 
+            keyspace = props.getProperty("kundera.keyspace");
             
             String resourceName = "net.sf.ehcache.configurationResourceName";
+            ClientType clientType = ClientType.getValue(client.toUpperCase());
+            createIdentifier(clientType, persistenceUnit);
             setField(emf, emf.getClass().getDeclaredField("cacheProvider"), initSecondLevelCache(props
                     .getProperty("kundera.cache.provider_class"), resourceName));
-            
-            //Client Type (Pelops/ Thrift/ HBase/ MongoDB etc)
-            ClientType clientType = ClientType.getValue(client.toUpperCase());
-            
-            createIdentifier(clientType, persistenceUnit);    
-            
-            
-                  
-            
-            if(! emMap.containsKey(identifier) || emMap.get(identifier) == null) {
-                em = emf.createEntityManager();
-                emMap.put(identifier, em);
-            } else {
-                em = emMap.get(identifier);
-            }                    
-            
-            //Set and connect to client
-            setClient(em, persistenceUnit);            
-            logger.info("Kundera Client for Persistence Unit " + persistenceUnit + " is: " + client);
+            emfMap.put(identifier, emf);
+            em = emf.createEntityManager();
+            setClient(em, clientType, persistenceUnit);
+            emMap.put(identifier, em);
+            logger.info("Kundera Client is: " + props.getProperty("kundera.client"));
 
         }
         catch (SecurityException e)
@@ -151,10 +128,6 @@ public class Configuration
         }
         return em;
     }
-    
-    public void setConfigurationFields(Properties props) {
-        
-    }
 
     /**
      * Initialises.
@@ -162,34 +135,30 @@ public class Configuration
      * @param url
      *            the url
      */
-    /*public void init(URL url)
+    public void init(URL url)
     {
         try
         {
             List<PersistenceMetadata> metadataCol = PersistenceXmlLoader.findPersistenceUnits(url,
                     PersistenceUnitTransactionType.JTA);
-            for (PersistenceMetadata pMetaData : metadataCol)
+            for (PersistenceMetadata metadata : metadataCol)
             {
-                Properties props = pMetaData.getProps();
+                Properties props = metadata.getProps();
                 String client = props.getProperty("kundera.client");
-                
                 node = props.getProperty("kundera.nodes");
                 port = props.getProperty("kundera.port");
                 keyspace = props.getProperty("kundera.keyspace");
                 String resourceName = "net.sf.ehcache.configurationResourceName";
-                
                 ClientType clientType = ClientType.getValue(client.toUpperCase());
-                createIdentifier(clientType, pMetaData.getName());
-                
+                createIdentifier(clientType, metadata.getName());
                 if (!emfMap.containsKey(identifier))
                 {
-                    EntityManagerFactory emf = Persistence.createEntityManagerFactory(pMetaData.getName());
+                    EntityManagerFactory emf = Persistence.createEntityManagerFactory(metadata.getName());
                     setField(emf, emf.getClass().getDeclaredField("cacheProvider"), initSecondLevelCache(props
                             .getProperty("kundera.cache.provider_class"), resourceName));
                     emfMap.put(identifier, emf);
-                    
                     EntityManager em = emf.createEntityManager();
-                    setClient(em, pMetaData.getName());
+                    setClient(em, clientType, metadata.getName());
                     emMap.put(identifier, em);
                     logger.info((emf.getClass().getDeclaredField("cacheProvider")));
                 }
@@ -199,7 +168,7 @@ public class Configuration
         {
             throw new PersistenceException(e.getMessage());
         }
-    }*/
+    }
 
     /**
      * Returns entityManager.
@@ -233,8 +202,7 @@ public class Configuration
             emf.close();
             emf = null;
         }
-    }   
-
+    }
 
     /**
      * Set client to entity manager.
@@ -246,11 +214,11 @@ public class Configuration
      * @param persistenceUnit
      *            the persistence unit
      */
-    public void setClient(EntityManager em, String persistenceUnit)
+    private void setClient(EntityManager em, ClientType clientType, String persistenceUnit)
     {
         try
         {
-            setField(em, em.getClass().getDeclaredField("client"), getClient(persistenceUnit));
+            setField(em, em.getClass().getDeclaredField("client"), getClient(clientType, persistenceUnit));
         }
         catch (NoSuchFieldException e)
         {
@@ -293,7 +261,7 @@ public class Configuration
      *            the persistence unit
      * @return the client
      */
-    public Client getClient(String persistenceUnit)
+    private Client getClient(ClientType clientType, String persistenceUnit)
     {
         Client client = ClientResolver.getClient(identifier);
         client.connect();

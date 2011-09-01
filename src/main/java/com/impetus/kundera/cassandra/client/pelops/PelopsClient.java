@@ -105,9 +105,6 @@ public class PelopsClient implements CassandraClient
     // TODO: This has been moved to EntityMetadata, refactor cassandra code to
     // pick it from meta data
     EmbeddedCollectionCacheHandler ecCacheHandler = new EmbeddedCollectionCacheHandler();
-    
-    /** Whether this client is connected */
-    private boolean isConnected;
 
     /**
      * default constructor.
@@ -124,11 +121,8 @@ public class PelopsClient implements CassandraClient
     @Override
     public final void connect()
     {
-        if(!isConnected) {
-         // Start Solandra Service
-            new SolandraUtils().startSolandraServer();
-            isConnected = true;
-        }        
+        // Start Solandra Service
+        new SolandraUtils().startSolandraServer();
     }
 
     /*

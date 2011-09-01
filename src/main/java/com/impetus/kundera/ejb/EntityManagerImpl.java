@@ -26,8 +26,10 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceException;
+import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Query;
@@ -328,16 +330,24 @@ public class EntityManagerImpl implements KunderaEntityManager
             List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.PERSIST, this.client
                     .getType());
 
-            // Save each one
-            PersistThreadPoolExecutor ptpe = new PersistThreadPoolExecutor();
-            
+            // save each one
             for (EnhancedEntity o : reachableEntities)
             {
                 log.debug("Persisting @Entity >> " + o);
 
-                PersistTask persistTask = new PersistTask(o, this);
-                ptpe.runPersistTask(persistTask);
+                EntityMetadata metadata = metadataManager.getEntityMetadata(o.getEntity().getClass());
+                metadata.setDBType(this.client.getType());
+                // TODO: throw EntityExistsException if already exists
 
+                // fire pre-persist events
+                eventDispatcher.fireEventListeners(metadata, o, PrePersist.class);
+
+                // TODO uncomment
+                dataManager.persist(o, metadata);
+                getIndexManager().write(metadata, o.getEntity());
+
+                // fire post-persist events
+                eventDispatcher.fireEventListeners(metadata, o, PostPersist.class);
             }
         }
         catch (Exception exp)
@@ -360,7 +370,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     @Override
     public final void close()
     {
-        closed = true;        
+        closed = true;
         session = null;
     }
 
@@ -721,14 +731,6 @@ public class EntityManagerImpl implements KunderaEntityManager
     public final Client getClient()
     {
         return client;
-    }   
-
-    /**
-     * @param client the client to set
-     */
-    public void setClient(Client client)
-    {
-        this.client = client;
     }
 
     /**
@@ -759,23 +761,6 @@ public class EntityManagerImpl implements KunderaEntityManager
     public EntityResolver getEntityResolver()
     {
         return entityResolver;
-    }
-    
-
-    /**
-     * @return the eventDispatcher
-     */
-    public EntityEventDispatcher getEventDispatcher()
-    {
-        return eventDispatcher;
-    }
-
-    /**
-     * @param eventDispatcher the eventDispatcher to set
-     */
-    public void setEventDispatcher(EntityEventDispatcher eventDispatcher)
-    {
-        this.eventDispatcher = eventDispatcher;
     }
 
     @Override
@@ -817,7 +802,5 @@ public class EntityManagerImpl implements KunderaEntityManager
             throw new PersistenceException(e);
         }
     }
-    
-    
 
 }
