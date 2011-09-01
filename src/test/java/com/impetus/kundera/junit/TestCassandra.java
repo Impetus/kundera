@@ -30,7 +30,6 @@ import com.impetus.kundera.entity.PersonalDetail;
 import com.impetus.kundera.entity.Post;
 import com.impetus.kundera.entity.PostData;
 import com.impetus.kundera.entity.Preference;
-import com.impetus.kundera.entity.SnsUser;
 import com.impetus.kundera.entity.Tweet;
 import com.impetus.kundera.entity.User;
 import com.impetus.kundera.loader.Configuration;
@@ -96,7 +95,7 @@ public class TestCassandra extends BaseTest
         conf.destroy();
     }
 
-/*    public void testInsertUser()
+    public void testInsertUser()
     {
         User user = new User();
         user.setUserId("IIIPL-0001");
@@ -120,7 +119,7 @@ public class TestCassandra extends BaseTest
         manager.persist(user);
     }
 
-    
+    /*
      * public void testUpdateUser() { User user = manager.find(User.class,
      * "IIIPL-0001");
      *
@@ -138,26 +137,26 @@ public class TestCassandra extends BaseTest
      * tweets.add(new Tweet("c", "My Third tweet", "iPhone"));
      *
      * manager.persist(user); }
-     
+     */
 
-    
+    /*
      * public void testFindUser() { User user = manager.find(User.class,
      * "IIIPL-0001"); System.out.println(user.getUserId() + "(Personal Data): "
      * + user.getPersonalDetail().getName() + "/Tweets:" + user.getTweets()); }
-     
+     */
 
-    
+    /*
      * public void testDeleteUser() { User user = manager.find(User.class,
      * "IIIPL-0001"); System.out.println(user); manager.remove(user); }
-     
+     */
 
-    *//**
+    /**
      * Test save authors.
      *
      * @throws Exception
      *             the exception
-     *//*
-    
+     */
+    /*
      * public void testSaveAuthors() throws Exception {
      * logger.info("onTestSaveAuthors"); String key = System.currentTimeMillis()
      * + "-author"; Author animesh = createAuthor(key, "animesh@animesh.org",
@@ -165,14 +164,14 @@ public class TestCassandra extends BaseTest
      *
      * // check if saved? Author animesh_db = manager.find(Author.class, key);
      * assertEquals(animesh, animesh_db); }
-     
+     */
 
-    *//**
+    /**
      * Test save posts.
      *
      * @throws Exception
      *             the exception
-     *//*
+     */
     public void testSavePosts() throws Exception
     {
         logger.info("onTestSavePosts");
@@ -203,13 +202,13 @@ public class TestCassandra extends BaseTest
         assertEquals(post, post_db);
     }
 
-    *//**
+    /**
      * _test delete authors.
      *
      * @throws Exception
      *             the exception
-     *//*
-    
+     */
+    /*
      * public void testDeleteAuthors() throws Exception {
      * logger.info("ontestDeleteAuthors");
      *
@@ -222,9 +221,9 @@ public class TestCassandra extends BaseTest
      *
      * // check if deleted? Author animesh_db = manager.find(Author.class, key);
      * assertEquals(null, animesh_db); }
-     
+     */
 
-    *//**
+    /**
      * Creates the author.
      *
      * @param username
@@ -237,16 +236,16 @@ public class TestCassandra extends BaseTest
      *            the registered since
      *
      * @return the author
-     *//*
-    
+     */
+    /*
      * private static Author createAuthor(String username, String email, String
      * country, Date registeredSince) { Author author = new Author();
      * author.setUsername(username); author.setCountry(country);
      * author.setEmailAddress(email); author.setRegistered(registeredSince);
      * return author; }
-     
+     */
 
-    *//**
+    /**
      * Creates the post.
      *
      * @param permalink
@@ -263,7 +262,7 @@ public class TestCassandra extends BaseTest
      *            the tags
      *
      * @return the post
-     *//*
+     */
     private static Post createPost(String permalink, String title, String body, String author, Date created,
             String... tags)
     {
@@ -280,21 +279,6 @@ public class TestCassandra extends BaseTest
         post.setData(data);
         // post.setTags(Arrays.asList(tags));
         return post;
-    }
-    */
-    public void testSnsUser()
-    {
-        for(int i=0;i<=500;i++)
-        {
-            SnsUser user = new SnsUser();
-            user.setSnstype("snstype"+i);
-            user.setSnsuid(i+"");
-            user.setBlessuid(i+"");
-            user.setLocalId(i+"");
-            user.setAccountName("account" + i);
-            manager.persist(user);
-        }
-//        for
     }
 
     /*

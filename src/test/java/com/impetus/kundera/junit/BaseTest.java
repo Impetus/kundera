@@ -148,9 +148,6 @@ public abstract class BaseTest extends TestCase
         CfDef followers_Def = new CfDef("Blog", "Profile");
         CfDef tweet_Def = new CfDef("Blog", "Addresses");
         CfDef userLine_Def = new CfDef("Blog", "Authors");
-        //Added for snsUser Test.
-        CfDef snsUser_Def = new CfDef("Blog", "snsusers");
-
         CfDef timeLine_Def = new CfDef("Blog", "Posts");
         timeLine_Def.setComparator_type("UTF8Type");
         timeLine_Def.setColumn_type("Super");
@@ -178,7 +175,7 @@ public abstract class BaseTest extends TestCase
         cfDefs.add(preference_Def);
         cfDefs.add(external_Def);
         cfDefs.add(imDetails_Def);
-        cfDefs.add(snsUser_Def);
+
         KsDef ksDef = new KsDef("Blog", simple.getCanonicalName(), 1, cfDefs);
         client.send_system_add_keyspace(ksDef);
         logger.info("Data loaded");
