@@ -7,7 +7,7 @@
 		<provider>com.impetus.kundera.ejb.KunderaPersistence</provider>
 		
 		<properties>
-			<property name="server.config" value="C:/Cassandra/cassandra-0.7.6/conf/cassandra.yaml"/>
+			<property name="server.config" value="D:/vivek/source/apache-cassandra-0.7.6-src/conf/cassandra.yaml"/>
 			<property name="kundera.nodes" value="localhost"/>
 			<property name="kundera.port" value="9160"/>
 			<property name="kundera.keyspace" value="Blog"/>
