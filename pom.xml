@@ -210,9 +210,15 @@
 			<version>3.0.1</version>
 		</dependency>
 
-		<!-- Non public dependencies- being picked from kundera svn repository -->
+		<!-- Non public dependencies- being picked from kundera svn repository --><!--
 
-		<dependency>
+	<dependency>
+		<groupId>org.apache.cassandra</groupId>
+		<artifactId>cassandra-all</artifactId>
+		<version>0.7.6</version>
+	</dependency>
+
+		--><dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>apache-cassandra</artifactId>
 			<version>0.8.2</version>
@@ -238,7 +244,13 @@
 			<version>2.0.0</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- Required for running tests for embedded cassandra mode -->
+		<!-- Required for running tests for embedded cassandra mode 
+    	<dependency>
+			<groupId>com.google.collections</groupId>
+			<artifactId>google-collections</artifactId>
+			<version>1.0</version>
+			<scope>test</scope>
+		</dependency> -->
 		<dependency>
 			<groupId>org.cliffc</groupId>
 			<artifactId>high-scale-lib</artifactId>
