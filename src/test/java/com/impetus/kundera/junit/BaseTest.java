@@ -161,6 +161,8 @@ public abstract class BaseTest extends TestCase
         CfDef preference_Def = new CfDef("Blog", "preference");
         CfDef external_Def = new CfDef("Blog", "externalLinks");
         CfDef imDetails_Def = new CfDef("Blog", "imDetails");
+        //Added for snsUser Test.
+        CfDef snsUser_Def = new CfDef("Blog", "snsusers");
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(user_Def);
@@ -175,6 +177,8 @@ public abstract class BaseTest extends TestCase
         cfDefs.add(preference_Def);
         cfDefs.add(external_Def);
         cfDefs.add(imDetails_Def);
+
+        cfDefs.add(snsUser_Def);
 
         KsDef ksDef = new KsDef("Blog", simple.getCanonicalName(),  cfDefs);
         ksDef.setReplication_factor(1);
