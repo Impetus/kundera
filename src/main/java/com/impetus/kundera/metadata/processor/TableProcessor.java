@@ -36,7 +36,9 @@ import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
 import com.impetus.kundera.metadata.EntityMetadata.Type;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.sun.xml.internal.ws.util.MetadataUtil;
 
 /**
  * Metadata processor class for persistent entities
@@ -81,9 +83,10 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         // Set Name of persistence object
         metadata.setTableName(table.name());
 
-        // set database name
-        String schema = table.schema().length() != 0 ? table.schema() : emf.getSchema();
-        metadata.setSchema(schema);
+        // set schema name and persistence unit name (if provided)
+        String schemaStr = table.schema().length() != 0 ? table.schema() : emf.getSchema();
+        MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr);        
+        
         metadata.setType(com.impetus.kundera.metadata.EntityMetadata.Type.COLUMN_FAMILY);
         // scan for fields
         for (Field f : clazz.getDeclaredFields())

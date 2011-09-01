@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -73,7 +74,7 @@ public class EntityResolver
      */
     public List<EnhancedEntity> resolve(Object entity, CascadeType cascadeType, DBType dbType)
     {
-        Map<String, EnhancedEntity> map = new HashMap<String, EnhancedEntity>();
+        Map<String, EnhancedEntity> map = new LinkedHashMap<String, EnhancedEntity>();
         try
         {
             LOG.debug("Resolving reachable entities for cascade " + cascadeType);
