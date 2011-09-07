@@ -35,7 +35,7 @@ import org.scale7.cassandra.pelops.Bytes;
 import com.impetus.kundera.Client;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
-import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.mongodb.BasicDBObject;

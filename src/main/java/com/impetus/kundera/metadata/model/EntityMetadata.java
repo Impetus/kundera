@@ -13,33 +13,31 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.metadata;
+package com.impetus.kundera.metadata.model;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-
 import com.impetus.kundera.ejb.event.CallbackMethod;
 import com.impetus.kundera.loader.DBType;
+import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class EntityMetadata.
- *
+ * Holds metadata for entities
  * @author animesh.kumar
  */
 public final class EntityMetadata
 {
 
+    /*
+     * Entity related metadata properties 
+     */
+    
     /** class corresponding to this meta. */
-    private Class<?> entityClazz;
+    Class<?> entityClazz;
 
     /** Name of Persistence Object. */
     private String tableName;   
@@ -49,9 +47,19 @@ public final class EntityMetadata
     
     /** Persistence unit of database this entity is to be persisted */
     private String persistenceUnit;
+    
+    /** The index name. */
+    private String indexName;
 
-    /** field that keeps row identifier. */
-    private Field idProperty;
+    /** The is indexable. */
+    private boolean isIndexable = true; // default is indexable
+    
+    /** Cacheable?. */
+    private boolean cacheable = false; // default is to not set second-level
+
+    /*
+     * Fields related metadata properties
+     */    
 
     /** Column that keeps row identifier. */
     private Column idColumn;
@@ -62,23 +70,15 @@ public final class EntityMetadata
     /** The write identifier method. */
     private Method writeIdentifierMethod;
 
-    /** columnMeta map. */
+    /** Maps of column name and their metadata */
     private Map<String, Column> columnsMap = new HashMap<String, Column>();
 
-    /** supercolumn map. */
-    private Map<String, SuperColumn> superColumnsMap = new HashMap<String, SuperColumn>();
+    /** Map of embedded column names and their metadata */
+    private Map<String, EmbeddedColumn> embeddedColumnsMap = new HashMap<String, EmbeddedColumn>();
     
+    //TODO: This shouldn't be in metadata, move it to cache package
     /** The ec cache handler. */
-    EmbeddedCollectionCacheHandler ecCacheHandler = new EmbeddedCollectionCacheHandler();
-
-    /** document index boost, lucene specific. */
-    private float indexBoost = 1.0f;
-
-    /** The index name. */
-    private String indexName;
-
-    /** The is indexable. */
-    private boolean isIndexable = true; // default is indexable
+    EmbeddedCollectionCacheHandler ecCacheHandler = new EmbeddedCollectionCacheHandler();   
 
     /** The index prperties. */
     private List<PropertyIndex> indexPrperties = new ArrayList<PropertyIndex>();
@@ -89,16 +89,12 @@ public final class EntityMetadata
     /** The callback methods map. */
     private Map<Class<?>, List<? extends CallbackMethod>> callbackMethodsMap = new HashMap<Class<?>, List<? extends CallbackMethod>>();
     
+    //TODO: Unused, remove this
     /** The embeddable collection. */
     private List<Class<?>> embeddableCollection = new ArrayList<Class<?>>();
 
     /** Relationship map, key=>property name, value=>relation. */
     private Map<String, Relation> relationsMap = new HashMap<String, Relation>();
-
-    /** Cacheable?. */
-    private boolean cacheable = false; // default is to not set second-level
-
-    // cache
 
     /** The db type. */
     private DBType dbType;
@@ -198,23 +194,6 @@ public final class EntityMetadata
     }
 
     /**
-     *
-     * The Enum ForeignKey.
-     */
-    public static enum ForeignKey
-    {
-        
-        /** The ON e_ t o_ one. */
-        ONE_TO_ONE, 
- /** The ON e_ t o_ many. */
- ONE_TO_MANY, 
- /** The MAN y_ t o_ one. */
- MANY_TO_ONE, 
- /** The MAN y_ t o_ many. */
- MANY_TO_MANY
-    };
-
-    /**
      * Instantiates a new metadata.
      *
      * @param entityClazz
@@ -291,28 +270,7 @@ public final class EntityMetadata
     {
         this.persistenceUnit = persistenceUnit;
     }
-
-    /**
-     * Gets the id property.
-     *
-     * @return the id property
-     */
-    public Field getIdProperty()
-    {
-        return idProperty;
-    }
-
-    /**
-     * Sets the id property.
-     *
-     * @param idProperty
-     *            the new id property
-     */
-    public void setIdProperty(Field idProperty)
-    {
-        this.idProperty = idProperty;
-    }
-
+    
     /**
      * Gets the id column.
      *
@@ -390,9 +348,9 @@ public final class EntityMetadata
      *
      * @return the super columns map
      */
-    public Map<String, SuperColumn> getSuperColumnsMap()
+    public Map<String, EmbeddedColumn> getEmbeddedColumnsMap()
     {
-        return superColumnsMap;
+        return embeddedColumnsMap;
     }
 
     /**
@@ -416,9 +374,9 @@ public final class EntityMetadata
      *
      * @return the super column
      */
-    public SuperColumn getSuperColumn(String key)
+    public EmbeddedColumn getEmbeddedColumn(String key)
     {
-        return superColumnsMap.get(key);
+        return embeddedColumnsMap.get(key);
     }
 
     /**
@@ -436,9 +394,9 @@ public final class EntityMetadata
      *
      * @return the super columns as list
      */
-    public List<SuperColumn> getSuperColumnsAsList()
+    public List<EmbeddedColumn> getEmbeddedColumnsAsList()
     {
-        return new ArrayList<SuperColumn>(superColumnsMap.values());
+        return new ArrayList<EmbeddedColumn>(embeddedColumnsMap.values());
     }
 
     /**
@@ -456,9 +414,9 @@ public final class EntityMetadata
      *
      * @return the super column field names
      */
-    public List<String> getSuperColumnFieldNames()
+    public List<String> getEmbeddedColumnFieldNames()
     {
-        return new ArrayList<String>(superColumnsMap.keySet());
+        return new ArrayList<String>(embeddedColumnsMap.keySet());
     }
 
     /**
@@ -479,12 +437,12 @@ public final class EntityMetadata
      *
      * @param key
      *            the key
-     * @param superColumn
+     * @param embeddedColumn
      *            the super column
      */
-    public void addSuperColumn(String key, SuperColumn superColumn)
+    public void addEmbeddedColumn(String key, EmbeddedColumn embeddedColumn)
     {
-        superColumnsMap.put(key, superColumn);
+        embeddedColumnsMap.put(key, embeddedColumn);
     }
 
     /**
@@ -541,27 +499,6 @@ public final class EntityMetadata
     public List<PropertyIndex> getIndexProperties()
     {
         return indexPrperties;
-    }
-
-    /**
-     * Gets the index boost.
-     *
-     * @return the index boost
-     */
-    public float getIndexBoost()
-    {
-        return indexBoost;
-    }
-
-    /**
-     * Sets the index boost.
-     *
-     * @param indexBoost
-     *            the new index boost
-     */
-    public void setIndexBoost(float indexBoost)
-    {
-        this.indexBoost = indexBoost;
     }
 
     /**
@@ -648,8 +585,7 @@ public final class EntityMetadata
      */
     public boolean isEmbeddable(Class<?> fieldClass)
     {
-    	return embeddableCollection.contains(fieldClass);
-    	
+        return embeddableCollection.contains(fieldClass);    	
     }
     
     /**
@@ -659,10 +595,10 @@ public final class EntityMetadata
      */
     public void addToEmbedCollection(Class<?> fieldClass)
     {
-    	if(!embeddableCollection.contains(fieldClass))
-    	{
-    		embeddableCollection.add(fieldClass);
-    	}
+        if (!embeddableCollection.contains(fieldClass))
+        {
+            embeddableCollection.add(fieldClass);
+        }
     }
     /**
      * Checks if is cacheable.
@@ -684,23 +620,17 @@ public final class EntityMetadata
     {
         this.cacheable = cacheable;
     }
-
-    /* @see java.lang.Object#toString() */
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
+    
     @Override
     public String toString()
     {
         int start = 0;
         StringBuilder builder = new StringBuilder();
         builder.append(entityClazz.getName() + " (\n");
-        // builder.append("EntityMetadata [\n");
-
-        // builder.append("\tentity:" + entityClazz.getName() + ",\n");
         builder.append("\tTable: " + tableName + ", \n");
         builder.append("\tKeyspace: " + schema + ",\n");
-        builder.append("\tId: " + idProperty.getName() + ",\n");
+        builder.append("\tPersistence Unit: " + persistenceUnit + ",\n");
+        builder.append("\tId: " + idColumn.getName() + ",\n");
         builder.append("\tReadIdMethod: " + readIdentifierMethod.getName() + ",\n");
         builder.append("\tWriteIdMethod: " + writeIdentifierMethod.getName() + ",\n");
         builder.append("\tCacheable: " + cacheable + ",\n");
@@ -719,10 +649,10 @@ public final class EntityMetadata
             builder.append("),\n");
         }
 
-        if (!superColumnsMap.isEmpty())
+        if (!embeddedColumnsMap.isEmpty())
         {
-            builder.append("\tSuperColumns (\n");
-            for (SuperColumn col : superColumnsMap.values())
+            builder.append("\tEmbedded Columns (\n");
+            for (EmbeddedColumn col : embeddedColumnsMap.values())
             {
                 builder.append("\t\t" + col.getName() + "(");
 
@@ -788,513 +718,6 @@ public final class EntityMetadata
 
         builder.append(")");
         return builder.toString();
-    }
-
-    /**
-     * Represents Thrift Column.
-     *
-     * @author animesh.kumar
-     */
-    public final class Column
-    {
-
-        /** name of the column. */
-        private String name;
-
-        /** field. */
-        private Field field;
-
-        /**
-         * Instantiates a new column.
-         *
-         * @param name
-         *            the name
-         * @param field
-         *            the field
-         */
-        public Column(String name, Field field)
-        {
-            this.name = name;
-            this.field = field;
-        }
-
-        /**
-         * Gets the name.
-         *
-         * @return the name
-         */
-        public String getName()
-        {
-            return name;
-        }
-
-        /**
-         * Gets the field.
-         *
-         * @return the field
-         */
-        public Field getField()
-        {
-            return field;
-        }
-
-    }
-
-    /**
-     * Represents Thrift SuperColumn.
-     *
-     * @author animesh.kumar
-     */
-    public final class SuperColumn
-    {
-
-        /** The name. */
-        private String name;
-
-        /** Super column field. */
-        private Field field;
-
-        /** The columns. */
-        private List<Column> columns;
-
-        /**
-         * Instantiates a new super column.
-         *
-         * @param name the name
-         * @param f the f
-         */
-        public SuperColumn(String name, Field f)
-        {
-            this.name = name;
-            this.field = f;
-            columns = new ArrayList<Column>();
-        }
-
-        /**
-         * Gets the name.
-         *
-         * @return the name
-         */
-        public String getName()
-        {
-            return name;
-        }
-
-        /**
-         * Sets the name.
-         *
-         * @param name the name to set
-         */
-        public void setName(String name)
-        {
-            this.name = name;
-        }
-
-        /**
-         * Gets the field.
-         *
-         * @return the field
-         */
-        public Field getField()
-        {
-            return field;
-        }
-
-        /**
-         * Sets the field.
-         *
-         * @param field the field to set
-         */
-        public void setField(Field field)
-        {
-            this.field = field;
-        }
-
-        /**
-         * Gets the columns.
-         *
-         * @return the columns
-         */
-        public List<Column> getColumns()
-        {
-            return columns;
-        }    
-        
-        
-
-        /**
-         * Adds the column.
-         *
-         * @param name
-         *            the name
-         * @param field
-         *            the field
-         */
-        public void addColumn(String name, Field field)
-        {
-            columns.add(new Column(name, field));
-        }
-    }
-
-    /**
-     * Contains Index information of a field.
-     *
-     * @author animesh.kumar
-     */
-    public final class PropertyIndex
-    {
-
-        /** The name. */
-        private String name;
-
-        /** The property. */
-        private Field property;
-
-        /** The boost. */
-        private float boost = 1.0f;
-
-        /**
-         * The Constructor.
-         *
-         * @param property
-         *            the property
-         */
-        public PropertyIndex(Field property)
-        {
-            this.property = property;
-            this.name = property.getName();
-        }
-
-        /**
-         * Instantiates a new property index.
-         *
-         * @param property
-         *            the property
-         * @param name
-         *            the name
-         */
-        public PropertyIndex(Field property, String name)
-        {
-            this.property = property;
-            this.name = name;
-        }
-
-        /**
-         * Gets the name.
-         *
-         * @return the name
-         */
-        public String getName()
-        {
-            return name;
-        }
-
-        /**
-         * Gets the property.
-         *
-         * @return the property
-         */
-        public Field getProperty()
-        {
-            return property;
-        }
-
-        /**
-         * Gets the boost.
-         *
-         * @return the boost
-         */
-        public float getBoost()
-        {
-            return boost;
-        }
-
-        /**
-         * Sets the boost.
-         *
-         * @param boost
-         *            the new boost
-         */
-        public void setBoost(float boost)
-        {
-            this.boost = boost;
-        }
-    }
-
-    /**
-     * Class to hold class-method instances for EntityListeners.
-     *
-     * @author animesh.kumar
-     */
-    public final class ExternalCallbackMethod implements CallbackMethod
-    {
-
-        /** The clazz. */
-        private Class<?> clazz;
-
-        /** The method. */
-        private Method method;
-
-        /**
-         * Instantiates a new external callback method.
-         *
-         * @param clazz
-         *            the clazz
-         * @param method
-         *            the method
-         */
-        public ExternalCallbackMethod(Class<?> clazz, Method method)
-        {
-            this.clazz = clazz;
-            this.method = method;
-        }
-
-        /*
-         * @see
-         * com.impetus.kundera.ejb.event.CallbackMethod#invoke(java.lang.Object)
-         */
-        /* (non-Javadoc)
-         * @see com.impetus.kundera.ejb.event.CallbackMethod#invoke(java.lang.Object)
-         */
-        public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException,
-                InvocationTargetException, InstantiationException
-        {
-            if (!method.isAccessible())
-                method.setAccessible(true);
-            method.invoke(clazz.newInstance(), new Object[] { entity });
-        }
-
-        /* @see java.lang.Object#toString() */
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        @Override
-        public String toString()
-        {
-            StringBuilder builder = new StringBuilder();
-            builder.append(clazz.getName() + "." + method.getName());
-            return builder.toString();
-        }
-    }
-
-    /**
-     * The Class InternalCallbackMethod.
-     *
-     * @author animesh.kumar
-     */
-    public final class InternalCallbackMethod implements CallbackMethod
-    {
-
-        /** The method. */
-        private Method method;
-
-        /**
-         * Instantiates a new internal callback method.
-         *
-         * @param method
-         *            the method
-         */
-        public InternalCallbackMethod(Method method)
-        {
-            this.method = method;
-        }
-
-        /*
-         * @see
-         * com.impetus.kundera.ejb.event.CallbackMethod#invoke(java.lang.Object)
-         */
-        /* (non-Javadoc)
-         * @see com.impetus.kundera.ejb.event.CallbackMethod#invoke(java.lang.Object)
-         */
-        public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException,
-                InvocationTargetException, InstantiationException
-        {
-            if (!method.isAccessible())
-                method.setAccessible(true);
-            method.invoke(entity, new Object[] {});
-        }
-
-        /* @see java.lang.Object#toString() */
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        @Override
-        public String toString()
-        {
-            StringBuilder builder = new StringBuilder();
-            builder.append(entityClazz.getName() + "." + method.getName());
-            return builder.toString();
-        }
-    }
-
-    /**
-     * The Class Relation.
-     */
-    public final class Relation
-    {
-
-        /** The property. */
-        private Field property;
-
-        /** The target entity. */
-        private Class<?> targetEntity;
-
-        /** The property type. */
-        private Class<?> propertyType;
-
-        /** The fetch type. */
-        private FetchType fetchType;
-
-        /** The cascades. */
-        private List<CascadeType> cascades;
-
-        /** The optional. */
-        private boolean optional;
-
-        /** The mapped by. */
-        private String mappedBy;
-
-        /** The type. */
-        private ForeignKey type;
-
-        /**
-         * Instantiates a new relation.
-         *
-         * @param property
-         *            the property
-         * @param targetEntity
-         *            the target entity
-         * @param propertyType
-         *            the property type
-         * @param fetchType
-         *            the fetch type
-         * @param cascades
-         *            the cascades
-         * @param optional
-         *            the optional
-         * @param mappedBy
-         *            the mapped by
-         * @param type
-         *            the type
-         */
-
-        /**
-         * Specifies the type of the metadata.
-         */
-
-        public Relation(Field property, Class<?> targetEntity, Class<?> propertyType, FetchType fetchType,
-                List<CascadeType> cascades, boolean optional, String mappedBy, ForeignKey type)
-        {
-            super();
-            this.property = property;
-            this.targetEntity = targetEntity;
-            this.propertyType = propertyType;
-            this.fetchType = fetchType;
-            this.cascades = cascades;
-            this.optional = optional;
-            this.mappedBy = mappedBy;
-            this.type = type;
-        }
-
-        /**
-         * Gets the property.
-         *
-         * @return the property
-         */
-        public Field getProperty()
-        {
-            return property;
-        }
-
-        /**
-         * Gets the target entity.
-         *
-         * @return the targetEntity
-         */
-        public Class<?> getTargetEntity()
-        {
-            return targetEntity;
-        }
-
-        /**
-         * Gets the property type.
-         *
-         * @return the propertyType
-         */
-        public Class<?> getPropertyType()
-        {
-            return propertyType;
-        }
-
-        /**
-         * Gets the fetch type.
-         *
-         * @return the fetchType
-         */
-        public FetchType getFetchType()
-        {
-            return fetchType;
-        }
-
-        /**
-         * Gets the cascades.
-         *
-         * @return the cascades
-         */
-        public List<CascadeType> getCascades()
-        {
-            return cascades;
-        }
-
-        /**
-         * Checks if is optional.
-         *
-         * @return the optional
-         */
-        public boolean isOptional()
-        {
-            return optional;
-        }
-
-        /**
-         * Gets the mapped by.
-         *
-         * @return the mappedBy
-         */
-        public String getMappedBy()
-        {
-            return mappedBy;
-        }
-
-        /**
-         * Gets the type.
-         *
-         * @return the type
-         */
-        public ForeignKey getType()
-        {
-            return type;
-        }
-
-        /**
-         * Checks if is unary.
-         *
-         * @return true, if is unary
-         */
-        public boolean isUnary()
-        {
-            return type.equals(ForeignKey.ONE_TO_ONE) || type.equals(ForeignKey.MANY_TO_ONE);
-        }
-
-        /**
-         * Checks if is collection.
-         *
-         * @return true, if is collection
-         */
-        public boolean isCollection()
-        {
-            return type.equals(ForeignKey.ONE_TO_MANY) || type.equals(ForeignKey.MANY_TO_MANY);
-        }
     }
 
     /**

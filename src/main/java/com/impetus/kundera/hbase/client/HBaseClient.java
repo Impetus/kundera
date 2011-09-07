@@ -35,9 +35,9 @@ import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.hbase.admin.DataHandler;
 import com.impetus.kundera.hbase.admin.HBaseDataHandler;
 import com.impetus.kundera.loader.DBType;
-import com.impetus.kundera.metadata.EntityMetadata;
-import com.impetus.kundera.metadata.EntityMetadata.Column;
-import com.impetus.kundera.metadata.EntityMetadata.Relation;
+import com.impetus.kundera.metadata.model.Column;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
@@ -92,7 +92,7 @@ public class HBaseClient implements com.impetus.kundera.Client
         }
         
         //Check whether this table exists, if not create it
-        columnFamilyNames.addAll(m.getSuperColumnFieldNames());
+        columnFamilyNames.addAll(m.getEmbeddedColumnFieldNames());
         handler.createTableIfDoesNotExist(tableName, columnFamilyNames.toArray(new String[0]));
         
         //Write data to HBase

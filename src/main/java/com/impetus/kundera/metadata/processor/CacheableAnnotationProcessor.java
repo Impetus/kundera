@@ -19,8 +19,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.api.Cacheable;
-import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataProcessor;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * The MetadataProcessor implementation to scan for EntityListener class/method

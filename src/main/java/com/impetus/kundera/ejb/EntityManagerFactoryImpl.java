@@ -164,7 +164,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         long start = System.currentTimeMillis();
 
         this.persistenceUnitName = persistenceUnitName;
-        metadataManager = new MetadataManager(this);
+        metadataManager = new MetadataManager();
 
         // scan classes for @Entity
         Reader reader = new ClasspathReader(this.classes);
@@ -172,7 +172,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         reader.addAnnotationDiscoveryListeners(metadataManager);
         reader.read();
 
-        metadataManager.build();
+        //metadataManager.build();
 
         enhancedProxyFactory = new CglibEntityEnhancerFactory();
         lazyInitializerFactory = new CglibLazyInitializerFactory();

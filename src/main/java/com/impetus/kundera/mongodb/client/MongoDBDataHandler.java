@@ -33,10 +33,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.ejb.EntityManagerImpl;
-import com.impetus.kundera.metadata.EntityMetadata;
-import com.impetus.kundera.metadata.EntityMetadata.Column;
-import com.impetus.kundera.metadata.EntityMetadata.Relation;
-import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
+import com.impetus.kundera.metadata.model.Column;
+import com.impetus.kundera.metadata.model.EmbeddedColumn;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.mongodb.DocumentObjectMapper;
 import com.impetus.kundera.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -73,11 +73,11 @@ public class MongoDBDataHandler
             }
 
             // Populate primary key column
-            PropertyAccessorHelper.set(entity, m.getIdProperty(), document.get(m.getIdProperty().getName()));
+            PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), document.get(m.getIdColumn().getField().getName()));
 
             // Populate @Embedded objects and collections
-            List<SuperColumn> superColumns = m.getSuperColumnsAsList();
-            for (SuperColumn superColumn : superColumns)
+            List<EmbeddedColumn> superColumns = m.getEmbeddedColumnsAsList();
+            for (EmbeddedColumn superColumn : superColumns)
             {
                 Field superColumnField = superColumn.getField();
                 // Can be a BasicDBObject or a list of it.
@@ -229,8 +229,8 @@ public class MongoDBDataHandler
         }
 
         // Populate @Embedded objects and collections
-        List<SuperColumn> superColumns = m.getSuperColumnsAsList();
-        for (SuperColumn superColumn : superColumns)
+        List<EmbeddedColumn> superColumns = m.getEmbeddedColumnsAsList();
+        for (EmbeddedColumn superColumn : superColumns)
         {
             Field superColumnField = superColumn.getField();
             Object embeddedObject = PropertyAccessorHelper.getObject(e.getEntity(), superColumnField);
@@ -373,7 +373,7 @@ public class MongoDBDataHandler
         if (!m.getColumnFieldNames().contains(columnName))
         {
 
-            for (SuperColumn superColumn : m.getSuperColumnsAsList())
+            for (EmbeddedColumn superColumn : m.getEmbeddedColumnsAsList())
             {
                 List<Column> columns = superColumn.getColumns();
                 for (Column column : columns)
@@ -419,7 +419,7 @@ public class MongoDBDataHandler
         BasicDBObject mongoQuery = createMongoQuery(m, filterClauseQueue);
         DBCursor cursor = dbCollection.find(mongoQuery);
 
-        SuperColumn superColumn = m.getSuperColumn(enclosingDocumentName);
+        EmbeddedColumn superColumn = m.getEmbeddedColumn(enclosingDocumentName);
         Field superColumnField = superColumn.getField();
         while (cursor.hasNext())
         {

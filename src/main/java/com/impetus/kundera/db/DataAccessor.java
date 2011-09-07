@@ -18,7 +18,7 @@ package com.impetus.kundera.db;
 import java.util.List;
 import java.util.Map;
 
-import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**

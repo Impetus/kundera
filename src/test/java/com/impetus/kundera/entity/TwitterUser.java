@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -36,7 +38,7 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "users", schema = "Blog")
+@Table(name = "users", schema = "Blog@cassandra")
 public class TwitterUser
 {
     @Id
@@ -47,7 +49,8 @@ public class TwitterUser
     private PersonalDetail personalDetail;
 
     // Embedded collection, will persist co-located
-    @Embedded
+    @ElementCollection
+    @CollectionTable(name="tweets")
     private List<UserTweet> tweets;
 
     // One-to-one, will be persisted separately

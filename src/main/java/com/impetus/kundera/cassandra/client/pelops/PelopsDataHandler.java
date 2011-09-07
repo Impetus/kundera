@@ -37,8 +37,10 @@ import org.scale7.cassandra.pelops.Selector;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
-import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.EmbeddedColumn;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -56,7 +58,7 @@ public class PelopsDataHandler
     public <E> E fromThriftRow(Selector selector, EntityManagerImpl em, Class<E> clazz, EntityMetadata m, String rowKey)
             throws Exception
     {
-        List<String> superColumnNames = m.getSuperColumnFieldNames();
+        List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
         E e = null;
         if (!superColumnNames.isEmpty())
         {
@@ -115,7 +117,7 @@ public class PelopsDataHandler
         E e = clazz.newInstance();
 
         // Set row-key. Note: @Id is always String.
-        PropertyAccessorHelper.set(e, m.getIdProperty(), thriftRow.getId());
+        PropertyAccessorHelper.set(e, m.getIdColumn().getField(), thriftRow.getId());
 
         // Iterate through each column
         for (Column c : thriftRow.getColumns())
@@ -129,7 +131,7 @@ public class PelopsDataHandler
             }
 
             // check if this is a property?
-            EntityMetadata.Column column = m.getColumn(name);
+            com.impetus.kundera.metadata.model.Column column = m.getColumn(name);
             if (null == column)
             {
                 // it could be some relational column
@@ -164,7 +166,7 @@ public class PelopsDataHandler
         E e = clazz.newInstance();
 
         // Set row-key. Note: @Id is always String.
-        PropertyAccessorHelper.set(e, m.getIdProperty(), tr.getId());
+        PropertyAccessorHelper.set(e, m.getIdColumn().getField(), tr.getId());
 
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
@@ -247,7 +249,7 @@ public class PelopsDataHandler
                             continue;
                         }
                         
-                        EntityMetadata.Relation relation = m.getRelation(name);
+                        Relation relation = m.getRelation(name);
                         if(relation.getTargetEntity().equals(clazz)) {
                             continue;
                         }
@@ -400,7 +402,7 @@ public class PelopsDataHandler
         List<Column> columns = new ArrayList<Column>();
 
         // Iterate through each column-meta and populate that with field values
-        for (EntityMetadata.Column column : m.getColumnsAsList())
+        for (com.impetus.kundera.metadata.model.Column column : m.getColumnsAsList())
         {
             Field field = column.getField();
             String name = column.getName();
@@ -427,7 +429,7 @@ public class PelopsDataHandler
             EntityMetadata m, EnhancedEntity e) throws Exception
     {
         // Iterate through Super columns
-        for (EntityMetadata.SuperColumn superColumn : m.getSuperColumnsAsList())
+        for (EmbeddedColumn superColumn : m.getEmbeddedColumnsAsList())
         {
             Field superColumnField = superColumn.getField();
             Object superColumnObject = PropertyAccessorHelper.getObject(e.getEntity(), superColumnField);
@@ -505,7 +507,7 @@ public class PelopsDataHandler
     public void addRelationshipsToThriftRow(long timestamp, PelopsClient.ThriftRow tr, EnhancedEntity e, EntityMetadata m)
             throws PropertyAccessException
     {        
-        if (!m.getSuperColumnsAsList().isEmpty())
+        if (!m.getEmbeddedColumnsAsList().isEmpty())
         {
             List<Column> columns = new ArrayList<Column>();
             addForeignkeysToColumns(timestamp, e, columns);
@@ -529,10 +531,10 @@ public class PelopsDataHandler
     }
 
     private SuperColumn buildThriftSuperColumn(String superColumnName, long timestamp,
-            EntityMetadata.SuperColumn superColumn, Object superColumnObject) throws PropertyAccessException
+            EmbeddedColumn superColumn, Object superColumnObject) throws PropertyAccessException
     {
         List<Column> thriftColumns = new ArrayList<Column>();
-        for (EntityMetadata.Column column : superColumn.getColumns())
+        for (com.impetus.kundera.metadata.model.Column column : superColumn.getColumns())
         {
             Field field = column.getField();
             String name = column.getName();
@@ -599,7 +601,7 @@ public class PelopsDataHandler
      * @throws PropertyAccessException
      */
     public <E> void populateRelationshipEntities(EntityManagerImpl em, PelopsClient.ThriftRow tr,
-            E e, EntityMetadata.Relation relation, byte[] value) throws PropertyAccessException
+            E e, Relation relation, byte[] value) throws PropertyAccessException
     { 
 
         String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);

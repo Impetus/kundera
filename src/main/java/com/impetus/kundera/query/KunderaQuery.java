@@ -29,8 +29,8 @@ import javax.persistence.PersistenceException;
 import org.apache.commons.lang.StringUtils;
 
 import com.impetus.kundera.ejb.EntityManagerImpl;
-import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * The Class KunderaQuery.

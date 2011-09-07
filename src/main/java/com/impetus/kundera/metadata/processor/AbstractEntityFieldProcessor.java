@@ -24,13 +24,15 @@ import java.util.Date;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.PersistenceException;
 import javax.persistence.Temporal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataProcessor;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.validator.Validator;
 
 /**
  * The Class AbstractEntityFieldProcessor.
@@ -42,6 +44,9 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
 
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(AbstractEntityFieldProcessor.class);
+    
+    /** The Validator. */
+    protected Validator validator;
 
     /**
      * Gets the valid jpa column.
@@ -53,6 +58,21 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
      *
      * @return the valid jpa column
      */
+    
+    /**
+     * Validate.
+     *
+     * @param clazz
+     *            the clazz
+     *
+     * @throws PersistenceException
+     *             the persistence exception
+     */
+    public final void validate(Class<?> clazz) throws PersistenceException
+    {
+        validator.validate(clazz);
+    }
+    
     protected final String getValidJPAColumnName(Class<?> entity, Field f)
     {
 
@@ -131,16 +151,16 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
             Column c = f.getAnnotation(Column.class);
             if (!c.name().isEmpty())
             {
-                metadata.setIdColumn(metadata.new Column(c.name(), f));
+                metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(c.name(), f));
             }
             else
             {
-                metadata.setIdColumn(metadata.new Column(f.getName(), f));
+                metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(f.getName(), f));
             }
         }
         else
         {
-            metadata.setIdColumn(metadata.new Column(f.getName(), f));
+            metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(f.getName(), f));
         }
     }
 

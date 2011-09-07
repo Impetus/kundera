@@ -36,8 +36,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.ejb.event.CallbackMethod;
-import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.ejb.event.ExternalCallbackMethod;
+import com.impetus.kundera.ejb.event.InternalCallbackMethod;
 import com.impetus.kundera.metadata.MetadataProcessor;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
@@ -106,7 +108,7 @@ public class EntityListenersProcessor implements MetadataProcessor
                         // add them all to metadata
                         for (Class<?> jpaAnnotation : jpaAnnotations)
                         {
-                            CallbackMethod callBackMethod = metadata.new ExternalCallbackMethod(entityListener, method);
+                            CallbackMethod callBackMethod = new ExternalCallbackMethod(entityListener, method);
                             addCallBackMethod(metadata, jpaAnnotation, callBackMethod);
                         }
                     }
@@ -125,7 +127,7 @@ public class EntityListenersProcessor implements MetadataProcessor
             // add them all to metadata
             for (Class<?> jpaAnnotation : jpaAnnotations)
             {
-                CallbackMethod callbackMethod = metadata.new InternalCallbackMethod(method);
+                CallbackMethod callbackMethod = new InternalCallbackMethod(metadata, method);
                 addCallBackMethod(metadata, jpaAnnotation, callbackMethod);
             }
         }

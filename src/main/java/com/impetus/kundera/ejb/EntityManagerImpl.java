@@ -48,8 +48,8 @@ import com.impetus.kundera.ejb.event.EntityEventDispatcher;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.loader.Configuration;
 import com.impetus.kundera.loader.DBType;
-import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.LuceneQuery;
@@ -138,10 +138,7 @@ public class EntityManagerImpl implements KunderaEntityManager
         if (primaryKey == null)
         {
             throw new IllegalArgumentException("primaryKey value must not be null.");
-        }
-
-        // Validate
-        metadataManager.validate(entityClass);
+        }        
 
         E e = null;
         e = session.lookup(entityClass, primaryKey);
@@ -198,10 +195,7 @@ public class EntityManagerImpl implements KunderaEntityManager
         if (primaryKeys == null)
         {
             throw new IllegalArgumentException("primaryKey value must not be null.");
-        }
-
-        // Validate
-        metadataManager.validate(entityClass);
+        }        
 
         if (null == primaryKeys || primaryKeys.length == 0)
         {
@@ -234,9 +228,6 @@ public class EntityManagerImpl implements KunderaEntityManager
         {
             throw new IllegalArgumentException("Entity must not be null.");
         }
-
-        // Validate
-        metadataManager.validate(e.getClass());
 
         try
         {
@@ -275,10 +266,7 @@ public class EntityManagerImpl implements KunderaEntityManager
         if (e == null)
         {
             throw new IllegalArgumentException("Entity must not be null.");
-        }
-
-        // Validate
-        metadataManager.validate(e.getClass());
+        }       
 
         try
         {
@@ -324,9 +312,7 @@ public class EntityManagerImpl implements KunderaEntityManager
         }
 
         try
-        {
-            // validate
-            metadataManager.validate(e.getClass());
+        {        
 
             List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.PERSIST,
                     this.client.getType());
@@ -881,10 +867,7 @@ public class EntityManagerImpl implements KunderaEntityManager
         if (primaryKeys == null)
         {
             throw new IllegalArgumentException("primaryKey value must not be null.");
-        }
-
-        // Validate
-        metadataManager.validate(entityClass);
+        }        
 
         if (null == primaryKeys || primaryKeys.isEmpty())
         {

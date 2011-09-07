@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata;
 
+import com.impetus.kundera.metadata.model.EntityMetadata;
+
 /**
  * The Interface IMetadataProcessor.
  *

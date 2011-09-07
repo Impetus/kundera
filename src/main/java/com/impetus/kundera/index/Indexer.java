@@ -17,7 +17,7 @@ package com.impetus.kundera.index;
 
 import java.util.Map;
 
-import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * Interface to define the behavior of an Indexer.

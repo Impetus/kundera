@@ -34,7 +34,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.loader.Configuration;
 import com.impetus.kundera.loader.DBType;
-import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
@@ -137,7 +138,7 @@ public class EntityResolver
         if (null == id || id.trim().isEmpty())
         {
             throw new PersistenceException("Missing primary key >> " + m.getEntityClazz().getName() + "#"
-                    + m.getIdProperty().getName());
+                    + m.getIdColumn().getField().getName());
         }
 
         // Dummy name to check if the object is already processed
@@ -157,7 +158,7 @@ public class EntityResolver
         entities.put(mapKeyForEntity, em.getFactory().getEnhancedEntity(o, id, foreignKeysMap));
 
         // Iterate over EntityMetata.Relation relations
-        for (EntityMetadata.Relation relation : m.getRelations())
+        for (Relation relation : m.getRelations())
         {
 
             // Cascade?
@@ -247,7 +248,7 @@ public class EntityResolver
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public void populateForeignEntities(Object entity, String entityId, EntityMetadata.Relation relation,
+    public void populateForeignEntities(Object entity, String entityId, Relation relation,
             String... foreignKeys) throws PropertyAccessException
     {
 
@@ -285,7 +286,7 @@ public class EntityResolver
      * Populates entire foreign entity object (Because parent entity and foreign
      * entity are in the same datastore)
      */
-    private void populateForeignEntityFromSameDatastore(Object entity, EntityMetadata.Relation relation,
+    private void populateForeignEntityFromSameDatastore(Object entity, Relation relation,
             String entityName, Class<?> foreignEntityClass, String... foreignKeys) throws PropertyAccessException
     {
         if (relation.isUnary())
@@ -326,7 +327,7 @@ public class EntityResolver
      * Populates only row key in the foreign entity object (Because foreign
      * entity is in different datastore vis-a-vis parent entity)
      */
-    private void populateForeignEntityFromDifferentDatastore(Object entity, EntityMetadata.Relation relation,
+    private void populateForeignEntityFromDifferentDatastore(Object entity, Relation relation,
             String entityName, Class<?> foreignEntityClass, String... foreignKeys) throws PropertyAccessException
     {
 
@@ -383,7 +384,7 @@ public class EntityResolver
      * @return the foreign entity or proxy
      */
     private Object getForeignEntityOrProxy(String entityName, Class<?> persistentClass, String foreignKey,
-            EntityMetadata.Relation relation)
+            Relation relation)
     {
 
         // Check in session cache!

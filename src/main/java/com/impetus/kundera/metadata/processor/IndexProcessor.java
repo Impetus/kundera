@@ -27,8 +27,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.api.Index;
-import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataProcessor;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.PropertyIndex;
 
 /**
  * The Class BaseMetadataProcessor.
@@ -87,7 +88,7 @@ public class IndexProcessor implements MetadataProcessor
         {
             if (f.isAnnotationPresent(Id.class))
             {
-                metadata.addIndexProperty(metadata.new PropertyIndex(f, f.getName()));
+                metadata.addIndexProperty(new PropertyIndex(f, f.getName()));
             }
             else if (f.isAnnotationPresent(Column.class))
             {
@@ -100,7 +101,7 @@ public class IndexProcessor implements MetadataProcessor
 
                 if (columnsToBeIndexed.isEmpty() || columnsToBeIndexed.contains(alias))
                 {
-                    metadata.addIndexProperty(metadata.new PropertyIndex(f, alias));
+                    metadata.addIndexProperty(new PropertyIndex(f, alias));
                 }
 
             }

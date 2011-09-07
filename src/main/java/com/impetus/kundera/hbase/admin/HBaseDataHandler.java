@@ -44,10 +44,10 @@ import com.impetus.kundera.hbase.client.Writer;
 import com.impetus.kundera.hbase.client.service.HBaseReader;
 import com.impetus.kundera.hbase.client.service.HBaseWriter;
 import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
-import com.impetus.kundera.metadata.EntityMetadata;
-import com.impetus.kundera.metadata.EntityMetadata.Column;
-import com.impetus.kundera.metadata.EntityMetadata.Relation;
-import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
+import com.impetus.kundera.metadata.model.Column;
+import com.impetus.kundera.metadata.model.EmbeddedColumn;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -161,8 +161,8 @@ public class HBaseDataHandler implements DataHandler
     {        
         
         //Now persist column families in the table
-        List<SuperColumn> columnFamilies = m.getSuperColumnsAsList();  //Yes, for HBase they are called column families
-        for(SuperColumn columnFamily : columnFamilies) {
+        List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList();  //Yes, for HBase they are called column families
+        for(EmbeddedColumn columnFamily : columnFamilies) {
             String columnFamilyName = columnFamily.getName();
             Field columnFamilyField = columnFamily.getField();            
             Object columnFamilyObject = null;
@@ -247,7 +247,7 @@ public class HBaseDataHandler implements DataHandler
             {   //EntityMetadata.Column col = new EntityMetadata().Column(property, null);
 
 
-                List<Column> columns2 = new ArrayList<EntityMetadata.Column>();
+                List<Column> columns2 = new ArrayList<Column>();
                 //columns.add(col);
             }
             hbaseWriter.writeColumns(gethTable(tableName), Constants.TO_ONE_SUPER_COL_NAME, e.getId(), columns, keys);
@@ -311,11 +311,11 @@ public class HBaseDataHandler implements DataHandler
         try
         {  
             /*Set Row Key*/
-            PropertyAccessorHelper.set(entity, m.getIdProperty(), rowKey);  
+            PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), rowKey);  
             
             /*Set each column families*/
-            List<SuperColumn> columnFamilies = m.getSuperColumnsAsList();  //Yes, for HBase they are called column families
-            for(SuperColumn columnFamily : columnFamilies) {            
+            List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList();  //Yes, for HBase they are called column families
+            for(EmbeddedColumn columnFamily : columnFamilies) {            
                 Field columnFamilyFieldInEntity = columnFamily.getField();
                 Class<?> columnFamilyClass = columnFamilyFieldInEntity.getType();
                 

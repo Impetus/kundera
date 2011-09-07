@@ -28,7 +28,7 @@ import java.util.HashSet;
 
 import java.util.List;
 
-import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**

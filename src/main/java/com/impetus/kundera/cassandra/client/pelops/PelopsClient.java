@@ -67,8 +67,9 @@ import com.impetus.kundera.db.accessor.DataRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
-import com.impetus.kundera.metadata.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -914,7 +915,7 @@ public class PelopsClient implements CassandraClient
         E e = clazz.newInstance();
 
         // Set row-key. Note: @Id is always String.
-        PropertyAccessorHelper.set(e, m.getIdProperty(), tr.getId());
+        PropertyAccessorHelper.set(e, m.getIdColumn().getField(), tr.getId());
 
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
@@ -975,7 +976,7 @@ public class PelopsClient implements CassandraClient
 
                     if (intoRelations)
                     {
-                        EntityMetadata.Relation relation = m.getRelation(name);
+                        Relation relation = m.getRelation(name);
 
                         String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
                         Set<String> keys = MetadataUtils.deserializeKeys(foreignKeys);

@@ -18,7 +18,7 @@ package com.impetus.kundera.hbase.client;
 import java.io.IOException;
 import java.util.List;
 
-import com.impetus.kundera.metadata.EntityMetadata.Column;
+import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**

@@ -47,8 +47,10 @@ import org.apache.lucene.util.Version;
 import com.impetus.kundera.Client;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.loader.DBType;
-import com.impetus.kundera.metadata.EntityMetadata;
-import com.impetus.kundera.metadata.EntityMetadata.PropertyIndex;
+import com.impetus.kundera.metadata.model.Column;
+import com.impetus.kundera.metadata.model.EmbeddedColumn;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.PropertyIndex;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -190,11 +192,11 @@ public class KunderaIndexer implements Indexer
         // we need to create seperate lucene document for indexing.
         if (metadata.getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY))
         {
-            Map<String, EntityMetadata.SuperColumn> superColMap = metadata.getSuperColumnsMap();
+            Map<String, EmbeddedColumn> superColMap = metadata.getEmbeddedColumnsMap();
 
             for (String superColumnName : superColMap.keySet())
             {
-                EntityMetadata.SuperColumn superColumn = superColMap.get(superColumnName);
+                EmbeddedColumn superColumn = superColMap.get(superColumnName);
                 try
                 {
                     
@@ -262,9 +264,9 @@ public class KunderaIndexer implements Indexer
      * @param superColumn the super column
      */
     private void indexSuperColumn(EntityMetadata metadata, Object object, Document currentDoc, Object embeddedObject,
-            EntityMetadata.SuperColumn superColumn)
+            EmbeddedColumn superColumn)
     {
-        for (EntityMetadata.Column col : superColumn.getColumns())
+        for (Column col : superColumn.getColumns())
         {
             java.lang.reflect.Field field = col.getField();
             String colName = col.getName();

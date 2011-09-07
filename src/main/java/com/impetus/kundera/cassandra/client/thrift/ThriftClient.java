@@ -36,7 +36,7 @@ import org.scale7.cassandra.pelops.Bytes;
 import com.impetus.kundera.cassandra.client.CassandraClient;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
-import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**

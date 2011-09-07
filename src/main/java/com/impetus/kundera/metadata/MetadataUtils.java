@@ -27,8 +27,9 @@ import java.util.Set;
 import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.metadata.EntityMetadata.Column;
-import com.impetus.kundera.metadata.EntityMetadata.SuperColumn;
+import com.impetus.kundera.metadata.model.Column;
+import com.impetus.kundera.metadata.model.EmbeddedColumn;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -46,11 +47,11 @@ public class MetadataUtils
     public static void populateColumnAndSuperColumnMaps(EntityMetadata m, Map<String, Field> columnNameToFieldMap,
             Map<String, Field> superColumnNameToFieldMap)
     {
-        for (Map.Entry<String, EntityMetadata.SuperColumn> entry : m.getSuperColumnsMap().entrySet())
+        for (Map.Entry<String, EmbeddedColumn> entry : m.getEmbeddedColumnsMap().entrySet())
         {
-            EntityMetadata.SuperColumn scMetadata = entry.getValue();
+            EmbeddedColumn scMetadata = entry.getValue();
             superColumnNameToFieldMap.put(scMetadata.getName(), scMetadata.getField());
-            for (EntityMetadata.Column column : entry.getValue().getColumns())
+            for (Column column : entry.getValue().getColumns())
             {                
                 columnNameToFieldMap.put(column.getName(), column.getField());
             }
@@ -62,10 +63,10 @@ public class MetadataUtils
      * @param columnNameToFieldMap
      * @param superColumnNameToFieldMap
      */
-    public static Map<String, Field> createColumnsFieldMap(EntityMetadata m, SuperColumn superColumn)
+    public static Map<String, Field> createColumnsFieldMap(EntityMetadata m, EmbeddedColumn superColumn)
     {
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
-        for (EntityMetadata.Column column : superColumn.getColumns())
+        for (Column column : superColumn.getColumns())
         {
             columnNameToFieldMap.put(column.getName(), column.getField());
         }
@@ -81,9 +82,9 @@ public class MetadataUtils
     public static Map<String, Field> createSuperColumnsFieldMap(EntityMetadata m)
     {
         Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
-        for (Map.Entry<String, EntityMetadata.SuperColumn> entry : m.getSuperColumnsMap().entrySet())
+        for (Map.Entry<String, EmbeddedColumn> entry : m.getEmbeddedColumnsMap().entrySet())
         {
-            EntityMetadata.SuperColumn scMetadata = entry.getValue();
+            EmbeddedColumn scMetadata = entry.getValue();
             superColumnNameToFieldMap.put(scMetadata.getName(), scMetadata.getField());
             
         }

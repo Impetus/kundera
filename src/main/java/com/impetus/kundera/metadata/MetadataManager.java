@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -34,11 +33,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.classreading.AnnotationDiscoveryListener;
-import com.impetus.kundera.metadata.EntityMetadata.Relation;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.processor.CacheableAnnotationProcessor;
 import com.impetus.kundera.metadata.processor.EntityListenersProcessor;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.processor.TableProcessor;
+import com.impetus.kundera.metadata.validator.Validator;
+import com.impetus.kundera.metadata.validator.ValidatorImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -64,11 +66,6 @@ public class MetadataManager implements AnnotationDiscoveryListener
     /** The Validator. */
     private Validator validator;
 
-    // intentionally unused!
-    /** The factory. */
-    @SuppressWarnings("unused")
-    private EntityManagerFactory factory;
-
     // set after build is called?
     /** The instantiated. */
     private boolean instantiated = false;
@@ -79,21 +76,18 @@ public class MetadataManager implements AnnotationDiscoveryListener
      * @param factory
      *            the factory
      */
-    public MetadataManager(EntityManagerFactory factory)
+    public MetadataManager()
     {
-        this.factory = factory;
-
         validator = new ValidatorImpl();
-
         metadataProcessors = new ArrayList<MetadataProcessor>();
 
         // add processors to chain.
-        metadataProcessors.add(new TableProcessor(factory));
+        metadataProcessors.add(new TableProcessor());
         metadataProcessors.add(new CacheableAnnotationProcessor());
         metadataProcessors.add(new IndexProcessor());
         metadataProcessors.add(new EntityListenersProcessor());
-    }
-
+    } 
+    
     /**
      * Validate.
      *
@@ -131,7 +125,7 @@ public class MetadataManager implements AnnotationDiscoveryListener
             {
                 if (null == metadata)
                 {
-                    metadata = process(clazz);
+                    metadata = buildEntityMetadata(clazz);
                     cacheMetadata(clazz, metadata);
                 }
             }
@@ -152,7 +146,7 @@ public class MetadataManager implements AnnotationDiscoveryListener
      * @throws PersistenceException
      *             the persistence exception
      */
-    private EntityMetadata process(Class<?> clazz)
+    public EntityMetadata buildEntityMetadata(Class<?> clazz)
     {
 
         EntityMetadata metadata = new EntityMetadata(clazz);
@@ -227,7 +221,7 @@ public class MetadataManager implements AnnotationDiscoveryListener
             Class<?> clazz = Class.forName(className);
 
             // process for Metadata
-            EntityMetadata metadata = process(clazz);
+            EntityMetadata metadata = buildEntityMetadata(clazz);
             cacheMetadata(clazz, metadata);
             log.info("Added @Entity " + clazz.getName());
         }
@@ -240,7 +234,7 @@ public class MetadataManager implements AnnotationDiscoveryListener
     /**
      * Build Inter/Intra @Entity relationships.
      */
-    public void build()
+    /*public void build()
     {
         log.debug("Building @Entity's foreign relations.");
         for (EntityMetadata metadata : getEntityMetadatasAsList())
@@ -249,128 +243,6 @@ public class MetadataManager implements AnnotationDiscoveryListener
             log.debug("Metadata for @Entity " + metadata.getEntityClazz() + "\n" + metadata);
         }
         instantiated = true;
-    }
-
-    /**
-     * Helper class to scan each @Entity class and build various relational
-     * annotation.
-     *
-     * @param entity
-     *            the entity
-     */
-    private void processRelations(Class<?> entity)
-    {
-        EntityMetadata metadata = getEntityMetadata(entity);
-
-        for (Field f : entity.getDeclaredFields())
-        {
-
-            // OneToOne
-            if (f.isAnnotationPresent(OneToOne.class))
-            {
-                // taking field's type as foreign entity, ignoring
-                // "targetEntity"
-                Class<?> targetEntity = f.getType();
-                try
-                {
-                    validate(targetEntity);
-                    OneToOne ann = f.getAnnotation(OneToOne.class);
-
-                    Relation relation = metadata.new Relation(f, targetEntity, null, ann.fetch(), Arrays.asList(ann
-                            .cascade()), ann.optional(), ann.mappedBy(), EntityMetadata.ForeignKey.ONE_TO_ONE);
-
-                    metadata.addRelation(f.getName(), relation);
-                }
-                catch (PersistenceException pe)
-                {
-                    throw new PersistenceException("Error with @OneToOne in @Entity(" + entity.getName() + "."
-                            + f.getName() + "), reason: " + pe.getMessage());
-                }
-            }
-
-            // OneToMany
-            else if (f.isAnnotationPresent(OneToMany.class))
-            {
-
-                OneToMany ann = f.getAnnotation(OneToMany.class);
-
-                Class<?> targetEntity = PropertyAccessorHelper.getGenericClass(f);
-
-                // now, check annotations
-                if (null != ann.targetEntity() && !ann.targetEntity().getSimpleName().equals("void"))
-                {
-                    targetEntity = ann.targetEntity();
-                }
-
-                try
-                {
-                    validate(targetEntity);
-                    Relation relation = metadata.new Relation(f, targetEntity, f.getType(), ann.fetch(), Arrays
-                            .asList(ann.cascade()), Boolean.TRUE, ann.mappedBy(), EntityMetadata.ForeignKey.ONE_TO_MANY);
-
-                    metadata.addRelation(f.getName(), relation);
-                }
-                catch (PersistenceException pe)
-                {
-                    throw new PersistenceException("Error with @OneToMany in @Entity(" + entity.getName() + "."
-                            + f.getName() + "), reason: " + pe.getMessage());
-                }
-            }
-
-            // ManyToOne
-            else if (f.isAnnotationPresent(ManyToOne.class))
-            {
-                // taking field's type as foreign entity, ignoring
-                // "targetEntity"
-                Class<?> targetEntity = f.getType();
-                try
-                {
-                    validate(targetEntity);
-                    ManyToOne ann = f.getAnnotation(ManyToOne.class);
-
-                    Relation relation = metadata.new Relation(f, targetEntity, null, ann.fetch(), Arrays.asList(ann
-                            .cascade()), ann.optional(), null, // mappedBy is
-                                                               // null
-                            EntityMetadata.ForeignKey.MANY_TO_ONE);
-
-                    metadata.addRelation(f.getName(), relation);
-                }
-                catch (PersistenceException pe)
-                {
-                    throw new PersistenceException("Error with @OneToOne in @Entity(" + entity.getName() + "."
-                            + f.getName() + "), reason: " + pe.getMessage());
-                }
-            }
-
-            // ManyToMany
-            else if (f.isAnnotationPresent(ManyToMany.class))
-            {
-
-                ManyToMany ann = f.getAnnotation(ManyToMany.class);
-
-                Class<?> targetEntity = PropertyAccessorHelper.getGenericClass(f);
-                // now, check annotations
-                if (null != ann.targetEntity() && !ann.targetEntity().getSimpleName().equals("void"))
-                {
-                    targetEntity = ann.targetEntity();
-                }
-
-                try
-                {
-                    validate(targetEntity);
-                    Relation relation = metadata.new Relation(f, targetEntity, f.getType(), ann.fetch(), Arrays
-                            .asList(ann.cascade()), Boolean.TRUE, ann.mappedBy(),
-                            EntityMetadata.ForeignKey.MANY_TO_MANY);
-
-                    metadata.addRelation(f.getName(), relation);
-                }
-                catch (PersistenceException pe)
-                {
-                    throw new PersistenceException("Error with @OneToMany in @Entity(" + entity.getName() + "."
-                            + f.getName() + "), reason: " + pe.getMessage());
-                }
-            }
-
-        }
-    }
+    }*/
+    
 }

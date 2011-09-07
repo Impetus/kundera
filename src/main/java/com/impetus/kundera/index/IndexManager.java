@@ -25,7 +25,7 @@ import org.apache.lucene.util.Version;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
-import com.impetus.kundera.metadata.EntityMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.mongodb.query.MongoDBIndexer;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 

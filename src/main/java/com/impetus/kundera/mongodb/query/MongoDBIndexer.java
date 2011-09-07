@@ -26,8 +26,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Client;
 import com.impetus.kundera.index.Indexer;
-import com.impetus.kundera.metadata.EntityMetadata;
-import com.impetus.kundera.metadata.EntityMetadata.PropertyIndex;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.PropertyIndex;
 import com.impetus.kundera.mongodb.client.MongoDBClient;
 
 /**
