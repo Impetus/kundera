@@ -62,11 +62,11 @@ import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.cache.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.cassandra.client.CassandraClient;
 import com.impetus.kundera.db.accessor.DataRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.loader.DBType;
-import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;

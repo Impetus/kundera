@@ -38,12 +38,12 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.cache.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.hbase.client.HBaseData;
 import com.impetus.kundera.hbase.client.Reader;
 import com.impetus.kundera.hbase.client.Writer;
 import com.impetus.kundera.hbase.client.service.HBaseReader;
 import com.impetus.kundera.hbase.client.service.HBaseWriter;
-import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;

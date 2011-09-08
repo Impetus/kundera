@@ -35,8 +35,8 @@ import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.cache.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.ejb.EntityManagerImpl;
-import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;

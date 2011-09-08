@@ -21,9 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.impetus.kundera.cache.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.ejb.event.CallbackMethod;
 import com.impetus.kundera.loader.DBType;
-import com.impetus.kundera.metadata.EmbeddedCollectionCacheHandler;
 
 /**
  * Holds metadata for entities
