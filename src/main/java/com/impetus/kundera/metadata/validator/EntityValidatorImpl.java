@@ -28,15 +28,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * The Class CassandraEntityValidator.
+ * Validates entity for JPA rules
  *
  * @author animesh.kumar
  */
-public class ValidatorImpl implements Validator
+public class EntityValidatorImpl implements EntityValidator
 {
 
     /** The Constant log. */
-    private static final Log LOG = LogFactory.getLog(ValidatorImpl.class);
+    private static final Log LOG = LogFactory.getLog(EntityValidatorImpl.class);
 
     /** cache for validated classes. */
     private List<Class<?>> classes = new ArrayList<Class<?>>();

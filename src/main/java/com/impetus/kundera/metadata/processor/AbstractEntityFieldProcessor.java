@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.validator.Validator;
+import com.impetus.kundera.metadata.validator.EntityValidator;
 
 /**
  * The Class AbstractEntityFieldProcessor.
@@ -46,7 +46,7 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
     private static final Log log = LogFactory.getLog(AbstractEntityFieldProcessor.class);
     
     /** The Validator. */
-    protected Validator validator;
+    protected EntityValidator validator;
 
     /**
      * Gets the valid jpa column.

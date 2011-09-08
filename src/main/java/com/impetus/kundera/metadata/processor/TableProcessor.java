@@ -43,8 +43,8 @@ import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
-import com.impetus.kundera.metadata.validator.Validator;
-import com.impetus.kundera.metadata.validator.ValidatorImpl;
+import com.impetus.kundera.metadata.validator.EntityValidator;
+import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -61,7 +61,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     
     
     public TableProcessor() {
-        validator = new ValidatorImpl();
+        validator = new EntityValidatorImpl();
     }
 
     @Override

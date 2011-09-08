@@ -15,18 +15,12 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
@@ -34,14 +28,12 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.classreading.AnnotationDiscoveryListener;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.processor.CacheableAnnotationProcessor;
 import com.impetus.kundera.metadata.processor.EntityListenersProcessor;
 import com.impetus.kundera.metadata.processor.IndexProcessor;
 import com.impetus.kundera.metadata.processor.TableProcessor;
-import com.impetus.kundera.metadata.validator.Validator;
-import com.impetus.kundera.metadata.validator.ValidatorImpl;
-import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.metadata.validator.EntityValidator;
+import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 
 /**
  * Concrete implementation of IMetadataManager.
@@ -64,7 +56,7 @@ public class MetadataManager implements AnnotationDiscoveryListener
     private List<MetadataProcessor> metadataProcessors;
 
     /** The Validator. */
-    private Validator validator;
+    private EntityValidator validator;
 
     // set after build is called?
     /** The instantiated. */
@@ -78,7 +70,7 @@ public class MetadataManager implements AnnotationDiscoveryListener
      */
     public MetadataManager()
     {
-        validator = new ValidatorImpl();
+        validator = new EntityValidatorImpl();
         metadataProcessors = new ArrayList<MetadataProcessor>();
 
         // add processors to chain.
