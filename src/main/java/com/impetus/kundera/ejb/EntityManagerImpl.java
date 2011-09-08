@@ -43,6 +43,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Client;
+import com.impetus.kundera.cache.metadata.MetadataCacheManager;
 import com.impetus.kundera.db.DataManager;
 import com.impetus.kundera.ejb.event.EntityEventDispatcher;
 import com.impetus.kundera.index.IndexManager;
@@ -81,7 +82,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     private IndexManager indexManager;
 
     /** The metadata manager. */
-    private MetadataManager metadataManager;
+    private MetadataCacheManager metadataCacheManager;
 
     /** The persistence unit name. */
     private String persistenceUnitName;
@@ -106,7 +107,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     public EntityManagerImpl(EntityManagerFactoryImpl factory)
     {
         this.factory = factory;
-        this.metadataManager = factory.getMetadataManager();
+        this.metadataCacheManager = factory.getMetadataCacheManager();
         this.persistenceUnitName = factory.getPersistenceUnitName();
         dataManager = new DataManager(this);
         entityResolver = new EntityResolver(this);
@@ -166,7 +167,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     {
         try
         {
-            EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
+            EntityMetadata m = metadataCacheManager.getEntityMetadataFromCache(entityClass);
             m.setDBType(this.client.getType());
             E e = dataManager.find(entityClass, m, primaryKey.toString());
             if (e != null)
@@ -207,7 +208,7 @@ public class EntityManagerImpl implements KunderaEntityManager
         try
         {
             String[] ids = Arrays.asList(primaryKeys).toArray(new String[] {});
-            EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
+            EntityMetadata m = metadataCacheManager.getEntityMetadataFromCache(entityClass);
             m.setDBType(this.client.getType());
             List<E> entities = dataManager.find(entityClass, m, ids);
 
@@ -240,7 +241,7 @@ public class EntityManagerImpl implements KunderaEntityManager
             {
                 log.debug("Removing @Entity >> " + o);
 
-                EntityMetadata m = metadataManager.getEntityMetadata(o.getEntity().getClass());
+                EntityMetadata m = metadataCacheManager.getEntityMetadataFromCache(o.getEntity().getClass());
                 m.setDBType(this.client.getType());
                 // fire PreRemove events
                 eventDispatcher.fireEventListeners(m, o, PreRemove.class);
@@ -279,7 +280,7 @@ public class EntityManagerImpl implements KunderaEntityManager
             {
                 log.debug("Merging @Entity >> " + o);
 
-                EntityMetadata metadata = metadataManager.getEntityMetadata(o.getEntity().getClass());
+                EntityMetadata metadata = metadataCacheManager.getEntityMetadataFromCache(o.getEntity().getClass());
                 metadata.setDBType(this.client.getType());
                 // TODO: throw OptisticLockException if wrong version and
                 // optimistic locking enabled
@@ -341,7 +342,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     {
         try
         {
-            EntityMetadata metadata = getMetadataManager().getEntityMetadata(e.getEntity().getClass());
+            EntityMetadata metadata = getMetadataCacheManager().getEntityMetadataFromCache(e.getEntity().getClass());
 
             // Check if persistenceUnit name is same as the parent entity, if
             // not, it's a case of cross-store persistence
@@ -442,11 +443,11 @@ public class EntityManagerImpl implements KunderaEntityManager
     {
         if (this.client.getType().equals(DBType.MONGODB))
         {
-            return new MongoDBQuery(this, metadataManager, ejbqlString);
+            return new MongoDBQuery(this, metadataCacheManager, ejbqlString);
         }
         else
         {
-            return new LuceneQuery(this, metadataManager, ejbqlString);
+            return new LuceneQuery(this, metadataCacheManager, ejbqlString);
         }
     }
 
@@ -760,9 +761,9 @@ public class EntityManagerImpl implements KunderaEntityManager
      * 
      * @return the metadataManager
      */
-    public final MetadataManager getMetadataManager()
+    public final MetadataCacheManager getMetadataCacheManager()
     {
-        return metadataManager;
+        return metadataCacheManager;
     }
 
     /**
@@ -880,7 +881,7 @@ public class EntityManagerImpl implements KunderaEntityManager
         {
             // String[] ids = Arrays.asList(primaryKeys).toArray(new String[]
             // {});
-            EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
+            EntityMetadata m = metadataCacheManager.getEntityMetadataFromCache(entityClass);
             m.setDBType(this.client.getType());
             List<T> entities = dataManager.find(entityClass, m, primaryKeys);
 

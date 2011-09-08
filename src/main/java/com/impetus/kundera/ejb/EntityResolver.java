@@ -120,7 +120,7 @@ public class EntityResolver
         EntityMetadata m = null;
         try
         {
-            m = em.getMetadataManager().getEntityMetadata(o.getClass());
+            m = em.getMetadataCacheManager().getEntityMetadataFromCache(o.getClass());
         }
         catch (Exception e)
         {
@@ -185,7 +185,7 @@ public class EntityResolver
                 {
                     // Unary relation will have single target object.
                     String targetId = PropertyAccessorHelper.getId(value,
-                            em.getMetadataManager().getEntityMetadata(targetClass));
+                            em.getMetadataCacheManager().getEntityMetadataFromCache(targetClass));
 
                     Set<String> foreignKeys = new HashSet<String>();
 
@@ -211,7 +211,7 @@ public class EntityResolver
                     for (Object o_ : collection)
                     {
                         String targetId = PropertyAccessorHelper.getId(o_,
-                                em.getMetadataManager().getEntityMetadata(targetClass));
+                                em.getMetadataCacheManager().getEntityMetadataFromCache(targetClass));
 
                         foreignKeys.add(targetId);
 
@@ -268,7 +268,7 @@ public class EntityResolver
         // in case the target contains a reference to containing entity.
         em.getSession().store(entity, entityId, Boolean.FALSE);
 
-        EntityMetadata relMetadata = em.getMetadataManager().getEntityMetadata(foreignEntityClass);
+        EntityMetadata relMetadata = em.getMetadataCacheManager().getEntityMetadataFromCache(foreignEntityClass);
 
         // Check for cross-store persistence
         if (em.getPersistenceUnitName().equals(relMetadata.getPersistenceUnit()))
@@ -331,7 +331,7 @@ public class EntityResolver
             String entityName, Class<?> foreignEntityClass, String... foreignKeys) throws PropertyAccessException
     {
 
-        EntityMetadata relMetadata = em.getMetadataManager().getEntityMetadata(foreignEntityClass);
+        EntityMetadata relMetadata = em.getMetadataCacheManager().getEntityMetadataFromCache(foreignEntityClass);
         this.em = (EntityManagerImpl) new Configuration().getEntityManager(relMetadata.getPersistenceUnit());
 
         if (relation.isUnary())
@@ -408,7 +408,7 @@ public class EntityResolver
                     + "_" + foreignKey);
 
             // metadata
-            EntityMetadata m = em.getMetadataManager().getEntityMetadata(persistentClass);
+            EntityMetadata m = em.getMetadataCacheManager().getEntityMetadataFromCache(persistentClass);
 
             return em.getFactory().getLazyEntity(entityName, persistentClass, m.getReadIdentifierMethod(),
                     m.getWriteIdentifierMethod(), foreignKey, em);

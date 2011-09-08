@@ -121,7 +121,7 @@ public class MongoDBDataHandler
                                                                       // to this
                                                                       // property
 
-                EntityMetadata relMetadata = em.getMetadataManager().getEntityMetadata(embeddedEntityClass);
+                EntityMetadata relMetadata = em.getMetadataCacheManager().getEntityMetadataFromCache(embeddedEntityClass);
                 BasicDBList relList = (BasicDBList) document.get(embeddedPropertyField.getName());
                 ; // List foreign keys
 

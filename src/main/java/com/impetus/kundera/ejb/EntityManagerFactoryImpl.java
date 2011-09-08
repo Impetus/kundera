@@ -35,9 +35,9 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
+import com.impetus.kundera.cache.metadata.MetadataCacheManager;
 import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
-import com.impetus.kundera.metadata.MetadataManager;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.proxy.EntityEnhancerFactory;
 import com.impetus.kundera.proxy.KunderaProxy;
@@ -70,7 +70,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     private boolean sessionless;
 
     /** The metadata manager. */
-    private MetadataManager metadataManager;
+    private MetadataCacheManager metadataCacheManager;
 
     /** The nodes. */
     private String[] nodes;
@@ -164,12 +164,12 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         long start = System.currentTimeMillis();
 
         this.persistenceUnitName = persistenceUnitName;
-        metadataManager = new MetadataManager();
+        metadataCacheManager = new MetadataCacheManager();
 
         // scan classes for @Entity
         Reader reader = new ClasspathReader(this.classes);
         reader.addValidAnnotations(Entity.class.getName());
-        reader.addAnnotationDiscoveryListeners(metadataManager);
+        reader.addAnnotationDiscoveryListeners(metadataCacheManager);
         reader.read();
 
         //metadataManager.build();
@@ -191,7 +191,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     {
         try
         {
-            String cacheName = metadataManager.getEntityMetadata(entity).getEntityClazz().getName();
+            String cacheName = metadataCacheManager.getEntityMetadataFromCache(entity).getEntityClazz().getName();
             return cacheProvider.createCache(cacheName);
         }
         catch (CacheException e)
@@ -205,9 +205,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      *
      * @return the metadataManager
      */
-    public final MetadataManager getMetadataManager()
+    public final MetadataCacheManager getMetadataCacheManager()
     {
-        return metadataManager;
+        return metadataCacheManager;
     }
 
     /* @see javax.persistence.EntityManagerFactory#close() */

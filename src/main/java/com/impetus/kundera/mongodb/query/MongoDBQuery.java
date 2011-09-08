@@ -22,8 +22,8 @@ import javax.persistence.Query;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.cache.metadata.MetadataCacheManager;
 import com.impetus.kundera.ejb.EntityManagerImpl;
-import com.impetus.kundera.metadata.MetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.query.QueryImpl;
 
@@ -37,9 +37,9 @@ public class MongoDBQuery extends QueryImpl
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(MongoDBQuery.class);
 
-    public MongoDBQuery(EntityManagerImpl em, MetadataManager metadataManager, String jpaQuery)
+    public MongoDBQuery(EntityManagerImpl em, MetadataCacheManager metadataCacheManager, String jpaQuery)
     {
-        super(em, metadataManager, jpaQuery);
+        super(em, metadataCacheManager, jpaQuery);
     }
 
     @Override
