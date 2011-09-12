@@ -1,5 +1,6 @@
 <classpath>
   <classpathentry kind="src" path="src/test/java" output="target/test-classes" including="**/*.java"/>
+  <classpathentry kind="src" path="src/test/resources" output="target/test-classes" excluding="**/*.java"/>
   <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
   <classpathentry kind="src" path="src/main/resources" excluding="**/*.java"/>
   <classpathentry kind="output" path="target/classes"/>
@@ -53,7 +54,7 @@
   <classpathentry kind="var" path="M2_REPO/org/safehaus/jug/jug-asl/2.0.0/jug-asl-2.0.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/junit/junit/3.8.1/junit-3.8.1.jar"/>
   <classpathentry kind="var" path="M2_REPO/net/sf/kosmosfs/kfs/0.3/kfs-0.3.jar"/>
-  <classpathentry kind="src" path="/kundera-core"/>
+  <classpathentry kind="var" path="M2_REPO/com/impetus/core/kundera-core/2.0.4/kundera-core-2.0.4.jar"/>
   <classpathentry kind="var" path="M2_REPO/libthrift/libthrift/0.6/libthrift-0.6.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/apache/thrift/libthrift/0.6.1/libthrift-0.6.1.jar"/>
   <classpathentry kind="var" path="M2_REPO/log4j/log4j/1.2.16/log4j-1.2.16.jar"/>

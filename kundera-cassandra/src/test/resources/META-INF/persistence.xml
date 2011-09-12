@@ -1,0 +1,45 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
+	http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+	version="2.0">
+
+	<persistence-unit name="cassandra">
+		<provider>com.impetus.kundera.ejb.KunderaPersistence</provider>
+		
+		<properties>
+			<property name="server.config" value="D:/vivek/source/cassandra-0.8.2/conf/cassandra.yaml"/>
+			<property name="kundera.nodes" value="localhost"/>
+			<property name="kundera.port" value="9160"/>
+			<property name="kundera.keyspace" value="Blog"/>
+			<property name="kundera.dialect" value="cassandra"/>
+			<property name="kundera.client" value="Pelops"/>
+			<property name="kundera.cache.provider_class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider"/>
+            <property name="net.sf.ehcache.configurationResourceName" value="/ehcache-test.xml"/>   			
+		</properties>
+		
+	</persistence-unit>
+
+	<persistence-unit name="hbase">
+		<provider>com.impetus.kundera.ejb.KunderaPersistence</provider>
+		
+		<properties>
+			<property name="kundera.nodes" value="localhost"/>
+			<property name="kundera.port" value="9165"/>
+			<property name="kundera.keyspace" value="Blog"/>
+			<property name="kundera.dialect" value="hbase"/>
+			<property name="kundera.client" value="Hbase"/>
+			<property name="kundera.cache.provider_class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider"/>
+            <property name="net.sf.ehcache.configurationResourceName" value="/ehcache-test.xml"/>			
+		</properties>
+	</persistence-unit>
+	<persistence-unit name="mongodb">
+		<provider>com.impetus.kundera.ejb.KunderaPersistence</provider>		
+		<properties>
+			<property name="kundera.nodes" value="localhost"/>
+			<property name="kundera.port" value="27017"/>
+			<property name="kundera.keyspace" value="Blog"/>
+			<property name="kundera.dialect" value="mongodb"/>
+			<property name="kundera.client" value="MongoDB"/>
+		</properties>
+	</persistence-unit>	
+</persistence>
