@@ -4,8 +4,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.impetus</groupId>
 	<artifactId>kundera</artifactId>
-	<version>2.0.3</version>
-	<packaging>jar</packaging>
+	<version>2.0.4</version>
+	<packaging>pom</packaging>
 	<name>kundera</name>
 	<url>http://kundera.googlecode.com</url>
 
@@ -121,6 +121,12 @@
 		</plugins>
 	</reporting>
 
+        <modules>
+	    <module>kundera-core</module>
+	    <module>kundera-cassandra</module>
+	    <module>kundera-hbase</module>
+	    <module>kundera-mongo</module>
+	  </modules>
 
 	<dependencies>
 		<dependency>
@@ -296,63 +302,5 @@
 		</dependency>		
 
 	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<!-- NOTE: We don't need a groupId specification because the group is 
-					org.apache.maven.plugins ...which is assumed by default. -->
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2.1</version>
-				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<dependencies>
-					<dependency>
-						<groupId>com.impetus.ilabs.build</groupId>
-						<artifactId>checkstyle-config</artifactId>
-						<version>1</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pmd-plugin</artifactId>
-				<version>2.3</version>
-				<dependencies>
-					<dependency>
-						<groupId>com.impetus.ilabs.build</groupId>
-						<artifactId>pmd-config</artifactId>
-						<version>1</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>${basedir}</directory>
-							<includes>
-								<include>cobertura.ser</include>
-							</includes>
-						</fileset>
-					</filesets>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+	
 </project>
