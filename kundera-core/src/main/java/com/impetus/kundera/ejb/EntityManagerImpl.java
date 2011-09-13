@@ -442,8 +442,8 @@ public class EntityManagerImpl implements KunderaEntityManager
     @Override
     public final Query createQuery(String ejbqlString)
     {
-        ((KunderaQuery)this.client.getQuery()).parse(ejbqlString);
-        return this.client.getQuery(); 
+        return this.client.getQuery(this,ejbqlString);
+//        return this.client.getQuery(); 
      /*   if (this.client.getType().equals(DBType.MONGODB))
         {
             return new MongoDBQuery(this, metadataManager, ejbqlString);

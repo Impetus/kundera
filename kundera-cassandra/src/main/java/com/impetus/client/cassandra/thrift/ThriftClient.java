@@ -239,7 +239,7 @@ public class ThriftClient implements CassandraClient
     }
 
     @Override
-    public DataAccessor getDataAccessor()
+    public DataAccessor getDataAccessor(EntityManagerImpl em)
     {
         // TODO Auto-generated method stub
         return null;
@@ -253,7 +253,7 @@ public class ThriftClient implements CassandraClient
     }
 
     @Override
-    public Query getQuery()
+    public Query getQuery(EntityManagerImpl em, String queryString)
     {
         // TODO Auto-generated method stub
         return null;

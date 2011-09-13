@@ -55,7 +55,7 @@ public class DataManager
      */
     public DataManager(EntityManagerImpl em)
     {
-        accessor = em.getClient().getDataAccessor();
+        accessor = em.getClient().getDataAccessor(em);
 //        accessor = new ColumnFamilyDataAccessor(em);        
 //        accessorDocument = new DocumentDataAccessor(em);
 

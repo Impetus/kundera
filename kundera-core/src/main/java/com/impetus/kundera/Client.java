@@ -189,7 +189,7 @@ public interface Client
      */
     Indexer getIndexer();
     
-    Query getQuery();
+    Query getQuery(EntityManagerImpl em, String queryString);
 
-    DataAccessor getDataAccessor();
+    DataAccessor getDataAccessor(EntityManagerImpl em);
  }

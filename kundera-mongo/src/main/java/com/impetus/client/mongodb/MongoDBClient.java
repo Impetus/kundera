@@ -32,6 +32,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 
+import com.impetus.client.mongodb.accessor.DocumentDataAccessor;
+import com.impetus.client.mongodb.query.MongoDBIndexer;
 import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.Client;
 import com.impetus.kundera.db.DataAccessor;
@@ -418,23 +420,20 @@ public class MongoDBClient implements Client
     }
 
     @Override
-    public DataAccessor getDataAccessor()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Indexer getIndexer()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return new MongoDBIndexer(this);
     }
 
     @Override
-    public Query getQuery()
+    public DataAccessor getDataAccessor(EntityManagerImpl em)
     {
-        // TODO Auto-generated method stub
+        return new DocumentDataAccessor(em);
+    }
+
+    @Override
+    public Query getQuery(EntityManagerImpl em, String queryString)
+    {
         return null;
     }
 

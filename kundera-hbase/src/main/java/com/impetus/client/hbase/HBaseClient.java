@@ -28,6 +28,8 @@ import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.client.hbase.admin.DataHandler;
@@ -36,13 +38,15 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.DataAccessor;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.Indexer;
+import com.impetus.kundera.index.KunderaIndexer;
 import com.impetus.kundera.loader.DBType;
-import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
+import com.impetus.kundera.query.LuceneQuery;
 
 /**
  * HBase client.
@@ -268,23 +272,20 @@ public class HBaseClient implements com.impetus.kundera.Client
     }
 
     @Override
-    public DataAccessor getDataAccessor()
+    public DataAccessor getDataAccessor(EntityManagerImpl em)
     {
-        // TODO Auto-generated method stub
-        return null;
+        return new ColumnFamilyDataAccessor(em);
     }
 
     @Override
     public Indexer getIndexer()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return new KunderaIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT));
     }
 
     @Override
-    public Query getQuery()
+    public Query getQuery(EntityManagerImpl em, String queryString)
     {
-        // TODO Auto-generated method stub
-        return null;
+        return new LuceneQuery(em, em.getMetadataCacheManager(), queryString);
     }
 }

@@ -46,6 +46,8 @@ import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -62,20 +64,23 @@ import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.client.cassandra.CassandraClient;
+import com.impetus.client.cassandra.ColumnFamilyDataAccessor;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.cache.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.db.DataAccessor;
 import com.impetus.kundera.db.accessor.DataRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.Indexer;
+import com.impetus.kundera.index.KunderaIndexer;
 import com.impetus.kundera.loader.DBType;
-import com.impetus.kundera.cache.EmbeddedCollectionCacheHandler;
-import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
+import com.impetus.kundera.query.LuceneQuery;
 
 /**
  * Client implementation using Pelops. http://code.google.com/p/pelops/
@@ -1000,25 +1005,21 @@ public class PelopsClient implements CassandraClient
     }
 
     @Override
-    public DataAccessor getDataAccessor()
+    public DataAccessor getDataAccessor(EntityManagerImpl em)
     {
-        // TODO Auto-generated method stub
-        return null;
+        return new ColumnFamilyDataAccessor(em);
     }
 
     @Override
     public Indexer getIndexer()
     {
-        // TODO Auto-generated method stub
-        return null;
+       return new KunderaIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT));
     }
 
     @Override
-    public Query getQuery()
+    public Query getQuery(EntityManagerImpl em, String ejbqlString)
     {
-        // TODO Auto-generated method stub
-        return null;
+        return new LuceneQuery(em, em.getMetadataCacheManager(), ejbqlString);
     }
-
 
 }
