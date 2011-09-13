@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.impetus.kundera.entity;
+package com.impetus.client.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

@@ -13,14 +13,14 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.junit;
+package com.impetus.client.junit;
 
 import javax.persistence.EntityManager;
 
 import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.log4j.Logger;
 
-import com.impetus.kundera.entity.SnsUser;
+import com.impetus.client.entity.SnsUser;
 import com.impetus.kundera.loader.Configuration;
 
 /**
