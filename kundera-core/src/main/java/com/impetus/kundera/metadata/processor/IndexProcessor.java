@@ -27,8 +27,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.api.Index;
-import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataProcessor;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PropertyIndex;
 
 /**

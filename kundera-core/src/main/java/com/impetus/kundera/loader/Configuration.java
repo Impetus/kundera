@@ -16,9 +16,7 @@
 package com.impetus.kundera.loader;
 
 import java.lang.reflect.Field;
-import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -26,7 +24,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
-import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.apache.log4j.Logger;
 
@@ -34,8 +31,6 @@ import com.impetus.kundera.Client;
 import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.cache.NonOperationalCacheProvider;
 import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
-import com.impetus.kundera.ejb.PersistenceMetadata;
-import com.impetus.kundera.ejb.PersistenceXmlLoader;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 

@@ -47,14 +47,9 @@ import com.impetus.kundera.db.DataManager;
 import com.impetus.kundera.ejb.event.EntityEventDispatcher;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.loader.Configuration;
-import com.impetus.kundera.loader.DBType;
-import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.MetadataManager;
-//import com.impetus.kundera.mongodb.query.MongoDBQuery;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
-import com.impetus.kundera.query.KunderaQuery;
-//import com.impetus.kundera.query.LuceneQuery;
 
 /**
  * The Class EntityManagerImpl.

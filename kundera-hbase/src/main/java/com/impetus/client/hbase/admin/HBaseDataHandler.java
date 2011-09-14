@@ -44,13 +44,12 @@ import com.impetus.client.hbase.service.HBaseReader;
 import com.impetus.client.hbase.service.HBaseWriter;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.EmbeddedCollectionCacheHandler;
-import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessException;
-import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 

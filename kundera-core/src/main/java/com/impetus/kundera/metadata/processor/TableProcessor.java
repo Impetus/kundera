@@ -22,11 +22,9 @@ import java.util.Collection;
 import java.util.Map;
 
 import javax.persistence.CollectionTable;
-import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -38,14 +36,12 @@ import javax.persistence.Table;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
-import com.impetus.kundera.metadata.validator.EntityValidator;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**

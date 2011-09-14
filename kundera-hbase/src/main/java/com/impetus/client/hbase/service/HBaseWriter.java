@@ -26,7 +26,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.Writer;
 import com.impetus.kundera.metadata.model.Column;
-
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 

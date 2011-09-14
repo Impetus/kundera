@@ -21,7 +21,6 @@ import java.util.List;
 import org.apache.hadoop.hbase.client.HTable;
 
 import com.impetus.kundera.metadata.model.Column;
-import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * HBase data writer.

@@ -23,8 +23,8 @@ import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
 import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.Cassandra.Client;
+import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
