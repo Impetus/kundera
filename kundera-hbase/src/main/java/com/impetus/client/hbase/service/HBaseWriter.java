@@ -25,12 +25,10 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.Writer;
-import com.impetus.kundera.metadata.MetadataManager;
 import com.impetus.kundera.metadata.model.Column;
 
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * The Class HBaseWriter.
