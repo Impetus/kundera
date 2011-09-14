@@ -43,7 +43,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Client;
-import com.impetus.kundera.cache.metadata.MetadataCacheManager;
 import com.impetus.kundera.db.DataManager;
 import com.impetus.kundera.ejb.event.EntityEventDispatcher;
 import com.impetus.kundera.index.IndexManager;
@@ -51,6 +50,7 @@ import com.impetus.kundera.loader.Configuration;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.MetadataBuilder;
+import com.impetus.kundera.metadata.MetadataManager;
 //import com.impetus.kundera.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.KunderaQuery;
@@ -83,7 +83,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     private IndexManager indexManager;
 
     /** The metadata manager. */
-    private MetadataCacheManager metadataCacheManager;
+    private MetadataManager metadataManager;
 
     /** The persistence unit name. */
     private String persistenceUnitName;
@@ -108,7 +108,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     public EntityManagerImpl(EntityManagerFactoryImpl factory)
     {
         this.factory = factory;
-        this.metadataCacheManager = factory.getMetadataCacheManager();
+        this.metadataManager = factory.getMetadataManager();
         this.persistenceUnitName = factory.getPersistenceUnitName();
         dataManager = new DataManager(this);
         entityResolver = new EntityResolver(this);
@@ -168,7 +168,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     {
         try
         {
-            EntityMetadata m = metadataCacheManager.getEntityMetadataFromCache(entityClass);
+            EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
             m.setDBType(this.client.getType());
             E e = dataManager.find(entityClass, m, primaryKey.toString());
             if (e != null)
@@ -209,7 +209,7 @@ public class EntityManagerImpl implements KunderaEntityManager
         try
         {
             String[] ids = Arrays.asList(primaryKeys).toArray(new String[] {});
-            EntityMetadata m = metadataCacheManager.getEntityMetadataFromCache(entityClass);
+            EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
             m.setDBType(this.client.getType());
             List<E> entities = dataManager.find(entityClass, m, ids);
 
@@ -242,7 +242,7 @@ public class EntityManagerImpl implements KunderaEntityManager
             {
                 log.debug("Removing @Entity >> " + o);
 
-                EntityMetadata m = metadataCacheManager.getEntityMetadataFromCache(o.getEntity().getClass());
+                EntityMetadata m = metadataManager.getEntityMetadata(o.getEntity().getClass());
                 m.setDBType(this.client.getType());
                 // fire PreRemove events
                 eventDispatcher.fireEventListeners(m, o, PreRemove.class);
@@ -281,7 +281,7 @@ public class EntityManagerImpl implements KunderaEntityManager
             {
                 log.debug("Merging @Entity >> " + o);
 
-                EntityMetadata metadata = metadataCacheManager.getEntityMetadataFromCache(o.getEntity().getClass());
+                EntityMetadata metadata = metadataManager.getEntityMetadata(o.getEntity().getClass());
                 metadata.setDBType(this.client.getType());
                 // TODO: throw OptisticLockException if wrong version and
                 // optimistic locking enabled
@@ -343,7 +343,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     {
         try
         {
-            EntityMetadata metadata = getMetadataCacheManager().getEntityMetadataFromCache(e.getEntity().getClass());
+            EntityMetadata metadata = getMetadataManager().getEntityMetadata(e.getEntity().getClass());
 
             // Check if persistenceUnit name is same as the parent entity, if
             // not, it's a case of cross-store persistence
@@ -764,9 +764,9 @@ public class EntityManagerImpl implements KunderaEntityManager
      * 
      * @return the metadataManager
      */
-    public final MetadataCacheManager getMetadataCacheManager()
+    public final MetadataManager getMetadataManager()
     {
-        return metadataCacheManager;
+        return metadataManager;
     }
 
     /**
@@ -884,7 +884,7 @@ public class EntityManagerImpl implements KunderaEntityManager
         {
             // String[] ids = Arrays.asList(primaryKeys).toArray(new String[]
             // {});
-            EntityMetadata m = metadataCacheManager.getEntityMetadataFromCache(entityClass);
+            EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
             m.setDBType(this.client.getType());
             List<T> entities = dataManager.find(entityClass, m, primaryKeys);
 

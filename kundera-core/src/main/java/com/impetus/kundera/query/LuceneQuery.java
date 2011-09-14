@@ -25,10 +25,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.cache.metadata.MetadataCacheManager;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.KunderaIndexer;
 import com.impetus.kundera.metadata.MetadataBuilder;
+import com.impetus.kundera.metadata.MetadataManager;
 
 /**
  * The Class LuceneQuery.
@@ -52,14 +52,14 @@ public class LuceneQuery extends QueryImpl implements Query
      *
      * @param em
      *            the em
-     * @param metadataCacheManager
+     * @param metadataManager
      *            the metadata manager
      * @param jpaQuery
      *            the jpa query
      */
-    public LuceneQuery(EntityManagerImpl em, MetadataCacheManager metadataCacheManager, String jpaQuery)
+    public LuceneQuery(EntityManagerImpl em, MetadataManager metadataManager, String jpaQuery)
     {
-        super(em, metadataCacheManager, jpaQuery);
+        super(em, metadataManager, jpaQuery);
     }
 
     /**

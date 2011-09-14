@@ -286,6 +286,6 @@ public class HBaseClient implements com.impetus.kundera.Client
     @Override
     public Query getQuery(EntityManagerImpl em, String queryString)
     {
-        return new LuceneQuery(em, em.getMetadataCacheManager(), queryString);
+        return new LuceneQuery(em, em.getMetadataManager(), queryString);
     }
 }

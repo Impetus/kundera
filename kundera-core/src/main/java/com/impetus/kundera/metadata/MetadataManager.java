@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.cache.metadata;
+package com.impetus.kundera.metadata;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,17 +27,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.classreading.AnnotationDiscoveryListener;
-import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * Provides functionality for caching entity metadata
  * @author amresh.singh
  */
-public class MetadataCacheManager implements AnnotationDiscoveryListener
+public class MetadataManager implements AnnotationDiscoveryListener
 {
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(MetadataCacheManager.class);
+    private static Log log = LogFactory.getLog(MetadataManager.class);
     
     /** cache for Metadata. */
     private Map<Class<?>, EntityMetadata> metadataCache = new ConcurrentHashMap<Class<?>, EntityMetadata>();
@@ -82,7 +81,7 @@ public class MetadataCacheManager implements AnnotationDiscoveryListener
      * @throws PersistenceException
      *             the persistence exception
      */
-    public final EntityMetadata getEntityMetadataFromCache(Class<?> clazz)
+    public final EntityMetadata getEntityMetadata(Class<?> clazz)
     {
 
         EntityMetadata metadata = metadataCache.get(clazz);
@@ -125,13 +124,6 @@ public class MetadataCacheManager implements AnnotationDiscoveryListener
     }
     
 
-    
-
-    /*
-     * @see
-     * com.impetus.kundera.classreading.AnnotationDiscoveryListener#discovered
-     * (java.lang.String, java.lang.String[])
-     */
     @Override
     // called whenever a class with @Entity annotation is encountered in the
     // classpath.

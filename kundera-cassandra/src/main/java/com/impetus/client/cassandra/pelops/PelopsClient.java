@@ -1019,7 +1019,7 @@ public class PelopsClient implements CassandraClient
     @Override
     public Query getQuery(EntityManagerImpl em, String ejbqlString)
     {
-        return new LuceneQuery(em, em.getMetadataCacheManager(), ejbqlString);
+        return new LuceneQuery(em, em.getMetadataManager(), ejbqlString);
     }
 
 }

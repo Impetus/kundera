@@ -48,7 +48,7 @@ public class PersistTask implements Runnable
     {
         try
         {
-            EntityMetadata metadata = this.em.getMetadataCacheManager().getEntityMetadataFromCache(e.getEntity().getClass());
+            EntityMetadata metadata = this.em.getMetadataManager().getEntityMetadata(e.getEntity().getClass());
             
             //Check if persistenceUnit name is same as the parent entity, if not, it's a case of cross-store persistence
             String persistenceUnit = metadata.getPersistenceUnit();
