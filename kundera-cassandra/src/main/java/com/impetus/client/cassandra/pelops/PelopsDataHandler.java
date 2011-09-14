@@ -35,7 +35,7 @@ import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.cache.EmbeddedCollectionCacheHandler;
+import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
@@ -182,7 +182,7 @@ public class PelopsDataHandler
             String scNamePrefix = null;
 
             // If this super column is variable in number (name#sequence format)
-            if (scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER) != -1)
+            if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
             {
                 scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
                 embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
@@ -194,7 +194,7 @@ public class PelopsDataHandler
 
                 Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
                 boolean intoRelations = false;
-                if (scName.equals(Constants.TO_ONE_SUPER_COL_NAME))
+                if (scName.equals(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME))
                 {
                     intoRelations = true;
                 }
@@ -222,14 +222,14 @@ public class PelopsDataHandler
                 embeddedCollection.add(embeddedObject);
 
                 // Add this embedded object to cache
-                ((PelopsClient) em.getClient()).getEcCacheHandler().addEmbeddedCollectionCacheMapping(tr.getId(),
-                        embeddedObject, scName);
+                ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(), embeddedObject, scName);
+                
 
             }
             else
             {
                 boolean intoRelations = false;
-                if (scName.equals(Constants.TO_ONE_SUPER_COL_NAME))
+                if (scName.equals(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME))
                 {
                     intoRelations = true;
                 }
@@ -299,9 +299,9 @@ public class PelopsDataHandler
         MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
 
         // If this super column is variable in number (name#sequence format)
-        if (scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER) != -1)
+        if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
         {
-            StringTokenizer st = new StringTokenizer(scName, Constants.SUPER_COLUMN_NAME_DELIMITER);
+            StringTokenizer st = new StringTokenizer(scName, Constants.EMBEDDED_COLUMN_NAME_DELIMITER);
             if (st.hasMoreTokens())
             {
                 scNamePrefix = st.nextToken();
@@ -449,7 +449,7 @@ public class PelopsDataHandler
             if (superColumnObject instanceof Collection)
             {
 
-                EmbeddedCollectionCacheHandler ecCacheHandler = client.getEcCacheHandler();
+                ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
 
                 // Check whether it's first time insert or updation
                 if (ecCacheHandler.isCacheEmpty())
@@ -457,7 +457,7 @@ public class PelopsDataHandler
                     int count = 0;
                     for (Object obj : (Collection) superColumnObject)
                     {
-                        superColumnName = superColumn.getName() + Constants.SUPER_COLUMN_NAME_DELIMITER + count;
+                        superColumnName = superColumn.getName() + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
                         SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp, superColumn,
                                 obj);
                         tr.addSuperColumn(thriftSuperColumn);
@@ -470,13 +470,13 @@ public class PelopsDataHandler
                   // Check whether this object is already in cache, which
                   // means we already have a super column
                   // Otherwise we need to generate a fresh super column name
-                    int lastEmbeddedObjectCount = ecCacheHandler.getLastEmbeddedObjectCount(e.getId());
+                    int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(e.getId());
                     for (Object obj : (Collection) superColumnObject)
                     {
-                        superColumnName = ecCacheHandler.getEmbeddedObjectName(e.getId(), obj);
+                        superColumnName = ecCacheHandler.getElementCollectionObjectName(e.getId(), obj);
                         if (superColumnName == null)
                         { // Fresh row
-                            superColumnName = superColumn.getName() + Constants.SUPER_COLUMN_NAME_DELIMITER
+                            superColumnName = superColumn.getName() + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
                                     + (++lastEmbeddedObjectCount);
                         }
                         SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp, superColumn,
@@ -514,7 +514,7 @@ public class PelopsDataHandler
             if (!columns.isEmpty())
             {
                 SuperColumn superCol = new SuperColumn();
-                superCol.setName(PropertyAccessorFactory.STRING.toBytes(Constants.TO_ONE_SUPER_COL_NAME));
+                superCol.setName(PropertyAccessorFactory.STRING.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME));
                 superCol.setColumns(columns);
                 tr.addSuperColumn(superCol);
             }

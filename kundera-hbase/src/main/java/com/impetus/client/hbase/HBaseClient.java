@@ -94,7 +94,7 @@ public class HBaseClient implements com.impetus.kundera.Client
         //All relationships are maintained as special Foreign key column by Kundera in a newly created column family 
         List<Relation> relations = m.getRelations();  
         if(!relations.isEmpty()) {
-            columnFamilyNames.add(Constants.TO_ONE_SUPER_COL_NAME);
+            columnFamilyNames.add(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME);
         }
         
         //Check whether this table exists, if not create it

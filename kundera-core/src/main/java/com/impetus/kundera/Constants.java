@@ -42,9 +42,9 @@ public final class Constants
     public final static int INVALID = -1;
 
     /** The Constant SUPER_COLUMN_NAME_DELIMITER. */
-    public final static String SUPER_COLUMN_NAME_DELIMITER = "#";
+    public final static String EMBEDDED_COLUMN_NAME_DELIMITER = "#";
     
     /** The Constant TO_ONE_SUPER_COL_NAME. */
-    public static final String TO_ONE_SUPER_COL_NAME = "FKey-TO";
+    public static final String FOREIGN_KEY_EMBEDDED_COLUMN_NAME = "FKey-TO";
 
 }

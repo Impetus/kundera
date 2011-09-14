@@ -141,11 +141,11 @@ public class MetadataUtils
     }
     
     public static String getEmbeddedCollectionPrefix(String embeddedCollectionName) {
-        return embeddedCollectionName.substring(0, embeddedCollectionName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER));
+        return embeddedCollectionName.substring(0, embeddedCollectionName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER));
     }
     
     public static String getEmbeddedCollectionPostfix(String embeddedCollectionName) {
-        return embeddedCollectionName.substring(embeddedCollectionName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER) + 1, embeddedCollectionName.length());
+        return embeddedCollectionName.substring(embeddedCollectionName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) + 1, embeddedCollectionName.length());
     }  
     
     /**

@@ -66,7 +66,6 @@ import org.scale7.cassandra.pelops.Selector;
 import com.impetus.client.cassandra.CassandraClient;
 import com.impetus.client.cassandra.ColumnFamilyDataAccessor;
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.cache.EmbeddedCollectionCacheHandler;
 import com.impetus.kundera.db.DataAccessor;
 import com.impetus.kundera.db.accessor.DataRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
@@ -109,11 +108,7 @@ public class PelopsClient implements CassandraClient
     /** The data handler. */
     PelopsDataHandler dataHandler = new PelopsDataHandler();
 
-    /** The ec cache handler. */
-    // TODO: This has been moved to EntityMetadata, refactor cassandra code to
-    // pick it from meta data
-    EmbeddedCollectionCacheHandler ecCacheHandler = new EmbeddedCollectionCacheHandler();
-    
+   
     /** Whether this client is connected */
     private boolean isConnected;
 
@@ -707,16 +702,6 @@ public class PelopsClient implements CassandraClient
     }
 
     /**
-     * Gets the ec cache handler.
-     * 
-     * @return the scCacheHandler
-     */
-    public EmbeddedCollectionCacheHandler getEcCacheHandler()
-    {
-        return ecCacheHandler;
-    }
-
-    /**
      * The Class SolandraUtils.
      */
     private class SolandraUtils
@@ -937,13 +922,13 @@ public class PelopsClient implements CassandraClient
             String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
             String scNamePrefix = null;
 
-            if (scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER) != -1)
+            if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
             {
                 scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
                 embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
                 embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
 
-                String scFieldName = scName.substring(0, scName.indexOf(Constants.SUPER_COLUMN_NAME_DELIMITER));
+                String scFieldName = scName.substring(0, scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER));
                 Field superColumnField = e.getClass().getDeclaredField(scFieldName);
                 if (!superColumnField.isAccessible())
                 {
@@ -966,7 +951,7 @@ public class PelopsClient implements CassandraClient
             else
             {
                 boolean intoRelations = false;
-                if (scName.equals(Constants.TO_ONE_SUPER_COL_NAME))
+                if (scName.equals(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME))
                 {
                     intoRelations = true;
                 }

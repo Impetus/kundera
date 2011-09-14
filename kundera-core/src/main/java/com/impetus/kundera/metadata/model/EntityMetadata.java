@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.impetus.kundera.cache.EmbeddedCollectionCacheHandler;
+import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.ejb.event.CallbackMethod;
 import com.impetus.kundera.loader.DBType;
 
@@ -74,11 +74,7 @@ public final class EntityMetadata
     private Map<String, Column> columnsMap = new HashMap<String, Column>();
 
     /** Map of embedded column names and their metadata */
-    private Map<String, EmbeddedColumn> embeddedColumnsMap = new HashMap<String, EmbeddedColumn>();
-    
-    //TODO: This shouldn't be in metadata, move it to cache package
-    /** The ec cache handler. */
-    EmbeddedCollectionCacheHandler ecCacheHandler = new EmbeddedCollectionCacheHandler();   
+    private Map<String, EmbeddedColumn> embeddedColumnsMap = new HashMap<String, EmbeddedColumn>();      
 
     /** The index prperties. */
     private List<PropertyIndex> indexPrperties = new ArrayList<PropertyIndex>();
@@ -738,15 +734,6 @@ public final class EntityMetadata
     public void setDBType(DBType type)
     {
         this.dbType = type;
-    }
-    
-    /**
-     * Gets the ec cache handler.
-     * 
-     * @return the scCacheHandler
-     */
-    public EmbeddedCollectionCacheHandler getEcCacheHandler()
-    {
-        return ecCacheHandler;
-    }
+    }  
+
 }

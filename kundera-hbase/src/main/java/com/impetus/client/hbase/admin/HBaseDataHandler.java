@@ -43,7 +43,7 @@ import com.impetus.client.hbase.Writer;
 import com.impetus.client.hbase.service.HBaseReader;
 import com.impetus.client.hbase.service.HBaseWriter;
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.cache.EmbeddedCollectionCacheHandler;
+import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
@@ -186,14 +186,14 @@ public class HBaseDataHandler implements DataHandler
             if(columnFamilyObject instanceof Collection) {
                 String dynamicCFName = null;        
                 
-                EmbeddedCollectionCacheHandler ecCacheHandler = m.getEcCacheHandler();
+                ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
                 // Check whether it's first time insert or updation
                 if (ecCacheHandler.isCacheEmpty())
                 { // First time insert
                     int count = 0;
                     for (Object obj : (Collection) columnFamilyObject)
                     {
-                        dynamicCFName = columnFamilyName + Constants.SUPER_COLUMN_NAME_DELIMITER + count;
+                        dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
                         addColumnFamilyToTable(tableName, dynamicCFName);
                         
                         hbaseWriter.writeColumns(gethTable(tableName), dynamicCFName, e.getId(), columns, obj);
@@ -205,13 +205,13 @@ public class HBaseDataHandler implements DataHandler
                     // Check whether this object is already in cache, which
                     // means we already have a column family with that name
                     // Otherwise we need to generate a fresh column family name
-                    int lastEmbeddedObjectCount = ecCacheHandler.getLastEmbeddedObjectCount(e.getId());                    
+                    int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(e.getId());                    
                     for (Object obj : (Collection) columnFamilyObject)
                     {
-                        dynamicCFName = ecCacheHandler.getEmbeddedObjectName(e.getId(), obj);
+                        dynamicCFName = ecCacheHandler.getElementCollectionObjectName(e.getId(), obj);
                         if (dynamicCFName == null)
                         { // Fresh row
-                            dynamicCFName = columnFamilyName + Constants.SUPER_COLUMN_NAME_DELIMITER
+                            dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
                                     + (++lastEmbeddedObjectCount);
                         }
                     }
@@ -249,7 +249,7 @@ public class HBaseDataHandler implements DataHandler
                 List<Column> columns2 = new ArrayList<Column>();
                 //columns.add(col);
             }
-            hbaseWriter.writeColumns(gethTable(tableName), Constants.TO_ONE_SUPER_COL_NAME, e.getId(), columns, keys);
+            hbaseWriter.writeColumns(gethTable(tableName), Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME, e.getId(), columns, keys);
         }
         
                 
@@ -357,7 +357,7 @@ public class HBaseDataHandler implements DataHandler
                         embeddedObjectArr[cfNameCounter] = embeddedObject;                        
                         
                         //Save embedded object into Cache, needed while updation and deletion
-                        m.getEcCacheHandler().addEmbeddedCollectionCacheMapping(rowKey, embeddedObject, cfInHbase);
+                        ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(rowKey, embeddedObject, cfInHbase);
                     }             
                     
                     //Collection to hold column family objects
