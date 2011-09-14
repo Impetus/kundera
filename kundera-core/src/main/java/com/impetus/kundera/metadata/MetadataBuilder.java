@@ -36,11 +36,11 @@ import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
  *
  * @author animesh.kumar
  */
-public class MetadataManager
+public class MetadataBuilder
 {
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(MetadataManager.class);
+    private static Log log = LogFactory.getLog(MetadataBuilder.class);
 
     
     /** The metadata processors. */
@@ -59,7 +59,7 @@ public class MetadataManager
      * @param factory
      *            the factory
      */
-    public MetadataManager()
+    public MetadataBuilder()
     {
         validator = new EntityValidatorImpl();
         metadataProcessors = new ArrayList<MetadataProcessor>();

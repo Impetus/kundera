@@ -28,7 +28,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.metadata.MetadataCacheManager;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.KunderaIndexer;
-import com.impetus.kundera.metadata.MetadataManager;
+import com.impetus.kundera.metadata.MetadataBuilder;
 
 /**
  * The Class LuceneQuery.
@@ -39,7 +39,7 @@ public class LuceneQuery extends QueryImpl implements Query
 {
 
     /** the log used by this class. */
-    private static Log log = LogFactory.getLog(MetadataManager.class);
+    private static Log log = LogFactory.getLog(MetadataBuilder.class);
 
     /** The max result. */
     int maxResult = Constants.INVALID;

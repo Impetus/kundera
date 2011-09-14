@@ -27,7 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.classreading.AnnotationDiscoveryListener;
-import com.impetus.kundera.metadata.MetadataManager;
+import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
@@ -45,7 +45,7 @@ public class MetadataCacheManager implements AnnotationDiscoveryListener
     /** The entity name to class map. */
     private Map<String, Class<?>> entityNameToClassMap = new ConcurrentHashMap<String, Class<?>>();
     
-    MetadataManager metadataManager;
+    MetadataBuilder metadataBuilder;
     
     
     /**
@@ -94,8 +94,8 @@ public class MetadataCacheManager implements AnnotationDiscoveryListener
             {
                 if (null == metadata)
                 {
-                    metadataManager = new MetadataManager();
-                    metadata = metadataManager.buildEntityMetadata(clazz);
+                    metadataBuilder = new MetadataBuilder();
+                    metadata = metadataBuilder.buildEntityMetadata(clazz);
                     cacheMetadata(clazz, metadata);
                 }
             }
@@ -142,8 +142,8 @@ public class MetadataCacheManager implements AnnotationDiscoveryListener
             Class<?> clazz = Class.forName(className);
 
             // process for Metadata
-            metadataManager = new MetadataManager();
-            EntityMetadata metadata = metadataManager.buildEntityMetadata(clazz);
+            metadataBuilder = new MetadataBuilder();
+            EntityMetadata metadata = metadataBuilder.buildEntityMetadata(clazz);
             cacheMetadata(clazz, metadata);
             log.info("Added @Entity " + clazz.getName());
         }
