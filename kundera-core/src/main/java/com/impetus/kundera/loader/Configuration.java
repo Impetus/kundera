@@ -147,55 +147,6 @@ public class Configuration
         return em;
     }
     
-    public void setConfigurationFields(Properties props) {
-        
-    }
-
-    /**
-     * Initialises.
-     *
-     * @param url
-     *            the url
-     */
-    /*public void init(URL url)
-    {
-        try
-        {
-            List<PersistenceMetadata> metadataCol = PersistenceXmlLoader.findPersistenceUnits(url,
-                    PersistenceUnitTransactionType.JTA);
-            for (PersistenceMetadata pMetaData : metadataCol)
-            {
-                Properties props = pMetaData.getProps();
-                String client = props.getProperty("kundera.client");
-                
-                node = props.getProperty("kundera.nodes");
-                port = props.getProperty("kundera.port");
-                keyspace = props.getProperty("kundera.keyspace");
-                String resourceName = "net.sf.ehcache.configurationResourceName";
-                
-                ClientType clientType = ClientType.getValue(client.toUpperCase());
-                createIdentifier(clientType, pMetaData.getName());
-                
-                if (!emfMap.containsKey(identifier))
-                {
-                    EntityManagerFactory emf = Persistence.createEntityManagerFactory(pMetaData.getName());
-                    setField(emf, emf.getClass().getDeclaredField("cacheProvider"), initSecondLevelCache(props
-                            .getProperty("kundera.cache.provider_class"), resourceName));
-                    emfMap.put(identifier, emf);
-                    
-                    EntityManager em = emf.createEntityManager();
-                    setClient(em, pMetaData.getName());
-                    emMap.put(identifier, em);
-                    logger.info((emf.getClass().getDeclaredField("cacheProvider")));
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            throw new PersistenceException(e.getMessage());
-        }
-    }*/
-
     /**
      * Returns entityManager.
      *
