@@ -46,17 +46,6 @@ public class IndexManager
     public IndexManager(EntityManagerImpl manager)
     {
         indexer = manager.getClient().getIndexer();
-        //TODO Refactoring.
-        /*DBType dbType = manager.getClient().getType();
-        if (dbType.MONGODB.equals(dbType))
-        {
-            indexer = new MongoDBIndexer(manager.getClient());
-        }
-        else
-        {
-            indexer = new KunderaIndexer(manager.getClient(), new StandardAnalyzer(Version.LUCENE_CURRENT));
-        }*/
-
     }
 
     /**

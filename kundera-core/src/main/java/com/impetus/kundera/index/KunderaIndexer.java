@@ -118,18 +118,6 @@ public class KunderaIndexer implements Indexer
         this.analyzer = analyzer;
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.index.Indexer#unindex(com.impetus.kundera.metadata
-     * .EntityMetadata, java.lang.String)
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.index.Indexer#unindex(com.impetus.kundera.metadata
-     * .EntityMetadata, java.lang.String)
-     */
     @Override
     public final void unindex(EntityMetadata metadata, String id)
     {
@@ -149,19 +137,7 @@ public class KunderaIndexer implements Indexer
             throw new IndexingException(e.getMessage());
         }
     }
-
-    /*
-     * @see
-     * com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.
-     * EntityMetadata, java.lang.Object)
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.
-     * EntityMetadata, java.lang.Object)
-     */
+    
     @Override
     public final void index(EntityMetadata metadata, Object object)
     {
@@ -232,7 +208,7 @@ public class KunderaIndexer implements Indexer
             currentDoc = new Document();
             prepareIndexDocument(metadata, object, currentDoc);
             addIndexProperties(metadata, object, currentDoc);
-            onPersist(metadata, currentDoc);
+            indexDocument(metadata, currentDoc);
         }
 
     }
@@ -275,7 +251,7 @@ public class KunderaIndexer implements Indexer
         }
         // add document.
         addIndexProperties(metadata, object, currentDoc);
-        onPersist(metadata, currentDoc);
+        indexDocument(metadata, currentDoc);
     }
 
     /**
@@ -295,30 +271,24 @@ public class KunderaIndexer implements Indexer
     }
 
     /**
-     * On persist.
-     * 
-     * @param metadata
-     *            the metadata
-     * @param document
-     *            the document
+     * Indexes document. For Cassandra it uses Lucandra library, for others it simply indexes into file system using Lucene 
+     * @param metadata the metadata
+     * @param document the document
      */
-    private void onPersist(EntityMetadata metadata, Document document)
+    private void indexDocument(EntityMetadata metadata, Document document)
     {
         try
-        {
-            LOG.debug("Flushing to Lucandra: " + document);
-            if (!metadata.getDBType().equals(DBType.CASSANDRA))
+        {        	
+            LOG.debug("Indexing document: " + document + " for " + metadata.getDBType());            
+            if (metadata.getDBType().equals(DBType.CASSANDRA))
             {
-                IndexWriter w = getDefaultIndexWriter();
-                w.addDocument(document, analyzer);
-                w.optimize();
-                w.commit();
-                w.close();
-
+            	LOG.debug("Indexing document using Lucandra: " + document);
+                indexDocumentUsingLucandra(document);
             }
             else
             {
-                indexDocument(document);
+            	LOG.debug("Indexing document in file system using lucene: " + document);
+                indexDocumentUsingLucene(document);
             }
         }
         catch (CorruptIndexException e)
@@ -329,7 +299,7 @@ public class KunderaIndexer implements Indexer
         {
             throw new IndexingException(e.getMessage());
         }
-    }
+    }	
 
     /**
      * Adds the index properties.
@@ -400,12 +370,10 @@ public class KunderaIndexer implements Indexer
     }
 
     /**
-     * Index document.
-     * 
-     * @param document
-     *            the document
+     * Indexes document using Lucandra library
+     * @param document the document
      */
-    private void indexDocument(Document document)
+    private void indexDocumentUsingLucandra(Document document)
     {
         try
         {
@@ -422,6 +390,21 @@ public class KunderaIndexer implements Indexer
             throw new IndexingException(e.getMessage());
         }
     }
+    
+    /**
+     * Indexes document in file system using lucene
+	 * @param document
+	 * @throws CorruptIndexException
+	 * @throws IOException
+	 */
+	private void indexDocumentUsingLucene(Document document)
+			throws CorruptIndexException, IOException {
+		IndexWriter w = getDefaultIndexWriter();
+		w.addDocument(document, analyzer);
+		w.optimize();
+		w.commit();
+		w.close();
+	}
 
     /**
      * Index field.
