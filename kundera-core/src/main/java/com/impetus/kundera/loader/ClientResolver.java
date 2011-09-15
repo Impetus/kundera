@@ -52,19 +52,19 @@ public final class ClientResolver
         {
             if (clientIdentifier.getClientType().equals(ClientType.HBASE))
             {
-                proxy = (Client) Class.forName("com.impetus.kundera.hbase.client.HBaseClient").newInstance();
+                proxy = (Client) Class.forName("com.impetus.client.hbase.HBaseClient").newInstance();
             }
             else if (clientIdentifier.getClientType().equals(ClientType.PELOPS))
             {
-                proxy = (Client) Class.forName("com.impetus.kundera.cassandra.client.pelops.PelopsClient").newInstance();
+                proxy = (Client) Class.forName("com.impetus.client.cassandra.pelops.PelopsClient").newInstance();
             }
             else if (clientIdentifier.getClientType().equals(ClientType.THRIFT))
             {
-                proxy = (Client) Class.forName("com.impetus.kundera.cassandra.client.thrift.ThriftClient").newInstance();
+                proxy = (Client) Class.forName("com.impetus.client.cassandra.thrift.ThriftClient").newInstance();
             }
             else if (clientIdentifier.getClientType().equals(ClientType.MONGODB))
             {
-                proxy = (Client) Class.forName("com.impetus.kundera.mongodb.client.MongoDBClient").newInstance();
+                proxy = (Client) Class.forName("com.impetus.client.mongodb.MongoDBClient").newInstance();
             }
         }
         catch (InstantiationException e)

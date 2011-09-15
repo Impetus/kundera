@@ -105,7 +105,7 @@ public class EntityManagerImpl implements KunderaEntityManager
         this.factory = factory;
         this.metadataManager = factory.getMetadataManager();
         this.persistenceUnitName = factory.getPersistenceUnitName();
-        dataManager = new DataManager(this);
+        //dataManager = new DataManager(this);
         entityResolver = new EntityResolver(this);
         session = new EntityManagerSession(this);
         eventDispatcher = new EntityEventDispatcher();
