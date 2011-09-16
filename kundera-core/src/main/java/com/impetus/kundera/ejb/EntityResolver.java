@@ -271,7 +271,7 @@ public class EntityResolver
         EntityMetadata relMetadata = em.getMetadataManager().getEntityMetadata(foreignEntityClass);
 
         // Check for cross-store persistence
-        if (em.getPersistenceUnitName().equals(relMetadata.getPersistenceUnit()))
+        if (relMetadata.getPersistenceUnit() == null || em.getPersistenceUnitName().equals(relMetadata.getPersistenceUnit()))
         {
             populateForeignEntityFromSameDatastore(entity, relation, entityName, foreignEntityClass, foreignKeys);
         }

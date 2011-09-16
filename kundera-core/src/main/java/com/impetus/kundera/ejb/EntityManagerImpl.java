@@ -339,15 +339,16 @@ public class EntityManagerImpl implements KunderaEntityManager
         try
         {
             EntityMetadata metadata = getMetadataManager().getEntityMetadata(e.getEntity().getClass());
-
+            
+            //TODO: This piece of code is for cross-database persistence. Currently commented because we need to find a better way
             // Check if persistenceUnit name is same as the parent entity, if
-            // not, it's a case of cross-store persistence
-            String persistenceUnit = metadata.getPersistenceUnit();
-            /*if (persistenceUnit != null && !persistenceUnit.equals(getPersistenceUnitName()))
-            {*/
+            // not, it's a case of cross-store persistence            
+            /*String persistenceUnit = metadata.getPersistenceUnit();
+            if (persistenceUnit != null && !persistenceUnit.equals(getPersistenceUnitName()))
+            {
                 // TODO: Required to set client in EM, check?
                 setClient(((EntityManagerImpl) new Configuration().getEntityManager(persistenceUnit)).getClient());
-            //}
+            }*/
 
             metadata.setDBType(getClient().getType());
             // TODO: throw EntityExistsException if already exists
