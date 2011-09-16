@@ -24,21 +24,20 @@ import com.impetus.kundera.metadata.model.Column;
 
 /**
  * HBase data writer.
- *
+ * 
  * @author impetus
  */
-public interface Writer
-{
+public interface Writer {
 
-    /**
-     *
-     * @param columnFamily
-     * @param rowKey
-     * @param columns
-     */
-    void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns, Object columnFamilyObj)
-            throws IOException;
-    
-    public void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity)
-    throws IOException;
+	/**
+	 * 
+	 * @param columnFamily
+	 * @param rowKey
+	 * @param columns
+	 */
+	void writeColumns(HTable htable, String columnFamily, String rowKey,
+			List<Column> columns, Object columnFamilyObj) throws IOException;
+
+	public void writeColumns(HTable htable, String rowKey,
+			List<Column> columns, Object entity) throws IOException;
 }

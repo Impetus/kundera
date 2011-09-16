@@ -25,54 +25,45 @@ import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * The Class DateAccessor.
- *
+ * 
  * @author animesh.kumar
  */
-public class DateAccessor implements PropertyAccessor<Date>
-{
+public class DateAccessor implements PropertyAccessor<Date> {
 
-    /** The Constant DATE_FORMATTER. */
-    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd MMM yyyy HH:mm:ss:S Z",
-            Locale.ENGLISH);
+	/** The Constant DATE_FORMATTER. */
+	private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat(
+			"dd MMM yyyy HH:mm:ss:S Z", Locale.ENGLISH);
 
-    /* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
-    @Override
-    public final Date fromBytes(byte[] bytes) throws PropertyAccessException
-    {
-        try
-        {
-            return DATE_FORMATTER.parse(new String(bytes, Constants.ENCODING));
-        }
-        catch (Exception e)
-        {
-            throw new PropertyAccessException(e.getMessage());
-        }
-    }
+	/* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
+	@Override
+	public final Date fromBytes(byte[] bytes) throws PropertyAccessException {
+		try {
+			return DATE_FORMATTER.parse(new String(bytes, Constants.ENCODING));
+		} catch (Exception e) {
+			throw new PropertyAccessException(e.getMessage());
+		}
+	}
 
-    /*
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
-     */
-    @Override
-    public final byte[] toBytes(Object date) throws PropertyAccessException
-    {
-        try
-        {
-            return DATE_FORMATTER.format(((Date) date)).getBytes(Constants.ENCODING);
-        }
-        catch (Exception e)
-        {
-            throw new PropertyAccessException(e.getMessage());
-        }
-    }
+	/*
+	 * @see
+	 * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+	 */
+	@Override
+	public final byte[] toBytes(Object date) throws PropertyAccessException {
+		try {
+			return DATE_FORMATTER.format(((Date) date)).getBytes(
+					Constants.ENCODING);
+		} catch (Exception e) {
+			throw new PropertyAccessException(e.getMessage());
+		}
+	}
 
-    /*
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
-     */
-    @Override
-    public final String toString(Object object)
-    {
-        return object.toString();
-    }
+	/*
+	 * @see
+	 * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+	 */
+	@Override
+	public final String toString(Object object) {
+		return object.toString();
+	}
 }

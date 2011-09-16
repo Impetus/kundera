@@ -19,19 +19,18 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * The Interface IMetadataProcessor.
- *
+ * 
  * @author animesh.kumar
  */
-public interface MetadataProcessor
-{
+public interface MetadataProcessor {
 
-    /**
-     * Process.
-     *
-     * @param clazz
-     *            the clazz
-     * @param metadata
-     *            the metadata
-     */
-    void process(Class<?> clazz, EntityMetadata metadata);
+	/**
+	 * Process.
+	 * 
+	 * @param clazz
+	 *            the clazz
+	 * @param metadata
+	 *            the metadata
+	 */
+	void process(Class<?> clazz, EntityMetadata metadata);
 }

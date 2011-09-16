@@ -22,84 +22,75 @@ import javax.persistence.Table;
 
 /**
  * Entity class for User Preferences
- *
+ * 
  * @author amresh.singh
  */
 
 @Entity
 @Table(name = "preference", schema = "Blog")
-public class UserPreference
-{
+public class UserPreference {
 
-    @Id
-    String preferenceId;
+	@Id
+	String preferenceId;
 
-    @Column(name = "website_theme")
-    String websiteTheme;
+	@Column(name = "website_theme")
+	String websiteTheme;
 
-    @Column(name = "privacy_level")
-    String privacyLevel; // 1, 2, 3
+	@Column(name = "privacy_level")
+	String privacyLevel; // 1, 2, 3
 
-    public UserPreference()
-    {
+	public UserPreference() {
 
-    }
+	}
 
-    public UserPreference(String prefId, String theme, String privacyLevel)
-    {
-        this.preferenceId = prefId;
-        this.websiteTheme = theme;
-        this.privacyLevel = privacyLevel;
-    }
+	public UserPreference(String prefId, String theme, String privacyLevel) {
+		this.preferenceId = prefId;
+		this.websiteTheme = theme;
+		this.privacyLevel = privacyLevel;
+	}
 
-    /**
-     * @return the preferenceId
-     */
-    public String getPreferenceId()
-    {
-        return preferenceId;
-    }
+	/**
+	 * @return the preferenceId
+	 */
+	public String getPreferenceId() {
+		return preferenceId;
+	}
 
-    /**
-     * @param preferenceId
-     *            the preferenceId to set
-     */
-    public void setPreferenceId(String preferenceId)
-    {
-        this.preferenceId = preferenceId;
-    }
+	/**
+	 * @param preferenceId
+	 *            the preferenceId to set
+	 */
+	public void setPreferenceId(String preferenceId) {
+		this.preferenceId = preferenceId;
+	}
 
-    /**
-     * @return the websiteTheme
-     */
-    public String getWebsiteTheme()
-    {
-        return websiteTheme;
-    }
+	/**
+	 * @return the websiteTheme
+	 */
+	public String getWebsiteTheme() {
+		return websiteTheme;
+	}
 
-    /**
-     * @param websiteTheme
-     *            the websiteTheme to set
-     */
-    public void setWebsiteTheme(String websiteTheme)
-    {
-        this.websiteTheme = websiteTheme;
-    }
+	/**
+	 * @param websiteTheme
+	 *            the websiteTheme to set
+	 */
+	public void setWebsiteTheme(String websiteTheme) {
+		this.websiteTheme = websiteTheme;
+	}
 
-    /**
-     * @return the privacyLevel
-     */
-    public String getPrivacyLevel()
-    {
-        return privacyLevel;
-    }
+	/**
+	 * @return the privacyLevel
+	 */
+	public String getPrivacyLevel() {
+		return privacyLevel;
+	}
 
-    /**
-     * @param privacyLevel
-     *            the privacyLevel to set
-     */
-    public void setPrivacyLevel(String privacyLevel)
-    {
-        this.privacyLevel = privacyLevel;
-    }
+	/**
+	 * @param privacyLevel
+	 *            the privacyLevel to set
+	 */
+	public void setPrivacyLevel(String privacyLevel) {
+		this.privacyLevel = privacyLevel;
+	}
 }

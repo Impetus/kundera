@@ -4,69 +4,64 @@ import java.lang.reflect.Field;
 
 /**
  * Holds metadata for entity column
- *
+ * 
  * @author animesh.kumar
  */
-public final class Column
-{
+public final class Column {
 
-    /** name of the column. */
-    private String name;
+	/** name of the column. */
+	private String name;
 
-    /** column field. */
-    private Field field;
-    
-    /** whether indexable. */
-    private boolean isIndexable; // default is NOT indexable
+	/** column field. */
+	private Field field;
 
-    /**
-     * Instantiates a new column.
-     *
-     * @param name
-     *            the name
-     * @param field
-     *            the field
-     */
-    public Column(String name, Field field)
-    {
-        this.name = name;
-        this.field = field;
-    }
+	/** whether indexable. */
+	private boolean isIndexable; // default is NOT indexable
 
-    /**
-     * Gets the name.
-     *
-     * @return the name
-     */
-    public String getName()
-    {
-        return name;
-    }
+	/**
+	 * Instantiates a new column.
+	 * 
+	 * @param name
+	 *            the name
+	 * @param field
+	 *            the field
+	 */
+	public Column(String name, Field field) {
+		this.name = name;
+		this.field = field;
+	}
 
-    /**
-     * Gets the field.
-     *
-     * @return the field
-     */
-    public Field getField()
-    {
-        return field;
-    }
+	/**
+	 * Gets the name.
+	 * 
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
 
-    /**
-     * @return the isIndexable
-     */
-    public boolean isIndexable()
-    {
-        return isIndexable;
-    }
+	/**
+	 * Gets the field.
+	 * 
+	 * @return the field
+	 */
+	public Field getField() {
+		return field;
+	}
 
-    /**
-     * @param isIndexable the isIndexable to set
-     */
-    public void setIndexable(boolean isIndexable)
-    {
-        this.isIndexable = isIndexable;
-    }   
+	/**
+	 * @return the isIndexable
+	 */
+	public boolean isIndexable() {
+		return isIndexable;
+	}
+
+	/**
+	 * @param isIndexable
+	 *            the isIndexable to set
+	 */
+	public void setIndexable(boolean isIndexable) {
+		this.isIndexable = isIndexable;
+	}
 
 }

@@ -24,95 +24,80 @@ import java.util.List;
 
 /**
  * The Class ClassFileIterator.
- *
+ * 
  * @author animesh.kumar
  */
-public class ClassFileIterator implements ResourceIterator
-{
+public class ClassFileIterator implements ResourceIterator {
 
-    /** The files. */
-    private List<File> files;
+	/** The files. */
+	private List<File> files;
 
-    /** The index. */
-    private int index = 0;
+	/** The index. */
+	private int index = 0;
 
-    /**
-     * Instantiates a new class file iterator.
-     *
-     * @param file
-     *            the file
-     * @param filter
-     *            the filter
-     */
-    public ClassFileIterator(File file, Filter filter)
-    {
-        files = new ArrayList<File>();
-        try
-        {
-            init(files, file, filter);
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
+	/**
+	 * Instantiates a new class file iterator.
+	 * 
+	 * @param file
+	 *            the file
+	 * @param filter
+	 *            the filter
+	 */
+	public ClassFileIterator(File file, Filter filter) {
+		files = new ArrayList<File>();
+		try {
+			init(files, file, filter);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-    public ClassFileIterator(File fileToAdd)
-    {
-        files = new ArrayList<File>();
-        files.add(fileToAdd);
-    }
+	public ClassFileIterator(File fileToAdd) {
+		files = new ArrayList<File>();
+		files.add(fileToAdd);
+	}
 
-    /**
-     * Creates the.
-     *
-     * @param list
-     *            the list
-     * @param dir
-     *            the dir
-     * @param filter
-     *            the filter
-     *
-     * @throws Exception
-     *             the exception
-     */
-    private static void init(List<File> list, File dir, Filter filter) throws Exception
-    {
-        File[] files = dir.listFiles();
-        for (int i = 0; i < files.length; i++)
-        {
-            if (files[i].isDirectory())
-            {
-                init(list, files[i], filter);
-            }
-            else
-            {
-                if (filter == null || filter.accepts(files[i].getAbsolutePath()))
-                {
-                    list.add(files[i]);
-                }
-            }
-        }
-    }
+	/**
+	 * Creates the.
+	 * 
+	 * @param list
+	 *            the list
+	 * @param dir
+	 *            the dir
+	 * @param filter
+	 *            the filter
+	 * 
+	 * @throws Exception
+	 *             the exception
+	 */
+	private static void init(List<File> list, File dir, Filter filter)
+			throws Exception {
+		File[] files = dir.listFiles();
+		for (int i = 0; i < files.length; i++) {
+			if (files[i].isDirectory()) {
+				init(list, files[i], filter);
+			} else {
+				if (filter == null
+						|| filter.accepts(files[i].getAbsolutePath())) {
+					list.add(files[i]);
+				}
+			}
+		}
+	}
 
-    /* @see com.impetus.kundera.classreading.ResourceIterator#next() */
-    public final InputStream next()
-    {
-        if (index >= files.size())
-            return null;
-        File fp = (File) files.get(index++);
-        try
-        {
-            return new FileInputStream(fp);
-        }
-        catch (FileNotFoundException e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
+	/* @see com.impetus.kundera.classreading.ResourceIterator#next() */
+	public final InputStream next() {
+		if (index >= files.size())
+			return null;
+		File fp = (File) files.get(index++);
+		try {
+			return new FileInputStream(fp);
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-    /* @see com.impetus.kundera.classreading.ResourceIterator#close() */
-    public void close()
-    {
-    }
+	/* @see com.impetus.kundera.classreading.ResourceIterator#close() */
+	public void close() {
+	}
 }

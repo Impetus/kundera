@@ -45,147 +45,133 @@ import org.apache.thrift.transport.TTransportException;
 /**
  * The Class BaseTest.
  */
-public abstract class BaseTest extends TestCase
-{
+public abstract class BaseTest extends TestCase {
 
-    /** The embedded server cassandra. */
-    // private static EmbeddedCassandraService cassandra;
+	/** The embedded server cassandra. */
+	// private static EmbeddedCassandraService cassandra;
 
-    /** The client. */
-    private Cassandra.Client client;
+	/** The client. */
+	private Cassandra.Client client;
 
-    /** The logger. */
-    private static Logger logger = Logger.getLogger(BaseTest.class);
+	/** The logger. */
+	private static Logger logger = Logger.getLogger(BaseTest.class);
 
-    /**
-     * Start cassandra server.
-     *
-     * @throws Exception
-     *             the exception
-     */
-    protected void startCassandraServer() throws Exception
-    {
-        /*
-         * if (!checkIfServerRunning()) { // cassandra = new
-         * EmbeddedCassandraService(); // cassandra.start(); // startSolandra();
-         *
-         * }
-         */
-        initClient();
-        logger.info("Loading Data:");
-        loadData();
-    }
+	/**
+	 * Start cassandra server.
+	 * 
+	 * @throws Exception
+	 *             the exception
+	 */
+	protected void startCassandraServer() throws Exception {
+		/*
+		 * if (!checkIfServerRunning()) { // cassandra = new
+		 * EmbeddedCassandraService(); // cassandra.start(); // startSolandra();
+		 * 
+		 * }
+		 */
+		initClient();
+		logger.info("Loading Data:");
+		loadData();
+	}
 
-    /**
-     * Check if server running.
-     *
-     * @return true, if successful
-     */
-    private boolean checkIfServerRunning()
-    {
-        try
-        {
-            Socket socket = new Socket("127.0.0.1", 9160);
-            return socket.getInetAddress() != null;
-        }
-        catch (UnknownHostException e)
-        {
-            return false;
-        }
-        catch (IOException e)
-        {
-            return false;
-        }
-    }
+	/**
+	 * Check if server running.
+	 * 
+	 * @return true, if successful
+	 */
+	private boolean checkIfServerRunning() {
+		try {
+			Socket socket = new Socket("127.0.0.1", 9160);
+			return socket.getInetAddress() != null;
+		} catch (UnknownHostException e) {
+			return false;
+		} catch (IOException e) {
+			return false;
+		}
+	}
 
-    /**
-     * Inits the client.
-     */
-    private void initClient()
-    {
-        TSocket socket = new TSocket("127.0.0.1", 9160);
-        TTransport transport = new TFramedTransport(socket);
-        TProtocol protocol = new TBinaryProtocol(transport);
-        client = new Cassandra.Client(protocol);
+	/**
+	 * Inits the client.
+	 */
+	private void initClient() {
+		TSocket socket = new TSocket("127.0.0.1", 9160);
+		TTransport transport = new TFramedTransport(socket);
+		TProtocol protocol = new TBinaryProtocol(transport);
+		client = new Cassandra.Client(protocol);
 
-        try
-        {
-            socket.open();
-        }
-        catch (TTransportException ttex)
-        {
-            logger.error(ttex.getMessage());
-        }
-        catch (Exception ex)
-        {
-            logger.error(ex.getMessage());
-        }
+		try {
+			socket.open();
+		} catch (TTransportException ttex) {
+			logger.error(ttex.getMessage());
+		} catch (Exception ex) {
+			logger.error(ex.getMessage());
+		}
 
-    }
+	}
 
-    /**
-     * Load data.
-     *
-     * @throws ConfigurationException
-     *             the configuration exception
-     * @throws TException
-     *             the t exception
-     * @throws NotFoundException
-     *             the not found exception
-     * @throws InvalidRequestException
-     *             the invalid request exception
-     */
-    private void loadData() throws org.apache.cassandra.config.ConfigurationException, TException, NotFoundException,
-            InvalidRequestException
-    {
+	/**
+	 * Load data.
+	 * 
+	 * @throws ConfigurationException
+	 *             the configuration exception
+	 * @throws TException
+	 *             the t exception
+	 * @throws NotFoundException
+	 *             the not found exception
+	 * @throws InvalidRequestException
+	 *             the invalid request exception
+	 */
+	private void loadData()
+			throws org.apache.cassandra.config.ConfigurationException,
+			TException, NotFoundException, InvalidRequestException {
 
-        Class<? extends AbstractReplicationStrategy> simple = SimpleStrategy.class;
-        Map<String, String> ret = new HashMap<String, String>();
-        ret.put("replication_factor", "1");
-        CfDef user_Def = new CfDef("Blog", "Person");
-        CfDef userName_Def = new CfDef("Blog", "Department");
-        CfDef friends_Def = new CfDef("Blog", "Employee");
-        CfDef followers_Def = new CfDef("Blog", "Profile");
-        CfDef tweet_Def = new CfDef("Blog", "Addresses");
-        CfDef userLine_Def = new CfDef("Blog", "Authors");
-        CfDef timeLine_Def = new CfDef("Blog", "Posts");
-        timeLine_Def.setComparator_type("UTF8Type");
-        timeLine_Def.setColumn_type("Super");
-        timeLine_Def.setSubcomparator_type("UTF8Type");
-        timeLine_Def.setDefault_validation_class("UTF8Type");
-        CfDef users_Def = new CfDef("Blog", "users");
-        users_Def.setComparator_type("UTF8Type");
-        users_Def.setColumn_type("Super");
-        users_Def.setSubcomparator_type("UTF8Type");
-        users_Def.setDefault_validation_class("UTF8Type");
-        CfDef preference_Def = new CfDef("Blog", "preference");
-        CfDef external_Def = new CfDef("Blog", "externalLinks");
-        CfDef imDetails_Def = new CfDef("Blog", "imDetails");
-        //Added for snsUser Test.
-        CfDef snsUser_Def = new CfDef("Blog", "snsusers");
+		Class<? extends AbstractReplicationStrategy> simple = SimpleStrategy.class;
+		Map<String, String> ret = new HashMap<String, String>();
+		ret.put("replication_factor", "1");
+		CfDef user_Def = new CfDef("Blog", "Person");
+		CfDef userName_Def = new CfDef("Blog", "Department");
+		CfDef friends_Def = new CfDef("Blog", "Employee");
+		CfDef followers_Def = new CfDef("Blog", "Profile");
+		CfDef tweet_Def = new CfDef("Blog", "Addresses");
+		CfDef userLine_Def = new CfDef("Blog", "Authors");
+		CfDef timeLine_Def = new CfDef("Blog", "Posts");
+		timeLine_Def.setComparator_type("UTF8Type");
+		timeLine_Def.setColumn_type("Super");
+		timeLine_Def.setSubcomparator_type("UTF8Type");
+		timeLine_Def.setDefault_validation_class("UTF8Type");
+		CfDef users_Def = new CfDef("Blog", "users");
+		users_Def.setComparator_type("UTF8Type");
+		users_Def.setColumn_type("Super");
+		users_Def.setSubcomparator_type("UTF8Type");
+		users_Def.setDefault_validation_class("UTF8Type");
+		CfDef preference_Def = new CfDef("Blog", "preference");
+		CfDef external_Def = new CfDef("Blog", "externalLinks");
+		CfDef imDetails_Def = new CfDef("Blog", "imDetails");
+		// Added for snsUser Test.
+		CfDef snsUser_Def = new CfDef("Blog", "snsusers");
 
-        List<CfDef> cfDefs = new ArrayList<CfDef>();
-        cfDefs.add(user_Def);
-        cfDefs.add(userName_Def);
-        cfDefs.add(friends_Def);
-        cfDefs.add(followers_Def);
-        cfDefs.add(tweet_Def);
-        cfDefs.add(userLine_Def);
-        cfDefs.add(timeLine_Def);
-        cfDefs.add(users_Def);
-        cfDefs.add(user_Def);
-        cfDefs.add(preference_Def);
-        cfDefs.add(external_Def);
-        cfDefs.add(imDetails_Def);
+		List<CfDef> cfDefs = new ArrayList<CfDef>();
+		cfDefs.add(user_Def);
+		cfDefs.add(userName_Def);
+		cfDefs.add(friends_Def);
+		cfDefs.add(followers_Def);
+		cfDefs.add(tweet_Def);
+		cfDefs.add(userLine_Def);
+		cfDefs.add(timeLine_Def);
+		cfDefs.add(users_Def);
+		cfDefs.add(user_Def);
+		cfDefs.add(preference_Def);
+		cfDefs.add(external_Def);
+		cfDefs.add(imDetails_Def);
 
-        cfDefs.add(snsUser_Def);
+		cfDefs.add(snsUser_Def);
 
-        KsDef ksDef = new KsDef("Blog", simple.getCanonicalName(),  cfDefs);
-        ksDef.setReplication_factor(1);
-        
-        client.send_system_add_keyspace(ksDef);
-        logger.info("Data loaded");
+		KsDef ksDef = new KsDef("Blog", simple.getCanonicalName(), cfDefs);
+		ksDef.setReplication_factor(1);
 
-    }
+		client.send_system_add_keyspace(ksDef);
+		logger.info("Data loaded");
+
+	}
 
 }

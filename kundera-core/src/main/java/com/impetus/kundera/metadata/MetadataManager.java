@@ -31,119 +31,107 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * Provides functionality for caching entity metadata
+ * 
  * @author amresh.singh
  */
-public class MetadataManager implements AnnotationDiscoveryListener
-{
-    /** the log used by this class. */
-    private static Log log = LogFactory.getLog(MetadataManager.class);
-    
-    /** cache for Metadata. */
-    private Map<Class<?>, EntityMetadata> metadataCache = new ConcurrentHashMap<Class<?>, EntityMetadata>();
+public class MetadataManager implements AnnotationDiscoveryListener {
+	/** the log used by this class. */
+	private static Log log = LogFactory.getLog(MetadataManager.class);
 
-    /** The entity name to class map. */
-    private Map<String, Class<?>> entityNameToClassMap = new ConcurrentHashMap<String, Class<?>>();
-    
-    MetadataBuilder metadataBuilder;
-    
-    
-    /**
-     * Gets the entity class by name.
-     *
-     * @param name
-     *            the name
-     *
-     * @return the entity class by name
-     */
-    public final Class<?> getEntityClassByName(String name)
-    {
-        return entityNameToClassMap.get(name);
-    }
+	/** cache for Metadata. */
+	private Map<Class<?>, EntityMetadata> metadataCache = new ConcurrentHashMap<Class<?>, EntityMetadata>();
 
-    /**
-     * Gets the entity metadatas as list.
-     *
-     * @return the entity metadatas as list
-     */
-    public final List<EntityMetadata> getEntityMetadatasAsList()
-    {
-        return Collections.unmodifiableList(new ArrayList<EntityMetadata>(metadataCache.values()));
-    }
-    
-    /**
-     * Gets the entity metadata.
-     *
-     * @param clazz
-     *            the clazz
-     *
-     * @return the entity metadata
-     *
-     * @throws PersistenceException
-     *             the persistence exception
-     */
-    public final EntityMetadata getEntityMetadata(Class<?> clazz)
-    {
+	/** The entity name to class map. */
+	private Map<String, Class<?>> entityNameToClassMap = new ConcurrentHashMap<String, Class<?>>();
 
-        EntityMetadata metadata = metadataCache.get(clazz);
-        if (null == metadata)
-        {
-            log.debug("Metadata not found in cache for " + clazz.getName());
-            // double check locking.
-            synchronized (clazz)
-            {
-                if (null == metadata)
-                {
-                    metadataBuilder = new MetadataBuilder();
-                    metadata = metadataBuilder.buildEntityMetadata(clazz);
-                    cacheMetadata(clazz, metadata);
-                }
-            }
-        }
-        return metadata;
-    }
-    
-    /**
-     * Cache metadata.
-     *
-     * @param clazz
-     *            the clazz
-     * @param metadata
-     *            the metadata
-     */
-    private void cacheMetadata(Class<?> clazz, EntityMetadata metadata)
-    {
-        metadataCache.put(clazz, metadata);
+	MetadataBuilder metadataBuilder;
 
-        // save name to class map.
-        if (entityNameToClassMap.containsKey(clazz.getSimpleName()))
-        {
-            throw new PersistenceException("Name conflict between classes "
-                    + entityNameToClassMap.get(clazz.getSimpleName()).getName() + " and " + clazz.getName());
-        }
-        entityNameToClassMap.put(clazz.getSimpleName(), clazz);
-    }
-    
+	/**
+	 * Gets the entity class by name.
+	 * 
+	 * @param name
+	 *            the name
+	 * 
+	 * @return the entity class by name
+	 */
+	public final Class<?> getEntityClassByName(String name) {
+		return entityNameToClassMap.get(name);
+	}
 
-    @Override
-    // called whenever a class with @Entity annotation is encountered in the
-    // classpath.
-    public final void discovered(String className, String[] annotations)
-    {
-        try
-        {
-            Class<?> clazz = Class.forName(className);
+	/**
+	 * Gets the entity metadatas as list.
+	 * 
+	 * @return the entity metadatas as list
+	 */
+	public final List<EntityMetadata> getEntityMetadatasAsList() {
+		return Collections.unmodifiableList(new ArrayList<EntityMetadata>(
+				metadataCache.values()));
+	}
 
-            // process for Metadata
-            metadataBuilder = new MetadataBuilder();
-            EntityMetadata metadata = metadataBuilder.buildEntityMetadata(clazz);
-            cacheMetadata(clazz, metadata);
-            log.info("Added @Entity " + clazz.getName());
-        }
-        catch (ClassNotFoundException e)
-        {
-            throw new PersistenceException(e.getMessage());
-        }
-    }
+	/**
+	 * Gets the entity metadata.
+	 * 
+	 * @param clazz
+	 *            the clazz
+	 * 
+	 * @return the entity metadata
+	 * 
+	 * @throws PersistenceException
+	 *             the persistence exception
+	 */
+	public final EntityMetadata getEntityMetadata(Class<?> clazz) {
 
+		EntityMetadata metadata = metadataCache.get(clazz);
+		if (null == metadata) {
+			log.debug("Metadata not found in cache for " + clazz.getName());
+			// double check locking.
+			synchronized (clazz) {
+				if (null == metadata) {
+					metadataBuilder = new MetadataBuilder();
+					metadata = metadataBuilder.buildEntityMetadata(clazz);
+					cacheMetadata(clazz, metadata);
+				}
+			}
+		}
+		return metadata;
+	}
+
+	/**
+	 * Cache metadata.
+	 * 
+	 * @param clazz
+	 *            the clazz
+	 * @param metadata
+	 *            the metadata
+	 */
+	private void cacheMetadata(Class<?> clazz, EntityMetadata metadata) {
+		metadataCache.put(clazz, metadata);
+
+		// save name to class map.
+		if (entityNameToClassMap.containsKey(clazz.getSimpleName())) {
+			throw new PersistenceException("Name conflict between classes "
+					+ entityNameToClassMap.get(clazz.getSimpleName()).getName()
+					+ " and " + clazz.getName());
+		}
+		entityNameToClassMap.put(clazz.getSimpleName(), clazz);
+	}
+
+	@Override
+	// called whenever a class with @Entity annotation is encountered in the
+	// classpath.
+	public final void discovered(String className, String[] annotations) {
+		try {
+			Class<?> clazz = Class.forName(className);
+
+			// process for Metadata
+			metadataBuilder = new MetadataBuilder();
+			EntityMetadata metadata = metadataBuilder
+					.buildEntityMetadata(clazz);
+			cacheMetadata(clazz, metadata);
+			log.info("Added @Entity " + clazz.getName());
+		} catch (ClassNotFoundException e) {
+			throw new PersistenceException(e.getMessage());
+		}
+	}
 
 }

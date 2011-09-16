@@ -22,110 +22,99 @@ import javax.persistence.Table;
 
 /**
  * The Contact Entity Class
- *
+ * 
  * @author amresh.singh
  */
 
 @Entity
 @Table(name = "contact", schema = "Blog")
-public class Contact
-{
-    @Id
-    String contactId;
+public class Contact {
+	@Id
+	String contactId;
 
-    @Column(name = "last_name")
-    String lastName;
+	@Column(name = "last_name")
+	String lastName;
 
-    @Column(name = "first_name")
-    String firstName;
+	@Column(name = "first_name")
+	String firstName;
 
-    @Column(name = "email_id")
-    String emailId;
+	@Column(name = "email_id")
+	String emailId;
 
-    public Contact()
-    {
+	public Contact() {
 
-    }
+	}
 
-    public Contact(String contactId, String firstName, String lastName, String emailId)
-    {
-        this.contactId = contactId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.emailId = emailId;
-    }
+	public Contact(String contactId, String firstName, String lastName,
+			String emailId) {
+		this.contactId = contactId;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.emailId = emailId;
+	}
 
-    public String toString()
-    {
-        return firstName + " " + lastName + " <" + emailId + ">";
-    }
+	public String toString() {
+		return firstName + " " + lastName + " <" + emailId + ">";
+	}
 
-    /**
-     * @return the contactId
-     */
-    public String getContactId()
-    {
-        return contactId;
-    }
+	/**
+	 * @return the contactId
+	 */
+	public String getContactId() {
+		return contactId;
+	}
 
-    /**
-     * @param contactId
-     *            the contactId to set
-     */
-    public void setContactId(String contactId)
-    {
-        this.contactId = contactId;
-    }
+	/**
+	 * @param contactId
+	 *            the contactId to set
+	 */
+	public void setContactId(String contactId) {
+		this.contactId = contactId;
+	}
 
-    /**
-     * @return the lastName
-     */
-    public String getLastName()
-    {
-        return lastName;
-    }
+	/**
+	 * @return the lastName
+	 */
+	public String getLastName() {
+		return lastName;
+	}
 
-    /**
-     * @param lastName
-     *            the lastName to set
-     */
-    public void setLastName(String lastName)
-    {
-        this.lastName = lastName;
-    }
+	/**
+	 * @param lastName
+	 *            the lastName to set
+	 */
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
 
-    /**
-     * @return the firstName
-     */
-    public String getFirstName()
-    {
-        return firstName;
-    }
+	/**
+	 * @return the firstName
+	 */
+	public String getFirstName() {
+		return firstName;
+	}
 
-    /**
-     * @param firstName
-     *            the firstName to set
-     */
-    public void setFirstName(String firstName)
-    {
-        this.firstName = firstName;
-    }
+	/**
+	 * @param firstName
+	 *            the firstName to set
+	 */
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
 
-    /**
-     * @return the emailId
-     */
-    public String getEmailId()
-    {
-        return emailId;
-    }
+	/**
+	 * @return the emailId
+	 */
+	public String getEmailId() {
+		return emailId;
+	}
 
-    /**
-     * @param emailId
-     *            the emailId to set
-     */
-    public void setEmailId(String emailId)
-    {
-        this.emailId = emailId;
-    }
+	/**
+	 * @param emailId
+	 *            the emailId to set
+	 */
+	public void setEmailId(String emailId) {
+		this.emailId = emailId;
+	}
 
 }

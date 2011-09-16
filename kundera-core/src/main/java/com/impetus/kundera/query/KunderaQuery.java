@@ -35,512 +35,472 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 /**
  * The Class KunderaQuery.
  */
-public abstract class KunderaQuery
-{
+public abstract class KunderaQuery {
 
-    /** The Constant SINGLE_STRING_KEYWORDS. */
-    public static final String[] SINGLE_STRING_KEYWORDS = { "SELECT", "UPDATE", "DELETE", "UNIQUE", "FROM", "WHERE",
-            "GROUP BY", "HAVING", "ORDER BY" };
+	/** The Constant SINGLE_STRING_KEYWORDS. */
+	public static final String[] SINGLE_STRING_KEYWORDS = { "SELECT", "UPDATE",
+			"DELETE", "UNIQUE", "FROM", "WHERE", "GROUP BY", "HAVING",
+			"ORDER BY" };
 
-    /** The Constant INTER_CLAUSE_OPERATORS. */
-    public static final String[] INTER_CLAUSE_OPERATORS = { "AND", "OR" };
+	/** The Constant INTER_CLAUSE_OPERATORS. */
+	public static final String[] INTER_CLAUSE_OPERATORS = { "AND", "OR" };
 
-    /** The Constant INTRA_CLAUSE_OPERATORS. */
-    public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE" };
+	/** The Constant INTRA_CLAUSE_OPERATORS. */
+	public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE" };
 
-    /** The INTER pattern. */
-    private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile("\\band\\b|\\bor\\b", Pattern.CASE_INSENSITIVE);
+	/** The INTER pattern. */
+	private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile(
+			"\\band\\b|\\bor\\b", Pattern.CASE_INSENSITIVE);
 
-    /** The INTRA pattern. */
-    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b", Pattern.CASE_INSENSITIVE);
+	/** The INTRA pattern. */
+	private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile(
+			"=|\\blike\\b", Pattern.CASE_INSENSITIVE);
 
-    /** The EntityManager. */
-    private EntityManagerImpl em;
+	/** The EntityManager. */
+	private EntityManagerImpl em;
 
-    /** The MetadataManager. */
-    private MetadataManager metadataManager;
+	/** The MetadataManager. */
+	private MetadataManager metadataManager;
 
-    /** The result. */
-    private String result;
+	/** The result. */
+	private String result;
 
-    /** The from. */
-    private String from;
+	/** The from. */
+	private String from;
 
-    /** The filter. */
-    private String filter;
+	/** The filter. */
+	private String filter;
 
-    /** The ordering. */
-    private String ordering;
+	/** The ordering. */
+	private String ordering;
 
-    /** The entity name. */
-    private String entityName;
+	/** The entity name. */
+	private String entityName;
 
-    /** The entity alias. */
-    private String entityAlias;
+	/** The entity alias. */
+	private String entityAlias;
 
-    /** The entity class. */
-    private Class<?> entityClass;
+	/** The entity class. */
+	private Class<?> entityClass;
 
-    // contains a Queue of alternate FilterClause object and Logical Strings
-    // (AND, OR etc.)
-    /** The filters queue. */
-    private Queue filtersQueue = new LinkedList();
+	// contains a Queue of alternate FilterClause object and Logical Strings
+	// (AND, OR etc.)
+	/** The filters queue. */
+	private Queue filtersQueue = new LinkedList();
 
-    /**
-     * Instantiates a new kundera query.
-     *
-     * @param em
-     *            EntityManager
-     * @param metadataManager
-     *            MetadataManager
-     */
-    public KunderaQuery(EntityManagerImpl em, MetadataManager metadataManager)
-    {
-        this.em = em;
-        this.metadataManager = metadataManager;
-    }
+	/**
+	 * Instantiates a new kundera query.
+	 * 
+	 * @param em
+	 *            EntityManager
+	 * @param metadataManager
+	 *            MetadataManager
+	 */
+	public KunderaQuery(EntityManagerImpl em, MetadataManager metadataManager) {
+		this.em = em;
+		this.metadataManager = metadataManager;
+	}
 
-    /**
-     * Gets the entity manager.
-     *
-     * @return the em
-     */
-    public EntityManagerImpl getEntityManager()
-    {
-        return em;
-    }
+	/**
+	 * Gets the entity manager.
+	 * 
+	 * @return the em
+	 */
+	public EntityManagerImpl getEntityManager() {
+		return em;
+	}
 
-    /**
-     * Gets the metadata manager.
-     *
-     * @return the metadataManager
-     */
-    public MetadataManager getMetadataManager()
-    {
-        return metadataManager;
-    }
+	/**
+	 * Gets the metadata manager.
+	 * 
+	 * @return the metadataManager
+	 */
+	public MetadataManager getMetadataManager() {
+		return metadataManager;
+	}
 
-    /**
-     * Sets the grouping.
-     *
-     * @param groupingClause
-     *            the new grouping
-     */
-    public void setGrouping(String groupingClause)
-    {
-    }
+	/**
+	 * Sets the grouping.
+	 * 
+	 * @param groupingClause
+	 *            the new grouping
+	 */
+	public void setGrouping(String groupingClause) {
+	}
 
-    /**
-     * Sets the result.
-     *
-     * @param result
-     *            the new result
-     */
-    public final void setResult(String result)
-    {
-        this.result = result;
-    }
+	/**
+	 * Sets the result.
+	 * 
+	 * @param result
+	 *            the new result
+	 */
+	public final void setResult(String result) {
+		this.result = result;
+	}
 
-    /**
-     * Sets the from.
-     *
-     * @param from
-     *            the new from
-     */
-    public final void setFrom(String from)
-    {
-        this.from = from;
-    }
+	/**
+	 * Sets the from.
+	 * 
+	 * @param from
+	 *            the new from
+	 */
+	public final void setFrom(String from) {
+		this.from = from;
+	}
 
-    /**
-     * Sets the filter.
-     *
-     * @param filter
-     *            the new filter
-     */
-    public final void setFilter(String filter)
-    {
-        this.filter = filter;
-    }
+	/**
+	 * Sets the filter.
+	 * 
+	 * @param filter
+	 *            the new filter
+	 */
+	public final void setFilter(String filter) {
+		this.filter = filter;
+	}
 
-    /**
-     * Sets the ordering.
-     *
-     * @param ordering
-     *            the new ordering
-     */
-    public final void setOrdering(String ordering)
-    {
-        this.ordering = ordering;
-    }
+	/**
+	 * Sets the ordering.
+	 * 
+	 * @param ordering
+	 *            the new ordering
+	 */
+	public final void setOrdering(String ordering) {
+		this.ordering = ordering;
+	}
 
-    /**
-     * Gets the filter.
-     *
-     * @return the filter
-     */
-    public final String getFilter()
-    {
-        return filter;
-    }
+	/**
+	 * Gets the filter.
+	 * 
+	 * @return the filter
+	 */
+	public final String getFilter() {
+		return filter;
+	}
 
-    /**
-     * Gets the from.
-     *
-     * @return the from
-     */
-    public final String getFrom()
-    {
-        return from;
-    }
+	/**
+	 * Gets the from.
+	 * 
+	 * @return the from
+	 */
+	public final String getFrom() {
+		return from;
+	}
 
-    /**
-     * Gets the ordering.
-     *
-     * @return the ordering
-     */
-    public final String getOrdering()
-    {
-        return ordering;
-    }
+	/**
+	 * Gets the ordering.
+	 * 
+	 * @return the ordering
+	 */
+	public final String getOrdering() {
+		return ordering;
+	}
 
-    /**
-     * Gets the result.
-     *
-     * @return the result
-     */
-    public final String getResult()
-    {
-        return result;
-    }
+	/**
+	 * Gets the result.
+	 * 
+	 * @return the result
+	 */
+	public final String getResult() {
+		return result;
+	}
 
-    /**
-     * Method to check if required result is to get complete entity or a select
-     * scalar value.
-     *
-     * @return true, if it result is for complete alias.
-     *
-     */
-    protected final boolean isAliasOnly()
-    {
-        return result != null && (result.indexOf(".") == -1);
-    }
+	/**
+	 * Method to check if required result is to get complete entity or a select
+	 * scalar value.
+	 * 
+	 * @return true, if it result is for complete alias.
+	 * 
+	 */
+	protected final boolean isAliasOnly() {
+		return result != null && (result.indexOf(".") == -1);
+	}
 
-    // must be executed after parse(). it verifies and populated the query
-    // predicates.
-    /**
-     * Post parsing init.
-     */
-    protected void postParsingInit()
-    {
-        initEntityClass();
-        initFilter();
-    }
+	// must be executed after parse(). it verifies and populated the query
+	// predicates.
+	/**
+	 * Post parsing init.
+	 */
+	protected void postParsingInit() {
+		initEntityClass();
+		initFilter();
+	}
 
-    /**
-     * Inits the entity class.
-     */
-    private void initEntityClass()
-    {
-        // String result = getResult();
-        // String from = getFrom();
+	/**
+	 * Inits the entity class.
+	 */
+	private void initEntityClass() {
+		// String result = getResult();
+		// String from = getFrom();
 
-        String fromArray[] = from.split(" ");
-        if (fromArray.length != 2)
-        {
-            throw new PersistenceException("Bad query format: " + from);
-        }
+		String fromArray[] = from.split(" ");
+		if (fromArray.length != 2) {
+			throw new PersistenceException("Bad query format: " + from);
+		}
 
-        StringTokenizer tokenizer = new StringTokenizer(getResult(), ",");
-        while (tokenizer.hasMoreTokens())
-        {
-            String token = tokenizer.nextToken();
-            if (!StringUtils.containsAny(fromArray[1]+".",token))
-            {
-                throw new RuntimeException("bad query format with invalid alias:" + token);
-            }
-        }
-        /*
-         * if (!fromArray[1].equals(result)) { throw new
-         * PersistenceException("Bad query format: " + from); }
-         */
-        this.entityName = fromArray[0];
-        this.entityAlias = fromArray[1];
+		StringTokenizer tokenizer = new StringTokenizer(getResult(), ",");
+		while (tokenizer.hasMoreTokens()) {
+			String token = tokenizer.nextToken();
+			if (!StringUtils.containsAny(fromArray[1] + ".", token)) {
+				throw new RuntimeException(
+						"bad query format with invalid alias:" + token);
+			}
+		}
+		/*
+		 * if (!fromArray[1].equals(result)) { throw new
+		 * PersistenceException("Bad query format: " + from); }
+		 */
+		this.entityName = fromArray[0];
+		this.entityAlias = fromArray[1];
 
-        entityClass = metadataManager.getEntityClassByName(entityName);
-        if (null == entityClass)
-        {
-            throw new PersistenceException("No entity found by the name: " + entityName);
-        }
-        EntityMetadata metadata = metadataManager.getEntityMetadata(entityClass);
-        if (!metadata.isIndexable())
-        {
-            throw new PersistenceException(entityClass + " is not indexed. What are you searching for dude?");
-        }
-    }
+		entityClass = metadataManager.getEntityClassByName(entityName);
+		if (null == entityClass) {
+			throw new PersistenceException("No entity found by the name: "
+					+ entityName);
+		}
+		EntityMetadata metadata = metadataManager
+				.getEntityMetadata(entityClass);
+		if (!metadata.isIndexable()) {
+			throw new PersistenceException(entityClass
+					+ " is not indexed. What are you searching for dude?");
+		}
+	}
 
-    /**
-     * Inits the filter.
-     */
-    private void initFilter()
-    {
-        EntityMetadata metadata = metadataManager.getEntityMetadata(entityClass);
-        String indexName = metadata.getIndexName();
+	/**
+	 * Inits the filter.
+	 */
+	private void initFilter() {
+		EntityMetadata metadata = metadataManager
+				.getEntityMetadata(entityClass);
+		String indexName = metadata.getIndexName();
 
-        // String filter = getFilter();
+		// String filter = getFilter();
 
-        if (null == filter)
-        {
-            return;
-        }
+		if (null == filter) {
+			return;
+		}
 
-        List<String> clauses = tokenize(filter, INTER_CLAUSE_PATTERN);
-        // clauses must be alternate Inter and Intra conbination, starting with
-        // Intra.
-        boolean newClause = true;
-        for (String clause : clauses)
-        {
+		List<String> clauses = tokenize(filter, INTER_CLAUSE_PATTERN);
+		// clauses must be alternate Inter and Intra conbination, starting with
+		// Intra.
+		boolean newClause = true;
+		for (String clause : clauses) {
 
-            if (newClause)
-            {
-                List<String> tokens = tokenize(clause, INTRA_CLAUSE_PATTERN);
+			if (newClause) {
+				List<String> tokens = tokenize(clause, INTRA_CLAUSE_PATTERN);
 
-                if (tokens.size() != 3)
-                {
-                    throw new PersistenceException("bad jpa query: " + clause);
-                }
+				if (tokens.size() != 3) {
+					throw new PersistenceException("bad jpa query: " + clause);
+				}
 
-                // strip alias from property name
-                String property = tokens.get(0);
-                property = property.substring((entityAlias + ".").length());
-                property = indexName + "." + property;
-                // verify condition
-                String condition = tokens.get(1);
-                if (!Arrays.asList(INTRA_CLAUSE_OPERATORS).contains(condition.toUpperCase()))
-                {
-                    throw new PersistenceException("bad jpa query: " + clause);
-                }
+				// strip alias from property name
+				String property = tokens.get(0);
+				property = property.substring((entityAlias + ".").length());
+				property = indexName + "." + property;
+				// verify condition
+				String condition = tokens.get(1);
+				if (!Arrays.asList(INTRA_CLAUSE_OPERATORS).contains(
+						condition.toUpperCase())) {
+					throw new PersistenceException("bad jpa query: " + clause);
+				}
 
-                filtersQueue.add(new FilterClause(property, condition, tokens.get(2)));
-                newClause = false;
-            }
+				filtersQueue.add(new FilterClause(property, condition, tokens
+						.get(2)));
+				newClause = false;
+			}
 
-            else
-            {
-                if (Arrays.asList(INTER_CLAUSE_OPERATORS).contains(clause.toUpperCase()))
-                {
-                    filtersQueue.add(clause.toUpperCase());
-                    newClause = true;
-                }
-                else
-                {
-                    throw new PersistenceException("bad jpa query: " + clause);
-                }
-            }
-        }
-    }
+			else {
+				if (Arrays.asList(INTER_CLAUSE_OPERATORS).contains(
+						clause.toUpperCase())) {
+					filtersQueue.add(clause.toUpperCase());
+					newClause = true;
+				} else {
+					throw new PersistenceException("bad jpa query: " + clause);
+				}
+			}
+		}
+	}
 
-    /**
-     * Sets the parameter.
-     *
-     * @param name
-     *            the name
-     * @param value
-     *            the value
-     */
-    public final void setParameter(String name, String value)
-    {
-        boolean found = false;
-        for (Object object : getFilterClauseQueue())
-        {
-            if (object instanceof FilterClause)
-            {
-                FilterClause filter = (FilterClause) object;
-                // key
-                if (filter.getValue().equals(":" + name))
-                {
-                    filter.setValue(value);
-                    found = true;
-                    return;
-                }
-            }
-        }
-        if (!found)
-        {
-            throw new PersistenceException("invalid parameter: " + name);
-        }
-    }
+	/**
+	 * Sets the parameter.
+	 * 
+	 * @param name
+	 *            the name
+	 * @param value
+	 *            the value
+	 */
+	public final void setParameter(String name, String value) {
+		boolean found = false;
+		for (Object object : getFilterClauseQueue()) {
+			if (object instanceof FilterClause) {
+				FilterClause filter = (FilterClause) object;
+				// key
+				if (filter.getValue().equals(":" + name)) {
+					filter.setValue(value);
+					found = true;
+					return;
+				}
+			}
+		}
+		if (!found) {
+			throw new PersistenceException("invalid parameter: " + name);
+		}
+	}
 
-    /**
-     * Gets the entity class.
-     *
-     * @return the entityClass
-     */
-    public final Class<?> getEntityClass()
-    {
-        return entityClass;
-    }
+	/**
+	 * Gets the entity class.
+	 * 
+	 * @return the entityClass
+	 */
+	public final Class<?> getEntityClass() {
+		return entityClass;
+	}
 
-    public final EntityMetadata getEntityMetadata()
-    {
-        return metadataManager.getEntityMetadata(entityClass);
-    }
+	public final EntityMetadata getEntityMetadata() {
+		return metadataManager.getEntityMetadata(entityClass);
+	}
 
-    /**
-     * Gets the filter clause queue.
-     *
-     * @return the filters
-     */
-    public final Queue getFilterClauseQueue()
-    {
-        return filtersQueue;
-    }
+	/**
+	 * Gets the filter clause queue.
+	 * 
+	 * @return the filters
+	 */
+	public final Queue getFilterClauseQueue() {
+		return filtersQueue;
+	}
 
-    // class to keep hold of a where clause predicate
-    /**
-     * The Class FilterClause.
-     */
-    public final class FilterClause
-    {
+	// class to keep hold of a where clause predicate
+	/**
+	 * The Class FilterClause.
+	 */
+	public final class FilterClause {
 
-        /** The property. */
-        private String property;
+		/** The property. */
+		private String property;
 
-        /** The condition. */
-        private String condition;
+		/** The condition. */
+		private String condition;
 
-        /** The value. */
-        String value;
+		/** The value. */
+		String value;
 
-        /**
-         * The Constructor.
-         *
-         * @param property
-         *            the property
-         * @param condition
-         *            the condition
-         * @param value
-         *            the value
-         */
-        public FilterClause(String property, String condition, String value)
-        {
-            super();
-            this.property = property;
-            this.condition = condition;
-            this.value = value;
-        }
+		/**
+		 * The Constructor.
+		 * 
+		 * @param property
+		 *            the property
+		 * @param condition
+		 *            the condition
+		 * @param value
+		 *            the value
+		 */
+		public FilterClause(String property, String condition, String value) {
+			super();
+			this.property = property;
+			this.condition = condition;
+			this.value = value;
+		}
 
-        /**
-         * Gets the property.
-         *
-         * @return the property
-         */
-        public final String getProperty()
-        {
-            return property;
-        }
+		/**
+		 * Gets the property.
+		 * 
+		 * @return the property
+		 */
+		public final String getProperty() {
+			return property;
+		}
 
-        /**
-         * Gets the condition.
-         *
-         * @return the condition
-         */
-        public final String getCondition()
-        {
-            return condition;
-        }
+		/**
+		 * Gets the condition.
+		 * 
+		 * @return the condition
+		 */
+		public final String getCondition() {
+			return condition;
+		}
 
-        /**
-         * Gets the value.
-         *
-         * @return the value
-         */
-        public final String getValue()
-        {
-            return value;
-        }
+		/**
+		 * Gets the value.
+		 * 
+		 * @return the value
+		 */
+		public final String getValue() {
+			return value;
+		}
 
-        /**
-         * Sets the value.
-         *
-         * @param value
-         *            the value to set
-         */
-        protected void setValue(String value)
-        {
-            this.value = value;
-        }
+		/**
+		 * Sets the value.
+		 * 
+		 * @param value
+		 *            the value to set
+		 */
+		protected void setValue(String value) {
+			this.value = value;
+		}
 
-        /* @see java.lang.Object#toString() */
-        @Override
-        public String toString()
-        {
-            StringBuilder builder = new StringBuilder();
-            builder.append("FilterClause [property=");
-            builder.append(property);
-            builder.append(", condition=");
-            builder.append(condition);
-            builder.append(", value=");
-            builder.append(value);
-            builder.append("]");
-            return builder.toString();
-        }
-    }
+		/* @see java.lang.Object#toString() */
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("FilterClause [property=");
+			builder.append(property);
+			builder.append(", condition=");
+			builder.append(condition);
+			builder.append(", value=");
+			builder.append(value);
+			builder.append("]");
+			return builder.toString();
+		}
+	}
 
-    /* @see java.lang.Object#clone() */
-    @Override
-    public final Object clone() throws CloneNotSupportedException
-    {
-        return super.clone();
-    }
+	/* @see java.lang.Object#clone() */
+	@Override
+	public final Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
 
-    /* @see java.lang.Object#toString() */
-    @Override
-    public final String toString()
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append("KunderaQuery [entityName=");
-        builder.append(entityName);
-        builder.append(", entityAlias=");
-        builder.append(entityAlias);
-        builder.append(", filtersQueue=");
-        builder.append(filtersQueue);
-        builder.append("]");
-        return builder.toString();
-    }
+	/* @see java.lang.Object#toString() */
+	@Override
+	public final String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("KunderaQuery [entityName=");
+		builder.append(entityName);
+		builder.append(", entityAlias=");
+		builder.append(entityAlias);
+		builder.append(", filtersQueue=");
+		builder.append(filtersQueue);
+		builder.append("]");
+		return builder.toString();
+	}
 
-    public abstract void parse(String jpaQuery);
-    // helper method
-    /**
-     * Tokenize.
-     *
-     * @param where
-     *            the where
-     * @param pattern
-     *            the pattern
-     * @return the list
-     */
-    private static List<String> tokenize(String where, Pattern pattern)
-    {
-        List<String> split = new ArrayList<String>();
-        Matcher matcher = pattern.matcher(where);
-        int lastIndex = 0;
-        String s;
-        // int count = 0;
-        while (matcher.find())
-        {
-            s = where.substring(lastIndex, matcher.start()).trim();
-            split.add(s);
-            s = matcher.group();
-            split.add(s);
-            lastIndex = matcher.end();
-            // count++;
-        }
-        s = where.substring(lastIndex).trim();
-        split.add(s);
-        return split;
-    }
-    
-  
+	public abstract void parse(String jpaQuery);
+
+	// helper method
+	/**
+	 * Tokenize.
+	 * 
+	 * @param where
+	 *            the where
+	 * @param pattern
+	 *            the pattern
+	 * @return the list
+	 */
+	private static List<String> tokenize(String where, Pattern pattern) {
+		List<String> split = new ArrayList<String>();
+		Matcher matcher = pattern.matcher(where);
+		int lastIndex = 0;
+		String s;
+		// int count = 0;
+		while (matcher.find()) {
+			s = where.substring(lastIndex, matcher.start()).trim();
+			split.add(s);
+			s = matcher.group();
+			split.add(s);
+			lastIndex = matcher.end();
+			// count++;
+		}
+		s = where.substring(lastIndex).trim();
+		split.add(s);
+		return split;
+	}
 
 }

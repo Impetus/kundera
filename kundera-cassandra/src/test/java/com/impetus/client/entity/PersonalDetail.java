@@ -19,87 +19,78 @@ import javax.persistence.Embeddable;
 
 /**
  * Entity class for user's personal details
- *
+ * 
  * @author amresh.singh
  */
 
 @Embeddable
-public class PersonalDetail
-{
-    private String personalDetailId;
+public class PersonalDetail {
+	private String personalDetailId;
 
-    private String name;
+	private String name;
 
-    private String password;
+	private String password;
 
-    private String relationshipStatus;
+	private String relationshipStatus;
 
-    /**
-     * @return the personalDetailId
-     */
-    public String getPersonalDetailId()
-    {
-        return personalDetailId;
-    }
+	/**
+	 * @return the personalDetailId
+	 */
+	public String getPersonalDetailId() {
+		return personalDetailId;
+	}
 
-    /**
-     * @param personalDetailId
-     *            the personalDetailId to set
-     */
-    public void setPersonalDetailId(String personalDetailId)
-    {
-        this.personalDetailId = personalDetailId;
-    }
+	/**
+	 * @param personalDetailId
+	 *            the personalDetailId to set
+	 */
+	public void setPersonalDetailId(String personalDetailId) {
+		this.personalDetailId = personalDetailId;
+	}
 
-    /**
-     * @return the name
-     */
-    public String getName()
-    {
-        return name;
-    }
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
 
-    /**
-     * @param name
-     *            the name to set
-     */
-    public void setName(String name)
-    {
-        this.name = name;
-    }
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    /**
-     * @return the password
-     */
-    public String getPassword()
-    {
-        return password;
-    }
+	/**
+	 * @return the password
+	 */
+	public String getPassword() {
+		return password;
+	}
 
-    /**
-     * @param password
-     *            the password to set
-     */
-    public void setPassword(String password)
-    {
-        this.password = password;
-    }
+	/**
+	 * @param password
+	 *            the password to set
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    /**
-     * @return the relationshipStatus
-     */
-    public String getRelationshipStatus()
-    {
-        return relationshipStatus;
-    }
+	/**
+	 * @return the relationshipStatus
+	 */
+	public String getRelationshipStatus() {
+		return relationshipStatus;
+	}
 
-    /**
-     * @param relationshipStatus
-     *            the relationshipStatus to set
-     */
-    public void setRelationshipStatus(String relationshipStatus)
-    {
-        this.relationshipStatus = relationshipStatus;
-    }
+	/**
+	 * @param relationshipStatus
+	 *            the relationshipStatus to set
+	 */
+	public void setRelationshipStatus(String relationshipStatus) {
+		this.relationshipStatus = relationshipStatus;
+	}
 
 }

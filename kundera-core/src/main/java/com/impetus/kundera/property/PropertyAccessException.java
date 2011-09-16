@@ -17,42 +17,38 @@ package com.impetus.kundera.property;
 
 /**
  * The Class PropertyAccessException.
- *
+ * 
  * @author animesh.kumar
  */
-public class PropertyAccessException extends Exception
-{
+public class PropertyAccessException extends Exception {
 
-    /** The Constant serialVersionUID. */
-    private static final long serialVersionUID = 2920598132353417557L;
+	/** The Constant serialVersionUID. */
+	private static final long serialVersionUID = 2920598132353417557L;
 
-    /**
-     * Instantiates a new property access exception.
-     */
-    public PropertyAccessException()
-    {
-    }
+	/**
+	 * Instantiates a new property access exception.
+	 */
+	public PropertyAccessException() {
+	}
 
-    /**
-     * Instantiates a new property access exception.
-     *
-     * @param message
-     *            the message
-     */
-    public PropertyAccessException(String message)
-    {
-        super(message);
-    }
+	/**
+	 * Instantiates a new property access exception.
+	 * 
+	 * @param message
+	 *            the message
+	 */
+	public PropertyAccessException(String message) {
+		super(message);
+	}
 
-    /**
-     * Instantiates a new property access exception.
-     *
-     * @param cause
-     *            the cause
-     */
-    public PropertyAccessException(Throwable cause)
-    {
-        super(cause);
-    }
+	/**
+	 * Instantiates a new property access exception.
+	 * 
+	 * @param cause
+	 *            the cause
+	 */
+	public PropertyAccessException(Throwable cause) {
+		super(cause);
+	}
 
 }

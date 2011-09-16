@@ -17,19 +17,18 @@ package com.impetus.kundera.classreading;
 
 /**
  * Interface to filter out filenames.
- *
+ * 
  * @author animesh.kumar
  */
-public interface Filter
-{
+public interface Filter {
 
-    /**
-     * Accepts.
-     *
-     * @param filename
-     *            the filename
-     *
-     * @return true, if successful
-     */
-    boolean accepts(String filename);
+	/**
+	 * Accepts.
+	 * 
+	 * @param filename
+	 *            the filename
+	 * 
+	 * @return true, if successful
+	 */
+	boolean accepts(String filename);
 }

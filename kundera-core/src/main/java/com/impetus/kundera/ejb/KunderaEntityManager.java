@@ -24,43 +24,42 @@ import com.impetus.kundera.Client;
 
 /**
  * The Interface KunderaEntityManager.
- *
+ * 
  * @author animesh.kumar
  */
-public interface KunderaEntityManager extends EntityManager
-{
+public interface KunderaEntityManager extends EntityManager {
 
-    /**
-     * Find.
-     *
-     * @param <T>
-     *            the generic type
-     * @param entityClass
-     *            the entity class
-     * @param primaryKey
-     *            the primary key
-     * @return the list
-     */
-    <T> List<T> find(Class<T> entityClass, Object... primaryKey);
+	/**
+	 * Find.
+	 * 
+	 * @param <T>
+	 *            the generic type
+	 * @param entityClass
+	 *            the entity class
+	 * @param primaryKey
+	 *            the primary key
+	 * @return the list
+	 */
+	<T> List<T> find(Class<T> entityClass, Object... primaryKey);
 
-    /**
-     * Find.
-     *
-     * @param <T>
-     *            the generic type
-     * @param entityClass
-     *            the entity class
-     * @param primaryKeys
-     *            the primary keys
-     * @return the list
-     */
-    <T> List<T> find(Class<T> entityClass, Map<String, String> primaryKeys);
+	/**
+	 * Find.
+	 * 
+	 * @param <T>
+	 *            the generic type
+	 * @param entityClass
+	 *            the entity class
+	 * @param primaryKeys
+	 *            the primary keys
+	 * @return the list
+	 */
+	<T> List<T> find(Class<T> entityClass, Map<String, String> primaryKeys);
 
-    /**
-     * Gets the client.
-     *
-     * @return the client
-     */
-    Client getClient();
+	/**
+	 * Gets the client.
+	 * 
+	 * @return the client
+	 */
+	Client getClient();
 
 }

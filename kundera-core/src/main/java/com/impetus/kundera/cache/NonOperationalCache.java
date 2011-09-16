@@ -17,48 +17,42 @@ package com.impetus.kundera.cache;
 
 /**
  * NonOperational Cache implementation.
- *
+ * 
  * @author animesh.kumar
- *
+ * 
  */
-public class NonOperationalCache implements Cache
-{
+public class NonOperationalCache implements Cache {
 
-    /* @see com.impetus.kundera.cache.Cache#size() */
-    @Override
-    public int size()
-    {
-        return 0;
-    }
+	/* @see com.impetus.kundera.cache.Cache#size() */
+	@Override
+	public int size() {
+		return 0;
+	}
 
-    /*
-     * @see com.impetus.kundera.cache.Cache#put(java.lang.Object,
-     * java.lang.Object)
-     */
-    @Override
-    public void put(final Object key, final Object value)
-    {
-    }
+	/*
+	 * @see com.impetus.kundera.cache.Cache#put(java.lang.Object,
+	 * java.lang.Object)
+	 */
+	@Override
+	public void put(final Object key, final Object value) {
+	}
 
-    /* @see com.impetus.kundera.cache.Cache#remove(java.lang.Object) */
-    @Override
-    public boolean remove(final Object key)
-    {
-        return true;
-    }
+	/* @see com.impetus.kundera.cache.Cache#remove(java.lang.Object) */
+	@Override
+	public boolean remove(final Object key) {
+		return true;
+	}
 
-    /* @see com.impetus.kundera.cache.Cache#clear() */
-    @Override
-    public void clear()
-    {
+	/* @see com.impetus.kundera.cache.Cache#clear() */
+	@Override
+	public void clear() {
 
-    }
+	}
 
-    /* @see com.impetus.kundera.cache.Cache#get(java.lang.Object) */
-    @Override
-    public Object get(final Object key)
-    {
-        return null;
-    }
+	/* @see com.impetus.kundera.cache.Cache#get(java.lang.Object) */
+	@Override
+	public Object get(final Object key) {
+		return null;
+	}
 
 }

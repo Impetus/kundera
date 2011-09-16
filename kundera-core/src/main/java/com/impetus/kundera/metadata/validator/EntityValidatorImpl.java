@@ -29,86 +29,78 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Validates entity for JPA rules
- *
+ * 
  * @author animesh.kumar
  */
-public class EntityValidatorImpl implements EntityValidator
-{
+public class EntityValidatorImpl implements EntityValidator {
 
-    /** The Constant log. */
-    private static final Log LOG = LogFactory.getLog(EntityValidatorImpl.class);
+	/** The Constant log. */
+	private static final Log LOG = LogFactory.getLog(EntityValidatorImpl.class);
 
-    /** cache for validated classes. */
-    private List<Class<?>> classes = new ArrayList<Class<?>>();
+	/** cache for validated classes. */
+	private List<Class<?>> classes = new ArrayList<Class<?>>();
 
-    /**
-     * Checks the validity of a class for Cassandra entity.
-     *
-     * @param clazz
-     *            validates this class
-     *
-     * @return returns 'true' if valid
-     */
-    @Override
-    // TODO: reduce Cyclomatic complexity
-    public final void validate(final Class<?> clazz)
-    {
+	/**
+	 * Checks the validity of a class for Cassandra entity.
+	 * 
+	 * @param clazz
+	 *            validates this class
+	 * 
+	 * @return returns 'true' if valid
+	 */
+	@Override
+	// TODO: reduce Cyclomatic complexity
+	public final void validate(final Class<?> clazz) {
 
-        if (classes.contains(clazz))
-        {
-            return;
-        }
+		if (classes.contains(clazz)) {
+			return;
+		}
 
-        LOG.debug("Validating " + clazz.getName());
+		LOG.debug("Validating " + clazz.getName());
 
-        // Is Entity?
-        if (!clazz.isAnnotationPresent(Entity.class))
-        {
-            throw new PersistenceException(clazz.getName() + " is not annotated with @Entity");
-        }
+		// Is Entity?
+		if (!clazz.isAnnotationPresent(Entity.class)) {
+			throw new PersistenceException(clazz.getName()
+					+ " is not annotated with @Entity");
+		}
 
-        // must have a default no-argument constructor
-        try
-        {
-            clazz.getConstructor();
-        }
-        catch (NoSuchMethodException nsme)
-        {
-            throw new PersistenceException(clazz.getName() + " must have a default no-argument constructor.");
-        }
+		// must have a default no-argument constructor
+		try {
+			clazz.getConstructor();
+		} catch (NoSuchMethodException nsme) {
+			throw new PersistenceException(clazz.getName()
+					+ " must have a default no-argument constructor.");
+		}
 
-        // Must be annotated with @Table
-        if (!clazz.isAnnotationPresent(Table.class))
-        {
-            throw new PersistenceException(clazz.getName() + " must be annotated with @Table");
-        }
+		// Must be annotated with @Table
+		if (!clazz.isAnnotationPresent(Table.class)) {
+			throw new PersistenceException(clazz.getName()
+					+ " must be annotated with @Table");
+		}
 
-        // Check for @Key and ensure that there is just 1 @Key field of String
-        // type.
-        List<Field> keys = new ArrayList<Field>();
-        for (Field field : clazz.getDeclaredFields())
-        {
-            if (field.isAnnotationPresent(Id.class))
-            {
-                keys.add(field);
-            }
-        }
+		// Check for @Key and ensure that there is just 1 @Key field of String
+		// type.
+		List<Field> keys = new ArrayList<Field>();
+		for (Field field : clazz.getDeclaredFields()) {
+			if (field.isAnnotationPresent(Id.class)) {
+				keys.add(field);
+			}
+		}
 
-        if (keys.size() == 0)
-        {
-            throw new PersistenceException(clazz.getName() + " must have an @Id field.");
-        }
-        else if (keys.size() > 1)
-        {
-            throw new PersistenceException(clazz.getName() + " can only have 1 @Id field.");
-        }
+		if (keys.size() == 0) {
+			throw new PersistenceException(clazz.getName()
+					+ " must have an @Id field.");
+		} else if (keys.size() > 1) {
+			throw new PersistenceException(clazz.getName()
+					+ " can only have 1 @Id field.");
+		}
 
-        if (!keys.get(0).getType().equals(String.class))
-        {
-            throw new PersistenceException(clazz.getName() + " @Id must be of String type.");
-        }
+		if (!keys.get(0).getType().equals(String.class)) {
+			throw new PersistenceException(clazz.getName()
+					+ " @Id must be of String type.");
+		}
 
-        // save in cache
-        classes.add(clazz);
-    }
+		// save in cache
+		classes.add(clazz);
+	}
 }

@@ -26,171 +26,156 @@ import com.impetus.kundera.cache.Cache;
 /**
  * The Class EntityManagerCache.
  */
-public class EntityManagerSession
-{
+public class EntityManagerSession {
 
-    /** The Constant log. */
-    private static final Log LOG = LogFactory.getLog(EntityManagerSession.class);
+	/** The Constant log. */
+	private static final Log LOG = LogFactory
+			.getLog(EntityManagerSession.class);
 
-    /** cache is used to store objects retrieved in this EntityManager session. */
-    private Map<Object, Object> sessionCache;
+	/** cache is used to store objects retrieved in this EntityManager session. */
+	private Map<Object, Object> sessionCache;
 
-    /** The em. */
-    private EntityManagerImpl em;
+	/** The em. */
+	private EntityManagerImpl em;
 
-    /**
-     * Instantiates a new entity manager cache.
-     *
-     * @param em
-     *            the em
-     */
-    public EntityManagerSession(EntityManagerImpl em)
-    {
-        this.em = em;
-        this.sessionCache = new ConcurrentHashMap<Object, Object>();
-    }
+	/**
+	 * Instantiates a new entity manager cache.
+	 * 
+	 * @param em
+	 *            the em
+	 */
+	public EntityManagerSession(EntityManagerImpl em) {
+		this.em = em;
+		this.sessionCache = new ConcurrentHashMap<Object, Object>();
+	}
 
-    /**
-     * Find in cache.
-     *
-     * @param <T>
-     *            the generic type
-     * @param entityClass
-     *            the entity class
-     * @param id
-     *            the id
-     * @return the t
-     */
-    @SuppressWarnings("unchecked")
-    protected <T> T lookup(Class<T> entityClass, Object id)
-    {
-        String key = cacheKey(entityClass, id);
-        LOG.debug("Reading from L1 >> " + key);
-        T o = (T) sessionCache.get(key);
+	/**
+	 * Find in cache.
+	 * 
+	 * @param <T>
+	 *            the generic type
+	 * @param entityClass
+	 *            the entity class
+	 * @param id
+	 *            the id
+	 * @return the t
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T> T lookup(Class<T> entityClass, Object id) {
+		String key = cacheKey(entityClass, id);
+		LOG.debug("Reading from L1 >> " + key);
+		T o = (T) sessionCache.get(key);
 
-        // go to second-level cache
-        if (o == null)
-        {
-            LOG.debug("Reading from L2 >> " + key);
-            Cache c = em.getFactory().getCache(entityClass);
-            if (c != null)
-            {
-                o = (T) c.get(key);
-                if (o != null)
-                {
-                    LOG.debug("Found item in second level cache!");
-                }
-            }
-        }
-        return o;
-    }
+		// go to second-level cache
+		if (o == null) {
+			LOG.debug("Reading from L2 >> " + key);
+			Cache c = em.getFactory().getCache(entityClass);
+			if (c != null) {
+				o = (T) c.get(key);
+				if (o != null) {
+					LOG.debug("Found item in second level cache!");
+				}
+			}
+		}
+		return o;
+	}
 
-    /**
-     * Store in L1 only.
-     *
-     * @param id
-     *            the id
-     * @param entity
-     *            the entity
-     */
-    protected void store(Object id, Object entity)
-    {
-        store(id, entity, Boolean.FALSE);
-    }
+	/**
+	 * Store in L1 only.
+	 * 
+	 * @param id
+	 *            the id
+	 * @param entity
+	 *            the entity
+	 */
+	protected void store(Object id, Object entity) {
+		store(id, entity, Boolean.FALSE);
+	}
 
-    /**
-     * Save to cache.
-     *
-     * @param id
-     *            the id
-     * @param entity
-     *            the entity
-     * @param spillOverToL2
-     *            the spill over to l2
-     */
-    protected void store(Object id, Object entity, boolean spillOverToL2)
-    {
-        String key = cacheKey(entity.getClass(), id);
-        LOG.debug("Writing to L1 >> " + key);
-        sessionCache.put(key, entity);
+	/**
+	 * Save to cache.
+	 * 
+	 * @param id
+	 *            the id
+	 * @param entity
+	 *            the entity
+	 * @param spillOverToL2
+	 *            the spill over to l2
+	 */
+	protected void store(Object id, Object entity, boolean spillOverToL2) {
+		String key = cacheKey(entity.getClass(), id);
+		LOG.debug("Writing to L1 >> " + key);
+		sessionCache.put(key, entity);
 
-        if (spillOverToL2)
-        {
-            LOG.debug("Writing to L2 >>" + key);
-            // save to second level cache
-            Cache c = em.getFactory().getCache(entity.getClass());
-            if (c != null)
-            {
-                c.put(key, entity);
-            }
-        }
-    }
+		if (spillOverToL2) {
+			LOG.debug("Writing to L2 >>" + key);
+			// save to second level cache
+			Cache c = em.getFactory().getCache(entity.getClass());
+			if (c != null) {
+				c.put(key, entity);
+			}
+		}
+	}
 
-    /**
-     * Removes the.
-     *
-     * @param <T>
-     *            the generic type
-     * @param entityClass
-     *            the entity class
-     * @param id
-     *            the id
-     */
-    protected <T> void remove(Class<T> entityClass, Object id)
-    {
-        remove(entityClass, id, Boolean.FALSE);
-    }
+	/**
+	 * Removes the.
+	 * 
+	 * @param <T>
+	 *            the generic type
+	 * @param entityClass
+	 *            the entity class
+	 * @param id
+	 *            the id
+	 */
+	protected <T> void remove(Class<T> entityClass, Object id) {
+		remove(entityClass, id, Boolean.FALSE);
+	}
 
-    /**
-     * Removes the from cache.
-     *
-     * @param <T>
-     *            the generic type
-     * @param entityClass
-     *            the entity class
-     * @param id
-     *            the id
-     * @param spillOverToL2
-     *            the spill over to l2
-     */
-    protected <T> void remove(Class<T> entityClass, Object id, boolean spillOverToL2)
-    {
-        String key = cacheKey(entityClass, id);
-        LOG.debug("Removing from L1 >> " + key);
-        Object o = sessionCache.remove(key);
+	/**
+	 * Removes the from cache.
+	 * 
+	 * @param <T>
+	 *            the generic type
+	 * @param entityClass
+	 *            the entity class
+	 * @param id
+	 *            the id
+	 * @param spillOverToL2
+	 *            the spill over to l2
+	 */
+	protected <T> void remove(Class<T> entityClass, Object id,
+			boolean spillOverToL2) {
+		String key = cacheKey(entityClass, id);
+		LOG.debug("Removing from L1 >> " + key);
+		Object o = sessionCache.remove(key);
 
-        if (spillOverToL2)
-        {
-            LOG.debug("Removing from L2 >> " + key);
-            Cache c = em.getFactory().getCache(entityClass);
-            if (c != null)
-            {
-                Object o2 = c.remove(key);
-                if (o == null)
-                {
-                    o = o2;
-                }
-            }
-        }
-    }
+		if (spillOverToL2) {
+			LOG.debug("Removing from L2 >> " + key);
+			Cache c = em.getFactory().getCache(entityClass);
+			if (c != null) {
+				Object o2 = c.remove(key);
+				if (o == null) {
+					o = o2;
+				}
+			}
+		}
+	}
 
-    /**
-     * Cache key.
-     *
-     * @param clazz
-     *            the clazz
-     * @param id
-     *            the id
-     *
-     * @return the string
-     */
-    private String cacheKey(Class<?> clazz, Object id)
-    {
-        return clazz.getName() + "_" + id;
-    }
+	/**
+	 * Cache key.
+	 * 
+	 * @param clazz
+	 *            the clazz
+	 * @param id
+	 *            the id
+	 * 
+	 * @return the string
+	 */
+	private String cacheKey(Class<?> clazz, Object id) {
+		return clazz.getName() + "_" + id;
+	}
 
-    public final void clear()
-    {
-        sessionCache = new ConcurrentHashMap<Object, Object>();
-    }
+	public final void clear() {
+		sessionCache = new ConcurrentHashMap<Object, Object>();
+	}
 }

@@ -31,125 +31,112 @@ import javax.persistence.Table;
 
 /**
  * Entity Class for User object
- *
+ * 
  * @author amresh.singh
  */
 
 @Entity
 @Table(name = "users", schema = "Blog")
-public class TwitterUser
-{
-    @Id
-    private String userId; // PK
+public class TwitterUser {
+	@Id
+	private String userId; // PK
 
-    // Embedded object, will persist co-located
-    @Embedded
-    private PersonalDetail personalDetail;
+	// Embedded object, will persist co-located
+	@Embedded
+	private PersonalDetail personalDetail;
 
-    // Embedded collection, will persist co-located
-    @Embedded
-    private List<UserTweet> tweets;
+	// Embedded collection, will persist co-located
+	@Embedded
+	private List<UserTweet> tweets;
 
-    // One-to-one, will be persisted separately
-    @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
-    private UserPreference preference;
+	// One-to-one, will be persisted separately
+	@OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
+	private UserPreference preference;
 
-    // One to many, will be persisted separately
-    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
-    private Set<IMDetail> imDetails;
+	// One to many, will be persisted separately
+	@OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
+	private Set<IMDetail> imDetails;
 
-    /**
-     * @return the userId
-     */
-    public String getUserId()
-    {
-        return userId;
-    }
+	/**
+	 * @return the userId
+	 */
+	public String getUserId() {
+		return userId;
+	}
 
-    /**
-     * @param userId
-     *            the userId to set
-     */
-    public void setUserId(String userId)
-    {
-        this.userId = userId;
-    }
+	/**
+	 * @param userId
+	 *            the userId to set
+	 */
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 
-    /**
-     * @return the personalDetail
-     */
-    public PersonalDetail getPersonalDetail()
-    {
-        return personalDetail;
-    }
+	/**
+	 * @return the personalDetail
+	 */
+	public PersonalDetail getPersonalDetail() {
+		return personalDetail;
+	}
 
-    /**
-     * @param personalDetail
-     *            the personalDetail to set
-     */
-    public void setPersonalDetail(PersonalDetail personalDetail)
-    {
-        this.personalDetail = personalDetail;
-    }
+	/**
+	 * @param personalDetail
+	 *            the personalDetail to set
+	 */
+	public void setPersonalDetail(PersonalDetail personalDetail) {
+		this.personalDetail = personalDetail;
+	}
 
-    /**
-     * @return the tweets
-     */
-    public List<UserTweet> getTweets()
-    {
-        return tweets;
-    }
+	/**
+	 * @return the tweets
+	 */
+	public List<UserTweet> getTweets() {
+		return tweets;
+	}
 
-    /**
-     * @param tweets
-     *            the tweets to set
-     */
-    public void addTweet(UserTweet tweet)
-    {
-        if (this.tweets == null || this.tweets.isEmpty())
-        {
-            this.tweets = new ArrayList<UserTweet>();
-        }
-        this.tweets.add(tweet);
-    }
+	/**
+	 * @param tweets
+	 *            the tweets to set
+	 */
+	public void addTweet(UserTweet tweet) {
+		if (this.tweets == null || this.tweets.isEmpty()) {
+			this.tweets = new ArrayList<UserTweet>();
+		}
+		this.tweets.add(tweet);
+	}
 
-    /**
-     * @return the preference
-     */
-    public UserPreference getPreference()
-    {
-        return preference;
-    }
+	/**
+	 * @return the preference
+	 */
+	public UserPreference getPreference() {
+		return preference;
+	}
 
-    /**
-     * @param preference
-     *            the preference to set
-     */
-    public void setPreference(UserPreference preference)
-    {
-        this.preference = preference;
-    }
+	/**
+	 * @param preference
+	 *            the preference to set
+	 */
+	public void setPreference(UserPreference preference) {
+		this.preference = preference;
+	}
 
-    /**
-     * @return the imDetails
-     */
-    public Set<IMDetail> getImDetails()
-    {
-        return imDetails;
-    }
+	/**
+	 * @return the imDetails
+	 */
+	public Set<IMDetail> getImDetails() {
+		return imDetails;
+	}
 
-    /**
-     * @param imDetails
-     *            the imDetails to set
-     */
-    public void addImDetail(IMDetail imDetail)
-    {
-        if (this.imDetails == null || this.imDetails.isEmpty())
-        {
-            this.imDetails = new HashSet<IMDetail>();
-        }
+	/**
+	 * @param imDetails
+	 *            the imDetails to set
+	 */
+	public void addImDetail(IMDetail imDetail) {
+		if (this.imDetails == null || this.imDetails.isEmpty()) {
+			this.imDetails = new HashSet<IMDetail>();
+		}
 
-        this.imDetails.add(imDetail);
-    }
+		this.imDetails.add(imDetail);
+	}
 
 }

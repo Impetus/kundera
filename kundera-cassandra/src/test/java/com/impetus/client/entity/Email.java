@@ -26,156 +26,140 @@ import javax.persistence.Table;
 
 /**
  * Entity class for Email
- *
+ * 
  * @author amresh.singh
  */
 
 @Entity
 @Table(name = "emails", schema = "Blog")
-public class Email
-{
+public class Email {
 
-    @Id
-    private String messageId;
+	@Id
+	private String messageId;
 
-    @Column(name = "subject_email")
-    private String subject;
+	@Column(name = "subject_email")
+	private String subject;
 
-    @Column(name = "body_email")
-    private String body;
+	@Column(name = "body_email")
+	private String body;
 
-    // @OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
-    @Embedded
-    private Contact from;
+	// @OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	@Embedded
+	private Contact from;
 
-    // @OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
-    @Embedded
-    private Contact to;
+	// @OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	@Embedded
+	private Contact to;
 
-    // @OneToMany (cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
-    @Embedded
-    private List<Attachment> attachments;
+	// @OneToMany (cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	@Embedded
+	private List<Attachment> attachments;
 
-    public Email()
-    {
+	public Email() {
 
-    }
+	}
 
-    public String toString()
-    {
-        return "MessageId: " + messageId + "\tFrom:" + from + "\tTo: " + to + "\tSubject: " + subject + "\tBody: "
-                + body + "\tAttachments: " + attachments;
-    }
+	public String toString() {
+		return "MessageId: " + messageId + "\tFrom:" + from + "\tTo: " + to
+				+ "\tSubject: " + subject + "\tBody: " + body
+				+ "\tAttachments: " + attachments;
+	}
 
-    public void addAttachment(Attachment attchment)
-    {
-        if (this.attachments == null || this.attachments.isEmpty())
-        {
-            this.attachments = new ArrayList<Attachment>();
-        }
-        this.attachments.add(attchment);
-    }
+	public void addAttachment(Attachment attchment) {
+		if (this.attachments == null || this.attachments.isEmpty()) {
+			this.attachments = new ArrayList<Attachment>();
+		}
+		this.attachments.add(attchment);
+	}
 
-    /**
-     * @return the messageId
-     */
-    public String getMessageId()
-    {
-        return messageId;
-    }
+	/**
+	 * @return the messageId
+	 */
+	public String getMessageId() {
+		return messageId;
+	}
 
-    /**
-     * @param messageId
-     *            the messageId to set
-     */
-    public void setMessageId(String messageId)
-    {
-        this.messageId = messageId;
-    }
+	/**
+	 * @param messageId
+	 *            the messageId to set
+	 */
+	public void setMessageId(String messageId) {
+		this.messageId = messageId;
+	}
 
-    /**
-     * @return the from
-     */
-    public Contact getFrom()
-    {
-        return from;
-    }
+	/**
+	 * @return the from
+	 */
+	public Contact getFrom() {
+		return from;
+	}
 
-    /**
-     * @param from
-     *            the from to set
-     */
-    public void setFrom(Contact from)
-    {
-        this.from = from;
-    }
+	/**
+	 * @param from
+	 *            the from to set
+	 */
+	public void setFrom(Contact from) {
+		this.from = from;
+	}
 
-    /**
-     * @return the to
-     */
-    public Contact getTo()
-    {
-        return to;
-    }
+	/**
+	 * @return the to
+	 */
+	public Contact getTo() {
+		return to;
+	}
 
-    /**
-     * @param to
-     *            the to to set
-     */
-    public void setTo(Contact to)
-    {
-        this.to = to;
-    }
+	/**
+	 * @param to
+	 *            the to to set
+	 */
+	public void setTo(Contact to) {
+		this.to = to;
+	}
 
-    /**
-     * @return the subject
-     */
-    public String getSubject()
-    {
-        return subject;
-    }
+	/**
+	 * @return the subject
+	 */
+	public String getSubject() {
+		return subject;
+	}
 
-    /**
-     * @param subject
-     *            the subject to set
-     */
-    public void setSubject(String subject)
-    {
-        this.subject = subject;
-    }
+	/**
+	 * @param subject
+	 *            the subject to set
+	 */
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
 
-    /**
-     * @return the body
-     */
-    public String getBody()
-    {
-        return body;
-    }
+	/**
+	 * @return the body
+	 */
+	public String getBody() {
+		return body;
+	}
 
-    /**
-     * @param body
-     *            the body to set
-     */
-    public void setBody(String body)
-    {
-        this.body = body;
-    }
+	/**
+	 * @param body
+	 *            the body to set
+	 */
+	public void setBody(String body) {
+		this.body = body;
+	}
 
-    /**
-     * @return the attachments
-     */
-    public List<Attachment> getAttachments()
-    {
-        return attachments;
-    }
+	/**
+	 * @return the attachments
+	 */
+	public List<Attachment> getAttachments() {
+		return attachments;
+	}
 
-    /**
-     * @param attachments
-     *            the attachments to set
-     */
-    public void setAttachments(List<Attachment> attachments)
-    {
-        this.attachments = attachments;
-    }
+	/**
+	 * @param attachments
+	 *            the attachments to set
+	 */
+	public void setAttachments(List<Attachment> attachments) {
+		this.attachments = attachments;
+	}
 
 }

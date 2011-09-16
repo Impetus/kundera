@@ -23,101 +23,91 @@ import javax.persistence.Embeddable;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 @Embeddable
-public class PostData
-{
-    /** The title. */
-    @Column(name = "title")
-    public String title;
+public class PostData {
+	/** The title. */
+	@Column(name = "title")
+	public String title;
 
-    /** The body. */
-    @Column(name = "body")
-    public String body;
+	/** The body. */
+	@Column(name = "body")
+	public String body;
 
-    /** The created. */
-    @Column(name = "created")
-    public Date created;
+	/** The created. */
+	@Column(name = "created")
+	public Date created;
 
-    /**
+	/**
      *
      */
-    public PostData()
-    {
-    }
+	public PostData() {
+	}
 
-    /**
-     * @return the title
-     */
-    public String getTitle()
-    {
-        return title;
-    }
+	/**
+	 * @return the title
+	 */
+	public String getTitle() {
+		return title;
+	}
 
-    /**
-     * @param title
-     *            the title to set
-     */
-    public void setTitle(String title)
-    {
-        this.title = title;
-    }
+	/**
+	 * @param title
+	 *            the title to set
+	 */
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
-    /**
-     * @return the body
-     */
-    public String getBody()
-    {
-        return body;
-    }
+	/**
+	 * @return the body
+	 */
+	public String getBody() {
+		return body;
+	}
 
-    /**
-     * @param body
-     *            the body to set
-     */
-    public void setBody(String body)
-    {
-        this.body = body;
-    }
+	/**
+	 * @param body
+	 *            the body to set
+	 */
+	public void setBody(String body) {
+		this.body = body;
+	}
 
-    /**
-     * @return the created
-     */
-    public Date getCreated()
-    {
-        return created;
-    }
+	/**
+	 * @return the created
+	 */
+	public Date getCreated() {
+		return created;
+	}
 
-    /**
-     * @param created
-     *            the created to set
-     */
-    public void setCreated(Date created)
-    {
-        this.created = created;
-    }
+	/**
+	 * @param created
+	 *            the created to set
+	 */
+	public void setCreated(Date created) {
+		this.created = created;
+	}
 
-    @Override
-    public int hashCode()
-    {
-        return HashCodeBuilder.reflectionHashCode(this);
-    }
+	@Override
+	public int hashCode() {
+		return HashCodeBuilder.reflectionHashCode(this);
+	}
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString()
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Post [title=");
-        builder.append(title);
-        builder.append(", body=");
-        builder.append(body);
-        builder.append(", created=");
-        builder.append(created);
-        builder.append("]");
-        return builder.toString();
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Post [title=");
+		builder.append(title);
+		builder.append(", body=");
+		builder.append(body);
+		builder.append(", created=");
+		builder.append(created);
+		builder.append("]");
+		return builder.toString();
+	}
 
 }

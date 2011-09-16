@@ -20,33 +20,32 @@ import java.util.Set;
 
 /**
  * Interface to proxy @Entity classes so as to introduce Foreign relations.
- *
+ * 
  * @author animesh.kumar
- *
+ * 
  */
-public interface EnhancedEntity
-{
+public interface EnhancedEntity {
 
-    /**
-     * Map to hold foreign relationships Key=>property Value=>Set of foreign @Entity
-     * ids.
-     *
-     * @return the foreign keys map
-     */
-    Map<String, Set<String>> getForeignKeysMap();
+	/**
+	 * Map to hold foreign relationships Key=>property Value=>Set of foreign @Entity
+	 * ids.
+	 * 
+	 * @return the foreign keys map
+	 */
+	Map<String, Set<String>> getForeignKeysMap();
 
-    /**
-     * Gets the entity.
-     *
-     * @return the entity
-     * @Entity that is proxied
-     */
-    Object getEntity();
+	/**
+	 * Gets the entity.
+	 * 
+	 * @return the entity
+	 * @Entity that is proxied
+	 */
+	Object getEntity();
 
-    /**
-     * Id of @Entity object.
-     *
-     * @return the id
-     */
-    String getId();
+	/**
+	 * Id of @Entity object.
+	 * 
+	 * @return the id
+	 */
+	String getId();
 }

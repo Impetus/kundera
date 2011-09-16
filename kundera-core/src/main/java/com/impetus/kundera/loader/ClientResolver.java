@@ -23,74 +23,61 @@ import com.impetus.kundera.Client;
 /**
  * @author impetus
  */
-public final class ClientResolver
-{
+public final class ClientResolver {
 
-    static Map<ClientIdentifier, Client> clientsNew = new HashMap<ClientIdentifier, Client>();
+	static Map<ClientIdentifier, Client> clientsNew = new HashMap<ClientIdentifier, Client>();
 
-    /**
-     *
-     * @param clientIdentifier
-     * @return
-     */
-    public static Client getClient(ClientIdentifier clientIdentifier)
-    {
-        if (clientsNew.containsKey(clientIdentifier))
-        {
-            return clientsNew.get(clientIdentifier);
-        }
-        else
-        {
-            return loadNewProxyInstance(clientIdentifier);
-        }
-    }
+	/**
+	 * 
+	 * @param clientIdentifier
+	 * @return
+	 */
+	public static Client getClient(ClientIdentifier clientIdentifier) {
+		if (clientsNew.containsKey(clientIdentifier)) {
+			return clientsNew.get(clientIdentifier);
+		} else {
+			return loadNewProxyInstance(clientIdentifier);
+		}
+	}
 
-    private static Client loadNewProxyInstance(ClientIdentifier clientIdentifier)
-    {
-        Client proxy = null;
-        try
-        {
-            if (clientIdentifier.getClientType().equals(ClientType.HBASE))
-            {
-                proxy = (Client) Class.forName("com.impetus.client.hbase.HBaseClient").newInstance();
-            }
-            else if (clientIdentifier.getClientType().equals(ClientType.PELOPS))
-            {
-                proxy = (Client) Class.forName("com.impetus.client.cassandra.pelops.PelopsClient").newInstance();
-            }
-            else if (clientIdentifier.getClientType().equals(ClientType.THRIFT))
-            {
-                proxy = (Client) Class.forName("com.impetus.client.cassandra.thrift.ThriftClient").newInstance();
-            }
-            else if (clientIdentifier.getClientType().equals(ClientType.MONGODB))
-            {
-                proxy = (Client) Class.forName("com.impetus.client.mongodb.MongoDBClient").newInstance();
-            }
-        }
-        catch (InstantiationException e)
-        {
-            throw new ClientResolverException(e.getMessage());
-        }
-        catch (IllegalAccessException e)
-        {
-            throw new ClientResolverException(e.getMessage());
-        }
-        catch (ClassNotFoundException e)
-        {
-            throw new ClientResolverException(e.getMessage());
-        }
+	private static Client loadNewProxyInstance(ClientIdentifier clientIdentifier) {
+		Client proxy = null;
+		try {
+			if (clientIdentifier.getClientType().equals(ClientType.HBASE)) {
+				proxy = (Client) Class.forName(
+						"com.impetus.client.hbase.HBaseClient").newInstance();
+			} else if (clientIdentifier.getClientType().equals(
+					ClientType.PELOPS)) {
+				proxy = (Client) Class.forName(
+						"com.impetus.client.cassandra.pelops.PelopsClient")
+						.newInstance();
+			} else if (clientIdentifier.getClientType().equals(
+					ClientType.THRIFT)) {
+				proxy = (Client) Class.forName(
+						"com.impetus.client.cassandra.thrift.ThriftClient")
+						.newInstance();
+			} else if (clientIdentifier.getClientType().equals(
+					ClientType.MONGODB)) {
+				proxy = (Client) Class.forName(
+						"com.impetus.client.mongodb.MongoDBClient")
+						.newInstance();
+			}
+		} catch (InstantiationException e) {
+			throw new ClientResolverException(e.getMessage());
+		} catch (IllegalAccessException e) {
+			throw new ClientResolverException(e.getMessage());
+		} catch (ClassNotFoundException e) {
+			throw new ClientResolverException(e.getMessage());
+		}
 
-        if (proxy != null)
-        {
-            proxy.setContactNodes(clientIdentifier.getNode());
-            proxy.setDefaultPort(clientIdentifier.getPort());
-            proxy.setSchema(clientIdentifier.getKeyspace());
-            clientsNew.put(clientIdentifier, proxy);
-        }
-        else
-        {
-            throw new ClientResolverException("No client configured:");
-        }
-        return proxy;
-    }
+		if (proxy != null) {
+			proxy.setContactNodes(clientIdentifier.getNode());
+			proxy.setDefaultPort(clientIdentifier.getPort());
+			proxy.setSchema(clientIdentifier.getKeyspace());
+			clientsNew.put(clientIdentifier, proxy);
+		} else {
+			throw new ClientResolverException("No client configured:");
+		}
+		return proxy;
+	}
 }

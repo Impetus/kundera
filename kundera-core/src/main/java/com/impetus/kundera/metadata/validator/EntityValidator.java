@@ -17,18 +17,17 @@ package com.impetus.kundera.metadata.validator;
 
 /**
  * Interface to validate an entity.
- *
+ * 
  * @author animesh.kumar
  */
-public interface EntityValidator
-{
+public interface EntityValidator {
 
-    /**
-     * Validate.
-     *
-     * @param clazz
-     *            the clazz
-     */
-    void validate(Class<?> clazz);
+	/**
+	 * Validate.
+	 * 
+	 * @param clazz
+	 *            the clazz
+	 */
+	void validate(Class<?> clazz);
 
 }

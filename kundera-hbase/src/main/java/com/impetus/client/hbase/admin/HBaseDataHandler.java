@@ -56,366 +56,385 @@ import com.impetus.kundera.proxy.EnhancedEntity;
 /**
  * @author impetus
  */
-public class HBaseDataHandler implements DataHandler
-{
-    /** the log used by this class. */
-    private static Log log = LogFactory.getLog(HBaseDataHandler.class);
+public class HBaseDataHandler implements DataHandler {
+	/** the log used by this class. */
+	private static Log log = LogFactory.getLog(HBaseDataHandler.class);
 
-    private HBaseConfiguration conf;
+	private HBaseConfiguration conf;
 
-    private HBaseAdmin admin;
+	private HBaseAdmin admin;
 
-    private Reader hbaseReader = new HBaseReader();
+	private Reader hbaseReader = new HBaseReader();
 
-    private Writer hbaseWriter = new HBaseWriter();
+	private Writer hbaseWriter = new HBaseWriter();
 
-    public HBaseDataHandler(String hostName, String port)
-    {
-        try
-        {
-            init(hostName, port);
-        }
-        catch (MasterNotRunningException e)
-        {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
+	public HBaseDataHandler(String hostName, String port) {
+		try {
+			init(hostName, port);
+		} catch (MasterNotRunningException e) {
+			throw new RuntimeException(e.getMessage());
+		}
+	}
 
-    @Override
-    public void createTableIfDoesNotExist(final String tableName, final String... colFamily)
-            throws MasterNotRunningException, IOException
-    {
-        if (!admin.tableExists(Bytes.toBytes(tableName)))
-        {
-            HTableDescriptor htDescriptor = new HTableDescriptor(tableName);
-            for (String columnFamily : colFamily)
-            {
-                HColumnDescriptor familyMetadata = new HColumnDescriptor(columnFamily);
-                htDescriptor.addFamily(familyMetadata);
-            }
+	@Override
+	public void createTableIfDoesNotExist(final String tableName,
+			final String... colFamily) throws MasterNotRunningException,
+			IOException {
+		if (!admin.tableExists(Bytes.toBytes(tableName))) {
+			HTableDescriptor htDescriptor = new HTableDescriptor(tableName);
+			for (String columnFamily : colFamily) {
+				HColumnDescriptor familyMetadata = new HColumnDescriptor(
+						columnFamily);
+				htDescriptor.addFamily(familyMetadata);
+			}
 
-            admin.createTable(htDescriptor);
-        }
-    }    
+			admin.createTable(htDescriptor);
+		}
+	}
 
-    private void addColumnFamilyToTable(String tableName, String columnFamilyName) throws IOException
-    {        
-        HColumnDescriptor cfDesciptor = new HColumnDescriptor(columnFamilyName);      
-        
-        try
-        {            
-            if(admin.tableExists(tableName)) {
-                
-                //Before any modification to table schema, it's necessary to disable it                
-                if(admin.isTableEnabled(tableName)) {
-                    admin.disableTable(tableName);
-                }                
-                admin.addColumn(tableName, cfDesciptor);
-                
-                //Enable table once done
-                admin.enableTable(tableName);
-            } else {
-                log.warn("Table " + tableName + " doesn't exist, so no question of adding column family " + columnFamilyName + " to it!");
-            }                                
-        }
-        catch (IOException e)
-        {
-            log.error("Error while adding column family " + columnFamilyName + " to table " + tableName);
-            throw e;
-        }
-        
-    }
+	private void addColumnFamilyToTable(String tableName,
+			String columnFamilyName) throws IOException {
+		HColumnDescriptor cfDesciptor = new HColumnDescriptor(columnFamilyName);
 
-    @Override
-    public <E> E readData(final String tableName, Class<E> clazz, EntityMetadata m, final String rowKey) throws IOException
-    {        
-        
-        E e = null;
-        try
-        {
-            e = clazz.newInstance();    
-            
-            //Load raw data from HBase 
-            HBaseData data = hbaseReader.LoadData(gethTable(tableName), rowKey);                          
-            
-            //Populate raw data from HBase into entity
-            populateEntityFromHbaseData(e, data, m, rowKey);           
-        }
-        catch (InstantiationException e1)
-        {
-            log.error("Error while creating an instance of " + clazz);
-            return e;
-        }
-        catch (IllegalAccessException e1)
-        {
-            log.error("Illegal Access while reading data from " + tableName + ";Details: " + e1.getMessage());
-            return e;
-        }
-        return e;        
-    }
+		try {
+			if (admin.tableExists(tableName)) {
 
-    @Override
-    public void writeData(String tableName, EntityMetadata m, EnhancedEntity e)
-            throws IOException
-    {        
-        
-        //Now persist column families in the table
-        List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList();  //Yes, for HBase they are called column families
-        for(EmbeddedColumn columnFamily : columnFamilies) {
-            String columnFamilyName = columnFamily.getName();
-            Field columnFamilyField = columnFamily.getField();            
-            Object columnFamilyObject = null;
-            try
-            {
-                columnFamilyObject = PropertyAccessorHelper.getObject(e.getEntity(), columnFamilyField);
-            }
-            catch (PropertyAccessException e1)
-            {
-                log.error("Error while getting " + columnFamilyName + " field from entity " + e.getEntity());
-                return;
-            }
-            
-            if(columnFamilyObject == null) {
-                return;
-            }
-            
-            List<Column> columns = columnFamily.getColumns();
-            
-            //TODO: Handle Embedded collections differently
-            //Write Column family which was Embedded collection in entity
-            if(columnFamilyObject instanceof Collection) {
-                String dynamicCFName = null;        
-                
-                ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
-                // Check whether it's first time insert or updation
-                if (ecCacheHandler.isCacheEmpty())
-                { // First time insert
-                    int count = 0;
-                    for (Object obj : (Collection) columnFamilyObject)
-                    {
-                        dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
-                        addColumnFamilyToTable(tableName, dynamicCFName);
-                        
-                        hbaseWriter.writeColumns(gethTable(tableName), dynamicCFName, e.getId(), columns, obj);
-                        count++;
-                    }
-                    
-                } else {
-                    // Updation
-                    // Check whether this object is already in cache, which
-                    // means we already have a column family with that name
-                    // Otherwise we need to generate a fresh column family name
-                    int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(e.getId());                    
-                    for (Object obj : (Collection) columnFamilyObject)
-                    {
-                        dynamicCFName = ecCacheHandler.getElementCollectionObjectName(e.getId(), obj);
-                        if (dynamicCFName == null)
-                        { // Fresh row
-                            dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
-                                    + (++lastEmbeddedObjectCount);
-                        }
-                    }
-                    
-                    //Clear embedded collection cache for GC
-                    ecCacheHandler.clearCache();
-                }                
-                
-            } else {
-                //Write Column family which was Embedded object in entity
-                hbaseWriter.writeColumns(gethTable(tableName), columnFamilyName, e.getId(), columns, columnFamilyObject);
-            }
-            
-        }  
-        
-        
-        //HBase tables may have columns alongwith column families
-        List<Column> columns = m.getColumnsAsList();    
-        if(columns != null && ! columns.isEmpty()) {
-            hbaseWriter.writeColumns(gethTable(tableName), e.getId(), columns, e.getEntity());
-        }
-        
-        //Persist relationships as a column in newly created Column family by Kundera
-        List<Relation> relations = m.getRelations();
-        for (Map.Entry<String, Set<String>> entry : e.getForeignKeysMap().entrySet())
-        {
-            String property = entry.getKey();
-            Set<String> foreignKeys = entry.getValue();
+				// Before any modification to table schema, it's necessary to
+				// disable it
+				if (admin.isTableEnabled(tableName)) {
+					admin.disableTable(tableName);
+				}
+				admin.addColumn(tableName, cfDesciptor);
 
-            String keys = MetadataUtils.serializeKeys(foreignKeys);
-            if (null != keys)
-            {   //EntityMetadata.Column col = new EntityMetadata().Column(property, null);
+				// Enable table once done
+				admin.enableTable(tableName);
+			} else {
+				log.warn("Table "
+						+ tableName
+						+ " doesn't exist, so no question of adding column family "
+						+ columnFamilyName + " to it!");
+			}
+		} catch (IOException e) {
+			log.error("Error while adding column family " + columnFamilyName
+					+ " to table " + tableName);
+			throw e;
+		}
 
+	}
 
-                List<Column> columns2 = new ArrayList<Column>();
-                //columns.add(col);
-            }
-            hbaseWriter.writeColumns(gethTable(tableName), Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME, e.getId(), columns, keys);
-        }
-        
-                
-    }    
+	@Override
+	public <E> E readData(final String tableName, Class<E> clazz,
+			EntityMetadata m, final String rowKey) throws IOException {
 
+		E e = null;
+		try {
+			e = clazz.newInstance();
 
-    private void loadConfiguration(final String hostName, final String port) throws MasterNotRunningException
-    {
-        Configuration hadoopConf = new Configuration();
-        hadoopConf.set("hbase.master", hostName + ":" + port);
-        conf = new HBaseConfiguration(hadoopConf);
-        getHBaseAdmin();
-    }
+			// Load raw data from HBase
+			HBaseData data = hbaseReader.LoadData(gethTable(tableName), rowKey);
 
-    /**
-     * 
-     * @param hostName
-     * @param port
-     * @throws MasterNotRunningException
-     */
-    private void init(final String hostName, final String port) throws MasterNotRunningException
-    {
-        if (conf == null)
-        {
-            loadConfiguration(hostName, port);
-        }
-    }
+			// Populate raw data from HBase into entity
+			populateEntityFromHbaseData(e, data, m, rowKey);
+		} catch (InstantiationException e1) {
+			log.error("Error while creating an instance of " + clazz);
+			return e;
+		} catch (IllegalAccessException e1) {
+			log.error("Illegal Access while reading data from " + tableName
+					+ ";Details: " + e1.getMessage());
+			return e;
+		}
+		return e;
+	}
 
-    /**
-     * @throws MasterNotRunningException
-     */
-    private void getHBaseAdmin() throws MasterNotRunningException
-    {
-        admin = new HBaseAdmin(conf);
-    }
+	@Override
+	public void writeData(String tableName, EntityMetadata m, EnhancedEntity e)
+			throws IOException {
 
-    private HTable gethTable(final String tableName) throws IOException
-    {
-        return new HTable(conf, tableName);
-    }
+		// Now persist column families in the table
+		List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList(); // Yes,
+																			// for
+																			// HBase
+																			// they
+																			// are
+																			// called
+																			// column
+																			// families
+		for (EmbeddedColumn columnFamily : columnFamilies) {
+			String columnFamilyName = columnFamily.getName();
+			Field columnFamilyField = columnFamily.getField();
+			Object columnFamilyObject = null;
+			try {
+				columnFamilyObject = PropertyAccessorHelper.getObject(
+						e.getEntity(), columnFamilyField);
+			} catch (PropertyAccessException e1) {
+				log.error("Error while getting " + columnFamilyName
+						+ " field from entity " + e.getEntity());
+				return;
+			}
 
-    @Override
-    public void shutdown()
-    {
-        try
-        {
-            admin.shutdown();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-    
-    //TODO: Scope of performance improvement in this method
-    private void populateEntityFromHbaseData(Object entity, HBaseData data, EntityMetadata m, String rowKey)
-    {       
-        try
-        {  
-            /*Set Row Key*/
-            PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), rowKey);  
-            
-            /*Set each column families*/
-            List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList();  //Yes, for HBase they are called column families
-            for(EmbeddedColumn columnFamily : columnFamilies) {            
-                Field columnFamilyFieldInEntity = columnFamily.getField();
-                Class<?> columnFamilyClass = columnFamilyFieldInEntity.getType();
-                
-                //Get a name->field map for columns in this column family
-                Map<String, Field> columnNameToFieldMap = MetadataUtils.createColumnsFieldMap(m, columnFamily);  
-                
-                //Raw data retrieved from HBase for a particular row key (contains all column families)
-                List<KeyValue> hbaseValues = data.getColumns();  
-                
-                //Column family can be either @Embedded or @EmbeddedCollection
-                if(Collection.class.isAssignableFrom(columnFamilyClass)) {
-                    
-                    Field embeddedCollectionField = columnFamily.getField();                                    
-                    Object[] embeddedObjectArr = new Object[hbaseValues.size()];  //Array to hold column family objects
-                    
-                    
-                    Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
-                    int prevCFNameCounter = 0;    //Previous CF name counter
-                    for (KeyValue colData : hbaseValues)
-                    {
-                        String cfInHbase = Bytes.toString(colData.getFamily());                   
-                        //Only populate those data from Hbase into entity that matches with column family name 
-                        // in the format <Collection field name>#<sequence count>
-                        if(! cfInHbase.startsWith(columnFamily.getName())) {
-                            continue;
-                        }
-                        
-                        String cfNamePostfix = MetadataUtils.getEmbeddedCollectionPostfix(cfInHbase);                        
-                        int cfNameCounter = Integer.parseInt(cfNamePostfix);
-                        if(cfNameCounter != prevCFNameCounter) {
-                            prevCFNameCounter = cfNameCounter;
-                            
-                            //Fresh embedded object for the next column family in collection
-                            embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
-                        }                        
-                        
-                        //Set Hbase data into the embedded object
-                        setHBaseDataIntoObject(colData, columnNameToFieldMap, embeddedObject);              
-                        
-                        embeddedObjectArr[cfNameCounter] = embeddedObject;                        
-                        
-                        //Save embedded object into Cache, needed while updation and deletion
-                        ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(rowKey, embeddedObject, cfInHbase);
-                    }             
-                    
-                    //Collection to hold column family objects
-                    Collection embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
-                    embeddedCollection.addAll(Arrays.asList(embeddedObjectArr));
-                    embeddedCollection.removeAll(Collections.singletonList(null));
-                    embeddedObjectArr = null;    //Eligible for GC
-                    
-                    //Now, set the embedded collection into entity
-                    if(embeddedCollection != null && ! embeddedCollection.isEmpty()) {
-                        PropertyAccessorHelper.set(entity, embeddedCollectionField, embeddedCollection);
-                    }
-                    
-                } else {
-                    Object columnFamilyObj = columnFamilyClass.newInstance();                                      
-                    
-                    for (KeyValue colData : hbaseValues)
-                    {
-                        String cfInHbase = Bytes.toString(colData.getFamily());
-                        
-                        if(!cfInHbase.equals(columnFamily.getName())) {
-                            continue;
-                        }                        
-                        
-                        //Set Hbase data into the column family object
-                        setHBaseDataIntoObject(colData, columnNameToFieldMap, columnFamilyObj);                                
-                    }
-                    PropertyAccessorHelper.set(entity, columnFamilyFieldInEntity, columnFamilyObj);   
-                }               
-                             
-            }         
-            
-        }        
-        catch (PropertyAccessException e1)
-        {
-            throw new RuntimeException(e1.getMessage());
-        } 
-        catch(InstantiationException e1) 
-        {
-            throw new RuntimeException(e1.getMessage());
-        }
-        catch(IllegalAccessException e1) 
-        {
-            throw new RuntimeException(e1.getMessage());
-        }
-    }
-    
-    private void setHBaseDataIntoObject(KeyValue colData, Map<String, Field> columnNameToFieldMap, Object columnFamilyObj) 
-        throws PropertyAccessException {      
-        
-        String colName = Bytes.toString(colData.getQualifier());
-        byte[] columnValue = colData.getValue();                 
+			if (columnFamilyObject == null) {
+				return;
+			}
 
-        // Get Column from metadata
-        Field columnField = columnNameToFieldMap.get(colName);
-        if(columnField != null) {
-            PropertyAccessorHelper.set(columnFamilyObj, columnField, columnValue);
-        }                        
-    }
+			List<Column> columns = columnFamily.getColumns();
+
+			// TODO: Handle Embedded collections differently
+			// Write Column family which was Embedded collection in entity
+			if (columnFamilyObject instanceof Collection) {
+				String dynamicCFName = null;
+
+				ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager
+						.getInstance();
+				// Check whether it's first time insert or updation
+				if (ecCacheHandler.isCacheEmpty()) { // First time insert
+					int count = 0;
+					for (Object obj : (Collection) columnFamilyObject) {
+						dynamicCFName = columnFamilyName
+								+ Constants.EMBEDDED_COLUMN_NAME_DELIMITER
+								+ count;
+						addColumnFamilyToTable(tableName, dynamicCFName);
+
+						hbaseWriter.writeColumns(gethTable(tableName),
+								dynamicCFName, e.getId(), columns, obj);
+						count++;
+					}
+
+				} else {
+					// Updation
+					// Check whether this object is already in cache, which
+					// means we already have a column family with that name
+					// Otherwise we need to generate a fresh column family name
+					int lastEmbeddedObjectCount = ecCacheHandler
+							.getLastElementCollectionObjectCount(e.getId());
+					for (Object obj : (Collection) columnFamilyObject) {
+						dynamicCFName = ecCacheHandler
+								.getElementCollectionObjectName(e.getId(), obj);
+						if (dynamicCFName == null) { // Fresh row
+							dynamicCFName = columnFamilyName
+									+ Constants.EMBEDDED_COLUMN_NAME_DELIMITER
+									+ (++lastEmbeddedObjectCount);
+						}
+					}
+
+					// Clear embedded collection cache for GC
+					ecCacheHandler.clearCache();
+				}
+
+			} else {
+				// Write Column family which was Embedded object in entity
+				hbaseWriter.writeColumns(gethTable(tableName),
+						columnFamilyName, e.getId(), columns,
+						columnFamilyObject);
+			}
+
+		}
+
+		// HBase tables may have columns alongwith column families
+		List<Column> columns = m.getColumnsAsList();
+		if (columns != null && !columns.isEmpty()) {
+			hbaseWriter.writeColumns(gethTable(tableName), e.getId(), columns,
+					e.getEntity());
+		}
+
+		// Persist relationships as a column in newly created Column family by
+		// Kundera
+		List<Relation> relations = m.getRelations();
+		for (Map.Entry<String, Set<String>> entry : e.getForeignKeysMap()
+				.entrySet()) {
+			String property = entry.getKey();
+			Set<String> foreignKeys = entry.getValue();
+
+			String keys = MetadataUtils.serializeKeys(foreignKeys);
+			if (null != keys) { // EntityMetadata.Column col = new
+								// EntityMetadata().Column(property, null);
+
+				List<Column> columns2 = new ArrayList<Column>();
+				// columns.add(col);
+			}
+			hbaseWriter.writeColumns(gethTable(tableName),
+					Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME, e.getId(),
+					columns, keys);
+		}
+
+	}
+
+	private void loadConfiguration(final String hostName, final String port)
+			throws MasterNotRunningException {
+		Configuration hadoopConf = new Configuration();
+		hadoopConf.set("hbase.master", hostName + ":" + port);
+		conf = new HBaseConfiguration(hadoopConf);
+		getHBaseAdmin();
+	}
+
+	/**
+	 * 
+	 * @param hostName
+	 * @param port
+	 * @throws MasterNotRunningException
+	 */
+	private void init(final String hostName, final String port)
+			throws MasterNotRunningException {
+		if (conf == null) {
+			loadConfiguration(hostName, port);
+		}
+	}
+
+	/**
+	 * @throws MasterNotRunningException
+	 */
+	private void getHBaseAdmin() throws MasterNotRunningException {
+		admin = new HBaseAdmin(conf);
+	}
+
+	private HTable gethTable(final String tableName) throws IOException {
+		return new HTable(conf, tableName);
+	}
+
+	@Override
+	public void shutdown() {
+		try {
+			admin.shutdown();
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage());
+		}
+	}
+
+	// TODO: Scope of performance improvement in this method
+	private void populateEntityFromHbaseData(Object entity, HBaseData data,
+			EntityMetadata m, String rowKey) {
+		try {
+			/* Set Row Key */
+			PropertyAccessorHelper.set(entity, m.getIdColumn().getField(),
+					rowKey);
+
+			/* Set each column families */
+			List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList(); // Yes,
+																				// for
+																				// HBase
+																				// they
+																				// are
+																				// called
+																				// column
+																				// families
+			for (EmbeddedColumn columnFamily : columnFamilies) {
+				Field columnFamilyFieldInEntity = columnFamily.getField();
+				Class<?> columnFamilyClass = columnFamilyFieldInEntity
+						.getType();
+
+				// Get a name->field map for columns in this column family
+				Map<String, Field> columnNameToFieldMap = MetadataUtils
+						.createColumnsFieldMap(m, columnFamily);
+
+				// Raw data retrieved from HBase for a particular row key
+				// (contains all column families)
+				List<KeyValue> hbaseValues = data.getColumns();
+
+				// Column family can be either @Embedded or @EmbeddedCollection
+				if (Collection.class.isAssignableFrom(columnFamilyClass)) {
+
+					Field embeddedCollectionField = columnFamily.getField();
+					Object[] embeddedObjectArr = new Object[hbaseValues.size()]; // Array
+																					// to
+																					// hold
+																					// column
+																					// family
+																					// objects
+
+					Object embeddedObject = MetadataUtils
+							.getEmbeddedGenericObjectInstance(embeddedCollectionField);
+					int prevCFNameCounter = 0; // Previous CF name counter
+					for (KeyValue colData : hbaseValues) {
+						String cfInHbase = Bytes.toString(colData.getFamily());
+						// Only populate those data from Hbase into entity that
+						// matches with column family name
+						// in the format <Collection field name>#<sequence
+						// count>
+						if (!cfInHbase.startsWith(columnFamily.getName())) {
+							continue;
+						}
+
+						String cfNamePostfix = MetadataUtils
+								.getEmbeddedCollectionPostfix(cfInHbase);
+						int cfNameCounter = Integer.parseInt(cfNamePostfix);
+						if (cfNameCounter != prevCFNameCounter) {
+							prevCFNameCounter = cfNameCounter;
+
+							// Fresh embedded object for the next column family
+							// in collection
+							embeddedObject = MetadataUtils
+									.getEmbeddedGenericObjectInstance(embeddedCollectionField);
+						}
+
+						// Set Hbase data into the embedded object
+						setHBaseDataIntoObject(colData, columnNameToFieldMap,
+								embeddedObject);
+
+						embeddedObjectArr[cfNameCounter] = embeddedObject;
+
+						// Save embedded object into Cache, needed while
+						// updation and deletion
+						ElementCollectionCacheManager.getInstance()
+								.addElementCollectionCacheMapping(rowKey,
+										embeddedObject, cfInHbase);
+					}
+
+					// Collection to hold column family objects
+					Collection embeddedCollection = MetadataUtils
+							.getEmbeddedCollectionInstance(embeddedCollectionField);
+					embeddedCollection.addAll(Arrays.asList(embeddedObjectArr));
+					embeddedCollection.removeAll(Collections
+							.singletonList(null));
+					embeddedObjectArr = null; // Eligible for GC
+
+					// Now, set the embedded collection into entity
+					if (embeddedCollection != null
+							&& !embeddedCollection.isEmpty()) {
+						PropertyAccessorHelper.set(entity,
+								embeddedCollectionField, embeddedCollection);
+					}
+
+				} else {
+					Object columnFamilyObj = columnFamilyClass.newInstance();
+
+					for (KeyValue colData : hbaseValues) {
+						String cfInHbase = Bytes.toString(colData.getFamily());
+
+						if (!cfInHbase.equals(columnFamily.getName())) {
+							continue;
+						}
+
+						// Set Hbase data into the column family object
+						setHBaseDataIntoObject(colData, columnNameToFieldMap,
+								columnFamilyObj);
+					}
+					PropertyAccessorHelper.set(entity,
+							columnFamilyFieldInEntity, columnFamilyObj);
+				}
+
+			}
+
+		} catch (PropertyAccessException e1) {
+			throw new RuntimeException(e1.getMessage());
+		} catch (InstantiationException e1) {
+			throw new RuntimeException(e1.getMessage());
+		} catch (IllegalAccessException e1) {
+			throw new RuntimeException(e1.getMessage());
+		}
+	}
+
+	private void setHBaseDataIntoObject(KeyValue colData,
+			Map<String, Field> columnNameToFieldMap, Object columnFamilyObj)
+			throws PropertyAccessException {
+
+		String colName = Bytes.toString(colData.getQualifier());
+		byte[] columnValue = colData.getValue();
+
+		// Get Column from metadata
+		Field columnField = columnNameToFieldMap.get(colName);
+		if (columnField != null) {
+			PropertyAccessorHelper.set(columnFamilyObj, columnField,
+					columnValue);
+		}
+	}
 
 }

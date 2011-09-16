@@ -31,30 +31,30 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  * InternalCallback methods must NOT accept any parameter. 7. EntityListeners
  * are state-less. 8. EnternalCallbackMethods must be fired before
  * InternalCallbackMethods.
- *
+ * 
  * @author animesh.kumar
  */
 
-public class CacheableAnnotationProcessor implements MetadataProcessor
-{
+public class CacheableAnnotationProcessor implements MetadataProcessor {
 
-    /** the log used by this class. */
-    private static Log log = LogFactory.getLog(CacheableAnnotationProcessor.class);
+	/** the log used by this class. */
+	private static Log log = LogFactory
+			.getLog(CacheableAnnotationProcessor.class);
 
-    /*
-     * @see
-     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-     * com.impetus.kundera.metadata.EntityMetadata)
-     */
-    @Override
-    public final void process(final Class<?> entityClass, EntityMetadata metadata)
-    {
+	/*
+	 * @see
+	 * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
+	 * com.impetus.kundera.metadata.EntityMetadata)
+	 */
+	@Override
+	public final void process(final Class<?> entityClass,
+			EntityMetadata metadata) {
 
-        Cacheable cacheable = (Cacheable) entityClass.getAnnotation(Cacheable.class);
+		Cacheable cacheable = (Cacheable) entityClass
+				.getAnnotation(Cacheable.class);
 
-        if (null != cacheable)
-        {
-            metadata.setCacheable(cacheable.value());
-        }
-    }
+		if (null != cacheable) {
+			metadata.setCacheable(cacheable.value());
+		}
+	}
 }

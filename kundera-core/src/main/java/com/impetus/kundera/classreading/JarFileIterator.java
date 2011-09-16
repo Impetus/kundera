@@ -24,189 +24,164 @@ import java.util.jar.JarInputStream;
 
 /**
  * Iterates through a Jar file for each file resource.
- *
+ * 
  * @author animesh.kumar
  */
-public final class JarFileIterator implements ResourceIterator
-{
+public final class JarFileIterator implements ResourceIterator {
 
-    /** The jar. */
-    private JarInputStream jar;
+	/** The jar. */
+	private JarInputStream jar;
 
-    /** The next. */
-    private JarEntry next;
+	/** The next. */
+	private JarEntry next;
 
-    /** The filter. */
-    private Filter filter;
+	/** The filter. */
+	private Filter filter;
 
-    /** The initial. */
-    private boolean initial = true;
+	/** The initial. */
+	private boolean initial = true;
 
-    /** The closed. */
-    private boolean closed = false;
+	/** The closed. */
+	private boolean closed = false;
 
-    /**
-     * Instantiates a new jar file iterator.
-     *
-     * @param file
-     *            the file
-     * @param filter
-     *            the filter
-     *
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
-     */
-    public JarFileIterator(File file, Filter filter) throws IOException
-    {
-        this(new FileInputStream(file), filter);
-    }
+	/**
+	 * Instantiates a new jar file iterator.
+	 * 
+	 * @param file
+	 *            the file
+	 * @param filter
+	 *            the filter
+	 * 
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
+	public JarFileIterator(File file, Filter filter) throws IOException {
+		this(new FileInputStream(file), filter);
+	}
 
-    /**
-     * Instantiates a new jar file iterator.
-     *
-     * @param is
-     *            the is
-     * @param filter
-     *            the filter
-     *
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
-     */
-    public JarFileIterator(InputStream is, Filter filter) throws IOException
-    {
-        this.filter = filter;
-        jar = new JarInputStream(is);
-    }
+	/**
+	 * Instantiates a new jar file iterator.
+	 * 
+	 * @param is
+	 *            the is
+	 * @param filter
+	 *            the filter
+	 * 
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
+	public JarFileIterator(InputStream is, Filter filter) throws IOException {
+		this.filter = filter;
+		jar = new JarInputStream(is);
+	}
 
-    /**
-     * Sets the next.
-     */
-    private void setNext()
-    {
-        initial = true;
-        try
-        {
-            if (next != null)
-            {
-                jar.closeEntry();
-            }
-            next = null;
+	/**
+	 * Sets the next.
+	 */
+	private void setNext() {
+		initial = true;
+		try {
+			if (next != null) {
+				jar.closeEntry();
+			}
+			next = null;
 
-            do
-            {
-                next = jar.getNextJarEntry();
-            }
-            while (next != null && (next.isDirectory() || (filter == null || !filter.accepts(next.getName()))));
+			do {
+				next = jar.getNextJarEntry();
+			} while (next != null
+					&& (next.isDirectory() || (filter == null || !filter
+							.accepts(next.getName()))));
 
-            if (next == null)
-            {
-                close();
-            }
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("failed to browse jar", e);
-        }
-    }
+			if (next == null) {
+				close();
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("failed to browse jar", e);
+		}
+	}
 
-    /* @see com.impetus.kundera.classreading.ResourceIterator#next() */
-    public InputStream next()
-    {
-        if (closed || (next == null && !initial))
-            return null;
-        setNext();
-        if (next == null)
-            return null;
-        return new InputStreamWrapper(jar);
-    }
+	/* @see com.impetus.kundera.classreading.ResourceIterator#next() */
+	public InputStream next() {
+		if (closed || (next == null && !initial))
+			return null;
+		setNext();
+		if (next == null)
+			return null;
+		return new InputStreamWrapper(jar);
+	}
 
-    /* @see com.impetus.kundera.classreading.ResourceIterator#close() */
-    public void close()
-    {
-        try
-        {
-            closed = true;
-            jar.close();
-        }
-        catch (IOException ignored)
-        {
+	/* @see com.impetus.kundera.classreading.ResourceIterator#close() */
+	public void close() {
+		try {
+			closed = true;
+			jar.close();
+		} catch (IOException ignored) {
 
-        }
+		}
 
-    }
+	}
 
-    /**
-     * The Class InputStreamWrapper.
-     */
-    class InputStreamWrapper extends InputStream
-    {
+	/**
+	 * The Class InputStreamWrapper.
+	 */
+	class InputStreamWrapper extends InputStream {
 
-        /** The delegate. */
-        private InputStream delegate;
+		/** The delegate. */
+		private InputStream delegate;
 
-        /**
-         * Instantiates a new input stream wrapper.
-         *
-         * @param delegate
-         *            the delegate
-         */
-        public InputStreamWrapper(InputStream delegate)
-        {
-            this.delegate = delegate;
-        }
+		/**
+		 * Instantiates a new input stream wrapper.
+		 * 
+		 * @param delegate
+		 *            the delegate
+		 */
+		public InputStreamWrapper(InputStream delegate) {
+			this.delegate = delegate;
+		}
 
-        /* @see java.io.InputStream#read() */
-        public int read() throws IOException
-        {
-            return delegate.read();
-        }
+		/* @see java.io.InputStream#read() */
+		public int read() throws IOException {
+			return delegate.read();
+		}
 
-        /* @see java.io.InputStream#read(byte[]) */
-        public int read(byte[] bytes) throws IOException
-        {
-            return delegate.read(bytes);
-        }
+		/* @see java.io.InputStream#read(byte[]) */
+		public int read(byte[] bytes) throws IOException {
+			return delegate.read(bytes);
+		}
 
-        /* @see java.io.InputStream#read(byte[], int, int) */
-        public int read(byte[] bytes, int i, int i1) throws IOException
-        {
-            return delegate.read(bytes, i, i1);
-        }
+		/* @see java.io.InputStream#read(byte[], int, int) */
+		public int read(byte[] bytes, int i, int i1) throws IOException {
+			return delegate.read(bytes, i, i1);
+		}
 
-        /* @see java.io.InputStream#skip(long) */
-        public long skip(long l) throws IOException
-        {
-            return delegate.skip(l);
-        }
+		/* @see java.io.InputStream#skip(long) */
+		public long skip(long l) throws IOException {
+			return delegate.skip(l);
+		}
 
-        /* @see java.io.InputStream#available() */
-        public int available() throws IOException
-        {
-            return delegate.available();
-        }
+		/* @see java.io.InputStream#available() */
+		public int available() throws IOException {
+			return delegate.available();
+		}
 
-        /* @see java.io.InputStream#close() */
-        public void close() throws IOException
-        {
-            // ignored
-        }
+		/* @see java.io.InputStream#close() */
+		public void close() throws IOException {
+			// ignored
+		}
 
-        /* @see java.io.InputStream#mark(int) */
-        public void mark(int i)
-        {
-            delegate.mark(i);
-        }
+		/* @see java.io.InputStream#mark(int) */
+		public void mark(int i) {
+			delegate.mark(i);
+		}
 
-        /* @see java.io.InputStream#reset() */
-        public void reset() throws IOException
-        {
-            delegate.reset();
-        }
+		/* @see java.io.InputStream#reset() */
+		public void reset() throws IOException {
+			delegate.reset();
+		}
 
-        /* @see java.io.InputStream#markSupported() */
-        public boolean markSupported()
-        {
-            return delegate.markSupported();
-        }
-    }
+		/* @see java.io.InputStream#markSupported() */
+		public boolean markSupported() {
+			return delegate.markSupported();
+		}
+	}
 }
