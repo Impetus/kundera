@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.ejb.event.CallbackMethod;
 import com.impetus.kundera.loader.DBType;
 

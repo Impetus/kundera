@@ -43,10 +43,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Client;
-import com.impetus.kundera.db.DataManager;
 import com.impetus.kundera.ejb.event.EntityEventDispatcher;
 import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.loader.Configuration;
 import com.impetus.kundera.metadata.MetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
@@ -70,9 +68,6 @@ public class EntityManagerImpl implements KunderaEntityManager
 
     /** The client. */
     private Client client;
-
-    /** The data manager. */
-    private DataManager dataManager;
 
     /** The index manager. */
     private IndexManager indexManager;
@@ -105,7 +100,6 @@ public class EntityManagerImpl implements KunderaEntityManager
         this.factory = factory;
         this.metadataManager = factory.getMetadataManager();
         this.persistenceUnitName = factory.getPersistenceUnitName();
-        //dataManager = new DataManager(this);
         entityResolver = new EntityResolver(this);
         session = new EntityManagerSession(this);
         eventDispatcher = new EntityEventDispatcher();
@@ -165,7 +159,8 @@ public class EntityManagerImpl implements KunderaEntityManager
         {
             EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
             m.setDBType(this.client.getType());
-            E e = dataManager.find(entityClass, m, primaryKey.toString());
+            
+            E e = client.loadData(this, primaryKey.toString(), m);            
             if (e != null)
             {
                 session.store(primaryKey, e, m.isCacheable());
@@ -206,7 +201,7 @@ public class EntityManagerImpl implements KunderaEntityManager
             String[] ids = Arrays.asList(primaryKeys).toArray(new String[] {});
             EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
             m.setDBType(this.client.getType());
-            List<E> entities = dataManager.find(entityClass, m, ids);
+            List<E> entities = client.loadData(this, m, ids);           	
 
             // TODO: cache entities for future lookup
             return entities;
@@ -243,7 +238,8 @@ public class EntityManagerImpl implements KunderaEntityManager
                 eventDispatcher.fireEventListeners(m, o, PreRemove.class);
 
                 session.remove(o.getEntity().getClass(), o.getId());
-                dataManager.remove(o, m);
+                
+                client.delete(m.getSchema(), m.getTableName(), o.getId());                
                 getIndexManager().remove(m, o.getEntity(), o.getId());
 
                 // fire PostRemove events
@@ -283,8 +279,8 @@ public class EntityManagerImpl implements KunderaEntityManager
 
                 // fire PreUpdate events
                 eventDispatcher.fireEventListeners(metadata, o, PreUpdate.class);
-
-                dataManager.merge(o, metadata);
+                client.writeData(this, o, metadata);               
+                
                 getIndexManager().update(metadata, o.getEntity());
 
                 // fire PreUpdate events
@@ -357,7 +353,8 @@ public class EntityManagerImpl implements KunderaEntityManager
             getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
 
             // TODO uncomment
-            getDataManager().persist(e, metadata);
+            
+            client.writeData(this, e, metadata);            
             getIndexManager().write(metadata, e.getEntity());
 
             // fire post-persist events
@@ -481,11 +478,11 @@ public class EntityManagerImpl implements KunderaEntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* @see javax.persistence.EntityManager#getTransaction() */
+    
     @Override
     public final EntityTransaction getTransaction()
     {
-        return new EntityTransactionImpl();
+    	throw new NotImplementedException("Not yet implemented");
     }
 
     /* @see javax.persistence.EntityManager#isOpen() */
@@ -766,16 +763,6 @@ public class EntityManagerImpl implements KunderaEntityManager
     }
 
     /**
-     * Gets the data manager.
-     * 
-     * @return the dataManager
-     */
-    public final DataManager getDataManager()
-    {
-        return dataManager;
-    }
-
-    /**
      * Gets the index manager.
      * 
      * @return the indexManager
@@ -882,7 +869,8 @@ public class EntityManagerImpl implements KunderaEntityManager
             // {});
             EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
             m.setDBType(this.client.getType());
-            List<T> entities = dataManager.find(entityClass, m, primaryKeys);
+            
+            List<T> entities = client.loadData(this, m, primaryKeys);           
 
             // TODO: cache entities for future lookup
             return entities;

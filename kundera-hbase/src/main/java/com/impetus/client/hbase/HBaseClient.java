@@ -35,7 +35,6 @@ import org.scale7.cassandra.pelops.Bytes;
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.db.DataAccessor;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.index.KunderaIndexer;
@@ -114,12 +113,11 @@ public class HBaseClient implements com.impetus.kundera.Client
      * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public <E> E loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, String rowKey,
-            EntityMetadata m) throws Exception
+    public <E> E loadData(EntityManagerImpl em, String rowKey, EntityMetadata m) throws Exception
     {
         //columnFamily has a different meaning for HBase, so it won't be used here
         String tableName = m.getTableName();
-        E e = handler.readData(tableName, clazz, m, rowKey);
+        E e = (E) handler.readData(tableName, m.getEntityClazz(), m, rowKey);
         return e;
     }
 
@@ -131,13 +129,12 @@ public class HBaseClient implements com.impetus.kundera.Client
      * com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
      */
     @Override
-    public <E> List<E> loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
-            EntityMetadata m, String... keys) throws Exception
+    public <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, String... keys) throws Exception
     {
         List<E> entities = new ArrayList<E>();
         for (String rowKey : keys)
         {
-            E e = handler.readData(m.getTableName(), clazz, m, rowKey);
+            E e = (E) handler.readData(m.getTableName(), m.getEntityClazz(), m, rowKey);
             entities.add(e);
         }
         return entities;
@@ -157,15 +154,14 @@ public class HBaseClient implements com.impetus.kundera.Client
 
     
     @Override
-    public <E> List<E> loadData(EntityManager em, Class<E> clazz, EntityMetadata m, Map<String, String> col,
-            String keyspace, String family) throws Exception
+    public <E> List<E> loadData(EntityManager em, EntityMetadata m, Map<String, String> col) throws Exception
     {
         List<E> entities = new ArrayList<E>();
         Map<String, Field> columnFamilyNameToFieldMap = MetadataUtils.createSuperColumnsFieldMap(m);
         for (String columnFamilyName : col.keySet())
         {
             String entityId = col.get(columnFamilyName);
-            E e = handler.readData(m.getTableName(), clazz, m, entityId);
+            E e = (E) handler.readData(m.getTableName(), m.getEntityClazz(), m, entityId);
             
             Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName);
             Object columnFamilyValue = PropertyAccessorHelper.getObject(e, columnFamilyField);
@@ -255,7 +251,7 @@ public class HBaseClient implements com.impetus.kundera.Client
      * @see com.impetus.kundera.Client#setKeySpace(java.lang.String)
      */
     @Override
-    public void setKeySpace(String keySpace)
+    public void setSchema(String keySpace)
     {
         // TODO not required, Keyspace not applicable to Hbase
     }
@@ -269,12 +265,6 @@ public class HBaseClient implements com.impetus.kundera.Client
     public DBType getType()
     {
         return DBType.HBASE;
-    }
-
-    @Override
-    public DataAccessor getDataAccessor(EntityManagerImpl em)
-    {
-        return new ColumnFamilyDataAccessor(em);
     }
 
     @Override

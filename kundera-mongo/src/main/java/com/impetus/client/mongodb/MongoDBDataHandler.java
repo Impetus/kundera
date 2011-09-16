@@ -32,7 +32,6 @@ import javax.persistence.Query;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.client.mongodb.accessor.DocumentObjectMapper;
 import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.model.Column;
@@ -134,8 +133,8 @@ public class MongoDBDataHandler
                         Object embeddedEntity = null;
                         try
                         {
-                            embeddedEntity = em.getClient().loadData(em, embeddedEntityClass,
-                                    relMetadata.getSchema(), relMetadata.getTableName(), foreignKey, relMetadata);
+                            embeddedEntity = em.getClient().loadData(em, foreignKey,
+                                    relMetadata);
                         }
                         catch (Exception e)
                         {
@@ -158,8 +157,7 @@ public class MongoDBDataHandler
 
                         try
                         {
-                            embeddedEntityList = em.getClient().loadData(em, embeddedEntityClass,
-                                    relMetadata.getSchema(), relMetadata.getTableName(), relMetadata,
+                            embeddedEntityList = em.getClient().loadData(em, relMetadata,
                                     foreignKeys.toArray(new String[0]));
                         }
                         catch (Exception e)

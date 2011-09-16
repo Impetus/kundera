@@ -84,7 +84,7 @@ public final class ClientResolver
         {
             proxy.setContactNodes(clientIdentifier.getNode());
             proxy.setDefaultPort(clientIdentifier.getPort());
-            proxy.setKeySpace(clientIdentifier.getKeyspace());
+            proxy.setSchema(clientIdentifier.getKeyspace());
             clientsNew.put(clientIdentifier, proxy);
         }
         else

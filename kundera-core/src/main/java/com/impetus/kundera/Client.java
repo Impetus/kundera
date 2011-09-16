@@ -24,7 +24,6 @@ import javax.persistence.Query;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.scale7.cassandra.pelops.Bytes;
 
-import com.impetus.kundera.db.DataAccessor;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.loader.DBType;
@@ -54,55 +53,43 @@ public interface Client
      *
      * @param <E> the element type
      * @param em the em
-     * @param clazz the clazz
-     * @param keyspace the keyspace
-     * @param columnFamily The name of the super column family to operate on
      * @param key The key of the row
      * @param m the m
      * @return A list of matching columns
      * @throws Exception the exception
      */
-    <E> E loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily, String key,
-            EntityMetadata m) throws Exception;
+    <E> E loadData(EntityManagerImpl em, String key, EntityMetadata m) throws Exception;
 
     /**
      * Retrieve columns from multiple rows of a column-family.
      *
      * @param <E> the element type
      * @param em the em
-     * @param clazz the clazz
-     * @param keyspace the keyspace
-     * @param columnFamily The name of the super column family to operate on
      * @param m the m
      * @param keys Array of row keys
      * @return A Map of row and corresponding list of columns.
      * @throws Exception the exception
      */
-    <E> List<E> loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
-            EntityMetadata m, String... keys) throws Exception;
+    <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, String... keys) throws Exception;
     
     /**
      * Load data.
      *
      * @param <E> the element type
      * @param em the em
-     * @param clazz the clazz
      * @param m the m
      * @param col the col
-     * @param keyspace the keyspace
-     * @param family the family
      * @return the list
      * @throws Exception the exception
      */
-    public <E> List<E> loadData(EntityManager em, Class<E> clazz, EntityMetadata m, Map<String, String> col, String keyspace,
-            String family) throws Exception;
+    public <E> List<E> loadData(EntityManager em, EntityMetadata m, Map<String, String> col) throws Exception;
     
     /**
      * Load super-columns from multiple rows of a super-column-family.
      *
-     * @param keyspace
+     * @param schema
      *            the keyspace
-     * @param columnFamily
+     * @param tableName
      *            The name of the super column family to operate on
      * @param keys
      *            Array of row keys
@@ -110,7 +97,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String keyspace, String columnFamily, String... keys)
+    Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String schema, String tableName, String... keys)
             throws Exception;
 
     /**
@@ -146,10 +133,10 @@ public interface Client
     /**
      * Set key space.
      *
-     * @param keySpace
+     * @param schema
      *            key space.
      */
-    void setKeySpace(String keySpace);
+    void setSchema(String schema);
 
     /**
      * Shutdown.
@@ -164,16 +151,16 @@ public interface Client
     /**
      * Delete a row from either column-family or super-column-family.
      *
-     * @param keyspace
+     * @param schema
      *            the keyspace
-     * @param columnFamily
+     * @param tableName
      *            The name of the super column family to operate on
      * @param rowId
      *            the row id
      * @throws Exception
      *             the exception
      */
-    void delete(String keyspace, String columnFamily, String rowId) throws Exception;
+    void delete(String schema, String tableName, String rowId) throws Exception;
 
     /**
      * Returns type of nosql database.
@@ -189,7 +176,5 @@ public interface Client
      */
     Indexer getIndexer();
     
-    Query getQuery(EntityManagerImpl em, String queryString);
-
-    DataAccessor getDataAccessor(EntityManagerImpl em);
+    Query getQuery(EntityManagerImpl em, String queryString);   
  }

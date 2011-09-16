@@ -63,11 +63,9 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 
-import com.impetus.client.cassandra.CassandraClient;
-import com.impetus.client.cassandra.ColumnFamilyDataAccessor;
+import com.impetus.kundera.Client;
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.db.DataAccessor;
-import com.impetus.kundera.db.accessor.DataRow;
+import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.index.KunderaIndexer;
@@ -87,7 +85,7 @@ import com.impetus.kundera.query.LuceneQuery;
  * @author animesh.kumar
  * @since 0.1
  */
-public class PelopsClient implements CassandraClient
+public class PelopsClient implements Client
 {
 
     /** The Constant poolName. */
@@ -202,12 +200,9 @@ public class PelopsClient implements CassandraClient
 
     }
 
-    // TODO: This method is not being used anywhere currently. Delete it while
-    // refactoring exercise
+    
     @Override
-    @Deprecated
-    public final void writeSuperColumns(String keyspace, String columnFamily, String rowId, SuperColumn... superColumns)
-            throws Exception
+    public final <E> E loadData(EntityManagerImpl em, String rowId, EntityMetadata m) throws Exception
     {
 
         if (!isOpen())
@@ -215,87 +210,46 @@ public class PelopsClient implements CassandraClient
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        configurePool(keyspace);
-        Mutator mutator = Pelops.createMutator(POOL_NAME);
-
-        for (SuperColumn sc : superColumns)
-        {
-            /**
-             * String colFamily, String rowKey, String colName, List<Column>
-             * subColumns
-             */
-            Bytes.toUTF8(sc.getColumns().get(0).getValue());
-            mutator.writeSubColumns(columnFamily, rowId, Bytes.toUTF8(sc.getName()), sc.getColumns());
-        }
-        mutator.execute(ConsistencyLevel.ONE);
-    }
-
-    /*
-     * @see com.impetus.kundera.CassandraClient#loadColumns(java.lang.String,
-     * java.lang.String, java.lang.String)
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
-     * EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String,
-     * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
-     */
-    @Override
-    public final <E> E loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
-            String rowId, EntityMetadata m) throws Exception
-    {
-
-        if (!isOpen())
-        {
-            throw new PersistenceException("PelopsClient is closed.");
-        }
-
-        configurePool(keyspace);
+        configurePool(m.getSchema());
         Selector selector = Pelops.createSelector(POOL_NAME);
 
-        E e = dataHandler.fromThriftRow(selector, em, clazz, m, rowId);
+        E e = (E) dataHandler.fromThriftRow(selector, em, m.getEntityClazz(), m, rowId);
 
         return e;
     }
 
     @Override
-    public final <E> List<E> loadData(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
-            EntityMetadata m, String... rowIds) throws Exception
+    public final <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, String... rowIds) throws Exception
     {
         if (!isOpen())
         {
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        configurePool(keyspace);
+        configurePool(m.getSchema());
         Selector selector = Pelops.createSelector(POOL_NAME);
 
-        List<E> entities = dataHandler.fromThriftRow(selector, em, clazz, m, rowIds);
+        List<E> entities = (List<E>) dataHandler.fromThriftRow(selector, em, m.getEntityClazz(), m, rowIds);
 
         return entities;
     }
 
     /**
-     * @param <E>
-     * @param clazz
      * @param m
      * @param col
-     * @param keyspace
-     * @param family
+     * @param <E>
      * @return
      * @throws Exception
      */
-    public <E> List<E> loadData(EntityManager em, Class<E> clazz, EntityMetadata m, Map<String, String> col,
-            String keyspace, String family) throws Exception
+    public <E> List<E> loadData(EntityManager em, EntityMetadata m, Map<String, String> col) throws Exception
     {
         List<E> entities = new ArrayList<E>();
         for (String superColName : col.keySet())
         {
             String entityId = col.get(superColName);
-            List<SuperColumn> superColumnList = loadSuperColumns(keyspace, family, entityId,
+            List<SuperColumn> superColumnList = loadSuperColumns(m.getSchema(), m.getTableName(), entityId,
                     new String[] { superColName });
-            E e = fromThriftRow(em, clazz, m, new DataRow<SuperColumn>(entityId, family, superColumnList));
+            E e = (E) fromThriftRow(em, m.getEntityClazz(), m, new DataRow<SuperColumn>(entityId, m.getTableName(), superColumnList));
             entities.add(e);
         }
         return entities;
@@ -344,24 +298,8 @@ public class PelopsClient implements CassandraClient
         }
         return entities;
     }
-
-    // TODO: This method is not being used currently anywhere and should be
-    // deleted in code refactoring exercise
-    /*
-     * private <E> List<E> loadEmbeddedObjects(EntityManager em, Class<E> clazz,
-     * EntityMetadata m, String keyspace, String family, String... ids) throws
-     * Exception { List<E> entities = new ArrayList<E>(); Map<Bytes,
-     * List<SuperColumn>> map = loadEmbeddedObjects(keyspace, family, ids); for
-     * (Map.Entry<Bytes, List<SuperColumn>> entry : map.entrySet()) { String
-     * entityId =
-     * PropertyAccessorFactory.STRING.fromBytes(entry.getKey().toByteArray());
-     * List<SuperColumn> superColumn = entry.getValue(); E e = fromThriftRow(em,
-     * clazz, m, new DataRow<SuperColumn>(entityId, family, superColumn));
-     * entities.add(e); } return entities; }
-     */
-
-    // TODO: Move this code to PelopsDataHandler if at all required
-    @Override
+    
+    // TODO: Move this code to PelopsDataHandler if at all required    
     public final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
             String... superColumnNames) throws Exception
     {
@@ -444,17 +382,6 @@ public class PelopsClient implements CassandraClient
          */
         return selector.getSuperColumnsFromRows(columnFamily, bytesArr, Selector.newColumnsPredicateAll(false, 1000),
                 ConsistencyLevel.ONE);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.CassandraClient#getCassandraClient()
-     */
-    @Override
-    public final Cassandra.Client getCassandraClient() throws Exception
-    {
-        return Pelops.getDbConnPool(POOL_NAME).getConnection().getAPI();
     }
 
     /**
@@ -672,7 +599,7 @@ public class PelopsClient implements CassandraClient
      * @see com.impetus.kundera.Client#setKeySpace(java.lang.String)
      */
     @Override
-    public void setKeySpace(String keySpace)
+    public void setSchema(String keySpace)
     {
 
     }
@@ -987,13 +914,7 @@ public class PelopsClient implements CassandraClient
             }
         }
         return e;
-    }
-
-    @Override
-    public DataAccessor getDataAccessor(EntityManagerImpl em)
-    {
-        return new ColumnFamilyDataAccessor(em);
-    }
+    } 
 
     @Override
     public Indexer getIndexer()

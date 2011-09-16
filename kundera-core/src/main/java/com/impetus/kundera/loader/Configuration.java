@@ -30,9 +30,7 @@ import org.apache.log4j.Logger;
 import com.impetus.kundera.Client;
 import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.cache.NonOperationalCacheProvider;
-import com.impetus.kundera.db.DataManager;
 import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
-import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -130,9 +128,7 @@ public class Configuration
             }                    
             
             //Set and connect to client
-            setClient(em, persistenceUnit);               
-            setField(em, em.getClass().getDeclaredField("dataManager"), new DataManager((EntityManagerImpl)em));
-            
+            setClient(em, persistenceUnit);
             logger.info("Kundera Client for Persistence Unit " + persistenceUnit + " is: " + client);
 
         }

@@ -32,11 +32,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 
-import com.impetus.client.mongodb.accessor.DocumentDataAccessor;
 import com.impetus.client.mongodb.query.MongoDBIndexer;
 import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.Client;
-import com.impetus.kundera.db.DataAccessor;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.loader.DBType;
@@ -97,7 +95,7 @@ public class MongoDBClient implements Client
         String key = e.getId();
 
         log.debug("Checking whether record already exist for " + dbName + "." + documentName + " for " + key);
-        Object entity = loadData(em, m.getEntityClazz(), dbName, documentName, key, m);
+        Object entity = loadData(em, key, m);
         if (entity != null)
         {
             log.debug("Updating data into " + dbName + "." + documentName + " for " + key);
@@ -127,11 +125,10 @@ public class MongoDBClient implements Client
      * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public <E> E loadData(EntityManagerImpl em, Class<E> clazz, String dbName, String documentName, String key,
-            EntityMetadata m) throws Exception
+    public <E> E loadData(EntityManagerImpl em, String key, EntityMetadata m) throws Exception
     {
-        log.debug("Fetching data from " + documentName + " for PK " + key);
-        DBCollection dbCollection = mongoDb.getCollection(documentName);
+        log.debug("Fetching data from " + m.getTableName() + " for PK " + key);
+        DBCollection dbCollection = mongoDb.getCollection(m.getTableName());
 
         BasicDBObject query = new BasicDBObject();
         query.put(m.getIdColumn().getName(), key);
@@ -148,7 +145,7 @@ public class MongoDBClient implements Client
             return null;
         }
 
-        Object entity = new MongoDBDataHandler().getEntityFromDocument(em, clazz, m, fetchedDocument);
+        Object entity = new MongoDBDataHandler().getEntityFromDocument(em, m.getEntityClazz(), m, fetchedDocument);
 
         return (E) entity;
     }
@@ -161,12 +158,11 @@ public class MongoDBClient implements Client
      * com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
      */
     @Override
-    public <E> List<E> loadData(EntityManagerImpl em, Class<E> clazz, String dbName, String documentName,
-            EntityMetadata m, String... keys) throws Exception
+    public <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, String... keys) throws Exception
     {
-        log.debug("Fetching data from " + documentName + " for Keys " + keys);
+        log.debug("Fetching data from " + m.getTableName() + " for Keys " + keys);
 
-        DBCollection dbCollection = mongoDb.getCollection(documentName);
+        DBCollection dbCollection = mongoDb.getCollection(m.getTableName());
 
         BasicDBObject query = new BasicDBObject();
         query.put(m.getIdColumn().getName(), new BasicDBObject("$in", keys));
@@ -177,7 +173,7 @@ public class MongoDBClient implements Client
         while (cursor.hasNext())
         {
             DBObject fetchedDocument = cursor.next();
-            Object entity = new MongoDBDataHandler().getEntityFromDocument(em, clazz, m, fetchedDocument);
+            Object entity = new MongoDBDataHandler().getEntityFromDocument(em, m.getEntityClazz(), m, fetchedDocument);
             entities.add(entity);
         }
         return entities;
@@ -240,8 +236,7 @@ public class MongoDBClient implements Client
     }
     
     @Override
-    public <E> List<E> loadData(EntityManager em, Class<E> clazz, EntityMetadata m, Map<String, String> col,
-            String keyspace, String family) throws Exception
+    public <E> List<E> loadData(EntityManager em, EntityMetadata m, Map<String, String> col) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");
     }
@@ -378,7 +373,7 @@ public class MongoDBClient implements Client
      * @see com.impetus.kundera.Client#setKeySpace(java.lang.String)
      */
     @Override
-    public void setKeySpace(String keySpace)
+    public void setSchema(String keySpace)
     {
         this.dbName = keySpace;
     }
@@ -423,12 +418,6 @@ public class MongoDBClient implements Client
     public Indexer getIndexer()
     {
         return new MongoDBIndexer(this);
-    }
-
-    @Override
-    public DataAccessor getDataAccessor(EntityManagerImpl em)
-    {
-        return new DocumentDataAccessor(em);
     }
 
     @Override
