@@ -160,7 +160,7 @@ public class EntityManagerImpl implements KunderaEntityManager
             EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
             m.setDBType(this.client.getType());
 
-            E e = client.loadData(this, primaryKey.toString(), m);
+            E e = (E)client.loadData(this, primaryKey.toString(), m);
             if (e != null)
             {
                 session.store(primaryKey, e, m.isCacheable());
