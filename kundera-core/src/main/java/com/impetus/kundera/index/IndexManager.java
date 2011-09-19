@@ -30,108 +30,122 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author animesh.kumar
  */
-public class IndexManager {
+public class IndexManager
+{
 
-	/** The indexer. */
-	private Indexer indexer;
+    /** The indexer. */
+    private Indexer indexer;
 
-	/**
-	 * The Constructor.
-	 * 
-	 * @param manager
-	 *            the manager
-	 */
-	@SuppressWarnings("deprecation")
-	public IndexManager(EntityManagerImpl manager) {
-		indexer = manager.getClient().getIndexer();
-	}
+    /**
+     * The Constructor.
+     * 
+     * @param manager
+     *            the manager
+     */
+    @SuppressWarnings("deprecation")
+    public IndexManager(EntityManagerImpl manager)
+    {
+        indexer = manager.getClient().getIndexer();
+    }
 
-	/**
-	 * Removes an object from Index.
-	 * 
-	 * @param metadata
-	 *            the metadata
-	 * @param entity
-	 *            the entity
-	 * @param key
-	 *            the key
-	 */
-	public final void remove(EntityMetadata metadata, Object entity, String key) {
-		try {
-			indexer.unindex(metadata, key);
-		} catch (Exception e) {
-			throw new PersistenceException(e.getMessage());
-		}
-	}
+    /**
+     * Removes an object from Index.
+     * 
+     * @param metadata
+     *            the metadata
+     * @param entity
+     *            the entity
+     * @param key
+     *            the key
+     */
+    public final void remove(EntityMetadata metadata, Object entity, String key)
+    {
+        try
+        {
+            indexer.unindex(metadata, key);
+        }
+        catch (Exception e)
+        {
+            throw new PersistenceException(e.getMessage());
+        }
+    }
 
-	/**
-	 * Updates the index for an object.
-	 * 
-	 * @param metadata
-	 *            the metadata
-	 * @param entity
-	 *            the entity
-	 */
-	public final void update(EntityMetadata metadata, Object entity) {
-		try {
-			String id = PropertyAccessorHelper.getId(entity, metadata);
-			indexer.unindex(metadata, id);
-			indexer.index(metadata, entity);
-		} catch (Exception e) {
-			throw new PersistenceException(e.getMessage());
-		}
-	}
+    /**
+     * Updates the index for an object.
+     * 
+     * @param metadata
+     *            the metadata
+     * @param entity
+     *            the entity
+     */
+    public final void update(EntityMetadata metadata, Object entity)
+    {
+        try
+        {
+            String id = PropertyAccessorHelper.getId(entity, metadata);
+            indexer.unindex(metadata, id);
+            indexer.index(metadata, entity);
+        }
+        catch (Exception e)
+        {
+            throw new PersistenceException(e.getMessage());
+        }
+    }
 
-	/**
-	 * Indexes an object.
-	 * 
-	 * @param metadata
-	 *            the metadata
-	 * @param entity
-	 *            the entity
-	 */
-	public final void write(EntityMetadata metadata, Object entity) {
-		indexer.index(metadata, entity);
-	}
+    /**
+     * Indexes an object.
+     * 
+     * @param metadata
+     *            the metadata
+     * @param entity
+     *            the entity
+     */
+    public final void write(EntityMetadata metadata, Object entity)
+    {
+        indexer.index(metadata, entity);
+    }
 
-	/**
-	 * Searches on the index. Note: Query must be in Indexer's understandable
-	 * format
-	 * 
-	 * @param query
-	 *            the query
-	 * @return the list
-	 */
-	public final Map<String, String> search(String query) {
-		return search(query, Constants.INVALID, Constants.INVALID);
-	}
+    /**
+     * Searches on the index. Note: Query must be in Indexer's understandable
+     * format
+     * 
+     * @param query
+     *            the query
+     * @return the list
+     */
+    public final Map<String, String> search(String query)
+    {
+        return search(query, Constants.INVALID, Constants.INVALID);
+    }
 
-	/**
-	 * Search.
-	 * 
-	 * @param query
-	 *            the query
-	 * @param count
-	 *            the count
-	 * @return the list
-	 */
-	public final Map<String, String> search(String query, int count) {
-		return search(query, Constants.INVALID, count);
-	}
+    /**
+     * Search.
+     * 
+     * @param query
+     *            the query
+     * @param count
+     *            the count
+     * @return the list
+     */
+    public final Map<String, String> search(String query, int count)
+    {
+        return search(query, Constants.INVALID, count);
+    }
 
-	/**
-	 * Search.
-	 * 
-	 * @param query
-	 *            the query
-	 * @param start
-	 *            the start
-	 * @param count
-	 *            the count
-	 * @return the list
-	 */
-	public final Map<String, String> search(String query, int start, int count) {
-		return indexer.search(query, start, count);
-	}
+    /**
+     * Search.
+     * 
+     * @param query
+     *            the query
+     * @param start
+     *            the start
+     * @param count
+     *            the count
+     * @return the list
+     */
+    public final Map<String, String> search(String query, int start, int count)
+    {
+        return indexer.search(query, start, count);
+    }
 
 }

@@ -20,14 +20,15 @@ package com.impetus.kundera.metadata.validator;
  * 
  * @author animesh.kumar
  */
-public interface EntityValidator {
+public interface EntityValidator
+{
 
-	/**
-	 * Validate.
-	 * 
-	 * @param clazz
-	 *            the clazz
-	 */
-	void validate(Class<?> clazz);
+    /**
+     * Validate.
+     * 
+     * @param clazz
+     *            the clazz
+     */
+    void validate(Class<?> clazz);
 
 }

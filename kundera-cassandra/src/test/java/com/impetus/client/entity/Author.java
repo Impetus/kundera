@@ -35,171 +35,185 @@ import javax.persistence.TemporalType;
 // makes it an entity class
 @Table(name = "Authors", schema = "Blog")
 // assign ColumnFamily type and name
-public class Author implements Serializable {
+public class Author implements Serializable
+{
 
-	/** The username. */
-	@Id
-	// row identifier
-	String username;
+    /** The username. */
+    @Id
+    // row identifier
+    String username;
 
-	/** The email address. */
-	@Column(name = "email")
-	// override column-name
-	String emailAddress;
+    /** The email address. */
+    @Column(name = "email")
+    // override column-name
+    String emailAddress;
 
-	/** The country. */
-	@Column
-	String country;
+    /** The country. */
+    @Column
+    String country;
 
-	/** The registered. */
-	@Column(name = "registeredSince")
-	@Temporal(TemporalType.DATE)
-	@Basic
-	Date registered;
+    /** The registered. */
+    @Column(name = "registeredSince")
+    @Temporal(TemporalType.DATE)
+    @Basic
+    Date registered;
 
-	/** The name. */
-	String name;
+    /** The name. */
+    String name;
 
-	/**
-	 * Instantiates a new author.
-	 */
-	public Author() { // must have a default constructor
-	}
+    /**
+     * Instantiates a new author.
+     */
+    public Author()
+    { // must have a default constructor
+    }
 
-	// getters, setters etc.
+    // getters, setters etc.
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((username == null) ? 0 : username.hashCode());
-		return result;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((username == null) ? 0 : username.hashCode());
+        return result;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (!(obj instanceof Author))
-			return false;
-		Author other = (Author) obj;
-		if (username == null) {
-			if (other.username != null)
-				return false;
-		} else if (!username.equals(other.username))
-			return false;
-		return true;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof Author))
+            return false;
+        Author other = (Author) obj;
+        if (username == null)
+        {
+            if (other.username != null)
+                return false;
+        }
+        else if (!username.equals(other.username))
+            return false;
+        return true;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("Author [name=");
-		builder.append(name);
-		builder.append(", country=");
-		builder.append(country);
-		builder.append(", emailAddress=");
-		builder.append(emailAddress);
-		builder.append(", registered=");
-		builder.append(registered);
-		builder.append(", username=");
-		builder.append(username);
-		builder.append("]");
-		return builder.toString();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Author [name=");
+        builder.append(name);
+        builder.append(", country=");
+        builder.append(country);
+        builder.append(", emailAddress=");
+        builder.append(emailAddress);
+        builder.append(", registered=");
+        builder.append(registered);
+        builder.append(", username=");
+        builder.append(username);
+        builder.append("]");
+        return builder.toString();
+    }
 
-	/**
-	 * Gets the username.
-	 * 
-	 * @return the username
-	 */
-	public String getUsername() {
-		return username;
-	}
+    /**
+     * Gets the username.
+     * 
+     * @return the username
+     */
+    public String getUsername()
+    {
+        return username;
+    }
 
-	/**
-	 * Sets the username.
-	 * 
-	 * @param username
-	 *            the username to set
-	 */
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    /**
+     * Sets the username.
+     * 
+     * @param username
+     *            the username to set
+     */
+    public void setUsername(String username)
+    {
+        this.username = username;
+    }
 
-	/**
-	 * Gets the email address.
-	 * 
-	 * @return the emailAddress
-	 */
-	public String getEmailAddress() {
-		return emailAddress;
-	}
+    /**
+     * Gets the email address.
+     * 
+     * @return the emailAddress
+     */
+    public String getEmailAddress()
+    {
+        return emailAddress;
+    }
 
-	/**
-	 * Sets the email address.
-	 * 
-	 * @param emailAddress
-	 *            the emailAddress to set
-	 */
-	public void setEmailAddress(String emailAddress) {
-		this.emailAddress = emailAddress;
-	}
+    /**
+     * Sets the email address.
+     * 
+     * @param emailAddress
+     *            the emailAddress to set
+     */
+    public void setEmailAddress(String emailAddress)
+    {
+        this.emailAddress = emailAddress;
+    }
 
-	/**
-	 * Gets the country.
-	 * 
-	 * @return the country
-	 */
-	public String getCountry() {
-		return country;
-	}
+    /**
+     * Gets the country.
+     * 
+     * @return the country
+     */
+    public String getCountry()
+    {
+        return country;
+    }
 
-	/**
-	 * Sets the country.
-	 * 
-	 * @param country
-	 *            the country to set
-	 */
-	public void setCountry(String country) {
-		this.country = country;
-	}
+    /**
+     * Sets the country.
+     * 
+     * @param country
+     *            the country to set
+     */
+    public void setCountry(String country)
+    {
+        this.country = country;
+    }
 
-	/**
-	 * Gets the registered.
-	 * 
-	 * @return the registered
-	 */
-	public Date getRegistered() {
-		return registered;
-	}
+    /**
+     * Gets the registered.
+     * 
+     * @return the registered
+     */
+    public Date getRegistered()
+    {
+        return registered;
+    }
 
-	/**
-	 * Sets the registered.
-	 * 
-	 * @param registered
-	 *            the registered to set
-	 */
-	public void setRegistered(Date registered) {
-		this.registered = registered;
-	}
+    /**
+     * Sets the registered.
+     * 
+     * @param registered
+     *            the registered to set
+     */
+    public void setRegistered(Date registered)
+    {
+        this.registered = registered;
+    }
 
 }

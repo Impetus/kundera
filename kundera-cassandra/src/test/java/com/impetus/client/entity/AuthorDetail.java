@@ -21,65 +21,73 @@ import javax.persistence.Embeddable;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 @Embeddable
-public class AuthorDetail {
-	/** The author. */
-	@Column(name = "authorname")
-	public String name;
+public class AuthorDetail
+{
+    /** The author. */
+    @Column(name = "authorname")
+    public String name;
 
-	@Column(name = "email")
-	public String email;
+    @Column(name = "email")
+    public String email;
 
-	public AuthorDetail() {
-	}
+    public AuthorDetail()
+    {
+    }
 
-	/**
-	 * @return the author
-	 */
-	public String getAuthor() {
-		return name;
-	}
+    /**
+     * @return the author
+     */
+    public String getAuthor()
+    {
+        return name;
+    }
 
-	/**
-	 * @param author
-	 *            the author to set
-	 */
-	public void setAuthor(String author) {
-		this.name = author;
-	}
+    /**
+     * @param author
+     *            the author to set
+     */
+    public void setAuthor(String author)
+    {
+        this.name = author;
+    }
 
-	/**
-	 * @return the email
-	 */
-	public String getEmail() {
-		return email;
-	}
+    /**
+     * @return the email
+     */
+    public String getEmail()
+    {
+        return email;
+    }
 
-	/**
-	 * @param email
-	 *            the email to set
-	 */
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    /**
+     * @param email
+     *            the email to set
+     */
+    public void setEmail(String email)
+    {
+        this.email = email;
+    }
 
-	@Override
-	public int hashCode() {
-		return HashCodeBuilder.reflectionHashCode(this);
-	}
+    @Override
+    public int hashCode()
+    {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append(", [author=");
-		builder.append(name);
-		builder.append(", email=");
-		builder.append(email);
-		builder.append("]");
-		return builder.toString();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append(", [author=");
+        builder.append(name);
+        builder.append(", email=");
+        builder.append(email);
+        builder.append("]");
+        return builder.toString();
+    }
 }

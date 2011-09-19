@@ -24,39 +24,49 @@ import com.impetus.kundera.property.PropertyAccessor;
  * 
  * @author animesh.kumar
  */
-public class StringAccessor implements PropertyAccessor<String> {
+public class StringAccessor implements PropertyAccessor<String>
+{
 
-	/* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
-	@Override
-	public final String fromBytes(byte[] bytes) throws PropertyAccessException {
-		try {
-			return new String(bytes, Constants.ENCODING);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new PropertyAccessException(e.getMessage());
-		}
-	}
+    /* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
+    @Override
+    public final String fromBytes(byte[] bytes) throws PropertyAccessException
+    {
+        try
+        {
+            return new String(bytes, Constants.ENCODING);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            throw new PropertyAccessException(e.getMessage());
+        }
+    }
 
-	/*
-	 * @see
-	 * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
-	 */
-	@Override
-	public final byte[] toBytes(Object s) throws PropertyAccessException {
-		try {
-			return ((String) s).getBytes(Constants.ENCODING);
-		} catch (Exception e) {
-			throw new PropertyAccessException(e.getMessage());
-		}
-	}
+    /*
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+     */
+    @Override
+    public final byte[] toBytes(Object s) throws PropertyAccessException
+    {
+        try
+        {
+            return ((String) s).getBytes(Constants.ENCODING);
+        }
+        catch (Exception e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
+    }
 
-	/*
-	 * @see
-	 * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
-	 */
-	@Override
-	public final String toString(Object object) {
-		return (String) object;
-	}
+    /*
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+     */
+    @Override
+    public final String toString(Object object)
+    {
+        return (String) object;
+    }
 
 }

@@ -33,12 +33,13 @@ import java.lang.annotation.Target;
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Cacheable {
+public @interface Cacheable
+{
 
-	/**
-	 * Value.
-	 * 
-	 * @return true, if successful
-	 */
-	boolean value() default true;
+    /**
+     * Value.
+     * 
+     * @return true, if successful
+     */
+    boolean value() default true;
 }

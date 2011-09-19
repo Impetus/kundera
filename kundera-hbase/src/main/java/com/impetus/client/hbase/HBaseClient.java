@@ -52,228 +52,239 @@ import com.impetus.kundera.query.LuceneQuery;
  * 
  * @author impetus
  */
-public class HBaseClient implements com.impetus.kundera.Client {
-	/** the log used by this class. */
-	private static Log log = LogFactory.getLog(HBaseClient.class);
+public class HBaseClient implements com.impetus.kundera.Client
+{
+    /** the log used by this class. */
+    private static Log log = LogFactory.getLog(HBaseClient.class);
 
-	/** The contact node. */
-	String contactNode;
+    /** The contact node. */
+    String contactNode;
 
-	/** The default port. */
-	String defaultPort;
+    /** The default port. */
+    String defaultPort;
 
-	/** The handler. */
-	private DataHandler handler;
+    /** The handler. */
+    private DataHandler handler;
 
-	/** The is connected. */
-	private boolean isConnected;
+    /** The is connected. */
+    private boolean isConnected;
 
-	/** The em. */
-	private EntityManager em;
+    /** The em. */
+    private EntityManager em;
 
-	/**
-	 * Writes an entity data into HBase store
-	 */
-	@Override
-	public void writeData(EntityManagerImpl em, EnhancedEntity e,
-			EntityMetadata m) throws Exception {
-		String dbName = m.getSchema(); // Has no meaning for HBase, not used
-		String tableName = m.getTableName();
+    /**
+     * Writes an entity data into HBase store
+     */
+    @Override
+    public void writeData(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
+    {
+        String dbName = m.getSchema(); // Has no meaning for HBase, not used
+        String tableName = m.getTableName();
 
-		List<String> columnFamilyNames = new ArrayList<String>();
+        List<String> columnFamilyNames = new ArrayList<String>();
 
-		// If this entity has columns(apart from embedded objects, they will be
-		// treated as column family)
-		List<Column> columns = m.getColumnsAsList();
-		if (columns != null && !columns.isEmpty()) {
-			columnFamilyNames.addAll(m.getColumnFieldNames());
-		}
+        // If this entity has columns(apart from embedded objects, they will be
+        // treated as column family)
+        List<Column> columns = m.getColumnsAsList();
+        if (columns != null && !columns.isEmpty())
+        {
+            columnFamilyNames.addAll(m.getColumnFieldNames());
+        }
 
-		// All relationships are maintained as special Foreign key column by
-		// Kundera in a newly created column family
-		List<Relation> relations = m.getRelations();
-		if (!relations.isEmpty()) {
-			columnFamilyNames.add(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME);
-		}
+        // All relationships are maintained as special Foreign key column by
+        // Kundera in a newly created column family
+        List<Relation> relations = m.getRelations();
+        if (!relations.isEmpty())
+        {
+            columnFamilyNames.add(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME);
+        }
 
-		// Check whether this table exists, if not create it
-		columnFamilyNames.addAll(m.getEmbeddedColumnFieldNames());
-		handler.createTableIfDoesNotExist(tableName,
-				columnFamilyNames.toArray(new String[0]));
+        // Check whether this table exists, if not create it
+        columnFamilyNames.addAll(m.getEmbeddedColumnFieldNames());
+        handler.createTableIfDoesNotExist(tableName, columnFamilyNames.toArray(new String[0]));
 
-		// Write data to HBase
-		handler.writeData(tableName, m, e);
+        // Write data to HBase
+        handler.writeData(tableName, m, e);
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
-	 * EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String,
-	 * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
-	 */
-	@Override
-	public <E> E loadData(EntityManagerImpl em, String rowKey, EntityMetadata m)
-			throws Exception {
-		// columnFamily has a different meaning for HBase, so it won't be used
-		// here
-		String tableName = m.getTableName();
-		E e = (E) handler.readData(tableName, m.getEntityClazz(), m, rowKey);
-		return e;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
+     * EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String,
+     * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
+     */
+    @Override
+    public <E> E loadData(EntityManagerImpl em, String rowKey, EntityMetadata m) throws Exception
+    {
+        // columnFamily has a different meaning for HBase, so it won't be used
+        // here
+        String tableName = m.getTableName();
+        E e = (E) handler.readData(tableName, m.getEntityClazz(), m, rowKey);
+        return e;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
-	 * EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String,
-	 * com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
-	 */
-	@Override
-	public <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m,
-			String... keys) throws Exception {
-		List<E> entities = new ArrayList<E>();
-		for (String rowKey : keys) {
-			E e = (E) handler.readData(m.getTableName(), m.getEntityClazz(), m,
-					rowKey);
-			entities.add(e);
-		}
-		return entities;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
+     * EntityManagerImpl, java.lang.Class, java.lang.String, java.lang.String,
+     * com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
+     */
+    @Override
+    public <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, String... keys) throws Exception
+    {
+        List<E> entities = new ArrayList<E>();
+        for (String rowKey : keys)
+        {
+            E e = (E) handler.readData(m.getTableName(), m.getEntityClazz(), m, rowKey);
+            entities.add(e);
+        }
+        return entities;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
-	 * EntityManagerImpl, com.impetus.kundera.metadata.EntityMetadata,
-	 * java.util.Queue)
-	 */
-	public <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m,
-			Query query) throws Exception {
-		throw new NotImplementedException("Not yet implemented");
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
+     * EntityManagerImpl, com.impetus.kundera.metadata.EntityMetadata,
+     * java.util.Queue)
+     */
+    public <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
+    {
+        throw new NotImplementedException("Not yet implemented");
+    }
 
-	@Override
-	public <E> List<E> loadData(EntityManager em, EntityMetadata m,
-			Map<String, String> col) throws Exception {
-		List<E> entities = new ArrayList<E>();
-		Map<String, Field> columnFamilyNameToFieldMap = MetadataUtils
-				.createSuperColumnsFieldMap(m);
-		for (String columnFamilyName : col.keySet()) {
-			String entityId = col.get(columnFamilyName);
-			E e = (E) handler.readData(m.getTableName(), m.getEntityClazz(), m,
-					entityId);
+    @Override
+    public <E> List<E> loadData(EntityManager em, EntityMetadata m, Map<String, String> col) throws Exception
+    {
+        List<E> entities = new ArrayList<E>();
+        Map<String, Field> columnFamilyNameToFieldMap = MetadataUtils.createSuperColumnsFieldMap(m);
+        for (String columnFamilyName : col.keySet())
+        {
+            String entityId = col.get(columnFamilyName);
+            E e = (E) handler.readData(m.getTableName(), m.getEntityClazz(), m, entityId);
 
-			Field columnFamilyField = columnFamilyNameToFieldMap
-					.get(columnFamilyName);
-			Object columnFamilyValue = PropertyAccessorHelper.getObject(e,
-					columnFamilyField);
-			if (Collection.class.isAssignableFrom(columnFamilyField.getType())) {
-				entities.addAll((Collection) columnFamilyValue);
-			} else {
-				entities.add((E) columnFamilyValue);
-			}
-		}
-		return entities;
-	}
+            Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName);
+            Object columnFamilyValue = PropertyAccessorHelper.getObject(e, columnFamilyField);
+            if (Collection.class.isAssignableFrom(columnFamilyField.getType()))
+            {
+                entities.addAll((Collection) columnFamilyValue);
+            }
+            else
+            {
+                entities.add((E) columnFamilyValue);
+            }
+        }
+        return entities;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.Client#loadEmbeddedObjects(java.lang.String,
-	 * java.lang.String, java.lang.String[])
-	 */
-	@Override
-	public Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String keyspace,
-			String columnFamily, String... keys) throws Exception {
-		throw new NotImplementedException("Not yet implemented");
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.Client#loadEmbeddedObjects(java.lang.String,
+     * java.lang.String, java.lang.String[])
+     */
+    @Override
+    public Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String keyspace, String columnFamily, String... keys)
+            throws Exception
+    {
+        throw new NotImplementedException("Not yet implemented");
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.Client#shutdown()
-	 */
-	@Override
-	public void shutdown() {
-		handler.shutdown();
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.Client#shutdown()
+     */
+    @Override
+    public void shutdown()
+    {
+        handler.shutdown();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.Client#connect()
-	 */
-	@Override
-	public void connect() {
-		if (!isConnected) {
-			handler = new HBaseDataHandler(contactNode, defaultPort);
-			isConnected = true;
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.Client#connect()
+     */
+    @Override
+    public void connect()
+    {
+        if (!isConnected)
+        {
+            handler = new HBaseDataHandler(contactNode, defaultPort);
+            isConnected = true;
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.Client#setContactNodes(java.lang.String[])
-	 */
-	@Override
-	public void setContactNodes(String... contactNodes) {
-		this.contactNode = contactNodes[0];
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.Client#setContactNodes(java.lang.String[])
+     */
+    @Override
+    public void setContactNodes(String... contactNodes)
+    {
+        this.contactNode = contactNodes[0];
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.Client#setDefaultPort(int)
-	 */
-	@Override
-	public void setDefaultPort(int defaultPort) {
-		this.defaultPort = String.valueOf(defaultPort);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.Client#setDefaultPort(int)
+     */
+    @Override
+    public void setDefaultPort(int defaultPort)
+    {
+        this.defaultPort = String.valueOf(defaultPort);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.Client#delete(java.lang.String,
-	 * java.lang.String, java.lang.String)
-	 */
-	@Override
-	public void delete(String keyspace, String columnFamily, String rowId)
-			throws Exception {
-		throw new RuntimeException("TODO:not yet supported");
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.Client#delete(java.lang.String,
+     * java.lang.String, java.lang.String)
+     */
+    @Override
+    public void delete(String keyspace, String columnFamily, String rowId) throws Exception
+    {
+        throw new RuntimeException("TODO:not yet supported");
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.Client#setKeySpace(java.lang.String)
-	 */
-	@Override
-	public void setSchema(String keySpace) {
-		// TODO not required, Keyspace not applicable to Hbase
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.Client#setKeySpace(java.lang.String)
+     */
+    @Override
+    public void setSchema(String keySpace)
+    {
+        // TODO not required, Keyspace not applicable to Hbase
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.impetus.kundera.Client#getType()
-	 */
-	@Override
-	public DBType getType() {
-		return DBType.HBASE;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.Client#getType()
+     */
+    @Override
+    public DBType getType()
+    {
+        return DBType.HBASE;
+    }
 
-	@Override
-	public Indexer getIndexer() {
-		return new KunderaIndexer(this, new StandardAnalyzer(
-				Version.LUCENE_CURRENT));
-	}
+    @Override
+    public Indexer getIndexer()
+    {
+        return new KunderaIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT));
+    }
 
-	@Override
-	public Query getQuery(EntityManagerImpl em, String queryString) {
-		return new LuceneQuery(em, em.getMetadataManager(), queryString);
-	}
+    @Override
+    public Query getQuery(EntityManagerImpl em, String queryString)
+    {
+        return new LuceneQuery(em, em.getMetadataManager(), queryString);
+    }
 }

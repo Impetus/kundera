@@ -21,28 +21,30 @@ package com.impetus.kundera;
  * @author animesh.kumar
  * @since 0.1
  */
-public final class Constants {
+public final class Constants
+{
 
-	/**
-	 * Instantiates a new constants.
-	 */
-	private Constants() {
+    /**
+     * Instantiates a new constants.
+     */
+    private Constants()
+    {
 
-	}
+    }
 
-	/** The Constant ENCODING. */
-	public static final String ENCODING = "utf-8";
+    /** The Constant ENCODING. */
+    public static final String ENCODING = "utf-8";
 
-	/** The Constant SEPARATOR. */
-	public final static String SEPARATOR = "~";
+    /** The Constant SEPARATOR. */
+    public final static String SEPARATOR = "~";
 
-	/** The Constant INVALID. */
-	public final static int INVALID = -1;
+    /** The Constant INVALID. */
+    public final static int INVALID = -1;
 
-	/** The Constant SUPER_COLUMN_NAME_DELIMITER. */
-	public final static String EMBEDDED_COLUMN_NAME_DELIMITER = "#";
+    /** The Constant SUPER_COLUMN_NAME_DELIMITER. */
+    public final static String EMBEDDED_COLUMN_NAME_DELIMITER = "#";
 
-	/** The Constant TO_ONE_SUPER_COL_NAME. */
-	public static final String FOREIGN_KEY_EMBEDDED_COLUMN_NAME = "FKey-TO";
+    /** The Constant TO_ONE_SUPER_COL_NAME. */
+    public static final String FOREIGN_KEY_EMBEDDED_COLUMN_NAME = "FKey-TO";
 
 }

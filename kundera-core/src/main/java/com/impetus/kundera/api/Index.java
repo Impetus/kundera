@@ -30,26 +30,27 @@ import java.lang.annotation.Target;
 @Target({ ElementType.TYPE, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Index {
+public @interface Index
+{
 
-	/**
-	 * defines if the column should be indexed?.
-	 * 
-	 * @return boolean
-	 */
-	boolean index() default true;
+    /**
+     * defines if the column should be indexed?.
+     * 
+     * @return boolean
+     */
+    boolean index() default true;
 
-	/**
-	 * Index name (if not provided, defualt is entity name)
-	 * 
-	 * @return
-	 */
-	String name() default "";
+    /**
+     * Index name (if not provided, defualt is entity name)
+     * 
+     * @return
+     */
+    String name() default "";
 
-	/**
-	 * List of columns to index
-	 * 
-	 * @return
-	 */
-	String[] columns() default {};
+    /**
+     * List of columns to index
+     * 
+     * @return
+     */
+    String[] columns() default {};
 }

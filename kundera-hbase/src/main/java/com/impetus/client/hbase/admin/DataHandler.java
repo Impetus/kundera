@@ -25,38 +25,36 @@ import com.impetus.kundera.proxy.EnhancedEntity;
  * 
  * @author impetus
  */
-public interface DataHandler {
+public interface DataHandler
+{
 
-	/**
-	 * Creates a HBase table.
-	 * 
-	 * @param tableName
-	 *            table name.
-	 * @param colFamily
-	 *            column family.
-	 */
-	void createTableIfDoesNotExist(String tableName, String... colFamily)
-			throws IOException;
+    /**
+     * Creates a HBase table.
+     * 
+     * @param tableName
+     *            table name.
+     * @param colFamily
+     *            column family.
+     */
+    void createTableIfDoesNotExist(String tableName, String... colFamily) throws IOException;
 
-	/**
-	 * Writes data help in entity into HBase table
-	 * 
-	 * @param tableName
-	 * @param m
-	 * @param e
-	 * @throws IOException
-	 */
-	public void writeData(String tableName, EntityMetadata m, EnhancedEntity e)
-			throws IOException;
+    /**
+     * Writes data help in entity into HBase table
+     * 
+     * @param tableName
+     * @param m
+     * @param e
+     * @throws IOException
+     */
+    public void writeData(String tableName, EntityMetadata m, EnhancedEntity e) throws IOException;
 
-	/**
-	 * Populates data for give column family, column name, and HBase table name.
-	 */
-	<E> E readData(String tableName, Class<E> clazz, EntityMetadata m,
-			String rowKey) throws IOException;
+    /**
+     * Populates data for give column family, column name, and HBase table name.
+     */
+    <E> E readData(String tableName, Class<E> clazz, EntityMetadata m, String rowKey) throws IOException;
 
-	/**
-	 * Shutdown.
-	 */
-	void shutdown();
+    /**
+     * Shutdown.
+     */
+    void shutdown();
 }

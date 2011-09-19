@@ -39,111 +39,129 @@ import com.impetus.kundera.metadata.validator.EntityValidator;
  * 
  * @author animesh.kumar
  */
-public abstract class AbstractEntityFieldProcessor implements MetadataProcessor {
+public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
+{
 
-	/** The Constant log. */
-	private static final Log log = LogFactory
-			.getLog(AbstractEntityFieldProcessor.class);
+    /** The Constant log. */
+    private static final Log log = LogFactory.getLog(AbstractEntityFieldProcessor.class);
 
-	/** The Validator. */
-	protected EntityValidator validator;
+    /** The Validator. */
+    protected EntityValidator validator;
 
-	/**
-	 * Gets the valid jpa column.
-	 * 
-	 * @param entity
-	 *            the entity
-	 * @param f
-	 *            the f
-	 * 
-	 * @return the valid jpa column
-	 */
+    /**
+     * Gets the valid jpa column.
+     * 
+     * @param entity
+     *            the entity
+     * @param f
+     *            the f
+     * 
+     * @return the valid jpa column
+     */
 
-	/**
-	 * Validate.
-	 * 
-	 * @param clazz
-	 *            the clazz
-	 * 
-	 * @throws PersistenceException
-	 *             the persistence exception
-	 */
-	public final void validate(Class<?> clazz) throws PersistenceException {
-		validator.validate(clazz);
-	}
+    /**
+     * Validate.
+     * 
+     * @param clazz
+     *            the clazz
+     * 
+     * @throws PersistenceException
+     *             the persistence exception
+     */
+    public final void validate(Class<?> clazz) throws PersistenceException
+    {
+        validator.validate(clazz);
+    }
 
-	protected final String getValidJPAColumnName(Class<?> entity, Field f) {
+    protected final String getValidJPAColumnName(Class<?> entity, Field f)
+    {
 
-		String name = null;
+        String name = null;
 
-		if (f.isAnnotationPresent(Column.class)) {
-			Column c = f.getAnnotation(Column.class);
-			if (!c.name().isEmpty()) {
-				name = c.name();
-			} else {
-				name = f.getName();
-			}
-		} else if (f.isAnnotationPresent(Basic.class)) {
-			name = f.getName();
-		}
+        if (f.isAnnotationPresent(Column.class))
+        {
+            Column c = f.getAnnotation(Column.class);
+            if (!c.name().isEmpty())
+            {
+                name = c.name();
+            }
+            else
+            {
+                name = f.getName();
+            }
+        }
+        else if (f.isAnnotationPresent(Basic.class))
+        {
+            name = f.getName();
+        }
 
-		if (f.isAnnotationPresent(Temporal.class)) {
-			if (!f.getType().equals(Date.class)) {
-				log.error("@Temporal must map to java.util.Date for @Entity("
-						+ entity.getName() + "." + f.getName() + ")");
-				return name;
-			}
-			if (null == name) {
-				name = f.getName();
-			}
-		}
-		return name;
-	}
+        if (f.isAnnotationPresent(Temporal.class))
+        {
+            if (!f.getType().equals(Date.class))
+            {
+                log.error("@Temporal must map to java.util.Date for @Entity(" + entity.getName() + "." + f.getName()
+                        + ")");
+                return name;
+            }
+            if (null == name)
+            {
+                name = f.getName();
+            }
+        }
+        return name;
+    }
 
-	/**
-	 * Populates @Id accesser methods like, getId and setId of clazz to
-	 * metadata.
-	 * 
-	 * @param metadata
-	 *            the metadata
-	 * @param clazz
-	 *            the clazz
-	 * @param f
-	 *            the f
-	 */
-	protected final void populateIdAccessorMethods(EntityMetadata metadata,
-			Class<?> clazz, Field f) {
-		try {
-			BeanInfo info = Introspector.getBeanInfo(clazz);
+    /**
+     * Populates @Id accesser methods like, getId and setId of clazz to
+     * metadata.
+     * 
+     * @param metadata
+     *            the metadata
+     * @param clazz
+     *            the clazz
+     * @param f
+     *            the f
+     */
+    protected final void populateIdAccessorMethods(EntityMetadata metadata, Class<?> clazz, Field f)
+    {
+        try
+        {
+            BeanInfo info = Introspector.getBeanInfo(clazz);
 
-			for (PropertyDescriptor descriptor : info.getPropertyDescriptors()) {
-				if (descriptor.getName().equals(f.getName())) {
-					metadata.setReadIdentifierMethod(descriptor.getReadMethod());
-					metadata.setWriteIdentifierMethod(descriptor
-							.getWriteMethod());
-					return;
-				}
-			}
-		} catch (IntrospectionException e) {
-			throw new RuntimeException(e);
-		}
-	}
+            for (PropertyDescriptor descriptor : info.getPropertyDescriptors())
+            {
+                if (descriptor.getName().equals(f.getName()))
+                {
+                    metadata.setReadIdentifierMethod(descriptor.getReadMethod());
+                    metadata.setWriteIdentifierMethod(descriptor.getWriteMethod());
+                    return;
+                }
+            }
+        }
+        catch (IntrospectionException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
 
-	protected final void populateIdColumn(EntityMetadata metadata,
-			Class<?> clazz, Field f) {
-		if (f.isAnnotationPresent(Column.class)) {
-			Column c = f.getAnnotation(Column.class);
-			if (!c.name().isEmpty()) {
-				metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(
-						c.name(), f));
-			} else {
-				metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(
-						f.getName(), f));
-			}
-		} else {
-			metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(
-					f.getName(), f));
-		}
-	}
+    protected final void populateIdColumn(EntityMetadata metadata, Class<?> clazz, Field f)
+    {
+        if (f.isAnnotationPresent(Column.class))
+        {
+            Column c = f.getAnnotation(Column.class);
+            if (!c.name().isEmpty())
+            {
+                metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(c.name(), f));
+            }
+            else
+            {
+                metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(f.getName(), f));
+            }
+        }
+        else
+        {
+            metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(f.getName(), f));
+        }
+    }
 
 }

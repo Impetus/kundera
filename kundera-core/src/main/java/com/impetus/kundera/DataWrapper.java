@@ -19,20 +19,21 @@ package com.impetus.kundera;
  * @author impetus
  * 
  */
-public interface DataWrapper {
+public interface DataWrapper
+{
 
-	/**
-	 * Returns column family.
-	 * 
-	 * @return column family.
-	 */
-	String getColumnFamily();
+    /**
+     * Returns column family.
+     * 
+     * @return column family.
+     */
+    String getColumnFamily();
 
-	/**
-	 * Returns row key.
-	 * 
-	 * @return rowKey.
-	 */
-	String getRowKey();
+    /**
+     * Returns row key.
+     * 
+     * @return rowKey.
+     */
+    String getRowKey();
 
 }

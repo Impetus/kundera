@@ -20,18 +20,20 @@ package com.impetus.kundera.index;
  * 
  * @author animesh.kumar
  */
-public class IndexingException extends RuntimeException {
+public class IndexingException extends RuntimeException
+{
 
-	/** The Constant serialVersionUID. */
-	private static final long serialVersionUID = 7917821486831927353L;
+    /** The Constant serialVersionUID. */
+    private static final long serialVersionUID = 7917821486831927353L;
 
-	/**
-	 * Instantiates a new indexing exception.
-	 * 
-	 * @param message
-	 *            the message
-	 */
-	public IndexingException(String message) {
-		super(message);
-	}
+    /**
+     * Instantiates a new indexing exception.
+     * 
+     * @param message
+     *            the message
+     */
+    public IndexingException(String message)
+    {
+        super(message);
+    }
 }

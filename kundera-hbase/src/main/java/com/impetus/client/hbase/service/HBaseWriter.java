@@ -34,47 +34,55 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author impetus
  */
-public class HBaseWriter implements Writer {
-	/** the log used by this class. */
-	private static Log log = LogFactory.getLog(HBaseWriter.class);
+public class HBaseWriter implements Writer
+{
+    /** the log used by this class. */
+    private static Log log = LogFactory.getLog(HBaseWriter.class);
 
-	@Override
-	public void writeColumns(HTable htable, String columnFamily, String rowKey,
-			List<Column> columns, Object columnFamilyObj) throws IOException {
-		Put p = new Put(Bytes.toBytes(rowKey));
+    @Override
+    public void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns,
+            Object columnFamilyObj) throws IOException
+    {
+        Put p = new Put(Bytes.toBytes(rowKey));
 
-		for (Column column : columns) {
-			String qualifier = column.getName();
-			try {
+        for (Column column : columns)
+        {
+            String qualifier = column.getName();
+            try
+            {
 
-				p.add(Bytes.toBytes(columnFamily),
-						Bytes.toBytes(qualifier),
-						PropertyAccessorHelper.get(columnFamilyObj,
-								column.getField()));
-			} catch (PropertyAccessException e1) {
-				throw new IOException(e1.getMessage());
-			}
-		}
-		htable.put(p);
-	}
+                p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier),
+                        PropertyAccessorHelper.get(columnFamilyObj, column.getField()));
+            }
+            catch (PropertyAccessException e1)
+            {
+                throw new IOException(e1.getMessage());
+            }
+        }
+        htable.put(p);
+    }
 
-	@Override
-	public void writeColumns(HTable htable, String rowKey,
-			List<Column> columns, Object entity) throws IOException {
-		Put p = new Put(Bytes.toBytes(rowKey));
+    @Override
+    public void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity) throws IOException
+    {
+        Put p = new Put(Bytes.toBytes(rowKey));
 
-		for (Column column : columns) {
-			String qualifier = column.getName();
-			try {
+        for (Column column : columns)
+        {
+            String qualifier = column.getName();
+            try
+            {
 
-				p.add(Bytes.toBytes(qualifier), System.currentTimeMillis(),
-						PropertyAccessorHelper.get(entity, column.getField()));
+                p.add(Bytes.toBytes(qualifier), System.currentTimeMillis(),
+                        PropertyAccessorHelper.get(entity, column.getField()));
 
-			} catch (PropertyAccessException e1) {
-				throw new IOException(e1.getMessage());
-			}
-		}
-		htable.put(p);
-	}
+            }
+            catch (PropertyAccessException e1)
+            {
+                throw new IOException(e1.getMessage());
+            }
+        }
+        htable.put(p);
+    }
 
 }

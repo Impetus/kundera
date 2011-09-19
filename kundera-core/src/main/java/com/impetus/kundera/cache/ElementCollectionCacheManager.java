@@ -35,136 +35,152 @@ import com.impetus.kundera.Constants;
  * 
  * @author amresh.singh
  */
-public class ElementCollectionCacheManager {
-	/** log for this class. */
-	private static Log log = LogFactory
-			.getLog(ElementCollectionCacheManager.class);
+public class ElementCollectionCacheManager
+{
+    /** log for this class. */
+    private static Log log = LogFactory.getLog(ElementCollectionCacheManager.class);
 
-	/* Single instance */
-	private static ElementCollectionCacheManager instance;
+    /* Single instance */
+    private static ElementCollectionCacheManager instance;
 
-	private ElementCollectionCacheManager() {
+    private ElementCollectionCacheManager()
+    {
 
-	}
+    }
 
-	public static synchronized ElementCollectionCacheManager getInstance() {
-		if (instance == null) {
-			instance = new ElementCollectionCacheManager();
-		}
-		return instance;
-	}
+    public static synchronized ElementCollectionCacheManager getInstance()
+    {
+        if (instance == null)
+        {
+            instance = new ElementCollectionCacheManager();
+        }
+        return instance;
+    }
 
-	/**
-	 * Mapping between Row Key and (Map of element collection objects and
-	 * element collection object name)
-	 */
-	private static Map<String, Map<Object, String>> elementCollectionCache;
+    /**
+     * Mapping between Row Key and (Map of element collection objects and
+     * element collection object name)
+     */
+    private static Map<String, Map<Object, String>> elementCollectionCache;
 
-	/**
-	 * @return the elementCollectionCache
-	 */
-	public Map<String, Map<Object, String>> getElementCollectionCache() {
-		if (this.elementCollectionCache == null) {
-			this.elementCollectionCache = new HashMap<String, Map<Object, String>>();
-		}
-		return this.elementCollectionCache;
-	}
+    /**
+     * @return the elementCollectionCache
+     */
+    public Map<String, Map<Object, String>> getElementCollectionCache()
+    {
+        if (this.elementCollectionCache == null)
+        {
+            this.elementCollectionCache = new HashMap<String, Map<Object, String>>();
+        }
+        return this.elementCollectionCache;
+    }
 
-	public boolean isCacheEmpty() {
-		return elementCollectionCache == null
-				|| elementCollectionCache.isEmpty();
-	}
+    public boolean isCacheEmpty()
+    {
+        return elementCollectionCache == null || elementCollectionCache.isEmpty();
+    }
 
-	public void addElementCollectionCacheMapping(String rowKey,
-			Object elementCollectionObject, String elementCollObjectName) {
-		Map embeddedObjectMap = new HashMap<Object, String>();
-		if (getElementCollectionCache().get(rowKey) == null) {
-			embeddedObjectMap.put(elementCollectionObject,
-					elementCollObjectName);
-			getElementCollectionCache().put(rowKey, embeddedObjectMap);
-		} else {
-			getElementCollectionCache().get(rowKey).put(
-					elementCollectionObject, elementCollObjectName);
-		}
-	}
+    public void addElementCollectionCacheMapping(String rowKey, Object elementCollectionObject,
+            String elementCollObjectName)
+    {
+        Map embeddedObjectMap = new HashMap<Object, String>();
+        if (getElementCollectionCache().get(rowKey) == null)
+        {
+            embeddedObjectMap.put(elementCollectionObject, elementCollObjectName);
+            getElementCollectionCache().put(rowKey, embeddedObjectMap);
+        }
+        else
+        {
+            getElementCollectionCache().get(rowKey).put(elementCollectionObject, elementCollObjectName);
+        }
+    }
 
-	public String getElementCollectionObjectName(String rowKey,
-			Object elementCollectionObject) {
-		if (getElementCollectionCache().get(rowKey) == null) {
-			log.debug("No element collection object map found in cache for Row key "
-					+ rowKey);
-			return null;
-		} else {
-			Map<Object, String> elementCollectionObjectMap = getElementCollectionCache()
-					.get(rowKey);
-			String elementCollectionObjectName = elementCollectionObjectMap
-					.get(elementCollectionObject);
-			if (elementCollectionObjectName == null) {
-				log.debug("No element collection object name found in cache for object:"
-						+ elementCollectionObject);
-				return null;
-			} else {
-				return elementCollectionObjectName;
-			}
-		}
-	}
+    public String getElementCollectionObjectName(String rowKey, Object elementCollectionObject)
+    {
+        if (getElementCollectionCache().get(rowKey) == null)
+        {
+            log.debug("No element collection object map found in cache for Row key " + rowKey);
+            return null;
+        }
+        else
+        {
+            Map<Object, String> elementCollectionObjectMap = getElementCollectionCache().get(rowKey);
+            String elementCollectionObjectName = elementCollectionObjectMap.get(elementCollectionObject);
+            if (elementCollectionObjectName == null)
+            {
+                log.debug("No element collection object name found in cache for object:" + elementCollectionObject);
+                return null;
+            }
+            else
+            {
+                return elementCollectionObjectName;
+            }
+        }
+    }
 
-	public int getLastElementCollectionObjectCount(String rowKey) {
-		if (getElementCollectionCache().get(rowKey) == null) {
-			log.debug("No element collection object map found in cache for Row key "
-					+ rowKey);
-			return -1;
-		} else {
-			Map<Object, String> elementCollectionMap = getElementCollectionCache()
-					.get(rowKey);
-			Collection<String> elementCollectionObjectNames = elementCollectionMap
-					.values();
-			int max = 0;
+    public int getLastElementCollectionObjectCount(String rowKey)
+    {
+        if (getElementCollectionCache().get(rowKey) == null)
+        {
+            log.debug("No element collection object map found in cache for Row key " + rowKey);
+            return -1;
+        }
+        else
+        {
+            Map<Object, String> elementCollectionMap = getElementCollectionCache().get(rowKey);
+            Collection<String> elementCollectionObjectNames = elementCollectionMap.values();
+            int max = 0;
 
-			for (String s : elementCollectionObjectNames) {
-				String elementCollectionCountStr = s.substring(s
-						.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) + 1);
-				int elementCollectionCount = 0;
-				try {
-					elementCollectionCount = Integer
-							.parseInt(elementCollectionCountStr);
-				} catch (NumberFormatException e) {
-					log.error("Invalid element collection Object name " + s);
-					throw new PersistenceException(
-							"Invalid element collection Object name " + s);
-				}
-				if (elementCollectionCount > max) {
-					max = elementCollectionCount;
-				}
-			}
-			return max;
-		}
-	}
+            for (String s : elementCollectionObjectNames)
+            {
+                String elementCollectionCountStr = s.substring(s.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) + 1);
+                int elementCollectionCount = 0;
+                try
+                {
+                    elementCollectionCount = Integer.parseInt(elementCollectionCountStr);
+                }
+                catch (NumberFormatException e)
+                {
+                    log.error("Invalid element collection Object name " + s);
+                    throw new PersistenceException("Invalid element collection Object name " + s);
+                }
+                if (elementCollectionCount > max)
+                {
+                    max = elementCollectionCount;
+                }
+            }
+            return max;
+        }
+    }
 
-	public void clearCache() {
-		this.elementCollectionCache = null;
-		try {
-			finalize();
-		} catch (Throwable e) {
-			log.warn("Unable to reclaim memory while clearing ElementCollection cache. Nothing to worry, will be taken care of by GC");
-		}
-	}
-	/*
-	 * public static void main(String args[]) { EmbeddedCollectionCacheHandler h
-	 * = new EmbeddedCollectionCacheHandler(); Tweet t1 = new Tweet("1",
-	 * "Tweet 1111", "web"); Tweet t2 = new Tweet("2", "Tweet 2222", "mobile");
-	 * Tweet t3 = new Tweet("3", "Tweet 3333", "iPhone");
-	 * 
-	 * h.addEmbeddedCollectionCacheMapping("IIIPL-0001", t1, "tweet#1");
-	 * h.addEmbeddedCollectionCacheMapping("IIIPL-0001", t2, "tweet#2");
-	 * h.addEmbeddedCollectionCacheMapping("IIIPL-0002", t3, "tweet#a");
-	 * System.out.println(h.getEmbeddedCollectionCache());
-	 * 
-	 * System.out.println(h.getEmbeddedObjectName("IIIPL-0001", t3));
-	 * System.out.println(h.getLastEmbeddedObjectCount("IIIPL-0001"));
-	 * 
-	 * 
-	 * }
-	 */
+    public void clearCache()
+    {
+        this.elementCollectionCache = null;
+        try
+        {
+            finalize();
+        }
+        catch (Throwable e)
+        {
+            log.warn("Unable to reclaim memory while clearing ElementCollection cache. Nothing to worry, will be taken care of by GC");
+        }
+    }
+    /*
+     * public static void main(String args[]) { EmbeddedCollectionCacheHandler h
+     * = new EmbeddedCollectionCacheHandler(); Tweet t1 = new Tweet("1",
+     * "Tweet 1111", "web"); Tweet t2 = new Tweet("2", "Tweet 2222", "mobile");
+     * Tweet t3 = new Tweet("3", "Tweet 3333", "iPhone");
+     * 
+     * h.addEmbeddedCollectionCacheMapping("IIIPL-0001", t1, "tweet#1");
+     * h.addEmbeddedCollectionCacheMapping("IIIPL-0001", t2, "tweet#2");
+     * h.addEmbeddedCollectionCacheMapping("IIIPL-0002", t3, "tweet#a");
+     * System.out.println(h.getEmbeddedCollectionCache());
+     * 
+     * System.out.println(h.getEmbeddedObjectName("IIIPL-0001", t3));
+     * System.out.println(h.getLastEmbeddedObjectCount("IIIPL-0001"));
+     * 
+     * 
+     * }
+     */
 
 }

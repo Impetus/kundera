@@ -28,30 +28,29 @@ import com.impetus.kundera.ejb.EntityManagerImpl;
  * 
  * @author animesh.kumar
  */
-public interface LazyInitializerFactory {
+public interface LazyInitializerFactory
+{
 
-	/**
-	 * Get Lazily loadable @Entity proxy.
-	 * 
-	 * @param entityName
-	 *            the entity name
-	 * @param persistentClass
-	 *            the persistent class
-	 * @param getIdentifierMethod
-	 *            the get identifier method
-	 * @param setIdentifierMethod
-	 *            the set identifier method
-	 * @param id
-	 *            the id
-	 * @param em
-	 *            the em
-	 * @return the proxy
-	 * @throws PersistenceException
-	 *             the persistence exception
-	 */
-	KunderaProxy getProxy(final String entityName,
-			final Class<?> persistentClass, final Method getIdentifierMethod,
-			final Method setIdentifierMethod, final String id,
-			final EntityManagerImpl em) throws PersistenceException;
+    /**
+     * Get Lazily loadable @Entity proxy.
+     * 
+     * @param entityName
+     *            the entity name
+     * @param persistentClass
+     *            the persistent class
+     * @param getIdentifierMethod
+     *            the get identifier method
+     * @param setIdentifierMethod
+     *            the set identifier method
+     * @param id
+     *            the id
+     * @param em
+     *            the em
+     * @return the proxy
+     * @throws PersistenceException
+     *             the persistence exception
+     */
+    KunderaProxy getProxy(final String entityName, final Class<?> persistentClass, final Method getIdentifierMethod,
+            final Method setIdentifierMethod, final String id, final EntityManagerImpl em) throws PersistenceException;
 
 }

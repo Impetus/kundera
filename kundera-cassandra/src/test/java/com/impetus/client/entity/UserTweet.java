@@ -24,67 +24,76 @@ import javax.persistence.Embeddable;
  */
 
 @Embeddable
-public class UserTweet {
+public class UserTweet
+{
 
-	private String tweetId;
+    private String tweetId;
 
-	private String body;
+    private String body;
 
-	private String device;
+    private String device;
 
-	public UserTweet(String tweetId, String body, String device) {
-		this.tweetId = tweetId;
-		this.body = body;
-		this.device = device;
-	}
+    public UserTweet(String tweetId, String body, String device)
+    {
+        this.tweetId = tweetId;
+        this.body = body;
+        this.device = device;
+    }
 
-	public UserTweet() {
+    public UserTweet()
+    {
 
-	}
+    }
 
-	/**
-	 * @return the tweetId
-	 */
-	public String getTweetId() {
-		return tweetId;
-	}
+    /**
+     * @return the tweetId
+     */
+    public String getTweetId()
+    {
+        return tweetId;
+    }
 
-	/**
-	 * @param tweetId
-	 *            the tweetId to set
-	 */
-	public void setTweetId(String tweetId) {
-		this.tweetId = tweetId;
-	}
+    /**
+     * @param tweetId
+     *            the tweetId to set
+     */
+    public void setTweetId(String tweetId)
+    {
+        this.tweetId = tweetId;
+    }
 
-	/**
-	 * @return the body
-	 */
-	public String getBody() {
-		return body;
-	}
+    /**
+     * @return the body
+     */
+    public String getBody()
+    {
+        return body;
+    }
 
-	/**
-	 * @param body
-	 *            the body to set
-	 */
-	public void setBody(String body) {
-		this.body = body;
-	}
+    /**
+     * @param body
+     *            the body to set
+     */
+    public void setBody(String body)
+    {
+        this.body = body;
+    }
 
-	/**
-	 * @return the device
-	 */
-	public String getDevice() {
-		return device;
-	}
+    /**
+     * @return the device
+     */
+    public String getDevice()
+    {
+        return device;
+    }
 
-	/**
-	 * @param device
-	 *            the device to set
-	 */
-	public void setDevice(String device) {
-		this.device = device;
-	}
+    /**
+     * @param device
+     *            the device to set
+     */
+    public void setDevice(String device)
+    {
+        this.device = device;
+    }
 
 }

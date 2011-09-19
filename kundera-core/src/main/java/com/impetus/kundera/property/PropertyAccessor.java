@@ -24,42 +24,43 @@ import java.lang.reflect.Field;
  *            the generic type
  * @author animesh.kumar
  */
-public interface PropertyAccessor<T> {
+public interface PropertyAccessor<T>
+{
 
-	/**
-	 * From bytes.
-	 * 
-	 * @param b
-	 *            the b
-	 * 
-	 * @return the T
-	 * 
-	 * @throws PropertyAccessException
-	 *             the property access exception
-	 */
-	T fromBytes(byte[] b) throws PropertyAccessException;
+    /**
+     * From bytes.
+     * 
+     * @param b
+     *            the b
+     * 
+     * @return the T
+     * 
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    T fromBytes(byte[] b) throws PropertyAccessException;
 
-	/**
-	 * To bytes.
-	 * 
-	 * @param object
-	 *            the object
-	 * 
-	 * @return the byte[]
-	 * 
-	 * @throws PropertyAccessException
-	 *             the property access exception
-	 */
-	byte[] toBytes(Object object) throws PropertyAccessException;
+    /**
+     * To bytes.
+     * 
+     * @param object
+     *            the object
+     * 
+     * @return the byte[]
+     * 
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    byte[] toBytes(Object object) throws PropertyAccessException;
 
-	/**
-	 * Converts Object to String. Normally, this will be object.toString() But
-	 * in some cases, this might be different.
-	 * 
-	 * @param object
-	 *            the object
-	 * 
-	 * @return the string
-	 */
-	String toString(Object object);
+    /**
+     * Converts Object to String. Normally, this will be object.toString() But
+     * in some cases, this might be different.
+     * 
+     * @param object
+     *            the object
+     * 
+     * @return the string
+     */
+    String toString(Object object);
 }

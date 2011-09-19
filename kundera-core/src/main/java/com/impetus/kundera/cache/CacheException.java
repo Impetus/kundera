@@ -21,42 +21,46 @@ package com.impetus.kundera.cache;
  * @author animesh.kumar
  * 
  */
-public class CacheException extends Exception {
+public class CacheException extends Exception
+{
 
-	/**
+    /**
      *
      */
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Instantiates a new cache exception.
-	 * 
-	 * @param s
-	 *            the s
-	 */
-	public CacheException(final String s) {
-		super(s);
-	}
+    /**
+     * Instantiates a new cache exception.
+     * 
+     * @param s
+     *            the s
+     */
+    public CacheException(final String s)
+    {
+        super(s);
+    }
 
-	/**
-	 * Instantiates a new cache exception.
-	 * 
-	 * @param s
-	 *            the s
-	 * @param e
-	 *            the e
-	 */
-	public CacheException(final String s, final Throwable e) {
-		super(s, e);
-	}
+    /**
+     * Instantiates a new cache exception.
+     * 
+     * @param s
+     *            the s
+     * @param e
+     *            the e
+     */
+    public CacheException(final String s, final Throwable e)
+    {
+        super(s, e);
+    }
 
-	/**
-	 * Instantiates a new cache exception.
-	 * 
-	 * @param e
-	 *            the e
-	 */
-	public CacheException(final Throwable e) {
-		super(e);
-	}
+    /**
+     * Instantiates a new cache exception.
+     * 
+     * @param e
+     *            the e
+     */
+    public CacheException(final Throwable e)
+    {
+        super(e);
+    }
 }

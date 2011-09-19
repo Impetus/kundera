@@ -36,85 +36,90 @@ import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
  * 
  * @author animesh.kumar
  */
-public class MetadataBuilder {
+public class MetadataBuilder
+{
 
-	/** the log used by this class. */
-	private static Log log = LogFactory.getLog(MetadataBuilder.class);
+    /** the log used by this class. */
+    private static Log log = LogFactory.getLog(MetadataBuilder.class);
 
-	/** The metadata processors. */
-	private List<MetadataProcessor> metadataProcessors;
+    /** The metadata processors. */
+    private List<MetadataProcessor> metadataProcessors;
 
-	/** The Validator. */
-	private EntityValidator validator;
+    /** The Validator. */
+    private EntityValidator validator;
 
-	// set after build is called?
-	/** The instantiated. */
-	private boolean instantiated = false;
+    // set after build is called?
+    /** The instantiated. */
+    private boolean instantiated = false;
 
-	/**
-	 * Instantiates a new metadata manager.
-	 * 
-	 * @param factory
-	 *            the factory
-	 */
-	public MetadataBuilder() {
-		validator = new EntityValidatorImpl();
-		metadataProcessors = new ArrayList<MetadataProcessor>();
+    /**
+     * Instantiates a new metadata manager.
+     * 
+     * @param factory
+     *            the factory
+     */
+    public MetadataBuilder()
+    {
+        validator = new EntityValidatorImpl();
+        metadataProcessors = new ArrayList<MetadataProcessor>();
 
-		// add processors to chain.
-		metadataProcessors.add(new TableProcessor());
-		metadataProcessors.add(new CacheableAnnotationProcessor());
-		metadataProcessors.add(new IndexProcessor());
-		metadataProcessors.add(new EntityListenersProcessor());
-	}
+        // add processors to chain.
+        metadataProcessors.add(new TableProcessor());
+        metadataProcessors.add(new CacheableAnnotationProcessor());
+        metadataProcessors.add(new IndexProcessor());
+        metadataProcessors.add(new EntityListenersProcessor());
+    }
 
-	/**
-	 * Validate.
-	 * 
-	 * @param clazz
-	 *            the clazz
-	 * 
-	 * @throws PersistenceException
-	 *             the persistence exception
-	 */
-	public final void validate(Class<?> clazz) throws PersistenceException {
-		validator.validate(clazz);
-	}
+    /**
+     * Validate.
+     * 
+     * @param clazz
+     *            the clazz
+     * 
+     * @throws PersistenceException
+     *             the persistence exception
+     */
+    public final void validate(Class<?> clazz) throws PersistenceException
+    {
+        validator.validate(clazz);
+    }
 
-	/**
-	 * Process.
-	 * 
-	 * @param clazz
-	 *            the clazz
-	 * 
-	 * @return the entity metadata
-	 * 
-	 * @throws PersistenceException
-	 *             the persistence exception
-	 */
-	public EntityMetadata buildEntityMetadata(Class<?> clazz) {
+    /**
+     * Process.
+     * 
+     * @param clazz
+     *            the clazz
+     * 
+     * @return the entity metadata
+     * 
+     * @throws PersistenceException
+     *             the persistence exception
+     */
+    public EntityMetadata buildEntityMetadata(Class<?> clazz)
+    {
 
-		EntityMetadata metadata = new EntityMetadata(clazz);
-		validate(clazz);
+        EntityMetadata metadata = new EntityMetadata(clazz);
+        validate(clazz);
 
-		log.debug("Processing @Entity >> " + clazz);
+        log.debug("Processing @Entity >> " + clazz);
 
-		for (MetadataProcessor processor : metadataProcessors) {
-			processor.process(clazz, metadata);
-		}
+        for (MetadataProcessor processor : metadataProcessors)
+        {
+            processor.process(clazz, metadata);
+        }
 
-		return metadata;
-	}
+        return metadata;
+    }
 
-	/**
-	 * Build Inter/Intra @Entity relationships.
-	 */
-	/*
-	 * public void build() { log.debug("Building @Entity's foreign relations.");
-	 * for (EntityMetadata metadata : getEntityMetadatasAsList()) {
-	 * processRelations(metadata.getEntityClazz());
-	 * log.debug("Metadata for @Entity " + metadata.getEntityClazz() + "\n" +
-	 * metadata); } instantiated = true; }
-	 */
+    /**
+     * Build Inter/Intra @Entity relationships.
+     */
+    /*
+     * public void build() { log.debug("Building @Entity's foreign relations.");
+     * for (EntityMetadata metadata : getEntityMetadatasAsList()) {
+     * processRelations(metadata.getEntityClazz());
+     * log.debug("Metadata for @Entity " + metadata.getEntityClazz() + "\n" +
+     * metadata); } instantiated = true; }
+     */
 
 }
