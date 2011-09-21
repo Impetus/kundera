@@ -23,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.ejb.EntityManagerImpl;
-import com.impetus.kundera.metadata.MetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.query.QueryImpl;
 
@@ -37,9 +36,9 @@ public class MongoDBQuery extends QueryImpl
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(MongoDBQuery.class);
 
-    public MongoDBQuery(EntityManagerImpl em, MetadataManager metadataManager, String jpaQuery)
+    public MongoDBQuery(EntityManagerImpl em, String jpaQuery)
     {
-        super(em, metadataManager, jpaQuery);
+        super(em, jpaQuery);
     }
 
     @Override

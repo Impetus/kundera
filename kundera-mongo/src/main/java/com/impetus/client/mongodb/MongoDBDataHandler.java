@@ -41,6 +41,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
+import com.impetus.kundera.query.KunderaMetadataManager;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -122,7 +123,8 @@ public class MongoDBDataHandler
                                                                       // this
                                                                       // property
 
-                EntityMetadata relMetadata = em.getMetadataManager().getEntityMetadata(embeddedEntityClass);
+                EntityMetadata relMetadata = KunderaMetadataManager.getMetamodel(em.getPersistenceUnitName()).getEntityMetadata(embeddedEntityClass); 
+                    
                 BasicDBList relList = (BasicDBList) document.get(embeddedPropertyField.getName());
                 ; // List foreign keys
 
