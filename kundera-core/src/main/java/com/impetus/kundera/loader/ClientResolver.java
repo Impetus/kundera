@@ -35,14 +35,7 @@ public final class ClientResolver
      */
     public static Client getClient(ClientIdentifier clientIdentifier)
     {
-        if (clientsNew.containsKey(clientIdentifier))
-        {
-            return clientsNew.get(clientIdentifier);
-        }
-        else
-        {
-            return loadNewProxyInstance(clientIdentifier);
-        }
+        return loadNewProxyInstance(clientIdentifier);
     }
 
     private static Client loadNewProxyInstance(ClientIdentifier clientIdentifier)

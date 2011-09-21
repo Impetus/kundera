@@ -108,7 +108,21 @@ public class EntityManagerImpl implements KunderaEntityManager
         session = new EntityManagerSession(this);
         eventDispatcher = new EntityEventDispatcher();
 
-        setClient(getClient());
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager
+                .getPersistenceUnitMetadata(getPersistenceUnitName());
+
+        String node = puMetadata.getProps().getProperty("kundera.nodes");
+        String port = puMetadata.getProps().getProperty("kundera.port");
+        String keyspace = puMetadata.getProps().getProperty("kundera.keyspace");
+        String clientName = puMetadata.getProps().getProperty("kundera.client");
+        String persistenceUnit = puMetadata.getPersistenceUnitName();
+
+        ClientType clientType = ClientType.getValue(clientName.toUpperCase());
+        ClientIdentifier identifier = new ClientIdentifier(new String[] { node }, Integer.valueOf(port), keyspace,
+                clientType, persistenceUnit);
+
+        client = ClientResolver.getClient(identifier);
+        client.connect();
     }
 
     /**
@@ -333,7 +347,7 @@ public class EntityManagerImpl implements KunderaEntityManager
                 // PersistTask persistTask = new PersistTask(o, this);
                 // ptpe.runPersistTask(persistTask);
                 persistData(o);
-
+                log.debug("Data persisted successfully");
             }
         }
         catch (Exception exp)
@@ -788,26 +802,12 @@ public class EntityManagerImpl implements KunderaEntityManager
     @Override
     public final Client getClient()
     {
-
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(getPersistenceUnitName());
-
-        String node = puMetadata.getProps().getProperty("kundera.nodes");
-        String port = puMetadata.getProps().getProperty("kundera.port");
-        String keyspace = puMetadata.getProps().getProperty("kundera.keyspace");
-        String clientName = puMetadata.getProps().getProperty("kundera.client");
-        String persistenceUnit = puMetadata.getPersistenceUnitName();
-
-        ClientType clientType = ClientType.getValue(clientName.toUpperCase());
-        ClientIdentifier identifier = new ClientIdentifier(new String[] { node }, Integer.valueOf(port), keyspace,
-                clientType, persistenceUnit);
-
-        client = ClientResolver.getClient(identifier);
-        client.connect();
         return client;
     }
-    
-    public String getPersistenceUnitName() {
-        return (String)this.factory.getProperties().get(Constants.PERSISTENCE_UNIT_NAME);
+
+    public String getPersistenceUnitName()
+    {
+        return (String) this.factory.getProperties().get(Constants.PERSISTENCE_UNIT_NAME);
     }
 
     /**
