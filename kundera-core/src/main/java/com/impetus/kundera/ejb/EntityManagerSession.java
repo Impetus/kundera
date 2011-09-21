@@ -72,7 +72,7 @@ public class EntityManagerSession
         if (o == null)
         {
             LOG.debug("Reading from L2 >> " + key);
-            Cache c = em.getFactory().getCache(entityClass);
+            Cache c = (Cache)em.getEntityManagerFactory().getCache();
             if (c != null)
             {
                 o = (T) c.get(key);
@@ -118,7 +118,7 @@ public class EntityManagerSession
         {
             LOG.debug("Writing to L2 >>" + key);
             // save to second level cache
-            Cache c = em.getFactory().getCache(entity.getClass());
+            Cache c = (Cache)em.getEntityManagerFactory().getCache();
             if (c != null)
             {
                 c.put(key, entity);
@@ -162,7 +162,7 @@ public class EntityManagerSession
         if (spillOverToL2)
         {
             LOG.debug("Removing from L2 >> " + key);
-            Cache c = em.getFactory().getCache(entityClass);
+            Cache c = (Cache)em.getEntityManagerFactory().getCache();
             if (c != null)
             {
                 Object o2 = c.remove(key);

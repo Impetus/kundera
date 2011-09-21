@@ -39,6 +39,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
+import com.impetus.kundera.startup.model.MetamodelImpl;
 
 /**
  * The Class EntityReachabilityResolver.
@@ -120,7 +121,7 @@ public class EntityResolver
         EntityMetadata m = null;
         try
         {
-            m = em.getMetadataManager().getEntityMetadata(o.getClass());
+            m = ((MetamodelImpl)em.getEntityManagerFactory().getMetamodel()).getEntityMetadata(o.getClass());
         }
         catch (Exception e)
         {
@@ -155,7 +156,7 @@ public class EntityResolver
         Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
         // Save to map
-        entities.put(mapKeyForEntity, em.getFactory().getEnhancedEntity(o, id, foreignKeysMap));
+        entities.put(mapKeyForEntity, ((EntityManagerFactoryImpl)em.getEntityManagerFactory()).getEnhancedEntity(o, id, foreignKeysMap));
 
         // Iterate over EntityMetata.Relation relations
         for (Relation relation : m.getRelations())
@@ -180,12 +181,12 @@ public class EntityResolver
             // if object is not null, then proceed
             if (null != value)
             {
+                EntityMetadata relMetadata = ((MetamodelImpl)em.getEntityManagerFactory().getMetamodel()).getEntityMetadataMap().get(targetClass);
 
                 if (relation.isUnary())
                 {
                     // Unary relation will have single target object.
-                    String targetId = PropertyAccessorHelper.getId(value,
-                            em.getMetadataManager().getEntityMetadata(targetClass));
+                    String targetId = PropertyAccessorHelper.getId(value, relMetadata);
 
                     Set<String> foreignKeys = new HashSet<String>();
 
@@ -210,8 +211,7 @@ public class EntityResolver
                     // Iterate over each Object and get the @Id
                     for (Object o_ : collection)
                     {
-                        String targetId = PropertyAccessorHelper.getId(o_,
-                                em.getMetadataManager().getEntityMetadata(targetClass));
+                        String targetId = PropertyAccessorHelper.getId(o_, relMetadata);
 
                         foreignKeys.add(targetId);
 
@@ -268,10 +268,10 @@ public class EntityResolver
         // in case the target contains a reference to containing entity.
         em.getSession().store(entity, entityId, Boolean.FALSE);
 
-        EntityMetadata relMetadata = em.getMetadataManager().getEntityMetadata(foreignEntityClass);
+        EntityMetadata relMetadata = ((MetamodelImpl)em.getEntityManagerFactory().getMetamodel()).getEntityMetadata(foreignEntityClass);
 
         // Check for cross-store persistence
-        if (relMetadata.getPersistenceUnit() == null
+        if (relMetadata.getPersistenceUnit() == null 
                 || em.getPersistenceUnitName().equals(relMetadata.getPersistenceUnit()))
         {
             populateForeignEntityFromSameDatastore(entity, relation, entityName, foreignEntityClass, foreignKeys);
@@ -332,7 +332,7 @@ public class EntityResolver
             Class<?> foreignEntityClass, String... foreignKeys) throws PropertyAccessException
     {
 
-        EntityMetadata relMetadata = em.getMetadataManager().getEntityMetadata(foreignEntityClass);
+        EntityMetadata relMetadata = ((MetamodelImpl)em.getEntityManagerFactory().getMetamodel()).getEntityMetadata(foreignEntityClass);
         this.em = (EntityManagerImpl) new Configuration().getEntityManager(relMetadata.getPersistenceUnit());
 
         if (relation.isUnary())
@@ -409,9 +409,9 @@ public class EntityResolver
                     + "_" + foreignKey);
 
             // metadata
-            EntityMetadata m = em.getMetadataManager().getEntityMetadata(persistentClass);
+            EntityMetadata m = ((MetamodelImpl)em.getEntityManagerFactory().getMetamodel()).getEntityMetadata(persistentClass);
 
-            return em.getFactory().getLazyEntity(entityName, persistentClass, m.getReadIdentifierMethod(),
+            return ((EntityManagerFactoryImpl)em.getEntityManagerFactory()).getLazyEntity(entityName, persistentClass, m.getReadIdentifierMethod(),
                     m.getWriteIdentifierMethod(), foreignKey, em);
         }
     }

@@ -16,11 +16,10 @@
 package com.impetus.kundera.ejb;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.Entity;
+import javax.persistence.Cache;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnitUtil;
@@ -32,18 +31,18 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.cache.Cache;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
-import com.impetus.kundera.classreading.ClasspathReader;
-import com.impetus.kundera.classreading.Reader;
-import com.impetus.kundera.metadata.MetadataManager;
+import com.impetus.kundera.cache.NonOperationalCacheProvider;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.proxy.EntityEnhancerFactory;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
 import com.impetus.kundera.proxy.cglib.CglibEntityEnhancerFactory;
 import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
+import com.impetus.kundera.query.KunderaMetadataManager;
+import com.impetus.kundera.startup.model.KunderaMetadata;
 
 /**
  * The Class EntityManagerFactoryImpl.
@@ -51,7 +50,7 @@ import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
  * @author animesh.kumar
  */
 public class EntityManagerFactoryImpl implements EntityManagerFactory
-{
+{    
 
     /** the log used by this class. */
     private static Log LOG = LogFactory.getLog(EntityManagerFactoryImpl.class);
@@ -59,53 +58,17 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     /** Whether or not the factory has been closed. */
     private boolean closed = false;
 
-    /** Also the prefix that will be applied to each Domain. */
-    private String persistenceUnitName;
-
-    /** properties file values. */
-    @SuppressWarnings("unchecked")
-    private Map props;
-
-    /** The sessionless. */
-    private boolean sessionless;
-
-    /** The metadata manager. */
-    private MetadataManager metadataManager;
-
-    /** The nodes. */
-    private String[] nodes;
-
-    /** The port. */
-    private Integer port;
-
-    /** The keyspace. */
-    private String schema;
-
-    /** The classes. */
-    private List<String> classes;
-
-    /** The Cache provider. */
-    private CacheProvider cacheProvider;
-
-    /** The cache provider class name. */
-    private String cacheProviderClassName;
-
     /** The enhanced proxy factory. */
     private EntityEnhancerFactory enhancedProxyFactory;
 
     /** The lazy initializer factory. */
     private LazyInitializerFactory lazyInitializerFactory;
 
-    /**
-     * A convenience constructor.
-     * 
-     * @param persistenceUnitName
-     *            used to prefix the Cassandra domains
-     */
-    public EntityManagerFactoryImpl(String persistenceUnitName)
-    {
-        this(persistenceUnitName, null);
-    }
+    private Map<String, Object> properties;
+
+    private CacheProvider cacheProvider;
+
+    private String persistenceUnitName;
 
     /**
      * This one is generally called via the PersistenceProvider.
@@ -128,99 +91,20 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      * @param props
      *            should have accessKey and secretKey
      */
-    public EntityManagerFactoryImpl(String persistenceUnitName, Map props)
+    public EntityManagerFactoryImpl(String persistenceUnitName, Map<String, Object> properties)
     {
-        onLoad(persistenceUnitName);
-        this.props = props;
-    }
-
-    /**
-     * Instantiates a new entity manager factory impl.
-     * 
-     * @param metaData
-     *            the meta data
-     * @param props
-     *            the props
-     */
-    public EntityManagerFactoryImpl(PersistenceMetadata metaData, Map props)
-    {
-        this.classes = metaData.getClasses();
-        onLoad(metaData.getName());
-        this.props = props;
-    }
-
-    /**
-     * Method to instantiate persistence entities and metadata.
-     * 
-     * @param persistenceUnitName
-     *            the persistence unit name
-     */
-    private void onLoad(String persistenceUnitName)
-    {
-        if (persistenceUnitName == null)
-        {
-            throw new IllegalArgumentException("Must have a persistenceUnitName!");
-        }
-        long start = System.currentTimeMillis();
-
+        // TODO Device some better (JPA) way
+        properties.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnitName);
+        this.properties = properties;
         this.persistenceUnitName = persistenceUnitName;
-        metadataManager = new MetadataManager();
-
-        // scan classes for @Entity
-        Reader reader = new ClasspathReader(this.classes);
-        reader.addValidAnnotations(Entity.class.getName());
-        reader.addAnnotationDiscoveryListeners(metadataManager);
-        reader.read();
-
-        // metadataManager.build();
-
         enhancedProxyFactory = new CglibEntityEnhancerFactory();
         lazyInitializerFactory = new CglibLazyInitializerFactory();
-
-        LOG.info("EntityManagerFactoryImpl loaded in " + (System.currentTimeMillis() - start) + "ms.");
     }
 
-    /**
-     * Gets the cache.
-     * 
-     * @param entity
-     *            the entity
-     * @return the cache
-     */
-    public Cache getCache(Class<?> entity)
-    {
-        try
-        {
-            String cacheName = metadataManager.getEntityMetadata(entity).getEntityClazz().getName();
-            return cacheProvider.createCache(cacheName);
-        }
-        catch (CacheException e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Gets the metadata manager.
-     * 
-     * @return the metadataManager
-     */
-    public final MetadataManager getMetadataManager()
-    {
-        return metadataManager;
-    }
-
-    /* @see javax.persistence.EntityManagerFactory#close() */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManagerFactory#close()
-     */
     @Override
     public final void close()
     {
         closed = true;
-        // client.shutdown();
         cacheProvider.shutdown();
     }
 
@@ -249,7 +133,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public final EntityManager createEntityManager(Map map)
     {
-        return new EntityManagerImpl(this);
+        return new EntityManagerImpl(this, map);
     }
 
     /**
@@ -303,78 +187,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         return !closed;
     }
 
-    /**
-     * Gets the persistence unit name.
-     * 
-     * @return the persistence unit name
-     */
-    public final String getPersistenceUnitName()
-    {
-        return persistenceUnitName;
-    }
-
-    /**
-     * Gets the nodes.
-     * 
-     * @return the nodes
-     */
-    public String[] getNodes()
-    {
-        return nodes;
-    }
-
-    /**
-     * Gets the port.
-     * 
-     * @return the port
-     */
-    public int getPort()
-    {
-        return port;
-    }
-
-    /**
-     * Gets the schema.
-     * 
-     * @return the schema
-     */
-    public String getSchema()
-    {
-        return schema;
-    }
-
-    /**
-     * Sets the schema.
-     * 
-     * @param schema
-     *            the schema to set
-     */
-    public void setSchema(String schema)
-    {
-        this.schema = schema;
-    }
-
-    /**
-     * Gets the classes.
-     * 
-     * @return the classes
-     */
-    public List<String> getClasses()
-    {
-        return classes;
-    }
-
-    /**
-     * Sets the classes.
-     * 
-     * @param classes
-     *            the classes to set
-     */
-    public void setClasses(List<String> classes)
-    {
-        this.classes = classes;
-    }
-
     /*
      * (non-Javadoc)
      * 
@@ -394,7 +206,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Metamodel getMetamodel()
     {
-        throw new NotImplementedException("TODO");
+        return KunderaMetadataManager.getMetamodel(this.persistenceUnitName);
     }
 
     /*
@@ -405,7 +217,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Map<String, Object> getProperties()
     {
-        throw new NotImplementedException("TODO");
+        return properties;
     }
 
     /*
@@ -414,9 +226,21 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      * @see javax.persistence.EntityManagerFactory#getCache()
      */
     @Override
-    public javax.persistence.Cache getCache()
+    public Cache getCache()
     {
-        throw new NotImplementedException("TODO");
+        try
+        {
+            String resourceName = (String) getProperties().get("kundera.cache.config.resource");
+            cacheProvider = initSecondLevelCache((String) getProperties().get("kundera.cache.provider.class"),
+                    resourceName);
+
+            return cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
+        }
+        catch (CacheException e)
+        {
+            LOG.error("Error while getting cache. Details:" + e.getMessage());
+            return null;
+        }
     }
 
     /*
@@ -428,6 +252,41 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     public PersistenceUnitUtil getPersistenceUnitUtil()
     {
         throw new NotImplementedException("TODO");
+    }
+
+    /**
+     * Inits the second level cache.
+     * 
+     * @param cacheProviderClassName
+     *            the cache provider class name
+     * @param classResourceName
+     *            the class resource name
+     * @return the cache provider
+     */
+    @SuppressWarnings("unchecked")
+    private CacheProvider initSecondLevelCache(String cacheProviderClassName, String classResourceName)
+    {
+        // String cacheProviderClassName = (String)
+        // props.get("kundera.cache.provider_class");
+        CacheProvider cacheProvider = null;
+        if (cacheProviderClassName != null)
+        {
+            try
+            {
+                Class<CacheProvider> cacheProviderClass = (Class<CacheProvider>) Class.forName(cacheProviderClassName);
+                cacheProvider = cacheProviderClass.newInstance();
+                cacheProvider.init(classResourceName);
+            }
+            catch (Exception e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+        if (cacheProvider == null)
+        {
+            cacheProvider = new NonOperationalCacheProvider();
+        }
+        return cacheProvider;
     }
 
 }

@@ -21,7 +21,7 @@ package com.impetus.kundera.cache;
  * 
  * @author animesh.kumar
  */
-public interface Cache
+public interface Cache extends javax.persistence.Cache
 {
 
     /**

@@ -25,12 +25,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.ejb.EntityManagerImpl;
-import com.impetus.kundera.metadata.MetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.startup.model.MetamodelImpl;
 
 /**
  * The Class KunderaQuery.
@@ -56,10 +58,7 @@ public abstract class KunderaQuery
 
     /** The EntityManager. */
     private EntityManagerImpl em;
-
-    /** The MetadataManager. */
-    private MetadataManager metadataManager;
-
+    
     /** The result. */
     private String result;
 
@@ -94,10 +93,9 @@ public abstract class KunderaQuery
      * @param metadataManager
      *            MetadataManager
      */
-    public KunderaQuery(EntityManagerImpl em, MetadataManager metadataManager)
+    public KunderaQuery(EntityManagerImpl em)
     {
-        this.em = em;
-        this.metadataManager = metadataManager;
+        this.em = em;        
     }
 
     /**
@@ -109,17 +107,7 @@ public abstract class KunderaQuery
     {
         return em;
     }
-
-    /**
-     * Gets the metadata manager.
-     * 
-     * @return the metadataManager
-     */
-    public MetadataManager getMetadataManager()
-    {
-        return metadataManager;
-    }
-
+    
     /**
      * Sets the grouping.
      * 
@@ -267,12 +255,13 @@ public abstract class KunderaQuery
         this.entityName = fromArray[0];
         this.entityAlias = fromArray[1];
 
-        entityClass = metadataManager.getEntityClassByName(entityName);
+        entityClass = getMetamodel().getEntityClass(entityName);
+            
         if (null == entityClass)
         {
             throw new PersistenceException("No entity found by the name: " + entityName);
         }
-        EntityMetadata metadata = metadataManager.getEntityMetadata(entityClass);
+        EntityMetadata metadata = getMetamodel().getEntityMetadata(entityClass);            
         if (!metadata.isIndexable())
         {
             throw new PersistenceException(entityClass + " is not indexed. What are you searching for dude?");
@@ -284,7 +273,7 @@ public abstract class KunderaQuery
      */
     private void initFilter()
     {
-        EntityMetadata metadata = metadataManager.getEntityMetadata(entityClass);
+        EntityMetadata metadata = getMetamodel().getEntityMetadata(entityClass);
         String indexName = metadata.getIndexName();
 
         // String filter = getFilter();
@@ -383,7 +372,7 @@ public abstract class KunderaQuery
 
     public final EntityMetadata getEntityMetadata()
     {
-        return metadataManager.getEntityMetadata(entityClass);
+        return getMetamodel().getEntityMetadata(entityClass);
     }
 
     /**
@@ -541,5 +530,8 @@ public abstract class KunderaQuery
         split.add(s);
         return split;
     }
-
+    
+    private MetamodelImpl getMetamodel() {
+        return KunderaMetadataManager.getMetamodel(em.getPersistenceUnitName());
+    }
 }

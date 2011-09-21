@@ -28,7 +28,6 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.KunderaIndexer;
 import com.impetus.kundera.metadata.MetadataBuilder;
-import com.impetus.kundera.metadata.MetadataManager;
 
 /**
  * The Class LuceneQuery.
@@ -57,9 +56,9 @@ public class LuceneQuery extends QueryImpl implements Query
      * @param jpaQuery
      *            the jpa query
      */
-    public LuceneQuery(EntityManagerImpl em, MetadataManager metadataManager, String jpaQuery)
+    public LuceneQuery(EntityManagerImpl em, String jpaQuery)
     {
-        super(em, metadataManager, jpaQuery);
+        super(em, jpaQuery);
     }
 
     /**

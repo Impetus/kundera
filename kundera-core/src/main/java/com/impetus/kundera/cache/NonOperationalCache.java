@@ -21,7 +21,7 @@ package com.impetus.kundera.cache;
  * @author animesh.kumar
  * 
  */
-public class NonOperationalCache implements Cache
+public class NonOperationalCache implements Cache, javax.persistence.Cache
 {
 
     /* @see com.impetus.kundera.cache.Cache#size() */
@@ -59,6 +59,27 @@ public class NonOperationalCache implements Cache
     public Object get(final Object key)
     {
         return null;
+    }
+
+    @Override
+    public boolean contains(Class paramClass, Object paramObject)
+    {
+        return false;
+    }
+
+    @Override
+    public void evict(Class paramClass, Object paramObject)
+    {
+    }
+
+    @Override
+    public void evict(Class paramClass)
+    {
+    }
+
+    @Override
+    public void evictAll()
+    {
     }
 
 }

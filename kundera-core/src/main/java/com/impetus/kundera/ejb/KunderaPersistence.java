@@ -24,6 +24,8 @@ import javax.persistence.spi.ProviderUtil;
 
 import org.apache.commons.lang.NotImplementedException;
 
+import com.impetus.kundera.startup.KunderaLoadManager;
+
 /**
  * The Class KunderaPersistence.
  * 
@@ -57,10 +59,14 @@ public class KunderaPersistence implements PersistenceProvider
      * java.lang.String, java.util.Map)
      */
     @Override
-    public final EntityManagerFactory createEntityManagerFactory(String emName, Map map)
+    public final EntityManagerFactory createEntityManagerFactory(String persistenceUnit, Map map)
     {
-        EntityManagerFactoryBuilder conf = new EntityManagerFactoryBuilder();
-        return conf.buildEntityManagerFactory(emName, map);
+        // Invoke all Kundera Related Initiallization Tasks
+        KunderaLoadManager loadManager = new KunderaLoadManager();
+        loadManager.loadMetadata(persistenceUnit);      
+        
+        EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder();
+        return builder.buildEntityManagerFactory(persistenceUnit, map);
     }
 
     /*
@@ -72,6 +78,7 @@ public class KunderaPersistence implements PersistenceProvider
     public ProviderUtil getProviderUtil()
     {
         throw new NotImplementedException("TODO");
-    }
+    } 
+    
 
 }

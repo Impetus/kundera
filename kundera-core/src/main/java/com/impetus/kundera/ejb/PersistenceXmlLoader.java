@@ -39,7 +39,7 @@ import org.xml.sax.SAXParseException;
 
 /**
  * Class that loads persistence.xml files
- * 
+ *      * TODO: DELETE THIS, IT HAS BEEN MOVED to STARTUOP.UTIL PACKAGE
  * @author animesh.kumar
  * 
  */

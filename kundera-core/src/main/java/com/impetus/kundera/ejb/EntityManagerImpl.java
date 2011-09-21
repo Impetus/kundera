@@ -43,11 +43,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Client;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.ejb.event.EntityEventDispatcher;
 import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.metadata.MetadataManager;
+import com.impetus.kundera.loader.ClientIdentifier;
+import com.impetus.kundera.loader.ClientResolver;
+import com.impetus.kundera.loader.ClientType;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
+import com.impetus.kundera.query.KunderaMetadataManager;
+import com.impetus.kundera.startup.model.KunderaMetadata;
+import com.impetus.kundera.startup.model.MetamodelImpl;
+import com.impetus.kundera.startup.model.PersistenceUnitMetadata;
 
 /**
  * The Class EntityManagerImpl.
@@ -61,7 +68,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     private static final Log log = LogFactory.getLog(EntityManagerImpl.class);
 
     /** The factory. */
-    private EntityManagerFactoryImpl factory;
+    private EntityManagerFactory factory;
 
     /** The closed. */
     private boolean closed = false;
@@ -72,12 +79,6 @@ public class EntityManagerImpl implements KunderaEntityManager
     /** The index manager. */
     private IndexManager indexManager;
 
-    /** The metadata manager. */
-    private MetadataManager metadataManager;
-
-    /** The persistence unit name. */
-    private String persistenceUnitName;
-
     /** The entity resolver. */
     private EntityResolver entityResolver;
 
@@ -87,6 +88,11 @@ public class EntityManagerImpl implements KunderaEntityManager
     /** The event dispatcher. */
     private EntityEventDispatcher eventDispatcher;
 
+    /** The Metamodel. */
+    private Metamodel metaModel;
+
+    private Map<String, Object> properties;
+
     /**
      * Instantiates a new entity manager impl.
      * 
@@ -95,24 +101,28 @@ public class EntityManagerImpl implements KunderaEntityManager
      * @param client
      *            the client
      */
-    public EntityManagerImpl(EntityManagerFactoryImpl factory)
+    public EntityManagerImpl(EntityManagerFactory factory)
     {
         this.factory = factory;
-        this.metadataManager = factory.getMetadataManager();
-        this.persistenceUnitName = factory.getPersistenceUnitName();
         entityResolver = new EntityResolver(this);
         session = new EntityManagerSession(this);
         eventDispatcher = new EntityEventDispatcher();
+
+        setClient(getClient());
     }
 
     /**
-     * Gets the factory.
+     * Instantiates a new entity manager impl.
      * 
-     * @return the factory
+     * @param factory
+     *            the factory
+     * @param client
+     *            the client
      */
-    public EntityManagerFactoryImpl getFactory()
+    public EntityManagerImpl(EntityManagerFactory factory, Map properties)
     {
-        return factory;
+        this(factory);
+        this.properties = properties;
     }
 
     /*
@@ -157,10 +167,11 @@ public class EntityManagerImpl implements KunderaEntityManager
     {
         try
         {
-            EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
+            EntityMetadata m = ((MetamodelImpl) this.factory.getMetamodel()).getEntityMetadata(entityClass);
+
             m.setDBType(this.client.getType());
 
-            E e = (E)client.loadData(this, primaryKey.toString(), m);
+            E e = (E) client.loadData(this, primaryKey.toString(), m);
             if (e != null)
             {
                 session.store(primaryKey, e, m.isCacheable());
@@ -199,7 +210,7 @@ public class EntityManagerImpl implements KunderaEntityManager
         try
         {
             String[] ids = Arrays.asList(primaryKeys).toArray(new String[] {});
-            EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
+            EntityMetadata m = ((MetamodelImpl) this.factory.getMetamodel()).getEntityMetadata(entityClass);
             m.setDBType(this.client.getType());
             List<E> entities = client.loadData(this, m, ids);
 
@@ -232,7 +243,8 @@ public class EntityManagerImpl implements KunderaEntityManager
             {
                 log.debug("Removing @Entity >> " + o);
 
-                EntityMetadata m = metadataManager.getEntityMetadata(o.getEntity().getClass());
+                EntityMetadata m = ((MetamodelImpl) this.factory.getMetamodel()).getEntityMetadata(o.getEntity()
+                        .getClass());
                 m.setDBType(this.client.getType());
                 // fire PreRemove events
                 eventDispatcher.fireEventListeners(m, o, PreRemove.class);
@@ -272,19 +284,20 @@ public class EntityManagerImpl implements KunderaEntityManager
             {
                 log.debug("Merging @Entity >> " + o);
 
-                EntityMetadata metadata = metadataManager.getEntityMetadata(o.getEntity().getClass());
-                metadata.setDBType(this.client.getType());
+                EntityMetadata m = ((MetamodelImpl) this.factory.getMetamodel()).getEntityMetadata(o.getEntity()
+                        .getClass());
+                m.setDBType(this.client.getType());
                 // TODO: throw OptisticLockException if wrong version and
                 // optimistic locking enabled
 
                 // fire PreUpdate events
-                eventDispatcher.fireEventListeners(metadata, o, PreUpdate.class);
-                client.writeData(this, o, metadata);
+                eventDispatcher.fireEventListeners(m, o, PreUpdate.class);
+                client.writeData(this, o, m);
 
-                getIndexManager().update(metadata, o.getEntity());
+                getIndexManager().update(m, o.getEntity());
 
                 // fire PreUpdate events
-                eventDispatcher.fireEventListeners(metadata, o, PostUpdate.class);
+                eventDispatcher.fireEventListeners(m, o, PostUpdate.class);
             }
         }
         catch (Exception exp)
@@ -334,7 +347,8 @@ public class EntityManagerImpl implements KunderaEntityManager
     {
         try
         {
-            EntityMetadata metadata = getMetadataManager().getEntityMetadata(e.getEntity().getClass());
+            EntityMetadata m = ((MetamodelImpl) this.factory.getMetamodel())
+                    .getEntityMetadata(e.getEntity().getClass());
 
             // TODO: This piece of code is for cross-database persistence.
             // Currently commented because we need to find a better way
@@ -350,19 +364,19 @@ public class EntityManagerImpl implements KunderaEntityManager
              * }
              */
 
-            metadata.setDBType(getClient().getType());
+            m.setDBType(getClient().getType());
             // TODO: throw EntityExistsException if already exists
 
             // fire pre-persist events
-            getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
+            getEventDispatcher().fireEventListeners(m, e, PrePersist.class);
 
             // TODO uncomment
 
-            client.writeData(this, e, metadata);
-            getIndexManager().write(metadata, e.getEntity());
+            client.writeData(this, e, m);
+            getIndexManager().write(m, e.getEntity());
 
             // fire post-persist events
-            getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
+            getEventDispatcher().fireEventListeners(m, e, PostPersist.class);
         }
         catch (PersistenceException ex)
         {
@@ -646,7 +660,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     @Override
     public Map<String, Object> getProperties()
     {
-        throw new NotImplementedException("TODO");
+        return properties;
     }
 
     /*
@@ -705,7 +719,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     @Override
     public EntityManagerFactory getEntityManagerFactory()
     {
-        throw new NotImplementedException("TODO");
+        return factory;
     }
 
     /*
@@ -716,7 +730,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     @Override
     public CriteriaBuilder getCriteriaBuilder()
     {
-        throw new NotImplementedException("TODO");
+        return factory.getCriteriaBuilder();
     }
 
     /*
@@ -727,7 +741,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     @Override
     public Metamodel getMetamodel()
     {
-        throw new NotImplementedException("TODO");
+        return factory.getMetamodel();
     }
 
     /*
@@ -753,16 +767,6 @@ public class EntityManagerImpl implements KunderaEntityManager
     }
 
     /**
-     * Gets the metadata manager.
-     * 
-     * @return the metadataManager
-     */
-    public final MetadataManager getMetadataManager()
-    {
-        return metadataManager;
-    }
-
-    /**
      * Gets the index manager.
      * 
      * @return the indexManager
@@ -784,7 +788,26 @@ public class EntityManagerImpl implements KunderaEntityManager
     @Override
     public final Client getClient()
     {
+
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(getPersistenceUnitName());
+
+        String node = puMetadata.getProps().getProperty("kundera.nodes");
+        String port = puMetadata.getProps().getProperty("kundera.port");
+        String keyspace = puMetadata.getProps().getProperty("kundera.keyspace");
+        String clientName = puMetadata.getProps().getProperty("kundera.client");
+        String persistenceUnit = puMetadata.getPersistenceUnitName();
+
+        ClientType clientType = ClientType.getValue(clientName.toUpperCase());
+        ClientIdentifier identifier = new ClientIdentifier(new String[] { node }, Integer.valueOf(port), keyspace,
+                clientType, persistenceUnit);
+
+        client = ClientResolver.getClient(identifier);
+        client.connect();
         return client;
+    }
+    
+    public String getPersistenceUnitName() {
+        return (String)this.factory.getProperties().get(Constants.PERSISTENCE_UNIT_NAME);
     }
 
     /**
@@ -794,16 +817,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     public void setClient(Client client)
     {
         this.client = client;
-    }
 
-    /**
-     * Gets the persistence unit name.
-     * 
-     * @return the persistence unit name
-     */
-    public final String getPersistenceUnitName()
-    {
-        return persistenceUnitName;
     }
 
     /**
@@ -867,7 +881,7 @@ public class EntityManagerImpl implements KunderaEntityManager
         {
             // String[] ids = Arrays.asList(primaryKeys).toArray(new String[]
             // {});
-            EntityMetadata m = metadataManager.getEntityMetadata(entityClass);
+            EntityMetadata m = ((MetamodelImpl) this.factory.getMetamodel()).getEntityMetadataMap().get(entityClass);
             m.setDBType(this.client.getType());
 
             List<T> entities = client.loadData(this, m, primaryKeys);

@@ -79,4 +79,25 @@ public class EhCacheWrapper implements com.impetus.kundera.cache.Cache
         return ehcache.getSize();
     }
 
+    @Override
+    public boolean contains(Class arg0, Object arg1)
+    {
+        return false;
+    }
+
+    @Override
+    public void evict(Class arg0)
+    {
+    }
+
+    @Override
+    public void evict(Class arg0, Object arg1)
+    {
+    }
+
+    @Override
+    public void evictAll()
+    {
+    }
+
 }

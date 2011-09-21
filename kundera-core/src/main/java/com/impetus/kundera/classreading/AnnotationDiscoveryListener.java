@@ -31,5 +31,5 @@ public interface AnnotationDiscoveryListener
      * @param annotations
      *            the annotations
      */
-    void discovered(String className, String[] annotations);
+    void discovered(String className);
 }

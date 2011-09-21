@@ -82,7 +82,7 @@ public abstract class Reader
                     // fire all listeners
                     for (AnnotationDiscoveryListener listener : getAnnotationDiscoveryListeners())
                     {
-                        listener.discovered(className, annotations.toArray(new String[] {}));
+                        listener.discovered(className);
                     }
                 }
             }
@@ -104,7 +104,7 @@ public abstract class Reader
      * @param annatt
      *            the annatt
      */
-    private void accumulateAnnotations(List<String> annotations, AnnotationsAttribute annatt)
+    public void accumulateAnnotations(List<String> annotations, AnnotationsAttribute annatt)
     {
         if (null == annatt)
         {
@@ -214,6 +214,7 @@ public abstract class Reader
      * Read.
      */
     public abstract void read();
+    
 
     /**
      * Gets the filter.
@@ -228,5 +229,9 @@ public abstract class Reader
      * @return the uR l[]
      */
     public abstract URL[] findResources();
+    
+    public abstract URL[] findResourcesByContextLoader();
+    
+    public abstract URL[] findResourcesByClasspath();
 
 }

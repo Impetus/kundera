@@ -32,6 +32,10 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.startup.model.ApplicationMetadata;
+import com.impetus.kundera.startup.model.KunderaMetadata;
+import com.impetus.kundera.startup.model.PersistenceUnitMetadata;
+
 /**
  * Builds EmtityManagerFactory instances from classpath.
  * 
@@ -58,11 +62,13 @@ public class EntityManagerFactoryBuilder
      */
     public EntityManagerFactory buildEntityManagerFactory(String persistenceUnitName, Map<Object, Object> override)
     {
-        PersistenceMetadata metadata = getPersistenceMetadata(persistenceUnitName);
-
         Properties props = new Properties();
         // Override properties
-        Properties metadataProperties = metadata.getProps();
+        
+        KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();        
+        PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnitName);
+        
+        Properties metadataProperties = puMetadata.getProps();
         // Make sure, it's empty or Unmodifiable
         override = override == null ? Collections.EMPTY_MAP : Collections.unmodifiableMap(override);
 
@@ -91,121 +97,8 @@ public class EntityManagerFactoryBuilder
             }
         }
 
-        LOG.info("Building EntityManagerFactory for name: " + metadata.getName() + ", and Properties:" + props);
-        return new EntityManagerFactoryImpl(metadata, props);
+        LOG.info("Building EntityManagerFactory for name: " + puMetadata.getPersistenceUnitName() + ", and Properties:" + props);
+        return new EntityManagerFactoryImpl(puMetadata, props);
     }
 
-    /**
-     * Gets the persistence metadata.
-     * 
-     * @param persistenceUnitName
-     *            the persistence unit name
-     * @return the persistence metadata
-     */
-    private PersistenceMetadata getPersistenceMetadata(String persistenceUnitName)
-    {
-        LOG.info("Look up for persistence unit: " + persistenceUnitName);
-
-        List<PersistenceMetadata> metadatas = findPersistenceMetadatas();
-
-        // If there is just ONE persistenceUnit, then use this irrespective of
-        // the name
-        if (metadatas.size() == 1)
-        {
-            return metadatas.get(0);
-        }
-
-        // Since there is more persistenceUnits, you must provide a name to look
-        // up
-        if (isEmpty(persistenceUnitName))
-        {
-            throw new PersistenceException("No name provided and several persistence units found");
-        }
-
-        // Look for one that interests us
-        for (PersistenceMetadata metadata : metadatas)
-        {
-            if (metadata.getName().equals(persistenceUnitName))
-            {
-                return metadata;
-            }
-        }
-
-        throw new PersistenceException("Could not find persistence unit in the classpath for name: "
-                + persistenceUnitName);
-    }
-
-    /**
-     * Find persistence metadatas.
-     * 
-     * @return the list
-     */
-    private List<PersistenceMetadata> findPersistenceMetadatas()
-    {
-        try
-        {
-            Enumeration<URL> xmls = Thread.currentThread().getContextClassLoader()
-                    .getResources("META-INF/persistence.xml");
-
-            if (!xmls.hasMoreElements())
-            {
-                LOG.info("Could not find any META-INF/persistence.xml " + "file in the classpath");
-            }
-
-            Set<String> persistenceUnitNames = new HashSet<String>();
-            List<PersistenceMetadata> persistenceUnits = new ArrayList<PersistenceMetadata>();
-
-            while (xmls.hasMoreElements())
-            {
-                URL url = xmls.nextElement();
-                LOG.trace("Analyse of persistence.xml: " + url);
-                List<PersistenceMetadata> metadataFiles = PersistenceXmlLoader.findPersistenceUnits(url,
-                        PersistenceUnitTransactionType.RESOURCE_LOCAL);
-
-                // Pick only those that have Kundera Provider
-                for (PersistenceMetadata metadata : metadataFiles)
-                {
-                    // check for provider
-                    if (metadata.getProvider() == null
-                            || PROVIDER_IMPLEMENTATION_NAME.equalsIgnoreCase(metadata.getProvider()))
-                    {
-                        persistenceUnits.add(metadata);
-                    }
-
-                    // check for unique names
-                    if (persistenceUnitNames.contains(metadata.getName()))
-                    {
-                        throw new PersistenceException("Duplicate persistence-units for name: " + metadata.getName());
-                    }
-                    persistenceUnitNames.add(metadata.getName());
-                }
-            }
-
-            return persistenceUnits;
-        }
-        catch (Exception e)
-        {
-            if (e instanceof PersistenceException)
-            {
-                throw (PersistenceException) e;
-            }
-            else
-            {
-                throw new PersistenceException(e);
-            }
-        }
-    }
-
-    // helper class
-    /**
-     * Checks if is empty.
-     * 
-     * @param str
-     *            the str
-     * @return true, if is empty
-     */
-    private static boolean isEmpty(String str)
-    {
-        return null == str || str.isEmpty();
-    }
 }
