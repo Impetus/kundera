@@ -925,7 +925,7 @@ public class PelopsClient implements Client
     @Override
     public Query getQuery(EntityManagerImpl em, String ejbqlString)
     {
-        return new LuceneQuery(em, em.getMetadataManager(), ejbqlString);
+        return new LuceneQuery(em, ejbqlString);
     }
 
 }
