@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.startup.model;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 
@@ -22,12 +24,18 @@ package com.impetus.kundera.startup.model;
  */
 public class KunderaMetadata
 {
+
+    /* Metadata for Kundera core */
+    private CoreMetadata coreMetadata;
+
+    /* User application specific metadata */
+    private ApplicationMetadata applicationMetadata;
+
+    /* Client specific persistence unit specific metadata */
+    private Map<String, ClientMetadata> clientMetadata = new ConcurrentHashMap<String, ClientMetadata>();
+
     private static KunderaMetadata instance;
-    
-    private KunderaMetadata() {
-        
-    }
-    
+
     public static synchronized KunderaMetadata getInstance()
     {
         if (instance == null)
@@ -36,15 +44,18 @@ public class KunderaMetadata
         }
         return instance;
     }
-    
-    /* Metadata for Kundera core */
-    private CoreMetadata coreMetadata;
-    
-    /* Client specific metadata */
-    private ClientMetadata clientMetadata;
-    
-    /* User application specific metadata */
-    private ApplicationMetadata applicationMetadata;
+
+    /**
+     * @return the applicationMetadata
+     */
+    public ApplicationMetadata getApplicationMetadata()
+    {
+        if (applicationMetadata == null)
+        {
+            applicationMetadata = new ApplicationMetadata();
+        }
+        return applicationMetadata;
+    }
 
     /**
      * @return the coreMetadata
@@ -55,46 +66,31 @@ public class KunderaMetadata
     }
 
     /**
-     * @param coreMetadata the coreMetadata to set
+     * @param applicationMetadata
+     *            the applicationMetadata to set
+     */
+    public void setApplicationMetadata(ApplicationMetadata applicationMetadata)
+    {
+        this.applicationMetadata = applicationMetadata;
+    }
+
+    /**
+     * @param coreMetadata
+     *            the coreMetadata to set
      */
     public void setCoreMetadata(CoreMetadata coreMetadata)
     {
         this.coreMetadata = coreMetadata;
     }
 
-    /**
-     * @return the clientMetadata
-     */
-    public ClientMetadata getClientMetadata()
+    public ClientMetadata getClientMetadata(String persistenceUnit)
     {
-        return clientMetadata;
+        return clientMetadata.get(persistenceUnit);
     }
 
-    /**
-     * @param clientMetadata the clientMetadata to set
-     */
-    public void setClientMetadata(ClientMetadata clientMetadata)
+    public void addClientMetadata(String persistenceUnit, ClientMetadata clientMetadata)
     {
-        this.clientMetadata = clientMetadata;
+        this.clientMetadata.put(persistenceUnit, clientMetadata);
     }
-
-    /**
-     * @return the applicationMetadata
-     */
-    public ApplicationMetadata getApplicationMetadata()
-    {
-        if(applicationMetadata == null) {
-            applicationMetadata = new ApplicationMetadata();
-        }
-        return applicationMetadata;
-    }
-
-    /**
-     * @param applicationMetadata the applicationMetadata to set
-     */
-    public void setApplicationMetadata(ApplicationMetadata applicationMetadata)
-    {
-        this.applicationMetadata = applicationMetadata;
-    }  
 
 }

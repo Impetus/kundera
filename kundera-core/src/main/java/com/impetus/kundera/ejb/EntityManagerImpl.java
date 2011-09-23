@@ -52,7 +52,6 @@ import com.impetus.kundera.loader.ClientType;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.KunderaMetadataManager;
-import com.impetus.kundera.startup.model.KunderaMetadata;
 import com.impetus.kundera.startup.model.MetamodelImpl;
 import com.impetus.kundera.startup.model.PersistenceUnitMetadata;
 
@@ -91,6 +90,7 @@ public class EntityManagerImpl implements KunderaEntityManager
     /** The Metamodel. */
     private Metamodel metaModel;
 
+    /** Properties provided by user at the time of EntityManager Creation. */
     private Map<String, Object> properties;
 
     /**
@@ -111,17 +111,17 @@ public class EntityManagerImpl implements KunderaEntityManager
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager
                 .getPersistenceUnitMetadata(getPersistenceUnitName());
 
-        String node = puMetadata.getProps().getProperty("kundera.nodes");
-        String port = puMetadata.getProps().getProperty("kundera.port");
-        String keyspace = puMetadata.getProps().getProperty("kundera.keyspace");
-        String clientName = puMetadata.getProps().getProperty("kundera.client");
+        String node = puMetadata.getProperties().getProperty("kundera.nodes");
+        String port = puMetadata.getProperties().getProperty("kundera.port");
+        String keyspace = puMetadata.getProperties().getProperty("kundera.keyspace");
+        String clientName = puMetadata.getProperties().getProperty("kundera.client");
         String persistenceUnit = puMetadata.getPersistenceUnitName();
 
         ClientType clientType = ClientType.getValue(clientName.toUpperCase());
         ClientIdentifier identifier = new ClientIdentifier(new String[] { node }, Integer.valueOf(port), keyspace,
                 clientType, persistenceUnit);
 
-        client = ClientResolver.getClient(identifier);
+        client = ClientResolver.getClient(persistenceUnit, identifier);
         client.connect();
     }
 
@@ -261,7 +261,7 @@ public class EntityManagerImpl implements KunderaEntityManager
                         .getClass());
                 m.setDBType(this.client.getType());
                 // fire PreRemove events
-                eventDispatcher.fireEventListeners(m, o, PreRemove.class);
+                getEventDispatcher().fireEventListeners(m, o, PreRemove.class);
 
                 session.remove(o.getEntity().getClass(), o.getId());
 
@@ -269,7 +269,7 @@ public class EntityManagerImpl implements KunderaEntityManager
                 getIndexManager().remove(m, o.getEntity(), o.getId());
 
                 // fire PostRemove events
-                eventDispatcher.fireEventListeners(m, o, PostRemove.class);
+                getEventDispatcher().fireEventListeners(m, o, PostRemove.class);
             }
         }
         catch (Exception exp)
@@ -305,13 +305,13 @@ public class EntityManagerImpl implements KunderaEntityManager
                 // optimistic locking enabled
 
                 // fire PreUpdate events
-                eventDispatcher.fireEventListeners(m, o, PreUpdate.class);
+                getEventDispatcher().fireEventListeners(m, o, PreUpdate.class);
                 client.writeData(this, o, m);
 
                 getIndexManager().update(m, o.getEntity());
 
                 // fire PreUpdate events
-                eventDispatcher.fireEventListeners(m, o, PostUpdate.class);
+                getEventDispatcher().fireEventListeners(m, o, PostUpdate.class);
             }
         }
         catch (Exception exp)
@@ -357,7 +357,7 @@ public class EntityManagerImpl implements KunderaEntityManager
         }
     }
 
-    public void persistData(EnhancedEntity e)
+    private void persistData(EnhancedEntity e)
     {
         try
         {
@@ -418,8 +418,11 @@ public class EntityManagerImpl implements KunderaEntityManager
     @Override
     public final void close()
     {
+        checkClosed();
         closed = true;
         session = null;
+        eventDispatcher = null;
+        entityResolver = null;
     }
 
     /* @see javax.persistence.EntityManager#contains(java.lang.Object) */
@@ -468,12 +471,6 @@ public class EntityManagerImpl implements KunderaEntityManager
     public final Query createQuery(String ejbqlString)
     {
         return this.client.getQuery(this, ejbqlString);
-        // return this.client.getQuery();
-        /*
-         * if (this.client.getType().equals(DBType.MONGODB)) { return new
-         * MongoDBQuery(this, metadataManager, ejbqlString); } else { return new
-         * LuceneQuery(this, metadataManager, ejbqlString); }
-         */
     }
 
     /* @see javax.persistence.EntityManager#flush() */
@@ -843,18 +840,9 @@ public class EntityManagerImpl implements KunderaEntityManager
     /**
      * @return the eventDispatcher
      */
-    public EntityEventDispatcher getEventDispatcher()
+    private EntityEventDispatcher getEventDispatcher()
     {
         return eventDispatcher;
-    }
-
-    /**
-     * @param eventDispatcher
-     *            the eventDispatcher to set
-     */
-    public void setEventDispatcher(EntityEventDispatcher eventDispatcher)
-    {
-        this.eventDispatcher = eventDispatcher;
     }
 
     @Override

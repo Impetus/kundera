@@ -19,15 +19,13 @@ import org.apache.log4j.Logger;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
-public class CoreLoader implements Loader
+public class CoreLoader
 {
     private static Logger log = Logger.getLogger(CoreLoader.class);
 
-   
-    @Override
-    public void load(String persistenceUnit)
+    public void load()
     {
         log.debug("Loading Kundera Core...");
 

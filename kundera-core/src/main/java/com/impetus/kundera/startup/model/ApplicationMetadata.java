@@ -27,47 +27,69 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class ApplicationMetadata
 {
     /** Map of Entity Metadata. */
     private Map<String, Metamodel> metamodelMap = new ConcurrentHashMap<String, Metamodel>();
-    
+
     /** Map of Persistence Unit Metadata. */
     private Map<String, PersistenceUnitMetadata> persistenceUnitMetadataMap = new ConcurrentHashMap<String, PersistenceUnitMetadata>();
+
+    /**
+     * @param metamodelMap
+     *            the entityMetadataMap to set
+     */
+    public void addEntityMetadata(String persistenceUnit, Class<?> clazz, EntityMetadata entityMetadata)
+    {
+        Metamodel metamodel = getMetamodelMap().get(persistenceUnit);
+        Map<Class<?>, EntityMetadata> entityClassToMetadataMap = ((MetamodelImpl) metamodel).getEntityMetadataMap();
+        if (entityClassToMetadataMap == null || entityClassToMetadataMap.isEmpty())
+        {
+            entityClassToMetadataMap.put(clazz, entityMetadata);
+        }
+        else
+        {
+            Log.debug("Entity meta model already exists for persistence unit " + persistenceUnit + " and class "
+                    + clazz + ". Noting needs to be done");
+        }
+    }
+
+    /**
+     * @param persistenceUnitMetadataMap
+     *            the persistenceUnitMetadataMap to set
+     */
+    public void addPersistenceUnitMetadata(String persistenceUnit, PersistenceUnitMetadata persistenceUnitMetadata)
+    {
+        getPersistenceUnitMetadataMap().put(persistenceUnit, persistenceUnitMetadata);
+    }
+
+    public EntityMetadata getEntityMetadata(String persistenceUnit, Class<?> entityClass)
+    {
+        return ((MetamodelImpl) getMetamodel(persistenceUnit)).getEntityMetadata(entityClass);
+    }
 
     /**
      * @return the entityMetadataMap
      */
     public Map<String, Metamodel> getMetamodelMap()
     {
-        if(metamodelMap == null) {
+        if (metamodelMap == null)
+        {
             metamodelMap = new HashMap<String, Metamodel>();
         }
         return metamodelMap;
     }
-    
-    public Metamodel getMetamodel(String persistenceUnit) {
-        return getMetamodelMap().get(persistenceUnit);
-    }
-    
-    public EntityMetadata getEntityMetadata(String persistenceUnit, Class<?> entityClass) {
-        return ((MetamodelImpl)getMetamodel(persistenceUnit)).getEntityMetadata(entityClass);
+
+    public PersistenceUnitMetadata getPersistenceUnitMetadata(String persistenceUnit)
+    {
+        return getPersistenceUnitMetadataMap().get(persistenceUnit);
     }
 
-    /**
-     * @param metamodelMap the entityMetadataMap to set
-     */
-    public void addEntityMetadata(String persistenceUnit, Class<?> clazz, EntityMetadata entityMetadata)
+    public Metamodel getMetamodel(String persistenceUnit)
     {
-        Metamodel metamodel = getMetamodelMap().get(persistenceUnit);
-        Map<Class<?>, EntityMetadata> entityClassToMetadataMap = ((MetamodelImpl)metamodel).getEntityMetadataMap();
-        if(entityClassToMetadataMap == null || entityClassToMetadataMap.isEmpty()) {
-            entityClassToMetadataMap.put(clazz, entityMetadata);
-        } else {
-            Log.debug("Entity meta model already exists for persistence unit " + persistenceUnit + " and class " + clazz + ". Noting needs to be done");
-        }        
+        return getMetamodelMap().get(persistenceUnit);
     }
 
     /**
@@ -76,18 +98,5 @@ public class ApplicationMetadata
     public Map<String, PersistenceUnitMetadata> getPersistenceUnitMetadataMap()
     {
         return persistenceUnitMetadataMap;
-    }
-    
-    public PersistenceUnitMetadata  getPersistenceUnitMetadata(String persistenceUnit) {
-       return getPersistenceUnitMetadataMap().get(persistenceUnit);
-    }
-    
-
-    /**
-     * @param persistenceUnitMetadataMap the persistenceUnitMetadataMap to set
-     */
-    public void addPersistenceUnitMetadata(String persistenceUnit, PersistenceUnitMetadata persistenceUnitMetadata)
-    {
-        getPersistenceUnitMetadataMap().put(persistenceUnit, persistenceUnitMetadata);
     }
 }

@@ -15,24 +15,15 @@
  ******************************************************************************/
 package com.impetus.kundera.ejb;
 
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceException;
-import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.startup.model.ApplicationMetadata;
 import com.impetus.kundera.startup.model.KunderaMetadata;
 import com.impetus.kundera.startup.model.PersistenceUnitMetadata;
 
@@ -68,7 +59,7 @@ public class EntityManagerFactoryBuilder
         KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();        
         PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnitName);
         
-        Properties metadataProperties = puMetadata.getProps();
+        Properties metadataProperties = puMetadata.getProperties();
         // Make sure, it's empty or Unmodifiable
         override = override == null ? Collections.EMPTY_MAP : Collections.unmodifiableMap(override);
 

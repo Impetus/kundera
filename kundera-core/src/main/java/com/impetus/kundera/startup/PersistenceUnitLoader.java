@@ -74,13 +74,15 @@ public class PersistenceUnitLoader extends ApplicationLoader
         log.info("Looking up for persistence unit: " + persistenceUnit);
         List<PersistenceUnitMetadata> metadatas = findPersistenceMetadatas();
 
-        // If there is just ONE persistenceUnit, then use this irrespective of the name
+        // If there is just ONE persistenceUnit, then use this irrespective of
+        // the name
         if (metadatas.size() == 1)
         {
             return metadatas.get(0);
         }
 
-        // Since there is more persistenceUnits, you must provide a name to look up
+        // Since there is more persistenceUnits, you must provide a name to look
+        // up
         if (isEmpty(persistenceUnit))
         {
             throw new PersistenceException("No name provided and several persistence units found");
@@ -95,8 +97,7 @@ public class PersistenceUnitLoader extends ApplicationLoader
             }
         }
 
-        throw new PersistenceException("Could not find persistence unit in the classpath for name: "
-                + persistenceUnit);
+        throw new PersistenceException("Could not find persistence unit in the classpath for name: " + persistenceUnit);
     }
 
     /**
@@ -139,7 +140,8 @@ public class PersistenceUnitLoader extends ApplicationLoader
                     // check for unique names
                     if (persistenceUnitNames.contains(metadata.getPersistenceUnitName()))
                     {
-                        throw new PersistenceException("Duplicate persistence-units for name: " + metadata.getPersistenceUnitName());
+                        throw new PersistenceException("Duplicate persistence-units for name: "
+                                + metadata.getPersistenceUnitName());
                     }
                     persistenceUnitNames.add(metadata.getPersistenceUnitName());
                 }

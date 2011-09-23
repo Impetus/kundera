@@ -31,13 +31,13 @@ import javax.sql.DataSource;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class PersistenceUnitMetadata implements PersistenceUnitInfo
-{   
+{
     /** Persistence Unit name */
-    private String persistenceUnitName;    
-    
+    private String persistenceUnitName;
+
     /** The provider. */
     private String provider;
 
@@ -53,21 +53,21 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     /** The jar files. */
     private Set<String> jarFiles = new HashSet<String>();
 
-    /** The props. */
-    private Properties props = new Properties();
+    /** The properties. */
+    private Properties properties = new Properties();
 
     /** The exclude unlisted classes. */
     private boolean excludeUnlistedClasses = false;
-    
+
     @Override
     public String getPersistenceUnitName()
     {
         return persistenceUnitName;
-    } 
-    
+    }
 
     /**
-     * @param persistenceUnitName the persistenceUnitName to set
+     * @param persistenceUnitName
+     *            the persistenceUnitName to set
      */
     public void setPersistenceUnitName(String persistenceUnitName)
     {
@@ -174,27 +174,6 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     }
 
     /**
-     * Gets the props.
-     * 
-     * @return the props
-     */
-    public Properties getProps()
-    {
-        return props;
-    }
-
-    /**
-     * Sets the props.
-     * 
-     * @param props
-     *            the new props
-     */
-    public void setProps(Properties props)
-    {
-        this.props = props;
-    }
-
-    /**
      * Gets the exclude unlisted classes.
      * 
      * @return the exclude unlisted classes
@@ -235,24 +214,10 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         builder.append(", packages=");
         builder.append(packages);
         builder.append(", props=");
-        builder.append(props);
+        builder.append(properties);
         builder.append("]");
         return builder.toString();
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-
 
     @Override
     public String getPersistenceProviderClassName()
@@ -323,10 +288,17 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     @Override
     public Properties getProperties()
     {
-        return null;
-    }
+        return this.properties;
+    }    
 
-    @Override
+    /**
+	 * @param properties the properties to set
+	 */
+	public void setProperties(Properties properties) {
+		this.properties = properties;
+	}
+
+	@Override
     public String getPersistenceXMLSchemaVersion()
     {
         return null;
@@ -347,6 +319,6 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     public ClassLoader getNewTempClassLoader()
     {
         return null;
-    } 
+    }
 
 }

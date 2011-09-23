@@ -16,7 +16,6 @@
 
 package com.impetus.client.cassandra.pelops;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,36 +24,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
-import lucandra.CassandraUtils;
-
-import org.apache.cassandra.config.DatabaseDescriptor;
-import org.apache.cassandra.locator.AbstractReplicationStrategy;
-import org.apache.cassandra.locator.SimpleStrategy;
-import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
-import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.transport.TFramedTransport;
-import org.apache.thrift.transport.TSocket;
-import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.TTransportException;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.IConnection;
@@ -63,6 +46,7 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.impetus.client.cassandra.index.SolandraUtils;
 import com.impetus.kundera.Client;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.DataRow;
@@ -124,12 +108,7 @@ public class PelopsClient implements Client
     @Override
     public final void connect()
     {
-        if (!isConnected)
-        {
-            // Start Solandra Service
-            new SolandraUtils().startSolandraServer();
-            isConnected = true;
-        }
+       
     }
 
     /*
@@ -628,186 +607,7 @@ public class PelopsClient implements Client
 
     }
 
-    /**
-     * The Class SolandraUtils.
-     */
-    private class SolandraUtils
-    {
-
-        /**
-         * Start solandra server.
-         */
-        public void startSolandraServer()
-        {
-            log.info("Starting Solandra Server.");
-            new CassandraUtils();
-            CassandraUtils.cacheInvalidationInterval = 0; // real-time
-
-            try
-            {
-
-                createCassSchema();
-                Thread.sleep(10000);
-                CassandraUtils.startupServer();
-            }
-            catch (Throwable t)
-            {
-                log.error("errror while starting solandra schema:", t);
-            }
-
-        }
-
-        /**
-         * Creates the cass schema.
-         * 
-         * @throws IOException
-         *             Signals that an I/O exception has occurred.
-         */
-        private void createCassSchema() throws IOException
-        {
-
-            final String keySpace = "L";
-            final String termVecColumnFamily = "TI";
-            final String docColumnFamily = "Docs";
-            final String metaInfoColumnFamily = "TL";
-            final String fieldCacheColumnFamily = "FC";
-
-            final String schemaInfoColumnFamily = "SI";
-
-            if (DatabaseDescriptor.getNonSystemTables().contains(keySpace))
-            {
-                log.info("Found Solandra specific schema");
-                return;
-            }
-
-            try
-            {
-                Thread.sleep(1000);
-
-                int sleep = new Random().nextInt(6000);
-
-                log.info("\nSleeping " + sleep + "ms to stagger solandra schema creation\n");
-
-                Thread.sleep(sleep);
-            }
-            catch (InterruptedException e1)
-            {
-                e1.printStackTrace();
-                System.exit(2);
-            }
-
-            if (DatabaseDescriptor.getNonSystemTables().contains(keySpace))
-            {
-                log.info("Found Solandra specific schema");
-                return;
-            }
-
-            List<CfDef> cfs = new ArrayList<CfDef>();
-
-            CfDef cf = new CfDef();
-            cf.setName(docColumnFamily);
-            cf.setComparator_type("BytesType");
-            cf.setKey_cache_size(0);
-            cf.setRow_cache_size(0);
-            cf.setComment("Stores the document and field data for each doc with docId as key");
-            cf.setKeyspace(keySpace);
-
-            cfs.add(cf);
-
-            cf = new CfDef();
-            cf.setName(termVecColumnFamily);
-            cf.setComparator_type("lucandra.VIntType");
-            cf.setKey_cache_size(0);
-            cf.setRow_cache_size(0);
-            cf.setComment("Stores term information with indexName/field/term as composite key");
-            cf.setKeyspace(keySpace);
-
-            cfs.add(cf);
-
-            cf = new CfDef();
-            cf.setName(fieldCacheColumnFamily);
-            cf.setComparator_type("lucandra.VIntType");
-            cf.setKey_cache_size(0);
-            cf.setRow_cache_size(0);
-            cf.setComment("Stores term per doc per field");
-            cf.setKeyspace(keySpace);
-
-            cfs.add(cf);
-
-            cf = new CfDef();
-            cf.setName(metaInfoColumnFamily);
-            cf.setComparator_type("BytesType");
-            cf.setKey_cache_size(0);
-            cf.setRow_cache_size(0);
-            cf.setComment("Stores ordered list of terms for a given field with indexName/field as composite key");
-            cf.setKeyspace(keySpace);
-
-            cfs.add(cf);
-
-            cf = new CfDef();
-            cf.setName(schemaInfoColumnFamily);
-            cf.setColumn_type("Super");
-            cf.setComparator_type("BytesType");
-            cf.setKey_cache_size(0);
-            cf.setRow_cache_size(0);
-            cf.setComment("Stores solr and index id information");
-            cf.setKeyspace(keySpace);
-
-            cfs.add(cf);
-
-            Class<? extends AbstractReplicationStrategy> simple = SimpleStrategy.class;
-            KsDef solandraKS = new KsDef(keySpace, simple.getCanonicalName(), cfs);
-            solandraKS.setReplication_factor(1);
-            Cassandra.Client client = getClient();
-
-            try
-            {
-                client.send_system_add_keyspace(solandraKS);
-            }
-            catch (TException e)
-            {
-                throw new IOException(e);
-            }
-            catch (Exception e)
-            {
-                throw new IOException(e);
-            }
-
-            log.info("Added Solandra specific schema");
-        }
-
-        /**
-         * Inits the client.
-         * 
-         * @return the client
-         */
-        private Cassandra.Client getClient()
-        {
-            TSocket socket = new TSocket(contactNodes[0], defaultPort);
-            TTransport transport = new TFramedTransport(socket);
-            TProtocol protocol = new TBinaryProtocol(transport);
-            Cassandra.Client client = new Cassandra.Client(protocol);
-
-            try
-            {
-                if (!socket.isOpen())
-                {
-                    socket.open();
-
-                }
-            }
-            catch (TTransportException ttex)
-            {
-                log.error(ttex.getMessage());
-            }
-            catch (Exception ex)
-            {
-                log.error(ex.getMessage());
-            }
-            return client;
-
-        }
-    }
+    
 
     /**
      * From thrift row.

@@ -37,7 +37,6 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
 
-import com.impetus.kundera.ejb.PersistenceMetadata;
 import com.impetus.kundera.ejb.PersistenceXmlLoader;
 import com.impetus.kundera.startup.model.PersistenceUnitMetadata;
 
@@ -215,7 +214,7 @@ public class PersistenceXMLLoader
                             {
                                 propValue = getElementContent(propElement, "");
                             }
-                            metadata.getProps().put(propName, propValue);
+                            metadata.getProperties().put(propName, propValue);
                         }
                     }
                 }

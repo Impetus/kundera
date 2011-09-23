@@ -287,4 +287,5 @@ public class HBaseClient implements com.impetus.kundera.Client
     {
         return new LuceneQuery(em, queryString);
     }
+
 }

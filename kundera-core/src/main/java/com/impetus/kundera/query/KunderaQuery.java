@@ -25,11 +25,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.persistence.PersistenceException;
-import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.startup.model.MetamodelImpl;

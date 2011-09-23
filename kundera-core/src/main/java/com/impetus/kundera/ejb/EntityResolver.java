@@ -16,6 +16,7 @@
 package com.impetus.kundera.ejb;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,6 +40,11 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
+import com.impetus.kundera.proxy.EntityEnhancerFactory;
+import com.impetus.kundera.proxy.KunderaProxy;
+import com.impetus.kundera.proxy.LazyInitializerFactory;
+import com.impetus.kundera.proxy.cglib.CglibEntityEnhancerFactory;
+import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 import com.impetus.kundera.startup.model.MetamodelImpl;
 
 /**
@@ -55,6 +61,12 @@ public class EntityResolver
     /** The em. */
     private EntityManagerImpl em;
 
+    /** The enhanced proxy factory. */
+    private EntityEnhancerFactory enhancedProxyFactory;
+
+    /** The lazy initializer factory. */
+    private LazyInitializerFactory lazyInitializerFactory;
+
     /**
      * Instantiates a new entity resolver.
      * 
@@ -64,6 +76,8 @@ public class EntityResolver
     public EntityResolver(EntityManagerImpl em)
     {
         this.em = em;
+        enhancedProxyFactory = new CglibEntityEnhancerFactory();
+        lazyInitializerFactory = new CglibLazyInitializerFactory();
     }
 
     /**
@@ -121,7 +135,7 @@ public class EntityResolver
         EntityMetadata m = null;
         try
         {
-            m = ((MetamodelImpl)em.getEntityManagerFactory().getMetamodel()).getEntityMetadata(o.getClass());
+            m = ((MetamodelImpl) em.getEntityManagerFactory().getMetamodel()).getEntityMetadata(o.getClass());
         }
         catch (Exception e)
         {
@@ -156,7 +170,7 @@ public class EntityResolver
         Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
         // Save to map
-        entities.put(mapKeyForEntity, ((EntityManagerFactoryImpl)em.getEntityManagerFactory()).getEnhancedEntity(o, id, foreignKeysMap));
+        entities.put(mapKeyForEntity, getEnhancedEntity(o, id, foreignKeysMap));
 
         // Iterate over EntityMetata.Relation relations
         for (Relation relation : m.getRelations())
@@ -181,7 +195,8 @@ public class EntityResolver
             // if object is not null, then proceed
             if (null != value)
             {
-                EntityMetadata relMetadata = ((MetamodelImpl)em.getEntityManagerFactory().getMetamodel()).getEntityMetadataMap().get(targetClass);
+                EntityMetadata relMetadata = ((MetamodelImpl) em.getEntityManagerFactory().getMetamodel())
+                        .getEntityMetadataMap().get(targetClass);
 
                 if (relation.isUnary())
                 {
@@ -268,10 +283,11 @@ public class EntityResolver
         // in case the target contains a reference to containing entity.
         em.getSession().store(entity, entityId, Boolean.FALSE);
 
-        EntityMetadata relMetadata = ((MetamodelImpl)em.getEntityManagerFactory().getMetamodel()).getEntityMetadata(foreignEntityClass);
+        EntityMetadata relMetadata = ((MetamodelImpl) em.getEntityManagerFactory().getMetamodel())
+                .getEntityMetadata(foreignEntityClass);
 
         // Check for cross-store persistence
-        if (relMetadata.getPersistenceUnit() == null 
+        if (relMetadata.getPersistenceUnit() == null
                 || em.getPersistenceUnitName().equals(relMetadata.getPersistenceUnit()))
         {
             populateForeignEntityFromSameDatastore(entity, relation, entityName, foreignEntityClass, foreignKeys);
@@ -332,7 +348,8 @@ public class EntityResolver
             Class<?> foreignEntityClass, String... foreignKeys) throws PropertyAccessException
     {
 
-        EntityMetadata relMetadata = ((MetamodelImpl)em.getEntityManagerFactory().getMetamodel()).getEntityMetadata(foreignEntityClass);
+        EntityMetadata relMetadata = ((MetamodelImpl) em.getEntityManagerFactory().getMetamodel())
+                .getEntityMetadata(foreignEntityClass);
         this.em = (EntityManagerImpl) new Configuration().getEntityManager(relMetadata.getPersistenceUnit());
 
         if (relation.isUnary())
@@ -409,11 +426,52 @@ public class EntityResolver
                     + "_" + foreignKey);
 
             // metadata
-            EntityMetadata m = ((MetamodelImpl)em.getEntityManagerFactory().getMetamodel()).getEntityMetadata(persistentClass);
+            EntityMetadata m = ((MetamodelImpl) em.getEntityManagerFactory().getMetamodel())
+                    .getEntityMetadata(persistentClass);
 
-            return ((EntityManagerFactoryImpl)em.getEntityManagerFactory()).getLazyEntity(entityName, persistentClass, m.getReadIdentifierMethod(),
+            return getLazyEntity(entityName, persistentClass, m.getReadIdentifierMethod(),
                     m.getWriteIdentifierMethod(), foreignKey, em);
         }
+    }
+
+    /**
+     * Gets the lazy entity.
+     * 
+     * @param entityName
+     *            the entity name
+     * @param persistentClass
+     *            the persistent class
+     * @param getIdentifierMethod
+     *            the get identifier method
+     * @param setIdentifierMethod
+     *            the set identifier method
+     * @param id
+     *            the id
+     * @param em
+     *            the em
+     * @return the lazy entity
+     */
+    private KunderaProxy getLazyEntity(String entityName, Class<?> persistentClass, Method getIdentifierMethod,
+            Method setIdentifierMethod, String id, EntityManagerImpl em)
+    {
+        return lazyInitializerFactory.getProxy(entityName, persistentClass, getIdentifierMethod, setIdentifierMethod,
+                id, em);
+    }
+
+    /**
+     * Gets the enhanced entity.
+     * 
+     * @param entity
+     *            the entity
+     * @param id
+     *            the id
+     * @param foreignKeyMap
+     *            the foreign key map
+     * @return the enhanced entity
+     */
+    private EnhancedEntity getEnhancedEntity(Object entity, String id, Map<String, Set<String>> foreignKeyMap)
+    {
+        return enhancedProxyFactory.getProxy(entity, id, foreignKeyMap);
     }
 
 }

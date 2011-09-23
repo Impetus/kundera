@@ -28,14 +28,14 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class MetamodelImpl implements Metamodel
 {
     Map<Class<?>, EntityMetadata> entityMetadataMap;
-    
+
     Map<String, Class<?>> entityNameToClassMap;
-    
+
     @Override
     public <X> EntityType<X> entity(Class<X> paramClass)
     {
@@ -71,8 +71,9 @@ public class MetamodelImpl implements Metamodel
     {
         return null;
     }
-    
-    public MetamodelImpl() {
+
+    public MetamodelImpl()
+    {
         super();
         setEntityMetadataMap(new HashMap<Class<?>, EntityMetadata>());
     }
@@ -82,14 +83,16 @@ public class MetamodelImpl implements Metamodel
      */
     public Map<Class<?>, EntityMetadata> getEntityMetadataMap()
     {
-        if(entityMetadataMap == null) {
+        if (entityMetadataMap == null)
+        {
             entityMetadataMap = new HashMap<Class<?>, EntityMetadata>();
         }
         return entityMetadataMap;
-    }   
+    }
 
     /**
-     * @param entityMetadataMap the entityMetadataMap to set
+     * @param entityMetadataMap
+     *            the entityMetadataMap to set
      */
     public void setEntityMetadataMap(Map<Class<?>, EntityMetadata> entityMetadataMap)
     {
@@ -97,45 +100,52 @@ public class MetamodelImpl implements Metamodel
     }
 
     /**
-     * @param entityMetadataMap the entityMetadataMap to set
+     * @param entityMetadataMap
+     *            the entityMetadataMap to set
      */
     public void addEntityMetadata(Class<?> clazz, EntityMetadata entityMetadata)
     {
         getEntityMetadataMap().put(clazz, entityMetadata);
-    }  
-    
-    public EntityMetadata getEntityMetadata(Class<?> entityClass) {
+    }
+
+    public EntityMetadata getEntityMetadata(Class<?> entityClass)
+    {
         return getEntityMetadataMap().get(entityClass);
     }
-    
+
     /**
      * @return the entityNameToClassMap
      */
     public Map<String, Class<?>> getEntityNameToClassMap()
     {
-        if(entityNameToClassMap == null) {
+        if (entityNameToClassMap == null)
+        {
             entityNameToClassMap = new HashMap<String, Class<?>>();
         }
         return entityNameToClassMap;
     }
 
     /**
-     * @param entityNameToClassMap the entityNameToClassMap to set
+     * @param entityNameToClassMap
+     *            the entityNameToClassMap to set
      */
     public void setEntityNameToClassMap(Map<String, Class<?>> entityNameToClassMap)
     {
         this.entityNameToClassMap = entityNameToClassMap;
     }
-    
-    public void addEntityNameToClassMapping(String className, Class<?> entityClass) {
+
+    public void addEntityNameToClassMapping(String className, Class<?> entityClass)
+    {
         getEntityNameToClassMap().put(className, entityClass);
     }
-    
-    public Class<?> getEntityClass(String className) {
-        return getEntityNameToClassMap().get(className);
-    }  
 
-    public String toString() {
+    public Class<?> getEntityClass(String className)
+    {
+        return getEntityNameToClassMap().get(className);
+    }
+
+    public String toString()
+    {
         return entityMetadataMap.toString();
     }
 

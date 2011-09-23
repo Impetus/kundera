@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +45,7 @@ import com.impetus.kundera.startup.model.PersistenceUnitMetadata;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class MetamodelLoader extends ApplicationLoader
 {
@@ -55,7 +54,7 @@ public class MetamodelLoader extends ApplicationLoader
     @Override
     public void load(String persistenceUnit)
     {
-        log.debug("Loading Entity Metadata...");  
+        log.debug("Loading Entity Metadata...");
         KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         if (appMetadata.getMetamodelMap().get(persistenceUnit) != null)
@@ -67,57 +66,66 @@ public class MetamodelLoader extends ApplicationLoader
             loadEntityMetadata(persistenceUnit);
         }
     }
-    
+
     private void loadEntityMetadata(String persistenceUnit)
     {
         if (persistenceUnit == null)
         {
             throw new IllegalArgumentException("Must have a persistenceUnitName!");
         }
-        
+
         KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
-        Map<String, PersistenceUnitMetadata> persistentUnitMetadataMap = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadataMap();
-        
+        Map<String, PersistenceUnitMetadata> persistentUnitMetadataMap = kunderaMetadata.getApplicationMetadata()
+                .getPersistenceUnitMetadataMap();
+
         /** Classes to scan */
         List<String> classesToScan;
-        
-        if(persistentUnitMetadataMap == null || persistentUnitMetadataMap.isEmpty()) {
+
+        if (persistentUnitMetadataMap == null || persistentUnitMetadataMap.isEmpty())
+        {
             log.error("It is necessary to load Persistence Unit metadata  for persistence unit " + persistenceUnit
                     + " first before loading entity metadata.");
             throw new PersistenceException("load Persistence Unit metadata  for persistence unit " + persistenceUnit
                     + " first before loading entity metadata.");
-        } else {
+        }
+        else
+        {
             PersistenceUnitMetadata puMetadata = persistentUnitMetadataMap.get(persistenceUnit);
-            classesToScan = puMetadata.getClasses(); 
-            
-        }      
-        
-        /* Check whether Classes to scan was provided into persistence.xml
-         * If yes, load them. Otherwise load them from classpath/ context path
-         * */
+            classesToScan = puMetadata.getClasses();
+
+        }
+
+        /*
+         * Check whether Classes to scan was provided into persistence.xml If
+         * yes, load them. Otherwise load them from classpath/ context path
+         */
         Reader reader;
         URL[] resources;
-        if(classesToScan == null || classesToScan.isEmpty()) {
-            log.info("No class to scan for persistence unit " + persistenceUnit 
+        if (classesToScan == null || classesToScan.isEmpty())
+        {
+            log.info("No class to scan for persistence unit " + persistenceUnit
                     + ". Entities will be loaded from classpath/ context-path");
             reader = new ClasspathReader();
             resources = reader.findResourcesByClasspath();
-        } else {
-            reader = new ClasspathReader(classesToScan);  
+        }
+        else
+        {
+            reader = new ClasspathReader(classesToScan);
             resources = reader.findResourcesByContextLoader();
-        }    
-        //All entities to load should be annotated with @Entity
-        reader.addValidAnnotations(Entity.class.getName());        
-        
+        }
+        // All entities to load should be annotated with @Entity
+        reader.addValidAnnotations(Entity.class.getName());
+
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         Metamodel metamodel = appMetadata.getMetamodel(persistenceUnit);
-        if(metamodel == null) {
+        if (metamodel == null)
+        {
             metamodel = new MetamodelImpl();
-        }        
-        
-        Map<Class<?>, EntityMetadata> entityMetadataMap = ((MetamodelImpl)metamodel).getEntityMetadataMap();        
-        Map<String, Class<?>> entityNameToClassMap = ((MetamodelImpl)metamodel).getEntityNameToClassMap();       
-        
+        }
+
+        Map<Class<?>, EntityMetadata> entityMetadataMap = ((MetamodelImpl) metamodel).getEntityMetadataMap();
+        Map<String, Class<?>> entityNameToClassMap = ((MetamodelImpl) metamodel).getEntityNameToClassMap();
+
         for (URL resource : resources)
         {
             try
@@ -137,17 +145,18 @@ public class MetamodelLoader extends ApplicationLoader
                 e.printStackTrace();
             }
         }
-        ((MetamodelImpl)metamodel).setEntityMetadataMap(entityMetadataMap);
-        appMetadata.getMetamodelMap().put(persistenceUnit, metamodel);        
+        ((MetamodelImpl) metamodel).setEntityMetadataMap(entityMetadataMap);
+        appMetadata.getMetamodelMap().put(persistenceUnit, metamodel);
     }
-    
-    public void scanClassAndPutMetadata(InputStream bits, Reader reader, Map<Class<?>, 
-            EntityMetadata> entityMetadataMap, Map<String, Class<?>> entityNameToClassMap) throws IOException
+
+    private void scanClassAndPutMetadata(InputStream bits, Reader reader,
+            Map<Class<?>, EntityMetadata> entityMetadataMap, Map<String, Class<?>> entityNameToClassMap)
+            throws IOException
     {
         DataInputStream dstream = new DataInputStream(new BufferedInputStream(bits));
         ClassFile cf = null;
         String className = null;
-        
+
         try
         {
             cf = new ClassFile(dstream);
@@ -165,17 +174,17 @@ public class MetamodelLoader extends ApplicationLoader
             {
                 // check if the current class has one?
                 if (annotations.contains(validAnn))
-                {                    
+                {
                     Class<?> clazz = Class.forName(className);
-                    
+
                     if (entityNameToClassMap.containsKey(clazz.getSimpleName()))
                     {
                         throw new PersistenceException("Name conflict between classes "
                                 + entityNameToClassMap.get(clazz.getSimpleName()).getName() + " and " + clazz.getName());
                     }
-                    entityNameToClassMap.put(clazz.getSimpleName(), clazz);                    
-                    
-                    EntityMetadata metadata = entityMetadataMap.get(clazz); 
+                    entityNameToClassMap.put(clazz.getSimpleName(), clazz);
+
+                    EntityMetadata metadata = entityMetadataMap.get(clazz);
                     if (null == metadata)
                     {
                         log.debug("Metadata not found in cache for " + clazz.getName());
@@ -186,7 +195,7 @@ public class MetamodelLoader extends ApplicationLoader
                             {
                                 MetadataBuilder metadataBuilder = new MetadataBuilder();
                                 metadata = metadataBuilder.buildEntityMetadata(clazz);
-                                entityMetadataMap.put(clazz, metadata);                                
+                                entityMetadataMap.put(clazz, metadata);
                             }
                         }
                     }
@@ -204,5 +213,5 @@ public class MetamodelLoader extends ApplicationLoader
             bits.close();
         }
     }
-   
+
 }

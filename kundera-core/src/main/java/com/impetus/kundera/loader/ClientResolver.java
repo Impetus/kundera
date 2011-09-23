@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.impetus.kundera.Client;
+import com.impetus.kundera.startup.Loader;
+import com.impetus.kundera.startup.model.KunderaMetadata;
 
 /**
  * @author impetus
@@ -33,31 +35,71 @@ public final class ClientResolver
      * @param clientIdentifier
      * @return
      */
-    public static Client getClient(ClientIdentifier clientIdentifier)
+    public static Client getClient(String persistenceUnit, ClientIdentifier clientIdentifier)
     {
-        return loadNewProxyInstance(clientIdentifier);
+
+        Client client = getClientInstance(persistenceUnit);
+
+        client.setContactNodes(clientIdentifier.getNode());
+        client.setDefaultPort(clientIdentifier.getPort());
+        client.setSchema(clientIdentifier.getKeyspace());
+        clientsNew.put(clientIdentifier, client);
+
+        return client;
     }
 
-    private static Client loadNewProxyInstance(ClientIdentifier clientIdentifier)
+    public static Client getClientInstance(String persistenceUnit)
     {
-        Client proxy = null;
+        Client client = null;
         try
         {
-            if (clientIdentifier.getClientType().equals(ClientType.HBASE))
+
+            client = (Client) Class.forName(
+                    KunderaMetadata.getInstance().getClientMetadata(persistenceUnit).getClientImplementor())
+                    .newInstance();
+        }
+        catch (InstantiationException e)
+        {
+            throw new ClientResolverException(e.getMessage());
+        }
+        catch (IllegalAccessException e)
+        {
+            throw new ClientResolverException(e.getMessage());
+        }
+        catch (ClassNotFoundException e)
+        {
+            throw new ClientResolverException(e.getMessage());
+        }
+
+        if (client == null)
+        {
+            throw new ClientResolverException("Client Not Configured For Specified Client Type.");
+        }
+
+        return client;
+    }
+
+    // TODO To move this method to client dicoverer
+    public static Loader getClientLoader(ClientType clientType)
+    {
+        Loader loader = null;
+        try
+        {
+            if (clientType.equals(ClientType.HBASE))
             {
-                proxy = (Client) Class.forName("com.impetus.client.hbase.HBaseClient").newInstance();
+                loader = (Loader) Class.forName("com.impetus.client.hbase.HBaseClientLoader").newInstance();
             }
-            else if (clientIdentifier.getClientType().equals(ClientType.PELOPS))
+            else if (clientType.equals(ClientType.PELOPS))
             {
-                proxy = (Client) Class.forName("com.impetus.client.cassandra.pelops.PelopsClient").newInstance();
+                loader = (Loader) Class.forName("com.impetus.client.cassandra.pelops.PelopsClientLoader").newInstance();
             }
-            else if (clientIdentifier.getClientType().equals(ClientType.THRIFT))
+            else if (clientType.equals(ClientType.THRIFT))
             {
-                proxy = (Client) Class.forName("com.impetus.client.cassandra.thrift.ThriftClient").newInstance();
+                loader = (Loader) Class.forName("com.impetus.client.cassandra.thrift.ThriftClientLoader").newInstance();
             }
-            else if (clientIdentifier.getClientType().equals(ClientType.MONGODB))
+            else if (clientType.equals(ClientType.MONGODB))
             {
-                proxy = (Client) Class.forName("com.impetus.client.mongodb.MongoDBClient").newInstance();
+                loader = (Loader) Class.forName("com.impetus.client.mongodb.MongoDBClientLoader").newInstance();
             }
         }
         catch (InstantiationException e)
@@ -73,17 +115,11 @@ public final class ClientResolver
             throw new ClientResolverException(e.getMessage());
         }
 
-        if (proxy != null)
+        if (loader == null)
         {
-            proxy.setContactNodes(clientIdentifier.getNode());
-            proxy.setDefaultPort(clientIdentifier.getPort());
-            proxy.setSchema(clientIdentifier.getKeyspace());
-            clientsNew.put(clientIdentifier, proxy);
+            throw new ClientResolverException("Client Loader Not Configured For Specified Client Type.");
         }
-        else
-        {
-            throw new ClientResolverException("No client configured:");
-        }
-        return proxy;
+
+        return loader;
     }
 }

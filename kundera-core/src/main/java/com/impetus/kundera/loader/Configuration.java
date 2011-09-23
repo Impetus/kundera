@@ -17,20 +17,13 @@ package com.impetus.kundera.loader;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
 
 import org.apache.log4j.Logger;
 
-import com.impetus.kundera.ejb.EntityManagerFactoryImpl;
-import com.impetus.kundera.property.PropertyAccessException;
-import com.impetus.kundera.property.PropertyAccessorHelper;
-
-// TODO: Auto-generated Javadoc
 /**
  * Configuration loader.
  * 
@@ -42,9 +35,6 @@ public class Configuration
 
     /** The emf map. */
     private static Map<String, EntityManagerFactory> emfMap = new HashMap<String, EntityManagerFactory>();
-
-    /** Full path of Server config file */
-    private String serverConfig;
 
     /** The logger. */
     private static Logger logger = Logger.getLogger(Configuration.class);
@@ -61,37 +51,23 @@ public class Configuration
     {
         EntityManager em = null;
         EntityManagerFactory emf;
-
+        
+        long start = System.currentTimeMillis();
         if (emfMap.get(persistenceUnit) == null)
         {
-            emf = (EntityManagerFactoryImpl) Persistence.createEntityManagerFactory(persistenceUnit);
+            emf = (EntityManagerFactory) Persistence.createEntityManagerFactory(persistenceUnit);
             emfMap.put(persistenceUnit, emf);
         }
         else
         {
             emf = emfMap.get(persistenceUnit);
         }
-
-        try
-        {            
-
-            Properties props = new Properties();
-            props.putAll(emf.getProperties());
-
-            // Server configuration path
-            String serverConfig = props.getProperty("server.config");
-            if (serverConfig != null)
-            {
-                serverConfig = "file:///" + props.getProperty("server.config");
-                System.setProperty("cassandra.config", serverConfig);
-            }
-
-        }
-        catch (SecurityException e)
-        {
-            throw new PersistenceException(e.getMessage());
-        }        
-        return emf.createEntityManager();
+        System.out.println("EntityManagerFactory Loaded in >>>\t" + (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        em = emf.createEntityManager();
+        System.out.println("EntityManager Created in >>>\t" + (System.currentTimeMillis() - start));
+        return em;
     }
 
     /**
@@ -99,19 +75,7 @@ public class Configuration
      */
     public void destroy()
     {
-        // for (EntityManager em : emMap.values())
-        // {
-        // if (em.isOpen())
-        // {
-        // em.flush();
-        // em.clear();
-        // em.close();
-        // em = null;
-        // }
-        // }
-
-        // TODO Discuss
-
+        // TODO Discuss On Closing EM
         for (EntityManagerFactory emf : emfMap.values())
         {
             emf.close();

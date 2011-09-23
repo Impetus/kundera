@@ -17,7 +17,7 @@ package com.impetus.kundera.startup;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public interface Loader
 {

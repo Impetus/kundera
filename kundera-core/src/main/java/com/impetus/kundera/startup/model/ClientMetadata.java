@@ -17,9 +17,20 @@ package com.impetus.kundera.startup.model;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class ClientMetadata
 {
+    private String clientImplementor;
+
+    public String getClientImplementor()
+    {
+        return clientImplementor;
+    }
+
+    public void setClientImplementor(String clientImplementor)
+    {
+        this.clientImplementor = clientImplementor;
+    }
 
 }

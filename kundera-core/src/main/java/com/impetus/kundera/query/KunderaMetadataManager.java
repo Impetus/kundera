@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
-import javax.persistence.metamodel.Metamodel;
-
 import com.impetus.kundera.startup.model.KunderaMetadata;
 import com.impetus.kundera.startup.model.MetamodelImpl;
 import com.impetus.kundera.startup.model.PersistenceUnitMetadata;

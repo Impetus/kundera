@@ -15,9 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.ejb;
 
-import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.Cache;
 import javax.persistence.EntityManager;
@@ -35,14 +33,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.cache.NonOperationalCacheProvider;
-import com.impetus.kundera.proxy.EnhancedEntity;
-import com.impetus.kundera.proxy.EntityEnhancerFactory;
-import com.impetus.kundera.proxy.KunderaProxy;
-import com.impetus.kundera.proxy.LazyInitializerFactory;
-import com.impetus.kundera.proxy.cglib.CglibEntityEnhancerFactory;
-import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 import com.impetus.kundera.query.KunderaMetadataManager;
-import com.impetus.kundera.startup.model.KunderaMetadata;
 
 /**
  * The Class EntityManagerFactoryImpl.
@@ -50,7 +41,7 @@ import com.impetus.kundera.startup.model.KunderaMetadata;
  * @author animesh.kumar
  */
 public class EntityManagerFactoryImpl implements EntityManagerFactory
-{    
+{
 
     /** the log used by this class. */
     private static Log LOG = LogFactory.getLog(EntityManagerFactoryImpl.class);
@@ -58,12 +49,10 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     /** Whether or not the factory has been closed. */
     private boolean closed = false;
 
-    /** The enhanced proxy factory. */
-    private EntityEnhancerFactory enhancedProxyFactory;
-
-    /** The lazy initializer factory. */
-    private LazyInitializerFactory lazyInitializerFactory;
-
+    /**
+     * Persistence Unit Properties Overriden by user provided factory
+     * properties.
+     */
     private Map<String, Object> properties;
 
     private CacheProvider cacheProvider;
@@ -97,8 +86,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         properties.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnitName);
         this.properties = properties;
         this.persistenceUnitName = persistenceUnitName;
-        enhancedProxyFactory = new CglibEntityEnhancerFactory();
-        lazyInitializerFactory = new CglibLazyInitializerFactory();
     }
 
     @Override
@@ -134,46 +121,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     public final EntityManager createEntityManager(Map map)
     {
         return new EntityManagerImpl(this, map);
-    }
-
-    /**
-     * Gets the enhanced entity.
-     * 
-     * @param entity
-     *            the entity
-     * @param id
-     *            the id
-     * @param foreignKeyMap
-     *            the foreign key map
-     * @return the enhanced entity
-     */
-    public EnhancedEntity getEnhancedEntity(Object entity, String id, Map<String, Set<String>> foreignKeyMap)
-    {
-        return enhancedProxyFactory.getProxy(entity, id, foreignKeyMap);
-    }
-
-    /**
-     * Gets the lazy entity.
-     * 
-     * @param entityName
-     *            the entity name
-     * @param persistentClass
-     *            the persistent class
-     * @param getIdentifierMethod
-     *            the get identifier method
-     * @param setIdentifierMethod
-     *            the set identifier method
-     * @param id
-     *            the id
-     * @param em
-     *            the em
-     * @return the lazy entity
-     */
-    public KunderaProxy getLazyEntity(String entityName, Class<?> persistentClass, Method getIdentifierMethod,
-            Method setIdentifierMethod, String id, EntityManagerImpl em)
-    {
-        return lazyInitializerFactory.getProxy(entityName, persistentClass, getIdentifierMethod, setIdentifierMethod,
-                id, em);
     }
 
     /*
