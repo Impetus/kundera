@@ -27,7 +27,7 @@ public class CoreLoader
 
     public void load()
     {
-        log.debug("Loading Kundera Core...");
+        log.debug("Nothing to load in Core");
 
     }
 

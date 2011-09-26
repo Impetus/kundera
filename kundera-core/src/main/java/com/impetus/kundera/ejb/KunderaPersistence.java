@@ -23,6 +23,7 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.ProviderUtil;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.log4j.Logger;
 
 import com.impetus.kundera.loader.ClientResolver;
 import com.impetus.kundera.loader.ClientType;
@@ -40,12 +41,16 @@ import com.impetus.kundera.startup.model.PersistenceUnitMetadata;
 public class KunderaPersistence implements PersistenceProvider
 {
 
+    /** The logger. */
+    private static Logger logger = Logger.getLogger(KunderaPersistence.class);
+
     /**
      * Instantiates a new kundera persistence.
      */
     public KunderaPersistence()
     {
         // Load Core
+        logger.debug("Loading Core");
         new CoreLoader().load();
     }
 
@@ -68,9 +73,11 @@ public class KunderaPersistence implements PersistenceProvider
     private void initializeKundera(String persistenceUnit)
     {
         // Invoke Application MetaData
+        logger.debug("Loading Application MetaData For Persistence Unit " + persistenceUnit);
         (new ApplicationLoader()).load(persistenceUnit);
 
         // Invoke Client Loaders
+        logger.debug("Loading Client MetaData For Persistence Unit " + persistenceUnit);
         PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.getInstance().getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         String kunderaClientName = (String) persistenceUnitMetadata.getProperties().get("kundera.client");

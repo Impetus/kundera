@@ -29,8 +29,7 @@ import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.KsDef;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -44,28 +43,30 @@ import org.apache.thrift.transport.TTransportException;
  */
 public class SolandraUtils
 {
-	private static Log log = LogFactory.getLog(SolandraUtils.class);
+    /** The logger. */
+    private static Logger logger = Logger.getLogger(SolandraUtils.class);
 
     /**
      * Start solandra server.
      */
     public void initializeSolandra(String contactNode, int port)
     {
-        log.info("Initializing Solandra...");
+        logger.info("Initializing Solandra...");
         new CassandraUtils();
         CassandraUtils.cacheInvalidationInterval = 0; // real-time
 
         try
         {
-            //Create solandra specific schema
-            createSolandraSpecificSchema(contactNode, port);            
-            //Start Solandra 
+            // Create solandra specific schema
+            createSolandraSpecificSchema(contactNode, port);
+            // Start Solandra
             CassandraUtils.startupServer();
         }
         catch (Throwable t)
         {
-            log.error("errror while starting solandra schema:", t);
+            logger.error("errror while starting solandra schema:", t);
         }
+        logger.info("Initialized Solandra...");
 
     }
 
@@ -77,10 +78,10 @@ public class SolandraUtils
      */
     private void createSolandraSpecificSchema(String contactNode, int port) throws IOException
     {
-        log.info("Creating solandra specific schema (if not already exists)...");
-        final String keySpace = "L";	//Solandra specific schema
-        
-        /* Solandra column families*/
+        logger.info("Creating solandra specific schema (if not already exists)...");
+        final String keySpace = "L"; // Solandra specific schema
+
+        /* Solandra column families */
         final String termVecColumnFamily = "TI";
         final String docColumnFamily = "Docs";
         final String metaInfoColumnFamily = "TL";
@@ -89,7 +90,7 @@ public class SolandraUtils
 
         if (DatabaseDescriptor.getNonSystemTables().contains(keySpace))
         {
-            log.info("Solandra specific schema, \"L\" already exist, Noting to do.");
+            logger.info("Solandra specific schema, \"L\" already exist, Noting to do.");
             return;
         }
 
@@ -99,7 +100,7 @@ public class SolandraUtils
 
             int sleep = new Random().nextInt(6000);
 
-            log.info("\nSleeping " + sleep + "ms to stagger solandra schema creation\n");
+            logger.info("\nSleeping " + sleep + "ms to stagger solandra schema creation\n");
 
             Thread.sleep(sleep);
         }
@@ -111,7 +112,7 @@ public class SolandraUtils
 
         if (DatabaseDescriptor.getNonSystemTables().contains(keySpace))
         {
-            log.info("Solandra specific schema, \"L\" already exist, Noting to do.");
+            logger.info("Solandra specific schema, \"L\" already exist, Noting to do.");
             return;
         }
 
@@ -186,7 +187,7 @@ public class SolandraUtils
             throw new IOException(e);
         }
 
-        log.info("Added Solandra specific schema. Sleeping for 10 seconds...");
+        logger.info("Added Solandra specific schema. Sleeping for 10 seconds...");
         try
         {
             Thread.sleep(10000);
@@ -219,11 +220,11 @@ public class SolandraUtils
         }
         catch (TTransportException ttex)
         {
-            log.error(ttex.getMessage());
+            logger.error(ttex.getMessage());
         }
         catch (Exception ex)
         {
-            log.error(ex.getMessage());
+            logger.error(ex.getMessage());
         }
         return client;
 

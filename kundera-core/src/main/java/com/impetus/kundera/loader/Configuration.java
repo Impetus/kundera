@@ -51,7 +51,7 @@ public class Configuration
     {
         EntityManager em = null;
         EntityManagerFactory emf;
-        
+
         long start = System.currentTimeMillis();
         if (emfMap.get(persistenceUnit) == null)
         {
@@ -62,11 +62,11 @@ public class Configuration
         {
             emf = emfMap.get(persistenceUnit);
         }
-        System.out.println("EntityManagerFactory Loaded in >>>\t" + (System.currentTimeMillis() - start));
-        
+        logger.debug("EntityManagerFactory Loaded in >>>\t" + (System.currentTimeMillis() - start));
+
         start = System.currentTimeMillis();
         em = emf.createEntityManager();
-        System.out.println("EntityManager Created in >>>\t" + (System.currentTimeMillis() - start));
+        logger.debug("EntityManager Created in >>>\t" + (System.currentTimeMillis() - start));
         return em;
     }
 
