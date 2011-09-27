@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
@@ -60,7 +61,7 @@ import com.impetus.kundera.startup.model.PersistenceUnitMetadata;
  * 
  * @author animesh.kumar
  */
-public class EntityManagerImpl implements KunderaEntityManager
+public class EntityManagerImpl implements EntityManager
 {
 
     /** The Constant log. */
@@ -198,11 +199,7 @@ public class EntityManagerImpl implements KunderaEntityManager
         }
     }
 
-    /*
-     * @see com.impetus.kundera.CassandraEntityManager#find(java.lang.Class,
-     * java.lang.Object[])
-     */
-    @Override
+
     public final <E> List<E> find(Class<E> entityClass, Object... primaryKeys)
     {
         if (closed)
@@ -796,7 +793,6 @@ public class EntityManagerImpl implements KunderaEntityManager
      * 
      * @return the client
      */
-    @Override
     public final Client getClient()
     {
         return client;
@@ -845,7 +841,6 @@ public class EntityManagerImpl implements KunderaEntityManager
         return eventDispatcher;
     }
 
-    @Override
     public <T> List<T> find(Class<T> entityClass, Map<String, String> primaryKeys)
     {
 
