@@ -178,20 +178,7 @@ public class HBaseClient implements com.impetus.kundera.Client
             }
         }
         return entities;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#loadEmbeddedObjects(java.lang.String,
-     * java.lang.String, java.lang.String[])
-     */
-    @Override
-    public Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String keyspace, String columnFamily, String... keys)
-            throws Exception
-    {
-        throw new NotImplementedException("Not yet implemented");
-    }
+    }    
 
     /*
      * (non-Javadoc)

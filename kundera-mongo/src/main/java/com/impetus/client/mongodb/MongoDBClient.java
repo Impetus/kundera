@@ -244,13 +244,6 @@ public class MongoDBClient implements Client
         throw new NotImplementedException("Not yet implemented");
     }
 
-    @Override
-    public Map<Bytes, List<org.apache.cassandra.thrift.SuperColumn>> loadEmbeddedObjects(String keyspace,
-            String columnFamily, String... keys) throws Exception
-    {
-        throw new NotImplementedException("Method not applicable for MongoDB. Invalid method call");
-    }
-
     /*
      * (non-Javadoc)
      * 

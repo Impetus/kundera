@@ -326,43 +326,6 @@ public class PelopsClient implements Client
         rowDeletor.deleteRow(columnFamily, rowId, ConsistencyLevel.ONE);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String,
-     * java.lang.String, java.lang.String[])
-     */
-    // TODO: This method is not being used currently anywhere and should be
-    // deleted in code refactoring exercise
-    // It may contain optimized code and hence can be used elsewhere for
-    // improvement
-    @Override
-    public final Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String keyspace, String columnFamily,
-            String... rowIds) throws Exception
-    {
-
-        if (!isOpen())
-            throw new PersistenceException("PelopsClient is closed.");
-
-        configurePool(keyspace);
-        Selector selector = Pelops.createSelector(POOL_NAME);
-
-        List<Bytes> bytesArr = new ArrayList<Bytes>();
-
-        for (String rowkey : rowIds)
-        {
-            Bytes bytes = new Bytes(PropertyAccessorFactory.STRING.toBytes(rowkey));
-            bytesArr.add(bytes);
-        }
-        /**
-         * String columnFamily, List<Bytes> rowKeys, SlicePredicate
-         * colPredicate, ConsistencyLevel cLevel
-         */
-        return selector.getSuperColumnsFromRows(columnFamily, bytesArr, Selector.newColumnsPredicateAll(false, 1000),
-                ConsistencyLevel.ONE);
-    }
-
     /**
      * Sets the contact nodes.
      * 
