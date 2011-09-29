@@ -28,7 +28,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
-import com.impetus.kundera.api.Index;
+import com.impetus.kundera.annotations.Index;
 
 /**
  * @author animesh.kumar

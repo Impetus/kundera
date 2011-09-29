@@ -26,7 +26,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import com.impetus.kundera.api.Cacheable;
+import com.impetus.kundera.annotations.Cacheable;
 
 @Entity
 @Table(name = "Department", schema = "Blog")

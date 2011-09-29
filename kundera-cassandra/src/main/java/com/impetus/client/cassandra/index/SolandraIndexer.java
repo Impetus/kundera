@@ -36,8 +36,8 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.util.Version;
 
-import com.impetus.kundera.Client;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.index.IndexingException;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;

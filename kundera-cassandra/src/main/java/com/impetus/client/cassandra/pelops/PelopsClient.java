@@ -48,13 +48,13 @@ import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.client.cassandra.index.SolandraIndexer;
 import com.impetus.client.cassandra.index.SolandraUtils;
-import com.impetus.kundera.Client;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.index.DocumentIndexer;
-import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;

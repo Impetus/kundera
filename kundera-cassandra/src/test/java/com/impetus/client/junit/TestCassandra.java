@@ -21,7 +21,7 @@ import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.log4j.Logger;
 
 import com.impetus.client.entity.SnsUser;
-import com.impetus.kundera.loader.Configuration;
+import com.impetus.kundera.client.Configuration;
 
 /**
  * Test case for CRUD operations on Cassandra database using Kundera.

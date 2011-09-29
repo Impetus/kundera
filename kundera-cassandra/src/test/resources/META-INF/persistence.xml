@@ -4,7 +4,7 @@
 	version="2.0">
 
 	<persistence-unit name="cassandra">
-		<provider>com.impetus.kundera.ejb.KunderaPersistence</provider>
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		
 		<properties>
 			<property name="server.config" value="D:/vivek/source/cassandra-0.8.2/conf/cassandra.yaml"/>
@@ -20,7 +20,7 @@
 	</persistence-unit>
 
 	<persistence-unit name="hbase">
-		<provider>com.impetus.kundera.ejb.KunderaPersistence</provider>
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		
 		<properties>
 			<property name="kundera.nodes" value="localhost"/>
@@ -33,7 +33,7 @@
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="mongodb">
-		<provider>com.impetus.kundera.ejb.KunderaPersistence</provider>		
+		<provider>com.impetus.kundera.KunderaPersistence</provider>		
 		<properties>
 			<property name="kundera.nodes" value="localhost"/>
 			<property name="kundera.port" value="27017"/>

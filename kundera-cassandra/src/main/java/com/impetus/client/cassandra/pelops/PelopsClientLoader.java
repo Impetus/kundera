@@ -1,11 +1,11 @@
 package com.impetus.client.cassandra.pelops;
 
 import com.impetus.client.cassandra.index.SolandraUtils;
-import com.impetus.kundera.query.KunderaMetadataManager;
-import com.impetus.kundera.startup.Loader;
-import com.impetus.kundera.startup.model.ClientMetadata;
-import com.impetus.kundera.startup.model.KunderaMetadata;
-import com.impetus.kundera.startup.model.PersistenceUnitMetadata;
+import com.impetus.kundera.loader.Loader;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.ClientMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 public class PelopsClientLoader implements Loader
 {
