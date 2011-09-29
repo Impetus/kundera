@@ -46,13 +46,14 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.impetus.client.cassandra.index.SolandraIndexer;
 import com.impetus.client.cassandra.index.SolandraUtils;
 import com.impetus.kundera.Client;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.Indexer;
-import com.impetus.kundera.index.KunderaIndexer;
+import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -682,7 +683,7 @@ public class PelopsClient implements Client
     @Override
     public Indexer getIndexer()
     {
-        return new KunderaIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT));
+        return new SolandraIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT));
     }
 
     @Override

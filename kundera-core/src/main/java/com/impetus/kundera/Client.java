@@ -21,7 +21,6 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import org.apache.cassandra.thrift.SuperColumn;
 import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.kundera.ejb.EntityManagerImpl;

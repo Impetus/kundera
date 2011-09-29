@@ -32,7 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 
-import com.impetus.client.mongodb.query.MongoDBIndexer;
+import com.impetus.client.mongodb.index.MongoDBIndexer;
 import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.Client;
 import com.impetus.kundera.ejb.EntityManagerImpl;
