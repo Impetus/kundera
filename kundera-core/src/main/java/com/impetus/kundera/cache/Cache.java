@@ -50,17 +50,4 @@ public interface Cache extends javax.persistence.Cache
      */
     void put(Object key, Object value);
 
-    /**
-     * Removes an item from cache.
-     * 
-     * @param key
-     *            the key
-     * @return true, if successful
-     */
-    boolean remove(Object key);
-
-    /**
-     * Clears cache.
-     */
-    void clear();
 }

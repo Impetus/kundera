@@ -40,20 +40,6 @@ public class NonOperationalCache implements Cache, javax.persistence.Cache
     {
     }
 
-    /* @see com.impetus.kundera.cache.Cache#remove(java.lang.Object) */
-    @Override
-    public boolean remove(final Object key)
-    {
-        return true;
-    }
-
-    /* @see com.impetus.kundera.cache.Cache#clear() */
-    @Override
-    public void clear()
-    {
-
-    }
-
     /* @see com.impetus.kundera.cache.Cache#get(java.lang.Object) */
     @Override
     public Object get(final Object key)

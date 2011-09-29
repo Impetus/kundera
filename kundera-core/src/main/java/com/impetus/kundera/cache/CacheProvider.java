@@ -16,6 +16,7 @@
 package com.impetus.kundera.cache;
 
 import java.util.Map;
+import javax.persistence.Cache;
 
 /**
  * CacheProvider.

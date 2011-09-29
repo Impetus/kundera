@@ -156,22 +156,12 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         return KunderaMetadataManager.getMetamodel(this.persistenceUnitName);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManagerFactory#getProperties()
-     */
     @Override
     public Map<String, Object> getProperties()
     {
         return properties;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManagerFactory#getCache()
-     */
     @Override
     public Cache getCache()
     {

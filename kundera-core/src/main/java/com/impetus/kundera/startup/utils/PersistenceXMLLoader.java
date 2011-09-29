@@ -37,17 +37,16 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
 
-import com.impetus.kundera.ejb.PersistenceXmlLoader;
 import com.impetus.kundera.startup.model.PersistenceUnitMetadata;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class PersistenceXMLLoader
 {
     /** The log. */
-    private static Log log = LogFactory.getLog(PersistenceXmlLoader.class);
+    private static Log log = LogFactory.getLog(PersistenceXMLLoader.class);
 
     /**
      * Instantiates a new persistence xml loader.

@@ -15,19 +15,22 @@
  ******************************************************************************/
 package com.impetus.kundera.cache.ehcache;
 
-import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
+
+import org.apache.commons.lang.NotImplementedException;
+
+import com.impetus.kundera.cache.Cache;
 
 /**
  * Cache implementation using Ehcache.
  * 
  * @author animesh.kumar
  */
-public class EhCacheWrapper implements com.impetus.kundera.cache.Cache
+public class EhCacheWrapper implements Cache
 {
 
     /** The ehcache. */
-    private Cache ehcache;
+    private net.sf.ehcache.Cache ehcache;
 
     /**
      * Instantiates a new eh cache wrapper.
@@ -35,16 +38,9 @@ public class EhCacheWrapper implements com.impetus.kundera.cache.Cache
      * @param ehcache
      *            the ehcache
      */
-    public EhCacheWrapper(Cache ehcache)
+    public EhCacheWrapper(net.sf.ehcache.Cache ehcache)
     {
         this.ehcache = ehcache;
-    }
-
-    /* @see com.impetus.kundera.cache.Cache#clear() */
-    @Override
-    public void clear()
-    {
-        ehcache.removeAll();
     }
 
     /* @see com.impetus.kundera.cache.Cache#get(java.lang.Object) */
@@ -65,13 +61,6 @@ public class EhCacheWrapper implements com.impetus.kundera.cache.Cache
         ehcache.put(new Element(key, value));
     }
 
-    /* @see com.impetus.kundera.cache.Cache#remove(java.lang.Object) */
-    @Override
-    public boolean remove(Object key)
-    {
-        return ehcache.remove(key);
-    }
-
     /* @see com.impetus.kundera.cache.Cache#size() */
     @Override
     public int size()
@@ -82,22 +71,27 @@ public class EhCacheWrapper implements com.impetus.kundera.cache.Cache
     @Override
     public boolean contains(Class arg0, Object arg1)
     {
-        return false;
+        return (ehcache.get(arg1) != null);
     }
 
     @Override
     public void evict(Class arg0)
     {
+        // TODO Can we use Class with ehcache
+        throw new NotImplementedException("TODO");
     }
 
     @Override
     public void evict(Class arg0, Object arg1)
     {
+        // TODO Can we use Class with ehcache
+        ehcache.remove(arg1);
     }
 
     @Override
     public void evictAll()
     {
+        ehcache.removeAll();
     }
 
 }

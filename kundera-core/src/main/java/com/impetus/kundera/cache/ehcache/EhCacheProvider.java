@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Cache;
+
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.event.CacheEventListener;
@@ -28,7 +30,6 @@ import net.sf.ehcache.util.ClassLoaderUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
 
