@@ -32,7 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 
-import com.impetus.client.mongodb.query.MongoDBIndexer;
+import com.impetus.client.mongodb.index.MongoDBIndexer;
 import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.Client;
 import com.impetus.kundera.ejb.EntityManagerImpl;
@@ -242,13 +242,6 @@ public class MongoDBClient implements Client
     public <E> List<E> loadData(EntityManager em, EntityMetadata m, Map<String, String> col) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");
-    }
-
-    @Override
-    public Map<Bytes, List<org.apache.cassandra.thrift.SuperColumn>> loadEmbeddedObjects(String keyspace,
-            String columnFamily, String... keys) throws Exception
-    {
-        throw new NotImplementedException("Method not applicable for MongoDB. Invalid method call");
     }
 
     /*

@@ -37,7 +37,8 @@ import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.Indexer;
-import com.impetus.kundera.index.KunderaIndexer;
+import com.impetus.kundera.index.DocumentIndexer;
+import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
@@ -178,20 +179,7 @@ public class HBaseClient implements com.impetus.kundera.Client
             }
         }
         return entities;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#loadEmbeddedObjects(java.lang.String,
-     * java.lang.String, java.lang.String[])
-     */
-    @Override
-    public Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String keyspace, String columnFamily, String... keys)
-            throws Exception
-    {
-        throw new NotImplementedException("Not yet implemented");
-    }
+    }    
 
     /*
      * (non-Javadoc)
@@ -279,7 +267,7 @@ public class HBaseClient implements com.impetus.kundera.Client
     @Override
     public Indexer getIndexer()
     {
-        return new KunderaIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT));
+        return new LuceneIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT));
     }
 
     @Override

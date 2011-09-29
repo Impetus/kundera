@@ -21,7 +21,6 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import org.apache.cassandra.thrift.SuperColumn;
 import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.kundera.ejb.EntityManagerImpl;
@@ -102,21 +101,7 @@ public interface Client
      *             the exception
      */
     public <E> List<E> loadData(EntityManager em, EntityMetadata m, Map<String, String> col) throws Exception;
-
-    /**
-     * Load super-columns from multiple rows of a super-column-family.
-     * 
-     * @param schema
-     *            the keyspace
-     * @param tableName
-     *            The name of the super column family to operate on
-     * @param keys
-     *            Array of row keys
-     * @return A Map of row and corresponding list of super-columns.
-     * @throws Exception
-     *             the exception
-     */
-    Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String schema, String tableName, String... keys) throws Exception;
+    
 
     /**
      * Loads columns from multiple rows restricting results to conditions stored

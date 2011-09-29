@@ -46,13 +46,14 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.impetus.client.cassandra.index.SolandraIndexer;
 import com.impetus.client.cassandra.index.SolandraUtils;
 import com.impetus.kundera.Client;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.Indexer;
-import com.impetus.kundera.index.KunderaIndexer;
+import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -324,43 +325,6 @@ public class PelopsClient implements Client
         configurePool(keyspace);
         RowDeletor rowDeletor = Pelops.createRowDeletor(POOL_NAME);
         rowDeletor.deleteRow(columnFamily, rowId, ConsistencyLevel.ONE);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.CassandraClient#loadSuperColumns(java.lang.String,
-     * java.lang.String, java.lang.String[])
-     */
-    // TODO: This method is not being used currently anywhere and should be
-    // deleted in code refactoring exercise
-    // It may contain optimized code and hence can be used elsewhere for
-    // improvement
-    @Override
-    public final Map<Bytes, List<SuperColumn>> loadEmbeddedObjects(String keyspace, String columnFamily,
-            String... rowIds) throws Exception
-    {
-
-        if (!isOpen())
-            throw new PersistenceException("PelopsClient is closed.");
-
-        configurePool(keyspace);
-        Selector selector = Pelops.createSelector(POOL_NAME);
-
-        List<Bytes> bytesArr = new ArrayList<Bytes>();
-
-        for (String rowkey : rowIds)
-        {
-            Bytes bytes = new Bytes(PropertyAccessorFactory.STRING.toBytes(rowkey));
-            bytesArr.add(bytes);
-        }
-        /**
-         * String columnFamily, List<Bytes> rowKeys, SlicePredicate
-         * colPredicate, ConsistencyLevel cLevel
-         */
-        return selector.getSuperColumnsFromRows(columnFamily, bytesArr, Selector.newColumnsPredicateAll(false, 1000),
-                ConsistencyLevel.ONE);
     }
 
     /**
@@ -719,7 +683,7 @@ public class PelopsClient implements Client
     @Override
     public Indexer getIndexer()
     {
-        return new KunderaIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT));
+        return new SolandraIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT));
     }
 
     @Override

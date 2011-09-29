@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.client.mongodb.query;
+package com.impetus.client.mongodb.index;
 
 import java.util.ArrayList;
 import java.util.List;
