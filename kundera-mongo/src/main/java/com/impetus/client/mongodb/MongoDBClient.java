@@ -30,15 +30,14 @@ import javax.persistence.Query;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.client.mongodb.index.MongoDBIndexer;
 import com.impetus.client.mongodb.query.MongoDBQuery;
-import com.impetus.kundera.Client;
-import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.index.Indexer;
-import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityManagerImpl;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;

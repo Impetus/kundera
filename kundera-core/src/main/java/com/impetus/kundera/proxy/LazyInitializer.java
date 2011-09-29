@@ -17,7 +17,7 @@ package com.impetus.kundera.proxy;
 
 import javax.persistence.PersistenceException;
 
-import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
  * Handles fetching of the underlying entity for a proxy.

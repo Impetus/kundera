@@ -55,8 +55,8 @@ public class ClasspathReader extends Reader
     }
 
     /*
-     * (non-Javadoc)
-     * TODO: MOVED to startup package, delete this
+     * (non-Javadoc) TODO: MOVED to startup package, delete this
+     * 
      * @see com.impetus.kundera.classreading.Reader#read()
      */
 
@@ -82,8 +82,7 @@ public class ClasspathReader extends Reader
                 e.printStackTrace();
             }
         }
-    }   
-
+    }
 
     /**
      * Uses the java.class.path system property to obtain a list of URLs that
@@ -123,7 +122,7 @@ public class ClasspathReader extends Reader
      * 
      * @return list of class path included in the base package
      */
-    
+
     @Override
     public final URL[] findResourcesByContextLoader()
     {

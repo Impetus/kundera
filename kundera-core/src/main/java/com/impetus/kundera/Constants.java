@@ -46,9 +46,9 @@ public final class Constants
 
     /** The Constant TO_ONE_SUPER_COL_NAME. */
     public static final String FOREIGN_KEY_EMBEDDED_COLUMN_NAME = "FKey-TO";
-    
+
     public static final String KUNDERA_SECONDARY_CACHE_NAME = "Kundera";
-    
+
     public static final String PERSISTENCE_UNIT_NAME = "persistenceUnitName";
 
 }

@@ -33,15 +33,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.mongodb.query.MongoDBQuery;
-import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.persistence.EntityManagerImpl;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
-import com.impetus.kundera.query.KunderaMetadataManager;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -123,8 +123,9 @@ public class MongoDBDataHandler
                                                                       // this
                                                                       // property
 
-                EntityMetadata relMetadata = KunderaMetadataManager.getMetamodel(em.getPersistenceUnitName()).getEntityMetadata(embeddedEntityClass); 
-                    
+                EntityMetadata relMetadata = KunderaMetadataManager.getMetamodel(em.getPersistenceUnitName())
+                        .getEntityMetadata(embeddedEntityClass);
+
                 BasicDBList relList = (BasicDBList) document.get(embeddedPropertyField.getName());
                 ; // List foreign keys
 

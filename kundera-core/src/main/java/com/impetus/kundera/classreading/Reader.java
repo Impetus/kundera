@@ -214,7 +214,6 @@ public abstract class Reader
      * Read.
      */
     public abstract void read();
-    
 
     /**
      * Gets the filter.
@@ -229,9 +228,9 @@ public abstract class Reader
      * @return the uR l[]
      */
     public abstract URL[] findResources();
-    
+
     public abstract URL[] findResourcesByContextLoader();
-    
+
     public abstract URL[] findResourcesByClasspath();
 
 }

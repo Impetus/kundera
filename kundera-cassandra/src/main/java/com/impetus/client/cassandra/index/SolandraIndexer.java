@@ -47,23 +47,24 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Provides indexing functionality using solandra library
+ * 
  * @author amresh.singh
  */
-public class SolandraIndexer extends DocumentIndexer {
-	/** log for this class. */
+public class SolandraIndexer extends DocumentIndexer
+{
+    /** log for this class. */
     private static final Log LOG = LogFactory.getLog(DocumentIndexer.class);
 
-	/**
-	 * @param client
-	 * @param analyzer
-	 */
-	public SolandraIndexer(Client client, Analyzer analyzer) {
-		super(client, analyzer);
-		
-	}
-	
-	
-	
+    /**
+     * @param client
+     * @param analyzer
+     */
+    public SolandraIndexer(Client client, Analyzer analyzer)
+    {
+        super(client, analyzer);
+
+    }
+
     @Override
     public final void index(EntityMetadata metadata, Object object)
     {
@@ -127,8 +128,6 @@ public class SolandraIndexer extends DocumentIndexer {
 
     }
 
-	
-    
     @Override
     public final void unindex(EntityMetadata metadata, String id)
     {
@@ -148,7 +147,7 @@ public class SolandraIndexer extends DocumentIndexer {
             throw new IndexingException(e.getMessage());
         }
     }
-    
+
     @SuppressWarnings("deprecation")
     @Override
     public final Map<String, String> search(String luceneQuery, int start, int count)
@@ -168,9 +167,9 @@ public class SolandraIndexer extends DocumentIndexer {
 
         try
         {
-            
-                indexReader = getIndexReader();
-           
+
+            indexReader = getIndexReader();
+
         }
         catch (Exception e)
         {
@@ -211,25 +210,27 @@ public class SolandraIndexer extends DocumentIndexer {
         // log.debug("Result[" + entityIds + "]");
         return indexCol;
     }
-    
-	/**
-	 * Indexes document using Lucandra library
-	 * @param metadata
-	 *            the metadata
-	 * @param document
-	 *            the document
-	 */
-	public void indexDocument(EntityMetadata metadata, Document document) {
 
-		LOG.debug("Indexing document: " + document + " for "
-				+ metadata.getDBType());
+    /**
+     * Indexes document using Lucandra library
+     * 
+     * @param metadata
+     *            the metadata
+     * @param document
+     *            the document
+     */
+    public void indexDocument(EntityMetadata metadata, Document document)
+    {
 
-		LOG.debug("Indexing document using Lucandra: " + document);
-		indexDocumentUsingLucandra(document);
-	}
-	
-	/**
-     * Indexes document using Lucandra library 
+        LOG.debug("Indexing document: " + document + " for " + metadata.getDBType());
+
+        LOG.debug("Indexing document using Lucandra: " + document);
+        indexDocumentUsingLucandra(document);
+    }
+
+    /**
+     * Indexes document using Lucandra library
+     * 
      * @param document
      *            the document
      */
@@ -249,10 +250,11 @@ public class SolandraIndexer extends DocumentIndexer {
         {
             throw new IndexingException(e.getMessage());
         }
-    }	
-    
+    }
+
     /**
-     * helper method to get Lucandra IndexWriter object 
+     * helper method to get Lucandra IndexWriter object
+     * 
      * @return the index writer
      */
     private lucandra.IndexWriter getIndexWriter()
@@ -266,7 +268,7 @@ public class SolandraIndexer extends DocumentIndexer {
             throw new IndexingException(e.getMessage());
         }
     }
-    
+
     /**
      * Returns default index reader.
      * 
@@ -274,7 +276,7 @@ public class SolandraIndexer extends DocumentIndexer {
      */
     public IndexReader getIndexReader()
     {
-    	return new lucandra.IndexReader(INDEX_NAME);
+        return new lucandra.IndexReader(INDEX_NAME);
     }
 
 }

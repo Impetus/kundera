@@ -29,9 +29,9 @@ import net.sf.cglib.proxy.NoOp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.LazyInitializationException;
-import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.persistence.EntityManagerImpl;
 import com.impetus.kundera.proxy.KunderaProxy;
+import com.impetus.kundera.proxy.LazyInitializationException;
 import com.impetus.kundera.proxy.LazyInitializer;
 
 /**

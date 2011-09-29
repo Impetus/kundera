@@ -41,9 +41,8 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.Version;
 
-import com.impetus.kundera.Client;
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.loader.DBType;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -54,85 +53,102 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author amresh.singh
  */
-public class LuceneIndexer extends DocumentIndexer {
-	/** log for this class. */
-	private static Log log = LogFactory.getLog(LuceneIndexer.class);
-	private static final String LUCENE_INDEX_DIRECTORY_NAME = "lucene";
+public class LuceneIndexer extends DocumentIndexer
+{
+    /** log for this class. */
+    private static Log log = LogFactory.getLog(LuceneIndexer.class);
 
-	/**
-	 * @param client
-	 * @param analyzer
-	 */
-	public LuceneIndexer(Client client, Analyzer analyzer) {
-		super(client, analyzer);
+    private static final String LUCENE_INDEX_DIRECTORY_NAME = "lucene";
 
-	}
+    /**
+     * @param client
+     * @param analyzer
+     */
+    public LuceneIndexer(Client client, Analyzer analyzer)
+    {
+        super(client, analyzer);
 
-	
+    }
 
-	/**
-	 * Added for HBase support.
-	 * 
-	 * @return default index writer
-	 */
-	private IndexWriter getIndexWriter() {
-		StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
-		Directory index = null;
-		IndexWriter w = null;
-		try {
-			index = FSDirectory.open(getIndexDirectory());
-			if (index.listAll().length == 0) {
-				log.info("Creating fresh Index because it was empty");
-				w = new IndexWriter(index, analyzer, true,
-						IndexWriter.MaxFieldLength.LIMITED);
-			} else {
-				w = new IndexWriter(index, analyzer, false,
-						IndexWriter.MaxFieldLength.LIMITED);
-			}
+    /**
+     * Added for HBase support.
+     * 
+     * @return default index writer
+     */
+    private IndexWriter getIndexWriter()
+    {
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
+        Directory index = null;
+        IndexWriter w = null;
+        try
+        {
+            index = FSDirectory.open(getIndexDirectory());
+            if (index.listAll().length == 0)
+            {
+                log.info("Creating fresh Index because it was empty");
+                w = new IndexWriter(index, analyzer, true, IndexWriter.MaxFieldLength.LIMITED);
+            }
+            else
+            {
+                w = new IndexWriter(index, analyzer, false, IndexWriter.MaxFieldLength.LIMITED);
+            }
 
-		} catch (CorruptIndexException e) {
-			throw new IndexingException(e.getMessage());
-		} catch (LockObtainFailedException e) {
-			throw new IndexingException(e.getMessage());
-		} catch (IOException e) {
-			throw new IndexingException(e.getMessage());
-		}
-		return w;
-	}
+        }
+        catch (CorruptIndexException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        catch (LockObtainFailedException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        catch (IOException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        return w;
+    }
 
-	/**
-	 * Returns default index reader.
-	 * 
-	 * @return index reader.
-	 */
-	private IndexReader getIndexReader() {
-		org.apache.lucene.index.IndexReader reader = null;
-		try {
-			reader = IndexReader.open(FSDirectory.open(getIndexDirectory()));
-		} catch (CorruptIndexException e) {
-			throw new IndexingException(e.getMessage());
-		} catch (IOException e) {
-			throw new IndexingException(e.getMessage());
-		}
-		return reader;
-	}
+    /**
+     * Returns default index reader.
+     * 
+     * @return index reader.
+     */
+    private IndexReader getIndexReader()
+    {
+        org.apache.lucene.index.IndexReader reader = null;
+        try
+        {
+            reader = IndexReader.open(FSDirectory.open(getIndexDirectory()));
+        }
+        catch (CorruptIndexException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        catch (IOException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        return reader;
+    }
 
-	/**
-	 * Creates a Lucene index directory if it does not exist.
-	 * 
-	 * @return the index directory
-	 */
-	private File getIndexDirectory() {
-		String filePath = System.getProperty("user.home")
-				+ LUCENE_INDEX_DIRECTORY_NAME;
-		File file = new File(filePath);
-		if (!file.isDirectory()) {
-			file.mkdir();
-		}
-		return file;
-	}
-	
-	@Override
+    /**
+     * Creates a Lucene index directory if it does not exist.
+     * 
+     * @return the index directory
+     */
+    private File getIndexDirectory()
+    {
+        String filePath = System.getProperty("user.home") + LUCENE_INDEX_DIRECTORY_NAME;
+        File file = new File(filePath);
+        if (!file.isDirectory())
+        {
+            file.mkdir();
+        }
+        return file;
+    }
+
+    @Override
     public final void index(EntityMetadata metadata, Object object)
     {
 
@@ -195,21 +211,26 @@ public class LuceneIndexer extends DocumentIndexer {
 
     }
 
-	@Override
-	public final void unindex(EntityMetadata metadata, String id) {
-		log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName()
-				+ "] for key:" + id);
-		try {
-			/* String indexName, Query query, boolean autoCommit */
-			getIndexWriter().deleteDocuments(new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));
-		} catch (CorruptIndexException e) {
-			throw new IndexingException(e.getMessage());
-		} catch (IOException e) {
-			throw new IndexingException(e.getMessage());
-		}
-	}
-	
-	@SuppressWarnings("deprecation")
+    @Override
+    public final void unindex(EntityMetadata metadata, String id)
+    {
+        log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
+        try
+        {
+            /* String indexName, Query query, boolean autoCommit */
+            getIndexWriter().deleteDocuments(new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));
+        }
+        catch (CorruptIndexException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        catch (IOException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("deprecation")
     @Override
     public final Map<String, String> search(String luceneQuery, int start, int count)
     {
@@ -228,9 +249,9 @@ public class LuceneIndexer extends DocumentIndexer {
 
         try
         {
-            
-                indexReader = getIndexReader();
-           
+
+            indexReader = getIndexReader();
+
         }
         catch (Exception e)
         {
@@ -272,46 +293,50 @@ public class LuceneIndexer extends DocumentIndexer {
         return indexCol;
     }
 
-	/**
-	 * Indexes document. For Cassandra it uses Lucandra library, for others it
-	 * simply indexes into file system using Lucene
-	 * 
-	 * @param metadata
-	 *            the metadata
-	 * @param document
-	 *            the document
-	 */
-	public void indexDocument(EntityMetadata metadata, Document document) {
+    /**
+     * Indexes document. For Cassandra it uses Lucandra library, for others it
+     * simply indexes into file system using Lucene
+     * 
+     * @param metadata
+     *            the metadata
+     * @param document
+     *            the document
+     */
+    public void indexDocument(EntityMetadata metadata, Document document)
+    {
 
-		log.debug("Indexing document: " + document + " for "
-				+ metadata.getDBType());
+        log.debug("Indexing document: " + document + " for " + metadata.getDBType());
 
-		log.debug("Indexing document in file system using lucene: " + document);
-		indexDocumentUsingLucene(document);
+        log.debug("Indexing document in file system using lucene: " + document);
+        indexDocumentUsingLucene(document);
 
-	}
-	
-	/**
-	 * Indexes document in file system using lucene
-	 * 
-	 * @param document
-	 * @throws CorruptIndexException
-	 * @throws IOException
-	 */
-	public void indexDocumentUsingLucene(Document document) {
-		IndexWriter w = getIndexWriter();
-		try {
-			w.addDocument(document, super.analyzer);
-			w.optimize();
-			w.commit();
-			w.close();
-		} catch (CorruptIndexException e) {
-			log.error("Error while indexing document " + document
-					+ " into Lucene. Details:" + e.getMessage());
-		} catch (IOException e) {
-			log.error("Error while indexing document " + document
-					+ " into Lucene. Details:" + e.getMessage());
-		}
-	}
+    }
+
+    /**
+     * Indexes document in file system using lucene
+     * 
+     * @param document
+     * @throws CorruptIndexException
+     * @throws IOException
+     */
+    public void indexDocumentUsingLucene(Document document)
+    {
+        IndexWriter w = getIndexWriter();
+        try
+        {
+            w.addDocument(document, super.analyzer);
+            w.optimize();
+            w.commit();
+            w.close();
+        }
+        catch (CorruptIndexException e)
+        {
+            log.error("Error while indexing document " + document + " into Lucene. Details:" + e.getMessage());
+        }
+        catch (IOException e)
+        {
+            log.error("Error while indexing document " + document + " into Lucene. Details:" + e.getMessage());
+        }
+    }
 
 }

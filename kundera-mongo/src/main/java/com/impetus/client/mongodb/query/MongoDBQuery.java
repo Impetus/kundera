@@ -22,8 +22,8 @@ import javax.persistence.Query;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityManagerImpl;
 import com.impetus.kundera.query.QueryImpl;
 
 /**

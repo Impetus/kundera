@@ -35,11 +35,11 @@ import javax.persistence.PreUpdate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.ejb.event.CallbackMethod;
-import com.impetus.kundera.ejb.event.ExternalCallbackMethod;
-import com.impetus.kundera.ejb.event.InternalCallbackMethod;
 import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.event.CallbackMethod;
+import com.impetus.kundera.persistence.event.ExternalCallbackMethod;
+import com.impetus.kundera.persistence.event.InternalCallbackMethod;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**

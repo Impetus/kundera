@@ -1,6 +1,6 @@
 package com.impetus.client.hbase;
 
-import com.impetus.kundera.startup.Loader;
+import com.impetus.kundera.loader.Loader;
 
 public class HBaseClientLoader implements Loader
 {
@@ -9,7 +9,7 @@ public class HBaseClientLoader implements Loader
     public void load(String persistenceUnit)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

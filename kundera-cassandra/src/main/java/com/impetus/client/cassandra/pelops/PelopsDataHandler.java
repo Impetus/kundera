@@ -36,11 +36,11 @@ import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
-import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.persistence.EntityManagerImpl;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;

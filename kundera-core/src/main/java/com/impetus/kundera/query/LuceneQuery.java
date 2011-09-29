@@ -25,9 +25,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.metadata.MetadataBuilder;
+import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
  * The Class LuceneQuery.

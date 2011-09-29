@@ -19,7 +19,7 @@ import java.lang.reflect.Method;
 
 import javax.persistence.PersistenceException;
 
-import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
  * Interface LazyInitializerFactory

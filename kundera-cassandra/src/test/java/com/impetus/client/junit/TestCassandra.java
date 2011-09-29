@@ -16,12 +16,12 @@
 package com.impetus.client.junit;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
 
 import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.log4j.Logger;
 
 import com.impetus.client.entity.SnsUser;
-import com.impetus.kundera.client.Configuration;
 
 /**
  * Test case for CRUD operations on Cassandra database using Kundera.
@@ -31,8 +31,6 @@ public class TestCassandra extends BaseTest
 
     /** The manager. */
     private EntityManager manager;
-
-    Configuration conf;
 
     private static Logger logger = Logger.getLogger(TestCassandra.class);
 
@@ -59,12 +57,8 @@ public class TestCassandra extends BaseTest
         {
             // startCassandraServer();
         }
-        if (conf == null)
-        {
-            conf = new Configuration();
-            manager = conf.getEntityManager("cassandra");
-            startCassandraServer();
-        }
+        manager = Persistence.createEntityManagerFactory("cassandra").createEntityManager();
+        startCassandraServer();
 
     }
 
@@ -78,8 +72,7 @@ public class TestCassandra extends BaseTest
      */
     public void tearDown() throws Exception
     {
-        logger.info("destroying conf");
-        conf.destroy();
+        logger.info("destroying");
     }
 
     /*

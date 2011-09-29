@@ -15,28 +15,13 @@
  ******************************************************************************/
 package com.impetus.kundera.index;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import lucandra.IndexReader;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.util.Version;
 
-import com.impetus.kundera.Client;
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.loader.DBType;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -106,7 +91,7 @@ public abstract class DocumentIndexer implements Indexer
         this.client = client;
         this.analyzer = analyzer;
     }
-    
+
     /**
      * Prepare document.
      * 
@@ -171,7 +156,7 @@ public abstract class DocumentIndexer implements Indexer
         currentDoc.add(luceneField);
 
     }
-    
+
     /**
      * Adds the index properties.
      * 
@@ -238,8 +223,7 @@ public abstract class DocumentIndexer implements Indexer
         {
             throw new IllegalArgumentException("Id could not be read.");
         }
-    }   
-    
+    }
 
     /**
      * Index field.
@@ -276,7 +260,7 @@ public abstract class DocumentIndexer implements Indexer
         {
             LOG.error("Error in accessing field:" + e.getMessage());
         }
-    }  
+    }
 
     /**
      * Gets the kundera id.
@@ -307,8 +291,7 @@ public abstract class DocumentIndexer implements Indexer
     {
         return indexName + "." + propertyName;
     }
-    
+
     protected abstract void indexDocument(EntityMetadata metadata, Document currentDoc);
-    
-    
+
 }

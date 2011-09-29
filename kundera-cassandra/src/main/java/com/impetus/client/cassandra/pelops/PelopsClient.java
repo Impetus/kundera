@@ -47,17 +47,15 @@ import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.client.cassandra.index.SolandraIndexer;
-import com.impetus.client.cassandra.index.SolandraUtils;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.db.DataRow;
-import com.impetus.kundera.ejb.EntityManagerImpl;
 import com.impetus.kundera.index.Indexer;
-import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.persistence.EntityManagerImpl;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -109,7 +107,7 @@ public class PelopsClient implements Client
     @Override
     public final void connect()
     {
-       
+
     }
 
     /*
@@ -570,8 +568,6 @@ public class PelopsClient implements Client
         Pelops.addPool(POOL_NAME, cluster, keyspace);
 
     }
-
-    
 
     /**
      * From thrift row.

@@ -29,7 +29,7 @@ import javax.persistence.TemporalType;
 
 import org.apache.commons.lang.NotImplementedException;
 
-import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
  * The Class QueryImpl.

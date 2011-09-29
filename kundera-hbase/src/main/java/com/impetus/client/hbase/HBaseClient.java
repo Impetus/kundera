@@ -24,26 +24,23 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
-import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.ejb.EntityManagerImpl;
+import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.index.Indexer;
-import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.index.LuceneIndexer;
-import com.impetus.kundera.loader.DBType;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.persistence.EntityManagerImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.LuceneQuery;
@@ -53,7 +50,7 @@ import com.impetus.kundera.query.LuceneQuery;
  * 
  * @author impetus
  */
-public class HBaseClient implements com.impetus.kundera.Client
+public class HBaseClient implements com.impetus.kundera.client.Client
 {
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseClient.class);
@@ -179,7 +176,7 @@ public class HBaseClient implements com.impetus.kundera.Client
             }
         }
         return entities;
-    }    
+    }
 
     /*
      * (non-Javadoc)
