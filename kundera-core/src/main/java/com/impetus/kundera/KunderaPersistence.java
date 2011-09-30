@@ -104,11 +104,6 @@ public class KunderaPersistence implements PersistenceProvider
         ClientResolver.getClientLoader(clientType).load(persistenceUnit);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.spi.PersistenceProvider#getProviderUtil()
-     */
     @Override
     public ProviderUtil getProviderUtil()
     {

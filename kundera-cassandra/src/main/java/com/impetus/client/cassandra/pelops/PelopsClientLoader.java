@@ -29,6 +29,8 @@ public class PelopsClientLoader implements Loader
 
         // TODO Make a client properties file
         clientMetadata.setClientImplementor("com.impetus.client.cassandra.pelops.PelopsClient");
+        clientMetadata.setIndexImplementor("com.impetus.client.cassandra.index.SolandraIndexer");
+        
         if (KunderaMetadata.getInstance().getClientMetadata(persistenceUnit) == null)
             KunderaMetadata.getInstance().addClientMetadata(persistenceUnit, clientMetadata);
     }
