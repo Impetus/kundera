@@ -15,9 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.proxy;
 
+import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
-
-import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
  * Handles fetching of the underlying entity for a proxy.
@@ -79,7 +78,7 @@ public interface LazyInitializer
      * 
      * @return The associated session.
      */
-    public EntityManagerImpl getEntityManager();
+    public EntityManager getEntityManager();
 
     /**
      * Unset this initializer's reference to session. It is assumed that the

@@ -17,13 +17,13 @@ package com.impetus.kundera.persistence.event;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
  * The Class EntityEventDispatcher.
@@ -32,7 +32,7 @@ public class EntityEventDispatcher
 {
 
     /** The Constant log. */
-    private static final Log log = LogFactory.getLog(EntityManagerImpl.class);
+    private static final Log log = LogFactory.getLog(EntityManager.class);
 
     /**
      * Fire event listeners.

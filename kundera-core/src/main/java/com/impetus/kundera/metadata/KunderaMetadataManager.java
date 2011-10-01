@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata;
 
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -34,6 +35,11 @@ public class KunderaMetadataManager
     {
         KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
         return (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(persistenceUnit);
+    }
+
+    public static EntityMetadata getEntityMetadata(String persistenceUnit, Class entityClass)
+    {
+        return KunderaMetadataManager.getMetamodel(persistenceUnit).getEntityMetadata(entityClass);
     }
 
 }

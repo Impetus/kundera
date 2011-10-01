@@ -28,10 +28,10 @@ import javax.persistence.PersistenceException;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
  * The Class KunderaQuery.
@@ -56,7 +56,7 @@ public abstract class KunderaQuery
     private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b", Pattern.CASE_INSENSITIVE);
 
     /** The EntityManager. */
-    private EntityManagerImpl em;
+    private Client client;
 
     /** The result. */
     private String result;
@@ -92,9 +92,9 @@ public abstract class KunderaQuery
      * @param metadataManager
      *            MetadataManager
      */
-    public KunderaQuery(EntityManagerImpl em)
+    public KunderaQuery(Client client)
     {
-        this.em = em;
+        this.client = client;
     }
 
     /**
@@ -102,9 +102,9 @@ public abstract class KunderaQuery
      * 
      * @return the em
      */
-    public EntityManagerImpl getEntityManager()
+    public Client getClient()
     {
-        return em;
+        return client;
     }
 
     /**
@@ -364,7 +364,7 @@ public abstract class KunderaQuery
      * 
      * @return the entityClass
      */
-    public final Class<?> getEntityClass()
+    public final Class getEntityClass()
     {
         return entityClass;
     }
@@ -532,6 +532,6 @@ public abstract class KunderaQuery
 
     private MetamodelImpl getMetamodel()
     {
-        return KunderaMetadataManager.getMetamodel(em.getPersistenceUnitName());
+        return KunderaMetadataManager.getMetamodel(client.getPersistenceUnit());
     }
 }

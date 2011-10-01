@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
+import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
@@ -33,12 +34,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.mongodb.query.MongoDBQuery;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
-import com.impetus.kundera.persistence.EntityManagerImpl;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
@@ -56,9 +57,20 @@ import com.mongodb.DBObject;
  */
 public class MongoDBDataHandler
 {
+    private Client client;
+
+    private String persistenceUnit;
+
+    public MongoDBDataHandler(Client client, String persistenceUnit)
+    {
+        super();
+        this.client = client;
+        this.persistenceUnit = persistenceUnit;
+    }
+
     private static Log log = LogFactory.getLog(MongoDBDataHandler.class);
 
-    public Object getEntityFromDocument(EntityManagerImpl em, Class<?> entityClass, EntityMetadata m, DBObject document)
+    public Object getEntityFromDocument(EntityManager em, Class<?> entityClass, EntityMetadata m, DBObject document)
     {
         Object entity = null;
         try
@@ -123,7 +135,7 @@ public class MongoDBDataHandler
                                                                       // this
                                                                       // property
 
-                EntityMetadata relMetadata = KunderaMetadataManager.getMetamodel(em.getPersistenceUnitName())
+                EntityMetadata relMetadata = KunderaMetadataManager.getMetamodel(getPersistenceUnit())
                         .getEntityMetadata(embeddedEntityClass);
 
                 BasicDBList relList = (BasicDBList) document.get(embeddedPropertyField.getName());
@@ -138,7 +150,7 @@ public class MongoDBDataHandler
                         Object embeddedEntity = null;
                         try
                         {
-                            embeddedEntity = em.getClient().loadData(em, foreignKey, relMetadata);
+                            embeddedEntity = getClient().loadData(embeddedEntityClass, foreignKey);
                         }
                         catch (Exception e)
                         {
@@ -161,7 +173,7 @@ public class MongoDBDataHandler
 
                         try
                         {
-                            embeddedEntityList = em.getClient().loadData(em, relMetadata,
+                            embeddedEntityList = getClient().loadData(embeddedEntityClass,
                                     foreignKeys.toArray(new String[0]));
                         }
                         catch (Exception e)
@@ -211,7 +223,17 @@ public class MongoDBDataHandler
         return entity;
     }
 
-    public BasicDBObject getDocumentFromEntity(EntityManagerImpl em, EntityMetadata m, EnhancedEntity e)
+    private Client getClient()
+    {
+        return client;
+    }
+
+    private String getPersistenceUnit()
+    {
+        return persistenceUnit;
+    }
+
+    public BasicDBObject getDocumentFromEntity(EntityManager em, EntityMetadata m, EnhancedEntity e)
             throws PropertyAccessException
     {
         List<Column> columns = m.getColumnsAsList();
@@ -333,7 +355,8 @@ public class MongoDBDataHandler
             if (object instanceof FilterClause)
             {
                 FilterClause filter = (FilterClause) object;
-                String property = new MongoDBDataHandler().getColumnName(filter.getProperty());
+                String property = new MongoDBDataHandler(getClient(), getPersistenceUnit()).getColumnName(filter
+                        .getProperty());
                 String condition = filter.getCondition();
                 String value = filter.getValue();
 

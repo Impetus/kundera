@@ -15,19 +15,19 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.metadata.MetadataBuilder;
-import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
  * The Class LuceneQuery.
@@ -56,9 +56,9 @@ public class LuceneQuery extends QueryImpl implements Query
      * @param jpaQuery
      *            the jpa query
      */
-    public LuceneQuery(EntityManagerImpl em, String jpaQuery)
+    public LuceneQuery(Client client, String jpaQuery)
     {
-        super(em, jpaQuery);
+        super(client, jpaQuery);
     }
 
     /**
@@ -86,14 +86,23 @@ public class LuceneQuery extends QueryImpl implements Query
         }
 
         log.debug("Lucene Query: " + q);
-        Map<String, String> searchFilter = getEntityManager().getIndexManager().search(q, -1, maxResult);
-        if (isAliasOnly())
+        Map<String, String> searchFilter = getClient().getIndexManager().search(q, -1, maxResult);
+        String[] primaryKeys = searchFilter.values().toArray(new String[] {});
+
+        try
         {
-            return getEntityManager().find(getEntityClass(), new HashSet(searchFilter.values()).toArray());
+            if (isAliasOnly())
+            {
+                return getClient().loadData(getEntityClass(), primaryKeys);
+            }
+            else
+            {
+                return getClient().loadData(getEntityClass(), searchFilter);
+            }
         }
-        else
+        catch (Exception e)
         {
-            return getEntityManager().find(getEntityClass(), searchFilter);
+            throw new PersistenceException(e);
         }
 
     }

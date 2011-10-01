@@ -18,6 +18,7 @@ package com.impetus.kundera.proxy.cglib;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
 import net.sf.cglib.proxy.Callback;
@@ -29,7 +30,6 @@ import net.sf.cglib.proxy.NoOp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.persistence.EntityManagerImpl;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializationException;
 import com.impetus.kundera.proxy.LazyInitializer;
@@ -75,7 +75,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     private boolean constructed = false;
 
     /** The em. */
-    private transient EntityManagerImpl em;
+    private transient EntityManager em;
 
     /** The Constant FINALIZE_FILTER. */
     private static final CallbackFilter FINALIZE_FILTER = new CallbackFilter()
@@ -116,7 +116,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
      */
     public static KunderaProxy getProxy(final String entityName, final Class<?> persistentClass,
             final Class<?>[] interfaces, final Method getIdentifierMethod, final Method setIdentifierMethod,
-            final String id, final EntityManagerImpl em) throws PersistenceException
+            final String id, final EntityManager em) throws PersistenceException
     {
 
         try
@@ -207,8 +207,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
      *            the em
      */
     private CglibLazyInitializer(final String entityName, final Class<?> persistentClass, final Class<?>[] interfaces,
-            final String id, final Method getIdentifierMethod, final Method setIdentifierMethod,
-            final EntityManagerImpl em)
+            final String id, final Method getIdentifierMethod, final Method setIdentifierMethod, final EntityManager em)
     {
 
         this.entityName = entityName;
@@ -335,7 +334,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
      * 
      * @return the entity manager {@inheritDoc}
      */
-    public final EntityManagerImpl getEntityManager()
+    public final EntityManager getEntityManager()
     {
         return em;
     }

@@ -36,11 +36,11 @@ import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
-import com.impetus.kundera.persistence.EntityManagerImpl;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -53,10 +53,17 @@ import com.impetus.kundera.proxy.EnhancedEntity;
  */
 public class PelopsDataHandler
 {
+    private Client client;
+
+    public PelopsDataHandler(Client client)
+    {
+        super();
+        this.client = client;
+    }
+
     private static Log log = LogFactory.getLog(PelopsDataHandler.class);
 
-    public <E> E fromThriftRow(Selector selector, EntityManagerImpl em, Class<E> clazz, EntityMetadata m, String rowKey)
-            throws Exception
+    public <E> E fromThriftRow(Selector selector, Class<E> clazz, EntityMetadata m, String rowKey) throws Exception
     {
         List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
         E e = null;
@@ -64,7 +71,7 @@ public class PelopsDataHandler
         {
             List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(), rowKey,
                     Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
-            e = fromSuperColumnThriftRow(em, clazz, m, new PelopsClient().new ThriftRow(rowKey, m.getTableName(), null,
+            e = fromSuperColumnThriftRow(clazz, m, new PelopsClient().new ThriftRow(rowKey, m.getTableName(), null,
                     thriftSuperColumns));
 
         }
@@ -73,20 +80,19 @@ public class PelopsDataHandler
             List<Column> columns = selector.getColumnsFromRow(m.getTableName(), new Bytes(rowKey.getBytes()),
                     Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
 
-            e = fromColumnThriftRow(em, clazz, m, new PelopsClient().new ThriftRow(rowKey, m.getTableName(), columns,
-                    null));
+            e = fromColumnThriftRow(clazz, m, new PelopsClient().new ThriftRow(rowKey, m.getTableName(), columns, null));
 
         }
         return e;
     }
 
-    public <E> List<E> fromThriftRow(Selector selector, EntityManagerImpl em, Class<E> clazz, EntityMetadata m,
-            String... rowIds) throws Exception
+    public <E> List<E> fromThriftRow(Selector selector, Class<E> clazz, EntityMetadata m, String... rowIds)
+            throws Exception
     {
         List<E> entities = new ArrayList<E>();
         for (String rowKey : rowIds)
         {
-            E e = fromThriftRow(selector, em, clazz, m, rowKey);
+            E e = fromThriftRow(selector, clazz, m, rowKey);
             entities.add(e);
         }
         return entities;
@@ -109,8 +115,8 @@ public class PelopsDataHandler
      * @throws Exception
      *             the exception
      */
-    public <E> E fromColumnThriftRow(EntityManagerImpl em, Class<E> clazz, EntityMetadata m,
-            PelopsClient.ThriftRow thriftRow) throws Exception
+    public <E> E fromColumnThriftRow(Class<E> clazz, EntityMetadata m, PelopsClient.ThriftRow thriftRow)
+            throws Exception
     {
 
         // Instantiate a new instance
@@ -135,7 +141,7 @@ public class PelopsDataHandler
             if (null == column)
             {
                 // it could be some relational column
-                populateRelationshipEntities(em, thriftRow, e, m.getRelation(name), value);
+                populateRelationshipEntities(thriftRow, e, m.getRelation(name), value);
 
             }
             else
@@ -158,8 +164,7 @@ public class PelopsDataHandler
      * Fetches data held in Thrift row super columns and populates to Entity
      * objects
      */
-    public <E> E fromSuperColumnThriftRow(EntityManagerImpl em, Class<E> clazz, EntityMetadata m,
-            PelopsClient.ThriftRow tr) throws Exception
+    public <E> E fromSuperColumnThriftRow(Class<E> clazz, EntityMetadata m, PelopsClient.ThriftRow tr) throws Exception
     {
 
         // Instantiate a new instance
@@ -210,7 +215,7 @@ public class PelopsDataHandler
 
                     if (intoRelations)
                     {
-                        populateRelationshipEntities(em, tr, e, m.getRelation(name), value);
+                        populateRelationshipEntities(tr, e, m.getRelation(name), value);
                     }
                     else
                     {
@@ -254,7 +259,7 @@ public class PelopsDataHandler
                         {
                             continue;
                         }
-                        populateRelationshipEntities(em, tr, e, relation, value);
+                        populateRelationshipEntities(tr, e, relation, value);
                     }
                 }
                 else
@@ -600,13 +605,13 @@ public class PelopsDataHandler
      * 
      * @throws PropertyAccessException
      */
-    public <E> void populateRelationshipEntities(EntityManagerImpl em, PelopsClient.ThriftRow tr, E e,
-            Relation relation, byte[] value) throws PropertyAccessException
+    public <E> void populateRelationshipEntities(PelopsClient.ThriftRow tr, E e, Relation relation, byte[] value)
+            throws PropertyAccessException
     {
 
         String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
         Set<String> keys = MetadataUtils.deserializeKeys(foreignKeys);
-        em.getEntityResolver().populateForeignEntities(e, tr.getId(), relation, keys.toArray(new String[0]));
+        this.client.getEntityResolver().populateForeignEntities(e, tr.getId(), relation, keys.toArray(new String[0]));
     }
 
 }

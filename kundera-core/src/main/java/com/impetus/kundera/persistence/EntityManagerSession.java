@@ -18,6 +18,8 @@ package com.impetus.kundera.persistence;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.persistence.EntityManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -36,7 +38,7 @@ public class EntityManagerSession
     private Map<Object, Object> sessionCache;
 
     /** The em. */
-    private EntityManagerImpl em;
+    private EntityManager em;
 
     /**
      * Instantiates a new entity manager cache.
@@ -44,7 +46,7 @@ public class EntityManagerSession
      * @param em
      *            the em
      */
-    public EntityManagerSession(EntityManagerImpl em)
+    public EntityManagerSession(EntityManager em)
     {
         this.em = em;
         this.sessionCache = new ConcurrentHashMap<Object, Object>();

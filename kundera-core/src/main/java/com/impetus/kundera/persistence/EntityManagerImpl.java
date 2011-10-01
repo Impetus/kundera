@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -76,9 +74,6 @@ public class EntityManagerImpl implements EntityManager
     /** The client. */
     private Client client;
 
-    /** The index manager. */
-    private IndexManager indexManager;
-
     /** The entity resolver. */
     private EntityResolver entityResolver;
 
@@ -123,6 +118,12 @@ public class EntityManagerImpl implements EntityManager
                 clientType, persistenceUnit);
 
         client = ClientResolver.getClient(persistenceUnit, identifier);
+
+        // TODO Remove this code once design gets completed
+        client.setEntityResolver(entityResolver);
+        client.setPersistenceUnit(persistenceUnit);
+        client.setIndexManager(new IndexManager(client));
+
         client.connect();
     }
 
@@ -182,54 +183,18 @@ public class EntityManagerImpl implements EntityManager
     {
         try
         {
-            EntityMetadata m = ((MetamodelImpl) this.factory.getMetamodel()).getEntityMetadata(entityClass);
 
-            m.setDBType(this.client.getType());
-
-            E e = (E) client.loadData(this, primaryKey.toString(), m);
+            E e = (E) client.loadData(entityClass, primaryKey.toString());
             if (e != null)
             {
-                session.store(primaryKey, e, m.isCacheable());
+                session.store(primaryKey, e, KunderaMetadataManager.getMetamodel(getPersistenceUnitName())
+                        .getEntityMetadata(entityClass).isCacheable());
             }
             return e;
         }
         catch (Exception exp)
         {
             throw new PersistenceException(exp);
-        }
-    }
-
-    public final <E> List<E> find(Class<E> entityClass, Object... primaryKeys)
-    {
-        if (closed)
-        {
-            throw new PersistenceException("EntityManager already closed.");
-        }
-        if (primaryKeys == null)
-        {
-            throw new IllegalArgumentException("primaryKey value must not be null.");
-        }
-
-        if (null == primaryKeys || primaryKeys.length == 0)
-        {
-            return new ArrayList<E>();
-        }
-
-        // TODO: load from cache first
-
-        try
-        {
-            String[] ids = Arrays.asList(primaryKeys).toArray(new String[] {});
-            EntityMetadata m = ((MetamodelImpl) this.factory.getMetamodel()).getEntityMetadata(entityClass);
-            m.setDBType(this.client.getType());
-            List<E> entities = client.loadData(this, m, ids);
-
-            // TODO: cache entities for future lookup
-            return entities;
-        }
-        catch (Exception e)
-        {
-            throw new PersistenceException(e);
         }
     }
 
@@ -249,23 +214,21 @@ public class EntityManagerImpl implements EntityManager
                     this.client.getType());
 
             // remove each one
-            for (EnhancedEntity o : reachableEntities)
+            for (EnhancedEntity enhancedEntity : reachableEntities)
             {
-                log.debug("Removing @Entity >> " + o);
+                log.debug("Removing @Entity >> " + enhancedEntity);
 
-                EntityMetadata m = ((MetamodelImpl) this.factory.getMetamodel()).getEntityMetadata(o.getEntity()
-                        .getClass());
-                m.setDBType(this.client.getType());
                 // fire PreRemove events
-                getEventDispatcher().fireEventListeners(m, o, PreRemove.class);
+                getEventDispatcher().fireEventListeners(getEntityMetadata(enhancedEntity), enhancedEntity,
+                        PreRemove.class);
 
-                session.remove(o.getEntity().getClass(), o.getId());
+                session.remove(enhancedEntity.getEntity().getClass(), enhancedEntity.getId());
 
-                client.delete(m.getSchema(), m.getTableName(), o.getId());
-                getIndexManager().remove(m, o.getEntity(), o.getId());
+                client.delete(enhancedEntity);
 
                 // fire PostRemove events
-                getEventDispatcher().fireEventListeners(m, o, PostRemove.class);
+                getEventDispatcher().fireEventListeners(getEntityMetadata(enhancedEntity), enhancedEntity,
+                        PostRemove.class);
             }
         }
         catch (Exception exp)
@@ -302,10 +265,7 @@ public class EntityManagerImpl implements EntityManager
 
                 // fire PreUpdate events
                 getEventDispatcher().fireEventListeners(m, o, PreUpdate.class);
-                client.writeData(this, o, m);
-
-                getIndexManager().update(m, o.getEntity());
-
+                client.writeData(o);
                 // fire PreUpdate events
                 getEventDispatcher().fireEventListeners(m, o, PostUpdate.class);
             }
@@ -353,40 +313,24 @@ public class EntityManagerImpl implements EntityManager
         }
     }
 
-    private void persistData(EnhancedEntity e)
+    private void persistData(EnhancedEntity enhancedEntity)
     {
         try
         {
-            EntityMetadata m = ((MetamodelImpl) this.factory.getMetamodel())
-                    .getEntityMetadata(e.getEntity().getClass());
+            EntityMetadata entityMetadata = ((MetamodelImpl) this.factory.getMetamodel())
+                    .getEntityMetadata(enhancedEntity.getEntity().getClass());
 
-            // TODO: This piece of code is for cross-database persistence.
-            // Currently commented because we need to find a better way
-            // Check if persistenceUnit name is same as the parent entity, if
-            // not, it's a case of cross-store persistence
-            /*
-             * String persistenceUnit = metadata.getPersistenceUnit(); if
-             * (persistenceUnit != null &&
-             * !persistenceUnit.equals(getPersistenceUnitName())) { // TODO:
-             * Required to set client in EM, check?
-             * setClient(((EntityManagerImpl) new
-             * Configuration().getEntityManager(persistenceUnit)).getClient());
-             * }
-             */
+            entityMetadata.setDBType(getClient().getType());
 
-            m.setDBType(getClient().getType());
             // TODO: throw EntityExistsException if already exists
 
             // fire pre-persist events
-            getEventDispatcher().fireEventListeners(m, e, PrePersist.class);
+            getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PrePersist.class);
 
-            // TODO uncomment
-
-            client.writeData(this, e, m);
-            getIndexManager().write(m, e.getEntity());
+            client.writeData(enhancedEntity);
 
             // fire post-persist events
-            getEventDispatcher().fireEventListeners(m, e, PostPersist.class);
+            getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PostPersist.class);
         }
         catch (PersistenceException ex)
         {
@@ -466,7 +410,7 @@ public class EntityManagerImpl implements EntityManager
     @Override
     public final Query createQuery(String ejbqlString)
     {
-        return this.client.getQuery(this, ejbqlString);
+        return this.client.getQuery(ejbqlString);
     }
 
     /* @see javax.persistence.EntityManager#flush() */
@@ -774,25 +718,11 @@ public class EntityManagerImpl implements EntityManager
     }
 
     /**
-     * Gets the index manager.
-     * 
-     * @return the indexManager
-     */
-    public final IndexManager getIndexManager()
-    {
-        if (indexManager == null)
-        {
-            indexManager = new IndexManager(this);
-        }
-        return indexManager;
-    }
-
-    /**
      * Gets the client.
      * 
      * @return the client
      */
-    public final Client getClient()
+    private final Client getClient()
     {
         return client;
     }
@@ -806,7 +736,7 @@ public class EntityManagerImpl implements EntityManager
      * @param client
      *            the client to set
      */
-    public void setClient(Client client)
+    private void setClient(Client client)
     {
         this.client = client;
 
@@ -827,7 +757,7 @@ public class EntityManagerImpl implements EntityManager
      * 
      * @return the reachabilityResolver
      */
-    public EntityResolver getEntityResolver()
+    private EntityResolver getEntityResolver()
     {
         return entityResolver;
     }
@@ -840,41 +770,10 @@ public class EntityManagerImpl implements EntityManager
         return eventDispatcher;
     }
 
-    public <T> List<T> find(Class<T> entityClass, Map<String, String> primaryKeys)
+    private EntityMetadata getEntityMetadata(EnhancedEntity enhancedEntity)
     {
-
-        if (closed)
-        {
-            throw new PersistenceException("EntityManager already closed.");
-        }
-        if (primaryKeys == null)
-        {
-            throw new IllegalArgumentException("primaryKey value must not be null.");
-        }
-
-        if (null == primaryKeys || primaryKeys.isEmpty())
-        {
-            return new ArrayList<T>();
-        }
-
-        // TODO: load from cache first
-
-        try
-        {
-            // String[] ids = Arrays.asList(primaryKeys).toArray(new String[]
-            // {});
-            EntityMetadata m = ((MetamodelImpl) this.factory.getMetamodel()).getEntityMetadataMap().get(entityClass);
-            m.setDBType(this.client.getType());
-
-            List<T> entities = client.loadData(this, m, primaryKeys);
-
-            // TODO: cache entities for future lookup
-            return entities;
-        }
-        catch (Exception e)
-        {
-            throw new PersistenceException(e);
-        }
+        return KunderaMetadataManager.getMetamodel(getPersistenceUnitName()).getEntityMetadata(
+                enhancedEntity.getEntity().getClass());
     }
 
 }

@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
@@ -51,12 +50,13 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.db.DataRow;
+import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.Indexer;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
-import com.impetus.kundera.persistence.EntityManagerImpl;
-import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.persistence.EntityResolver;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
@@ -87,16 +87,26 @@ public class PelopsClient implements Client
     private static Log log = LogFactory.getLog(PelopsClient.class);
 
     /** The data handler. */
-    PelopsDataHandler dataHandler = new PelopsDataHandler();
+    PelopsDataHandler dataHandler = new PelopsDataHandler(this);
 
     /** Whether this client is connected */
     private boolean isConnected;
+
+    /** The index manager. */
+    private IndexManager indexManager;
+
+    private EntityResolver entityResolver;
+
+    private String persistenceUnit;
+
+    private Indexer indexer;
 
     /**
      * default constructor.
      */
     public PelopsClient()
     {
+        indexer = new SolandraIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT));
     }
 
     /*
@@ -136,22 +146,24 @@ public class PelopsClient implements Client
      * (non-Javadoc)
      * 
      * @seecom.impetus.kundera.Client#writeColumns(com.impetus.kundera.ejb.
-     * EntityManagerImpl, com.impetus.kundera.proxy.EnhancedEntity,
+     * EntityManager, com.impetus.kundera.proxy.EnhancedEntity,
      * com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public void writeData(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception
+    public void writeData(EnhancedEntity enhancedEntity) throws Exception
     {
 
-        String keyspace = m.getSchema();
-        String columnFamily = m.getTableName();
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
+                .getEntity().getClass());
+        String keyspace = entityMetadata.getSchema();
+        String columnFamily = entityMetadata.getTableName();
 
         if (!isOpen())
         {
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        PelopsClient.ThriftRow tf = dataHandler.toThriftRow(this, e, m, columnFamily);
+        PelopsClient.ThriftRow tf = dataHandler.toThriftRow(this, enhancedEntity, entityMetadata, columnFamily);
         configurePool(keyspace);
 
         Mutator mutator = Pelops.createMutator(POOL_NAME);
@@ -176,10 +188,12 @@ public class PelopsClient implements Client
         }
         mutator.execute(ConsistencyLevel.ONE);
 
+        getIndexManager().update(entityMetadata, enhancedEntity.getEntity());
+
     }
 
     @Override
-    public final <E> E loadData(EntityManagerImpl em, String rowId, EntityMetadata m) throws Exception
+    public final <E> E loadData(Class<E> entityClass, String rowId) throws Exception
     {
 
         if (!isOpen())
@@ -187,97 +201,49 @@ public class PelopsClient implements Client
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        configurePool(m.getSchema());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
+        configurePool(entityMetadata.getSchema());
         Selector selector = Pelops.createSelector(POOL_NAME);
 
-        E e = (E) dataHandler.fromThriftRow(selector, em, m.getEntityClazz(), m, rowId);
+        E e = (E) dataHandler.fromThriftRow(selector, entityClass, entityMetadata, rowId);
 
         return e;
     }
 
     @Override
-    public final <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, String... rowIds) throws Exception
+    public final <E> List<E> loadData(Class<E> entityClass, String... rowIds) throws Exception
     {
         if (!isOpen())
         {
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        configurePool(m.getSchema());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
+        configurePool(entityMetadata.getSchema());
         Selector selector = Pelops.createSelector(POOL_NAME);
 
-        List<E> entities = (List<E>) dataHandler.fromThriftRow(selector, em, m.getEntityClazz(), m, rowIds);
+        List<E> entities = (List<E>) dataHandler.fromThriftRow(selector, entityClass, entityMetadata, rowIds);
 
         return entities;
     }
 
-    /**
-     * @param m
-     * @param col
-     * @param <E>
-     * @return
-     * @throws Exception
-     */
-    public <E> List<E> loadData(EntityManager em, EntityMetadata m, Map<String, String> col) throws Exception
+    @Override
+    public <E> List<E> loadData(Class<E> entityClass, Map<String, String> col) throws Exception
     {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         List<E> entities = new ArrayList<E>();
         for (String superColName : col.keySet())
         {
             String entityId = col.get(superColName);
-            List<SuperColumn> superColumnList = loadSuperColumns(m.getSchema(), m.getTableName(), entityId,
-                    new String[] { superColName });
-            E e = (E) fromThriftRow(em, m.getEntityClazz(), m, new DataRow<SuperColumn>(entityId, m.getTableName(),
-                    superColumnList));
+            List<SuperColumn> superColumnList = loadSuperColumns(entityMetadata.getSchema(),
+                    entityMetadata.getTableName(), entityId, new String[] { superColName });
+            E e = (E) fromThriftRow(entityMetadata.getEntityClazz(), entityMetadata, new DataRow<SuperColumn>(entityId,
+                    entityMetadata.getTableName(), superColumnList));
             entities.add(e);
         }
         return entities;
     }
 
-    // TODO: This method is not being used currently anywhere and should be
-    // deleted in code refactoring exercise
-    private <E> List<E> loadColumns(EntityManagerImpl em, Class<E> clazz, String keyspace, String columnFamily,
-            EntityMetadata m, String... rowIds) throws PropertyAccessException, Exception
-    {
-        if (!isOpen())
-        {
-            throw new PersistenceException("PelopsClient is closed.");
-        }
-
-        configurePool(keyspace);
-        Selector selector = Pelops.createSelector(POOL_NAME);
-
-        List<Bytes> bytesArr = new ArrayList<Bytes>();
-
-        for (String rowkey : rowIds)
-        {
-            Bytes bytes = new Bytes(PropertyAccessorFactory.STRING.toBytes(rowkey));
-            bytesArr.add(bytes);
-        }
-
-        Map<Bytes, List<Column>> map = selector.getColumnsFromRows(columnFamily, bytesArr,
-                Selector.newColumnsPredicateAll(false, 1000), ConsistencyLevel.ONE);
-        List<E> entities = new ArrayList<E>();
-        // Iterate and populate entities
-        for (Map.Entry<Bytes, List<Column>> entry : map.entrySet())
-        {
-
-            String id = PropertyAccessorFactory.STRING.fromBytes(entry.getKey().toByteArray());
-
-            List<Column> columns = entry.getValue();
-
-            if (entry.getValue().size() == 0)
-            {
-                log.debug("@Entity not found for id: " + id);
-                continue;
-            }
-
-            E e = dataHandler.fromColumnThriftRow(em, clazz, m, this.new ThriftRow(id, columnFamily, columns, null));
-            entities.add(e);
-        }
-        return entities;
-    }
-
-    // TODO: Move this code to PelopsDataHandler if at all required
     public final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
             String... superColumnNames) throws Exception
     {
@@ -289,30 +255,14 @@ public class PelopsClient implements Client
                 ConsistencyLevel.ONE);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
-     * EntityManagerImpl, com.impetus.kundera.metadata.EntityMetadata,
-     * java.util.Queue)
-     */
-    public <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception
+    @Override
+    public <E> List<E> loadData(Query query) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");
     }
 
-    /*
-     * @see com.impetus.kundera.CassandraClient#delete(java.lang.String,
-     * java.lang.String, java.lang.String)
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#delete(java.lang.String,
-     * java.lang.String, java.lang.String)
-     */
     @Override
-    public final void delete(String keyspace, String columnFamily, String rowId) throws Exception
+    public final void delete(EnhancedEntity enhancedEntity) throws Exception
     {
 
         if (!isOpen())
@@ -320,9 +270,12 @@ public class PelopsClient implements Client
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        configurePool(keyspace);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
+                .getEntity().getClass());
+        configurePool(entityMetadata.getSchema());
         RowDeletor rowDeletor = Pelops.createRowDeletor(POOL_NAME);
-        rowDeletor.deleteRow(columnFamily, rowId, ConsistencyLevel.ONE);
+        rowDeletor.deleteRow(entityMetadata.getTableName(), enhancedEntity.getId(), ConsistencyLevel.ONE);
+        getIndexManager().remove(entityMetadata, enhancedEntity.getEntity(), enhancedEntity.getId());
     }
 
     /**
@@ -586,8 +539,7 @@ public class PelopsClient implements Client
      */
     // TODO: this is a duplicate code snippet and we need to refactor this.(it
     // should be moved to PelopsDataHandler)
-    private <E> E fromThriftRow(EntityManager em, Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr)
-            throws Exception
+    private <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception
     {
 
         // Instantiate a new instance
@@ -630,7 +582,7 @@ public class PelopsClient implements Client
                 {
                     embeddedCollection = new HashSet();
                 }
-                PelopsDataHandler handler = new PelopsDataHandler();
+                PelopsDataHandler handler = new PelopsDataHandler(this);
                 Object embeddedObject = handler.populateEmbeddedObject(sc, m);
                 embeddedCollection.add(embeddedObject);
                 superColumnField.set(e, embeddedCollection);
@@ -659,7 +611,7 @@ public class PelopsClient implements Client
 
                         String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
                         Set<String> keys = MetadataUtils.deserializeKeys(foreignKeys);
-                        ((EntityManagerImpl) em).getEntityResolver().populateForeignEntities(e, tr.getId(), relation,
+                        getEntityResolver().populateForeignEntities(e, tr.getId(), relation,
                                 keys.toArray(new String[0]));
 
                     }
@@ -679,13 +631,53 @@ public class PelopsClient implements Client
     @Override
     public Indexer getIndexer()
     {
-        return new SolandraIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT));
+        return indexer;
+    }
+
+    /**
+     * Gets the index manager.
+     * 
+     * @return the indexManager
+     */
+    @Override
+    public final IndexManager getIndexManager()
+    {
+        return indexManager;
     }
 
     @Override
-    public Query getQuery(EntityManagerImpl em, String ejbqlString)
+    public Query getQuery(String ejbqlString)
     {
-        return new LuceneQuery(em, ejbqlString);
+        return new LuceneQuery(this, ejbqlString);
+    }
+
+    @Override
+    public String getPersistenceUnit()
+    {
+        return persistenceUnit;
+    }
+
+    @Override
+    public EntityResolver getEntityResolver()
+    {
+        return entityResolver;
+    }
+
+    // TODO To remove the setters
+
+    public void setIndexManager(IndexManager indexManager)
+    {
+        this.indexManager = indexManager;
+    }
+
+    public void setEntityResolver(EntityResolver entityResolver)
+    {
+        this.entityResolver = entityResolver;
+    }
+
+    public void setPersistenceUnit(String persistenceUnit)
+    {
+        this.persistenceUnit = persistenceUnit;
     }
 
 }

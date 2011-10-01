@@ -18,12 +18,11 @@ package com.impetus.kundera.client;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.Indexer;
-import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.persistence.EntityManagerImpl;
+import com.impetus.kundera.persistence.EntityResolver;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
@@ -46,7 +45,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    void writeData(EntityManagerImpl em, EnhancedEntity e, EntityMetadata m) throws Exception;
+    void writeData(EnhancedEntity e) throws Exception;
 
     /**
      * Retrieve columns from a column-family row.
@@ -63,7 +62,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    <E> E loadData(EntityManagerImpl em, String key, EntityMetadata m) throws Exception;
+    <E> E loadData(Class<E> entityClass, String key) throws Exception;
 
     /**
      * Retrieve columns from multiple rows of a column-family.
@@ -80,7 +79,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, String... keys) throws Exception;
+    <E> List<E> loadData(Class<E> entityClass, String... keys) throws Exception;
 
     /**
      * Load data.
@@ -97,7 +96,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    public <E> List<E> loadData(EntityManager em, EntityMetadata m, Map<String, String> col) throws Exception;
+    public <E> List<E> loadData(Class<E> entityClass, Map<String, String> col) throws Exception;
 
     /**
      * Loads columns from multiple rows restricting results to conditions stored
@@ -116,7 +115,7 @@ public interface Client
      *             the exception
      */
     @SuppressWarnings("unchecked")
-    <E> List<E> loadData(EntityManagerImpl em, EntityMetadata m, Query query) throws Exception;
+    <E> List<E> loadData(Query query) throws Exception;
 
     /**
      * Set Cassandra nodes.
@@ -164,7 +163,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    void delete(String schema, String tableName, String rowId) throws Exception;
+    void delete(EnhancedEntity enhancedEntity) throws Exception;
 
     /**
      * Returns type of nosql database.
@@ -180,5 +179,17 @@ public interface Client
      */
     Indexer getIndexer();
 
-    Query getQuery(EntityManagerImpl em, String queryString);
+    Query getQuery(String queryString);
+
+    String getPersistenceUnit();
+
+    IndexManager getIndexManager();
+
+    EntityResolver getEntityResolver();
+
+    void setIndexManager(IndexManager indexManager);
+
+    void setEntityResolver(EntityResolver entityResolver);
+
+    void setPersistenceUnit(String persistenceUnit);
 }
