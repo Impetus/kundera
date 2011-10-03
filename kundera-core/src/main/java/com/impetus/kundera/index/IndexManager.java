@@ -20,7 +20,6 @@ import java.util.Map;
 import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -43,9 +42,9 @@ public class IndexManager
      *            the manager
      */
     @SuppressWarnings("deprecation")
-    public IndexManager(Client client)
+    public IndexManager(Indexer indexer)
     {
-        indexer = client.getIndexer();
+        this.indexer = indexer;
     }
 
     /**

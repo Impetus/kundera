@@ -172,13 +172,6 @@ public interface Client
      */
     DBType getType();
 
-    /**
-     * Gets the indexer.
-     * 
-     * @return the indexer
-     */
-    Indexer getIndexer();
-
     Query getQuery(String queryString);
 
     String getPersistenceUnit();
@@ -186,8 +179,6 @@ public interface Client
     IndexManager getIndexManager();
 
     EntityResolver getEntityResolver();
-
-    void setIndexManager(IndexManager indexManager);
 
     void setEntityResolver(EntityResolver entityResolver);
 

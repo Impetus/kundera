@@ -106,7 +106,7 @@ public class PelopsClient implements Client
      */
     public PelopsClient()
     {
-        indexer = new SolandraIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT));
+        indexManager = new IndexManager(new SolandraIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT)));
     }
 
     /*
@@ -628,12 +628,6 @@ public class PelopsClient implements Client
         return e;
     }
 
-    @Override
-    public Indexer getIndexer()
-    {
-        return indexer;
-    }
-
     /**
      * Gets the index manager.
      * 
@@ -664,11 +658,6 @@ public class PelopsClient implements Client
     }
 
     // TODO To remove the setters
-
-    public void setIndexManager(IndexManager indexManager)
-    {
-        this.indexManager = indexManager;
-    }
 
     public void setEntityResolver(EntityResolver entityResolver)
     {

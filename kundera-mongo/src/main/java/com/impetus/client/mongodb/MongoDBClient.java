@@ -31,12 +31,10 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.client.mongodb.index.MongoDBIndexer;
 import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityResolver;
@@ -406,12 +404,6 @@ public class MongoDBClient implements Client
     }
 
     @Override
-    public Indexer getIndexer()
-    {
-        return new MongoDBIndexer(this);
-    }
-
-    @Override
     public Query getQuery(String queryString)
     {
         return null;
@@ -442,13 +434,6 @@ public class MongoDBClient implements Client
     {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    @Override
-    public void setIndexManager(IndexManager indexManager)
-    {
-        // TODO Auto-generated method stub
-
     }
 
     @Override

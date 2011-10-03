@@ -26,13 +26,15 @@ import javax.persistence.Query;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.index.Indexer;
+import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
@@ -72,7 +74,10 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     private String persistenceUnit;
 
-    private Indexer indexer;
+    public HBaseClient()
+    {
+        indexManager = new IndexManager(new LuceneIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT)));
+    }
 
     /**
      * Writes an entity data into HBase store
@@ -274,12 +279,6 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return DBType.HBASE;
     }
 
-    @Override
-    public Indexer getIndexer()
-    {
-        return indexer;
-    }
-
     /**
      * Gets the index manager.
      * 
@@ -310,11 +309,6 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     }
 
     // TODO To remove the setters
-
-    public void setIndexManager(IndexManager indexManager)
-    {
-        this.indexManager = indexManager;
-    }
 
     public void setEntityResolver(EntityResolver entityResolver)
     {

@@ -46,7 +46,6 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientIdentifier;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.client.ClientType;
-import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -122,7 +121,6 @@ public class EntityManagerImpl implements EntityManager
         // TODO Remove this code once design gets completed
         client.setEntityResolver(entityResolver);
         client.setPersistenceUnit(persistenceUnit);
-        client.setIndexManager(new IndexManager(client));
 
         client.connect();
     }
@@ -219,16 +217,18 @@ public class EntityManagerImpl implements EntityManager
                 log.debug("Removing @Entity >> " + enhancedEntity);
 
                 // fire PreRemove events
-                getEventDispatcher().fireEventListeners(getEntityMetadata(enhancedEntity), enhancedEntity,
-                        PreRemove.class);
+                getEventDispatcher().fireEventListeners(
+                        KunderaMetadataManager.getEntityMetadata(getPersistenceUnitName(), enhancedEntity.getEntity()
+                                .getClass()), enhancedEntity, PreRemove.class);
 
                 session.remove(enhancedEntity.getEntity().getClass(), enhancedEntity.getId());
 
                 client.delete(enhancedEntity);
 
                 // fire PostRemove events
-                getEventDispatcher().fireEventListeners(getEntityMetadata(enhancedEntity), enhancedEntity,
-                        PostRemove.class);
+                getEventDispatcher().fireEventListeners(
+                        KunderaMetadataManager.getEntityMetadata(getPersistenceUnitName(), enhancedEntity.getEntity()
+                                .getClass()), enhancedEntity, PostRemove.class);
             }
         }
         catch (Exception exp)
@@ -733,16 +733,6 @@ public class EntityManagerImpl implements EntityManager
     }
 
     /**
-     * @param client
-     *            the client to set
-     */
-    private void setClient(Client client)
-    {
-        this.client = client;
-
-    }
-
-    /**
      * Gets the session.
      * 
      * @return the session
@@ -753,27 +743,10 @@ public class EntityManagerImpl implements EntityManager
     }
 
     /**
-     * Gets the entity resolver.
-     * 
-     * @return the reachabilityResolver
-     */
-    private EntityResolver getEntityResolver()
-    {
-        return entityResolver;
-    }
-
-    /**
      * @return the eventDispatcher
      */
     private EntityEventDispatcher getEventDispatcher()
     {
         return eventDispatcher;
     }
-
-    private EntityMetadata getEntityMetadata(EnhancedEntity enhancedEntity)
-    {
-        return KunderaMetadataManager.getMetamodel(getPersistenceUnitName()).getEntityMetadata(
-                enhancedEntity.getEntity().getClass());
-    }
-
 }
