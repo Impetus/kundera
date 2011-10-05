@@ -69,16 +69,15 @@ import com.impetus.kundera.query.LuceneQuery;
  * @since 0.1
  */
 public class PelopsClient implements Client
-{
-
-    /** The Constant poolName. */
-    private static final String POOL_NAME = "Main";
+{	
 
     /** array of cassandra hosts. */
     private String[] contactNodes;
 
     /** default port. */
     private int defaultPort;
+    
+    private String keyspace;
 
     /** The closed. */
     private boolean closed = false;
@@ -163,10 +162,9 @@ public class PelopsClient implements Client
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        PelopsClient.ThriftRow tf = dataHandler.toThriftRow(this, enhancedEntity, entityMetadata, columnFamily);
-        configurePool(keyspace);
+        PelopsClient.ThriftRow tf = dataHandler.toThriftRow(this, enhancedEntity, entityMetadata, columnFamily);      
 
-        Mutator mutator = Pelops.createMutator(POOL_NAME);
+        Mutator mutator = Pelops.createMutator(getPoolName());
 
         List<Column> thriftColumns = tf.getColumns();
         List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
@@ -201,9 +199,8 @@ public class PelopsClient implements Client
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
-        configurePool(entityMetadata.getSchema());
-        Selector selector = Pelops.createSelector(POOL_NAME);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);        
+        Selector selector = Pelops.createSelector(getPoolName());
 
         E e = (E) dataHandler.fromThriftRow(selector, entityClass, entityMetadata, rowId);
 
@@ -218,9 +215,8 @@ public class PelopsClient implements Client
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
-        configurePool(entityMetadata.getSchema());
-        Selector selector = Pelops.createSelector(POOL_NAME);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);        
+        Selector selector = Pelops.createSelector(getPoolName());
 
         List<E> entities = (List<E>) dataHandler.fromThriftRow(selector, entityClass, entityMetadata, rowIds);
 
@@ -248,9 +244,8 @@ public class PelopsClient implements Client
             String... superColumnNames) throws Exception
     {
         if (!isOpen())
-            throw new PersistenceException("PelopsClient is closed.");
-        configurePool(keyspace);
-        Selector selector = Pelops.createSelector(POOL_NAME);
+            throw new PersistenceException("PelopsClient is closed.");        
+        Selector selector = Pelops.createSelector(getPoolName());
         return selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames),
                 ConsistencyLevel.ONE);
     }
@@ -272,8 +267,8 @@ public class PelopsClient implements Client
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
                 .getEntity().getClass());
-        configurePool(entityMetadata.getSchema());
-        RowDeletor rowDeletor = Pelops.createRowDeletor(POOL_NAME);
+        
+        RowDeletor rowDeletor = Pelops.createRowDeletor(getPoolName());
         rowDeletor.deleteRow(entityMetadata.getTableName(), enhancedEntity.getId(), ConsistencyLevel.ONE);
         getIndexManager().remove(entityMetadata, enhancedEntity.getEntity(), enhancedEntity.getId());
     }
@@ -495,7 +490,7 @@ public class PelopsClient implements Client
     @Override
     public void setSchema(String keySpace)
     {
-
+    	this.keyspace = keySpace;
     }
 
     /*
@@ -507,20 +502,7 @@ public class PelopsClient implements Client
     public DBType getType()
     {
         return DBType.CASSANDRA;
-    }
-
-    /**
-     * Configure pool.
-     * 
-     * @param keyspace
-     *            the keyspace
-     */
-    private void configurePool(String keyspace)
-    {
-        Cluster cluster = new Cluster(contactNodes, new IConnection.Config(defaultPort, true, -1), false);
-        Pelops.addPool(POOL_NAME, cluster, keyspace);
-
-    }
+    }   
 
     /**
      * From thrift row.
@@ -667,6 +649,10 @@ public class PelopsClient implements Client
     public void setPersistenceUnit(String persistenceUnit)
     {
         this.persistenceUnit = persistenceUnit;
+    }
+    
+    private String getPoolName() {
+    	return contactNodes[0] + ":" + defaultPort + ":" + keyspace;
     }
 
 }

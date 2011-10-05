@@ -1,5 +1,11 @@
 package com.impetus.client.cassandra.pelops;
 
+import java.util.Properties;
+
+import org.scale7.cassandra.pelops.Cluster;
+import org.scale7.cassandra.pelops.IConnection;
+import org.scale7.cassandra.pelops.Pelops;
+
 import com.impetus.client.cassandra.index.SolandraUtils;
 import com.impetus.kundera.loader.Loader;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -13,13 +19,16 @@ public class PelopsClientLoader implements Loader
     @Override
     public void load(String persistenceUnit)
     {
-
+    	
         loadClientMetadata(persistenceUnit);
 
         setServerConfigAsSystemProperty(persistenceUnit);
 
         // Start Solandra specific tasks
         initializeSolandra(persistenceUnit);
+        
+        //Initialize Pelops Pool
+        initializePelopsPool(persistenceUnit);
 
     }
 
@@ -58,6 +67,28 @@ public class PelopsClientLoader implements Loader
         String node = puMetadata.getProperties().getProperty("kundera.nodes");
         String port = puMetadata.getProperties().getProperty("kundera.port");
         new SolandraUtils().initializeSolandra(node, Integer.valueOf(port));
+    }
+    
+    /**
+     * Configure pool.
+     * 
+     * @param keyspace
+     *            the keyspace
+     */
+    private void initializePelopsPool(String persistenceUnit)
+    {        
+        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.getInstance().getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
+        
+        Properties props = persistenceUnitMetadata.getProperties();
+        String contactNodes = (String) props.get("kundera.nodes");
+        String defaultPort = (String) props.get("kundera.port");
+        String keyspace = (String) props.get("kundera.keyspace");
+        
+        
+    	Cluster cluster = new Cluster(contactNodes, new IConnection.Config(Integer.parseInt(defaultPort), true, -1), false);    
+    	String poolName = contactNodes + ":" + defaultPort +  ":" + keyspace;
+        Pelops.addPool(poolName , cluster, keyspace);         
+
     }
 
 }
