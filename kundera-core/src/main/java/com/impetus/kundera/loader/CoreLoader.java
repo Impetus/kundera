@@ -17,6 +17,11 @@ package com.impetus.kundera.loader;
 
 import org.apache.log4j.Logger;
 
+import com.impetus.kundera.metadata.model.CoreMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.proxy.cglib.CglibEntityEnhancerFactory;
+import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
+
 /**
  * @author amresh.singh
  * 
@@ -27,8 +32,11 @@ public class CoreLoader
 
     public void load()
     {
-        log.debug("Nothing to load in Core");
+        log.info("Loading factories ... ");
 
+        CoreMetadata coreMetadata = new CoreMetadata();
+        coreMetadata.setEnhancedProxyFactory(new CglibEntityEnhancerFactory());
+        coreMetadata.setLazyInitializerFactory(new CglibLazyInitializerFactory());
+        KunderaMetadata.getInstance().setCoreMetadata(coreMetadata);
     }
-
 }

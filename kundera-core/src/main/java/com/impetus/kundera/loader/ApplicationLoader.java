@@ -44,4 +44,11 @@ public class ApplicationLoader implements Loader
         }
     }
 
+    @Override
+    public void unload(String persistenceUnit)
+    {
+        // TODO Auto-generated method stub
+
+    }
+
 }

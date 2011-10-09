@@ -35,6 +35,7 @@ import java.lang.reflect.Method;
 import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.persistence.EntityManagerImpl;
+import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
 
@@ -54,11 +55,12 @@ public class CglibLazyInitializerFactory implements LazyInitializerFactory
      */
     @Override
     public KunderaProxy getProxy(String entityName, Class<?> persistentClass, Method getIdentifierMethod,
-            Method setIdentifierMethod, String id, EntityManagerImpl em) throws PersistenceException
+            Method setIdentifierMethod, String id, PersistenceDelegator persistenceDelegator)
+            throws PersistenceException
     {
 
         return (KunderaProxy) CglibLazyInitializer.getProxy(entityName, persistentClass,
-                new Class[] { KunderaProxy.class }, getIdentifierMethod, setIdentifierMethod, id, em);
+                new Class[] { KunderaProxy.class }, getIdentifierMethod, setIdentifierMethod, id, persistenceDelegator);
 
     }
 

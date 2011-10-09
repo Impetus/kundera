@@ -25,9 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -61,23 +62,25 @@ public class HBaseDataHandler implements DataHandler
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseDataHandler.class);
 
-    private HBaseConfiguration conf;
-
     private HBaseAdmin admin;
+
+    private HBaseConfiguration conf;
 
     private Reader hbaseReader = new HBaseReader();
 
     private Writer hbaseWriter = new HBaseWriter();
 
-    public HBaseDataHandler(String hostName, String port)
+    public HBaseDataHandler(HBaseConfiguration conf)
     {
         try
         {
-            init(hostName, port);
+            this.conf = conf;
+            this.admin = new HBaseAdmin(conf);
         }
-        catch (MasterNotRunningException e)
+        catch (Exception e)
         {
-            throw new RuntimeException(e.getMessage());
+            // TODO We need a generic ExceptionTranslator
+            throw new PersistenceException(e);
         }
     }
 
@@ -275,36 +278,6 @@ public class HBaseDataHandler implements DataHandler
                     columns, keys);
         }
 
-    }
-
-    private void loadConfiguration(final String hostName, final String port) throws MasterNotRunningException
-    {
-        Configuration hadoopConf = new Configuration();
-        hadoopConf.set("hbase.master", hostName + ":" + port);
-        conf = new HBaseConfiguration(hadoopConf);
-        getHBaseAdmin();
-    }
-
-    /**
-     * 
-     * @param hostName
-     * @param port
-     * @throws MasterNotRunningException
-     */
-    private void init(final String hostName, final String port) throws MasterNotRunningException
-    {
-        if (conf == null)
-        {
-            loadConfiguration(hostName, port);
-        }
-    }
-
-    /**
-     * @throws MasterNotRunningException
-     */
-    private void getHBaseAdmin() throws MasterNotRunningException
-    {
-        admin = new HBaseAdmin(conf);
     }
 
     private HTable gethTable(final String tableName) throws IOException

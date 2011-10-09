@@ -42,7 +42,6 @@ import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.Version;
 
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -64,9 +63,9 @@ public class LuceneIndexer extends DocumentIndexer
      * @param client
      * @param analyzer
      */
-    public LuceneIndexer(Client client, Analyzer analyzer)
+    public LuceneIndexer(Analyzer analyzer)
     {
-        super(client, analyzer);
+        super(analyzer);
 
     }
 

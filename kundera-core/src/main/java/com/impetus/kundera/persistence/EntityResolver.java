@@ -16,7 +16,6 @@
 package com.impetus.kundera.persistence;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,25 +26,17 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.client.DBType;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
-import com.impetus.kundera.proxy.EntityEnhancerFactory;
-import com.impetus.kundera.proxy.KunderaProxy;
-import com.impetus.kundera.proxy.LazyInitializerFactory;
-import com.impetus.kundera.proxy.cglib.CglibEntityEnhancerFactory;
-import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 
 /**
  * The Class EntityReachabilityResolver.
@@ -58,28 +49,6 @@ public class EntityResolver
     /** The Constant log. */
     private static final Log LOG = LogFactory.getLog(EntityResolver.class);
 
-    /** The em. */
-    private EntityManagerImpl em;
-
-    /** The enhanced proxy factory. */
-    private EntityEnhancerFactory enhancedProxyFactory;
-
-    /** The lazy initializer factory. */
-    private LazyInitializerFactory lazyInitializerFactory;
-
-    /**
-     * Instantiates a new entity resolver.
-     * 
-     * @param em
-     *            the em
-     */
-    public EntityResolver(EntityManagerImpl em)
-    {
-        this.em = em;
-        enhancedProxyFactory = new CglibEntityEnhancerFactory();
-        lazyInitializerFactory = new CglibLazyInitializerFactory();
-    }
-
     /**
      * Resolve all reachable entities from entity
      * 
@@ -89,14 +58,14 @@ public class EntityResolver
      *            the cascade type
      * @return the all reachable entities
      */
-    public List<EnhancedEntity> resolve(Object entity, CascadeType cascadeType, DBType dbType)
+    public static List<EnhancedEntity> resolve(String persistenceUnit, Object entity, CascadeType cascadeType)
     {
         Map<String, EnhancedEntity> map = new LinkedHashMap<String, EnhancedEntity>();
         try
         {
             LOG.debug("Resolving reachable entities for cascade " + cascadeType);
 
-            recursivelyResolveEntities(entity, cascadeType, map);
+            recursivelyResolveEntities(persistenceUnit, entity, cascadeType, map);
 
         }
         catch (PropertyAccessException e)
@@ -118,7 +87,7 @@ public class EntityResolver
     /**
      * helper method to recursively build reachable object list.
      * 
-     * @param o
+     * @param object
      *            the o
      * @param cascadeType
      *            the cascade type
@@ -128,36 +97,36 @@ public class EntityResolver
      * @throws PropertyAccessException
      *             the property access exception
      */
-    private void recursivelyResolveEntities(Object o, CascadeType cascadeType, Map<String, EnhancedEntity> entities)
-            throws PropertyAccessException
+    private static void recursivelyResolveEntities(String persistenceUnit, Object object, CascadeType cascadeType,
+            Map<String, EnhancedEntity> entities) throws PropertyAccessException
     {
 
-        EntityMetadata m = null;
+        EntityMetadata entityMetaData = null;
         try
         {
-            m = ((MetamodelImpl) em.getEntityManagerFactory().getMetamodel()).getEntityMetadata(o.getClass());
+            entityMetaData = KunderaMetadataManager.getEntityMetadata(persistenceUnit, object.getClass());
         }
         catch (Exception e)
         {
             // Object might already be an enhanced entity
         }
 
-        if (m == null)
+        if (entityMetaData == null)
         {
             return;
         }
 
-        String id = PropertyAccessorHelper.getId(o, m);
+        String id = PropertyAccessorHelper.getId(object, entityMetaData);
 
         // Ensure that @Id is set
         if (null == id || id.trim().isEmpty())
         {
-            throw new PersistenceException("Missing primary key >> " + m.getEntityClazz().getName() + "#"
-                    + m.getIdColumn().getField().getName());
+            throw new PersistenceException("Missing primary key >> " + entityMetaData.getEntityClazz().getName() + "#"
+                    + entityMetaData.getIdColumn().getField().getName());
         }
 
         // Dummy name to check if the object is already processed
-        String mapKeyForEntity = m.getEntityClazz().getName() + "_" + id;
+        String mapKeyForEntity = entityMetaData.getEntityClazz().getName() + "_" + id;
 
         if (entities.containsKey(mapKeyForEntity))
         {
@@ -170,10 +139,10 @@ public class EntityResolver
         Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
         // Save to map
-        entities.put(mapKeyForEntity, getEnhancedEntity(o, id, foreignKeysMap));
+        entities.put(mapKeyForEntity, getEnhancedEntity(object, id, foreignKeysMap));
 
         // Iterate over EntityMetata.Relation relations
-        for (Relation relation : m.getRelations())
+        for (Relation relation : entityMetaData.getRelations())
         {
 
             // Cascade?
@@ -190,13 +159,12 @@ public class EntityResolver
             boolean optional = relation.isOptional();
 
             // Value
-            Object value = PropertyAccessorHelper.getObject(o, targetField);
+            Object value = PropertyAccessorHelper.getObject(object, targetField);
 
             // if object is not null, then proceed
             if (null != value)
             {
-                EntityMetadata relMetadata = ((MetamodelImpl) em.getEntityManagerFactory().getMetamodel())
-                        .getEntityMetadataMap().get(targetClass);
+                EntityMetadata relMetadata = KunderaMetadataManager.getEntityMetadata(persistenceUnit, targetClass);
 
                 if (relation.isUnary())
                 {
@@ -210,7 +178,7 @@ public class EntityResolver
                     foreignKeysMap.put(targetField.getName(), foreignKeys);
 
                     // get all other reachable objects from object "value"
-                    recursivelyResolveEntities(value, cascadeType, entities);
+                    recursivelyResolveEntities(persistenceUnit, value, cascadeType, entities);
 
                 }
                 if (relation.isCollection())
@@ -231,7 +199,7 @@ public class EntityResolver
                         foreignKeys.add(targetId);
 
                         // Get all other reachable objects from "o_"
-                        recursivelyResolveEntities(o_, cascadeType, entities);
+                        recursivelyResolveEntities(persistenceUnit, o_, cascadeType, entities);
                     }
                     foreignKeysMap.put(targetField.getName(), foreignKeys);
                 }
@@ -250,216 +218,6 @@ public class EntityResolver
     }
 
     /**
-     * Populate foreign entities.
-     * 
-     * @param containingEntity
-     *            the containing entity
-     * @param containingEntityId
-     *            the containing entity id
-     * @param relation
-     *            the relation
-     * @param foreignKeys
-     *            the foreign keys
-     * @throws PropertyAccessException
-     *             the property access exception
-     */
-    public void populateForeignEntities(Object entity, String entityId, Relation relation, String... foreignKeys)
-            throws PropertyAccessException
-    {
-
-        if (null == foreignKeys || foreignKeys.length == 0)
-        {
-            return;
-        }
-
-        String entityName = entity.getClass().getName() + "_" + entityId + "#" + relation.getProperty().getName();
-
-        LOG.debug("Populating foreign entities for " + entityName);
-
-        // foreignEntityClass
-        Class<?> foreignEntityClass = relation.getTargetEntity();
-
-        // Eagerly Caching containing entity to avoid it's own loading,
-        // in case the target contains a reference to containing entity.
-        em.getSession().store(entity, entityId, Boolean.FALSE);
-
-        EntityMetadata relMetadata = ((MetamodelImpl) em.getEntityManagerFactory().getMetamodel())
-                .getEntityMetadata(foreignEntityClass);
-
-        // Check for cross-store persistence
-        if (relMetadata.getPersistenceUnit() == null
-                || em.getPersistenceUnitName().equals(relMetadata.getPersistenceUnit()))
-        {
-            populateForeignEntityFromSameDatastore(entity, relation, entityName, foreignEntityClass, foreignKeys);
-        }
-        else
-        {
-            LOG.debug("Relationship entity is for a different database, only PKs will be set");
-            populateForeignEntityFromDifferentDatastore(entity, relation, entityName, foreignEntityClass, foreignKeys);
-        }
-    }
-
-    /**
-     * Populates entire foreign entity object (Because parent entity and foreign
-     * entity are in the same datastore)
-     */
-    private void populateForeignEntityFromSameDatastore(Object entity, Relation relation, String entityName,
-            Class<?> foreignEntityClass, String... foreignKeys) throws PropertyAccessException
-    {
-        if (relation.isUnary())
-        {
-            // there is just one target object
-            String foreignKey = foreignKeys[0];
-
-            Object foreignObject = getForeignEntityOrProxy(entityName, foreignEntityClass, foreignKey, relation);
-
-            PropertyAccessorHelper.set(entity, relation.getProperty(), foreignObject);
-        }
-
-        else if (relation.isCollection())
-        {
-            // there could be multiple target objects Cast to Collection
-            Collection<Object> foreignObjects = null;
-            if (relation.getPropertyType().equals(Set.class))
-            {
-                foreignObjects = new HashSet<Object>();
-            }
-            else if (relation.getPropertyType().equals(List.class))
-            {
-                foreignObjects = new ArrayList<Object>();
-            }
-
-            // Iterate over keys
-            for (String foreignKey : foreignKeys)
-            {
-                Object foreignObject = getForeignEntityOrProxy(entityName, foreignEntityClass, foreignKey, relation);
-                foreignObjects.add(foreignObject);
-            }
-
-            PropertyAccessorHelper.set(entity, relation.getProperty(), foreignObjects);
-        }
-    }
-
-    /**
-     * Populates only row key in the foreign entity object (Because foreign
-     * entity is in different datastore vis-a-vis parent entity)
-     */
-    private void populateForeignEntityFromDifferentDatastore(Object entity, Relation relation, String entityName,
-            Class<?> foreignEntityClass, String... foreignKeys) throws PropertyAccessException
-    {
-
-        EntityMetadata relMetadata = ((MetamodelImpl) em.getEntityManagerFactory().getMetamodel())
-                .getEntityMetadata(foreignEntityClass);
-        this.em = (EntityManagerImpl) Persistence.createEntityManagerFactory(relMetadata.getPersistenceUnit())
-                .createEntityManager();
-
-        if (relation.isUnary())
-        {
-            // there is just one target object
-            String foreignKey = foreignKeys[0];
-
-            Object foreignObject = getForeignEntityOrProxy(entityName, foreignEntityClass, foreignKey, relation);
-
-            PropertyAccessorHelper.set(entity, relation.getProperty(), foreignObject);
-        }
-
-        else if (relation.isCollection())
-        {
-            // there could be multiple target objects
-
-            // Cast to Collection
-            Collection<Object> foreignObjects = null;
-            if (relation.getPropertyType().equals(Set.class))
-            {
-                foreignObjects = new HashSet<Object>();
-            }
-            else if (relation.getPropertyType().equals(List.class))
-            {
-                foreignObjects = new ArrayList<Object>();
-            }
-
-            // Iterate over keys
-            for (String foreignKey : foreignKeys)
-            {
-                Object foreignObject = getForeignEntityOrProxy(entityName, foreignEntityClass, foreignKey, relation);
-                foreignObjects.add(foreignObject);
-            }
-
-            PropertyAccessorHelper.set(entity, relation.getProperty(), foreignObjects);
-        }
-    }
-
-    /**
-     * Helper method to load Foreign Entity/Proxy
-     * 
-     * @param entityName
-     *            the entity name
-     * @param persistentClass
-     *            the persistent class
-     * @param foreignKey
-     *            the foreign key
-     * @param relation
-     *            the relation
-     * @return the foreign entity or proxy
-     */
-    private Object getForeignEntityOrProxy(String entityName, Class<?> persistentClass, String foreignKey,
-            Relation relation)
-    {
-
-        // Check in session cache!
-        Object cached = em.getSession().lookup(persistentClass, foreignKey);
-        if (cached != null)
-        {
-            return cached;
-        }
-
-        FetchType fetch = relation.getFetchType();
-
-        if (fetch.equals(FetchType.EAGER))
-        {
-            LOG.debug("Eagerly loading >> " + persistentClass.getName() + "_" + foreignKey);
-            // load target eagerly!
-            return em.immediateLoadAndCache(persistentClass, foreignKey);
-        }
-        else
-        {
-            LOG.debug("Creating proxy for >> " + persistentClass.getName() + "#" + relation.getProperty().getName()
-                    + "_" + foreignKey);
-
-            // metadata
-            EntityMetadata m = ((MetamodelImpl) em.getEntityManagerFactory().getMetamodel())
-                    .getEntityMetadata(persistentClass);
-
-            return getLazyEntity(entityName, persistentClass, m.getReadIdentifierMethod(),
-                    m.getWriteIdentifierMethod(), foreignKey, em);
-        }
-    }
-
-    /**
-     * Gets the lazy entity.
-     * 
-     * @param entityName
-     *            the entity name
-     * @param persistentClass
-     *            the persistent class
-     * @param getIdentifierMethod
-     *            the get identifier method
-     * @param setIdentifierMethod
-     *            the set identifier method
-     * @param id
-     *            the id
-     * @param em
-     *            the em
-     * @return the lazy entity
-     */
-    private KunderaProxy getLazyEntity(String entityName, Class<?> persistentClass, Method getIdentifierMethod,
-            Method setIdentifierMethod, String id, EntityManagerImpl em)
-    {
-        return lazyInitializerFactory.getProxy(entityName, persistentClass, getIdentifierMethod, setIdentifierMethod,
-                id, em);
-    }
-
-    /**
      * Gets the enhanced entity.
      * 
      * @param entity
@@ -470,9 +228,8 @@ public class EntityResolver
      *            the foreign key map
      * @return the enhanced entity
      */
-    private EnhancedEntity getEnhancedEntity(Object entity, String id, Map<String, Set<String>> foreignKeyMap)
+    public static EnhancedEntity getEnhancedEntity(Object entity, String id, Map<String, Set<String>> foreignKeyMap)
     {
-        return enhancedProxyFactory.getProxy(entity, id, foreignKeyMap);
+        return KunderaMetadataManager.getEntityEnhancerFactory().getProxy(entity, id, foreignKeyMap);
     }
-
 }

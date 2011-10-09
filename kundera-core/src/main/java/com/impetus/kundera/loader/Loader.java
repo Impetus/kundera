@@ -22,4 +22,6 @@ package com.impetus.kundera.loader;
 public interface Loader
 {
     void load(String persistenceUnit);
+
+    void unload(String persistenceUnit);
 }

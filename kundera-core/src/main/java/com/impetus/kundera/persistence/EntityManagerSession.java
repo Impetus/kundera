@@ -37,18 +37,18 @@ public class EntityManagerSession
     /** cache is used to store objects retrieved in this EntityManager session. */
     private Map<Object, Object> sessionCache;
 
-    /** The em. */
-    private EntityManager em;
+    /** The entityManager. */
+    private EntityManager entityManager;
 
     /**
      * Instantiates a new entity manager cache.
      * 
-     * @param em
-     *            the em
+     * @param entityManager
+     *            the entityManager
      */
     public EntityManagerSession(EntityManager em)
     {
-        this.em = em;
+        this.entityManager = em;
         this.sessionCache = new ConcurrentHashMap<Object, Object>();
     }
 
@@ -74,7 +74,7 @@ public class EntityManagerSession
         if (o == null)
         {
             LOG.debug("Reading from L2 >> " + key);
-            Cache c = (Cache) em.getEntityManagerFactory().getCache();
+            Cache c = (Cache) entityManager.getEntityManagerFactory().getCache();
             if (c != null)
             {
                 o = (T) c.get(key);
@@ -120,7 +120,7 @@ public class EntityManagerSession
         {
             LOG.debug("Writing to L2 >>" + key);
             // save to second level cache
-            Cache c = (Cache) em.getEntityManagerFactory().getCache();
+            Cache c = (Cache) entityManager.getEntityManagerFactory().getCache();
             if (c != null)
             {
                 c.put(key, entity);
@@ -164,7 +164,7 @@ public class EntityManagerSession
         if (spillOverToL2)
         {
             LOG.debug("Removing from L2 >> " + key);
-            Cache c = (Cache) em.getEntityManagerFactory().getCache();
+            Cache c = (Cache) entityManager.getEntityManagerFactory().getCache();
             if (c != null)
             {
                 c.evict(entityClass, key);

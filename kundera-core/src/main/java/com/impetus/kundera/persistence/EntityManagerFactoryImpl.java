@@ -33,6 +33,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.cache.NonOperationalCacheProvider;
+import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 
 /**
@@ -44,7 +45,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 {
 
     /** the log used by this class. */
-    private static Log LOG = LogFactory.getLog(EntityManagerFactoryImpl.class);
+    private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
 
     /** Whether or not the factory has been closed. */
     private boolean closed = false;
@@ -57,13 +58,13 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     private CacheProvider cacheProvider;
 
-    private String persistenceUnitName;
+    private String persistenceUnit;
 
     /**
      * This one is generally called via the PersistenceProvider.
      * 
      * @param persistenceUnitInfo
-     *            only using persistenceUnitName for now
+     *            only using persistenceUnit for now
      * @param props
      *            the props
      */
@@ -75,17 +76,18 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     /**
      * Use this if you want to construct this directly.
      * 
-     * @param persistenceUnitName
+     * @param persistenceUnit
      *            used to prefix the Cassandra domains
      * @param props
      *            should have accessKey and secretKey
      */
-    public EntityManagerFactoryImpl(String persistenceUnitName, Map<String, Object> properties)
+    public EntityManagerFactoryImpl(String persistenceUnit, Map<String, Object> properties)
     {
         // TODO Device some better (JPA) way
-        properties.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnitName);
+        properties.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         this.properties = properties;
-        this.persistenceUnitName = persistenceUnitName;
+        this.persistenceUnit = persistenceUnit;
+        logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
 
     @Override
@@ -93,52 +95,27 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     {
         closed = true;
         cacheProvider.shutdown();
+        ClientResolver.getClientLoader(getPersistenceUnit()).unload(getPersistenceUnit());
     }
 
-    /* @see javax.persistence.EntityManagerFactory#createEntityManager() */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManagerFactory#createEntityManager()
-     */
     @Override
     public final EntityManager createEntityManager()
     {
         return new EntityManagerImpl(this);
     }
 
-    /*
-     * @see
-     * javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
-     */
     @Override
     public final EntityManager createEntityManager(Map map)
     {
         return new EntityManagerImpl(this, map);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManagerFactory#isOpen()
-     */
     @Override
     public final boolean isOpen()
     {
         return !closed;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManagerFactory#getCriteriaBuilder()
-     */
     @Override
     public CriteriaBuilder getCriteriaBuilder()
     {
@@ -153,7 +130,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Metamodel getMetamodel()
     {
-        return KunderaMetadataManager.getMetamodel(this.persistenceUnitName);
+        return KunderaMetadataManager.getMetamodel(getPersistenceUnit());
     }
 
     @Override
@@ -175,16 +152,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         }
         catch (CacheException e)
         {
-            LOG.error("Error while getting cache. Details:" + e.getMessage());
+            logger.error("Error while getting cache. Details:" + e.getMessage());
             return null;
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManagerFactory#getPersistenceUnitUtil()
-     */
     @Override
     public PersistenceUnitUtil getPersistenceUnitUtil()
     {
@@ -224,6 +196,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
             cacheProvider = new NonOperationalCacheProvider();
         }
         return cacheProvider;
+    }
+
+    private String getPersistenceUnit()
+    {
+        return persistenceUnit;
     }
 
 }

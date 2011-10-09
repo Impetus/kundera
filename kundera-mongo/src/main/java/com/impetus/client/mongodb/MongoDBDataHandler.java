@@ -70,7 +70,7 @@ public class MongoDBDataHandler
 
     private static Log log = LogFactory.getLog(MongoDBDataHandler.class);
 
-    public Object getEntityFromDocument(EntityManager em, Class<?> entityClass, EntityMetadata m, DBObject document)
+    public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document)
     {
         Object entity = null;
         try
@@ -233,8 +233,7 @@ public class MongoDBDataHandler
         return persistenceUnit;
     }
 
-    public BasicDBObject getDocumentFromEntity(EntityManager em, EntityMetadata m, EnhancedEntity e)
-            throws PropertyAccessException
+    public BasicDBObject getDocumentFromEntity(EntityMetadata m, EnhancedEntity e) throws PropertyAccessException
     {
         List<Column> columns = m.getColumnsAsList();
         BasicDBObject dbObj = new BasicDBObject();

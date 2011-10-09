@@ -30,6 +30,7 @@ import net.sf.cglib.proxy.NoOp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializationException;
 import com.impetus.kundera.proxy.LazyInitializer;
@@ -74,8 +75,8 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     /** The constructed. */
     private boolean constructed = false;
 
-    /** The em. */
-    private transient EntityManager em;
+    /** The persistenceDelegator. */
+    private transient PersistenceDelegator persistenceDelegator;
 
     /** The Constant FINALIZE_FILTER. */
     private static final CallbackFilter FINALIZE_FILTER = new CallbackFilter()
@@ -116,13 +117,13 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
      */
     public static KunderaProxy getProxy(final String entityName, final Class<?> persistentClass,
             final Class<?>[] interfaces, final Method getIdentifierMethod, final Method setIdentifierMethod,
-            final String id, final EntityManager em) throws PersistenceException
+            final String id, final PersistenceDelegator persistenceDelegator) throws PersistenceException
     {
 
         try
         {
             final CglibLazyInitializer instance = new CglibLazyInitializer(entityName, persistentClass, interfaces, id,
-                    getIdentifierMethod, setIdentifierMethod, em);
+                    getIdentifierMethod, setIdentifierMethod, persistenceDelegator);
 
             final KunderaProxy proxy;
             Class factory = getProxyFactory(persistentClass, interfaces);
@@ -207,12 +208,13 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
      *            the em
      */
     private CglibLazyInitializer(final String entityName, final Class<?> persistentClass, final Class<?>[] interfaces,
-            final String id, final Method getIdentifierMethod, final Method setIdentifierMethod, final EntityManager em)
+            final String id, final Method getIdentifierMethod, final Method setIdentifierMethod,
+            final PersistenceDelegator persistenceDelegator)
     {
 
         this.entityName = entityName;
         this.id = id;
-        this.em = em;
+        this.persistenceDelegator = persistenceDelegator;
         this.persistentClass = persistentClass;
         this.getIdentifierMethod = getIdentifierMethod;
         this.setIdentifierMethod = setIdentifierMethod;
@@ -330,23 +332,23 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     }
 
     /**
-     * Gets the entity manager.
+     * Gets the PersistenceDelegator.
      * 
      * @return the entity manager {@inheritDoc}
      */
-    public final EntityManager getEntityManager()
+    public final PersistenceDelegator getPersistenceDelegator()
     {
-        return em;
+        return persistenceDelegator;
     }
 
     /**
-     * Unset entity manager.
+     * Unset PersistenceDelegator.
      * 
      * {@inheritDoc}
      */
-    public void unsetEntityManager()
+    public void unsetPersistenceDelegator()
     {
-        em = null;
+        persistenceDelegator = null;
     }
 
     /**
@@ -359,12 +361,12 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     {
         if (!initialized)
         {
-            if (em == null)
+            if (persistenceDelegator == null)
             {
                 throw new LazyInitializationException("could not initialize proxy " + persistentClass.getName() + "_"
                         + id + " - no EntityManager");
             }
-            else if (!em.isOpen())
+            else if (!persistenceDelegator.isOpen())
             {
                 throw new LazyInitializationException("could not initialize proxy " + persistentClass.getName() + "_"
                         + id + " - the owning Session was closed");
@@ -376,7 +378,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
                 // TODO: consider not calling em.find from here. Not sure 'why',
                 // but something
                 // doesn't feel right.
-                target = em.find(persistentClass, id);
+                target = persistenceDelegator.find(persistentClass, id);
                 initialized = true;
             }
         }

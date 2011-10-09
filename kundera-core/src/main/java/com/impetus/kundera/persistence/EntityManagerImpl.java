@@ -43,13 +43,10 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.client.ClientIdentifier;
 import com.impetus.kundera.client.ClientResolver;
-import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
@@ -62,7 +59,7 @@ public class EntityManagerImpl implements EntityManager
 {
 
     /** The Constant log. */
-    private static final Log log = LogFactory.getLog(EntityManagerImpl.class);
+    private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
 
     /** The factory. */
     private EntityManagerFactory factory;
@@ -70,11 +67,9 @@ public class EntityManagerImpl implements EntityManager
     /** The closed. */
     private boolean closed = false;
 
+    // TODO To move the client to persistence delegator
     /** The client. */
     private Client client;
-
-    /** The entity resolver. */
-    private EntityResolver entityResolver;
 
     /** The session. */
     private EntityManagerSession session;
@@ -82,11 +77,11 @@ public class EntityManagerImpl implements EntityManager
     /** The event dispatcher. */
     private EntityEventDispatcher eventDispatcher;
 
-    /** The Metamodel. */
-    private Metamodel metaModel;
-
     /** Properties provided by user at the time of EntityManager Creation. */
     private Map<String, Object> properties;
+
+    /** Properties provided by user at the time of EntityManager Creation. */
+    private PersistenceDelegator persistenceDelegator;
 
     /**
      * Instantiates a new entity manager impl.
@@ -99,30 +94,12 @@ public class EntityManagerImpl implements EntityManager
     public EntityManagerImpl(EntityManagerFactory factory)
     {
         this.factory = factory;
-        entityResolver = new EntityResolver(this);
+        logger.info("Creating EntityManager for persistence unit : " + getPersistenceUnit());
         session = new EntityManagerSession(this);
         eventDispatcher = new EntityEventDispatcher();
-
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager
-                .getPersistenceUnitMetadata(getPersistenceUnitName());
-
-        String node = puMetadata.getProperties().getProperty("kundera.nodes");
-        String port = puMetadata.getProperties().getProperty("kundera.port");
-        String keyspace = puMetadata.getProperties().getProperty("kundera.keyspace");
-        String clientName = puMetadata.getProperties().getProperty("kundera.client");
-        String persistenceUnit = puMetadata.getPersistenceUnitName();
-
-        ClientType clientType = ClientType.getValue(clientName.toUpperCase());
-        ClientIdentifier identifier = new ClientIdentifier(new String[] { node }, Integer.valueOf(port), keyspace,
-                clientType, persistenceUnit);
-
-        client = ClientResolver.getClient(persistenceUnit, identifier);
-
-        // TODO Remove this code once design gets completed
-        client.setEntityResolver(entityResolver);
-        client.setPersistenceUnit(persistenceUnit);
-
-        client.connect();
+        client = ClientResolver.getClient(getPersistenceUnit());
+        persistenceDelegator = new PersistenceDelegator(client, session);
+        logger.info("Created EntityManager for persistence unit : " + getPersistenceUnit());
     }
 
     /**
@@ -139,67 +116,24 @@ public class EntityManagerImpl implements EntityManager
         this.properties = properties;
     }
 
-    /*
-     * @see javax.persistence.EntityManager#find(java.lang.Class,
-     * java.lang.Object)
-     */
     @Override
     public final <E> E find(Class<E> entityClass, Object primaryKey)
     {
-        if (closed)
-        {
-            throw new PersistenceException("EntityManager already closed.");
-        }
+        checkClosed();
+        // TODO Check for validity also as per JPA
         if (primaryKey == null)
         {
             throw new IllegalArgumentException("primaryKey value must not be null.");
         }
 
-        E e = null;
-        e = session.lookup(entityClass, primaryKey);
-        if (null != e)
-        {
-            log.debug(entityClass.getName() + "_" + primaryKey + " is loaded from cache!");
-            return e;
-        }
-
-        return immediateLoadAndCache(entityClass, primaryKey);
+        return getPersistenceDelegator().find(entityClass, primaryKey);
     }
 
-    /**
-     * Immediate load and cache.
-     * 
-     * @param <E>
-     *            the element type
-     * @param entityClass
-     *            the entity class
-     * @param primaryKey
-     *            the primary key
-     * @return the e
-     */
-    protected <E> E immediateLoadAndCache(Class<E> entityClass, Object primaryKey)
-    {
-        try
-        {
-
-            E e = (E) client.loadData(entityClass, primaryKey.toString());
-            if (e != null)
-            {
-                session.store(primaryKey, e, KunderaMetadataManager.getMetamodel(getPersistenceUnitName())
-                        .getEntityMetadata(entityClass).isCacheable());
-            }
-            return e;
-        }
-        catch (Exception exp)
-        {
-            throw new PersistenceException(exp);
-        }
-    }
-
-    /* @see javax.persistence.EntityManager#remove(java.lang.Object) */
     @Override
     public final void remove(Object e)
     {
+        checkClosed();
+        // TODO Check for validity also as per JPA
         if (e == null)
         {
             throw new IllegalArgumentException("Entity must not be null.");
@@ -208,17 +142,17 @@ public class EntityManagerImpl implements EntityManager
         try
         {
 
-            List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.REMOVE,
-                    this.client.getType());
+            List<EnhancedEntity> reachableEntities = EntityResolver
+                    .resolve(getPersistenceUnit(), e, CascadeType.REMOVE);
 
             // remove each one
             for (EnhancedEntity enhancedEntity : reachableEntities)
             {
-                log.debug("Removing @Entity >> " + enhancedEntity);
+                logger.debug("Removing Entity : " + enhancedEntity);
 
                 // fire PreRemove events
                 getEventDispatcher().fireEventListeners(
-                        KunderaMetadataManager.getEntityMetadata(getPersistenceUnitName(), enhancedEntity.getEntity()
+                        KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity.getEntity()
                                 .getClass()), enhancedEntity, PreRemove.class);
 
                 session.remove(enhancedEntity.getEntity().getClass(), enhancedEntity.getId());
@@ -227,7 +161,7 @@ public class EntityManagerImpl implements EntityManager
 
                 // fire PostRemove events
                 getEventDispatcher().fireEventListeners(
-                        KunderaMetadataManager.getEntityMetadata(getPersistenceUnitName(), enhancedEntity.getEntity()
+                        KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity.getEntity()
                                 .getClass()), enhancedEntity, PostRemove.class);
             }
         }
@@ -237,10 +171,10 @@ public class EntityManagerImpl implements EntityManager
         }
     }
 
-    /* @see javax.persistence.EntityManager#merge(java.lang.Object) */
     @Override
     public final <E> E merge(E e)
     {
+        checkClosed();
         if (e == null)
         {
             throw new IllegalArgumentException("Entity must not be null.");
@@ -248,24 +182,24 @@ public class EntityManagerImpl implements EntityManager
 
         try
         {
-
-            List<EnhancedEntity> reachableEntities = entityResolver
-                    .resolve(e, CascadeType.MERGE, this.client.getType());
+            List<EnhancedEntity> reachableEntities = EntityResolver.resolve(getPersistenceUnit(), e, CascadeType.MERGE);
 
             // save each one
             for (EnhancedEntity o : reachableEntities)
             {
-                log.debug("Merging @Entity >> " + o);
+                logger.debug("Merging Entity : " + o);
 
                 EntityMetadata m = ((MetamodelImpl) this.factory.getMetamodel()).getEntityMetadata(o.getEntity()
                         .getClass());
-                m.setDBType(this.client.getType());
+
                 // TODO: throw OptisticLockException if wrong version and
                 // optimistic locking enabled
 
                 // fire PreUpdate events
                 getEventDispatcher().fireEventListeners(m, o, PreUpdate.class);
+
                 client.writeData(o);
+
                 // fire PreUpdate events
                 getEventDispatcher().fireEventListeners(m, o, PostUpdate.class);
             }
@@ -278,10 +212,10 @@ public class EntityManagerImpl implements EntityManager
         return e;
     }
 
-    /* @see javax.persistence.EntityManager#persist(java.lang.Object) */
     @Override
     public final void persist(Object e)
     {
+        checkClosed();
         if (e == null)
         {
             throw new IllegalArgumentException("Entity must not be null.");
@@ -289,21 +223,27 @@ public class EntityManagerImpl implements EntityManager
 
         try
         {
+            List<EnhancedEntity> reachableEntities = EntityResolver.resolve(getPersistenceUnit(), e,
+                    CascadeType.PERSIST);
 
-            List<EnhancedEntity> reachableEntities = entityResolver.resolve(e, CascadeType.PERSIST,
-                    this.client.getType());
-
-            // Save each one
-            // PersistThreadPoolExecutor ptpe = new PersistThreadPoolExecutor();
-
-            for (EnhancedEntity o : reachableEntities)
+            for (EnhancedEntity enhancedEntity : reachableEntities)
             {
-                log.debug("Persisting @Entity >> " + o);
+                logger.debug("Persisting entity : " + enhancedEntity.getEntity().getClass());
 
-                // PersistTask persistTask = new PersistTask(o, this);
-                // ptpe.runPersistTask(persistTask);
-                persistData(o);
-                log.debug("Data persisted successfully");
+                EntityMetadata entityMetadata = ((MetamodelImpl) this.factory.getMetamodel())
+                        .getEntityMetadata(enhancedEntity.getEntity().getClass());
+
+                // TODO: throw EntityExistsException if already exists
+
+                // fire pre-persist events
+                getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PrePersist.class);
+
+                client.writeData(enhancedEntity);
+
+                // fire post-persist events
+                getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PostPersist.class);
+
+                logger.debug("Data persisted successfully for entity : " + enhancedEntity.getEntity().getClass());
             }
         }
         catch (Exception exp)
@@ -313,131 +253,73 @@ public class EntityManagerImpl implements EntityManager
         }
     }
 
-    private void persistData(EnhancedEntity enhancedEntity)
-    {
-        try
-        {
-            EntityMetadata entityMetadata = ((MetamodelImpl) this.factory.getMetamodel())
-                    .getEntityMetadata(enhancedEntity.getEntity().getClass());
-
-            entityMetadata.setDBType(getClient().getType());
-
-            // TODO: throw EntityExistsException if already exists
-
-            // fire pre-persist events
-            getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PrePersist.class);
-
-            client.writeData(enhancedEntity);
-
-            // fire post-persist events
-            getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PostPersist.class);
-        }
-        catch (PersistenceException ex)
-        {
-            log.error("Error while persisting entity into datastore, Details: " + ex.getMessage());
-            throw ex;
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            throw new PersistenceException(ex.getMessage());
-        }
-
-    }
-
-    /* @see javax.persistence.EntityManager#clear() */
     @Override
     public final void clear()
     {
         checkClosed();
         session.clear();
-        client.shutdown();
+        // TODO Do we need a client and persistenceDelegator close here?
     }
 
-    /* @see javax.persistence.EntityManager#close() */
     @Override
     public final void close()
     {
         checkClosed();
-        closed = true;
         session = null;
         eventDispatcher = null;
-        entityResolver = null;
+        persistenceDelegator.close();
+        client.close();
+        closed = true;
     }
 
-    /* @see javax.persistence.EntityManager#contains(java.lang.Object) */
     @Override
     public final boolean contains(Object entity)
     {
         return false;
     }
 
-    /* @see javax.persistence.EntityManager#createNamedQuery(java.lang.String) */
     @Override
-    public final Query createNamedQuery(String name)
+    public final Query createQuery(String query)
     {
-        throw new NotImplementedException("TODO");
+        return this.client.getQuery(query);
     }
 
-    /* @see javax.persistence.EntityManager#createNativeQuery(java.lang.String) */
-    @Override
-    public final Query createNativeQuery(String sqlString)
-    {
-        throw new NotImplementedException("TODO");
-    }
-
-    /*
-     * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String,
-     * java.lang.Class)
-     */
-    @Override
-    public final Query createNativeQuery(String sqlString, Class resultClass)
-    {
-        throw new NotImplementedException("TODO");
-    }
-
-    /*
-     * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String,
-     * java.lang.String)
-     */
-    @Override
-    public final Query createNativeQuery(String sqlString, String resultSetMapping)
-    {
-        throw new NotImplementedException("TODO");
-    }
-
-    /* @see javax.persistence.EntityManager#createQuery(java.lang.String) */
-    @Override
-    public final Query createQuery(String ejbqlString)
-    {
-        return this.client.getQuery(ejbqlString);
-    }
-
-    /* @see javax.persistence.EntityManager#flush() */
     @Override
     public final void flush()
     {
         // always flushed to cassandra anyway! relax.
     }
 
-    /* @see javax.persistence.EntityManager#getDelegate() */
     @Override
     public final Object getDelegate()
     {
         return null;
     }
 
-    /* @see javax.persistence.EntityManager#getFlushMode() */
     @Override
-    public final FlushModeType getFlushMode()
+    public final Query createNamedQuery(String name)
     {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * @see javax.persistence.EntityManager#getReference(java.lang.Class,
-     * java.lang.Object)
-     */
+    @Override
+    public final Query createNativeQuery(String sqlString)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    @Override
+    public final Query createNativeQuery(String sqlString, Class resultClass)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    @Override
+    public final Query createNativeQuery(String sqlString, String resultSetMapping)
+    {
+        throw new NotImplementedException("TODO");
+    }
+
     @Override
     public final <T> T getReference(Class<T> entityClass, Object primaryKey)
     {
@@ -445,71 +327,47 @@ public class EntityManagerImpl implements EntityManager
     }
 
     @Override
+    public final FlushModeType getFlushMode()
+    {
+        throw new NotImplementedException("TODO");
+    }
+
+    @Override
     public final EntityTransaction getTransaction()
     {
-        throw new NotImplementedException("Not yet implemented");
+        throw new NotImplementedException("TODO");
     }
 
-    /* @see javax.persistence.EntityManager#isOpen() */
-    @Override
-    public final boolean isOpen()
-    {
-        return !closed;
-    }
-
-    /* @see javax.persistence.EntityManager#joinTransaction() */
     @Override
     public final void joinTransaction()
     {
+        throw new NotImplementedException("TODO");
     }
 
-    /*
-     * @see javax.persistence.EntityManager#lock(java.lang.Object,
-     * javax.persistence.LockModeType)
-     */
     @Override
     public final void lock(Object entity, LockModeType lockMode)
     {
         throw new NotImplementedException("TODO");
     }
 
-    /* @see javax.persistence.EntityManager#refresh(java.lang.Object) */
     @Override
     public final void refresh(Object entity)
     {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#find(java.lang.Class,
-     * java.lang.Object, java.util.Map)
-     */
     @Override
     public <T> T find(Class<T> paramClass, Object paramObject, Map<String, Object> paramMap)
     {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#find(java.lang.Class,
-     * java.lang.Object, javax.persistence.LockModeType)
-     */
     @Override
     public <T> T find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType)
     {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#find(java.lang.Class,
-     * java.lang.Object, javax.persistence.LockModeType, java.util.Map)
-     */
     @Override
     public <T> T find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType,
             Map<String, Object> paramMap)
@@ -517,24 +375,12 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#lock(java.lang.Object,
-     * javax.persistence.LockModeType, java.util.Map)
-     */
     @Override
     public void lock(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
     {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#refresh(java.lang.Object,
-     * java.util.Map)
-     */
     @Override
     public void refresh(Object paramObject, Map<String, Object> paramMap)
     {
@@ -542,12 +388,6 @@ public class EntityManagerImpl implements EntityManager
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#refresh(java.lang.Object,
-     * javax.persistence.LockModeType)
-     */
     @Override
     public void refresh(Object paramObject, LockModeType paramLockModeType)
     {
@@ -555,23 +395,12 @@ public class EntityManagerImpl implements EntityManager
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#refresh(java.lang.Object,
-     * javax.persistence.LockModeType, java.util.Map)
-     */
     @Override
     public void refresh(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
     {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#detach(java.lang.Object)
-     */
     @Override
     public void detach(Object paramObject)
     {
@@ -579,23 +408,12 @@ public class EntityManagerImpl implements EntityManager
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#getLockMode(java.lang.Object)
-     */
     @Override
     public LockModeType getLockMode(Object paramObject)
     {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#setProperty(java.lang.String,
-     * java.lang.Object)
-     */
     @Override
     public void setProperty(String paramString, Object paramObject)
     {
@@ -603,112 +421,66 @@ public class EntityManagerImpl implements EntityManager
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#getProperties()
-     */
-    @Override
-    public Map<String, Object> getProperties()
-    {
-        return properties;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * javax.persistence.EntityManager#createQuery(javax.persistence.criteria
-     * .CriteriaQuery)
-     */
     @Override
     public <T> TypedQuery<T> createQuery(CriteriaQuery<T> paramCriteriaQuery)
     {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#createQuery(java.lang.String,
-     * java.lang.Class)
-     */
     @Override
     public <T> TypedQuery<T> createQuery(String paramString, Class<T> paramClass)
     {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#createNamedQuery(java.lang.String,
-     * java.lang.Class)
-     */
     @Override
     public <T> TypedQuery<T> createNamedQuery(String paramString, Class<T> paramClass)
     {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#unwrap(java.lang.Class)
-     */
     @Override
     public <T> T unwrap(Class<T> paramClass)
     {
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#getEntityManagerFactory()
-     */
-    @Override
-    public EntityManagerFactory getEntityManagerFactory()
-    {
-        return factory;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#getCriteriaBuilder()
-     */
-    @Override
-    public CriteriaBuilder getCriteriaBuilder()
-    {
-        return factory.getCriteriaBuilder();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#getMetamodel()
-     */
-    @Override
-    public Metamodel getMetamodel()
-    {
-        return factory.getMetamodel();
-    }
-
-    /*
-     * @see
-     * javax.persistence.EntityManager#setFlushMode(javax.persistence.FlushModeType
-     * )
-     */
     @Override
     public final void setFlushMode(FlushModeType flushMode)
     {
         throw new NotImplementedException("TODO");
     }
 
-    /**
-     * Check closed.
-     */
+    @Override
+    public Map<String, Object> getProperties()
+    {
+        return properties;
+    }
+
+    @Override
+    public EntityManagerFactory getEntityManagerFactory()
+    {
+        return factory;
+    }
+
+    @Override
+    public CriteriaBuilder getCriteriaBuilder()
+    {
+        return factory.getCriteriaBuilder();
+    }
+
+    @Override
+    public Metamodel getMetamodel()
+    {
+        return factory.getMetamodel();
+    }
+
+    @Override
+    public final boolean isOpen()
+    {
+        return !closed;
+    }
+
     private void checkClosed()
     {
         if (!isOpen())
@@ -717,36 +489,29 @@ public class EntityManagerImpl implements EntityManager
         }
     }
 
-    /**
-     * Gets the client.
-     * 
-     * @return the client
-     */
     private final Client getClient()
     {
         return client;
     }
 
-    public String getPersistenceUnitName()
+    private String getPersistenceUnit()
     {
         return (String) this.factory.getProperties().get(Constants.PERSISTENCE_UNIT_NAME);
     }
 
-    /**
-     * Gets the session.
-     * 
-     * @return the session
-     */
-    protected EntityManagerSession getSession()
+    private EntityManagerSession getSession()
     {
         return session;
     }
 
-    /**
-     * @return the eventDispatcher
-     */
     private EntityEventDispatcher getEventDispatcher()
     {
         return eventDispatcher;
     }
+
+    private PersistenceDelegator getPersistenceDelegator()
+    {
+        return persistenceDelegator;
+    }
+
 }

@@ -15,11 +15,12 @@
  ******************************************************************************/
 package com.impetus.kundera.client;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import com.impetus.kundera.loader.Loader;
+import com.impetus.kundera.loader.GenericClientLoader;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * @author impetus
@@ -27,78 +28,52 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 public final class ClientResolver
 {
 
-    static Map<ClientIdentifier, Client> clientsNew = new HashMap<ClientIdentifier, Client>();
+    static Map<String, GenericClientLoader> clientLoaders = new ConcurrentHashMap<String, GenericClientLoader>();
 
     /**
      * 
      * @param clientIdentifier
      * @return
      */
-    public static Client getClient(String persistenceUnit, ClientIdentifier clientIdentifier)
+    public static Client getClient(String persistenceUnit)
     {
-
-        Client client = getClientInstance(persistenceUnit);
-
-        client.setContactNodes(clientIdentifier.getNode());
-        client.setDefaultPort(clientIdentifier.getPort());
-        client.setSchema(clientIdentifier.getKeyspace());
-        clientsNew.put(clientIdentifier, client);
-
-        return client;
-    }
-
-    public static Client getClientInstance(String persistenceUnit)
-    {
-        Client client = null;
-        try
-        {
-
-            client = (Client) Class.forName(
-                    KunderaMetadata.getInstance().getClientMetadata(persistenceUnit).getClientImplementor())
-                    .newInstance();
-        }
-        catch (InstantiationException e)
-        {
-            throw new ClientResolverException(e.getMessage());
-        }
-        catch (IllegalAccessException e)
-        {
-            throw new ClientResolverException(e.getMessage());
-        }
-        catch (ClassNotFoundException e)
-        {
-            throw new ClientResolverException(e.getMessage());
-        }
-
-        if (client == null)
-        {
-            throw new ClientResolverException("Client Not Configured For Specified Client Type.");
-        }
-
-        return client;
+        return clientLoaders.get(persistenceUnit).getClientInstance();
     }
 
     // TODO To move this method to client dicoverer
-    public static Loader getClientLoader(ClientType clientType)
+    public static GenericClientLoader getClientLoader(String persistenceUnit)
     {
-        Loader loader = null;
+        GenericClientLoader loader = clientLoaders.get(persistenceUnit);
+
+        if (loader != null)
+            return loader;
+
+        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.getInstance().getApplicationMetadata()
+                .getPersistenceUnitMetadata(persistenceUnit);
+        String kunderaClientName = (String) persistenceUnitMetadata.getProperties().get("kundera.client");
+        ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());
+
         try
         {
             if (clientType.equals(ClientType.HBASE))
             {
-                loader = (Loader) Class.forName("com.impetus.client.hbase.HBaseClientLoader").newInstance();
+                loader = (GenericClientLoader) Class.forName("com.impetus.client.hbase.HBaseClientLoader")
+                        .newInstance();
             }
             else if (clientType.equals(ClientType.PELOPS))
             {
-                loader = (Loader) Class.forName("com.impetus.client.cassandra.pelops.PelopsClientLoader").newInstance();
+                loader = (GenericClientLoader) Class.forName("com.impetus.client.cassandra.pelops.PelopsClientLoader")
+                        .newInstance();
             }
             else if (clientType.equals(ClientType.THRIFT))
             {
-                loader = (Loader) Class.forName("com.impetus.client.cassandra.thrift.ThriftClientLoader").newInstance();
+                loader = (GenericClientLoader) Class.forName("com.impetus.client.cassandra.thrift.ThriftClientLoader")
+                        .newInstance();
             }
             else if (clientType.equals(ClientType.MONGODB))
             {
-                loader = (Loader) Class.forName("com.impetus.client.mongodb.MongoDBClientLoader").newInstance();
+                loader = (GenericClientLoader) Class.forName("com.impetus.client.mongodb.MongoDBClientLoader")
+                        .newInstance();
             }
         }
         catch (InstantiationException e)
@@ -118,6 +93,8 @@ public final class ClientResolver
         {
             throw new ClientResolverException("Client Loader Not Configured For Specified Client Type.");
         }
+
+        clientLoaders.put(persistenceUnit, loader);
 
         return loader;
     }

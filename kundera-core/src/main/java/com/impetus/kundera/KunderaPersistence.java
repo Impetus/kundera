@@ -27,11 +27,8 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 
 import com.impetus.kundera.client.ClientResolver;
-import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.loader.ApplicationLoader;
 import com.impetus.kundera.loader.CoreLoader;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryBuilder;
 
 /**
@@ -55,7 +52,7 @@ public class KunderaPersistence implements PersistenceProvider
     public KunderaPersistence()
     {
         // Load Core
-        logger.debug("Loading Core");
+        logger.info("Loading Core");
         new CoreLoader().load();
     }
 
@@ -72,17 +69,18 @@ public class KunderaPersistence implements PersistenceProvider
         // uses it every time.
         if (emfMap.get(persistenceUnit) != null)
         {
-            logger.debug("Returning existing factory for persistence unit : " + persistenceUnit);
+            logger.info("Returning existing factory for persistence unit : " + persistenceUnit);
             return emfMap.get(persistenceUnit);
         }
         else
         {
 
-            logger.debug("Creating non-existing factory for persistence unit : " + persistenceUnit);
+            logger.info("Creating non-existing factory for persistence unit : " + persistenceUnit);
 
             // Initialize Persistence Unit Related Parts
             initializeKundera(persistenceUnit);
 
+            logger.info("Preparing EntityManagerFactoryBuilder for persistence unit : " + persistenceUnit);
             EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder();
             return builder.buildEntityManagerFactory(persistenceUnit, map);
 
@@ -92,16 +90,12 @@ public class KunderaPersistence implements PersistenceProvider
     private void initializeKundera(String persistenceUnit)
     {
         // Invoke Application MetaData
-        logger.debug("Loading Application MetaData For Persistence Unit " + persistenceUnit);
+        logger.info("Loading Application MetaData For Persistence Unit " + persistenceUnit);
         (new ApplicationLoader()).load(persistenceUnit);
 
         // Invoke Client Loaders
-        logger.debug("Loading Client MetaData For Persistence Unit " + persistenceUnit);
-        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.getInstance().getApplicationMetadata()
-                .getPersistenceUnitMetadata(persistenceUnit);
-        String kunderaClientName = (String) persistenceUnitMetadata.getProperties().get("kundera.client");
-        ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());
-        ClientResolver.getClientLoader(clientType).load(persistenceUnit);
+        logger.info("Loading Client For Persistence Unit " + persistenceUnit);
+        ClientResolver.getClientLoader(persistenceUnit).load(persistenceUnit);
     }
 
     @Override

@@ -21,37 +21,42 @@ package com.impetus.kundera.metadata.model;
  */
 public class ClientMetadata
 {
-    private String clientImplementor;	
+    private String clientImplementor;
+
     private String indexImplementor;
 
-	/**
-	 * @return the clientImplementor
-	 */
-	public String getClientImplementor() {
-		return clientImplementor;
-	}
+    /**
+     * @return the clientImplementor
+     */
+    public String getClientImplementor()
+    {
+        return clientImplementor;
+    }
 
-	/**
-	 * @param clientImplementor the clientImplementor to set
-	 */
-	public void setClientImplementor(String clientImplementor) {
-		this.clientImplementor = clientImplementor;
-	}
+    /**
+     * @param clientImplementor
+     *            the clientImplementor to set
+     */
+    public void setClientImplementor(String clientImplementor)
+    {
+        this.clientImplementor = clientImplementor;
+    }
 
-	/**
-	 * @return the indexImplementor
-	 */
-	public String getIndexImplementor() {
-		return indexImplementor;
-	}
+    /**
+     * @return the indexImplementor
+     */
+    public String getIndexImplementor()
+    {
+        return indexImplementor;
+    }
 
-	/**
-	 * @param indexImplementor the indexImplementor to set
-	 */
-	public void setIndexImplementor(String indexImplementor) {
-		this.indexImplementor = indexImplementor;
-	}
-    
-    
+    /**
+     * @param indexImplementor
+     *            the indexImplementor to set
+     */
+    public void setIndexImplementor(String indexImplementor)
+    {
+        this.indexImplementor = indexImplementor;
+    }
 
 }

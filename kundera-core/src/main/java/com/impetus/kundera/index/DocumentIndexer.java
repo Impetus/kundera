@@ -72,9 +72,6 @@ public abstract class DocumentIndexer implements Indexer
     /** The doc number. */
     protected static int docNumber = 1;
 
-    /** The client. */
-    private Client client;
-
     /** The analyzer. */
     protected Analyzer analyzer;
 
@@ -86,9 +83,8 @@ public abstract class DocumentIndexer implements Indexer
      * @param analyzer
      *            the analyzer
      */
-    public DocumentIndexer(Client client, Analyzer analyzer)
+    public DocumentIndexer(Analyzer analyzer)
     {
-        this.client = client;
         this.analyzer = analyzer;
     }
 

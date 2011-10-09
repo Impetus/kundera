@@ -21,8 +21,6 @@ import java.util.Map;
 import javax.persistence.Query;
 
 import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.index.Indexer;
-import com.impetus.kundera.persistence.EntityResolver;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
@@ -96,7 +94,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    public <E> List<E> loadData(Class<E> entityClass, Map<String, String> col) throws Exception;
+    <E> List<E> loadData(Class<E> entityClass, Map<String, String> col) throws Exception;
 
     /**
      * Loads columns from multiple rows restricting results to conditions stored
@@ -118,38 +116,9 @@ public interface Client
     <E> List<E> loadData(Query query) throws Exception;
 
     /**
-     * Set Cassandra nodes.
-     * 
-     * @param contactNodes
-     *            the contact nodes
-     */
-    void setContactNodes(String... contactNodes);
-
-    /**
-     * Set default port. Default is 9160
-     * 
-     * @param defaultPort
-     *            the default port
-     */
-    void setDefaultPort(int defaultPort);
-
-    /**
-     * Set key space.
-     * 
-     * @param schema
-     *            key space.
-     */
-    void setSchema(String schema);
-
-    /**
      * Shutdown.
      */
-    void shutdown();
-
-    /**
-     * connects to Cassandra DB.
-     */
-    void connect();
+    void close();
 
     /**
      * Delete a row from either column-family or super-column-family.
@@ -165,22 +134,13 @@ public interface Client
      */
     void delete(EnhancedEntity enhancedEntity) throws Exception;
 
-    /**
-     * Returns type of nosql database.
-     * 
-     * @return dbType database type.
-     */
-    DBType getType();
-
     Query getQuery(String queryString);
 
     String getPersistenceUnit();
 
+    // TODO Do we really need it. This may not be required for few of the
+    // clients
     IndexManager getIndexManager();
-
-    EntityResolver getEntityResolver();
-
-    void setEntityResolver(EntityResolver entityResolver);
 
     void setPersistenceUnit(String persistenceUnit);
 }

@@ -22,13 +22,12 @@ import com.impetus.kundera.persistence.EntityResolver;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
-public class DataHandler {
-	
-	/** log for this class. */
+public class DataHandler
+{
+
+    /** log for this class. */
     private static Log LOG = LogFactory.getLog(DataHandler.class);
-    
-    protected EntityResolver entityResolver;
 
 }

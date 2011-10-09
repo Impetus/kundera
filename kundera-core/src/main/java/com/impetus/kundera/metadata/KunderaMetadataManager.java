@@ -19,6 +19,8 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.proxy.EntityEnhancerFactory;
+import com.impetus.kundera.proxy.LazyInitializerFactory;
 
 /**
  * @author amresh.singh
@@ -40,6 +42,16 @@ public class KunderaMetadataManager
     public static EntityMetadata getEntityMetadata(String persistenceUnit, Class entityClass)
     {
         return KunderaMetadataManager.getMetamodel(persistenceUnit).getEntityMetadata(entityClass);
+    }
+
+    public static LazyInitializerFactory getLazyInitializerFactory()
+    {
+        return KunderaMetadata.getInstance().getCoreMetadata().getLazyInitializerFactory();
+    }
+
+    public static EntityEnhancerFactory getEntityEnhancerFactory()
+    {
+        return KunderaMetadata.getInstance().getCoreMetadata().getEnhancedProxyFactory();
     }
 
 }

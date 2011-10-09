@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.mongodb;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +22,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
@@ -33,19 +31,15 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.persistence.EntityResolver;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
 
 /**
  * CLient class for MongoDB database.
@@ -55,29 +49,19 @@ import com.mongodb.MongoException;
 public class MongoDBClient implements Client
 {
 
-    /** The contact node. */
-    private String contactNode;
-
-    /** The default port. */
-    private String defaultPort;
-
-    /** The db name. */
-    private String dbName;
-
     /** The is connected. */
     private boolean isConnected;
 
-    /** The em. */
-    private EntityManager em;
-
-    /** The mongo. */
-    Mongo mongo;
-
     /** The mongo db. */
-    DB mongoDb;
+    private DB mongoDb;
 
     /** The log. */
     private static Log log = LogFactory.getLog(MongoDBClient.class);
+
+    public MongoDBClient(Object mongo)
+    {
+        this.mongoDb = (DB) mongo;
+    }
 
     @Override
     public void writeData(EnhancedEntity enhancedEntity) throws Exception
@@ -99,7 +83,7 @@ public class MongoDBClient implements Client
             BasicDBObject searchQuery = new BasicDBObject();
             searchQuery.put(entityMetadata.getIdColumn().getName(), key);
             BasicDBObject updatedDocument = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(
-                    em, entityMetadata, enhancedEntity);
+                    entityMetadata, enhancedEntity);
             dbCollection.update(searchQuery, updatedDocument);
 
         }
@@ -108,7 +92,7 @@ public class MongoDBClient implements Client
             log.debug("Inserting data into " + dbName + "." + documentName + " for " + key);
             DBCollection dbCollection = mongoDb.getCollection(documentName);
 
-            BasicDBObject document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(em,
+            BasicDBObject document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(
                     entityMetadata, enhancedEntity);
             dbCollection.insert(document);
         }
@@ -145,7 +129,7 @@ public class MongoDBClient implements Client
             return null;
         }
 
-        Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(em,
+        Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
                 entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument);
 
         return (E) entity;
@@ -169,7 +153,7 @@ public class MongoDBClient implements Client
         while (cursor.hasNext())
         {
             DBObject fetchedDocument = cursor.next();
-            Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(em,
+            Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
                     entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument);
             entities.add(entity);
         }
@@ -233,7 +217,7 @@ public class MongoDBClient implements Client
             while (cursor.hasNext())
             {
                 DBObject fetchedDocument = cursor.next();
-                Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(em, clazz,
+                Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(clazz,
                         entityMetadata, fetchedDocument);
                 entities.add(entity);
             }
@@ -269,102 +253,22 @@ public class MongoDBClient implements Client
         dbCollection.remove(documentToRemove);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#connect()
-     */
     @Override
-    public void connect()
+    public void close()
     {
-        if (!isConnected)
-        {
-            log.info(">>> Connecting to MONGODB at " + contactNode + " on port " + defaultPort);
-            try
-            {
-                mongo = new Mongo(contactNode, Integer.parseInt(defaultPort));
-                mongoDb = mongo.getDB(dbName);
-                isConnected = true;
-                log.info("CONNECTED to MONGODB at " + contactNode + " on port " + defaultPort);
-            }
-            catch (NumberFormatException e)
-            {
-                log.error("Invalid format for MONGODB port, Unale to connect!" + "; Details:" + e.getMessage());
-            }
-            catch (UnknownHostException e)
-            {
-                log.error("Unable to connect to MONGODB at host " + contactNode + "; Details:" + e.getMessage());
-            }
-            catch (MongoException e)
-            {
-                log.error("Unable to connect to MONGODB; Details:" + e.getMessage());
-            }
-        }
-    }
+        // TODO Once pool is implemented this code should not be there.
+        // Workaround for pool
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#shutdown()
-     */
-    @Override
-    public void shutdown()
-    {
-        if (isConnected && mongo != null)
+        if (this.mongoDb != null)
         {
-            log.info("Closing connection to MONGODB at " + contactNode + " on port " + defaultPort);
-            mongo.close();
-            log.info("Connection to MONGODB at " + contactNode + " on port " + defaultPort + " closed");
+            log.info("Closing connection to mongodb.");
+            this.mongoDb.getMongo().close();
+            log.info("Closed connection to mongodb.");
         }
         else
         {
             log.warn("Can't close connection to MONGODB, it was already disconnected");
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#getType()
-     */
-    @Override
-    public DBType getType()
-    {
-        return DBType.MONGODB;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#setContactNodes(java.lang.String[])
-     */
-    @Override
-    public void setContactNodes(String... contactNodes)
-    {
-        this.contactNode = contactNodes[0];
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#setDefaultPort(int)
-     */
-    @Override
-    public void setDefaultPort(int defaultPort)
-    {
-        this.defaultPort = String.valueOf(defaultPort);
-    }
-
-    // For MongoDB, keyspace means DB name
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#setKeySpace(java.lang.String)
-     */
-    @Override
-    public void setSchema(String keySpace)
-    {
-        this.dbName = keySpace;
     }
 
     /**
@@ -427,20 +331,6 @@ public class MongoDBClient implements Client
     {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    @Override
-    public EntityResolver getEntityResolver()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void setEntityResolver(EntityResolver entityResolver)
-    {
-        // TODO Auto-generated method stub
-
     }
 
     @Override

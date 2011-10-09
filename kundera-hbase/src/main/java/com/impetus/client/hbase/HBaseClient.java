@@ -26,15 +26,13 @@ import javax.persistence.Query;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.util.Version;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.HBaseAdmin;
 
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
@@ -74,9 +72,10 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     private String persistenceUnit;
 
-    public HBaseClient()
+    public HBaseClient(IndexManager indexManager, HBaseConfiguration conf)
     {
-        indexManager = new IndexManager(new LuceneIndexer(this, new StandardAnalyzer(Version.LUCENE_CURRENT)));
+        this.indexManager = indexManager;
+        this.handler = new HBaseDataHandler(conf);
     }
 
     /**
@@ -196,87 +195,17 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return entities;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#shutdown()
-     */
     @Override
-    public void shutdown()
+    public void close()
     {
         handler.shutdown();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#connect()
-     */
-    @Override
-    public void connect()
-    {
-        if (!isConnected)
-        {
-            handler = new HBaseDataHandler(contactNode, defaultPort);
-            isConnected = true;
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#setContactNodes(java.lang.String[])
-     */
-    @Override
-    public void setContactNodes(String... contactNodes)
-    {
-        this.contactNode = contactNodes[0];
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#setDefaultPort(int)
-     */
-    @Override
-    public void setDefaultPort(int defaultPort)
-    {
-        this.defaultPort = String.valueOf(defaultPort);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#delete(java.lang.String,
-     * java.lang.String, java.lang.String)
-     */
     @Override
     public void delete(EnhancedEntity enhancedEntity) throws Exception
     {
         throw new RuntimeException("TODO:not yet supported");
 
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#setKeySpace(java.lang.String)
-     */
-    @Override
-    public void setSchema(String keySpace)
-    {
-        // TODO not required, Keyspace not applicable to Hbase
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.Client#getType()
-     */
-    @Override
-    public DBType getType()
-    {
-        return DBType.HBASE;
     }
 
     /**
@@ -300,19 +229,6 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     public String getPersistenceUnit()
     {
         return persistenceUnit;
-    }
-
-    @Override
-    public EntityResolver getEntityResolver()
-    {
-        return entityResolver;
-    }
-
-    // TODO To remove the setters
-
-    public void setEntityResolver(EntityResolver entityResolver)
-    {
-        this.entityResolver = entityResolver;
     }
 
     public void setPersistenceUnit(String persistenceUnit)

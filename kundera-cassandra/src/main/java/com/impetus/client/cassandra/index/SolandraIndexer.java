@@ -56,12 +56,11 @@ public class SolandraIndexer extends DocumentIndexer
     private static final Log LOG = LogFactory.getLog(DocumentIndexer.class);
 
     /**
-     * @param client
      * @param analyzer
      */
-    public SolandraIndexer(Client client, Analyzer analyzer)
+    public SolandraIndexer(Analyzer analyzer)
     {
-        super(client, analyzer);
+        super(analyzer);
 
     }
 
