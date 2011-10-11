@@ -27,7 +27,6 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
 
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
@@ -38,7 +37,6 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
-import com.impetus.kundera.persistence.EntityResolver;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.LuceneQuery;
@@ -53,22 +51,11 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseClient.class);
 
-    /** The contact node. */
-    String contactNode;
-
-    /** The default port. */
-    String defaultPort;
-
     /** The handler. */
     private DataHandler handler;
 
-    /** The is connected. */
-    private boolean isConnected;
-
     /** The index manager. */
     private IndexManager indexManager;
-
-    private EntityResolver entityResolver;
 
     private String persistenceUnit;
 
@@ -78,11 +65,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         this.handler = new HBaseDataHandler(conf);
     }
 
-    /**
-     * Writes an entity data into HBase store
-     */
     @Override
-    public void writeData(EnhancedEntity enhancedEntity) throws Exception
+    public void persist(EnhancedEntity enhancedEntity) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
                 .getEntity().getClass());
@@ -118,15 +102,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
-     * EntityManager, java.lang.Class, java.lang.String, java.lang.String,
-     * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
-     */
     @Override
-    public <E> E loadData(Class<E> entityClass, String rowId) throws Exception
+    public <E> E find(Class<E> entityClass, String rowId) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         // columnFamily has a different meaning for HBase, so it won't be used
@@ -136,15 +113,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return e;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
-     * EntityManager, java.lang.Class, java.lang.String, java.lang.String,
-     * com.impetus.kundera.metadata.EntityMetadata, java.lang.String[])
-     */
     @Override
-    public <E> List<E> loadData(Class<E> entityClass, String... rowIds) throws Exception
+    public <E> List<E> find(Class<E> entityClass, String... rowIds) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         List<E> entities = new ArrayList<E>();
@@ -157,20 +127,14 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return entities;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seecom.impetus.kundera.Client#loadColumns(com.impetus.kundera.ejb.
-     * EntityManager, com.impetus.kundera.metadata.EntityMetadata,
-     * java.util.Queue)
-     */
+    @Override
     public <E> List<E> loadData(Query query) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");
     }
 
     @Override
-    public <E> List<E> loadData(Class<E> entityClass, Map<String, String> col) throws Exception
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> col) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         List<E> entities = new ArrayList<E>();
@@ -208,11 +172,6 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     }
 
-    /**
-     * Gets the index manager.
-     * 
-     * @return the indexManager
-     */
     @Override
     public final IndexManager getIndexManager()
     {
@@ -220,7 +179,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     }
 
     @Override
-    public Query getQuery(String ejbqlString)
+    public Query createQuery(String ejbqlString)
     {
         return new LuceneQuery(this, ejbqlString);
     }
@@ -231,6 +190,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return persistenceUnit;
     }
 
+    @Override
     public void setPersistenceUnit(String persistenceUnit)
     {
         this.persistenceUnit = persistenceUnit;

@@ -95,7 +95,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     {
         closed = true;
         cacheProvider.shutdown();
-        ClientResolver.getClientLoader(getPersistenceUnit()).unload(getPersistenceUnit());
+        ClientResolver.getClientFactory(getPersistenceUnit()).unload(getPersistenceUnit());
     }
 
     @Override

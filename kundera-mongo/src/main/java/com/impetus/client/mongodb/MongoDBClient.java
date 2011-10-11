@@ -64,7 +64,7 @@ public class MongoDBClient implements Client
     }
 
     @Override
-    public void writeData(EnhancedEntity enhancedEntity) throws Exception
+    public void persist(EnhancedEntity enhancedEntity) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
                 .getEntity().getClass());
@@ -74,7 +74,7 @@ public class MongoDBClient implements Client
         String key = enhancedEntity.getId();
 
         log.debug("Checking whether record already exist for " + dbName + "." + documentName + " for " + key);
-        Object entity = loadData(enhancedEntity.getClass(), key);
+        Object entity = find(enhancedEntity.getClass(), key);
         if (entity != null)
         {
             log.debug("Updating data into " + dbName + "." + documentName + " for " + key);
@@ -106,7 +106,7 @@ public class MongoDBClient implements Client
      * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public <E> E loadData(Class<E> entityClass, String key) throws Exception
+    public <E> E find(Class<E> entityClass, String key) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
 
@@ -136,7 +136,7 @@ public class MongoDBClient implements Client
     }
 
     @Override
-    public <E> List<E> loadData(Class<E> entityClass, String... keys) throws Exception
+    public <E> List<E> find(Class<E> entityClass, String... keys) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
 
@@ -308,13 +308,13 @@ public class MongoDBClient implements Client
     }
 
     @Override
-    public Query getQuery(String queryString)
+    public Query createQuery(String queryString)
     {
         return null;
     }
 
     @Override
-    public <E> List<E> loadData(Class<E> entityClass, Map<String, String> col) throws Exception
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> col) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");
     }

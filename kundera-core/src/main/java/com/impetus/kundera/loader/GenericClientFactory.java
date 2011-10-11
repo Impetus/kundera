@@ -8,7 +8,7 @@ import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 // Client Loaders are more of 
-public abstract class GenericClientLoader implements Loader
+public abstract class GenericClientFactory implements Loader
 {
     /** The logger. */
     private static Logger logger = Logger.getLogger(KunderaPersistence.class);

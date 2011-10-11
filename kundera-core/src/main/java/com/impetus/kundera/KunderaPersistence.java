@@ -95,7 +95,7 @@ public class KunderaPersistence implements PersistenceProvider
 
         // Invoke Client Loaders
         logger.info("Loading Client For Persistence Unit " + persistenceUnit);
-        ClientResolver.getClientLoader(persistenceUnit).load(persistenceUnit);
+        ClientResolver.getClientFactory(persistenceUnit).load(persistenceUnit);
     }
 
     @Override

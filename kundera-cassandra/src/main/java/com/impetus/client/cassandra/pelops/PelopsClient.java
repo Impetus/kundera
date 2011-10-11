@@ -77,7 +77,7 @@ public class PelopsClient implements Client
     }
 
     @Override
-    public void writeData(EnhancedEntity enhancedEntity) throws Exception
+    public void persist(EnhancedEntity enhancedEntity) throws Exception
     {
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
@@ -119,7 +119,7 @@ public class PelopsClient implements Client
     }
 
     @Override
-    public final <E> E loadData(Class<E> entityClass, String rowId) throws Exception
+    public final <E> E find(Class<E> entityClass, String rowId) throws Exception
     {
 
         if (!isOpen())
@@ -136,7 +136,7 @@ public class PelopsClient implements Client
     }
 
     @Override
-    public final <E> List<E> loadData(Class<E> entityClass, String... rowIds) throws Exception
+    public final <E> List<E> find(Class<E> entityClass, String... rowIds) throws Exception
     {
         if (!isOpen())
         {
@@ -152,7 +152,7 @@ public class PelopsClient implements Client
     }
 
     @Override
-    public <E> List<E> loadData(Class<E> entityClass, Map<String, String> col) throws Exception
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> col) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         List<E> entities = new ArrayList<E>();
@@ -208,7 +208,7 @@ public class PelopsClient implements Client
     }
 
     @Override
-    public Query getQuery(String ejbqlString)
+    public Query createQuery(String ejbqlString)
     {
         return new LuceneQuery(this, ejbqlString);
     }

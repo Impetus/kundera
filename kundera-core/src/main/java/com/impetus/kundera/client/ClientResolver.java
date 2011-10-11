@@ -18,7 +18,7 @@ package com.impetus.kundera.client;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.impetus.kundera.loader.GenericClientLoader;
+import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
@@ -28,7 +28,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 public final class ClientResolver
 {
 
-    static Map<String, GenericClientLoader> clientLoaders = new ConcurrentHashMap<String, GenericClientLoader>();
+    static Map<String, GenericClientFactory> clientFactories = new ConcurrentHashMap<String, GenericClientFactory>();
 
     /**
      * 
@@ -37,13 +37,13 @@ public final class ClientResolver
      */
     public static Client getClient(String persistenceUnit)
     {
-        return clientLoaders.get(persistenceUnit).getClientInstance();
+        return clientFactories.get(persistenceUnit).getClientInstance();
     }
 
     // TODO To move this method to client dicoverer
-    public static GenericClientLoader getClientLoader(String persistenceUnit)
+    public static GenericClientFactory getClientFactory(String persistenceUnit)
     {
-        GenericClientLoader loader = clientLoaders.get(persistenceUnit);
+        GenericClientFactory loader = clientFactories.get(persistenceUnit);
 
         if (loader != null)
             return loader;
@@ -57,22 +57,22 @@ public final class ClientResolver
         {
             if (clientType.equals(ClientType.HBASE))
             {
-                loader = (GenericClientLoader) Class.forName("com.impetus.client.hbase.HBaseClientLoader")
+                loader = (GenericClientFactory) Class.forName("com.impetus.client.hbase.HBaseClientFactory")
                         .newInstance();
             }
             else if (clientType.equals(ClientType.PELOPS))
             {
-                loader = (GenericClientLoader) Class.forName("com.impetus.client.cassandra.pelops.PelopsClientLoader")
-                        .newInstance();
+                loader = (GenericClientFactory) Class
+                        .forName("com.impetus.client.cassandra.pelops.PelopsClientFactory").newInstance();
             }
             else if (clientType.equals(ClientType.THRIFT))
             {
-                loader = (GenericClientLoader) Class.forName("com.impetus.client.cassandra.thrift.ThriftClientLoader")
-                        .newInstance();
+                loader = (GenericClientFactory) Class
+                        .forName("com.impetus.client.cassandra.thrift.ThriftClientFactory").newInstance();
             }
             else if (clientType.equals(ClientType.MONGODB))
             {
-                loader = (GenericClientLoader) Class.forName("com.impetus.client.mongodb.MongoDBClientLoader")
+                loader = (GenericClientFactory) Class.forName("com.impetus.client.mongodb.MongoDBClientFactory")
                         .newInstance();
             }
         }
@@ -91,10 +91,10 @@ public final class ClientResolver
 
         if (loader == null)
         {
-            throw new ClientResolverException("Client Loader Not Configured For Specified Client Type.");
+            throw new ClientResolverException("Client Factory Not Configured For Specified Client Type.");
         }
 
-        clientLoaders.put(persistenceUnit, loader);
+        clientFactories.put(persistenceUnit, loader);
 
         return loader;
     }

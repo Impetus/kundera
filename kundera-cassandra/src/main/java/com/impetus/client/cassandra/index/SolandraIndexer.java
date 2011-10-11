@@ -37,7 +37,6 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.util.Version;
 
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.index.IndexingException;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
@@ -53,7 +52,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 public class SolandraIndexer extends DocumentIndexer
 {
     /** log for this class. */
-    private static final Log LOG = LogFactory.getLog(DocumentIndexer.class);
+    private static final Log LOG = LogFactory.getLog(SolandraIndexer.class);
 
     /**
      * @param analyzer
@@ -218,23 +217,13 @@ public class SolandraIndexer extends DocumentIndexer
      * @param document
      *            the document
      */
-    public void indexDocument(EntityMetadata metadata, Document document)
+    protected void indexDocument(EntityMetadata metadata, Document document)
     {
 
         LOG.debug("Indexing document: " + document + " for " + metadata.getDBType());
 
         LOG.debug("Indexing document using Lucandra: " + document);
-        indexDocumentUsingLucandra(document);
-    }
 
-    /**
-     * Indexes document using Lucandra library
-     * 
-     * @param document
-     *            the document
-     */
-    public void indexDocumentUsingLucandra(Document document)
-    {
         try
         {
             RowMutation[] rms = null;
@@ -249,6 +238,7 @@ public class SolandraIndexer extends DocumentIndexer
         {
             throw new IndexingException(e.getMessage());
         }
+
     }
 
     /**
@@ -273,7 +263,7 @@ public class SolandraIndexer extends DocumentIndexer
      * 
      * @return index reader.
      */
-    public IndexReader getIndexReader()
+    private IndexReader getIndexReader()
     {
         return new lucandra.IndexReader(INDEX_NAME);
     }

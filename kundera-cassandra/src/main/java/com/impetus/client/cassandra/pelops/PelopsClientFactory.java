@@ -14,12 +14,12 @@ import com.impetus.client.cassandra.index.SolandraUtils;
 import com.impetus.kundera.KunderaPersistence;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.loader.GenericClientLoader;
+import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
-public class PelopsClientLoader extends GenericClientLoader
+public class PelopsClientFactory extends GenericClientFactory
 {
     private static Logger logger = Logger.getLogger(KunderaPersistence.class);
 

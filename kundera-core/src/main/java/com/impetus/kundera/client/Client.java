@@ -43,7 +43,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    void writeData(EnhancedEntity e) throws Exception;
+    void persist(EnhancedEntity e) throws Exception;
 
     /**
      * Retrieve columns from a column-family row.
@@ -60,7 +60,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    <E> E loadData(Class<E> entityClass, String key) throws Exception;
+    <E> E find(Class<E> entityClass, String key) throws Exception;
 
     /**
      * Retrieve columns from multiple rows of a column-family.
@@ -77,7 +77,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    <E> List<E> loadData(Class<E> entityClass, String... keys) throws Exception;
+    <E> List<E> find(Class<E> entityClass, String... keys) throws Exception;
 
     /**
      * Load data.
@@ -94,7 +94,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    <E> List<E> loadData(Class<E> entityClass, Map<String, String> col) throws Exception;
+    <E> List<E> find(Class<E> entityClass, Map<String, String> col) throws Exception;
 
     /**
      * Loads columns from multiple rows restricting results to conditions stored
@@ -134,7 +134,7 @@ public interface Client
      */
     void delete(EnhancedEntity enhancedEntity) throws Exception;
 
-    Query getQuery(String queryString);
+    Query createQuery(String queryString);
 
     String getPersistenceUnit();
 

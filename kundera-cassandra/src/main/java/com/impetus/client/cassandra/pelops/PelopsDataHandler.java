@@ -374,8 +374,9 @@ public class PelopsDataHandler extends DataHandler
                             // Set of all foreign keys for this field
                             Set<String> foreignKeys = MetadataUtils.deserializeKeys(PropertyAccessorFactory.STRING
                                     .fromBytes(columnValue));
-                            Field foreignKeyField = columnNameToFieldMap.get(columnName);
-
+                            
+                            Relation relation = m.getRelation(columnName);
+                            Field foreignKeyField = relation.getProperty();
                             foreignKeysMap.put(foreignKeyField.getName(), foreignKeys);
 
                         }

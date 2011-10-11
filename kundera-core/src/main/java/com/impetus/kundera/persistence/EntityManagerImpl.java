@@ -198,7 +198,7 @@ public class EntityManagerImpl implements EntityManager
                 // fire PreUpdate events
                 getEventDispatcher().fireEventListeners(m, o, PreUpdate.class);
 
-                client.writeData(o);
+                client.persist(o);
 
                 // fire PreUpdate events
                 getEventDispatcher().fireEventListeners(m, o, PostUpdate.class);
@@ -238,7 +238,7 @@ public class EntityManagerImpl implements EntityManager
                 // fire pre-persist events
                 getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PrePersist.class);
 
-                client.writeData(enhancedEntity);
+                client.persist(enhancedEntity);
 
                 // fire post-persist events
                 getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PostPersist.class);
@@ -281,7 +281,7 @@ public class EntityManagerImpl implements EntityManager
     @Override
     public final Query createQuery(String query)
     {
-        return this.client.getQuery(query);
+        return this.client.createQuery(query);
     }
 
     @Override

@@ -93,11 +93,11 @@ public class LuceneQuery extends QueryImpl implements Query
         {
             if (isAliasOnly())
             {
-                return getClient().loadData(getEntityClass(), primaryKeys);
+                return getClient().find(getEntityClass(), primaryKeys);
             }
             else
             {
-                return getClient().loadData(getEntityClass(), searchFilter);
+                return getClient().find(getEntityClass(), searchFilter);
             }
         }
         catch (Exception e)

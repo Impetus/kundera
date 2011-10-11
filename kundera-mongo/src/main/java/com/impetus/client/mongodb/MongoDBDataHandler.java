@@ -150,7 +150,7 @@ public class MongoDBDataHandler
                         Object embeddedEntity = null;
                         try
                         {
-                            embeddedEntity = getClient().loadData(embeddedEntityClass, foreignKey);
+                            embeddedEntity = getClient().find(embeddedEntityClass, foreignKey);
                         }
                         catch (Exception e)
                         {
@@ -173,7 +173,7 @@ public class MongoDBDataHandler
 
                         try
                         {
-                            embeddedEntityList = getClient().loadData(embeddedEntityClass,
+                            embeddedEntityList = getClient().find(embeddedEntityClass,
                                     foreignKeys.toArray(new String[0]));
                         }
                         catch (Exception e)

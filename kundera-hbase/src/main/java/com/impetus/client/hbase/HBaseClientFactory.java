@@ -8,11 +8,11 @@ import org.apache.lucene.util.Version;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
-import com.impetus.kundera.loader.GenericClientLoader;
+import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
-public class HBaseClientLoader extends GenericClientLoader
+public class HBaseClientFactory extends GenericClientFactory
 {
     IndexManager indexManager;
 

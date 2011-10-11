@@ -6,17 +6,17 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.loader.GenericClientLoader;
+import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
-public class MongoDBClientLoader extends GenericClientLoader
+public class MongoDBClientFactory extends GenericClientFactory
 {
     /** The logger. */
-    private static Logger logger = Logger.getLogger(MongoDBClientLoader.class);
+    private static Logger logger = Logger.getLogger(MongoDBClientFactory.class);
 
     @Override
     protected void initialize()
