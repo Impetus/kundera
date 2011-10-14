@@ -138,7 +138,7 @@ public class LuceneIndexer extends DocumentIndexer
      */
     private File getIndexDirectory()
     {
-        String filePath = System.getProperty("user.home") + LUCENE_INDEX_DIRECTORY_NAME;
+        String filePath = System.getProperty("user.home") + "/" + LUCENE_INDEX_DIRECTORY_NAME;
         File file = new File(filePath);
         if (!file.isDirectory())
         {
