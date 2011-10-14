@@ -114,7 +114,7 @@ public class PelopsClient implements Client
         }
         mutator.execute(ConsistencyLevel.ONE);
 
-        getIndexManager().update(entityMetadata, enhancedEntity.getEntity());
+        getIndexManager().write(entityMetadata, enhancedEntity.getEntity());
 
     }
 

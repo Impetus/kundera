@@ -94,12 +94,12 @@ public class EntityManagerImpl implements EntityManager
     public EntityManagerImpl(EntityManagerFactory factory)
     {
         this.factory = factory;
-        logger.info("Creating EntityManager for persistence unit : " + getPersistenceUnit());
+        logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
         session = new EntityManagerSession(this);
         eventDispatcher = new EntityEventDispatcher();
         client = ClientResolver.getClient(getPersistenceUnit());
         persistenceDelegator = new PersistenceDelegator(client, session);
-        logger.info("Created EntityManager for persistence unit : " + getPersistenceUnit());
+        logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
     }
 
     /**

@@ -2,7 +2,6 @@ package com.impetus.kundera.loader;
 
 import org.apache.log4j.Logger;
 
-import com.impetus.kundera.KunderaPersistence;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -11,7 +10,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 public abstract class GenericClientFactory implements Loader
 {
     /** The logger. */
-    private static Logger logger = Logger.getLogger(KunderaPersistence.class);
+    private static Logger logger = Logger.getLogger(GenericClientFactory.class);
 
     private Client client;
 
@@ -66,7 +65,7 @@ public abstract class GenericClientFactory implements Loader
         }
         else
         {
-            logger.info("Returning fresh client instance for persistence unit : " + persistenceUnit);
+            logger.debug("Returning fresh client instance for persistence unit : " + persistenceUnit);
             client = instantiateClient();
         }
 
