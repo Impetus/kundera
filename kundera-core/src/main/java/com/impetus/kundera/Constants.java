@@ -22,9 +22,9 @@ package com.impetus.kundera;
  * @since 0.1
  */
 public final class Constants
-{
+{    
 
-    /**
+	/**
      * Instantiates a new constants.
      */
     private Constants()
@@ -50,5 +50,7 @@ public final class Constants
     public static final String KUNDERA_SECONDARY_CACHE_NAME = "Kundera";
 
     public static final String PERSISTENCE_UNIT_NAME = "persistenceUnitName";
+    
+    public static final String LUCENE_INDEX_DIRECTORY_NAME = "lucene";
 
 }
