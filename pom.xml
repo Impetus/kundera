@@ -2,10 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>com.impetus</groupId>
 	<artifactId>kundera</artifactId>
 	<version>2.0.4</version>
 	<packaging>pom</packaging>
+
 	<name>kundera</name>
 	<url>http://kundera.googlecode.com</url>
 
@@ -14,6 +16,7 @@
 		<developerConnection>scm:svn:https://kundera.googlecode.com/svn/trunk</developerConnection>
 		<url>http://kundera.googlecode.com/svn/trunk</url>
 	</scm>
+
 	<issueManagement>
 		<system>Google Code</system>
 		<url>http://code.google.com/p/kundera/issues/list</url>
@@ -33,8 +36,18 @@
 			<url>dav:https://kundera.googlecode.com/svn/maven2/maven-repo-snapshot/</url>
 			<uniqueVersion>false</uniqueVersion>
 		</snapshotRepository>
-
 	</distributionManagement>
+
+	<modules>
+		<module>kundera-core</module>
+		<module>kundera-cassandra</module>
+		<module>kundera-hbase</module>
+		<module>kundera-mongo</module>
+	</modules>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
 	<repositories>
 		<repository>
@@ -53,188 +66,55 @@
 			<name>riptano</name>
 			<url>http://mvn.riptano.com/content/repositories/public</url>
 		</repository>
-
 	</repositories>
-        <modules>
-	    <module>kundera-core</module>
-	    <module>kundera-cassandra</module>
-	    <module>kundera-hbase</module>
-	    <module>kundera-mongo</module>
-	  </modules>
 
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-collections</groupId>
-			<artifactId>commons-collections</artifactId>
-			<version>3.2.1</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.4</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-			<version>1.1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.16</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.5.8</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.5.8</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>1.2</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>persistence-api</artifactId>
-			<version>2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-core</artifactId>
-			<version>3.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers</artifactId>
-			<version>3.0.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.xerial</groupId>
-			<artifactId>snappy</artifactId>
-			<version>1.0.1-rc4</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache</artifactId>
-			<version>2.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>cglib</groupId>
-			<artifactId>cglib</artifactId>
-			<version>2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>r08</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.stephenc</groupId>
-			<artifactId>jamm</artifactId>
-			<version>0.2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>antlr-runtime</artifactId>
-			<version>3.0.1</version>
-		</dependency>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<dependencies>
+					<dependency>
+						<groupId>com.impetus.ilabs.build</groupId>
+						<artifactId>checkstyle-config</artifactId>
+						<version>1</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>2.3</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.impetus.ilabs.build</groupId>
+						<artifactId>pmd-config</artifactId>
+						<version>1</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${basedir}</directory>
+							<includes>
+								<include>cobertura.ser</include>
+							</includes>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
-		<!-- Non public dependencies- being picked from kundera svn repository --><!--
-
-	<dependency>
-		<groupId>org.apache.cassandra</groupId>
-		<artifactId>cassandra-all</artifactId>
-		<version>0.7.6</version>
-	</dependency>
-
-		--><dependency>
-			<groupId>org.apache.cassandra</groupId>
-			<artifactId>apache-cassandra</artifactId>
-			<version>0.8.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cassandra</groupId>
-			<artifactId>apache-cassandra-thrift</artifactId>
-			<version>0.8.2</version>
-		</dependency>
-		<dependency>
-			<groupId>libthrift</groupId>
-			<artifactId>libthrift</artifactId>
-			<version>0.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.scale7</groupId>
-			<artifactId>scale7-pelops</artifactId>
-			<version>1.2-0.7.x-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.safehaus.jug</groupId>
-			<artifactId>jug-asl</artifactId>
-			<version>2.0.0</version>
-			<scope>test</scope>
-		</dependency>
-		<!-- Required for running tests for embedded cassandra mode 
-    	<dependency>
-			<groupId>com.google.collections</groupId>
-			<artifactId>google-collections</artifactId>
-			<version>1.0</version>
-			<scope>test</scope>
-		</dependency> -->
-		<dependency>
-			<groupId>org.cliffc</groupId>
-			<artifactId>high-scale-lib</artifactId>
-			<version>UNKNOWN</version>
-		</dependency>
-		<dependency>
-			<groupId>com.reardencommerce</groupId>
-			<artifactId>clhm-production</artifactId>
-			<version>UNKNOWN</version>
-		</dependency>
-		<dependency>
-			<groupId>javassist</groupId>
-			<artifactId>javassist</artifactId>
-			<version>3.9.0.GA</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.solr</groupId>
-			<artifactId>solandra</artifactId>
-			<version>UNKNOWN</version>
-		</dependency>
-
-		<!-- HBase depndencies -->
-		<dependency>
-			<groupId>org.apache.hbase</groupId>
-			<artifactId>hbase-core</artifactId>
-			<version>0.20.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-core</artifactId>
-			<version>0.20.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hbase.zookeeper</groupId>
-			<artifactId>zookeeper</artifactId>
-			<version>3.2.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.mongodb</groupId>
-			<artifactId>mongo</artifactId>
-			<version>2.5.3</version>
-		</dependency>		
-
-	</dependencies>
-	
 </project>

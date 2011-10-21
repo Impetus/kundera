@@ -1,93 +1,31 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-	<groupId>com.impetus</groupId>
-	<artifactId>kundera</artifactId>
-	<version>2.0.4</version>
-  </parent>
-  <groupId>com.impetus.client</groupId>
-  <artifactId>kundera-mongo</artifactId>
-  <version>2.0.4</version>
-  <packaging>jar</packaging>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-  <name>kundera-mongo</name>
-  <url>http://maven.apache.org</url>
+	<parent>
+		<groupId>com.impetus</groupId>
+		<artifactId>kundera</artifactId>
+		<version>2.0.4</version>
+	</parent>
+	<groupId>com.impetus.client</groupId>
+	<artifactId>kundera-mongo</artifactId>
+	<packaging>jar</packaging>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-     <groupId>com.impetus.core</groupId>
-     <artifactId>kundera-core</artifactId>
-     <version>2.0.4</version>
-    </dependency>
-  </dependencies>
-  <build>
-  		<plugins>
-  			<plugin>
-  				<artifactId>maven-compiler-plugin</artifactId>
-  				<configuration>
-  					<source>1.6</source>
-  					<target>1.6</target>
-  				</configuration>
-  			</plugin>
-  			<plugin>
-  				<!-- NOTE: We don't need a groupId specification because the group is 
-  					org.apache.maven.plugins ...which is assumed by default. -->
-  				<artifactId>maven-assembly-plugin</artifactId>
-  				<version>2.2.1</version>
-  				<configuration>
-  					<descriptorRefs>
-  						<descriptorRef>jar-with-dependencies</descriptorRef>
-  					</descriptorRefs>
-  				</configuration>
-  			</plugin>
-  			<plugin>
-  				<groupId>org.apache.maven.plugins</groupId>
-  				<artifactId>maven-checkstyle-plugin</artifactId>
-  				<dependencies>
-  					<dependency>
-  						<groupId>com.impetus.ilabs.build</groupId>
-  						<artifactId>checkstyle-config</artifactId>
-  						<version>1</version>
-  					</dependency>
-  				</dependencies>
-  			</plugin>
-  			<plugin>
-  				<groupId>org.apache.maven.plugins</groupId>
-  				<artifactId>maven-pmd-plugin</artifactId>
-  				<version>2.3</version>
-  				<dependencies>
-  					<dependency>
-  						<groupId>com.impetus.ilabs.build</groupId>
-  						<artifactId>pmd-config</artifactId>
-  						<version>1</version>
-  					</dependency>
-  				</dependencies>
-  			</plugin>
-  			<plugin>
-  				<groupId>org.apache.maven.plugins</groupId>
-  				<artifactId>maven-clean-plugin</artifactId>
-  				<configuration>
-  					<filesets>
-  						<fileset>
-  							<directory>${basedir}</directory>
-  							<includes>
-  								<include>cobertura.ser</include>
-  							</includes>
-  						</fileset>
-  					</filesets>
-  				</configuration>
-  			</plugin>
-  		</plugins>
-	</build>
+	<name>kundera-mongo</name>
+	<url>http://maven.apache.org</url>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.impetus.core</groupId>
+			<artifactId>kundera-core</artifactId>
+			<version>2.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mongodb</groupId>
+			<artifactId>mongo</artifactId>
+			<version>2.5.3</version>
+		</dependency>
+	</dependencies>
+
 </project>

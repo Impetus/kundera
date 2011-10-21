@@ -21,7 +21,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.metamodel.Metamodel;
 
-import org.mortbay.log.Log;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * @author amresh.singh
@@ -34,6 +37,9 @@ public class ApplicationMetadata
 
     /** Map of Persistence Unit Metadata. */
     private Map<String, PersistenceUnitMetadata> persistenceUnitMetadataMap = new ConcurrentHashMap<String, PersistenceUnitMetadata>();
+
+    /** The Constant log. */
+    private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
 
     /**
      * @param metamodelMap
@@ -49,7 +55,7 @@ public class ApplicationMetadata
         }
         else
         {
-            Log.debug("Entity meta model already exists for persistence unit " + persistenceUnit + " and class "
+            logger.debug("Entity meta model already exists for persistence unit " + persistenceUnit + " and class "
                     + clazz + ". Noting needs to be done");
         }
     }
