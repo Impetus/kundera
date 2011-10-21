@@ -65,6 +65,10 @@ public class PersistenceDelegator
 
             // Fetch top level entity (including embedded objects)
             EnhancedEntity enhancedEntity = (EnhancedEntity) getClient().find(entityClass, primaryKey.toString());
+            
+            if(enhancedEntity == null) {
+            	return null;
+            }
 
             E entity = (E) enhancedEntity.getEntity();
 

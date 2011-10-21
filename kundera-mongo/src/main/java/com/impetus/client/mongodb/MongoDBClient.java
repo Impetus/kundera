@@ -54,13 +54,27 @@ public class MongoDBClient implements Client
 
     /** The mongo db. */
     private DB mongoDb;
+    
+    /** The data handler. */
+    private MongoDBDataHandler dataHandler;
+
+    /** The index manager. */
+    private IndexManager indexManager;
+    
+    private String persistenceUnit;
+
 
     /** The log. */
     private static Log log = LogFactory.getLog(MongoDBClient.class);
 
     public MongoDBClient(Object mongo)
     {
+    	//TODO: This could be a constly call, see how connection pooling is relevant here
         this.mongoDb = (DB) mongo;
+        
+        //this.dataHandler = new MongoDBDataHandler(this);
+        
+        
     }
 
     @Override
@@ -74,7 +88,7 @@ public class MongoDBClient implements Client
         String key = enhancedEntity.getId();
 
         log.debug("Checking whether record already exist for " + dbName + "." + documentName + " for " + key);
-        Object entity = find(enhancedEntity.getClass(), key);
+        Object entity = find(enhancedEntity.getEntity().getClass(), key);
         if (entity != null)
         {
             log.debug("Updating data into " + dbName + "." + documentName + " for " + key);
@@ -322,8 +336,7 @@ public class MongoDBClient implements Client
     @Override
     public String getPersistenceUnit()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return persistenceUnit;
     }
 
     @Override
@@ -336,7 +349,7 @@ public class MongoDBClient implements Client
     @Override
     public void setPersistenceUnit(String persistenceUnit)
     {
-        // TODO Auto-generated method stub
+        this.persistenceUnit = persistenceUnit;
 
     }
 
