@@ -239,6 +239,7 @@ public class EntityManagerImpl implements EntityManager
                 getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PrePersist.class);
 
                 client.persist(enhancedEntity);
+                
 
                 // fire post-persist events
                 getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PostPersist.class);

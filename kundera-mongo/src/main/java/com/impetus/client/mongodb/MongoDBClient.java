@@ -143,10 +143,12 @@ public class MongoDBClient implements Client
             return null;
         }
 
-        Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
+        Object enhancedEntity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
                 entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument);
+        
+        
 
-        return (E) entity;
+        return (E) enhancedEntity;
     }
 
     @Override
@@ -177,11 +179,6 @@ public class MongoDBClient implements Client
     /**
      * Loads columns from multiple rows restricting results to conditions stored
      * in <code>filterClauseQueue</code>.
-     * 
-     * @param <E>
-     *            the element type
-     * @param em
-     *            the em
      * @param m
      *            the m
      * @param filterClauseQueue
@@ -192,17 +189,18 @@ public class MongoDBClient implements Client
      */
     public <E> List<E> loadData(Query query) throws Exception
     {
+    	MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
+    	
         // TODO Resolve the workaround
         EntityMetadata entityMetadata = KunderaMetadataManager
-                .getEntityMetadata(getPersistenceUnit(), query.getClass());
+                .getEntityMetadata(getPersistenceUnit(), mongoDBQuery.getEntityClass());
 
         String documentName = entityMetadata.getTableName();
         String dbName = entityMetadata.getSchema();
         Class clazz = entityMetadata.getEntityClazz();
 
         DBCollection dbCollection = mongoDb.getCollection(documentName);
-
-        MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
+        
         Queue filterClauseQueue = mongoDBQuery.getFilterClauseQueue();
         String result = mongoDBQuery.getResult();
 
@@ -324,7 +322,7 @@ public class MongoDBClient implements Client
     @Override
     public Query createQuery(String queryString)
     {
-        return null;
+        return new MongoDBQuery(this, queryString);
     }
 
     @Override

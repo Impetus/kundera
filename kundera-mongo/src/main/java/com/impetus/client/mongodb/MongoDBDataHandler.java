@@ -18,6 +18,7 @@ package com.impetus.client.mongodb;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,13 +35,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.mongodb.query.MongoDBQuery;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.persistence.EntityResolver;
 import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
@@ -72,10 +77,19 @@ public class MongoDBDataHandler
 
     public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document)
     {
-        Object entity = null;
+    	//Entity object
+        Object entity = null;	
+        
+        // Map to hold property-name=>foreign-entity relations
+        Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+        
         try
         {
             entity = entityClass.newInstance();
+            
+            // Populate primary key column
+            String rowKey = (String)document.get(m.getIdColumn().getField().getName());
+            PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), rowKey);
 
             // Populate entity columns
             List<Column> columns = m.getColumnsAsList();
@@ -84,34 +98,30 @@ public class MongoDBDataHandler
                 PropertyAccessorHelper.set(entity, column.getField(), document.get(column.getName()));
             }
 
-            // Populate primary key column
-            PropertyAccessorHelper.set(entity, m.getIdColumn().getField(),
-                    document.get(m.getIdColumn().getField().getName()));
-
             // Populate @Embedded objects and collections
-            List<EmbeddedColumn> superColumns = m.getEmbeddedColumnsAsList();
-            for (EmbeddedColumn superColumn : superColumns)
-            {
-                Field superColumnField = superColumn.getField();
+            List<EmbeddedColumn> embeddedColumns = m.getEmbeddedColumnsAsList();
+            for (EmbeddedColumn embeddedColumn : embeddedColumns)
+            {                	
+            	Field embeddedColumnField = embeddedColumn.getField();
                 // Can be a BasicDBObject or a list of it.
-                Object embeddedDocumentObject = document.get(superColumnField.getName());
+                Object embeddedDocumentObject = document.get(embeddedColumnField.getName());
 
                 if (embeddedDocumentObject != null)
                 {
                     if (embeddedDocumentObject instanceof BasicDBList)
                     {
-                        Class embeddedObjectClass = PropertyAccessorHelper.getGenericClass(superColumnField);
+                        Class embeddedObjectClass = PropertyAccessorHelper.getGenericClass(embeddedColumnField);
                         Collection embeddedCollection = DocumentObjectMapper.getCollectionFromDocumentList(
-                                (BasicDBList) embeddedDocumentObject, superColumnField.getType(), embeddedObjectClass,
-                                superColumn.getColumns());
-                        PropertyAccessorHelper.set(entity, superColumnField, embeddedCollection);
+                                (BasicDBList) embeddedDocumentObject, embeddedColumnField.getType(), embeddedObjectClass,
+                                embeddedColumn.getColumns());
+                        PropertyAccessorHelper.set(entity, embeddedColumnField, embeddedCollection);
                     }
                     else if (embeddedDocumentObject instanceof BasicDBObject)
                     {
                         Object embeddedObject = DocumentObjectMapper.getObjectFromDocument(
-                                (BasicDBObject) embeddedDocumentObject, superColumn.getField().getType(),
-                                superColumn.getColumns());
-                        PropertyAccessorHelper.set(entity, superColumnField, embeddedObject);
+                                (BasicDBObject) embeddedDocumentObject, embeddedColumn.getField().getType(),
+                                embeddedColumn.getColumns());
+                        PropertyAccessorHelper.set(entity, embeddedColumnField, embeddedObject);
 
                     }
                     else
@@ -119,91 +129,32 @@ public class MongoDBDataHandler
                         throw new PersistenceException("Can't retrieve embedded object from MONGODB document coz "
                                 + "it wasn't stored as BasicDBObject, possible problem in format.");
                     }
-                }
+                }        	
 
             }
-
-            // Check relations and fetch data from foreign keys list column
-            List<Relation> relations = m.getRelations();
-            for (Relation relation : relations)
-            {
-                Class<?> embeddedEntityClass = relation.getTargetEntity(); // Embedded
-                                                                           // entity
-                                                                           // class
-                Field embeddedPropertyField = relation.getProperty(); // Mapped
-                                                                      // to
-                                                                      // this
-                                                                      // property
-
-                EntityMetadata relMetadata = KunderaMetadataManager.getMetamodel(getPersistenceUnit())
-                        .getEntityMetadata(embeddedEntityClass);
-
-                BasicDBList relList = (BasicDBList) document.get(embeddedPropertyField.getName());
-                ; // List foreign keys
-
-                if (relList != null)
-                {
-                    if (relation.isUnary())
-                    {
-                        String foreignKey = (String) relList.get(0);
-
-                        Object embeddedEntity = null;
-                        try
-                        {
-                            embeddedEntity = getClient().find(embeddedEntityClass, foreignKey);
-                        }
-                        catch (Exception e)
-                        {
-                            throw new PersistenceException("Error while fetching relationship entity "
-                                    + relMetadata.getTableName() + " from " + m.getTableName());
-                        }
-                        PropertyAccessorHelper.set(entity, embeddedPropertyField, embeddedEntity);
-                    }
-                    else if (relation.isCollection())
-                    {
-                        List<String> foreignKeys = new ArrayList<String>();
-                        for (Object o : relList)
-                        {
-                            foreignKeys.add((String) o);
-                        }
-
-                        Collection embeddedEntityList = null; // Collection of
-                                                              // embedded
-                                                              // entities
-
-                        try
-                        {
-                            embeddedEntityList = getClient().find(embeddedEntityClass,
-                                    foreignKeys.toArray(new String[0]));
-                        }
-                        catch (Exception e)
-                        {
-                            throw new PersistenceException("Error while fetching relationship entity collection  "
-                                    + relMetadata.getTableName() + " from " + m.getTableName());
-                        }
-
-                        Collection<Object> embeddedObjects = null; // Collection
-                                                                   // of
-                                                                   // embedded
-                                                                   // entities
-                        if (relation.getPropertyType().equals(Set.class))
-                        {
-                            embeddedObjects = new HashSet<Object>();
-                        }
-                        else if (relation.getPropertyType().equals(List.class))
-                        {
-                            embeddedObjects = new ArrayList<Object>();
-                        }
-
-                        embeddedObjects.addAll(embeddedEntityList);
-                        PropertyAccessorHelper.set(entity, embeddedPropertyField, embeddedObjects);
-
-                    }
-
-                }
-
+            
+            //Check whether there is an embedded document for foreign keys, if it is there, put data
+            //into foreign keys map
+            Object foreignKeyObj = document.get(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME);
+            if(foreignKeyObj != null && foreignKeyObj instanceof BasicDBObject) {
+            	BasicDBObject dbObj = (BasicDBObject)foreignKeyObj;
+            	
+            	Set<String> foreignKeySet = dbObj.keySet();
+            	for(String foreignKey : foreignKeySet) {
+            		String foreignKeyValues = (String)dbObj.get(foreignKey);  //Foreign key values are stored as list 
+            		
+            		Set<String> foreignKeysSet = MetadataUtils.deserializeKeys(foreignKeyValues);    	           		       		
+            		
+            		foreignKeysMap.put(foreignKey, foreignKeysSet);         		
+            		
+            	}           	
+            	
             }
-
+            
+            //Set entity object and foreign key map into enhanced entity and return
+            EnhancedEntity e = EntityResolver.getEnhancedEntity(entity, rowKey, foreignKeysMap);
+            return e;            
+            
         }
         catch (InstantiationException e)
         {
@@ -220,7 +171,7 @@ public class MongoDBDataHandler
             log.error("Error while Getting entity from Document. Details:" + e.getMessage());
             return entity;
         }
-        return entity;
+        
     }
 
     private Client getClient()
@@ -237,6 +188,9 @@ public class MongoDBDataHandler
     {
         List<Column> columns = m.getColumnsAsList();
         BasicDBObject dbObj = new BasicDBObject();
+        
+        //Populate Row Key
+        extractEntityField(e.getEntity(), dbObj, m.getIdColumn());
 
         // Populate columns
         for (Column column : columns)
@@ -252,10 +206,10 @@ public class MongoDBDataHandler
         }
 
         // Populate @Embedded objects and collections
-        List<EmbeddedColumn> superColumns = m.getEmbeddedColumnsAsList();
-        for (EmbeddedColumn superColumn : superColumns)
+        List<EmbeddedColumn> embeddedColumns = m.getEmbeddedColumnsAsList();
+        for (EmbeddedColumn embeddedColumn : embeddedColumns)
         {
-            Field superColumnField = superColumn.getField();
+            Field superColumnField = embeddedColumn.getField();
             Object embeddedObject = PropertyAccessorHelper.getObject(e.getEntity(), superColumnField);
 
             if (embeddedObject != null)
@@ -268,29 +222,35 @@ public class MongoDBDataHandler
                     dbObj.put(
                             superColumnField.getName(),
                             DocumentObjectMapper.getDocumentListFromCollection(embeddedCollection,
-                                    superColumn.getColumns()));
+                                    embeddedColumn.getColumns()));
                 }
                 else
                 {
                     dbObj.put(superColumnField.getName(),
-                            DocumentObjectMapper.getDocumentFromObject(embeddedObject, superColumn.getColumns()));
+                            DocumentObjectMapper.getDocumentFromObject(embeddedObject, embeddedColumn.getColumns()));
                 }
             }
         }
 
         // Check foreign keys and set as list column on document object
         Map<String, Set<String>> foreignKeyMap = e.getForeignKeysMap();
-        Set foreignKeyNameSet = foreignKeyMap.keySet();
-        for (Object foreignKeyName : foreignKeyNameSet)
-        {
-            Set valueSet = foreignKeyMap.get(foreignKeyName);
-            BasicDBList foreignKeyValueList = new BasicDBList();
-            for (Object o : valueSet)
+        if(foreignKeyMap != null && !foreignKeyMap.isEmpty()) {   	
+            
+            DBObject foreignKeyObj = new BasicDBObject(); //A document containing all foreign keys as columns        
+            
+            Set foreignKeyNameSet = foreignKeyMap.keySet();
+            for (Object foreignKeyName : foreignKeyNameSet)
             {
-                foreignKeyValueList.add(o);
+                Set<String> valueSet = foreignKeyMap.get(foreignKeyName);              
+                
+                String foreignKeyValues = MetadataUtils.serializeKeys(valueSet);              
+                
+                foreignKeyObj.put((String) foreignKeyName, foreignKeyValues);
             }
-            dbObj.put((String) foreignKeyName, foreignKeyValueList);
+            
+            dbObj.put(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME, foreignKeyObj);            
         }
+        
 
         return dbObj;
     }
