@@ -179,7 +179,7 @@ public class MetadataUtils
         {
             if (sb.length() > 0)
             {
-                sb.append(Constants.SEPARATOR);
+                sb.append(Constants.FOREIGN_KEY_SEPARATOR);
             }
             sb.append(key);
         }
@@ -202,7 +202,7 @@ public class MetadataUtils
             return keys;
         }
 
-        String array[] = foreignKeys.split(Constants.SEPARATOR);
+        String array[] = foreignKeys.split(Constants.FOREIGN_KEY_SEPARATOR);
         for (String element : array)
         {
             keys.add(element);

@@ -36,7 +36,7 @@ public final class Constants
     public static final String ENCODING = "utf-8";
 
     /** The Constant SEPARATOR. */
-    public final static String SEPARATOR = "~";
+    public final static String FOREIGN_KEY_SEPARATOR = "~";
 
     /** The Constant INVALID. */
     public final static int INVALID = -1;

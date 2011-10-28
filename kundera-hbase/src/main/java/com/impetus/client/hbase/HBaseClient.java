@@ -109,8 +109,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         // columnFamily has a different meaning for HBase, so it won't be used
         // here
         String tableName = entityMetadata.getTableName();
-        E e = (E) handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId);
-        return e;
+        Object enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId);
+        return (E) enhancedEntity;
     }
 
     @Override
@@ -163,6 +163,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     public void close()
     {
         handler.shutdown();
+        
     }
 
     @Override

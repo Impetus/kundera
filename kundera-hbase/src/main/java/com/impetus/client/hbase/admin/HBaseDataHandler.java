@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,6 +51,7 @@ import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.persistence.EntityResolver;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
@@ -140,43 +142,44 @@ public class HBaseDataHandler implements DataHandler
             throws IOException
     {
 
-        E e = null;
+    	E enhancedEntity = null;
         try
         {
-            e = clazz.newInstance();
+            
+        	E entity = clazz.newInstance();	//Entity Object
 
             // Load raw data from HBase
             HBaseData data = hbaseReader.LoadData(gethTable(tableName), rowKey);
 
             // Populate raw data from HBase into entity
-            populateEntityFromHbaseData(e, data, m, rowKey);
+            populateEntityFromHbaseData(entity, data, m, rowKey);
+            
+            //Map to hold property-name=>foreign-entity relations
+            Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+            
+            //Set entity object and foreign key map into enhanced entity and return
+            enhancedEntity = (E)EntityResolver.getEnhancedEntity(entity, rowKey, foreignKeysMap);
         }
         catch (InstantiationException e1)
         {
             log.error("Error while creating an instance of " + clazz);
-            return e;
+            return enhancedEntity;
         }
         catch (IllegalAccessException e1)
         {
             log.error("Illegal Access while reading data from " + tableName + ";Details: " + e1.getMessage());
-            return e;
+            return enhancedEntity;
         }
-        return e;
+        return enhancedEntity;
     }
 
     @Override
     public void writeData(String tableName, EntityMetadata m, EnhancedEntity e) throws IOException
     {
 
-        // Now persist column families in the table
-        List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList(); // Yes,
-                                                                            // for
-                                                                            // HBase
-                                                                            // they
-                                                                            // are
-                                                                            // called
-                                                                            // column
-                                                                            // families
+        // Now persist column families in the table. For HBase, embedded columns are called column families    	
+        List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList(); 
+        
         for (EmbeddedColumn columnFamily : columnFamilies)
         {
             String columnFamilyName = columnFamily.getName();
@@ -194,7 +197,7 @@ public class HBaseDataHandler implements DataHandler
 
             if (columnFamilyObject == null)
             {
-                return;
+                continue;
             }
 
             List<Column> columns = columnFamily.getColumns();
@@ -256,27 +259,12 @@ public class HBaseDataHandler implements DataHandler
         if (columns != null && !columns.isEmpty())
         {
             hbaseWriter.writeColumns(gethTable(tableName), e.getId(), columns, e.getEntity());
-        }
-
-        // Persist relationships as a column in newly created Column family by
-        // Kundera
-        List<Relation> relations = m.getRelations();
-        for (Map.Entry<String, Set<String>> entry : e.getForeignKeysMap().entrySet())
-        {
-            String property = entry.getKey();
-            Set<String> foreignKeys = entry.getValue();
-
-            String keys = MetadataUtils.serializeKeys(foreignKeys);
-            if (null != keys)
-            { // EntityMetadata.Column col = new
-              // EntityMetadata().Column(property, null);
-
-                List<Column> columns2 = new ArrayList<Column>();
-                // columns.add(col);
-            }
-            hbaseWriter.writeColumns(gethTable(tableName), Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME, e.getId(),
-                    columns, keys);
-        }
+        }       
+        
+        // Persist relationships as a column in newly created Column family by Kundera
+        if(e.getForeignKeysMap() != null && ! e.getForeignKeysMap().isEmpty()) {
+        	hbaseWriter.writeForeignKeys(gethTable(tableName), e.getId(), e.getForeignKeysMap());
+        }              
 
     }
 
@@ -288,33 +276,36 @@ public class HBaseDataHandler implements DataHandler
     @Override
     public void shutdown()
     {
-        try
-        {
-            admin.shutdown();
+
+    	//TODO: Shutting down admin actually shuts down HMaster, something we don't want.
+    	//Devise a better way to release resources.
+    	
+    	/*try
+        {           
+        	
+        	admin.shutdown();
+
         }
         catch (IOException e)
         {
             throw new RuntimeException(e.getMessage());
         }
-    }
+*/    }
 
     // TODO: Scope of performance improvement in this method
-    private void populateEntityFromHbaseData(Object entity, HBaseData data, EntityMetadata m, String rowKey)
+    private void populateEntityFromHbaseData(Object entity, HBaseData hbaseData, EntityMetadata m, String rowKey)
     {
         try
         {
             /* Set Row Key */
             PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), rowKey);
 
-            /* Set each column families */
-            List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList(); // Yes,
-                                                                                // for
-                                                                                // HBase
-                                                                                // they
-                                                                                // are
-                                                                                // called
-                                                                                // column
-                                                                                // families
+            /* Set each column families, for HBase embedded columns are called columns families */
+            List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList(); 
+            
+            //Raw data retrieved from HBase for a particular row key (contains all column families)
+            List<KeyValue> hbaseValues = hbaseData.getColumns();            
+            
             for (EmbeddedColumn columnFamily : columnFamilies)
             {
                 Field columnFamilyFieldInEntity = columnFamily.getField();
@@ -323,9 +314,7 @@ public class HBaseDataHandler implements DataHandler
                 // Get a name->field map for columns in this column family
                 Map<String, Field> columnNameToFieldMap = MetadataUtils.createColumnsFieldMap(m, columnFamily);
 
-                // Raw data retrieved from HBase for a particular row key
-                // (contains all column families)
-                List<KeyValue> hbaseValues = data.getColumns();
+                
 
                 // Column family can be either @Embedded or @EmbeddedCollection
                 if (Collection.class.isAssignableFrom(columnFamilyClass))
