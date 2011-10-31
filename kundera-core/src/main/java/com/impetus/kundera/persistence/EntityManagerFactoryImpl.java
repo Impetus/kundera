@@ -87,6 +87,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         properties.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         this.properties = properties;
         this.persistenceUnit = persistenceUnit;
+        
+        //Initialize L2 cache        
+        cacheProvider = initSecondLevelCache();        
         logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
 
@@ -125,11 +128,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManagerFactory#getMetamodel()
-     */
     @Override
     public Metamodel getMetamodel()
     {
@@ -146,10 +144,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     public Cache getCache()
     {
         try
-        {
-            String resourceName = (String) getProperties().get("kundera.cache.config.resource");
-            cacheProvider = initSecondLevelCache((String) getProperties().get("kundera.cache.provider.class"),
-                    resourceName);
+        {            
 
             return cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
         }
@@ -176,10 +171,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      * @return the cache provider
      */
     @SuppressWarnings("unchecked")
-    private CacheProvider initSecondLevelCache(String cacheProviderClassName, String classResourceName)
+    private CacheProvider initSecondLevelCache()
     {
-        // String cacheProviderClassName = (String)
-        // props.get("kundera.cache.provider_class");
+    	String classResourceName = (String) getProperties().get("kundera.cache.config.resource");
+    	String cacheProviderClassName = (String) getProperties().get("kundera.cache.provider.class");
+
         CacheProvider cacheProvider = null;
         if (cacheProviderClassName != null)
         {

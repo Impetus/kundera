@@ -237,9 +237,12 @@ public class EntityManagerImpl implements EntityManager
 
                 // fire pre-persist events
                 getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PrePersist.class);
-
+                
+                //Persist data into data-store
                 client.persist(enhancedEntity);
                 
+                //Store entity into session
+                session.store(enhancedEntity.getId(), enhancedEntity.getEntity());                
 
                 // fire post-persist events
                 getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PostPersist.class);
