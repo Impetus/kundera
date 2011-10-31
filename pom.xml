@@ -38,13 +38,13 @@
 		</snapshotRepository>
 	</distributionManagement>
 
-	<modules>
+	<!-- <modules>
 		<module>kundera-core</module>
 		<module>kundera-cassandra</module>
 		<module>kundera-hbase</module>
 		<module>kundera-mongo</module>
 	</modules>
-
+-->
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -68,7 +68,52 @@
 		</repository>
 	</repositories>
 
+           <profiles>
+                <profile>
+                  <id>all</id>
+    			<activation>
+      				<activeByDefault>true</activeByDefault>
+    			</activation>
+		  <modules>
+  			<module>kundera-core</module>
+			<module>kundera-cassandra</module>
+			<module>kundera-hbase</module>
+			<module>kundera-mongo</module>
+		  </modules>
+                </profile>
+                <profile>
+                  <id>hbase</id>
+    			<activation>
+      				<activeByDefault>false</activeByDefault>
+    			</activation>
+		  <modules>
+  			<module>kundera-core</module>
+			<module>kundera-hbase</module>
+		  </modules>
+                </profile>
+                <profile>
+                  <id>mongo</id>
+    			<activation>
+      				<activeByDefault>true</activeByDefault>
+    			</activation>
+		  <modules>
+  			<module>kundera-core</module>
+			<module>kundera-mongo</module>
+		  </modules>
+                </profile>
+                <profile>
+                  <id>cassandra</id>
+    			<activation>
+      				<activeByDefault>false</activeByDefault>
+    			</activation>
+		<modules>
+			<module>kundera-core</module>
+			<module>kundera-cassandra</module>
+		</modules>
+                </profile>
+              </profiles>
 	<build>
+         
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
