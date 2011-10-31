@@ -90,6 +90,12 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         
         //Initialize L2 cache        
         cacheProvider = initSecondLevelCache();        
+        try {
+			cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
+		} catch (CacheException e) {
+			logger.warn("Error while creating L2 cache. Entities won't be stored in L2 cache. Details:" + e.getMessage());			
+		}
+		
         logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
 
@@ -145,8 +151,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     {
         try
         {            
-
-            return cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
+            return cacheProvider.getCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
         }
         catch (CacheException e)
         {
