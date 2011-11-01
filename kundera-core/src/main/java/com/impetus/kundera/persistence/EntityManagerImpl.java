@@ -15,22 +15,13 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
-import java.util.List;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
-import javax.persistence.PersistenceException;
-import javax.persistence.PostPersist;
-import javax.persistence.PostRemove;
-import javax.persistence.PostUpdate;
-import javax.persistence.PrePersist;
-import javax.persistence.PreRemove;
-import javax.persistence.PreUpdate;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -45,11 +36,6 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolver;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.persistence.event.EntityEventDispatcher;
-import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * The Class EntityManagerImpl.
@@ -75,8 +61,7 @@ public class EntityManagerImpl implements EntityManager
     /** The session. */
     private EntityManagerSession session;
 
-    /** The event dispatcher. */
-    private EntityEventDispatcher eventDispatcher;
+   
 
     /** Properties provided by user at the time of EntityManager Creation. */
     private Map<String, Object> properties;
@@ -96,8 +81,7 @@ public class EntityManagerImpl implements EntityManager
     {
         this.factory = factory;
         logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
-        session = new EntityManagerSession((Cache) factory.getCache());
-        eventDispatcher = new EntityEventDispatcher();
+        session = new EntityManagerSession((Cache) factory.getCache());        
         client = ClientResolver.getClient(getPersistenceUnit());
         persistenceDelegator = new PersistenceDelegator(client, session);
         logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
@@ -140,36 +124,7 @@ public class EntityManagerImpl implements EntityManager
             throw new IllegalArgumentException("Entity must not be null.");
         }
 
-        try
-        {
-
-            List<EnhancedEntity> reachableEntities = EntityResolver
-                    .resolve(getPersistenceUnit(), e, CascadeType.REMOVE);
-
-            // remove each one
-            for (EnhancedEntity enhancedEntity : reachableEntities)
-            {
-                logger.debug("Removing Entity : " + enhancedEntity);
-
-                // fire PreRemove events
-                getEventDispatcher().fireEventListeners(
-                        KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity.getEntity()
-                                .getClass()), enhancedEntity, PreRemove.class);
-
-                session.remove(enhancedEntity.getEntity().getClass(), enhancedEntity.getId());
-
-                client.delete(enhancedEntity);
-
-                // fire PostRemove events
-                getEventDispatcher().fireEventListeners(
-                        KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity.getEntity()
-                                .getClass()), enhancedEntity, PostRemove.class);
-            }
-        }
-        catch (Exception exp)
-        {
-            throw new PersistenceException(exp);
-        }
+        getPersistenceDelegator().remove(e);
     }
 
     @Override
@@ -181,36 +136,7 @@ public class EntityManagerImpl implements EntityManager
             throw new IllegalArgumentException("Entity must not be null.");
         }
 
-        try
-        {
-            List<EnhancedEntity> reachableEntities = EntityResolver.resolve(getPersistenceUnit(), e, CascadeType.MERGE);
-
-            // save each one
-            for (EnhancedEntity o : reachableEntities)
-            {
-                logger.debug("Merging Entity : " + o);
-
-                EntityMetadata m = ((MetamodelImpl) this.factory.getMetamodel()).getEntityMetadata(o.getEntity()
-                        .getClass());
-
-                // TODO: throw OptisticLockException if wrong version and
-                // optimistic locking enabled
-
-                // fire PreUpdate events
-                getEventDispatcher().fireEventListeners(m, o, PreUpdate.class);
-
-                client.persist(o);
-
-                // fire PreUpdate events
-                getEventDispatcher().fireEventListeners(m, o, PostUpdate.class);
-            }
-        }
-        catch (Exception exp)
-        {
-            throw new PersistenceException(exp);
-        }
-
-        return e;
+        return getPersistenceDelegator().merge(e);
     }
 
     @Override
@@ -222,40 +148,7 @@ public class EntityManagerImpl implements EntityManager
             throw new IllegalArgumentException("Entity must not be null.");
         }
 
-        try
-        {
-            List<EnhancedEntity> reachableEntities = EntityResolver.resolve(getPersistenceUnit(), e,
-                    CascadeType.PERSIST);
-
-            for (EnhancedEntity enhancedEntity : reachableEntities)
-            {
-                logger.debug("Persisting entity : " + enhancedEntity.getEntity().getClass());
-
-                EntityMetadata entityMetadata = ((MetamodelImpl) this.factory.getMetamodel())
-                        .getEntityMetadata(enhancedEntity.getEntity().getClass());
-
-                // TODO: throw EntityExistsException if already exists
-
-                // fire pre-persist events
-                getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PrePersist.class);
-
-                // Persist data into data-store
-                client.persist(enhancedEntity);
-
-                // Store entity into session
-                session.store(enhancedEntity.getId(), enhancedEntity.getEntity());
-
-                // fire post-persist events
-                getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PostPersist.class);
-
-                logger.debug("Data persisted successfully for entity : " + enhancedEntity.getEntity().getClass());
-            }
-        }
-        catch (Exception exp)
-        {
-            exp.printStackTrace();
-            throw new PersistenceException(exp);
-        }
+        getPersistenceDelegator().persist(e);
     }
 
     @Override
@@ -270,8 +163,7 @@ public class EntityManagerImpl implements EntityManager
     public final void close()
     {
         checkClosed();
-        session = null;
-        eventDispatcher = null;
+        session = null;        
         persistenceDelegator.close();
         client.close();
         closed = true;
@@ -508,12 +400,7 @@ public class EntityManagerImpl implements EntityManager
     {
         return session;
     }
-
-    private EntityEventDispatcher getEventDispatcher()
-    {
-        return eventDispatcher;
-    }
-
+    
     private PersistenceDelegator getPersistenceDelegator()
     {
         return persistenceDelegator;
