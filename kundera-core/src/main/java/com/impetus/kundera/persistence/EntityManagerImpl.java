@@ -42,6 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -95,7 +96,7 @@ public class EntityManagerImpl implements EntityManager
     {
         this.factory = factory;
         logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
-        session = new EntityManagerSession(this);
+        session = new EntityManagerSession((Cache) factory.getCache());
         eventDispatcher = new EntityEventDispatcher();
         client = ClientResolver.getClient(getPersistenceUnit());
         persistenceDelegator = new PersistenceDelegator(client, session);
@@ -237,12 +238,12 @@ public class EntityManagerImpl implements EntityManager
 
                 // fire pre-persist events
                 getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PrePersist.class);
-                
-                //Persist data into data-store
+
+                // Persist data into data-store
                 client.persist(enhancedEntity);
-                
-                //Store entity into session
-                session.store(enhancedEntity.getId(), enhancedEntity.getEntity());                
+
+                // Store entity into session
+                session.store(enhancedEntity.getId(), enhancedEntity.getEntity());
 
                 // fire post-persist events
                 getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PostPersist.class);

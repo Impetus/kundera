@@ -22,69 +22,84 @@ import javax.persistence.Table;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 
 @Entity
-@Table(name="person", schema="kunderaunit")
-public class Person {
-	
-	@Id
-	private String personId;
-	
-	@Column(name="first_name")
-	private String firstName;
-	
-	@Column(name="last_name")
-	private String lastName;
-	
-	
-	public Person(String personId, String firstName, String lastName) {
-		this.personId = personId;
-		this.firstName = firstName;
-		this.lastName = lastName;		
-	}
+@Table(name = "person", schema = "KunderaTest")
+public class Person
+{
 
-	/**
-	 * @return the personId
-	 */
-	public String getPersonId() {
-		return personId;
-	}
+    @Id
+    private String personId;
 
-	/**
-	 * @param personId the personId to set
-	 */
-	public void setPersonId(String personId) {
-		this.personId = personId;
-	}
+    @Column(name = "first_name")
+    private String firstName;
 
-	/**
-	 * @return the firstName
-	 */
-	public String getFirstName() {
-		return firstName;
-	}
+    @Column(name = "last_name")
+    private String lastName;
 
-	/**
-	 * @param firstName the firstName to set
-	 */
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+    public Person(String personId, String firstName, String lastName)
+    {
+        this.personId = personId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
 
-	/**
-	 * @return the lastName
-	 */
-	public String getLastName() {
-		return lastName;
-	}
+    public Person()
+    {
 
-	/**
-	 * @param lastName the lastName to set
-	 */
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+    }
+
+    /**
+     * @return the personId
+     */
+    public String getPersonId()
+    {
+        return personId;
+    }
+
+    /**
+     * @param personId
+     *            the personId to set
+     */
+    public void setPersonId(String personId)
+    {
+        this.personId = personId;
+    }
+
+    /**
+     * @return the firstName
+     */
+    public String getFirstName()
+    {
+        return firstName;
+    }
+
+    /**
+     * @param firstName
+     *            the firstName to set
+     */
+    public void setFirstName(String firstName)
+    {
+        this.firstName = firstName;
+    }
+
+    /**
+     * @return the lastName
+     */
+    public String getLastName()
+    {
+        return lastName;
+    }
+
+    /**
+     * @param lastName
+     *            the lastName to set
+     */
+    public void setLastName(String lastName)
+    {
+        this.lastName = lastName;
+    }
 
 }

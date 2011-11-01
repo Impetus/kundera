@@ -51,14 +51,15 @@ public class NonOperationalCacheProvider implements CacheProvider
     public Cache createCache(String name)
     {
         return cache;
-    }   
+    }
 
     @Override
-	public Cache getCache(String name) throws CacheException {
-		return null;
-	}
+    public Cache getCache(String name) throws CacheException
+    {
+        return null;
+    }
 
-	/* @see com.impetus.kundera.cache.CacheProvider#shutdown() */
+    /* @see com.impetus.kundera.cache.CacheProvider#shutdown() */
     @Override
     public void shutdown()
     {

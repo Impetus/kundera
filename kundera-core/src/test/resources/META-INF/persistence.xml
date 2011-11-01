@@ -1,0 +1,20 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
+	http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+	version="2.0">
+
+	<persistence-unit name="kunderatest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>		
+		<properties>
+			<property name="server.config" value="D:/vivek/source/cassandra-0.8.2/conf/cassandra.yaml"/>
+			<property name="kundera.nodes" value="localhost"/>
+			<property name="kundera.port" value="9160"/>
+			<property name="kundera.keyspace" value="KunderaTest"/>
+			<property name="kundera.dialect" value="cassandra"/>
+			<property name="kundera.client" value="Pelops"/>
+			<property name="kundera.cache.provider.class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider"/>
+            <property name="kundera.cache.config.resource" value="/ehcache-test.xml"/>   			
+		</properties>
+		
+	</persistence-unit>
+</persistence>

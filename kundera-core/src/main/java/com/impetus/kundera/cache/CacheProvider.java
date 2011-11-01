@@ -49,10 +49,12 @@ public interface CacheProvider
      *             the cache exception
      */
     Cache createCache(String name) throws CacheException;
-    
+
     /**
      * Returns cache for a given cache name
-     * @param name Cache Name
+     * 
+     * @param name
+     *            Cache Name
      */
     Cache getCache(String name) throws CacheException;
 

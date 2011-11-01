@@ -46,7 +46,7 @@ public class EhCacheProvider implements CacheProvider
 
     /** The manager. */
     private CacheManager manager;
-    
+
     private Cache cache;
 
     /** The Constant NET_SF_EHCACHE_CONFIGURATION_RESOURCE_NAME. */
@@ -229,8 +229,8 @@ public class EhCacheProvider implements CacheProvider
                     }
                 }
             }
-            
-            this.cache = new EhCacheWrapper(cache); 
+
+            this.cache = new EhCacheWrapper(cache);
             return this.cache;
         }
         catch (net.sf.ehcache.CacheException e)
@@ -238,18 +238,20 @@ public class EhCacheProvider implements CacheProvider
             throw new CacheException("Could not create cache: " + name, e);
         }
 
-    }    
+    }
 
     @Override
-	public Cache getCache(String cacheName) throws CacheException {
-		if(this.cache == null) {
-			this.cache = createCache(cacheName);
-		}
-		
-		return this.cache;
-	}
+    public Cache getCache(String cacheName) throws CacheException
+    {
+        if (this.cache == null)
+        {
+            this.cache = createCache(cacheName);
+        }
 
-	/* @see com.impetus.kundera.cache.CacheProvider#shutdown() */
+        return this.cache;
+    }
+
+    /* @see com.impetus.kundera.cache.CacheProvider#shutdown() */
     @Override
     public void shutdown()
     {

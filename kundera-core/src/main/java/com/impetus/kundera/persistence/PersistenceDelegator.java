@@ -52,8 +52,7 @@ public class PersistenceDelegator
     private EntityManagerSession getSession()
     {
         return session;
-    }    
-   
+    }
 
     public <E> E find(Class<E> entityClass, Object primaryKey)
     {
@@ -70,9 +69,10 @@ public class PersistenceDelegator
 
             // Fetch top level entity (including embedded objects)
             EnhancedEntity enhancedEntity = (EnhancedEntity) getClient().find(entityClass, primaryKey.toString());
-            
-            if(enhancedEntity == null) {
-            	return null;
+
+            if (enhancedEntity == null)
+            {
+                return null;
             }
 
             E entity = (E) enhancedEntity.getEntity();

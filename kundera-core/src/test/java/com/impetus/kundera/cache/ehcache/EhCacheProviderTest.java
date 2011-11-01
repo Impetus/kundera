@@ -24,87 +24,96 @@ import junit.framework.TestCase;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
-public class EhCacheProviderTest extends TestCase {
-	
-	EhCacheProvider cacheProvider; 
-	String cacheResource;
-	
-	String cacheName;
-	
-	Person person1;
-	Person person2;
+public class EhCacheProviderTest extends TestCase
+{
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		
-		cacheProvider = new EhCacheProvider();
-		
-		cacheResource = "/ehcache-test.xml";
-		
-		cacheName = "Kundera";	
-		
-		person1 = new Person("1", "Amresh", "Singh");
-		person2 = new Person("2", "Vivek", "Mishra");
-		
-		
-	}
+    EhCacheProvider cacheProvider;
 
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		cacheProvider.shutdown();
-	}
-	
-	/**
-	 * Test method for {@link com.impetus.kundera.cache.ehcache.EhCacheProvider#createCache(java.lang.String)}.
-	 */
-	public void testCreateCache() {
-		//Initialize Cache Provider
-		assertNotNull(cacheProvider);
-		try {
-			cacheProvider.init(cacheResource);
-		} catch (CacheException e) {
-			fail(e.getMessage());
-		}
-		
-		assertNotNull(cacheProvider.getCacheManager());
+    String cacheResource = "/ehcache-test.xml";;
 
-		//Initialize Cache
-		Cache cache = null; 
-		try {
-			cache = cacheProvider.createCache(cacheName);
-		} catch (CacheException e) {
-			fail(e.getMessage());
-		}
-		assertNotNull(cache);
-		assertEquals(cache.getClass(), EhCacheWrapper.class);		
-		
-		EhCacheWrapper ehCache = (EhCacheWrapper) cache;
-		
-		assertEquals(0, ehCache.size());
-		
-		//Store objects into cache
-		ehCache.put(person1.getClass() + "_" + person1.getPersonId(), person1);
-		assertEquals(1, ehCache.size());
-		ehCache.put(person2.getClass() + "_" + person2.getPersonId(), person2);
-		assertEquals(2, ehCache.size());
-		
-		//Lookup objects from cache
-		Object o = ehCache.get(person1.getClass() + "_" + person1.getPersonId());
-		assertEquals(Person.class, o.getClass());
-		Person p1 = (Person) o;
-		assertNotNull(p1);
-		assertEquals("1", p1.getPersonId());
-		assertEquals("Amresh", p1.getFirstName());
-		assertEquals("Singh", p1.getLastName());
-		
-		//Remove object from cache
-		ehCache.evict(Person.class, Person.class + "_" + person1.getPersonId());
-		assertEquals(1, ehCache.size());		
-		
-		//Clear cache
-		cacheProvider.clearAll();
-		assertEquals(0, ehCache.size());		
-	}
+    String cacheName = "Kundera";
+
+    Person person1;
+
+    Person person2;
+
+    protected void setUp() throws Exception
+    {
+        super.setUp();
+
+        cacheProvider = new EhCacheProvider();
+
+        person1 = new Person("1", "Amresh", "Singh");
+        person2 = new Person("2", "Vivek", "Mishra");
+
+    }
+
+    protected void tearDown() throws Exception
+    {
+        super.tearDown();
+        cacheProvider.shutdown();
+    }
+
+    /**
+     * Test method for
+     * {@link com.impetus.kundera.cache.ehcache.EhCacheProvider#createCache(java.lang.String)}
+     * .
+     */
+    public void testCreateCache()
+    {
+        // Initialize Cache Provider
+        assertNotNull(cacheProvider);
+        try
+        {
+            cacheProvider.init(cacheResource);
+        }
+        catch (CacheException e)
+        {
+            fail(e.getMessage());
+        }
+
+        assertNotNull(cacheProvider.getCacheManager());
+
+        // Initialize Cache
+        Cache cache = null;
+        try
+        {
+            cache = cacheProvider.createCache(cacheName);
+        }
+        catch (CacheException e)
+        {
+            fail(e.getMessage());
+        }
+        assertNotNull(cache);
+        assertEquals(cache.getClass(), EhCacheWrapper.class);
+
+        EhCacheWrapper ehCache = (EhCacheWrapper) cache;
+
+        assertEquals(0, ehCache.size());
+
+        // Store objects into cache
+        ehCache.put(person1.getClass() + "_" + person1.getPersonId(), person1);
+        assertEquals(1, ehCache.size());
+        ehCache.put(person2.getClass() + "_" + person2.getPersonId(), person2);
+        assertEquals(2, ehCache.size());
+
+        // Lookup objects from cache
+        Object o = ehCache.get(person1.getClass() + "_" + person1.getPersonId());
+        assertEquals(Person.class, o.getClass());
+        Person p1 = (Person) o;
+        assertNotNull(p1);
+        assertEquals("1", p1.getPersonId());
+        assertEquals("Amresh", p1.getFirstName());
+        assertEquals("Singh", p1.getLastName());
+
+        // Remove object from cache
+        ehCache.evict(Person.class, Person.class + "_" + person1.getPersonId());
+        assertEquals(1, ehCache.size());
+
+        // Clear cache
+        cacheProvider.clearAll();
+        assertEquals(0, ehCache.size());
+    }
 }
