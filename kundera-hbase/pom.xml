@@ -14,6 +14,8 @@
 	<name>kundera-hbase</name>
 	<url>http://maven.apache.org</url>
 
+
+        <!-- Dependencies -->
 	<dependencies>
 		<dependency>
 			<groupId>com.impetus.core</groupId>
@@ -31,5 +33,21 @@
 			<version>0.20.2</version>
 		</dependency>
 	</dependencies>
+     
+       <!-- Assembly build -->
+       <build>
+          <plugins>
+             <plugin>
+		<!-- NOTE: We don't need a groupId specification because the group is org.apache.maven.plugins ...which is assumed by default. -->
+	        <artifactId>maven-assembly-plugin</artifactId>
+	        <version>2.2.1</version>
+	        <configuration>
+	    	  <descriptorRefs>
+		     <descriptorRef>jar-with-dependencies</descriptorRef>
+		  </descriptorRefs>
+	        </configuration>
+	     </plugin>
+          </plugins>
+       </build>
 
 </project>
