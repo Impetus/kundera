@@ -18,15 +18,13 @@ package com.impetus.kundera.persistence;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.persistence.EntityManager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.cache.Cache;
 
 /**
- * The Class EntityManagerCache.
+ * The Class EntityManagerSession.
  */
 public class EntityManagerSession
 {
@@ -37,8 +35,7 @@ public class EntityManagerSession
     /** cache is used to store objects retrieved in this EntityManager session. */
     private Map<Object, Object> sessionCache;
 
-    /** The entityManager. */
-    private EntityManager entityManager;
+    private Cache l2Cache; // L2 Cache
 
     /**
      * Instantiates a new entity manager cache.
@@ -46,10 +43,10 @@ public class EntityManagerSession
      * @param entityManager
      *            the entityManager
      */
-    public EntityManagerSession(EntityManager em)
+    public EntityManagerSession(Cache cache)
     {
-        this.entityManager = em;
         this.sessionCache = new ConcurrentHashMap<Object, Object>();
+        setL2Cache(cache);
     }
 
     /**
@@ -74,7 +71,7 @@ public class EntityManagerSession
         if (o == null)
         {
             LOG.debug("Reading from L2 >> " + key);
-            Cache c = (Cache) entityManager.getEntityManagerFactory().getCache();
+            Cache c = (Cache) getL2Cache();
             if (c != null)
             {
                 o = (T) c.get(key);
@@ -97,7 +94,7 @@ public class EntityManagerSession
      */
     protected void store(Object id, Object entity)
     {
-        store(id, entity, Boolean.FALSE);
+        store(id, entity, Boolean.TRUE);
     }
 
     /**
@@ -120,7 +117,7 @@ public class EntityManagerSession
         {
             LOG.debug("Writing to L2 >>" + key);
             // save to second level cache
-            Cache c = (Cache) entityManager.getEntityManagerFactory().getCache();
+            Cache c = (Cache) getL2Cache();
             if (c != null)
             {
                 c.put(key, entity);
@@ -140,7 +137,7 @@ public class EntityManagerSession
      */
     protected <T> void remove(Class<T> entityClass, Object id)
     {
-        remove(entityClass, id, Boolean.FALSE);
+        remove(entityClass, id, Boolean.TRUE);
     }
 
     /**
@@ -164,7 +161,7 @@ public class EntityManagerSession
         if (spillOverToL2)
         {
             LOG.debug("Removing from L2 >> " + key);
-            Cache c = (Cache) entityManager.getEntityManagerFactory().getCache();
+            Cache c = (Cache) getL2Cache();
             if (c != null)
             {
                 c.evict(entityClass, key);
@@ -190,5 +187,24 @@ public class EntityManagerSession
     public final void clear()
     {
         sessionCache = new ConcurrentHashMap<Object, Object>();
+        getL2Cache().evictAll();
     }
+
+    /**
+     * @return the l2Cache
+     */
+    public Cache getL2Cache()
+    {
+        return l2Cache;
+    }
+
+    /**
+     * @param l2Cache
+     *            the l2Cache to set
+     */
+    public void setL2Cache(Cache l2Cache)
+    {
+        this.l2Cache = l2Cache;
+    }
+
 }

@@ -17,6 +17,8 @@ package com.impetus.kundera.cache;
 
 import java.util.Map;
 
+import javax.persistence.Cache;
+
 /**
  * NonOperational cache provider.
  * 
@@ -49,6 +51,12 @@ public class NonOperationalCacheProvider implements CacheProvider
     public Cache createCache(String name)
     {
         return cache;
+    }
+
+    @Override
+    public Cache getCache(String name) throws CacheException
+    {
+        return null;
     }
 
     /* @see com.impetus.kundera.cache.CacheProvider#shutdown() */

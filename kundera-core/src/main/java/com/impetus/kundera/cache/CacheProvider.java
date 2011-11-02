@@ -40,7 +40,7 @@ public interface CacheProvider
     void init(String cacheResourceName) throws CacheException;
 
     /**
-     * Create cache for a given name.
+     * Creates cache for a given name.
      * 
      * @param name
      *            the name
@@ -49,6 +49,14 @@ public interface CacheProvider
      *             the cache exception
      */
     Cache createCache(String name) throws CacheException;
+
+    /**
+     * Returns cache for a given cache name
+     * 
+     * @param name
+     *            Cache Name
+     */
+    Cache getCache(String name) throws CacheException;
 
     /**
      * Shutdown cache.

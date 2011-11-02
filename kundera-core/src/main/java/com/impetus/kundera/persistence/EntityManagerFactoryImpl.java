@@ -87,6 +87,19 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         properties.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         this.properties = properties;
         this.persistenceUnit = persistenceUnit;
+
+        // Initialize L2 cache
+        cacheProvider = initSecondLevelCache();
+        try
+        {
+            cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
+        }
+        catch (CacheException e)
+        {
+            logger.warn("Error while creating L2 cache. Entities won't be stored in L2 cache. Details:"
+                    + e.getMessage());
+        }
+
         logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
 
@@ -94,10 +107,13 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     public final void close()
     {
         closed = true;
-        if(cacheProvider != null) {
-        	cacheProvider.shutdown();
+
+        // Shut cache provider down
+        if (cacheProvider != null)
+        {
+            cacheProvider.shutdown();
         }
-        
+
         ClientResolver.getClientFactory(getPersistenceUnit()).unload(getPersistenceUnit());
     }
 
@@ -125,11 +141,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManagerFactory#getMetamodel()
-     */
     @Override
     public Metamodel getMetamodel()
     {
@@ -147,11 +158,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     {
         try
         {
-            String resourceName = (String) getProperties().get("kundera.cache.config.resource");
-            cacheProvider = initSecondLevelCache((String) getProperties().get("kundera.cache.provider.class"),
-                    resourceName);
-
-            return cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
+            return cacheProvider.getCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
         }
         catch (CacheException e)
         {
@@ -176,10 +183,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      * @return the cache provider
      */
     @SuppressWarnings("unchecked")
-    private CacheProvider initSecondLevelCache(String cacheProviderClassName, String classResourceName)
+    private CacheProvider initSecondLevelCache()
     {
-        // String cacheProviderClassName = (String)
-        // props.get("kundera.cache.provider_class");
+        String classResourceName = (String) getProperties().get("kundera.cache.config.resource");
+        String cacheProviderClassName = (String) getProperties().get("kundera.cache.provider.class");
+
         CacheProvider cacheProvider = null;
         if (cacheProviderClassName != null)
         {
