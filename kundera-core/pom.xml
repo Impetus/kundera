@@ -73,5 +73,19 @@
 			<version>r08</version>
 		</dependency>
 	</dependencies>
+       <build>
+         <plugins>
+          <plugin>
+		<!-- NOTE: We don't need a groupId specification because the group is org.apache.maven.plugins ...which is assumed by default. -->
+		     <artifactId>maven-assembly-plugin</artifactId>
+	 	     <version>2.2.1</version>
+		     <configuration>
+			<descriptorRefs>
+			  <descriptorRef>jar-with-dependencies</descriptorRef>
+			</descriptorRefs>
+	 	     </configuration>
+		</plugin>
+          </plugins>
+       </build>
 
 </project>
