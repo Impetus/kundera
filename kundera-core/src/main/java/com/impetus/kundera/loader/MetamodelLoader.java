@@ -52,19 +52,23 @@ public class MetamodelLoader extends ApplicationLoader
     private static Logger log = Logger.getLogger(MetamodelLoader.class);
 
     @Override
-    public void load(String persistenceUnit)
+    public void load(String... persistenceUnits)
     {
         log.debug("Loading Entity Metadata...");
         KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
-        if (appMetadata.getMetamodelMap().get(persistenceUnit) != null)
-        {
-            log.debug("Metadata already exists for the Persistence Unit " + persistenceUnit + ". Nothing to do");
+        
+        for(String persistenceUnit : persistenceUnits) {
+            if (appMetadata.getMetamodelMap().get(persistenceUnit) != null)
+            {
+                log.debug("Metadata already exists for the Persistence Unit " + persistenceUnit + ". Nothing to do");
+            }
+            else
+            {
+                loadEntityMetadata(persistenceUnit);
+            }
         }
-        else
-        {
-            loadEntityMetadata(persistenceUnit);
-        }
+        
     }
 
     private void loadEntityMetadata(String persistenceUnit)

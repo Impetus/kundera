@@ -43,8 +43,8 @@ public class KunderaPersistence implements PersistenceProvider
     /** The logger. */
     private static Logger logger = Logger.getLogger(KunderaPersistence.class);
 
-    /** The emf map. */
-    private static Map<String, EntityManagerFactory> emfMap = new HashMap<String, EntityManagerFactory>();
+    /** Instance of Entity Manager Factory */
+    private static EntityManagerFactory emf;
 
     /**
      * Instantiates a new kundera persistence.
@@ -62,35 +62,39 @@ public class KunderaPersistence implements PersistenceProvider
         return createEntityManagerFactory(info.getPersistenceUnitName(), map);
     }
 
-    @Override
+    @Override    
+
     public final EntityManagerFactory createEntityManagerFactory(String persistenceUnit, Map map)
     {
-        // TODO Pooling of factories. Current code caches a single factory and
-        // uses it every time.
-        if (emfMap.get(persistenceUnit) != null)
+        //TODO: Pooling of factories. Current code caches a single factory and uses it every time.
+        if (emf != null)
         {
-            logger.info("Returning existing factory for persistence unit : " + persistenceUnit);
-            return emfMap.get(persistenceUnit);
-        }
-        else
-        {
-
-            logger.info("Creating non-existing factory for persistence unit : " + persistenceUnit);
-
-            // Initialize Persistence Unit Related Parts
-            initializeKundera(persistenceUnit);
-
-            logger.info("Preparing EntityManagerFactoryBuilder for persistence unit : " + persistenceUnit);
+            logger.info("Returning existing factory " + emf);
+            return emf;
+        } else {
+            logger.info("Creating non-existing factory for persistence unit(s) : " + persistenceUnit);
             EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder();
-            return builder.buildEntityManagerFactory(persistenceUnit, map);
-
+            emf = builder.buildEntityManagerFactory(persistenceUnit, map); 
         }
-    }
+        
+        //One time initialization (Application and Client level)
+        initializeKundera(persistenceUnit);
 
+        
+        return emf;
+
+        
+    }
+    
+    /**
+     * One time initialization at Application and Client level
+     * @param persistenceUnit Persistence Unit/ Comma separated persistence units(provided by user)
+     */
     private void initializeKundera(String persistenceUnit)
     {
         // Invoke Application MetaData
-        logger.info("Loading Application MetaData For Persistence Unit " + persistenceUnit);
+        logger.info("Loading Application MetaData and Initializing Client(s) For Persistence Unit(s) " 
+                + persistenceUnit);
         (new ApplicationLoader()).load(persistenceUnit);
 
         // Invoke Client Loaders

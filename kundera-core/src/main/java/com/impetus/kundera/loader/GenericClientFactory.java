@@ -19,7 +19,7 @@ public abstract class GenericClientFactory implements Loader
     private Object connectionPoolOrConnection;
 
     @Override
-    public void load(String persistenceUnit)
+    public void load(String... persistenceUnits)
     {
 
         setPersistenceUnit(persistenceUnit);
@@ -30,7 +30,7 @@ public abstract class GenericClientFactory implements Loader
 
         // initialize the client
         logger.info("Initializing client for persistence unit : " + persistenceUnit);
-        initialize();
+        initializeClient();
 
         // Construct Pool
         logger.info("Constructing pool for persistence unit : " + persistenceUnit);
@@ -45,7 +45,7 @@ public abstract class GenericClientFactory implements Loader
             KunderaMetadata.getInstance().addClientMetadata(persistenceUnit, clientMetadata);
     }
 
-    protected abstract void initialize();
+    protected abstract void initializeClient();
 
     protected abstract Object createPoolOrConnection();
 

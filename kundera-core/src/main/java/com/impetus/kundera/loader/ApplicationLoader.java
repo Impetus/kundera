@@ -31,7 +31,7 @@ public class ApplicationLoader implements Loader
     List<ApplicationLoader> applicationLoaders = new ArrayList<ApplicationLoader>();
 
     @Override
-    public void load(String persistenceUnit)
+    public void load(String... persistenceUnits)
     {
         log.debug("Loading User Application...");
 
@@ -40,12 +40,12 @@ public class ApplicationLoader implements Loader
 
         for (ApplicationLoader appLoader : applicationLoaders)
         {
-            appLoader.load(persistenceUnit);
+            appLoader.load(persistenceUnits);
         }
     }
 
     @Override
-    public void unload(String persistenceUnit)
+    public void unload(String... persistenceUnits)
     {
         // TODO Auto-generated method stub
 

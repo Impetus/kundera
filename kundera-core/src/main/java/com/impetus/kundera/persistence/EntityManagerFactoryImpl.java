@@ -56,6 +56,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      */
     private Map<String, Object> properties;
 
+    //TODO: Move it to Application Metadata
     private CacheProvider cacheProvider;
 
     private String persistenceUnit;
