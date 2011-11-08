@@ -34,8 +34,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.Cache;
-import com.impetus.kundera.client.Client;
-import com.impetus.kundera.client.ClientResolver;
 
 /**
  * The Class EntityManagerImpl.
@@ -53,10 +51,6 @@ public class EntityManagerImpl implements EntityManager
 
     /** The closed. */
     private boolean closed = false;
-
-    // TODO To move the client to persistence delegator
-    /** The client. */
-    private Client client;
 
     /** The session. */
     private EntityManagerSession session;
@@ -81,9 +75,9 @@ public class EntityManagerImpl implements EntityManager
     {
         this.factory = factory;
         logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
-        session = new EntityManagerSession((Cache) factory.getCache());        
-        client = ClientResolver.getClient(getPersistenceUnit());
-        persistenceDelegator = new PersistenceDelegator(client, session);
+        session = new EntityManagerSession((Cache) factory.getCache());       
+        
+        persistenceDelegator = new PersistenceDelegator(session, getPersistenceUnit().split(Constants.PERSISTENCE_UNIT_SEPARATOR));
         logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
     }
 
@@ -164,8 +158,7 @@ public class EntityManagerImpl implements EntityManager
     {
         checkClosed();
         session = null;        
-        persistenceDelegator.close();
-        client.close();
+        persistenceDelegator.close();        
         closed = true;
     }
 
@@ -178,7 +171,7 @@ public class EntityManagerImpl implements EntityManager
     @Override
     public final Query createQuery(String query)
     {
-        return this.client.createQuery(query);
+        return persistenceDelegator.createQuery(query);
     }
 
     @Override
@@ -385,15 +378,14 @@ public class EntityManagerImpl implements EntityManager
             throw new IllegalStateException("EntityManager has been closed.");
         }
     }
-
-    private final Client getClient()
-    {
-        return client;
-    }
-
+    
+    /**
+     * Returns Persistence unit (or comma separated units) associated with EMF
+     * @return
+     */
     private String getPersistenceUnit()
     {
-        return (String) this.factory.getProperties().get(Constants.PERSISTENCE_UNIT_NAME);
+        return (String)this.factory.getProperties().get(Constants.PERSISTENCE_UNIT_NAME);
     }
 
     private EntityManagerSession getSession()

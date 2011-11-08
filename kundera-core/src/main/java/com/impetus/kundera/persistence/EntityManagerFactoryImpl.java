@@ -58,8 +58,12 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     //TODO: Move it to Application Metadata
     private CacheProvider cacheProvider;
-
-    private String persistenceUnit;
+    
+    /**
+     * Array of persistence units. (Contains only one string usually except when persisting in multiple data-stores)
+     */
+    String[] persistenceUnits;
+    
 
     /**
      * This one is generally called via the PersistenceProvider.
@@ -87,7 +91,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         // TODO Device some better (JPA) way
         properties.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         this.properties = properties;
-        this.persistenceUnit = persistenceUnit;
+        this.persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
 
         // Initialize L2 cache
         cacheProvider = initSecondLevelCache();
@@ -103,6 +107,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
         logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
+    
+    
 
     @Override
     public final void close()
@@ -114,8 +120,10 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         {
             cacheProvider.shutdown();
         }
-
-        ClientResolver.getClientFactory(getPersistenceUnit()).unload(getPersistenceUnit());
+        
+        for(String pu : persistenceUnits) {
+            ClientResolver.getClientFactory(pu).unload(pu);
+        }        
     }
 
     @Override
@@ -145,7 +153,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Metamodel getMetamodel()
     {
-        return KunderaMetadataManager.getMetamodel(getPersistenceUnit());
+        //return KunderaMetadataManager.getMetamodel(getPersistenceUnit());
+        return null;
     }
 
     @Override
@@ -210,9 +219,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         return cacheProvider;
     }
 
-    private String getPersistenceUnit()
+    private String[] getPersistenceUnits()
     {
-        return persistenceUnit;
+        return persistenceUnits;
     }
 
 }

@@ -37,8 +37,9 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author amresh.singh
  */
-public class MetadataUtils
-{
+public class MetadataUtils{
+    
+
     /**
      * @param m
      * @param columnNameToFieldMap
@@ -213,10 +214,10 @@ public class MetadataUtils
     public static void setSchemaAndPersistenceUnit(EntityMetadata m, String schemaStr)
     {
 
-        if (schemaStr.indexOf("@") > 0)
+        if (schemaStr.indexOf(Constants.SCHEMA_PERSISTENCE_UNIT_SEPARATOR) > 0)
         {
-            m.setSchema(schemaStr.substring(0, schemaStr.indexOf("@")));
-            m.setPersistenceUnit(schemaStr.substring(schemaStr.indexOf("@") + 1, schemaStr.length()));
+            m.setSchema(schemaStr.substring(0, schemaStr.indexOf(Constants.SCHEMA_PERSISTENCE_UNIT_SEPARATOR)));
+            m.setPersistenceUnit(schemaStr.substring(schemaStr.indexOf(Constants.SCHEMA_PERSISTENCE_UNIT_SEPARATOR) + 1, schemaStr.length()));
         }
         else
         {

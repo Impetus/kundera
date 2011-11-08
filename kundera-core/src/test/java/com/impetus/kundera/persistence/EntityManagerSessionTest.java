@@ -19,7 +19,7 @@ import junit.framework.TestCase;
 
 import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.cache.CacheProvider;
-import com.impetus.kundera.entity.Person;
+import com.impetus.kundera.entity.PersonDTO;
 
 /**
  * @author amresh.singh
@@ -37,9 +37,9 @@ public class EntityManagerSessionTest extends TestCase
 
     String cacheProviderClassName = "com.impetus.kundera.cache.ehcache.EhCacheProvider";
 
-    Person person1;
+    PersonDTO person1;
 
-    Person person2;
+    PersonDTO person2;
 
     protected void setUp() throws Exception
     {
@@ -52,8 +52,8 @@ public class EntityManagerSessionTest extends TestCase
         cache = (Cache) cacheProvider.createCache("Kundera");
         ems = new EntityManagerSession(cache);
 
-        person1 = new Person("1", "Amresh", "Singh");
-        person2 = new Person("2", "Vivek", "Mishra");
+        person1 = new PersonDTO("1", "Amresh", "Singh");
+        person2 = new PersonDTO("2", "Vivek", "Mishra");
     }
 
     protected void tearDown() throws Exception
@@ -73,14 +73,14 @@ public class EntityManagerSessionTest extends TestCase
         assertEquals(2, ems.getL2Cache().size());
 
         // Lookup object from session
-        Person p1 = ems.lookup(Person.class, person1.getPersonId());
+        PersonDTO p1 = ems.lookup(PersonDTO.class, person1.getPersonId());
         assertNotNull(p1);
         assertEquals(person1.getPersonId(), p1.getPersonId());
         assertEquals(person1.getFirstName(), p1.getFirstName());
         assertEquals(person1.getLastName(), p1.getLastName());
 
         // Remove object from session
-        ems.remove(Person.class, person1.getPersonId());
+        ems.remove(PersonDTO.class, person1.getPersonId());
         assertNotNull(ems);
         assertEquals(1, ems.getL2Cache().size());
 

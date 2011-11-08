@@ -58,14 +58,14 @@ public class EntityResolver
      *            the cascade type
      * @return the all reachable entities
      */
-    public static List<EnhancedEntity> resolve(String persistenceUnit, Object entity, CascadeType cascadeType)
+    public static List<EnhancedEntity> resolve(Object entity, CascadeType cascadeType, String... persistenceUnits)
     {
         Map<String, EnhancedEntity> map = new LinkedHashMap<String, EnhancedEntity>();
         try
         {
             LOG.debug("Resolving reachable entities for cascade " + cascadeType);
 
-            recursivelyResolveEntities(persistenceUnit, entity, cascadeType, map);
+            recursivelyResolveEntities(entity, cascadeType, map, persistenceUnits);
 
         }
         catch (PropertyAccessException e)
@@ -97,14 +97,14 @@ public class EntityResolver
      * @throws PropertyAccessException
      *             the property access exception
      */
-    private static void recursivelyResolveEntities(String persistenceUnit, Object object, CascadeType cascadeType,
-            Map<String, EnhancedEntity> entities) throws PropertyAccessException
+    private static void recursivelyResolveEntities(Object object, CascadeType cascadeType,
+            Map<String, EnhancedEntity> entities, String... persistenceUnits) throws PropertyAccessException
     {
 
         EntityMetadata entityMetaData = null;
         try
         {
-            entityMetaData = KunderaMetadataManager.getEntityMetadata(persistenceUnit, object.getClass());
+            entityMetaData = KunderaMetadataManager.getEntityMetadata(object.getClass(), persistenceUnits);
         }
         catch (Exception e)
         {
@@ -164,7 +164,7 @@ public class EntityResolver
             // if object is not null, then proceed
             if (null != value)
             {
-                EntityMetadata relMetadata = KunderaMetadataManager.getEntityMetadata(persistenceUnit, targetClass);
+                EntityMetadata relMetadata = KunderaMetadataManager.getEntityMetadata(targetClass, persistenceUnits);
 
                 if (relation.isUnary())
                 {
@@ -178,7 +178,7 @@ public class EntityResolver
                     foreignKeysMap.put(targetField.getName(), foreignKeys);
 
                     // get all other reachable objects from object "value"
-                    recursivelyResolveEntities(persistenceUnit, value, cascadeType, entities);
+                    recursivelyResolveEntities(value, cascadeType, entities, persistenceUnits);
 
                 }
                 if (relation.isCollection())
@@ -199,7 +199,7 @@ public class EntityResolver
                         foreignKeys.add(targetId);
 
                         // Get all other reachable objects from "o_"
-                        recursivelyResolveEntities(persistenceUnit, o_, cascadeType, entities);
+                        recursivelyResolveEntities(o_, cascadeType, entities, persistenceUnits);
                     }
                     foreignKeysMap.put(targetField.getName(), foreignKeys);
                 }

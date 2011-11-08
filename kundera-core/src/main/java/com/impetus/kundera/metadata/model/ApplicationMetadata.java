@@ -69,11 +69,6 @@ public class ApplicationMetadata
         getPersistenceUnitMetadataMap().put(persistenceUnit, persistenceUnitMetadata);
     }
 
-    public EntityMetadata getEntityMetadata(String persistenceUnit, Class<?> entityClass)
-    {
-        return ((MetamodelImpl) getMetamodel(persistenceUnit)).getEntityMetadata(entityClass);
-    }
-
     /**
      * @return the entityMetadataMap
      */
@@ -94,7 +89,7 @@ public class ApplicationMetadata
     public Metamodel getMetamodel(String persistenceUnit)
     {
         return getMetamodelMap().get(persistenceUnit);
-    }
+    }   
 
     /**
      * @return the persistenceUnitMetadataMap

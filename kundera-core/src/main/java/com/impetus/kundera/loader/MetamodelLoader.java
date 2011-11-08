@@ -33,6 +33,7 @@ import javax.persistence.metamodel.Metamodel;
 
 import org.apache.log4j.Logger;
 
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
 import com.impetus.kundera.classreading.ResourceIterator;
@@ -75,7 +76,7 @@ public class MetamodelLoader extends ApplicationLoader
     {
         if (persistenceUnit == null)
         {
-            throw new IllegalArgumentException("Must have a persistenceUnitName!");
+            throw new IllegalArgumentException("Must have a persistenceUnitName in order to load entity metadata!");
         }
 
         KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
@@ -105,10 +106,20 @@ public class MetamodelLoader extends ApplicationLoader
          */
         Reader reader;
         URL[] resources;
+        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         if (classesToScan == null || classesToScan.isEmpty())
         {
             log.info("No class to scan for persistence unit " + persistenceUnit
                     + ". Entities will be loaded from classpath/ context-path");
+            //Entity metadata is not related to any PU, and hence will be stored at common place
+            persistenceUnit = Constants.COMMON_ENTITY_METADATAS;
+            
+            //Check whether all common entity metadata have already been loaded
+            if(appMetadata.getMetamodelMap().get(persistenceUnit) != null) {
+                log.info("All common entitity metadata already loaded, nothing need to be done");
+                return;
+            }
+            
             reader = new ClasspathReader();
             resources = reader.findResourcesByClasspath();
         }
@@ -120,7 +131,7 @@ public class MetamodelLoader extends ApplicationLoader
         // All entities to load should be annotated with @Entity
         reader.addValidAnnotations(Entity.class.getName());
 
-        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
+        
         Metamodel metamodel = appMetadata.getMetamodel(persistenceUnit);
         if (metamodel == null)
         {

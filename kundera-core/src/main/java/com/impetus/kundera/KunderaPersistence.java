@@ -29,7 +29,10 @@ import org.apache.log4j.Logger;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ApplicationLoader;
 import com.impetus.kundera.loader.CoreLoader;
+import com.impetus.kundera.metadata.model.ClientMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryBuilder;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * The Class KunderaPersistence.
@@ -44,8 +47,9 @@ public class KunderaPersistence implements PersistenceProvider
     private static Logger logger = Logger.getLogger(KunderaPersistence.class);
 
     /** Instance of Entity Manager Factory */
-    private static EntityManagerFactory emf;
-
+    private static EntityManagerFactory emf;   
+    
+    
     /**
      * Instantiates a new kundera persistence.
      */
@@ -74,7 +78,8 @@ public class KunderaPersistence implements PersistenceProvider
         } else {
             logger.info("Creating non-existing factory for persistence unit(s) : " + persistenceUnit);
             EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder();
-            emf = builder.buildEntityManagerFactory(persistenceUnit, map); 
+            //emf = builder.buildEntityManagerFactory(persistenceUnit, map); 
+            emf = new EntityManagerFactoryImpl(persistenceUnit, new HashMap<String, Object>());
         }
         
         //One time initialization (Application and Client level)
@@ -88,18 +93,25 @@ public class KunderaPersistence implements PersistenceProvider
     
     /**
      * One time initialization at Application and Client level
-     * @param persistenceUnit Persistence Unit/ Comma separated persistence units(provided by user)
+     * @param persistenceUnit Persistence Unit/ Comma separated persistence units
      */
     private void initializeKundera(String persistenceUnit)
     {
         // Invoke Application MetaData
         logger.info("Loading Application MetaData and Initializing Client(s) For Persistence Unit(s) " 
                 + persistenceUnit);
-        (new ApplicationLoader()).load(persistenceUnit);
+        
+        String[] persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
+        
+        
+        (new ApplicationLoader()).load(persistenceUnits);
 
         // Invoke Client Loaders
-        logger.info("Loading Client For Persistence Unit " + persistenceUnit);
-        ClientResolver.getClientFactory(persistenceUnit).load(persistenceUnit);
+        logger.info("Loading Client(s) For Persistence Unit(s) " + persistenceUnit);
+        for(String pu : persistenceUnits) {
+            ClientResolver.getClientFactory(pu).load(pu);
+        }      
+        
     }
 
     @Override

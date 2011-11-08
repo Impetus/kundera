@@ -27,7 +27,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "person", schema = "KunderaTest")
-public class Person
+public class PersonDTO
 {
 
     @Id
@@ -39,14 +39,14 @@ public class Person
     @Column(name = "last_name")
     private String lastName;
 
-    public Person(String personId, String firstName, String lastName)
+    public PersonDTO(String personId, String firstName, String lastName)
     {
         this.personId = personId;
         this.firstName = firstName;
         this.lastName = lastName;
     }
 
-    public Person()
+    public PersonDTO()
     {
 
     }

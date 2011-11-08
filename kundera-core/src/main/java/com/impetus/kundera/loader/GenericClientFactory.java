@@ -1,5 +1,7 @@
 package com.impetus.kundera.loader;
 
+import javax.persistence.PersistenceException;
+
 import org.apache.log4j.Logger;
 
 import com.impetus.kundera.client.Client;
@@ -20,6 +22,11 @@ public abstract class GenericClientFactory implements Loader
 
     @Override
     public void load(String... persistenceUnits)
+    {
+        throw new PersistenceException();
+    }
+    
+    public void load(String persistenceUnit)
     {
 
         setPersistenceUnit(persistenceUnit);

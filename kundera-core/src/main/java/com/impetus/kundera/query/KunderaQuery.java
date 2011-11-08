@@ -272,7 +272,7 @@ public abstract class KunderaQuery
      */
     private void initFilter()
     {
-        EntityMetadata metadata = getMetamodel().getEntityMetadata(entityClass);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(client.getPersistenceUnit(), entityClass);
         String indexName = metadata.getIndexName();
 
         // String filter = getFilter();
@@ -371,7 +371,7 @@ public abstract class KunderaQuery
 
     public final EntityMetadata getEntityMetadata()
     {
-        return getMetamodel().getEntityMetadata(entityClass);
+        return KunderaMetadataManager.getEntityMetadata(client.getPersistenceUnit(), entityClass);
     }
 
     /**

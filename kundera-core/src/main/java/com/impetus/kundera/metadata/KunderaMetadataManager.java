@@ -15,6 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata;
 
+import org.apache.log4j.Logger;
+
+import com.impetus.kundera.Constants;
+import com.impetus.kundera.loader.MetamodelLoader;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -28,20 +32,49 @@ import com.impetus.kundera.proxy.LazyInitializerFactory;
  */
 public class KunderaMetadataManager
 {
+    private static Logger log = Logger.getLogger(KunderaMetadataManager.class);
+    
     public static PersistenceUnitMetadata getPersistenceUnitMetadata(String persistenceUnit)
     {
         return KunderaMetadata.getInstance().getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
     }
 
     public static MetamodelImpl getMetamodel(String persistenceUnit)
-    {
+    {        
         KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
-        return (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(persistenceUnit);
+        
+        MetamodelImpl metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(persistenceUnit);
+        if(metamodel == null) {
+            metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(Constants.COMMON_ENTITY_METADATAS);
+        }
+        
+        return metamodel;
     }
 
     public static EntityMetadata getEntityMetadata(String persistenceUnit, Class entityClass)
     {
-        return KunderaMetadataManager.getMetamodel(persistenceUnit).getEntityMetadata(entityClass);
+        return getMetamodel(persistenceUnit).getEntityMetadata(entityClass);
+    }
+    
+    
+    /**
+     * Finds ands returns Entity metadata for a given array of PUs
+     * @param entityClass
+     * @param persistenceUnits
+     * @return
+     */
+    public static EntityMetadata getEntityMetadata(Class entityClass, String... persistenceUnits)
+    {
+        for(String pu : persistenceUnits) {
+            MetamodelImpl metamodel = getMetamodel(pu);
+            EntityMetadata metadata = metamodel.getEntityMetadata(entityClass); 
+            if(metadata != null) {
+                return metadata;
+            }
+        }
+        log.warn("Something is terribly wrong, No Entity metadata found for the class " + entityClass + ". Returning null value.");
+        return null; 
+        
     }
 
     public static LazyInitializerFactory getLazyInitializerFactory()
