@@ -19,7 +19,7 @@ public class MongoDBClientFactory extends GenericClientFactory
     private static Logger logger = Logger.getLogger(MongoDBClientFactory.class);
 
     @Override
-    protected void initialize()
+    protected void initializeClient()
     {
         // TODO Try to created table indexes over here
 
@@ -81,7 +81,7 @@ public class MongoDBClientFactory extends GenericClientFactory
     }
 
     @Override
-    public void unload(String persistenceUnit)
+    public void unload(String... persistenceUnits)
     {
         // TODO Remove connection pool
     }
