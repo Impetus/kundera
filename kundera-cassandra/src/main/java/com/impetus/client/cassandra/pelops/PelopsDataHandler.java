@@ -84,7 +84,7 @@ public class PelopsDataHandler extends DataHandler
                     Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
 
             e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), columns, null));
-
+            
         }
         return e;
     }

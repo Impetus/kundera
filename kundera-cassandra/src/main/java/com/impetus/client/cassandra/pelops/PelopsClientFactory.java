@@ -26,7 +26,7 @@ public class PelopsClientFactory extends GenericClientFactory
     IndexManager indexManager;
 
     @Override
-    protected void initialize()
+    protected void initializeClient()
     {
         PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.getInstance().getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
@@ -90,7 +90,7 @@ public class PelopsClientFactory extends GenericClientFactory
     }
 
     @Override
-    public void unload(String persistenceUnit)
+    public void unload(String... persistenceUnits)
     {
         Pelops.shutdown();
     }
