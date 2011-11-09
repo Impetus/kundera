@@ -92,40 +92,44 @@ public class HBaseWriter implements Writer
         }
         htable.put(p);
     }
-    
-    
-    //TODO: Scope of performance improvement in this code
+
+    // TODO: Scope of performance improvement in this code
     @Override
-    public void writeForeignKeys(HTable hTable, String rowKey, Map<String, Set<String>> foreignKeyMap) throws IOException {
-    	Put p = new Put(Bytes.toBytes(rowKey));   	
-    	
-    	//Checking if foreign key column family exists
-		Get g = new Get(Bytes.toBytes(rowKey));
-		Result r = hTable.get(g);	
-		
-    	
-    	for (Map.Entry<String, Set<String>> entry : foreignKeyMap.entrySet())
+    public void writeForeignKeys(HTable hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
+            throws IOException
+    {
+        Put p = new Put(Bytes.toBytes(rowKey));
+
+        // Checking if foreign key column family exists
+        Get g = new Get(Bytes.toBytes(rowKey));
+        Result r = hTable.get(g);
+
+        for (Map.Entry<String, Set<String>> entry : foreignKeyMap.entrySet())
         {
-    		String property = entry.getKey();	//Foreign key name
-    		Set<String> foreignKeys = entry.getValue();
+            String property = entry.getKey(); // Foreign key name
+            Set<String> foreignKeys = entry.getValue();
             String keys = MetadataUtils.serializeKeys(foreignKeys);
 
-            //Check if there was any existing foreign key value, if yes, append it
-    		byte [] value = r.getValue(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes.toBytes(property));
-    		String 	existingForeignKey = Bytes.toString(value);
-    		
-    		if(existingForeignKey == null || existingForeignKey.isEmpty()) {
-    			p.add(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes.toBytes(property), Bytes.toBytes(keys));
-    		} else {
-    			p.add(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), 
-    					Bytes.toBytes(property), Bytes.toBytes(existingForeignKey + Constants.FOREIGN_KEY_SEPARATOR + keys));
-    		}       
-            
-			
+            // Check if there was any existing foreign key value, if yes, append
+            // it
+            byte[] value = r.getValue(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME),
+                    Bytes.toBytes(property));
+            String existingForeignKey = Bytes.toString(value);
+
+            if (existingForeignKey == null || existingForeignKey.isEmpty())
+            {
+                p.add(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes.toBytes(property),
+                        Bytes.toBytes(keys));
+            }
+            else
+            {
+                p.add(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes.toBytes(property),
+                        Bytes.toBytes(existingForeignKey + Constants.FOREIGN_KEY_SEPARATOR + keys));
+            }
+
         }
-    	
-    	
-    	hTable.put(p);
+
+        hTable.put(p);
     }
 
 }

@@ -163,7 +163,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     public void close()
     {
         handler.shutdown();
-        
+
     }
 
     @Override

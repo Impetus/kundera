@@ -17,7 +17,7 @@ public class HBaseClientFactory extends GenericClientFactory
     IndexManager indexManager;
 
     @Override
-    protected void initialize()
+    protected void initializeClient()
     {
         indexManager = new IndexManager(new LuceneIndexer(new StandardAnalyzer(Version.LUCENE_CURRENT)));
     }
@@ -48,7 +48,7 @@ public class HBaseClientFactory extends GenericClientFactory
     }
 
     @Override
-    public void unload(String persistenceUnit)
+    public void unload(String... persistenceUnits)
     {
         // TODO destroy pool
     }

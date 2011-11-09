@@ -33,32 +33,42 @@ public interface Writer
 {
 
     /**
-     * Writes a column family with name <code>columnFamily</code>, into a table whose columns are <code>columns</code>
-     * @param columnFamily Column Family Name
-     * @param rowKey Row Key
-     * @param columns Columns for a given column family
+     * Writes a column family with name <code>columnFamily</code>, into a table
+     * whose columns are <code>columns</code>
+     * 
+     * @param columnFamily
+     *            Column Family Name
+     * @param rowKey
+     *            Row Key
+     * @param columns
+     *            Columns for a given column family
      */
     void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns, Object columnFamilyObj)
             throws IOException;
-    
+
     /**
-     * Writes Columns <code>columns</code> into a given table. Each columns is written in their own column family(name same as column name)
+     * Writes Columns <code>columns</code> into a given table. Each columns is
+     * written in their own column family(name same as column name)
+     * 
      * @param htable
      * @param rowKey
-     * @param columns Columns of a given table (No column family given)
+     * @param columns
+     *            Columns of a given table (No column family given)
      * @param entity
      * @throws IOException
      */
     public void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity) throws IOException;
-    
-    
+
     /**
-     * Writes foreign keys along with a database table. They are stored into a column family named FKey-TO. Each column corresponds to 
-     * foreign key field name and values are actual foreign keys (separated by ~ if applicable) 
+     * Writes foreign keys along with a database table. They are stored into a
+     * column family named FKey-TO. Each column corresponds to foreign key field
+     * name and values are actual foreign keys (separated by ~ if applicable)
+     * 
      * @param hTable
      * @param rowKey
      * @param foreignKeyMap
      * @throws IOException
      */
-    public void writeForeignKeys(HTable hTable, String rowKey, Map<String, Set<String>> foreignKeyMap) throws IOException;
+    public void writeForeignKeys(HTable hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
+            throws IOException;
 }
