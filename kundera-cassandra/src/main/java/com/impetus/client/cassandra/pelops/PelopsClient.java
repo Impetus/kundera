@@ -114,7 +114,7 @@ public class PelopsClient implements Client
         }
         mutator.execute(ConsistencyLevel.ONE);
 
-        getIndexManager().write(entityMetadata, enhancedEntity.getEntity());
+        //getIndexManager().write(entityMetadata, enhancedEntity.getEntity());
 
     }
 
@@ -205,12 +205,6 @@ public class PelopsClient implements Client
     public final IndexManager getIndexManager()
     {
         return indexManager;
-    }
-
-    @Override
-    public Query createQuery(String ejbqlString)
-    {
-        return new LuceneQuery(this, ejbqlString);
     }
 
     @Override

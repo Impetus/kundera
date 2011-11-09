@@ -318,12 +318,6 @@ public class MongoDBClient implements Client
     }
 
     @Override
-    public Query createQuery(String queryString)
-    {
-        return new MongoDBQuery(this, queryString);
-    }
-
-    @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> col) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");

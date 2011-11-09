@@ -40,7 +40,7 @@ public class PelopsClientFactory extends GenericClientFactory
         }
 
         // Start Solandra specific tasks
-        initializeSolandra(getPersistenceUnit());
+        //initializeSolandra(getPersistenceUnit());
 
         // TODO StandardAnalyzer is thread safe. So it looks like indexManager
         // is threadsafe an hence using a single instance

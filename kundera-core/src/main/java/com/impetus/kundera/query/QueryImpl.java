@@ -29,14 +29,12 @@ import javax.persistence.TemporalType;
 
 import org.apache.commons.lang.NotImplementedException;
 
-import com.impetus.kundera.client.Client;
-
 /**
  * The Class QueryImpl.
  * 
  * @author animesh.kumar
  */
-public abstract class QueryImpl extends KunderaQuery implements Query
+public class QueryImpl extends KunderaQuery implements Query
 {
 
     /** The query. */
@@ -52,9 +50,9 @@ public abstract class QueryImpl extends KunderaQuery implements Query
      * @param query
      *            the query
      */
-    public QueryImpl(Client client, String query)
+    public QueryImpl(String query, String... persistenceUnits)
     {
-        super(client);
+        super(persistenceUnits);
         this.query = query;
         parse();
     }

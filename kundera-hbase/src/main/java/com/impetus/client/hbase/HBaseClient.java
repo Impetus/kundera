@@ -180,12 +180,6 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     }
 
     @Override
-    public Query createQuery(String ejbqlString)
-    {
-        return new LuceneQuery(this, ejbqlString);
-    }
-
-    @Override
     public String getPersistenceUnit()
     {
         return persistenceUnit;

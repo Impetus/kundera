@@ -53,6 +53,29 @@ public class KunderaMetadataManager
 
         return metamodel;
     }
+    
+    public static MetamodelImpl getMetamodel(String... persistenceUnits)
+    {
+        KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
+        
+        MetamodelImpl metamodel = null;
+        for(String pu : persistenceUnits) {
+        	metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+            .getMetamodel(pu);
+        	
+        	if(metamodel != null) {
+        		return metamodel;
+        	}
+        }       
+        
+        if (metamodel == null)
+        {
+            metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    Constants.COMMON_ENTITY_METADATAS);
+        }
+        return metamodel;
+    }
+
 
     public static EntityMetadata getEntityMetadata(String persistenceUnit, Class entityClass)
     {

@@ -55,9 +55,6 @@ public abstract class KunderaQuery
     /** The INTRA pattern. */
     private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b", Pattern.CASE_INSENSITIVE);
 
-    /** The EntityManager. */
-    private Client client;
-
     /** The result. */
     private String result;
 
@@ -78,6 +75,11 @@ public abstract class KunderaQuery
 
     /** The entity class. */
     private Class<?> entityClass;
+    
+    /**
+     * Persistence Unit(s)
+     */
+    String[] persistenceUnits;
 
     // contains a Queue of alternate FilterClause object and Logical Strings
     // (AND, OR etc.)
@@ -92,19 +94,9 @@ public abstract class KunderaQuery
      * @param metadataManager
      *            MetadataManager
      */
-    public KunderaQuery(Client client)
+    public KunderaQuery(String... persistenceUnits)
     {
-        this.client = client;
-    }
-
-    /**
-     * Gets the entity manager.
-     * 
-     * @return the em
-     */
-    public Client getClient()
-    {
-        return client;
+       this.persistenceUnits = persistenceUnits;
     }
 
     /**
@@ -272,7 +264,7 @@ public abstract class KunderaQuery
      */
     private void initFilter()
     {
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(client.getPersistenceUnit(), entityClass);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClass, persistenceUnits);
         String indexName = metadata.getIndexName();
 
         // String filter = getFilter();
@@ -371,7 +363,7 @@ public abstract class KunderaQuery
 
     public final EntityMetadata getEntityMetadata()
     {
-        return KunderaMetadataManager.getEntityMetadata(client.getPersistenceUnit(), entityClass);
+        return KunderaMetadataManager.getEntityMetadata(entityClass, persistenceUnits);
     }
 
     /**
@@ -532,6 +524,6 @@ public abstract class KunderaQuery
 
     private MetamodelImpl getMetamodel()
     {
-        return KunderaMetadataManager.getMetamodel(client.getPersistenceUnit());
+        return KunderaMetadataManager.getMetamodel(persistenceUnits);
     }
 }

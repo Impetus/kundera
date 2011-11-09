@@ -30,6 +30,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
+import com.impetus.kundera.query.QueryImpl;
 
 public class PersistenceDelegator
 {
@@ -336,8 +337,7 @@ public class PersistenceDelegator
 
     public Query createQuery(String query)
     {
-        // return client.createQuery(query);
-        return null;
+        return new QueryImpl(query, persistenceUnits);        
     }
 
     public final boolean isOpen()

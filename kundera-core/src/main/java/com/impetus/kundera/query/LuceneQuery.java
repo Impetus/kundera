@@ -56,9 +56,9 @@ public class LuceneQuery extends QueryImpl implements Query
      * @param jpaQuery
      *            the jpa query
      */
-    public LuceneQuery(Client client, String jpaQuery)
+    public LuceneQuery(String jpaQuery, String... persistenceUnits)
     {
-        super(client, jpaQuery);
+        super(jpaQuery, persistenceUnits);
     }
 
     /**
