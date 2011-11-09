@@ -89,7 +89,7 @@ public class ApplicationMetadata
     public Metamodel getMetamodel(String persistenceUnit)
     {
         return getMetamodelMap().get(persistenceUnit);
-    }   
+    }
 
     /**
      * @return the persistenceUnitMetadataMap

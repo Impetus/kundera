@@ -58,8 +58,9 @@ public class MetamodelLoader extends ApplicationLoader
         log.debug("Loading Entity Metadata...");
         KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
-        
-        for(String persistenceUnit : persistenceUnits) {
+
+        for (String persistenceUnit : persistenceUnits)
+        {
             if (appMetadata.getMetamodelMap().get(persistenceUnit) != null)
             {
                 log.debug("Metadata already exists for the Persistence Unit " + persistenceUnit + ". Nothing to do");
@@ -69,7 +70,7 @@ public class MetamodelLoader extends ApplicationLoader
                 loadEntityMetadata(persistenceUnit);
             }
         }
-        
+
     }
 
     private void loadEntityMetadata(String persistenceUnit)
@@ -111,15 +112,17 @@ public class MetamodelLoader extends ApplicationLoader
         {
             log.info("No class to scan for persistence unit " + persistenceUnit
                     + ". Entities will be loaded from classpath/ context-path");
-            //Entity metadata is not related to any PU, and hence will be stored at common place
+            // Entity metadata is not related to any PU, and hence will be
+            // stored at common place
             persistenceUnit = Constants.COMMON_ENTITY_METADATAS;
-            
-            //Check whether all common entity metadata have already been loaded
-            if(appMetadata.getMetamodelMap().get(persistenceUnit) != null) {
+
+            // Check whether all common entity metadata have already been loaded
+            if (appMetadata.getMetamodelMap().get(persistenceUnit) != null)
+            {
                 log.info("All common entitity metadata already loaded, nothing need to be done");
                 return;
             }
-            
+
             reader = new ClasspathReader();
             resources = reader.findResourcesByClasspath();
         }
@@ -131,7 +134,6 @@ public class MetamodelLoader extends ApplicationLoader
         // All entities to load should be annotated with @Entity
         reader.addValidAnnotations(Entity.class.getName());
 
-        
         Metamodel metamodel = appMetadata.getMetamodel(persistenceUnit);
         if (metamodel == null)
         {

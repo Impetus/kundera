@@ -33,21 +33,24 @@ import com.impetus.kundera.proxy.LazyInitializerFactory;
 public class KunderaMetadataManager
 {
     private static Logger log = Logger.getLogger(KunderaMetadataManager.class);
-    
+
     public static PersistenceUnitMetadata getPersistenceUnitMetadata(String persistenceUnit)
     {
         return KunderaMetadata.getInstance().getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
     }
 
     public static MetamodelImpl getMetamodel(String persistenceUnit)
-    {        
+    {
         KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
-        
-        MetamodelImpl metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(persistenceUnit);
-        if(metamodel == null) {
-            metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(Constants.COMMON_ENTITY_METADATAS);
+
+        MetamodelImpl metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
+                .getMetamodel(persistenceUnit);
+        if (metamodel == null)
+        {
+            metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                    Constants.COMMON_ENTITY_METADATAS);
         }
-        
+
         return metamodel;
     }
 
@@ -55,26 +58,29 @@ public class KunderaMetadataManager
     {
         return getMetamodel(persistenceUnit).getEntityMetadata(entityClass);
     }
-    
-    
+
     /**
      * Finds ands returns Entity metadata for a given array of PUs
+     * 
      * @param entityClass
      * @param persistenceUnits
      * @return
      */
     public static EntityMetadata getEntityMetadata(Class entityClass, String... persistenceUnits)
     {
-        for(String pu : persistenceUnits) {
+        for (String pu : persistenceUnits)
+        {
             MetamodelImpl metamodel = getMetamodel(pu);
-            EntityMetadata metadata = metamodel.getEntityMetadata(entityClass); 
-            if(metadata != null) {
+            EntityMetadata metadata = metamodel.getEntityMetadata(entityClass);
+            if (metadata != null)
+            {
                 return metadata;
             }
         }
-        log.warn("Something is terribly wrong, No Entity metadata found for the class " + entityClass + ". Returning null value.");
-        return null; 
-        
+        log.warn("Something is terribly wrong, No Entity metadata found for the class " + entityClass
+                + ". Returning null value.");
+        return null;
+
     }
 
     public static LazyInitializerFactory getLazyInitializerFactory()

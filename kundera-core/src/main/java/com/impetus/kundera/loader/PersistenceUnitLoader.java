@@ -50,8 +50,9 @@ public class PersistenceUnitLoader extends ApplicationLoader
         KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
 
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
-        
-        for(String persistenceUnit : persistenceUnits) {
+
+        for (String persistenceUnit : persistenceUnits)
+        {
             if (appMetadata.getPersistenceUnitMetadataMap().get(persistenceUnit) != null)
             {
                 log.debug("Metadata already exists for the Persistence Unit " + persistenceUnit + ". Nothing to do");
@@ -61,7 +62,7 @@ public class PersistenceUnitLoader extends ApplicationLoader
             {
                 appMetadata.addPersistenceUnitMetadata(persistenceUnit, getPersistenceMetadata(persistenceUnit));
             }
-        }            
+        }
     }
 
     /**

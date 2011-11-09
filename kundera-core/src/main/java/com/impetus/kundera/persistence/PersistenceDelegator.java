@@ -37,10 +37,10 @@ public class PersistenceDelegator
 
     private boolean closed = false;
 
-    private Client client;
+    private EntityManagerSession session;
 
-    private EntityManagerSession session;    
-    
+    private List<Client> clients;
+
     String[] persistenceUnits;
 
     /** The event dispatcher. */
@@ -48,15 +48,29 @@ public class PersistenceDelegator
 
     public PersistenceDelegator(EntityManagerSession session, String... persistenceUnits)
     {
-        super();        
-        this.persistenceUnits = persistenceUnits;        
+        super();
+        this.persistenceUnits = persistenceUnits;
         this.session = session;
         eventDispatcher = new EntityEventDispatcher();
     }
 
-    private Client getClient(String persistenceUnitName)
+    private Client getClient(EntityMetadata m)
     {
-        client = ClientResolver.getClient(persistenceUnitName);
+        Client client = null;
+        if (getPersistenceUnits().length == 1)
+        {
+            client = ClientResolver.getClient(getPersistenceUnits()[0]);
+        }
+        else
+        {
+            client = ClientResolver.getClient(m.getPersistenceUnit());
+        }
+
+        if (clients == null || clients.isEmpty())
+        {
+            clients = new ArrayList<Client>();
+        }
+        clients.add(client);
         return client;
     }
 
@@ -74,13 +88,15 @@ public class PersistenceDelegator
     {
         try
         {
-            List<EnhancedEntity> reachableEntities = EntityResolver.resolve(e, CascadeType.PERSIST, getPersistenceUnits());
+            List<EnhancedEntity> reachableEntities = EntityResolver.resolve(e, CascadeType.PERSIST,
+                    getPersistenceUnits());
 
             for (EnhancedEntity enhancedEntity : reachableEntities)
             {
                 log.debug("Persisting entity : " + enhancedEntity.getEntity().getClass());
 
-                EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(enhancedEntity.getEntity().getClass(), getPersistenceUnits());
+                EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(enhancedEntity.getEntity()
+                        .getClass(), getPersistenceUnits());
 
                 // TODO: throw EntityExistsException if already exists
 
@@ -88,7 +104,7 @@ public class PersistenceDelegator
                 getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PrePersist.class);
 
                 // Persist data into data-store
-                client.persist(enhancedEntity);
+                getClient(entityMetadata).persist(enhancedEntity);
 
                 // Store entity into session
                 session.store(enhancedEntity.getId(), enhancedEntity.getEntity());
@@ -119,8 +135,12 @@ public class PersistenceDelegator
                 return e;
             }
 
+            EntityMetadata entityMetadata = KunderaMetadataManager
+                    .getEntityMetadata(entityClass, getPersistenceUnits());
+
             // Fetch top level entity (including embedded objects)
-            EnhancedEntity enhancedEntity = (EnhancedEntity) client.find(entityClass, primaryKey.toString());
+            EnhancedEntity enhancedEntity = (EnhancedEntity) getClient(entityMetadata).find(entityClass,
+                    primaryKey.toString());
 
             if (enhancedEntity == null)
             {
@@ -128,8 +148,6 @@ public class PersistenceDelegator
             }
 
             E entity = (E) enhancedEntity.getEntity();
-
-            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass, getPersistenceUnits());
 
             if (entity != null)
             {
@@ -167,14 +185,16 @@ public class PersistenceDelegator
     {
         try
         {
-            List<EnhancedEntity> reachableEntities = EntityResolver.resolve(e, CascadeType.MERGE, getPersistenceUnits());
+            List<EnhancedEntity> reachableEntities = EntityResolver
+                    .resolve(e, CascadeType.MERGE, getPersistenceUnits());
 
             // save each one
             for (EnhancedEntity o : reachableEntities)
             {
                 log.debug("Merging Entity : " + o);
 
-                EntityMetadata m = KunderaMetadataManager.getEntityMetadata(o.getEntity().getClass(), getPersistenceUnits());
+                EntityMetadata m = KunderaMetadataManager.getEntityMetadata(o.getEntity().getClass(),
+                        getPersistenceUnits());
 
                 // TODO: throw OptisticLockException if wrong version and
                 // optimistic locking enabled
@@ -182,7 +202,7 @@ public class PersistenceDelegator
                 // fire PreUpdate events
                 getEventDispatcher().fireEventListeners(m, o, PreUpdate.class);
 
-                client.persist(o);
+                getClient(m).persist(o);
 
                 // fire PreUpdate events
                 getEventDispatcher().fireEventListeners(m, o, PostUpdate.class);
@@ -200,8 +220,8 @@ public class PersistenceDelegator
     {
         try
         {
-            List<EnhancedEntity> reachableEntities = EntityResolver
-                    .resolve(e, CascadeType.REMOVE, getPersistenceUnits());
+            List<EnhancedEntity> reachableEntities = EntityResolver.resolve(e, CascadeType.REMOVE,
+                    getPersistenceUnits());
 
             // remove each one
             for (EnhancedEntity enhancedEntity : reachableEntities)
@@ -209,18 +229,18 @@ public class PersistenceDelegator
                 log.debug("Removing Entity : " + enhancedEntity);
 
                 // fire PreRemove events
-                getEventDispatcher().fireEventListeners(
-                        KunderaMetadataManager.getEntityMetadata(enhancedEntity.getEntity()
-                                .getClass(), getPersistenceUnits()), enhancedEntity, PreRemove.class);
+                EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(enhancedEntity.getEntity()
+                        .getClass(), getPersistenceUnits());
+                getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PreRemove.class);
 
                 session.remove(enhancedEntity.getEntity().getClass(), enhancedEntity.getId());
 
-                client.delete(enhancedEntity);
+                getClient(entityMetadata).delete(enhancedEntity);
 
                 // fire PostRemove events
                 getEventDispatcher().fireEventListeners(
-                        KunderaMetadataManager.getEntityMetadata(enhancedEntity.getEntity()
-                                .getClass(), getPersistenceUnits()), enhancedEntity, PostRemove.class);
+                        KunderaMetadataManager.getEntityMetadata(enhancedEntity.getEntity().getClass(),
+                                getPersistenceUnits()), enhancedEntity, PostRemove.class);
             }
         }
         catch (Exception exp)
@@ -296,7 +316,8 @@ public class PersistenceDelegator
         else
         {
             // load target lazily!
-            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(foreignEntityClass, getPersistenceUnits());
+            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(foreignEntityClass,
+                    getPersistenceUnits());
 
             String entityName = foreignEntityClass.getName() + "_" + foreignKey + "#"
                     + relation.getProperty().getName();
@@ -312,10 +333,11 @@ public class PersistenceDelegator
     {
         return persistenceUnits;
     }
-    
+
     public Query createQuery(String query)
     {
-        return client.createQuery(query);
+        // return client.createQuery(query);
+        return null;
     }
 
     public final boolean isOpen()
@@ -326,7 +348,11 @@ public class PersistenceDelegator
     public final void close()
     {
         eventDispatcher = null;
-        client.close();
+        persistenceUnits = null;
+        for (Client client : clients)
+        {
+            client.close();
+        }
         closed = true;
     }
 

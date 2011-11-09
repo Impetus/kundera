@@ -25,7 +25,7 @@ public abstract class GenericClientFactory implements Loader
     {
         throw new PersistenceException();
     }
-    
+
     public void load(String persistenceUnit)
     {
 

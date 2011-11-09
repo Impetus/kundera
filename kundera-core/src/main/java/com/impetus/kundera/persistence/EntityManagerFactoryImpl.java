@@ -56,14 +56,14 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      */
     private Map<String, Object> properties;
 
-    //TODO: Move it to Application Metadata
+    // TODO: Move it to Application Metadata
     private CacheProvider cacheProvider;
-    
+
     /**
-     * Array of persistence units. (Contains only one string usually except when persisting in multiple data-stores)
+     * Array of persistence units. (Contains only one string usually except when
+     * persisting in multiple data-stores)
      */
     String[] persistenceUnits;
-    
 
     /**
      * This one is generally called via the PersistenceProvider.
@@ -88,7 +88,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      */
     public EntityManagerFactoryImpl(String persistenceUnit, Map<String, Object> properties)
     {
-        // TODO Device some better (JPA) way
+        // TODO Devise some better (JPA) way
         properties.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         this.properties = properties;
         this.persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
@@ -107,8 +107,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
         logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
-    
-    
 
     @Override
     public final void close()
@@ -120,10 +118,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         {
             cacheProvider.shutdown();
         }
-        
-        for(String pu : persistenceUnits) {
+
+        for (String pu : persistenceUnits)
+        {
             ClientResolver.getClientFactory(pu).unload(pu);
-        }        
+        }
     }
 
     @Override
@@ -153,7 +152,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Metamodel getMetamodel()
     {
-        //return KunderaMetadataManager.getMetamodel(getPersistenceUnit());
+        // return KunderaMetadataManager.getMetamodel(getPersistenceUnit());
         return null;
     }
 

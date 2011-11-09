@@ -41,7 +41,7 @@ public final class Constants
     /** The Constant INVALID. */
     public final static int INVALID = -1;
 
-    /** The Constant SUPER_COLUMN_NAME_DELIMITER. */    
+    /** The Constant SUPER_COLUMN_NAME_DELIMITER. */
     public final static String EMBEDDED_COLUMN_NAME_DELIMITER = "#";
 
     /** The Constant TO_ONE_SUPER_COL_NAME. */
@@ -51,16 +51,24 @@ public final class Constants
 
     public static final String PERSISTENCE_UNIT_NAME = "persistenceUnitName";
 
-    public static final String LUCENE_INDEX_DIRECTORY_NAME = "lucene"; 
-    
-    /** Separator used for providing persistence unit alongwith schema on entity class 
-     * (applicable in case of cross-datastore persistence)*/
+    public static final String LUCENE_INDEX_DIRECTORY_NAME = "lucene";
+
+    /**
+     * Separator used for providing persistence unit alongwith schema on entity
+     * class (applicable in case of cross-datastore persistence)
+     */
     public static final String SCHEMA_PERSISTENCE_UNIT_SEPARATOR = "@";
-    
-    /** Separator used for providing a list of persistence units while creating EMF */
+
+    /**
+     * Separator used for providing a list of persistence units while creating
+     * EMF
+     */
     public final static String PERSISTENCE_UNIT_SEPARATOR = ",";
-    
-    /** Meta data for all entities that are not specified specific to any persistence unit, are stored under this name */
-    public final static String COMMON_ENTITY_METADATAS = "commonEntityMetadatas"; 
+
+    /**
+     * Meta data for all entities that are not specified specific to any
+     * persistence unit, are stored under this name
+     */
+    public final static String COMMON_ENTITY_METADATAS = "commonEntityMetadatas";
 
 }

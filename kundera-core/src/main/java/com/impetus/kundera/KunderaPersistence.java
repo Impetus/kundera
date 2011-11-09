@@ -47,9 +47,8 @@ public class KunderaPersistence implements PersistenceProvider
     private static Logger logger = Logger.getLogger(KunderaPersistence.class);
 
     /** Instance of Entity Manager Factory */
-    private static EntityManagerFactory emf;   
-    
-    
+    private static EntityManagerFactory emf;
+
     /**
      * Instantiates a new kundera persistence.
      */
@@ -66,52 +65,54 @@ public class KunderaPersistence implements PersistenceProvider
         return createEntityManagerFactory(info.getPersistenceUnitName(), map);
     }
 
-    @Override    
-
+    @Override
     public final EntityManagerFactory createEntityManagerFactory(String persistenceUnit, Map map)
     {
-        //TODO: Pooling of factories. Current code caches a single factory and uses it every time.
+        // TODO: Pooling of factories. Current code caches a single factory and
+        // uses it every time.
         if (emf != null)
         {
             logger.info("Returning existing factory " + emf);
             return emf;
-        } else {
+        }
+        else
+        {
             logger.info("Creating non-existing factory for persistence unit(s) : " + persistenceUnit);
             EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder();
-            //emf = builder.buildEntityManagerFactory(persistenceUnit, map); 
+            // emf = builder.buildEntityManagerFactory(persistenceUnit, map);
             emf = new EntityManagerFactoryImpl(persistenceUnit, new HashMap<String, Object>());
         }
-        
-        //One time initialization (Application and Client level)
+
+        // One time initialization (Application and Client level)
         initializeKundera(persistenceUnit);
 
-        
         return emf;
 
-        
     }
-    
+
     /**
      * One time initialization at Application and Client level
-     * @param persistenceUnit Persistence Unit/ Comma separated persistence units
+     * 
+     * @param persistenceUnit
+     *            Persistence Unit/ Comma separated persistence units
      */
     private void initializeKundera(String persistenceUnit)
     {
         // Invoke Application MetaData
-        logger.info("Loading Application MetaData and Initializing Client(s) For Persistence Unit(s) " 
+        logger.info("Loading Application MetaData and Initializing Client(s) For Persistence Unit(s) "
                 + persistenceUnit);
-        
+
         String[] persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
-        
-        
+
         (new ApplicationLoader()).load(persistenceUnits);
 
         // Invoke Client Loaders
         logger.info("Loading Client(s) For Persistence Unit(s) " + persistenceUnit);
-        for(String pu : persistenceUnits) {
+        for (String pu : persistenceUnits)
+        {
             ClientResolver.getClientFactory(pu).load(pu);
-        }      
-        
+        }
+
     }
 
     @Override

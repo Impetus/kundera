@@ -55,8 +55,6 @@ public class EntityManagerImpl implements EntityManager
     /** The session. */
     private EntityManagerSession session;
 
-   
-
     /** Properties provided by user at the time of EntityManager Creation. */
     private Map<String, Object> properties;
 
@@ -75,9 +73,10 @@ public class EntityManagerImpl implements EntityManager
     {
         this.factory = factory;
         logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
-        session = new EntityManagerSession((Cache) factory.getCache());       
-        
-        persistenceDelegator = new PersistenceDelegator(session, getPersistenceUnit().split(Constants.PERSISTENCE_UNIT_SEPARATOR));
+        session = new EntityManagerSession((Cache) factory.getCache());
+
+        persistenceDelegator = new PersistenceDelegator(session, getPersistenceUnit().split(
+                Constants.PERSISTENCE_UNIT_SEPARATOR));
         logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
     }
 
@@ -157,8 +156,8 @@ public class EntityManagerImpl implements EntityManager
     public final void close()
     {
         checkClosed();
-        session = null;        
-        persistenceDelegator.close();        
+        session = null;
+        persistenceDelegator.close();
         closed = true;
     }
 
@@ -378,21 +377,22 @@ public class EntityManagerImpl implements EntityManager
             throw new IllegalStateException("EntityManager has been closed.");
         }
     }
-    
+
     /**
      * Returns Persistence unit (or comma separated units) associated with EMF
+     * 
      * @return
      */
     private String getPersistenceUnit()
     {
-        return (String)this.factory.getProperties().get(Constants.PERSISTENCE_UNIT_NAME);
+        return (String) this.factory.getProperties().get(Constants.PERSISTENCE_UNIT_NAME);
     }
 
     private EntityManagerSession getSession()
     {
         return session;
     }
-    
+
     private PersistenceDelegator getPersistenceDelegator()
     {
         return persistenceDelegator;
