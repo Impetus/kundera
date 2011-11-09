@@ -77,18 +77,18 @@ public class MongoDBDataHandler
 
     public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document)
     {
-    	//Entity object
-        Object entity = null;	
-        
+        // Entity object
+        Object entity = null;
+
         // Map to hold property-name=>foreign-entity relations
         Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
-        
+
         try
         {
             entity = entityClass.newInstance();
-            
+
             // Populate primary key column
-            String rowKey = (String)document.get(m.getIdColumn().getField().getName());
+            String rowKey = (String) document.get(m.getIdColumn().getField().getName());
             PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), rowKey);
 
             // Populate entity columns
@@ -101,8 +101,8 @@ public class MongoDBDataHandler
             // Populate @Embedded objects and collections
             List<EmbeddedColumn> embeddedColumns = m.getEmbeddedColumnsAsList();
             for (EmbeddedColumn embeddedColumn : embeddedColumns)
-            {                	
-            	Field embeddedColumnField = embeddedColumn.getField();
+            {
+                Field embeddedColumnField = embeddedColumn.getField();
                 // Can be a BasicDBObject or a list of it.
                 Object embeddedDocumentObject = document.get(embeddedColumnField.getName());
 
@@ -112,8 +112,8 @@ public class MongoDBDataHandler
                     {
                         Class embeddedObjectClass = PropertyAccessorHelper.getGenericClass(embeddedColumnField);
                         Collection embeddedCollection = DocumentObjectMapper.getCollectionFromDocumentList(
-                                (BasicDBList) embeddedDocumentObject, embeddedColumnField.getType(), embeddedObjectClass,
-                                embeddedColumn.getColumns());
+                                (BasicDBList) embeddedDocumentObject, embeddedColumnField.getType(),
+                                embeddedObjectClass, embeddedColumn.getColumns());
                         PropertyAccessorHelper.set(entity, embeddedColumnField, embeddedCollection);
                     }
                     else if (embeddedDocumentObject instanceof BasicDBObject)
@@ -129,32 +129,42 @@ public class MongoDBDataHandler
                         throw new PersistenceException("Can't retrieve embedded object from MONGODB document coz "
                                 + "it wasn't stored as BasicDBObject, possible problem in format.");
                     }
-                }        	
+                }
 
             }
-            
-            //Check whether there is an embedded document for foreign keys, if it is there, put data
-            //into foreign keys map
+
+            // Check whether there is an embedded document for foreign keys, if
+            // it is there, put data
+            // into foreign keys map
             Object foreignKeyObj = document.get(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME);
-            if(foreignKeyObj != null && foreignKeyObj instanceof BasicDBObject) {
-            	BasicDBObject dbObj = (BasicDBObject)foreignKeyObj;
-            	
-            	Set<String> foreignKeySet = dbObj.keySet();
-            	for(String foreignKey : foreignKeySet) {
-            		String foreignKeyValues = (String)dbObj.get(foreignKey);  //Foreign key values are stored as list 
-            		
-            		Set<String> foreignKeysSet = MetadataUtils.deserializeKeys(foreignKeyValues);    	           		       		
-            		
-            		foreignKeysMap.put(foreignKey, foreignKeysSet);         		
-            		
-            	}           	
-            	
+            if (foreignKeyObj != null && foreignKeyObj instanceof BasicDBObject)
+            {
+                BasicDBObject dbObj = (BasicDBObject) foreignKeyObj;
+
+                Set<String> foreignKeySet = dbObj.keySet();
+                for (String foreignKey : foreignKeySet)
+                {
+                    String foreignKeyValues = (String) dbObj.get(foreignKey); // Foreign
+                                                                              // key
+                                                                              // values
+                                                                              // are
+                                                                              // stored
+                                                                              // as
+                                                                              // list
+
+                    Set<String> foreignKeysSet = MetadataUtils.deserializeKeys(foreignKeyValues);
+
+                    foreignKeysMap.put(foreignKey, foreignKeysSet);
+
+                }
+
             }
-            
-            //Set entity object and foreign key map into enhanced entity and return
+
+            // Set entity object and foreign key map into enhanced entity and
+            // return
             EnhancedEntity e = EntityResolver.getEnhancedEntity(entity, rowKey, foreignKeysMap);
-            return e;            
-            
+            return e;
+
         }
         catch (InstantiationException e)
         {
@@ -171,7 +181,7 @@ public class MongoDBDataHandler
             log.error("Error while Getting entity from Document. Details:" + e.getMessage());
             return entity;
         }
-        
+
     }
 
     private Client getClient()
@@ -188,8 +198,8 @@ public class MongoDBDataHandler
     {
         List<Column> columns = m.getColumnsAsList();
         BasicDBObject dbObj = new BasicDBObject();
-        
-        //Populate Row Key
+
+        // Populate Row Key
         extractEntityField(e.getEntity(), dbObj, m.getIdColumn());
 
         // Populate columns
@@ -234,23 +244,26 @@ public class MongoDBDataHandler
 
         // Check foreign keys and set as list column on document object
         Map<String, Set<String>> foreignKeyMap = e.getForeignKeysMap();
-        if(foreignKeyMap != null && !foreignKeyMap.isEmpty()) {   	
-            
-            DBObject foreignKeyObj = new BasicDBObject(); //A document containing all foreign keys as columns        
-            
+        if (foreignKeyMap != null && !foreignKeyMap.isEmpty())
+        {
+
+            DBObject foreignKeyObj = new BasicDBObject(); // A document
+                                                          // containing all
+                                                          // foreign keys as
+                                                          // columns
+
             Set foreignKeyNameSet = foreignKeyMap.keySet();
             for (Object foreignKeyName : foreignKeyNameSet)
             {
-                Set<String> valueSet = foreignKeyMap.get(foreignKeyName);              
-                
-                String foreignKeyValues = MetadataUtils.serializeKeys(valueSet);              
-                
+                Set<String> valueSet = foreignKeyMap.get(foreignKeyName);
+
+                String foreignKeyValues = MetadataUtils.serializeKeys(valueSet);
+
                 foreignKeyObj.put((String) foreignKeyName, foreignKeyValues);
             }
-            
-            dbObj.put(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME, foreignKeyObj);            
+
+            dbObj.put(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME, foreignKeyObj);
         }
-        
 
         return dbObj;
     }

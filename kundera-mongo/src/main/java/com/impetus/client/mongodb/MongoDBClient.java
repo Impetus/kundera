@@ -54,27 +54,26 @@ public class MongoDBClient implements Client
 
     /** The mongo db. */
     private DB mongoDb;
-    
+
     /** The data handler. */
     private MongoDBDataHandler dataHandler;
 
     /** The index manager. */
     private IndexManager indexManager;
-    
-    private String persistenceUnit;
 
+    private String persistenceUnit;
 
     /** The log. */
     private static Log log = LogFactory.getLog(MongoDBClient.class);
 
     public MongoDBClient(Object mongo)
     {
-    	//TODO: This could be a constly call, see how connection pooling is relevant here
+        // TODO: This could be a constly call, see how connection pooling is
+        // relevant here
         this.mongoDb = (DB) mongo;
-        
-        //this.dataHandler = new MongoDBDataHandler(this);
-        
-        
+
+        // this.dataHandler = new MongoDBDataHandler(this);
+
     }
 
     @Override
@@ -145,8 +144,6 @@ public class MongoDBClient implements Client
 
         Object enhancedEntity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
                 entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument);
-        
-        
 
         return (E) enhancedEntity;
     }
@@ -179,6 +176,7 @@ public class MongoDBClient implements Client
     /**
      * Loads columns from multiple rows restricting results to conditions stored
      * in <code>filterClauseQueue</code>.
+     * 
      * @param m
      *            the m
      * @param filterClauseQueue
@@ -189,18 +187,18 @@ public class MongoDBClient implements Client
      */
     public <E> List<E> loadData(Query query) throws Exception
     {
-    	MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
-    	
+        MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
+
         // TODO Resolve the workaround
-        EntityMetadata entityMetadata = KunderaMetadataManager
-                .getEntityMetadata(getPersistenceUnit(), mongoDBQuery.getEntityClass());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(),
+                mongoDBQuery.getEntityClass());
 
         String documentName = entityMetadata.getTableName();
         String dbName = entityMetadata.getSchema();
         Class clazz = entityMetadata.getEntityClazz();
 
         DBCollection dbCollection = mongoDb.getCollection(documentName);
-        
+
         Queue filterClauseQueue = mongoDBQuery.getFilterClauseQueue();
         String result = mongoDBQuery.getResult();
 
