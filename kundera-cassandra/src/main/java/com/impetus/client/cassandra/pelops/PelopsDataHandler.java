@@ -84,7 +84,7 @@ public class PelopsDataHandler extends DataHandler
                     Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
 
             e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), columns, null));
-            
+
         }
         return e;
     }
@@ -374,7 +374,7 @@ public class PelopsDataHandler extends DataHandler
                             // Set of all foreign keys for this field
                             Set<String> foreignKeys = MetadataUtils.deserializeKeys(PropertyAccessorFactory.STRING
                                     .fromBytes(columnValue));
-                            
+
                             Relation relation = m.getRelation(columnName);
                             Field foreignKeyField = relation.getProperty();
                             foreignKeysMap.put(foreignKeyField.getName(), foreignKeys);

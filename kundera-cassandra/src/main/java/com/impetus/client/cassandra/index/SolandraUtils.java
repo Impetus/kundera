@@ -59,9 +59,9 @@ public class SolandraUtils
         {
             // Start Solandra
             CassandraUtils.startupServer();
-            
+
             // Create solandra specific schema
-            createSolandraSpecificSchema(contactNode, port);            
+            createSolandraSpecificSchema(contactNode, port);
         }
         catch (Throwable t)
         {
