@@ -191,7 +191,7 @@ public class MongoDBClient implements Client
 
         // TODO Resolve the workaround
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(),
-                mongoDBQuery.getEntityClass());
+                mongoDBQuery.getKunderaQuery().getEntityClass());
 
         String documentName = entityMetadata.getTableName();
         String dbName = entityMetadata.getSchema();
@@ -199,8 +199,8 @@ public class MongoDBClient implements Client
 
         DBCollection dbCollection = mongoDb.getCollection(documentName);
 
-        Queue filterClauseQueue = mongoDBQuery.getFilterClauseQueue();
-        String result = mongoDBQuery.getResult();
+        Queue filterClauseQueue = mongoDBQuery.getKunderaQuery().getFilterClauseQueue();
+        String result = mongoDBQuery.getKunderaQuery().getResult();
 
         List entities = new ArrayList<E>();
 

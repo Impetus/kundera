@@ -24,6 +24,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.QueryImpl;
 
 /**
@@ -36,12 +38,13 @@ public class MongoDBQuery extends QueryImpl
     /** The log used by this class. */
     private static Log log = LogFactory.getLog(MongoDBQuery.class);
 
-    public MongoDBQuery(Client client, String jpaQuery)
+    public MongoDBQuery(String jpaQuery, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, String... persistenceUnits)
     {
-        super(client, jpaQuery); 
+        super(jpaQuery, persistenceDelegator, persistenceUnits);
+        this.kunderaQuery = kunderaQuery;    
     }
 
-    @Override
+   /* @Override
     public List<?> getResultList()
     {
         log.debug("JPA Query is: " + query);
@@ -56,7 +59,7 @@ public class MongoDBQuery extends QueryImpl
         {
             return null;
         }
-    }
+    }*/
 
     @Override
     public int executeUpdate()

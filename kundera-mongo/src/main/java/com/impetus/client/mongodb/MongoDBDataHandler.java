@@ -402,8 +402,8 @@ public class MongoDBDataHandler
 
         // Query parameters,
         MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
-        Queue filterClauseQueue = mongoDBQuery.getFilterClauseQueue();
-        String result = mongoDBQuery.getResult();
+        Queue filterClauseQueue = mongoDBQuery.getKunderaQuery().getFilterClauseQueue();
+        String result = mongoDBQuery.getKunderaQuery().getResult();
 
         // Specified after entity alias in query
         String columnName = getColumnName(result);
