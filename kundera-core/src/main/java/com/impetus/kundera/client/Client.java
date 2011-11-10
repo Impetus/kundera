@@ -135,7 +135,7 @@ public interface Client
     void delete(EnhancedEntity enhancedEntity) throws Exception;
 
     String getPersistenceUnit();
-
+    
     // TODO Do we really need it. This may not be required for few of the
     // clients
     IndexManager getIndexManager();

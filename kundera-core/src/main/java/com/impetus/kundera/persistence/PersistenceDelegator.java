@@ -30,7 +30,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
-import com.impetus.kundera.query.QueryImpl;
+import com.impetus.kundera.query.QueryResolver;
 
 public class PersistenceDelegator
 {
@@ -55,7 +55,7 @@ public class PersistenceDelegator
         eventDispatcher = new EntityEventDispatcher();
     }
 
-    private Client getClient(EntityMetadata m)
+    public Client getClient(EntityMetadata m)
     {
         Client client = null;
         if (getPersistenceUnits().length == 1)
@@ -180,6 +180,29 @@ public class PersistenceDelegator
             exception.printStackTrace();
             throw new PersistenceException(exception);
         }
+    }
+    
+    public <E> List<E> find(Class<E> entityClass, Object... primaryKeys) {
+        List<E> entities = new ArrayList<E>();
+        for(Object primaryKey : primaryKeys) {
+            entities.add(find(entityClass, primaryKey));
+        }
+        return entities;
+    }
+    
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> col) {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass, getPersistenceUnits());
+
+        List<E> entities = new ArrayList<E>();
+        try
+        {
+            entities = getClient(entityMetadata).find(entityClass, col);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return entities;
     }
 
     public <E> E merge(E e)
@@ -335,9 +358,12 @@ public class PersistenceDelegator
         return persistenceUnits;
     }
 
-    public Query createQuery(String query)
+    public Query createQuery(String jpaQuery)
     {
-        return new QueryImpl(query, persistenceUnits);        
+        Query query = new QueryResolver().getQueryImplementation(jpaQuery, this, persistenceUnits);
+        
+        return query;
+       
     }
 
     public final boolean isOpen()

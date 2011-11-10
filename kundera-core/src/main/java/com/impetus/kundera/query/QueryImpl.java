@@ -29,16 +29,24 @@ import javax.persistence.TemporalType;
 
 import org.apache.commons.lang.NotImplementedException;
 
+import com.impetus.kundera.persistence.PersistenceDelegator;
+
 /**
  * The Class QueryImpl.
  * 
  * @author animesh.kumar
  */
-public class QueryImpl extends KunderaQuery implements Query
+public class QueryImpl implements Query
 {
 
     /** The query. */
-    protected String query;
+    protected String query; 
+    
+    protected KunderaQuery kunderaQuery;
+    
+    protected PersistenceDelegator persistenceDelegeator;
+    
+    
 
     /**
      * Instantiates a new query impl.
@@ -50,12 +58,13 @@ public class QueryImpl extends KunderaQuery implements Query
      * @param query
      *            the query
      */
-    public QueryImpl(String query, String... persistenceUnits)
+    public QueryImpl(String query, PersistenceDelegator persistenceDelegator, String... persistenceUnits)
     {
-        super(persistenceUnits);
+        
         this.query = query;
-        parse();
+        this.persistenceDelegeator = persistenceDelegator;        
     }
+    
 
     /**
      * Gets the jPA query.
@@ -66,23 +75,26 @@ public class QueryImpl extends KunderaQuery implements Query
     {
         return query;
     }
+    
+    
 
     /**
-     * Parses the.
+     * @return the kunderaQuery
      */
-    private void parse()
+    public KunderaQuery getKunderaQuery()
     {
-        KunderaQueryParser parser = new KunderaQueryParser(this, query);
-        parser.parse();
-        postParsingInit();
+        return kunderaQuery;
     }
 
-    public void parse(String jpaQuery)
-    {
-        this.query = query;
-        parse();
 
+    /**
+     * @param kunderaQuery the kunderaQuery to set
+     */
+    public void setKunderaQuery(KunderaQuery kunderaQuery)
+    {
+        this.kunderaQuery = kunderaQuery;
     }
+
 
     /* @see javax.persistence.Query#executeUpdate() */
     @Override
@@ -94,9 +106,29 @@ public class QueryImpl extends KunderaQuery implements Query
     /* @see javax.persistence.Query#getResultList() */
     @Override
     public List<?> getResultList()
-    {
+    {             
         throw new NotImplementedException("TODO");
+    } 
+    
+    
+
+    /**
+     * @return the persistenceDelegeator
+     */
+    public PersistenceDelegator getPersistenceDelegeator()
+    {
+        return persistenceDelegeator;
     }
+
+
+    /**
+     * @param persistenceDelegeator the persistenceDelegeator to set
+     */
+    public void setPersistenceDelegeator(PersistenceDelegator persistenceDelegeator)
+    {
+        this.persistenceDelegeator = persistenceDelegeator;
+    }
+
 
     /* @see javax.persistence.Query#getSingleResult() */
     @Override

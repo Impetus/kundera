@@ -28,7 +28,6 @@ import javax.persistence.PersistenceException;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -36,7 +35,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 /**
  * The Class KunderaQuery.
  */
-public abstract class KunderaQuery
+public class KunderaQuery
 {
 
     /** The Constant SINGLE_STRING_KEYWORDS. */
@@ -200,7 +199,7 @@ public abstract class KunderaQuery
      * @return true, if it result is for complete alias.
      * 
      */
-    protected final boolean isAliasOnly()
+    public final boolean isAliasOnly()
     {
         return result != null && (result.indexOf(".") == -1);
     }
@@ -489,8 +488,6 @@ public abstract class KunderaQuery
         return builder.toString();
     }
 
-    public abstract void parse(String jpaQuery);
-
     // helper method
     /**
      * Tokenize.
@@ -526,4 +523,21 @@ public abstract class KunderaQuery
     {
         return KunderaMetadataManager.getMetamodel(persistenceUnits);
     }
+
+    /**
+     * @return the persistenceUnits
+     */
+    public String[] getPersistenceUnits()
+    {
+        return persistenceUnits;
+    }
+
+    /**
+     * @param persistenceUnits the persistenceUnits to set
+     */
+    public void setPersistenceUnits(String[] persistenceUnits)
+    {
+        this.persistenceUnits = persistenceUnits;
+    }    
+    
 }
