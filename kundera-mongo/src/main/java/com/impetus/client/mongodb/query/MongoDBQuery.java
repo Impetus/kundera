@@ -33,12 +33,12 @@ import com.impetus.kundera.query.QueryImpl;
  */
 public class MongoDBQuery extends QueryImpl
 {
-    /** the log used by this class. */
+    /** The log used by this class. */
     private static Log log = LogFactory.getLog(MongoDBQuery.class);
 
     public MongoDBQuery(Client client, String jpaQuery)
     {
-        super(client, jpaQuery);
+        super(client, jpaQuery); 
     }
 
     @Override
