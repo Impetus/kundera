@@ -57,11 +57,12 @@ public class SolandraUtils
 
         try
         {
-            // Start Solandra
-            CassandraUtils.startupServer();
-
             // Create solandra specific schema
             createSolandraSpecificSchema(contactNode, port);
+            
+            // Start Solandra
+            CassandraUtils.startupServer();
+            
         }
         catch (Throwable t)
         {

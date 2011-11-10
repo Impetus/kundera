@@ -42,7 +42,6 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
-import com.impetus.kundera.query.LuceneQuery;
 
 /**
  * Client implementation using Pelops. http://code.google.com/p/pelops/
@@ -114,7 +113,7 @@ public class PelopsClient implements Client
         }
         mutator.execute(ConsistencyLevel.ONE);
 
-        //getIndexManager().write(entityMetadata, enhancedEntity.getEntity());
+        getIndexManager().write(entityMetadata, enhancedEntity.getEntity());
 
     }
 
@@ -200,6 +199,7 @@ public class PelopsClient implements Client
         rowDeletor.deleteRow(entityMetadata.getTableName(), enhancedEntity.getId(), ConsistencyLevel.ONE);
         getIndexManager().remove(entityMetadata, enhancedEntity.getEntity(), enhancedEntity.getId());
     }
+  
 
     @Override
     public final IndexManager getIndexManager()
