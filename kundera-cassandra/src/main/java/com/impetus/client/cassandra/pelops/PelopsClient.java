@@ -220,8 +220,8 @@ public class PelopsClient implements Client
 
     @Override
     public final void close()
-    {
-        this.indexManager = null;
+    {        
+        this.indexManager.close();
         this.dataHandler = null;
         closed = true;
 

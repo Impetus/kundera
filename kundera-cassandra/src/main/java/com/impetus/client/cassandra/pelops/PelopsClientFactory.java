@@ -104,7 +104,9 @@ public class PelopsClientFactory extends GenericClientFactory
     @Override
     public void unload(String... persistenceUnits)
     {
+        indexManager.close();
         Pelops.shutdown();
+        
     }
 
 }

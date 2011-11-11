@@ -29,7 +29,6 @@ import org.apache.log4j.Logger;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ApplicationLoader;
 import com.impetus.kundera.loader.CoreLoader;
-import com.impetus.kundera.persistence.EntityManagerFactoryBuilder;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
@@ -44,14 +43,13 @@ public class KunderaPersistence implements PersistenceProvider
     /** The logger. */
     private static Logger logger = Logger.getLogger(KunderaPersistence.class);
 
-    /** Instance of Entity Manager Factory */
-    private static EntityManagerFactory emf;
-
+    private static Boolean loaded = false;
+    
     /**
      * Instantiates a new kundera persistence.
      */
     public KunderaPersistence()
-    {
+    {        
         // Load Core
         logger.info("Loading Core");
         new CoreLoader().load();
@@ -62,30 +60,24 @@ public class KunderaPersistence implements PersistenceProvider
     {
         return createEntityManagerFactory(info.getPersistenceUnitName(), map);
     }
+ 
+  
 
     @Override
-    public final EntityManagerFactory createEntityManagerFactory(String persistenceUnit, Map map)
+    public synchronized final EntityManagerFactory createEntityManagerFactory(String persistenceUnit, Map map)
     {
-        // TODO: Pooling of factories. Current code caches a single factory and
-        // uses it every time.
-        if (emf != null)
+        synchronized (persistenceUnit)
         {
-            logger.info("Returning existing factory " + emf);
+            if (!loaded)
+            {
+                loaded = true;
+                initializeKundera(persistenceUnit);
+
+            }            
+            EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, new HashMap<String, Object>(1));
+
             return emf;
         }
-        else
-        {
-            logger.info("Creating non-existing factory for persistence unit(s) : " + persistenceUnit);
-            EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder();
-            // emf = builder.buildEntityManagerFactory(persistenceUnit, map);
-            emf = new EntityManagerFactoryImpl(persistenceUnit, new HashMap<String, Object>());
-        }
-
-        // One time initialization (Application and Client level)
-        initializeKundera(persistenceUnit);
-
-        return emf;
-
     }
 
     /**
