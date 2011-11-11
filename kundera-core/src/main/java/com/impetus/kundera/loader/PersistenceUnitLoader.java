@@ -47,7 +47,7 @@ public class PersistenceUnitLoader extends ApplicationLoader
     public void load(String... persistenceUnits)
     {
         log.debug("Loading Metadata from persistence.xml...");
-        KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
+        KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
 
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 

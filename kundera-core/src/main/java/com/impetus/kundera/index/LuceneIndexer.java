@@ -24,11 +24,11 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
@@ -57,6 +57,8 @@ public class LuceneIndexer extends DocumentIndexer
     /** log for this class. */
     private static Log log = LogFactory.getLog(LuceneIndexer.class);
 
+    private IndexWriter w;
+
     /**
      * @param client
      * @param analyzer
@@ -64,32 +66,14 @@ public class LuceneIndexer extends DocumentIndexer
     public LuceneIndexer(Analyzer analyzer)
     {
         super(analyzer);
-
-    }
-
-    /**
-     * Added for HBase support.
-     * 
-     * @return default index writer
-     */
-    private IndexWriter getIndexWriter()
-    {
-        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
-        Directory index = null;
-        IndexWriter w = null;
         try
         {
-            index = FSDirectory.open(getIndexDirectory());
-            if (index.listAll().length == 0)
-            {
-                log.info("Creating fresh Index because it was empty");
-                w = new IndexWriter(index, analyzer, true, IndexWriter.MaxFieldLength.LIMITED);
-            }
-            else
-            {
-                w = new IndexWriter(index, analyzer, false, IndexWriter.MaxFieldLength.LIMITED);
-            }
-
+            Directory index = FSDirectory.open(getIndexDirectory());
+            w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
+            w.getConfig().setRAMBufferSizeMB(100);
+            w.setUseCompoundFile(false);
+            // w.
+            // w.getConfig().setMaxBufferedDocs(100);
         }
         catch (CorruptIndexException e)
         {
@@ -103,8 +87,33 @@ public class LuceneIndexer extends DocumentIndexer
         {
             throw new IndexingException(e.getMessage());
         }
-        return w;
     }
+
+    /**
+     * Added for HBase support.
+     * 
+     * @return default index writer
+     */
+    private IndexWriter getIndexWriter()
+    {
+        return w;
+        /*
+         * StandardAnalyzer analyzer = new
+         * StandardAnalyzer(Version.LUCENE_CURRENT); Directory index = null;
+         * IndexWriter w = null; try { index =
+         * FSDirectory.open(getIndexDirectory()); if (index.listAll().length ==
+         * 0) { log.info("Creating fresh Index because it was empty"); w = new
+         * IndexWriter(index, analyzer, true,
+         * IndexWriter.MaxFieldLength.LIMITED); } else { w = new
+         * IndexWriter(index, analyzer, false,
+         * IndexWriter.MaxFieldLength.LIMITED); }
+         * 
+         * } catch (CorruptIndexException e) { throw new
+         * IndexingException(e.getMessage()); } catch (LockObtainFailedException
+         * e) { throw new IndexingException(e.getMessage()); } catch
+         * (IOException e) { throw new IndexingException(e.getMessage()); }
+         * return w;
+         */}
 
     /**
      * Returns default index reader.
@@ -321,10 +330,11 @@ public class LuceneIndexer extends DocumentIndexer
         IndexWriter w = getIndexWriter();
         try
         {
+            // w.setR
             w.addDocument(document, super.analyzer);
-            w.optimize();
-            w.commit();
-            w.close();
+            // w.optimize();
+            // w.commit();
+            // w.close();
         }
         catch (CorruptIndexException e)
         {
@@ -336,4 +346,24 @@ public class LuceneIndexer extends DocumentIndexer
         }
     }
 
+    public void close()
+    {
+        try
+        {
+            if (w != null)
+            {
+                w.commit();
+                w.close();
+            }
+        }
+
+        catch (CorruptIndexException e)
+        {
+            log.error("Error while indexing document " + " into Lucene. Details:" + e.getMessage());
+        }
+        catch (IOException e)
+        {
+            log.error("Error while indexing document  into Lucene. Details:" + e.getMessage());
+        }
+    }
 }

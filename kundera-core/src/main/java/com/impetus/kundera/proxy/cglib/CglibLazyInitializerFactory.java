@@ -34,7 +34,6 @@ import java.lang.reflect.Method;
 
 import javax.persistence.PersistenceException;
 
-import com.impetus.kundera.persistence.EntityManagerImpl;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializerFactory;

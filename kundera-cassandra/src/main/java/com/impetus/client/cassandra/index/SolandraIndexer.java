@@ -268,4 +268,11 @@ public class SolandraIndexer extends DocumentIndexer
         return new lucandra.IndexReader(INDEX_NAME);
     }
 
+    @Override
+    public void close()
+    {
+        // TODO need to hold instance variable of indexwriter.
+
+    }
+
 }

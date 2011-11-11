@@ -48,8 +48,8 @@ public abstract class GenericClientFactory implements Loader
     {
         ClientMetadata clientMetadata = new ClientMetadata();
 
-        if (KunderaMetadata.getInstance().getClientMetadata(persistenceUnit) == null)
-            KunderaMetadata.getInstance().addClientMetadata(persistenceUnit, clientMetadata);
+        if (KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit) == null)
+            KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
     }
 
     protected abstract void initializeClient();

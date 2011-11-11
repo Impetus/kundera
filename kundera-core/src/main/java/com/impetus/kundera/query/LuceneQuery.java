@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.DocumentIndexer;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -48,10 +47,7 @@ public class LuceneQuery extends QueryImpl implements Query
     int maxResult = Constants.INVALID;
 
     /** The lucene query. */
-    String luceneQuery;   
-    
-    
-    
+    String luceneQuery;
 
     /**
      * Instantiates a new lucene query.
@@ -66,9 +62,8 @@ public class LuceneQuery extends QueryImpl implements Query
     public LuceneQuery(String jpaQuery, KunderaQuery kunderaQuery, PersistenceDelegator pd, String... persistenceUnits)
     {
         super(jpaQuery, pd, persistenceUnits);
-        this.kunderaQuery = kunderaQuery;        
+        this.kunderaQuery = kunderaQuery;
     }
-    
 
     /**
      * Sets the lucene query.
@@ -81,7 +76,7 @@ public class LuceneQuery extends QueryImpl implements Query
         this.luceneQuery = luceneQuery;
     }
 
-    //@see com.impetus.kundera.query.QueryImpl#getResultList() 
+    // @see com.impetus.kundera.query.QueryImpl#getResultList()
     @Override
     public List<?> getResultList()
     {
@@ -95,34 +90,33 @@ public class LuceneQuery extends QueryImpl implements Query
         }
 
         log.debug("Lucene Query: " + q);
-        
+
         EntityMetadata m = kunderaQuery.getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
         Map<String, String> searchFilter = client.getIndexManager().search(q, -1, maxResult);
         String[] primaryKeys = searchFilter.values().toArray(new String[] {});
-        
 
         try
         {
             if (kunderaQuery.isAliasOnly())
             {
-                //return persistenceDelegeator.find(entityClass, primaryKey);
+                // return persistenceDelegeator.find(entityClass, primaryKey);
                 return persistenceDelegeator.find(m.getEntityClazz(), primaryKeys);
             }
             else
             {
                 return persistenceDelegeator.find(m.getEntityClazz(), searchFilter);
-                
+
             }
         }
         catch (Exception e)
         {
             throw new PersistenceException(e);
-        }        
+        }
 
     }
 
-     //@see com.impetus.kundera.query.QueryImpl#setMaxResults(int) 
+    // @see com.impetus.kundera.query.QueryImpl#setMaxResults(int)
     @Override
     public Query setMaxResults(int maxResult)
     {

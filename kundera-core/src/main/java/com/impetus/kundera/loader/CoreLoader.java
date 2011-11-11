@@ -37,6 +37,6 @@ public class CoreLoader
         CoreMetadata coreMetadata = new CoreMetadata();
         coreMetadata.setEnhancedProxyFactory(new CglibEntityEnhancerFactory());
         coreMetadata.setLazyInitializerFactory(new CglibLazyInitializerFactory());
-        KunderaMetadata.getInstance().setCoreMetadata(coreMetadata);
+        KunderaMetadata.INSTANCE.setCoreMetadata(coreMetadata);
     }
 }

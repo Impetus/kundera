@@ -111,4 +111,11 @@ public class MongoDBIndexer implements Indexer
                 "Invalid method call! When you search on a column, MongoDB will automatically search in index if that exists.");
     }
 
+    @Override
+    public void close()
+    {
+        client.close();
+
+    }
+
 }

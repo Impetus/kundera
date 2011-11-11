@@ -9,9 +9,9 @@ public class PelopsUtils
 {
     public static String generatePoolName(String persistenceUnit)
     {
-        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.getInstance().getApplicationMetadata()
+        PersistenceUnitMetadata persistenceUnitMetadatata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
-        Properties props = persistenceUnitMetadata.getProperties();
+        Properties props = persistenceUnitMetadatata.getProperties();
         String contactNodes = (String) props.get("kundera.nodes");
         String defaultPort = (String) props.get("kundera.port");
         String keyspace = (String) props.get("kundera.keyspace");

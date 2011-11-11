@@ -147,4 +147,8 @@ public class IndexManager
         return indexer.search(query, start, count);
     }
 
+    public void close()
+    {
+        indexer.close();
+    }
 }

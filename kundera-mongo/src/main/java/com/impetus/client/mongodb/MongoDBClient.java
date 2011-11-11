@@ -190,8 +190,8 @@ public class MongoDBClient implements Client
         MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
 
         // TODO Resolve the workaround
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(),
-                mongoDBQuery.getKunderaQuery().getEntityClass());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), mongoDBQuery
+                .getKunderaQuery().getEntityClass());
 
         String documentName = entityMetadata.getTableName();
         String dbName = entityMetadata.getSchema();

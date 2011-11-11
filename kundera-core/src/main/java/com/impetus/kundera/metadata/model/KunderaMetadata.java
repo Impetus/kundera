@@ -34,17 +34,17 @@ public class KunderaMetadata
     /* Client specific persistence unit specific metadata */
     private Map<String, ClientMetadata> clientMetadata = new ConcurrentHashMap<String, ClientMetadata>();
 
-    private static KunderaMetadata instance;
+    public static final KunderaMetadata INSTANCE = new KunderaMetadata();
 
-    public static synchronized KunderaMetadata getInstance()
+    private KunderaMetadata()
     {
-        if (instance == null)
-        {
-            instance = new KunderaMetadata();
-        }
-        return instance;
+
     }
 
+    /*
+     * public static synchronized KunderaMetadata getInstance() { if (instance
+     * == null) { instance = new KunderaMetadata(); } return instance; }
+     */
     /**
      * @return the applicationMetadata
      */

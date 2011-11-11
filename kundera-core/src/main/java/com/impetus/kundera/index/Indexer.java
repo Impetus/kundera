@@ -62,4 +62,9 @@ public interface Indexer
     // List<String> search(String query, int start, int count);
 
     Map<String, String> search(String luceneQuery, int start, int count);
+
+    /**
+     * Close on index writer/reader.
+     */
+    void close();
 }

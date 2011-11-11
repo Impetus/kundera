@@ -33,8 +33,6 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.property.PropertyAccessException;
-import com.impetus.kundera.property.PropertyAccessor;
-import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**

@@ -74,7 +74,7 @@ public class KunderaQuery
 
     /** The entity class. */
     private Class<?> entityClass;
-    
+
     /**
      * Persistence Unit(s)
      */
@@ -95,7 +95,7 @@ public class KunderaQuery
      */
     public KunderaQuery(String... persistenceUnits)
     {
-       this.persistenceUnits = persistenceUnits;
+        this.persistenceUnits = persistenceUnits;
     }
 
     /**
@@ -533,11 +533,12 @@ public class KunderaQuery
     }
 
     /**
-     * @param persistenceUnits the persistenceUnits to set
+     * @param persistenceUnits
+     *            the persistenceUnits to set
      */
     public void setPersistenceUnits(String[] persistenceUnits)
     {
         this.persistenceUnits = persistenceUnits;
-    }    
-    
+    }
+
 }

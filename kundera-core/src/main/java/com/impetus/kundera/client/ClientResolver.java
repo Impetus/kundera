@@ -48,7 +48,7 @@ public final class ClientResolver
         if (loader != null)
             return loader;
 
-        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.getInstance().getApplicationMetadata()
+        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         String kunderaClientName = (String) persistenceUnitMetadata.getProperties().get("kundera.client");
         ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());

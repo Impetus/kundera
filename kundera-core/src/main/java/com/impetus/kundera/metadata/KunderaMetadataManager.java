@@ -18,7 +18,6 @@ package com.impetus.kundera.metadata;
 import org.apache.log4j.Logger;
 
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.loader.MetamodelLoader;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -36,12 +35,12 @@ public class KunderaMetadataManager
 
     public static PersistenceUnitMetadata getPersistenceUnitMetadata(String persistenceUnit)
     {
-        return KunderaMetadata.getInstance().getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
+        return KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
     }
 
     public static MetamodelImpl getMetamodel(String persistenceUnit)
     {
-        KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
+        KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
 
         MetamodelImpl metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
                 .getMetamodel(persistenceUnit);
@@ -53,21 +52,22 @@ public class KunderaMetadataManager
 
         return metamodel;
     }
-    
+
     public static MetamodelImpl getMetamodel(String... persistenceUnits)
     {
-        KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
-        
+        KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
+
         MetamodelImpl metamodel = null;
-        for(String pu : persistenceUnits) {
-        	metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
-            .getMetamodel(pu);
-        	
-        	if(metamodel != null) {
-        		return metamodel;
-        	}
-        }       
-        
+        for (String pu : persistenceUnits)
+        {
+            metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(pu);
+
+            if (metamodel != null)
+            {
+                return metamodel;
+            }
+        }
+
         if (metamodel == null)
         {
             metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
@@ -75,7 +75,6 @@ public class KunderaMetadataManager
         }
         return metamodel;
     }
-
 
     public static EntityMetadata getEntityMetadata(String persistenceUnit, Class entityClass)
     {
@@ -108,12 +107,12 @@ public class KunderaMetadataManager
 
     public static LazyInitializerFactory getLazyInitializerFactory()
     {
-        return KunderaMetadata.getInstance().getCoreMetadata().getLazyInitializerFactory();
+        return KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory();
     }
 
     public static EntityEnhancerFactory getEntityEnhancerFactory()
     {
-        return KunderaMetadata.getInstance().getCoreMetadata().getEnhancedProxyFactory();
+        return KunderaMetadata.INSTANCE.getCoreMetadata().getEnhancedProxyFactory();
     }
 
 }

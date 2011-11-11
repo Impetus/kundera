@@ -56,8 +56,7 @@ public class MetamodelLoader extends ApplicationLoader
     public void load(String... persistenceUnits)
     {
         log.debug("Loading Entity Metadata...");
-        KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
-        ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 
         for (String persistenceUnit : persistenceUnits)
         {
@@ -80,7 +79,7 @@ public class MetamodelLoader extends ApplicationLoader
             throw new IllegalArgumentException("Must have a persistenceUnitName in order to load entity metadata!");
         }
 
-        KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
+        KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
         Map<String, PersistenceUnitMetadata> persistentUnitMetadataMap = kunderaMetadata.getApplicationMetadata()
                 .getPersistenceUnitMetadataMap();
 

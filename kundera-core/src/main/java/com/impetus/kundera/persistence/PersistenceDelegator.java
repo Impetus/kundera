@@ -181,16 +181,19 @@ public class PersistenceDelegator
             throw new PersistenceException(exception);
         }
     }
-    
-    public <E> List<E> find(Class<E> entityClass, Object... primaryKeys) {
+
+    public <E> List<E> find(Class<E> entityClass, Object... primaryKeys)
+    {
         List<E> entities = new ArrayList<E>();
-        for(Object primaryKey : primaryKeys) {
+        for (Object primaryKey : primaryKeys)
+        {
             entities.add(find(entityClass, primaryKey));
         }
         return entities;
     }
-    
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> col) {
+
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> col)
+    {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass, getPersistenceUnits());
 
         List<E> entities = new ArrayList<E>();
@@ -361,9 +364,9 @@ public class PersistenceDelegator
     public Query createQuery(String jpaQuery)
     {
         Query query = new QueryResolver().getQueryImplementation(jpaQuery, this, persistenceUnits);
-        
+
         return query;
-       
+
     }
 
     public final boolean isOpen()

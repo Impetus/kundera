@@ -1,9 +1,9 @@
 package com.impetus.kundera;
 
-import com.impetus.kundera.persistence.JPAImplementationTestSuite;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import com.impetus.kundera.persistence.JPAImplementationTestSuite;
 
 public class AllTestSuites
 {

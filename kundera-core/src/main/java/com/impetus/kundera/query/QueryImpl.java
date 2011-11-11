@@ -40,13 +40,11 @@ public class QueryImpl implements Query
 {
 
     /** The query. */
-    protected String query; 
-    
+    protected String query;
+
     protected KunderaQuery kunderaQuery;
-    
+
     protected PersistenceDelegator persistenceDelegeator;
-    
-    
 
     /**
      * Instantiates a new query impl.
@@ -60,11 +58,10 @@ public class QueryImpl implements Query
      */
     public QueryImpl(String query, PersistenceDelegator persistenceDelegator, String... persistenceUnits)
     {
-        
+
         this.query = query;
-        this.persistenceDelegeator = persistenceDelegator;        
+        this.persistenceDelegeator = persistenceDelegator;
     }
-    
 
     /**
      * Gets the jPA query.
@@ -75,8 +72,6 @@ public class QueryImpl implements Query
     {
         return query;
     }
-    
-    
 
     /**
      * @return the kunderaQuery
@@ -86,15 +81,14 @@ public class QueryImpl implements Query
         return kunderaQuery;
     }
 
-
     /**
-     * @param kunderaQuery the kunderaQuery to set
+     * @param kunderaQuery
+     *            the kunderaQuery to set
      */
     public void setKunderaQuery(KunderaQuery kunderaQuery)
     {
         this.kunderaQuery = kunderaQuery;
     }
-
 
     /* @see javax.persistence.Query#executeUpdate() */
     @Override
@@ -106,11 +100,9 @@ public class QueryImpl implements Query
     /* @see javax.persistence.Query#getResultList() */
     @Override
     public List<?> getResultList()
-    {             
+    {
         throw new NotImplementedException("TODO");
-    } 
-    
-    
+    }
 
     /**
      * @return the persistenceDelegeator
@@ -120,15 +112,14 @@ public class QueryImpl implements Query
         return persistenceDelegeator;
     }
 
-
     /**
-     * @param persistenceDelegeator the persistenceDelegeator to set
+     * @param persistenceDelegeator
+     *            the persistenceDelegeator to set
      */
     public void setPersistenceDelegeator(PersistenceDelegator persistenceDelegeator)
     {
         this.persistenceDelegeator = persistenceDelegeator;
     }
-
 
     /* @see javax.persistence.Query#getSingleResult() */
     @Override

@@ -15,15 +15,11 @@
  ******************************************************************************/
 package com.impetus.client.mongodb.query;
 
-import java.util.List;
-
 import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.client.Client;
-import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.QueryImpl;
@@ -38,28 +34,22 @@ public class MongoDBQuery extends QueryImpl
     /** The log used by this class. */
     private static Log log = LogFactory.getLog(MongoDBQuery.class);
 
-    public MongoDBQuery(String jpaQuery, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, String... persistenceUnits)
+    public MongoDBQuery(String jpaQuery, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
+            String... persistenceUnits)
     {
         super(jpaQuery, persistenceDelegator, persistenceUnits);
-        this.kunderaQuery = kunderaQuery;    
+        this.kunderaQuery = kunderaQuery;
     }
 
-   /* @Override
-    public List<?> getResultList()
-    {
-        log.debug("JPA Query is: " + query);
-
-        EntityMetadata m = getEntityMetadata();
-
-        try
-        {
-            return getClient().loadData(this);
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
-    }*/
+    /*
+     * @Override public List<?> getResultList() { log.debug("JPA Query is: " +
+     * query);
+     * 
+     * EntityMetadata m = getEntityMetadata();
+     * 
+     * try { return getClient().loadData(this); } catch (Exception e) { return
+     * null; } }
+     */
 
     @Override
     public int executeUpdate()

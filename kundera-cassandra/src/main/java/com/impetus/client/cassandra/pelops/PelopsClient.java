@@ -115,6 +115,7 @@ public class PelopsClient implements Client
 
         getIndexManager().write(entityMetadata, enhancedEntity.getEntity());
 
+        tf = null;
     }
 
     @Override
@@ -199,7 +200,6 @@ public class PelopsClient implements Client
         rowDeletor.deleteRow(entityMetadata.getTableName(), enhancedEntity.getId(), ConsistencyLevel.ONE);
         getIndexManager().remove(entityMetadata, enhancedEntity.getEntity(), enhancedEntity.getId());
     }
-  
 
     @Override
     public final IndexManager getIndexManager()

@@ -29,8 +29,6 @@ import org.apache.log4j.Logger;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ApplicationLoader;
 import com.impetus.kundera.loader.CoreLoader;
-import com.impetus.kundera.metadata.model.ClientMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryBuilder;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 

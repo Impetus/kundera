@@ -57,7 +57,7 @@ public class EntityManagerFactoryBuilder
         Properties props = new Properties();
         // Override properties
 
-        KunderaMetadata kunderaMetadata = KunderaMetadata.getInstance();
+        KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
         PersistenceUnitMetadata puMetadata = kunderaMetadata.getApplicationMetadata().getPersistenceUnitMetadata(
                 persistenceUnitName);
 

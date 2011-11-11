@@ -17,10 +17,10 @@ package com.impetus.kundera.cache.ehcache;
 
 import javax.persistence.Cache;
 
+import junit.framework.TestCase;
+
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.entity.PersonDTO;
-
-import junit.framework.TestCase;
 
 /**
  * @author amresh.singh
