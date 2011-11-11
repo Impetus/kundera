@@ -70,10 +70,8 @@ public class LuceneIndexer extends DocumentIndexer
         {
             Directory index = FSDirectory.open(getIndexDirectory());
             w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
-            w.getConfig().setRAMBufferSizeMB(100);
-            w.setUseCompoundFile(false);
-            // w.
-            // w.getConfig().setMaxBufferedDocs(100);
+            w.getConfig().setRAMBufferSizeMB(100);           
+
         }
         catch (CorruptIndexException e)
         {
