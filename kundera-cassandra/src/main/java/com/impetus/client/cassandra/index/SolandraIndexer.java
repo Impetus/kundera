@@ -275,4 +275,11 @@ public class SolandraIndexer extends DocumentIndexer
 
     }
 
+    @Override
+    public void flush()
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

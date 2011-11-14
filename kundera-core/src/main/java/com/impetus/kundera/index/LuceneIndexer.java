@@ -39,6 +39,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.LockObtainFailedException;
+import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 
 import com.impetus.kundera.Constants;
@@ -56,8 +57,9 @@ public class LuceneIndexer extends DocumentIndexer
 {
     /** log for this class. */
     private static Log log = LogFactory.getLog(LuceneIndexer.class);
-
     private IndexWriter w;
+    private IndexReader reader;
+    private Directory index;
 
     /**
      * @param client
@@ -68,10 +70,13 @@ public class LuceneIndexer extends DocumentIndexer
         super(analyzer);
         try
         {
-            Directory index = FSDirectory.open(getIndexDirectory());
+            
+            index = new RAMDirectory();/*FSDirectory.open(getIndexDirectory())*/;
+            /* writer */
             w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
+            /*reader = */
+            getIndexReader();
             w.getConfig().setRAMBufferSizeMB(100);           
-
         }
         catch (CorruptIndexException e)
         {
@@ -95,23 +100,7 @@ public class LuceneIndexer extends DocumentIndexer
     private IndexWriter getIndexWriter()
     {
         return w;
-        /*
-         * StandardAnalyzer analyzer = new
-         * StandardAnalyzer(Version.LUCENE_CURRENT); Directory index = null;
-         * IndexWriter w = null; try { index =
-         * FSDirectory.open(getIndexDirectory()); if (index.listAll().length ==
-         * 0) { log.info("Creating fresh Index because it was empty"); w = new
-         * IndexWriter(index, analyzer, true,
-         * IndexWriter.MaxFieldLength.LIMITED); } else { w = new
-         * IndexWriter(index, analyzer, false,
-         * IndexWriter.MaxFieldLength.LIMITED); }
-         * 
-         * } catch (CorruptIndexException e) { throw new
-         * IndexingException(e.getMessage()); } catch (LockObtainFailedException
-         * e) { throw new IndexingException(e.getMessage()); } catch
-         * (IOException e) { throw new IndexingException(e.getMessage()); }
-         * return w;
-         */}
+    }
 
     /**
      * Returns default index reader.
@@ -120,10 +109,10 @@ public class LuceneIndexer extends DocumentIndexer
      */
     private IndexReader getIndexReader()
     {
-        org.apache.lucene.index.IndexReader reader = null;
+//        org.apache.lucene.index.IndexReader reader = null;
         try
         {
-            reader = IndexReader.open(FSDirectory.open(getIndexDirectory()));
+            reader = IndexReader.open(/*FSDirectory.open(getIndexDirectory())*/ index,true);
         }
         catch (CorruptIndexException e)
         {
@@ -213,6 +202,20 @@ public class LuceneIndexer extends DocumentIndexer
             indexDocument(metadata, currentDoc);
         }
 
+        //TODO: Sadly this required to keep lucene happy, in case of indexing and searching with same entityManager.
+        // Other alternative would be to issue flush on each search
+        try
+        {
+            w.commit();
+        }
+        catch (CorruptIndexException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        catch (IOException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
     }
 
     @Override
@@ -249,7 +252,11 @@ public class LuceneIndexer extends DocumentIndexer
         // Set<String> entityIds = new HashSet<String>();
         Map<String, String> indexCol = new HashMap<String, String>();
 
-        org.apache.lucene.index.IndexReader indexReader = null;
+        if(reader ==null)
+        {
+            throw new RuntimeException("Index reader is not initialized!");
+        }
+/*        org.apache.lucene.index.IndexReader indexReader = null;
 
         try
         {
@@ -261,7 +268,7 @@ public class LuceneIndexer extends DocumentIndexer
         {
             throw new IndexingException(e.getMessage());
         }
-        IndexSearcher searcher = new IndexSearcher(indexReader);
+*/        IndexSearcher searcher = new IndexSearcher(reader);
 
         QueryParser qp = new QueryParser(Version.LUCENE_CURRENT, DEFAULT_SEARCHABLE_FIELD, analyzer);
         try
@@ -344,6 +351,9 @@ public class LuceneIndexer extends DocumentIndexer
         }
     }
 
+    /**
+     * Close of transaction.
+     */
     public void close()
     {
         try
@@ -352,6 +362,7 @@ public class LuceneIndexer extends DocumentIndexer
             {
                 w.commit();
                 w.close();
+                index.copy(index, FSDirectory.open(getIndexDirectory()), true);
             }
         }
 
@@ -363,5 +374,31 @@ public class LuceneIndexer extends DocumentIndexer
         {
             log.error("Error while indexing document  into Lucene. Details:" + e.getMessage());
         }
+    }
+
+    @Override
+    public void flush()
+    {
+        try
+        {
+        if(w !=null)
+        {
+            
+            w.commit();
+            w.close();
+            index.copy(index, FSDirectory.open(getIndexDirectory()), false);
+        }
+        }
+        catch (CorruptIndexException e)
+        {
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+     
+        
     }
 }

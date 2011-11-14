@@ -147,6 +147,17 @@ public class IndexManager
         return indexer.search(query, start, count);
     }
 
+    /**
+     * Flushes out the indexes, keeping RAM directory open.
+     */
+    public void flush()
+    {
+        indexer.flush();
+    }
+    
+    /**
+     * Closes the transaction alongwith RAM directory.
+     */
     public void close()
     {
         indexer.close();

@@ -3,6 +3,8 @@ package com.impetus.client.hbase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.lucene.analysis.KeywordAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
@@ -18,12 +20,7 @@ public class HBaseClientFactory extends GenericClientFactory
     @Override
     protected void initializeClient()
     {
-        indexManager = new IndexManager(new LuceneIndexer(/*
-                                                           * new
-                                                           * StandardAnalyzer
-                                                           * (Version
-                                                           * .LUCENE_CURRENT))
-                                                           */new KeywordAnalyzer()));
+        indexManager = new IndexManager(new LuceneIndexer(new StandardAnalyzer(Version.LUCENE_34))/*new KeywordAnalyzer())*/);
     }
 
     @Override

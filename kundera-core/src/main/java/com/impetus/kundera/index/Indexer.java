@@ -67,4 +67,9 @@ public interface Indexer
      * Close on index writer/reader.
      */
     void close();
+    
+    /**
+     * Flushes out indexes.
+     */
+    void flush();
 }
