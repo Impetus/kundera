@@ -220,7 +220,7 @@ public class PelopsClient implements Client
 
     @Override
     public final void close()
-    {        
+    {
         this.indexManager.flush();
         this.dataHandler = null;
         closed = true;

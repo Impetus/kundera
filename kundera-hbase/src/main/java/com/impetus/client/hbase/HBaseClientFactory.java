@@ -20,7 +20,13 @@ public class HBaseClientFactory extends GenericClientFactory
     @Override
     protected void initializeClient()
     {
-        indexManager = new IndexManager(new LuceneIndexer(new StandardAnalyzer(Version.LUCENE_34))/*new KeywordAnalyzer())*/);
+        indexManager = new IndexManager(new LuceneIndexer(new StandardAnalyzer(Version.LUCENE_34))/*
+                                                                                                   * new
+                                                                                                   * KeywordAnalyzer
+                                                                                                   * (
+                                                                                                   * )
+                                                                                                   * )
+                                                                                                   */);
     }
 
     @Override

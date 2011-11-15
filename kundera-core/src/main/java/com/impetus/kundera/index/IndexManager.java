@@ -154,7 +154,7 @@ public class IndexManager
     {
         indexer.flush();
     }
-    
+
     /**
      * Closes the transaction alongwith RAM directory.
      */
