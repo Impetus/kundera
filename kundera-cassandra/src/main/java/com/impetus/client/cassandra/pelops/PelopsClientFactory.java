@@ -25,37 +25,14 @@ public class PelopsClientFactory extends GenericClientFactory
 
     @Override
     protected void initializeClient()
-    {
-        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getPersistenceUnitMetadata(getPersistenceUnit());
-
-        String serverConfig = (String) persistenceUnitMetadata.getProperties().get("server.config");
-
-        if (serverConfig != null)
-        {
-            serverConfig = "file:///" + serverConfig;
-            System.setProperty("cassandra.config", serverConfig);
-        }
-
-        // Start Solandra specific tasks
-        // initializeSolandra(getPersistenceUnit());
-
+    {    	
         // TODO StandardAnalyzer is thread safe. So it looks like indexManager
         // is threadsafe an hence using a single instance
         logger.info("Initializing Threadsafe Indexmanager. Is it really threadsafe?");
         indexManager = new IndexManager(new LuceneIndexer(new StandardAnalyzer(Version.LUCENE_34)/*new KeywordAnalyzer())*/));
     }
     
-/*
-    private void initializeSolandra(String persistenceUnit)
-    {
-        logger.info("Initializing Solandra.");
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
-        String node = puMetadata.getProperties().getProperty("kundera.nodes");
-        String port = puMetadata.getProperties().getProperty("kundera.port");
-        new SolandraUtils().initializeSolandra(node, Integer.valueOf(port));
-    }
-*/
+
     @Override
     protected Object createPoolOrConnection()
     {
