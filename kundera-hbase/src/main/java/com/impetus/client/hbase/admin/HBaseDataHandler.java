@@ -300,16 +300,39 @@ public class HBaseDataHandler implements DataHandler
             /* Set Row Key */
             PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), rowKey);
 
+            
+
+            // Raw data retrieved from HBase for a particular row key (contains
+            // all column families)
+            List<KeyValue> hbaseValues = hbaseData.getColumns();
+            
+            
+            /*
+             * Populate columns data
+             */
+            List<Column> columns = m.getColumnsAsList();
+            for(Column column : columns) {
+                Field columnField = column.getField();
+                String columnName = column.getName();
+                
+                for(KeyValue colData : hbaseValues) {
+                    String hbaseColumn = Bytes.toString(colData.getColumn());
+                    if(hbaseColumn != null && hbaseColumn.startsWith(columnName)) {
+                        byte[] hbaseColumnValue = colData.getValue();
+                        PropertyAccessorHelper.set(entity, columnField, hbaseColumnValue);
+                        
+                        break;
+                    }
+                }              
+                
+            }
+            
+            
             /*
              * Set each column families, for HBase embedded columns are called
              * columns families
              */
             List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList();
-
-            // Raw data retrieved from HBase for a particular row key (contains
-            // all column families)
-            List<KeyValue> hbaseValues = hbaseData.getColumns();
-
             for (EmbeddedColumn columnFamily : columnFamilies)
             {
                 Field columnFamilyFieldInEntity = columnFamily.getField();
