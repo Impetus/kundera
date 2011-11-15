@@ -63,6 +63,8 @@ public class LuceneIndexer extends DocumentIndexer
     private IndexReader reader;
 
     private Directory index;
+    
+    private boolean isInitialized;
 
     /**
      * @param client
@@ -74,8 +76,8 @@ public class LuceneIndexer extends DocumentIndexer
         try
         {
 
-            index = new RAMDirectory();/* FSDirectory.open(getIndexDirectory()) */
-            ;
+            index = new RAMDirectory();/* FSDirectory.open(getIndexDirectory()) */;
+//            isInitialized
             /* writer */
             w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
             /* reader = */
@@ -116,6 +118,12 @@ public class LuceneIndexer extends DocumentIndexer
         {
             try
             {
+                if(!isInitialized)
+                {
+                    Directory sourceDir = FSDirectory.open(getIndexDirectory()) ;
+                    sourceDir.copy(sourceDir, index, true);
+                    isInitialized = true;
+                }
                 reader = IndexReader.open(
                 /* FSDirectory.open(getIndexDirectory()) */index, true);
             }
@@ -214,6 +222,7 @@ public class LuceneIndexer extends DocumentIndexer
         try
         {
             w.commit();
+            isInitialized =  true;
         }
         catch (CorruptIndexException e)
         {

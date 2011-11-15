@@ -72,7 +72,7 @@ public class KunderaPersistence implements PersistenceProvider
                 initializeKundera(persistenceUnit);
 
             }
-            EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, new HashMap<String, Object>(1));
+            EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, map);
 
             return emf;
         }
