@@ -2,6 +2,7 @@ package com.impetus.kundera.persistence;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class PersistenceDelegator
 
     private EntityManagerSession session;
 
-    private List<Client> clients;
+    private Map<String, Client> clientMap;
 
     String[] persistenceUnits;
 
@@ -58,20 +59,38 @@ public class PersistenceDelegator
     public Client getClient(EntityMetadata m)
     {
         Client client = null;
+        
+        // Persistence Unit used to retrieve client
+        String persistenceUnit = null;
+
         if (getPersistenceUnits().length == 1)
         {
-            client = ClientResolver.getClient(getPersistenceUnits()[0]);
+            persistenceUnit = getPersistenceUnits()[0];
         }
         else
         {
-            client = ClientResolver.getClient(m.getPersistenceUnit());
+            persistenceUnit = m.getPersistenceUnit();
+
         }
 
-        if (clients == null || clients.isEmpty())
+        //If client has already been created, return it, or create it and put it into client map
+        if (clientMap == null || clientMap.isEmpty())
         {
-            clients = new ArrayList<Client>();
+            clientMap = new HashMap<String, Client>();
+            client = ClientResolver.getClient(persistenceUnit);
+            clientMap.put(persistenceUnit, client);
+
         }
-        clients.add(client);
+        else if (clientMap.get(persistenceUnit) == null)
+        {
+            client = ClientResolver.getClient(persistenceUnit);
+            clientMap.put(persistenceUnit, client);
+        }
+        else
+        {
+            client = clientMap.get(persistenceUnit);
+        }      
+
         return client;
     }
 
@@ -378,10 +397,12 @@ public class PersistenceDelegator
     {
         eventDispatcher = null;
         persistenceUnits = null;
-        for (Client client : clients)
-        {
+        
+        //Close all clients created in this session
+        for(Client client : clientMap.values()) {
             client.close();
         }
+        
         closed = true;
     }
 

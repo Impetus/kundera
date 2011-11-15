@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +35,7 @@ import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.cache.NonOperationalCacheProvider;
 import com.impetus.kundera.client.ClientResolver;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 
 /**
  * The Class EntityManagerFactoryImpl.
@@ -157,8 +157,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Metamodel getMetamodel()
     {
-        // return KunderaMetadataManager.getMetamodel(getPersistenceUnit());
-        return null;
+        return KunderaMetadataManager.getMetamodel(getPersistenceUnits());        
     }
 
     @Override
