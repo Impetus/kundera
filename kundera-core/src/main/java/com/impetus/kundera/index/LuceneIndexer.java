@@ -190,14 +190,14 @@ public class LuceneIndexer extends DocumentIndexer
                     {
                         for (Object obj : (Collection<?>) embeddedObject)
                         {
-                            currentDoc = prepareDocument(metadata, object, superColumnName);
+                            currentDoc = prepareDocumentForSuperColumn(metadata, object, superColumnName);
                             indexSuperColumn(metadata, object, currentDoc, obj, superColumn);
                         }
                         return;
                     }
                     else
                     {
-                        currentDoc = prepareDocument(metadata, object, superColumnName);
+                        currentDoc = prepareDocumentForSuperColumn(metadata, object, superColumnName);
                     }
                 }
                 catch (PropertyAccessException e)
@@ -211,8 +211,8 @@ public class LuceneIndexer extends DocumentIndexer
         else
         {
             currentDoc = new Document();
-            prepareIndexDocument(metadata, object, currentDoc);
-            addIndexProperties(metadata, object, currentDoc);
+            addEntityClassToDocument(metadata, object, currentDoc);
+            addFieldsToDocument(metadata, object, currentDoc);
             indexDocument(metadata, currentDoc);
         }
 
