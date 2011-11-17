@@ -166,7 +166,7 @@ public class QueryImpl implements Query
     @Override
     public Query setParameter(String name, Object value)
     {
-        setParameter(name, value.toString());
+        kunderaQuery.setParameter(name, value.toString());
         return this;
     }
 

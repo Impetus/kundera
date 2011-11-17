@@ -59,7 +59,7 @@ public class PersistenceDelegator
     public Client getClient(EntityMetadata m)
     {
         Client client = null;
-        
+
         // Persistence Unit used to retrieve client
         String persistenceUnit = null;
 
@@ -73,7 +73,8 @@ public class PersistenceDelegator
 
         }
 
-        //If client has already been created, return it, or create it and put it into client map
+        // If client has already been created, return it, or create it and put
+        // it into client map
         if (clientMap == null || clientMap.isEmpty())
         {
             clientMap = new HashMap<String, Client>();
@@ -89,7 +90,7 @@ public class PersistenceDelegator
         else
         {
             client = clientMap.get(persistenceUnit);
-        }      
+        }
 
         return client;
     }
@@ -397,12 +398,13 @@ public class PersistenceDelegator
     {
         eventDispatcher = null;
         persistenceUnits = null;
-        
-        //Close all clients created in this session
-        for(Client client : clientMap.values()) {
+
+        // Close all clients created in this session
+        for (Client client : clientMap.values())
+        {
             client.close();
         }
-        
+
         closed = true;
     }
 

@@ -127,7 +127,7 @@ public abstract class DocumentIndexer implements Indexer
         for (Column col : superColumn.getColumns())
         {
             java.lang.reflect.Field field = col.getField();
-            String colName = col.getName();
+            String colName = field.getName();
             String indexName = metadata.getIndexName();
             addFieldToDocument(embeddedObject, currentDoc, field, colName, indexName);
         }

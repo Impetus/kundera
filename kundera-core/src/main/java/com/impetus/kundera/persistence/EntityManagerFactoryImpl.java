@@ -89,10 +89,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      */
     public EntityManagerFactoryImpl(String persistenceUnit, Map<String, Object> properties)
     {
-        if(properties == null) {
+        if (properties == null)
+        {
             properties = new HashMap<String, Object>();
         }
-        
+
         // TODO Devise some better (JPA) way
         properties.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         this.properties = properties;
@@ -157,7 +158,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Metamodel getMetamodel()
     {
-        return KunderaMetadataManager.getMetamodel(getPersistenceUnits());        
+        return KunderaMetadataManager.getMetamodel(getPersistenceUnits());
     }
 
     @Override
