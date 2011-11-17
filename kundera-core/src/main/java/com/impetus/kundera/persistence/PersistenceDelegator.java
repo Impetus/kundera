@@ -400,10 +400,12 @@ public class PersistenceDelegator
         persistenceUnits = null;
 
         // Close all clients created in this session
-        for (Client client : clientMap.values())
-        {
-            client.close();
-        }
+        if(clientMap != null && ! clientMap.isEmpty()) {
+            for (Client client : clientMap.values())
+            {
+                client.close();
+            }
+        }       
 
         closed = true;
     }

@@ -193,20 +193,20 @@ public class LuceneIndexer extends DocumentIndexer
                         {
                             currentDoc = prepareDocumentForSuperColumn(metadata, object, superColumnName);
                             indexSuperColumn(metadata, object, currentDoc, obj, superColumn);
-                        }
-                        return;
+                        }                        
                     }
                     else
                     {
                         currentDoc = prepareDocumentForSuperColumn(metadata, object, superColumnName);
+                        indexSuperColumn(metadata, object, currentDoc,
+                                metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object, superColumn);
                     }
                 }
                 catch (PropertyAccessException e)
                 {
                     log.error("Error while accesing embedded Object:" + superColumnName);
                 }
-                indexSuperColumn(metadata, object, currentDoc,
-                        metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object, superColumn);
+                
             }
         }
         else
