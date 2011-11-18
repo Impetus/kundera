@@ -88,7 +88,8 @@ public class ApplicationMetadata
 
     public Metamodel getMetamodel(String persistenceUnit)
     {
-        return getMetamodelMap().get(persistenceUnit);
+        Map<String, Metamodel> model = getMetamodelMap();
+        return persistenceUnit !=null && model.containsKey(persistenceUnit)?model.get(persistenceUnit):null;
     }
 
     /**

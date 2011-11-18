@@ -405,6 +405,8 @@ public class PersistenceDelegator
             {
                 client.close();
             }
+            clientMap.clear();
+            clientMap=null;
         }       
 
         closed = true;

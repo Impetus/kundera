@@ -77,7 +77,6 @@ public class LuceneIndexer extends DocumentIndexer
         {
 
             index = new RAMDirectory();/* FSDirectory.open(getIndexDirectory()) */
-            ;
             // isInitialized
             /* writer */
             w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
@@ -358,7 +357,7 @@ public class LuceneIndexer extends DocumentIndexer
         try
         {
             // w.setR
-            w.addDocument(document, super.analyzer);
+            w.addDocument(document);
             // w.optimize();
             // w.commit();
             // w.close();
@@ -408,7 +407,7 @@ public class LuceneIndexer extends DocumentIndexer
 
                 w.commit();
                 // w.close();
-                index.copy(index, FSDirectory.open(getIndexDirectory()), false);
+//                index.copy(index, FSDirectory.open(getIndexDirectory()), false);
             }
         }
         catch (CorruptIndexException e)
@@ -417,7 +416,6 @@ public class LuceneIndexer extends DocumentIndexer
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
