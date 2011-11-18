@@ -64,6 +64,8 @@ public class LuceneIndexer extends DocumentIndexer
 
     private Directory index;
 
+    private boolean isInitialized;
+
     /**
      * @param client
      * @param analyzer
@@ -75,7 +77,7 @@ public class LuceneIndexer extends DocumentIndexer
         {
 
             index = new RAMDirectory();/* FSDirectory.open(getIndexDirectory()) */
-            ;
+            // isInitialized
             /* writer */
             w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
             /* reader = */
@@ -116,6 +118,12 @@ public class LuceneIndexer extends DocumentIndexer
         {
             try
             {
+                if (!isInitialized)
+                {
+                    Directory sourceDir = FSDirectory.open(getIndexDirectory());
+                    sourceDir.copy(sourceDir, index, true);
+                    isInitialized = true;
+                }
                 reader = IndexReader.open(
                 /* FSDirectory.open(getIndexDirectory()) */index, true);
             }
@@ -182,29 +190,29 @@ public class LuceneIndexer extends DocumentIndexer
                     {
                         for (Object obj : (Collection<?>) embeddedObject)
                         {
-                            currentDoc = prepareDocument(metadata, object, superColumnName);
+                            currentDoc = prepareDocumentForSuperColumn(metadata, object, superColumnName);
                             indexSuperColumn(metadata, object, currentDoc, obj, superColumn);
-                        }
-                        return;
+                        }                        
                     }
                     else
                     {
-                        currentDoc = prepareDocument(metadata, object, superColumnName);
+                        currentDoc = prepareDocumentForSuperColumn(metadata, object, superColumnName);
+                        indexSuperColumn(metadata, object, currentDoc,
+                                metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object, superColumn);
                     }
                 }
                 catch (PropertyAccessException e)
                 {
                     log.error("Error while accesing embedded Object:" + superColumnName);
                 }
-                indexSuperColumn(metadata, object, currentDoc,
-                        metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object, superColumn);
+                
             }
         }
         else
         {
             currentDoc = new Document();
-            prepareIndexDocument(metadata, object, currentDoc);
-            addIndexProperties(metadata, object, currentDoc);
+            addEntityClassToDocument(metadata, object, currentDoc);
+            addFieldsToDocument(metadata, object, currentDoc);
             indexDocument(metadata, currentDoc);
         }
 
@@ -214,6 +222,7 @@ public class LuceneIndexer extends DocumentIndexer
         try
         {
             w.commit();
+            isInitialized = true;
         }
         catch (CorruptIndexException e)
         {
@@ -400,7 +409,6 @@ public class LuceneIndexer extends DocumentIndexer
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

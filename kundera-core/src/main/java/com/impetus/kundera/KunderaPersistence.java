@@ -44,12 +44,12 @@ public class KunderaPersistence implements PersistenceProvider
     private static Logger logger = Logger.getLogger(KunderaPersistence.class);
 
     private static Boolean loaded = false;
-    
+
     /**
      * Instantiates a new kundera persistence.
      */
     public KunderaPersistence()
-    {        
+    {
         // Load Core
         logger.info("Loading Core");
         new CoreLoader().load();
@@ -60,8 +60,6 @@ public class KunderaPersistence implements PersistenceProvider
     {
         return createEntityManagerFactory(info.getPersistenceUnitName(), map);
     }
- 
-  
 
     @Override
     public synchronized final EntityManagerFactory createEntityManagerFactory(String persistenceUnit, Map map)
@@ -73,8 +71,8 @@ public class KunderaPersistence implements PersistenceProvider
                 loaded = true;
                 initializeKundera(persistenceUnit);
 
-            }            
-            EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, new HashMap<String, Object>(1));
+            }
+            EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, map);
 
             return emf;
         }

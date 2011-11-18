@@ -122,7 +122,7 @@ public class MongoDBIndexer implements Indexer
     public void flush()
     {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

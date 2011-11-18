@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.Cache;
@@ -34,6 +35,7 @@ import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.cache.NonOperationalCacheProvider;
 import com.impetus.kundera.client.ClientResolver;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 
 /**
  * The Class EntityManagerFactoryImpl.
@@ -87,6 +89,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      */
     public EntityManagerFactoryImpl(String persistenceUnit, Map<String, Object> properties)
     {
+        if (properties == null)
+        {
+            properties = new HashMap<String, Object>();
+        }
+
         // TODO Devise some better (JPA) way
         properties.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         this.properties = properties;
@@ -151,8 +158,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Metamodel getMetamodel()
     {
-        // return KunderaMetadataManager.getMetamodel(getPersistenceUnit());
-        return null;
+        return KunderaMetadataManager.getMetamodel(getPersistenceUnits());
     }
 
     @Override

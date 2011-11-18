@@ -5,8 +5,7 @@
 
 	<persistence-unit name="kunderatest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>		
-		<properties>
-			<property name="server.config" value="D:/vivek/source/cassandra-0.8.2/conf/cassandra.yaml"/>
+		<properties>			
 			<property name="kundera.nodes" value="localhost"/>
 			<property name="kundera.port" value="9160"/>
 			<property name="kundera.keyspace" value="KunderaTest"/>

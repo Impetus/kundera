@@ -98,12 +98,12 @@ public abstract class DocumentIndexer implements Indexer
      *            the super column name
      * @return the document
      */
-    protected Document prepareDocument(EntityMetadata metadata, Object object, String superColumnName)
+    protected Document prepareDocumentForSuperColumn(EntityMetadata metadata, Object object, String superColumnName)
     {
         Document currentDoc;
         currentDoc = new Document();
-        prepareIndexDocument(metadata, object, currentDoc);
-        indexSuperColumnName(superColumnName, currentDoc);
+        addEntityClassToDocument(metadata, object, currentDoc);
+        addSuperColumnNameToDocument(superColumnName, currentDoc);
         return currentDoc;
     }
 
@@ -127,12 +127,12 @@ public abstract class DocumentIndexer implements Indexer
         for (Column col : superColumn.getColumns())
         {
             java.lang.reflect.Field field = col.getField();
-            String colName = col.getName();
+            String colName = field.getName();
             String indexName = metadata.getIndexName();
-            indexField(embeddedObject, currentDoc, field, colName, indexName);
+            addFieldToDocument(embeddedObject, currentDoc, field, colName, indexName);
         }
-        // add document.
-        addIndexProperties(metadata, object, currentDoc);
+        // Add document.
+        addFieldsToDocument(metadata, object, currentDoc);
         indexDocument(metadata, currentDoc);
     }
 
@@ -144,7 +144,7 @@ public abstract class DocumentIndexer implements Indexer
      * @param currentDoc
      *            the current doc
      */
-    private void indexSuperColumnName(String superColumnName, Document currentDoc)
+    private void addSuperColumnNameToDocument(String superColumnName, Document currentDoc)
     {
         byte[] value = superColumnName.getBytes();
         Field luceneField = new Field(SUPERCOLUMN_INDEX, value,0,value.length);
@@ -162,7 +162,7 @@ public abstract class DocumentIndexer implements Indexer
      * @param document
      *            the document
      */
-    protected void addIndexProperties(EntityMetadata metadata, Object object, Document document)
+    protected void addFieldsToDocument(EntityMetadata metadata, Object object, Document document)
     {
         String indexName = metadata.getIndexName();
         for (PropertyIndex index : metadata.getIndexProperties())
@@ -170,7 +170,7 @@ public abstract class DocumentIndexer implements Indexer
 
             java.lang.reflect.Field property = index.getProperty();
             String propertyName = index.getName();
-            indexField(object, document, property, propertyName, indexName);
+            addFieldToDocument(object, document, property, propertyName, indexName);
         }
     }
 
@@ -184,7 +184,7 @@ public abstract class DocumentIndexer implements Indexer
      * @param document
      *            the document
      */
-    protected void prepareIndexDocument(EntityMetadata metadata, Object object, Document document)
+    protected void addEntityClassToDocument(EntityMetadata metadata, Object object, Document document)
     {
         try
         {
@@ -241,7 +241,7 @@ public abstract class DocumentIndexer implements Indexer
      * @param indexName
      *            the index name
      */
-    private void indexField(Object object, Document document, java.lang.reflect.Field field, String colName,
+    private void addFieldToDocument(Object object, Document document, java.lang.reflect.Field field, String colName,
             String indexName)
     {
         try
