@@ -88,13 +88,13 @@ public interface Client
      *            the em
      * @param m
      *            the m
-     * @param col
+     * @param embeddedColumnMap
      *            the col
      * @return the list
      * @throws Exception
      *             the exception
      */
-    <E> List<E> find(Class<E> entityClass, Map<String, String> col) throws Exception;
+    <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap) throws Exception;
 
     /**
      * Loads columns from multiple rows restricting results to conditions stored

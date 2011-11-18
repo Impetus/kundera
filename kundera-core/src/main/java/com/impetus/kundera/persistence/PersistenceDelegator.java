@@ -212,14 +212,14 @@ public class PersistenceDelegator
         return entities;
     }
 
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> col)
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass, getPersistenceUnits());
 
         List<E> entities = new ArrayList<E>();
         try
         {
-            entities = getClient(entityMetadata).find(entityClass, col);
+            entities = getClient(entityMetadata).find(entityClass, embeddedColumnMap);
         }
         catch (Exception e)
         {

@@ -173,38 +173,39 @@ public class LuceneIndexer extends DocumentIndexer
         // we need to create seperate lucene document for indexing.
         if (metadata.getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY))
         {
-            Map<String, EmbeddedColumn> superColMap = metadata.getEmbeddedColumnsMap();
+            Map<String, EmbeddedColumn> embeddedColumnMap = metadata.getEmbeddedColumnsMap();
 
-            for (String superColumnName : superColMap.keySet())
+            for (String embeddedColumnName : embeddedColumnMap.keySet())
             {
-                EmbeddedColumn superColumn = superColMap.get(superColumnName);
+                EmbeddedColumn embeddedColumn = embeddedColumnMap.get(embeddedColumnName);
                 try
                 {
 
-                    embeddedObject = PropertyAccessorHelper.getObject(object, superColumn.getField());
-                    // if embeddedObject is not set.
+                    embeddedObject = PropertyAccessorHelper.getObject(object, embeddedColumn.getField());
+                    
+                    //If embeddedObject is not set, no point of indexing, move to next super column
                     if (embeddedObject == null)
-                    {
-                        return;
+                    {                       
+                        continue;
                     }
                     if (embeddedObject instanceof Collection<?>)
                     {
                         for (Object obj : (Collection<?>) embeddedObject)
                         {
-                            currentDoc = prepareDocumentForSuperColumn(metadata, object, superColumnName);
-                            indexSuperColumn(metadata, object, currentDoc, obj, superColumn);
+                            currentDoc = prepareDocumentForSuperColumn(metadata, object, embeddedColumnName);
+                            indexSuperColumn(metadata, object, currentDoc, obj, embeddedColumn);
                         }                        
                     }
                     else
                     {
-                        currentDoc = prepareDocumentForSuperColumn(metadata, object, superColumnName);
+                        currentDoc = prepareDocumentForSuperColumn(metadata, object, embeddedColumnName);
                         indexSuperColumn(metadata, object, currentDoc,
-                                metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object, superColumn);
+                                metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object, embeddedColumn);
                     }
                 }
                 catch (PropertyAccessException e)
                 {
-                    log.error("Error while accesing embedded Object:" + superColumnName);
+                    log.error("Error while accesing embedded Object:" + embeddedColumnName);
                 }
                 
             }
@@ -212,8 +213,14 @@ public class LuceneIndexer extends DocumentIndexer
         else
         {
             currentDoc = new Document();
+            
+            //Add entity class, PK info into document
             addEntityClassToDocument(metadata, object, currentDoc);
-            addFieldsToDocument(metadata, object, currentDoc);
+            
+            //Add all entity fields(columns) into document
+            addEntityFieldsToDocument(metadata, object, currentDoc);
+            
+            //Store document into index
             indexDocument(metadata, currentDoc);
         }
 

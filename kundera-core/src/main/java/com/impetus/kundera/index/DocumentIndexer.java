@@ -102,7 +102,11 @@ public abstract class DocumentIndexer implements Indexer
     {
         Document currentDoc;
         currentDoc = new Document();
+        
+        //Add entity class and row key info to document
         addEntityClassToDocument(metadata, object, currentDoc);
+        
+        //Add super column name to document
         addSuperColumnNameToDocument(superColumnName, currentDoc);
         return currentDoc;
     }
@@ -124,6 +128,7 @@ public abstract class DocumentIndexer implements Indexer
     protected void indexSuperColumn(EntityMetadata metadata, Object object, Document currentDoc, Object embeddedObject,
             EmbeddedColumn superColumn)
     {
+        //Add all super column fields into document
         for (Column col : superColumn.getColumns())
         {
             java.lang.reflect.Field field = col.getField();
@@ -131,8 +136,10 @@ public abstract class DocumentIndexer implements Indexer
             String indexName = metadata.getIndexName();
             addFieldToDocument(embeddedObject, currentDoc, field, colName, indexName);
         }
-        // Add document.
-        addFieldsToDocument(metadata, object, currentDoc);
+        //Add all entity fields to document
+        addEntityFieldsToDocument(metadata, object, currentDoc);
+        
+        //Store document into Index
         indexDocument(metadata, currentDoc);
     }
 
@@ -162,7 +169,7 @@ public abstract class DocumentIndexer implements Indexer
      * @param document
      *            the document
      */
-    protected void addFieldsToDocument(EntityMetadata metadata, Object object, Document document)
+    protected void addEntityFieldsToDocument(EntityMetadata metadata, Object object, Document document)
     {
         String indexName = metadata.getIndexName();
         for (PropertyIndex index : metadata.getIndexProperties())
