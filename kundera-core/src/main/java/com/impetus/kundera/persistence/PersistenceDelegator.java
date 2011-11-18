@@ -382,6 +382,8 @@ public class PersistenceDelegator
         {
             client.close();
         }
+        clients.clear();
+        clients=null;
         closed = true;
     }
 

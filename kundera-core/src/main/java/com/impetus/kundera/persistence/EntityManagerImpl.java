@@ -156,6 +156,7 @@ public class EntityManagerImpl implements EntityManager
     public final void close()
     {
         checkClosed();
+        session.clear();
         session = null;
         persistenceDelegator.close();
         closed = true;
