@@ -594,12 +594,11 @@ public class PelopsDataHandler extends DataHandler
                     }
                 }
                 else
-                { // Updation
-                  // Check whether this object is already in cache,
-                  // which
-                  // means we already have a super column
-                  // Otherwise we need to generate a fresh super
-                  // column name
+                {
+                    // Updation, Check whether this object is already in cache,
+                    // which means we already have a super column
+                    // Otherwise we need to generate a fresh embedded column
+                    // name
                     int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(e.getId());
                     for (Object obj : (Collection) superColumnObject)
                     {
