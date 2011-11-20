@@ -43,6 +43,7 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -168,6 +169,17 @@ public class LuceneIndexer extends DocumentIndexer
 
         Document currentDoc = null;
         Object embeddedObject = null;
+        String rowKey = null;
+        try
+        {
+            rowKey = PropertyAccessorHelper.getId(object, metadata);
+        }
+        catch (PropertyAccessException e1)
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
         // In case defined entity is Super column family.
         // we need to create seperate lucene document for indexing.
         if (metadata.getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY))
@@ -181,45 +193,84 @@ public class LuceneIndexer extends DocumentIndexer
                 {
 
                     embeddedObject = PropertyAccessorHelper.getObject(object, embeddedColumn.getField());
-                    
-                    //If embeddedObject is not set, no point of indexing, move to next super column
+
+                    // If embeddedObject is not set, no point of indexing, move
+                    // to next super column
                     if (embeddedObject == null)
-                    {                       
+                    {
                         continue;
                     }
                     if (embeddedObject instanceof Collection<?>)
                     {
-                        for (Object obj : (Collection<?>) embeddedObject)
+                        ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
+                        // Check whether it's first time insert or updation
+                        if (ecCacheHandler.isCacheEmpty())
+                        { // First time
+                          // insert
+                            int count = 0;
+                            for (Object obj : (Collection<?>) embeddedObject)
+                            {
+                                String elementCollectionObjectName = embeddedColumnName
+                                        + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
+
+                                currentDoc = prepareDocumentForSuperColumn(metadata, object,
+                                        elementCollectionObjectName);
+                                indexSuperColumn(metadata, object, currentDoc, obj, embeddedColumn);
+                                count++;
+                            }
+                        }
+                        else
                         {
-                            currentDoc = prepareDocumentForSuperColumn(metadata, object, embeddedColumnName);
-                            indexSuperColumn(metadata, object, currentDoc, obj, embeddedColumn);
-                        }                        
+                            // Updation, Check whether this object is already in
+                            // cache, which means we already have an embedded
+                            // column
+                            // Otherwise we need to generate a fresh embedded
+                            // column name
+                            int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(rowKey);
+                            for (Object obj : (Collection<?>) embeddedObject)
+                            {
+                                String elementCollectionObjectName = ecCacheHandler.getElementCollectionObjectName(
+                                        rowKey, obj);
+                                if (elementCollectionObjectName == null)
+                                { // Fresh
+                                  // row
+                                    elementCollectionObjectName = embeddedColumnName
+                                            + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + (++lastEmbeddedObjectCount);
+                                }
+
+                                currentDoc = prepareDocumentForSuperColumn(metadata, object,
+                                        elementCollectionObjectName);
+                                indexSuperColumn(metadata, object, currentDoc, obj, embeddedColumn);
+                            }
+                        }
+
                     }
                     else
                     {
                         currentDoc = prepareDocumentForSuperColumn(metadata, object, embeddedColumnName);
                         indexSuperColumn(metadata, object, currentDoc,
-                                metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object, embeddedColumn);
+                                metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object,
+                                embeddedColumn);
                     }
                 }
                 catch (PropertyAccessException e)
                 {
                     log.error("Error while accesing embedded Object:" + embeddedColumnName);
                 }
-                
+
             }
         }
         else
         {
             currentDoc = new Document();
-            
-            //Add entity class, PK info into document
+
+            // Add entity class, PK info into document
             addEntityClassToDocument(metadata, object, currentDoc);
-            
-            //Add all entity fields(columns) into document
+
+            // Add all entity fields(columns) into document
             addEntityFieldsToDocument(metadata, object, currentDoc);
-            
-            //Store document into index
+
+            // Store document into index
             indexDocument(metadata, currentDoc);
         }
 
@@ -407,7 +458,8 @@ public class LuceneIndexer extends DocumentIndexer
 
                 w.commit();
                 // w.close();
-//                index.copy(index, FSDirectory.open(getIndexDirectory()), false);
+                // index.copy(index, FSDirectory.open(getIndexDirectory()),
+                // false);
             }
         }
         catch (CorruptIndexException e)

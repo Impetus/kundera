@@ -94,20 +94,20 @@ public abstract class DocumentIndexer implements Indexer
      *            the metadata
      * @param object
      *            the object
-     * @param superColumnName
+     * @param embeddedColumnName
      *            the super column name
      * @return the document
      */
-    protected Document prepareDocumentForSuperColumn(EntityMetadata metadata, Object object, String superColumnName)
+    protected Document prepareDocumentForSuperColumn(EntityMetadata metadata, Object object, String embeddedColumnName)
     {
         Document currentDoc;
         currentDoc = new Document();
-        
-        //Add entity class and row key info to document
+
+        // Add entity class and row key info to document
         addEntityClassToDocument(metadata, object, currentDoc);
-        
-        //Add super column name to document
-        addSuperColumnNameToDocument(superColumnName, currentDoc);
+
+        // Add super column name to document
+        addEmbeddedColumnNameToDocument(embeddedColumnName, currentDoc);
         return currentDoc;
     }
 
@@ -128,7 +128,7 @@ public abstract class DocumentIndexer implements Indexer
     protected void indexSuperColumn(EntityMetadata metadata, Object object, Document currentDoc, Object embeddedObject,
             EmbeddedColumn superColumn)
     {
-        //Add all super column fields into document
+        // Add all super column fields into document
         for (Column col : superColumn.getColumns())
         {
             java.lang.reflect.Field field = col.getField();
@@ -136,10 +136,10 @@ public abstract class DocumentIndexer implements Indexer
             String indexName = metadata.getIndexName();
             addFieldToDocument(embeddedObject, currentDoc, field, colName, indexName);
         }
-        //Add all entity fields to document
+        // Add all entity fields to document
         addEntityFieldsToDocument(metadata, object, currentDoc);
-        
-        //Store document into Index
+
+        // Store document into Index
         indexDocument(metadata, currentDoc);
     }
 
@@ -151,10 +151,10 @@ public abstract class DocumentIndexer implements Indexer
      * @param currentDoc
      *            the current doc
      */
-    private void addSuperColumnNameToDocument(String superColumnName, Document currentDoc)
+    private void addEmbeddedColumnNameToDocument(String superColumnName, Document currentDoc)
     {
         byte[] value = superColumnName.getBytes();
-        Field luceneField = new Field(SUPERCOLUMN_INDEX, value,0,value.length);
+        Field luceneField = new Field(SUPERCOLUMN_INDEX, value, 0, value.length);
         currentDoc.add(luceneField);
 
     }
@@ -200,31 +200,31 @@ public abstract class DocumentIndexer implements Indexer
             String id;
             id = PropertyAccessorHelper.getId(object, metadata);
             byte[] value = id.getBytes();
-            luceneField = new Field(ENTITY_ID_FIELD, value,0,value.length);
+            luceneField = new Field(ENTITY_ID_FIELD, value, 0, value.length);
             // adding class
-                    // namespace
-                    ///*Field.Store.YES, Field.Index.ANALYZED_NO_NORMS*/);
+            // namespace
+            // /*Field.Store.YES, Field.Index.ANALYZED_NO_NORMS*/);
             luceneField.setOmitNorms(true);
             document.add(luceneField);
 
             // index namespace for unique deletion
             value = getKunderaId(metadata, id).getBytes();
-            luceneField = new Field(KUNDERA_ID_FIELD,value ,0,value.length); // adding
-                    // class
-                    // namespace
-//                    Field.Store.YES/*, Field.Index.ANALYZED_NO_NORMS*/);
+            luceneField = new Field(KUNDERA_ID_FIELD, value, 0, value.length); // adding
+            // class
+            // namespace
+            // Field.Store.YES/*, Field.Index.ANALYZED_NO_NORMS*/);
             luceneField.setOmitNorms(true);
             document.add(luceneField);
 
             // index entity class
             value = metadata.getEntityClazz().getCanonicalName().toLowerCase().getBytes();
-            luceneField = new Field(ENTITY_CLASS_FIELD,value ,0,value.length);
+            luceneField = new Field(ENTITY_CLASS_FIELD, value, 0, value.length);
             luceneField.setOmitNorms(true);
             document.add(luceneField);
 
             // index index name
             value = metadata.getIndexName().getBytes();
-            luceneField = new Field(ENTITY_INDEXNAME_FIELD,value,0,value.length);
+            luceneField = new Field(ENTITY_INDEXNAME_FIELD, value, 0, value.length);
             luceneField.setOmitNorms(true);
             document.add(luceneField);
         }
@@ -257,7 +257,7 @@ public abstract class DocumentIndexer implements Indexer
             if (value != null)
             {
                 byte[] val = value.getBytes();
-                Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), val,0,val.length);
+                Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), val, 0, val.length);
                 luceneField.setOmitNorms(true);
                 document.add(luceneField);
             }
