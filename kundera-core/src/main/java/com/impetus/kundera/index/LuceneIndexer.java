@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.index;
 
+import java.io.CharArrayReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -24,7 +25,11 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.KeywordAnalyzer;
+import org.apache.lucene.analysis.LetterTokenizer;
+import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -36,6 +41,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.function.FieldScoreQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.LockObtainFailedException;
@@ -66,6 +72,7 @@ public class LuceneIndexer extends DocumentIndexer
     private Directory index;
 
     private boolean isInitialized;
+    
 
     /**
      * @param client
@@ -342,9 +349,14 @@ public class LuceneIndexer extends DocumentIndexer
          * }
          */IndexSearcher searcher = new IndexSearcher(reader);
 
-        QueryParser qp = new QueryParser(Version.LUCENE_CURRENT, DEFAULT_SEARCHABLE_FIELD, analyzer);
+        QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new KeywordAnalyzer());
+        
+        
         try
         {
+            qp.setLowercaseExpandedTerms(false);
+            qp.setAllowLeadingWildcard(true);
+//            qp.set
             Query q = qp.parse(luceneQuery);
             TopDocs docs = searcher.search(q, count);
 
@@ -354,8 +366,13 @@ public class LuceneIndexer extends DocumentIndexer
             for (ScoreDoc sc : docs.scoreDocs)
             {
                 Document doc = searcher.doc(sc.doc);
+                //Field f = doc.getField(ENTITY_ID_FIELD);
+                //Field f1 = doc.getField(SUPERCOLUMN_INDEX);
+//                String entityId = new String(doc.getBinaryValue(ENTITY_ID_FIELD));
+//                String superCol = new String(doc.getBinaryValue(SUPERCOLUMN_INDEX));
                 String entityId = doc.get(ENTITY_ID_FIELD);
                 String superCol = doc.get(SUPERCOLUMN_INDEX);
+
                 if (superCol == null)
                 {
                     superCol = "SuperCol" + nullCount++;
@@ -402,7 +419,7 @@ public class LuceneIndexer extends DocumentIndexer
      * @throws CorruptIndexException
      * @throws IOException
      */
-    public void indexDocumentUsingLucene(Document document)
+    private void indexDocumentUsingLucene(Document document)
     {
         IndexWriter w = getIndexWriter();
         try
