@@ -19,7 +19,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -145,26 +144,9 @@ public class PelopsDataHandler extends DataHandler
                 embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
                 embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
 
-                /*String scFieldName = scName.substring(0, scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER));
-                Field superColumnField = e.getClass().getDeclaredField(scFieldName);
-                if (!superColumnField.isAccessible())
-                {
-                    superColumnField.setAccessible(true);
-                }
-                // Collection embeddedCollection = null;
-                if (superColumnField.getType().equals(List.class))
-                {
-                    embeddedCollection = new ArrayList();
-                }
-                else if (superColumnField.getType().equals(Set.class))
-                {
-                    embeddedCollection = new HashSet();
-                }
-*/
                 Object embeddedObject = populateEmbeddedObject(sc, m);
                 embeddedCollection.add(embeddedObject);
-                PropertyAccessorHelper.set(e, embeddedCollectionField, embeddedCollection);
-                //superColumnField.set(e, embeddedCollection);
+                PropertyAccessorHelper.set(e, embeddedCollectionField, embeddedCollection);               
             }
             else
             {
@@ -190,13 +172,6 @@ public class PelopsDataHandler extends DataHandler
 
                         String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
                         Set<String> keys = MetadataUtils.deserializeKeys(foreignKeys);
-
-                        // Commented as it has been moved to EM
-                        // TODO: Correct this
-
-                        // populateForeignEntities(e, tr.getId(), relation,
-                        // keys.toArray(new String[0]));
-
                     }
                     else
                     {
