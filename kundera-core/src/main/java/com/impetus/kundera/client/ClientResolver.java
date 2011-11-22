@@ -74,6 +74,10 @@ public final class ClientResolver
             {
                 loader = (GenericClientFactory) Class.forName("com.impetus.client.mongodb.MongoDBClientFactory")
                         .newInstance();
+            } else if(clientType.equals(ClientType.RDBMS))
+            {
+                loader = (GenericClientFactory) Class.forName("com.impetus.client.rdbms.RDBMSClientFactory")
+                .newInstance();
             }
         }
         catch (InstantiationException e)

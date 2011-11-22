@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public enum ClientType
 {
-    HBASE, PELOPS, MONGODB, THRIFT;
+    HBASE, PELOPS, MONGODB, THRIFT, RDBMS;
     static Map<String, ClientType> coll = new HashMap<String, ClientType>();
 
     /**
@@ -37,6 +37,7 @@ public enum ClientType
         coll.put(PELOPS.name(), PELOPS);
         coll.put(THRIFT.name(), THRIFT);
         coll.put(MONGODB.name(), MONGODB);
+        coll.put(RDBMS.name(), RDBMS);
     }
 
     /**
