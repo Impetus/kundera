@@ -20,6 +20,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.Field.TermVector;
+import org.apache.lucene.index.IndexReader.FieldOption;
 
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
@@ -146,8 +149,7 @@ public abstract class DocumentIndexer implements Indexer
      */
     private void addSuperColumnNameToDocument(String superColumnName, Document currentDoc)
     {
-        byte[] value = superColumnName.getBytes();
-        Field luceneField = new Field(SUPERCOLUMN_INDEX, value,0,value.length);
+        Field luceneField = new Field(SUPERCOLUMN_INDEX, superColumnName, Store.YES,Field.Index.NO);
         currentDoc.add(luceneField);
 
     }
@@ -192,33 +194,25 @@ public abstract class DocumentIndexer implements Indexer
             Field luceneField;
             String id;
             id = PropertyAccessorHelper.getId(object, metadata);
-            byte[] value = id.getBytes();
-            luceneField = new Field(ENTITY_ID_FIELD, value,0,value.length);
+            luceneField = new Field(ENTITY_ID_FIELD, id,Field.Store.YES,Field.Index.NO);
             // adding class
                     // namespace
                     ///*Field.Store.YES, Field.Index.ANALYZED_NO_NORMS*/);
-            luceneField.setOmitNorms(true);
             document.add(luceneField);
 
             // index namespace for unique deletion
-            value = getKunderaId(metadata, id).getBytes();
-            luceneField = new Field(KUNDERA_ID_FIELD,value ,0,value.length); // adding
+            luceneField = new Field(KUNDERA_ID_FIELD,getKunderaId(metadata, id),Field.Store.YES,Field.Index.NO); // adding
                     // class
                     // namespace
 //                    Field.Store.YES/*, Field.Index.ANALYZED_NO_NORMS*/);
-            luceneField.setOmitNorms(true);
             document.add(luceneField);
 
             // index entity class
-            value = metadata.getEntityClazz().getCanonicalName().toLowerCase().getBytes();
-            luceneField = new Field(ENTITY_CLASS_FIELD,value ,0,value.length);
-            luceneField.setOmitNorms(true);
+            luceneField = new Field(ENTITY_CLASS_FIELD,metadata.getEntityClazz().getCanonicalName().toLowerCase() ,Field.Store.YES,Field.Index.ANALYZED);
             document.add(luceneField);
 
             // index index name
-            value = metadata.getIndexName().getBytes();
-            luceneField = new Field(ENTITY_INDEXNAME_FIELD,value,0,value.length);
-            luceneField.setOmitNorms(true);
+            luceneField = new Field(ENTITY_INDEXNAME_FIELD,metadata.getIndexName(),Field.Store.NO,Field.Index.ANALYZED_NO_NORMS);
             document.add(luceneField);
         }
         catch (PropertyAccessException e)
@@ -249,9 +243,7 @@ public abstract class DocumentIndexer implements Indexer
             String value = PropertyAccessorHelper.getString(object, field);
             if (value != null)
             {
-                byte[] val = value.getBytes();
-                Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), val,0,val.length);
-                luceneField.setOmitNorms(true);
+                Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), value,Field.Store.YES,Field.Index.ANALYZED_NO_NORMS);
                 document.add(luceneField);
             }
             else

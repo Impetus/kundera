@@ -81,7 +81,7 @@ public class LuceneIndexer extends DocumentIndexer
             /* writer */
             w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
             /* reader = */
-            w.getConfig().setRAMBufferSizeMB(100);
+            w.getConfig().setRAMBufferSizeMB(32);
         }
         catch (CorruptIndexException e)
         {
