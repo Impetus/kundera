@@ -93,14 +93,13 @@ public class LuceneQuery extends QueryImpl implements Query
 
         EntityMetadata m = kunderaQuery.getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
-        Map<String, String> searchFilter = client.getIndexManager().search(q, -1, maxResult);
-        String[] primaryKeys = searchFilter.values().toArray(new String[] {});
-
+        Map<String, String> searchFilter = client.getIndexManager().search(q, -1, maxResult);        
+        
         try
         {
             if (kunderaQuery.isAliasOnly())
             {
-                // return persistenceDelegeator.find(entityClass, primaryKey);
+                String[] primaryKeys = searchFilter.values().toArray(new String[] {});
                 return persistenceDelegeator.find(m.getEntityClazz(), primaryKeys);
             }
             else

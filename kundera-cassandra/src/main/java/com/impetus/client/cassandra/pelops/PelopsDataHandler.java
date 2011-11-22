@@ -145,7 +145,7 @@ public class PelopsDataHandler extends DataHandler
                 embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
                 embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
 
-                String scFieldName = scName.substring(0, scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER));
+                /*String scFieldName = scName.substring(0, scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER));
                 Field superColumnField = e.getClass().getDeclaredField(scFieldName);
                 if (!superColumnField.isAccessible())
                 {
@@ -160,10 +160,11 @@ public class PelopsDataHandler extends DataHandler
                 {
                     embeddedCollection = new HashSet();
                 }
-
+*/
                 Object embeddedObject = populateEmbeddedObject(sc, m);
                 embeddedCollection.add(embeddedObject);
-                superColumnField.set(e, embeddedCollection);
+                PropertyAccessorHelper.set(e, embeddedCollectionField, embeddedCollection);
+                //superColumnField.set(e, embeddedCollection);
             }
             else
             {
@@ -594,12 +595,11 @@ public class PelopsDataHandler extends DataHandler
                     }
                 }
                 else
-                { // Updation
-                  // Check whether this object is already in cache,
-                  // which
-                  // means we already have a super column
-                  // Otherwise we need to generate a fresh super
-                  // column name
+                {
+                    // Updation, Check whether this object is already in cache,
+                    // which means we already have a super column
+                    // Otherwise we need to generate a fresh embedded column
+                    // name
                     int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(e.getId());
                     for (Object obj : (Collection) superColumnObject)
                     {

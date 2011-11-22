@@ -212,14 +212,14 @@ public class PersistenceDelegator
         return entities;
     }
 
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> col)
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass, getPersistenceUnits());
 
         List<E> entities = new ArrayList<E>();
         try
         {
-            entities = getClient(entityMetadata).find(entityClass, col);
+            entities = getClient(entityMetadata).find(entityClass, embeddedColumnMap);
         }
         catch (Exception e)
         {
@@ -400,14 +400,15 @@ public class PersistenceDelegator
         persistenceUnits = null;
 
         // Close all clients created in this session
-        if(clientMap != null && ! clientMap.isEmpty()) {
+        if (clientMap != null && !clientMap.isEmpty())
+        {
             for (Client client : clientMap.values())
             {
                 client.close();
             }
             clientMap.clear();
-            clientMap=null;
-        }       
+            clientMap = null;
+        }
 
         closed = true;
     }

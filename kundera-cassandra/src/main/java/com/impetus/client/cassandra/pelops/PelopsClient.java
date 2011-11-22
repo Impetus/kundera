@@ -152,15 +152,15 @@ public class PelopsClient implements Client
     }
 
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> col) throws Exception
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> superColumnMap) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         List<E> entities = new ArrayList<E>();
-        for (String superColName : col.keySet())
+        for (String superColumnName : superColumnMap.keySet())
         {
-            String entityId = col.get(superColName);
+            String entityId = superColumnMap.get(superColumnName);
             List<SuperColumn> superColumnList = loadSuperColumns(entityMetadata.getSchema(),
-                    entityMetadata.getTableName(), entityId, new String[] { superColName });
+                    entityMetadata.getTableName(), entityId, new String[] { superColumnName });
             E e = (E) dataHandler.fromThriftRow(entityMetadata.getEntityClazz(), entityMetadata,
                     new DataRow<SuperColumn>(entityId, entityMetadata.getTableName(), superColumnList));
             entities.add(e);

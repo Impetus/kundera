@@ -15,14 +15,21 @@
  ******************************************************************************/
 package com.impetus.kundera.index;
 
+import java.io.CharArrayReader;
+import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.LetterTokenizer;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.Field.TermVector;
 import org.apache.lucene.index.IndexReader.FieldOption;
+import org.apache.lucene.util.Version;
 
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
@@ -77,6 +84,8 @@ public abstract class DocumentIndexer implements Indexer
     /** The analyzer. */
     protected Analyzer analyzer;
 
+    protected Tokenizer tokenizer;
+
     /**
      * Instantiates a new lucandra indexer.
      * 
@@ -87,7 +96,9 @@ public abstract class DocumentIndexer implements Indexer
      */
     public DocumentIndexer(Analyzer analyzer)
     {
+        final String empty = "";
         this.analyzer = analyzer;
+        tokenizer = new LetterTokenizer(Version.LUCENE_34,new CharArrayReader(empty.toCharArray()));
     }
 
     /**
@@ -97,16 +108,20 @@ public abstract class DocumentIndexer implements Indexer
      *            the metadata
      * @param object
      *            the object
-     * @param superColumnName
+     * @param embeddedColumnName
      *            the super column name
      * @return the document
      */
-    protected Document prepareDocumentForSuperColumn(EntityMetadata metadata, Object object, String superColumnName)
+    protected Document prepareDocumentForSuperColumn(EntityMetadata metadata, Object object, String embeddedColumnName)
     {
         Document currentDoc;
         currentDoc = new Document();
+
+        // Add entity class and row key info to document
         addEntityClassToDocument(metadata, object, currentDoc);
-        addSuperColumnNameToDocument(superColumnName, currentDoc);
+
+        // Add super column name to document
+        addSuperColumnNameToDocument(embeddedColumnName, currentDoc);
         return currentDoc;
     }
 
@@ -127,6 +142,7 @@ public abstract class DocumentIndexer implements Indexer
     protected void indexSuperColumn(EntityMetadata metadata, Object object, Document currentDoc, Object embeddedObject,
             EmbeddedColumn superColumn)
     {
+        // Add all super column fields into document
         for (Column col : superColumn.getColumns())
         {
             java.lang.reflect.Field field = col.getField();
@@ -134,8 +150,10 @@ public abstract class DocumentIndexer implements Indexer
             String indexName = metadata.getIndexName();
             addFieldToDocument(embeddedObject, currentDoc, field, colName, indexName);
         }
-        // Add document.
-        addFieldsToDocument(metadata, object, currentDoc);
+        // Add all entity fields to document
+        addEntityFieldsToDocument(metadata, object, currentDoc);
+
+        // Store document into Index
         indexDocument(metadata, currentDoc);
     }
 
@@ -151,7 +169,6 @@ public abstract class DocumentIndexer implements Indexer
     {
         Field luceneField = new Field(SUPERCOLUMN_INDEX, superColumnName, Store.YES,Field.Index.NO);
         currentDoc.add(luceneField);
-
     }
 
     /**
@@ -164,7 +181,7 @@ public abstract class DocumentIndexer implements Indexer
      * @param document
      *            the document
      */
-    protected void addFieldsToDocument(EntityMetadata metadata, Object object, Document document)
+    protected void addEntityFieldsToDocument(EntityMetadata metadata, Object object, Document document)
     {
         String indexName = metadata.getIndexName();
         for (PropertyIndex index : metadata.getIndexProperties())
@@ -288,5 +305,20 @@ public abstract class DocumentIndexer implements Indexer
     }
 
     protected abstract void indexDocument(EntityMetadata metadata, Document currentDoc);
+    
+    
+    public Field getLuceneField(String name, String value) {
+//        try
+//        {
+  //          tokenizer = new StandardTokenizer(Version.LUCENE_34,new CharArrayReader(value.toCharArray()));
+//            tokenizer.reset(new CharArrayReader(value.toCharArray()));
+          //  return new Field(name, tokenizer);        
+//        }
+//        catch (IOException e)
+//        {
+//            throw new IndexingException(e.getMessage());
+//        }
+        return new Field(name, value, Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
+    }
 
 }
