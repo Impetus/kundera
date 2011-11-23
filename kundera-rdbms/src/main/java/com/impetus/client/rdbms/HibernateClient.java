@@ -30,7 +30,7 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.ejb.HibernatePersistence;
 
-import com.impetus.client.Player;
+//import com.impetus.client.Player;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.model.KunderaMetadata;

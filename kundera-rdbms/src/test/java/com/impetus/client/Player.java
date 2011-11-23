@@ -20,16 +20,6 @@ import org.hibernate.annotations.PolymorphismType;
  * The Class Player.
  */
 @Entity
-@org.hibernate.annotations.Entity(
-
-        selectBeforeUpdate = true,
-
-        dynamicInsert = true, dynamicUpdate = true,
-
-        optimisticLock = OptimisticLockType.ALL,
-
-        polymorphism = PolymorphismType.EXPLICIT)
-//@org.hibernate.annotations.Table(name="Forest", appliesTo = "" )
 @Table(name="player" , schema="test")
 public class Player implements Serializable {
     
