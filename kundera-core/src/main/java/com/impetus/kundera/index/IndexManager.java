@@ -105,6 +105,24 @@ public class IndexManager
     }
 
     /**
+     * Indexes an object.
+     * 
+     * @param metadata
+     *            the metadata
+     * @param entity
+     *            the entity
+     * @param parentId
+     *            parent Id.           
+     * @param clazz
+     *            class name           
+     */
+    public final void write(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz)
+    {
+        indexer.index(metadata, entity, parentId, clazz);
+    }
+
+    
+    /**
      * Searches on the index. Note: Query must be in Indexer's understandable
      * format
      * 
@@ -114,7 +132,21 @@ public class IndexManager
      */
     public final Map<String, String> search(String query)
     {
-        return search(query, Constants.INVALID, Constants.INVALID);
+        return search(query, Constants.INVALID, Constants.INVALID, false);
+    }
+
+    /**
+     * Searches on the index. Note: Query must be in Indexer's understandable
+     * format
+     * 
+     * @param query
+     *            the query
+     * @return the list
+     */
+    public final Map<String, String> fetchRelation(String query)
+    {
+        //TODO: need to return list.
+        return search(query, Constants.INVALID, Constants.INVALID, true);
     }
 
     /**
@@ -128,7 +160,7 @@ public class IndexManager
      */
     public final Map<String, String> search(String query, int count)
     {
-        return search(query, Constants.INVALID, count);
+        return search(query, Constants.INVALID, count, false);
     }
 
     /**
@@ -144,7 +176,23 @@ public class IndexManager
      */
     public final Map<String, String> search(String query, int start, int count)
     {
-        return indexer.search(query, start, count);
+        return indexer.search(query, start, count, false);
+    }
+
+    /**
+     * Search.
+     * 
+     * @param query
+     *            the query
+     * @param start
+     *            the start
+     * @param count
+     *            the count
+     * @return the list
+     */
+    public final Map<String, String> search(String query, int start, int count, boolean fetchRelation)
+    {
+        return indexer.search(query, start, count, fetchRelation);
     }
 
     /**

@@ -17,6 +17,7 @@ package com.impetus.client.hbase.admin;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,14 +46,15 @@ import com.impetus.client.hbase.service.HBaseReader;
 import com.impetus.client.hbase.service.HBaseWriter;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
+import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityResolver;
+import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * @author impetus
@@ -140,11 +142,11 @@ public class HBaseDataHandler implements DataHandler
             throws IOException
     {
 
-        E enhancedEntity = null;
+        E entity = null;
         try
         {
 
-            E entity = clazz.newInstance(); // Entity Object
+            entity = clazz.newInstance(); // Entity Object
 
             // Load raw data from HBase
             HBaseData data = hbaseReader.LoadData(gethTable(tableName), rowKey);
@@ -153,27 +155,27 @@ public class HBaseDataHandler implements DataHandler
             populateEntityFromHbaseData(entity, data, m, rowKey);
 
             // Map to hold property-name=>foreign-entity relations
-            Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+//            Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
             // Set entity object and foreign key map into enhanced entity and
             // return
-            enhancedEntity = (E) EntityResolver.getEnhancedEntity(entity, rowKey, foreignKeysMap);
+//            enhancedEntity = (E) EntityResolver.getEnhancedEntity(entity, rowKey, foreignKeysMap);
         }
         catch (InstantiationException e1)
         {
             log.error("Error while creating an instance of " + clazz);
-            return enhancedEntity;
+//            return enhancedEntity;
         }
         catch (IllegalAccessException e1)
         {
             log.error("Illegal Access while reading data from " + tableName + ";Details: " + e1.getMessage());
-            return enhancedEntity;
+//            return enhancedEntity;
         }
-        return enhancedEntity;
+        return entity;
     }
 
     @Override
-    public void writeData(String tableName, EntityMetadata m, EnhancedEntity e) throws IOException
+    public void writeData(String tableName, EntityMetadata m, Object entity, String rowId, List<RelationHolder> relations) throws IOException
     {
 
         // Now persist column families in the table. For HBase, embedded columns
@@ -187,11 +189,11 @@ public class HBaseDataHandler implements DataHandler
             Object columnFamilyObject = null;
             try
             {
-                columnFamilyObject = PropertyAccessorHelper.getObject(e.getEntity(), columnFamilyField);
+                columnFamilyObject = PropertyAccessorHelper.getObject(entity/*.getEntity()*/, columnFamilyField);
             }
             catch (PropertyAccessException e1)
             {
-                log.error("Error while getting " + columnFamilyName + " field from entity " + e.getEntity());
+                log.error("Error while getting " + columnFamilyName + " field from entity " + entity/*.getEntity()*/);
                 return;
             }
 
@@ -218,7 +220,7 @@ public class HBaseDataHandler implements DataHandler
                         dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
                         addColumnFamilyToTable(tableName, dynamicCFName);
 
-                        hbaseWriter.writeColumns(gethTable(tableName), dynamicCFName, e.getId(), columns, obj);
+                        hbaseWriter.writeColumns(gethTable(tableName), dynamicCFName, rowId, columns, obj);
                         count++;
                     }
 
@@ -229,10 +231,10 @@ public class HBaseDataHandler implements DataHandler
                     // Check whether this object is already in cache, which
                     // means we already have a column family with that name
                     // Otherwise we need to generate a fresh column family name
-                    int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(e.getId());
+                    int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(rowId);
                     for (Object obj : (Collection) columnFamilyObject)
                     {
-                        dynamicCFName = ecCacheHandler.getElementCollectionObjectName(e.getId(), obj);
+                        dynamicCFName = ecCacheHandler.getElementCollectionObjectName(rowId, obj);
                         if (dynamicCFName == null)
                         { // Fresh row
                             dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
@@ -249,7 +251,7 @@ public class HBaseDataHandler implements DataHandler
             {
                 // Write Column family which was Embedded object in entity
                 hbaseWriter
-                        .writeColumns(gethTable(tableName), columnFamilyName, e.getId(), columns, columnFamilyObject);
+                        .writeColumns(gethTable(tableName), columnFamilyName, rowId, columns, columnFamilyObject);
             }
 
         }
@@ -258,16 +260,17 @@ public class HBaseDataHandler implements DataHandler
         List<Column> columns = m.getColumnsAsList();
         if (columns != null && !columns.isEmpty())
         {
-            hbaseWriter.writeColumns(gethTable(tableName), e.getId(), columns, e.getEntity());
+            
+            hbaseWriter.writeColumns(gethTable(tableName), rowId, columns, entity/*.getEntity()*/, relations);
         }
 
         // Persist relationships as a column in newly created Column family by
         // Kundera
-        if (e.getForeignKeysMap() != null && !e.getForeignKeysMap().isEmpty())
+/*        if (entity.getForeignKeysMap() != null && !entity.getForeignKeysMap().isEmpty())
         {
-            hbaseWriter.writeForeignKeys(gethTable(tableName), e.getId(), e.getForeignKeysMap());
+            hbaseWriter.writeForeignKeys(gethTable(tableName), entity.getId(), entity.getForeignKeysMap());
         }
-
+*/
     }
 
     private HTable gethTable(final String tableName) throws IOException
@@ -454,4 +457,5 @@ public class HBaseDataHandler implements DataHandler
         }
     }
 
+    
 }

@@ -30,6 +30,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.Writer;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -69,7 +70,7 @@ public class HBaseWriter implements Writer
     }
 
     @Override
-    public void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity) throws IOException
+    public void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity, List<RelationHolder> relation) throws IOException
     {
         Put p = new Put(Bytes.toBytes(rowKey));
 
@@ -88,7 +89,20 @@ public class HBaseWriter implements Writer
                 throw new IOException(e1.getMessage());
             }
         }
+        handleRelation(relation, p);
         htable.put(p);
+    }
+
+    private void handleRelation(List<RelationHolder> relation, Put p)
+    {
+        for(RelationHolder r : relation)
+        {
+            if (relation != null)
+            {
+                p.add(Bytes.toBytes(r.getRelationName()), System.currentTimeMillis(), Bytes.toBytes(r.getRelationValue()));
+
+            }
+        }
     }
 
     // TODO: Scope of performance improvement in this code
@@ -129,5 +143,4 @@ public class HBaseWriter implements Writer
 
         hTable.put(p);
     }
-
-}
+ }

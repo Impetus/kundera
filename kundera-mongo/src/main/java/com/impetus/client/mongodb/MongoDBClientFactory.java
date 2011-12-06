@@ -4,8 +4,12 @@ import java.net.UnknownHostException;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -18,10 +22,12 @@ public class MongoDBClientFactory extends GenericClientFactory
     /** The logger. */
     private static Logger logger = Logger.getLogger(MongoDBClientFactory.class);
 
+    IndexManager indexManager;
+
     @Override
     protected void initializeClient()
     {
-        // TODO Try to created table indexes over here
+    	indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));                                                                                             
 
     }
 
@@ -37,7 +43,7 @@ public class MongoDBClientFactory extends GenericClientFactory
     {
         // TODO To change this one pool is implemented
         DB mongoDB = getConnection();
-        return new MongoDBClient(mongoDB);
+        return new MongoDBClient(mongoDB, indexManager);
     }
 
     private DB getConnection()

@@ -78,6 +78,11 @@ public abstract class DocumentIndexer implements Indexer
     /** The Constant SUPERCOLUMN_INDEX. */
     protected static final String SUPERCOLUMN_INDEX = UUID + ".entity.super.indexname";
 
+
+    public static final String PARENT_ID_FIELD = UUID + ".parent.id";
+
+    public static final String PARENT_ID_CLASS = UUID + ".parent.class";
+
     /** The doc number. */
     protected static int docNumber = 1;
 
@@ -112,7 +117,7 @@ public abstract class DocumentIndexer implements Indexer
      *            the super column name
      * @return the document
      */
-    protected Document prepareDocumentForSuperColumn(EntityMetadata metadata, Object object, String embeddedColumnName)
+    protected Document prepareDocumentForSuperColumn(EntityMetadata metadata, Object object, String embeddedColumnName, String parentId, Class<?> clazz)
     {
         Document currentDoc;
         currentDoc = new Document();
@@ -122,7 +127,20 @@ public abstract class DocumentIndexer implements Indexer
 
         // Add super column name to document
         addSuperColumnNameToDocument(embeddedColumnName, currentDoc);
+        
+        indexParentKey(parentId, currentDoc, clazz);
         return currentDoc;
+    }
+
+    protected void indexParentKey(String parentId, Document currentDoc, Class<?> clazz)
+    {
+        if(parentId != null)
+        {
+        Field  luceneField = new Field(PARENT_ID_FIELD, parentId,Field.Store.YES,Field.Index.ANALYZED_NO_NORMS);
+        currentDoc.add(luceneField);
+        Field  fieldClass = new Field(PARENT_ID_CLASS, clazz.getCanonicalName().toLowerCase() ,Field.Store.YES,Field.Index.ANALYZED);
+        currentDoc.add(fieldClass);
+        }
     }
 
     /**
@@ -211,7 +229,7 @@ public abstract class DocumentIndexer implements Indexer
             Field luceneField;
             String id;
             id = PropertyAccessorHelper.getId(object, metadata);
-            luceneField = new Field(ENTITY_ID_FIELD, id,Field.Store.YES,Field.Index.NO);
+            luceneField = new Field(ENTITY_ID_FIELD, id,Field.Store.YES,Field.Index.ANALYZED);
             // adding class
                     // namespace
                     ///*Field.Store.YES, Field.Index.ANALYZED_NO_NORMS*/);

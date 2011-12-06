@@ -4,6 +4,8 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.KeywordAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.IConnection;
 import org.scale7.cassandra.pelops.Pelops;
@@ -28,13 +30,14 @@ public class PelopsClientFactory extends GenericClientFactory
         // TODO StandardAnalyzer is thread safe. So it looks like indexManager
         // is threadsafe an hence using a single instance
         logger.info("Initializing Threadsafe Indexmanager. Is it really threadsafe?");
-        indexManager = new IndexManager(new LuceneIndexer(new KeywordAnalyzer()/*new StandardAnalyzer(Version.LUCENE_34*/)/*
-                                                                                                  * new
-                                                                                                  * KeywordAnalyzer
-                                                                                                  * (
-                                                                                                  * )
-                                                                                                  * )
-                                                                                                  *//*)*/);
+//        indexManager = new IndexManager(new LuceneIndexer(new KeywordAnalyzer()/*new StandardAnalyzer(Version.LUCENE_34*/)/*
+//                                                                                                  * new
+//                                                                                                  * KeywordAnalyzer
+//                                                                                                  * (
+//                                                                                                  * )
+//                                                                                                  * )
+//                                                                                                  *//*)*/);
+        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
         
     }
 

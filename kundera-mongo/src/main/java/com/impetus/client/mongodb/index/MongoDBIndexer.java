@@ -105,12 +105,13 @@ public class MongoDBIndexer implements Indexer
      * @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int)
      */
     @Override
-    public Map<String, String> search(String query, int start, int count)
+    public Map<String, String> search(String query, int start, int count, boolean fetchRelation)
     {
         throw new PersistenceException(
                 "Invalid method call! When you search on a column, MongoDB will automatically search in index if that exists.");
     }
 
+    
     @Override
     public void close()
     {
@@ -123,6 +124,16 @@ public class MongoDBIndexer implements Indexer
     {
         // TODO Auto-generated method stub
 
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object, java.lang.String, java.lang.Class)
+     */
+    @Override
+    public void index(EntityMetadata metadata, Object object, String parentId, Class<?> clazz)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
 }

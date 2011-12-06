@@ -29,6 +29,7 @@ import javax.persistence.PersistenceException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.utils.ReflectUtils;
 
+// TODO: Auto-generated Javadoc
 /**
  * Helper class to access fields.
  * 
@@ -144,7 +145,8 @@ public class PropertyAccessorHelper
     {
 
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
-        return accessor.toString(getObject(from, field));
+        Object object = getObject(from, field);
+        return object != null ? accessor.toString() : null;
 
     }
 
@@ -205,12 +207,11 @@ public class PropertyAccessorHelper
 
     /**
      * Gets the embedded object.
-     * 
-     * @param obj
-     *            the obj
-     * @param fieldName
-     *            the field name
+     *
+     * @param obj the obj
+     * @param fieldName the field name
      * @return the embedded object
+     * @throws PropertyAccessException the property access exception
      */
     @SuppressWarnings("null")
     // TODO: Too much code, improve this, possibly by breaking it
@@ -279,14 +280,17 @@ public class PropertyAccessorHelper
     }
 
     /**
-     * Retrieves Generic class from a collection field
-     * 
-     * @param collectionField
-     * @return
+     * Retrieves Generic class from a collection field.
+     *
+     * @param collectionField the collection field
+     * @return the generic class
      */
     public static Class<?> getGenericClass(Field collectionField)
     {
         Class<?> genericClass = null;
+        if(isCollection(collectionField.getType()))
+        {
+
         Type[] parameters = ReflectUtils.getTypeArguments(collectionField);
         if (parameters != null)
         {
@@ -299,6 +303,36 @@ public class PropertyAccessorHelper
                 throw new PersistenceException("Can't determine generic class from a field that has two parameters.");
             }
         }
-        return genericClass;
+       }
+        return genericClass !=null ? genericClass:collectionField.getType();
     }
+
+    /**
+     * Gets the declared fields.
+     *
+     * @param relationalField the relational field
+     * @return the declared fields
+     */
+    public static Field[] getDeclaredFields(Field relationalField)
+    {
+        Field[] fields;
+        if (isCollection(relationalField.getType()))
+        {
+            fields = PropertyAccessorHelper.getGenericClass(relationalField).getDeclaredFields();
+        }
+        else
+        {
+            fields = relationalField.getType().getDeclaredFields();
+        }
+        return fields;
+    }
+
+
+    
+    public static final boolean isCollection(Class<?> clazz)
+    {
+        return Collection.class.isAssignableFrom(clazz) /*|| clazz.isAssignableFrom(Set.class)*/;
+        
+    }
+
 }

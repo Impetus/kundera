@@ -47,6 +47,21 @@ public interface Indexer
      */
     void index(EntityMetadata metadata, Object object);
 
+
+    /**
+     * Indexes and object.
+     * 
+     * @param metadata
+     *            the meta data.
+     * @param object
+     *            the object.
+     * @param parentId
+     *            parent Id.           
+     * @param clazz
+     *           parent class.           
+     */
+    void index(EntityMetadata metadata, Object object, String parentId, Class<?> clazz);
+
     /**
      * Searches for an object. Note that the "query" must be in Indexer
      * specified form.
@@ -59,9 +74,8 @@ public interface Indexer
      *            the count
      * @return the list
      */
-    // List<String> search(String query, int start, int count);
 
-    Map<String, String> search(String luceneQuery, int start, int count);
+    Map<String, String> search(String luceneQuery, int start, int count, boolean fetchRelation);
 
     /**
      * Close on index writer/reader.

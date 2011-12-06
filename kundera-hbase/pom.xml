@@ -32,6 +32,11 @@
 			<artifactId>hadoop-core</artifactId>
 			<version>0.20.2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.hbase.zookeeper</groupId>
+			<artifactId>zookeeper</artifactId>
+			<version>3.2.2</version>
+		</dependency>
 	</dependencies>
      
        <!-- Assembly build -->

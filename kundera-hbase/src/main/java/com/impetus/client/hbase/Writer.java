@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.hadoop.hbase.client.HTable;
 
+import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.model.Column;
 
 /**
@@ -57,7 +58,8 @@ public interface Writer
      * @param entity
      * @throws IOException
      */
-    public void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity) throws IOException;
+    void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity, List<RelationHolder> relation) throws IOException;
+
 
     /**
      * Writes foreign keys along with a database table. They are stored into a

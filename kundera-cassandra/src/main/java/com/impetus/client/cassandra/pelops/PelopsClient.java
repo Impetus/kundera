@@ -41,7 +41,11 @@ import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
+import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.proxy.EnhancedEntity;
+
 
 /**
  * Client implementation using Pelops. http://code.google.com/p/pelops/
@@ -64,10 +68,16 @@ public class PelopsClient implements Client
     /** The index manager. */
     private IndexManager indexManager;
 
+    /** The persistence unit. */
     private String persistenceUnit;
+
+    /** The timestamp. */
+    private long timestamp;
 
     /**
      * default constructor.
+     *
+     * @param indexManager the index manager
      */
     public PelopsClient(IndexManager indexManager)
     {
@@ -75,6 +85,9 @@ public class PelopsClient implements Client
         this.dataHandler = new PelopsDataHandler(this);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.proxy.EnhancedEntity)
+     */
     @Override
     public void persist(EnhancedEntity enhancedEntity) throws Exception
     {
@@ -118,6 +131,9 @@ public class PelopsClient implements Client
         tf = null;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class, java.lang.String)
+     */
     @Override
     public final <E> E find(Class<E> entityClass, String rowId) throws Exception
     {
@@ -135,6 +151,30 @@ public class PelopsClient implements Client
         return e;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
+     */
+    public final Object find(Class<?> clazz, EntityMetadata metadata, String rowId)
+    {
+
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        Object entity = null;
+        PelopsDataHandlerN handler = new PelopsDataHandlerN(this);
+        try
+        {
+            entity = handler.fromThriftRow(selector, clazz, metadata, rowId.toString());
+        }
+        catch (Exception e)
+        {
+            throw new PersistenceException(e.getMessage());
+        }
+
+        return entity;
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class, java.lang.String[])
+     */
     @Override
     public final <E> List<E> find(Class<E> entityClass, String... rowIds) throws Exception
     {
@@ -146,11 +186,16 @@ public class PelopsClient implements Client
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
-        List<E> entities = (List<E>) dataHandler.fromThriftRow(selector, entityClass, entityMetadata, rowIds);
+        PelopsDataHandlerN handler = new PelopsDataHandlerN(this);
+
+        List<E> entities = (List<E>) handler.fromThriftRow(selector, entityClass, entityMetadata, rowIds);
 
         return entities;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class, java.util.Map)
+     */
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> superColumnMap) throws Exception
     {
@@ -168,6 +213,16 @@ public class PelopsClient implements Client
         return entities;
     }
 
+    /**
+     * Load super columns.
+     *
+     * @param keyspace the keyspace
+     * @param columnFamily the column family
+     * @param rowId the row id
+     * @param superColumnNames the super column names
+     * @return the list
+     * @throws Exception the exception
+     */
     private final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
             String... superColumnNames) throws Exception
     {
@@ -178,12 +233,18 @@ public class PelopsClient implements Client
                 ConsistencyLevel.ONE);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#loadData(javax.persistence.Query)
+     */
     @Override
     public <E> List<E> loadData(Query query) throws Exception
     {
         throw new NotImplementedException("Not yet implemented");
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#delete(com.impetus.kundera.proxy.EnhancedEntity)
+     */
     @Override
     public final void delete(EnhancedEntity enhancedEntity) throws Exception
     {
@@ -201,23 +262,37 @@ public class PelopsClient implements Client
         getIndexManager().remove(entityMetadata, enhancedEntity.getEntity(), enhancedEntity.getId());
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getIndexManager()
+     */
     @Override
     public final IndexManager getIndexManager()
     {
         return indexManager;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getPersistenceUnit()
+     */
     @Override
     public String getPersistenceUnit()
     {
         return persistenceUnit;
     }
 
+    /**
+     * Checks if is open.
+     *
+     * @return true, if is open
+     */
     private final boolean isOpen()
     {
         return !closed;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#close()
+     */
     @Override
     public final void close()
     {
@@ -227,10 +302,189 @@ public class PelopsClient implements Client
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#setPersistenceUnit(java.lang.String)
+     */
     @Override
     public void setPersistenceUnit(String persistenceUnit)
     {
         this.persistenceUnit = persistenceUnit;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#persist(java.lang.Object)
+     */
+    @Override
+    public String persist(EntitySaveGraph entityGraph, EntityMetadata metadata)
+    {
+        try
+        {
+            Object entity = entityGraph.getParentEntity();
+            String id = entityGraph.getParentId();
+            PelopsDataHandlerN.ThriftRow tf = populateTfRow(entity, id, metadata);
+            onPersist(metadata, entity, tf);
+            getIndexManager().write(metadata, entity);
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            throw new PersistenceException(e.getMessage());
+        }
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
+     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph,
+     * com.impetus.kundera.metadata.model.EntityMetadata, boolean)
+     */
+    @Override
+    public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
+    {
+        // you got child entity and
+        String rlName = entitySaveGraph.getfKeyName();
+        String rlValue = entitySaveGraph.getParentId();
+        String id = entitySaveGraph.getChildId();
+        try
+        {
+            PelopsDataHandlerN.ThriftRow tf = populateTfRow(childEntity, id, metadata);
+            addRelation(entitySaveGraph, rlName, rlValue, tf);
+            onPersist(metadata, childEntity, tf);
+            onIndex(childEntity, entitySaveGraph, metadata, rlValue);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            new PersistenceException(e.getMessage());
+        }
+
+    }
+
+    /**
+     * On index.
+     *
+     * @param childEntity the child entity
+     * @param entitySaveGraph the entity save graph
+     * @param metadata the metadata
+     * @param rlValue the rl value
+     */
+    private void onIndex(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata, String rlValue)
+    {
+        if (!entitySaveGraph.isSharedPrimaryKey())
+        {
+            getIndexManager().write(metadata, childEntity, rlValue, entitySaveGraph.getParentEntity().getClass());
+        }
+        else
+        {
+            getIndexManager().write(metadata, childEntity);
+        }
+    }
+
+    /**
+     * Adds the relation.
+     *
+     * @param entitySaveGraph the entity save graph
+     * @param rlName the rl name
+     * @param rlValue the rl value
+     * @param tf the tf
+     * @throws PropertyAccessException the property access exception
+     */
+    private void addRelation(EntitySaveGraph entitySaveGraph, String rlName, String rlValue,
+            PelopsDataHandlerN.ThriftRow tf) throws PropertyAccessException
+    {
+        if (!entitySaveGraph.isSharedPrimaryKey())
+        {
+            Column col = populateFkey(rlName, rlValue, timestamp);
+            tf.addColumn(col);
+        }
+    }
+
+    /**
+     * Populates foreign key as column.
+     *
+     * @param rlName relation name
+     * @param rlValue relation value
+     * @param timestamp the timestamp
+     * @return the column
+     * @throws PropertyAccessException the property access exception
+     */
+    private Column populateFkey(String rlName, String rlValue, long timestamp) throws PropertyAccessException
+    {
+        Column col = new Column();
+        col.setName(PropertyAccessorFactory.STRING.toBytes(rlName));
+        col.setValue(rlValue.getBytes());
+        col.setTimestamp(timestamp);
+        return col;
+    }
+
+    /**
+     * Populate tf row.
+     *
+     * @param entity the entity
+     * @param id the id
+     * @param metadata the metadata
+     * @return the pelops data handler n. thrift row
+     * @throws Exception the exception
+     */
+    private PelopsDataHandlerN.ThriftRow populateTfRow(Object entity, String id, EntityMetadata metadata)
+            throws Exception
+    {
+
+        String columnFamily = metadata.getTableName();
+
+        if (!isOpen())
+        {
+            throw new PersistenceException("PelopsClient is closed.");
+        }
+
+        if (!isOpen())
+        {
+            throw new PersistenceException("PelopsClient is closed.");
+        }
+
+        PelopsDataHandlerN handler = new PelopsDataHandlerN(this);
+        PelopsDataHandlerN.ThriftRow tf = handler.toThriftRow(this, entity, id, metadata, columnFamily);
+        timestamp = handler.getTimestamp();
+        return tf;
+    }
+
+    /**
+     * On persist.
+     *
+     * @param metadata the metadata
+     * @param entity the entity
+     * @param tf the tf
+     */
+    private void onPersist(EntityMetadata metadata, Object entity, PelopsDataHandlerN.ThriftRow tf)
+    {
+        Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
+
+        List<Column> thriftColumns = tf.getColumns();
+        List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
+        if (thriftColumns != null && !thriftColumns.isEmpty())
+        {
+            mutator.writeColumns(metadata.getTableName(), new Bytes(tf.getId().getBytes()),
+                    Arrays.asList(tf.getColumns().toArray(new Column[0])));
+        }
+
+        if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
+        {
+            for (SuperColumn sc : thriftSuperColumns)
+            {
+                System.out.println(Bytes.toUTF8(sc.getColumns().get(0).getValue()));
+                mutator.writeSubColumns(metadata.getTableName(), tf.getId(), Bytes.toUTF8(sc.getName()),
+                        sc.getColumns());
+
+            }
+
+        }
+
+        mutator.execute(ConsistencyLevel.ONE);
+        tf = null;
+    }
 }

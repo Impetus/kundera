@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.index;
 
-import java.io.CharArrayReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -26,14 +25,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.KeywordAnalyzer;
-import org.apache.lucene.analysis.LetterTokenizer;
-import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.LogDocMergePolicy;
+import org.apache.lucene.index.LogMergePolicy;
+import org.apache.lucene.index.MergePolicy;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
@@ -41,7 +40,6 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.search.function.FieldScoreQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.LockObtainFailedException;
@@ -62,33 +60,41 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 public class LuceneIndexer extends DocumentIndexer
 {
+
+
     /** log for this class. */
     private static Log log = LogFactory.getLog(LuceneIndexer.class);
 
-    private IndexWriter w;
+    private static IndexWriter w;
 
-    private IndexReader reader;
+    private static IndexReader reader;
 
-    private Directory index;
+    private static Directory index;
 
     private boolean isInitialized;
-    
 
+    private static LuceneIndexer indexer;
+
+    
     /**
-     * @param client
      * @param analyzer
      */
-    public LuceneIndexer(Analyzer analyzer)
+    private LuceneIndexer(Analyzer analyzer)
     {
         super(analyzer);
         try
         {
 
-            index = new RAMDirectory();/* FSDirectory.open(getIndexDirectory()) */
+            index = new RAMDirectory();/*
+                                        * FSDirectory.open(getIndexDirectory(
+                                        * ))
+                                        */
             // isInitialized
             /* writer */
             w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
             /* reader = */
+            w.setMergePolicy(new LogDocMergePolicy());
+            w.setMergeFactor(1000);
             w.getConfig().setRAMBufferSizeMB(32);
         }
         catch (CorruptIndexException e)
@@ -103,6 +109,23 @@ public class LuceneIndexer extends DocumentIndexer
         {
             throw new IndexingException(e.getMessage());
         }
+//        throw new IndexingException("This should be instantiated via getInstance() method");
+//        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * @param client
+     * @param analyzer
+     */
+    public static synchronized  LuceneIndexer getInstance(Analyzer analyzer)
+    {
+        // super(analyzer);
+        if (indexer == null)
+        {
+          indexer = new LuceneIndexer(analyzer);   
+            
+        }
+        return indexer;
     }
 
     /**
@@ -167,136 +190,9 @@ public class LuceneIndexer extends DocumentIndexer
     public final void index(EntityMetadata metadata, Object object)
     {
 
-        if (!metadata.isIndexable())
-        {
-            return;
-        }
+        indexDocument(metadata, object, null, null);
+        onCommit();
 
-        log.debug("Indexing @Entity[" + metadata.getEntityClazz().getName() + "] " + object);
-
-        Document currentDoc = null;
-        Object embeddedObject = null;
-        String rowKey = null;
-        try
-        {
-            rowKey = PropertyAccessorHelper.getId(object, metadata);
-        }
-        catch (PropertyAccessException e1)
-        {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-
-        // In case defined entity is Super column family.
-        // we need to create seperate lucene document for indexing.
-        if (metadata.getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY))
-        {
-            Map<String, EmbeddedColumn> embeddedColumnMap = metadata.getEmbeddedColumnsMap();
-
-            for (String embeddedColumnName : embeddedColumnMap.keySet())
-            {
-                EmbeddedColumn embeddedColumn = embeddedColumnMap.get(embeddedColumnName);
-                try
-                {
-
-                    embeddedObject = PropertyAccessorHelper.getObject(object, embeddedColumn.getField());
-
-                    // If embeddedObject is not set, no point of indexing, move
-                    // to next super column
-                    if (embeddedObject == null)
-                    {
-                        continue;
-                    }
-                    if (embeddedObject instanceof Collection<?>)
-                    {
-                        ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
-                        // Check whether it's first time insert or updation
-                        if (ecCacheHandler.isCacheEmpty())
-                        { // First time
-                          // insert
-                            int count = 0;
-                            for (Object obj : (Collection<?>) embeddedObject)
-                            {
-                                String elementCollectionObjectName = embeddedColumnName
-                                        + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
-
-                                currentDoc = prepareDocumentForSuperColumn(metadata, object,
-                                        elementCollectionObjectName);
-                                indexSuperColumn(metadata, object, currentDoc, obj, embeddedColumn);
-                                count++;
-                            }
-                        }
-                        else
-                        {
-                            // Updation, Check whether this object is already in
-                            // cache, which means we already have an embedded
-                            // column
-                            // Otherwise we need to generate a fresh embedded
-                            // column name
-                            int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(rowKey);
-                            for (Object obj : (Collection<?>) embeddedObject)
-                            {
-                                String elementCollectionObjectName = ecCacheHandler.getElementCollectionObjectName(
-                                        rowKey, obj);
-                                if (elementCollectionObjectName == null)
-                                { // Fresh
-                                  // row
-                                    elementCollectionObjectName = embeddedColumnName
-                                            + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + (++lastEmbeddedObjectCount);
-                                }
-
-                                currentDoc = prepareDocumentForSuperColumn(metadata, object,
-                                        elementCollectionObjectName);
-                                indexSuperColumn(metadata, object, currentDoc, obj, embeddedColumn);
-                            }
-                        }
-
-                    }
-                    else
-                    {
-                        currentDoc = prepareDocumentForSuperColumn(metadata, object, embeddedColumnName);
-                        indexSuperColumn(metadata, object, currentDoc,
-                                metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object,
-                                embeddedColumn);
-                    }
-                }
-                catch (PropertyAccessException e)
-                {
-                    log.error("Error while accesing embedded Object:" + embeddedColumnName);
-                }
-
-            }
-        }
-        else
-        {
-            currentDoc = new Document();
-
-            // Add entity class, PK info into document
-            addEntityClassToDocument(metadata, object, currentDoc);
-
-            // Add all entity fields(columns) into document
-            addEntityFieldsToDocument(metadata, object, currentDoc);
-
-            // Store document into index
-            indexDocument(metadata, currentDoc);
-        }
-
-        // TODO: Sadly this required to keep lucene happy, in case of indexing
-        // and searching with same entityManager.
-        // Other alternative would be to issue flush on each search
-        try
-        {
-            w.commit();
-            isInitialized = true;
-        }
-        catch (CorruptIndexException e)
-        {
-            throw new IndexingException(e.getMessage());
-        }
-        catch (IOException e)
-        {
-            throw new IndexingException(e.getMessage());
-        }
     }
 
     @Override
@@ -320,7 +216,7 @@ public class LuceneIndexer extends DocumentIndexer
 
     @SuppressWarnings("deprecation")
     @Override
-    public final Map<String, String> search(String luceneQuery, int start, int count)
+    public final Map<String, String> search(String luceneQuery, int start, int count, boolean fetchRelation)
     {
 
         getIndexReader();
@@ -350,13 +246,12 @@ public class LuceneIndexer extends DocumentIndexer
          */IndexSearcher searcher = new IndexSearcher(reader);
 
         QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new KeywordAnalyzer());
-        
-        
+
         try
         {
             qp.setLowercaseExpandedTerms(false);
             qp.setAllowLeadingWildcard(true);
-//            qp.set
+            // qp.set
             Query q = qp.parse(luceneQuery);
             TopDocs docs = searcher.search(q, count);
 
@@ -366,11 +261,7 @@ public class LuceneIndexer extends DocumentIndexer
             for (ScoreDoc sc : docs.scoreDocs)
             {
                 Document doc = searcher.doc(sc.doc);
-                //Field f = doc.getField(ENTITY_ID_FIELD);
-                //Field f1 = doc.getField(SUPERCOLUMN_INDEX);
-//                String entityId = new String(doc.getBinaryValue(ENTITY_ID_FIELD));
-//                String superCol = new String(doc.getBinaryValue(SUPERCOLUMN_INDEX));
-                String entityId = doc.get(ENTITY_ID_FIELD);
+                String entityId = doc.get(fetchRelation?PARENT_ID_FIELD:ENTITY_ID_FIELD);
                 String superCol = doc.get(SUPERCOLUMN_INDEX);
 
                 if (superCol == null)
@@ -449,9 +340,10 @@ public class LuceneIndexer extends DocumentIndexer
         {
             if (w != null)
             {
-                w.commit();
-                w.close();
-                index.copy(index, FSDirectory.open(getIndexDirectory()), true);
+//                w.optimize();
+//                w.commit();
+//                w.close(true);
+                index.copy(index, FSDirectory.open(getIndexDirectory()), false);
             }
         }
 
@@ -489,4 +381,161 @@ public class LuceneIndexer extends DocumentIndexer
         }
 
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.
+     * model.EntityMetadata, java.lang.Object, java.lang.String)
+     */
+    @Override
+    public void index(EntityMetadata metadata, Object object, String parentId, Class<?> clazz)
+    {
+        indexDocument(metadata, object, parentId, clazz);
+        onCommit();
+
+    }
+
+    private Document indexDocument(EntityMetadata metadata, Object object, String parentId, Class<?> clazz)
+    {
+        if (!metadata.isIndexable())
+        {
+            return null;
+        }
+
+        log.debug("Indexing @Entity[" + metadata.getEntityClazz().getName() + "] " + object);
+
+        Document currentDoc = null;
+        Object embeddedObject = null;
+        String rowKey = null;
+        try
+        {
+            rowKey = PropertyAccessorHelper.getId(object, metadata);
+        }
+        catch (PropertyAccessException e1)
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+        // In case defined entity is Super column family.
+        // we need to create seperate lucene document for indexing.
+        if (metadata.getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY))
+        {
+            Map<String, EmbeddedColumn> embeddedColumnMap = metadata.getEmbeddedColumnsMap();
+
+            for (String embeddedColumnName : embeddedColumnMap.keySet())
+            {
+                EmbeddedColumn embeddedColumn = embeddedColumnMap.get(embeddedColumnName);
+                try
+                {
+
+                    embeddedObject = PropertyAccessorHelper.getObject(object, embeddedColumn.getField());
+
+                    // If embeddedObject is not set, no point of indexing, move
+                    // to next super column
+                    if (embeddedObject == null)
+                    {
+                        continue;
+                    }
+                    if (embeddedObject instanceof Collection<?>)
+                    {
+                        ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
+                        // Check whether it's first time insert or updation
+                        if (ecCacheHandler.isCacheEmpty())
+                        { // First time
+                          // insert
+                            int count = 0;
+                            for (Object obj : (Collection<?>) embeddedObject)
+                            {
+                                String elementCollectionObjectName = embeddedColumnName
+                                        + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
+
+                                currentDoc = prepareDocumentForSuperColumn(metadata, object,
+                                        elementCollectionObjectName, parentId, clazz);
+                                indexSuperColumn(metadata, object, currentDoc, obj, embeddedColumn);
+                                count++;
+                            }
+                        }
+                        else
+                        {
+                            // Updation, Check whether this object is already in
+                            // cache, which means we already have an embedded
+                            // column
+                            // Otherwise we need to generate a fresh embedded
+                            // column name
+                            int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(rowKey);
+                            for (Object obj : (Collection<?>) embeddedObject)
+                            {
+                                String elementCollectionObjectName = ecCacheHandler.getElementCollectionObjectName(
+                                        rowKey, obj);
+                                if (elementCollectionObjectName == null)
+                                { // Fresh
+                                  // row
+                                    elementCollectionObjectName = embeddedColumnName
+                                            + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + (++lastEmbeddedObjectCount);
+                                }
+
+                                currentDoc = prepareDocumentForSuperColumn(metadata, object,
+                                        elementCollectionObjectName, parentId,clazz);
+                                indexSuperColumn(metadata, object, currentDoc, obj, embeddedColumn);
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        currentDoc = prepareDocumentForSuperColumn(metadata, object, embeddedColumnName, parentId, clazz);
+                        indexSuperColumn(metadata, object, currentDoc,
+                                metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object,
+                                embeddedColumn);
+                    }
+                }
+                catch (PropertyAccessException e)
+                {
+                    log.error("Error while accesing embedded Object:" + embeddedColumnName);
+                }
+
+            }
+        }
+        else
+        {
+            currentDoc = new Document();
+
+            // Add entity class, PK info into document
+            addEntityClassToDocument(metadata, object, currentDoc);
+
+            // Add all entity fields(columns) into document
+            addEntityFieldsToDocument(metadata, object, currentDoc);
+
+            indexParentKey(parentId, currentDoc, clazz);
+            // Store document into index
+            indexDocument(metadata, currentDoc);
+        }
+
+        return currentDoc;
+    }
+
+    
+    private void onCommit()
+    {
+        // TODO: Sadly this required to keep lucene happy, in case of indexing
+        // and searching with same entityManager.
+        // Other alternative would be to issue flush on each search
+        try
+        {
+            w.commit();
+            isInitialized = true;
+        }
+        catch (CorruptIndexException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+        catch (IOException e)
+        {
+            throw new IndexingException(e.getMessage());
+        }
+    }
+
 }

@@ -6,6 +6,18 @@
 	<persistence-unit name="testHibernate">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 			<class>com.impetus.client.Player</class>			
+			<class>com.impetus.client.onetoone.OTONPerson</class>			
+			<class>com.impetus.client.onetoone.OTONSPerson</class>			
+			<class>com.impetus.client.onetomany.OTMNPerson</class>			
+			<class>com.impetus.client.onetomany.bi.OTMBNPerson</class>			
+			<class>com.impetus.client.manytoone.MTONPerson</class>			
+			<class>com.impetus.client.manytomany.MTMNPerson</class>			
+			<class>com.impetus.client.onetoone.OTOAddress</class>			
+			<class>com.impetus.client.onetoone.OTOSAddress</class>			
+			<class>com.impetus.client.onetomany.OTMAddress</class>			
+			<class>com.impetus.client.onetomany.bi.OTMBAddress</class>			
+			<class>com.impetus.client.manytoone.MTOAddress</class>			
+			<class>com.impetus.client.manytomany.MTMAddress</class>			
 		<properties>			
 <!--             <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
  -->			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>
@@ -15,7 +27,24 @@
 			<property name="kundera.client" value="rdbms"/>
 			<property name="hibernate.connection.password" value="impetus"/>
 			<property name="hibernate.current_session_context_class" value="org.hibernate.context.ThreadLocalSessionContext" />
+			<property name="hibernate.show_sql" value="true"/>
+			<property name="hibernate.format_sql" value="true"/>
+			
 		</properties>
 		
 	</persistence-unit>
+	
+		<persistence-unit name="kcassandra">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>			
+			<property name="kundera.nodes" value="localhost"/>
+			<property name="kundera.port" value="9160"/>
+			<property name="kundera.keyspace" value="KunderaKeyspace"/>
+			<property name="kundera.dialect" value="cassandra"/>
+			<property name="kundera.client" value="Pelops"/>
+			<property name="kundera.cache.provider.class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider"/>
+		</properties>
+		
+	</persistence-unit>
+	
 </persistence>

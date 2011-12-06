@@ -15,12 +15,15 @@
  ******************************************************************************/
 package com.impetus.client.hbase;
 
+
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
 import org.apache.commons.lang.NotImplementedException;
@@ -30,13 +33,13 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
-import com.impetus.kundera.Constants;
+import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
@@ -67,37 +70,29 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     @Override
     public void persist(EnhancedEntity enhancedEntity) throws Exception
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
-                .getEntity().getClass());
-
-        String dbName = entityMetadata.getSchema(); // Has no meaning for HBase,
-                                                    // not used
-        String tableName = entityMetadata.getTableName();
-
-        List<String> columnFamilyNames = new ArrayList<String>();
-
-        // If this entity has columns(apart from embedded objects, they will be
-        // treated as column family)
-        List<Column> columns = entityMetadata.getColumnsAsList();
-        if (columns != null && !columns.isEmpty())
-        {
-            columnFamilyNames.addAll(entityMetadata.getColumnFieldNames());
-        }
-
-        // All relationships are maintained as special Foreign key column by
-        // Kundera in a newly created column family
-        List<Relation> relations = entityMetadata.getRelations();
-        if (!relations.isEmpty())
-        {
-            columnFamilyNames.add(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME);
-        }
-
-        // Check whether this table exists, if not create it
-        columnFamilyNames.addAll(entityMetadata.getEmbeddedColumnFieldNames());
-        handler.createTableIfDoesNotExist(tableName, columnFamilyNames.toArray(new String[0]));
-
-        // Write data to HBase
-        handler.writeData(tableName, entityMetadata, enhancedEntity);
+//        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
+//                .getEntity().getClass());
+//
+//        String dbName = entityMetadata.getSchema(); // Has no meaning for HBase,
+//                                                    // not used
+//        String tableName = entityMetadata.getTableName();
+//
+//        List<String> columnFamilyNames = new ArrayList<String>();
+//
+//        // If this entity has columns(apart from embedded objects, they will be
+//        // treated as column family)
+//        List<Column> columns = entityMetadata.getColumnsAsList();
+//        if (columns != null && !columns.isEmpty())
+//        {
+//            columnFamilyNames.addAll(entityMetadata.getColumnFieldNames());
+//        }
+//
+//        // Check whether this table exists, if not create it
+//        columnFamilyNames.addAll(entityMetadata.getEmbeddedColumnFieldNames());
+//        handler.createTableIfDoesNotExist(tableName, columnFamilyNames.toArray(new String[0]));
+//
+//        // Write data to HBase
+//        handler.writeData(tableName, entityMetadata, enhancedEntity);
 
     }
 
@@ -189,4 +184,80 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     {
         this.persistenceUnit = persistenceUnit;
     }
-}
+
+    @Override
+    public String persist(EntitySaveGraph entityGraph, EntityMetadata entityMetadata)
+    {
+        Object entity = entityGraph.getParentEntity();
+        String id = entityGraph.getParentId();
+        onPersist(entityMetadata, entity, id, null);
+        
+        return null;
+        
+    }
+
+    private void onPersist(EntityMetadata entityMetadata, Object entity, String id, List<RelationHolder> relations)
+    {
+        String dbName = entityMetadata.getSchema(); // Has no meaning for HBase,
+                                                    // not used
+        String tableName = entityMetadata.getTableName();
+
+        List<String> columnFamilyNames = new ArrayList<String>();
+
+        // If this entity has columns(apart from embedded objects, they will be
+        // treated as column family)
+        List<Column> columns = entityMetadata.getColumnsAsList();
+        if (columns != null && !columns.isEmpty())
+        {
+            columnFamilyNames.addAll(entityMetadata.getColumnFieldNames());
+        }
+
+        // Check whether this table exists, if not create it
+        columnFamilyNames.addAll(entityMetadata.getEmbeddedColumnFieldNames());
+        try
+        {
+            handler.createTableIfDoesNotExist(tableName, columnFamilyNames.toArray(new String[0]));
+
+            // Write data to HBase
+            
+            handler.writeData(tableName, entityMetadata, entity, id, relations);
+        }
+        catch (IOException e)
+        {
+            throw new PersistenceException(e.getMessage());
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#persist(java.lang.Object, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph, com.impetus.kundera.metadata.model.EntityMetadata, boolean)
+     */
+    @Override
+    public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata entityMetadata)
+    {
+        String rlName = entitySaveGraph.getfKeyName();
+        String rlValue = entitySaveGraph.getParentId();
+        String id = entitySaveGraph.getChildId();
+        onPersist(entityMetadata, childEntity, id, RelationHolder.addRelation(entitySaveGraph, rlName, rlValue));
+    }
+
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
+     */
+    @Override
+    public Object find(Class<?> clazz, EntityMetadata entityMetadata, String rowId)
+    {
+        String tableName = entityMetadata.getTableName();
+        Object enhancedEntity = null;
+        try
+        {
+            enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId);
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return enhancedEntity;
+    }
+   }

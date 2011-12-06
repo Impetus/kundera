@@ -1,6 +1,7 @@
 package com.impetus.client;
 
 
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -8,9 +9,6 @@ import javax.persistence.Persistence;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.impetus.kundera.proxy.EnhancedEntity;
-import com.impetus.kundera.proxy.cglib.CglibEnhancedEntity;
 
 public class PlayerTest
 {
