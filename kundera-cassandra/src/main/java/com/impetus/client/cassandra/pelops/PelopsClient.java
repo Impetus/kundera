@@ -90,7 +90,7 @@ public class PelopsClient implements Client
      */
     @Override
     public void persist(EnhancedEntity enhancedEntity) throws Exception
-    {
+    {/*
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
                 .getEntity().getClass());
@@ -129,7 +129,7 @@ public class PelopsClient implements Client
         getIndexManager().write(entityMetadata, enhancedEntity.getEntity());
 
         tf = null;
-    }
+    */}
 
     /* (non-Javadoc)
      * @see com.impetus.kundera.client.Client#find(java.lang.Class, java.lang.String)
@@ -159,7 +159,7 @@ public class PelopsClient implements Client
 
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
         Object entity = null;
-        PelopsDataHandlerN handler = new PelopsDataHandlerN(this);
+        PelopsDataHandler handler = new PelopsDataHandler(this);
         try
         {
             entity = handler.fromThriftRow(selector, clazz, metadata, rowId.toString());
@@ -186,7 +186,7 @@ public class PelopsClient implements Client
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
-        PelopsDataHandlerN handler = new PelopsDataHandlerN(this);
+        PelopsDataHandler handler = new PelopsDataHandler(this);
 
         List<E> entities = (List<E>) handler.fromThriftRow(selector, entityClass, entityMetadata, rowIds);
 
@@ -323,7 +323,7 @@ public class PelopsClient implements Client
         {
             Object entity = entityGraph.getParentEntity();
             String id = entityGraph.getParentId();
-            PelopsDataHandlerN.ThriftRow tf = populateTfRow(entity, id, metadata);
+            PelopsDataHandler.ThriftRow tf = populateTfRow(entity, id, metadata);
             onPersist(metadata, entity, tf);
             getIndexManager().write(metadata, entity);
 
@@ -352,7 +352,7 @@ public class PelopsClient implements Client
         String id = entitySaveGraph.getChildId();
         try
         {
-            PelopsDataHandlerN.ThriftRow tf = populateTfRow(childEntity, id, metadata);
+            PelopsDataHandler.ThriftRow tf = populateTfRow(childEntity, id, metadata);
             addRelation(entitySaveGraph, rlName, rlValue, tf);
             onPersist(metadata, childEntity, tf);
             onIndex(childEntity, entitySaveGraph, metadata, rlValue);
@@ -395,7 +395,7 @@ public class PelopsClient implements Client
      * @throws PropertyAccessException the property access exception
      */
     private void addRelation(EntitySaveGraph entitySaveGraph, String rlName, String rlValue,
-            PelopsDataHandlerN.ThriftRow tf) throws PropertyAccessException
+            PelopsDataHandler.ThriftRow tf) throws PropertyAccessException
     {
         if (!entitySaveGraph.isSharedPrimaryKey())
         {
@@ -431,7 +431,7 @@ public class PelopsClient implements Client
      * @return the pelops data handler n. thrift row
      * @throws Exception the exception
      */
-    private PelopsDataHandlerN.ThriftRow populateTfRow(Object entity, String id, EntityMetadata metadata)
+    private PelopsDataHandler.ThriftRow populateTfRow(Object entity, String id, EntityMetadata metadata)
             throws Exception
     {
 
@@ -447,8 +447,8 @@ public class PelopsClient implements Client
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        PelopsDataHandlerN handler = new PelopsDataHandlerN(this);
-        PelopsDataHandlerN.ThriftRow tf = handler.toThriftRow(this, entity, id, metadata, columnFamily);
+        PelopsDataHandler handler = new PelopsDataHandler(this);
+        PelopsDataHandler.ThriftRow tf = handler.toThriftRow(this, entity, id, metadata, columnFamily);
         timestamp = handler.getTimestamp();
         return tf;
     }
@@ -460,7 +460,7 @@ public class PelopsClient implements Client
      * @param entity the entity
      * @param tf the tf
      */
-    private void onPersist(EntityMetadata metadata, Object entity, PelopsDataHandlerN.ThriftRow tf)
+    private void onPersist(EntityMetadata metadata, Object entity, PelopsDataHandler.ThriftRow tf)
     {
         Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
