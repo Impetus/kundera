@@ -260,7 +260,7 @@ public class LuceneIndexer extends DocumentIndexer
             // This is a quick fix
             for (ScoreDoc sc : docs.scoreDocs)
             {
-                Document doc = searcher.doc(sc.doc);
+                Document doc = searcher.doc(sc.doc);                
                 String entityId = doc.get(fetchRelation?PARENT_ID_FIELD:ENTITY_ID_FIELD);
                 String superCol = doc.get(SUPERCOLUMN_INDEX);
 

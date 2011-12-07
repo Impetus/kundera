@@ -531,7 +531,7 @@ public class PersistenceDelegator
                 childMetadata = getMetadata(childClazz);
                 childClient = getClient(childMetadata);
 
-                chids = populateAssociation(entity, objectGraph.getProperty(), childClient, query, objectGraph.getParentClass());
+                chids = populateAssociation(entity, objectGraph.getProperty(), childClient, query, objectGraph.getParentClass(), true);
 
             }
             else
@@ -554,7 +554,7 @@ public class PersistenceDelegator
                 }
                 else
                 {
-                    chids = populateAssociation(entity, objectGraph.getProperty(), childClient, query, childClazz);
+                    chids = populateAssociation(entity, objectGraph.getProperty(), childClient, query, childClazz, false);
                 }
             }
 
@@ -580,11 +580,11 @@ public class PersistenceDelegator
      * @return the sets the
      * @throws PropertyAccessException the property access exception
      */
-    private Set<?> populateAssociation(Object entity, Field f, Client childClient, String query, Class<?> clazz)
+    private Set<?> populateAssociation(Object entity, Field f, Client childClient, String query, Class<?> clazz, boolean fetchRelation)
             throws PropertyAccessException
     {
 //        Set<?> chids;
-        List<?> childs = onAssociation(clazz, childClient, true, query, false, null);
+        List<?> childs = onAssociation(clazz, childClient, fetchRelation, query, false, null);
 //        chids = new HashSet(childs);
 //        Field f = objectGraph.getProperty();
         
@@ -617,6 +617,7 @@ public class PersistenceDelegator
         try
         {
             IndexManager ixManager = client.getIndexManager();
+            isOpen();
             Map<String, String> results = fetchRelation ? ixManager.fetchRelation(query) : ixManager.search(query);
             if(biDirectional)
             {
