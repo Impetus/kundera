@@ -44,7 +44,7 @@ public class HBaseClientFactory extends GenericClientFactory
     @Override
     protected boolean isClientThreadSafe()
     {
-        return false;
+        return true;
     }
 
     @Override

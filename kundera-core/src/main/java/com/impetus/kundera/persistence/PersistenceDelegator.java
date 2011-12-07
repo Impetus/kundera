@@ -539,6 +539,7 @@ public class PersistenceDelegator
                 childClazz = objectGraph.getChildClass();
                 childMetadata = getMetadata(childClazz);
                 childClient = getClient(childMetadata);
+
                 String query = AssociationBuilder.getQuery(DocumentIndexer.PARENT_ID_CLASS, 
                                                            entity.getClass().getCanonicalName().toLowerCase(), 
                                                            DocumentIndexer.PARENT_ID_FIELD, rowId);
@@ -557,8 +558,6 @@ public class PersistenceDelegator
                 }
             }
 
-            childMetadata = getMetadata(childClazz);
-            childClient = getClient(childMetadata);
 
             onBiDirection(entity, objectGraph, client, rowId, entityClass, chids, childMetadata, childClient);
         }

@@ -95,18 +95,16 @@ public class HBaseWriter implements Writer
 
     private void handleRelation(List<RelationHolder> relation, Put p)
     {
-        if (relation != null)
-        {
-            for (RelationHolder r : relation)
-            {
-                if (relation != null)
-                {
-                    p.add(Bytes.toBytes(r.getRelationName()), System.currentTimeMillis(),
-                            Bytes.toBytes(r.getRelationValue()));
+		if (relation != null) {
+			for (RelationHolder r : relation) {
+				if (relation != null) {
+					p.add(Bytes.toBytes(r.getRelationName()),
+							System.currentTimeMillis(),
+							Bytes.toBytes(r.getRelationValue()));
 
-                }
-            }
-        }
+				}
+			}
+		}
     }
 
     // TODO: Scope of performance improvement in this code
