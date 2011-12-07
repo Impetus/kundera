@@ -176,26 +176,13 @@ public class HibernateClient implements Client
     public <E> List<E> find(Class<E> arg0, String... arg1) throws Exception
     {
     	//TODO: Vivek correct it. unfortunately i need to open a new session for each finder to avoid lazy loading.
-//    	Session s = getSessionInstance();
         Session s = sf.openSession();
-//        System.out.println(s.isConnected());
     	Transaction tx = s.beginTransaction();
     
         Criteria c = s.createCriteria(arg0);
-//        Metadata metadata = 
         c.add(Restrictions.in("personId", arg1));
-     //   c.setFetchMode("address", FetchMode.SELECT);
         
         return  c.list();
-//        System.out.println(lst.size());
-//        return null;
-//    	List<E> entities = new ArrayList<E>();
-//        for(String key : arg1)
-//        {
-//        	entities.add ((E) s.get(arg0, key));
-//        }
-//        tx.commit();
-//        return entities;
     }
 
     /* (non-Javadoc)
@@ -227,6 +214,8 @@ public class HibernateClient implements Client
     @Override
     public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
     {
+//        String rlName = entitySaveGraph.getfKeyName();
+        String rlValue = entitySaveGraph.getParentId();
         Session s = getSessionInstance();
         Transaction tx = s.beginTransaction();
        s.persist(childEntity);
@@ -234,13 +223,33 @@ public class HibernateClient implements Client
        s = getSessionInstance();
        tx = s.beginTransaction();
        String updateSql = "Update " + metadata.getTableName() + " SET " + entitySaveGraph.getfKeyName() + "= '" + entitySaveGraph.getParentId() + "' WHERE " + metadata.getIdColumn().getName() + " = '" + entitySaveGraph.getChildId() + "'";
-       System.out.println(updateSql);
        s.createSQLQuery(updateSql).executeUpdate();
        tx.commit();
-       getIndexManager().write(metadata, childEntity, entitySaveGraph.getParentId(), entitySaveGraph.getParentEntity().getClass()); 
-       //TODO: Write native query to persist fKey and fKeyValue.
+       onIndex(childEntity, entitySaveGraph, metadata, rlValue);
         
     }
+
+    
+    /**
+     * On index.
+     *
+     * @param childEntity the child entity
+     * @param entitySaveGraph the entity save graph
+     * @param metadata the metadata
+     * @param rlValue the rl value
+     */
+    private void onIndex(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata, String rlValue)
+    {
+        if (!entitySaveGraph.isSharedPrimaryKey())
+        {
+            getIndexManager().write(metadata, childEntity, rlValue, entitySaveGraph.getParentEntity().getClass());
+        }
+        else
+        {
+            getIndexManager().write(metadata, childEntity);
+        }
+    }
+
 
     private Session getSessionInstance()
     {

@@ -23,7 +23,6 @@ import javax.persistence.ManyToOne;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.handler.api.MappingHandler;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * The Class OneToManyHandler.

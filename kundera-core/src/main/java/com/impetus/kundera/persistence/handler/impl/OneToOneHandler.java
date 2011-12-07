@@ -29,7 +29,6 @@ import com.impetus.kundera.persistence.handler.api.MappingHandler;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-// TODO: Auto-generated Javadoc
 //TODO need to think of multiple relationships. 
 //A->B = output says( B->A) and other relation says (A->C). so overall output is : C->B->A (need to look into this later).
 
@@ -98,8 +97,6 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
             objectGraph.setParentEntity(entity);
             objectGraph.setChildEntity(associatedEntity);
             objectGraph.setSharedPrimaryKey(true);
-//            objectGraph.setChildClass(PropertyAccessorHelper.getGenericClass(rField));
-//            objectGraph.setParentClass(entity.getClass());
         }
     }
 

@@ -31,8 +31,6 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.LogDocMergePolicy;
-import org.apache.lucene.index.LogMergePolicy;
-import org.apache.lucene.index.MergePolicy;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
@@ -74,6 +72,8 @@ public class LuceneIndexer extends DocumentIndexer
     private boolean isInitialized;
 
     private static LuceneIndexer indexer;
+    
+    private static boolean readyForCommit;
 
     
     /**
@@ -338,11 +338,8 @@ public class LuceneIndexer extends DocumentIndexer
     {
         try
         {
-            if (w != null)
+            if (w != null && readyForCommit)
             {
-//                w.optimize();
-//                w.commit();
-//                w.close(true);
                 index.copy(index, FSDirectory.open(getIndexDirectory()), false);
             }
         }
@@ -527,6 +524,7 @@ public class LuceneIndexer extends DocumentIndexer
         {
             w.commit();
             isInitialized = true;
+            readyForCommit = true;
         }
         catch (CorruptIndexException e)
         {

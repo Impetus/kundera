@@ -60,7 +60,6 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.QueryResolver;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class PersistenceDelegator.
  */
@@ -529,6 +528,8 @@ public class PersistenceDelegator
                                                            DocumentIndexer.ENTITY_ID_FIELD, rowId);
                 
                 childClazz = objectGraph.getParentClass();
+                childMetadata = getMetadata(childClazz);
+                childClient = getClient(childMetadata);
 
                 chids = populateAssociation(entity, objectGraph.getProperty(), childClient, query, objectGraph.getParentClass());
 
@@ -536,6 +537,8 @@ public class PersistenceDelegator
             else
             {
                 childClazz = objectGraph.getChildClass();
+                childMetadata = getMetadata(childClazz);
+                childClient = getClient(childMetadata);
                 String query = AssociationBuilder.getQuery(DocumentIndexer.PARENT_ID_CLASS, 
                                                            entity.getClass().getCanonicalName().toLowerCase(), 
                                                            DocumentIndexer.PARENT_ID_FIELD, rowId);

@@ -16,13 +16,9 @@
 package com.impetus.kundera.persistence.handler.impl;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Set;
 
 import javax.persistence.JoinColumn;
 
@@ -73,14 +69,13 @@ class AssociationHandler
      * @param rField the r field
      * @return the entity save graph
      */
+    
     protected EntitySaveGraph populateDefaultGraph(Object entity, Object associatedEntity, Field rField)
     {
         EntitySaveGraph objectGraph = new EntitySaveGraph(rField);
         objectGraph.setParentEntity(associatedEntity);
         objectGraph.setChildEntity(entity);
         objectGraph.setfKeyName(getJoinColumnName(rField));
-//        objectGraph.setParentClass(PropertyAccessorHelper.getGenericClass(rField));
-//        objectGraph.setChildClass(entity.getClass());
         return objectGraph;
     }
 
@@ -93,6 +88,8 @@ class AssociationHandler
      * @param objectGraph the object graph
      * @return the field
      */
+
+    //TODO: this can be moved to metadata level.
     protected <T extends Annotation> Field computeDirection(Object entity, Field relationalField, EntitySaveGraph objectGraph, Class<T> clazz)
     {
     Field[] fields = PropertyAccessorHelper.getDeclaredFields(relationalField);

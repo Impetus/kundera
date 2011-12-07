@@ -17,10 +17,7 @@ package com.impetus.kundera.persistence.handler.impl;
 
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
 
-import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -240,13 +237,6 @@ public class EntitySaveGraph
         return parentClass;  
     }
 
-//    /**
-//     * @param parentClass the parentClass to set
-//     */
-//    public void setParentClass(Class<?> parentClass)
-//    {
-//        this.parentClass = parentClass;
-//    }
 
     /**
      * @return the childClass
@@ -264,15 +254,6 @@ public class EntitySaveGraph
         }
         return childClass;
     }
-
-//    /**
-//     * @param childClass the childClass to set
-//     */
-//    public void setChildClass(Class<?> childClass)
-//    {
-//        this.childClass = childClass;
-//    }
-
     /**
      * @return the property
      */

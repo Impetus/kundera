@@ -45,8 +45,6 @@ public final class EntityInterceptor
         EntitySaveGraph objectGraph = new EntitySaveGraph();
         objectGraph.setParentEntity(entity);
 
-        //Need to handle unidirection and bi direction handler.
-        
         // TODO : Need to find a way for recursive calls and by-pass in case parent and child belongs to same Store! 
         
         for (Relation relation : relations)
