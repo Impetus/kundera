@@ -18,6 +18,7 @@ package com.impetus.kundera.persistence.handler.impl;
 import java.lang.reflect.Field;
 
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
 import javax.persistence.PrimaryKeyJoinColumn;
 
@@ -60,7 +61,7 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
         EntitySaveGraph objectGraph = populateDefaultGraph(entity, associatedEntity, rField);
 
         isSharedByPrimaryKey(entity, rField, objectGraph, associatedEntity, metadata);
-        
+        computeDirection(entity, relation.getProperty(), objectGraph, OneToOne.class);
         onDetach(entity, associatedEntity, relation.getProperty(), true);
         // Read annotation over field, if it is joinByPrimaryKey then consider
         // populating primary key of associated table as of entity.
