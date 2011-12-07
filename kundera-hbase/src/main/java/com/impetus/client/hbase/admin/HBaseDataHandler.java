@@ -149,7 +149,7 @@ public class HBaseDataHandler implements DataHandler
             entity = clazz.newInstance(); // Entity Object
 
             // Load raw data from HBase
-            HBaseData data = hbaseReader.LoadData(gethTable(tableName), rowKey);
+            HBaseData data = hbaseReader.LoadData(gethTable(tableName), rowKey);            
 
             // Populate raw data from HBase into entity
             populateEntityFromHbaseData(entity, data, m, rowKey);

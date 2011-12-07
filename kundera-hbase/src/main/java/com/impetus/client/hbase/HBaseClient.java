@@ -191,7 +191,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         Object entity = entityGraph.getParentEntity();
         String id = entityGraph.getParentId();
         onPersist(entityMetadata, entity, id, null);
-        
+        getIndexManager().write(entityMetadata, entityGraph.getParentEntity());
         return null;
         
     }
@@ -214,6 +214,14 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
         // Check whether this table exists, if not create it
         columnFamilyNames.addAll(entityMetadata.getEmbeddedColumnFieldNames());
+        
+        //Add relationship fields if they are there
+        if(relations != null) {
+        	for(RelationHolder rh : relations) {
+        		columnFamilyNames.add(rh.getRelationName());
+        	}
+        }
+        
         try
         {
             handler.createTableIfDoesNotExist(tableName, columnFamilyNames.toArray(new String[0]));
@@ -238,9 +246,29 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         String rlValue = entitySaveGraph.getParentId();
         String id = entitySaveGraph.getChildId();
         onPersist(entityMetadata, childEntity, id, RelationHolder.addRelation(entitySaveGraph, rlName, rlValue));
+        onIndex(childEntity, entitySaveGraph, entityMetadata, rlValue);
     }
 
 
+    /**
+     * On index.
+     *
+     * @param childEntity the child entity
+     * @param entitySaveGraph the entity save graph
+     * @param metadata the metadata
+     * @param rlValue the rl value
+     */
+    private void onIndex(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata, String rlValue)
+    {
+        if (!entitySaveGraph.isSharedPrimaryKey())
+        {
+            getIndexManager().write(metadata, childEntity, rlValue, entitySaveGraph.getParentEntity().getClass());
+        }
+        else
+        {
+            getIndexManager().write(metadata, childEntity);
+        }
+    }
     /* (non-Javadoc)
      * @see com.impetus.kundera.client.Client#find(java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
