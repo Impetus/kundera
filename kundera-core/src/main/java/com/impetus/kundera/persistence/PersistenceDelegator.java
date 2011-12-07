@@ -436,8 +436,12 @@ public class PersistenceDelegator
             // Collections.addAll(arg0, arg1)
 
             EntitySaveGraph objectGraph = interceptor.handleRelation(entity, getMetadata(entity.getClass()));
-
-            onComputeGraph(entity, objectGraph, client, primaryKey.toString(), entityClass);
+            
+            //Compute object graph if there is any association.
+            if(objectGraph.getChildEntity() != null)
+            {
+                onComputeGraph(entity, objectGraph, client, primaryKey.toString(), entityClass);
+            }
             boolean isCacheableToL2 = entityMetadata.isCacheable();
             getSession().store(primaryKey, entity, isCacheableToL2);
             return (E) entity;
@@ -772,8 +776,12 @@ public class PersistenceDelegator
 
         }
         Object childEntity = objectGraph.getChildEntity();
-
-        onClientPersist(objectGraph, childEntity);
+        
+        //If any association exists.
+        if(childEntity != null)
+        {
+            onClientPersist(objectGraph, childEntity);
+        }
     }
 
     /**
