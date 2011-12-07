@@ -550,7 +550,7 @@ public class PersistenceDelegator
                 {
                     List c = new ArrayList();
                     c.add(childClient.find(childClazz, rowId));
-                    chids =  onReflect(entityClass, objectGraph.getProperty(), c);
+                    chids =  onReflect(entity, objectGraph.getProperty(), c);
                 }
                 else
                 {
