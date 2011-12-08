@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.KeywordAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
@@ -245,7 +246,7 @@ public class LuceneIndexer extends DocumentIndexer
          * }
          */IndexSearcher searcher = new IndexSearcher(reader);
 
-        QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new KeywordAnalyzer());
+        QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(Version.LUCENE_34));
 
         try
         {
@@ -268,7 +269,8 @@ public class LuceneIndexer extends DocumentIndexer
                 {
                     superCol = "SuperCol" + nullCount++;
                 }
-                indexCol.put(superCol, entityId);
+                // In case of super column and association.
+                indexCol.put(superCol+"|" + entityId, entityId);
             }
         }
         catch (ParseException e)

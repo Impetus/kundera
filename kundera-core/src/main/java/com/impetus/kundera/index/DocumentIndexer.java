@@ -230,6 +230,7 @@ public abstract class DocumentIndexer implements Indexer
             String id;
             id = PropertyAccessorHelper.getId(object, metadata);
             luceneField = new Field(ENTITY_ID_FIELD, id,Field.Store.YES,Field.Index.ANALYZED);
+//            luceneField.set
             // adding class
                     // namespace
                     ///*Field.Store.YES, Field.Index.ANALYZED_NO_NORMS*/);
@@ -275,7 +276,7 @@ public abstract class DocumentIndexer implements Indexer
     {
         try
         {
-            String value = PropertyAccessorHelper.getString(object, field);
+            String value = (String)PropertyAccessorHelper.getObject(object, field);
             if (value != null)
             {
                 Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), value,Field.Store.YES,Field.Index.ANALYZED_NO_NORMS);

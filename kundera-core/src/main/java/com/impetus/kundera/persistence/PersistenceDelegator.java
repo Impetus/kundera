@@ -617,14 +617,13 @@ public class PersistenceDelegator
         try
         {
             IndexManager ixManager = client.getIndexManager();
-            isOpen();
             Map<String, String> results = fetchRelation ? ixManager.fetchRelation(query) : ixManager.search(query);
+            System.out.println(results);
+            Set<String> rsSet = new HashSet<String>(results.values());
             if(biDirectional)
             {
-                results.values().remove(rowId);
+                rsSet.remove(rowId);
             }
-            Set<String> rsSet = new HashSet<String>(results.values());
-
             return (List<Object>) client.find(clazz, rsSet.toArray(new String[] {}));
         }
         catch (Exception e)
@@ -673,9 +672,12 @@ public class PersistenceDelegator
                     try
                     {
                         String id = PropertyAccessorHelper.getId(child, childMetadata);
-                        query = AssociationBuilder.getQuery(DocumentIndexer.PARENT_ID_CLASS, entity.getClass()
-                                .getCanonicalName().toLowerCase(), DocumentIndexer.ENTITY_ID_FIELD, id);
-                        obj = onAssociation(entityClass, childClient, true, query, true, rowId);
+                        query = AssociationBuilder.getQuery(DocumentIndexer.PARENT_ID_CLASS, child.getClass()
+                                .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, id);
+                        List<Object> results = onAssociation(entityClass, client, false, query, true, rowId);
+						if (results != null) {
+							obj.addAll(results);
+						}
                     }
                     catch (PropertyAccessException e)
                     {

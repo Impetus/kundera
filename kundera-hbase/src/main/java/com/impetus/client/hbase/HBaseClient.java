@@ -139,7 +139,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
             E e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(), entityMetadata,
                     entityId);
 
-            Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName);
+            Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName.substring(0, columnFamilyName.indexOf("|")));
             Object columnFamilyValue = PropertyAccessorHelper.getObject(e, columnFamilyField);
             if (Collection.class.isAssignableFrom(columnFamilyField.getType()))
             {

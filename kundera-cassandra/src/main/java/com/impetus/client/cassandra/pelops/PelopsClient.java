@@ -205,7 +205,7 @@ public class PelopsClient implements Client
         {
             String entityId = superColumnMap.get(superColumnName);
             List<SuperColumn> superColumnList = loadSuperColumns(entityMetadata.getSchema(),
-                    entityMetadata.getTableName(), entityId, new String[] { superColumnName });
+                    entityMetadata.getTableName(), entityId, new String[] { superColumnName.substring(0, superColumnName.indexOf("|")) });
             E e = (E) dataHandler.fromThriftRow(entityMetadata.getEntityClazz(), entityMetadata,
                     new DataRow<SuperColumn>(entityId, entityMetadata.getTableName(), superColumnList));
             entities.add(e);
