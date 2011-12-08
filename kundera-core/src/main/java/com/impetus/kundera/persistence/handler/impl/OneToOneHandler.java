@@ -98,6 +98,7 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
             objectGraph.setParentEntity(entity);
             objectGraph.setChildEntity(associatedEntity);
             objectGraph.setSharedPrimaryKey(true);
+            objectGraph.setfKeyName(metadata.getIdColumn().getName());
         }
     }
 

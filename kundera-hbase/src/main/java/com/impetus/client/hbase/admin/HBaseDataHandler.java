@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.Embedded;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
@@ -249,9 +250,16 @@ public class HBaseDataHandler implements DataHandler
             }
             else
             {
-                // Write Column family which was Embedded object in entity
-                hbaseWriter
-                        .writeColumns(gethTable(tableName), columnFamilyName, rowId, columns, columnFamilyObject);
+                // Write Column family which was Embedded object in entity            	
+        		if(columnFamilyField.isAnnotationPresent(Embedded.class)) {
+        			hbaseWriter
+                    .writeColumns(gethTable(tableName), columnFamilyName, rowId, columns, columnFamilyObject);
+        		} else {
+        			hbaseWriter.writeColumn(gethTable(tableName), columnFamilyName, rowId, columns.get(0), columnFamilyObject);
+        		}
+            	
+            	
+                
             }
 
         }

@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
+import javax.persistence.Embedded;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
@@ -114,9 +115,18 @@ public class MongoDBDataHandler
                     }
                     else if (embeddedDocumentObject instanceof BasicDBObject)
                     {
-                        Object embeddedObject = DocumentObjectMapper.getObjectFromDocument(
+                    	Object embeddedObject = null;
+                    	if(embeddedColumnField.isAnnotationPresent(Embedded.class))
+                    	{
+                        embeddedObject = DocumentObjectMapper.getObjectFromDocument(
                                 (BasicDBObject) embeddedDocumentObject, embeddedColumn.getField().getType(),
                                 embeddedColumn.getColumns());
+                    	} else
+                    	{
+                            
+                    		embeddedObject =((BasicDBObject) embeddedDocumentObject).get(embeddedColumn.getName()) ;
+                    		
+                    	}
                         PropertyAccessorHelper.set(entity, embeddedColumnField, embeddedObject);
 
                     }
@@ -232,8 +242,16 @@ public class MongoDBDataHandler
                 }
                 else
                 {
-                    dbObj.put(superColumnField.getName(),
-                            DocumentObjectMapper.getDocumentFromObject(embeddedObject, embeddedColumn.getColumns()));
+                	if(superColumnField.isAnnotationPresent(Embedded.class))
+                	{
+                		dbObj.put(superColumnField.getName(),
+                				DocumentObjectMapper.getDocumentFromObject(embeddedObject, embeddedColumn.getColumns()));
+                	} else 
+                	{
+                		dbObj.put(superColumnField.getName(),
+                				DocumentObjectMapper.getDocumentFromObject(entity, embeddedColumn.getColumns()));
+                		
+                	}
                 }
             }
         }

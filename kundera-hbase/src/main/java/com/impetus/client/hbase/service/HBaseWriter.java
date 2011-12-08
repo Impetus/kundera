@@ -68,6 +68,18 @@ public class HBaseWriter implements Writer
         }
         htable.put(p);
     }
+    
+    @Override
+    public void writeColumn(HTable htable, String columnFamily, String rowKey, Column column, Object columnObj) throws IOException
+    {
+        Put p = new Put(Bytes.toBytes(rowKey));       
+        
+        
+        p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(column.getName()), Bytes.toBytes(columnObj.toString()));
+                        
+                
+        htable.put(p);
+    }
 
     @Override
     public void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity, List<RelationHolder> relation) throws IOException

@@ -437,7 +437,7 @@ public class PersistenceDelegator
             EntitySaveGraph objectGraph = interceptor.handleRelation(entity, getMetadata(entity.getClass()));
             
             //Compute object graph if there is any association.
-            if(objectGraph.getChildEntity() != null)
+            if(objectGraph.getProperty() != null)
             {
                 onComputeGraph(entity, objectGraph, client, primaryKey.toString(), entityClass);
             }

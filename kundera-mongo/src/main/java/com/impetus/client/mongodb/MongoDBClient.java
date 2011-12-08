@@ -149,6 +149,7 @@ public class MongoDBClient implements Client
 			onPersist(metadata, childEntity, id, RelationHolder.addRelation(entitySaveGraph, rlName, rlValue));
             onIndex(childEntity, entitySaveGraph, metadata, rlValue);
 		} catch (PropertyAccessException e) {
+			e.printStackTrace();
 			log.error(e.getMessage());
 			throw new PersistenceException(e.getMessage());
 		} catch (Exception e) {

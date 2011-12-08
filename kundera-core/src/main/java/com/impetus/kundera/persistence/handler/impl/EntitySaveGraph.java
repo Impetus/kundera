@@ -232,7 +232,7 @@ public class EntitySaveGraph
                 return parentEntity.getClass().getSuperclass();
             }
             
-            parentClass = !PropertyAccessorHelper.isCollection(parentEntity.getClass())? parentEntity.getClass(): PropertyAccessorHelper.getGenericClass(getProperty()); 
+            parentClass = parentEntity!= null && !PropertyAccessorHelper.isCollection(parentEntity.getClass())? parentEntity.getClass(): PropertyAccessorHelper.getGenericClass(getProperty()); 
         }   
         return parentClass;  
     }

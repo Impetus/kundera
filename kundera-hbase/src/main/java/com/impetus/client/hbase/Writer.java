@@ -32,6 +32,8 @@ import com.impetus.kundera.metadata.model.Column;
  */
 public interface Writer
 {
+	
+	void writeColumn(HTable htable, String columnFamily, String rowKey, Column column, Object columnObj) throws IOException;
 
     /**
      * Writes a column family with name <code>columnFamily</code>, into a table

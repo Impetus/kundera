@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.rdbms;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -176,13 +177,18 @@ public class HibernateClient implements Client
     public <E> List<E> find(Class<E> arg0, String... arg1) throws Exception
     {
     	//TODO: Vivek correct it. unfortunately i need to open a new session for each finder to avoid lazy loading.
-        Session s = sf.openSession();
+        List<E> objs = new ArrayList<E>();
+    	Session s = sf.openSession();
     	Transaction tx = s.beginTransaction();
     
-        Criteria c = s.createCriteria(arg0);
-        c.add(Restrictions.in("personId", arg1));
+    	for(String pKey : arg1)
+    	{
+    		objs.add((E)s.get(arg0, pKey));
+    	}
+//        Criteria c = s.createCriteria(arg0);
+//        c.add(Restrictions.in("personId", arg1));
         
-        return  c.list();
+        return  objs;
     }
 
     /* (non-Javadoc)
