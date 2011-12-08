@@ -94,7 +94,7 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
             // Means it is a case of populating associatedEntity's primary key
             // with entity's primary key.
             
-            populatePKey(entity, associatedEntity, metadata);
+            populatePKey(entity, associatedEntity,metadata);
             objectGraph.setParentEntity(entity);
             objectGraph.setChildEntity(associatedEntity);
             objectGraph.setSharedPrimaryKey(true);
@@ -106,33 +106,31 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
     //TODO: if getting metadata via class is possible.this method will not be required. refactor this one finish that.
     
     private void populatePKey(Object entity, Object associatedEntity, EntityMetadata metadata)
-    {
-        Class<?> clazz = associatedEntity.getClass();
-        if(associatedEntity instanceof HibernateProxy)
-        {
-            clazz = associatedEntity.getClass().getSuperclass();
-        }
-        Field[] fields = clazz.getDeclaredFields();
-        Field f = null;
-        for(Field field : fields)
-        {
-            if(field.isAnnotationPresent(Id.class))
-            {
-                f = field;
-                break;
-            }
-           
-        }
-       
-        try
-        {
-            PropertyAccessorHelper.set(associatedEntity, f, getId(entity, metadata));
-        }
-        catch (PropertyAccessException e)
-        {
-            throw new PersistenceException(e.getMessage());
-        }
-    }
+ {
+		if (associatedEntity != null)
+		{
+			Class<?> clazz = associatedEntity.getClass();
+			if (associatedEntity instanceof HibernateProxy) {
+				clazz = associatedEntity.getClass().getSuperclass();
+			}
+			Field[] fields = clazz.getDeclaredFields();
+			Field f = null;
+			for (Field field : fields) {
+				if (field.isAnnotationPresent(Id.class)) {
+					f = field;
+					break;
+				}
+
+			}
+
+			try {
+				PropertyAccessorHelper.set(associatedEntity, f,
+						getId(entity, metadata));
+			} catch (PropertyAccessException e) {
+				throw new PersistenceException(e.getMessage());
+			}
+		}
+	}
 
     
     private String getId(Object entity, EntityMetadata metadata)

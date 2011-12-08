@@ -128,7 +128,10 @@ class AssociationHandler
 
         try
         {
-            PropertyAccessorHelper.set(entity, field, setNull || associationEntity == null? null:associationEntity.getClass().newInstance());
+        	if(entity != null)
+        	{
+        		PropertyAccessorHelper.set(entity, field, setNull || associationEntity == null? null:associationEntity.getClass().newInstance());
+        	}
         }
         catch (PropertyAccessException e)
         {

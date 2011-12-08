@@ -60,9 +60,10 @@ public interface Writer
      * @param entity
      * @throws IOException
      */
-    void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity, List<RelationHolder> relation) throws IOException;
+    void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity) throws IOException;
 
-
+    void writeRelations(HTable htable, String rowKey, boolean containsEmbeddedObjectsOnly, List<RelationHolder> relations) throws IOException;
+    
     /**
      * Writes foreign keys along with a database table. They are stored into a
      * column family named FKey-TO. Each column corresponds to foreign key field
@@ -75,4 +76,6 @@ public interface Writer
      */
     public void writeForeignKeys(HTable hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
             throws IOException;
+    
+    
 }

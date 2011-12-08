@@ -82,7 +82,7 @@ public class HBaseWriter implements Writer
     }
 
     @Override
-    public void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity, List<RelationHolder> relation) throws IOException
+    public void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity) throws IOException
     {
         Put p = new Put(Bytes.toBytes(rowKey));
 
@@ -100,24 +100,34 @@ public class HBaseWriter implements Writer
             {
                 throw new IOException(e1.getMessage());
             }
-        }
-        handleRelation(relation, p);
+        }        
         htable.put(p);
-    }
+    } 
+    
 
-    private void handleRelation(List<RelationHolder> relation, Put p)
-    {
-		if (relation != null) {
-			for (RelationHolder r : relation) {
-				if (relation != null) {
+    @Override
+	public void writeRelations(HTable htable, String rowKey, boolean containsEmbeddedObjectsOnly, List<RelationHolder> relations) throws IOException {
+    	Put p = new Put(Bytes.toBytes(rowKey));
+    	
+		for (RelationHolder r : relations) {
+			if (r != null) {
+				if(containsEmbeddedObjectsOnly) {
+					p.add(Bytes.toBytes(r.getRelationName()),
+							Bytes.toBytes(r.getRelationName()),
+							Bytes.toBytes(r.getRelationValue()));
+				} else {
 					p.add(Bytes.toBytes(r.getRelationName()),
 							System.currentTimeMillis(),
 							Bytes.toBytes(r.getRelationValue()));
-
 				}
+				
+
 			}
-		}
-    }
+		}		
+    	
+    	htable.put(p);
+	}
+	
 
     // TODO: Scope of performance improvement in this code
     @Override

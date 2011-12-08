@@ -31,6 +31,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -181,14 +182,17 @@ public class HibernateClient implements Client
     	Session s = sf.openSession();
     	Transaction tx = s.beginTransaction();
     
-    	for(String pKey : arg1)
-    	{
-    		objs.add((E)s.get(arg0, pKey));
-    	}
-//        Criteria c = s.createCriteria(arg0);
-//        c.add(Restrictions.in("personId", arg1));
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), arg0);
         
-        return  objs;
+        String id = entityMetadata.getIdColumn().getField().getName();
+//    	for(String pKey : arg1)
+//    	{
+//    		objs.add((E)s.get(arg0, pKey));
+//    	}
+        Criteria c = s.createCriteria(arg0);
+        c.add(Restrictions.in(id, arg1));
+        
+        return  c.list();
     }
 
     /* (non-Javadoc)
@@ -277,7 +281,7 @@ public class HibernateClient implements Client
     public Object find(Class<?> clazz, EntityMetadata metadata, String rowId)
     {
         // TODO Auto-generated method stub
-        Session s = getSessionInstance();
+        Session s = sf.openSession();
         s.beginTransaction();
         return s.get(clazz, rowId);
 //        return null;
