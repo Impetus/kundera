@@ -36,7 +36,7 @@ This release includes bug fixes, performance improvements and the following new 
 
 * Cross-datastore persistence.
 * Support for relational databases.
-* Moved out solandra with lucene.
+* Moved out solandra and replaced with lucene.
 
 #### 08-Aug-2011 - Kundera 2.0.3 released
 This release includes bug fixes and the following new features compared to version 2.0.2:
