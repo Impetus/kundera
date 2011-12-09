@@ -486,7 +486,6 @@ public class PelopsClient implements Client
         {
             for (SuperColumn sc : thriftSuperColumns)
             {
-                System.out.println(Bytes.toUTF8(sc.getColumns().get(0).getValue()));
                 mutator.writeSubColumns(metadata.getTableName(), tf.getId(), Bytes.toUTF8(sc.getName()),
                         sc.getColumns());
 

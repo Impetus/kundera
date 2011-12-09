@@ -89,6 +89,6 @@ public class MongoDBClientFactory extends GenericClientFactory
     @Override
     public void unload(String... persistenceUnits)
     {
-        // TODO Remove connection pool
+    	indexManager.close();
     }
 }

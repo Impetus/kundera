@@ -254,7 +254,8 @@ public class PersistenceDelegator
     public <E> List<E> find(Class<E> entityClass, Object... primaryKeys)
     {
         List<E> entities = new ArrayList<E>();
-        for (Object primaryKey : primaryKeys)
+        Set pKeys = new  HashSet(Arrays.asList(primaryKeys));
+        for (Object primaryKey : pKeys)
         {
             entities.add(find(entityClass, primaryKey));
         }
@@ -385,8 +386,11 @@ public class PersistenceDelegator
             EntityMetadata metadata = getMetadata(e.getClass());
             getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
             EntityInterceptor interceptor = new EntityInterceptor();
-            EntitySaveGraph objectGraph = interceptor.handleRelation(e, metadata);
+            List<EntitySaveGraph> objectGraphs = interceptor.handleRelation(e, metadata);
+            for(EntitySaveGraph objectGraph : objectGraphs)
+        {
             saveGraph(objectGraph);
+        }
             getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
             log.debug("Data persisted successfully for entity : " + e.getClass());
         }
@@ -434,13 +438,15 @@ public class PersistenceDelegator
             EntityInterceptor interceptor = new EntityInterceptor();
             // Collections.addAll(arg0, arg1)
 
-            EntitySaveGraph objectGraph = interceptor.handleRelation(entity, getMetadata(entity.getClass()));
-            
-            //Compute object graph if there is any association.
-            if(objectGraph.getProperty() != null)
-            {
-                onComputeGraph(entity, objectGraph, client, primaryKey.toString(), entityClass);
-            }
+            List<EntitySaveGraph> objectGraphs = interceptor.handleRelation(entity, getMetadata(entity.getClass()));
+			for (EntitySaveGraph objectGraph : objectGraphs) 
+			{
+				// Compute object graph if there is any association.
+				if (objectGraph.getProperty() != null) {
+					onComputeGraph(entity, objectGraph, client,
+							primaryKey.toString(), entityClass);
+				}
+			}
             boolean isCacheableToL2 = entityMetadata.isCacheable();
             getSession().store(primaryKey, entity, isCacheableToL2);
             return (E) entity;
@@ -596,10 +602,13 @@ public class PersistenceDelegator
     
     private Set<?>  onReflect(Object entity, Field f, List<?> childs) throws PropertyAccessException
     {
-        Set<?> chids;
+        Set chids = new HashSet();
+        if(childs != null)
+        {
         chids = new HashSet(childs);
         PropertyAccessorHelper.set(entity, f, PropertyAccessorHelper.isCollection(f.getType()) ? getFieldInstance(childs, f)
                 : childs.get(0));
+        }
         return chids; 
     }
     
@@ -618,13 +627,13 @@ public class PersistenceDelegator
         {
             IndexManager ixManager = client.getIndexManager();
             Map<String, String> results = fetchRelation ? ixManager.fetchRelation(query) : ixManager.search(query);
-            System.out.println(results);
+//            System.out.println(results);
             Set<String> rsSet = new HashSet<String>(results.values());
             if(biDirectional)
             {
                 rsSet.remove(rowId);
             }
-            return (List<Object>) client.find(clazz, rsSet.toArray(new String[] {}));
+            return rsSet.isEmpty()? null:(List<Object>) client.find(clazz, rsSet.toArray(new String[] {}));
         }
         catch (Exception e)
         {
@@ -770,6 +779,8 @@ public class PersistenceDelegator
     private void saveGraph(EntitySaveGraph objectGraph)
     {
         Object parentEntity = objectGraph.getParentEntity();
+        if(parentEntity != null)
+        {
         EntityMetadata metadata = getMetadata(objectGraph.getParentClass());
         objectGraph.setParentId(getId(parentEntity, metadata));
 
@@ -779,6 +790,7 @@ public class PersistenceDelegator
             pClient.persist(objectGraph, metadata);
             session.store(objectGraph.getParentId(), objectGraph.getParentEntity());
 
+        }
         }
         Object childEntity = objectGraph.getChildEntity();
         

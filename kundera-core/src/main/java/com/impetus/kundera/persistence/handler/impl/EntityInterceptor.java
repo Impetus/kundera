@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence.handler.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -38,8 +39,9 @@ public final class EntityInterceptor
      * @param metadata source entity meta data.
      * @return the entity save graph
      */
-    public EntitySaveGraph handleRelation(Object entity, EntityMetadata metadata)
+    public List<EntitySaveGraph> handleRelation(Object entity, EntityMetadata metadata)
     {
+    	List<EntitySaveGraph> objectGraphs = new ArrayList<EntitySaveGraph>();
         List<Relation> relations = metadata.getRelations();
         Object rlEntity = null;
         EntitySaveGraph objectGraph = new EntitySaveGraph();
@@ -64,6 +66,7 @@ public final class EntityInterceptor
             MappingHandler handler = getHandlerInstance(relationType);
 
             objectGraph = handler.handleAssociation(entity, rlEntity, metadata, relation);
+            objectGraphs.add(objectGraph);
             
             //object graph 
             //If it is unidirectional, then detach child from parent.
@@ -79,7 +82,7 @@ public final class EntityInterceptor
 
         }
         
-        return objectGraph;
+        return objectGraphs;
         // At the end of for loop, there is a list of objects to be persisted
         // sequentially.
     }
