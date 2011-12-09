@@ -276,7 +276,7 @@ public abstract class DocumentIndexer implements Indexer
     {
         try
         {
-            String value = (String)PropertyAccessorHelper.getObject(object, field);
+            String value = PropertyAccessorHelper.getObject(object, field).toString();
             if (value != null)
             {
                 Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), value,Field.Store.YES,Field.Index.ANALYZED_NO_NORMS);

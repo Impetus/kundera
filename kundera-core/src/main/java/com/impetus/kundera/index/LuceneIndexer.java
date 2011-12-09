@@ -70,7 +70,7 @@ public class LuceneIndexer extends DocumentIndexer
 
     private static Directory index;
 
-    private boolean isInitialized;
+    private static boolean isInitialized;
 
     private static LuceneIndexer indexer;
     
@@ -148,6 +148,7 @@ public class LuceneIndexer extends DocumentIndexer
     {
         if (reader == null)
         {
+            flushInternal();
             try
             {
                 if (!isInitialized)
@@ -333,6 +334,27 @@ public class LuceneIndexer extends DocumentIndexer
         }
     }
 
+    private void flushInternal()
+    {
+        try
+        {
+        if(w != null && readyForCommit)
+        {
+            w.commit();
+            index.copy(index, FSDirectory.open(getIndexDirectory()), false);
+            readyForCommit=false;
+        }
+        }
+
+        catch (CorruptIndexException e)
+        {
+            log.error("Error while indexing document " + " into Lucene. Details:" + e.getMessage());
+        }
+        catch (IOException e)
+        {
+            log.error("Error while indexing document  into Lucene. Details:" + e.getMessage());
+        }
+    }
     /**
      * Close of transaction.
      */
@@ -342,6 +364,7 @@ public class LuceneIndexer extends DocumentIndexer
         {
             if (w != null && readyForCommit)
             {
+                w.commit();
                 index.copy(index, FSDirectory.open(getIndexDirectory()), false);
             }
         }
@@ -359,25 +382,25 @@ public class LuceneIndexer extends DocumentIndexer
     @Override
     public void flush()
     {
-        try
-        {
+//        try
+//        {
             if (w != null)
             {
 
-                w.commit();
+//                w.commit();
                 // w.close();
                 // index.copy(index, FSDirectory.open(getIndexDirectory()),
                 // false);
             }
-        }
-        catch (CorruptIndexException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+//        }
+//        catch (CorruptIndexException e)
+//        {
+//            e.printStackTrace();
+//        }
+//        catch (IOException e)
+//        {
+//            e.printStackTrace();
+//        }
 
     }
 
@@ -522,20 +545,20 @@ public class LuceneIndexer extends DocumentIndexer
         // TODO: Sadly this required to keep lucene happy, in case of indexing
         // and searching with same entityManager.
         // Other alternative would be to issue flush on each search
-        try
-        {
-            w.commit();
+//        try
+//        {
+//            w.commit();
             isInitialized = true;
             readyForCommit = true;
-        }
-        catch (CorruptIndexException e)
-        {
-            throw new IndexingException(e.getMessage());
-        }
-        catch (IOException e)
-        {
-            throw new IndexingException(e.getMessage());
-        }
+//        }
+//        catch (CorruptIndexException e)
+//        {
+//            throw new IndexingException(e.getMessage());
+//        }
+//        catch (IOException e)
+//        {
+//            throw new IndexingException(e.getMessage());
+//        }
     }
 
 }
