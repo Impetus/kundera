@@ -353,7 +353,7 @@ public class PelopsClient implements Client
         try
         {
             PelopsDataHandler.ThriftRow tf = populateTfRow(childEntity, id, metadata);
-            addRelation(entitySaveGraph, rlName, rlValue, tf);
+            addRelation(entitySaveGraph, metadata, rlName, rlValue, tf);
             onPersist(metadata, childEntity, tf);
             onIndex(childEntity, entitySaveGraph, metadata, rlValue);
         }
@@ -394,13 +394,23 @@ public class PelopsClient implements Client
      * @param tf the tf
      * @throws PropertyAccessException the property access exception
      */
-    private void addRelation(EntitySaveGraph entitySaveGraph, String rlName, String rlValue,
+    private void addRelation(EntitySaveGraph entitySaveGraph, EntityMetadata m, String rlName, String rlValue,
             PelopsDataHandler.ThriftRow tf) throws PropertyAccessException
     {
         if (!entitySaveGraph.isSharedPrimaryKey())
         {
-            Column col = populateFkey(rlName, rlValue, timestamp);
-            tf.addColumn(col);
+            if(m.getEmbeddedColumnsAsList().isEmpty()) {
+            	Column col = populateFkey(rlName, rlValue, timestamp);
+                tf.addColumn(col);
+            } else {
+            	SuperColumn superColumn = new SuperColumn();
+            	superColumn.setName(rlName.getBytes());
+            	Column column = populateFkey(rlName, rlValue, timestamp);
+            	superColumn.addToColumns(column);
+            	tf.addSuperColumn(superColumn);
+            }
+        	
+        	
         }
     }
 

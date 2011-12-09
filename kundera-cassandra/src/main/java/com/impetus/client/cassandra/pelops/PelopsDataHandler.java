@@ -306,72 +306,37 @@ public class PelopsDataHandler extends DataHandler
             }
             else
             {
-                /*
-                 * Check whether this super column represents a foreign key
-                 * list, if yes, set foreign key set in enhanced entity along
-                 * with entity object, Otherwise, Just set entity object.
-                 */
-                boolean intoRelations = false;
-                if (scName.equals(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME))
-                {
-                    intoRelations = true;
-                }
+				// For embedded super columns, create embedded entities and
+				// add them to parent entity
+				Field superColumnField = superColumnNameToFieldMap.get(scName);
+				if (superColumnField != null) {
+					Class superColumnClass = superColumnField.getType();
+					Object superColumnObj = superColumnClass.newInstance();
 
-                // For relations, fetch foreign keys from foreign key super
-                // column and populate related entities into parent entity
-                if (intoRelations)
-                {
+					for (Column column : sc.getColumns()) {
+						String name = PropertyAccessorFactory.STRING
+								.fromBytes(column.getName());
+						byte[] value = column.getValue();
 
-                    for (Column column : sc.getColumns())
-                    {
-                        String columnName = PropertyAccessorFactory.STRING.fromBytes(column.getName());
-                        byte[] columnValue = column.getValue();
+						Field columnField = columnNameToFieldMap.get(name);
+						try {
+							PropertyAccessorHelper.set(superColumnObj,
+									columnField, value);
+						} catch (PropertyAccessException e) {
+							// This is an entity column to be retrieved in a
+							// super column family. It's stored as a super
+							// column that would
+							// have just one column with the same name
+							log.debug(e.getMessage()
+									+ ". Possible case of entity column in a super column family. Will be treated as a super column.");
+							superColumnObj = Bytes.toUTF8(value);
+						}
+					}
+					PropertyAccessorHelper.set(entity, superColumnField,
+							superColumnObj);
+				}
 
-                        if (columnValue == null)
-                        {
-                            continue;
-                        }
-                        else
-                        {
-
-                            // Set of all foreign keys for this field
-                            Set<String> foreignKeys = MetadataUtils.deserializeKeys(PropertyAccessorFactory.STRING
-                                    .fromBytes(columnValue));
-
-                            Relation relation = m.getRelation(columnName);
-                            Field foreignKeyField = relation.getProperty();
-                            foreignKeysMap.put(foreignKeyField.getName(), foreignKeys);
-
-                        }
-                    }
-                }
-                else
-                {
-                    // For embedded super columns, create embedded entities and
-                    // add them to parent entity
-                    Field superColumnField = superColumnNameToFieldMap.get(scName);
-                    Class superColumnClass = superColumnField.getType();
-                    Object superColumnObj = superColumnClass.newInstance();
-
-                    for (Column column : sc.getColumns())
-                    {
-                        String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
-                        byte[] value = column.getValue();
-
-                        Field columnField = columnNameToFieldMap.get(name);
-                        try {
-PropertyAccessorHelper.set(superColumnObj, columnField, value);
-} catch (PropertyAccessException e) {
-//This is an entity column to be retrieved in a super column family. It's stored as a super column that would
-                // have just one column with the same name
-                log.debug(e.getMessage() + ". Possible case of entity column in a super column family. Will be treated as a super column.");
-                superColumnObj = Bytes.toUTF8(value);
-}
-                    }
-                    PropertyAccessorHelper.set(entity, superColumnField, superColumnObj);
-
-                }
-            }
+			}
 
         }
 
@@ -484,8 +449,11 @@ PropertyAccessorHelper.set(superColumnObj, columnField, value);
         // Add super columns to thrift row
         addSuperColumnsToThriftRow(timestamp, client, tr, m, e, id);
 
-        // Add columns to thrift row
-        addColumnsToThriftRow(timestamp, tr, m, e);
+        // Add columns to thrift row, only if there is no super column
+        if(m.getEmbeddedColumnsAsList().isEmpty()) {
+        	addColumnsToThriftRow(timestamp, tr, m, e);
+        }
+        
 
         // Add relations entities as Foreign keys to a new super column created
         // internally
