@@ -31,7 +31,7 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
-#### 08-Aug-2011 - Kundera 2.0.4 released
+#### 09-Dec-2011 - Kundera 2.0.4 released
 This release includes bug fixes, performance improvements and the following new features compared to version 2.0.3:
 
 * Cross-datastore persistence.
