@@ -2,7 +2,7 @@ Overview
 =========
 The idea behind Kundera is to make working with NoSQL Databases drop-dead simple and fun. Kundera is being developed with following objectives:
 
-*  To make working with NoSQL as simple as working with SQL
+* To make working with NoSQL as simple as working with SQL
 *	To serve as JPA Compliant mapping solution for NoSQL Datastores.
 *	To help developers, forget the complexity of NoSQL stores and focus on Domain Model.
 *	To make switching across data-stores as easy as changing a configuration.
@@ -13,12 +13,13 @@ The idea behind Kundera is to make working with NoSQL Databases drop-dead simple
 
 Up and running in 5 minutes
 ============================
-If you have worked upon Hibernate or any JPA Compliant ORM Solution, then the whole process, right from learning to coming up with first sample implementation will not take more than 5 minutes. Please follow wiki pages in following sequence:
+If you have worked upon Hibernate or any JPA Compliant ORM Solution, then the whole process, right from learning to coming up with first sample implementation will not take more than 5 minutes. Please follow below steps from [this link] (https://github.com/impetus-opensource/Kundera/wiki/Getting-Started-in-5-minutes "Getting started in 5 minutes"):
 
-+	Get Kundera
-+	Go through the Basic Concepts
-+	Go through the Examples, Download And Play !!!
-
++	Set up Cassandra server.
++	Download and include Kundera Jar
++ Write persistence.xml file
++ Write Entity class
++	Moment of Truth!
 
 
 Currently Supported Datasources
@@ -26,9 +27,16 @@ Currently Supported Datasources
 *	Cassandra
 *	MongoDB
 *	HBase
+* Relational databases
 
 Recent Releases
 ================================
+#### 08-Aug-2011 - Kundera 2.0.4 released
+This release includes bug fixes, performance improvements and the following new features compared to version 2.0.3:
+
+* Cross-datastore persistence.
+* Support for relational databases.
+* Moved out solandra with lucene.
 
 #### 08-Aug-2011 - Kundera 2.0.3 released
 This release includes bug fixes and the following new features compared to version 2.0.2:
