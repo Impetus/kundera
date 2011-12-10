@@ -47,7 +47,13 @@ public final class EntityInterceptor
         EntitySaveGraph objectGraph = new EntitySaveGraph();
         objectGraph.setParentEntity(entity);
 
-        // TODO : Need to find a way for recursive calls and by-pass in case parent and child belongs to same Store! 
+        // TODO : Need to find a way for recursive calls and by-pass in case parent and child belongs to same Store!
+        
+        if(relations.isEmpty())
+        {
+            objectGraphs.add(objectGraph);
+            return objectGraphs;
+        }
         
         for (Relation relation : relations)
         {
