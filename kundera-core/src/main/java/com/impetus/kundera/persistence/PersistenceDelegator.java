@@ -348,12 +348,12 @@ public class PersistenceDelegator
             
             EntityInterceptor interceptor = new EntityInterceptor();
             List<EntitySaveGraph> objectGraphs = interceptor.handleRelation(e, metadata);
-            for(EntitySaveGraph objectGraph : objectGraphs)
-        {
-            removeGraph(objectGraph);
-            // If cascade delete then delete parent and child. Else delete marked entity only. 
-            // If parent entity is marked for delete 
-        }
+			for (EntitySaveGraph objectGraph : objectGraphs) {
+				removeGraph(objectGraph);
+				// If cascade delete then delete parent and child. Else delete
+				// marked entity only.
+				// If parent entity is marked for delete
+			}
             getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
             log.debug("Data persisted successfully for entity : " + e.getClass());
         }
