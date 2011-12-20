@@ -242,25 +242,43 @@ public class PelopsClient implements Client
         throw new NotImplementedException("Not yet implemented");
     }
 
+//    /* (non-Javadoc)
+//     * @see com.impetus.kundera.client.Client#delete(com.impetus.kundera.proxy.EnhancedEntity)
+//     */
+////    @Override
+//    public final void delete(EnhancedEntity enhancedEntity) throws Exception
+//    {
+//
+//        if (!isOpen())
+//        {
+//            throw new PersistenceException("PelopsClient is closed.");
+//        }
+//
+//        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
+//                .getEntity().getClass());
+//
+//        RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
+//        rowDeletor.deleteRow(entityMetadata.getTableName(), enhancedEntity.getId(), ConsistencyLevel.ONE);
+//        getIndexManager().remove(entityMetadata, enhancedEntity.getEntity(), enhancedEntity.getId());
+//    }
+//    
+
     /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#delete(com.impetus.kundera.proxy.EnhancedEntity)
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object, java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
-    public final void delete(EnhancedEntity enhancedEntity) throws Exception
+    public void delete(Object entity, Object pKey, EntityMetadata metadata) throws Exception
     {
-
         if (!isOpen())
         {
             throw new PersistenceException("PelopsClient is closed.");
         }
-
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
-                .getEntity().getClass());
-
+        
         RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        rowDeletor.deleteRow(entityMetadata.getTableName(), enhancedEntity.getId(), ConsistencyLevel.ONE);
-        getIndexManager().remove(entityMetadata, enhancedEntity.getEntity(), enhancedEntity.getId());
+        rowDeletor.deleteRow(metadata.getTableName(), pKey.toString(), ConsistencyLevel.ONE);
+        getIndexManager().remove(metadata, entity, pKey.toString());
     }
+
 
     /* (non-Javadoc)
      * @see com.impetus.kundera.client.Client#getIndexManager()

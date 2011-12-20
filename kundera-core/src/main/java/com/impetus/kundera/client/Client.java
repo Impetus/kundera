@@ -39,6 +39,7 @@ public interface Client
      * @param e Ehanced Entity
      * @throws Exception the exception
      */
+    @Deprecated
     void persist(EnhancedEntity e) throws Exception;
 
     /**
@@ -91,13 +92,15 @@ public interface Client
      */
     void close();
 
+
     /**
-     * Delete a row from either column-family or super-column-family.
-     *
-     * @param enhancedEntity the enhanced entity
-     * @throws Exception the exception
+     * 
+     * @param entity
+     * @param pKey
+     * @param metadata
+     * @throws Exception
      */
-    void delete(EnhancedEntity enhancedEntity) throws Exception;
+    void delete(Object entity, Object pKey, EntityMetadata metadata) throws Exception;
 
     /**
      * Gets the persistence unit.

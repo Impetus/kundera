@@ -160,13 +160,13 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     }
 
-    @Override
+/*    @Override
     public void delete(EnhancedEntity enhancedEntity) throws Exception
     {
         throw new RuntimeException("TODO:not yet supported");
 
     }
-
+*/
     @Override
     public final IndexManager getIndexManager()
     {
@@ -288,4 +288,16 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         }
         return enhancedEntity;
     }
-   }
+
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object, java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
+     */
+    @Override
+    public void delete(Object entity, Object pKey, EntityMetadata metadata) throws Exception
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
+}

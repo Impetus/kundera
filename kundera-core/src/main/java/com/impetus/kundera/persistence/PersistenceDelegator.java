@@ -343,32 +343,110 @@ public class PersistenceDelegator
     {
         try
         {
-            List<EnhancedEntity> reachableEntities = EntityResolver.resolve(e, CascadeType.REMOVE,
-                    getPersistenceUnits());
-
-            // remove each one
-            for (EnhancedEntity enhancedEntity : reachableEntities)
-            {
-                log.debug("Removing Entity : " + enhancedEntity);
-
-                // fire PreRemove events
-                EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(enhancedEntity.getEntity()
-                        .getClass(), getPersistenceUnits());
-                getEventDispatcher().fireEventListeners(entityMetadata, enhancedEntity, PreRemove.class);
-
-                session.remove(enhancedEntity.getEntity().getClass(), enhancedEntity.getId());
-
-                getClient(entityMetadata).delete(enhancedEntity);
-
-                // fire PostRemove events
-                getEventDispatcher().fireEventListeners(
-                        KunderaMetadataManager.getEntityMetadata(enhancedEntity.getEntity().getClass(),
-                                getPersistenceUnits()), enhancedEntity, PostRemove.class);
-            }
+            EntityMetadata metadata = getMetadata(e.getClass());
+            getEventDispatcher().fireEventListeners(metadata, e, PreRemove.class);
+            
+            EntityInterceptor interceptor = new EntityInterceptor();
+            List<EntitySaveGraph> objectGraphs = interceptor.handleRelation(e, metadata);
+            for(EntitySaveGraph objectGraph : objectGraphs)
+        {
+            removeGraph(objectGraph);
+            // If cascade delete then delete parent and child. Else delete marked entity only. 
+            // If parent entity is marked for delete 
         }
+            getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
+            log.debug("Data persisted successfully for entity : " + e.getClass());
+        }
+    
         catch (Exception exp)
         {
             throw new PersistenceException(exp);
+        }
+    }
+
+    /**
+     * Save graph.
+     * 
+     * @param objectGraph
+     *            the object graph
+     * @throws Exception 
+     */
+    private void removeGraph(EntitySaveGraph objectGraph) throws Exception
+    {
+        EntityMetadata metadata = null;
+        Object parentEntity = objectGraph.getParentEntity();
+        if(parentEntity != null)
+        {
+            metadata = getMetadata(objectGraph.getParentClass());
+            objectGraph.setParentId(getId(parentEntity, metadata));
+        }
+        
+        if (getSession().lookup(parentEntity.getClass(), objectGraph.getParentId()) != null)
+        {
+            Client pClient = getClient(metadata);
+            pClient.persist(objectGraph, metadata);
+            
+            Object childEntity = objectGraph.getChildEntity();
+            
+            //If any association exists.
+            if(childEntity != null)
+            {
+                onClientHandle(objectGraph, childEntity);
+            }
+
+            session.remove(parentEntity.getClass(), objectGraph.getParentEntity());
+            
+        } else
+        {
+            throw new PersistenceException("invalid operation on detached entity:" + parentEntity.getClass() + " for id :" + objectGraph.getParentId());
+        }
+    }
+
+    /**
+     * On client persist.
+     * 
+     * @param objectGraph
+     *            the object graph
+     * @param childEntity
+     *            the child entity
+     * @throws Exception 
+     */
+    private void onClientHandle(EntitySaveGraph objectGraph, Object childEntity) throws Exception
+    {
+        if (childEntity instanceof Collection<?>)
+        {
+            Collection<?> childCol = (Collection<?>) childEntity;
+            for (Object ch : childCol)
+            {
+                onClientDelete(ch, objectGraph);
+            }
+
+        }
+        else
+        {
+            onClientDelete(childEntity, objectGraph);
+        }
+    }
+
+    /**
+     * Handle client.
+     * 
+     * @param child
+     *            the child
+     * @param objectGraph
+     *            the object graph
+     * @throws Exception 
+     */
+    private void onClientDelete(Object child, EntitySaveGraph objectGraph) throws Exception
+    {
+        EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
+        String id = getId(child, metadata);
+        objectGraph.setChildId(id);
+        if (getSession().lookup(child.getClass(), id) == null)
+        {
+            Client chClient = getClient(metadata);
+            chClient.delete(child, id, metadata);
+            session.store(id, child);
         }
     }
 
@@ -797,7 +875,7 @@ public class PersistenceDelegator
         //If any association exists.
         if(childEntity != null)
         {
-            onClientPersist(objectGraph, childEntity);
+            onClient(objectGraph, childEntity);
         }
     }
 
@@ -809,20 +887,20 @@ public class PersistenceDelegator
      * @param childEntity
      *            the child entity
      */
-    private void onClientPersist(EntitySaveGraph objectGraph, Object childEntity)
+    private void onClient(EntitySaveGraph objectGraph, Object childEntity)
     {
         if (childEntity instanceof Collection<?>)
         {
             Collection<?> childCol = (Collection<?>) childEntity;
             for (Object ch : childCol)
             {
-                handleClient(ch, objectGraph);
+                onClientPersist(ch, objectGraph);
             }
 
         }
         else
         {
-            handleClient(childEntity, objectGraph);
+            onClientPersist(childEntity, objectGraph);
         }
     }
 
@@ -834,7 +912,7 @@ public class PersistenceDelegator
      * @param objectGraph
      *            the object graph
      */
-    private void handleClient(Object child, EntitySaveGraph objectGraph)
+    private void onClientPersist(Object child, EntitySaveGraph objectGraph)
     {
         EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
         String id = getId(child, metadata);
