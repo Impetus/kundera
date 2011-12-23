@@ -383,22 +383,22 @@ public class MongoDBClient implements Client
 
         // Find the DBObject to remove first
         BasicDBObject query = new BasicDBObject();
-        query.put(entityMetadata.getSchema(), pKey.toString());
+        query.put(entityMetadata.getIdColumn().getName(), pKey.toString());
 
-        DBCursor cursor = dbCollection.find(query);
-        DBObject documentToRemove = null;
+        /*DBCursor cursor = */dbCollection.remove(query);
+//        DBObject documentToRemove = null;
+//
+//        if (cursor.hasNext())
+//        {
+//            documentToRemove = cursor.next();
+//        }
+//        else
+//        {
+//            throw new PersistenceException("Can't remove Row# " + pKey.toString() + " for "
+//                    + entityMetadata.getTableName() + " because record doesn't exist.");
+//        }
 
-        if (cursor.hasNext())
-        {
-            documentToRemove = cursor.next();
-        }
-        else
-        {
-            throw new PersistenceException("Can't remove Row# " + pKey.toString() + " for "
-                    + entityMetadata.getTableName() + " because record doesn't exist.");
-        }
-
-        dbCollection.remove(documentToRemove);
+//        dbCollection.remove(documentToRemove);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
         
     }

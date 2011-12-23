@@ -381,10 +381,10 @@ public class PersistenceDelegator
             objectGraph.setParentId(getId(parentEntity, metadata));
         }
         
-        if (getSession().lookup(parentEntity.getClass(), objectGraph.getParentId()) != null)
-        {
+//        if (getSession().lookup(parentEntity.getClass(), objectGraph.getParentId()) != null)
+//        {
             Client pClient = getClient(metadata);
-            pClient.persist(objectGraph, metadata);
+            pClient.delete(parentEntity, objectGraph.getParentId(), metadata);
             
             Object childEntity = objectGraph.getChildEntity();
             
@@ -396,10 +396,10 @@ public class PersistenceDelegator
 
             session.remove(parentEntity.getClass(), objectGraph.getParentEntity());
             
-        } else
-        {
-            throw new PersistenceException("invalid operation on detached entity:" + parentEntity.getClass() + " for id :" + objectGraph.getParentId());
-        }
+//        } else
+//        {
+////            throw new PersistenceException("invalid operation on detached entity:" + parentEntity.getClass() + " for id :" + objectGraph.getParentId());
+//        }
     }
 
     /**
@@ -442,12 +442,12 @@ public class PersistenceDelegator
         EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
         String id = getId(child, metadata);
         objectGraph.setChildId(id);
-        if (getSession().lookup(child.getClass(), id) == null)
-        {
+//        if (getSession().lookup(child.getClass(), id) == null)
+//        {
             Client chClient = getClient(metadata);
             chClient.delete(child, id, metadata);
-            session.store(id, child);
-        }
+//            session.store(id, child);
+//        }
     }
 
     /**
@@ -684,6 +684,8 @@ public class PersistenceDelegator
         if(childs != null)
         {
         chids = new HashSet(childs);
+        //TODO: need to store object in sesion.
+//        getSession().store(id, entity)
         PropertyAccessorHelper.set(entity, f, PropertyAccessorHelper.isCollection(f.getType()) ? getFieldInstance(childs, f)
                 : childs.get(0));
         }
