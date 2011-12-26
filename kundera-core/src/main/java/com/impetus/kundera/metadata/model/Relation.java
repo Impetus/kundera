@@ -37,10 +37,16 @@ public final class Relation
     private Relation.ForeignKey type;
     
     /** Join column name for this relationship */
-    private String joinColumnName;
+    private String joinColumnName;     
     
     /** Whether this relationship is through a Join Table */
     private boolean isRelatedViaJoinTable;
+    
+    /** Metadata for JoinTable, applicable only if isRelatedViaJoinTable==true */
+    private JoinTableMetadata joinTableMetadata; 
+    
+    /** Whether this relationship is joined by primary key, only applicable for OneToOne*/
+    private boolean isJoinedByPrimaryKey;
 
     /**
      * 
@@ -204,6 +210,34 @@ public final class Relation
 	 */
 	public void setRelatedViaJoinTable(boolean isRelatedViaJoinTable) {
 		this.isRelatedViaJoinTable = isRelatedViaJoinTable;
+	}
+	
+	/**
+	 * @return the joinTableMetadata
+	 */
+	public JoinTableMetadata getJoinTableMetadata() {
+		return joinTableMetadata;
+	}
+
+	/**
+	 * @param joinTableMetadata the joinTableMetadata to set
+	 */
+	public void setJoinTableMetadata(JoinTableMetadata joinTableMetadata) {
+		this.joinTableMetadata = joinTableMetadata;
+	}	
+
+	/**
+	 * @return the isJoinedByPrimaryKey
+	 */
+	public boolean isJoinedByPrimaryKey() {
+		return isJoinedByPrimaryKey;
+	}
+
+	/**
+	 * @param isJoinedByPrimaryKey the isJoinedByPrimaryKey to set
+	 */
+	public void setJoinedByPrimaryKey(boolean isJoinedByPrimaryKey) {
+		this.isJoinedByPrimaryKey = isJoinedByPrimaryKey;
 	}
 
 	/**
