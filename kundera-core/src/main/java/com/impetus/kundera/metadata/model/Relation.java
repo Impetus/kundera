@@ -35,6 +35,12 @@ public final class Relation
 
     /** The type. */
     private Relation.ForeignKey type;
+    
+    /** Join column name for this relationship */
+    private String joinColumnName;
+    
+    /** Whether this relationship is through a Join Table */
+    private boolean isRelatedViaJoinTable;
 
     /**
      * 
@@ -169,9 +175,38 @@ public final class Relation
     public Relation.ForeignKey getType()
     {
         return type;
-    }
+    }   
+    
 
     /**
+	 * @return the joinColumnName
+	 */
+	public String getJoinColumnName() {
+		return joinColumnName;
+	}
+
+	/**
+	 * @param joinColumnName the joinColumnName to set
+	 */
+	public void setJoinColumnName(String joinColumnName) {
+		this.joinColumnName = joinColumnName;
+	}
+
+	/**
+	 * @return the isRelatedViaJoinTable
+	 */
+	public boolean isRelatedViaJoinTable() {
+		return isRelatedViaJoinTable;
+	}
+
+	/**
+	 * @param isRelatedViaJoinTable the isRelatedViaJoinTable to set
+	 */
+	public void setRelatedViaJoinTable(boolean isRelatedViaJoinTable) {
+		this.isRelatedViaJoinTable = isRelatedViaJoinTable;
+	}
+
+	/**
      * Checks if is unary.
      * 
      * @return true, if is unary
