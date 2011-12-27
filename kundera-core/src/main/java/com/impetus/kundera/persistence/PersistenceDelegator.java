@@ -465,11 +465,12 @@ public class PersistenceDelegator
             getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
             EntityInterceptor interceptor = new EntityInterceptor();
             List<EntitySaveGraph> objectGraphs = interceptor.handleRelation(e, metadata);
-            for(EntitySaveGraph objectGraph : objectGraphs)
-        {
-            saveGraph(objectGraph);
-        }
-            getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
+            
+			for (EntitySaveGraph objectGraph : objectGraphs) {
+				saveGraph(objectGraph);
+			}
+			getEventDispatcher().fireEventListeners(metadata, e,
+					PostPersist.class);
             log.debug("Data persisted successfully for entity : " + e.getClass());
         }
         catch (Exception exp)

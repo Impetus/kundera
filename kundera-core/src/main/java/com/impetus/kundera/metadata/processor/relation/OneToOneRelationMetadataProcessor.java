@@ -28,12 +28,16 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
+import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 
 /**
  * @author Amresh Singh
  */
 public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProcessor implements RelationMetadataProcessor {
 
+	public OneToOneRelationMetadataProcessor() {
+		validator = new EntityValidatorImpl();
+	}
 
 	@Override
 	public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata) {
@@ -50,9 +54,9 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
         boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
         boolean isJoinedByTable = relationField.isAnnotationPresent(JoinTable.class);
         
-        if(!isJoinedByPK && !isJoinedByFK) {                	
+        /*if(!isJoinedByPK && !isJoinedByFK) {                	
         	throw new PersistenceException("A one-to-one relationship must have either JoinColumn or PrimaryKeyJoinColumn annotation");
-        }      
+        } */     
         
 
         Relation relation = new Relation(relationField, targetEntity, null, oneToOneAnn.fetch(), Arrays.asList(oneToOneAnn

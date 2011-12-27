@@ -26,13 +26,17 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
+import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 
 /**
  * @author Amresh Singh
  */
 public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProcessor implements RelationMetadataProcessor {
 
-
+	public ManyToOneRelationMetadataProcessor() {
+		validator = new EntityValidatorImpl();
+	}
+	
 	@Override
 	public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata) {
 		// taking field's type as foreign entity, ignoring  "targetEntity"

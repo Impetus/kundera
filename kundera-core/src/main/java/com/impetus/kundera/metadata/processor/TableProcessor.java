@@ -293,7 +293,11 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 		try {
 
 			relProcessor = RelationMetadataProcessorFactory.getRelationMetadataProcessor(relationField);
-			relProcessor.addRelationIntoMetadata(relationField, metadata);		
+			
+			if(relProcessor != null) {
+				relProcessor.addRelationIntoMetadata(relationField, metadata);
+			}
+					
 			
 		} catch (PersistenceException pe) {
 			throw new PersistenceException(

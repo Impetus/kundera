@@ -26,12 +26,17 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
+import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * @author Amresh Singh
  */
 public class OneToManyRelationMetadataProcessor extends AbstractEntityFieldProcessor implements RelationMetadataProcessor {
+	
+	public OneToManyRelationMetadataProcessor() {
+		validator = new EntityValidatorImpl();
+	}
 	
 	@Override
 	public void process(Class<?> clazz, EntityMetadata metadata) {

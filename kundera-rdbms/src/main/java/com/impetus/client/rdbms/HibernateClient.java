@@ -284,13 +284,18 @@ public class HibernateClient implements Client
         Transaction tx = s.beginTransaction();
         s.persist(childEntity);
         tx.commit();
-        s = getSessionInstance();
-        tx = s.beginTransaction();
-        String updateSql = "Update " + metadata.getTableName() + " SET " + entitySaveGraph.getfKeyName() + "= '"
-                + entitySaveGraph.getParentId() + "' WHERE " + metadata.getIdColumn().getName() + " = '"
-                + entitySaveGraph.getChildId() + "'";
-        s.createSQLQuery(updateSql).executeUpdate();
-        tx.commit();
+        
+        //Update foreign key value
+        if(entitySaveGraph.getfKeyName() != null) {
+        	s = getSessionInstance();
+            tx = s.beginTransaction();
+            String updateSql = "Update " + metadata.getTableName() + " SET " + entitySaveGraph.getfKeyName() + "= '"
+                    + entitySaveGraph.getParentId() + "' WHERE " + metadata.getIdColumn().getName() + " = '"
+                    + entitySaveGraph.getChildId() + "'";
+            s.createSQLQuery(updateSql).executeUpdate();
+            tx.commit();
+        }        
+        
         onIndex(childEntity, entitySaveGraph, metadata, rlValue);
 
     }

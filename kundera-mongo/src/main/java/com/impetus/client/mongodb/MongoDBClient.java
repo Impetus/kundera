@@ -409,17 +409,7 @@ public class MongoDBClient implements Client
     {
         // TODO Once pool is implemented this code should not be there.
         // Workaround for pool
-
-        if (this.mongoDb != null)
-        {
-            log.info("Closing connection to mongodb.");
-            this.mongoDb.getMongo().close();
-            log.info("Closed connection to mongodb.");
-        }
-        else
-        {
-            log.warn("Can't close connection to MONGODB, it was already disconnected");
-        }
+    	this.indexManager.flush(); 
     }
 
     /**

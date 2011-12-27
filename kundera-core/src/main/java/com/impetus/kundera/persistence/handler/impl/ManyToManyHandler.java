@@ -15,6 +15,11 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence.handler.impl;
 
+import java.lang.reflect.Field;
+
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.handler.api.MappingHandler;
@@ -36,7 +41,30 @@ public class ManyToManyHandler extends AssociationHandler implements MappingHand
         //It is only possible via join table.
         //which means need to populate child entity explicitly.
         
-        return populateDefaultGraph(associationEntity, entity, relation.getProperty());
+    	EntitySaveGraph objectGraph = getDirectionalGraph(entity, associationEntity, relation);
+    	
+    	return objectGraph;
+    }
+    
+    private EntitySaveGraph getDirectionalGraph(Object entity, Object associationEntity, Relation relation)
+    {
+    	 EntitySaveGraph objectGraph = new EntitySaveGraph(relation.getProperty());
+         objectGraph.setChildEntity(associationEntity);
+         objectGraph.setParentEntity(entity);
+         Field field = computeDirection(entity, relation.getProperty(), objectGraph, ManyToMany.class);
+
+         if (!objectGraph.isUniDirectional())
+         {
+             //objectGraph.setfKeyName(getJoinColumnName(field));
+             onDetach(entity, associationEntity, relation.getProperty(), false);
+             // onDetach(associationEntity, entity, field, false);
+             return objectGraph;
+         }
+
+         onDetach(entity, associationEntity, relation.getProperty(), false);
+         // in case of uni-directional.
+         //objectGraph.setfKeyName(getJoinColumnName(relation.getProperty()));
+         return objectGraph;
     }
 
 }
