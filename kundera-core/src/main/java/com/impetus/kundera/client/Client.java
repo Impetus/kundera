@@ -140,7 +140,8 @@ public interface Client
      * @param metadata                     entity meta data
      * @return id                          id of persisted entity.
      */
-    void  persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata);
+    void  persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata); 
+    
     
     
     /**

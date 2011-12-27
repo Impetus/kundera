@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Query;
 
@@ -33,9 +34,12 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
@@ -258,17 +262,21 @@ public class HibernateClient implements Client
     @Override
     public String persist(EntitySaveGraph entityGraph, EntityMetadata metadata)
     {
-        Session s = getSessionInstance();
+   	
+
+    	Session s = getSessionInstance();
         Transaction tx = s.beginTransaction();
         s.persist(entityGraph.getParentEntity());
         tx.commit();
-        getIndexManager().write(metadata, entityGraph.getParentEntity());
+        getIndexManager().write(metadata, entityGraph.getParentEntity());       
 
         return null;
 
     }
+    
+    
 
-    /*
+	/*
      * (non-Javadoc)
      * 
      * @see com.impetus.kundera.client.Client#persist(java.lang.Object,

@@ -48,6 +48,7 @@ import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
@@ -857,27 +858,58 @@ public class PersistenceDelegator
      */
     private void saveGraph(EntitySaveGraph objectGraph)
     {
-        Object parentEntity = objectGraph.getParentEntity();
-        if(parentEntity != null)
-        {
-        EntityMetadata metadata = getMetadata(objectGraph.getParentClass());
-        objectGraph.setParentId(getId(parentEntity, metadata));
+		
+    	//Persist parent entity
+    	Object parentEntity = objectGraph.getParentEntity();
+    	EntityMetadata metadata = getMetadata(objectGraph.getParentClass());
+		if (parentEntity != null) {
+			
+			objectGraph.setParentId(getId(parentEntity, metadata));
 
-        if (getSession().lookup(parentEntity.getClass(), objectGraph.getParentId()) == null)
-        {
-            Client pClient = getClient(metadata);
-            pClient.persist(objectGraph, metadata);
-            session.store(objectGraph.getParentId(), objectGraph.getParentEntity());
+			if (getSession().lookup(parentEntity.getClass(),
+					objectGraph.getParentId()) == null) {
+				Client pClient = getClient(metadata);
+				pClient.persist(objectGraph, metadata);
+				session.store(objectGraph.getParentId(),
+						objectGraph.getParentEntity());
 
+			}
+		}
+		
+		//Persist child entity(ies)
+		Object childEntity = objectGraph.getChildEntity();
+		if (childEntity != null) {
+			persistChildEntity(objectGraph, childEntity);
+		}
+		
+		//Persist Join Table
+		for(Relation relation : metadata.getRelations()) {
+        	if(relation.isRelatedViaJoinTable()) {        		
+        		
+        		JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
+        		String joinTableName = jtMetadata.getJoinTableName();
+        		
+        		Set<String> joinColumns = jtMetadata.getJoinColumns();
+        		Set<String> inverseJoinColumns = jtMetadata.getInverseJoinColumns();
+        		
+        		if(PropertyAccessorHelper.isCollection(objectGraph.getChildClass())) {
+        			Collection coll = (Collection)objectGraph.getChildEntity();
+        			
+        			for(Object child : coll) {
+        				StringBuffer query = new StringBuffer();
+        				query.append("INSERT INTO ").append(joinTableName).append("(").append(joinColumns.toArray()[0]).append(",").append(inverseJoinColumns.toArray()[0]).append(")")
+                		.append(" VALUES(").append(objectGraph.getParentId()).append(",").append(PropertyAccessorHelper.getId(childEntity, KunderaMetadataManager.get)).append(")");
+                		System.out.println(query);
+        			}
+        			
+        			
+        		} else {
+        			
+        		}     		
+        		
+        	}
         }
-        }
-        Object childEntity = objectGraph.getChildEntity();
-        
-        //If any association exists.
-        if(childEntity != null)
-        {
-            onClient(objectGraph, childEntity);
-        }
+
     }
 
     /**
@@ -888,20 +920,20 @@ public class PersistenceDelegator
      * @param childEntity
      *            the child entity
      */
-    private void onClient(EntitySaveGraph objectGraph, Object childEntity)
+    private void persistChildEntity(EntitySaveGraph objectGraph, Object childEntity)
     {
         if (childEntity instanceof Collection<?>)
         {
             Collection<?> childCol = (Collection<?>) childEntity;
             for (Object ch : childCol)
             {
-                onClientPersist(ch, objectGraph);
+                persistOneChildEntity(ch, objectGraph);
             }
 
         }
         else
         {
-            onClientPersist(childEntity, objectGraph);
+            persistOneChildEntity(childEntity, objectGraph);
         }
     }
 
@@ -913,7 +945,7 @@ public class PersistenceDelegator
      * @param objectGraph
      *            the object graph
      */
-    private void onClientPersist(Object child, EntitySaveGraph objectGraph)
+    private void persistOneChildEntity(Object child, EntitySaveGraph objectGraph)
     {
         EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
         String id = getId(child, metadata);
