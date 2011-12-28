@@ -142,6 +142,7 @@ public interface Client
      */
     void  persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata); 
     
+    void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph);
     
     
     /**

@@ -354,7 +354,19 @@ public class PelopsClient implements Client
         return null;
     }
 
-    /*
+    
+    
+    /* (non-Javadoc)
+	 * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+	 */
+	@Override
+	public void persistJoinTable(String joinTableName, String joinColumnName,
+			String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/*
      * (non-Javadoc)
      * 
      * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
@@ -371,7 +383,10 @@ public class PelopsClient implements Client
         try
         {
             PelopsDataHandler.ThriftRow tf = populateTfRow(childEntity, id, metadata);
-            addRelation(entitySaveGraph, metadata, rlName, rlValue, tf);
+            if(rlName != null) {
+            	addRelation(entitySaveGraph, metadata, rlName, rlValue, tf);
+            }
+            
             onPersist(metadata, childEntity, tf);
             onIndex(childEntity, entitySaveGraph, metadata, rlValue);
         }

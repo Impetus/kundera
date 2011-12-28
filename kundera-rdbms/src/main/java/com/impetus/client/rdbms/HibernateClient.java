@@ -24,6 +24,7 @@ import java.util.Set;
 import javax.persistence.Query;
 
 import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -39,6 +40,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
+import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
@@ -274,15 +276,72 @@ public class HibernateClient implements Client
 
     }
     
-    
-
-	/*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
-     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph,
-     * com.impetus.kundera.metadata.model.EntityMetadata, boolean)
+    /**
+     * Inserts records into JoinTable for the given relationship
      */
+	@Override
+	public void persistJoinTable(String joinTableName, String joinColumnName,
+			String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph) {
+		
+		String parentId = objectGraph.getParentId();
+		if(Collection.class.isAssignableFrom(objectGraph.getChildEntity().getClass())) {
+			Collection children = (Collection)objectGraph.getChildEntity();				
+			
+			for(Object child : children) {
+				insertRecordInJoinTable(joinTableName, joinColumnName,
+						inverseJoinColumnName, relMetadata, parentId, child);
+			}		
+			
+		} else {
+			Object child = objectGraph.getChildEntity();
+			insertRecordInJoinTable(joinTableName, joinColumnName,
+					inverseJoinColumnName, relMetadata, parentId, child);
+		}     
+		
+	}
+
+	/**
+	 * @param joinTableName
+	 * @param joinColumnName
+	 * @param inverseJoinColumnName
+	 * @param relMetadata
+	 * @param parentId
+	 * @param child
+	 */
+	private void insertRecordInJoinTable(String joinTableName,
+			String joinColumnName, String inverseJoinColumnName,
+			EntityMetadata relMetadata, String parentId, Object child) {
+		String childId = null;
+		try {
+			childId = PropertyAccessorHelper.getId(child, relMetadata);
+		} catch (PropertyAccessException e) {					
+			e.printStackTrace();
+			return;
+		}
+		
+		StringBuffer query = new StringBuffer();
+		query.append("INSERT INTO ")
+		.append(joinTableName)
+		.append("(")
+		.append(joinColumnName)
+		.append(",")
+		.append(inverseJoinColumnName)
+		.append(")")
+		.append(" VALUES('")
+		.append(parentId)
+		.append("','")
+		.append(childId)
+		.append("')");      		
+		
+		
+		Session s = getSessionInstance();
+		Transaction tx = s.beginTransaction();
+		s.createSQLQuery(query.toString()).executeUpdate();
+		tx.commit();
+		
+	}
+
+
     @Override
     public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
     {
@@ -305,7 +364,6 @@ public class HibernateClient implements Client
         }        
         
         onIndex(childEntity, entitySaveGraph, metadata, rlValue);
-
     }
 
     /**

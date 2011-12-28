@@ -248,9 +248,21 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         onPersist(entityMetadata, childEntity, id, RelationHolder.addRelation(entitySaveGraph, rlName, rlValue));
         onIndex(childEntity, entitySaveGraph, entityMetadata, rlValue);
     }
+    
+    
 
 
-    /**
+    /* (non-Javadoc)
+	 * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+	 */
+	@Override
+	public void persistJoinTable(String joinTableName, String joinColumnName,
+			String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
      * On index.
      *
      * @param childEntity the child entity

@@ -892,20 +892,14 @@ public class PersistenceDelegator
         		Set<String> joinColumns = jtMetadata.getJoinColumns();
         		Set<String> inverseJoinColumns = jtMetadata.getInverseJoinColumns();
         		
-        		if(PropertyAccessorHelper.isCollection(objectGraph.getChildClass())) {
-        			Collection coll = (Collection)objectGraph.getChildEntity();
-        			
-        			for(Object child : coll) {
-        				StringBuffer query = new StringBuffer();
-        				query.append("INSERT INTO ").append(joinTableName).append("(").append(joinColumns.toArray()[0]).append(",").append(inverseJoinColumns.toArray()[0]).append(")")
-                		.append(" VALUES(").append(objectGraph.getParentId()).append(",").append(PropertyAccessorHelper.getId(childEntity, KunderaMetadataManager.get)).append(")");
-                		System.out.println(query);
-        			}
-        			
-        			
-        		} else {
-        			
-        		}     		
+        		String joinColumnName = (String)joinColumns.toArray()[0];
+        		String inverseJoinColumnName = (String)inverseJoinColumns.toArray()[0];
+        		
+        		EntityMetadata relMetadata = getMetadata(objectGraph.getChildClass());        		
+        		
+        		
+        		Client pClient = getClient(metadata);
+        		pClient.persistJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, objectGraph);    				
         		
         	}
         }

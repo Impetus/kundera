@@ -158,7 +158,19 @@ public class MongoDBClient implements Client
 		}
     }
     
-    /**
+    
+    
+    /* (non-Javadoc)
+	 * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+	 */
+	@Override
+	public void persistJoinTable(String joinTableName, String joinColumnName,
+			String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
      * On index.
      *
      * @param childEntity the child entity
@@ -213,7 +225,7 @@ public class MongoDBClient implements Client
 
             BasicDBObject document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(
                     entityMetadata, entity, relations);
-            dbCollection.insert(document);
+            dbCollection.insert(document);            
         }
 	}
 
