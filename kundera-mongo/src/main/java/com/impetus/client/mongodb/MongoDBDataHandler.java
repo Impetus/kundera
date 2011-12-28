@@ -205,8 +205,8 @@ public class MongoDBDataHandler
         List<Column> columns = m.getColumnsAsList();
         BasicDBObject dbObj = new BasicDBObject();
 
-        // Populate Row Key
-        extractEntityField(entity, dbObj, m.getIdColumn());
+        // Populate Row Key        
+        dbObj.put("_id", PropertyAccessorHelper.getId(entity, m));  
 
         // Populate columns
         for (Column column : columns)

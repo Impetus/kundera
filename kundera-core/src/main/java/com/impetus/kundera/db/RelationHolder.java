@@ -62,7 +62,7 @@ public class RelationHolder
          */
         public static List<RelationHolder> addRelation(EntitySaveGraph entitySaveGraph, String rlName, String rlValue)
         {
-            if (!entitySaveGraph.isSharedPrimaryKey())
+            if (rlName != null && !entitySaveGraph.isSharedPrimaryKey())
             {
                 List<RelationHolder> relations = new ArrayList<RelationHolder>();
                 RelationHolder relation = new RelationHolder(rlName, rlValue);

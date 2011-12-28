@@ -18,6 +18,7 @@ package com.impetus.client.cassandra.pelops;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,8 @@ import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Mutator;
 import org.scale7.cassandra.pelops.Pelops;
@@ -44,6 +47,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 
@@ -356,15 +360,62 @@ public class PelopsClient implements Client
 
     
     
-    /* (non-Javadoc)
-	 * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
-	 */
 	@Override
 	public void persistJoinTable(String joinTableName, String joinColumnName,
 			String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph) {
-		// TODO Auto-generated method stub
+		
+		Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
+		
+		String parentId = objectGraph.getParentId();
+		List<Column> columns = new ArrayList<Column>();
+		
+		if(Collection.class.isAssignableFrom(objectGraph.getChildEntity().getClass())) {
+			Collection children = (Collection)objectGraph.getChildEntity();				
+			
+			for(Object child : children) {
+				
+				addColumnsToJoinTable(inverseJoinColumnName, relMetadata,
+						columns, child);
+			}		
+			
+		} else {
+			Object child = objectGraph.getChildEntity();
+			addColumnsToJoinTable(inverseJoinColumnName, relMetadata,
+					columns, child);			
+		}   
+		
+		
+		mutator.writeColumns(joinTableName, new Bytes(objectGraph.getParentId().getBytes()),
+                Arrays.asList(columns.toArray(new Column[0])));
+		mutator.execute(ConsistencyLevel.ONE);		
+	}
+
+	/**
+	 * @param inverseJoinColumnName
+	 * @param relMetadata
+	 * @param columns
+	 * @param child
+	 * @throws PropertyAccessException
+	 */
+	private void addColumnsToJoinTable(String inverseJoinColumnName,
+			EntityMetadata relMetadata, List<Column> columns, Object child)
+			{
+		String childId = null;
+		try {
+			childId = PropertyAccessorHelper.getId(child, relMetadata);
+			Column col = new Column();
+			col.setName(PropertyAccessorFactory.STRING.toBytes(inverseJoinColumnName + "_" + childId));
+			col.setValue(PropertyAccessorFactory.STRING.toBytes(childId));
+			col.setTimestamp(System.currentTimeMillis());
+			columns.add(col);
+		} catch (PropertyAccessException e) {					
+			e.printStackTrace();			
+		}					
 		
 	}
+	
+
+
 
 	/*
      * (non-Javadoc)
@@ -479,11 +530,6 @@ public class PelopsClient implements Client
     {
 
         String columnFamily = metadata.getTableName();
-
-        if (!isOpen())
-        {
-            throw new PersistenceException("PelopsClient is closed.");
-        }
 
         if (!isOpen())
         {
