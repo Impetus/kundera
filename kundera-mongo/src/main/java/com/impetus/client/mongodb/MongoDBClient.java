@@ -16,6 +16,7 @@
 package com.impetus.client.mongodb;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -160,14 +162,50 @@ public class MongoDBClient implements Client
     
     
     
-    /* (non-Javadoc)
-	 * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
-	 */
 	@Override
 	public void persistJoinTable(String joinTableName, String joinColumnName,
 			String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph) {
-		// TODO Auto-generated method stub
+		DBCollection dbCollection = mongoDb.getCollection(joinTableName);
+
+		List<BasicDBObject> documents = new ArrayList<BasicDBObject>();
 		
+		String parentId = objectGraph.getParentId();
+		try {
+			if(Collection.class.isAssignableFrom(objectGraph.getChildEntity().getClass())) {
+				Collection children = (Collection)objectGraph.getChildEntity();				
+				
+				for(Object child : children) {
+					
+					addColumnsToJoinTable(joinColumnName,
+							inverseJoinColumnName, relMetadata, documents,
+							parentId, child);
+					
+				}		
+				
+			} else {
+				Object child = objectGraph.getChildEntity();
+				
+				addColumnsToJoinTable(joinColumnName, inverseJoinColumnName,
+						relMetadata, documents, parentId, child);
+							
+			}
+		} catch (PropertyAccessException e) {			
+			e.printStackTrace();
+		} 	
+		
+		dbCollection.insert(documents.toArray(new BasicDBObject[0]));
+	}
+
+	private void addColumnsToJoinTable(String joinColumnName,
+			String inverseJoinColumnName, EntityMetadata relMetadata,
+			List<BasicDBObject> documents, String parentId, Object child)
+			throws PropertyAccessException {
+		String childId = PropertyAccessorHelper.getId(child, relMetadata);
+		BasicDBObject dbObj = new BasicDBObject();
+		dbObj.put(joinColumnName, parentId);
+		dbObj.put(inverseJoinColumnName, childId);
+		
+		documents.add(dbObj);
 	}
 
 	/**
