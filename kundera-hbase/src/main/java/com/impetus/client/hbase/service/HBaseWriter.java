@@ -104,8 +104,24 @@ public class HBaseWriter implements Writer
         htable.put(p);
     } 
     
+    
+    
 
-    @Override
+	@Override
+	public void writeColumns(HTable htable, String rowKey,
+			Map<String, String> columns) throws IOException {
+		
+		Put p = new Put(Bytes.toBytes(rowKey));
+
+        for(String columnName : columns.keySet())
+        {                        
+			p.add(Bytes.toBytes(Constants.JOIN_COLUMNS_FAMILY_NAME), Bytes.toBytes(columnName),
+					columns.get(columnName).getBytes());             
+        }        
+        htable.put(p);		
+	}
+
+	@Override
 	public void writeRelations(HTable htable, String rowKey, boolean containsEmbeddedObjectsOnly, List<RelationHolder> relations) throws IOException {
     	Put p = new Put(Bytes.toBytes(rowKey));
     	

@@ -385,7 +385,7 @@ public class PelopsClient implements Client
 		}   
 		
 		
-		mutator.writeColumns(joinTableName, new Bytes(objectGraph.getParentId().getBytes()),
+		mutator.writeColumns(joinTableName, new Bytes(parentId.getBytes()),
                 Arrays.asList(columns.toArray(new Column[0])));
 		mutator.execute(ConsistencyLevel.ONE);		
 	}

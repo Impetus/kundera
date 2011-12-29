@@ -68,7 +68,7 @@ public interface Writer
      * Writes foreign keys along with a database table. They are stored into a
      * column family named FKey-TO. Each column corresponds to foreign key field
      * name and values are actual foreign keys (separated by ~ if applicable)
-     * 
+     * @deprecated
      * @param hTable
      * @param rowKey
      * @param foreignKeyMap
@@ -76,6 +76,17 @@ public interface Writer
      */
     public void writeForeignKeys(HTable hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
             throws IOException;
+    
+    
+    /**
+     * Writes columns data to HBase table, supplied as a map in Key/ value pair; key and value representing 
+     * column name and value respectively. 
+     * @param htable
+     * @param rowKey
+     * @param columns
+     * @throws IOException
+     */
+    void writeColumns(HTable htable, String rowKey, Map<String, String> columns) throws IOException;
     
     
 }

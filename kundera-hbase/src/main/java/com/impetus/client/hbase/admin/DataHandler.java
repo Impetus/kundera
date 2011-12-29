@@ -17,6 +17,7 @@ package com.impetus.client.hbase.admin;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -58,6 +59,8 @@ public interface DataHandler
 
     
     void writeData(String tableName, EntityMetadata m, Object entity, String rowId, List<RelationHolder> relations) throws IOException;
+    
+    void writeJoinTableData(String tableName, String rowId, Map<String, String> columns) throws IOException;
     
     /**
      * Shutdown.

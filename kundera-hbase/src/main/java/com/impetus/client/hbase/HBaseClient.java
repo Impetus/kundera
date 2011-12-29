@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,8 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
+import com.impetus.client.hbase.service.HBaseWriter;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -40,6 +43,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
+import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
@@ -258,7 +262,36 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 	@Override
 	public void persistJoinTable(String joinTableName, String joinColumnName,
 			String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph) {
-		// TODO Auto-generated method stub
+		String parentId = objectGraph.getParentId();
+		
+		Map<String, String> columns = new HashMap<String, String>();
+		
+		try {
+			if(Collection.class.isAssignableFrom(objectGraph.getChildEntity().getClass())) {
+				Collection children = (Collection)objectGraph.getChildEntity();				
+				
+				for(Object child : children) {
+					String childId = PropertyAccessorHelper.getId(child, relMetadata);				
+			        columns.put(inverseJoinColumnName + "_" + childId, childId);				
+				}		
+				
+			} else {
+				Object child = objectGraph.getChildEntity();
+				String childId = PropertyAccessorHelper.getId(child, relMetadata);				
+			    columns.put(inverseJoinColumnName + "_" + childId, childId);
+			}  
+			
+			
+			if (columns != null && !columns.isEmpty())
+			{
+				handler.createTableIfDoesNotExist(joinTableName, Constants.JOIN_COLUMNS_FAMILY_NAME);
+				handler.writeJoinTableData(joinTableName, parentId, columns);  							            
+			}
+		} catch (PropertyAccessException e) {			
+			e.printStackTrace();
+		} catch (IOException e) {			
+			e.printStackTrace();
+		}
 		
 	}
 

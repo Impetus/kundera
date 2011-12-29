@@ -280,8 +280,18 @@ public class HBaseDataHandler implements DataHandler
         }
        
     }
+    
+    
 
-    private HTable gethTable(final String tableName) throws IOException
+	@Override
+	public void writeJoinTableData(String tableName, String rowId,
+			Map<String, String> columns) throws IOException {
+		
+		hbaseWriter.writeColumns(gethTable(tableName), rowId, columns);
+		
+	}
+
+	private HTable gethTable(final String tableName) throws IOException
     {
         return new HTable(conf, tableName);
     }

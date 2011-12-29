@@ -70,5 +70,8 @@ public final class Constants
      * persistence unit, are stored under this name
      */
     public final static String COMMON_ENTITY_METADATAS = "commonEntityMetadatas";
+    
+    /** Name of column family(HBase) or super column(cassandra) which houses all join columns*/
+    public final static String JOIN_COLUMNS_FAMILY_NAME = "JoinColumns";
 
 }
