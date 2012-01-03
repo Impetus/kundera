@@ -112,16 +112,15 @@ public class IndexManager
      * @param entity
      *            the entity
      * @param parentId
-     *            parent Id.           
+     *            parent Id.
      * @param clazz
-     *            class name           
+     *            class name
      */
     public final void write(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz)
     {
         indexer.index(metadata, entity, parentId, clazz);
     }
 
-    
     /**
      * Searches on the index. Note: Query must be in Indexer's understandable
      * format
@@ -145,7 +144,7 @@ public class IndexManager
      */
     public final Map<String, String> fetchRelation(String query)
     {
-        //TODO: need to return list.
+        // TODO: need to return list.
         return search(query, Constants.INVALID, Constants.INVALID, true);
     }
 

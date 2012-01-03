@@ -11,30 +11,26 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-
 @Entity
-@Table(name="PERSON", schema="test")
+@Table(name = "PERSON", schema = "test")
 public class OTMNPerson
 {
-    @Id   
-    @Column(name="PERSON_ID")    
+    @Id
+    @Column(name = "PERSON_ID")
     private String personId;
-    
-    @Column(name="PERSON_NAME")
+
+    @Column(name = "PERSON_NAME")
     private String personName;
-    
-//    @OneToMany(cascade=CascadeType.ALL)
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy="person") 
-//    @JoinColumn(name="PERSON_ID")
+
+    // @OneToMany(cascade=CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "person")
+    // @JoinColumn(name="PERSON_ID")
     private Set<OTMAddress> addresses;
 
-
-    
     public String getPersonId()
     {
         return personId;
-    }   
-    
+    }
 
     public String getPersonName()
     {
@@ -46,21 +42,19 @@ public class OTMNPerson
         this.personName = personName;
     }
 
-
-
     public void setPersonId(String personId)
     {
         this.personId = personId;
     }
 
+    public Set<OTMAddress> getAddresses()
+    {
+        return addresses;
+    }
 
-	public Set<OTMAddress> getAddresses() {
-		return addresses;
-	}
-
-
-	public void setAddresses(Set<OTMAddress> addresses) {
-		this.addresses = addresses;
-	}    
+    public void setAddresses(Set<OTMAddress> addresses)
+    {
+        this.addresses = addresses;
+    }
 
 }

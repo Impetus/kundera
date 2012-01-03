@@ -55,6 +55,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 public class PelopsDataHandler extends DataHandler
 {
     private Client client;
+
     private long timestamp = System.currentTimeMillis();
 
     public PelopsDataHandler(Client client)
@@ -145,7 +146,7 @@ public class PelopsDataHandler extends DataHandler
 
                 Object embeddedObject = populateEmbeddedObject(sc, m);
                 embeddedCollection.add(embeddedObject);
-                PropertyAccessorHelper.set(e, embeddedCollectionField, embeddedCollection);               
+                PropertyAccessorHelper.set(e, embeddedCollectionField, embeddedCollection);
             }
             else
             {
@@ -209,7 +210,8 @@ public class PelopsDataHandler extends DataHandler
         Object entity = clazz.newInstance();
 
         // Map to hold property-name=>foreign-entity relations
-     //   Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+        // Map<String, Set<String>> foreignKeysMap = new HashMap<String,
+        // Set<String>>();
 
         // Set row-key. Note: @Id is always String.
         PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), thriftRow.getId());
@@ -228,7 +230,7 @@ public class PelopsDataHandler extends DataHandler
             // Check if this is a property, or a column representing foreign
             // keys
             com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
-            if(column != null)
+            if (column != null)
             {
                 try
                 {
@@ -306,37 +308,39 @@ public class PelopsDataHandler extends DataHandler
             }
             else
             {
-				// For embedded super columns, create embedded entities and
-				// add them to parent entity
-				Field superColumnField = superColumnNameToFieldMap.get(scName);
-				if (superColumnField != null) {
-					Class superColumnClass = superColumnField.getType();
-					Object superColumnObj = superColumnClass.newInstance();
+                // For embedded super columns, create embedded entities and
+                // add them to parent entity
+                Field superColumnField = superColumnNameToFieldMap.get(scName);
+                if (superColumnField != null)
+                {
+                    Class superColumnClass = superColumnField.getType();
+                    Object superColumnObj = superColumnClass.newInstance();
 
-					for (Column column : sc.getColumns()) {
-						String name = PropertyAccessorFactory.STRING
-								.fromBytes(column.getName());
-						byte[] value = column.getValue();
+                    for (Column column : sc.getColumns())
+                    {
+                        String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
+                        byte[] value = column.getValue();
 
-						Field columnField = columnNameToFieldMap.get(name);
-						try {
-							PropertyAccessorHelper.set(superColumnObj,
-									columnField, value);
-						} catch (PropertyAccessException e) {
-							// This is an entity column to be retrieved in a
-							// super column family. It's stored as a super
-							// column that would
-							// have just one column with the same name
-							log.debug(e.getMessage()
-									+ ". Possible case of entity column in a super column family. Will be treated as a super column.");
-							superColumnObj = Bytes.toUTF8(value);
-						}
-					}
-					PropertyAccessorHelper.set(entity, superColumnField,
-							superColumnObj);
-				}
+                        Field columnField = columnNameToFieldMap.get(name);
+                        try
+                        {
+                            PropertyAccessorHelper.set(superColumnObj, columnField, value);
+                        }
+                        catch (PropertyAccessException e)
+                        {
+                            // This is an entity column to be retrieved in a
+                            // super column family. It's stored as a super
+                            // column that would
+                            // have just one column with the same name
+                            log.debug(e.getMessage()
+                                    + ". Possible case of entity column in a super column family. Will be treated as a super column.");
+                            superColumnObj = Bytes.toUTF8(value);
+                        }
+                    }
+                    PropertyAccessorHelper.set(entity, superColumnField, superColumnObj);
+                }
 
-			}
+            }
 
         }
 
@@ -345,7 +349,8 @@ public class PelopsDataHandler extends DataHandler
             PropertyAccessorHelper.set(entity, embeddedCollectionField, embeddedCollection);
         }
 
-        //EnhancedEntity e = EntityResolver.getEnhancedEntity(entity, tr.getId(), foreignKeysMap);
+        // EnhancedEntity e = EntityResolver.getEnhancedEntity(entity,
+        // tr.getId(), foreignKeysMap);
         return (E) entity;
     }
 
@@ -439,7 +444,7 @@ public class PelopsDataHandler extends DataHandler
             throws Exception
     {
         // timestamp to use in thrift column objects
-//        long timestamp = System.currentTimeMillis();
+        // long timestamp = System.currentTimeMillis();
 
         ThriftRow tr = new ThriftRow();
 
@@ -450,20 +455,19 @@ public class PelopsDataHandler extends DataHandler
         addSuperColumnsToThriftRow(timestamp, client, tr, m, e, id);
 
         // Add columns to thrift row, only if there is no super column
-        if(m.getEmbeddedColumnsAsList().isEmpty()) {
-        	addColumnsToThriftRow(timestamp, tr, m, e);
+        if (m.getEmbeddedColumnsAsList().isEmpty())
+        {
+            addColumnsToThriftRow(timestamp, tr, m, e);
         }
-        
 
         // Add relations entities as Foreign keys to a new super column created
         // internally
-//        addRelationshipsToThriftRow(timestamp, tr, e, m);
+        // addRelationshipsToThriftRow(timestamp, tr, e, m);
 
         return tr;
     }
 
-    private void addColumnsToThriftRow(long timestamp, ThriftRow tr, EntityMetadata m, Object e)
-            throws Exception
+    private void addColumnsToThriftRow(long timestamp, ThriftRow tr, EntityMetadata m, Object e) throws Exception
     {
         List<Column> columns = new ArrayList<Column>();
 
@@ -471,25 +475,26 @@ public class PelopsDataHandler extends DataHandler
         for (com.impetus.kundera.metadata.model.Column column : m.getColumnsAsList())
         {
             Field field = column.getField();
-          if(field.getType().isAssignableFrom(Set.class) || field.getType().isAssignableFrom(Collection.class))
-          {
-          }else
-          {
-            String name = column.getName();
-            try
+            if (field.getType().isAssignableFrom(Set.class) || field.getType().isAssignableFrom(Collection.class))
             {
-                byte[] value = PropertyAccessorHelper.get(e, field);
-                Column col = new Column();
-                col.setName(PropertyAccessorFactory.STRING.toBytes(name));
-                col.setValue(value);
-                col.setTimestamp(timestamp);
-                columns.add(col);
             }
-            catch (PropertyAccessException exp)
+            else
             {
-                log.warn(exp.getMessage());
+                String name = column.getName();
+                try
+                {
+                    byte[] value = PropertyAccessorHelper.get(e, field);
+                    Column col = new Column();
+                    col.setName(PropertyAccessorFactory.STRING.toBytes(name));
+                    col.setValue(value);
+                    col.setTimestamp(timestamp);
+                    columns.add(col);
+                }
+                catch (PropertyAccessException exp)
+                {
+                    log.warn(exp.getMessage());
+                }
             }
-          }
         }
         tr.setColumns(columns);
 
@@ -569,7 +574,6 @@ public class PelopsDataHandler extends DataHandler
 
     }
 
-
     private SuperColumn buildThriftSuperColumn(String superColumnName, long timestamp, EmbeddedColumn superColumn,
             Object superColumnObject) throws PropertyAccessException
     {
@@ -586,9 +590,11 @@ public class PelopsDataHandler extends DataHandler
             }
             catch (PropertyAccessException exp)
             {
-                //This is an entity column to be persisted in a super column family. It will be stored as a super column that would 
-            // have just one column with the same name
-            log.info(exp.getMessage() + ". Possible case of entity column in a super column family. Will be treated as a super column.");
+                // This is an entity column to be persisted in a super column
+                // family. It will be stored as a super column that would
+                // have just one column with the same name
+                log.info(exp.getMessage()
+                        + ". Possible case of entity column in a super column family. Will be treated as a super column.");
                 value = superColumnObject.toString().getBytes();
             }
             if (null != value)
@@ -599,7 +605,7 @@ public class PelopsDataHandler extends DataHandler
                 thriftColumn.setTimestamp(timestamp);
                 thriftColumns.add(thriftColumn);
             }
-       }
+        }
         SuperColumn thriftSuperColumn = new SuperColumn();
         thriftSuperColumn.setName(PropertyAccessorFactory.STRING.toBytes(superColumnName));
         thriftSuperColumn.setColumns(thriftColumns);
@@ -780,5 +786,4 @@ public class PelopsDataHandler extends DataHandler
         return timestamp;
     }
 
-    
 }

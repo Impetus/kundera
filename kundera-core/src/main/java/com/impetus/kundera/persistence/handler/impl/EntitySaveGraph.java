@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence.handler.impl;
 
-
 import java.lang.reflect.Field;
 
 import org.hibernate.proxy.HibernateProxy;
@@ -24,7 +23,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * The Class EntitySaveGraph.
- *
+ * 
  * @author vivek.mishra
  */
 public class EntitySaveGraph
@@ -32,26 +31,28 @@ public class EntitySaveGraph
 
     /** The parent entity. */
     private Object parentEntity;
-    
+
     /** The child entity. */
     private Object childEntity;
-    
+
     /** The key name. */
     private String fKeyName;
-    
+
     /** The key value. */
     private String fKeyValue;
-    
+
     private boolean isSharedPrimaryKey;
-    
+
     private boolean isUniDirectional = true;
-    
+
+    private boolean isRelatedViaJoinTable;
+
     private String parentId;
-    
+
     private String childId;
-    
+
     private Class<?> parentClass;
-    
+
     private Class<?> childClass;
 
     private Field property;
@@ -65,86 +66,90 @@ public class EntitySaveGraph
     {
         this.property = type;
     }
-    
+
     public EntitySaveGraph()
     {
-        
+
     }
 
     /**
      * Gets the parent entity.
-     *
+     * 
      * @return the parentEntity
      */
     public Object getParentEntity()
     {
         return parentEntity;
     }
-    
+
     /**
      * Sets the parent entity.
-     *
-     * @param parentEntity the parentEntity to set
+     * 
+     * @param parentEntity
+     *            the parentEntity to set
      */
     public void setParentEntity(Object parentEntity)
     {
         this.parentEntity = parentEntity;
     }
-    
+
     /**
      * Gets the child entity.
-     *
+     * 
      * @return the childEntity
      */
     public Object getChildEntity()
     {
         return childEntity;
     }
-    
+
     /**
      * Sets the child entity.
-     *
-     * @param childEntity the childEntity to set
+     * 
+     * @param childEntity
+     *            the childEntity to set
      */
     public void setChildEntity(Object childEntity)
     {
         this.childEntity = childEntity;
     }
-    
+
     /**
      * Gets the f key name.
-     *
+     * 
      * @return the fKeyName
      */
     public String getfKeyName()
     {
         return fKeyName;
     }
-    
+
     /**
      * Sets the f key name.
-     *
-     * @param fKeyName the fKeyName to set
+     * 
+     * @param fKeyName
+     *            the fKeyName to set
      */
     public void setfKeyName(String fKeyName)
     {
         this.fKeyName = fKeyName;
     }
-    
+
     /**
      * Gets the f key value.
-     *
+     * 
      * @return the fKeyValue
      */
     public String getfKeyValue()
     {
         return fKeyValue;
     }
-    
+
     /**
      * Sets the f key value.
-     *
-     * @param fKeyValue the fKeyValue to set
+     * 
+     * @param fKeyValue
+     *            the fKeyValue to set
      */
     public void setfKeyValue(String fKeyValue)
     {
@@ -160,7 +165,8 @@ public class EntitySaveGraph
     }
 
     /**
-     * @param isSharedPrimaryKey the isSharedPrimaryKey to set
+     * @param isSharedPrimaryKey
+     *            the isSharedPrimaryKey to set
      */
     public void setSharedPrimaryKey(boolean isSharedPrimaryKey)
     {
@@ -176,11 +182,29 @@ public class EntitySaveGraph
     }
 
     /**
-     * @param isUniDirectional the isUniDirectional to set
+     * @param isUniDirectional
+     *            the isUniDirectional to set
      */
     public void setUniDirectional(boolean isUniDirectional)
     {
         this.isUniDirectional = isUniDirectional;
+    }
+
+    /**
+     * @return the isRelatedViaJoinTable
+     */
+    public boolean isRelatedViaJoinTable()
+    {
+        return isRelatedViaJoinTable;
+    }
+
+    /**
+     * @param isRelatedViaJoinTable
+     *            the isRelatedViaJoinTable to set
+     */
+    public void setRelatedViaJoinTable(boolean isRelatedViaJoinTable)
+    {
+        this.isRelatedViaJoinTable = isRelatedViaJoinTable;
     }
 
     /**
@@ -192,7 +216,8 @@ public class EntitySaveGraph
     }
 
     /**
-     * @param parentId the parentId to set
+     * @param parentId
+     *            the parentId to set
      */
     public void setParentId(String parentId)
     {
@@ -208,7 +233,8 @@ public class EntitySaveGraph
     }
 
     /**
-     * @param childId the childId to set
+     * @param childId
+     *            the childId to set
      */
     public void setChildId(String childId)
     {
@@ -218,25 +244,24 @@ public class EntitySaveGraph
     /**
      * @return the isSwapped
      */
-   
 
     /**
      * @return the parentClass
      */
     public Class<?> getParentClass()
     {
-        if(parentClass == null)
+        if (parentClass == null)
         {
-            if(parentEntity instanceof HibernateProxy)
+            if (parentEntity instanceof HibernateProxy)
             {
                 return parentEntity.getClass().getSuperclass();
             }
-            
-            parentClass = parentEntity!= null && !PropertyAccessorHelper.isCollection(parentEntity.getClass())? parentEntity.getClass(): PropertyAccessorHelper.getGenericClass(getProperty()); 
-        }   
-        return parentClass;  
-    }
 
+            parentClass = parentEntity != null && !PropertyAccessorHelper.isCollection(parentEntity.getClass()) ? parentEntity
+                    .getClass() : PropertyAccessorHelper.getGenericClass(getProperty());
+        }
+        return parentClass;
+    }
 
     /**
      * @return the childClass
@@ -245,15 +270,16 @@ public class EntitySaveGraph
     {
         if (childClass == null)
         {
-            if(childEntity instanceof HibernateProxy)
+            if (childEntity instanceof HibernateProxy)
             {
                 return childEntity.getClass().getSuperclass();
             }
-            childClass = childEntity != null && !PropertyAccessorHelper.isCollection(childEntity.getClass()) ? childEntity.getClass()
-                                                              : PropertyAccessorHelper.getGenericClass(getProperty());
+            childClass = childEntity != null && !PropertyAccessorHelper.isCollection(childEntity.getClass()) ? childEntity
+                    .getClass() : PropertyAccessorHelper.getGenericClass(getProperty());
         }
         return childClass;
     }
+
     /**
      * @return the property
      */
@@ -263,7 +289,8 @@ public class EntitySaveGraph
     }
 
     /**
-     * @param property the property to set
+     * @param property
+     *            the property to set
      */
     public void setProperty(Field property)
     {
@@ -279,13 +306,12 @@ public class EntitySaveGraph
     }
 
     /**
-     * @param bidirectionalProperty the bidirectionalProperty to set
+     * @param bidirectionalProperty
+     *            the bidirectionalProperty to set
      */
     public void setBidirectionalProperty(Field bidirectionalProperty)
     {
         this.bidirectionalProperty = bidirectionalProperty;
     }
 
-
-    
 }

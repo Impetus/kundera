@@ -33,53 +33,60 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 /**
  * @author Amresh Singh
  */
-public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProcessor implements RelationMetadataProcessor {
-	
-	public ManyToManyRelationMetadataProcessor() {
-		validator = new EntityValidatorImpl();
-	}
+public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProcessor implements
+        RelationMetadataProcessor
+{
 
-	@Override
-	public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata) {
-		ManyToMany ann = relationField.getAnnotation(ManyToMany.class);
+    public ManyToManyRelationMetadataProcessor()
+    {
+        validator = new EntityValidatorImpl();
+    }
 
-		Class<?> targetEntity = PropertyAccessorHelper
-				.getGenericClass(relationField);
-		// now, check annotations
-		if (null != ann.targetEntity()
-				&& !ann.targetEntity().getSimpleName().equals("void")) {
-			targetEntity = ann.targetEntity();
-		}
+    @Override
+    public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata)
+    {
+        ManyToMany ann = relationField.getAnnotation(ManyToMany.class);
 
-		validate(targetEntity);
-		Relation relation = new Relation(relationField, targetEntity,
-				relationField.getType(), ann.fetch(), Arrays.asList(ann
-						.cascade()), Boolean.TRUE, ann.mappedBy(),
-				Relation.ForeignKey.MANY_TO_MANY);
+        Class<?> targetEntity = PropertyAccessorHelper.getGenericClass(relationField);
+        // now, check annotations
+        if (null != ann.targetEntity() && !ann.targetEntity().getSimpleName().equals("void"))
+        {
+            targetEntity = ann.targetEntity();
+        }
 
-		boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
+        validate(targetEntity);
+        Relation relation = new Relation(relationField, targetEntity, relationField.getType(), ann.fetch(),
+                Arrays.asList(ann.cascade()), Boolean.TRUE, ann.mappedBy(), Relation.ForeignKey.MANY_TO_MANY);
+
+        boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
         boolean isJoinedByTable = relationField.isAnnotationPresent(JoinTable.class);
-        
-        if(isJoinedByFK) {
-        	throw new PersistenceException("@JoinColumn not allowed for ManyToMany relationship. Use @JoinTable instead");
-        	
-        } else if(isJoinedByTable) {
-        	JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
-        	
-        	relation.setRelatedViaJoinTable(true);
-        	relation.setJoinTableMetadata(jtMetadata);  
-        } else {
-        	throw new PersistenceException("It's manadatory to use @JoinTable for a ManyToMany relationship.");
-        }	
-		
-		metadata.addRelation(relationField.getName(), relation);
-		
-	}
 
-	@Override
-	public void process(Class<?> clazz, EntityMetadata metadata) {
+        if (isJoinedByFK)
+        {
+            throw new PersistenceException(
+                    "@JoinColumn not allowed for ManyToMany relationship. Use @JoinTable instead");
 
-		
-	}	
-	
+        }
+        else if (isJoinedByTable)
+        {
+            JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
+
+            relation.setRelatedViaJoinTable(true);
+            relation.setJoinTableMetadata(jtMetadata);
+        }
+        else
+        {
+            throw new PersistenceException("It's manadatory to use @JoinTable for a ManyToMany relationship.");
+        }
+
+        metadata.addRelation(relationField.getName(), relation);
+
+    }
+
+    @Override
+    public void process(Class<?> clazz, EntityMetadata metadata)
+    {
+
+    }
+
 }

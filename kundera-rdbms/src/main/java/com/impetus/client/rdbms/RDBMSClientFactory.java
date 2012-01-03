@@ -16,7 +16,7 @@ import com.impetus.kundera.loader.GenericClientFactory;
 
 /**
  * @author impadmin
- *
+ * 
  */
 public class RDBMSClientFactory extends GenericClientFactory
 {
@@ -25,7 +25,9 @@ public class RDBMSClientFactory extends GenericClientFactory
 
     IndexManager indexManager;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.Loader#unload(java.lang.String[])
      */
     @Override
@@ -34,7 +36,9 @@ public class RDBMSClientFactory extends GenericClientFactory
         indexManager.close();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#initializeClient()
      */
     @Override
@@ -43,8 +47,11 @@ public class RDBMSClientFactory extends GenericClientFactory
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
      */
     @Override
     protected Object createPoolOrConnection()
@@ -53,7 +60,9 @@ public class RDBMSClientFactory extends GenericClientFactory
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient()
      */
     @Override
@@ -63,7 +72,9 @@ public class RDBMSClientFactory extends GenericClientFactory
         return new HibernateClient(getPersistenceUnit(), indexManager);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#isClientThreadSafe()
      */
     @Override

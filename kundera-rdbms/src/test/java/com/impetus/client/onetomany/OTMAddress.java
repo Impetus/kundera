@@ -7,34 +7,32 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
 @Entity
-@Table(name="ADDRESS", schema="KunderaKeyspace@kcassandra")
+@Table(name = "ADDRESS", schema = "KunderaKeyspace@kcassandra")
 public class OTMAddress
 {
-    @Id    
+    @Id
     @Column(name = "ADDRESS_ID")
-    private String addressId;   
-   
+    private String addressId;
 
     @Column(name = "STREET")
-    private String street;   
-    
+    private String street;
+
     @ManyToOne
-    @JoinColumn(name="PERSON_ID")
-    private OTMNPerson person; 
-    
-    	
+    @JoinColumn(name = "PERSON_ID")
+    private OTMNPerson person;
 
-	public String getAddressId() {
-		return addressId;
-	}
+    public String getAddressId()
+    {
+        return addressId;
+    }
 
-	public void setAddressId(String addressId) {
-		this.addressId = addressId;
-	}
+    public void setAddressId(String addressId)
+    {
+        this.addressId = addressId;
+    }
 
-	public String getStreet()
+    public String getStreet()
     {
         return street;
     }
@@ -53,12 +51,12 @@ public class OTMAddress
     }
 
     /**
-     * @param person the person to set
+     * @param person
+     *            the person to set
      */
     public void setPerson(OTMNPerson person)
     {
         this.person = person;
-    }  
+    }
 
-    
 }

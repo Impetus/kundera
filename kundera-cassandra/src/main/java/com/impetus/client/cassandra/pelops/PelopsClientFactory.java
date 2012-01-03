@@ -30,15 +30,16 @@ public class PelopsClientFactory extends GenericClientFactory
         // TODO StandardAnalyzer is thread safe. So it looks like indexManager
         // is threadsafe an hence using a single instance
         logger.info("Initializing Threadsafe Indexmanager. Is it really threadsafe?");
-//        indexManager = new IndexManager(new LuceneIndexer(new KeywordAnalyzer()/*new StandardAnalyzer(Version.LUCENE_34*/)/*
-//                                                                                                  * new
-//                                                                                                  * KeywordAnalyzer
-//                                                                                                  * (
-//                                                                                                  * )
-//                                                                                                  * )
-//                                                                                                  *//*)*/);
+        // indexManager = new IndexManager(new LuceneIndexer(new
+        // KeywordAnalyzer()/*new StandardAnalyzer(Version.LUCENE_34*/)/*
+        // * new
+        // * KeywordAnalyzer
+        // * (
+        // * )
+        // * )
+        // *//*)*/);
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
-        
+
     }
 
     @Override

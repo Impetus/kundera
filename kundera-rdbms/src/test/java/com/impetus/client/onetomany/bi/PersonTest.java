@@ -23,7 +23,7 @@ import org.junit.Test;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 public class PersonTest
 {
@@ -32,7 +32,7 @@ public class PersonTest
     public void testPersist()
     {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-        
+
         EntityManager em = emf.createEntityManager();
         em.persist(prepareObject());
 
@@ -52,8 +52,5 @@ public class PersonTest
         person.setAddress(address);
         return person;
     }
-
-    
-    
 
 }

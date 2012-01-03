@@ -7,28 +7,25 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
-
 @Entity
-@Table(name="PERSON", schema="test")
+@Table(name = "PERSON", schema = "test")
 public class OTONSPerson
 {
-    @Id   
-    @Column(name="PERSON_ID")    
+    @Id
+    @Column(name = "PERSON_ID")
     private String personId;
-    
-    @Column(name="PERSON_NAME")
+
+    @Column(name = "PERSON_NAME")
     private String personName;
-    
+
     @OneToOne
     @PrimaryKeyJoinColumn
     private OTOSAddress address;
 
-    
     public String getPersonId()
     {
         return personId;
-    }   
-    
+    }
 
     public String getPersonName()
     {
@@ -40,22 +37,19 @@ public class OTONSPerson
         this.personName = personName;
     }
 
-
-
     public void setPersonId(String personId)
     {
         this.personId = personId;
     }
 
-
-//	public Set<Address> getAddresses() {
-//		return addresses;
-//	}
-//
-//
-//	public void setAddresses(Set<Address> addresses) {
-//		this.addresses = addresses;
-//	}    
+    // public Set<Address> getAddresses() {
+    // return addresses;
+    // }
+    //
+    //
+    // public void setAddresses(Set<Address> addresses) {
+    // this.addresses = addresses;
+    // }
 
     public OTOSAddress getAddress()
     {
@@ -63,7 +57,8 @@ public class OTONSPerson
     }
 
     /**
-     * @param address the address to set
+     * @param address
+     *            the address to set
      */
     public void setAddress(OTOSAddress address)
     {

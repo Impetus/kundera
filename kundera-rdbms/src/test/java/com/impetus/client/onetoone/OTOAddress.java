@@ -5,30 +5,28 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 @Entity
-@Table(name="ADDRESS", schema="KunderaKeyspace@kcassandra")
+@Table(name = "ADDRESS", schema = "KunderaKeyspace@kcassandra")
 public class OTOAddress
 {
-    @Id    
+    @Id
     @Column(name = "ADDRESS_ID")
-    private String addressId;   
-   
+    private String addressId;
 
     @Column(name = "STREET")
-    private String street;   
-    
-    	
+    private String street;
 
-	public String getAddressId() {
-		return addressId;
-	}
+    public String getAddressId()
+    {
+        return addressId;
+    }
 
-	public void setAddressId(String addressId) {
-		this.addressId = addressId;
-	}
+    public void setAddressId(String addressId)
+    {
+        this.addressId = addressId;
+    }
 
-	public String getStreet()
+    public String getStreet()
     {
         return street;
     }
@@ -36,6 +34,6 @@ public class OTOAddress
     public void setStreet(String street)
     {
         this.street = street;
-    }  
+    }
 
 }

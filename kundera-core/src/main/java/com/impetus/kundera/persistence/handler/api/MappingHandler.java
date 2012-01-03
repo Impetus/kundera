@@ -21,18 +21,24 @@ import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 
 /**
  * Interface to handle mapping.
+ * 
  * @author vivek.mishra
  */
 public interface MappingHandler
 {
-   
-   /**
-    * Handle association.
-    *
-    * @param entity the entity
-    * @param associationEntity the association entity
-    * @param metadata the meta data.
-    * @param relation holds entity relationships.
-    */
-   EntitySaveGraph handleAssociation(Object entity, Object associationEntity, EntityMetadata metadata, Relation relation);
+
+    /**
+     * Handle association.
+     * 
+     * @param entity
+     *            the entity
+     * @param associationEntity
+     *            the association entity
+     * @param metadata
+     *            the meta data.
+     * @param relation
+     *            holds entity relationships.
+     */
+    EntitySaveGraph handleAssociation(Object entity, Object associationEntity, EntityMetadata metadata,
+            Relation relation);
 }

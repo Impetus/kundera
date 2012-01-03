@@ -27,7 +27,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * The Class AssociationHandler.
- *
+ * 
  * @author vivek.mishra
  */
 class AssociationHandler
@@ -60,16 +60,18 @@ class AssociationHandler
         return columnName != null ? columnName : relation.getName();
     }
 
- 
     /**
      * Populate default graph.
-     *
-     * @param entity the entity
-     * @param associatedEntity the associated entity
-     * @param rField the r field
+     * 
+     * @param entity
+     *            the entity
+     * @param associatedEntity
+     *            the associated entity
+     * @param rField
+     *            the r field
      * @return the entity save graph
      */
-    
+
     protected EntitySaveGraph populateDefaultGraph(Object entity, Object associatedEntity, Field rField)
     {
         EntitySaveGraph objectGraph = new EntitySaveGraph(rField);
@@ -79,35 +81,37 @@ class AssociationHandler
         return objectGraph;
     }
 
-
     /**
      * Compute direction.
-     *
-     * @param entity the entity
-     * @param associatedEntity the associated entity
-     * @param objectGraph the object graph
+     * 
+     * @param entity
+     *            the entity
+     * @param associatedEntity
+     *            the associated entity
+     * @param objectGraph
+     *            the object graph
      * @return the field
      */
 
-    //TODO: this can be moved to metadata level.
-    protected <T extends Annotation> Field computeDirection(Object entity, Field relationalField, EntitySaveGraph objectGraph, Class<T> clazz)
+    // TODO: this can be moved to metadata level.
+    protected <T extends Annotation> Field computeDirection(Object entity, Field relationalField,
+            EntitySaveGraph objectGraph, Class<T> clazz)
     {
-    Field[] fields = PropertyAccessorHelper.getDeclaredFields(relationalField);
+        Field[] fields = PropertyAccessorHelper.getDeclaredFields(relationalField);
 
-        
         Class<?> clazzz = null;
         for (Field field : fields)
         {
             if (field.isAnnotationPresent(clazz))
             {
-                clazzz=field.getType();
-                if(PropertyAccessorHelper.isCollection(clazzz))
+                clazzz = field.getType();
+                if (PropertyAccessorHelper.isCollection(clazzz))
                 {
-                        ParameterizedType type = (ParameterizedType) field.getGenericType();
-                        Type[] types = type.getActualTypeArguments();
-                        clazzz = (Class<?>) types[0];
+                    ParameterizedType type = (ParameterizedType) field.getGenericType();
+                    Type[] types = type.getActualTypeArguments();
+                    clazzz = (Class<?>) types[0];
                 }
-                    
+
                 if (clazzz.equals(entity.getClass()))
                 {
                     // then it is a case of bi directional.
@@ -118,20 +122,20 @@ class AssociationHandler
             }
 
         }
-        
+
         return null;
     }
 
-    
     protected void onDetach(Object entity, Object associationEntity, Field field, boolean setNull)
     {
 
         try
         {
-        	if(entity != null)
-        	{
-        		PropertyAccessorHelper.set(entity, field, setNull || associationEntity == null? null:associationEntity.getClass().newInstance());
-        	}
+            if (entity != null)
+            {
+                PropertyAccessorHelper.set(entity, field, setNull || associationEntity == null ? null
+                        : associationEntity.getClass().newInstance());
+            }
         }
         catch (PropertyAccessException e)
         {
@@ -147,8 +151,7 @@ class AssociationHandler
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } 
+        }
     }
-
 
 }

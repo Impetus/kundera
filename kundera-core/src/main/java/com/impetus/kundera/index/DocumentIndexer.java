@@ -78,7 +78,6 @@ public abstract class DocumentIndexer implements Indexer
     /** The Constant SUPERCOLUMN_INDEX. */
     protected static final String SUPERCOLUMN_INDEX = UUID + ".entity.super.indexname";
 
-
     public static final String PARENT_ID_FIELD = UUID + ".parent.id";
 
     public static final String PARENT_ID_CLASS = UUID + ".parent.class";
@@ -103,7 +102,7 @@ public abstract class DocumentIndexer implements Indexer
     {
         final String empty = "";
         this.analyzer = analyzer;
-        tokenizer = new LetterTokenizer(Version.LUCENE_34,new CharArrayReader(empty.toCharArray()));
+        tokenizer = new LetterTokenizer(Version.LUCENE_34, new CharArrayReader(empty.toCharArray()));
     }
 
     /**
@@ -117,7 +116,8 @@ public abstract class DocumentIndexer implements Indexer
      *            the super column name
      * @return the document
      */
-    protected Document prepareDocumentForSuperColumn(EntityMetadata metadata, Object object, String embeddedColumnName, String parentId, Class<?> clazz)
+    protected Document prepareDocumentForSuperColumn(EntityMetadata metadata, Object object, String embeddedColumnName,
+            String parentId, Class<?> clazz)
     {
         Document currentDoc;
         currentDoc = new Document();
@@ -127,19 +127,20 @@ public abstract class DocumentIndexer implements Indexer
 
         // Add super column name to document
         addSuperColumnNameToDocument(embeddedColumnName, currentDoc);
-        
+
         indexParentKey(parentId, currentDoc, clazz);
         return currentDoc;
     }
 
     protected void indexParentKey(String parentId, Document currentDoc, Class<?> clazz)
     {
-        if(parentId != null)
+        if (parentId != null)
         {
-        Field  luceneField = new Field(PARENT_ID_FIELD, parentId,Field.Store.YES,Field.Index.ANALYZED_NO_NORMS);
-        currentDoc.add(luceneField);
-        Field  fieldClass = new Field(PARENT_ID_CLASS, clazz.getCanonicalName().toLowerCase() ,Field.Store.YES,Field.Index.ANALYZED);
-        currentDoc.add(fieldClass);
+            Field luceneField = new Field(PARENT_ID_FIELD, parentId, Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
+            currentDoc.add(luceneField);
+            Field fieldClass = new Field(PARENT_ID_CLASS, clazz.getCanonicalName().toLowerCase(), Field.Store.YES,
+                    Field.Index.ANALYZED);
+            currentDoc.add(fieldClass);
         }
     }
 
@@ -185,7 +186,7 @@ public abstract class DocumentIndexer implements Indexer
      */
     private void addSuperColumnNameToDocument(String superColumnName, Document currentDoc)
     {
-        Field luceneField = new Field(SUPERCOLUMN_INDEX, superColumnName, Store.YES,Field.Index.NO);
+        Field luceneField = new Field(SUPERCOLUMN_INDEX, superColumnName, Store.YES, Field.Index.NO);
         currentDoc.add(luceneField);
     }
 
@@ -229,26 +230,28 @@ public abstract class DocumentIndexer implements Indexer
             Field luceneField;
             String id;
             id = PropertyAccessorHelper.getId(object, metadata);
-            luceneField = new Field(ENTITY_ID_FIELD, id,Field.Store.YES,Field.Index.ANALYZED);
-//            luceneField.set
+            luceneField = new Field(ENTITY_ID_FIELD, id, Field.Store.YES, Field.Index.ANALYZED);
+            // luceneField.set
             // adding class
-                    // namespace
-                    ///*Field.Store.YES, Field.Index.ANALYZED_NO_NORMS*/);
+            // namespace
+            // /*Field.Store.YES, Field.Index.ANALYZED_NO_NORMS*/);
             document.add(luceneField);
 
             // index namespace for unique deletion
-            luceneField = new Field(KUNDERA_ID_FIELD,getKunderaId(metadata, id),Field.Store.YES,Field.Index.NO); // adding
-                    // class
-                    // namespace
-//                    Field.Store.YES/*, Field.Index.ANALYZED_NO_NORMS*/);
+            luceneField = new Field(KUNDERA_ID_FIELD, getKunderaId(metadata, id), Field.Store.YES, Field.Index.NO); // adding
+            // class
+            // namespace
+            // Field.Store.YES/*, Field.Index.ANALYZED_NO_NORMS*/);
             document.add(luceneField);
 
             // index entity class
-            luceneField = new Field(ENTITY_CLASS_FIELD,metadata.getEntityClazz().getCanonicalName().toLowerCase() ,Field.Store.YES,Field.Index.ANALYZED);
+            luceneField = new Field(ENTITY_CLASS_FIELD, metadata.getEntityClazz().getCanonicalName().toLowerCase(),
+                    Field.Store.YES, Field.Index.ANALYZED);
             document.add(luceneField);
 
             // index index name
-            luceneField = new Field(ENTITY_INDEXNAME_FIELD,metadata.getIndexName(),Field.Store.NO,Field.Index.ANALYZED_NO_NORMS);
+            luceneField = new Field(ENTITY_INDEXNAME_FIELD, metadata.getIndexName(), Field.Store.NO,
+                    Field.Index.ANALYZED_NO_NORMS);
             document.add(luceneField);
         }
         catch (PropertyAccessException e)
@@ -279,7 +282,8 @@ public abstract class DocumentIndexer implements Indexer
             String value = PropertyAccessorHelper.getObject(object, field).toString();
             if (value != null)
             {
-                Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), value,Field.Store.YES,Field.Index.ANALYZED_NO_NORMS);
+                Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), value, Field.Store.YES,
+                        Field.Index.ANALYZED_NO_NORMS);
                 document.add(luceneField);
             }
             else
@@ -324,19 +328,20 @@ public abstract class DocumentIndexer implements Indexer
     }
 
     protected abstract void indexDocument(EntityMetadata metadata, Document currentDoc);
-    
-    
-    public Field getLuceneField(String name, String value) {
-//        try
-//        {
-  //          tokenizer = new StandardTokenizer(Version.LUCENE_34,new CharArrayReader(value.toCharArray()));
-//            tokenizer.reset(new CharArrayReader(value.toCharArray()));
-          //  return new Field(name, tokenizer);        
-//        }
-//        catch (IOException e)
-//        {
-//            throw new IndexingException(e.getMessage());
-//        }
+
+    public Field getLuceneField(String name, String value)
+    {
+        // try
+        // {
+        // tokenizer = new StandardTokenizer(Version.LUCENE_34,new
+        // CharArrayReader(value.toCharArray()));
+        // tokenizer.reset(new CharArrayReader(value.toCharArray()));
+        // return new Field(name, tokenizer);
+        // }
+        // catch (IOException e)
+        // {
+        // throw new IndexingException(e.getMessage());
+        // }
         return new Field(name, value, Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
     }
 

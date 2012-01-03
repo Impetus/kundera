@@ -33,57 +33,66 @@ import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 /**
  * @author Amresh Singh
  */
-public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProcessor implements RelationMetadataProcessor {
+public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProcessor implements
+        RelationMetadataProcessor
+{
 
-	public OneToOneRelationMetadataProcessor() {
-		validator = new EntityValidatorImpl();
-	}
+    public OneToOneRelationMetadataProcessor()
+    {
+        validator = new EntityValidatorImpl();
+    }
 
-	@Override
-	public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata) {
-		// taking field's type as foreign entity, ignoring "targetEntity"
+    @Override
+    public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata)
+    {
+        // taking field's type as foreign entity, ignoring "targetEntity"
         Class<?> targetEntity = relationField.getType();
         validate(targetEntity);
-        
+
         // TODO: Add code to check whether this entity has already been
-        // validated, at all placed below	
-		
-		OneToOne oneToOneAnn = relationField.getAnnotation(OneToOne.class);
-        
+        // validated, at all placed below
+
+        OneToOne oneToOneAnn = relationField.getAnnotation(OneToOne.class);
+
         boolean isJoinedByPK = relationField.isAnnotationPresent(PrimaryKeyJoinColumn.class);
         boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
         boolean isJoinedByTable = relationField.isAnnotationPresent(JoinTable.class);
-        
-        /*if(!isJoinedByPK && !isJoinedByFK) {                	
-        	throw new PersistenceException("A one-to-one relationship must have either JoinColumn or PrimaryKeyJoinColumn annotation");
-        } */     
-        
 
-        Relation relation = new Relation(relationField, targetEntity, null, oneToOneAnn.fetch(), Arrays.asList(oneToOneAnn
-                .cascade()), oneToOneAnn.optional(), oneToOneAnn.mappedBy(), Relation.ForeignKey.ONE_TO_ONE);
-        
-        if(isJoinedByPK) {
-        	relation.setJoinedByPrimaryKey(true);
-        } else if(isJoinedByFK) {
-        	JoinColumn joinColumnAnn = relationField.getAnnotation(JoinColumn.class);
-        	relation.setJoinColumnName(joinColumnAnn.name());
-        } else if(isJoinedByTable) {        	
-        	
-        	JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
-        	
-        	relation.setRelatedViaJoinTable(true);
-        	relation.setJoinTableMetadata(jtMetadata);       	
-        }       
-        
+        /*
+         * if(!isJoinedByPK && !isJoinedByFK) { throw new PersistenceException(
+         * "A one-to-one relationship must have either JoinColumn or PrimaryKeyJoinColumn annotation"
+         * ); }
+         */
+
+        Relation relation = new Relation(relationField, targetEntity, null, oneToOneAnn.fetch(),
+                Arrays.asList(oneToOneAnn.cascade()), oneToOneAnn.optional(), oneToOneAnn.mappedBy(),
+                Relation.ForeignKey.ONE_TO_ONE);
+
+        if (isJoinedByPK)
+        {
+            relation.setJoinedByPrimaryKey(true);
+        }
+        else if (isJoinedByFK)
+        {
+            JoinColumn joinColumnAnn = relationField.getAnnotation(JoinColumn.class);
+            relation.setJoinColumnName(joinColumnAnn.name());
+        }
+        else if (isJoinedByTable)
+        {
+
+            JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
+
+            relation.setRelatedViaJoinTable(true);
+            relation.setJoinTableMetadata(jtMetadata);
+        }
+
         metadata.addRelation(relationField.getName(), relation);
-	}
+    }
 
+    @Override
+    public void process(Class<?> clazz, EntityMetadata metadata)
+    {
 
-	@Override
-	public void process(Class<?> clazz, EntityMetadata metadata) {
-
-		
-	}
-	
+    }
 
 }

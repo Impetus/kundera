@@ -9,32 +9,29 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
 @Entity
-@Table(name="PERSON", schema="test")
+@Table(name = "PERSON", schema = "test")
 public class MTMNPerson
 {
-    @Id   
-    @Column(name="PERSON_ID")    
+    @Id
+    @Column(name = "PERSON_ID")
     private String personId;
-    
-    @Column(name="PERSON_NAME")
+
+    @Column(name = "PERSON_NAME")
     private String personName;
-    
-//    @OneToMany(cascade=CascadeType.ALL)    
-//    @JoinColumn(name="PERSON_ID")
-//    private Set<Address> addresses;
+
+    // @OneToMany(cascade=CascadeType.ALL)
+    // @JoinColumn(name="PERSON_ID")
+    // private Set<Address> addresses;
 
     @ManyToOne
     @JoinColumn(name = "ADDRESS_ID")
     private MTMAddress address;
 
-    
     public String getPersonId()
     {
         return personId;
-    }   
-    
+    }
 
     public String getPersonName()
     {
@@ -46,22 +43,19 @@ public class MTMNPerson
         this.personName = personName;
     }
 
-
-
     public void setPersonId(String personId)
     {
         this.personId = personId;
     }
 
-
-//	public Set<Address> getAddresses() {
-//		return addresses;
-//	}
-//
-//
-//	public void setAddresses(Set<Address> addresses) {
-//		this.addresses = addresses;
-//	}    
+    // public Set<Address> getAddresses() {
+    // return addresses;
+    // }
+    //
+    //
+    // public void setAddresses(Set<Address> addresses) {
+    // this.addresses = addresses;
+    // }
 
     public MTMAddress getAddress()
     {
@@ -69,7 +63,8 @@ public class MTMNPerson
     }
 
     /**
-     * @param address the address to set
+     * @param address
+     *            the address to set
      */
     public void setAddress(MTMAddress address)
     {

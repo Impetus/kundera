@@ -22,8 +22,9 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 /**
  * @author Amresh Singh
  */
-public interface RelationMetadataProcessor {
-	
-	void addRelationIntoMetadata(Field relationField, EntityMetadata metadata);
+public interface RelationMetadataProcessor
+{
+
+    void addRelationIntoMetadata(Field relationField, EntityMetadata metadata);
 
 }

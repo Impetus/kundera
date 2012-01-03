@@ -32,50 +32,57 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 /**
  * @author Amresh Singh
  */
-public class OneToManyRelationMetadataProcessor extends AbstractEntityFieldProcessor implements RelationMetadataProcessor {
-	
-	public OneToManyRelationMetadataProcessor() {
-		validator = new EntityValidatorImpl();
-	}
-	
-	@Override
-	public void process(Class<?> clazz, EntityMetadata metadata) {
-		
-		
-	}
+public class OneToManyRelationMetadataProcessor extends AbstractEntityFieldProcessor implements
+        RelationMetadataProcessor
+{
 
-	@Override
-	public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata) {
-		
-		OneToMany ann = relationField.getAnnotation(OneToMany.class);		
-		Class<?> targetEntity = PropertyAccessorHelper.getGenericClass(relationField);
+    public OneToManyRelationMetadataProcessor()
+    {
+        validator = new EntityValidatorImpl();
+    }
+
+    @Override
+    public void process(Class<?> clazz, EntityMetadata metadata)
+    {
+
+    }
+
+    @Override
+    public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata)
+    {
+
+        OneToMany ann = relationField.getAnnotation(OneToMany.class);
+        Class<?> targetEntity = PropertyAccessorHelper.getGenericClass(relationField);
 
         // now, check annotations
         if (null != ann.targetEntity() && !ann.targetEntity().getSimpleName().equals("void"))
         {
             targetEntity = ann.targetEntity();
         }
-		
-        validate(targetEntity);        
-        
-		Relation relation = new Relation(relationField, targetEntity, relationField.getType(), ann.fetch(),
+
+        validate(targetEntity);
+
+        Relation relation = new Relation(relationField, targetEntity, relationField.getType(), ann.fetch(),
                 Arrays.asList(ann.cascade()), Boolean.TRUE, ann.mappedBy(), Relation.ForeignKey.ONE_TO_MANY);
 
-		boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
+        boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
         boolean isJoinedByTable = relationField.isAnnotationPresent(JoinTable.class);
-        
-        if(isJoinedByFK) {
-        	JoinColumn joinColumnAnn = relationField.getAnnotation(JoinColumn.class);
-        	relation.setJoinColumnName(joinColumnAnn.name());
-        } else if(isJoinedByTable) {
-        	JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
-        	
-        	relation.setRelatedViaJoinTable(true);
-        	relation.setJoinTableMetadata(jtMetadata);  
-        }        
-		
-        metadata.addRelation(relationField.getName(), relation);        
 
-	}
+        if (isJoinedByFK)
+        {
+            JoinColumn joinColumnAnn = relationField.getAnnotation(JoinColumn.class);
+            relation.setJoinColumnName(joinColumnAnn.name());
+        }
+        else if (isJoinedByTable)
+        {
+            JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
+
+            relation.setRelatedViaJoinTable(true);
+            relation.setJoinTableMetadata(jtMetadata);
+        }
+
+        metadata.addRelation(relationField.getName(), relation);
+
+    }
 
 }

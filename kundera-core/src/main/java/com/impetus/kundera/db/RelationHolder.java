@@ -23,53 +23,60 @@ import com.impetus.kundera.property.PropertyAccessException;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 public class RelationHolder
 {
-        private String relationName;
-        private String relationValue;
-        
-        public RelationHolder(String relationName, String relationValue)
-        {
-            this.relationName = relationName;
-            this.relationValue = relationValue;
-        }
-        /**
-         * @return the relationName
-         */
-        public String getRelationName()
-        {
-            return relationName;
-        }
-        /**
-         * @return the relationValue
-         */
-        public String getRelationValue()
-        {
-            return relationValue;
-        }
-        
-        
-        /**
-         * Adds the relation.
-         *
-         * @param entitySaveGraph the entity save graph
-         * @param rlName the rl name
-         * @param rlValue the rl value
-         * @param tf the tf
-         * @throws PropertyAccessException the property access exception
-         */
-        public static List<RelationHolder> addRelation(EntitySaveGraph entitySaveGraph, String rlName, String rlValue)
-        {
-            if (rlName != null && !entitySaveGraph.isSharedPrimaryKey())
-            {
-                List<RelationHolder> relations = new ArrayList<RelationHolder>();
-                RelationHolder relation = new RelationHolder(rlName, rlValue);
-                relations.add(relation);
+    private String relationName;
 
-                return relations;
-            }
-            return null;
+    private String relationValue;
+
+    public RelationHolder(String relationName, String relationValue)
+    {
+        this.relationName = relationName;
+        this.relationValue = relationValue;
+    }
+
+    /**
+     * @return the relationName
+     */
+    public String getRelationName()
+    {
+        return relationName;
+    }
+
+    /**
+     * @return the relationValue
+     */
+    public String getRelationValue()
+    {
+        return relationValue;
+    }
+
+    /**
+     * Adds the relation.
+     * 
+     * @param entitySaveGraph
+     *            the entity save graph
+     * @param rlName
+     *            the rl name
+     * @param rlValue
+     *            the rl value
+     * @param tf
+     *            the tf
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    public static List<RelationHolder> addRelation(EntitySaveGraph entitySaveGraph, String rlName, String rlValue)
+    {
+        if (rlName != null && !entitySaveGraph.isSharedPrimaryKey())
+        {
+            List<RelationHolder> relations = new ArrayList<RelationHolder>();
+            RelationHolder relation = new RelationHolder(rlName, rlValue);
+            relations.add(relation);
+
+            return relations;
         }
+        return null;
+    }
 }

@@ -23,42 +23,42 @@ import org.junit.Test;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 public class PersonTest
 {
 
-//    @Test
+    // @Test
     public void testPersist()
     {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-        
+
         EntityManager em = emf.createEntityManager();
         em.persist(prepareObject());
         emf.close();
 
     }
 
-//    @Test
+    // @Test
     public void testSharedByPKPersist()
     {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-        
+
         EntityManager em = emf.createEntityManager();
         em.persist(preparePKObject());
 
     }
 
-
     @Test
     public void testFindById()
     {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-        
+
         EntityManager em = emf.createEntityManager();
         Object obj = em.find(OTONPerson.class, "1_p");
         System.out.println(obj.getClass());
     }
+
     /**
      * @return
      */
@@ -88,6 +88,5 @@ public class PersonTest
         person.setAddress(address);
         return person;
     }
-
 
 }

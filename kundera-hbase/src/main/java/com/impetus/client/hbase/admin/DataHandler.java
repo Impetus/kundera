@@ -28,7 +28,8 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  * @author impetus
  */
 
-//TODO: Do we really require this interface? If yes, then should we move it kundera-core?
+// TODO: Do we really require this interface? If yes, then should we move it
+// kundera-core?
 public interface DataHandler
 {
 
@@ -42,26 +43,27 @@ public interface DataHandler
      */
     void createTableIfDoesNotExist(String tableName, String... colFamily) throws IOException;
 
-//    /**
-//     * Writes data help in entity into HBase table
-//     * 
-//     * @param tableName
-//     * @param m
-//     * @param e
-//     * @throws IOException
-//     */
-//    public void writeData(String tableName, EntityMetadata m, EnhancedEntity e) throws IOException;
+    // /**
+    // * Writes data help in entity into HBase table
+    // *
+    // * @param tableName
+    // * @param m
+    // * @param e
+    // * @throws IOException
+    // */
+    // public void writeData(String tableName, EntityMetadata m, EnhancedEntity
+    // e) throws IOException;
 
     /**
      * Populates data for give column family, column name, and HBase table name.
      */
     <E> E readData(String tableName, Class<E> clazz, EntityMetadata m, String rowKey) throws IOException;
 
-    
-    void writeData(String tableName, EntityMetadata m, Object entity, String rowId, List<RelationHolder> relations) throws IOException;
-    
+    void writeData(String tableName, EntityMetadata m, Object entity, String rowId, List<RelationHolder> relations)
+            throws IOException;
+
     void writeJoinTableData(String tableName, String rowId, Map<String, String> columns) throws IOException;
-    
+
     /**
      * Shutdown.
      */

@@ -7,28 +7,25 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
 @Entity
-@Table(name="PERSON", schema="test")
+@Table(name = "PERSON", schema = "test")
 public class MTONPerson
 {
-    @Id   
-    @Column(name="PERSON_ID")    
+    @Id
+    @Column(name = "PERSON_ID")
     private String personId;
-    
-    @Column(name="PERSON_NAME")
+
+    @Column(name = "PERSON_NAME")
     private String personName;
-    
+
     @ManyToOne
     @JoinColumn(name = "ADDRESS_ID")
     private MTOAddress address;
 
-    
     public String getPersonId()
     {
         return personId;
-    }   
-    
+    }
 
     public String getPersonName()
     {
@@ -40,13 +37,10 @@ public class MTONPerson
         this.personName = personName;
     }
 
-
-
     public void setPersonId(String personId)
     {
         this.personId = personId;
     }
-
 
     public MTOAddress getAddress()
     {
@@ -54,7 +48,8 @@ public class MTONPerson
     }
 
     /**
-     * @param address the address to set
+     * @param address
+     *            the address to set
      */
     public void setAddress(MTOAddress address)
     {

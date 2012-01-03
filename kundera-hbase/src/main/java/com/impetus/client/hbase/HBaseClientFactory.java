@@ -19,7 +19,7 @@ public class HBaseClientFactory extends GenericClientFactory
     @Override
     protected void initializeClient()
     {
-    	indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));                                                                                             
+        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
     }
 
     @Override

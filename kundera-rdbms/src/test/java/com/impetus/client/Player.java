@@ -20,97 +20,112 @@ import org.hibernate.annotations.PolymorphismType;
  * The Class Player.
  */
 @Entity
-@Table(name="player" , schema="test")
-public class Player implements Serializable {
-    
+@Table(name = "player", schema = "test")
+public class Player implements Serializable
+{
+
     /** The id. */
     @Id
-   // @GeneratedValue
+    // @GeneratedValue
     private String id;
-    
+
     /** The last name. */
-    @Column(name="lname",nullable=false)
-    private String  lastName;
-    
+    @Column(name = "lname", nullable = false)
+    private String lastName;
+
     /** The first name. */
-    @Column(name="fname",nullable=false)
-    private String  firstName;
-    
+    @Column(name = "fname", nullable = false)
+    private String firstName;
+
     /** The jersey number. */
-    @Column(name="jnumber",nullable=false) private int     jerseyNumber;
-    
+    @Column(name = "jnumber", nullable = false)
+    private int jerseyNumber;
+
     /** The last spoken words. */
-    @Column(name="lword",nullable=true) private String  lastSpokenWords;
-    
+    @Column(name = "lword", nullable = true)
+    private String lastSpokenWords;
+
     /**
      * Creates a new instance of Player.
      */
-    public Player() {
+    public Player()
+    {
     }
-    
+
     /**
-     * Gets the id of this Player. The persistence provider should 
-     * autogenerate a unique id for new player objects.
+     * Gets the id of this Player. The persistence provider should autogenerate
+     * a unique id for new player objects.
+     * 
      * @return the id
      */
-    
-    public String getId() {
+
+    public String getId()
+    {
         return this.id;
     }
-    
+
     /**
      * Sets the id of this Player to the specified value.
-     * @param id the new id
+     * 
+     * @param id
+     *            the new id
      */
-    public void setId(String id) {
+    public void setId(String id)
+    {
         this.id = id;
     }
-    
+
     /**
      * Gets the last name.
-     *
+     * 
      * @return the last name
      */
-    public String getLastName() {
+    public String getLastName()
+    {
         return lastName;
     }
-    
+
     /**
      * Sets the last name.
-     *
-     * @param name the new last name
+     * 
+     * @param name
+     *            the new last name
      */
-    public void setLastName(String name) {
+    public void setLastName(String name)
+    {
         lastName = name;
     }
-    
+
     // ...
     // some code excluded for brevity
     // ...
-    
+
     /**
-     * Returns the last words spoken by this player.
-     * We don't want to persist that!
-     *
+     * Returns the last words spoken by this player. We don't want to persist
+     * that!
+     * 
      * @return the last spoken words
      */
     @Transient
-    public String getLastSpokenWords() {
+    public String getLastSpokenWords()
+    {
         return lastSpokenWords;
     }
-    
+
     /**
      * Sets the last spoken words.
-     *
-     * @param lastWords the new last spoken words
+     * 
+     * @param lastWords
+     *            the new last spoken words
      */
-    public void setLastSpokenWords(String lastWords) {
+    public void setLastSpokenWords(String lastWords)
+    {
         lastSpokenWords = lastWords;
     }
 
     /**
      * Gets the first name.
-     *
+     * 
      * @return the first name
      */
     public String getFirstName()
@@ -120,8 +135,9 @@ public class Player implements Serializable {
 
     /**
      * Sets the first name.
-     *
-     * @param firstName the new first name
+     * 
+     * @param firstName
+     *            the new first name
      */
     public void setFirstName(String firstName)
     {
@@ -130,7 +146,7 @@ public class Player implements Serializable {
 
     /**
      * Gets the jersey number.
-     *
+     * 
      * @return the jersey number
      */
     public int getJerseyNumber()
@@ -140,12 +156,13 @@ public class Player implements Serializable {
 
     /**
      * Sets the jersey number.
-     *
-     * @param jerseyNumber the new jersey number
+     * 
+     * @param jerseyNumber
+     *            the new jersey number
      */
     public void setJerseyNumber(int jerseyNumber)
     {
         this.jerseyNumber = jerseyNumber;
     }
-    
+
 }

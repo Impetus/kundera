@@ -8,28 +8,25 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-
 @Entity
-@Table(name="PERSON", schema="test")
+@Table(name = "PERSON", schema = "test")
 public class OTONPerson
 {
-    @Id   
-    @Column(name="PERSON_ID")    
+    @Id
+    @Column(name = "PERSON_ID")
     private String personId;
-    
-    @Column(name="PERSON_NAME")
+
+    @Column(name = "PERSON_NAME")
     private String personName;
-    
-    @OneToOne(fetch=FetchType.LAZY)
+
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ADDRESS_ID")
     private OTOAddress address;
 
-    
     public String getPersonId()
     {
         return personId;
-    }   
-    
+    }
 
     public String getPersonName()
     {
@@ -41,22 +38,19 @@ public class OTONPerson
         this.personName = personName;
     }
 
-
-
     public void setPersonId(String personId)
     {
         this.personId = personId;
     }
 
-
-//	public Set<Address> getAddresses() {
-//		return addresses;
-//	}
-//
-//
-//	public void setAddresses(Set<Address> addresses) {
-//		this.addresses = addresses;
-//	}    
+    // public Set<Address> getAddresses() {
+    // return addresses;
+    // }
+    //
+    //
+    // public void setAddresses(Set<Address> addresses) {
+    // this.addresses = addresses;
+    // }
 
     public OTOAddress getAddress()
     {
@@ -64,7 +58,8 @@ public class OTONPerson
     }
 
     /**
-     * @param address the address to set
+     * @param address
+     *            the address to set
      */
     public void setAddress(OTOAddress address)
     {

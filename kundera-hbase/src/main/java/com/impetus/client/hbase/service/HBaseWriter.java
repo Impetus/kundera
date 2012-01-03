@@ -68,16 +68,15 @@ public class HBaseWriter implements Writer
         }
         htable.put(p);
     }
-    
+
     @Override
-    public void writeColumn(HTable htable, String columnFamily, String rowKey, Column column, Object columnObj) throws IOException
+    public void writeColumn(HTable htable, String columnFamily, String rowKey, Column column, Object columnObj)
+            throws IOException
     {
-        Put p = new Put(Bytes.toBytes(rowKey));       
-        
-        
+        Put p = new Put(Bytes.toBytes(rowKey));
+
         p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(column.getName()), Bytes.toBytes(columnObj.toString()));
-                        
-                
+
         htable.put(p);
     }
 
@@ -100,50 +99,50 @@ public class HBaseWriter implements Writer
             {
                 throw new IOException(e1.getMessage());
             }
-        }        
+        }
         htable.put(p);
-    } 
-    
-    
-    
+    }
 
-	@Override
-	public void writeColumns(HTable htable, String rowKey,
-			Map<String, String> columns) throws IOException {
-		
-		Put p = new Put(Bytes.toBytes(rowKey));
+    @Override
+    public void writeColumns(HTable htable, String rowKey, Map<String, String> columns) throws IOException
+    {
 
-        for(String columnName : columns.keySet())
-        {                        
-			p.add(Bytes.toBytes(Constants.JOIN_COLUMNS_FAMILY_NAME), Bytes.toBytes(columnName),
-					columns.get(columnName).getBytes());             
-        }        
-        htable.put(p);		
-	}
+        Put p = new Put(Bytes.toBytes(rowKey));
 
-	@Override
-	public void writeRelations(HTable htable, String rowKey, boolean containsEmbeddedObjectsOnly, List<RelationHolder> relations) throws IOException {
-    	Put p = new Put(Bytes.toBytes(rowKey));
-    	
-		for (RelationHolder r : relations) {
-			if (r != null) {
-				if(containsEmbeddedObjectsOnly) {
-					p.add(Bytes.toBytes(r.getRelationName()),
-							Bytes.toBytes(r.getRelationName()),
-							Bytes.toBytes(r.getRelationValue()));
-				} else {
-					p.add(Bytes.toBytes(r.getRelationName()),
-							System.currentTimeMillis(),
-							Bytes.toBytes(r.getRelationValue()));
-				}
-				
+        for (String columnName : columns.keySet())
+        {
+            p.add(Bytes.toBytes(Constants.JOIN_COLUMNS_FAMILY_NAME), Bytes.toBytes(columnName), columns.get(columnName)
+                    .getBytes());
+        }
+        htable.put(p);
+    }
 
-			}
-		}		
-    	
-    	htable.put(p);
-	}
-	
+    @Override
+    public void writeRelations(HTable htable, String rowKey, boolean containsEmbeddedObjectsOnly,
+            List<RelationHolder> relations) throws IOException
+    {
+        Put p = new Put(Bytes.toBytes(rowKey));
+
+        for (RelationHolder r : relations)
+        {
+            if (r != null)
+            {
+                if (containsEmbeddedObjectsOnly)
+                {
+                    p.add(Bytes.toBytes(r.getRelationName()), Bytes.toBytes(r.getRelationName()),
+                            Bytes.toBytes(r.getRelationValue()));
+                }
+                else
+                {
+                    p.add(Bytes.toBytes(r.getRelationName()), System.currentTimeMillis(),
+                            Bytes.toBytes(r.getRelationValue()));
+                }
+
+            }
+        }
+
+        htable.put(p);
+    }
 
     // TODO: Scope of performance improvement in this code
     @Override
@@ -183,4 +182,4 @@ public class HBaseWriter implements Writer
 
         hTable.put(p);
     }
- }
+}

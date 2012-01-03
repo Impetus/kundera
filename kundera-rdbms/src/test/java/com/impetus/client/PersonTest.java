@@ -26,7 +26,7 @@ import org.junit.Test;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 public class PersonTest
 {
@@ -35,7 +35,7 @@ public class PersonTest
     public void testPersist()
     {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-        
+
         EntityManager em = emf.createEntityManager();
         em.persist(prepareObject());
 
@@ -52,13 +52,12 @@ public class PersonTest
         Address address = new Address();
         address.setAddressId("2_a");
         address.setStreet("sadak");
-        
-//        Set<Address> addresses = new HashSet<Address>(1);
-//        addresses.add(address);
-//        person.setAddresses(addresses);
+
+        // Set<Address> addresses = new HashSet<Address>(1);
+        // addresses.add(address);
+        // person.setAddresses(addresses);
         person.setAddress(address);
         return person;
     }
-
 
 }

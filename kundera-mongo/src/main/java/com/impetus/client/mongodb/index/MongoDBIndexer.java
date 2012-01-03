@@ -111,7 +111,6 @@ public class MongoDBIndexer implements Indexer
                 "Invalid method call! When you search on a column, MongoDB will automatically search in index if that exists.");
     }
 
-    
     @Override
     public void close()
     {
@@ -126,14 +125,19 @@ public class MongoDBIndexer implements Indexer
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object, java.lang.String, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.
+     * model.EntityMetadata, java.lang.Object, java.lang.String,
+     * java.lang.Class)
      */
     @Override
     public void index(EntityMetadata metadata, Object object, String parentId, Class<?> clazz)
     {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

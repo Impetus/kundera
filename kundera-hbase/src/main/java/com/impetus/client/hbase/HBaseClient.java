@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.hbase;
 
-
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -74,29 +73,34 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     @Override
     public void persist(EnhancedEntity enhancedEntity) throws Exception
     {
-//        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
-//                .getEntity().getClass());
-//
-//        String dbName = entityMetadata.getSchema(); // Has no meaning for HBase,
-//                                                    // not used
-//        String tableName = entityMetadata.getTableName();
-//
-//        List<String> columnFamilyNames = new ArrayList<String>();
-//
-//        // If this entity has columns(apart from embedded objects, they will be
-//        // treated as column family)
-//        List<Column> columns = entityMetadata.getColumnsAsList();
-//        if (columns != null && !columns.isEmpty())
-//        {
-//            columnFamilyNames.addAll(entityMetadata.getColumnFieldNames());
-//        }
-//
-//        // Check whether this table exists, if not create it
-//        columnFamilyNames.addAll(entityMetadata.getEmbeddedColumnFieldNames());
-//        handler.createTableIfDoesNotExist(tableName, columnFamilyNames.toArray(new String[0]));
-//
-//        // Write data to HBase
-//        handler.writeData(tableName, entityMetadata, enhancedEntity);
+        // EntityMetadata entityMetadata =
+        // KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(),
+        // enhancedEntity
+        // .getEntity().getClass());
+        //
+        // String dbName = entityMetadata.getSchema(); // Has no meaning for
+        // HBase,
+        // // not used
+        // String tableName = entityMetadata.getTableName();
+        //
+        // List<String> columnFamilyNames = new ArrayList<String>();
+        //
+        // // If this entity has columns(apart from embedded objects, they will
+        // be
+        // // treated as column family)
+        // List<Column> columns = entityMetadata.getColumnsAsList();
+        // if (columns != null && !columns.isEmpty())
+        // {
+        // columnFamilyNames.addAll(entityMetadata.getColumnFieldNames());
+        // }
+        //
+        // // Check whether this table exists, if not create it
+        // columnFamilyNames.addAll(entityMetadata.getEmbeddedColumnFieldNames());
+        // handler.createTableIfDoesNotExist(tableName,
+        // columnFamilyNames.toArray(new String[0]));
+        //
+        // // Write data to HBase
+        // handler.writeData(tableName, entityMetadata, enhancedEntity);
 
     }
 
@@ -143,7 +147,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
             E e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(), entityMetadata,
                     entityId);
 
-            Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName.substring(0, columnFamilyName.indexOf("|")));
+            Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName.substring(0,
+                    columnFamilyName.indexOf("|")));
             Object columnFamilyValue = PropertyAccessorHelper.getObject(e, columnFamilyField);
             if (Collection.class.isAssignableFrom(columnFamilyField.getType()))
             {
@@ -164,13 +169,12 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     }
 
-/*    @Override
-    public void delete(EnhancedEntity enhancedEntity) throws Exception
-    {
-        throw new RuntimeException("TODO:not yet supported");
-
-    }
-*/
+    /*
+     * @Override public void delete(EnhancedEntity enhancedEntity) throws
+     * Exception { throw new RuntimeException("TODO:not yet supported");
+     * 
+     * }
+     */
     @Override
     public final IndexManager getIndexManager()
     {
@@ -197,7 +201,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         onPersist(entityMetadata, entity, id, null);
         getIndexManager().write(entityMetadata, entityGraph.getParentEntity());
         return null;
-        
+
     }
 
     private void onPersist(EntityMetadata entityMetadata, Object entity, String id, List<RelationHolder> relations)
@@ -218,20 +222,22 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
         // Check whether this table exists, if not create it
         columnFamilyNames.addAll(entityMetadata.getEmbeddedColumnFieldNames());
-        
-        //Add relationship fields if they are there
-        if(relations != null) {
-        	for(RelationHolder rh : relations) {
-        		columnFamilyNames.add(rh.getRelationName());
-        	}
+
+        // Add relationship fields if they are there
+        if (relations != null)
+        {
+            for (RelationHolder rh : relations)
+            {
+                columnFamilyNames.add(rh.getRelationName());
+            }
         }
-        
+
         try
         {
             handler.createTableIfDoesNotExist(tableName, columnFamilyNames.toArray(new String[0]));
 
             // Write data to HBase
-            
+
             handler.writeData(tableName, entityMetadata, entity, id, relations);
         }
         catch (IOException e)
@@ -240,8 +246,12 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#persist(java.lang.Object, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph, com.impetus.kundera.metadata.model.EntityMetadata, boolean)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
+     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph,
+     * com.impetus.kundera.metadata.model.EntityMetadata, boolean)
      */
     @Override
     public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata entityMetadata)
@@ -252,56 +262,77 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         onPersist(entityMetadata, childEntity, id, RelationHolder.addRelation(entitySaveGraph, rlName, rlValue));
         onIndex(childEntity, entitySaveGraph, entityMetadata, rlValue);
     }
-    
-    
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String,
+     * java.lang.String, java.lang.String,
+     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+     */
+    @Override
+    public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+            EntityMetadata relMetadata, EntitySaveGraph objectGraph)
+    {
+        String parentId = objectGraph.getParentId();
 
-    /* (non-Javadoc)
-	 * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
-	 */
-	@Override
-	public void persistJoinTable(String joinTableName, String joinColumnName,
-			String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph) {
-		String parentId = objectGraph.getParentId();
-		
-		Map<String, String> columns = new HashMap<String, String>();
-		
-		try {
-			if(Collection.class.isAssignableFrom(objectGraph.getChildEntity().getClass())) {
-				Collection children = (Collection)objectGraph.getChildEntity();				
-				
-				for(Object child : children) {
-					String childId = PropertyAccessorHelper.getId(child, relMetadata);				
-			        columns.put(inverseJoinColumnName + "_" + childId, childId);				
-				}		
-				
-			} else {
-				Object child = objectGraph.getChildEntity();
-				String childId = PropertyAccessorHelper.getId(child, relMetadata);				
-			    columns.put(inverseJoinColumnName + "_" + childId, childId);
-			}  
-			
-			
-			if (columns != null && !columns.isEmpty())
-			{
-				handler.createTableIfDoesNotExist(joinTableName, Constants.JOIN_COLUMNS_FAMILY_NAME);
-				handler.writeJoinTableData(joinTableName, parentId, columns);  							            
-			}
-		} catch (PropertyAccessException e) {			
-			e.printStackTrace();
-		} catch (IOException e) {			
-			e.printStackTrace();
-		}
-		
-	}
+        Map<String, String> columns = new HashMap<String, String>();
 
-	/**
+        try
+        {
+            if (Collection.class.isAssignableFrom(objectGraph.getChildEntity().getClass()))
+            {
+                Collection children = (Collection) objectGraph.getChildEntity();
+
+                for (Object child : children)
+                {
+                    String childId = PropertyAccessorHelper.getId(child, relMetadata);
+                    columns.put(inverseJoinColumnName + "_" + childId, childId);
+                }
+
+            }
+            else
+            {
+                Object child = objectGraph.getChildEntity();
+                String childId = PropertyAccessorHelper.getId(child, relMetadata);
+                columns.put(inverseJoinColumnName + "_" + childId, childId);
+            }
+
+            if (columns != null && !columns.isEmpty())
+            {
+                handler.createTableIfDoesNotExist(joinTableName, Constants.JOIN_COLUMNS_FAMILY_NAME);
+                handler.writeJoinTableData(joinTableName, parentId, columns);
+            }
+        }
+        catch (PropertyAccessException e)
+        {
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
+            String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
+    {
+        return null;
+    }
+
+    /**
      * On index.
-     *
-     * @param childEntity the child entity
-     * @param entitySaveGraph the entity save graph
-     * @param metadata the metadata
-     * @param rlValue the rl value
+     * 
+     * @param childEntity
+     *            the child entity
+     * @param entitySaveGraph
+     *            the entity save graph
+     * @param metadata
+     *            the metadata
+     * @param rlValue
+     *            the rl value
      */
     private void onIndex(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata, String rlValue)
     {
@@ -314,8 +345,12 @@ public class HBaseClient implements com.impetus.kundera.client.Client
             getIndexManager().write(metadata, childEntity);
         }
     }
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#find(java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
     @Override
     public Object find(Class<?> clazz, EntityMetadata entityMetadata, String rowId)
@@ -334,15 +369,17 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return enhancedEntity;
     }
 
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#delete(java.lang.Object, java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
+     * java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
     public void delete(Object entity, Object pKey, EntityMetadata metadata) throws Exception
     {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

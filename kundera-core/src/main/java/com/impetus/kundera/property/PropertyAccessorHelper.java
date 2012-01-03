@@ -84,7 +84,7 @@ public class PropertyAccessorHelper
             field.set(target, value);
         }
         catch (IllegalArgumentException iarg)
-        {        	
+        {
             throw new PropertyAccessException(iarg);
         }
         catch (IllegalAccessException iacc)
@@ -207,11 +207,14 @@ public class PropertyAccessorHelper
 
     /**
      * Gets the embedded object.
-     *
-     * @param obj the obj
-     * @param fieldName the field name
+     * 
+     * @param obj
+     *            the obj
+     * @param fieldName
+     *            the field name
      * @return the embedded object
-     * @throws PropertyAccessException the property access exception
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     @SuppressWarnings("null")
     // TODO: Too much code, improve this, possibly by breaking it
@@ -281,36 +284,39 @@ public class PropertyAccessorHelper
 
     /**
      * Retrieves Generic class from a collection field.
-     *
-     * @param collectionField the collection field
+     * 
+     * @param collectionField
+     *            the collection field
      * @return the generic class
      */
     public static Class<?> getGenericClass(Field collectionField)
     {
         Class<?> genericClass = null;
-        if(isCollection(collectionField.getType()))
+        if (isCollection(collectionField.getType()))
         {
 
-        Type[] parameters = ReflectUtils.getTypeArguments(collectionField);
-        if (parameters != null)
-        {
-            if (parameters.length == 1)
+            Type[] parameters = ReflectUtils.getTypeArguments(collectionField);
+            if (parameters != null)
             {
-                genericClass = (Class<?>) parameters[0];
-            }
-            else
-            {
-                throw new PersistenceException("Can't determine generic class from a field that has two parameters.");
+                if (parameters.length == 1)
+                {
+                    genericClass = (Class<?>) parameters[0];
+                }
+                else
+                {
+                    throw new PersistenceException(
+                            "Can't determine generic class from a field that has two parameters.");
+                }
             }
         }
-       }
-        return genericClass !=null ? genericClass:collectionField.getType();
+        return genericClass != null ? genericClass : collectionField.getType();
     }
 
     /**
      * Gets the declared fields.
-     *
-     * @param relationalField the relational field
+     * 
+     * @param relationalField
+     *            the relational field
      * @return the declared fields
      */
     public static Field[] getDeclaredFields(Field relationalField)
@@ -327,12 +333,14 @@ public class PropertyAccessorHelper
         return fields;
     }
 
-
-    
     public static final boolean isCollection(Class<?> clazz)
     {
-        return Collection.class.isAssignableFrom(clazz) /*|| clazz.isAssignableFrom(Set.class)*/;
-        
+        return Collection.class.isAssignableFrom(clazz) /*
+                                                         * ||
+                                                         * clazz.isAssignableFrom
+                                                         * (Set.class)
+                                                         */;
+
     }
 
 }

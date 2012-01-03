@@ -15,23 +15,25 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
-
 /**
  * @author vivek.mishra
- *
+ * 
  */
- final class AssociationBuilder
+final class AssociationBuilder
 {
 
-    
-    
     /**
      * Returns lucene based query.
-     * @param clazzFieldName       lucene field name for class 
-     * @param clazzName            class name
-     * @param idFieldName          lucene id field name
-     * @param idFieldValue         lucene id field value
-     * @return query               lucene query.
+     * 
+     * @param clazzFieldName
+     *            lucene field name for class
+     * @param clazzName
+     *            class name
+     * @param idFieldName
+     *            lucene id field name
+     * @param idFieldValue
+     *            lucene id field value
+     * @return query lucene query.
      */
     static String getQuery(String clazzFieldName, String clazzName, String idFieldName, String idFieldValue)
     {

@@ -60,7 +60,6 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 public class LuceneIndexer extends DocumentIndexer
 {
 
-
     /** log for this class. */
     private static Log log = LogFactory.getLog(LuceneIndexer.class);
 
@@ -73,10 +72,9 @@ public class LuceneIndexer extends DocumentIndexer
     private static boolean isInitialized;
 
     private static LuceneIndexer indexer;
-    
+
     private static boolean readyForCommit;
 
-    
     /**
      * @param analyzer
      */
@@ -87,8 +85,7 @@ public class LuceneIndexer extends DocumentIndexer
         {
 
             index = new RAMDirectory();/*
-                                        * FSDirectory.open(getIndexDirectory(
-                                        * ))
+                                        * FSDirectory.open(getIndexDirectory( ))
                                         */
             // isInitialized
             /* writer */
@@ -110,21 +107,22 @@ public class LuceneIndexer extends DocumentIndexer
         {
             throw new IndexingException(e.getMessage());
         }
-//        throw new IndexingException("This should be instantiated via getInstance() method");
-//        // TODO Auto-generated constructor stub
+        // throw new
+        // IndexingException("This should be instantiated via getInstance() method");
+        // // TODO Auto-generated constructor stub
     }
 
     /**
      * @param client
      * @param analyzer
      */
-    public static synchronized  LuceneIndexer getInstance(Analyzer analyzer)
+    public static synchronized LuceneIndexer getInstance(Analyzer analyzer)
     {
         // super(analyzer);
         if (indexer == null)
         {
-          indexer = new LuceneIndexer(analyzer);   
-            
+            indexer = new LuceneIndexer(analyzer);
+
         }
         return indexer;
     }
@@ -247,7 +245,8 @@ public class LuceneIndexer extends DocumentIndexer
          * }
          */IndexSearcher searcher = new IndexSearcher(reader);
 
-        QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(Version.LUCENE_34));
+        QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(
+                Version.LUCENE_34));
 
         try
         {
@@ -262,8 +261,8 @@ public class LuceneIndexer extends DocumentIndexer
             // This is a quick fix
             for (ScoreDoc sc : docs.scoreDocs)
             {
-                Document doc = searcher.doc(sc.doc);                
-                String entityId = doc.get(fetchRelation?PARENT_ID_FIELD:ENTITY_ID_FIELD);
+                Document doc = searcher.doc(sc.doc);
+                String entityId = doc.get(fetchRelation ? PARENT_ID_FIELD : ENTITY_ID_FIELD);
                 String superCol = doc.get(SUPERCOLUMN_INDEX);
 
                 if (superCol == null)
@@ -271,7 +270,7 @@ public class LuceneIndexer extends DocumentIndexer
                     superCol = "SuperCol" + nullCount++;
                 }
                 // In case of super column and association.
-                indexCol.put(superCol+"|" + entityId, entityId);
+                indexCol.put(superCol + "|" + entityId, entityId);
             }
         }
         catch (ParseException e)
@@ -338,12 +337,12 @@ public class LuceneIndexer extends DocumentIndexer
     {
         try
         {
-        if(w != null && readyForCommit)
-        {
-            w.commit();
-            index.copy(index, FSDirectory.open(getIndexDirectory()), false);
-            readyForCommit=false;
-        }
+            if (w != null && readyForCommit)
+            {
+                w.commit();
+                index.copy(index, FSDirectory.open(getIndexDirectory()), false);
+                readyForCommit = false;
+            }
         }
 
         catch (CorruptIndexException e)
@@ -355,6 +354,7 @@ public class LuceneIndexer extends DocumentIndexer
             log.error("Error while indexing document  into Lucene. Details:" + e.getMessage());
         }
     }
+
     /**
      * Close of transaction.
      */
@@ -382,25 +382,25 @@ public class LuceneIndexer extends DocumentIndexer
     @Override
     public void flush()
     {
-//        try
-//        {
-            if (w != null)
-            {
+        // try
+        // {
+        if (w != null)
+        {
 
-//                w.commit();
-                // w.close();
-                // index.copy(index, FSDirectory.open(getIndexDirectory()),
-                // false);
-            }
-//        }
-//        catch (CorruptIndexException e)
-//        {
-//            e.printStackTrace();
-//        }
-//        catch (IOException e)
-//        {
-//            e.printStackTrace();
-//        }
+            // w.commit();
+            // w.close();
+            // index.copy(index, FSDirectory.open(getIndexDirectory()),
+            // false);
+        }
+        // }
+        // catch (CorruptIndexException e)
+        // {
+        // e.printStackTrace();
+        // }
+        // catch (IOException e)
+        // {
+        // e.printStackTrace();
+        // }
 
     }
 
@@ -500,7 +500,7 @@ public class LuceneIndexer extends DocumentIndexer
                                 }
 
                                 currentDoc = prepareDocumentForSuperColumn(metadata, object,
-                                        elementCollectionObjectName, parentId,clazz);
+                                        elementCollectionObjectName, parentId, clazz);
                                 indexSuperColumn(metadata, object, currentDoc, obj, embeddedColumn);
                             }
                         }
@@ -508,7 +508,8 @@ public class LuceneIndexer extends DocumentIndexer
                     }
                     else
                     {
-                        currentDoc = prepareDocumentForSuperColumn(metadata, object, embeddedColumnName, parentId, clazz);
+                        currentDoc = prepareDocumentForSuperColumn(metadata, object, embeddedColumnName, parentId,
+                                clazz);
                         indexSuperColumn(metadata, object, currentDoc,
                                 metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object,
                                 embeddedColumn);
@@ -539,26 +540,25 @@ public class LuceneIndexer extends DocumentIndexer
         return currentDoc;
     }
 
-    
     private void onCommit()
     {
         // TODO: Sadly this required to keep lucene happy, in case of indexing
         // and searching with same entityManager.
         // Other alternative would be to issue flush on each search
-//        try
-//        {
-//            w.commit();
-            isInitialized = true;
-            readyForCommit = true;
-//        }
-//        catch (CorruptIndexException e)
-//        {
-//            throw new IndexingException(e.getMessage());
-//        }
-//        catch (IOException e)
-//        {
-//            throw new IndexingException(e.getMessage());
-//        }
+        // try
+        // {
+        // w.commit();
+        isInitialized = true;
+        readyForCommit = true;
+        // }
+        // catch (CorruptIndexException e)
+        // {
+        // throw new IndexingException(e.getMessage());
+        // }
+        // catch (IOException e)
+        // {
+        // throw new IndexingException(e.getMessage());
+        // }
     }
 
 }

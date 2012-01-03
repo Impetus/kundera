@@ -48,12 +48,11 @@ public class ManyToOneHandler extends AssociationHandler implements MappingHandl
         EntitySaveGraph objectGraph = populateDefaultGraph(entity, associationEntity, relation.getProperty());
         Field field = computeDirection(entity, relation.getProperty(), objectGraph, OneToMany.class);
         onDetach(entity, associationEntity, relation.getProperty(), true);
-        if(!objectGraph.isUniDirectional())
+        if (!objectGraph.isUniDirectional())
         {
             onDetach(associationEntity, entity, field, true);
         }
         return objectGraph;
     }
-    
-    
+
 }

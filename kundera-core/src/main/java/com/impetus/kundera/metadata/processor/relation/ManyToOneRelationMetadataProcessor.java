@@ -31,49 +31,54 @@ import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 /**
  * @author Amresh Singh
  */
-public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProcessor implements RelationMetadataProcessor {
+public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProcessor implements
+        RelationMetadataProcessor
+{
 
-	public ManyToOneRelationMetadataProcessor() {
-		validator = new EntityValidatorImpl();
-	}
-	
-	@Override
-	public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata) {
-		// taking field's type as foreign entity, ignoring  "targetEntity"
-		Class<?> targetEntity = relationField.getType();
+    public ManyToOneRelationMetadataProcessor()
+    {
+        validator = new EntityValidatorImpl();
+    }
 
-		validate(targetEntity);
-		
-		ManyToOne ann = relationField.getAnnotation(ManyToOne.class);
+    @Override
+    public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata)
+    {
+        // taking field's type as foreign entity, ignoring "targetEntity"
+        Class<?> targetEntity = relationField.getType();
 
-		Relation relation = new Relation(relationField, targetEntity,
-				null, ann.fetch(), Arrays.asList(ann.cascade()),
-				ann.optional(), null, // mappedBy is
-										// null
-				Relation.ForeignKey.MANY_TO_ONE);
+        validate(targetEntity);
 
-		boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
+        ManyToOne ann = relationField.getAnnotation(ManyToOne.class);
+
+        Relation relation = new Relation(relationField, targetEntity, null, ann.fetch(), Arrays.asList(ann.cascade()),
+                ann.optional(), null, // mappedBy is
+                                      // null
+                Relation.ForeignKey.MANY_TO_ONE);
+
+        boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
         boolean isJoinedByTable = relationField.isAnnotationPresent(JoinTable.class);
-        
-        if(isJoinedByFK) {
-        	JoinColumn joinColumnAnn = relationField.getAnnotation(JoinColumn.class);
-        	relation.setJoinColumnName(joinColumnAnn.name());
-        } else if(isJoinedByTable) {
-        	JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
-        	
-        	relation.setRelatedViaJoinTable(true);
-        	relation.setJoinTableMetadata(jtMetadata);  
-        }        
-		
-		metadata.addRelation(relationField.getName(), relation);
-		
-	}
 
-	@Override
-	public void process(Class<?> clazz, EntityMetadata metadata) {
+        if (isJoinedByFK)
+        {
+            JoinColumn joinColumnAnn = relationField.getAnnotation(JoinColumn.class);
+            relation.setJoinColumnName(joinColumnAnn.name());
+        }
+        else if (isJoinedByTable)
+        {
+            JoinTableMetadata jtMetadata = new JoinTableMetadata(relationField);
 
-		
-	}
-	
+            relation.setRelatedViaJoinTable(true);
+            relation.setJoinTableMetadata(jtMetadata);
+        }
+
+        metadata.addRelation(relationField.getName(), relation);
+
+    }
+
+    @Override
+    public void process(Class<?> clazz, EntityMetadata metadata)
+    {
+
+    }
 
 }

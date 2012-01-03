@@ -25,36 +25,42 @@ import javax.persistence.OneToOne;
 /**
  * @author Amresh Singh
  */
-public class RelationMetadataProcessorFactory {
-	
-	public static RelationMetadataProcessor getRelationMetadataProcessor(Field relationField) {
-		RelationMetadataProcessor relProcessor = null;
-		
-		// OneToOne
-		if (relationField.isAnnotationPresent(OneToOne.class)) {
-			relProcessor = new OneToOneRelationMetadataProcessor();
-		}
+public class RelationMetadataProcessorFactory
+{
 
-		// OneToMany
-		else if (relationField.isAnnotationPresent(OneToMany.class)) {
-			relProcessor = new OneToManyRelationMetadataProcessor();			
+    public static RelationMetadataProcessor getRelationMetadataProcessor(Field relationField)
+    {
+        RelationMetadataProcessor relProcessor = null;
 
-		}
+        // OneToOne
+        if (relationField.isAnnotationPresent(OneToOne.class))
+        {
+            relProcessor = new OneToOneRelationMetadataProcessor();
+        }
 
-		// ManyToOne
-		else if (relationField.isAnnotationPresent(ManyToOne.class)) {
-			relProcessor = new ManyToOneRelationMetadataProcessor();					
+        // OneToMany
+        else if (relationField.isAnnotationPresent(OneToMany.class))
+        {
+            relProcessor = new OneToManyRelationMetadataProcessor();
 
-		}
+        }
 
-		// ManyToMany
-		else if (relationField.isAnnotationPresent(ManyToMany.class)) {
-			relProcessor = new ManyToManyRelationMetadataProcessor();			
+        // ManyToOne
+        else if (relationField.isAnnotationPresent(ManyToOne.class))
+        {
+            relProcessor = new ManyToOneRelationMetadataProcessor();
 
-		}
-		
-		return relProcessor;
-		
-	}
+        }
+
+        // ManyToMany
+        else if (relationField.isAnnotationPresent(ManyToMany.class))
+        {
+            relProcessor = new ManyToManyRelationMetadataProcessor();
+
+        }
+
+        return relProcessor;
+
+    }
 
 }

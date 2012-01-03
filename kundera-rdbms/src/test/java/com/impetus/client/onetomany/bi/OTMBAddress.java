@@ -29,8 +29,9 @@ public class OTMBAddress
 
     public OTMBAddress()
     {
-        
+
     }
+
     public String getAddressId()
     {
         return addressId;
@@ -60,7 +61,8 @@ public class OTMBAddress
     }
 
     /**
-     * @param people the people to set
+     * @param people
+     *            the people to set
      */
     public void setPeople(Set<OTMBNPerson> people)
     {

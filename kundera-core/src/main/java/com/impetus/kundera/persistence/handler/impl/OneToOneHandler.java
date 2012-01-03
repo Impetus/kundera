@@ -53,8 +53,8 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
      * com.impetus.kundera.metadata.model.Relation)
      */
     @Override
-    public EntitySaveGraph handleAssociation(Object entity, Object associatedEntity, 
-                                             EntityMetadata metadata,Relation relation)
+    public EntitySaveGraph handleAssociation(Object entity, Object associatedEntity, EntityMetadata metadata,
+            Relation relation)
     {
 
         Field rField = relation.getProperty();
@@ -71,7 +71,7 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
         // 1) if Relation entity require id from source entity get it. (first
         // persist source entity
         // 2)
-        
+
         objectGraph.setProperty(rField);
 
         return objectGraph;
@@ -87,14 +87,15 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
      * @param objectGraph
      *            the object graph
      */
-    private void isSharedByPrimaryKey(Object entity, Field rField, EntitySaveGraph objectGraph, Object associatedEntity, EntityMetadata metadata)
+    private void isSharedByPrimaryKey(Object entity, Field rField, EntitySaveGraph objectGraph,
+            Object associatedEntity, EntityMetadata metadata)
     {
         if (rField.isAnnotationPresent(PrimaryKeyJoinColumn.class))
         {
             // Means it is a case of populating associatedEntity's primary key
             // with entity's primary key.
-            
-            populatePKey(entity, associatedEntity,metadata);
+
+            populatePKey(entity, associatedEntity, metadata);
             objectGraph.setParentEntity(entity);
             objectGraph.setChildEntity(associatedEntity);
             objectGraph.setSharedPrimaryKey(true);
@@ -102,37 +103,41 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
         }
     }
 
-    
-    //TODO: if getting metadata via class is possible.this method will not be required. refactor this one finish that.
-    
+    // TODO: if getting metadata via class is possible.this method will not be
+    // required. refactor this one finish that.
+
     private void populatePKey(Object entity, Object associatedEntity, EntityMetadata metadata)
- {
-		if (associatedEntity != null)
-		{
-			Class<?> clazz = associatedEntity.getClass();
-			if (associatedEntity instanceof HibernateProxy) {
-				clazz = associatedEntity.getClass().getSuperclass();
-			}
-			Field[] fields = clazz.getDeclaredFields();
-			Field f = null;
-			for (Field field : fields) {
-				if (field.isAnnotationPresent(Id.class)) {
-					f = field;
-					break;
-				}
+    {
+        if (associatedEntity != null)
+        {
+            Class<?> clazz = associatedEntity.getClass();
+            if (associatedEntity instanceof HibernateProxy)
+            {
+                clazz = associatedEntity.getClass().getSuperclass();
+            }
+            Field[] fields = clazz.getDeclaredFields();
+            Field f = null;
+            for (Field field : fields)
+            {
+                if (field.isAnnotationPresent(Id.class))
+                {
+                    f = field;
+                    break;
+                }
 
-			}
+            }
 
-			try {
-				PropertyAccessorHelper.set(associatedEntity, f,
-						getId(entity, metadata));
-			} catch (PropertyAccessException e) {
-				throw new PersistenceException(e.getMessage());
-			}
-		}
-	}
+            try
+            {
+                PropertyAccessorHelper.set(associatedEntity, f, getId(entity, metadata));
+            }
+            catch (PropertyAccessException e)
+            {
+                throw new PersistenceException(e.getMessage());
+            }
+        }
+    }
 
-    
     private String getId(Object entity, EntityMetadata metadata)
     {
         try
@@ -143,7 +148,7 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
         {
             throw new PersistenceException(e.getMessage());
         }
-        
+
     }
 
 }

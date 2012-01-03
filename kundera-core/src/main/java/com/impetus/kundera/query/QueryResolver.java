@@ -50,7 +50,7 @@ public class QueryResolver
         KunderaQueryParser parser = new KunderaQueryParser(kunderaQuery, jpaQuery);
         parser.parse();
         kunderaQuery.postParsingInit();
-        
+
         EntityMetadata entityMetadata = kunderaQuery.getEntityMetadata();
 
         String pu = null;

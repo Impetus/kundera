@@ -55,13 +55,13 @@ public class MongoDBClient implements Client
 {
 
     /** The is connected. */
-//    private boolean isConnected;
+    // private boolean isConnected;
 
     /** The mongo db. */
     private DB mongoDb;
 
     /** The data handler. */
-//    private MongoDBDataHandler dataHandler;
+    // private MongoDBDataHandler dataHandler;
 
     /** The index manager. */
     private IndexManager indexManager;
@@ -87,134 +87,154 @@ public class MongoDBClient implements Client
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
                 .getEntity().getClass());
-/*
-        String dbName = entityMetadata.getSchema();
-        String documentName = entityMetadata.getTableName();
-        String key = enhancedEntity.getId();
+        /*
+         * String dbName = entityMetadata.getSchema(); String documentName =
+         * entityMetadata.getTableName(); String key = enhancedEntity.getId();
+         * 
+         * log.debug("Checking whether record already exist for " + dbName + "."
+         * + documentName + " for " + key); Object entity =
+         * find(enhancedEntity.getEntity().getClass(), key); if (entity != null)
+         * { log.debug("Updating data into " + dbName + "." + documentName +
+         * " for " + key); DBCollection dbCollection =
+         * mongoDb.getCollection(documentName);
+         * 
+         * BasicDBObject searchQuery = new BasicDBObject();
+         * searchQuery.put(entityMetadata.getIdColumn().getName(), key);
+         * BasicDBObject updatedDocument = new MongoDBDataHandler(this,
+         * getPersistenceUnit()).getDocumentFromEntity( entityMetadata,
+         * enhancedEntity, null); dbCollection.update(searchQuery,
+         * updatedDocument);
+         * 
+         * } else { log.debug("Inserting data into " + dbName + "." +
+         * documentName + " for " + key); DBCollection dbCollection =
+         * mongoDb.getCollection(documentName);
+         * 
+         * BasicDBObject document = new MongoDBDataHandler(this,
+         * getPersistenceUnit()).getDocumentFromEntity( entityMetadata,
+         * enhancedEntity, null); dbCollection.insert(document); }
+         */}
 
-        log.debug("Checking whether record already exist for " + dbName + "." + documentName + " for " + key);
-        Object entity = find(enhancedEntity.getEntity().getClass(), key);
-        if (entity != null)
-        {
-            log.debug("Updating data into " + dbName + "." + documentName + " for " + key);
-            DBCollection dbCollection = mongoDb.getCollection(documentName);
-
-            BasicDBObject searchQuery = new BasicDBObject();
-            searchQuery.put(entityMetadata.getIdColumn().getName(), key);
-            BasicDBObject updatedDocument = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(
-                    entityMetadata, enhancedEntity, null);
-            dbCollection.update(searchQuery, updatedDocument);
-
-        }
-        else
-        {
-            log.debug("Inserting data into " + dbName + "." + documentName + " for " + key);
-            DBCollection dbCollection = mongoDb.getCollection(documentName);
-
-            BasicDBObject document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(
-                    entityMetadata, enhancedEntity, null);
-            dbCollection.insert(document);
-        }
-*/    }
-    
-    
     @Override
     public String persist(EntitySaveGraph entityGraph, EntityMetadata entityMetadata)
     {
-    	Object entity = entityGraph.getParentEntity();
-        String id = entityGraph.getParentId();       
-        
+        Object entity = entityGraph.getParentEntity();
+        String id = entityGraph.getParentId();
 
-        try {
-			onPersist(entityMetadata, entity, id, null);
+        try
+        {
+            onPersist(entityMetadata, entity, id, null);
             getIndexManager().write(entityMetadata, entity);
-			
-		} catch (PropertyAccessException e) {
-			log.error(e.getMessage());
-			throw new PersistenceException(e.getMessage());
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			throw new PersistenceException(e.getMessage());
-		}        
-        
+
+        }
+        catch (PropertyAccessException e)
+        {
+            log.error(e.getMessage());
+            throw new PersistenceException(e.getMessage());
+        }
+        catch (Exception e)
+        {
+            log.error(e.getMessage());
+            throw new PersistenceException(e.getMessage());
+        }
+
         return null;
     }
-    
+
     @Override
     public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
     {
-    	String rlName = entitySaveGraph.getfKeyName();
+        String rlName = entitySaveGraph.getfKeyName();
         String rlValue = entitySaveGraph.getParentId();
         String id = entitySaveGraph.getChildId();
-        
-        try {
-			onPersist(metadata, childEntity, id, RelationHolder.addRelation(entitySaveGraph, rlName, rlValue));
+
+        try
+        {
+            onPersist(metadata, childEntity, id, RelationHolder.addRelation(entitySaveGraph, rlName, rlValue));
             onIndex(childEntity, entitySaveGraph, metadata, rlValue);
-		} catch (PropertyAccessException e) {
-			e.printStackTrace();
-			log.error(e.getMessage());
-			throw new PersistenceException(e.getMessage());
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			throw new PersistenceException(e.getMessage());
-		}
+        }
+        catch (PropertyAccessException e)
+        {
+            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new PersistenceException(e.getMessage());
+        }
+        catch (Exception e)
+        {
+            log.error(e.getMessage());
+            throw new PersistenceException(e.getMessage());
+        }
     }
-    
-    
-    
-	@Override
-	public void persistJoinTable(String joinTableName, String joinColumnName,
-			String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph) {
-		DBCollection dbCollection = mongoDb.getCollection(joinTableName);
 
-		List<BasicDBObject> documents = new ArrayList<BasicDBObject>();
-		
-		String parentId = objectGraph.getParentId();
-		try {
-			if(Collection.class.isAssignableFrom(objectGraph.getChildEntity().getClass())) {
-				Collection children = (Collection)objectGraph.getChildEntity();				
-				
-				for(Object child : children) {
-					
-					addColumnsToJoinTable(joinColumnName,
-							inverseJoinColumnName, relMetadata, documents,
-							parentId, child);
-					
-				}		
-				
-			} else {
-				Object child = objectGraph.getChildEntity();
-				
-				addColumnsToJoinTable(joinColumnName, inverseJoinColumnName,
-						relMetadata, documents, parentId, child);
-							
-			}
-		} catch (PropertyAccessException e) {			
-			e.printStackTrace();
-		} 	
-		
-		dbCollection.insert(documents.toArray(new BasicDBObject[0]));
-	}
+    @Override
+    public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+            EntityMetadata relMetadata, EntitySaveGraph objectGraph)
+    {
+        DBCollection dbCollection = mongoDb.getCollection(joinTableName);
 
-	private void addColumnsToJoinTable(String joinColumnName,
-			String inverseJoinColumnName, EntityMetadata relMetadata,
-			List<BasicDBObject> documents, String parentId, Object child)
-			throws PropertyAccessException {
-		String childId = PropertyAccessorHelper.getId(child, relMetadata);
-		BasicDBObject dbObj = new BasicDBObject();
-		dbObj.put(joinColumnName, parentId);
-		dbObj.put(inverseJoinColumnName, childId);
-		
-		documents.add(dbObj);
-	}
+        List<BasicDBObject> documents = new ArrayList<BasicDBObject>();
 
-	/**
+        String parentId = objectGraph.getParentId();
+        try
+        {
+            if (Collection.class.isAssignableFrom(objectGraph.getChildEntity().getClass()))
+            {
+                Collection children = (Collection) objectGraph.getChildEntity();
+
+                for (Object child : children)
+                {
+
+                    addColumnsToJoinTable(joinColumnName, inverseJoinColumnName, relMetadata, documents, parentId,
+                            child);
+
+                }
+
+            }
+            else
+            {
+                Object child = objectGraph.getChildEntity();
+
+                addColumnsToJoinTable(joinColumnName, inverseJoinColumnName, relMetadata, documents, parentId, child);
+
+            }
+        }
+        catch (PropertyAccessException e)
+        {
+            e.printStackTrace();
+        }
+
+        dbCollection.insert(documents.toArray(new BasicDBObject[0]));
+    }
+
+    @Override
+    public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
+            String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
+    {
+
+        return null;
+    }
+
+    private void addColumnsToJoinTable(String joinColumnName, String inverseJoinColumnName, EntityMetadata relMetadata,
+            List<BasicDBObject> documents, String parentId, Object child) throws PropertyAccessException
+    {
+        String childId = PropertyAccessorHelper.getId(child, relMetadata);
+        BasicDBObject dbObj = new BasicDBObject();
+        dbObj.put(joinColumnName, parentId);
+        dbObj.put(inverseJoinColumnName, childId);
+
+        documents.add(dbObj);
+    }
+
+    /**
      * On index.
-     *
-     * @param childEntity the child entity
-     * @param entitySaveGraph the entity save graph
-     * @param metadata the metadata
-     * @param rlValue the rl value
+     * 
+     * @param childEntity
+     *            the child entity
+     * @param entitySaveGraph
+     *            the entity save graph
+     * @param metadata
+     *            the metadata
+     * @param rlValue
+     *            the rl value
      */
     private void onIndex(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata, String rlValue)
     {
@@ -228,22 +248,21 @@ public class MongoDBClient implements Client
         }
     }
 
-
-	/**
-	 * @param entityMetadata
-	 * @param id
-	 * @throws Exception
-	 * @throws PropertyAccessException
-	 */
-	private void onPersist(EntityMetadata entityMetadata, Object entity, String id, List<RelationHolder> relations) throws Exception, PropertyAccessException 
-	{
-		String dbName = entityMetadata.getSchema();
+    /**
+     * @param entityMetadata
+     * @param id
+     * @throws Exception
+     * @throws PropertyAccessException
+     */
+    private void onPersist(EntityMetadata entityMetadata, Object entity, String id, List<RelationHolder> relations)
+            throws Exception, PropertyAccessException
+    {
+        String dbName = entityMetadata.getSchema();
         String documentName = entityMetadata.getTableName();
-        
 
         log.debug("Checking whether record already exist for " + dbName + "." + documentName + " for " + id);
         Object entityFound = find(entityMetadata.getEntityClazz(), id);
-        
+
         if (entityFound != null)
         {
             log.debug("Updating data into " + dbName + "." + documentName + " for " + id);
@@ -263,12 +282,9 @@ public class MongoDBClient implements Client
 
             BasicDBObject document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(
                     entityMetadata, entity, relations);
-            dbCollection.insert(document);            
+            dbCollection.insert(document);
         }
-	}
-
-    
-    
+    }
 
     /*
      * (non-Javadoc)
@@ -395,36 +411,42 @@ public class MongoDBClient implements Client
         return entities;
     }
 
-////    @Override
-//    public void delete(EnhancedEntity enhancedEntity) throws Exception
-//    {
-//        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
-//                .getEntity().getClass());
-//        DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
-//
-//        // Find the DBObject to remove first
-//        BasicDBObject query = new BasicDBObject();
-//        query.put(entityMetadata.getSchema(), enhancedEntity.getId());
-//
-//        DBCursor cursor = dbCollection.find(query);
-//        DBObject documentToRemove = null;
-//
-//        if (cursor.hasNext())
-//        {
-//            documentToRemove = cursor.next();
-//        }
-//        else
-//        {
-//            throw new PersistenceException("Can't remove Row# " + enhancedEntity.getId() + " for "
-//                    + entityMetadata.getTableName() + " because record doesn't exist.");
-//        }
-//
-//        dbCollection.remove(documentToRemove);
-//    }
+    // // @Override
+    // public void delete(EnhancedEntity enhancedEntity) throws Exception
+    // {
+    // EntityMetadata entityMetadata =
+    // KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(),
+    // enhancedEntity
+    // .getEntity().getClass());
+    // DBCollection dbCollection =
+    // mongoDb.getCollection(entityMetadata.getTableName());
+    //
+    // // Find the DBObject to remove first
+    // BasicDBObject query = new BasicDBObject();
+    // query.put(entityMetadata.getSchema(), enhancedEntity.getId());
+    //
+    // DBCursor cursor = dbCollection.find(query);
+    // DBObject documentToRemove = null;
+    //
+    // if (cursor.hasNext())
+    // {
+    // documentToRemove = cursor.next();
+    // }
+    // else
+    // {
+    // throw new PersistenceException("Can't remove Row# " +
+    // enhancedEntity.getId() + " for "
+    // + entityMetadata.getTableName() + " because record doesn't exist.");
+    // }
+    //
+    // dbCollection.remove(documentToRemove);
+    // }
 
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#delete(java.lang.Object, java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
+     * java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
     public void delete(Object entity, Object pKey, EntityMetadata entityMetadata) throws Exception
@@ -450,16 +472,15 @@ public class MongoDBClient implements Client
 
         dbCollection.remove(documentToRemove);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
-        
+
     }
 
-    
     @Override
     public void close()
     {
         // TODO Once pool is implemented this code should not be there.
         // Workaround for pool
-    	this.indexManager.flush(); 
+        this.indexManager.flush();
     }
 
     /**
@@ -521,10 +542,13 @@ public class MongoDBClient implements Client
     {
         this.persistenceUnit = persistenceUnit;
 
-    }    
+    }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#find(java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
     @Override
     public Object find(Class<?> clazz, EntityMetadata entityMetadata, String rowId)

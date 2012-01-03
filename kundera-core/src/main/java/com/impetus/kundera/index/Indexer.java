@@ -47,7 +47,6 @@ public interface Indexer
      */
     void index(EntityMetadata metadata, Object object);
 
-
     /**
      * Indexes and object.
      * 
@@ -56,9 +55,9 @@ public interface Indexer
      * @param object
      *            the object.
      * @param parentId
-     *            parent Id.           
+     *            parent Id.
      * @param clazz
-     *           parent class.           
+     *            parent class.
      */
     void index(EntityMetadata metadata, Object object, String parentId, Class<?> clazz);
 

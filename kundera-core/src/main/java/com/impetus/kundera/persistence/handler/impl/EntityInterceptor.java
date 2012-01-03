@@ -27,34 +27,37 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 /**
  * The Class EntityInterceptor.
  * 
- * @author vivek.mishra 
+ * @author vivek.mishra
  */
 public final class EntityInterceptor
 {
 
     /**
      * ON handling relations.
-     *
-     * @param entity source entity
-     * @param metadata source entity meta data.
+     * 
+     * @param entity
+     *            source entity
+     * @param metadata
+     *            source entity meta data.
      * @return the entity save graph
      */
     public List<EntitySaveGraph> handleRelation(Object entity, EntityMetadata metadata)
     {
-    	List<EntitySaveGraph> objectGraphs = new ArrayList<EntitySaveGraph>();
+        List<EntitySaveGraph> objectGraphs = new ArrayList<EntitySaveGraph>();
         List<Relation> relations = metadata.getRelations();
         Object rlEntity = null;
         EntitySaveGraph objectGraph = new EntitySaveGraph();
         objectGraph.setParentEntity(entity);
 
-        // TODO : Need to find a way for recursive calls and by-pass in case parent and child belongs to same Store!
-        
-        if(relations.isEmpty())
+        // TODO : Need to find a way for recursive calls and by-pass in case
+        // parent and child belongs to same Store!
+
+        if (relations.isEmpty())
         {
             objectGraphs.add(objectGraph);
             return objectGraphs;
         }
-        
+
         for (Relation relation : relations)
         {
             Relation.ForeignKey relationType = relation.getType();
@@ -73,55 +76,57 @@ public final class EntityInterceptor
 
             objectGraph = handler.handleAssociation(entity, rlEntity, metadata, relation);
             objectGraphs.add(objectGraph);
-            
-            //object graph 
-            //If it is unidirectional, then detach child from parent.
-            //if it is bidirectional, then detach both of them.(disjoint of them)
+
+            // object graph
+            // If it is unidirectional, then detach child from parent.
+            // if it is bidirectional, then detach both of them.(disjoint of
+            // them)
             // once done with detacher, call to specific client for persistence.
-            
-           // No need of detacher.
-            
+
+            // No need of detacher.
+
             // Another case is : If returning child entity is also holding up
             // relations. then need to prepare a chain of calls. that will be
             // recursive call.
             // handler.handleAssociation(entity, metadata);
 
         }
-        
+
         return objectGraphs;
         // At the end of for loop, there is a list of objects to be persisted
         // sequentially.
     }
- 
+
     /**
      * Gets the handler instance.
-     *
-     * @param key the key
+     * 
+     * @param key
+     *            the key
      * @return the handler instance
      */
     private MappingHandler getHandlerInstance(Relation.ForeignKey key)
+    {
+        MappingHandler handler = null;
+        switch (key)
         {
-            MappingHandler handler = null;
-            switch (key)
-            {
-            case ONE_TO_ONE:
-                handler = new OneToOneHandler();
-                break;
-            case ONE_TO_MANY:
-                handler = new OneToManyHandler();
-                break;
-            case MANY_TO_ONE:
-                handler = new ManyToOneHandler();
-                break;
-            case MANY_TO_MANY:
-                handler = new ManyToManyHandler();
-                break;
+        case ONE_TO_ONE:
+            handler = new OneToOneHandler();
+            break;
+        case ONE_TO_MANY:
+            handler = new OneToManyHandler();
+            break;
+        case MANY_TO_ONE:
+            handler = new ManyToOneHandler();
+            break;
+        case MANY_TO_MANY:
+            handler = new ManyToManyHandler();
+            break;
 
-            default:
-                break;
-            }
-
-            return handler;
-
+        default:
+            break;
         }
- }
+
+        return handler;
+
+    }
+}

@@ -28,19 +28,19 @@ import com.impetus.client.onetoone.OTONPerson;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 public class PersonTest
 {
 
-//    @Test
+    // @Test
     public void testPersist()
     {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-        
+
         EntityManager em = emf.createEntityManager();
         em.persist(prepareObject());
-        emf.close(); 
+        emf.close();
     }
 
     /**
@@ -54,22 +54,21 @@ public class PersonTest
         OTMAddress address = new OTMAddress();
         address.setAddressId("oma");
         address.setStreet("sadak");
-        
+
         Set<OTMAddress> addresses = new HashSet<OTMAddress>(1);
         addresses.add(address);
         person.setAddresses(addresses);
         return person;
     }
 
-
     @Test
     public void testFindById()
     {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-        
+
         EntityManager em = emf.createEntityManager();
         OTMNPerson obj = em.find(OTMNPerson.class, "omp");
-        OTMAddress address =  obj.getAddresses().iterator().next();
+        OTMAddress address = obj.getAddresses().iterator().next();
         System.out.println(obj.getClass());
     }
 }

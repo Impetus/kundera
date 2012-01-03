@@ -23,30 +23,30 @@ public class MongoDBClientFactory extends GenericClientFactory
     private static Logger logger = Logger.getLogger(MongoDBClientFactory.class);
 
     IndexManager indexManager;
-    
+
     private DB mongoDB;
 
     @Override
     protected void initializeClient()
     {
-    	indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));                                                                                             
+        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
 
     }
 
     @Override
     protected Object createPoolOrConnection()
     {
-    	
-    	mongoDB = getConnection();
-    	
-    	return mongoDB;
+
+        mongoDB = getConnection();
+
+        return mongoDB;
     }
 
     @Override
     protected Client instantiateClient()
     {
         // TODO To change this one pool is implemented
-        
+
         return new MongoDBClient(mongoDB, indexManager);
     }
 
@@ -93,17 +93,17 @@ public class MongoDBClientFactory extends GenericClientFactory
     @Override
     public void unload(String... persistenceUnits)
     {
-    	indexManager.close();
-    	
-    	if (this.mongoDB != null)
+        indexManager.close();
+
+        if (this.mongoDB != null)
         {
-    		logger.info("Closing connection to mongodb.");
+            logger.info("Closing connection to mongodb.");
             this.mongoDB.getMongo().close();
             logger.info("Closed connection to mongodb.");
         }
         else
         {
-        	logger.warn("Can't close connection to MONGODB, it was already disconnected");
+            logger.warn("Can't close connection to MONGODB, it was already disconnected");
         }
     }
 }

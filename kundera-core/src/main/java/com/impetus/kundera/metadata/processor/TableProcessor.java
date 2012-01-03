@@ -286,25 +286,26 @@ public class TableProcessor extends AbstractEntityFieldProcessor
      * Adds relationship info into metadata for a given field
      * <code>relationField</code>
      */
-	private void addRelationIntoMetadata(Class<?> entityClass,
-			Field relationField, EntityMetadata metadata) {
-		RelationMetadataProcessor relProcessor = null;
+    private void addRelationIntoMetadata(Class<?> entityClass, Field relationField, EntityMetadata metadata)
+    {
+        RelationMetadataProcessor relProcessor = null;
 
-		try {
+        try
+        {
 
-			relProcessor = RelationMetadataProcessorFactory.getRelationMetadataProcessor(relationField);
-			
-			if(relProcessor != null) {
-				relProcessor.addRelationIntoMetadata(relationField, metadata);
-			}
-					
-			
-		} catch (PersistenceException pe) {
-			throw new PersistenceException(
-					"Error with relationship in @Entity(" + entityClass + "."
-							+ relationField.getName() + "), reason: "
-							+ pe.getMessage());
-		}
-	}
+            relProcessor = RelationMetadataProcessorFactory.getRelationMetadataProcessor(relationField);
+
+            if (relProcessor != null)
+            {
+                relProcessor.addRelationIntoMetadata(relationField, metadata);
+            }
+
+        }
+        catch (PersistenceException pe)
+        {
+            throw new PersistenceException("Error with relationship in @Entity(" + entityClass + "."
+                    + relationField.getName() + "), reason: " + pe.getMessage());
+        }
+    }
 
 }

@@ -187,8 +187,8 @@ public class EntityManagerSession
     public final void clear()
     {
         sessionCache = new ConcurrentHashMap<Object, Object>();
-        //TODO this is a bug.
-//        getL2Cache().evictAll();
+        // TODO this is a bug.
+        // getL2Cache().evictAll();
     }
 
     /**

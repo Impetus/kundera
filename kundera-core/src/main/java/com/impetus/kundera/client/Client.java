@@ -35,54 +35,71 @@ public interface Client
 
     /**
      * Writes Multiple columns.
-     *
-     * @param e Ehanced Entity
-     * @throws Exception the exception
+     * 
+     * @param e
+     *            Ehanced Entity
+     * @throws Exception
+     *             the exception
      */
     @Deprecated
     void persist(EnhancedEntity e) throws Exception;
 
     /**
      * Retrieve columns from a column-family row.
-     *
-     * @param <E> the element type
-     * @param entityClass the entity class
-     * @param key The key of the row
+     * 
+     * @param <E>
+     *            the element type
+     * @param entityClass
+     *            the entity class
+     * @param key
+     *            The key of the row
      * @return A list of matching columns
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     <E> E find(Class<E> entityClass, String key) throws Exception;
 
     /**
      * Retrieve columns from multiple rows of a column-family.
-     *
-     * @param <E> the element type
-     * @param entityClass the entity class
-     * @param keys Array of row keys
+     * 
+     * @param <E>
+     *            the element type
+     * @param entityClass
+     *            the entity class
+     * @param keys
+     *            Array of row keys
      * @return A Map of row and corresponding list of columns.
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     <E> List<E> find(Class<E> entityClass, String... keys) throws Exception;
 
     /**
      * Load data.
-     *
-     * @param <E> the element type
-     * @param entityClass the entity class
-     * @param embeddedColumnMap the col
+     * 
+     * @param <E>
+     *            the element type
+     * @param entityClass
+     *            the entity class
+     * @param embeddedColumnMap
+     *            the col
      * @return the list
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap) throws Exception;
 
     /**
      * Loads columns from multiple rows restricting results to conditions stored
      * in <code>filterClauseQueue</code>.
-     *
-     * @param <E> the element type
-     * @param query the query
+     * 
+     * @param <E>
+     *            the element type
+     * @param query
+     *            the query
      * @return the list
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     @SuppressWarnings("unchecked")
     <E> List<E> loadData(Query query) throws Exception;
@@ -91,7 +108,6 @@ public interface Client
      * Shutdown.
      */
     void close();
-
 
     /**
      * 
@@ -104,7 +120,7 @@ public interface Client
 
     /**
      * Gets the persistence unit.
-     *
+     * 
      * @return the persistence unit
      */
     String getPersistenceUnit();
@@ -113,38 +129,43 @@ public interface Client
     // clients
     /**
      * Gets the index manager.
-     *
+     * 
      * @return the index manager
      */
     IndexManager getIndexManager();
 
     /**
      * Sets the persistence unit.
-     *
-     * @param persistenceUnit the new persistence unit
+     * 
+     * @param persistenceUnit
+     *            the new persistence unit
      */
     void setPersistenceUnit(String persistenceUnit);
 
     /**
-     *  On persistence
-     * @param entitySaveGraph              entity save graph
-     * @param metadata                     entity meta data
-     * @return id                          id of persisted entity.
+     * On persistence
+     * 
+     * @param entitySaveGraph
+     *            entity save graph
+     * @param metadata
+     *            entity meta data
+     * @return id id of persisted entity.
      */
     String persist(EntitySaveGraph entitySaveGraph, EntityMetadata metadata);
-    
+
     /**
-     *  On persistence
-     *  @param childEntity                 child entity
-     * @param entitySaveGraph              entity save graph
-     * @param metadata                     entity meta data
-     * @return id                          id of persisted entity.
+     * On persistence
+     * 
+     * @param childEntity
+     *            child entity
+     * @param entitySaveGraph
+     *            entity save graph
+     * @param metadata
+     *            entity meta data
+     * @return id id of persisted entity.
      */
-    void  persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata); 
-    
-    void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph);
-    
-    
+    void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata);
+
     /**
      * 
      * @param clazz
@@ -153,4 +174,44 @@ public interface Client
      * @return
      */
     Object find(Class<?> clazz, EntityMetadata metadata, String rowId);
+
+    /**
+     * Inserts records into Join Table
+     * 
+     * @param joinTableName
+     *            Name of Join Table
+     * @param joinColumnName
+     *            Name of Join Column
+     * @param inverseJoinColumnName
+     *            Name of Inverse Join Column
+     * @param relMetadata
+     *            Entity metadata for the child entity (i.e. entity at the other
+     *            side of the relationship)
+     * @param objectGraph
+     *            Object graph of the persistence (Includes parent and child
+     *            data and other related info)
+     */
+    void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+            EntityMetadata relMetadata, EntitySaveGraph objectGraph);
+
+    /**
+     * Retrieves a list of foreign keys from a join table for a given primary
+     * key
+     * 
+     * @param joinTableName
+     *            Name of Join Table
+     * @param joinColumnName
+     *            Name of Join Column
+     * @param inverseJoinColumnName
+     *            Name of Inverse Join Column
+     * @param relMetadata
+     *            Entity metadata for the child entity (i.e. entity at the other
+     *            side of the relationship)
+     * @param objectGraph
+     *            Object graph of the persistence (Includes parent and child
+     *            data and other related info)
+     * @return
+     */
+    <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+            EntityMetadata relMetadata, EntitySaveGraph objectGraph);
 }

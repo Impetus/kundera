@@ -35,17 +35,20 @@ public final class Relation
 
     /** The type. */
     private Relation.ForeignKey type;
-    
+
     /** Join column name for this relationship */
-    private String joinColumnName;     
-    
+    private String joinColumnName;
+
     /** Whether this relationship is through a Join Table */
     private boolean isRelatedViaJoinTable;
-    
+
     /** Metadata for JoinTable, applicable only if isRelatedViaJoinTable==true */
-    private JoinTableMetadata joinTableMetadata; 
-    
-    /** Whether this relationship is joined by primary key, only applicable for OneToOne*/
+    private JoinTableMetadata joinTableMetadata;
+
+    /**
+     * Whether this relationship is joined by primary key, only applicable for
+     * OneToOne
+     */
     private boolean isJoinedByPrimaryKey;
 
     /**
@@ -181,66 +184,77 @@ public final class Relation
     public Relation.ForeignKey getType()
     {
         return type;
-    }   
-    
+    }
 
     /**
-	 * @return the joinColumnName
-	 */
-	public String getJoinColumnName() {
-		return joinColumnName;
-	}
+     * @return the joinColumnName
+     */
+    public String getJoinColumnName()
+    {
+        return joinColumnName;
+    }
 
-	/**
-	 * @param joinColumnName the joinColumnName to set
-	 */
-	public void setJoinColumnName(String joinColumnName) {
-		this.joinColumnName = joinColumnName;
-	}
+    /**
+     * @param joinColumnName
+     *            the joinColumnName to set
+     */
+    public void setJoinColumnName(String joinColumnName)
+    {
+        this.joinColumnName = joinColumnName;
+    }
 
-	/**
-	 * @return the isRelatedViaJoinTable
-	 */
-	public boolean isRelatedViaJoinTable() {
-		return isRelatedViaJoinTable;
-	}
+    /**
+     * @return the isRelatedViaJoinTable
+     */
+    public boolean isRelatedViaJoinTable()
+    {
+        return isRelatedViaJoinTable;
+    }
 
-	/**
-	 * @param isRelatedViaJoinTable the isRelatedViaJoinTable to set
-	 */
-	public void setRelatedViaJoinTable(boolean isRelatedViaJoinTable) {
-		this.isRelatedViaJoinTable = isRelatedViaJoinTable;
-	}
-	
-	/**
-	 * @return the joinTableMetadata
-	 */
-	public JoinTableMetadata getJoinTableMetadata() {
-		return joinTableMetadata;
-	}
+    /**
+     * @param isRelatedViaJoinTable
+     *            the isRelatedViaJoinTable to set
+     */
+    public void setRelatedViaJoinTable(boolean isRelatedViaJoinTable)
+    {
+        this.isRelatedViaJoinTable = isRelatedViaJoinTable;
+    }
 
-	/**
-	 * @param joinTableMetadata the joinTableMetadata to set
-	 */
-	public void setJoinTableMetadata(JoinTableMetadata joinTableMetadata) {
-		this.joinTableMetadata = joinTableMetadata;
-	}	
+    /**
+     * @return the joinTableMetadata
+     */
+    public JoinTableMetadata getJoinTableMetadata()
+    {
+        return joinTableMetadata;
+    }
 
-	/**
-	 * @return the isJoinedByPrimaryKey
-	 */
-	public boolean isJoinedByPrimaryKey() {
-		return isJoinedByPrimaryKey;
-	}
+    /**
+     * @param joinTableMetadata
+     *            the joinTableMetadata to set
+     */
+    public void setJoinTableMetadata(JoinTableMetadata joinTableMetadata)
+    {
+        this.joinTableMetadata = joinTableMetadata;
+    }
 
-	/**
-	 * @param isJoinedByPrimaryKey the isJoinedByPrimaryKey to set
-	 */
-	public void setJoinedByPrimaryKey(boolean isJoinedByPrimaryKey) {
-		this.isJoinedByPrimaryKey = isJoinedByPrimaryKey;
-	}
+    /**
+     * @return the isJoinedByPrimaryKey
+     */
+    public boolean isJoinedByPrimaryKey()
+    {
+        return isJoinedByPrimaryKey;
+    }
 
-	/**
+    /**
+     * @param isJoinedByPrimaryKey
+     *            the isJoinedByPrimaryKey to set
+     */
+    public void setJoinedByPrimaryKey(boolean isJoinedByPrimaryKey)
+    {
+        this.isJoinedByPrimaryKey = isJoinedByPrimaryKey;
+    }
+
+    /**
      * Checks if is unary.
      * 
      * @return true, if is unary
