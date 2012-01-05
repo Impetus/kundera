@@ -381,12 +381,12 @@ public class PersistenceDelegator
             metadata = getMetadata(objectGraph.getParentClass());
             objectGraph.setParentId(getId(parentEntity, metadata));
         }
-
-        if (getSession().lookup(parentEntity.getClass(), objectGraph.getParentId()) != null)
-        {
+        
+//        if (getSession().lookup(parentEntity.getClass(), objectGraph.getParentId()) != null)
+//        {
             Client pClient = getClient(metadata);
-            pClient.persist(objectGraph, metadata);
-
+            pClient.delete(parentEntity, objectGraph.getParentId(), metadata);
+            
             Object childEntity = objectGraph.getChildEntity();
 
             // If any association exists.
@@ -396,13 +396,11 @@ public class PersistenceDelegator
             }
 
             session.remove(parentEntity.getClass(), objectGraph.getParentEntity());
-
-        }
-        else
-        {
-            throw new PersistenceException("invalid operation on detached entity:" + parentEntity.getClass()
-                    + " for id :" + objectGraph.getParentId());
-        }
+            
+//        } else
+//        {
+////            throw new PersistenceException("invalid operation on detached entity:" + parentEntity.getClass() + " for id :" + objectGraph.getParentId());
+//        }
     }
 
     /**
@@ -445,12 +443,12 @@ public class PersistenceDelegator
         EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
         String id = getId(child, metadata);
         objectGraph.setChildId(id);
-        if (getSession().lookup(child.getClass(), id) == null)
-        {
+//        if (getSession().lookup(child.getClass(), id) == null)
+//        {
             Client chClient = getClient(metadata);
             chClient.delete(child, id, metadata);
-            session.store(id, child);
-        }
+//            session.store(id, child);
+//        }
     }
 
     /**

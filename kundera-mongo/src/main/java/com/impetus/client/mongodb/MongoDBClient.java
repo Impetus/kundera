@@ -83,36 +83,11 @@ public class MongoDBClient implements Client
     }
 
     @Override
+    @Deprecated
     public void persist(EnhancedEntity enhancedEntity) throws Exception
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), enhancedEntity
-                .getEntity().getClass());
-        /*
-         * String dbName = entityMetadata.getSchema(); String documentName =
-         * entityMetadata.getTableName(); String key = enhancedEntity.getId();
-         * 
-         * log.debug("Checking whether record already exist for " + dbName + "."
-         * + documentName + " for " + key); Object entity =
-         * find(enhancedEntity.getEntity().getClass(), key); if (entity != null)
-         * { log.debug("Updating data into " + dbName + "." + documentName +
-         * " for " + key); DBCollection dbCollection =
-         * mongoDb.getCollection(documentName);
-         * 
-         * BasicDBObject searchQuery = new BasicDBObject();
-         * searchQuery.put(entityMetadata.getIdColumn().getName(), key);
-         * BasicDBObject updatedDocument = new MongoDBDataHandler(this,
-         * getPersistenceUnit()).getDocumentFromEntity( entityMetadata,
-         * enhancedEntity, null); dbCollection.update(searchQuery,
-         * updatedDocument);
-         * 
-         * } else { log.debug("Inserting data into " + dbName + "." +
-         * documentName + " for " + key); DBCollection dbCollection =
-         * mongoDb.getCollection(documentName);
-         * 
-         * BasicDBObject document = new MongoDBDataHandler(this,
-         * getPersistenceUnit()).getDocumentFromEntity( entityMetadata,
-         * enhancedEntity, null); dbCollection.insert(document); }
-         */}
+        throw new PersistenceException("Not Implemented");
+    }
 
     @Override
     public String persist(EntitySaveGraph entityGraph, EntityMetadata entityMetadata)
@@ -277,30 +252,13 @@ public class MongoDBClient implements Client
         String dbName = entityMetadata.getSchema();
         String documentName = entityMetadata.getTableName();
 
-        log.debug("Checking whether record already exist for " + dbName + "." + documentName + " for " + id);
-        Object entityFound = find(entityMetadata.getEntityClazz(), id);
+        log.debug("Persisting data into " + dbName + "." + documentName + " for " + id);
+        DBCollection dbCollection = mongoDb.getCollection(documentName);
 
-        if (entityFound != null)
-        {
-            log.debug("Updating data into " + dbName + "." + documentName + " for " + id);
-            DBCollection dbCollection = mongoDb.getCollection(documentName);
+        BasicDBObject document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(
+                entityMetadata, entity, relations);
+        dbCollection.insert(document);
 
-            BasicDBObject searchQuery = new BasicDBObject();
-            searchQuery.put(entityMetadata.getIdColumn().getName(), id);
-            BasicDBObject updatedDocument = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(
-                    entityMetadata, entity, relations);
-            dbCollection.update(searchQuery, updatedDocument);
-
-        }
-        else
-        {
-            log.debug("Inserting data into " + dbName + "." + documentName + " for " + id);
-            DBCollection dbCollection = mongoDb.getCollection(documentName);
-
-            BasicDBObject document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(
-                    entityMetadata, entity, relations);
-            dbCollection.insert(document);
-        }
     }
 
     /*
@@ -320,7 +278,7 @@ public class MongoDBClient implements Client
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
 
         BasicDBObject query = new BasicDBObject();
-        query.put("_id", key);
+        query.put(entityMetadata.getIdColumn().getName(), key);
 
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
@@ -428,43 +386,6 @@ public class MongoDBClient implements Client
         return entities;
     }
 
-    // // @Override
-    // public void delete(EnhancedEntity enhancedEntity) throws Exception
-    // {
-    // EntityMetadata entityMetadata =
-    // KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(),
-    // enhancedEntity
-    // .getEntity().getClass());
-    // DBCollection dbCollection =
-    // mongoDb.getCollection(entityMetadata.getTableName());
-    //
-    // // Find the DBObject to remove first
-    // BasicDBObject query = new BasicDBObject();
-    // query.put(entityMetadata.getSchema(), enhancedEntity.getId());
-    //
-    // DBCursor cursor = dbCollection.find(query);
-    // DBObject documentToRemove = null;
-    //
-    // if (cursor.hasNext())
-    // {
-    // documentToRemove = cursor.next();
-    // }
-    // else
-    // {
-    // throw new PersistenceException("Can't remove Row# " +
-    // enhancedEntity.getId() + " for "
-    // + entityMetadata.getTableName() + " because record doesn't exist.");
-    // }
-    //
-    // dbCollection.remove(documentToRemove);
-    // }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
-     * java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
-     */
     @Override
     public void delete(Object entity, Object pKey, EntityMetadata entityMetadata) throws Exception
     {
@@ -472,22 +393,9 @@ public class MongoDBClient implements Client
 
         // Find the DBObject to remove first
         BasicDBObject query = new BasicDBObject();
-        query.put(entityMetadata.getSchema(), pKey.toString());
+        query.put(entityMetadata.getIdColumn().getName(), pKey.toString());
 
-        DBCursor cursor = dbCollection.find(query);
-        DBObject documentToRemove = null;
-
-        if (cursor.hasNext())
-        {
-            documentToRemove = cursor.next();
-        }
-        else
-        {
-            throw new PersistenceException("Can't remove Row# " + pKey.toString() + " for "
-                    + entityMetadata.getTableName() + " because record doesn't exist.");
-        }
-
-        dbCollection.remove(documentToRemove);
+        dbCollection.remove(query);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
 
     }

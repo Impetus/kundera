@@ -103,10 +103,10 @@ public class EntityValidatorImpl implements EntityValidator
             throw new PersistenceException(clazz.getName() + " can only have 1 @Id field.");
         }
 
-        if (!keys.get(0).getType().equals(String.class))
-        {
-            throw new PersistenceException(clazz.getName() + " @Id must be of String type.");
-        }
+//        if (!keys.get(0).getType().equals(String.class))
+//        {
+//            throw new PersistenceException(clazz.getName() + " @Id must be of String type.");
+//        }
 
         // save in cache
         classes.add(clazz);
