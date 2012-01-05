@@ -37,13 +37,6 @@ import com.impetus.client.hbase.Reader;
 public class HBaseReader implements Reader
 {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.hbase.client.Reader#LoadData(org.apache.hadoop.hbase
-     * .client.HTable, java.lang.String[], java.lang.String[], java.lang.String)
-     */
     @SuppressWarnings("unused")
     @Override
     public HBaseData LoadData(HTable hTable, String columnFamily, String rowKey) throws IOException

@@ -86,7 +86,7 @@ public class MongoDBDataHandler
             entity = entityClass.newInstance();
 
             // Populate primary key column
-            String rowKey = (String) document.get(m.getIdColumn().getName());
+            String rowKey = (String) document.get("_id");
             PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), rowKey);
 
             // Populate entity columns
@@ -216,6 +216,7 @@ public class MongoDBDataHandler
 
         // Populate Row Key
         dbObj.put("_id", PropertyAccessorHelper.getId(entity, m));
+        dbObj.put(m.getIdColumn().getName(), PropertyAccessorHelper.getId(entity, m));
 
         // Populate columns
         for (Column column : columns)

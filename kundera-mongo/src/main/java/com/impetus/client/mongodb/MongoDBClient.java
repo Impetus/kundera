@@ -210,7 +210,24 @@ public class MongoDBClient implements Client
             String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
     {
 
-        return null;
+        String parentId = objectGraph.getParentId();
+        List<E> foreignKeys = new ArrayList<E>();
+
+        DBCollection dbCollection = mongoDb.getCollection(joinTableName);
+        BasicDBObject query = new BasicDBObject();
+
+        query.put(joinColumnName, parentId);
+
+        DBCursor cursor = dbCollection.find(query);
+        DBObject fetchedDocument = null;
+
+        while (cursor.hasNext())
+        {
+            fetchedDocument = cursor.next();
+            String foreignKey = (String) fetchedDocument.get(inverseJoinColumnName);
+            foreignKeys.add((E) foreignKey);
+        }
+        return foreignKeys;
     }
 
     private void addColumnsToJoinTable(String joinColumnName, String inverseJoinColumnName, EntityMetadata relMetadata,
@@ -303,7 +320,7 @@ public class MongoDBClient implements Client
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
 
         BasicDBObject query = new BasicDBObject();
-        query.put(entityMetadata.getIdColumn().getName(), key);
+        query.put("_id", key);
 
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;

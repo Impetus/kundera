@@ -614,6 +614,50 @@ public class PelopsDataHandler extends DataHandler
     }
 
     /**
+     * @param <E>
+     * @param inverseJoinColumnName
+     * @param columns
+     * @return
+     */
+    public <E> List<E> getForeignKeysFromJoinTable(String inverseJoinColumnName, List<Column> columns)
+    {
+        List<E> foreignKeys = new ArrayList<E>();
+
+        if (columns == null || columns.isEmpty())
+        {
+            return foreignKeys;
+        }
+
+        for (Column c : columns)
+        {
+            try
+            {
+                // Thrift Column name
+                String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(c.getName());
+
+                // Thrift Column Value
+                byte[] thriftColumnValue = c.getValue();
+                if (null == thriftColumnValue)
+                {
+                    continue;
+                }
+
+                if (thriftColumnName != null && thriftColumnName.startsWith(inverseJoinColumnName))
+                {
+                    String val = PropertyAccessorFactory.STRING.fromBytes(thriftColumnValue);
+                    foreignKeys.add((E) val);
+                }
+            }
+            catch (PropertyAccessException e)
+            {
+                continue;
+            }
+
+        }
+        return foreignKeys;
+    }
+
+    /**
      * Utility class that represents a row in Cassandra DB.
      * 
      * @author animesh.kumar

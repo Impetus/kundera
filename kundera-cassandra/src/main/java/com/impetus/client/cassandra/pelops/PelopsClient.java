@@ -433,7 +433,14 @@ public class PelopsClient implements Client
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
             String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
     {
-        return null;
+        String parentId = objectGraph.getParentId();
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        List<Column> columns = selector.getColumnsFromRow(joinTableName, new Bytes(parentId.getBytes()),
+                Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
+
+        PelopsDataHandler handler = new PelopsDataHandler(this);
+        List<E> foreignKeys = handler.getForeignKeysFromJoinTable(inverseJoinColumnName, columns);
+        return foreignKeys;
     }
 
     /**

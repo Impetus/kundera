@@ -319,7 +319,9 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
             String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
     {
-        return null;
+        String parentId = objectGraph.getParentId();
+        return handler.getForeignKeysFromJoinTable(joinTableName, parentId, inverseJoinColumnName);
+
     }
 
     /**

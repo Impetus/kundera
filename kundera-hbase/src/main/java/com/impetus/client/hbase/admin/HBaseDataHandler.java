@@ -306,6 +306,37 @@ public class HBaseDataHandler implements DataHandler
 
     }
 
+    @Override
+    public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String rowKey, String inverseJoinColumnName)
+    {
+        List<E> foreignKeys = new ArrayList<E>();
+
+        // Load raw data from Join Table in HBase
+        try
+        {
+            HBaseData data = hbaseReader.LoadData(gethTable(joinTableName), Constants.JOIN_COLUMNS_FAMILY_NAME, rowKey);
+            List<KeyValue> hbaseValues = data.getColumns();
+
+            for (KeyValue colData : hbaseValues)
+            {
+                String hbaseColumn = Bytes.toString(colData.getColumn());
+
+                if (hbaseColumn.startsWith(Constants.JOIN_COLUMNS_FAMILY_NAME + ":" + inverseJoinColumnName))
+                {
+                    byte[] val = colData.getValue();
+                    String hbaseColumnValue = Bytes.toString(val);
+
+                    foreignKeys.add((E) hbaseColumnValue);
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            return foreignKeys;
+        }
+        return foreignKeys;
+    }
+
     private HTable gethTable(final String tableName) throws IOException
     {
         return new HTable(conf, tableName);

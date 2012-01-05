@@ -62,7 +62,26 @@ public interface DataHandler
     void writeData(String tableName, EntityMetadata m, Object entity, String rowId, List<RelationHolder> relations)
             throws IOException;
 
+    /**
+     * Writes data into Join Table
+     * 
+     * @param tableName
+     * @param rowId
+     * @param columns
+     * @throws IOException
+     */
     void writeJoinTableData(String tableName, String rowId, Map<String, String> columns) throws IOException;
+
+    /**
+     * Retrieves a list of foreign keys from the join table for a given row key
+     * 
+     * @param <E>
+     * @param joinTableName
+     * @param rowKey
+     * @param inverseJoinColumnName
+     * @return
+     */
+    <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String rowKey, String inverseJoinColumnName);
 
     /**
      * Shutdown.
