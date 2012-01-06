@@ -25,6 +25,7 @@ import javax.persistence.Query;
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.StatelessSession;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
@@ -60,6 +61,8 @@ public class HibernateClient implements Client
 
     /** The index manager. */
     private IndexManager indexManager;
+    
+    private StatelessSession s;    
 
     /**
      * Instantiates a new hibernate client.
@@ -442,5 +445,47 @@ public class HibernateClient implements Client
         Session s = sf.openSession();
         s.beginTransaction();
         return s.get(clazz, rowId);
+    }
+
+
+
+    public List<Object[]> find(String nativeQuery, List<String> relations, Class clazz)
+    {
+//        Session s = getSessionInstance();
+        if(s == null)
+        {
+          s = sf.openStatelessSession();
+        
+          s.beginTransaction();
+        }
+        SQLQuery q = s.createSQLQuery(nativeQuery).addEntity(clazz);
+        for(String r : relations)
+        {
+            q.addScalar(r);
+        }
+
+        
+        return q.list();
+    }
+
+    public List<Object> find(String colName, String colValue, EntityMetadata m)
+    {
+        String tableName = m.getTableName();
+        String aliasName = "_" + tableName;
+        StringBuilder queryBuilder = new StringBuilder("Select ");
+        queryBuilder.append(aliasName);
+        queryBuilder.append(".*");
+        queryBuilder.append("From ");
+        queryBuilder.append(tableName);
+        queryBuilder.append(" ");
+        queryBuilder.append(aliasName);
+        queryBuilder.append(" Where ");
+        queryBuilder.append(colName);
+        queryBuilder.append(" = ");
+        queryBuilder.append(colValue);
+        Session s = getSessionInstance();
+        s.beginTransaction();
+        SQLQuery q = s.createSQLQuery(queryBuilder.toString()).addEntity(m.getEntityClazz());
+        return q.list();
     }
 }

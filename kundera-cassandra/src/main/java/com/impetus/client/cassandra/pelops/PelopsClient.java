@@ -18,6 +18,7 @@ package com.impetus.client.cassandra.pelops;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,10 @@ import javax.persistence.Query;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.IndexClause;
+import org.apache.cassandra.thrift.IndexOperator;
+import org.apache.cassandra.thrift.KeyRange;
+import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
@@ -39,7 +44,9 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.impetus.client.cassandra.pelops.PelopsDataHandler.ThriftRow;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -503,6 +510,101 @@ public class PelopsClient implements Client
 
     }
 
+    /**
+     * Find.
+     *
+     * @param ixClause the ix clause
+     * @param m the m
+     * @return the list
+     */
+    public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations)
+    {
+        // ixClause can be 0,1 or more!
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+
+        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
+        List<Object> entities = null;
+        if (ixClause.isEmpty())
+        {
+            Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(), new KeyRange(
+                    Integer.MAX_VALUE), slicePredicate, ConsistencyLevel.ONE);
+            entities = new ArrayList<Object>(qResults.size());
+            populateData(m, qResults, entities, isRelation, relations);
+        }
+
+        for (IndexClause ix : ixClause)
+        {
+            Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
+                    ConsistencyLevel.ONE);
+            entities = new ArrayList<Object>(qResults.size());
+            // iterate through complete map and
+            populateData(m, qResults, entities, isRelation, relations);
+        }
+
+        return entities;
+    }
+
+    /**
+     * Populate data.
+     *
+     * @param m the m
+     * @param qResults the q results
+     * @param entities the entities
+     */
+    private void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities, boolean isRelational, List<String> relationNames)
+    {
+        Iterator<Bytes> rowIter = qResults.keySet().iterator();
+        while (rowIter.hasNext())
+        {
+            Bytes rowKey = rowIter.next();
+            List<Column> columns = qResults.get(rowKey);
+            try
+            {
+                Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m,
+                                                           dataHandler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), 
+                                                           m.getTableName(), columns, null), relationNames, isRelational);
+                entities.add(e);
+            }
+            catch (IllegalStateException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (Exception e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#find(java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
+     */
+    public List<Object> find(String colName, String colValue, EntityMetadata m)
+    {
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+
+        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
+        List<Object> entities = null;
+        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, Integer.MAX_VALUE,
+                                                 Selector.newIndexExpression(colName, IndexOperator.EQ, 
+                                                                             Bytes.fromByteArray(colValue.getBytes())));
+        Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), 
+                                                                       ix, slicePredicate, ConsistencyLevel.ONE);
+        entities = new ArrayList<Object>(qResults.size());
+        // iterate through complete map and
+        populateData(m, qResults, entities, false, null);
+
+        return entities;
+    }
+
+    public List<EnhanceEntity> find( EntityMetadata m, List<String> relationNames, List<IndexClause> conditions)
+    {
+           
+        return (List<EnhanceEntity>)find(conditions, m, true, relationNames);
+    }
+    
     /**
      * On index.
      * 

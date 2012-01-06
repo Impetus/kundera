@@ -30,6 +30,7 @@ import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
@@ -185,5 +186,25 @@ public class LuceneQuery extends QueryImpl implements Query
 
         }
 
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+     */
+    @Override
+    protected List<Object> populateEntities(EntityMetadata m, Client client)
+    {
+        throw new UnsupportedOperationException("Method not supported for default indexing");
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client, java.util.List, java.util.List, boolean)
+     */
+    @Override
+    protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
+            List<String> relationNames, boolean isParent)
+    {
+        throw new UnsupportedOperationException("Method not supported for default indexing");
+        
     }
 }

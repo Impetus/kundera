@@ -30,6 +30,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.PersistenceException;
 import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
@@ -464,13 +465,13 @@ public class PersistenceDelegator
             // invoke EntityInterceptor and get objectSaveGraph.
             EntityMetadata metadata = getMetadata(e.getClass());
             getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
-            EntityInterceptor interceptor = new EntityInterceptor();
-            List<EntitySaveGraph> objectGraphs = interceptor.handleRelation(e, metadata);
-
-            for (EntitySaveGraph objectGraph : objectGraphs)
-            {
-                saveGraph(objectGraph);
-            }
+//            EntityInterceptor interceptor = new EntityInterceptor();
+//            List<EntitySaveGraph> objectGraphs = interceptor.handleRelation(e, metadata);
+            List<EntitySaveGraph> objectGraphs = getGraph(e, metadata);
+            for(EntitySaveGraph objectGraph : objectGraphs)
+        {
+            saveGraph(objectGraph);
+        }
             getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
             log.debug("Data persisted successfully for entity : " + e.getClass());
         }
@@ -516,17 +517,19 @@ public class PersistenceDelegator
                 return null;
             }
 
-            // Find child entit(ies)
-            EntityInterceptor interceptor = new EntityInterceptor();
-            List<EntitySaveGraph> objectGraphs = interceptor.handleRelation(entity, getMetadata(entity.getClass()));
-            for (EntitySaveGraph objectGraph : objectGraphs)
-            {
-                // Compute object graph if there is any association.
-                if (objectGraph.getProperty() != null)
-                {
-                    onComputeGraph(entity, objectGraph, client, primaryKey.toString(), entityClass);
-                }
-            }
+//            EntityInterceptor interceptor = new EntityInterceptor();
+            // Collections.addAll(arg0, arg1)
+
+//            List<EntitySaveGraph> objectGraphs = interceptor.handleRelation(entity, getMetadata(entity.getClass()));
+            List<EntitySaveGraph> objectGraphs = getGraph(entity, getMetadata(entity.getClass()));
+			for (EntitySaveGraph objectGraph : objectGraphs) 
+			{
+				// Compute object graph if there is any association.
+				if (objectGraph.getProperty() != null) {
+					onComputeGraph(entity, objectGraph, client,
+							primaryKey.toString(), entityClass);
+				}
+			}
             boolean isCacheableToL2 = entityMetadata.isCacheable();
             getSession().store(primaryKey, entity, isCacheableToL2);
             return (E) entity;
@@ -931,7 +934,7 @@ public class PersistenceDelegator
      *            the clazz
      * @return the metadata
      */
-    private EntityMetadata getMetadata(Class<?> clazz)
+    public EntityMetadata getMetadata(Class<?> clazz)
     {
         return KunderaMetadataManager.getEntityMetadata(clazz, getPersistenceUnits());
     }
@@ -1049,7 +1052,7 @@ public class PersistenceDelegator
      *            the metadata
      * @return the id
      */
-    private String getId(Object entity, EntityMetadata metadata)
+    public String getId(Object entity, EntityMetadata metadata)
     {
         try
         {
@@ -1061,4 +1064,30 @@ public class PersistenceDelegator
         }
 
     }
+
+    /**
+     * Returns entity save graph collection for given entity.
+     * @param entity       entity in question
+     * @param metadata     entity's metadata
+     * @return             Collection of entity save graph  
+     */
+    public List<EntitySaveGraph> getGraph(Object entity, EntityMetadata metadata)
+    {
+        EntityInterceptor interceptor = new EntityInterceptor();
+        return interceptor.handleRelation(entity, metadata);
+    }
+
+    
+    public void store(Object id, Object entity)
+    {
+        session.store(id, entity);
+    }
+
+    public void store(List entities, EntityMetadata entityMetadata)
+    {
+        for(Object o : entities)
+        session.store(getId(o, entityMetadata), o);
+    }
+
+
 }

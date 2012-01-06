@@ -503,4 +503,9 @@ public class MongoDBClient implements Client
 
         return entity;
     }
+
+  public List<Object> find(String colName, String colValue, EntityMetadata m)
+    {
+        throw new UnsupportedOperationException("Method not supported");
+    }
 }

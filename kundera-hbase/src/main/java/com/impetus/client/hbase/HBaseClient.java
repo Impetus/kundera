@@ -384,4 +384,9 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     }
 
+    public List<Object> find(String colName, String colValue, EntityMetadata m)
+    {
+        throw new UnsupportedOperationException("Method not supported");
+    }
+
 }

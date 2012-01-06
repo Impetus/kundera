@@ -38,6 +38,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.DataHandler;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
@@ -79,10 +80,21 @@ public class PelopsDataHandler extends DataHandler
         }
         else
         {
-            List<Column> columns = selector.getColumnsFromRow(m.getTableName(), new Bytes(rowKey.getBytes()),
+			// TODO: this needs attention, once we finalize on how to determine SuperColmun Family.
+            List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(), rowKey,
+                    Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
+            List<Column> columns = null;
+            if(thriftSuperColumns == null && thriftSuperColumns.isEmpty())
+            {
+            columns = selector.getColumnsFromRow(m.getTableName(), new Bytes(rowKey.getBytes()),
                     Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
-
-            e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), columns, null));
+            e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), columns, null), null, false);
+            } else 
+            {
+                e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null, thriftSuperColumns), null, false);
+                
+            }
+            
 
         }
         return e;
@@ -203,21 +215,23 @@ public class PelopsDataHandler extends DataHandler
      * @throws Exception
      *             the exception
      */
-    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow) throws Exception
+    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow, List<String> relationNames, boolean isWrapperReq) throws Exception
     {
 
         // Instantiate a new instance
         Object entity = clazz.newInstance();
+        Map<String, Object> relations = null;
 
         // Map to hold property-name=>foreign-entity relations
-        // Map<String, Set<String>> foreignKeysMap = new HashMap<String,
-        // Set<String>>();
+     //   Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
         // Set row-key. Note: @Id is always String.
         PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), thriftRow.getId());
 
         // Iterate through each column
-        for (Column c : thriftRow.getColumns())
+     if(thriftRow.getColumns() != null && !thriftRow.getColumns().isEmpty() && (thriftRow.getColumns().size() == 1 && thriftRow.getColumns().get(0) != null))
+     {
+         for (Column c : thriftRow.getColumns())
         {
             String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(c.getName());
             byte[] thriftColumnValue = c.getValue();
@@ -230,7 +244,7 @@ public class PelopsDataHandler extends DataHandler
             // Check if this is a property, or a column representing foreign
             // keys
             com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
-            if (column != null)
+            if(column != null)
             {
                 try
                 {
@@ -240,10 +254,62 @@ public class PelopsDataHandler extends DataHandler
                 {
                     log.warn(pae.getMessage());
                 }
+            } else
+            {
+                if(relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
+                {
+                    relations = new HashMap<String, Object>();
+                    String value = PropertyAccessorFactory.STRING.fromBytes(thriftColumnValue);
+                    relations.put(thriftColumnName, value);
+                    //prepare EnhanceEntity and return it
+                }
             }
         }
+    }else 
+        {
+        for (SuperColumn c : thriftRow.getSuperColumns())
+            {
+                for (Column cc : c.getColumns())
+                {
 
-        return entity;
+                    String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(cc.getName());
+                    byte[] thriftColumnValue = cc.getValue();
+
+                    if (null == thriftColumnValue)
+                    {
+                        continue;
+                    }
+
+                    // Check if this is a property, or a column representing
+                    // foreign
+                    // keys
+                    com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
+                    if (column != null)
+                    {
+                        try
+                        {
+                            PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue);
+                        }
+                        catch (PropertyAccessException pae)
+                        {
+                            log.warn(pae.getMessage());
+                        }
+                    }
+                    else
+                    {
+                        if (relationNames != null && !relationNames.isEmpty()
+                                && relationNames.contains(thriftColumnName))
+                        {
+                            relations = new HashMap<String, Object>();
+                            String value = PropertyAccessorFactory.STRING.fromBytes(thriftColumnValue);
+                            relations.put(thriftColumnName, value);
+                            // prepare EnhanceEntity and return it
+                        }
+                    }
+                }
+            }
+        }
+        return isWrapperReq ? new EnhanceEntity(entity, thriftRow.getId(), relations):entity;
     }
 
     /**
