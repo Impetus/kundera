@@ -30,7 +30,6 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.PersistenceException;
 import javax.persistence.PostPersist;
-import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
@@ -382,26 +381,29 @@ public class PersistenceDelegator
             metadata = getMetadata(objectGraph.getParentClass());
             objectGraph.setParentId(getId(parentEntity, metadata));
         }
-        
-//        if (getSession().lookup(parentEntity.getClass(), objectGraph.getParentId()) != null)
-//        {
-            Client pClient = getClient(metadata);
-            pClient.delete(parentEntity, objectGraph.getParentId(), metadata);
-            
-            Object childEntity = objectGraph.getChildEntity();
 
-            // If any association exists.
-            if (childEntity != null)
-            {
-                onClientHandle(objectGraph, childEntity);
-            }
+        // if (getSession().lookup(parentEntity.getClass(),
+        // objectGraph.getParentId()) != null)
+        // {
+        Client pClient = getClient(metadata);
+        pClient.delete(parentEntity, objectGraph.getParentId(), metadata);
 
-            session.remove(parentEntity.getClass(), objectGraph.getParentEntity());
-            
-//        } else
-//        {
-////            throw new PersistenceException("invalid operation on detached entity:" + parentEntity.getClass() + " for id :" + objectGraph.getParentId());
-//        }
+        Object childEntity = objectGraph.getChildEntity();
+
+        // If any association exists.
+        if (childEntity != null)
+        {
+            onClientHandle(objectGraph, childEntity);
+        }
+
+        session.remove(parentEntity.getClass(), objectGraph.getParentEntity());
+
+        // } else
+        // {
+        // // throw new
+        // PersistenceException("invalid operation on detached entity:" +
+        // parentEntity.getClass() + " for id :" + objectGraph.getParentId());
+        // }
     }
 
     /**
@@ -444,12 +446,12 @@ public class PersistenceDelegator
         EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
         String id = getId(child, metadata);
         objectGraph.setChildId(id);
-//        if (getSession().lookup(child.getClass(), id) == null)
-//        {
-            Client chClient = getClient(metadata);
-            chClient.delete(child, id, metadata);
-//            session.store(id, child);
-//        }
+        // if (getSession().lookup(child.getClass(), id) == null)
+        // {
+        Client chClient = getClient(metadata);
+        chClient.delete(child, id, metadata);
+        // session.store(id, child);
+        // }
     }
 
     /**
@@ -462,16 +464,19 @@ public class PersistenceDelegator
     {
         try
         {
-            // invoke EntityInterceptor and get objectSaveGraph.
+            // Invoke Pre Persist Events
             EntityMetadata metadata = getMetadata(e.getClass());
             getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
-//            EntityInterceptor interceptor = new EntityInterceptor();
-//            List<EntitySaveGraph> objectGraphs = interceptor.handleRelation(e, metadata);
+
+            // Get Object graph list for this top level entity, and save them
+            // one by one.
             List<EntitySaveGraph> objectGraphs = getGraph(e, metadata);
-            for(EntitySaveGraph objectGraph : objectGraphs)
-        {
-            saveGraph(objectGraph);
-        }
+            for (EntitySaveGraph objectGraph : objectGraphs)
+            {
+                saveGraph(objectGraph);
+            }
+
+            // Invoke Post Persist Events
             getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
             log.debug("Data persisted successfully for entity : " + e.getClass());
         }
@@ -479,6 +484,7 @@ public class PersistenceDelegator
         {
             exp.printStackTrace();
             throw new PersistenceException(exp);
+
         }
     }
 
@@ -517,19 +523,21 @@ public class PersistenceDelegator
                 return null;
             }
 
-//            EntityInterceptor interceptor = new EntityInterceptor();
+            // EntityInterceptor interceptor = new EntityInterceptor();
             // Collections.addAll(arg0, arg1)
 
-//            List<EntitySaveGraph> objectGraphs = interceptor.handleRelation(entity, getMetadata(entity.getClass()));
+            // List<EntitySaveGraph> objectGraphs =
+            // interceptor.handleRelation(entity,
+            // getMetadata(entity.getClass()));
             List<EntitySaveGraph> objectGraphs = getGraph(entity, getMetadata(entity.getClass()));
-			for (EntitySaveGraph objectGraph : objectGraphs) 
-			{
-				// Compute object graph if there is any association.
-				if (objectGraph.getProperty() != null) {
-					onComputeGraph(entity, objectGraph, client,
-							primaryKey.toString(), entityClass);
-				}
-			}
+            for (EntitySaveGraph objectGraph : objectGraphs)
+            {
+                // Compute object graph if there is any association.
+                if (objectGraph.getProperty() != null)
+                {
+                    onComputeGraph(entity, objectGraph, client, primaryKey.toString(), entityClass);
+                }
+            }
             boolean isCacheableToL2 = entityMetadata.isCacheable();
             getSession().store(primaryKey, entity, isCacheableToL2);
             return (E) entity;
@@ -940,7 +948,9 @@ public class PersistenceDelegator
     }
 
     /**
-     * Save graph.
+     * Saves an object graph to persistence stores. An object graph contains a
+     * parent entity and one or more child entities at a time. There are other
+     * attributes too that represent their relationship. *
      * 
      * @param objectGraph
      *            the object graph
@@ -998,12 +1008,13 @@ public class PersistenceDelegator
     }
 
     /**
-     * On client persist.
+     * Persist child entities of a given object graph into persistence store.
      * 
      * @param objectGraph
      *            the object graph
      * @param childEntity
-     *            the child entity
+     *            the child entity, It maybe one entity or a collection of
+     *            entities.
      */
     private void persistChildEntity(EntitySaveGraph objectGraph, Object childEntity)
     {
@@ -1023,24 +1034,52 @@ public class PersistenceDelegator
     }
 
     /**
-     * Handle client.
+     * Persist one child entity into persistence store. Also checks whether this
+     * child entity has further relationships. If yes, it generates a graph for
+     * them and saves them recursively up to "n" level.
      * 
      * @param child
-     *            the child
+     *            the child Entity Object.
      * @param objectGraph
-     *            the object graph
+     *            the object graph to which this child entity belongs.
      */
     private void persistOneChildEntity(Object child, EntitySaveGraph objectGraph)
     {
         EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
-        String id = getId(child, metadata);
-        objectGraph.setChildId(id);
-        if (getSession().lookup(child.getClass(), id) == null)
+
+        // If child entity doesn't have any further relations, just persist it
+        // into database
+        // Otherwise treat it as parent entity for its related entities,
+        // determine graph and save that graph recursively.
+        List<Relation> relations = metadata.getRelations();
+        if (relations == null || relations.isEmpty())
         {
-            Client chClient = getClient(metadata);
-            chClient.persist(child, objectGraph, metadata);
-            session.store(id, child);
+
+            String id = getId(child, metadata);
+            objectGraph.setChildId(id);
+            if (getSession().lookup(child.getClass(), id) == null)
+            {
+                Client chClient = getClient(metadata);
+                chClient.persist(child, objectGraph, metadata);
+                session.store(id, child);
+            }
         }
+        else
+        {
+
+            List<EntitySaveGraph> objectGraphs = getGraph(child, metadata);
+            for (EntitySaveGraph graph : objectGraphs)
+            {
+                // This this graph is for an entity that has it's own parent,
+                // set reverse Foreign Key
+                // i.e. Foreign key that refers to its parent
+                graph.setRevFKeyName(objectGraph.getfKeyName());
+                graph.setRevFKeyValue(objectGraph.getParentId());
+
+                saveGraph(graph);
+            }
+        }
+
     }
 
     /**
@@ -1067,9 +1106,12 @@ public class PersistenceDelegator
 
     /**
      * Returns entity save graph collection for given entity.
-     * @param entity       entity in question
-     * @param metadata     entity's metadata
-     * @return             Collection of entity save graph  
+     * 
+     * @param entity
+     *            entity in question
+     * @param metadata
+     *            entity's metadata
+     * @return Collection of entity save graph
      */
     public List<EntitySaveGraph> getGraph(Object entity, EntityMetadata metadata)
     {
@@ -1077,7 +1119,6 @@ public class PersistenceDelegator
         return interceptor.handleRelation(entity, metadata);
     }
 
-    
     public void store(Object id, Object entity)
     {
         session.store(id, entity);
@@ -1085,9 +1126,8 @@ public class PersistenceDelegator
 
     public void store(List entities, EntityMetadata entityMetadata)
     {
-        for(Object o : entities)
-        session.store(getId(o, entityMetadata), o);
+        for (Object o : entities)
+            session.store(getId(o, entityMetadata), o);
     }
-
 
 }

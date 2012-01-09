@@ -198,10 +198,21 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     {
         Object entity = entityGraph.getParentEntity();
         String id = entityGraph.getParentId();
-        onPersist(entityMetadata, entity, id, null);
+        onPersist(entityMetadata, entity, id,
+                RelationHolder.addRelation(entityGraph, entityGraph.getRevFKeyName(), entityGraph.getRevFKeyValue()));
         getIndexManager().write(entityMetadata, entityGraph.getParentEntity());
         return null;
 
+    }
+
+    @Override
+    public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata entityMetadata)
+    {
+        String rlName = entitySaveGraph.getfKeyName();
+        String rlValue = entitySaveGraph.getParentId();
+        String id = entitySaveGraph.getChildId();
+        onPersist(entityMetadata, childEntity, id, RelationHolder.addRelation(entitySaveGraph, rlName, rlValue));
+        onIndex(childEntity, entitySaveGraph, entityMetadata, rlValue);
     }
 
     private void onPersist(EntityMetadata entityMetadata, Object entity, String id, List<RelationHolder> relations)
@@ -244,23 +255,6 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         {
             throw new PersistenceException(e.getMessage());
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
-     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph,
-     * com.impetus.kundera.metadata.model.EntityMetadata, boolean)
-     */
-    @Override
-    public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata entityMetadata)
-    {
-        String rlName = entitySaveGraph.getfKeyName();
-        String rlValue = entitySaveGraph.getParentId();
-        String id = entitySaveGraph.getChildId();
-        onPersist(entityMetadata, childEntity, id, RelationHolder.addRelation(entitySaveGraph, rlName, rlValue));
-        onIndex(childEntity, entitySaveGraph, entityMetadata, rlValue);
     }
 
     /*

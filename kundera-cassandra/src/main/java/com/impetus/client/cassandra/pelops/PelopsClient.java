@@ -379,11 +379,6 @@ public class PelopsClient implements Client
         this.persistenceUnit = persistenceUnit;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#persist(java.lang.Object)
-     */
     @Override
     public String persist(EntitySaveGraph entityGraph, EntityMetadata metadata)
     {
@@ -392,6 +387,12 @@ public class PelopsClient implements Client
             Object entity = entityGraph.getParentEntity();
             String id = entityGraph.getParentId();
             PelopsDataHandler.ThriftRow tf = populateTfRow(entity, id, metadata);
+
+            if (entityGraph.getRevFKeyName() != null)
+            {
+                addRelation(entityGraph, metadata, entityGraph.getRevFKeyName(), entityGraph.getRevFKeyValue(), tf);
+            }
+
             onPersist(metadata, entity, tf);
             getIndexManager().write(metadata, entity);
 
@@ -402,6 +403,32 @@ public class PelopsClient implements Client
             throw new PersistenceException(e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
+    {
+        // you got child entity and
+        String rlName = entitySaveGraph.getfKeyName();
+        String rlValue = entitySaveGraph.getParentId();
+        String id = entitySaveGraph.getChildId();
+        try
+        {
+            PelopsDataHandler.ThriftRow tf = populateTfRow(childEntity, id, metadata);
+            if (rlName != null)
+            {
+                addRelation(entitySaveGraph, metadata, rlName, rlValue, tf);
+            }
+
+            onPersist(metadata, childEntity, tf);
+            onIndex(childEntity, entitySaveGraph, metadata, rlValue);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            new PersistenceException(e.getMessage());
+        }
+
     }
 
     @Override
@@ -477,44 +504,13 @@ public class PelopsClient implements Client
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
-     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph,
-     * com.impetus.kundera.metadata.model.EntityMetadata, boolean)
-     */
-    @Override
-    public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
-    {
-        // you got child entity and
-        String rlName = entitySaveGraph.getfKeyName();
-        String rlValue = entitySaveGraph.getParentId();
-        String id = entitySaveGraph.getChildId();
-        try
-        {
-            PelopsDataHandler.ThriftRow tf = populateTfRow(childEntity, id, metadata);
-            if (rlName != null)
-            {
-                addRelation(entitySaveGraph, metadata, rlName, rlValue, tf);
-            }
-
-            onPersist(metadata, childEntity, tf);
-            onIndex(childEntity, entitySaveGraph, metadata, rlValue);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            new PersistenceException(e.getMessage());
-        }
-
-    }
-
     /**
      * Find.
-     *
-     * @param ixClause the ix clause
-     * @param m the m
+     * 
+     * @param ixClause
+     *            the ix clause
+     * @param m
+     *            the m
      * @return the list
      */
     public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations)
@@ -546,12 +542,16 @@ public class PelopsClient implements Client
 
     /**
      * Populate data.
-     *
-     * @param m the m
-     * @param qResults the q results
-     * @param entities the entities
+     * 
+     * @param m
+     *            the m
+     * @param qResults
+     *            the q results
+     * @param entities
+     *            the entities
      */
-    private void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities, boolean isRelational, List<String> relationNames)
+    private void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities,
+            boolean isRelational, List<String> relationNames)
     {
         Iterator<Bytes> rowIter = qResults.keySet().iterator();
         while (rowIter.hasNext())
@@ -561,8 +561,8 @@ public class PelopsClient implements Client
             try
             {
                 Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m,
-                                                           dataHandler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), 
-                                                           m.getTableName(), columns, null), relationNames, isRelational);
+                        dataHandler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null),
+                        relationNames, isRelational);
                 entities.add(e);
             }
             catch (IllegalStateException e)
@@ -578,8 +578,11 @@ public class PelopsClient implements Client
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#find(java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.String,
+     * java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     public List<Object> find(String colName, String colValue, EntityMetadata m)
     {
@@ -588,10 +591,9 @@ public class PelopsClient implements Client
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
         List<Object> entities = null;
         IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, Integer.MAX_VALUE,
-                                                 Selector.newIndexExpression(colName, IndexOperator.EQ, 
-                                                                             Bytes.fromByteArray(colValue.getBytes())));
-        Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), 
-                                                                       ix, slicePredicate, ConsistencyLevel.ONE);
+                Selector.newIndexExpression(colName, IndexOperator.EQ, Bytes.fromByteArray(colValue.getBytes())));
+        Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
+                ConsistencyLevel.ONE);
         entities = new ArrayList<Object>(qResults.size());
         // iterate through complete map and
         populateData(m, qResults, entities, false, null);
@@ -599,12 +601,12 @@ public class PelopsClient implements Client
         return entities;
     }
 
-    public List<EnhanceEntity> find( EntityMetadata m, List<String> relationNames, List<IndexClause> conditions)
+    public List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames, List<IndexClause> conditions)
     {
-           
-        return (List<EnhanceEntity>)find(conditions, m, true, relationNames);
+
+        return (List<EnhanceEntity>) find(conditions, m, true, relationNames);
     }
-    
+
     /**
      * On index.
      * 

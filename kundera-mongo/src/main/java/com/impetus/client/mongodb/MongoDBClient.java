@@ -97,7 +97,8 @@ public class MongoDBClient implements Client
 
         try
         {
-            onPersist(entityMetadata, entity, id, null);
+            onPersist(entityMetadata, entity, id, RelationHolder.addRelation(entityGraph, entityGraph.getRevFKeyName(),
+                    entityGraph.getRevFKeyValue()));
             getIndexManager().write(entityMetadata, entity);
 
         }
@@ -504,7 +505,7 @@ public class MongoDBClient implements Client
         return entity;
     }
 
-  public List<Object> find(String colName, String colValue, EntityMetadata m)
+    public List<Object> find(String colName, String colValue, EntityMetadata m)
     {
         throw new UnsupportedOperationException("Method not supported");
     }

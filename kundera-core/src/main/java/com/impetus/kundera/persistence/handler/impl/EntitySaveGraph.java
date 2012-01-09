@@ -35,11 +35,17 @@ public class EntitySaveGraph
     /** The child entity. */
     private Object childEntity;
 
-    /** The key name. */
+    /** Foreign Key name for Parent -> Child */
     private String fKeyName;
 
-    /** The key value. */
+    /** Foreign Key value for Parent -> Child */
     private String fKeyValue;
+
+    /** Foreign Key name for Parent -> Its Parent */
+    private String revFKeyName;
+
+    /** Foreign Key value for Parent -> Its Parent */
+    private String revFKeyValue;
 
     private boolean isSharedPrimaryKey;
 
@@ -154,6 +160,40 @@ public class EntitySaveGraph
     public void setfKeyValue(String fKeyValue)
     {
         this.fKeyValue = fKeyValue;
+    }
+
+    /**
+     * @return the revFKeyName
+     */
+    public String getRevFKeyName()
+    {
+        return revFKeyName;
+    }
+
+    /**
+     * @param revFKeyName
+     *            the revFKeyName to set
+     */
+    public void setRevFKeyName(String revFKeyName)
+    {
+        this.revFKeyName = revFKeyName;
+    }
+
+    /**
+     * @return the revFKeyValue
+     */
+    public String getRevFKeyValue()
+    {
+        return revFKeyValue;
+    }
+
+    /**
+     * @param revFKeyValue
+     *            the revFKeyValue to set
+     */
+    public void setRevFKeyValue(String revFKeyValue)
+    {
+        this.revFKeyValue = revFKeyValue;
     }
 
     /**

@@ -40,7 +40,7 @@ import com.impetus.kundera.query.QueryImpl;
 
 /**
  * The Class CassQuery.
- *
+ * 
  * @author vivek.mishra
  */
 public class CassQuery extends QueryImpl implements Query
@@ -51,20 +51,27 @@ public class CassQuery extends QueryImpl implements Query
 
     /**
      * Instantiates a new cass query.
-     *
-     * @param query the query
-     * @param persistenceDelegator the persistence delegator
-     * @param persistenceUnits the persistence units
+     * 
+     * @param query
+     *            the query
+     * @param persistenceDelegator
+     *            the persistence delegator
+     * @param persistenceUnits
+     *            the persistence units
      */
-    public CassQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, String[] persistenceUnits)
+    public CassQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
+            String[] persistenceUnits)
     {
         super(query, persistenceDelegator, persistenceUnits);
         this.kunderaQuery = kunderaQuery;
     }
 
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
      */
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
@@ -72,7 +79,7 @@ public class CassQuery extends QueryImpl implements Query
         log.debug("on populateEntities cassandra query");
 
         List<IndexClause> ixClause = prepareIndexClause();
-        
+
         List<Object> result = ((PelopsClient) client).find(ixClause, m, false, null);
 
         return result;
@@ -91,13 +98,14 @@ public class CassQuery extends QueryImpl implements Query
                 String fieldName = clause.getProperty();
                 String condition = clause.getCondition();
                 String value = clause.getValue();
-                expr.add(Selector.newIndexExpression(fieldName, getOperator(condition), Bytes.fromByteArray(value.getBytes())));
+                expr.add(Selector.newIndexExpression(fieldName, getOperator(condition),
+                        Bytes.fromByteArray(value.getBytes())));
             }
             else
             {
-             // Case of AND and OR clause.
+                // Case of AND and OR clause.
                 String opr = o.toString();
-                if(opr.equalsIgnoreCase("or"))
+                if (opr.equalsIgnoreCase("or"))
                 {
                     indexClause.setExpressions(expr);
                     clauses.add(indexClause);
@@ -105,63 +113,72 @@ public class CassQuery extends QueryImpl implements Query
                     expr = new ArrayList<IndexExpression>();
                 }
 
-                //TODO need to handle scenario for AND + OR .
+                // TODO need to handle scenario for AND + OR .
 
             }
         }
         indexClause.setExpressions(expr);
         clauses.add(indexClause);
-        
+
         return clauses;
     }
-    
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client, java.util.List, java.util.List, boolean)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client,
+     * java.util.List, java.util.List, boolean)
      */
     @Override
-    protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs, List<String> relationNames, boolean isParent)
+    protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
+            List<String> relationNames, boolean isParent)
     {
         log.debug("on handleAssociations rdbms query");
         List<EnhanceEntity> ls = null;
         if (!isParent)
         {
             List<IndexClause> ixClause = prepareIndexClause();
-            ls = ((PelopsClient)client).find(m, relationNames, ixClause);
-        } else
+            ls = ((PelopsClient) client).find(m, relationNames, ixClause);
+        }
+        else
         {
             List<IndexClause> ixClause = prepareIndexClause();
-            ls = ((PelopsClient)client).find(ixClause, m, true, null);
+            ls = ((PelopsClient) client).find(ixClause, m, true, null);
         }
-        
+
         return handleGraph(ls, graphs);
 
     }
 
-    
     private IndexOperator getOperator(String condition)
     {
-        if(condition.equals("="))
+        if (condition.equals("="))
         {
             return IndexOperator.EQ;
-        } else if(condition.equals(">"))
+        }
+        else if (condition.equals(">"))
         {
             return IndexOperator.GT;
-        } else if(condition.equals("<"))
+        }
+        else if (condition.equals("<"))
         {
             return IndexOperator.LT;
-        } else if(condition.equals(">="))
+        }
+        else if (condition.equals(">="))
         {
             return IndexOperator.GTE;
-        } else if(condition.equals("<="))
+        }
+        else if (condition.equals("<="))
         {
             return IndexOperator.LTE;
-        } else
-        {
-            throw new UnsupportedOperationException(" Condition " + condition+ " is not suported in  cassandra!");
         }
-        
-    }
-    
+        else
+        {
+            throw new UnsupportedOperationException(" Condition " + condition + " is not suported in  cassandra!");
+        }
 
+    }
 
 }

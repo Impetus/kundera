@@ -39,10 +39,11 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
     @Override
     public final byte[] toBytes(Object val)
     {
-        if(val != null)
+        if (val != null)
         {
-        Integer value = (Integer) (val);
-        return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value.intValue() };
+            Integer value = (Integer) (val);
+            return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8),
+                    (byte) value.intValue() };
         }
         return null;
     }

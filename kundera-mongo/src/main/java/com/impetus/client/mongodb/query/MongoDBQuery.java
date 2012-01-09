@@ -68,10 +68,13 @@ public class MongoDBQuery extends QueryImpl
         return super.setMaxResults(maxResult);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
      */
-    
 
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
@@ -79,16 +82,20 @@ public class MongoDBQuery extends QueryImpl
         throw new UnsupportedOperationException("Method not supported");
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client, java.util.List, java.util.List, boolean)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client,
+     * java.util.List, java.util.List, boolean)
      */
     @Override
     protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
             List<String> relationNames, boolean isParent)
     {
         throw new UnsupportedOperationException("Method not supported");
-        
+
     }
 
-    
 }

@@ -61,8 +61,8 @@ public class HibernateClient implements Client
 
     /** The index manager. */
     private IndexManager indexManager;
-    
-    private StatelessSession s;    
+
+    private StatelessSession s;
 
     /**
      * Instantiates a new hibernate client.
@@ -243,12 +243,6 @@ public class HibernateClient implements Client
         return c.list();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
-     * java.util.Map)
-     */
     @Override
     @Deprecated
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap) throws Exception
@@ -256,14 +250,6 @@ public class HibernateClient implements Client
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#persist(com.impetus.kundera.persistence
-     * .handler.impl.EntitySaveGraph,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
     @Override
     public String persist(EntitySaveGraph entityGraph, EntityMetadata metadata)
     {
@@ -272,10 +258,47 @@ public class HibernateClient implements Client
         Transaction tx = s.beginTransaction();
         s.persist(entityGraph.getParentEntity());
         tx.commit();
-        getIndexManager().write(metadata, entityGraph.getParentEntity());
 
+        // If entity has a parent entity, update foreign key
+        if (entityGraph.getRevFKeyName() != null)
+        {
+            s = getSessionInstance();
+            tx = s.beginTransaction();
+            String updateSql = "Update " + metadata.getTableName() + " SET " + entityGraph.getRevFKeyName() + "= '"
+                    + entityGraph.getRevFKeyValue() + "' WHERE " + metadata.getIdColumn().getName() + " = '"
+                    + entityGraph.getParentId() + "'";
+            s.createSQLQuery(updateSql).executeUpdate();
+            tx.commit();
+        }
+
+        getIndexManager().write(metadata, entityGraph.getParentEntity());
         return null;
 
+    }
+
+    @Override
+    public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
+    {
+        // String rlName = entitySaveGraph.getfKeyName();
+        String rlValue = entitySaveGraph.getParentId();
+        Session s = getSessionInstance();
+        Transaction tx = s.beginTransaction();
+        s.persist(childEntity);
+        tx.commit();
+
+        // Update foreign key value
+        if (entitySaveGraph.getfKeyName() != null)
+        {
+            s = getSessionInstance();
+            tx = s.beginTransaction();
+            String updateSql = "Update " + metadata.getTableName() + " SET " + entitySaveGraph.getfKeyName() + "= '"
+                    + entitySaveGraph.getParentId() + "' WHERE " + metadata.getIdColumn().getName() + " = '"
+                    + entitySaveGraph.getChildId() + "'";
+            s.createSQLQuery(updateSql).executeUpdate();
+            tx.commit();
+        }
+
+        onIndex(childEntity, entitySaveGraph, metadata, rlValue);
     }
 
     /**
@@ -364,31 +387,6 @@ public class HibernateClient implements Client
 
     }
 
-    @Override
-    public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
-    {
-        // String rlName = entitySaveGraph.getfKeyName();
-        String rlValue = entitySaveGraph.getParentId();
-        Session s = getSessionInstance();
-        Transaction tx = s.beginTransaction();
-        s.persist(childEntity);
-        tx.commit();
-
-        // Update foreign key value
-        if (entitySaveGraph.getfKeyName() != null)
-        {
-            s = getSessionInstance();
-            tx = s.beginTransaction();
-            String updateSql = "Update " + metadata.getTableName() + " SET " + entitySaveGraph.getfKeyName() + "= '"
-                    + entitySaveGraph.getParentId() + "' WHERE " + metadata.getIdColumn().getName() + " = '"
-                    + entitySaveGraph.getChildId() + "'";
-            s.createSQLQuery(updateSql).executeUpdate();
-            tx.commit();
-        }
-
-        onIndex(childEntity, entitySaveGraph, metadata, rlValue);
-    }
-
     /**
      * On index.
      * 
@@ -447,24 +445,21 @@ public class HibernateClient implements Client
         return s.get(clazz, rowId);
     }
 
-
-
     public List<Object[]> find(String nativeQuery, List<String> relations, Class clazz)
     {
-//        Session s = getSessionInstance();
-        if(s == null)
+        // Session s = getSessionInstance();
+        if (s == null)
         {
-          s = sf.openStatelessSession();
-        
-          s.beginTransaction();
+            s = sf.openStatelessSession();
+
+            s.beginTransaction();
         }
         SQLQuery q = s.createSQLQuery(nativeQuery).addEntity(clazz);
-        for(String r : relations)
+        for (String r : relations)
         {
             q.addScalar(r);
         }
 
-        
         return q.list();
     }
 

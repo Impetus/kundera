@@ -62,12 +62,16 @@ public abstract class QueryImpl implements Query
     protected PersistenceDelegator persistenceDelegeator;
 
     private static Log log = LogFactory.getLog(QueryImpl.class);
+
     /**
      * Instantiates a new query impl.
-     *
-     * @param query the query
-     * @param persistenceDelegator the persistence delegator
-     * @param persistenceUnits the persistence units
+     * 
+     * @param query
+     *            the query
+     * @param persistenceDelegator
+     *            the persistence delegator
+     * @param persistenceUnits
+     *            the persistence units
      */
     public QueryImpl(String query, PersistenceDelegator persistenceDelegator, String... persistenceUnits)
     {
@@ -88,7 +92,7 @@ public abstract class QueryImpl implements Query
 
     /**
      * Gets the kundera query.
-     *
+     * 
      * @return the kunderaQuery
      */
     public KunderaQuery getKunderaQuery()
@@ -98,8 +102,9 @@ public abstract class QueryImpl implements Query
 
     /**
      * Sets the kundera query.
-     *
-     * @param kunderaQuery the kunderaQuery to set
+     * 
+     * @param kunderaQuery
+     *            the kunderaQuery to set
      */
     public void setKunderaQuery(KunderaQuery kunderaQuery)
     {
@@ -107,7 +112,9 @@ public abstract class QueryImpl implements Query
     }
 
     /* @see javax.persistence.Query#executeUpdate() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.Query#executeUpdate()
      */
     @Override
@@ -117,7 +124,9 @@ public abstract class QueryImpl implements Query
     }
 
     /* @see javax.persistence.Query#getResultList() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.Query#getResultList()
      */
     @Override
@@ -147,7 +156,7 @@ public abstract class QueryImpl implements Query
             else
 
             {
-              return  handleAssociations(m, client, graphs, relationNames, isParent);
+                return handleAssociations(m, client, graphs, relationNames, isParent);
             }
 
         }
@@ -170,13 +179,13 @@ public abstract class QueryImpl implements Query
           // if entity is not parent then pass retrieved relation key value to
           // specific client for find by id.
 
-//        return null;
+        // return null;
 
     }
 
     /**
      * Gets the persistence delegeator.
-     *
+     * 
      * @return the persistenceDelegeator
      */
     public PersistenceDelegator getPersistenceDelegeator()
@@ -186,8 +195,9 @@ public abstract class QueryImpl implements Query
 
     /**
      * Sets the persistence delegeator.
-     *
-     * @param persistenceDelegeator the persistenceDelegeator to set
+     * 
+     * @param persistenceDelegeator
+     *            the persistenceDelegeator to set
      */
     public void setPersistenceDelegeator(PersistenceDelegator persistenceDelegeator)
     {
@@ -195,7 +205,9 @@ public abstract class QueryImpl implements Query
     }
 
     /* @see javax.persistence.Query#getSingleResult() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.Query#getSingleResult()
      */
     @Override
@@ -205,7 +217,9 @@ public abstract class QueryImpl implements Query
     }
 
     /* @see javax.persistence.Query#setFirstResult(int) */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.Query#setFirstResult(int)
      */
     @Override
@@ -218,8 +232,11 @@ public abstract class QueryImpl implements Query
      * @see
      * javax.persistence.Query#setFlushMode(javax.persistence.FlushModeType)
      */
-    /* (non-Javadoc)
-     * @see javax.persistence.Query#setFlushMode(javax.persistence.FlushModeType)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.Query#setFlushMode(javax.persistence.FlushModeType)
      */
     @Override
     public Query setFlushMode(FlushModeType flushMode)
@@ -228,7 +245,9 @@ public abstract class QueryImpl implements Query
     }
 
     /* @see javax.persistence.Query#setHint(java.lang.String, java.lang.Object) */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.Query#setHint(java.lang.String, java.lang.Object)
      */
     @Override
@@ -238,7 +257,9 @@ public abstract class QueryImpl implements Query
     }
 
     /* @see javax.persistence.Query#setMaxResults(int) */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.Query#setMaxResults(int)
      */
     @Override
@@ -251,8 +272,11 @@ public abstract class QueryImpl implements Query
      * @see javax.persistence.Query#setParameter(java.lang.String,
      * java.lang.Object)
      */
-    /* (non-Javadoc)
-     * @see javax.persistence.Query#setParameter(java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#setParameter(java.lang.String,
+     * java.lang.Object)
      */
     @Override
     public Query setParameter(String name, Object value)
@@ -262,7 +286,9 @@ public abstract class QueryImpl implements Query
     }
 
     /* @see javax.persistence.Query#setParameter(int, java.lang.Object) */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.Query#setParameter(int, java.lang.Object)
      */
     @Override
@@ -275,8 +301,11 @@ public abstract class QueryImpl implements Query
      * @see javax.persistence.Query#setParameter(java.lang.String,
      * java.util.Date, javax.persistence.TemporalType)
      */
-    /* (non-Javadoc)
-     * @see javax.persistence.Query#setParameter(java.lang.String, java.util.Date, javax.persistence.TemporalType)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#setParameter(java.lang.String,
+     * java.util.Date, javax.persistence.TemporalType)
      */
     @Override
     public Query setParameter(String name, Date value, TemporalType temporalType)
@@ -288,8 +317,11 @@ public abstract class QueryImpl implements Query
      * @see javax.persistence.Query#setParameter(java.lang.String,
      * java.util.Calendar, javax.persistence.TemporalType)
      */
-    /* (non-Javadoc)
-     * @see javax.persistence.Query#setParameter(java.lang.String, java.util.Calendar, javax.persistence.TemporalType)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#setParameter(java.lang.String,
+     * java.util.Calendar, javax.persistence.TemporalType)
      */
     @Override
     public Query setParameter(String name, Calendar value, TemporalType temporalType)
@@ -301,8 +333,11 @@ public abstract class QueryImpl implements Query
      * @see javax.persistence.Query#setParameter(int, java.util.Date,
      * javax.persistence.TemporalType)
      */
-    /* (non-Javadoc)
-     * @see javax.persistence.Query#setParameter(int, java.util.Date, javax.persistence.TemporalType)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#setParameter(int, java.util.Date,
+     * javax.persistence.TemporalType)
      */
     @Override
     public Query setParameter(int position, Date value, TemporalType temporalType)
@@ -314,8 +349,11 @@ public abstract class QueryImpl implements Query
      * @see javax.persistence.Query#setParameter(int, java.util.Calendar,
      * javax.persistence.TemporalType)
      */
-    /* (non-Javadoc)
-     * @see javax.persistence.Query#setParameter(int, java.util.Calendar, javax.persistence.TemporalType)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.Query#setParameter(int, java.util.Calendar,
+     * javax.persistence.TemporalType)
      */
     @Override
     public Query setParameter(int position, Calendar value, TemporalType temporalType)
@@ -539,9 +577,11 @@ public abstract class QueryImpl implements Query
 
     /**
      * Gets the relations.
-     *
-     * @param graphs the graphs
-     * @param clazz the clazz
+     * 
+     * @param graphs
+     *            the graphs
+     * @param clazz
+     *            the clazz
      * @return the relations
      */
     protected Map<Boolean, List<String>> getRelations(List<EntitySaveGraph> graphs, Class clazz)
@@ -571,9 +611,11 @@ public abstract class QueryImpl implements Query
 
     /**
      * Handle graph.
-     *
-     * @param enhanceEntities the enhance entities
-     * @param graphs the graphs
+     * 
+     * @param enhanceEntities
+     *            the enhance entities
+     * @param graphs
+     *            the graphs
      */
     protected List<Object> handleGraph(List<EnhanceEntity> enhanceEntities, List<EntitySaveGraph> graphs)
     {
@@ -584,7 +626,7 @@ public abstract class QueryImpl implements Query
         Map<Object, Object> relationalValues = new HashMap<Object, Object>();
         for (EnhanceEntity e : enhanceEntities)
         {
-            if(result == null)
+            if (result == null)
             {
                 result = new ArrayList<Object>(enhanceEntities.size());
             }
@@ -603,13 +645,17 @@ public abstract class QueryImpl implements Query
 
     /**
      * Compute graph.
-     *
-     * @param e the e
-     * @param graphs the graphs
+     * 
+     * @param e
+     *            the e
+     * @param graphs
+     *            the graphs
      * @return the object
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
-    private Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder) throws Exception
+    private Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder)
+            throws Exception
     {
 
         Client childClient = null;
@@ -627,7 +673,7 @@ public abstract class QueryImpl implements Query
                 Object relationalValue = e.getRelations().get(relationName);
                 childClazz = g.getParentClass();
                 Field f = g.getProperty();
-                if(!collectionHolder.containsKey(relationalValue))
+                if (!collectionHolder.containsKey(relationalValue))
                 {
                     childMetadata = persistenceDelegeator.getMetadata(childClazz);
                     childClient = persistenceDelegeator.getClient(childMetadata);
@@ -637,9 +683,9 @@ public abstract class QueryImpl implements Query
                     // If entity is holding association it means it can not be a
                     // collection.
                 }
-                    PropertyAccessorHelper.set(e.getEntity(), f, collectionHolder.get(relationalValue));
-                }
+                PropertyAccessorHelper.set(e.getEntity(), f, collectionHolder.get(relationalValue));
             }
+        }
         else
         {
             // means it is parent
@@ -651,7 +697,7 @@ public abstract class QueryImpl implements Query
                 String relationName = g.getfKeyName();
                 String relationalValue = e.getEntityId();
                 Field f = g.getProperty();
-                if(!collectionHolder.containsKey(relationalValue))
+                if (!collectionHolder.containsKey(relationalValue))
                 {
                     // create a finder and pass metadata, relationName,
                     // relationalValue.
@@ -659,23 +705,27 @@ public abstract class QueryImpl implements Query
                     // pass this entity id as a value to be searched for for
                     // secondary indexes.
                     // create sql query for hibernate client.
-                     f = g.getProperty();
-                     collectionHolder.put(relationalValue, childs);
+                    f = g.getProperty();
+                    collectionHolder.put(relationalValue, childs);
                 }
-                    onReflect(e.getEntity(), f, (List) collectionHolder.get(relationalValue));
-                }
-           }
+                onReflect(e.getEntity(), f, (List) collectionHolder.get(relationalValue));
+            }
+        }
         return e.getEntity();
     }
 
     /**
      * On reflect.
-     *
-     * @param entity the entity
-     * @param f the f
-     * @param childs the childs
+     * 
+     * @param entity
+     *            the entity
+     * @param f
+     *            the f
+     * @param childs
+     *            the childs
      * @return the sets the
-     * @throws PropertyAccessException the property access exception
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     private Set<?> onReflect(Object entity, Field f, List<?> childs) throws PropertyAccessException
     {
@@ -713,9 +763,11 @@ public abstract class QueryImpl implements Query
 
     /**
      * Populate relations.
-     *
-     * @param relations the relations
-     * @param o the o
+     * 
+     * @param relations
+     *            the relations
+     * @param o
+     *            the o
      * @return the map
      */
     protected Map<String, Object> populateRelations(List<String> relations, Object[] o)
@@ -730,22 +782,29 @@ public abstract class QueryImpl implements Query
     }
 
     /**
-     * Populate entities, in case of there is no relation exist. 
-     *
-     * @param m the m
-     * @param client the client
+     * Populate entities, in case of there is no relation exist.
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
      * @return the list
      */
     protected abstract List<Object> populateEntities(EntityMetadata m, Client client);
 
     /**
      * Handle associations.
-     *
-     * @param m the m
-     * @param client the client
-     * @param graphs the graphs
-     * @param relationNames the relation names
-     * @param isParent the is parent
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param graphs
+     *            the graphs
+     * @param relationNames
+     *            the relation names
+     * @param isParent
+     *            the is parent
      */
     protected abstract List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
             List<String> relationNames, boolean isParent);

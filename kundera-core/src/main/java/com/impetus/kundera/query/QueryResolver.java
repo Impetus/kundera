@@ -138,7 +138,6 @@ public class QueryResolver
 
     }
 
-
     /**
      * Gets the query.
      * 
@@ -204,8 +203,8 @@ public class QueryResolver
         Constructor constructor = clazz.getConstructor(String.class, KunderaQuery.class, PersistenceDelegator.class,
                 String[].class);
         query = (Query) constructor.newInstance(jpaQuery, kunderaQuery, persistenceDelegator, persistenceUnits);
-        
+
         return query;
-        
+
     }
 }

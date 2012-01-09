@@ -213,7 +213,8 @@ public interface Client
      * @return
      */
     <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, EntitySaveGraph objectGraph);    
+            EntityMetadata relMetadata, EntitySaveGraph objectGraph);
+
     List<Object> find(String colName, String colValue, EntityMetadata m);
 
 }

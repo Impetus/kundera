@@ -55,21 +55,26 @@ public class RDBMSQuery extends QueryImpl implements Query
      * @param persistenceUnits
      *            the persistence units
      */
-    public RDBMSQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator, String[] persistenceUnits)
+    public RDBMSQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
+            String[] persistenceUnits)
     {
         super(query, persistenceDelegator, persistenceUnits);
         this.kunderaQuery = kunderaQuery;
     }
 
-
     /**
      * Handle associations.
-     *
-     * @param m the m
-     * @param client the client
-     * @param graphs the graphs
-     * @param relationNames the relation names
-     * @param isParent the is parent
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param graphs
+     *            the graphs
+     * @param relationNames
+     *            the relation names
+     * @param isParent
+     *            the is parent
      */
     protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
             List<String> relationNames, boolean isParent)
@@ -119,8 +124,12 @@ public class RDBMSQuery extends QueryImpl implements Query
         return handleGraph(ls, graphs);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
      */
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
@@ -141,9 +150,11 @@ public class RDBMSQuery extends QueryImpl implements Query
 
     /**
      * Gets the sql query from jpa.
-     *
-     * @param entityMetadata the entity metadata
-     * @param relations the relations
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param relations
+     *            the relations
      * @return the sql query from jpa
      */
     private String getSqlQueryFromJPA(EntityMetadata entityMetadata, List<String> relations)
@@ -151,23 +162,23 @@ public class RDBMSQuery extends QueryImpl implements Query
         String filter = getKunderaQuery().getFilter();
         Queue q = getKunderaQuery().getFilterClauseQueue();
         String aliasName = "_" + entityMetadata.getTableName();
-        
+
         ;
-        
+
         StringBuilder queryBuilder = new StringBuilder("Select ");
-        
+
         queryBuilder.append(aliasName);
         queryBuilder.append(".");
         queryBuilder.append(entityMetadata.getIdColumn().getName());
-        
-        for(String column : entityMetadata.getColumnFieldNames())
+
+        for (String column : entityMetadata.getColumnFieldNames())
         {
             queryBuilder.append(", ");
             queryBuilder.append(aliasName);
             queryBuilder.append(".");
             queryBuilder.append(column);
         }
-//        queryBuilder.append(".*");
+        // queryBuilder.append(".*");
         for (String relation : relations)
         {
             queryBuilder.append(", ");
@@ -189,8 +200,9 @@ public class RDBMSQuery extends QueryImpl implements Query
             if (o instanceof FilterClause)
             {
                 FilterClause clause = ((FilterClause) o);
-//                queryBuilder.append(clause.getProperty());
-               queryBuilder.append(StringUtils.replace(clause.getProperty(), clause.getProperty().substring(0,clause.getProperty().indexOf(".")), aliasName));
+                // queryBuilder.append(clause.getProperty());
+                queryBuilder.append(StringUtils.replace(clause.getProperty(),
+                        clause.getProperty().substring(0, clause.getProperty().indexOf(".")), aliasName));
                 queryBuilder.append(" ");
                 queryBuilder.append(clause.getCondition());
 

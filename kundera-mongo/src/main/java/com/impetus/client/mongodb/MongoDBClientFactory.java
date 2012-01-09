@@ -17,83 +17,93 @@ import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
-public class MongoDBClientFactory extends GenericClientFactory {
-	/** The logger. */
-	private static Logger logger = Logger.getLogger(MongoDBClientFactory.class);
+public class MongoDBClientFactory extends GenericClientFactory
+{
+    /** The logger. */
+    private static Logger logger = Logger.getLogger(MongoDBClientFactory.class);
 
-	IndexManager indexManager;
-	private DB mongoDB;
+    IndexManager indexManager;
 
-	@Override
-	protected void initializeClient() {
-		indexManager = new IndexManager(
-				LuceneIndexer.getInstance(new StandardAnalyzer(
-						Version.LUCENE_34)));
+    private DB mongoDB;
 
-	}
+    @Override
+    protected void initializeClient()
+    {
+        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
 
-	@Override
-	protected Object createPoolOrConnection() {
-		// TODO implement pool
-		mongoDB = getConnection();
-		return mongoDB;
-	}
+    }
 
-	@Override
-	protected Client instantiateClient() {
-		// TODO To change this one pool is implemented
+    @Override
+    protected Object createPoolOrConnection()
+    {
+        // TODO implement pool
+        mongoDB = getConnection();
+        return mongoDB;
+    }
 
-		return new MongoDBClient(mongoDB, indexManager);
-	}
+    @Override
+    protected Client instantiateClient()
+    {
+        // TODO To change this one pool is implemented
 
-	private DB getConnection() {
+        return new MongoDBClient(mongoDB, indexManager);
+    }
 
-		PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE
-				.getApplicationMetadata().getPersistenceUnitMetadata(
-						getPersistenceUnit());
+    private DB getConnection()
+    {
 
-		Properties props = persistenceUnitMetadata.getProperties();
-		String contactNode = (String) props.get("kundera.nodes");
-		String defaultPort = (String) props.get("kundera.port");
-		String keyspace = (String) props.get("kundera.keyspace");
+        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata(getPersistenceUnit());
 
-		Mongo mongo = null;
-		logger.info("Connecting to mongodb at " + contactNode + " on port "
-				+ defaultPort);
-		try {
-			mongo = new Mongo(contactNode, Integer.parseInt(defaultPort));
-			logger.info("Connected to mongodb at " + contactNode + " on port "
-					+ defaultPort);
-		} catch (NumberFormatException e) {
-			logger.error("Invalid format for MONGODB port, Unale to connect!"
-					+ "; Details:" + e.getMessage());
-		} catch (UnknownHostException e) {
-			logger.error("Unable to connect to MONGODB at host " + contactNode
-					+ "; Details:" + e.getMessage());
-		} catch (MongoException e) {
-			logger.error("Unable to connect to MONGODB; Details:"
-					+ e.getMessage());
-		}
+        Properties props = persistenceUnitMetadata.getProperties();
+        String contactNode = (String) props.get("kundera.nodes");
+        String defaultPort = (String) props.get("kundera.port");
+        String keyspace = (String) props.get("kundera.keyspace");
 
-		DB mongoDB = mongo.getDB(keyspace);
-		return mongoDB;
+        Mongo mongo = null;
+        logger.info("Connecting to mongodb at " + contactNode + " on port " + defaultPort);
+        try
+        {
+            mongo = new Mongo(contactNode, Integer.parseInt(defaultPort));
+            logger.info("Connected to mongodb at " + contactNode + " on port " + defaultPort);
+        }
+        catch (NumberFormatException e)
+        {
+            logger.error("Invalid format for MONGODB port, Unale to connect!" + "; Details:" + e.getMessage());
+        }
+        catch (UnknownHostException e)
+        {
+            logger.error("Unable to connect to MONGODB at host " + contactNode + "; Details:" + e.getMessage());
+        }
+        catch (MongoException e)
+        {
+            logger.error("Unable to connect to MONGODB; Details:" + e.getMessage());
+        }
 
-	}
+        DB mongoDB = mongo.getDB(keyspace);
+        return mongoDB;
 
-	@Override
-	protected boolean isClientThreadSafe() {
-		return false;
-	}
+    }
 
-	@Override
-	public void unload(String... persistenceUnits) {
-		indexManager.close();
-		if (mongoDB != null) {
-			logger.info("Closing connection to mongodb.");
-			mongoDB.getMongo().close();
-			logger.info("Closed connection to mongodb.");
-		} else {
-			logger.warn("Can't close connection to MONGODB, it was already disconnected");
-		}
-	}
+    @Override
+    protected boolean isClientThreadSafe()
+    {
+        return false;
+    }
+
+    @Override
+    public void unload(String... persistenceUnits)
+    {
+        indexManager.close();
+        if (mongoDB != null)
+        {
+            logger.info("Closing connection to mongodb.");
+            mongoDB.getMongo().close();
+            logger.info("Closed connection to mongodb.");
+        }
+        else
+        {
+            logger.warn("Can't close connection to MONGODB, it was already disconnected");
+        }
+    }
 }
