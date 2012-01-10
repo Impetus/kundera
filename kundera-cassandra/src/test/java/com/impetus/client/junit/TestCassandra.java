@@ -18,7 +18,6 @@ package com.impetus.client.junit;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 
-import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.log4j.Logger;
 
 import com.impetus.client.entity.SnsUser;
@@ -35,7 +34,7 @@ public class TestCassandra extends BaseTest
     private static Logger logger = Logger.getLogger(TestCassandra.class);
 
     /** The embedded server cassandra. */
-    private static EmbeddedCassandraService cassandra;
+    //private static EmbeddedCassandraService cassandra;
 
     public void startCassandraServer() throws Exception
     {
@@ -53,10 +52,10 @@ public class TestCassandra extends BaseTest
     public void setUp() throws Exception
     {
         logger.info("starting server");
-        if (cassandra == null)
+        /*if (cassandra == null)
         {
-            // startCassandraServer();
-        }
+            startCassandraServer();
+        }*/
         manager = Persistence.createEntityManagerFactory("cassandra").createEntityManager();
         startCassandraServer();
 

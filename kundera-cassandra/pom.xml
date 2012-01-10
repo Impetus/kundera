@@ -15,6 +15,17 @@
 	<name>kundera-cassandra</name>
 	<url>http://maven.apache.org</url>
 
+	<repositories>
+		<repository>
+		        <id>cassandra-dependency</id>
+		        <name>Cassandra Dependencies</name>
+		        <url>http://repo1.maven.org/maven2</url>
+		        <snapshots>
+		            <enabled>true</enabled>
+		        </snapshots>
+		</repository>
+	</repositories>
+
 
         <!-- Dependencies -->
 	<dependencies>
@@ -23,31 +34,28 @@
 			<artifactId>kundera-core</artifactId>
 			<version>2.0.5</version>
 		</dependency>
-		<!-- <dependency>
+		<!--		
+		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>apache-cassandra</artifactId>
-			<version>1.0.3</version>
+			<version>1.0.6</version>
+			<scope>test</scope>
 		</dependency> -->
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
-			<artifactId>apache-cassandra-thrift</artifactId>
-			<version>1.0.3</version>
+			<artifactId>cassandra-thrift</artifactId>
+			<version>1.0.6</version>
 		</dependency>
-		<!-- 		<dependency>
-			<groupId>org.scale7</groupId>
-			<artifactId>scale7-pelops</artifactId>
-			<version>1.2-0.7.x-SNAPSHOT</version>
-		</dependency> -->
+		<dependency>
+			<groupId>org.apache.cassandra</groupId>
+			<artifactId>cassandra-clientutil</artifactId>
+			<version>1.0.6</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.scale7</groupId>
 			<artifactId>scale7-pelops</artifactId>
 			<version>1.3-1.0.x-SNAPSHOT</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.apache.solr</groupId>
-			<artifactId>solandra</artifactId>
-			<version>UNKNOWN</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xerial</groupId>

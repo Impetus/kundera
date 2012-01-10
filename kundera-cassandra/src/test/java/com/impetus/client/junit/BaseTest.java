@@ -23,11 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.ConfigurationException;
+
 import junit.framework.TestCase;
 
-import org.apache.cassandra.config.ConfigurationException;
-import org.apache.cassandra.locator.AbstractReplicationStrategy;
-import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.InvalidRequestException;
@@ -73,7 +72,7 @@ public abstract class BaseTest extends TestCase
          */
         initClient();
         logger.info("Loading Data:");
-        loadData();
+        //loadData();
     }
 
     /**
@@ -135,7 +134,7 @@ public abstract class BaseTest extends TestCase
      * @throws InvalidRequestException
      *             the invalid request exception
      */
-    private void loadData() throws org.apache.cassandra.config.ConfigurationException, TException, NotFoundException,
+    /*private void loadData() throws org.apache.cassandra.config.ConfigurationException, TException, NotFoundException,
             InvalidRequestException
     {
 
@@ -186,6 +185,6 @@ public abstract class BaseTest extends TestCase
         client.send_system_add_keyspace(ksDef);
         logger.info("Data loaded");
 
-    }
+    }*/
 
 }
