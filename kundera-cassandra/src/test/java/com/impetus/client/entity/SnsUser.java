@@ -13,7 +13,7 @@ import javax.persistence.Table;
  * 
  */
 @Entity
-@Table(name = "snsusers", schema = "Blog")
+@Table(name = "snsusers", schema = "Blog@cassandra")
 public class SnsUser
 {
     @Id
