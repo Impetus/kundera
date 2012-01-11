@@ -99,8 +99,16 @@ public class MongoDBClient implements Client
         {
             onPersist(entityMetadata, entity, id, RelationHolder.addRelation(entityGraph, entityGraph.getRevFKeyName(),
                     entityGraph.getRevFKeyValue()));
-            getIndexManager().write(entityMetadata, entity);
 
+            if (entityGraph.getRevParentClass() != null)
+            {
+                getIndexManager().write(entityMetadata, entity, entityGraph.getRevFKeyValue(),
+                        entityGraph.getRevParentClass());
+            }
+            else
+            {
+                getIndexManager().write(entityMetadata, entity);
+            }
         }
         catch (PropertyAccessException e)
         {

@@ -34,7 +34,7 @@ public class TestCassandra extends BaseTest
     private static Logger logger = Logger.getLogger(TestCassandra.class);
 
     /** The embedded server cassandra. */
-    //private static EmbeddedCassandraService cassandra;
+    // private static EmbeddedCassandraService cassandra;
 
     public void startCassandraServer() throws Exception
     {
@@ -52,10 +52,9 @@ public class TestCassandra extends BaseTest
     public void setUp() throws Exception
     {
         logger.info("starting server");
-        /*if (cassandra == null)
-        {
-            startCassandraServer();
-        }*/
+        /*
+         * if (cassandra == null) { startCassandraServer(); }
+         */
         manager = Persistence.createEntityManagerFactory("cassandra").createEntityManager();
         startCassandraServer();
 

@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -85,7 +86,9 @@ public class PelopsDataHandler extends DataHandler
             List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(), rowKey,
                     Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
             List<Column> columns = null;
-            if (thriftSuperColumns == null && thriftSuperColumns.isEmpty())
+
+            Set<SuperColumn> uniSupSet = new HashSet<SuperColumn>(thriftSuperColumns);
+            if (uniSupSet.isEmpty() || (uniSupSet.size() == 1 && uniSupSet.iterator().next() == null))
             {
                 columns = selector.getColumnsFromRow(m.getTableName(), new Bytes(rowKey.getBytes()),
                         Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
@@ -233,8 +236,12 @@ public class PelopsDataHandler extends DataHandler
         PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), thriftRow.getId());
 
         // Iterate through each column
-        if (thriftRow.getColumns() != null && !thriftRow.getColumns().isEmpty()
-                && (thriftRow.getColumns().size() == 1 && thriftRow.getColumns().get(0) != null))
+        Set<Column> columns = null;
+        if (thriftRow.getColumns() != null && !thriftRow.getColumns().isEmpty())
+        {
+            columns = new HashSet<Column>(thriftRow.getColumns());
+        }
+        if (columns != null && !(columns.size() == 1 && columns.iterator().next() != null))
         {
             for (Column c : thriftRow.getColumns())
             {

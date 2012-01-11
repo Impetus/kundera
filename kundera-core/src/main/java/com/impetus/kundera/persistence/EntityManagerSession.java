@@ -187,11 +187,12 @@ public class EntityManagerSession
     public final void clear()
     {
         sessionCache = new ConcurrentHashMap<Object, Object>();
-        
-        //Clear L2 Cahce
-        if(getL2Cache() != null) {
-        	getL2Cache().evictAll();
-        }        
+
+        // Clear L2 Cahce
+        if (getL2Cache() != null)
+        {
+            getL2Cache().evictAll();
+        }
     }
 
     /**

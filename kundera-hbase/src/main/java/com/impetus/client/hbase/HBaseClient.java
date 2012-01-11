@@ -200,7 +200,17 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         String id = entityGraph.getParentId();
         onPersist(entityMetadata, entity, id,
                 RelationHolder.addRelation(entityGraph, entityGraph.getRevFKeyName(), entityGraph.getRevFKeyValue()));
-        getIndexManager().write(entityMetadata, entityGraph.getParentEntity());
+
+        if (entityGraph.getRevParentClass() != null)
+        {
+            getIndexManager().write(entityMetadata, entity, entityGraph.getRevFKeyValue(),
+                    entityGraph.getRevParentClass());
+        }
+        else
+        {
+            getIndexManager().write(entityMetadata, entityGraph.getParentEntity());
+        }
+
         return null;
 
     }

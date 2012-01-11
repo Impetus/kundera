@@ -106,39 +106,38 @@ public class PelopsClient implements Client
     public void persist(EnhancedEntity enhancedEntity) throws Exception
     {/*
       * 
-      * EntityMetadata entityMetadata =
-      * KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(),
-      * enhancedEntity .getEntity().getClass()); String keyspace =
-      * entityMetadata.getSchema(); String columnFamily =
-      * entityMetadata.getTableName();
+      * EntityMetadata entityMetadata = KunderaMetadataManager .
+      * getEntityMetadata ( getPersistenceUnit (), enhancedEntity . getEntity
+      * (). getClass ()); String keyspace = entityMetadata . getSchema ();
+      * String columnFamily = entityMetadata . getTableName ();
       * 
-      * if (!isOpen()) { throw new
-      * PersistenceException("PelopsClient is closed."); }
+      * if (!isOpen ()) { throw new PersistenceException (
+      * "PelopsClient is closed." ); }
       * 
-      * PelopsDataHandler.ThriftRow tf = dataHandler.toThriftRow(this,
-      * enhancedEntity, entityMetadata, columnFamily);
+      * PelopsDataHandler . ThriftRow tf = dataHandler . toThriftRow ( this,
+      * enhancedEntity , entityMetadata , columnFamily );
       * 
-      * Mutator mutator =
-      * Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit
-      * ()));
+      * Mutator mutator = Pelops . createMutator ( PelopsUtils .
+      * generatePoolName ( getPersistenceUnit ()));
       * 
-      * List<Column> thriftColumns = tf.getColumns(); List<SuperColumn>
-      * thriftSuperColumns = tf.getSuperColumns(); if (thriftColumns != null &&
-      * !thriftColumns.isEmpty()) { mutator.writeColumns(columnFamily, new
-      * Bytes(tf.getId().getBytes()), Arrays.asList(tf.getColumns().toArray(new
-      * Column[0]))); }
+      * List< Column > thriftColumns = tf. getColumns (); List< SuperColumn >
+      * thriftSuperColumns = tf. getSuperColumns (); if ( thriftColumns != null
+      * && ! thriftColumns . isEmpty ()) { mutator . writeColumns ( columnFamily
+      * , new Bytes ( tf.getId (). getBytes ()), Arrays . asList (tf. getColumns
+      * ( ).toArray (new Column [ 0]))) ; }
       * 
-      * if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty()) { for
-      * (SuperColumn sc : thriftSuperColumns) {
-      * Bytes.toUTF8(sc.getColumns().get(0).getValue());
-      * mutator.writeSubColumns(columnFamily, tf.getId(),
-      * Bytes.toUTF8(sc.getName()), sc.getColumns());
+      * if ( thriftSuperColumns != null && ! thriftSuperColumns . isEmpty ()) {
+      * for ( SuperColumn sc : thriftSuperColumns ) { Bytes . toUTF8 (sc.
+      * getColumns ( ).get (0). getValue ()); mutator . writeSubColumns (
+      * columnFamily , tf.getId (), Bytes . toUTF8 (sc. getName ()), sc.
+      * getColumns ());
       * 
       * }
       * 
-      * } mutator.execute(ConsistencyLevel.ONE);
+      * } mutator . execute ( ConsistencyLevel . ONE);
       * 
-      * getIndexManager().write(entityMetadata, enhancedEntity.getEntity());
+      * getIndexManager ( ).write ( entityMetadata , enhancedEntity . getEntity
+      * ());
       * 
       * tf = null;
       */
@@ -394,7 +393,16 @@ public class PelopsClient implements Client
             }
 
             onPersist(metadata, entity, tf);
-            getIndexManager().write(metadata, entity);
+
+            if (entityGraph.getRevParentClass() != null)
+            {
+                getIndexManager().write(metadata, entity, entityGraph.getRevFKeyValue(),
+                        entityGraph.getRevParentClass());
+            }
+            else
+            {
+                getIndexManager().write(metadata, entity);
+            }
 
         }
         catch (Exception e)

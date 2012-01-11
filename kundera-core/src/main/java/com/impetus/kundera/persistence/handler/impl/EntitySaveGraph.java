@@ -47,6 +47,12 @@ public class EntitySaveGraph
     /** Foreign Key value for Parent -> Its Parent */
     private String revFKeyValue;
 
+    /**
+     * If this entity was child of another entity (Transitive persistence case),
+     * class of its parent
+     */
+    private Class<?> revParentClass;
+
     private boolean isSharedPrimaryKey;
 
     private boolean isUniDirectional = true;
@@ -194,6 +200,23 @@ public class EntitySaveGraph
     public void setRevFKeyValue(String revFKeyValue)
     {
         this.revFKeyValue = revFKeyValue;
+    }
+
+    /**
+     * @return the revParentClass
+     */
+    public Class<?> getRevParentClass()
+    {
+        return revParentClass;
+    }
+
+    /**
+     * @param revParentClass
+     *            the revParentClass to set
+     */
+    public void setRevParentClass(Class<?> revParentClass)
+    {
+        this.revParentClass = revParentClass;
     }
 
     /**

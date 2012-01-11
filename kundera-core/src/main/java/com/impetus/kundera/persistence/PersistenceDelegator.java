@@ -503,7 +503,7 @@ public class PersistenceDelegator
     {
         try
         {
-            // Look up in session first
+            // Look up for top level entity in session first
             E e = getSession().lookup(entityClass, primaryKey);
 
             if (null != e)
@@ -523,12 +523,7 @@ public class PersistenceDelegator
                 return null;
             }
 
-            // EntityInterceptor interceptor = new EntityInterceptor();
-            // Collections.addAll(arg0, arg1)
-
-            // List<EntitySaveGraph> objectGraphs =
-            // interceptor.handleRelation(entity,
-            // getMetadata(entity.getClass()));
+            // Find children entities recursively and set into top level entity
             List<EntitySaveGraph> objectGraphs = getGraph(entity, getMetadata(entity.getClass()));
             for (EntitySaveGraph objectGraph : objectGraphs)
             {
@@ -751,16 +746,37 @@ public class PersistenceDelegator
     private Set<?> populateAssociation(Object entity, Field f, Client childClient, String query, Class<?> clazz,
             boolean fetchRelation) throws PropertyAccessException
     {
-        // Set<?> chids;
-        List<?> childs = onAssociation(clazz, childClient, fetchRelation, query, false, null);
-        // chids = new HashSet(childs);
-        // Field f = objectGraph.getProperty();
 
-        // PropertyAccessorHelper.set(entity, f,
-        // PropertyAccessorHelper.isCollection(f.getType()) ?
-        // getFieldInstance(childs, f)
-        // : childs.get(0));
-        return onReflect(entity, f, childs);
+        List<?> children = onAssociation(clazz, childClient, fetchRelation, query, false, null);
+
+        for (Object child : children)
+        {
+            EntityMetadata childMetadata = getMetadata(clazz);
+            // Find children entities recursively and set into top level entity
+            List<EntitySaveGraph> objectGraphs = getGraph(child, childMetadata);
+            for (EntitySaveGraph objectGraph : objectGraphs)
+            {
+                // Compute object graph if there is any association.
+                if (objectGraph.getProperty() != null)
+                {
+                    Object primaryKey = PropertyAccessorHelper.getId(child, childMetadata);
+                    onComputeGraph(child, objectGraph, childClient, primaryKey.toString(), clazz);
+                }
+            }
+
+            /*
+             * List<Relation> childRelations = childMetadata.getRelations();
+             * if(childRelations != null && ! childRelations.isEmpty()) {
+             * for(Relation relation : childRelations) { //EntityMetadata
+             * childMetadata = getMetadata(relation.getTargetEntity()); //Client
+             * childClient = getClient(childMetadata); EntitySaveGraph
+             * childGraph = getGraph(child, childMetadata);
+             * onComputeGraph(child, objectGraph, childClient, rowId, clazz); }
+             * 
+             * }
+             */
+        }
+        return onReflect(entity, f, children);
     }
 
     private Set<?> onReflect(Object entity, Field f, List<?> childs) throws PropertyAccessException
@@ -795,7 +811,6 @@ public class PersistenceDelegator
         {
             IndexManager ixManager = client.getIndexManager();
             Map<String, String> results = fetchRelation ? ixManager.fetchRelation(query) : ixManager.search(query);
-            // System.out.println(results);
             Set<String> rsSet = new HashSet<String>(results.values());
             if (biDirectional)
             {
@@ -1075,6 +1090,7 @@ public class PersistenceDelegator
                 // i.e. Foreign key that refers to its parent
                 graph.setRevFKeyName(objectGraph.getfKeyName());
                 graph.setRevFKeyValue(objectGraph.getParentId());
+                graph.setRevParentClass(objectGraph.getParentEntity().getClass());
 
                 saveGraph(graph);
             }

@@ -271,7 +271,15 @@ public class HibernateClient implements Client
             tx.commit();
         }
 
-        getIndexManager().write(metadata, entityGraph.getParentEntity());
+        if (entityGraph.getRevParentClass() != null)
+        {
+            getIndexManager().write(metadata, entityGraph.getParentEntity(), entityGraph.getRevFKeyValue(),
+                    entityGraph.getRevParentClass());
+        }
+        else
+        {
+            getIndexManager().write(metadata, entityGraph.getParentEntity());
+        }
         return null;
 
     }
