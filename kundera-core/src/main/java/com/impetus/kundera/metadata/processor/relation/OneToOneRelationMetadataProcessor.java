@@ -21,7 +21,6 @@ import java.util.Arrays;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToOne;
-import javax.persistence.PersistenceException;
 import javax.persistence.PrimaryKeyJoinColumn;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;

@@ -15,13 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.manytomany;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
 import org.junit.Test;
 
 /**
@@ -34,10 +27,6 @@ public class PersonTest
     @Test
     public void testPersist()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-
-        EntityManager em = emf.createEntityManager();
-        em.persist(prepareObject());
 
     }
 

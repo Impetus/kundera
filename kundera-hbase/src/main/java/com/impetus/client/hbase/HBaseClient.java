@@ -33,7 +33,6 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
-import com.impetus.client.hbase.service.HBaseWriter;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;

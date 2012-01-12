@@ -8,8 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.impetus.client.entity.Person;
-
 @Entity
 @Table(name = "ADDRESS", schema = "KunderaKeyspace@kcassandra")
 public class OTMBAddress

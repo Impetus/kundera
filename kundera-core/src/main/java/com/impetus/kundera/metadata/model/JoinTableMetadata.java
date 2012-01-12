@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;

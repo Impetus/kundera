@@ -4,11 +4,9 @@
 package com.impetus.client.rdbms;
 
 import org.apache.log4j.Logger;
-import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 
-import com.impetus.kundera.KunderaPersistence;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;

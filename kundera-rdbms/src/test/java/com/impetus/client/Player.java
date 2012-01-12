@@ -11,10 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Index;
-import org.hibernate.annotations.OptimisticLockType;
-import org.hibernate.annotations.PolymorphismType;
-
 // TODO: Auto-generated Javadoc
 /**
  * The Class Player.

@@ -17,7 +17,6 @@ package com.impetus.kundera.metadata.processor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -26,13 +25,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 import org.apache.commons.logging.Log;
@@ -42,11 +35,6 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
-import com.impetus.kundera.metadata.model.Relation;
-import com.impetus.kundera.metadata.processor.relation.ManyToManyRelationMetadataProcessor;
-import com.impetus.kundera.metadata.processor.relation.ManyToOneRelationMetadataProcessor;
-import com.impetus.kundera.metadata.processor.relation.OneToManyRelationMetadataProcessor;
-import com.impetus.kundera.metadata.processor.relation.OneToOneRelationMetadataProcessor;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessorFactory;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;

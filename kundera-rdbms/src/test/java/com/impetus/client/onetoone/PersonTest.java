@@ -15,10 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.onetoone;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
 import org.junit.Test;
 
 /**
@@ -31,32 +27,19 @@ public class PersonTest
     // @Test
     public void testPersist()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-
-        EntityManager em = emf.createEntityManager();
-        em.persist(prepareObject());
-        emf.close();
 
     }
 
     // @Test
     public void testSharedByPKPersist()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-
-        EntityManager em = emf.createEntityManager();
-        em.persist(preparePKObject());
 
     }
 
     @Test
     public void testFindById()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
 
-        EntityManager em = emf.createEntityManager();
-        Object obj = em.find(OTONPerson.class, "1_p");
-        System.out.println(obj.getClass());
     }
 
     /**

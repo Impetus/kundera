@@ -16,19 +16,15 @@
 package com.impetus.kundera.index;
 
 import java.io.CharArrayReader;
-import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.LetterTokenizer;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.Field.TermVector;
-import org.apache.lucene.index.IndexReader.FieldOption;
 import org.apache.lucene.util.Version;
 
 import com.impetus.kundera.metadata.model.Column;

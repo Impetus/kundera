@@ -18,13 +18,7 @@ package com.impetus.client.onetomany;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
 import org.junit.Test;
-
-import com.impetus.client.onetoone.OTONPerson;
 
 /**
  * @author vivek.mishra
@@ -36,11 +30,7 @@ public class PersonTest
     // @Test
     public void testPersist()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
 
-        EntityManager em = emf.createEntityManager();
-        em.persist(prepareObject());
-        emf.close();
     }
 
     /**
@@ -64,11 +54,6 @@ public class PersonTest
     @Test
     public void testFindById()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
 
-        EntityManager em = emf.createEntityManager();
-        OTMNPerson obj = em.find(OTMNPerson.class, "omp");
-        OTMAddress address = obj.getAddresses().iterator().next();
-        System.out.println(obj.getClass());
     }
 }

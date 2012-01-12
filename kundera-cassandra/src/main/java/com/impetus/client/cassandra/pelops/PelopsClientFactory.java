@@ -3,7 +3,6 @@ package com.impetus.client.cassandra.pelops;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 import org.scale7.cassandra.pelops.Cluster;
