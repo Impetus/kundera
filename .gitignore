@@ -1,0 +1,6 @@
+*.*~
+*.iws
+*.iml
+*.ipr
+target/
+test-output/
