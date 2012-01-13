@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata;
 
-import org.apache.log4j.Logger;
-
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -24,14 +22,16 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.proxy.EntityEnhancerFactory;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author amresh.singh
- * 
+ *
  */
 public class KunderaMetadataManager
 {
-    private static Logger log = Logger.getLogger(KunderaMetadataManager.class);
+    private static Logger log = LoggerFactory.getLogger(KunderaMetadataManager.class);
 
     public static PersistenceUnitMetadata getPersistenceUnitMetadata(String persistenceUnit)
     {
@@ -83,7 +83,7 @@ public class KunderaMetadataManager
 
     /**
      * Finds ands returns Entity metadata for a given array of PUs
-     * 
+     *
      * @param entityClass
      * @param persistenceUnits
      * @return
