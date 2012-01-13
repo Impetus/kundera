@@ -31,8 +31,6 @@ import javax.persistence.Entity;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Metamodel;
 
-import org.apache.log4j.Logger;
-
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
@@ -43,14 +41,16 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author amresh.singh
- * 
+ *
  */
 public class MetamodelLoader extends ApplicationLoader
 {
-    private static Logger log = Logger.getLogger(MetamodelLoader.class);
+    private static Logger log = LoggerFactory.getLogger(MetamodelLoader.class);
 
     @Override
     public void load(String... persistenceUnits)

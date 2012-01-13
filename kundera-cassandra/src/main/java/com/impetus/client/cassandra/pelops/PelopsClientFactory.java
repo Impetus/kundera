@@ -2,7 +2,6 @@ package com.impetus.client.cassandra.pelops;
 
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 import org.scale7.cassandra.pelops.Cluster;
@@ -16,10 +15,12 @@ import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PelopsClientFactory extends GenericClientFactory
 {
-    private static Logger logger = Logger.getLogger(KunderaPersistence.class);
+    private static Logger logger = LoggerFactory.getLogger(KunderaPersistence.class);
 
     IndexManager indexManager;
 
