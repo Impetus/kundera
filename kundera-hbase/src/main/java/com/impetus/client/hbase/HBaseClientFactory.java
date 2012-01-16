@@ -1,7 +1,9 @@
 package com.impetus.client.hbase;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 
@@ -16,29 +18,53 @@ public class HBaseClientFactory extends GenericClientFactory
 {
     IndexManager indexManager;
 
+    HBaseConfiguration conf;
+
+    HTablePool hTablePool;
+
+    private static final int DEFAULT_POOL_SIZE = 100;
+
+    int poolSize;
+
     @Override
     protected void initializeClient()
     {
+        // Initialize Index Manager
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
+
+        // Initialize HBase configuration
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(getPersistenceUnit());
+
+        String node = puMetadata.getProperties().getProperty("kundera.nodes");
+        String port = puMetadata.getProperties().getProperty("kundera.port");
+        String poolSize = puMetadata.getProperties().getProperty("kundera.pool.size");
+
+        if (StringUtils.isEmpty(poolSize))
+        {
+            this.poolSize = DEFAULT_POOL_SIZE;
+        }
+        else
+        {
+            this.poolSize = Integer.parseInt(poolSize);
+        }
+
+        Configuration hadoopConf = new Configuration();
+        hadoopConf.set("hbase.master", node + ":" + port);
+        conf = new HBaseConfiguration(hadoopConf);
     }
 
     @Override
     protected Object createPoolOrConnection()
     {
-        return null;
+        // TODO: Make pool size configurable, extract from persistence.xml
+        hTablePool = new HTablePool(conf, poolSize);
+        return hTablePool;
     }
 
     @Override
     protected Client instantiateClient()
     {
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(getPersistenceUnit());
-        String node = puMetadata.getProperties().getProperty("kundera.nodes");
-        String port = puMetadata.getProperties().getProperty("kundera.port");
-
-        Configuration hadoopConf = new Configuration();
-        hadoopConf.set("hbase.master", node + ":" + port);
-        HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
-        return new HBaseClient(indexManager, conf);
+        return new HBaseClient(indexManager, conf, hTablePool);
     }
 
     @Override
@@ -51,6 +77,7 @@ public class HBaseClientFactory extends GenericClientFactory
     public void unload(String... persistenceUnits)
     {
         // TODO destroy pool
+        // hTablePool = null;
     }
 
 }

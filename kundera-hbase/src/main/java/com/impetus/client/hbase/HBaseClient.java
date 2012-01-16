@@ -30,6 +30,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.HTablePool;
 
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
@@ -63,10 +64,10 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     private String persistenceUnit;
 
-    public HBaseClient(IndexManager indexManager, HBaseConfiguration conf)
+    public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool)
     {
         this.indexManager = indexManager;
-        this.handler = new HBaseDataHandler(conf);
+        this.handler = new HBaseDataHandler(conf, hTablePool);
     }
 
     @Override

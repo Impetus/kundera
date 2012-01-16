@@ -3,6 +3,7 @@ package com.impetus.client.mongodb;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
@@ -16,6 +17,8 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
+import com.mongodb.MongoOptions;
+import com.mongodb.ServerAddress;
 
 public class MongoDBClientFactory extends GenericClientFactory
 {
@@ -59,12 +62,20 @@ public class MongoDBClientFactory extends GenericClientFactory
         String contactNode = (String) props.get("kundera.nodes");
         String defaultPort = (String) props.get("kundera.port");
         String keyspace = (String) props.get("kundera.keyspace");
+        String poolSize = props.getProperty("kundera.pool.size");
 
         Mongo mongo = null;
         logger.info("Connecting to mongodb at " + contactNode + " on port " + defaultPort);
         try
         {
             mongo = new Mongo(contactNode, Integer.parseInt(defaultPort));
+
+            if (!StringUtils.isEmpty(poolSize))
+            {
+                MongoOptions mo = mongo.getMongoOptions();
+                mo.connectionsPerHost = Integer.parseInt(poolSize);
+            }
+
             logger.info("Connected to mongodb at " + contactNode + " on port " + defaultPort);
         }
         catch (NumberFormatException e)
