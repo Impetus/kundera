@@ -189,7 +189,7 @@ public class PropertyAccessorHelper
         {
             // Always read from method. that way, even LazyInitialized
             // Proxy classes can be worked upon.
-            return (String) metadata.getReadIdentifierMethod().invoke(entity, new Object[] {});
+            return "" + metadata.getReadIdentifierMethod().invoke(entity, new Object[] {});
         }
         catch (IllegalArgumentException iarg)
         {

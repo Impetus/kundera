@@ -85,13 +85,13 @@ public class PelopsDataHandler extends DataHandler
             // SuperColmun Family.
             List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(), rowKey,
                     Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
-            List<Column> columns = null;
+            List<Column> columns = null;            
 
             Set<SuperColumn> uniSupSet = new HashSet<SuperColumn>(thriftSuperColumns);
             if (uniSupSet.isEmpty() || (uniSupSet.size() == 1 && uniSupSet.iterator().next() == null))
             {
                 columns = selector.getColumnsFromRow(m.getTableName(), new Bytes(rowKey.getBytes()),
-                        Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
+                        Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
                 e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), columns, null), null, false);
             }
             else

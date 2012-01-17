@@ -20,10 +20,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.impetus.kundera.property.accessor.BooleanAccessor;
+import com.impetus.kundera.property.accessor.ByteAccessor;
+import com.impetus.kundera.property.accessor.CharAccessor;
 import com.impetus.kundera.property.accessor.DateAccessor;
+import com.impetus.kundera.property.accessor.DoubleAccessor;
+import com.impetus.kundera.property.accessor.FloatAccessor;
 import com.impetus.kundera.property.accessor.IntegerAccessor;
 import com.impetus.kundera.property.accessor.LongAccessor;
 import com.impetus.kundera.property.accessor.ObjectAccessor;
+import com.impetus.kundera.property.accessor.ShortAccessor;
 import com.impetus.kundera.property.accessor.StringAccessor;
 
 /**
@@ -42,11 +48,35 @@ public class PropertyAccessorFactory
     public static Map<Class<?>, PropertyAccessor<?>> map = new HashMap<Class<?>, PropertyAccessor<?>>();
     static
     {
+        //Premitive Type accessors
+        map.put(boolean.class, new BooleanAccessor());
+        map.put(byte.class, new ByteAccessor());
+        map.put(short.class, new ShortAccessor());
+        map.put(char.class, new CharAccessor());
+        map.put(int.class, new IntegerAccessor());       
+        map.put(long.class, new LongAccessor());
+        map.put(float.class, new FloatAccessor());
+        map.put(double.class, new DoubleAccessor());
+        
+        //Wrapper Object accessors
+        map.put(Boolean.class, new BooleanAccessor());
+        map.put(Byte.class, new ByteAccessor());
+        map.put(Short.class, new ShortAccessor());
+        map.put(Character.class, new CharAccessor());        
         map.put(Integer.class, new IntegerAccessor());
         map.put(Long.class, new LongAccessor());
+        map.put(Float.class, new FloatAccessor());
+        map.put(Double.class, new DoubleAccessor());
+        
+        //String class Accessor
         map.put(String.class, new StringAccessor());
+        
+        //Date/ Time type accessors
         map.put(Date.class, new DateAccessor());
-        map.put(Object.class, new ObjectAccessor());
+        
+        //Accessor for the generic object
+        map.put(Object.class, new ObjectAccessor()); 
+        
     }
 
     /** Making String Accessor easy to access. */
