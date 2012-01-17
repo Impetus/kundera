@@ -288,6 +288,10 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     @Override
     public Properties getProperties()
     {
+        if(this.properties == null)
+        {
+            throw new PersistenceLoaderException(" Error while loading metadata as perssitenceUnitMetadata is null");
+        }
         return this.properties;
     }
 
@@ -323,4 +327,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return null;
     }
 
+    public String getProperty(String prop)
+    { 
+        // assuming Properties are initialized with this call
+      return prop != null ? getProperties().getProperty(prop):null;  
+    }
 }

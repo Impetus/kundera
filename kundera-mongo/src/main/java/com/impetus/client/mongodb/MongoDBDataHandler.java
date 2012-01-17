@@ -18,7 +18,9 @@ package com.impetus.client.mongodb;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -32,13 +34,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.mongodb.query.MongoDBQuery;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityResolver;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.proxy.EnhancedEntity;
+import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -66,10 +74,12 @@ public class MongoDBDataHandler
 
     private static Log log = LogFactory.getLog(MongoDBDataHandler.class);
 
-    public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document)
+    public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document, List<String> relations)
     {
         // Entity object
         Object entity = null;
+        
+        
 
         // Map to hold property-name=>foreign-entity relations
         // Map<String, Set<String>> foreignKeysMap = new HashMap<String,
@@ -89,6 +99,8 @@ public class MongoDBDataHandler
             {
                 PropertyAccessorHelper.set(entity, column.getField(), document.get(column.getName()));
             }
+            
+            
 
             // Populate @Embedded objects and collections
             List<EmbeddedColumn> embeddedColumns = m.getEmbeddedColumnsAsList();
@@ -171,6 +183,19 @@ public class MongoDBDataHandler
             // return
             // EnhancedEntity e = EntityResolver.getEnhancedEntity(entity,
             // rowKey, foreignKeysMap);
+            if(relations != null)
+            {
+               EnhanceEntity e = null;
+               Map<String, Object> relationValue = new HashMap<String, Object>();
+                for(String r : relations)
+                {
+                    Object colValue = document.get(r);
+                    relationValue.put(r, colValue);
+                }
+                
+                e = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationValue);
+                return e;
+            }
             return entity;
 
         }
@@ -419,15 +444,15 @@ public class MongoDBDataHandler
      * to be supported is
      * "Select alias.superColumnName.columnName from EntityName alias"
      */
-    public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName, Query query)
+    public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName, KunderaQuery query)
             throws PropertyAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned
 
         // Query parameters,
-        MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
-        Queue filterClauseQueue = mongoDBQuery.getKunderaQuery().getFilterClauseQueue();
-        String result = mongoDBQuery.getKunderaQuery().getResult();
+//        MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
+        Queue filterClauseQueue = query.getFilterClauseQueue();
+        String result = query.getResult();
 
         // Specified after entity alias in query
         String columnName = getColumnName(result);

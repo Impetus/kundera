@@ -105,7 +105,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     }
 
     @Override
-    public <E> E find(Class<E> entityClass, String rowId) throws Exception
+    public <E> E find(Class<E> entityClass, String rowId, List<String> relationNames) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         // columnFamily has a different meaning for HBase, so it won't be used
@@ -129,11 +129,6 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return entities;
     }
 
-    @Override
-    public <E> List<E> loadData(Query query) throws Exception
-    {
-        throw new NotImplementedException("Not yet implemented");
-    }
 
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> col) throws Exception
@@ -359,7 +354,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
     @Override
-    public Object find(Class<?> clazz, EntityMetadata entityMetadata, String rowId)
+    public Object find(Class<?> clazz, EntityMetadata entityMetadata, String rowId, List<String> relationNames)
     {
         String tableName = entityMetadata.getTableName();
         Object enhancedEntity = null;

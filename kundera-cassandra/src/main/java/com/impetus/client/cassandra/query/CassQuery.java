@@ -32,6 +32,7 @@ import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.query.KunderaQuery;
@@ -48,6 +49,8 @@ public class CassQuery extends QueryImpl implements Query
 
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(CassQuery.class);
+    
+    private EntityReader reader;
 
     /**
      * Instantiates a new cass query.
@@ -77,11 +80,19 @@ public class CassQuery extends QueryImpl implements Query
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
         log.debug("on populateEntities cassandra query");
+        List<Object> result = null;
+        if (useSecondryIndex(m.getPersistenceUnit()))
+        {
 
-        List<IndexClause> ixClause = prepareIndexClause();
+            List<IndexClause> ixClause = prepareIndexClause();
 
-        List<Object> result = ((PelopsClient) client).find(ixClause, m, false, null);
+            result = ((PelopsClient) client).find(ixClause, m, false, null);
+        }
+        else
+        {
+            result = populateUsingLucene(m, client, result);
 
+        }
         return result;
     }
 
@@ -132,25 +143,59 @@ public class CassQuery extends QueryImpl implements Query
      * java.util.List, java.util.List, boolean)
      */
     @Override
-    protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
-            List<String> relationNames, boolean isParent)
+    protected List<Object> handleAssociations(EntityMetadata m, Client client, 
+                                              List<EntitySaveGraph> graphs, List<String> relationNames,
+                                              boolean isParent)
     {
         log.debug("on handleAssociations rdbms query");
-        List<EnhanceEntity> ls = null;
+        List<IndexClause> ixClause = prepareIndexClause();
+        
+        ((CassandraEntityReader) getReader()).setConditions(ixClause);
+        
+        List<EnhanceEntity> ls = reader.populateRelation(m, relationNames, isParent, client);
+        /*        List<EnhanceEntity> ls = null;
         if (!isParent)
         {
-            List<IndexClause> ixClause = prepareIndexClause();
-            ls = ((PelopsClient) client).find(m, relationNames, ixClause);
+            if (useSecondryIndex(m.getPersistenceUnit()))
+            {
+                List<IndexClause> ixClause = prepareIndexClause();
+                ls = ((PelopsClient) client).find(m, relationNames, ixClause);
+            }
+            else
+            {
+                // prepare lucene query and find.
+                Set<String> rSet = fetchDataFromLucene(client);
+                
+                try
+                {
+                    ls = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(), relationNames,
+                                                                            true, m, rSet.toArray(new String[] {}));
+                }
+                catch (Exception e)
+                {
+                    log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
+                    throw new QueryHandlerException(e.getMessage());
+                }
+            }
         }
         else
         {
-            List<IndexClause> ixClause = prepareIndexClause();
-            ls = ((PelopsClient) client).find(ixClause, m, true, null);
+            if (useSecondryIndex(m.getPersistenceUnit()))
+            {
+                // in case need to search on secondry columns and it is not set
+                // to true!
+                List<IndexClause> ixClause = prepareIndexClause();
+                ls = ((PelopsClient) client).find(ixClause, m, true, null);
+            }
+            else
+            {
+                onAssociationUsingLucene(m, client, ls);
+            }
         }
-
-        return handleGraph(ls, graphs);
-
+*/
+        return handleGraph(ls, graphs, client, m);
     }
+
 
     private IndexOperator getOperator(String condition)
     {
@@ -179,6 +224,20 @@ public class CassQuery extends QueryImpl implements Query
             throw new UnsupportedOperationException(" Condition " + condition + " is not suported in  cassandra!");
         }
 
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.query.QueryImpl#getReader()
+     */
+    @Override
+    protected EntityReader getReader()
+    {
+        if(reader == null)
+        {
+            reader = new CassandraEntityReader(getLuceneQueryFromJPAQuery());
+        }
+        
+        return reader;
     }
 
 }

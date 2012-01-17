@@ -57,7 +57,8 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    <E> E find(Class<E> entityClass, String key) throws Exception;
+    @Deprecated
+    <E> E find(Class<E> entityClass, String key, List<String> relationNames) throws Exception;
 
     /**
      * Retrieve columns from multiple rows of a column-family.
@@ -89,21 +90,7 @@ public interface Client
      */
     <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap) throws Exception;
 
-    /**
-     * Loads columns from multiple rows restricting results to conditions stored
-     * in <code>filterClauseQueue</code>.
-     * 
-     * @param <E>
-     *            the element type
-     * @param query
-     *            the query
-     * @return the list
-     * @throws Exception
-     *             the exception
-     */
-    @SuppressWarnings("unchecked")
-    <E> List<E> loadData(Query query) throws Exception;
-
+    
     /**
      * Shutdown.
      */
@@ -171,9 +158,10 @@ public interface Client
      * @param clazz
      * @param metadata
      * @param rowId
-     * @return
+     * @param relationNames relation names
+     * @return entity.
      */
-    Object find(Class<?> clazz, EntityMetadata metadata, String rowId);
+    Object find(Class<?> clazz, EntityMetadata metadata, String rowId, List<String> relationNames);
 
     /**
      * Inserts records into Join Table
@@ -213,8 +201,8 @@ public interface Client
      * @return
      */
     <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, EntitySaveGraph objectGraph);
-
+                                            EntityMetadata relMetadata, EntitySaveGraph objectGraph);    
+    
     List<Object> find(String colName, String colValue, EntityMetadata m);
 
 }

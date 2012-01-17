@@ -40,6 +40,7 @@ import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
+import com.impetus.kundera.query.KunderaQuery;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -278,7 +279,7 @@ public class MongoDBClient implements Client
      * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public <E> E find(Class<E> entityClass, String key) throws Exception
+    public <E> E find(Class<E> entityClass, String key, List<String> relationNames) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
 
@@ -302,7 +303,7 @@ public class MongoDBClient implements Client
         }
 
         Object enhancedEntity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
-                entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument);
+                entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, null);
 
         return (E) enhancedEntity;
     }
@@ -326,7 +327,7 @@ public class MongoDBClient implements Client
         {
             DBObject fetchedDocument = cursor.next();
             Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
-                    entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument);
+                    entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, null);
             entities.add(entity);
         }
         return entities;
@@ -344,13 +345,13 @@ public class MongoDBClient implements Client
      * @throws Exception
      *             the exception
      */
-    public <E> List<E> loadData(Query query) throws Exception
+    public <E> List<E> loadData(EntityMetadata entityMetadata, KunderaQuery query, List<String> relationNames) throws Exception
     {
-        MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
+//        MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
 
         // TODO Resolve the workaround
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), mongoDBQuery
-                .getKunderaQuery().getEntityClass());
+//        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), mongoDBQuery
+//                .getKunderaQuery().getEntityClass());
 
         String documentName = entityMetadata.getTableName();
         String dbName = entityMetadata.getSchema();
@@ -358,8 +359,8 @@ public class MongoDBClient implements Client
 
         DBCollection dbCollection = mongoDb.getCollection(documentName);
 
-        Queue filterClauseQueue = mongoDBQuery.getKunderaQuery().getFilterClauseQueue();
-        String result = mongoDBQuery.getKunderaQuery().getResult();
+        Queue filterClauseQueue = query.getFilterClauseQueue();
+        String result = query.getResult();
 
         List entities = new ArrayList<E>();
 
@@ -369,7 +370,7 @@ public class MongoDBClient implements Client
         // TODO: improve code
         if (result.indexOf(".") >= 0)
         {
-
+            //TODO i need to discuss with Amresh before modifying it.
             entities.addAll(new MongoDBDataHandler(this, getPersistenceUnit()).getEmbeddedObjectList(dbCollection,
                     entityMetadata, documentName, query));
 
@@ -387,7 +388,7 @@ public class MongoDBClient implements Client
             {
                 DBObject fetchedDocument = cursor.next();
                 Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(clazz,
-                        entityMetadata, fetchedDocument);
+                        entityMetadata, fetchedDocument, relationNames);
                 entities.add(entity);
             }
         }
@@ -485,7 +486,7 @@ public class MongoDBClient implements Client
      * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
     @Override
-    public Object find(Class<?> clazz, EntityMetadata entityMetadata, String rowId)
+    public Object find(Class<?> clazz, EntityMetadata entityMetadata, String rowId, List<String> relationNames)
     {
 
         log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + rowId);
@@ -508,13 +509,37 @@ public class MongoDBClient implements Client
         }
 
         Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
-                entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument);
+                entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, null);
 
         return entity;
     }
 
-    public List<Object> find(String colName, String colValue, EntityMetadata m)
+    /**
+     * Method to find entity for given association name and association value.
+     */
+  public List<Object> find(String colName, String colValue, EntityMetadata m)
     {
-        throw new UnsupportedOperationException("Method not supported");
+       // you got column name and column value.
+      DBCollection dbCollection = mongoDb.getCollection(m.getTableName());
+
+      BasicDBObject query = new BasicDBObject();
+
+      query.put(colName, colValue);
+
+      DBCursor cursor = dbCollection.find(query);
+      DBObject fetchedDocument = null;
+      MongoDBDataHandler handler = new MongoDBDataHandler(this, getPersistenceUnit());
+      List<Object> results = new ArrayList<Object>();
+      while (cursor.hasNext())
+      {
+          fetchedDocument = cursor.next();
+          Object entity = handler.getEntityFromDocument(m.getEntityClazz(), m, fetchedDocument, null);
+          results.add(entity);
+      }
+      
+
+
+      return results.isEmpty()?null:results;
     }
+
 }

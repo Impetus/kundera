@@ -138,6 +138,7 @@ public class QueryResolver
 
     }
 
+
     /**
      * Gets the query.
      * 

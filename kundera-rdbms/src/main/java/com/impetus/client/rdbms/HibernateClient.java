@@ -132,18 +132,6 @@ public class HibernateClient implements Client
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.Client#loadData(javax.persistence.Query)
-     */
-    @Override
-    public <E> List<E> loadData(Query arg0) throws Exception
-    {
-
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see
      * com.impetus.kundera.client.Client#setPersistenceUnit(java.lang.String)
      */
@@ -208,7 +196,7 @@ public class HibernateClient implements Client
      * java.lang.String)
      */
     @Override
-    public <E> E find(Class<E> arg0, String arg1) throws Exception
+    public <E> E find(Class<E> arg0, String arg1, List<String> relationNames) throws Exception
     {
 
         Session s = getSessionInstance();
@@ -243,6 +231,12 @@ public class HibernateClient implements Client
         return c.list();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.util.Map)
+     */
     @Override
     @Deprecated
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap) throws Exception
@@ -250,6 +244,14 @@ public class HibernateClient implements Client
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#persist(com.impetus.kundera.persistence
+     * .handler.impl.EntitySaveGraph,
+     * com.impetus.kundera.metadata.model.EntityMetadata)
+     */
     @Override
     public String persist(EntitySaveGraph entityGraph, EntityMetadata metadata)
     {
@@ -445,29 +447,31 @@ public class HibernateClient implements Client
      * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
     @Override
-    public Object find(Class<?> clazz, EntityMetadata metadata, String rowId)
+    public Object find(Class<?> clazz, EntityMetadata metadata, String rowId, List<String> relations)
     {
-        // TODO Auto-generated method stub
         Session s = sf.openSession();
         s.beginTransaction();
         return s.get(clazz, rowId);
     }
 
+
+
     public List<Object[]> find(String nativeQuery, List<String> relations, Class clazz)
     {
-        // Session s = getSessionInstance();
-        if (s == null)
+//        Session s = getSessionInstance();
+        if(s == null)
         {
-            s = sf.openStatelessSession();
-
-            s.beginTransaction();
+          s = sf.openStatelessSession();
+        
+          s.beginTransaction();
         }
         SQLQuery q = s.createSQLQuery(nativeQuery).addEntity(clazz);
-        for (String r : relations)
+        for(String r : relations)
         {
             q.addScalar(r);
         }
 
+        
         return q.list();
     }
 

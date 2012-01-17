@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public enum DBType
 {
-    HBASE, MONGODB, CASSANDRA;
+    HBASE, MONGODB, CASSANDRA, RDBMS;
     static Map<String, DBType> coll = new HashMap<String, DBType>();
 
     /**
@@ -36,5 +36,6 @@ public enum DBType
         coll.put(HBASE.name(), HBASE);
         coll.put(CASSANDRA.name(), CASSANDRA);
         coll.put(MONGODB.name(), MONGODB);
+        coll.put(RDBMS.name(), RDBMS);
     }
 }

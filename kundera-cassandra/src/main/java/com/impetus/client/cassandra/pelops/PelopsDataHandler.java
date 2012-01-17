@@ -68,7 +68,7 @@ public class PelopsDataHandler extends DataHandler
 
     private static Log log = LogFactory.getLog(PelopsDataHandler.class);
 
-    public Object fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String rowKey) throws Exception
+    public Object fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String rowKey, List<String> relationNames, boolean isWrapReq) throws Exception
     {
         List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
         Object e = null;
@@ -92,7 +92,7 @@ public class PelopsDataHandler extends DataHandler
             {
                 columns = selector.getColumnsFromRow(m.getTableName(), new Bytes(rowKey.getBytes()),
                         Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
-                e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), columns, null), null, false);
+                e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), columns, null), relationNames, isWrapReq);
             }
             else
             {
@@ -105,13 +105,13 @@ public class PelopsDataHandler extends DataHandler
         return e;
     }
 
-    public List<Object> fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String... rowIds)
+    public List<Object> fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, List<String> relationNames, boolean isWrapReq, String... rowIds)
             throws Exception
     {
         List<Object> entities = new ArrayList<Object>(rowIds.length);
         for (String rowKey : rowIds)
         {
-            Object e = fromThriftRow(selector, clazz, m, rowKey);
+            Object e = fromThriftRow(selector, clazz, m, rowKey, relationNames, isWrapReq);
             entities.add(e);
         }
         return entities;
@@ -220,17 +220,15 @@ public class PelopsDataHandler extends DataHandler
      * @throws Exception
      *             the exception
      */
-    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
-            List<String> relationNames, boolean isWrapperReq) throws Exception
+    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow, List<String> relationNames, boolean isWrapperReq) throws Exception
     {
 
         // Instantiate a new instance
         Object entity = clazz.newInstance();
-        Map<String, Object> relations = null;
+        Map<String, Object> relations = new HashMap<String, Object>();
 
         // Map to hold property-name=>foreign-entity relations
-        // Map<String, Set<String>> foreignKeysMap = new HashMap<String,
-        // Set<String>>();
+     //   Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
         // Set row-key. Note: @Id is always String.
         PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), thriftRow.getId());
@@ -271,7 +269,7 @@ public class PelopsDataHandler extends DataHandler
                 {
                     if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
                     {
-                        relations = new HashMap<String, Object>();
+                      //  relations = new HashMap<String, Object>();
                         String value = PropertyAccessorFactory.STRING.fromBytes(thriftColumnValue);
                         relations.put(thriftColumnName, value);
                         // prepare EnhanceEntity and return it
@@ -314,7 +312,7 @@ public class PelopsDataHandler extends DataHandler
                         if (relationNames != null && !relationNames.isEmpty()
                                 && relationNames.contains(thriftColumnName))
                         {
-                            relations = new HashMap<String, Object>();
+//                            relations = new HashMap<String, Object>();
                             String value = PropertyAccessorFactory.STRING.fromBytes(thriftColumnValue);
                             relations.put(thriftColumnName, value);
                             // prepare EnhanceEntity and return it
@@ -323,7 +321,7 @@ public class PelopsDataHandler extends DataHandler
                 }
             }
         }
-        return isWrapperReq ? new EnhanceEntity(entity, thriftRow.getId(), relations) : entity;
+        return isWrapperReq ? new EnhanceEntity(entity, thriftRow.getId(), relations):entity;
     }
 
     /**
