@@ -5,6 +5,8 @@ package com.impetus.client.rdbms;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.client.rdbms.query.RDBMSEntityReader;
 import com.impetus.kundera.client.Client;
@@ -12,8 +14,6 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.persistence.EntityReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
