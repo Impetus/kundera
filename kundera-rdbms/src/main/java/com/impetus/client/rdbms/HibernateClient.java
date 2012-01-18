@@ -456,9 +456,10 @@ public class HibernateClient implements Client
         return s.get(clazz, rowId);
     }
 
-    public List<Object[]> find(String nativeQuery, List<String> relations, Class clazz)
+    public List find(String nativeQuery, List<String> relations, Class clazz)
     {
         // Session s = getSessionInstance();
+        List<Object[]> result = new ArrayList<Object[]>();
         if (s == null)
         {
             s = sf.openStatelessSession();

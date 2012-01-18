@@ -49,6 +49,7 @@ public class RDBMSClientFactory extends GenericClientFactory
     {
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
         reader = new RDBMSEntityReader();
+        ((RDBMSEntityReader) reader).setFilter("where");
     }
 
     /*

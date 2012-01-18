@@ -142,12 +142,15 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             String sqlQuery)
     {
         List<EnhanceEntity> ls;
-        List<Object[]> result = ((HibernateClient) client).find(sqlQuery, relationNames, m.getEntityClazz());
-
+        boolean isWithNoRelation = relationNames != null && relationNames.isEmpty();
+        List result = ((HibernateClient) client).find(sqlQuery, relationNames, m.getEntityClazz());
+        
         ls = new ArrayList<EnhanceEntity>(result.size());
-        for (Object[] o : result)
+        
+        for (Object o : result)
         {
-            EnhanceEntity e = new EnhanceEntity(o[0], getId(o[0], m), populateRelations(relationNames, o));
+            EnhanceEntity e = new EnhanceEntity( isWithNoRelation? o: ((Object[])o)[0], getId(isWithNoRelation? o: ((Object[])o)[0], m), 
+                                                 isWithNoRelation?null: populateRelations(relationNames,((Object[])o)));
             ls.add(e);
         }
         return ls;
@@ -229,11 +232,12 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
         else
         {
+            
             queryBuilder.append(aliasName);
             queryBuilder.append(".");
             queryBuilder.append(entityMetadata.getIdColumn().getName());
             queryBuilder.append(" ");
-            queryBuilder.append("IN (");
+            queryBuilder.append("IN(");
             int count = 0;
             for (String key : primaryKeys)
             {
@@ -241,8 +245,11 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                 if (++count != primaryKeys.size())
                 {
                     queryBuilder.append(",");
+                } else {
+                    queryBuilder.append(")");
                 }
             }
+            
 
         }
         return queryBuilder.toString();
@@ -304,7 +311,12 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         Set<String> keys = new HashSet<String>(1);
         keys.add(primaryKey);
         String query = getSqlQueryFromJPA(m, relationNames, keys);
-        return populateEnhanceEntities(m, relationNames, client, query).get(0);
+        List<EnhanceEntity> results = populateEnhanceEntities(m, relationNames, client, query);
+        if(results != null && !results.isEmpty())
+        {
+            return results.get(0);
+        }
+        return null;
     }
 
 }
