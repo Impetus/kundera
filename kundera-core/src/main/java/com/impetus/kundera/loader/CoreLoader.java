@@ -15,20 +15,20 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
-import org.apache.log4j.Logger;
-
 import com.impetus.kundera.metadata.model.CoreMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.proxy.cglib.CglibEntityEnhancerFactory;
 import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author amresh.singh
- * 
+ *
  */
 public class CoreLoader
 {
-    private static Logger log = Logger.getLogger(CoreLoader.class);
+    private static Logger log = LoggerFactory.getLogger(CoreLoader.class);
 
     public void load()
     {

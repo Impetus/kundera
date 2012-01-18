@@ -17,11 +17,14 @@ import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.kundera.persistence.EntityReader;
 
 public class PelopsClientFactory extends GenericClientFactory
 {
-    private static Logger logger = Logger.getLogger(KunderaPersistence.class);
+    private static Logger logger = LoggerFactory.getLogger(KunderaPersistence.class);
 
     IndexManager indexManager;
 

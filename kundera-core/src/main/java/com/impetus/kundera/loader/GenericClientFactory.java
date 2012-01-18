@@ -2,17 +2,17 @@ package com.impetus.kundera.loader;
 
 import javax.persistence.PersistenceException;
 
-import org.apache.log4j.Logger;
-
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-// Client Loaders are more of 
+// Client Loaders are more of
 public abstract class GenericClientFactory implements Loader
 {
     /** The logger. */
-    private static Logger logger = Logger.getLogger(GenericClientFactory.class);
+    private static Logger logger = LoggerFactory.getLogger(GenericClientFactory.class);
 
     private Client client;
 

@@ -51,16 +51,7 @@ public class MongoDBQuery extends QueryImpl
         this.kunderaQuery = kunderaQuery;
     }
 
-    /*
-     * @Override public List<?> getResultList() { log.debug("JPA Query is: " +
-     * query);
-     * 
-     * EntityMetadata m = getEntityMetadata();
-     * 
-     * try { return getClient().loadData(this); } catch (Exception e) { return
-     * null; } }
-     */
-
+    
     @Override
     public int executeUpdate()
     {

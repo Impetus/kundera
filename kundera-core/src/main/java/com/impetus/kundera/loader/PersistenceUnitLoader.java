@@ -25,20 +25,20 @@ import java.util.Set;
 import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
-import org.apache.log4j.Logger;
-
 import com.impetus.kundera.KunderaPersistence;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author amresh.singh
- * 
+ *
  */
 public class PersistenceUnitLoader extends ApplicationLoader
 {
-    private static Logger log = Logger.getLogger(PersistenceUnitLoader.class);
+    private static Logger log = LoggerFactory.getLogger(PersistenceUnitLoader.class);
 
     /** The Constant PROVIDER_IMPLEMENTATION_NAME. */
     private static final String PROVIDER_IMPLEMENTATION_NAME = KunderaPersistence.class.getName();

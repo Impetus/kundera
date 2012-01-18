@@ -19,11 +19,13 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.MongoOptions;
 import com.mongodb.ServerAddress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MongoDBClientFactory extends GenericClientFactory
 {
     /** The logger. */
-    private static Logger logger = Logger.getLogger(MongoDBClientFactory.class);
+    private static Logger logger = LoggerFactory.getLogger(MongoDBClientFactory.class);
 
     IndexManager indexManager;
 

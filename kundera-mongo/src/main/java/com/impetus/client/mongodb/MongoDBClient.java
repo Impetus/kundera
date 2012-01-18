@@ -348,12 +348,6 @@ public class MongoDBClient implements Client
      */
     public <E> List<E> loadData(EntityMetadata entityMetadata, KunderaQuery query, List<String> relationNames) throws Exception
     {
-//        MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
-
-        // TODO Resolve the workaround
-//        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), mongoDBQuery
-//                .getKunderaQuery().getEntityClass());
-
         String documentName = entityMetadata.getTableName();
         String dbName = entityMetadata.getSchema();
         Class clazz = entityMetadata.getEntityClazz();

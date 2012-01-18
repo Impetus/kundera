@@ -13,6 +13,9 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.persistence.EntityReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * @author impadmin
@@ -21,11 +24,11 @@ import com.impetus.kundera.persistence.EntityReader;
 public class RDBMSClientFactory extends GenericClientFactory
 {
 
-    private static Logger logger = Logger.getLogger(RDBMSClientFactory.class);
+    private static Logger logger = LoggerFactory.getLogger(RDBMSClientFactory.class);
 
     IndexManager indexManager;
 
-    EntityReader reader;
+    private EntityReader reader;
     /*
      * (non-Javadoc)
      * 

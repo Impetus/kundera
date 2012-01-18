@@ -23,16 +23,18 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.ProviderUtil;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.log4j.Logger;
+
 
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ApplicationLoader;
 import com.impetus.kundera.loader.CoreLoader;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Class KunderaPersistence.
- * 
+ *
  * @author animesh.kumar
  */
 @SuppressWarnings("unchecked")
@@ -40,7 +42,7 @@ public class KunderaPersistence implements PersistenceProvider
 {
 
     /** The logger. */
-    private static Logger logger = Logger.getLogger(KunderaPersistence.class);
+    private static Logger logger = LoggerFactory.getLogger(KunderaPersistence.class);
 
     private static Boolean loaded = false;
 

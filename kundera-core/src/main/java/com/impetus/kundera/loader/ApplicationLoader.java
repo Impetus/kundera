@@ -17,16 +17,16 @@ package com.impetus.kundera.loader;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author amresh.singh
- * 
+ *
  */
 public class ApplicationLoader implements Loader
 {
-    private static Logger log = Logger.getLogger(ApplicationLoader.class);
+    private static Logger log = LoggerFactory.getLogger(ApplicationLoader.class);
 
     List<ApplicationLoader> applicationLoaders = new ArrayList<ApplicationLoader>();
 
