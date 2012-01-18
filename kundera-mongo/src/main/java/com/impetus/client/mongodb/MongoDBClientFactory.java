@@ -4,9 +4,10 @@ import java.net.UnknownHostException;
 import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
@@ -18,9 +19,6 @@ import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.MongoOptions;
-import com.mongodb.ServerAddress;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MongoDBClientFactory extends GenericClientFactory
 {
