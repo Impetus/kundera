@@ -15,7 +15,6 @@ import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.persistence.EntityReader;
 
-
 /**
  * @author impadmin
  * 
@@ -28,6 +27,7 @@ public class RDBMSClientFactory extends GenericClientFactory
     IndexManager indexManager;
 
     private EntityReader reader;
+
     /*
      * (non-Javadoc)
      * 

@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class PersistenceUnitLoader extends ApplicationLoader
 {

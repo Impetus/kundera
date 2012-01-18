@@ -17,7 +17,7 @@ package com.impetus.kundera.persistence;
 
 /**
  * The Class ReaderResolverException.
- *
+ * 
  * @author vivek.mishra
  */
 public class ReaderResolverException extends RuntimeException
@@ -28,8 +28,9 @@ public class ReaderResolverException extends RuntimeException
 
     /**
      * Instantiates a new reader resolver exception.
-     *
-     * @param errMsg the err msg
+     * 
+     * @param errMsg
+     *            the err msg
      */
     public ReaderResolverException(String errMsg)
     {

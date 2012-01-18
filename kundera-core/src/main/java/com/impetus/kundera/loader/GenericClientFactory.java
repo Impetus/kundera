@@ -49,8 +49,9 @@ public abstract class GenericClientFactory implements Loader
         if (KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit) == null)
         {
             ClientMetadata clientMetadata = new ClientMetadata();
-            String secIndex = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit).getProperty("use_secondry_index");
-            clientMetadata.setUseSecondryIndex(secIndex == null || !secIndex.equals("true")? false:true);
+            String secIndex = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(persistenceUnit).getProperty("use_secondry_index");
+            clientMetadata.setUseSecondryIndex(secIndex == null || !secIndex.equals("true") ? false : true);
             KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
         }
     }

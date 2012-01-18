@@ -123,8 +123,12 @@ public class LuceneQuery extends QueryImpl implements Query
         return this;
     }
 
-   /* (non-Javadoc)
-     * @see com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
      */
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
@@ -132,18 +136,25 @@ public class LuceneQuery extends QueryImpl implements Query
         throw new UnsupportedOperationException("Method not supported for default indexing");
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client, java.util.List, java.util.List, boolean)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client,
+     * java.util.List, java.util.List, boolean)
      */
     @Override
     protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
             List<String> relationNames, boolean isParent)
     {
         throw new UnsupportedOperationException("Method not supported for default indexing");
-        
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.QueryImpl#getReader()
      */
     @Override

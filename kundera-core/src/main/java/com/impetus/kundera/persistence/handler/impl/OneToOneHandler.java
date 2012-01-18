@@ -129,7 +129,9 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
 
             try
             {
-                PropertyAccessorHelper.set(associatedEntity, f, getId(entity, metadata));
+                PropertyAccessorHelper.setId(associatedEntity, metadata, getId(entity, metadata));
+                // PropertyAccessorHelper.set(associatedEntity, f, getId(entity,
+                // metadata));
             }
             catch (PropertyAccessException e)
             {

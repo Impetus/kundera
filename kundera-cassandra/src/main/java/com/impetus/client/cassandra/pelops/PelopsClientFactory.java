@@ -27,7 +27,7 @@ public class PelopsClientFactory extends GenericClientFactory
     IndexManager indexManager;
 
     private EntityReader reader;
-    
+
     @Override
     protected void initializeClient()
     {
@@ -43,7 +43,7 @@ public class PelopsClientFactory extends GenericClientFactory
         // * )
         // *//*)*/);
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
-        
+
         reader = new CassandraEntityReader();
 
     }

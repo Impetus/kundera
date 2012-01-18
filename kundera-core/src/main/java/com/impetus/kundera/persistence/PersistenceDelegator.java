@@ -364,9 +364,11 @@ public class PersistenceDelegator
 
     /**
      * Save graph.
-     *
-     * @param objectGraph the object graph
-     * @throws Exception the exception
+     * 
+     * @param objectGraph
+     *            the object graph
+     * @throws Exception
+     *             the exception
      */
     private void removeGraph(EntitySaveGraph objectGraph) throws Exception
     {
@@ -404,10 +406,13 @@ public class PersistenceDelegator
 
     /**
      * On client persist.
-     *
-     * @param objectGraph the object graph
-     * @param childEntity the child entity
-     * @throws Exception the exception
+     * 
+     * @param objectGraph
+     *            the object graph
+     * @param childEntity
+     *            the child entity
+     * @throws Exception
+     *             the exception
      */
     private void onClientHandle(EntitySaveGraph objectGraph, Object childEntity) throws Exception
     {
@@ -428,10 +433,13 @@ public class PersistenceDelegator
 
     /**
      * Handle client.
-     *
-     * @param child the child
-     * @param objectGraph the object graph
-     * @throws Exception the exception
+     * 
+     * @param child
+     *            the child
+     * @param objectGraph
+     *            the object graph
+     * @throws Exception
+     *             the exception
      */
     private void onClientDelete(Object child, EntitySaveGraph objectGraph) throws Exception
     {
@@ -515,16 +523,21 @@ public class PersistenceDelegator
 
             EntityReader reader = getReader(client);
             List<String> relationNames = relations.values().iterator().next();
-            EnhanceEntity enhanceEntity = reader.findById(primaryKey.toString(), entityMetadata, relationNames, client);
+
+            String rowKey = primaryKey + "";
+
+            EnhanceEntity enhanceEntity = reader.findById(rowKey, entityMetadata, relationNames, client);
+
             Map<Object, Object> relationalValues = new HashMap<Object, Object>();
             E entity = (E) enhanceEntity.getEntity();
-            if(relationNames.isEmpty())
+            if (relationNames.isEmpty())
             {
-                return entity; 
-            } 
+                return entity;
+            }
             else
             {
-                entity = (E) reader.computeGraph(enhanceEntity, objectGraphs, relationalValues, client, entityMetadata, this);
+                entity = (E) reader.computeGraph(enhanceEntity, objectGraphs, relationalValues, client, entityMetadata,
+                        this);
             }
             boolean isCacheableToL2 = entityMetadata.isCacheable();
             getSession().store(primaryKey, entity, isCacheableToL2);
@@ -585,7 +598,6 @@ public class PersistenceDelegator
 
         closed = true;
     }
-
 
     /**
      * Gets the persistence units.
@@ -784,9 +796,11 @@ public class PersistenceDelegator
 
     /**
      * Store.
-     *
-     * @param id the id
-     * @param entity the entity
+     * 
+     * @param id
+     *            the id
+     * @param entity
+     *            the entity
      */
     public void store(Object id, Object entity)
     {
@@ -795,9 +809,11 @@ public class PersistenceDelegator
 
     /**
      * Store.
-     *
-     * @param entities the entities
-     * @param entityMetadata the entity metadata
+     * 
+     * @param entities
+     *            the entities
+     * @param entityMetadata
+     *            the entity metadata
      */
     public void store(List entities, EntityMetadata entityMetadata)
     {
@@ -841,8 +857,9 @@ public class PersistenceDelegator
 
     /**
      * Gets the reader.
-     *
-     * @param client the client
+     * 
+     * @param client
+     *            the client
      * @return the reader
      */
     private EntityReader getReader(Client client)

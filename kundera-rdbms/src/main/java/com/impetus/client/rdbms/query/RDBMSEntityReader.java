@@ -290,13 +290,18 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         return relationVal;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.persistence.EntityReader#findById(java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, java.util.List, com.impetus.kundera.client.Client)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.EntityReader#findById(java.lang.String,
+     * com.impetus.kundera.metadata.model.EntityMetadata, java.util.List,
+     * com.impetus.kundera.client.Client)
      */
     @Override
     public EnhanceEntity findById(String primaryKey, EntityMetadata m, List<String> relationNames, Client client)
     {
-        Set<String> keys = new HashSet<String>(1); 
+        Set<String> keys = new HashSet<String>(1);
         keys.add(primaryKey);
         String query = getSqlQueryFromJPA(m, relationNames, keys);
         return populateEnhanceEntities(m, relationNames, client, query).get(0);

@@ -20,11 +20,10 @@ import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * @author Amresh Singh
- *
+ * 
  */
 public class CharAccessor implements PropertyAccessor<Character>
 {
-
 
     @Override
     public Character fromBytes(byte[] data) throws PropertyAccessException
@@ -35,7 +34,6 @@ public class CharAccessor implements PropertyAccessor<Character>
         return (char) ((0xff & data[0]) << 8 | (0xff & data[1]) << 0);
     }
 
-
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
@@ -43,12 +41,29 @@ public class CharAccessor implements PropertyAccessor<Character>
         return new byte[] { (byte) ((data >> 8) & 0xff), (byte) ((data >> 0) & 0xff), };
     }
 
-
     @Override
     public String toString(Object object)
     {
         return object.toString();
     }
-    
+
+    @Override
+    public Character fromString(String s) throws PropertyAccessException
+    {
+        try
+        {
+            if (s == null || s.length() != 1)
+            {
+                throw new PropertyAccessException("Can't convert String " + s + " to character");
+            }
+
+            Character c = s.charAt(0);
+            return c;
+        }
+        catch (NumberFormatException e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
+    }
 
 }

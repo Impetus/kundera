@@ -101,7 +101,6 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return entities;
     }
 
-
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> col) throws Exception
     {
@@ -359,7 +358,9 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         throw new UnsupportedOperationException("Method not supported");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.client.Client#getReader()
      */
     @Override
@@ -367,5 +368,5 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     {
         throw new UnsupportedOperationException("Not yet implemented");
     }
-    
+
 }

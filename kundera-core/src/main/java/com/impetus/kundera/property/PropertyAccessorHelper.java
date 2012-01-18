@@ -206,6 +206,38 @@ public class PropertyAccessorHelper
     }
 
     /**
+     * Sets Primary Key (Row key) into entity field that was annotated with @Id
+     * 
+     * @param entity
+     * @param metadata
+     * @param rowKey
+     * @throws PropertyAccessException
+     */
+    public static void setId(Object entity, EntityMetadata metadata, String rowKey) throws PropertyAccessException
+    {
+        try
+        {
+            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn()
+                    .getField());
+            Object obj = accessor.fromString(rowKey);
+
+            metadata.getWriteIdentifierMethod().invoke(entity, obj);
+        }
+        catch (IllegalArgumentException iarg)
+        {
+            throw new PropertyAccessException(iarg);
+        }
+        catch (IllegalAccessException iacc)
+        {
+            throw new PropertyAccessException(iacc);
+        }
+        catch (InvocationTargetException ite)
+        {
+            throw new PropertyAccessException(ite);
+        }
+    }
+
+    /**
      * Gets the embedded object.
      * 
      * @param obj

@@ -15,10 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model;
 
- 
 /**
  * The Class PersistenceLoaderException.
- *
+ * 
  * @author vivek.mishra
  */
 public class PersistenceLoaderException extends RuntimeException
@@ -29,8 +28,9 @@ public class PersistenceLoaderException extends RuntimeException
 
     /**
      * Instantiates a new persistence loader exception.
-     *
-     * @param errMsg the err msg
+     * 
+     * @param errMsg
+     *            the err msg
      */
     public PersistenceLoaderException(String errMsg)
     {

@@ -66,13 +66,23 @@ public class DateAccessor implements PropertyAccessor<Date>
         }
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
-     */
     @Override
     public final String toString(Object object)
     {
         return object.toString();
+    }
+
+    @Override
+    public Date fromString(String s) throws PropertyAccessException
+    {
+        try
+        {
+            Date d = new Date(s);
+            return d;
+        }
+        catch (NumberFormatException e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
     }
 }

@@ -51,7 +51,6 @@ public class MongoDBQuery extends QueryImpl
         this.kunderaQuery = kunderaQuery;
     }
 
-    
     @Override
     public int executeUpdate()
     {
@@ -64,15 +63,18 @@ public class MongoDBQuery extends QueryImpl
         return super.setMaxResults(maxResult);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
      */
-    
 
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
-        //TODO : Must refactor client 
+        // TODO : Must refactor client
         try
         {
             return ((MongoDBClient) client).loadData(m, getKunderaQuery(), null);
@@ -81,34 +83,41 @@ public class MongoDBQuery extends QueryImpl
         {
             throw new QueryHandlerException(e.getMessage());
         }
-        
+
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client, java.util.List, java.util.List, boolean)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client,
+     * java.util.List, java.util.List, boolean)
      */
     @Override
     protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
             List<String> relationNames, boolean isParent)
     {
-        //TODO : required to modify client return relation.
+        // TODO : required to modify client return relation.
         // if it is a parent..then find data related to it only
         // else u need to load for associated fields too.
         List<EnhanceEntity> ls = new ArrayList<EnhanceEntity>();
 
-            try
-            {
-                ls = ((MongoDBClient) client).loadData(m, kunderaQuery, relationNames);
-            }
-            catch (Exception e)
-            {
-                throw new QueryHandlerException(e.getMessage());
-            }
-        return handleGraph(ls, graphs,client, m);
-        
+        try
+        {
+            ls = ((MongoDBClient) client).loadData(m, kunderaQuery, relationNames);
+        }
+        catch (Exception e)
+        {
+            throw new QueryHandlerException(e.getMessage());
+        }
+        return handleGraph(ls, graphs, client, m);
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.QueryImpl#getReader()
      */
     @Override
@@ -117,5 +126,4 @@ public class MongoDBQuery extends QueryImpl
         return null;
     }
 
-    
 }

@@ -68,7 +68,8 @@ public class PelopsDataHandler extends DataHandler
 
     private static Log log = LogFactory.getLog(PelopsDataHandler.class);
 
-    public Object fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String rowKey, List<String> relationNames, boolean isWrapReq) throws Exception
+    public Object fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String rowKey,
+            List<String> relationNames, boolean isWrapReq) throws Exception
     {
         List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
         Object e = null;
@@ -85,14 +86,15 @@ public class PelopsDataHandler extends DataHandler
             // SuperColmun Family.
             List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(), rowKey,
                     Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
-            List<Column> columns = null;            
+            List<Column> columns = null;
 
             Set<SuperColumn> uniSupSet = new HashSet<SuperColumn>(thriftSuperColumns);
             if (uniSupSet.isEmpty() || (uniSupSet.size() == 1 && uniSupSet.iterator().next() == null))
             {
                 columns = selector.getColumnsFromRow(m.getTableName(), new Bytes(rowKey.getBytes()),
                         Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
-                e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), columns, null), relationNames, isWrapReq);
+                e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), columns, null),
+                        relationNames, isWrapReq);
             }
             else
             {
@@ -105,8 +107,8 @@ public class PelopsDataHandler extends DataHandler
         return e;
     }
 
-    public List<Object> fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, List<String> relationNames, boolean isWrapReq, String... rowIds)
-            throws Exception
+    public List<Object> fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, List<String> relationNames,
+            boolean isWrapReq, String... rowIds) throws Exception
     {
         List<Object> entities = new ArrayList<Object>(rowIds.length);
         for (String rowKey : rowIds)
@@ -139,8 +141,8 @@ public class PelopsDataHandler extends DataHandler
         // Instantiate a new instance
         E e = clazz.newInstance();
 
-        // Set row-key. Note: @Id is always String.
-        PropertyAccessorHelper.set(e, m.getIdColumn().getField(), tr.getId());
+        // Set row-key. Note:
+        PropertyAccessorHelper.setId(e, m, tr.getId());
 
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
@@ -220,18 +222,18 @@ public class PelopsDataHandler extends DataHandler
      * @throws Exception
      *             the exception
      */
-    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow, List<String> relationNames, boolean isWrapperReq) throws Exception
+    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
+            List<String> relationNames, boolean isWrapperReq) throws Exception
     {
 
         // Instantiate a new instance
         Object entity = clazz.newInstance();
         Map<String, Object> relations = new HashMap<String, Object>();
 
-        // Map to hold property-name=>foreign-entity relations
-     //   Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
-
-        // Set row-key. Note: @Id is always String.
-        PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), thriftRow.getId());
+        // Set row-key.
+        PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
+        // PropertyAccessorHelper.set(entity, m.getIdColumn().getField(),
+        // thriftRow.getId());
 
         // Iterate through each column
         Set<Column> columns = null;
@@ -269,7 +271,7 @@ public class PelopsDataHandler extends DataHandler
                 {
                     if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
                     {
-                      //  relations = new HashMap<String, Object>();
+                        // relations = new HashMap<String, Object>();
                         String value = PropertyAccessorFactory.STRING.fromBytes(thriftColumnValue);
                         relations.put(thriftColumnName, value);
                         // prepare EnhanceEntity and return it
@@ -312,7 +314,7 @@ public class PelopsDataHandler extends DataHandler
                         if (relationNames != null && !relationNames.isEmpty()
                                 && relationNames.contains(thriftColumnName))
                         {
-//                            relations = new HashMap<String, Object>();
+                            // relations = new HashMap<String, Object>();
                             String value = PropertyAccessorFactory.STRING.fromBytes(thriftColumnValue);
                             relations.put(thriftColumnName, value);
                             // prepare EnhanceEntity and return it
@@ -321,7 +323,7 @@ public class PelopsDataHandler extends DataHandler
                 }
             }
         }
-        return isWrapperReq ? new EnhanceEntity(entity, thriftRow.getId(), relations):entity;
+        return isWrapperReq ? new EnhanceEntity(entity, thriftRow.getId(), relations) : entity;
     }
 
     /**
@@ -337,8 +339,8 @@ public class PelopsDataHandler extends DataHandler
         // Map to hold property-name=>foreign-entity relations
         Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
-        // Set row-key. Note: @Id is always String.
-        PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), tr.getId());
+        // Set row-key
+        PropertyAccessorHelper.setId(entity, m, tr.getId());
 
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
