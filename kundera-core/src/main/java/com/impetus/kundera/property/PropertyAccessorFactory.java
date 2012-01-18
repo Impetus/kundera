@@ -16,12 +16,20 @@
 package com.impetus.kundera.property;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.impetus.kundera.property.accessor.BigDecimalAccessor;
+import com.impetus.kundera.property.accessor.BigIntegerAccessor;
 import com.impetus.kundera.property.accessor.BooleanAccessor;
 import com.impetus.kundera.property.accessor.ByteAccessor;
+import com.impetus.kundera.property.accessor.CalendarAccessor;
 import com.impetus.kundera.property.accessor.CharAccessor;
 import com.impetus.kundera.property.accessor.DateAccessor;
 import com.impetus.kundera.property.accessor.DoubleAccessor;
@@ -29,6 +37,9 @@ import com.impetus.kundera.property.accessor.FloatAccessor;
 import com.impetus.kundera.property.accessor.IntegerAccessor;
 import com.impetus.kundera.property.accessor.LongAccessor;
 import com.impetus.kundera.property.accessor.ObjectAccessor;
+import com.impetus.kundera.property.accessor.SQLDateAccessor;
+import com.impetus.kundera.property.accessor.SQLTimeAccessor;
+import com.impetus.kundera.property.accessor.SQLTimestampAccessor;
 import com.impetus.kundera.property.accessor.ShortAccessor;
 import com.impetus.kundera.property.accessor.StringAccessor;
 
@@ -37,15 +48,13 @@ import com.impetus.kundera.property.accessor.StringAccessor;
  *
  * @author animesh.kumar
  */
-/**
- * @author animesh.kumar
- * 
- */
+
 public class PropertyAccessorFactory
 {
 
     /** The map. */
     public static Map<Class<?>, PropertyAccessor<?>> map = new HashMap<Class<?>, PropertyAccessor<?>>();
+    
     static
     {
         // Premitive Type accessors
@@ -66,13 +75,21 @@ public class PropertyAccessorFactory
         map.put(Integer.class, new IntegerAccessor());
         map.put(Long.class, new LongAccessor());
         map.put(Float.class, new FloatAccessor());
-        map.put(Double.class, new DoubleAccessor());
-
-        // String class Accessor
-        map.put(String.class, new StringAccessor());
+        map.put(Double.class, new DoubleAccessor());      
 
         // Date/ Time type accessors
         map.put(Date.class, new DateAccessor());
+        map.put(java.sql.Date.class, new SQLDateAccessor());
+        map.put(Time.class, new SQLTimeAccessor());
+        map.put(Timestamp.class, new SQLTimestampAccessor());
+        map.put(Calendar.class, new CalendarAccessor());
+        
+        //Accessors for Math classes
+        map.put(BigInteger.class, new BigIntegerAccessor());
+        map.put(BigDecimal.class, new BigDecimalAccessor());
+        
+        // String class Accessor
+        map.put(String.class, new StringAccessor());
 
         // Accessor for the generic object
         map.put(Object.class, new ObjectAccessor());

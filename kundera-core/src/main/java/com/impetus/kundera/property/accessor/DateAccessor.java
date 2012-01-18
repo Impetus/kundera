@@ -35,7 +35,6 @@ public class DateAccessor implements PropertyAccessor<Date>
     private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd MMM yyyy HH:mm:ss:S Z",
             Locale.ENGLISH);
 
-    /* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
     @Override
     public final Date fromBytes(byte[] bytes) throws PropertyAccessException
     {
@@ -49,10 +48,7 @@ public class DateAccessor implements PropertyAccessor<Date>
         }
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
-     */
+
     @Override
     public final byte[] toBytes(Object date) throws PropertyAccessException
     {
