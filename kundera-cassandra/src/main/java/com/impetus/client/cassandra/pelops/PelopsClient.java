@@ -154,7 +154,17 @@ public class PelopsClient implements Client
     public final <E> List<E> find(Class<E> entityClass, String... rowIds) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
-        return (List<E>) find(entityClass,null,false, entityMetadata, rowIds);
+        List<E> results = new ArrayList<E>();
+        for(String rowKey : rowIds)
+        {
+            List<E>  r =  (List<E>) find(entityClass,entityMetadata, rowKey, null);
+            if(r != null)
+            {
+                results.addAll(r);
+            }
+        }
+        
+        return results.isEmpty()?null:results;
     }
 
     
