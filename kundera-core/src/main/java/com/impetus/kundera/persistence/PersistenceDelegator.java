@@ -1184,49 +1184,11 @@ public class PersistenceDelegator
 
     private EntityReader getReader(DBType dbType)
     {
-        EntityReader reader = null;
-
-        try
+        reader = ReaderResolver.getReader(dbType);
+        if(reader == null)
         {
-            switch (dbType)
-            {
-
-            case CASSANDRA:
-                reader = (EntityReader) Class.forName("com.impetus.client.cassandra.query.CassandraEntityReader").newInstance();
-                break;
-
-            case RDBMS:
-                reader = (EntityReader) Class.forName("com.impetus.client.rdbms.query.RDBMSEntityReader").newInstance();
-
-                break;
-
-            /*
-             * case MONGODB:
-             * 
-             * break;
-             * 
-             * case HBASE:
-             * 
-             * break;
-             */
-            default:
-                throw new UnsupportedOperationException("input dbType : " + dbType + " is not yet supported");
-            }
-
+            throw new ReaderResolverException("no reader configured for:" + dbType);
         }
-        catch (InstantiationException e)
-        {
-            throw new ClientResolverException(e.getMessage());
-        }
-        catch (IllegalAccessException e)
-        {
-            throw new ClientResolverException(e.getMessage());
-        }
-        catch (ClassNotFoundException e)
-        {
-            throw new ClientResolverException(e.getMessage());
-        }
-        
         return reader;
     }
 
