@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.PersistenceException;
-import javax.persistence.Query;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
@@ -33,7 +32,6 @@ import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
@@ -48,6 +46,7 @@ import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -74,6 +73,8 @@ public class PelopsClient implements Client
 
     /** The index manager. */
     private IndexManager indexManager;
+    
+    private EntityReader reader;
 
     /** The persistence unit. */
     private String persistenceUnit;
@@ -87,10 +88,11 @@ public class PelopsClient implements Client
      * @param indexManager
      *            the index manager
      */
-    public PelopsClient(IndexManager indexManager)
+    public PelopsClient(IndexManager indexManager, EntityReader reader)
     {
         this.indexManager = indexManager;
         this.dataHandler = new PelopsDataHandler(this);
+        this.reader = reader;
     }
 
     /*
@@ -726,4 +728,14 @@ public class PelopsClient implements Client
         mutator.execute(ConsistencyLevel.ONE);
         tf = null;
     }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getReader()
+     */
+    @Override
+    public EntityReader getReader()
+    {
+        return reader;
+    }
+    
 }

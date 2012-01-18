@@ -7,10 +7,12 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 
+import com.impetus.client.rdbms.query.RDBMSEntityReader;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
+import com.impetus.kundera.persistence.EntityReader;
 
 /**
  * @author impadmin
@@ -23,6 +25,7 @@ public class RDBMSClientFactory extends GenericClientFactory
 
     IndexManager indexManager;
 
+    EntityReader reader;
     /*
      * (non-Javadoc)
      * 
@@ -43,6 +46,7 @@ public class RDBMSClientFactory extends GenericClientFactory
     protected void initializeClient()
     {
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
+        reader = new RDBMSEntityReader();
     }
 
     /*
@@ -67,7 +71,7 @@ public class RDBMSClientFactory extends GenericClientFactory
     protected Client instantiateClient()
     {
         // TODO Auto-generated method stub
-        return new HibernateClient(getPersistenceUnit(), indexManager);
+        return new HibernateClient(getPersistenceUnit(), indexManager, reader);
     }
 
     /*

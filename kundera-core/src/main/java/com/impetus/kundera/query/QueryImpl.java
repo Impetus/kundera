@@ -45,8 +45,6 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
-import com.impetus.kundera.property.PropertyAccessException;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
@@ -67,6 +65,7 @@ public abstract class QueryImpl implements Query
     /** The persistence delegeator. */
     protected PersistenceDelegator persistenceDelegeator;
 
+    /** The log. */
     private static Log log = LogFactory.getLog(QueryImpl.class);
 
     /**
@@ -138,11 +137,9 @@ public abstract class QueryImpl implements Query
     @Override
     public List<?> getResultList()
     {
-        log.debug("JPA Query: " + query);
+        log.info("On getResultList() executing query: " + query);
         try
         {
-            // TODO need to look what are the values for given from, select and
-            // where clause.
             EntityMetadata m = kunderaQuery.getEntityMetadata();
             Client client = persistenceDelegeator.getClient(m);
 
@@ -579,49 +576,17 @@ public abstract class QueryImpl implements Query
         throw new NotImplementedException("TODO");
     }
 
-/*    *//**
-     * Gets the relations.
-     * 
-     * @param graphs
-     *            the graphs
-     * @param clazz
-     *            the clazz
-     * @return the relations
-     *//*
-    protected Map<Boolean, List<String>> getRelations(List<EntitySaveGraph> graphs, Class clazz)
-    {
-        List<String> relationNames = new ArrayList<String>(graphs.size());
-        boolean isParent = false;
-        Map<Boolean, List<String>> relationHolder = new HashMap<Boolean, List<String>>(1);
-        // TODO need to check if there is any relation?
-        for (EntitySaveGraph g : graphs)
-        {
-            if (clazz.equals(g.getParentClass()))
-            {
-                isParent = true;
-                // Means entity is parent
-            }
-
-            if (g.getfKeyName() != null)
-            {
-                relationNames.add(g.getfKeyName());
-            }
-        }
-
-        relationHolder.put(isParent, relationNames);
-        return relationHolder;
-
-    }
-*/
     /**
      * Handle graph.
-     * 
-     * @param enhanceEntities
-     *            the enhance entities
-     * @param graphs
-     *            the graphs
+     *
+     * @param enhanceEntities the enhance entities
+     * @param graphs the graphs
+     * @param client the client
+     * @param m the m
+     * @return the list
      */
-    protected List<Object> handleGraph(List<EnhanceEntity> enhanceEntities, List<EntitySaveGraph> graphs, Client client, EntityMetadata m)
+    protected List<Object> handleGraph(List<EnhanceEntity> enhanceEntities, List<EntitySaveGraph> graphs,
+            Client client, EntityMetadata m)
     {
         // Enhance entities can contain or may not contain relation.
         // if it contain a relation means it is a child
@@ -647,6 +612,14 @@ public abstract class QueryImpl implements Query
         return result;
     }
 
+    /**
+     * Populate using lucene.
+     *
+     * @param m the m
+     * @param client the client
+     * @param result the result
+     * @return the list
+     */
     protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result)
     {
         String luceneQ = getLuceneQueryFromJPAQuery();
@@ -661,9 +634,8 @@ public abstract class QueryImpl implements Query
             }
             catch (Exception e)
             {
-                
+
             }
-            // persistenceDelegeator.find(m.getEntityClazz(), primaryKeys);
         }
         else
         {
@@ -671,131 +643,6 @@ public abstract class QueryImpl implements Query
 
         }
         return result;
-    }
-
-/*    *//**
-     * Compute graph.
-     * 
-     * @param e
-     *            the e
-     * @param graphs
-     *            the graphs
-     * @return the object
-     * @throws Exception
-     *             the exception
-     *//*
-    private Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder, Client client, EntityMetadata m)
-            throws Exception
-    {
-
-        Client childClient = null;
-        Class<?> childClazz = null;
-        EntityMetadata childMetadata = null;
-
-        if (e.getRelations() != null)
-        {
-            // means it is holding associations
-            // read graph for all the association
-            for (EntitySaveGraph g : graphs)
-            {
-
-                String relationName = g.getfKeyName();
-                Object relationalValue = e.getRelations().get(relationName);
-                childClazz = g.getParentClass();
-                Field f = g.getProperty();
-                if (!collectionHolder.containsKey(relationalValue))
-                {
-                    childMetadata = persistenceDelegeator.getMetadata(childClazz);
-                    childClient = persistenceDelegeator.getClient(childMetadata);
-                    Object child = childClient.find(childClazz, childMetadata, relationalValue.toString());
-                    collectionHolder.put(relationalValue, child);
-                    // If entity is holding association it means it can not be a
-                    // collection.
-                }
-                
-                onBiDirection(e, client,g,m,collectionHolder.get(relationalValue),childMetadata,childClient);
-                PropertyAccessorHelper.set(e.getEntity(), f, collectionHolder.get(relationalValue));
-                // this is a single place holder for bi direction.
-            }
-        }
-        else
-        {
-            // means it is parent
-            // Find child entities by passing  parent key and parent value.
-            for (EntitySaveGraph g : graphs)
-            {
-                childClazz = g.getChildClass();
-                childMetadata = persistenceDelegeator.getMetadata(childClazz);
-                childClient = persistenceDelegeator.getClient(childMetadata);
-                String relationName = g.getfKeyName();
-                String relationalValue = e.getEntityId();
-                Field f = g.getProperty();
-                if (!collectionHolder.containsKey(relationalValue))
-                {
-                    // create a finder and pass metadata, relationName,
-                    // relationalValue.
-                    List<Object> childs = null;
-                    if(useSecondryIndex(childMetadata.getPersistenceUnit()))
-                    {
-                        childs = childClient.find(relationName, relationalValue, childMetadata);
-                     // pass this entity id as a value to be searched for for
-                    }
-                    else
-                    {
-                        if (g.isSharedPrimaryKey())
-                        {
-                            childs = new ArrayList();
-                            childs.add(childClient.find(childClazz, childMetadata,e.getEntityId()));
-                        } else
-                        {
-                            // lucene query, where entity class is child class, parent class is entity's class and parentid is entity ID!
-                            //that's it!
-                            String query= getQuery(DocumentIndexer.PARENT_ID_CLASS, e.getEntity().getClass()
-                                    .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, e.getEntityId());
-                            Map<String, String> results = childClient.getIndexManager().search(query);
-                            Set<String> rsSet = new HashSet<String>(results.values());
-                            childs = (List<Object>) childClient.find(childClazz, rsSet.toArray(new String[] {}));
-                            
-                        }
-                    }
-                    // secondary indexes.
-                    // create sql query for hibernate client.
-//                    f = g.getProperty();
-                    collectionHolder.put(relationalValue, childs);
-                }
-                //handle bi direction here.
-                
-                onReflect(e.getEntity(), f, (List) collectionHolder.get(relationalValue));
-            }
-        }
-        return e.getEntity();
-    }
-*/
-    /**
-     * On reflect.
-     * 
-     * @param entity
-     *            the entity
-     * @param f
-     *            the f
-     * @param childs
-     *            the childs
-     * @return the sets the
-     * @throws PropertyAccessException
-     *             the property access exception
-     */
-    private Set<?> onReflect(Object entity, Field f, List<?> childs) throws PropertyAccessException
-    {
-        Set chids = new HashSet();
-        if (childs != null)
-        {
-            chids = new HashSet(childs);
-            // TODO: need to store object in sesion.
-            // getSession().store(id, entity)
-            PropertyAccessorHelper.set(entity, f,
-                    PropertyAccessorHelper.isCollection(f.getType()) ? getFieldInstance(childs, f) : childs.get(0));
-        }
-        return chids;
     }
 
     /**
@@ -838,13 +685,23 @@ public abstract class QueryImpl implements Query
         return relationVal;
     }
 
+    /**
+     * Use secondry index.
+     *
+     * @param persistenceUnit the persistence unit
+     * @return true, if successful
+     */
     protected boolean useSecondryIndex(String persistenceUnit)
     {
         ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
         return clientMetadata.isUseSecondryIndex();
     }
 
-    
+    /**
+     * Gets the lucene query from jpa query.
+     *
+     * @return the lucene query from jpa query
+     */
     protected String getLuceneQueryFromJPAQuery()
     {
         StringBuffer sb = new StringBuffer();
@@ -893,7 +750,7 @@ public abstract class QueryImpl implements Query
 
         return sb.toString();
     }
-    
+
     /**
      * Returns lucene based query.
      * 
@@ -921,6 +778,13 @@ public abstract class QueryImpl implements Query
         return sb.toString();
     }
 
+    /**
+     * Transform.
+     *
+     * @param m the m
+     * @param ls the ls
+     * @param resultList the result list
+     */
     protected void transform(EntityMetadata m, List<EnhanceEntity> ls, List resultList)
     {
         for (Object r : resultList)
@@ -930,6 +794,12 @@ public abstract class QueryImpl implements Query
         }
     }
 
+    /**
+     * Fetch data from lucene.
+     *
+     * @param client the client
+     * @return the sets the
+     */
     protected Set<String> fetchDataFromLucene(Client client)
     {
         String luceneQuery = getLuceneQueryFromJPAQuery();
@@ -941,6 +811,13 @@ public abstract class QueryImpl implements Query
         return rSet;
     }
 
+    /**
+     * On association using lucene.
+     *
+     * @param m the m
+     * @param client the client
+     * @param ls the ls
+     */
     protected void onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
     {
         Set<String> rSet = fetchDataFromLucene(client);
@@ -956,138 +833,24 @@ public abstract class QueryImpl implements Query
         }
     }
 
-/*    *//**
-     * On bi direction.
-     * 
-     * @param entity
-     *            the entity
-     * @param objectGraph
-     *            the object graph
-     * @param client
-     *            the client
-     * @param rowId
-     *            the row id
-     * @param entityClass
-     *            the entity class
-     * @param chids
-     *            the chids
-     * @param childMetadata
-     *            the child metadata
-     * @param childClient
-     *            the child client
-     * @throws Exception
-     *             the exception
-     *//*
-    private void onBiDirection(EnhanceEntity e, Client client, EntitySaveGraph objectGraph, 
-                               EntityMetadata origMetadata,Object child, EntityMetadata childMetadata, Client childClient) throws Exception
-    {
-        if (!objectGraph.isUniDirectional())
-        {
-                // Add original fetched entity.
-                List obj = new ArrayList();
-
-                Relation relation = childMetadata.getRelation(objectGraph.getBidirectionalProperty().getName());
-                
-                // join column name is pk of entity and 
-                // If relation is One to Many or MANY TO MANY for associated
-                // entity. Require to fetch all associated entity
-                
-                if (relation.getType().equals(ForeignKey.ONE_TO_MANY) || relation.getType().equals(ForeignKey.MANY_TO_MANY))
-                {
-                    String query = null;
-                    try
-                    {
-                        String id = PropertyAccessorHelper.getId(child, childMetadata);
-                        List<Object> results = null;
-                        
-                        if(useSecondryIndex(origMetadata.getPersistenceUnit()))
-                        {
-                            results =  client.find(objectGraph.getfKeyName(), id, origMetadata);
-                        } 
-                        else
-                        {
-                            query = getQuery(DocumentIndexer.PARENT_ID_CLASS, child.getClass()
-                                .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, id);
-                        Map<String, String> keys= client.getIndexManager().search(query);
-                        Set<String> uqSet = new HashSet<String>(keys.values());
-                         results = new ArrayList<Object>();
-                          for(String rowKey : uqSet)
-                          {
-                              results.add(client.find(e.getEntity().getClass(), origMetadata, rowKey));
-                          }
-                        }
-                        
-                        if (results != null)
-                        {
-                            obj.addAll(results);
-                        }
-                    }
-                    catch (PropertyAccessException ex)
-                    {
-                        log.error("error on handling bi direction:" + ex.getMessage());
-                        throw new QueryHandlerException(ex.getMessage());
-                    }
-
-                    // In case of other parent object found for given
-                    // bidirectional.
-                    for (Object o : obj)
-                    {
-                        Field f = objectGraph.getProperty();
-                        if (PropertyAccessorHelper.isCollection(f.getType()))
-                        {
-                            List l = new ArrayList();
-                            l.add(child);
-                            Object oo = getFieldInstance(l, f);
-                            PropertyAccessorHelper.set(o, f, oo);
-                        }
-                        else
-                        {
-                            PropertyAccessorHelper.set(o, f, child);
-                        }
-
-                    }
-                }
-                try
-                {
-                    PropertyAccessorHelper
-                            .set(child, objectGraph.getBidirectionalProperty(),
-                                    PropertyAccessorHelper.isCollection(objectGraph.getBidirectionalProperty()
-                                            .getType()) ? getFieldInstance(obj, objectGraph.getBidirectionalProperty())
-                                            : e.getEntity());
-                }
-                catch (PropertyAccessException ex)
-                {
-                    log.error("error on handling bi direction:" + ex.getMessage());
-                    throw new QueryHandlerException(ex.getMessage());
-                }
-        }
-    }
-*/
-    
     /**
-     * Populate entities, Method to populate data in case no relation exist!
-     * 
-     * @param m
-     *            the m
-     * @param client
-     *            the client
+     * Populate entities, Method to populate data in case no relation exist!.
+     *
+     * @param m the m
+     * @param client the client
      * @return the list
      */
     protected abstract List<Object> populateEntities(EntityMetadata m, Client client);
 
     /**
      * Method to handle population of associated entities based on relation map.
-     * 
-     * @param m
-     *            the m
-     * @param client
-     *            the client
-     * @param graphs
-     *            the graphs
-     * @param relationNames
-     *            the relation names
-     * @param isParent
-     *            the is parent
+     *
+     * @param m the m
+     * @param client the client
+     * @param graphs the graphs
+     * @param relationNames the relation names
+     * @param isParent the is parent
+     * @return the list
      */
     protected abstract List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
             List<String> relationNames, boolean isParent);

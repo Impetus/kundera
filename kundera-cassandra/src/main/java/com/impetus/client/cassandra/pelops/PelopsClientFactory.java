@@ -9,6 +9,7 @@ import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.IConnection;
 import org.scale7.cassandra.pelops.Pelops;
 
+import com.impetus.client.cassandra.query.CassandraEntityReader;
 import com.impetus.kundera.KunderaPersistence;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
@@ -16,6 +17,7 @@ import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 
 public class PelopsClientFactory extends GenericClientFactory
 {
@@ -23,6 +25,8 @@ public class PelopsClientFactory extends GenericClientFactory
 
     IndexManager indexManager;
 
+    private EntityReader reader;
+    
     @Override
     protected void initializeClient()
     {
@@ -38,6 +42,8 @@ public class PelopsClientFactory extends GenericClientFactory
         // * )
         // *//*)*/);
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
+        
+        reader = new CassandraEntityReader();
 
     }
 
@@ -65,7 +71,7 @@ public class PelopsClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient()
     {
-        return new PelopsClient(indexManager);
+        return new PelopsClient(indexManager, reader);
     }
 
     @Override

@@ -20,8 +20,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Query;
-
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -37,6 +35,7 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -64,6 +63,8 @@ public class HibernateClient implements Client
 
     private StatelessSession s;
 
+    private EntityReader reader;
+
     /**
      * Instantiates a new hibernate client.
      * 
@@ -72,7 +73,7 @@ public class HibernateClient implements Client
      * @param indexManager
      *            the index manager
      */
-    public HibernateClient(final String persistenceUnit, IndexManager indexManager)
+    public HibernateClient(final String persistenceUnit, IndexManager indexManager, EntityReader reader)
     {
         conf = new Configuration().addProperties(HibernateUtils.getProperties(persistenceUnit));
         Collection<Class<?>> classes = ((MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
@@ -87,6 +88,7 @@ public class HibernateClient implements Client
         // modify this to have a properties or even pass an EMF!
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
+        this.reader = reader;
     }
 
     /*
@@ -494,5 +496,10 @@ public class HibernateClient implements Client
         s.beginTransaction();
         SQLQuery q = s.createSQLQuery(queryBuilder.toString()).addEntity(m.getEntityClazz());
         return q.list();
+    }
+
+    public EntityReader getReader()
+    {
+        return reader;
     }
 }

@@ -18,10 +18,9 @@ package com.impetus.kundera.client;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Query;
-
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
@@ -205,4 +204,10 @@ public interface Client
     
     List<Object> find(String colName, String colValue, EntityMetadata m);
 
+    /**
+     * Returns entity reader instance bind to specific client.
+     * @return 
+     *           reader entity reader.
+     */
+    EntityReader getReader();
 }

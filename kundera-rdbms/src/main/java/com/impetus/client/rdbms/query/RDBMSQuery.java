@@ -17,12 +17,9 @@ package com.impetus.client.rdbms.query;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.Set;
 
 import javax.persistence.Query;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,9 +31,8 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.query.KunderaQuery;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
-import com.impetus.kundera.query.exception.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
+import com.impetus.kundera.query.exception.QueryHandlerException;
 
 /**
  * The Class RDBMSQuery.
@@ -84,7 +80,8 @@ public class RDBMSQuery extends QueryImpl implements Query
     protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
                                               List<String> relationNames, boolean isParent)
     {
-        log.debug("on handleAssociations rdbms query");
+        //retrieve
+        log.debug("On handleAssociation() retrieve associations ");
         
         ((RDBMSEntityReader)getReader()).setConditions(getKunderaQuery().getFilterClauseQueue());
         
@@ -105,7 +102,8 @@ public class RDBMSQuery extends QueryImpl implements Query
      */
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
-        log.debug("on populateEntities rdbms query");
+        log.debug("on start of fetching non associated entities");
+        
         List<Object> result = null;
 
         try
