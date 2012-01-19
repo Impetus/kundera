@@ -416,7 +416,7 @@ public class AbstractEntityReader
         //
         // if (relation.isRelatedViaJoinTable())
         // {
-
+        objectGraph.setParentId(getId(entity, entityMetadata));
         JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
         String joinTableName = jtMetadata.getJoinTableName();
 
