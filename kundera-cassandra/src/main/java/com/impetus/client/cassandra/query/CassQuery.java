@@ -31,6 +31,7 @@ import org.scale7.cassandra.pelops.Selector;
 import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -81,7 +82,7 @@ public class CassQuery extends QueryImpl implements Query
     {
         log.debug("on populateEntities cassandra query");
         List<Object> result = null;
-        if (useSecondryIndex(m.getPersistenceUnit()))
+        if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
         {
 
             List<IndexClause> ixClause = prepareIndexClause();
@@ -99,20 +100,22 @@ public class CassQuery extends QueryImpl implements Query
     private List<IndexClause> prepareIndexClause()
     {
         List<IndexClause> clauses = new ArrayList<IndexClause>();
-        IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, Integer.MAX_VALUE, null);
         List<IndexExpression> expr = new ArrayList<IndexExpression>();
         for (Object o : getKunderaQuery().getFilterClauseQueue())
         {
             if (o instanceof FilterClause)
             {
                 FilterClause clause = ((FilterClause) o);
-                String fieldName = clause.getProperty();
+                String fieldName = getColumnName(clause.getProperty());
                 String condition = clause.getCondition();
                 String value = clause.getValue();
+                IndexClause indexClause = Selector.newIndexClause(fieldName, Integer.SIZE);
                 expr.add(Selector.newIndexExpression(fieldName, getOperator(condition),
                         Bytes.fromByteArray(value.getBytes())));
+                indexClause.setExpressions(expr);
+                clauses.add(indexClause);
             }
-            else
+/*            else
             {
                 // Case of AND and OR clause.
                 String opr = o.toString();
@@ -120,16 +123,14 @@ public class CassQuery extends QueryImpl implements Query
                 {
                     indexClause.setExpressions(expr);
                     clauses.add(indexClause);
-                    indexClause = Selector.newIndexClause(Bytes.EMPTY, Integer.MAX_VALUE, null);
+                    indexClause = Selector.newIndexClause(Bytes.EMPTY, Integer.SIZE, null);
                     expr = new ArrayList<IndexExpression>();
                 }
 
                 // TODO need to handle scenario for AND + OR .
 
             }
-        }
-        indexClause.setExpressions(expr);
-        clauses.add(indexClause);
+*/        }
 
         return clauses;
     }

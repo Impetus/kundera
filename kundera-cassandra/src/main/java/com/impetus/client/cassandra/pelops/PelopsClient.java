@@ -254,32 +254,6 @@ public class PelopsClient implements Client
                 ConsistencyLevel.ONE);
     }
 
-    // /* (non-Javadoc)
-    // * @see
-    // com.impetus.kundera.client.Client#delete(com.impetus.kundera.proxy.EnhancedEntity)
-    // */
-    // // @Override
-    // public final void delete(EnhancedEntity enhancedEntity) throws Exception
-    // {
-    //
-    // if (!isOpen())
-    // {
-    // throw new PersistenceException("PelopsClient is closed.");
-    // }
-    //
-    // EntityMetadata entityMetadata =
-    // KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(),
-    // enhancedEntity
-    // .getEntity().getClass());
-    //
-    // RowDeletor rowDeletor =
-    // Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-    // rowDeletor.deleteRow(entityMetadata.getTableName(),
-    // enhancedEntity.getId(), ConsistencyLevel.ONE);
-    // getIndexManager().remove(entityMetadata, enhancedEntity.getEntity(),
-    // enhancedEntity.getId());
-    // }
-    //
 
     /*
      * (non-Javadoc)

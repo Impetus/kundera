@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
@@ -693,19 +694,6 @@ public abstract class QueryImpl implements Query
     }
 
     /**
-     * Use secondry index.
-     * 
-     * @param persistenceUnit
-     *            the persistence unit
-     * @return true, if successful
-     */
-    protected boolean useSecondryIndex(String persistenceUnit)
-    {
-        ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
-        return clientMetadata.isUseSecondryIndex();
-    }
-
-    /**
      * Gets the lucene query from jpa query.
      * 
      * @return the lucene query from jpa query
@@ -846,6 +834,25 @@ public abstract class QueryImpl implements Query
             log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
             throw new QueryHandlerException(e.getMessage());
         }
+    }
+
+    /**
+     * Returns column name from the filter property which is in the form
+     * dbName.columnName
+     * 
+     * @param filterProperty
+     * @return
+     */
+    protected String getColumnName(String filterProperty)
+    {
+        StringTokenizer st = new StringTokenizer(filterProperty, ".");
+        String columnName = "";
+        while (st.hasMoreTokens())
+        {
+            columnName = st.nextToken();
+        }
+
+        return columnName;
     }
 
     /**

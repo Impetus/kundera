@@ -27,9 +27,11 @@ import java.util.Set;
 import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -233,5 +235,11 @@ public class MetadataUtils
      * System.out.println(schemaStr.substring(schemaStr.indexOf("@") + 1,
      * schemaStr.length())); } else { System.out.println(schemaStr); } }
      */
+
+    public static boolean useSecondryIndex(String persistenceUnit)
+    {
+        ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
+        return clientMetadata.isUseSecondryIndex();
+    }
 
 }

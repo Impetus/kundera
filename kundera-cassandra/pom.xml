@@ -50,7 +50,6 @@
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-clientutil</artifactId>
 			<version>1.0.6</version>
-			<scope>test</scope>
 		</dependency>
 	    <dependency>
 	      <groupId>org.slf4j</groupId>

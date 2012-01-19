@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.client.rdbms.HibernateClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -108,7 +109,7 @@ public class RDBMSQuery extends QueryImpl implements Query
 
         try
         {
-            if (useSecondryIndex(m.getPersistenceUnit()))
+            if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
             {
                 List<String> relations = new ArrayList<String>();
                 List<Object[]> r = ((HibernateClient) client).find(

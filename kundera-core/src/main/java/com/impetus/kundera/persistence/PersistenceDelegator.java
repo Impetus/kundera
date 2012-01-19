@@ -34,6 +34,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Query;
+import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -153,7 +154,7 @@ public class PersistenceDelegator
                 if (!found)
                 {
                     throw new PersistenceException(
-                            "Invalid persistence unit configuration! should be intended for RDBMS");
+                            "Invalid persistence unit configuration! should be intended for RDBMS, else must annotate @Table(name = @table_col_family_name, schema = @keyspace@pu");
                 }
 
             }
@@ -518,7 +519,7 @@ public class PersistenceDelegator
 
             Client client = getClient(entityMetadata);
 
-            List<EntitySaveGraph> objectGraphs = getGraph(entityMetadata.getEntityClazz(), entityMetadata);
+            List<EntitySaveGraph> objectGraphs = getGraph(entityMetadata.getEntityClazz().newInstance(), entityMetadata);
             Map<Boolean, List<String>> relations = getRelations(objectGraphs, entityMetadata.getEntityClazz());
 
             EntityReader reader = getReader(client);
