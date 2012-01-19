@@ -349,10 +349,6 @@ public class MongoDBClient implements Client
         Class clazz = entityMetadata.getEntityClazz();
 
         DBCollection dbCollection = mongoDb.getCollection(documentName);
-
-//        Queue filterClauseQueue = query.getFilterClauseQueue();
-//        String result = query.getResult();
-
         List entities = new ArrayList<E>();
 
         // If User wants search on a column within a particular super column,
@@ -369,9 +365,6 @@ public class MongoDBClient implements Client
         else
         {
             log.debug("Fetching data from " + documentName + " for Filter " + mongoQuery.toString());
-//
-//            BasicDBObject mongoQuery = new MongoDBDataHandler(this, getPersistenceUnit()).createMongoQuery(
-//                    entityMetadata, filterClauseQueue);
 
             DBCursor cursor = dbCollection.find(mongoQuery);
             MongoDBDataHandler handler = new MongoDBDataHandler(this, getPersistenceUnit());

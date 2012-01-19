@@ -152,24 +152,7 @@ public class CassQuery extends QueryImpl implements Query
         ((CassandraEntityReader) getReader()).setConditions(ixClause);
 
         List<EnhanceEntity> ls = reader.populateRelation(m, relationNames, isParent, client);
-        /*
-         * List<EnhanceEntity> ls = null; if (!isParent) { if
-         * (useSecondryIndex(m.getPersistenceUnit())) { List<IndexClause>
-         * ixClause = prepareIndexClause(); ls = ((PelopsClient) client).find(m,
-         * relationNames, ixClause); } else { // prepare lucene query and find.
-         * Set<String> rSet = fetchDataFromLucene(client);
-         * 
-         * try { ls = (List<EnhanceEntity>) ((PelopsClient)
-         * client).find(m.getEntityClazz(), relationNames, true, m,
-         * rSet.toArray(new String[] {})); } catch (Exception e) {
-         * log.error("Error while executing handleAssociation for cassandra:" +
-         * e.getMessage()); throw new QueryHandlerException(e.getMessage()); } }
-         * } else { if (useSecondryIndex(m.getPersistenceUnit())) { // in case
-         * need to search on secondry columns and it is not set // to true!
-         * List<IndexClause> ixClause = prepareIndexClause(); ls =
-         * ((PelopsClient) client).find(ixClause, m, true, null); } else {
-         * onAssociationUsingLucene(m, client, ls); } }
-         */
+
         return handleGraph(ls, graphs, client, m);
     }
 

@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.mongodb.MongoDBClient;
+import com.impetus.client.mongodb.MongoEntityReader;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.Column;
@@ -81,7 +82,6 @@ public class MongoDBQuery extends QueryImpl
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
-        // TODO : Must refactor client
         try
         {
             return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), getKunderaQuery().getResult(),null);
@@ -130,7 +130,7 @@ public class MongoDBQuery extends QueryImpl
     @Override
     protected EntityReader getReader()
     {
-        return null;
+        return new MongoEntityReader();
     }
 
     
@@ -226,5 +226,5 @@ public class MongoDBQuery extends QueryImpl
         }
         return enclosingDocumentName;
     }
-
 }
+

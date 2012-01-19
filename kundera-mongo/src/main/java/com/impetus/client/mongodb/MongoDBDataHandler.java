@@ -134,49 +134,13 @@ public class MongoDBDataHandler
 
             }
 
-            // // Check whether there is an embedded document for foreign keys,
-            // if
-            // // it is there, put data
-            // // into foreign keys map
-            // Object foreignKeyObj =
-            // document.get(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME);
-            // if (foreignKeyObj != null && foreignKeyObj instanceof
-            // BasicDBObject)
-            // {
-            // BasicDBObject dbObj = (BasicDBObject) foreignKeyObj;
-            //
-            // Set<String> foreignKeySet = dbObj.keySet();
-            // for (String foreignKey : foreignKeySet)
-            // {
-            // String foreignKeyValues = (String) dbObj.get(foreignKey); //
-            // Foreign
-            // // key
-            // // values
-            // // are
-            // // stored
-            // // as
-            // // list
-            //
-            // Set<String> foreignKeysSet =
-            // MetadataUtils.deserializeKeys(foreignKeyValues);
-            //
-            // foreignKeysMap.put(foreignKey, foreignKeysSet);
-            //
-            // }
-            //
-            // }
-
-            // Set entity object and foreign key map into enhanced entity and
-            // return
-            // EnhancedEntity e = EntityResolver.getEnhancedEntity(entity,
-            // rowKey, foreignKeysMap);
             if (relations != null)
             {
                 EnhanceEntity e = null;
                 Map<String, Object> relationValue = new HashMap<String, Object>();
                 for (String r : relations)
                 {
-                    if(relationValue ==  null) 
+                    if (relationValue == null)
                     {
                         relationValue = new HashMap<String, Object>();
                     }
@@ -286,25 +250,6 @@ public class MongoDBDataHandler
             }
         }
 
-        /*
-         * // Check foreign keys and set as list column on document object
-         * Map<String, Set<String>> foreignKeyMap = e.getForeignKeysMap(); if
-         * (foreignKeyMap != null && !foreignKeyMap.isEmpty()) {
-         * 
-         * DBObject foreignKeyObj = new BasicDBObject(); // A document //
-         * containing all // foreign keys as // columns
-         * 
-         * Set foreignKeyNameSet = foreignKeyMap.keySet(); for (Object
-         * foreignKeyName : foreignKeyNameSet) { Set<String> valueSet =
-         * foreignKeyMap.get(foreignKeyName);
-         * 
-         * String foreignKeyValues = MetadataUtils.serializeKeys(valueSet);
-         * 
-         * foreignKeyObj.put((String) foreignKeyName, foreignKeyValues); }
-         * 
-         * dbObj.put(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME, foreignKeyObj);
-         * }
-         */
         return dbObj;
     }
 
@@ -353,7 +298,6 @@ public class MongoDBDataHandler
         return columnName;
     }
 
-
     /**
      * @param m
      * @param columnName
@@ -391,8 +335,8 @@ public class MongoDBDataHandler
      * to be supported is
      * "Select alias.superColumnName.columnName from EntityName alias"
      */
-    public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName, BasicDBObject mongoQuery, String result)
-            throws PropertyAccessException
+    public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
+            BasicDBObject mongoQuery, String result) throws PropertyAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned
 
@@ -427,36 +371,26 @@ public class MongoDBDataHandler
                                 embeddedObjectClass, superColumn.getColumns());
                         Object fieldValue = PropertyAccessorHelper.getObject(embeddedObject, columnName);
 
-                        //TODO : discussion required with amresh on this. 
-/*                        for (Object object : filterClauseQueue)
-                        {
-                            if (object instanceof FilterClause)
-                            {
-                                FilterClause filter = (FilterClause) object;
-                                String value = filter.getValue();
-                                String condition = filter.getCondition();
-
-                                // This is not an ideal and complete
-                                // implementation. A similar logic exists in
-                                // createMongoQuery method. Need to find a way
-                                // to combine them
-                                if (condition.equals("="))
-                                {
-                                    if (value.equals(fieldValue))
-                                    {
-                                        list.add(embeddedObject);
-                                    }
-                                }
-                                else if (condition.equalsIgnoreCase("like"))
-                                {
-                                    if (fieldValue.toString().indexOf(value) >= 0)
-                                    {
-                                        list.add(embeddedObject);
-                                    }
-                                }
-
-                            }
-                        }*/
+                        // TODO : discussion required with amresh on this.
+                        /*
+                         * for (Object object : filterClauseQueue) { if (object
+                         * instanceof FilterClause) { FilterClause filter =
+                         * (FilterClause) object; String value =
+                         * filter.getValue(); String condition =
+                         * filter.getCondition();
+                         * 
+                         * // This is not an ideal and complete //
+                         * implementation. A similar logic exists in //
+                         * createMongoQuery method. Need to find a way // to
+                         * combine them if (condition.equals("=")) { if
+                         * (value.equals(fieldValue)) {
+                         * list.add(embeddedObject); } } else if
+                         * (condition.equalsIgnoreCase("like")) { if
+                         * (fieldValue.toString().indexOf(value) >= 0) {
+                         * list.add(embeddedObject); } }
+                         * 
+                         * } }
+                         */
                     }
 
                 }
