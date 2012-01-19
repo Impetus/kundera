@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -138,8 +140,8 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         return ls;
     }
 
-    private List<EnhanceEntity> populateEnhanceEntities(EntityMetadata m, List<String> relationNames, Client client,
-            String sqlQuery)
+    private List<EnhanceEntity> populateEnhanceEntities(EntityMetadata m, List<String> relationNames, 
+                                                        Client client, String sqlQuery)
     {
         List<EnhanceEntity> ls;
         List<Object[]> result = ((HibernateClient) client).find(sqlQuery, relationNames, m.getEntityClazz());
@@ -296,10 +298,26 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
     @Override
     public EnhanceEntity findById(String primaryKey, EntityMetadata m, List<String> relationNames, Client client)
     {
-        Set<String> keys = new HashSet<String>(1); 
-        keys.add(primaryKey);
-        String query = getSqlQueryFromJPA(m, relationNames, keys);
-        return populateEnhanceEntities(m, relationNames, client, query).get(0);
+        if(relationNames != null && !relationNames.isEmpty())
+        {
+            Set<String> keys = new HashSet<String>(1);
+            keys.add(primaryKey);
+            String query = getSqlQueryFromJPA(m, relationNames, keys);
+            return populateEnhanceEntities(m, relationNames, client, query).get(0);
+        } else
+        {
+            Object entity;
+            try
+            {
+                entity = client.find(m.getEntityClazz(), primaryKey, null);
+            }
+            catch (Exception e)
+            {
+                throw new PersistenceException(e.getMessage());
+            }
+            
+            return new EnhanceEntity(entity, getId(entity, m), null);
+        }
     }
 
 }

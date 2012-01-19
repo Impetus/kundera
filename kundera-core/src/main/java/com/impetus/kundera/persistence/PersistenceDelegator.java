@@ -316,7 +316,7 @@ public class PersistenceDelegator
                 // fire PreUpdate events
                 getEventDispatcher().fireEventListeners(m, o, PreUpdate.class);
 
-                getClient(m).persist(o);
+                persist(o);
 
                 // fire PreUpdate events
                 getEventDispatcher().fireEventListeners(m, o, PostUpdate.class);

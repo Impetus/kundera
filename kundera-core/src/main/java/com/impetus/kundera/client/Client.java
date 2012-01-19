@@ -56,7 +56,6 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    @Deprecated
     <E> E find(Class<E> entityClass, String key, List<String> relationNames) throws Exception;
 
     /**

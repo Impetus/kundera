@@ -15,6 +15,7 @@ import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
@@ -28,12 +29,14 @@ public class MongoDBClientFactory extends GenericClientFactory
     IndexManager indexManager;
 
     private DB mongoDB;
+    
+    private EntityReader reader;
 
     @Override
     protected void initializeClient()
     {
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
-
+        reader = new MongoEntityReader();
     }
 
     @Override
@@ -49,7 +52,7 @@ public class MongoDBClientFactory extends GenericClientFactory
     {
         // TODO To change this one pool is implemented
 
-        return new MongoDBClient(mongoDB, indexManager);
+        return new MongoDBClient(mongoDB, indexManager, reader);
     }
 
     private DB getConnection()

@@ -189,6 +189,10 @@ public class MongoDBDataHandler
                Map<String, Object> relationValue = new HashMap<String, Object>();
                 for(String r : relations)
                 {
+                    if(relationValue ==  null) 
+                    {
+                        relationValue = new HashMap<String, Object>();
+                    }
                     Object colValue = document.get(r);
                     relationValue.put(r, colValue);
                 }
@@ -362,50 +366,6 @@ public class MongoDBDataHandler
         return columnName;
     }
 
-    /**
-     * Creates MongoDB Query object from filterClauseQueue
-     * 
-     * @param filterClauseQueue
-     * @return
-     */
-    public BasicDBObject createMongoQuery(EntityMetadata m, Queue filterClauseQueue)
-    {
-        BasicDBObject query = new BasicDBObject();
-        for (Object object : filterClauseQueue)
-        {
-            if (object instanceof FilterClause)
-            {
-                FilterClause filter = (FilterClause) object;
-                String property = new MongoDBDataHandler(getClient(), getPersistenceUnit()).getColumnName(filter
-                        .getProperty());
-                String condition = filter.getCondition();
-                String value = filter.getValue();
-
-                // Property, if doesn't exist in entity, may be there in a
-                // document embedded within it, so we have to check that
-                // TODO: Query should actually be in a format
-                // documentName.embeddedDocumentName.column, remove below if
-                // block once this is decided
-                String enclosingDocumentName = getEnclosingDocumentName(m, property);
-                if (enclosingDocumentName != null)
-                {
-                    property = enclosingDocumentName + "." + property;
-                }
-
-                if (condition.equals("="))
-                {
-                    query.append(property, value);
-                }
-                else if (condition.equalsIgnoreCase("like"))
-                {
-                    query.append(property, Pattern.compile(value));
-                }
-                // TODO: Add support for other operators like >, <, >=, <=,
-                // order by asc/ desc, limit, skip, count etc
-            }
-        }
-        return query;
-    }
 
     /**
      * @param m
@@ -444,15 +404,13 @@ public class MongoDBDataHandler
      * to be supported is
      * "Select alias.superColumnName.columnName from EntityName alias"
      */
-    public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName, KunderaQuery query)
+    public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName, BasicDBObject mongoQuery, String result)
             throws PropertyAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned
 
         // Query parameters,
 //        MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
-        Queue filterClauseQueue = query.getFilterClauseQueue();
-        String result = query.getResult();
 
         // Specified after entity alias in query
         String columnName = getColumnName(result);
@@ -463,7 +421,6 @@ public class MongoDBDataHandler
         String enclosingDocumentName = getEnclosingDocumentName(m, columnName);
 
         // Query for fetching entities based on user specified criteria
-        BasicDBObject mongoQuery = createMongoQuery(m, filterClauseQueue);
         DBCursor cursor = dbCollection.find(mongoQuery);
 
         EmbeddedColumn superColumn = m.getEmbeddedColumn(enclosingDocumentName);
@@ -484,7 +441,8 @@ public class MongoDBDataHandler
                                 embeddedObjectClass, superColumn.getColumns());
                         Object fieldValue = PropertyAccessorHelper.getObject(embeddedObject, columnName);
 
-                        for (Object object : filterClauseQueue)
+                        //TODO : discussion required with amresh on this. 
+/*                        for (Object object : filterClauseQueue)
                         {
                             if (object instanceof FilterClause)
                             {
@@ -512,7 +470,7 @@ public class MongoDBDataHandler
                                 }
 
                             }
-                        }
+                        }*/
                     }
 
                 }
