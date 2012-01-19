@@ -13,14 +13,17 @@ import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 
 public class HBaseClientFactory extends GenericClientFactory
 {
-    IndexManager indexManager;
+    private IndexManager indexManager;
 
-    HBaseConfiguration conf;
+    private HBaseConfiguration conf;
 
-    HTablePool hTablePool;
+    private HTablePool hTablePool;
+
+    private EntityReader reader;
 
     private static final int DEFAULT_POOL_SIZE = 100;
 
@@ -51,6 +54,7 @@ public class HBaseClientFactory extends GenericClientFactory
         Configuration hadoopConf = new Configuration();
         hadoopConf.set("hbase.master", node + ":" + port);
         conf = new HBaseConfiguration(hadoopConf);
+        reader = new HBaseEntityReader();
     }
 
     @Override
@@ -64,7 +68,7 @@ public class HBaseClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient()
     {
-        return new HBaseClient(indexManager, conf, hTablePool);
+        return new HBaseClient(indexManager, conf, hTablePool, reader);
     }
 
     @Override

@@ -63,10 +63,13 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     private String persistenceUnit;
 
-    public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool)
+    private EntityReader reader;
+
+    public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool, EntityReader reader)
     {
         this.indexManager = indexManager;
         this.handler = new HBaseDataHandler(conf, hTablePool);
+        this.reader = reader;
     }
 
     @Override
@@ -366,7 +369,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     @Override
     public EntityReader getReader()
     {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return reader;
     }
 
 }
