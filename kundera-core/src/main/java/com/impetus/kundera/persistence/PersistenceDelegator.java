@@ -81,6 +81,7 @@ public class PersistenceDelegator
     /** The event dispatcher. */
     private EntityEventDispatcher eventDispatcher;
 
+    boolean isRelationViaJoinTable;
     /**
      * Instantiates a new persistence delegator.
      * 
@@ -505,6 +506,7 @@ public class PersistenceDelegator
         {
             // Look up in session first
             E e = getSession().lookup(entityClass, primaryKey);
+            isRelationViaJoinTable = false;
 
             if (null != e)
             {
@@ -518,7 +520,7 @@ public class PersistenceDelegator
 
             Client client = getClient(entityMetadata);
 
-            List<EntitySaveGraph> objectGraphs = getGraph(entityMetadata.getEntityClazz(), entityMetadata);
+            List<EntitySaveGraph> objectGraphs = getGraph(entityMetadata.getEntityClazz().newInstance(), entityMetadata);
             Map<Boolean, List<String>> relations = getRelations(objectGraphs, entityMetadata.getEntityClazz());
 
             EntityReader reader = getReader(client);
@@ -530,7 +532,7 @@ public class PersistenceDelegator
 
             Map<Object, Object> relationalValues = new HashMap<Object, Object>();
             E entity = (E) enhanceEntity.getEntity();
-            if (relationNames.isEmpty())
+            if (relationNames.isEmpty() && !entityMetadata.isRelationViaJoinTable())
             {
                 return entity;
             }

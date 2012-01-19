@@ -77,7 +77,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
      */
     public RDBMSEntityReader()
     {
-
+        
     }
 
     /*

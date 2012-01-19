@@ -74,12 +74,13 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
             relation.setRelatedViaJoinTable(true);
             relation.setJoinTableMetadata(jtMetadata);
         }
-        else
+        else if(relation.getMappedBy() == null || relation.getMappedBy().isEmpty())
         {
-            throw new PersistenceException("It's manadatory to use @JoinTable for a ManyToMany relationship.");
+            throw new PersistenceException("It's manadatory to use @JoinTable with parent side of ManyToMany relationship.");
         }
 
-        metadata.addRelation(relationField.getName(), relation);
+        metadata.addRelation(relationField.getName(), relation);       
+        metadata.setRelationViaJoinTable(relation.isRelatedViaJoinTable());
 
     }
 

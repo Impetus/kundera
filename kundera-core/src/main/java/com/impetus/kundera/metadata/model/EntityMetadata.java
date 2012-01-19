@@ -97,6 +97,8 @@ public final class EntityMetadata
 
     /** type. */
     private Type type;
+    
+    private boolean isRelationViaJoinTable;
 
     /**
      * The Enum Type.
@@ -744,4 +746,24 @@ public final class EntityMetadata
         this.dbType = type;
     }
 
+    /**
+     * Getter method for isRelatedViaJoinTable
+     * @return true, if holds join table relation, else false.
+     */
+    public boolean isRelationViaJoinTable()
+    {
+        return isRelationViaJoinTable;
+    }
+
+    /**
+     * Setter method for isRelatedViaJoinTable
+     *   
+     * @param isRelationViaJoinTable
+     */
+    public void setRelationViaJoinTable(boolean isRelationViaJoinTable)
+    {
+        this.isRelationViaJoinTable = isRelationViaJoinTable;
+    }
+
+    
 }
