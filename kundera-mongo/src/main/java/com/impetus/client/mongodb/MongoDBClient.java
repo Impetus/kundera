@@ -361,7 +361,7 @@ public class MongoDBClient implements Client
         // TODO: improve code
         if (result.indexOf(".") >= 0)
         {
-            //TODO i need to discuss with Amresh before modifying it.
+            // TODO i need to discuss with Amresh before modifying it.
             entities.addAll(new MongoDBDataHandler(this, getPersistenceUnit()).getEmbeddedObjectList(dbCollection,
                     entityMetadata, documentName, mongoQuery, result));
 
@@ -507,32 +507,32 @@ public class MongoDBClient implements Client
     /**
      * Method to find entity for given association name and association value.
      */
-  public List<Object> find(String colName, String colValue, EntityMetadata m)
+    public List<Object> find(String colName, String colValue, EntityMetadata m)
     {
-       // you got column name and column value.
-      DBCollection dbCollection = mongoDb.getCollection(m.getTableName());
+        // you got column name and column value.
+        DBCollection dbCollection = mongoDb.getCollection(m.getTableName());
 
-      BasicDBObject query = new BasicDBObject();
+        BasicDBObject query = new BasicDBObject();
 
-      query.put(colName, colValue);
+        query.put(colName, colValue);
 
-      DBCursor cursor = dbCollection.find(query);
-      DBObject fetchedDocument = null;
-      MongoDBDataHandler handler = new MongoDBDataHandler(this, getPersistenceUnit());
-      List<Object> results = new ArrayList<Object>();
-      while (cursor.hasNext())
-      {
-          fetchedDocument = cursor.next();
-          Object entity = handler.getEntityFromDocument(m.getEntityClazz(), m, fetchedDocument, null);
-          results.add(entity);
-      }
-      
+        DBCursor cursor = dbCollection.find(query);
+        DBObject fetchedDocument = null;
+        MongoDBDataHandler handler = new MongoDBDataHandler(this, getPersistenceUnit());
+        List<Object> results = new ArrayList<Object>();
+        while (cursor.hasNext())
+        {
+            fetchedDocument = cursor.next();
+            Object entity = handler.getEntityFromDocument(m.getEntityClazz(), m, fetchedDocument, null);
+            results.add(entity);
+        }
 
-
-      return results.isEmpty()?null:results;
+        return results.isEmpty() ? null : results;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.client.Client#getReader()
      */
     @Override

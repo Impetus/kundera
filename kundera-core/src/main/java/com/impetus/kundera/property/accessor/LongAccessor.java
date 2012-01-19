@@ -52,13 +52,24 @@ public class LongAccessor implements PropertyAccessor<Long>
         return buffer.array();
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
-     */
     @Override
     public final String toString(Object object)
     {
         return object.toString();
     }
+
+    @Override
+    public Long fromString(String s) throws PropertyAccessException
+    {
+        try
+        {
+            Long l = new Long(s);
+            return l;
+        }
+        catch (NumberFormatException e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
+    }
+
 }

@@ -88,7 +88,6 @@ public interface Client
      */
     <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap) throws Exception;
 
-    
     /**
      * Shutdown.
      */
@@ -156,7 +155,8 @@ public interface Client
      * @param clazz
      * @param metadata
      * @param rowId
-     * @param relationNames relation names
+     * @param relationNames
+     *            relation names
      * @return entity.
      */
     Object find(Class<?> clazz, EntityMetadata metadata, String rowId, List<String> relationNames);
@@ -199,14 +199,14 @@ public interface Client
      * @return
      */
     <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-                                            EntityMetadata relMetadata, EntitySaveGraph objectGraph);    
-    
+            EntityMetadata relMetadata, EntitySaveGraph objectGraph);
+
     List<Object> find(String colName, String colValue, EntityMetadata m);
 
     /**
      * Returns entity reader instance bind to specific client.
-     * @return 
-     *           reader entity reader.
+     * 
+     * @return reader entity reader.
      */
     EntityReader getReader();
 }

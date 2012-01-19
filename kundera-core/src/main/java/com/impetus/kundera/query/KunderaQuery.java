@@ -46,13 +46,14 @@ public class KunderaQuery
     public static final String[] INTER_CLAUSE_OPERATORS = { "AND", "OR" };
 
     /** The Constant INTRA_CLAUSE_OPERATORS. */
-    public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE" , ">", ">=", "<", "<="};
+    public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE", ">", ">=", "<", "<=" };
 
     /** The INTER pattern. */
     private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile("\\band\\b|\\bor\\b", Pattern.CASE_INSENSITIVE);
 
     /** The INTRA pattern. */
-    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b|>=|>|<=|<", Pattern.CASE_INSENSITIVE);
+    private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b|>=|>|<=|<",
+            Pattern.CASE_INSENSITIVE);
 
     /** The result. */
     private String result;

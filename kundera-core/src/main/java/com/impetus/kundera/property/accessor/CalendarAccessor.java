@@ -15,55 +15,76 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
 /**
- * @author Amresh Singh
- * 
+ * @author amresh.singh
+ *
  */
-public class CharAccessor implements PropertyAccessor<Character>
+public class CalendarAccessor implements PropertyAccessor<Calendar>
 {
 
+    /** The Constant DATE_FORMATTER. */
+    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd-MM-yy HH:mm:ss", Locale.ENGLISH);    
+    
     @Override
-    public Character fromBytes(byte[] data) throws PropertyAccessException
+    public Calendar fromBytes(byte[] b) throws PropertyAccessException
     {
-        if (data == null || data.length != 2)
-            return 0x0;
-
-        return (char) ((0xff & data[0]) << 8 | (0xff & data[1]) << 0);
+        String s;
+        try
+        {
+            s = new String(b, Constants.ENCODING);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
+        
+        return fromString(s);
+        
     }
+
 
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
-        Character data = (Character) object;
-        return new byte[] { (byte) ((data >> 8) & 0xff), (byte) ((data >> 0) & 0xff), };
+        Calendar cal = (Calendar) object;
+        return DATE_FORMATTER.format(cal.getTime()).getBytes();
     }
+
 
     @Override
     public String toString(Object object)
     {
+
         return object.toString();
     }
 
+
     @Override
-    public Character fromString(String s) throws PropertyAccessException
+    public Calendar fromString(String s) throws PropertyAccessException
     {
+        Calendar cal = Calendar.getInstance();
+        Date d;
         try
         {
-            if (s == null || s.length() != 1)
-            {
-                throw new PropertyAccessException("Can't convert String " + s + " to character");
-            }
-
-            Character c = s.charAt(0);
-            return c;
+            d = (Date)DATE_FORMATTER.parse(s);
         }
-        catch (NumberFormatException e)
+        catch (ParseException e)
         {
             throw new PropertyAccessException(e.getMessage());
         }
+        cal.setTime(d);
+        return cal;
     }
-
+    
 }

@@ -49,7 +49,7 @@ public class CassQuery extends QueryImpl implements Query
 
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(CassQuery.class);
-    
+
     private EntityReader reader;
 
     /**
@@ -143,59 +143,35 @@ public class CassQuery extends QueryImpl implements Query
      * java.util.List, java.util.List, boolean)
      */
     @Override
-    protected List<Object> handleAssociations(EntityMetadata m, Client client, 
-                                              List<EntitySaveGraph> graphs, List<String> relationNames,
-                                              boolean isParent)
+    protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
+            List<String> relationNames, boolean isParent)
     {
         log.debug("on handleAssociations rdbms query");
         List<IndexClause> ixClause = prepareIndexClause();
-        
+
         ((CassandraEntityReader) getReader()).setConditions(ixClause);
-        
+
         List<EnhanceEntity> ls = reader.populateRelation(m, relationNames, isParent, client);
-        /*        List<EnhanceEntity> ls = null;
-        if (!isParent)
-        {
-            if (useSecondryIndex(m.getPersistenceUnit()))
-            {
-                List<IndexClause> ixClause = prepareIndexClause();
-                ls = ((PelopsClient) client).find(m, relationNames, ixClause);
-            }
-            else
-            {
-                // prepare lucene query and find.
-                Set<String> rSet = fetchDataFromLucene(client);
-                
-                try
-                {
-                    ls = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(), relationNames,
-                                                                            true, m, rSet.toArray(new String[] {}));
-                }
-                catch (Exception e)
-                {
-                    log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
-                    throw new QueryHandlerException(e.getMessage());
-                }
-            }
-        }
-        else
-        {
-            if (useSecondryIndex(m.getPersistenceUnit()))
-            {
-                // in case need to search on secondry columns and it is not set
-                // to true!
-                List<IndexClause> ixClause = prepareIndexClause();
-                ls = ((PelopsClient) client).find(ixClause, m, true, null);
-            }
-            else
-            {
-                onAssociationUsingLucene(m, client, ls);
-            }
-        }
-*/
+        /*
+         * List<EnhanceEntity> ls = null; if (!isParent) { if
+         * (useSecondryIndex(m.getPersistenceUnit())) { List<IndexClause>
+         * ixClause = prepareIndexClause(); ls = ((PelopsClient) client).find(m,
+         * relationNames, ixClause); } else { // prepare lucene query and find.
+         * Set<String> rSet = fetchDataFromLucene(client);
+         * 
+         * try { ls = (List<EnhanceEntity>) ((PelopsClient)
+         * client).find(m.getEntityClazz(), relationNames, true, m,
+         * rSet.toArray(new String[] {})); } catch (Exception e) {
+         * log.error("Error while executing handleAssociation for cassandra:" +
+         * e.getMessage()); throw new QueryHandlerException(e.getMessage()); } }
+         * } else { if (useSecondryIndex(m.getPersistenceUnit())) { // in case
+         * need to search on secondry columns and it is not set // to true!
+         * List<IndexClause> ixClause = prepareIndexClause(); ls =
+         * ((PelopsClient) client).find(ixClause, m, true, null); } else {
+         * onAssociationUsingLucene(m, client, ls); } }
+         */
         return handleGraph(ls, graphs, client, m);
     }
-
 
     private IndexOperator getOperator(String condition)
     {
@@ -226,17 +202,19 @@ public class CassQuery extends QueryImpl implements Query
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.QueryImpl#getReader()
      */
     @Override
     protected EntityReader getReader()
     {
-        if(reader == null)
+        if (reader == null)
         {
             reader = new CassandraEntityReader(getLuceneQueryFromJPAQuery());
         }
-        
+
         return reader;
     }
 

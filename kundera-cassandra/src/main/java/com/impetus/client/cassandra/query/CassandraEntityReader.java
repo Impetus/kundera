@@ -33,55 +33,61 @@ import com.impetus.kundera.query.exception.QueryHandlerException;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 public class CassandraEntityReader extends AbstractEntityReader implements EntityReader
 {
     List<IndexClause> conditions = new ArrayList<IndexClause>();
-    
+
     private static Log log = LogFactory.getLog(CassandraEntityReader.class);
-    
+
     public CassandraEntityReader(String luceneQuery)
     {
         this.luceneQueryFromJPAQuery = luceneQuery;
     }
-    
+
     public CassandraEntityReader()
     {
-        
+
     }
-    
 
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.persistence.EntityReader#findById(java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, java.util.List, com.impetus.kundera.client.Client)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.EntityReader#findById(java.lang.String,
+     * com.impetus.kundera.metadata.model.EntityMetadata, java.util.List,
+     * com.impetus.kundera.client.Client)
      */
     @Override
     public EnhanceEntity findById(String primaryKey, EntityMetadata m, List<String> relationNames, Client client)
     {
         try
         {
-            return (EnhanceEntity)client.find(m.getEntityClazz(), m,primaryKey, relationNames);
+            return (EnhanceEntity) client.find(m.getEntityClazz(), m, primaryKey, relationNames);
         }
         catch (Exception e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+
         return null;
     }
 
-
-    
     /**
-     * Method responsible for reading bacl entity and relations using secondary indexes(if it holds any relation), else retrieve row keys using
-     * lucene.
-     * @param m                 entity meta data
-     * @param relationNames     relation names
-     * @param isParent          if entity is not holding any relation.
-     * @param client            client instance 
-     * @return                  list of wrapped enhance entities.
+     * Method responsible for reading bacl entity and relations using secondary
+     * indexes(if it holds any relation), else retrieve row keys using lucene.
+     * 
+     * @param m
+     *            entity meta data
+     * @param relationNames
+     *            relation names
+     * @param isParent
+     *            if entity is not holding any relation.
+     * @param client
+     *            client instance
+     * @return list of wrapped enhance entities.
      */
 
     @Override
@@ -99,11 +105,11 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
             {
                 // prepare lucene query and find.
                 Set<String> rSet = fetchDataFromLucene(client);
-                
+
                 try
                 {
-                    ls = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(), relationNames,
-                                                                            true, m, rSet.toArray(new String[] {}));
+                    ls = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(), relationNames, true, m,
+                            rSet.toArray(new String[] {}));
                 }
                 catch (Exception e)
                 {
@@ -125,13 +131,15 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                 onAssociationUsingLucene(m, client, ls);
             }
         }
-        
+
         return ls;
     }
-    
+
     /**
      * Method to set indexcluase conditions.
-     * @param conditions index conditions.
+     * 
+     * @param conditions
+     *            index conditions.
      */
     public void setConditions(List<IndexClause> conditions)
     {

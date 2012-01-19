@@ -578,11 +578,15 @@ public abstract class QueryImpl implements Query
 
     /**
      * Handle graph.
-     *
-     * @param enhanceEntities the enhance entities
-     * @param graphs the graphs
-     * @param client the client
-     * @param m the m
+     * 
+     * @param enhanceEntities
+     *            the enhance entities
+     * @param graphs
+     *            the graphs
+     * @param client
+     *            the client
+     * @param m
+     *            the m
      * @return the list
      */
     protected List<Object> handleGraph(List<EnhanceEntity> enhanceEntities, List<EntitySaveGraph> graphs,
@@ -614,10 +618,13 @@ public abstract class QueryImpl implements Query
 
     /**
      * Populate using lucene.
-     *
-     * @param m the m
-     * @param client the client
-     * @param result the result
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param result
+     *            the result
      * @return the list
      */
     protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result)
@@ -687,8 +694,9 @@ public abstract class QueryImpl implements Query
 
     /**
      * Use secondry index.
-     *
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
      * @return true, if successful
      */
     protected boolean useSecondryIndex(String persistenceUnit)
@@ -699,7 +707,7 @@ public abstract class QueryImpl implements Query
 
     /**
      * Gets the lucene query from jpa query.
-     *
+     * 
      * @return the lucene query from jpa query
      */
     protected String getLuceneQueryFromJPAQuery()
@@ -780,10 +788,13 @@ public abstract class QueryImpl implements Query
 
     /**
      * Transform.
-     *
-     * @param m the m
-     * @param ls the ls
-     * @param resultList the result list
+     * 
+     * @param m
+     *            the m
+     * @param ls
+     *            the ls
+     * @param resultList
+     *            the result list
      */
     protected void transform(EntityMetadata m, List<EnhanceEntity> ls, List resultList)
     {
@@ -796,8 +807,9 @@ public abstract class QueryImpl implements Query
 
     /**
      * Fetch data from lucene.
-     *
-     * @param client the client
+     * 
+     * @param client
+     *            the client
      * @return the sets the
      */
     protected Set<String> fetchDataFromLucene(Client client)
@@ -813,10 +825,13 @@ public abstract class QueryImpl implements Query
 
     /**
      * On association using lucene.
-     *
-     * @param m the m
-     * @param client the client
-     * @param ls the ls
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param ls
+     *            the ls
      */
     protected void onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
     {
@@ -835,21 +850,28 @@ public abstract class QueryImpl implements Query
 
     /**
      * Populate entities, Method to populate data in case no relation exist!.
-     *
-     * @param m the m
-     * @param client the client
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
      * @return the list
      */
     protected abstract List<Object> populateEntities(EntityMetadata m, Client client);
 
     /**
      * Method to handle population of associated entities based on relation map.
-     *
-     * @param m the m
-     * @param client the client
-     * @param graphs the graphs
-     * @param relationNames the relation names
-     * @param isParent the is parent
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param graphs
+     *            the graphs
+     * @param relationNames
+     *            the relation names
+     * @param isParent
+     *            the is parent
      * @return the list
      */
     protected abstract List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,

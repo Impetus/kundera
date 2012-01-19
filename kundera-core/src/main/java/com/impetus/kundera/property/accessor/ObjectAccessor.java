@@ -70,14 +70,24 @@ public class ObjectAccessor implements PropertyAccessor<Object>
         }
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
-     */
     @Override
     public final String toString(Object object)
     {
         return object.toString();
+    }
+
+    @Override
+    public Object fromString(String s) throws PropertyAccessException
+    {
+        try
+        {
+            Object o = (Object) s;
+            return o;
+        }
+        catch (NumberFormatException e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
     }
 
 }

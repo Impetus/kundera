@@ -37,7 +37,7 @@ public class DoubleAccessor implements PropertyAccessor<Double>
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
-        return fromLong(Double.doubleToRawLongBits((Double)object));
+        return fromLong(Double.doubleToRawLongBits((Double) object));
     }
 
     @Override
@@ -58,12 +58,26 @@ public class DoubleAccessor implements PropertyAccessor<Double>
                 | (long) (0xff & data[3]) << 32 | (long) (0xff & data[4]) << 24 | (long) (0xff & data[5]) << 16
                 | (long) (0xff & data[6]) << 8 | (long) (0xff & data[7]) << 0);
     }
-    
+
     private byte[] fromLong(long data)
     {
         return new byte[] { (byte) ((data >> 56) & 0xff), (byte) ((data >> 48) & 0xff), (byte) ((data >> 40) & 0xff),
                 (byte) ((data >> 32) & 0xff), (byte) ((data >> 24) & 0xff), (byte) ((data >> 16) & 0xff),
                 (byte) ((data >> 8) & 0xff), (byte) ((data >> 0) & 0xff), };
+    }
+
+    @Override
+    public Double fromString(String s) throws PropertyAccessException
+    {
+        try
+        {
+            Double d = new Double(s);
+            return d;
+        }
+        catch (NumberFormatException e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
     }
 
 }

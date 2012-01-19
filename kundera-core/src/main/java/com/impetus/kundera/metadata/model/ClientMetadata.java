@@ -24,7 +24,7 @@ public class ClientMetadata
     private String clientImplementor;
 
     private String indexImplementor;
-    
+
     private boolean useSecondryIndex;
 
     /**
@@ -70,11 +70,12 @@ public class ClientMetadata
     }
 
     /**
-     * @param useSecondryIndex the useSecondryIndex to set
+     * @param useSecondryIndex
+     *            the useSecondryIndex to set
      */
     public void setUseSecondryIndex(boolean useSecondryIndex)
     {
         this.useSecondryIndex = useSecondryIndex;
     }
-    
+
 }

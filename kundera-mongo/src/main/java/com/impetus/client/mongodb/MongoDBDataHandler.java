@@ -21,33 +21,23 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.regex.Pattern;
 
 import javax.persistence.Embedded;
 import javax.persistence.PersistenceException;
-import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.client.mongodb.query.MongoDBQuery;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.persistence.EntityResolver;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.proxy.EnhancedEntity;
-import com.impetus.kundera.query.KunderaQuery;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
@@ -74,12 +64,11 @@ public class MongoDBDataHandler
 
     private static Log log = LogFactory.getLog(MongoDBDataHandler.class);
 
-    public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document, List<String> relations)
+    public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document,
+            List<String> relations)
     {
         // Entity object
         Object entity = null;
-        
-        
 
         // Map to hold property-name=>foreign-entity relations
         // Map<String, Set<String>> foreignKeysMap = new HashMap<String,
@@ -91,7 +80,7 @@ public class MongoDBDataHandler
 
             // Populate primary key column
             String rowKey = (String) document.get("_id");
-            PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), rowKey);
+            PropertyAccessorHelper.setId(entity, m, rowKey);
 
             // Populate entity columns
             List<Column> columns = m.getColumnsAsList();
@@ -99,8 +88,6 @@ public class MongoDBDataHandler
             {
                 PropertyAccessorHelper.set(entity, column.getField(), document.get(column.getName()));
             }
-            
-            
 
             // Populate @Embedded objects and collections
             List<EmbeddedColumn> embeddedColumns = m.getEmbeddedColumnsAsList();
@@ -183,11 +170,11 @@ public class MongoDBDataHandler
             // return
             // EnhancedEntity e = EntityResolver.getEnhancedEntity(entity,
             // rowKey, foreignKeysMap);
-            if(relations != null)
+            if (relations != null)
             {
-               EnhanceEntity e = null;
-               Map<String, Object> relationValue = new HashMap<String, Object>();
-                for(String r : relations)
+                EnhanceEntity e = null;
+                Map<String, Object> relationValue = new HashMap<String, Object>();
+                for (String r : relations)
                 {
                     if(relationValue ==  null) 
                     {
@@ -196,7 +183,7 @@ public class MongoDBDataHandler
                     Object colValue = document.get(r);
                     relationValue.put(r, colValue);
                 }
-                
+
                 e = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationValue);
                 return e;
             }
@@ -409,8 +396,7 @@ public class MongoDBDataHandler
     {
         List list = new ArrayList();// List of embedded object to be returned
 
-        // Query parameters,
-//        MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
+        // MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
 
         // Specified after entity alias in query
         String columnName = getColumnName(result);

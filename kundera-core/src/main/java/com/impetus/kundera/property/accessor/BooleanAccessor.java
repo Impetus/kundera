@@ -20,11 +20,10 @@ import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * @author Amresh Singh
- *
+ * 
  */
 public class BooleanAccessor implements PropertyAccessor<Boolean>
 {
-
 
     @Override
     public Boolean fromBytes(byte[] data) throws PropertyAccessException
@@ -32,15 +31,15 @@ public class BooleanAccessor implements PropertyAccessor<Boolean>
         return (data == null || data.length == 0) ? false : data[0] != 0x00;
     }
 
-
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
-        if(object != null) {
-            
+        if (object != null)
+        {
+
             Boolean b = (Boolean) object;
-            
-            return new byte[]{(byte)(b ? 0x01 : 0x00)}; // bool -> {1 byte}
+
+            return new byte[] { (byte) (b ? 0x01 : 0x00) }; // bool -> {1 byte}
         }
         return null;
     }
@@ -50,5 +49,19 @@ public class BooleanAccessor implements PropertyAccessor<Boolean>
     {
         return object.toString();
     }
-    
+
+    @Override
+    public Boolean fromString(String s) throws PropertyAccessException
+    {
+        try
+        {
+            Boolean b = new Boolean(s);
+            return b;
+        }
+        catch (NumberFormatException e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
+    }
+
 }

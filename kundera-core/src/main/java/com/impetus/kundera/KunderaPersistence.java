@@ -24,7 +24,6 @@ import javax.persistence.spi.ProviderUtil;
 
 import org.apache.commons.lang.NotImplementedException;
 
-
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ApplicationLoader;
 import com.impetus.kundera.loader.CoreLoader;
@@ -34,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Class KunderaPersistence.
- *
+ * 
  * @author animesh.kumar
  */
 @SuppressWarnings("unchecked")

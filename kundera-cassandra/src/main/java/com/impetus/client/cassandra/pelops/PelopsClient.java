@@ -73,7 +73,7 @@ public class PelopsClient implements Client
 
     /** The index manager. */
     private IndexManager indexManager;
-    
+
     private EntityReader reader;
 
     /** The persistence unit. */
@@ -104,7 +104,7 @@ public class PelopsClient implements Client
     @Override
     public void persist(EnhancedEntity enhancedEntity) throws Exception
     {
-        //DELETE it.
+        // DELETE it.
     }
 
     /*
@@ -133,16 +133,16 @@ public class PelopsClient implements Client
         List<Object> result = null;
         try
         {
-            result = (List<Object>) find(clazz,relationNames,relationNames != null, metadata, rowId);
+            result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata, rowId);
         }
         catch (Exception e)
         {
-            log.error("Error on retrieval"+ e.getMessage());
+            log.error("Error on retrieval" + e.getMessage());
             throw new PersistenceException(e.getMessage());
         }
-        
-        return result !=null & !result.isEmpty() ? result.get(0): null;
-     }
+
+        return result != null & !result.isEmpty() ? result.get(0) : null;
+    }
 
     /*
      * (non-Javadoc)
@@ -155,33 +155,41 @@ public class PelopsClient implements Client
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         List<E> results = new ArrayList<E>();
-        for(String rowKey : rowIds)
+        for (String rowKey : rowIds)
         {
-            List<E>  r =  (List<E>) find(entityClass,entityMetadata, rowKey, null);
-            if(r != null)
+            List<E> r = (List<E>) find(entityClass, entityMetadata, rowKey, null);
+            if (r != null)
             {
                 results.addAll(r);
             }
         }
-        
-        return results.isEmpty()?null:results;
+
+        return results.isEmpty() ? null : results;
     }
 
-    
     /**
-     * Method to return list of entities for given below attributes: 
-     * @param <E>                entity to be returned
-     * @param entityClass        entity class 
-     * @param relationNames      relation names
-     * @param isWrapReq          true, in case it needs to populate enhance entity.
-     * @param metadata           entity metadata.
-     * @param rowIds             array of row key s
-     * @return                   list of wrapped entities.
-     * @throws Exception         throws exception. don't know why
-     * TODO: why is it throwing exception. need to take care as part of exception handling exercise.
+     * Method to return list of entities for given below attributes:
+     * 
+     * @param <E>
+     *            entity to be returned
+     * @param entityClass
+     *            entity class
+     * @param relationNames
+     *            relation names
+     * @param isWrapReq
+     *            true, in case it needs to populate enhance entity.
+     * @param metadata
+     *            entity metadata.
+     * @param rowIds
+     *            array of row key s
+     * @return list of wrapped entities.
+     * @throws Exception
+     *             throws exception. don't know why TODO: why is it throwing
+     *             exception. need to take care as part of exception handling
+     *             exercise.
      */
-    public final  List find(Class entityClass, List<String> relationNames, boolean isWrapReq,
-                                  EntityMetadata metadata, String... rowIds) throws Exception
+    public final List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
+            String... rowIds) throws Exception
     {
         if (!isOpen())
         {
@@ -192,12 +200,11 @@ public class PelopsClient implements Client
 
         PelopsDataHandler handler = new PelopsDataHandler(this);
 
-        List entities = handler.fromThriftRow(selector, entityClass, metadata, relationNames, isWrapReq,
-                rowIds);
+        List entities = handler.fromThriftRow(selector, entityClass, metadata, relationNames, isWrapReq, rowIds);
 
         return entities;
     }
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -536,7 +543,8 @@ public class PelopsClient implements Client
      * @param entities
      *            the entities
      */
-    private void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities, boolean isRelational, List<String> relationNames)
+    private void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities,
+            boolean isRelational, List<String> relationNames)
     {
         Iterator<Bytes> rowIter = qResults.keySet().iterator();
         while (rowIter.hasNext())
@@ -546,8 +554,8 @@ public class PelopsClient implements Client
             try
             {
                 Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m,
-                                                           dataHandler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), 
-                                                           m.getTableName(), columns, null), relationNames, isRelational);
+                        dataHandler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null),
+                        relationNames, isRelational);
                 entities.add(e);
             }
             catch (IllegalStateException e)
@@ -563,8 +571,11 @@ public class PelopsClient implements Client
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#find(java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.String,
+     * java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     public List<Object> find(String colName, String colValue, EntityMetadata m)
     {
@@ -573,10 +584,9 @@ public class PelopsClient implements Client
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
         List<Object> entities = null;
         IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, Integer.MAX_VALUE,
-                                                 Selector.newIndexExpression(colName, IndexOperator.EQ, 
-                                                                             Bytes.fromByteArray(colValue.getBytes())));
-        Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), 
-                                                                       ix, slicePredicate, ConsistencyLevel.ONE);
+                Selector.newIndexExpression(colName, IndexOperator.EQ, Bytes.fromByteArray(colValue.getBytes())));
+        Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
+                ConsistencyLevel.ONE);
         entities = new ArrayList<Object>(qResults.size());
         // iterate through complete map and
         populateData(m, qResults, entities, false, null);
@@ -584,12 +594,12 @@ public class PelopsClient implements Client
         return entities;
     }
 
-    public List<EnhanceEntity> find( EntityMetadata m, List<String> relationNames, List<IndexClause> conditions)
+    public List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames, List<IndexClause> conditions)
     {
-           
-        return (List<EnhanceEntity>)find(conditions, m, true, relationNames);
+
+        return (List<EnhanceEntity>) find(conditions, m, true, relationNames);
     }
-    
+
     /**
      * On index.
      * 
@@ -739,7 +749,9 @@ public class PelopsClient implements Client
         tf = null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.client.Client#getReader()
      */
     @Override
@@ -747,5 +759,5 @@ public class PelopsClient implements Client
     {
         return reader;
     }
-    
+
 }

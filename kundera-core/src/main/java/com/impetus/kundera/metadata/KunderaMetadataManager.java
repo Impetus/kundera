@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class KunderaMetadataManager
 {
@@ -100,7 +100,9 @@ public class KunderaMetadataManager
             }
         }
         log.warn("Something is terribly wrong, No Entity metadata found for the class " + entityClass
-                + ". Returning null value.");
+                + ". If your entity is for RDBMS, make sure you put fully qualified entity class"
+                + " name under <class></class> tag in persistence.xml for RDBMS "
+                + "persistence unit. Returning null value.");
         return null;
 
     }

@@ -406,7 +406,7 @@ public class HBaseDataHandler implements DataHandler
         try
         {
             /* Set Row Key */
-            PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), rowKey);
+            PropertyAccessorHelper.setId(entity, m, rowKey);
 
             // Raw data retrieved from HBase for a particular row key (contains
             // all column families)

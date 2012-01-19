@@ -44,13 +44,13 @@ import com.impetus.kundera.query.exception.QueryHandlerException;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 public class AbstractEntityReader
 {
 
     private static Log log = LogFactory.getLog(AbstractEntityReader.class);
-    
+
     protected String luceneQueryFromJPAQuery;
 
     /**
@@ -64,8 +64,8 @@ public class AbstractEntityReader
      * @throws Exception
      *             the exception
      */
-    public Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder, 
-                                Client client, EntityMetadata m, PersistenceDelegator persistenceDelegeator) throws Exception
+    public Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder,
+            Client client, EntityMetadata m, PersistenceDelegator persistenceDelegeator) throws Exception
     {
 
         Client childClient = null;
@@ -79,28 +79,29 @@ public class AbstractEntityReader
             for (EntitySaveGraph g : graphs)
             {
                 Relation relation = m.getRelation(g.getProperty().getName());
-                if(relation.isRelatedViaJoinTable())
+                if (relation.isRelatedViaJoinTable())
                 {
                     computeJoinTableRelations(e.getEntity(), m, g, persistenceDelegeator, relation);
                 }
                 else
                 {
-                String relationName = g.getfKeyName();
-                Object relationalValue = e.getRelations().get(relationName);
-                childClazz = g.getParentClass();
-                Field f = g.getProperty();
-                if (!collectionHolder.containsKey(relationalValue))
-                {
-                    childMetadata = persistenceDelegeator.getMetadata(childClazz);
-                    childClient = persistenceDelegeator.getClient(childMetadata);
-                    Object child = childClient.find(childClazz, childMetadata, relationalValue.toString(), null);
-                    collectionHolder.put(relationalValue, child);
-                    // If entity is holding association it means it can not be a
-                    // collection.
-                }
-                
-                onBiDirection(e, client,g,m,collectionHolder.get(relationalValue),childMetadata,childClient);
-                PropertyAccessorHelper.set(e.getEntity(), f, collectionHolder.get(relationalValue));
+                    String relationName = g.getfKeyName();
+                    Object relationalValue = e.getRelations().get(relationName);
+                    childClazz = g.getParentClass();
+                    Field f = g.getProperty();
+                    if (!collectionHolder.containsKey(relationalValue))
+                    {
+                        childMetadata = persistenceDelegeator.getMetadata(childClazz);
+                        childClient = persistenceDelegeator.getClient(childMetadata);
+                        Object child = childClient.find(childClazz, childMetadata, relationalValue.toString(), null);
+                        collectionHolder.put(relationalValue, child);
+                        // If entity is holding association it means it can not
+                        // be a
+                        // collection.
+                    }
+
+                    onBiDirection(e, client, g, m, collectionHolder.get(relationalValue), childMetadata, childClient);
+                    PropertyAccessorHelper.set(e.getEntity(), f, collectionHolder.get(relationalValue));
                 }
                 // this is a single place holder for bi direction.
             }
@@ -108,60 +109,65 @@ public class AbstractEntityReader
         else
         {
             // means it is parent
-            // Find child entities by passing  parent key and parent value.
+            // Find child entities by passing parent key and parent value.
             for (EntitySaveGraph g : graphs)
             {
                 Relation relation = m.getRelation(g.getProperty().getName());
-                if(relation.isRelatedViaJoinTable())
+                if (relation.isRelatedViaJoinTable())
                 {
                     computeJoinTableRelations(e.getEntity(), m, g, persistenceDelegeator, relation);
                 }
                 else
                 {
-                childClazz = g.getChildClass();
-                childMetadata = persistenceDelegeator.getMetadata(childClazz);
-                childClient = persistenceDelegeator.getClient(childMetadata);
-                String relationName = g.getfKeyName();
-                String relationalValue = e.getEntityId();
-                Field f = g.getProperty();
-                if (!collectionHolder.containsKey(relationalValue))
-                {
-                    // create a finder and pass metadata, relationName,
-                    // relationalValue.
-                    List<Object> childs = null;
-                    if(useSecondryIndex(childMetadata.getPersistenceUnit()))
+                    childClazz = g.getChildClass();
+                    childMetadata = persistenceDelegeator.getMetadata(childClazz);
+                    childClient = persistenceDelegeator.getClient(childMetadata);
+                    String relationName = g.getfKeyName();
+                    String relationalValue = e.getEntityId();
+                    Field f = g.getProperty();
+                    if (!collectionHolder.containsKey(relationalValue))
                     {
-                        childs = childClient.find(relationName, relationalValue, childMetadata);
-                     // pass this entity id as a value to be searched for for
-                    }
-                    else
-                    {
-                        if (g.isSharedPrimaryKey())
+                        // create a finder and pass metadata, relationName,
+                        // relationalValue.
+                        List<Object> childs = null;
+                        if (useSecondryIndex(childMetadata.getPersistenceUnit()))
                         {
-                            childs = new ArrayList();
-                            childs.add(childClient.find(childClazz, childMetadata,e.getEntityId(), null));
-                        } else
-                        {
-                            // lucene query, where entity class is child class, parent class is entity's class and parentid is entity ID!
-                            //that's it!
-                            String query= getQuery(DocumentIndexer.PARENT_ID_CLASS, e.getEntity().getClass()
-                                    .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, e.getEntityId());
-                            Map<String, String> results = childClient.getIndexManager().search(query);
-                            Set<String> rsSet = new HashSet<String>(results.values());
-                            childs = (List<Object>) childClient.find(childClazz, rsSet.toArray(new String[] {}));
-                            
+                            childs = childClient.find(relationName, relationalValue, childMetadata);
+                            // pass this entity id as a value to be searched for
+                            // for
                         }
+                        else
+                        {
+                            if (g.isSharedPrimaryKey())
+                            {
+                                childs = new ArrayList();
+                                childs.add(childClient.find(childClazz, childMetadata, e.getEntityId(), null));
+                            }
+                            else
+                            {
+                                // lucene query, where entity class is child
+                                // class, parent class is entity's class and
+                                // parentid is entity ID!
+                                // that's it!
+                                String query = getQuery(DocumentIndexer.PARENT_ID_CLASS, e.getEntity().getClass()
+                                        .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD,
+                                        e.getEntityId());
+                                Map<String, String> results = childClient.getIndexManager().search(query);
+                                Set<String> rsSet = new HashSet<String>(results.values());
+                                childs = (List<Object>) childClient.find(childClazz, rsSet.toArray(new String[] {}));
+
+                            }
+                        }
+                        // secondary indexes.
+                        // create sql query for hibernate client.
+                        // f = g.getProperty();
+                        collectionHolder.put(relationalValue, childs);
                     }
-                    // secondary indexes.
-                    // create sql query for hibernate client.
-//                    f = g.getProperty();
-                    collectionHolder.put(relationalValue, childs);
+                    // handle bi direction here.
+
+                    onReflect(e.getEntity(), f, (List) collectionHolder.get(relationalValue));
                 }
-                //handle bi direction here.
-                
-                onReflect(e.getEntity(), f, (List) collectionHolder.get(relationalValue));
-                }
-           }
+            }
         }
         return e.getEntity();
     }
@@ -268,91 +274,91 @@ public class AbstractEntityReader
      * @throws Exception
      *             the exception
      */
-    private void onBiDirection(EnhanceEntity e, Client client, EntitySaveGraph objectGraph, 
-                               EntityMetadata origMetadata,Object child, EntityMetadata childMetadata, Client childClient) throws Exception
+    private void onBiDirection(EnhanceEntity e, Client client, EntitySaveGraph objectGraph,
+            EntityMetadata origMetadata, Object child, EntityMetadata childMetadata, Client childClient)
+            throws Exception
     {
         if (!objectGraph.isUniDirectional())
         {
-                // Add original fetched entity.
-                List obj = new ArrayList();
+            // Add original fetched entity.
+            List obj = new ArrayList();
 
-                Relation relation = childMetadata.getRelation(objectGraph.getBidirectionalProperty().getName());
-                
-                // join column name is pk of entity and 
-                // If relation is One to Many or MANY TO MANY for associated
-                // entity. Require to fetch all associated entity
-                
-                if (relation.getType().equals(ForeignKey.ONE_TO_MANY) || relation.getType().equals(ForeignKey.MANY_TO_MANY))
-                {
-                    String query = null;
-                    try
-                    {
-                        String id = PropertyAccessorHelper.getId(child, childMetadata);
-                        List<Object> results = null;
-                        
-                        if(useSecondryIndex(origMetadata.getPersistenceUnit()))
-                        {
-                            results =  client.find(objectGraph.getfKeyName(), id, origMetadata);
-                        } 
-                        else
-                        {
-                            query = getQuery(DocumentIndexer.PARENT_ID_CLASS, child.getClass()
-                                .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, id);
-                        Map<String, String> keys= client.getIndexManager().search(query);
-                        Set<String> uqSet = new HashSet<String>(keys.values());
-                         results = new ArrayList<Object>();
-                          for(String rowKey : uqSet)
-                          {
-                              results.add(client.find(e.getEntity().getClass(), origMetadata, rowKey, null));
-                          }
-                        }
-                        
-                        if (results != null)
-                        {
-                            obj.addAll(results);
-                        }
-                    }
-                    catch (PropertyAccessException ex)
-                    {
-                        log.error("error on handling bi direction:" + ex.getMessage());
-                        throw new QueryHandlerException(ex.getMessage());
-                    }
+            Relation relation = childMetadata.getRelation(objectGraph.getBidirectionalProperty().getName());
 
-                    // In case of other parent object found for given
-                    // bidirectional.
-                    for (Object o : obj)
-                    {
-                        Field f = objectGraph.getProperty();
-                        if (PropertyAccessorHelper.isCollection(f.getType()))
-                        {
-                            List l = new ArrayList();
-                            l.add(child);
-                            Object oo = getFieldInstance(l, f);
-                            PropertyAccessorHelper.set(o, f, oo);
-                        }
-                        else
-                        {
-                            PropertyAccessorHelper.set(o, f, child);
-                        }
+            // join column name is pk of entity and
+            // If relation is One to Many or MANY TO MANY for associated
+            // entity. Require to fetch all associated entity
 
-                    }
-                }
+            if (relation.getType().equals(ForeignKey.ONE_TO_MANY) || relation.getType().equals(ForeignKey.MANY_TO_MANY))
+            {
+                String query = null;
                 try
                 {
-                    PropertyAccessorHelper
-                            .set(child, objectGraph.getBidirectionalProperty(),
-                                    PropertyAccessorHelper.isCollection(objectGraph.getBidirectionalProperty()
-                                            .getType()) ? getFieldInstance(obj, objectGraph.getBidirectionalProperty())
-                                            : e.getEntity());
+                    String id = PropertyAccessorHelper.getId(child, childMetadata);
+                    List<Object> results = null;
+
+                    if (useSecondryIndex(origMetadata.getPersistenceUnit()))
+                    {
+                        results = client.find(objectGraph.getfKeyName(), id, origMetadata);
+                    }
+                    else
+                    {
+                        query = getQuery(DocumentIndexer.PARENT_ID_CLASS, child.getClass().getCanonicalName()
+                                .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, id);
+                        Map<String, String> keys = client.getIndexManager().search(query);
+                        Set<String> uqSet = new HashSet<String>(keys.values());
+                        results = new ArrayList<Object>();
+                        for (String rowKey : uqSet)
+                        {
+                            results.add(client.find(e.getEntity().getClass(), origMetadata, rowKey, null));
+                        }
+                    }
+
+                    if (results != null)
+                    {
+                        obj.addAll(results);
+                    }
                 }
                 catch (PropertyAccessException ex)
                 {
                     log.error("error on handling bi direction:" + ex.getMessage());
                     throw new QueryHandlerException(ex.getMessage());
                 }
+
+                // In case of other parent object found for given
+                // bidirectional.
+                for (Object o : obj)
+                {
+                    Field f = objectGraph.getProperty();
+                    if (PropertyAccessorHelper.isCollection(f.getType()))
+                    {
+                        List l = new ArrayList();
+                        l.add(child);
+                        Object oo = getFieldInstance(l, f);
+                        PropertyAccessorHelper.set(o, f, oo);
+                    }
+                    else
+                    {
+                        PropertyAccessorHelper.set(o, f, child);
+                    }
+
+                }
+            }
+            try
+            {
+                PropertyAccessorHelper
+                        .set(child,
+                                objectGraph.getBidirectionalProperty(),
+                                PropertyAccessorHelper.isCollection(objectGraph.getBidirectionalProperty().getType()) ? getFieldInstance(
+                                        obj, objectGraph.getBidirectionalProperty()) : e.getEntity());
+            }
+            catch (PropertyAccessException ex)
+            {
+                log.error("error on handling bi direction:" + ex.getMessage());
+                throw new QueryHandlerException(ex.getMessage());
+            }
         }
     }
-
 
     protected void onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
     {
@@ -368,7 +374,7 @@ public class AbstractEntityReader
             throw new QueryHandlerException(e.getMessage());
         }
     }
-    
+
     protected void transform(EntityMetadata m, List<EnhanceEntity> ls, List resultList)
     {
         for (Object r : resultList)
@@ -377,7 +383,6 @@ public class AbstractEntityReader
             ls.add(e);
         }
     }
-
 
     protected Set<String> fetchDataFromLucene(Client client)
     {
@@ -388,7 +393,6 @@ public class AbstractEntityReader
         Set<String> rSet = new HashSet<String>(results.values());
         return rSet;
     }
-
 
     /**
      * Gets the id.
@@ -412,66 +416,67 @@ public class AbstractEntityReader
 
     }
 
-    
-    private void computeJoinTableRelations(Object entity, EntityMetadata entityMetadata, EntitySaveGraph objectGraph, PersistenceDelegator delegator, Relation relation)
+    private void computeJoinTableRelations(Object entity, EntityMetadata entityMetadata, EntitySaveGraph objectGraph,
+            PersistenceDelegator delegator, Relation relation)
     {
-//        Relation relation = entityMetadata.getRelation(objectGraph.getProperty().getName());
-//
-//        if (relation.isRelatedViaJoinTable())
-//        {
+        // Relation relation =
+        // entityMetadata.getRelation(objectGraph.getProperty().getName());
+        //
+        // if (relation.isRelatedViaJoinTable())
+        // {
 
-            JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
-            String joinTableName = jtMetadata.getJoinTableName();
+        JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
+        String joinTableName = jtMetadata.getJoinTableName();
 
-            Set<String> joinColumns = jtMetadata.getJoinColumns();
-            Set<String> inverseJoinColumns = jtMetadata.getInverseJoinColumns();
+        Set<String> joinColumns = jtMetadata.getJoinColumns();
+        Set<String> inverseJoinColumns = jtMetadata.getInverseJoinColumns();
 
-            String joinColumnName = (String) joinColumns.toArray()[0];
-            String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
+        String joinColumnName = (String) joinColumns.toArray()[0];
+        String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
 
-            EntityMetadata relMetadata = delegator.getMetadata(objectGraph.getChildClass());
+        EntityMetadata relMetadata = delegator.getMetadata(objectGraph.getChildClass());
 
-            Client pClient = delegator.getClient(entityMetadata);
-            List<?> foreignKeys = pClient.getForeignKeysFromJoinTable(joinTableName, joinColumnName,
-                    inverseJoinColumnName, relMetadata, objectGraph);
+        Client pClient = delegator.getClient(entityMetadata);
+        List<?> foreignKeys = pClient.getForeignKeysFromJoinTable(joinTableName, joinColumnName, inverseJoinColumnName,
+                relMetadata, objectGraph);
 
-            List childrenEntities = new ArrayList();
-            for (Object foreignKey : foreignKeys)
-            {
-                try
-                {
-                    EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
-                    Client childClient = delegator.getClient(childMetadata);
-                    Object child = childClient.find(relation.getTargetEntity(), childMetadata, (String) foreignKey, null);
-
-                    childrenEntities.add(child);
-
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
-
-            Field childField = objectGraph.getProperty();
-
+        List childrenEntities = new ArrayList();
+        for (Object foreignKey : foreignKeys)
+        {
             try
             {
-                PropertyAccessorHelper.set(
-                        entity,
-                        childField,
-                        PropertyAccessorHelper.isCollection(childField.getType()) ? getFieldInstance(childrenEntities,
-                                childField) : childrenEntities.get(0));
+                EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
+                Client childClient = delegator.getClient(childMetadata);
+                Object child = childClient.find(relation.getTargetEntity(), childMetadata, (String) foreignKey, null);
+
+                childrenEntities.add(child);
+
             }
-            catch (PropertyAccessException e)
+            catch (Exception e)
             {
                 e.printStackTrace();
             }
+        }
 
-            System.out.println(entity);
+        Field childField = objectGraph.getProperty();
 
-//        }
+        try
+        {
+            PropertyAccessorHelper.set(
+                    entity,
+                    childField,
+                    PropertyAccessorHelper.isCollection(childField.getType()) ? getFieldInstance(childrenEntities,
+                            childField) : childrenEntities.get(0));
+        }
+        catch (PropertyAccessException e)
+        {
+            e.printStackTrace();
+        }
+
+        System.out.println(entity);
+
+        // }
 
     }
-    
+
 }

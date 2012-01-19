@@ -20,40 +20,49 @@ import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * @author Amresh Singh
- *
+ * 
  */
 public class ShortAccessor implements PropertyAccessor<Short>
 {
-
 
     @Override
     public Short fromBytes(byte[] data) throws PropertyAccessException
     {
         if (data == null || data.length != 2)
             return 0x0;
-        return (short) ((0xff & data[0]) << 8 | (0xff & data[1]) << 0);     
-        
-    }
+        return (short) ((0xff & data[0]) << 8 | (0xff & data[1]) << 0);
 
+    }
 
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
-        if(object != null) {
+        if (object != null)
+        {
             Short s = (Short) object;
-            return new byte[] {
-                    (byte)((s >> 8) & 0xff),
-                    (byte)((s >> 0) & 0xff),
-                };
+            return new byte[] { (byte) ((s >> 8) & 0xff), (byte) ((s >> 0) & 0xff), };
         }
-        return null;        
+        return null;
     }
-
 
     @Override
     public String toString(Object object)
     {
         return object.toString();
     }
-    
+
+    @Override
+    public Short fromString(String s) throws PropertyAccessException
+    {
+        try
+        {
+            Short sh = new Short(s);
+            return sh;
+        }
+        catch (NumberFormatException e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
+    }
+
 }

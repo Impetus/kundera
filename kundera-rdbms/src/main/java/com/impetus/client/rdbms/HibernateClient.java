@@ -456,24 +456,22 @@ public class HibernateClient implements Client
         return s.get(clazz, rowId);
     }
 
-
-
-    public List<Object[]> find(String nativeQuery, List<String> relations, Class clazz)
+    public List find(String nativeQuery, List<String> relations, Class clazz)
     {
-//        Session s = getSessionInstance();
-        if(s == null)
+        // Session s = getSessionInstance();
+        List<Object[]> result = new ArrayList<Object[]>();
+        if (s == null)
         {
-          s = sf.openStatelessSession();
-        
-          s.beginTransaction();
+            s = sf.openStatelessSession();
+
+            s.beginTransaction();
         }
         SQLQuery q = s.createSQLQuery(nativeQuery).addEntity(clazz);
-        for(String r : relations)
+        for (String r : relations)
         {
             q.addScalar(r);
         }
 
-        
         return q.list();
     }
 

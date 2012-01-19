@@ -24,40 +24,50 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 
 /**
- * @author vivek.mishra
- *  Interface to provide declarations for methods responsible for entity read operations.(Except queries).
- *  
+ * @author vivek.mishra Interface to provide declarations for methods
+ *         responsible for entity read operations.(Except queries).
+ * 
  */
 public interface EntityReader
 {
 
-    
     /**
-     * Method responsible for reading back entity and relations using secondary indexes(if it holds any relation), else retrieve row keys using
-     * lucene.
-     * @param m                 entity meta data
-     * @param relationNames     relation names
-     * @param isParent          if entity is not holding any relation.
-     * @param client            client instance 
-     * @return                  list of wrapped enhance entities.
+     * Method responsible for reading back entity and relations using secondary
+     * indexes(if it holds any relation), else retrieve row keys using lucene.
+     * 
+     * @param m
+     *            entity meta data
+     * @param relationNames
+     *            relation names
+     * @param isParent
+     *            if entity is not holding any relation.
+     * @param client
+     *            client instance
+     * @return list of wrapped enhance entities.
      */
     List<EnhanceEntity> populateRelation(EntityMetadata m, List<String> relationNames, boolean isParent, Client client);
 
     /**
      * Returns populated entity along with all relational value.
-     * @param e                       enhance entity
-     * @param graphs                  entity graph
-     * @param collectionHolder        collection holder.
-     * @param client                  client 
-     * @param m                       entity meta data
-     * @param persistenceDelegeator   persistence delegator.
-     * @return                        populate entity.  
-     * @throws Exception             
+     * 
+     * @param e
+     *            enhance entity
+     * @param graphs
+     *            entity graph
+     * @param collectionHolder
+     *            collection holder.
+     * @param client
+     *            client
+     * @param m
+     *            entity meta data
+     * @param persistenceDelegeator
+     *            persistence delegator.
+     * @return populate entity.
+     * @throws Exception
      */
-    Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder, 
-                        Client client, EntityMetadata m, PersistenceDelegator persistenceDelegeator) throws Exception;
-    
+    Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder,
+            Client client, EntityMetadata m, PersistenceDelegator persistenceDelegeator) throws Exception;
 
-    EnhanceEntity findById(String primaryKey, EntityMetadata m , List<String> relationNames, Client client);
+    EnhanceEntity findById(String primaryKey, EntityMetadata m, List<String> relationNames, Client client);
 
 }

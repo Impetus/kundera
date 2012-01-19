@@ -20,44 +20,59 @@ import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * @author Amresh Singh
- *
+ * 
  */
 public class FloatAccessor implements PropertyAccessor<Float>
 {
 
-
     @Override
     public Float fromBytes(byte[] data) throws PropertyAccessException
     {
-        if (data == null || data.length != 4) return (float)0x0;
-        
+        if (data == null || data.length != 4)
+            return (float) 0x0;
+
         return Float.intBitsToFloat(toInt(data));
     }
-
 
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
-        return fromInt(Float.floatToRawIntBits((Float)object));
+        return fromInt(Float.floatToRawIntBits((Float) object));
     }
-
 
     @Override
     public String toString(Object object)
     {
         return object.toString();
     }
-    
-    private byte[] fromInt(int data) {
+
+    private byte[] fromInt(int data)
+    {
         return new byte[] { (byte) ((data >> 24) & 0xff), (byte) ((data >> 16) & 0xff), (byte) ((data >> 8) & 0xff),
                 (byte) ((data >> 0) & 0xff), };
     }
-    
-    private int toInt(byte[] data) {
-        if (data == null || data.length != 4) return 0x0;
+
+    private int toInt(byte[] data)
+    {
+        if (data == null || data.length != 4)
+            return 0x0;
 
         return (int) ( // NOTE: type cast not necessary for int
         (0xff & data[0]) << 24 | (0xff & data[1]) << 16 | (0xff & data[2]) << 8 | (0xff & data[3]) << 0);
     }
-    
+
+    @Override
+    public Float fromString(String s) throws PropertyAccessException
+    {
+        try
+        {
+            Float f = new Float(s);
+            return f;
+        }
+        catch (NumberFormatException e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
+    }
+
 }

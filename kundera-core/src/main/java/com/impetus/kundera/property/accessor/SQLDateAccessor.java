@@ -15,30 +15,41 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
+import java.io.UnsupportedEncodingException;
+import java.sql.Date;
+
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
 /**
- * @author Amresh Singh
- * 
+ * @author amresh.singh
+ *
  */
-public class CharAccessor implements PropertyAccessor<Character>
+public class SQLDateAccessor implements PropertyAccessor<Date>
 {
 
     @Override
-    public Character fromBytes(byte[] data) throws PropertyAccessException
+    public Date fromBytes(byte[] b) throws PropertyAccessException
     {
-        if (data == null || data.length != 2)
-            return 0x0;
-
-        return (char) ((0xff & data[0]) << 8 | (0xff & data[1]) << 0);
+        String s;
+        try
+        {
+            s = new String(b, Constants.ENCODING);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
+        
+        return fromString(s);
     }
 
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
-        Character data = (Character) object;
-        return new byte[] { (byte) ((data >> 8) & 0xff), (byte) ((data >> 0) & 0xff), };
+        Date d = (Date) object;
+        return d.toString().getBytes();
     }
 
     @Override
@@ -48,22 +59,10 @@ public class CharAccessor implements PropertyAccessor<Character>
     }
 
     @Override
-    public Character fromString(String s) throws PropertyAccessException
+    public Date fromString(String s) throws PropertyAccessException
     {
-        try
-        {
-            if (s == null || s.length() != 1)
-            {
-                throw new PropertyAccessException("Can't convert String " + s + " to character");
-            }
-
-            Character c = s.charAt(0);
-            return c;
-        }
-        catch (NumberFormatException e)
-        {
-            throw new PropertyAccessException(e.getMessage());
-        }
+        Date d = Date.valueOf(s);
+        return d;
     }
-
+    
 }

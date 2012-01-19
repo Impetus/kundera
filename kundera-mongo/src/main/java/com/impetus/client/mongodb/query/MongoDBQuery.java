@@ -27,7 +27,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.mongodb.MongoDBClient;
-import com.impetus.client.mongodb.MongoDBDataHandler;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.Column;
@@ -37,8 +36,8 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.query.KunderaQuery;
-import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 import com.mongodb.BasicDBObject;
 
@@ -59,7 +58,6 @@ public class MongoDBQuery extends QueryImpl
         this.kunderaQuery = kunderaQuery;
     }
 
-    
     @Override
     public int executeUpdate()
     {
@@ -72,15 +70,18 @@ public class MongoDBQuery extends QueryImpl
         return super.setMaxResults(maxResult);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
      */
-    
 
     @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
-        //TODO : Must refactor client 
+        // TODO : Must refactor client
         try
         {
             return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), getKunderaQuery().getResult(),null);
@@ -89,16 +90,21 @@ public class MongoDBQuery extends QueryImpl
         {
             throw new QueryHandlerException(e.getMessage());
         }
-        
+
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.client.Client, java.util.List, java.util.List, boolean)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client,
+     * java.util.List, java.util.List, boolean)
      */
     @Override
     protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs, List<String> relationNames, boolean isParent)
     {
-        //TODO : required to modify client return relation.
+        // TODO : required to modify client return relation.
         // if it is a parent..then find data related to it only
         // else u need to load for associated fields too.
         List<EnhanceEntity> ls = new ArrayList<EnhanceEntity>();
@@ -116,7 +122,9 @@ public class MongoDBQuery extends QueryImpl
         
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.QueryImpl#getReader()
      */
     @Override
@@ -218,6 +226,5 @@ public class MongoDBQuery extends QueryImpl
         }
         return enclosingDocumentName;
     }
-
 
 }
