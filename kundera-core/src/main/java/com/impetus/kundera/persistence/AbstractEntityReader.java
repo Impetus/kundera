@@ -82,6 +82,7 @@ public class AbstractEntityReader
                 if (relation.isRelatedViaJoinTable())
                 {
                     computeJoinTableRelations(e.getEntity(), m, g, persistenceDelegeator, relation);
+                    //onBiDirection(e, client, g, m, collectionHolder.get(relationalValue), childMetadata, childClient);
                 }
                 else
                 {
@@ -419,11 +420,7 @@ public class AbstractEntityReader
     private void computeJoinTableRelations(Object entity, EntityMetadata entityMetadata, EntitySaveGraph objectGraph,
             PersistenceDelegator delegator, Relation relation)
     {
-        // Relation relation =
-        // entityMetadata.getRelation(objectGraph.getProperty().getName());
-        //
-        // if (relation.isRelatedViaJoinTable())
-        // {
+
         objectGraph.setParentId(getId(entity, entityMetadata));
         JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
         String joinTableName = jtMetadata.getJoinTableName();
@@ -448,7 +445,19 @@ public class AbstractEntityReader
                 EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
                 Client childClient = delegator.getClient(childMetadata);
                 Object child = childClient.find(relation.getTargetEntity(), childMetadata, (String) foreignKey, null);
-
+                
+                if(! objectGraph.isUniDirectional()) {
+                    Field parentField = objectGraph.getBidirectionalProperty();
+                    Object parentValue = null;
+                    
+                    /*if(PropertyAccessorHelper.isCollection(parentField.getType()) {
+                        
+                    } else {
+                        parentValue = entity;
+                    }*/
+                    
+                    PropertyAccessorHelper.set(child, parentField, parentValue);
+                }
                 childrenEntities.add(child);
 
             }
@@ -471,11 +480,8 @@ public class AbstractEntityReader
         catch (PropertyAccessException e)
         {
             e.printStackTrace();
-        }
-
-        System.out.println(entity);
-
-        // }
+        }     
+        
 
     }
 
