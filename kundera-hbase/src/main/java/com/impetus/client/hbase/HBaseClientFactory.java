@@ -7,6 +7,7 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
@@ -38,9 +39,9 @@ public class HBaseClientFactory extends GenericClientFactory
         // Initialize HBase configuration
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(getPersistenceUnit());
 
-        String node = puMetadata.getProperties().getProperty("kundera.nodes");
-        String port = puMetadata.getProperties().getProperty("kundera.port");
-        String poolSize = puMetadata.getProperties().getProperty("kundera.pool.size");
+        String node = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_NODES);
+        String port = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_PORT);
+        String poolSize = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_POOL_SIZE);
 
         if (StringUtils.isEmpty(poolSize))
         {

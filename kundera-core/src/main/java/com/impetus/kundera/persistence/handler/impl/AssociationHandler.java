@@ -19,6 +19,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Set;
 
 import javax.persistence.JoinColumn;
 
@@ -125,7 +127,14 @@ class AssociationHandler
 
         return null;
     }
-
+    
+    /**
+     * Removed association entit(ies) from the enclosing entity
+     * @param entity
+     * @param associationEntity
+     * @param field
+     * @param setNull
+     */
     protected void onDetach(Object entity, Object associationEntity, Field field, boolean setNull)
     {
 
@@ -133,23 +142,32 @@ class AssociationHandler
         {
             if (entity != null)
             {
+                if (entity instanceof Collection<?>)
+                {
+                    Collection<?> entityCollection = (Collection<?>) entity;
+                    for (Object entityObj : entityCollection)
+                    {
+                        PropertyAccessorHelper.set(entityObj, field, setNull || entity == null ? null
+                                : Set.class.isAssignableFrom(field.getType()) ? null:associationEntity.getClass().newInstance());
+                    }
+
+                } else
+                {
                 PropertyAccessorHelper.set(entity, field, setNull || associationEntity == null ? null
                         : associationEntity.getClass().newInstance());
+                }
             }
         }
         catch (PropertyAccessException e)
-        {
-            // TODO Auto-generated catch block
+        {            
             e.printStackTrace();
         }
         catch (InstantiationException e)
-        {
-            // TODO Auto-generated catch block
+        {            
             e.printStackTrace();
         }
         catch (IllegalAccessException e)
-        {
-            // TODO Auto-generated catch block
+        {            
             e.printStackTrace();
         }
     }

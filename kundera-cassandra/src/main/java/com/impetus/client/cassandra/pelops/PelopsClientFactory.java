@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.query.CassandraEntityReader;
 import com.impetus.kundera.KunderaPersistence;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
@@ -55,9 +56,9 @@ public class PelopsClientFactory extends GenericClientFactory
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = persistenceUnitMetadata.getProperties();
-        String contactNodes = (String) props.get("kundera.nodes");
-        String defaultPort = (String) props.get("kundera.port");
-        String keyspace = (String) props.get("kundera.keyspace");
+        String contactNodes = (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         String poolName = PelopsUtils.generatePoolName(getPersistenceUnit());
         if (Pelops.getDbConnPool(poolName) == null)
         {

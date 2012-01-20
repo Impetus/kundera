@@ -15,6 +15,11 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence.handler.impl;
 
+import java.lang.reflect.Field;
+
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.handler.api.MappingHandler;
@@ -57,16 +62,16 @@ public class ManyToManyHandler extends AssociationHandler implements MappingHand
         EntitySaveGraph objectGraph = new EntitySaveGraph(relation.getProperty());
         objectGraph.setChildEntity(associationEntity);
         objectGraph.setParentEntity(entity);
+        
+        Field field = computeDirection(entity, relation.getProperty(), objectGraph, ManyToMany.class);
 
+        onDetach(entity, associationEntity, relation.getProperty(), false);
         if (!objectGraph.isUniDirectional())
-        {
-            // objectGraph.setfKeyName(getJoinColumnName(field));
-            onDetach(entity, associationEntity, relation.getProperty(), false);
-            // onDetach(associationEntity, entity, field, false);
+        {            
+            onDetach(associationEntity, entity, objectGraph.getBidirectionalProperty(), false);
             return objectGraph;
         }
-        int i;
-        onDetach(entity, associationEntity, relation.getProperty(), false);
+        
         objectGraph.setRelatedViaJoinTable(true);
         try
         {

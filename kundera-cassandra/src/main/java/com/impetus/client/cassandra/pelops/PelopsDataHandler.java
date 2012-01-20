@@ -241,7 +241,7 @@ public class PelopsDataHandler extends DataHandler
         {
             columns = new HashSet<Column>(thriftRow.getColumns());
         }
-        if (columns != null && !(columns.size() == 1 && columns.iterator().next() != null))
+        if (columns != null && (columns.size() == 1 ? columns.iterator().next() != null : true))
         {
             for (Column c : thriftRow.getColumns())
             {

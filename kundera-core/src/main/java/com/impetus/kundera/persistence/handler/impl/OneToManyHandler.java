@@ -73,16 +73,16 @@ class OneToManyHandler extends AssociationHandler implements MappingHandler
 
         // objectGraph.setParentClass(PropertyAccessorHelper.getGenericClass(relation.getProperty()));
         // objectGraph.setChildClass(entity.getClass());
-
+        onDetach(entity, associationEntity, relation.getProperty(), false);
         if (!objectGraph.isUniDirectional())
         {
             objectGraph.setfKeyName(getJoinColumnName(field));
-            onDetach(entity, associationEntity, relation.getProperty(), false);
-            // onDetach(associationEntity, entity, field, false);
+            onDetach(associationEntity, entity, objectGraph.getBidirectionalProperty(), false);
+            
+            
             return objectGraph;
         }
-
-        onDetach(entity, associationEntity, relation.getProperty(), false);
+   
         // in case of uni-directional.
         objectGraph.setfKeyName(getJoinColumnName(relation.getProperty()));
         return objectGraph;
