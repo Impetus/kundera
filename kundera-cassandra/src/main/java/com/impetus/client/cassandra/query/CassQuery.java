@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.query;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,10 +29,12 @@ import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.eaio.uuid.UUID;
 import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -39,6 +42,7 @@ import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryImpl;
+import com.impetus.kundera.query.exception.QueryHandlerException;
 
 /**
  * The Class CassQuery.
@@ -85,7 +89,7 @@ public class CassQuery extends QueryImpl implements Query
         if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
         {
 
-            List<IndexClause> ixClause = prepareIndexClause();
+            List<IndexClause> ixClause = prepareIndexClause(m);
 
             result = ((PelopsClient) client).find(ixClause, m, false, null);
         }
@@ -97,8 +101,9 @@ public class CassQuery extends QueryImpl implements Query
         return result;
     }
 
-    private List<IndexClause> prepareIndexClause()
+    private List<IndexClause> prepareIndexClause(EntityMetadata m)
     {
+        IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, Integer.SIZE);
         List<IndexClause> clauses = new ArrayList<IndexClause>();
         List<IndexExpression> expr = new ArrayList<IndexExpression>();
         for (Object o : getKunderaQuery().getFilterClauseQueue())
@@ -109,28 +114,29 @@ public class CassQuery extends QueryImpl implements Query
                 String fieldName = getColumnName(clause.getProperty());
                 String condition = clause.getCondition();
                 String value = clause.getValue();
-                IndexClause indexClause = Selector.newIndexClause(fieldName, Integer.SIZE);
-                expr.add(Selector.newIndexExpression(fieldName, getOperator(condition),
-                        Bytes.fromByteArray(value.getBytes())));
-                indexClause.setExpressions(expr);
-                clauses.add(indexClause);
+                expr.add(Selector.newIndexExpression(fieldName, getOperator(condition),getBytesValue(fieldName, m, value)));
             }
-/*            else
+            else
             {
                 // Case of AND and OR clause.
                 String opr = o.toString();
                 if (opr.equalsIgnoreCase("or"))
                 {
-                    indexClause.setExpressions(expr);
+/*                    indexClause.setExpressions(expr);
                     clauses.add(indexClause);
-                    indexClause = Selector.newIndexClause(Bytes.EMPTY, Integer.SIZE, null);
+                    indexClause = Selector.newIndexClause(Bytes.EMPTY, Integer.SIZE);
                     expr = new ArrayList<IndexExpression>();
-                }
+*/                 
+                    log.error("Support for OR clause is not enabled with in cassandra");
+                    throw new QueryHandlerException("unsupported clause " + opr + " for cassandra");
+                 }
 
                 // TODO need to handle scenario for AND + OR .
 
             }
-*/        }
+        }
+        indexClause.setExpressions(expr);
+        clauses.add(indexClause);
 
         return clauses;
     }
@@ -148,7 +154,7 @@ public class CassQuery extends QueryImpl implements Query
             List<String> relationNames, boolean isParent)
     {
         log.debug("on handleAssociations rdbms query");
-        List<IndexClause> ixClause = prepareIndexClause();
+        List<IndexClause> ixClause = prepareIndexClause(m);
 
         ((CassandraEntityReader) getReader()).setConditions(ixClause);
 
@@ -202,4 +208,44 @@ public class CassQuery extends QueryImpl implements Query
         return reader;
     }
 
+    
+    private Bytes getBytesValue(String fieldName, EntityMetadata m, String value)
+    {
+        Column col = m.getColumn(fieldName);
+        Field f = col.getField();
+        
+       if(f.getType() != null)
+       {
+        if(f.getType().isAssignableFrom(String.class))
+        {
+            return Bytes.fromByteArray(value.getBytes());
+        } else if(f.getType().isAssignableFrom(Integer.class))
+        {
+            return Bytes.fromInt(Integer.parseInt(value));
+        } else if(f.getType().isAssignableFrom(Long.class))
+        {
+            return Bytes.fromLong(Long.parseLong(value));
+        } else if(f.getType().isAssignableFrom(Boolean.class))
+        {
+            return Bytes.fromBoolean(Boolean.valueOf(value));
+        } else if(f.getType().isAssignableFrom(Double.class))
+        {
+            return Bytes.fromDouble(Double.valueOf(value));
+        } else if(f.getType().isAssignableFrom(java.util.UUID.class))
+        {
+            return Bytes.fromUuid(value);
+        } else if(f.getType().isAssignableFrom(Float.class))
+        {
+            return Bytes.fromFloat(Float.valueOf(value));
+        } else
+        {
+            log.error("Error while handling data type for:" + fieldName);
+            throw new QueryHandlerException("unsupported data type:" + f.getType());
+        }
+       }else
+       {
+           log.error("Error while handling data type for:" + fieldName);
+           throw new QueryHandlerException("field type is null for:" + fieldName);
+       }
+    }
 }
