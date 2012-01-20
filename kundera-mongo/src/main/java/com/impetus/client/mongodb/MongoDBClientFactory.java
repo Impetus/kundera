@@ -9,6 +9,7 @@ import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
@@ -62,10 +63,10 @@ public class MongoDBClientFactory extends GenericClientFactory
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = persistenceUnitMetadata.getProperties();
-        String contactNode = (String) props.get("kundera.nodes");
-        String defaultPort = (String) props.get("kundera.port");
-        String keyspace = (String) props.get("kundera.keyspace");
-        String poolSize = props.getProperty("kundera.pool.size");
+        String contactNode = (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        String poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE);
 
         Mongo mongo = null;
         logger.info("Connecting to mongodb at " + contactNode + " on port " + defaultPort);

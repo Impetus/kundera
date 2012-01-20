@@ -50,7 +50,7 @@ public class ManyToOneHandler extends AssociationHandler implements MappingHandl
         onDetach(entity, associationEntity, relation.getProperty(), true);
         if (!objectGraph.isUniDirectional())
         {
-            onDetach(associationEntity, entity, field, true);
+            onDetach(associationEntity, entity, objectGraph.getBidirectionalProperty(), true);
         }
         return objectGraph;
     }
