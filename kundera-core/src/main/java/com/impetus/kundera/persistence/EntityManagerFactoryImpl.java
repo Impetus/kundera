@@ -111,6 +111,14 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
                     + e.getMessage());
         }
 
+        // Invoke Client Loaders
+        logger.info("Loading Client(s) For Persistence Unit(s) " + persistenceUnit);
+
+        for (String pu : persistenceUnits)
+        {
+            ClientResolver.getClientFactory(pu).load(pu);
+        }
+        
         logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
 

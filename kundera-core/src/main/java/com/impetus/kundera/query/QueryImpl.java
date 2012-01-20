@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
@@ -138,6 +139,7 @@ public abstract class QueryImpl implements Query
     public List<?> getResultList()
     {
         log.info("On getResultList() executing query: " + query);
+        List results = null;
         try
         {
             EntityMetadata m = kunderaQuery.getEntityMetadata();
@@ -153,11 +155,11 @@ public abstract class QueryImpl implements Query
             if (relationNames.isEmpty())
             {
                 // There is no association so simply return list of entities.
-                return populateEntities(m, client);
+                results = populateEntities(m, client);
             }
             else
             {
-                return handleAssociations(m, client, graphs, relationNames, isParent);
+                results = handleAssociations(m, client, graphs, relationNames, isParent);
             }
 
         }
@@ -180,7 +182,7 @@ public abstract class QueryImpl implements Query
           // if entity is not parent then pass retrieved relation key value to
           // specific client for find by id.
 
-        // return null;
+        return results !=null && !results.isEmpty()?results:null;
 
     }
 
@@ -693,19 +695,6 @@ public abstract class QueryImpl implements Query
     }
 
     /**
-     * Use secondry index.
-     * 
-     * @param persistenceUnit
-     *            the persistence unit
-     * @return true, if successful
-     */
-    protected boolean useSecondryIndex(String persistenceUnit)
-    {
-        ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
-        return clientMetadata.isUseSecondryIndex();
-    }
-
-    /**
      * Gets the lucene query from jpa query.
      * 
      * @return the lucene query from jpa query
@@ -846,6 +835,25 @@ public abstract class QueryImpl implements Query
             log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
             throw new QueryHandlerException(e.getMessage());
         }
+    }
+
+    /**
+     * Returns column name from the filter property which is in the form
+     * dbName.columnName
+     * 
+     * @param filterProperty
+     * @return
+     */
+    protected String getColumnName(String filterProperty)
+    {
+        StringTokenizer st = new StringTokenizer(filterProperty, ".");
+        String columnName = "";
+        while (st.hasMoreTokens())
+        {
+            columnName = st.nextToken();
+        }
+
+        return columnName;
     }
 
     /**

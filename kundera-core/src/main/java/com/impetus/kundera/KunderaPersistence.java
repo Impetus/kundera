@@ -94,13 +94,6 @@ public class KunderaPersistence implements PersistenceProvider
 
         (new ApplicationLoader()).load(persistenceUnits);
 
-        // Invoke Client Loaders
-        logger.info("Loading Client(s) For Persistence Unit(s) " + persistenceUnit);
-        for (String pu : persistenceUnits)
-        {
-            ClientResolver.getClientFactory(pu).load(pu);
-        }
-
     }
 
     @Override

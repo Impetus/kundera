@@ -34,6 +34,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Query;
+import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -154,7 +155,7 @@ public class PersistenceDelegator
                 if (!found)
                 {
                     throw new PersistenceException(
-                            "Invalid persistence unit configuration! should be intended for RDBMS");
+                            "Invalid persistence unit configuration! should be intended for RDBMS, else must annotate @Table(name = @table_col_family_name, schema = @keyspace@pu");
                 }
 
             }
@@ -317,7 +318,7 @@ public class PersistenceDelegator
                 // fire PreUpdate events
                 getEventDispatcher().fireEventListeners(m, o, PreUpdate.class);
 
-                persist(o);
+                persist(o.getEntity());
 
                 // fire PreUpdate events
                 getEventDispatcher().fireEventListeners(m, o, PostUpdate.class);
@@ -354,7 +355,7 @@ public class PersistenceDelegator
                 // If parent entity is marked for delete
             }
             getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
-            log.debug("Data persisted successfully for entity : " + e.getClass());
+            log.debug("Data removed successfully for entity : " + e.getClass());
         }
 
         catch (Exception exp)
@@ -642,13 +643,13 @@ public class PersistenceDelegator
 
             objectGraph.setParentId(getId(parentEntity, metadata));
 
-            if (getSession().lookup(parentEntity.getClass(), objectGraph.getParentId()) == null)
-            {
+//            if (getSession().lookup(parentEntity.getClass(), objectGraph.getParentId()) == null)
+//            {
                 Client pClient = getClient(metadata);
                 pClient.persist(objectGraph, metadata);
                 session.store(objectGraph.getParentId(), objectGraph.getParentEntity());
 
-            }
+//            }
         }
 
         // Persist child entity(ies)
@@ -733,12 +734,12 @@ public class PersistenceDelegator
 
             String id = getId(child, metadata);
             objectGraph.setChildId(id);
-            if (getSession().lookup(child.getClass(), id) == null)
-            {
+//            if (getSession().lookup(child.getClass(), id) == null)
+//            {
                 Client chClient = getClient(metadata);
                 chClient.persist(child, objectGraph, metadata);
                 session.store(id, child);
-            }
+//            }
         }
         else
         {

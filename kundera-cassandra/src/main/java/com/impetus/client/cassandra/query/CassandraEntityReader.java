@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
@@ -97,7 +98,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         List<EnhanceEntity> ls = null;
         if (!isParent)
         {
-            if (useSecondryIndex(m.getPersistenceUnit()))
+            if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
             {
                 ls = ((PelopsClient) client).find(m, relationNames, this.conditions);
             }
@@ -120,7 +121,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         }
         else
         {
-            if (useSecondryIndex(m.getPersistenceUnit()))
+            if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
             {
                 // in case need to search on secondry columns and it is not set
                 // to true!

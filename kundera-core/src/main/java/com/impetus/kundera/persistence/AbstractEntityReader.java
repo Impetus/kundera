@@ -30,11 +30,9 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.index.DocumentIndexer;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.ClientMetadata;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
@@ -131,7 +129,7 @@ public class AbstractEntityReader
                         // create a finder and pass metadata, relationName,
                         // relationalValue.
                         List<Object> childs = null;
-                        if (useSecondryIndex(childMetadata.getPersistenceUnit()))
+                        if (MetadataUtils.useSecondryIndex(childMetadata.getPersistenceUnit()))
                         {
                             childs = childClient.find(relationName, relationalValue, childMetadata);
                             // pass this entity id as a value to be searched for
@@ -220,12 +218,6 @@ public class AbstractEntityReader
         return chids;
     }
 
-    protected boolean useSecondryIndex(String persistenceUnit)
-    {
-        ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
-        return clientMetadata.isUseSecondryIndex();
-    }
-
     /**
      * Returns lucene based query.
      * 
@@ -298,7 +290,7 @@ public class AbstractEntityReader
                     String id = PropertyAccessorHelper.getId(child, childMetadata);
                     List<Object> results = null;
 
-                    if (useSecondryIndex(origMetadata.getPersistenceUnit()))
+                    if (MetadataUtils.useSecondryIndex(origMetadata.getPersistenceUnit()))
                     {
                         results = client.find(objectGraph.getfKeyName(), id, origMetadata);
                     }

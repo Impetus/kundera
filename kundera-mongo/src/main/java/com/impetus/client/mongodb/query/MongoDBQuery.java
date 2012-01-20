@@ -180,31 +180,12 @@ public class MongoDBQuery extends QueryImpl
 
 
     /**
-     * Returns column name from the filter property which is in the form
-     * dbName.columnName
-     * 
-     * @param filterProperty
-     * @return
-     */
-    public String getColumnName(String filterProperty)
-    {
-        StringTokenizer st = new StringTokenizer(filterProperty, ".");
-        String columnName = "";
-        while (st.hasMoreTokens())
-        {
-            columnName = st.nextToken();
-        }
-
-        return columnName;
-    }
-
-    /**
      * @param m
      * @param columnName
      * @param embeddedDocumentName
      * @return
      */
-    public String getEnclosingDocumentName(EntityMetadata m, String columnName)
+    private String getEnclosingDocumentName(EntityMetadata m, String columnName)
     {
         String enclosingDocumentName = null;
         if (!m.getColumnFieldNames().contains(columnName))
