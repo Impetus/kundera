@@ -139,6 +139,7 @@ public abstract class QueryImpl implements Query
     public List<?> getResultList()
     {
         log.info("On getResultList() executing query: " + query);
+        List results = null;
         try
         {
             EntityMetadata m = kunderaQuery.getEntityMetadata();
@@ -154,11 +155,11 @@ public abstract class QueryImpl implements Query
             if (relationNames.isEmpty())
             {
                 // There is no association so simply return list of entities.
-                return populateEntities(m, client);
+                results = populateEntities(m, client);
             }
             else
             {
-                return handleAssociations(m, client, graphs, relationNames, isParent);
+                results = handleAssociations(m, client, graphs, relationNames, isParent);
             }
 
         }
@@ -181,7 +182,7 @@ public abstract class QueryImpl implements Query
           // if entity is not parent then pass retrieved relation key value to
           // specific client for find by id.
 
-        // return null;
+        return results !=null && !results.isEmpty()?results:null;
 
     }
 

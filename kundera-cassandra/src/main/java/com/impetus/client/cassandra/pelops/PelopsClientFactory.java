@@ -28,6 +28,8 @@ public class PelopsClientFactory extends GenericClientFactory
 
     private EntityReader reader;
 
+    private String poolName;
+
     @Override
     protected void initializeClient()
     {
@@ -58,7 +60,7 @@ public class PelopsClientFactory extends GenericClientFactory
         String contactNodes = (String) props.get("kundera.nodes");
         String defaultPort = (String) props.get("kundera.port");
         String keyspace = (String) props.get("kundera.keyspace");
-        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit());
+        poolName = PelopsUtils.generatePoolName(getPersistenceUnit());
         if (Pelops.getDbConnPool(poolName) == null)
         {
             Cluster cluster = new Cluster(contactNodes,
@@ -85,6 +87,7 @@ public class PelopsClientFactory extends GenericClientFactory
     public void unload(String... persistenceUnits)
     {
         indexManager.close();
+        Pelops.removePool(poolName);
         Pelops.shutdown();
 
     }
