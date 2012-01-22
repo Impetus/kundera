@@ -103,7 +103,7 @@ public class CassQuery extends QueryImpl implements Query
 
     private List<IndexClause> prepareIndexClause(EntityMetadata m)
     {
-        IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, Integer.SIZE);
+        IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, 10000);
         List<IndexClause> clauses = new ArrayList<IndexClause>();
         List<IndexExpression> expr = new ArrayList<IndexExpression>();
         for (Object o : getKunderaQuery().getFilterClauseQueue())
