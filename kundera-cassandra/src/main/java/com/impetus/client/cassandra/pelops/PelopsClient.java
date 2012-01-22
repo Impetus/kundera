@@ -555,9 +555,9 @@ public class PelopsClient implements Client
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
-        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
+        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         List<Object> entities = null;
-        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, Integer.MAX_VALUE,
+        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000,
                 Selector.newIndexExpression(colName, IndexOperator.EQ, Bytes.fromByteArray(colValue.getBytes())));
         Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
                 ConsistencyLevel.ONE);
