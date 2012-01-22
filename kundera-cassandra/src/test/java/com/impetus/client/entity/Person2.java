@@ -37,7 +37,7 @@ import com.impetus.kundera.annotations.Index;
 @Entity
 @Table(name = "Person", schema = "Blog")
 @Index(index = false)
-public class Person implements Serializable
+public class Person2 implements Serializable
 {
 
     @Id
@@ -56,7 +56,7 @@ public class Person implements Serializable
     // (targetEntity=Post.class)
     private Set<Post> post = new HashSet<Post>();
 
-    public Person()
+    public Person2()
     {
 
     }

@@ -41,19 +41,19 @@ public class Profile
     private String blog;
 
     @OneToOne(cascade = { CascadeType.ALL })
-    private Person person;
+    private Person2 person;
 
     public Profile()
     {
 
     }
 
-    public Person getPerson()
+    public Person2 getPerson()
     {
         return person;
     }
 
-    public void setPerson(Person person)
+    public void setPerson(Person2 person)
     {
         this.person = person;
     }

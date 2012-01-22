@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -258,10 +259,16 @@ public class HibernateClient implements Client
     public String persist(EntitySaveGraph entityGraph, EntityMetadata metadata)
     {
 
-        Session s = getSessionInstance();
-        Transaction tx = s.beginTransaction();
-        s.persist(entityGraph.getParentEntity());
-        tx.commit();
+        Session s;
+		Transaction tx;
+		try {
+			s = getSessionInstance();
+			tx = s.beginTransaction();
+			s.persist(entityGraph.getParentEntity());
+		} catch (org.hibernate.exception.ConstraintViolationException e) {
+			e.printStackTrace();
+		}
+
 
         // If entity has a parent entity, update foreign key
         if (entityGraph.getRevFKeyName() != null)
