@@ -70,6 +70,8 @@ public class EntitySaveGraph
     private Field property;
 
     private Field bidirectionalProperty;
+    
+    private boolean isswapped;
 
     /**
      * @param type
@@ -377,4 +379,21 @@ public class EntitySaveGraph
         this.bidirectionalProperty = bidirectionalProperty;
     }
 
+    /**
+     * @return the isswapped
+     */
+    public boolean isIsswapped()
+    {
+        return isswapped;
+    }
+
+    /**
+     * @param isswapped the isswapped to set
+     */
+    public void setIsswapped(boolean isswapped)
+    {
+        this.isswapped = isswapped;
+    }
+
+    
 }

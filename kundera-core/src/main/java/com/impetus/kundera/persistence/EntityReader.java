@@ -62,6 +62,7 @@ public interface EntityReader
      *            entity meta data
      * @param persistenceDelegeator
      *            persistence delegator.
+
      * @return populate entity.
      * @throws Exception
      */

@@ -69,20 +69,21 @@ public class AbstractEntityReader
         Client childClient = null;
         Class<?> childClazz = null;
         EntityMetadata childMetadata = null;
-
-        if (e.getRelations() != null)
-        {
             // means it is holding associations
             // read graph for all the association
             for (EntitySaveGraph g : graphs)
+        {
+            Relation relation = m.getRelation(g.getProperty().getName());
+            if (relation.isRelatedViaJoinTable())
             {
-                Relation relation = m.getRelation(g.getProperty().getName());
-                if (relation.isRelatedViaJoinTable())
-                {
-                    computeJoinTableRelations(e.getEntity(), m, g, persistenceDelegeator, relation);
-                    //onBiDirection(e, client, g, m, collectionHolder.get(relationalValue), childMetadata, childClient);
-                }
-                else
+                computeJoinTableRelations(e.getEntity(), m, g, persistenceDelegeator, relation);
+                // onBiDirection(e, client, g, m,
+                // collectionHolder.get(relationalValue), childMetadata,
+                // childClient);
+            }
+            else
+            {
+                if (e.getEntity().getClass().equals(g.getChildClass()))
                 {
                     String relationName = g.getfKeyName();
                     Object relationalValue = e.getRelations().get(relationName);
@@ -100,21 +101,12 @@ public class AbstractEntityReader
                     }
 
                     onBiDirection(e, client, g, m, collectionHolder.get(relationalValue), childMetadata, childClient);
-                    PropertyAccessorHelper.set(e.getEntity(), f, collectionHolder.get(relationalValue));
-                }
-                // this is a single place holder for bi direction.
-            }
-        }
-        else
-        {
-            // means it is parent
-            // Find child entities by passing parent key and parent value.
-            for (EntitySaveGraph g : graphs)
-            {
-                Relation relation = m.getRelation(g.getProperty().getName());
-                if (relation.isRelatedViaJoinTable())
-                {
-                    computeJoinTableRelations(e.getEntity(), m, g, persistenceDelegeator, relation);
+
+                    List<Object> collection = new ArrayList<Object>(1);
+                    collection.add(collectionHolder.get(relationalValue));
+                    PropertyAccessorHelper.set(e.getEntity(), f,
+                            PropertyAccessorHelper.isCollection(f.getType()) ? getFieldInstance(collection, f)
+                                    : collection.get(0));
                 }
                 else
                 {
@@ -166,7 +158,9 @@ public class AbstractEntityReader
 
                     onReflect(e.getEntity(), f, (List) collectionHolder.get(relationalValue));
                 }
+
             }
+            // this is a single place holder for bi direction.
         }
         return e.getEntity();
     }

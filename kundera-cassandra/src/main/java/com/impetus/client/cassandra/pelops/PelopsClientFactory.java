@@ -89,9 +89,7 @@ public class PelopsClientFactory extends GenericClientFactory
     public void unload(String... persistenceUnits)
     {
         indexManager.close();
-        Pelops.removePool(poolName);
-        Pelops.shutdown();
-
+      //  Pelops.shutdown();
     }
 
 }

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.rdbms.query;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.persistence.PersistenceException;
 
@@ -33,12 +35,15 @@ import com.impetus.client.rdbms.HibernateClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.Column;
+import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class RDBMSEntityReader.
  * 
@@ -78,7 +83,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
      */
     public RDBMSEntityReader()
     {
-        
+
     }
 
     /*
@@ -141,8 +146,17 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         return ls;
     }
 
-    private List<EnhanceEntity> populateEnhanceEntities(EntityMetadata m, List<String> relationNames, 
-                                                        Client client, String sqlQuery)
+    /**
+     * Populate enhance entities.
+     *
+     * @param m the m
+     * @param relationNames the relation names
+     * @param client the client
+     * @param sqlQuery the sql query
+     * @return the list
+     */
+    private List<EnhanceEntity> populateEnhanceEntities(EntityMetadata m, List<String> relationNames, Client client,
+            String sqlQuery)
     {
         List<EnhanceEntity> ls;
         List<Object[]> result = ((HibernateClient) client).find(sqlQuery, relationNames, m.getEntityClazz());
@@ -184,6 +198,20 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             queryBuilder.append(".");
             queryBuilder.append(column);
         }
+
+        // Handle embedded columns, add them to list.
+        List<EmbeddedColumn> embeddedColumns = entityMetadata.getEmbeddedColumnsAsList();
+        for (EmbeddedColumn embeddedCol : embeddedColumns)
+        {
+            for (Column column : embeddedCol.getColumns())
+            {
+                queryBuilder.append(", ");
+                queryBuilder.append(aliasName);
+                queryBuilder.append(".");
+                queryBuilder.append(column.getName());
+            }
+        }
+
         for (String relation : relations)
         {
             queryBuilder.append(", ");
@@ -208,6 +236,9 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                 if (o instanceof FilterClause)
                 {
                     FilterClause clause = ((FilterClause) o);
+                    String fieldName = getColumnName(clause.getProperty());
+                    boolean isString = isStringProperty(entityMetadata, fieldName);
+                    appendStringPrefix(queryBuilder, isString);
                     queryBuilder.append(StringUtils.replace(clause.getProperty(),
                             clause.getProperty().substring(0, clause.getProperty().indexOf(".")), aliasName));
                     queryBuilder.append(" ");
@@ -218,8 +249,9 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                         queryBuilder.append("%");
                     }
                     queryBuilder.append(" ");
-                    queryBuilder.append(clause.getValue());
 
+                    queryBuilder.append(clause.getValue());
+                    appendStringPrefix(queryBuilder, isString);
                 }
                 else
                 {
@@ -232,27 +264,46 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
         else
         {
-            
+
             queryBuilder.append(aliasName);
             queryBuilder.append(".");
             queryBuilder.append(entityMetadata.getIdColumn().getName());
             queryBuilder.append(" ");
             queryBuilder.append("IN(");
             int count = 0;
+            Column col = entityMetadata.getIdColumn();
+            boolean isString = col.getField().getType().isAssignableFrom(String.class);
             for (String key : primaryKeys)
             {
+                appendStringPrefix(queryBuilder, isString);
                 queryBuilder.append(key);
+                appendStringPrefix(queryBuilder, isString);
                 if (++count != primaryKeys.size())
                 {
                     queryBuilder.append(",");
-                } else {
+                }
+                else
+                {
                     queryBuilder.append(")");
                 }
             }
-            
 
         }
         return queryBuilder.toString();
+    }
+
+    /**
+     * Append string prefix.
+     *
+     * @param queryBuilder the query builder
+     * @param isString the is string
+     */
+    private void appendStringPrefix(StringBuilder queryBuilder, boolean isString)
+    {
+        if (isString)
+        {
+            queryBuilder.append("'");
+        }
     }
 
     /**
@@ -297,19 +348,25 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         return relationVal;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.persistence.EntityReader#findById(java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, java.util.List, com.impetus.kundera.client.Client)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.EntityReader#findById(java.lang.String,
+     * com.impetus.kundera.metadata.model.EntityMetadata, java.util.List,
+     * com.impetus.kundera.client.Client)
      */
     @Override
     public EnhanceEntity findById(String primaryKey, EntityMetadata m, List<String> relationNames, Client client)
     {
-        if(relationNames != null && !relationNames.isEmpty())
+        if (relationNames != null && !relationNames.isEmpty())
         {
             Set<String> keys = new HashSet<String>(1);
             keys.add(primaryKey);
             String query = getSqlQueryFromJPA(m, relationNames, keys);
             return populateEnhanceEntities(m, relationNames, client, query).get(0);
-        } else
+        }
+        else
         {
             Object o;
             try
@@ -320,8 +377,46 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             {
                 throw new PersistenceException(e.getMessage());
             }
-            return o != null? new EnhanceEntity(o, getId(o, m), null):null;
+            return o != null ? new EnhanceEntity(o, getId(o, m), null) : null;
         }
     }
 
+    /**
+     * Returns column name from the filter property which is in the form
+     * dbName.columnName
+     *
+     * @param filterProperty the filter property
+     * @return the column name
+     */
+    private String getColumnName(String filterProperty)
+    {
+        StringTokenizer st = new StringTokenizer(filterProperty, ".");
+        String columnName = "";
+        while (st.hasMoreTokens())
+        {
+            columnName = st.nextToken();
+        }
+
+        return columnName;
+    }
+
+    /**
+     * Checks if is string property.
+     *
+     * @param m the m
+     * @param fieldName the field name
+     * @return true, if is string property
+     */
+    private boolean isStringProperty(EntityMetadata m, String fieldName)
+    {
+        Column col = m.getColumn(fieldName);
+        if (col != null)
+        {
+            Field f = col.getField();
+            return f != null ? f.getType().isAssignableFrom(String.class) : false;
+        }
+
+        return false;
+
+    }
 }

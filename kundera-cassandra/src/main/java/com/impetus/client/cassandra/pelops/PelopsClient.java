@@ -157,10 +157,10 @@ public class PelopsClient implements Client
         List<E> results = new ArrayList<E>();
         for (String rowKey : rowIds)
         {
-            List<E> r = (List<E>) find(entityClass, entityMetadata, rowKey, null);
+            E r = (E) find(entityClass, entityMetadata, rowKey, null);
             if (r != null)
             {
-                results.addAll(r);
+                results.add(r);
             }
         }
 

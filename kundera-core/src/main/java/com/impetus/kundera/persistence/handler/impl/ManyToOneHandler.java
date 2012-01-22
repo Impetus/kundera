@@ -52,6 +52,7 @@ public class ManyToOneHandler extends AssociationHandler implements MappingHandl
         {
             onDetach(associationEntity, entity, objectGraph.getBidirectionalProperty(), true);
         }
+        objectGraph.setIsswapped(true);
         return objectGraph;
     }
 
