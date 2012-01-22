@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,7 +33,7 @@ public class KunderaMetadata
     private ApplicationMetadata applicationMetadata;
 
     /* Client specific persistence unit specific metadata */
-    private Map<String, ClientMetadata> clientMetadata = new ConcurrentHashMap<String, ClientMetadata>();
+    private Map<String, ClientMetadata> clientMetadata = new HashMap<String, ClientMetadata>();
 
     public static final KunderaMetadata INSTANCE = new KunderaMetadata();
 

@@ -239,7 +239,7 @@ public class MetadataUtils
     public static boolean useSecondryIndex(String persistenceUnit)
     {
         ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
-        return clientMetadata.isUseSecondryIndex();
+        return clientMetadata != null? clientMetadata.isUseSecondryIndex() : false;
     }
 
 }
