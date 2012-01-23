@@ -59,6 +59,11 @@ This release includes bug fixes and the following new features compared to initi
 
 [Downloads] (https://github.com/impetus-opensource/Kundera/wiki/Kundera-releases "Downloads")
 
+Builds
+========
+This project is  ![built-and-tested-by-cloudbees](http://cloud.github.com/downloads/impetus-opensource/Kundera/cloud_bees.png).
+
+The public CI instance is available at https://impetus-opensource.ci.cloudbees.com/job/kundera-github/
 
 About Us
 ========
