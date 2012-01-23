@@ -76,10 +76,8 @@ public class AbstractEntityReader
             Relation relation = m.getRelation(g.getProperty().getName());
             if (relation.isRelatedViaJoinTable())
             {
-                computeJoinTableRelations(e.getEntity(), m, g, persistenceDelegeator, relation);
-                // onBiDirection(e, client, g, m,
-                // collectionHolder.get(relationalValue), childMetadata,
-                // childClient);
+                computeJoinTableRelations(e, client, m, g, persistenceDelegeator, relation);              
+               
             }
             else
             {
@@ -290,9 +288,19 @@ public class AbstractEntityReader
                     }
                     else
                     {
+                    	Map<String, String> keys = null;
+                    	if(relation.getType().equals(ForeignKey.ONE_TO_MANY))
+                    	{
                         query = getQuery(DocumentIndexer.PARENT_ID_CLASS, child.getClass().getCanonicalName()
                                 .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, id);
-                        Map<String, String> keys = client.getIndexManager().search(query);
+                        keys = client.getIndexManager().search(query);
+                    	} else
+                    	{
+                            query = getQuery(DocumentIndexer.ENTITY_CLASS_FIELD, child.getClass().getCanonicalName()
+                                    .toLowerCase(), DocumentIndexer.ENTITY_ID_FIELD, id);
+                            keys = client.getIndexManager().fetchRelation(query);
+                    		
+                    	}
                         Set<String> uqSet = new HashSet<String>(keys.values());
                         results = new ArrayList<Object>();
                         for (String rowKey : uqSet)
@@ -403,10 +411,12 @@ public class AbstractEntityReader
 
     }
 
-    private void computeJoinTableRelations(Object entity, EntityMetadata entityMetadata, EntitySaveGraph objectGraph,
+    private void computeJoinTableRelations(EnhanceEntity e, Client client, EntityMetadata entityMetadata, EntitySaveGraph objectGraph,
             PersistenceDelegator delegator, Relation relation)
     {
 
+    	Object entity = e.getEntity();
+    	
         objectGraph.setParentId(getId(entity, entityMetadata));
         JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
         String joinTableName = jtMetadata.getJoinTableName();
@@ -432,24 +442,14 @@ public class AbstractEntityReader
                 Client childClient = delegator.getClient(childMetadata);
                 Object child = childClient.find(relation.getTargetEntity(), childMetadata, (String) foreignKey, null);
                 
-                if(! objectGraph.isUniDirectional()) {
-                    Field parentField = objectGraph.getBidirectionalProperty();
-                    Object parentValue = null;
-                    
-                    /*if(PropertyAccessorHelper.isCollection(parentField.getType()) {
-                        
-                    } else {
-                        parentValue = entity;
-                    }*/
-                    
-                    PropertyAccessorHelper.set(child, parentField, parentValue);
-                }
+                onBiDirection(e, client, objectGraph, entityMetadata, child, childMetadata, childClient);
+                
                 childrenEntities.add(child);
 
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                e.printStackTrace();
+                ex.printStackTrace();
             }
         }
 
@@ -463,9 +463,9 @@ public class AbstractEntityReader
                     PropertyAccessorHelper.isCollection(childField.getType()) ? getFieldInstance(childrenEntities,
                             childField) : childrenEntities.get(0));
         }
-        catch (PropertyAccessException e)
+        catch (PropertyAccessException ex)
         {
-            e.printStackTrace();
+            ex.printStackTrace();
         }     
         
 
