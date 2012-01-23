@@ -34,7 +34,6 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Query;
-import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -724,41 +723,51 @@ public class PersistenceDelegator
     {
         EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
 
+        boolean imChildProcessed = false;
+
+        List<Relation> relations = metadata.getRelations();
+
         // If child entity doesn't have any further relations, just persist it
         // into database
         // Otherwise treat it as parent entity for its related entities,
         // determine graph and save that graph recursively.
-        List<Relation> relations = metadata.getRelations();
-        if ((relations == null || relations.isEmpty()) || objectGraph.isIsswapped())
+        
+        List<EntitySaveGraph> objectGraphs = getGraph(child, metadata);
+        if(!((relations == null || relations.isEmpty()) || objectGraph.isIsswapped()))
         {
-
-            String id = getId(child, metadata);
-            objectGraph.setChildId(id);
-//            if (getSession().lookup(child.getClass(), id) == null)
-//            {
-                Client chClient = getClient(metadata);
-                chClient.persist(child, objectGraph, metadata);
-                session.store(id, child);
-//            }
-        }
-        else
-        {
-
-            List<EntitySaveGraph> objectGraphs = getGraph(child, metadata);
             for (EntitySaveGraph graph : objectGraphs)
             {
                 // This this graph is for an entity that has it's own parent,
                 // set reverse Foreign Key
                 // i.e. Foreign key that refers to its parent
-                graph.setRevFKeyName(objectGraph.getfKeyName());
-                graph.setRevFKeyValue(objectGraph.getParentId());
-                graph.setRevParentClass(objectGraph.getParentEntity().getClass());
-
-            
-                saveGraph(graph);
+                if (!graph.equals(objectGraph))
+                {
+                    graph.setRevFKeyName(objectGraph.getfKeyName());
+                    graph.setRevFKeyValue(objectGraph.getParentId());
+                    graph.setRevParentClass(objectGraph.getParentClass());
+                    imChildProcessed = true;
+                    saveGraph(graph);
+                }
             }
         }
+        
+        //In case immediate child is not yet processed!
+        if (!imChildProcessed)
+        {
+            saveImmediateChild(child, objectGraph, metadata);
+        }
 
+    }
+
+    private void saveImmediateChild(Object child, EntitySaveGraph objectGraph, EntityMetadata metadata)
+    {
+        String id = getId(child, metadata);
+        objectGraph.setChildId(id);
+//                    if (getSession().lookup(child.getClass(), id) == null)
+//                    {
+            Client chClient = getClient(metadata);
+            chClient.persist(child, objectGraph, metadata);
+            session.store(id, child);
     }
 
     /**

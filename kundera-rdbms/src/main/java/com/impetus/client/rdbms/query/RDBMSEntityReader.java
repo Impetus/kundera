@@ -158,16 +158,20 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
     private List<EnhanceEntity> populateEnhanceEntities(EntityMetadata m, List<String> relationNames, Client client,
             String sqlQuery)
     {
-        List<EnhanceEntity> ls;
+        List<EnhanceEntity> ls = null;
         List<Object[]> result = ((HibernateClient) client).find(sqlQuery, relationNames, m.getEntityClazz());
 
+        if(!result.isEmpty())
+        {
         ls = new ArrayList<EnhanceEntity>(result.size());
         for (Object[] o : result)
         {
             EnhanceEntity e = new EnhanceEntity(o[0], getId(o[0], m), populateRelations(relationNames, o));
             ls.add(e);
         }
+        }
         return ls;
+        
     }
 
     /**

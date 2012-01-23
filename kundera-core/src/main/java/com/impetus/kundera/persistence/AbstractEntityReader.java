@@ -151,6 +151,14 @@ public class AbstractEntityReader
                         // create sql query for hibernate client.
                         // f = g.getProperty();
                         collectionHolder.put(relationalValue, childs);
+                        if(childs != null)
+                        {
+                            for (Object child : childs)
+                            {
+                                onBiDirection(e, client, g, m, child, childMetadata,
+                                        childClient);
+                            }
+                        }
                     }
                     // handle bi direction here.
 
@@ -338,6 +346,9 @@ public class AbstractEntityReader
                     }
 
                 }
+            }else
+            {
+                obj.add(e.getEntity());
             }
             try
             {

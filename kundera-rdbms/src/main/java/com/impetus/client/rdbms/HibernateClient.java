@@ -265,6 +265,7 @@ public class HibernateClient implements Client
 			s = getSessionInstance();
 			tx = s.beginTransaction();
 			s.persist(entityGraph.getParentEntity());
+                        tx.commit();
 		} catch (org.hibernate.exception.ConstraintViolationException e) {
 			e.printStackTrace();
 		}
