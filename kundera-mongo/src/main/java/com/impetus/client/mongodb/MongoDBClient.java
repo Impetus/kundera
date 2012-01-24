@@ -342,7 +342,7 @@ public class MongoDBClient implements Client
      * @throws Exception
      *             the exception
      */
-    public <E> List<E> loadData(EntityMetadata entityMetadata, BasicDBObject mongoQuery,String result, List<String> relationNames) throws Exception
+    public <E> List<E> loadData(EntityMetadata entityMetadata, BasicDBObject mongoQuery,String result, List<String> relationNames, BasicDBObject orderBy) throws Exception
     {
         String documentName = entityMetadata.getTableName();
         String dbName = entityMetadata.getSchema();
@@ -359,14 +359,14 @@ public class MongoDBClient implements Client
         {
             // TODO i need to discuss with Amresh before modifying it.
             entities.addAll(new MongoDBDataHandler(this, getPersistenceUnit()).getEmbeddedObjectList(dbCollection,
-                    entityMetadata, documentName, mongoQuery, result));
+                    entityMetadata, documentName, mongoQuery, result, orderBy));
 
         }
         else
         {
             log.debug("Fetching data from " + documentName + " for Filter " + mongoQuery.toString());
 
-            DBCursor cursor = dbCollection.find(mongoQuery);
+            DBCursor cursor = orderBy != null? dbCollection.find(mongoQuery).sort(orderBy):dbCollection.find(mongoQuery);
             MongoDBDataHandler handler = new MongoDBDataHandler(this, getPersistenceUnit());
             while (cursor.hasNext())
             {

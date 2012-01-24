@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
+			<version>4.5</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -37,7 +37,7 @@
 			<artifactId>lucene-core</artifactId>
 			<version>3.4.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>
@@ -74,19 +74,20 @@
 			<version>3.6.8.Final</version>
 		</dependency>
 	</dependencies>
-       <build>
-         <plugins>
-          <plugin>
-		<!-- NOTE: We don't need a groupId specification because the group is org.apache.maven.plugins ...which is assumed by default. -->
-		     <artifactId>maven-assembly-plugin</artifactId>
-	 	     <version>2.2.1</version>
-		     <configuration>
-			<descriptorRefs>
-			  <descriptorRef>jar-with-dependencies</descriptorRef>
-			</descriptorRefs>
-	 	     </configuration>
-		</plugin>
-          </plugins>
-       </build>
+	<build>
+		<plugins>
+			<plugin>
+				<!-- NOTE: We don't need a groupId specification because the group is 
+					org.apache.maven.plugins ...which is assumed by default. -->
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

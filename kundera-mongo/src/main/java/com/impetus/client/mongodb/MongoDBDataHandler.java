@@ -336,7 +336,7 @@ public class MongoDBDataHandler
      * "Select alias.superColumnName.columnName from EntityName alias"
      */
     public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
-            BasicDBObject mongoQuery, String result) throws PropertyAccessException
+            BasicDBObject mongoQuery, String result, BasicDBObject orderBy) throws PropertyAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned
 
@@ -351,7 +351,7 @@ public class MongoDBDataHandler
         String enclosingDocumentName = getEnclosingDocumentName(m, columnName);
 
         // Query for fetching entities based on user specified criteria
-        DBCursor cursor = dbCollection.find(mongoQuery);
+        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery).sort(orderBy):dbCollection.find(mongoQuery);
 
         EmbeddedColumn superColumn = m.getEmbeddedColumn(enclosingDocumentName);
         Field superColumnField = superColumn.getField();

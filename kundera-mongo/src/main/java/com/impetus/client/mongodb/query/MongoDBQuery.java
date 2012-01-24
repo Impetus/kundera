@@ -38,6 +38,8 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.KunderaQuery.SortOrder;
+import com.impetus.kundera.query.KunderaQuery.SortOrdering;
 import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 import com.mongodb.BasicDBObject;
@@ -84,7 +86,8 @@ public class MongoDBQuery extends QueryImpl
     {
         try
         {
-            return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), getKunderaQuery().getResult(),null);
+            BasicDBObject orderByClause = getOrderByClause();
+            return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), getKunderaQuery().getResult(),null, orderByClause);
         }
         catch (Exception e)
         {
@@ -111,7 +114,8 @@ public class MongoDBQuery extends QueryImpl
 
             try
             {
-                ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),getKunderaQuery().getResult(),relationNames);
+                BasicDBObject orderByClause = getOrderByClause();    
+                ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),getKunderaQuery().getResult(),relationNames, orderByClause);
             }
             catch (Exception e)
             {
@@ -140,7 +144,7 @@ public class MongoDBQuery extends QueryImpl
      * @param filterClauseQueue
      * @return
      */
-    public BasicDBObject createMongoQuery(EntityMetadata m, Queue filterClauseQueue)
+    private BasicDBObject createMongoQuery(EntityMetadata m, Queue filterClauseQueue)
     {
         BasicDBObject query = new BasicDBObject();
         for (Object object : filterClauseQueue)
@@ -174,11 +178,34 @@ public class MongoDBQuery extends QueryImpl
                 // TODO: Add support for other operators like >, <, >=, <=,
                 // order by asc/ desc, limit, skip, count etc
             }
+            
+//            List<SortOrdering> orders = kunderaQuery.getOrdering();
+            
+            
         }
         return query;
     }
 
-
+    /**
+     * Prepare order by clause
+     * @return order by clause.
+     */
+    private BasicDBObject getOrderByClause()
+    {
+        BasicDBObject orderByClause = null;
+        
+        List<SortOrdering> orders = kunderaQuery.getOrdering();
+        if(orders != null)
+        {
+            orderByClause = new BasicDBObject();
+            for (SortOrdering order : orders)
+            {
+                orderByClause.append(order.getColumnName(), order.getColumnName().equals(SortOrder.ASC)?1:-1);
+            }
+        }
+        
+        return orderByClause;
+    }
     /**
      * @param m
      * @param columnName
