@@ -66,7 +66,7 @@ public class MongoDBClientFactory extends GenericClientFactory
         String contactNode = (String) props.get(PersistenceProperties.KUNDERA_NODES);
         String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
         String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
-        String poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE);
+        String poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
 
         Mongo mongo = null;
         logger.info("Connecting to mongodb at " + contactNode + " on port " + defaultPort);

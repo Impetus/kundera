@@ -30,7 +30,20 @@ public interface PersistenceProperties
     public static final String KUNDERA_CLIENT = "kundera.client";
     public static final String KUNDERA_CACHE_PROVIDER_CLASS = "kundera.cache.provider.class";
     public static final String KUNDERA_CACHE_CONFIG_RESOURCE = "kundera.cache.config.resource";
-    public static final String KUNDERA_POOL_SIZE = "kundera.pool.size";
+    
     public static final String KUNDERA_FETCH_MAX_DEPTH = "kundera.fetch.max.depth";     
     
+    /** Connection Pooling related constants */
+    
+    //Cap on the number of object instances managed by the pool per node.
+    public static final String KUNDERA_POOL_SIZE_MAX_ACTIVE = "kundera.pool.size.max.active";
+    
+    //Cap on the number of "idle" instances in the pool.
+    public static final String KUNDERA_POOL_SIZE_MAX_IDLE = "kundera.pool.size.max.idle";
+    
+    //Minimum number of idle objects to maintain in each of the nodes.
+    public static final String KUNDERA_POOL_SIZE_MIN_IDLE = "kundera.pool.size.min.idle";
+    
+    //Cap on the total number of instances from all nodes combined.
+    public static final String KUNDERA_POOL_SIZE_MAX_TOTAL = "kundera.pool.size.max.total";
 }

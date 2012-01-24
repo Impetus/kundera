@@ -15,10 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
@@ -32,17 +30,7 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
     @Override
     public BigInteger fromBytes(byte[] b) throws PropertyAccessException
     {
-
-        String s;
-        try
-        {
-            s = new String(b, Constants.ENCODING);
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new PropertyAccessException(e.getMessage());
-        }
-        return fromString(s);
+        return new BigInteger(b);
     }
 
     @Override

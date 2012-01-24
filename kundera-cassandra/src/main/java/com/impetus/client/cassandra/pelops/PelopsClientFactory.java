@@ -2,11 +2,13 @@ package com.impetus.client.cassandra.pelops;
 
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.IConnection;
 import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,13 +25,11 @@ import com.impetus.kundera.persistence.EntityReader;
 
 public class PelopsClientFactory extends GenericClientFactory
 {
-    private static Logger logger = LoggerFactory.getLogger(KunderaPersistence.class);
+    private static Logger logger = LoggerFactory.getLogger(PelopsClientFactory.class);
 
     IndexManager indexManager;
 
     private EntityReader reader;
-
-    private String poolName;
 
     @Override
     protected void initializeClient()
@@ -67,11 +67,16 @@ public class PelopsClientFactory extends GenericClientFactory
         {
             Cluster cluster = new Cluster(contactNodes,
                     new IConnection.Config(Integer.parseInt(defaultPort), true, -1), false);
-            Pelops.addPool(poolName, cluster, keyspace);
+            
+            Policy policy = PelopsUtils.getPoolConfigPolicy(persistenceUnitMetadata);          
+            
+            //Add pool with specified policy. null means default operand policy.
+            Pelops.addPool(poolName, cluster, keyspace, policy, null);            
+            
         }
         // TODO return a thrift pool
         return null;
-    }
+    }	
 
     @Override
     protected Client instantiateClient()

@@ -41,7 +41,7 @@ public class HBaseClientFactory extends GenericClientFactory
 
         String node = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_NODES);
         String port = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_PORT);
-        String poolSize = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_POOL_SIZE);
+        String poolSize = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
 
         if (StringUtils.isEmpty(poolSize))
         {
@@ -61,7 +61,6 @@ public class HBaseClientFactory extends GenericClientFactory
     @Override
     protected Object createPoolOrConnection()
     {
-        // TODO: Make pool size configurable, extract from persistence.xml
         hTablePool = new HTablePool(conf, poolSize);
         return hTablePool;
     }
