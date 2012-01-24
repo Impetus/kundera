@@ -20,7 +20,7 @@ import javax.persistence.Cache;
 import junit.framework.TestCase;
 
 import com.impetus.kundera.cache.CacheException;
-import com.impetus.kundera.entity.PersonDTO;
+import com.impetus.kundera.entity.PersonnelDTO;
 
 /**
  * @author amresh.singh
@@ -35,9 +35,9 @@ public class EhCacheProviderTest extends TestCase
 
     String cacheName = "Kundera";
 
-    PersonDTO person1;
+    PersonnelDTO person1;
 
-    PersonDTO person2;
+    PersonnelDTO person2;
 
     protected void setUp() throws Exception
     {
@@ -45,8 +45,8 @@ public class EhCacheProviderTest extends TestCase
 
         cacheProvider = new EhCacheProvider();
 
-        person1 = new PersonDTO("1", "Amresh", "Singh");
-        person2 = new PersonDTO("2", "Vivek", "Mishra");
+        person1 = new PersonnelDTO("1", "Amresh", "Singh");
+        person2 = new PersonnelDTO("2", "Vivek", "Mishra");
 
     }
 
@@ -101,15 +101,15 @@ public class EhCacheProviderTest extends TestCase
 
         // Lookup objects from cache
         Object o = ehCache.get(person1.getClass() + "_" + person1.getPersonId());
-        assertEquals(PersonDTO.class, o.getClass());
-        PersonDTO p1 = (PersonDTO) o;
+        assertEquals(PersonnelDTO.class, o.getClass());
+        PersonnelDTO p1 = (PersonnelDTO) o;
         assertNotNull(p1);
         assertEquals("1", p1.getPersonId());
         assertEquals("Amresh", p1.getFirstName());
         assertEquals("Singh", p1.getLastName());
 
         // Remove object from cache
-        ehCache.evict(PersonDTO.class, PersonDTO.class + "_" + person1.getPersonId());
+        ehCache.evict(PersonnelDTO.class, PersonnelDTO.class + "_" + person1.getPersonId());
         assertEquals(1, ehCache.size());
 
         // Clear cache

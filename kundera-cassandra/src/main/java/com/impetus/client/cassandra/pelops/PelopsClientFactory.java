@@ -2,27 +2,34 @@ package com.impetus.client.cassandra.pelops;
 
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.IConnection;
 import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.impetus.client.cassandra.query.CassandraEntityReader;
 import com.impetus.kundera.KunderaPersistence;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.impetus.kundera.persistence.EntityReader;
 
 public class PelopsClientFactory extends GenericClientFactory
 {
-    private static Logger logger = LoggerFactory.getLogger(KunderaPersistence.class);
+    private static Logger logger = LoggerFactory.getLogger(PelopsClientFactory.class);
 
     IndexManager indexManager;
+
+    private EntityReader reader;
 
     @Override
     protected void initializeClient()
@@ -40,6 +47,8 @@ public class PelopsClientFactory extends GenericClientFactory
         // *//*)*/);
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
 
+        reader = new CassandraEntityReader();
+
     }
 
     @Override
@@ -49,24 +58,30 @@ public class PelopsClientFactory extends GenericClientFactory
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = persistenceUnitMetadata.getProperties();
-        String contactNodes = (String) props.get("kundera.nodes");
-        String defaultPort = (String) props.get("kundera.port");
-        String keyspace = (String) props.get("kundera.keyspace");
+        String contactNodes = (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         String poolName = PelopsUtils.generatePoolName(getPersistenceUnit());
+
         if (Pelops.getDbConnPool(poolName) == null)
         {
             Cluster cluster = new Cluster(contactNodes,
                     new IConnection.Config(Integer.parseInt(defaultPort), true, -1), false);
-            Pelops.addPool(poolName, cluster, keyspace);
+            
+            Policy policy = PelopsUtils.getPoolConfigPolicy(persistenceUnitMetadata);          
+            
+            //Add pool with specified policy. null means default operand policy.
+            Pelops.addPool(poolName, cluster, keyspace, policy, null);            
+            
         }
         // TODO return a thrift pool
         return null;
-    }
+    }	
 
     @Override
     protected Client instantiateClient()
     {
-        return new PelopsClient(indexManager);
+        return new PelopsClient(indexManager, reader);
     }
 
     @Override
@@ -79,8 +94,7 @@ public class PelopsClientFactory extends GenericClientFactory
     public void unload(String... persistenceUnits)
     {
         indexManager.close();
-        Pelops.shutdown();
-
+      //  Pelops.shutdown();
     }
 
 }

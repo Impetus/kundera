@@ -18,28 +18,26 @@ package com.impetus.client.mongodb;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Queue;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.regex.Pattern;
 
 import javax.persistence.Embedded;
 import javax.persistence.PersistenceException;
-import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
@@ -66,7 +64,8 @@ public class MongoDBDataHandler
 
     private static Log log = LogFactory.getLog(MongoDBDataHandler.class);
 
-    public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document)
+    public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document,
+            List<String> relations)
     {
         // Entity object
         Object entity = null;
@@ -81,7 +80,7 @@ public class MongoDBDataHandler
 
             // Populate primary key column
             String rowKey = (String) document.get("_id");
-            PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), rowKey);
+            PropertyAccessorHelper.setId(entity, m, rowKey);
 
             // Populate entity columns
             List<Column> columns = m.getColumnsAsList();
@@ -135,42 +134,23 @@ public class MongoDBDataHandler
 
             }
 
-            // // Check whether there is an embedded document for foreign keys,
-            // if
-            // // it is there, put data
-            // // into foreign keys map
-            // Object foreignKeyObj =
-            // document.get(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME);
-            // if (foreignKeyObj != null && foreignKeyObj instanceof
-            // BasicDBObject)
-            // {
-            // BasicDBObject dbObj = (BasicDBObject) foreignKeyObj;
-            //
-            // Set<String> foreignKeySet = dbObj.keySet();
-            // for (String foreignKey : foreignKeySet)
-            // {
-            // String foreignKeyValues = (String) dbObj.get(foreignKey); //
-            // Foreign
-            // // key
-            // // values
-            // // are
-            // // stored
-            // // as
-            // // list
-            //
-            // Set<String> foreignKeysSet =
-            // MetadataUtils.deserializeKeys(foreignKeyValues);
-            //
-            // foreignKeysMap.put(foreignKey, foreignKeysSet);
-            //
-            // }
-            //
-            // }
+            if (relations != null)
+            {
+                EnhanceEntity e = null;
+                Map<String, Object> relationValue = new HashMap<String, Object>();
+                for (String r : relations)
+                {
+                    if (relationValue == null)
+                    {
+                        relationValue = new HashMap<String, Object>();
+                    }
+                    Object colValue = document.get(r);
+                    relationValue.put(r, colValue);
+                }
 
-            // Set entity object and foreign key map into enhanced entity and
-            // return
-            // EnhancedEntity e = EntityResolver.getEnhancedEntity(entity,
-            // rowKey, foreignKeysMap);
+                e = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationValue);
+                return e;
+            }
             return entity;
 
         }
@@ -270,25 +250,6 @@ public class MongoDBDataHandler
             }
         }
 
-        /*
-         * // Check foreign keys and set as list column on document object
-         * Map<String, Set<String>> foreignKeyMap = e.getForeignKeysMap(); if
-         * (foreignKeyMap != null && !foreignKeyMap.isEmpty()) {
-         * 
-         * DBObject foreignKeyObj = new BasicDBObject(); // A document //
-         * containing all // foreign keys as // columns
-         * 
-         * Set foreignKeyNameSet = foreignKeyMap.keySet(); for (Object
-         * foreignKeyName : foreignKeyNameSet) { Set<String> valueSet =
-         * foreignKeyMap.get(foreignKeyName);
-         * 
-         * String foreignKeyValues = MetadataUtils.serializeKeys(valueSet);
-         * 
-         * foreignKeyObj.put((String) foreignKeyName, foreignKeyValues); }
-         * 
-         * dbObj.put(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME, foreignKeyObj);
-         * }
-         */
         return dbObj;
     }
 
@@ -338,51 +299,6 @@ public class MongoDBDataHandler
     }
 
     /**
-     * Creates MongoDB Query object from filterClauseQueue
-     * 
-     * @param filterClauseQueue
-     * @return
-     */
-    public BasicDBObject createMongoQuery(EntityMetadata m, Queue filterClauseQueue)
-    {
-        BasicDBObject query = new BasicDBObject();
-        for (Object object : filterClauseQueue)
-        {
-            if (object instanceof FilterClause)
-            {
-                FilterClause filter = (FilterClause) object;
-                String property = new MongoDBDataHandler(getClient(), getPersistenceUnit()).getColumnName(filter
-                        .getProperty());
-                String condition = filter.getCondition();
-                String value = filter.getValue();
-
-                // Property, if doesn't exist in entity, may be there in a
-                // document embedded within it, so we have to check that
-                // TODO: Query should actually be in a format
-                // documentName.embeddedDocumentName.column, remove below if
-                // block once this is decided
-                String enclosingDocumentName = getEnclosingDocumentName(m, property);
-                if (enclosingDocumentName != null)
-                {
-                    property = enclosingDocumentName + "." + property;
-                }
-
-                if (condition.equals("="))
-                {
-                    query.append(property, value);
-                }
-                else if (condition.equalsIgnoreCase("like"))
-                {
-                    query.append(property, Pattern.compile(value));
-                }
-                // TODO: Add support for other operators like >, <, >=, <=,
-                // order by asc/ desc, limit, skip, count etc
-            }
-        }
-        return query;
-    }
-
-    /**
      * @param m
      * @param columnName
      * @param embeddedDocumentName
@@ -419,15 +335,12 @@ public class MongoDBDataHandler
      * to be supported is
      * "Select alias.superColumnName.columnName from EntityName alias"
      */
-    public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName, Query query)
-            throws PropertyAccessException
+    public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
+            BasicDBObject mongoQuery, String result, BasicDBObject orderBy) throws PropertyAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned
 
-        // Query parameters,
-        MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
-        Queue filterClauseQueue = mongoDBQuery.getKunderaQuery().getFilterClauseQueue();
-        String result = mongoDBQuery.getKunderaQuery().getResult();
+        // MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
 
         // Specified after entity alias in query
         String columnName = getColumnName(result);
@@ -438,8 +351,7 @@ public class MongoDBDataHandler
         String enclosingDocumentName = getEnclosingDocumentName(m, columnName);
 
         // Query for fetching entities based on user specified criteria
-        BasicDBObject mongoQuery = createMongoQuery(m, filterClauseQueue);
-        DBCursor cursor = dbCollection.find(mongoQuery);
+        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery).sort(orderBy):dbCollection.find(mongoQuery);
 
         EmbeddedColumn superColumn = m.getEmbeddedColumn(enclosingDocumentName);
         Field superColumnField = superColumn.getField();
@@ -459,35 +371,26 @@ public class MongoDBDataHandler
                                 embeddedObjectClass, superColumn.getColumns());
                         Object fieldValue = PropertyAccessorHelper.getObject(embeddedObject, columnName);
 
-                        for (Object object : filterClauseQueue)
-                        {
-                            if (object instanceof FilterClause)
-                            {
-                                FilterClause filter = (FilterClause) object;
-                                String value = filter.getValue();
-                                String condition = filter.getCondition();
-
-                                // This is not an ideal and complete
-                                // implementation. A similar logic exists in
-                                // createMongoQuery method. Need to find a way
-                                // to combine them
-                                if (condition.equals("="))
-                                {
-                                    if (value.equals(fieldValue))
-                                    {
-                                        list.add(embeddedObject);
-                                    }
-                                }
-                                else if (condition.equalsIgnoreCase("like"))
-                                {
-                                    if (fieldValue.toString().indexOf(value) >= 0)
-                                    {
-                                        list.add(embeddedObject);
-                                    }
-                                }
-
-                            }
-                        }
+                        // TODO : discussion required with amresh on this.
+                        /*
+                         * for (Object object : filterClauseQueue) { if (object
+                         * instanceof FilterClause) { FilterClause filter =
+                         * (FilterClause) object; String value =
+                         * filter.getValue(); String condition =
+                         * filter.getCondition();
+                         * 
+                         * // This is not an ideal and complete //
+                         * implementation. A similar logic exists in //
+                         * createMongoQuery method. Need to find a way // to
+                         * combine them if (condition.equals("=")) { if
+                         * (value.equals(fieldValue)) {
+                         * list.add(embeddedObject); } } else if
+                         * (condition.equalsIgnoreCase("like")) { if
+                         * (fieldValue.toString().indexOf(value) >= 0) {
+                         * list.add(embeddedObject); } }
+                         * 
+                         * } }
+                         */
                     }
 
                 }

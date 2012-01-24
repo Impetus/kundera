@@ -25,6 +25,8 @@ public class ClientMetadata
 
     private String indexImplementor;
 
+    private boolean useSecondryIndex;
+
     /**
      * @return the clientImplementor
      */
@@ -57,6 +59,23 @@ public class ClientMetadata
     public void setIndexImplementor(String indexImplementor)
     {
         this.indexImplementor = indexImplementor;
+    }
+
+    /**
+     * @return the useSecondryIndex
+     */
+    public boolean isUseSecondryIndex()
+    {
+        return useSecondryIndex;
+    }
+
+    /**
+     * @param useSecondryIndex
+     *            the useSecondryIndex to set
+     */
+    public void setUseSecondryIndex(boolean useSecondryIndex)
+    {
+        this.useSecondryIndex = useSecondryIndex;
     }
 
 }

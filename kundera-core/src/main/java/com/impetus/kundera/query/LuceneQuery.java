@@ -26,12 +26,11 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
  * The Class LuceneQuery.
@@ -124,70 +123,6 @@ public class LuceneQuery extends QueryImpl implements Query
         return this;
     }
 
-    /**
-     * Gets the lucene query from jpa query.
-     * 
-     * @return the lucene query from jpa query
-     */
-    private String getLuceneQueryFromJPAQuery()
-    {
-        StringBuffer sb = new StringBuffer();
-
-        for (Object object : kunderaQuery.getFilterClauseQueue())
-        {
-            if (object instanceof FilterClause)
-            {
-                FilterClause filter = (FilterClause) object;
-                sb.append("+");
-                // property
-                sb.append(filter.getProperty());
-
-                // joiner
-                String appender = "";
-                if (filter.getCondition().equals("="))
-                {
-                    sb.append(":");
-                }
-                else if (filter.getCondition().equalsIgnoreCase("like"))
-                {
-                    sb.append(":");
-                    appender = "*";
-                }
-
-                // value
-                sb.append(filter.getValue());
-                sb.append(appender);
-            }
-            else
-            {
-                sb.append(" " + object + " ");
-            }
-        }
-
-        // add Entity_CLASS field too.
-        if (sb.length() > 0)
-        {
-            sb.append(" AND ");
-        }
-        sb.append("+");
-        sb.append(DocumentIndexer.ENTITY_CLASS_FIELD);
-        sb.append(":");
-        // sb.append(getEntityClass().getName());
-        sb.append(kunderaQuery.getEntityClass().getCanonicalName().toLowerCase());
-
-        return sb.toString();
-    }
-
-    private class SearchInterpretor
-    {
-
-        void getSearchType()
-        {
-
-        }
-
-    }
-
     /*
      * (non-Javadoc)
      * 
@@ -215,5 +150,16 @@ public class LuceneQuery extends QueryImpl implements Query
     {
         throw new UnsupportedOperationException("Method not supported for default indexing");
 
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#getReader()
+     */
+    @Override
+    protected EntityReader getReader()
+    {
+        throw new UnsupportedOperationException("Method not supported for default indexing");
     }
 }

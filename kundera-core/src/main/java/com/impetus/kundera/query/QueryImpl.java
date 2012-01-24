@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
@@ -35,13 +36,17 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
+import com.impetus.kundera.index.DocumentIndexer;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
-import com.impetus.kundera.property.PropertyAccessException;
-import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
 /**
@@ -61,6 +66,7 @@ public abstract class QueryImpl implements Query
     /** The persistence delegeator. */
     protected PersistenceDelegator persistenceDelegeator;
 
+    /** The log. */
     private static Log log = LogFactory.getLog(QueryImpl.class);
 
     /**
@@ -132,31 +138,28 @@ public abstract class QueryImpl implements Query
     @Override
     public List<?> getResultList()
     {
-        log.debug("JPA Query: " + query);
+        log.info("On getResultList() executing query: " + query);
+        List results = null;
         try
         {
-            // TODO need to look what are the values for given from, select and
-            // where clause.
             EntityMetadata m = kunderaQuery.getEntityMetadata();
             Client client = persistenceDelegeator.getClient(m);
 
             // get Graph
             List<EntitySaveGraph> graphs = persistenceDelegeator.getGraph(m.getEntityClazz().newInstance(), m);
             // Get relations.
-            Map<Boolean, List<String>> relationHolder = getRelations(graphs, m.getEntityClazz());
+            Map<Boolean, List<String>> relationHolder = persistenceDelegeator.getRelations(graphs, m.getEntityClazz());
             List<String> relationNames = relationHolder.values().iterator().next();
             boolean isParent = relationHolder.keySet().iterator().next();
 
             if (relationNames.isEmpty())
             {
                 // There is no association so simply return list of entities.
-                return populateEntities(m, client);
-
+                results = populateEntities(m, client);
             }
             else
-
             {
-                return handleAssociations(m, client, graphs, relationNames, isParent);
+                results = handleAssociations(m, client, graphs, relationNames, isParent);
             }
 
         }
@@ -179,7 +182,7 @@ public abstract class QueryImpl implements Query
           // if entity is not parent then pass retrieved relation key value to
           // specific client for find by id.
 
-        // return null;
+        return results !=null && !results.isEmpty()?results:null;
 
     }
 
@@ -576,48 +579,20 @@ public abstract class QueryImpl implements Query
     }
 
     /**
-     * Gets the relations.
-     * 
-     * @param graphs
-     *            the graphs
-     * @param clazz
-     *            the clazz
-     * @return the relations
-     */
-    protected Map<Boolean, List<String>> getRelations(List<EntitySaveGraph> graphs, Class clazz)
-    {
-        List<String> relationNames = new ArrayList<String>(graphs.size());
-        boolean isParent = false;
-        Map<Boolean, List<String>> relationHolder = new HashMap<Boolean, List<String>>(1);
-        // TODO need to check if there is any relation?
-        for (EntitySaveGraph g : graphs)
-        {
-            if (clazz.equals(g.getParentClass()))
-            {
-                isParent = true;
-                // Means entity is parent
-            }
-
-            if (g.getfKeyName() != null)
-            {
-                relationNames.add(g.getfKeyName());
-            }
-        }
-
-        relationHolder.put(isParent, relationNames);
-        return relationHolder;
-
-    }
-
-    /**
      * Handle graph.
      * 
      * @param enhanceEntities
      *            the enhance entities
      * @param graphs
      *            the graphs
+     * @param client
+     *            the client
+     * @param m
+     *            the m
+     * @return the list
      */
-    protected List<Object> handleGraph(List<EnhanceEntity> enhanceEntities, List<EntitySaveGraph> graphs)
+    protected List<Object> handleGraph(List<EnhanceEntity> enhanceEntities, List<EntitySaveGraph> graphs,
+            Client client, EntityMetadata m)
     {
         // Enhance entities can contain or may not contain relation.
         // if it contain a relation means it is a child
@@ -632,113 +607,51 @@ public abstract class QueryImpl implements Query
             }
             try
             {
-                result.add(computeGraph(e, graphs, relationalValues));
+                result.add(getReader().computeGraph(e, graphs, relationalValues, client, m, persistenceDelegeator));
             }
-            catch (Exception e1)
+            catch (Exception ex)
             {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+                log.error("Error on computing relations:" + ex.getMessage());
+                throw new QueryHandlerException(ex.getMessage());
             }
         }
         return result;
     }
 
     /**
-     * Compute graph.
+     * Populate using lucene.
      * 
-     * @param e
-     *            the e
-     * @param graphs
-     *            the graphs
-     * @return the object
-     * @throws Exception
-     *             the exception
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param result
+     *            the result
+     * @return the list
      */
-    private Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder)
-            throws Exception
+    protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result)
     {
-
-        Client childClient = null;
-        Class<?> childClazz = null;
-        EntityMetadata childMetadata = null;
-
-        if (e.getRelations() != null)
+        String luceneQ = getLuceneQueryFromJPAQuery();
+        Map<String, String> searchFilter = client.getIndexManager().search(luceneQ, Constants.INVALID,
+                Constants.INVALID);
+        if (kunderaQuery.isAliasOnly())
         {
-            // means it is holding associations
-            // read graph for all the association
-            for (EntitySaveGraph g : graphs)
+            String[] primaryKeys = searchFilter.values().toArray(new String[] {});
+            try
+            {
+                result = (List<Object>) client.find(m.getEntityClazz(), primaryKeys);
+            }
+            catch (Exception e)
             {
 
-                String relationName = g.getfKeyName();
-                Object relationalValue = e.getRelations().get(relationName);
-                childClazz = g.getParentClass();
-                Field f = g.getProperty();
-                if (!collectionHolder.containsKey(relationalValue))
-                {
-                    childMetadata = persistenceDelegeator.getMetadata(childClazz);
-                    childClient = persistenceDelegeator.getClient(childMetadata);
-                    Object child = childClient.find(childClazz, relationalValue.toString());
-                    f = g.getProperty();
-                    collectionHolder.put(relationalValue, child);
-                    // If entity is holding association it means it can not be a
-                    // collection.
-                }
-                PropertyAccessorHelper.set(e.getEntity(), f, collectionHolder.get(relationalValue));
             }
         }
         else
         {
-            // means it is parent
-            for (EntitySaveGraph g : graphs)
-            {
-                childClazz = g.getChildClass();
-                childMetadata = persistenceDelegeator.getMetadata(childClazz);
-                childClient = persistenceDelegeator.getClient(childMetadata);
-                String relationName = g.getfKeyName();
-                String relationalValue = e.getEntityId();
-                Field f = g.getProperty();
-                if (!collectionHolder.containsKey(relationalValue))
-                {
-                    // create a finder and pass metadata, relationName,
-                    // relationalValue.
-                    List<Object> childs = childClient.find(relationName, relationalValue, childMetadata);
-                    // pass this entity id as a value to be searched for for
-                    // secondary indexes.
-                    // create sql query for hibernate client.
-                    f = g.getProperty();
-                    collectionHolder.put(relationalValue, childs);
-                }
-                onReflect(e.getEntity(), f, (List) collectionHolder.get(relationalValue));
-            }
-        }
-        return e.getEntity();
-    }
+            return (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), searchFilter);
 
-    /**
-     * On reflect.
-     * 
-     * @param entity
-     *            the entity
-     * @param f
-     *            the f
-     * @param childs
-     *            the childs
-     * @return the sets the
-     * @throws PropertyAccessException
-     *             the property access exception
-     */
-    private Set<?> onReflect(Object entity, Field f, List<?> childs) throws PropertyAccessException
-    {
-        Set chids = new HashSet();
-        if (childs != null)
-        {
-            chids = new HashSet(childs);
-            // TODO: need to store object in sesion.
-            // getSession().store(id, entity)
-            PropertyAccessorHelper.set(entity, f,
-                    PropertyAccessorHelper.isCollection(f.getType()) ? getFieldInstance(childs, f) : childs.get(0));
         }
-        return chids;
+        return result;
     }
 
     /**
@@ -782,7 +695,169 @@ public abstract class QueryImpl implements Query
     }
 
     /**
-     * Populate entities, in case of there is no relation exist.
+     * Gets the lucene query from jpa query.
+     * 
+     * @return the lucene query from jpa query
+     */
+    protected String getLuceneQueryFromJPAQuery()
+    {
+        StringBuffer sb = new StringBuffer();
+
+        for (Object object : kunderaQuery.getFilterClauseQueue())
+        {
+            if (object instanceof FilterClause)
+            {
+                FilterClause filter = (FilterClause) object;
+                sb.append("+");
+                // property
+                sb.append(filter.getProperty());
+
+                // joiner
+                String appender = "";
+                if (filter.getCondition().equals("="))
+                {
+                    sb.append(":");
+                }
+                else if (filter.getCondition().equalsIgnoreCase("like"))
+                {
+                    sb.append(":");
+                    appender = "*";
+                }
+
+                // value
+                sb.append(filter.getValue());
+                sb.append(appender);
+            }
+            else
+            {
+                sb.append(" " + object + " ");
+            }
+        }
+
+        // add Entity_CLASS field too.
+        if (sb.length() > 0)
+        {
+            sb.append(" AND ");
+        }
+        sb.append("+");
+        sb.append(DocumentIndexer.ENTITY_CLASS_FIELD);
+        sb.append(":");
+        // sb.append(getEntityClass().getName());
+        sb.append(kunderaQuery.getEntityClass().getCanonicalName().toLowerCase());
+
+        return sb.toString();
+    }
+
+    /**
+     * Returns lucene based query.
+     * 
+     * @param clazzFieldName
+     *            lucene field name for class
+     * @param clazzName
+     *            class name
+     * @param idFieldName
+     *            lucene id field name
+     * @param idFieldValue
+     *            lucene id field value
+     * @return query lucene query.
+     */
+    protected static String getQuery(String clazzFieldName, String clazzName, String idFieldName, String idFieldValue)
+    {
+        StringBuffer sb = new StringBuffer("+");
+        sb.append(clazzFieldName);
+        sb.append(":");
+        sb.append(clazzName);
+        sb.append(" AND ");
+        sb.append("+");
+        sb.append(idFieldName);
+        sb.append(":");
+        sb.append(idFieldValue);
+        return sb.toString();
+    }
+
+    /**
+     * Transform.
+     * 
+     * @param m
+     *            the m
+     * @param ls
+     *            the ls
+     * @param resultList
+     *            the result list
+     */
+    protected void transform(EntityMetadata m, List<EnhanceEntity> ls, List resultList)
+    {
+        for (Object r : resultList)
+        {
+            EnhanceEntity e = new EnhanceEntity(r, persistenceDelegeator.getId(r, m), null);
+            ls.add(e);
+        }
+    }
+
+    /**
+     * Fetch data from lucene.
+     * 
+     * @param client
+     *            the client
+     * @return the sets the
+     */
+    protected Set<String> fetchDataFromLucene(Client client)
+    {
+        String luceneQuery = getLuceneQueryFromJPAQuery();
+        // use lucene to query and get Pk's only.
+        // go to client and get relation with values.!
+        // populate EnhanceEntity
+        Map<String, String> results = client.getIndexManager().search(luceneQuery);
+        Set<String> rSet = new HashSet<String>(results.values());
+        return rSet;
+    }
+
+    /**
+     * On association using lucene.
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param ls
+     *            the ls
+     */
+    protected void onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
+    {
+        Set<String> rSet = fetchDataFromLucene(client);
+        try
+        {
+            List resultList = client.find(m.getEntityClazz(), rSet.toArray(new String[] {}));
+            transform(m, ls, resultList);
+        }
+        catch (Exception e)
+        {
+            log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
+            throw new QueryHandlerException(e.getMessage());
+        }
+    }
+
+    /**
+     * Returns column name from the filter property which is in the form
+     * dbName.columnName
+     * 
+     * @param filterProperty
+     * @return
+     */
+    protected String getColumnName(String filterProperty)
+    {
+        StringTokenizer st = new StringTokenizer(filterProperty, ".");
+        String columnName = "";
+        while (st.hasMoreTokens())
+        {
+            columnName = st.nextToken();
+        }
+
+        return columnName;
+    }
+
+    /**
+     * Populate entities, Method to populate data in case no relation exist!.
      * 
      * @param m
      *            the m
@@ -793,7 +868,7 @@ public abstract class QueryImpl implements Query
     protected abstract List<Object> populateEntities(EntityMetadata m, Client client);
 
     /**
-     * Handle associations.
+     * Method to handle population of associated entities based on relation map.
      * 
      * @param m
      *            the m
@@ -805,7 +880,15 @@ public abstract class QueryImpl implements Query
      *            the relation names
      * @param isParent
      *            the is parent
+     * @return the list
      */
     protected abstract List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
             List<String> relationNames, boolean isParent);
+
+    /**
+     * Method returns entity reader.
+     * 
+     * @return entityReader entity reader.
+     */
+    protected abstract EntityReader getReader();
 }

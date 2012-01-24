@@ -189,7 +189,39 @@ public class PropertyAccessorHelper
         {
             // Always read from method. that way, even LazyInitialized
             // Proxy classes can be worked upon.
-            return (String) metadata.getReadIdentifierMethod().invoke(entity, new Object[] {});
+            return "" + metadata.getReadIdentifierMethod().invoke(entity, new Object[] {});
+        }
+        catch (IllegalArgumentException iarg)
+        {
+            throw new PropertyAccessException(iarg);
+        }
+        catch (IllegalAccessException iacc)
+        {
+            throw new PropertyAccessException(iacc);
+        }
+        catch (InvocationTargetException ite)
+        {
+            throw new PropertyAccessException(ite);
+        }
+    }
+
+    /**
+     * Sets Primary Key (Row key) into entity field that was annotated with @Id
+     * 
+     * @param entity
+     * @param metadata
+     * @param rowKey
+     * @throws PropertyAccessException
+     */
+    public static void setId(Object entity, EntityMetadata metadata, String rowKey) throws PropertyAccessException
+    {
+        try
+        {
+            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn()
+                    .getField());
+            Object obj = accessor.fromString(rowKey);
+
+            metadata.getWriteIdentifierMethod().invoke(entity, obj);
         }
         catch (IllegalArgumentException iarg)
         {

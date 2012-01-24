@@ -16,6 +16,7 @@
 package com.impetus.client.cassandra.pelops;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,8 +29,12 @@ import java.util.StringTokenizer;
 import javax.persistence.PersistenceException;
 
 import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
@@ -68,10 +73,12 @@ public class PelopsDataHandler extends DataHandler
 
     private static Log log = LogFactory.getLog(PelopsDataHandler.class);
 
-    public Object fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String rowKey) throws Exception
+    public Object fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String rowKey,
+            List<String> relationNames, boolean isWrapReq) throws Exception
     {
         List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
         Object e = null;
+
         if (!superColumnNames.isEmpty())
         {
             List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(), rowKey,
@@ -83,35 +90,44 @@ public class PelopsDataHandler extends DataHandler
         {
             // TODO: this needs attention, once we finalize on how to determine
             // SuperColmun Family.
-            List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(), rowKey,
-                    Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
-            List<Column> columns = null;
 
-            Set<SuperColumn> uniSupSet = new HashSet<SuperColumn>(thriftSuperColumns);
-            if (uniSupSet.isEmpty() || (uniSupSet.size() == 1 && uniSupSet.iterator().next() == null))
+            List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
+            ByteBuffer rKeyAsByte = ByteBufferUtil.bytes(rowKey);
+            rowKeys.add(ByteBufferUtil.bytes(rowKey));
+
+            Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow = selector
+                    .getColumnOrSuperColumnsFromRows(new ColumnParent(m.getTableName()), rowKeys,
+                            Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
+
+            List<ColumnOrSuperColumn> colList = columnOrSuperColumnsFromRow.get(rKeyAsByte);
+
+            List<Column> thriftColumns = new ArrayList<Column>(colList.size());
+            for (ColumnOrSuperColumn col : colList)
             {
-                columns = selector.getColumnsFromRow(m.getTableName(), new Bytes(rowKey.getBytes()),
-                        Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
-                e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), columns, null), null, false);
-            }
-            else
-            {
-                e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null, thriftSuperColumns),
-                        null, false);
+                if (col.super_column == null)
+                {
+                    thriftColumns.add(col.getColumn());
+                }
+                else
+                {
+                    thriftColumns.addAll(col.getSuper_column().getColumns());
+                }
 
             }
 
+            e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), thriftColumns, null),
+                    relationNames, isWrapReq);
         }
         return e;
     }
 
-    public List<Object> fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String... rowIds)
-            throws Exception
+    public List<Object> fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, List<String> relationNames,
+            boolean isWrapReq, String... rowIds) throws Exception
     {
         List<Object> entities = new ArrayList<Object>(rowIds.length);
         for (String rowKey : rowIds)
         {
-            Object e = fromThriftRow(selector, clazz, m, rowKey);
+            Object e = fromThriftRow(selector, clazz, m, rowKey, relationNames, isWrapReq);
             entities.add(e);
         }
         return entities;
@@ -139,8 +155,8 @@ public class PelopsDataHandler extends DataHandler
         // Instantiate a new instance
         E e = clazz.newInstance();
 
-        // Set row-key. Note: @Id is always String.
-        PropertyAccessorHelper.set(e, m.getIdColumn().getField(), tr.getId());
+        // Set row-key. Note:
+        PropertyAccessorHelper.setId(e, m, tr.getId());
 
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
@@ -226,100 +242,46 @@ public class PelopsDataHandler extends DataHandler
 
         // Instantiate a new instance
         Object entity = clazz.newInstance();
-        Map<String, Object> relations = null;
+        Map<String, Object> relations = new HashMap<String, Object>();
 
-        // Map to hold property-name=>foreign-entity relations
-        // Map<String, Set<String>> foreignKeysMap = new HashMap<String,
-        // Set<String>>();
-
-        // Set row-key. Note: @Id is always String.
-        PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), thriftRow.getId());
+        // Set row-key.
+        PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
+        // PropertyAccessorHelper.set(entity, m.getIdColumn().getField(),
+        // thriftRow.getId());
 
         // Iterate through each column
-        Set<Column> columns = null;
-        if (thriftRow.getColumns() != null && !thriftRow.getColumns().isEmpty())
+        for (Column c : thriftRow.getColumns())
         {
-            columns = new HashSet<Column>(thriftRow.getColumns());
-        }
-        if (columns != null && !(columns.size() == 1 && columns.iterator().next() != null))
-        {
-            for (Column c : thriftRow.getColumns())
+            String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(c.getName());
+            byte[] thriftColumnValue = c.getValue();
+
+            if (null == thriftColumnValue)
             {
-                String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(c.getName());
-                byte[] thriftColumnValue = c.getValue();
+                continue;
+            }
 
-                if (null == thriftColumnValue)
+            // Check if this is a property, or a column representing foreign
+            // keys
+            com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
+            if (column != null)
+            {
+                try
                 {
-                    continue;
+                    PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue);
                 }
-
-                // Check if this is a property, or a column representing foreign
-                // keys
-                com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
-                if (column != null)
+                catch (PropertyAccessException pae)
                 {
-                    try
-                    {
-                        PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue);
-                    }
-                    catch (PropertyAccessException pae)
-                    {
-                        log.warn(pae.getMessage());
-                    }
-                }
-                else
-                {
-                    if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
-                    {
-                        relations = new HashMap<String, Object>();
-                        String value = PropertyAccessorFactory.STRING.fromBytes(thriftColumnValue);
-                        relations.put(thriftColumnName, value);
-                        // prepare EnhanceEntity and return it
-                    }
+                    log.warn(pae.getMessage());
                 }
             }
-        }
-        else
-        {
-            for (SuperColumn c : thriftRow.getSuperColumns())
+            else
             {
-                for (Column cc : c.getColumns())
+                if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
                 {
-
-                    String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(cc.getName());
-                    byte[] thriftColumnValue = cc.getValue();
-
-                    if (null == thriftColumnValue)
-                    {
-                        continue;
-                    }
-
-                    // Check if this is a property, or a column representing
-                    // foreign
-                    // keys
-                    com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
-                    if (column != null)
-                    {
-                        try
-                        {
-                            PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue);
-                        }
-                        catch (PropertyAccessException pae)
-                        {
-                            log.warn(pae.getMessage());
-                        }
-                    }
-                    else
-                    {
-                        if (relationNames != null && !relationNames.isEmpty()
-                                && relationNames.contains(thriftColumnName))
-                        {
-                            relations = new HashMap<String, Object>();
-                            String value = PropertyAccessorFactory.STRING.fromBytes(thriftColumnValue);
-                            relations.put(thriftColumnName, value);
-                            // prepare EnhanceEntity and return it
-                        }
-                    }
+                    // relations = new HashMap<String, Object>();
+                    String value = PropertyAccessorFactory.STRING.fromBytes(thriftColumnValue);
+                    relations.put(thriftColumnName, value);
+                    // prepare EnhanceEntity and return it
                 }
             }
         }
@@ -339,8 +301,8 @@ public class PelopsDataHandler extends DataHandler
         // Map to hold property-name=>foreign-entity relations
         Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
-        // Set row-key. Note: @Id is always String.
-        PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), tr.getId());
+        // Set row-key
+        PropertyAccessorHelper.setId(entity, m, tr.getId());
 
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();

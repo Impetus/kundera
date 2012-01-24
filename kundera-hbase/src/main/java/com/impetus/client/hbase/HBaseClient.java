@@ -24,12 +24,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.PersistenceException;
-import javax.persistence.Query;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.HTablePool;
 
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
@@ -40,6 +39,7 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -63,48 +63,24 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     private String persistenceUnit;
 
-    public HBaseClient(IndexManager indexManager, HBaseConfiguration conf)
+    private EntityReader reader;
+
+    public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool, EntityReader reader)
     {
         this.indexManager = indexManager;
-        this.handler = new HBaseDataHandler(conf);
+        this.handler = new HBaseDataHandler(conf, hTablePool);
+        this.reader = reader;
     }
 
     @Override
     public void persist(EnhancedEntity enhancedEntity) throws Exception
     {
-        // EntityMetadata entityMetadata =
-        // KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(),
-        // enhancedEntity
-        // .getEntity().getClass());
-        //
-        // String dbName = entityMetadata.getSchema(); // Has no meaning for
-        // HBase,
-        // // not used
-        // String tableName = entityMetadata.getTableName();
-        //
-        // List<String> columnFamilyNames = new ArrayList<String>();
-        //
-        // // If this entity has columns(apart from embedded objects, they will
-        // be
-        // // treated as column family)
-        // List<Column> columns = entityMetadata.getColumnsAsList();
-        // if (columns != null && !columns.isEmpty())
-        // {
-        // columnFamilyNames.addAll(entityMetadata.getColumnFieldNames());
-        // }
-        //
-        // // Check whether this table exists, if not create it
-        // columnFamilyNames.addAll(entityMetadata.getEmbeddedColumnFieldNames());
-        // handler.createTableIfDoesNotExist(tableName,
-        // columnFamilyNames.toArray(new String[0]));
-        //
-        // // Write data to HBase
-        // handler.writeData(tableName, entityMetadata, enhancedEntity);
-
+        log.error("persist method on enhance entity is not supported now!");
+        throw new PersistenceException("method not supported");
     }
 
     @Override
-    public <E> E find(Class<E> entityClass, String rowId) throws Exception
+    public <E> E find(Class<E> entityClass, String rowId, List<String> relationNames) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         // columnFamily has a different meaning for HBase, so it won't be used
@@ -126,12 +102,6 @@ public class HBaseClient implements com.impetus.kundera.client.Client
             entities.add(e);
         }
         return entities;
-    }
-
-    @Override
-    public <E> List<E> loadData(Query query) throws Exception
-    {
-        throw new NotImplementedException("Not yet implemented");
     }
 
     @Override
@@ -358,7 +328,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
     @Override
-    public Object find(Class<?> clazz, EntityMetadata entityMetadata, String rowId)
+    public Object find(Class<?> clazz, EntityMetadata entityMetadata, String rowId, List<String> relationNames)
     {
         String tableName = entityMetadata.getTableName();
         Object enhancedEntity = null;
@@ -368,7 +338,6 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return enhancedEntity;
@@ -390,6 +359,17 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     public List<Object> find(String colName, String colValue, EntityMetadata m)
     {
         throw new UnsupportedOperationException("Method not supported");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getReader()
+     */
+    @Override
+    public EntityReader getReader()
+    {
+        return reader;
     }
 
 }

@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.cache.NonOperationalCacheProvider;
@@ -111,6 +112,14 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
                     + e.getMessage());
         }
 
+        // Invoke Client Loaders
+        logger.info("Loading Client(s) For Persistence Unit(s) " + persistenceUnit);
+
+        for (String pu : persistenceUnits)
+        {
+            ClientResolver.getClientFactory(pu).load(pu);
+        }
+        
         logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
 
@@ -199,8 +208,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @SuppressWarnings("unchecked")
     private CacheProvider initSecondLevelCache()
     {
-        String classResourceName = (String) getProperties().get("kundera.cache.config.resource");
-        String cacheProviderClassName = (String) getProperties().get("kundera.cache.provider.class");
+        String classResourceName = (String) getProperties().get(PersistenceProperties.KUNDERA_CACHE_CONFIG_RESOURCE);
+        String cacheProviderClassName = (String) getProperties().get(PersistenceProperties.KUNDERA_CACHE_PROVIDER_CLASS);
 
         CacheProvider cacheProvider = null;
         if (cacheProviderClassName != null)

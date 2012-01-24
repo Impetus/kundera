@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.PersistenceException;
-import javax.persistence.Query;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
@@ -33,7 +32,6 @@ import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
@@ -48,6 +46,7 @@ import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -75,6 +74,8 @@ public class PelopsClient implements Client
     /** The index manager. */
     private IndexManager indexManager;
 
+    private EntityReader reader;
+
     /** The persistence unit. */
     private String persistenceUnit;
 
@@ -87,10 +88,11 @@ public class PelopsClient implements Client
      * @param indexManager
      *            the index manager
      */
-    public PelopsClient(IndexManager indexManager)
+    public PelopsClient(IndexManager indexManager, EntityReader reader)
     {
         this.indexManager = indexManager;
         this.dataHandler = new PelopsDataHandler(this);
+        this.reader = reader;
     }
 
     /*
@@ -101,43 +103,8 @@ public class PelopsClient implements Client
      */
     @Override
     public void persist(EnhancedEntity enhancedEntity) throws Exception
-    {/*
-      * 
-      * EntityMetadata entityMetadata = KunderaMetadataManager .
-      * getEntityMetadata ( getPersistenceUnit (), enhancedEntity . getEntity
-      * (). getClass ()); String keyspace = entityMetadata . getSchema ();
-      * String columnFamily = entityMetadata . getTableName ();
-      * 
-      * if (!isOpen ()) { throw new PersistenceException (
-      * "PelopsClient is closed." ); }
-      * 
-      * PelopsDataHandler . ThriftRow tf = dataHandler . toThriftRow ( this,
-      * enhancedEntity , entityMetadata , columnFamily );
-      * 
-      * Mutator mutator = Pelops . createMutator ( PelopsUtils .
-      * generatePoolName ( getPersistenceUnit ()));
-      * 
-      * List< Column > thriftColumns = tf. getColumns (); List< SuperColumn >
-      * thriftSuperColumns = tf. getSuperColumns (); if ( thriftColumns != null
-      * && ! thriftColumns . isEmpty ()) { mutator . writeColumns ( columnFamily
-      * , new Bytes ( tf.getId (). getBytes ()), Arrays . asList (tf. getColumns
-      * ( ).toArray (new Column [ 0]))) ; }
-      * 
-      * if ( thriftSuperColumns != null && ! thriftSuperColumns . isEmpty ()) {
-      * for ( SuperColumn sc : thriftSuperColumns ) { Bytes . toUTF8 (sc.
-      * getColumns ( ).get (0). getValue ()); mutator . writeSubColumns (
-      * columnFamily , tf.getId (), Bytes . toUTF8 (sc. getName ()), sc.
-      * getColumns ());
-      * 
-      * }
-      * 
-      * } mutator . execute ( ConsistencyLevel . ONE);
-      * 
-      * getIndexManager ( ).write ( entityMetadata , enhancedEntity . getEntity
-      * ());
-      * 
-      * tf = null;
-      */
+    {
+        // DELETE it.
     }
 
     /*
@@ -147,20 +114,11 @@ public class PelopsClient implements Client
      * java.lang.String)
      */
     @Override
-    public final <E> E find(Class<E> entityClass, String rowId) throws Exception
+    @Deprecated
+    public final <E> E find(Class<E> entityClass, String rowId, List<String> relationNames) throws Exception
     {
-
-        if (!isOpen())
-        {
-            throw new PersistenceException("PelopsClient is closed.");
-        }
-
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-
-        E e = (E) dataHandler.fromThriftRow(selector, entityClass, entityMetadata, rowId.toString());
-
-        return e;
+        return (E) find(entityClass, entityMetadata, rowId, relationNames);
     }
 
     /*
@@ -169,22 +127,21 @@ public class PelopsClient implements Client
      * @see com.impetus.kundera.client.Client#find(java.lang.Class,
      * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
-    public final Object find(Class<?> clazz, EntityMetadata metadata, String rowId)
+    public final Object find(Class<?> clazz, EntityMetadata metadata, String rowId, List<String> relationNames)
     {
 
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        Object entity = null;
-        PelopsDataHandler handler = new PelopsDataHandler(this);
+        List<Object> result = null;
         try
         {
-            entity = handler.fromThriftRow(selector, clazz, metadata, rowId.toString());
+            result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata, rowId);
         }
         catch (Exception e)
         {
+            log.error("Error on retrieval" + e.getMessage());
             throw new PersistenceException(e.getMessage());
         }
 
-        return entity;
+        return result != null & !result.isEmpty() ? result.get(0) : null;
     }
 
     /*
@@ -196,17 +153,54 @@ public class PelopsClient implements Client
     @Override
     public final <E> List<E> find(Class<E> entityClass, String... rowIds) throws Exception
     {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
+        List<E> results = new ArrayList<E>();
+        for (String rowKey : rowIds)
+        {
+            E r = (E) find(entityClass, entityMetadata, rowKey, null);
+            if (r != null)
+            {
+                results.add(r);
+            }
+        }
+
+        return results.isEmpty() ? null : results;
+    }
+
+    /**
+     * Method to return list of entities for given below attributes:
+     * 
+     * @param <E>
+     *            entity to be returned
+     * @param entityClass
+     *            entity class
+     * @param relationNames
+     *            relation names
+     * @param isWrapReq
+     *            true, in case it needs to populate enhance entity.
+     * @param metadata
+     *            entity metadata.
+     * @param rowIds
+     *            array of row key s
+     * @return list of wrapped entities.
+     * @throws Exception
+     *             throws exception. don't know why TODO: why is it throwing
+     *             exception. need to take care as part of exception handling
+     *             exercise.
+     */
+    public final List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
+            String... rowIds) throws Exception
+    {
         if (!isOpen())
         {
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
         PelopsDataHandler handler = new PelopsDataHandler(this);
 
-        List<E> entities = (List<E>) handler.fromThriftRow(selector, entityClass, entityMetadata, rowIds);
+        List entities = handler.fromThriftRow(selector, entityClass, metadata, relationNames, isWrapReq, rowIds);
 
         return entities;
     }
@@ -260,43 +254,6 @@ public class PelopsClient implements Client
                 ConsistencyLevel.ONE);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#loadData(javax.persistence.Query)
-     */
-    @Override
-    public <E> List<E> loadData(Query query) throws Exception
-    {
-        throw new NotImplementedException("Not yet implemented");
-    }
-
-    // /* (non-Javadoc)
-    // * @see
-    // com.impetus.kundera.client.Client#delete(com.impetus.kundera.proxy.EnhancedEntity)
-    // */
-    // // @Override
-    // public final void delete(EnhancedEntity enhancedEntity) throws Exception
-    // {
-    //
-    // if (!isOpen())
-    // {
-    // throw new PersistenceException("PelopsClient is closed.");
-    // }
-    //
-    // EntityMetadata entityMetadata =
-    // KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(),
-    // enhancedEntity
-    // .getEntity().getClass());
-    //
-    // RowDeletor rowDeletor =
-    // Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-    // rowDeletor.deleteRow(entityMetadata.getTableName(),
-    // enhancedEntity.getId(), ConsistencyLevel.ONE);
-    // getIndexManager().remove(entityMetadata, enhancedEntity.getEntity(),
-    // enhancedEntity.getId());
-    // }
-    //
 
     /*
      * (non-Javadoc)
@@ -375,6 +332,11 @@ public class PelopsClient implements Client
         this.persistenceUnit = persistenceUnit;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#persist(java.lang.Object)
+     */
     @Override
     public String persist(EntitySaveGraph entityGraph, EntityMetadata metadata)
     {
@@ -593,9 +555,9 @@ public class PelopsClient implements Client
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
-        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
+        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         List<Object> entities = null;
-        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, Integer.MAX_VALUE,
+        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000,
                 Selector.newIndexExpression(colName, IndexOperator.EQ, Bytes.fromByteArray(colValue.getBytes())));
         Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
                 ConsistencyLevel.ONE);
@@ -760,4 +722,16 @@ public class PelopsClient implements Client
         mutator.execute(ConsistencyLevel.ONE);
         tf = null;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getReader()
+     */
+    @Override
+    public EntityReader getReader()
+    {
+        return reader;
+    }
+
 }

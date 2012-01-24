@@ -20,22 +20,20 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
-import javax.persistence.Query;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -68,18 +66,18 @@ public class MongoDBClient implements Client
 
     private String persistenceUnit;
 
+    private EntityReader reader;
+    
     /** The log. */
     private static Log log = LogFactory.getLog(MongoDBClient.class);
 
-    public MongoDBClient(Object mongo, IndexManager mgr)
+    public MongoDBClient(Object mongo, IndexManager mgr, EntityReader reader)
     {
         // TODO: This could be a constly call, see how connection pooling is
         // relevant here
         this.mongoDb = (DB) mongo;
         this.indexManager = mgr;
-
-        // this.dataHandler = new MongoDBDataHandler(this);
-
+        this.reader = reader;
     }
 
     @Override
@@ -278,7 +276,7 @@ public class MongoDBClient implements Client
      * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public <E> E find(Class<E> entityClass, String key) throws Exception
+    public <E> E find(Class<E> entityClass, String key, List<String> relationNames) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
 
@@ -302,7 +300,7 @@ public class MongoDBClient implements Client
         }
 
         Object enhancedEntity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
-                entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument);
+                entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, relationNames);
 
         return (E) enhancedEntity;
     }
@@ -326,7 +324,7 @@ public class MongoDBClient implements Client
         {
             DBObject fetchedDocument = cursor.next();
             Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
-                    entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument);
+                    entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, null);
             entities.add(entity);
         }
         return entities;
@@ -344,23 +342,13 @@ public class MongoDBClient implements Client
      * @throws Exception
      *             the exception
      */
-    public <E> List<E> loadData(Query query) throws Exception
+    public <E> List<E> loadData(EntityMetadata entityMetadata, BasicDBObject mongoQuery,String result, List<String> relationNames, BasicDBObject orderBy) throws Exception
     {
-        MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
-
-        // TODO Resolve the workaround
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), mongoDBQuery
-                .getKunderaQuery().getEntityClass());
-
         String documentName = entityMetadata.getTableName();
         String dbName = entityMetadata.getSchema();
         Class clazz = entityMetadata.getEntityClazz();
 
         DBCollection dbCollection = mongoDb.getCollection(documentName);
-
-        Queue filterClauseQueue = mongoDBQuery.getKunderaQuery().getFilterClauseQueue();
-        String result = mongoDBQuery.getKunderaQuery().getResult();
-
         List entities = new ArrayList<E>();
 
         // If User wants search on a column within a particular super column,
@@ -369,25 +357,21 @@ public class MongoDBClient implements Client
         // TODO: improve code
         if (result.indexOf(".") >= 0)
         {
-
+            // TODO i need to discuss with Amresh before modifying it.
             entities.addAll(new MongoDBDataHandler(this, getPersistenceUnit()).getEmbeddedObjectList(dbCollection,
-                    entityMetadata, documentName, query));
+                    entityMetadata, documentName, mongoQuery, result, orderBy));
 
         }
         else
         {
-            log.debug("Fetching data from " + documentName + " for Filter " + filterClauseQueue);
+            log.debug("Fetching data from " + documentName + " for Filter " + mongoQuery.toString());
 
-            BasicDBObject mongoQuery = new MongoDBDataHandler(this, getPersistenceUnit()).createMongoQuery(
-                    entityMetadata, filterClauseQueue);
-
-            DBCursor cursor = dbCollection.find(mongoQuery);
-
+            DBCursor cursor = orderBy != null? dbCollection.find(mongoQuery).sort(orderBy):dbCollection.find(mongoQuery);
+            MongoDBDataHandler handler = new MongoDBDataHandler(this, getPersistenceUnit());
             while (cursor.hasNext())
             {
                 DBObject fetchedDocument = cursor.next();
-                Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(clazz,
-                        entityMetadata, fetchedDocument);
+                Object entity = handler.getEntityFromDocument(clazz,entityMetadata, fetchedDocument, relationNames);
                 entities.add(entity);
             }
         }
@@ -485,7 +469,7 @@ public class MongoDBClient implements Client
      * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
     @Override
-    public Object find(Class<?> clazz, EntityMetadata entityMetadata, String rowId)
+    public Object find(Class<?> clazz, EntityMetadata entityMetadata, String rowId, List<String> relationNames)
     {
 
         log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + rowId);
@@ -508,13 +492,46 @@ public class MongoDBClient implements Client
         }
 
         Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
-                entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument);
+                entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, relationNames);
 
         return entity;
     }
 
+    /**
+     * Method to find entity for given association name and association value.
+     */
     public List<Object> find(String colName, String colValue, EntityMetadata m)
     {
-        throw new UnsupportedOperationException("Method not supported");
+        // you got column name and column value.
+        DBCollection dbCollection = mongoDb.getCollection(m.getTableName());
+
+        BasicDBObject query = new BasicDBObject();
+
+        query.put(colName, colValue);
+
+        DBCursor cursor = dbCollection.find(query);
+        DBObject fetchedDocument = null;
+        MongoDBDataHandler handler = new MongoDBDataHandler(this, getPersistenceUnit());
+        List<Object> results = new ArrayList<Object>();
+        while (cursor.hasNext())
+        {
+            fetchedDocument = cursor.next();
+            Object entity = handler.getEntityFromDocument(m.getEntityClazz(), m, fetchedDocument, null);
+            results.add(entity);
+        }
+
+        return results.isEmpty() ? null : results;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getReader()
+     */
+    @Override
+    public EntityReader getReader()
+    {
+        return reader;
+    }
+
 }

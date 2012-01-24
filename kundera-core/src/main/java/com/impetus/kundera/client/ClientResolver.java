@@ -18,6 +18,7 @@ package com.impetus.kundera.client;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -50,7 +51,7 @@ public final class ClientResolver
 
         PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
-        String kunderaClientName = (String) persistenceUnitMetadata.getProperties().get("kundera.client");
+        String kunderaClientName = (String) persistenceUnitMetadata.getProperties().get(PersistenceProperties.KUNDERA_CLIENT);
         ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());
 
         try

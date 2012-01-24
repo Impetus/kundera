@@ -188,10 +188,8 @@ public class LuceneIndexer extends DocumentIndexer
     @Override
     public final void index(EntityMetadata metadata, Object object)
     {
-
         indexDocument(metadata, object, null, null);
         onCommit();
-
     }
 
     @Override
@@ -301,7 +299,6 @@ public class LuceneIndexer extends DocumentIndexer
 
         log.debug("Indexing document in file system using lucene: " + document);
         indexDocumentUsingLucene(document);
-
     }
 
     /**
@@ -413,9 +410,9 @@ public class LuceneIndexer extends DocumentIndexer
     @Override
     public void index(EntityMetadata metadata, Object object, String parentId, Class<?> clazz)
     {
+
         indexDocument(metadata, object, parentId, clazz);
         onCommit();
-
     }
 
     private Document indexDocument(EntityMetadata metadata, Object object, String parentId, Class<?> clazz)

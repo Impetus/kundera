@@ -20,6 +20,7 @@ import java.util.Map;
 import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -61,7 +62,11 @@ public class IndexManager
     {
         try
         {
-            indexer.unindex(metadata, key);
+            if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+            {
+
+                indexer.unindex(metadata, key);
+            }
         }
         catch (Exception e)
         {
@@ -81,9 +86,13 @@ public class IndexManager
     {
         try
         {
-            String id = PropertyAccessorHelper.getId(entity, metadata);
-            indexer.unindex(metadata, id);
-            indexer.index(metadata, entity);
+            if(!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+            {
+
+                String id = PropertyAccessorHelper.getId(entity, metadata);
+                indexer.unindex(metadata, id);
+                indexer.index(metadata, entity);
+            }
         }
         catch (Exception e)
         {
@@ -101,7 +110,10 @@ public class IndexManager
      */
     public final void write(EntityMetadata metadata, Object entity)
     {
-        indexer.index(metadata, entity);
+        if(!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+        {
+            indexer.index(metadata, entity);
+        }
     }
 
     /**
@@ -118,7 +130,10 @@ public class IndexManager
      */
     public final void write(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz)
     {
-        indexer.index(metadata, entity, parentId, clazz);
+        if(!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+        {
+            indexer.index(metadata, entity, parentId, clazz);
+        }
     }
 
     /**

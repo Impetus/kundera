@@ -18,6 +18,7 @@ package com.impetus.client.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.FetchType;
@@ -25,7 +26,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import com.impetus.kundera.annotations.Cacheable;
 
 //@Entity
 @Table(name = "Department", schema = "Blog")

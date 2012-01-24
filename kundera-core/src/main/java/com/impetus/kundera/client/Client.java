@@ -18,10 +18,9 @@ package com.impetus.kundera.client;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Query;
-
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
@@ -57,7 +56,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    <E> E find(Class<E> entityClass, String key) throws Exception;
+    <E> E find(Class<E> entityClass, String key, List<String> relationNames) throws Exception;
 
     /**
      * Retrieve columns from multiple rows of a column-family.
@@ -88,21 +87,6 @@ public interface Client
      *             the exception
      */
     <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap) throws Exception;
-
-    /**
-     * Loads columns from multiple rows restricting results to conditions stored
-     * in <code>filterClauseQueue</code>.
-     * 
-     * @param <E>
-     *            the element type
-     * @param query
-     *            the query
-     * @return the list
-     * @throws Exception
-     *             the exception
-     */
-    @SuppressWarnings("unchecked")
-    <E> List<E> loadData(Query query) throws Exception;
 
     /**
      * Shutdown.
@@ -171,9 +155,11 @@ public interface Client
      * @param clazz
      * @param metadata
      * @param rowId
-     * @return
+     * @param relationNames
+     *            relation names
+     * @return entity.
      */
-    Object find(Class<?> clazz, EntityMetadata metadata, String rowId);
+    Object find(Class<?> clazz, EntityMetadata metadata, String rowId, List<String> relationNames);
 
     /**
      * Inserts records into Join Table
@@ -217,4 +203,10 @@ public interface Client
 
     List<Object> find(String colName, String colValue, EntityMetadata m);
 
+    /**
+     * Returns entity reader instance bind to specific client.
+     * 
+     * @return reader entity reader.
+     */
+    EntityReader getReader();
 }

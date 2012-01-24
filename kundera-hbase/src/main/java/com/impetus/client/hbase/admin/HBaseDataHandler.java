@@ -37,6 +37,7 @@ import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.HBaseData;
@@ -66,15 +67,18 @@ public class HBaseDataHandler implements DataHandler
 
     private HBaseConfiguration conf;
 
+    private HTablePool hTablePool;
+
     private Reader hbaseReader = new HBaseReader();
 
     private Writer hbaseWriter = new HBaseWriter();
 
-    public HBaseDataHandler(HBaseConfiguration conf)
+    public HBaseDataHandler(HBaseConfiguration conf, HTablePool hTablePool)
     {
         try
         {
             this.conf = conf;
+            this.hTablePool = hTablePool;
             this.admin = new HBaseAdmin(conf);
         }
         catch (Exception e)
@@ -141,13 +145,17 @@ public class HBaseDataHandler implements DataHandler
     {
 
         E entity = null;
+
+        HTable hTable = null;
+
         try
         {
-
             entity = clazz.newInstance(); // Entity Object
 
+            hTable = gethTable(tableName);
+
             // Load raw data from HBase
-            HBaseData data = hbaseReader.LoadData(gethTable(tableName), rowKey);
+            HBaseData data = hbaseReader.LoadData(hTable, rowKey);
 
             // Populate raw data from HBase into entity
             populateEntityFromHbaseData(entity, data, m, rowKey);
@@ -171,6 +179,13 @@ public class HBaseDataHandler implements DataHandler
             log.error("Illegal Access while reading data from " + tableName + ";Details: " + e1.getMessage());
             // return enhancedEntity;
         }
+        finally
+        {
+            if (hTable != null)
+            {
+                puthTable(hTable);
+            }
+        }
         return entity;
     }
 
@@ -178,6 +193,8 @@ public class HBaseDataHandler implements DataHandler
     public void writeData(String tableName, EntityMetadata m, Object entity, String rowId,
             List<RelationHolder> relations) throws IOException
     {
+
+        HTable hTable = gethTable(tableName);
 
         // Now persist column families in the table. For HBase, embedded columns
         // are called column families
@@ -199,12 +216,7 @@ public class HBaseDataHandler implements DataHandler
             }
             catch (PropertyAccessException e1)
             {
-                log.error("Error while getting " + columnFamilyName + " field from entity " + entity/*
-                                                                                                     * .
-                                                                                                     * getEntity
-                                                                                                     * (
-                                                                                                     * )
-                                                                                                     */);
+                log.error("Error while getting " + columnFamilyName + " field from entity " + entity);
                 return;
             }
 
@@ -217,6 +229,7 @@ public class HBaseDataHandler implements DataHandler
 
             // TODO: Handle Embedded collections differently
             // Write Column family which was Embedded collection in entity
+
             if (columnFamilyObject instanceof Collection)
             {
                 String dynamicCFName = null;
@@ -231,7 +244,7 @@ public class HBaseDataHandler implements DataHandler
                         dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
                         addColumnFamilyToTable(tableName, dynamicCFName);
 
-                        hbaseWriter.writeColumns(gethTable(tableName), dynamicCFName, rowId, columns, obj);
+                        hbaseWriter.writeColumns(hTable, dynamicCFName, rowId, columns, obj);
                         count++;
                     }
 
@@ -263,13 +276,11 @@ public class HBaseDataHandler implements DataHandler
                 // Write Column family which was Embedded object in entity
                 if (columnFamilyField.isAnnotationPresent(Embedded.class))
                 {
-                    hbaseWriter
-                            .writeColumns(gethTable(tableName), columnFamilyName, rowId, columns, columnFamilyObject);
+                    hbaseWriter.writeColumns(hTable, columnFamilyName, rowId, columns, columnFamilyObject);
                 }
                 else
                 {
-                    hbaseWriter.writeColumn(gethTable(tableName), columnFamilyName, rowId, columns.get(0),
-                            columnFamilyObject);
+                    hbaseWriter.writeColumn(hTable, columnFamilyName, rowId, columns.get(0), columnFamilyObject);
                 }
 
             }
@@ -281,7 +292,7 @@ public class HBaseDataHandler implements DataHandler
         if (columns != null && !columns.isEmpty())
         {
 
-            hbaseWriter.writeColumns(gethTable(tableName), rowId, columns, entity);
+            hbaseWriter.writeColumns(hTable, rowId, columns, entity);
         }
 
         // Persist relationships as a column in newly created Column family by
@@ -289,16 +300,20 @@ public class HBaseDataHandler implements DataHandler
         boolean containsEmbeddedObjectsOnly = (columns == null || columns.isEmpty());
         if (relations != null && !relations.isEmpty())
         {
-            hbaseWriter.writeRelations(gethTable(tableName), rowId, containsEmbeddedObjectsOnly, relations);
+            hbaseWriter.writeRelations(hTable, rowId, containsEmbeddedObjectsOnly, relations);
         }
 
+        puthTable(hTable);
     }
 
     @Override
     public void writeJoinTableData(String tableName, String rowId, Map<String, String> columns) throws IOException
     {
+        HTable hTable = gethTable(tableName);
 
-        hbaseWriter.writeColumns(gethTable(tableName), rowId, columns);
+        hbaseWriter.writeColumns(hTable, rowId, columns);
+
+        puthTable(hTable);
 
     }
 
@@ -307,10 +322,14 @@ public class HBaseDataHandler implements DataHandler
     {
         List<E> foreignKeys = new ArrayList<E>();
 
+        HTable hTable = null;
+
         // Load raw data from Join Table in HBase
         try
         {
-            HBaseData data = hbaseReader.LoadData(gethTable(joinTableName), Constants.JOIN_COLUMNS_FAMILY_NAME, rowKey);
+            hTable = gethTable(joinTableName);
+
+            HBaseData data = hbaseReader.LoadData(hTable, Constants.JOIN_COLUMNS_FAMILY_NAME, rowKey);
             List<KeyValue> hbaseValues = data.getColumns();
 
             for (KeyValue colData : hbaseValues)
@@ -330,12 +349,37 @@ public class HBaseDataHandler implements DataHandler
         {
             return foreignKeys;
         }
+        finally
+        {
+            if (hTable != null)
+            {
+                puthTable(hTable);
+            }
+        }
         return foreignKeys;
     }
 
+    /**
+     * Selects an HTable from the pool and returns
+     * 
+     * @param tableName
+     *            Name of HBase table
+     */
     private HTable gethTable(final String tableName) throws IOException
     {
-        return new HTable(conf, tableName);
+        // return new HTable(conf, tableName);
+        return hTablePool.getTable(tableName);
+    }
+
+    /**
+     * Puts HTable back into the HBase table pool
+     * 
+     * @param hTable
+     *            HBase Table instance
+     */
+    private void puthTable(HTable hTable)
+    {
+        hTablePool.putTable(hTable);
     }
 
     @Override
@@ -353,7 +397,8 @@ public class HBaseDataHandler implements DataHandler
          * 
          * } catch (IOException e) { throw new RuntimeException(e.getMessage());
          * }
-         */}
+         */
+    }
 
     // TODO: Scope of performance improvement in this method
     private void populateEntityFromHbaseData(Object entity, HBaseData hbaseData, EntityMetadata m, String rowKey)
@@ -361,7 +406,7 @@ public class HBaseDataHandler implements DataHandler
         try
         {
             /* Set Row Key */
-            PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), rowKey);
+            PropertyAccessorHelper.setId(entity, m, rowKey);
 
             // Raw data retrieved from HBase for a particular row key (contains
             // all column families)

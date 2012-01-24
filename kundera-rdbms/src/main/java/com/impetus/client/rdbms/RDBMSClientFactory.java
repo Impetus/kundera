@@ -1,21 +1,23 @@
 /**
- *
+ * 
  */
 package com.impetus.client.rdbms;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.impetus.client.rdbms.query.RDBMSEntityReader;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.impetus.kundera.persistence.EntityReader;
 
 /**
  * @author impadmin
- *
+ * 
  */
 public class RDBMSClientFactory extends GenericClientFactory
 {
@@ -24,9 +26,11 @@ public class RDBMSClientFactory extends GenericClientFactory
 
     IndexManager indexManager;
 
+    private EntityReader reader;
+
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.loader.Loader#unload(java.lang.String[])
      */
     @Override
@@ -37,18 +41,20 @@ public class RDBMSClientFactory extends GenericClientFactory
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#initializeClient()
      */
     @Override
     protected void initializeClient()
     {
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
+        reader = new RDBMSEntityReader();
+        ((RDBMSEntityReader) reader).setFilter("where");
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
      */
@@ -61,19 +67,19 @@ public class RDBMSClientFactory extends GenericClientFactory
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient()
      */
     @Override
     protected Client instantiateClient()
     {
         // TODO Auto-generated method stub
-        return new HibernateClient(getPersistenceUnit(), indexManager);
+        return new HibernateClient(getPersistenceUnit(), indexManager, reader);
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#isClientThreadSafe()
      */
     @Override

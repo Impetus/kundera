@@ -20,9 +20,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Query;
-
 import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -37,6 +36,7 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -64,6 +64,8 @@ public class HibernateClient implements Client
 
     private StatelessSession s;
 
+    private EntityReader reader;
+
     /**
      * Instantiates a new hibernate client.
      * 
@@ -72,7 +74,7 @@ public class HibernateClient implements Client
      * @param indexManager
      *            the index manager
      */
-    public HibernateClient(final String persistenceUnit, IndexManager indexManager)
+    public HibernateClient(final String persistenceUnit, IndexManager indexManager, EntityReader reader)
     {
         conf = new Configuration().addProperties(HibernateUtils.getProperties(persistenceUnit));
         Collection<Class<?>> classes = ((MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
@@ -87,6 +89,7 @@ public class HibernateClient implements Client
         // modify this to have a properties or even pass an EMF!
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
+        this.reader = reader;
     }
 
     /*
@@ -127,18 +130,6 @@ public class HibernateClient implements Client
     {
 
         return persistenceUnit;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#loadData(javax.persistence.Query)
-     */
-    @Override
-    public <E> List<E> loadData(Query arg0) throws Exception
-    {
-
-        return null;
     }
 
     /*
@@ -208,7 +199,7 @@ public class HibernateClient implements Client
      * java.lang.String)
      */
     @Override
-    public <E> E find(Class<E> arg0, String arg1) throws Exception
+    public <E> E find(Class<E> arg0, String arg1, List<String> relationNames) throws Exception
     {
 
         Session s = getSessionInstance();
@@ -243,6 +234,12 @@ public class HibernateClient implements Client
         return c.list();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.util.Map)
+     */
     @Override
     @Deprecated
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap) throws Exception
@@ -250,14 +247,29 @@ public class HibernateClient implements Client
         return null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#persist(com.impetus.kundera.persistence
+     * .handler.impl.EntitySaveGraph,
+     * com.impetus.kundera.metadata.model.EntityMetadata)
+     */
     @Override
     public String persist(EntitySaveGraph entityGraph, EntityMetadata metadata)
     {
 
-        Session s = getSessionInstance();
-        Transaction tx = s.beginTransaction();
-        s.persist(entityGraph.getParentEntity());
-        tx.commit();
+        Session s;
+		Transaction tx;
+		try {
+			s = getSessionInstance();
+			tx = s.beginTransaction();
+			s.persist(entityGraph.getParentEntity());
+                        tx.commit();
+		} catch (org.hibernate.exception.ConstraintViolationException e) {
+			e.printStackTrace();
+		}
+
 
         // If entity has a parent entity, update foreign key
         if (entityGraph.getRevFKeyName() != null)
@@ -445,17 +457,17 @@ public class HibernateClient implements Client
      * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
     @Override
-    public Object find(Class<?> clazz, EntityMetadata metadata, String rowId)
+    public Object find(Class<?> clazz, EntityMetadata metadata, String rowId, List<String> relations)
     {
-        // TODO Auto-generated method stub
         Session s = sf.openSession();
         s.beginTransaction();
         return s.get(clazz, rowId);
     }
 
-    public List<Object[]> find(String nativeQuery, List<String> relations, Class clazz)
+    public List find(String nativeQuery, List<String> relations, Class clazz)
     {
         // Session s = getSessionInstance();
+        List<Object[]> result = new ArrayList<Object[]>();
         if (s == null)
         {
             s = sf.openStatelessSession();
@@ -490,5 +502,10 @@ public class HibernateClient implements Client
         s.beginTransaction();
         SQLQuery q = s.createSQLQuery(queryBuilder.toString()).addEntity(m.getEntityClazz());
         return q.list();
+    }
+
+    public EntityReader getReader()
+    {
+        return reader;
     }
 }

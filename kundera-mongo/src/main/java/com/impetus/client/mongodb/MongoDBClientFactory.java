@@ -3,20 +3,24 @@ package com.impetus.client.mongodb;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.mongodb.MongoOptions;
 
 public class MongoDBClientFactory extends GenericClientFactory
 {
@@ -26,12 +30,14 @@ public class MongoDBClientFactory extends GenericClientFactory
     IndexManager indexManager;
 
     private DB mongoDB;
+    
+    private EntityReader reader;
 
     @Override
     protected void initializeClient()
     {
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
-
+        reader = new MongoEntityReader();
     }
 
     @Override
@@ -47,7 +53,7 @@ public class MongoDBClientFactory extends GenericClientFactory
     {
         // TODO To change this one pool is implemented
 
-        return new MongoDBClient(mongoDB, indexManager);
+        return new MongoDBClient(mongoDB, indexManager, reader);
     }
 
     private DB getConnection()
@@ -57,15 +63,23 @@ public class MongoDBClientFactory extends GenericClientFactory
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
         Properties props = persistenceUnitMetadata.getProperties();
-        String contactNode = (String) props.get("kundera.nodes");
-        String defaultPort = (String) props.get("kundera.port");
-        String keyspace = (String) props.get("kundera.keyspace");
+        String contactNode = (String) props.get(PersistenceProperties.KUNDERA_NODES);
+        String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
+        String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
+        String poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
 
         Mongo mongo = null;
         logger.info("Connecting to mongodb at " + contactNode + " on port " + defaultPort);
         try
         {
             mongo = new Mongo(contactNode, Integer.parseInt(defaultPort));
+
+            if (!StringUtils.isEmpty(poolSize))
+            {
+                MongoOptions mo = mongo.getMongoOptions();
+                mo.connectionsPerHost = Integer.parseInt(poolSize);
+            }
+
             logger.info("Connected to mongodb at " + contactNode + " on port " + defaultPort);
         }
         catch (NumberFormatException e)

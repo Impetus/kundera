@@ -42,10 +42,6 @@ public class StringAccessor implements PropertyAccessor<String>
         }
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
-     */
     @Override
     public final byte[] toBytes(Object s) throws PropertyAccessException
     {
@@ -59,14 +55,16 @@ public class StringAccessor implements PropertyAccessor<String>
         }
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
-     */
     @Override
     public final String toString(Object object)
     {
         return (String) object;
+    }
+
+    @Override
+    public String fromString(String s) throws PropertyAccessException
+    {
+        return s;
     }
 
 }
