@@ -26,6 +26,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -85,7 +86,7 @@ public class QueryResolver
             for (PersistenceUnitMetadata puMetadata : puMetadataMap.values())
             {
                 Properties props = puMetadata.getProperties();
-                String clientName = props.getProperty("kundera.client");
+                String clientName = props.getProperty(PersistenceProperties.KUNDERA_CLIENT);
                 if (ClientType.RDBMS.name().equalsIgnoreCase(clientName))
                 {
                     pu = puMetadata.getPersistenceUnitName();
@@ -96,7 +97,7 @@ public class QueryResolver
         }
 
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
-        String kunderaClientName = (String) puMetadata.getProperties().get("kundera.client");
+        String kunderaClientName = (String) puMetadata.getProperties().get(PersistenceProperties.KUNDERA_CLIENT);
         ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());
 
         Query query = null;

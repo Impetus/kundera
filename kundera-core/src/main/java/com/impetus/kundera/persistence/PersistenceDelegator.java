@@ -39,6 +39,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.client.ClientType;
@@ -138,7 +139,7 @@ public class PersistenceDelegator
                 for (PersistenceUnitMetadata puMetadata : puMetadataMap.values())
                 {
                     Properties props = puMetadata.getProperties();
-                    String clientName = props.getProperty("kundera.client");
+                    String clientName = props.getProperty(PersistenceProperties.KUNDERA_CLIENT);
                     if (ClientType.RDBMS.name().equalsIgnoreCase(clientName))
                     {
                         if (persistenceUnit.equals(puMetadata.getPersistenceUnitName()))
@@ -172,7 +173,7 @@ public class PersistenceDelegator
                 for (PersistenceUnitMetadata puMetadata : puMetadataMap.values())
                 {
                     Properties props = puMetadata.getProperties();
-                    String clientName = props.getProperty("kundera.client");
+                    String clientName = props.getProperty(PersistenceProperties.KUNDERA_CLIENT);
                     if (ClientType.RDBMS.name().equalsIgnoreCase(clientName))
                     {
                         persistenceUnit = puMetadata.getPersistenceUnitName();
