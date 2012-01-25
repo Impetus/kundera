@@ -722,42 +722,46 @@ public class PersistenceDelegator
      */
     private void persistOneChildEntity(Object child, EntitySaveGraph objectGraph)
     {
-        EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
-
-        boolean imChildProcessed = false;
-
-        List<Relation> relations = metadata.getRelations();
-
-        // If child entity doesn't have any further relations, just persist it
-        // into database
-        // Otherwise treat it as parent entity for its related entities,
-        // determine graph and save that graph recursively.
-        
-        List<EntitySaveGraph> objectGraphs = getGraph(child, metadata);
-        if(!((relations == null || relations.isEmpty()) || objectGraph.isIsswapped()))
+        if (getSession().lookup(child.getClass(), objectGraph.getChildId()) == null)
         {
-            for (EntitySaveGraph graph : objectGraphs)
+            EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
+
+            boolean imChildProcessed = false;
+
+            List<Relation> relations = metadata.getRelations();
+
+            // If child entity doesn't have any further relations, just persist
+            // it
+            // into database
+            // Otherwise treat it as parent entity for its related entities,
+            // determine graph and save that graph recursively.
+
+            List<EntitySaveGraph> objectGraphs = getGraph(child, metadata);
+            if (!((relations == null || relations.isEmpty()) || objectGraph.isIsswapped()))
             {
-                // This this graph is for an entity that has it's own parent,
-                // set reverse Foreign Key
-                // i.e. Foreign key that refers to its parent
-                if (!graph.equals(objectGraph))
+                for (EntitySaveGraph graph : objectGraphs)
                 {
-                    graph.setRevFKeyName(objectGraph.getfKeyName());
-                    graph.setRevFKeyValue(objectGraph.getParentId());
-                    graph.setRevParentClass(objectGraph.getParentClass());
-                    imChildProcessed = true;
-                    saveGraph(graph);
+                    // This this graph is for an entity that has it's own
+                    // parent,
+                    // set reverse Foreign Key
+                    // i.e. Foreign key that refers to its parent
+                    if (!graph.equals(objectGraph))
+                    {
+                        graph.setRevFKeyName(objectGraph.getfKeyName());
+                        graph.setRevFKeyValue(objectGraph.getParentId());
+                        graph.setRevParentClass(objectGraph.getParentClass());
+                        imChildProcessed = true;
+                        saveGraph(graph);
+                    }
                 }
             }
-        }
-        
-        //In case immediate child is not yet processed!
-        if (!imChildProcessed)
-        {
-            saveImmediateChild(child, objectGraph, metadata);
-        }
 
+            // In case immediate child is not yet processed!
+            if (!imChildProcessed)
+            {
+                saveImmediateChild(child, objectGraph, metadata);
+            }
+        }
     }
 
     private void saveImmediateChild(Object child, EntitySaveGraph objectGraph, EntityMetadata metadata)
