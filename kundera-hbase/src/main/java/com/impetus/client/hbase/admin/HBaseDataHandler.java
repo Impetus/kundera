@@ -479,7 +479,12 @@ public class HBaseDataHandler implements DataHandler
                         // count>
                         if (!cfInHbase.startsWith(columnFamily.getName()))
                         {
-                            continue;
+                        	 if(relationNames != null && relationNames.contains(cfInHbase))
+                             {
+                                 relations.put(cfInHbase, Bytes.toString(colData.getValue()));
+                             } 
+                            	 continue;
+                             
                         }
 
                         String cfNamePostfix = MetadataUtils.getEmbeddedCollectionPostfix(cfInHbase);
@@ -528,7 +533,12 @@ public class HBaseDataHandler implements DataHandler
 
                         if (!cfInHbase.equals(columnFamily.getName()))
                         {
-                            continue;
+                        	if(relationNames != null && relationNames.contains(cfInHbase))
+                            {
+                                relations.put(cfInHbase, Bytes.toString(colData.getValue()));
+                            }
+                           	 continue;
+                            
                         }
                         // Set Hbase data into the column family object
                         // setHBaseDataIntoObject(colData,

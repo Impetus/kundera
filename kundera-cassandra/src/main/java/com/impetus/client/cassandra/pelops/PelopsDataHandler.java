@@ -364,16 +364,16 @@ public class PelopsDataHandler extends DataHandler
                 // For embedded super columns, create embedded entities and
                 // add them to parent entity
                 Field superColumnField = superColumnNameToFieldMap.get(scName);
-                if (superColumnField != null)
+                Object superColumnObj = null;
+                if (superColumnField != null || (relationNames != null && !relationNames.isEmpty() && relationNames.contains(scName)))
                 {
-                    Class superColumnClass = superColumnField.getType();
-                    Object superColumnObj = superColumnClass.newInstance();
 
+                	Class  superColumnClass = superColumnField!=null? superColumnField.getType():null;
+                	superColumnObj = superColumnClass!= null? superColumnClass.newInstance():null;
                     for (Column column : sc.getColumns())
                     {
                         String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
                         byte[] value = column.getValue();
-
                         Field columnField = columnNameToFieldMap.get(name);
                         if (columnField != null)
                         {
@@ -391,15 +391,21 @@ public class PelopsDataHandler extends DataHandler
                                         + ". Possible case of entity column in a super column family. Will be treated as a super column.");
                                 superColumnObj = Bytes.toUTF8(value);
                             }
+                            
                         } 
-                        else if(relationNames != null && !relationNames.isEmpty() && relationNames.contains(name))
+                        else 
                         {
                             String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(value);
                             relations.put(name, valueAsStr);
                         }
 
                     }
-                    PropertyAccessorHelper.set(entity, superColumnField, superColumnObj);
+                 
+                }
+                
+                if(superColumnField !=null)
+                {	
+                	PropertyAccessorHelper.set(entity, superColumnField, superColumnObj);
                 }
 
             }
