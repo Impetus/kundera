@@ -27,6 +27,7 @@ import java.util.Set;
 import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.utils.ReflectUtils;
 
 // TODO: Auto-generated Javadoc
@@ -183,27 +184,17 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static String getId(Object entity, EntityMetadata metadata) throws PropertyAccessException
-    {
-        try
-        {
-            // Always read from method. that way, even LazyInitialized
-            // Proxy classes can be worked upon.
-            return metadata.getReadIdentifierMethod().invoke(entity, new Object[] {}).toString();
-        }
-        catch (IllegalArgumentException iarg)
-        {
-            throw new PropertyAccessException(iarg);
-        }
-        catch (IllegalAccessException iacc)
-        {
-            throw new PropertyAccessException(iacc);
-        }
-        catch (InvocationTargetException ite)
-        {
-            throw new PropertyAccessException(ite);
-        }
+  public static String getId (Object entity, EntityMetadata metadata) throws PropertyAccessException {
+
+    // If an Entity has been wrapped in a Proxy, we can call the Proxy classes' getId() method
+    if (entity instanceof EnhancedEntity) {
+
+      return ((EnhancedEntity)entity).getId();
     }
+
+    // Otherwise, as Kundera currently supports only field access, access the underlying Entity's id field
+    return getString(entity, metadata.getIdColumn().getField());
+  }
 
     /**
      * Sets Primary Key (Row key) into entity field that was annotated with @Id
