@@ -18,7 +18,6 @@ package com.impetus.client.mongodb.query;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 import javax.persistence.Query;
@@ -174,18 +173,32 @@ public class MongoDBQuery extends QueryImpl
                 else if (condition.equalsIgnoreCase("like"))
                 {
                     query.append(property, Pattern.compile(value));
+                } 
+                else if(condition.equalsIgnoreCase(">"))
+                {
+                    query.append(property, new BasicDBObject("$gt", value));
+                    
+                } else if(condition.equalsIgnoreCase(">="))
+                {
+                    query.append(property, new BasicDBObject("$gte", value));
+                    
+                } else if(condition.equalsIgnoreCase("<"))
+                {
+                    query.append(property, new BasicDBObject("$lt", value));
+
+                } else if(condition.equalsIgnoreCase("<="))
+                {
+                    query.append(property, new BasicDBObject("$lte", value));
                 }
+                
                 // TODO: Add support for other operators like >, <, >=, <=,
                 // order by asc/ desc, limit, skip, count etc
             }
-            
-//            List<SortOrdering> orders = kunderaQuery.getOrdering();
-            
-            
         }
         return query;
     }
 
+    
     /**
      * Prepare order by clause
      * @return order by clause.

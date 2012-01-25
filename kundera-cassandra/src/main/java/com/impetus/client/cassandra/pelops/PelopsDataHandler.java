@@ -83,7 +83,7 @@ public class PelopsDataHandler extends DataHandler
         {
             List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(), rowKey,
                     Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
-            e = fromSuperColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null, thriftSuperColumns));
+            e = fromSuperColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null, thriftSuperColumns), relationNames, isWrapReq);
 
         }
         else
@@ -292,7 +292,7 @@ public class PelopsDataHandler extends DataHandler
      * Fetches data held in Thrift row super columns and populates to Entity
      * objects
      */
-    public <E> E fromSuperColumnThriftRow(Class<E> clazz, EntityMetadata m, ThriftRow tr) throws Exception
+    public Object fromSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr, List<String> relationNames, boolean isWrapReq) throws Exception
     {
 
         // Instantiate a new instance
@@ -312,6 +312,8 @@ public class PelopsDataHandler extends DataHandler
         // Add all super columns to entity
         Collection embeddedCollection = null;
         Field embeddedCollectionField = null;
+        Map<String, Object> relations = new HashMap<String, Object>();
+
         for (SuperColumn sc : tr.getSuperColumns())
         {
             String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
@@ -338,9 +340,18 @@ public class PelopsDataHandler extends DataHandler
                     {
                         continue;
                     }
+                    
+                    
                     Field columnField = columnNameToFieldMap.get(name);
-                    PropertyAccessorHelper.set(embeddedObject, columnField, value);
-
+                    if(columnField != null)
+                    {
+                        PropertyAccessorHelper.set(embeddedObject, columnField, value);
+                    }
+                    else if(relationNames != null && !relationNames.isEmpty() && relationNames.contains(name))
+                    {
+                        String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(value);
+                        relations.put(name, valueAsStr);
+                    }
                 }
                 embeddedCollection.add(embeddedObject);
 
@@ -364,20 +375,29 @@ public class PelopsDataHandler extends DataHandler
                         byte[] value = column.getValue();
 
                         Field columnField = columnNameToFieldMap.get(name);
-                        try
+                        if (columnField != null)
                         {
-                            PropertyAccessorHelper.set(superColumnObj, columnField, value);
-                        }
-                        catch (PropertyAccessException e)
+                            try
+                            {
+                                PropertyAccessorHelper.set(superColumnObj, columnField, value);
+                            }
+                            catch (PropertyAccessException e)
+                            {
+                                // This is an entity column to be retrieved in a
+                                // super column family. It's stored as a super
+                                // column that would
+                                // have just one column with the same name
+                                log.debug(e.getMessage()
+                                        + ". Possible case of entity column in a super column family. Will be treated as a super column.");
+                                superColumnObj = Bytes.toUTF8(value);
+                            }
+                        } 
+                        else if(relationNames != null && !relationNames.isEmpty() && relationNames.contains(name))
                         {
-                            // This is an entity column to be retrieved in a
-                            // super column family. It's stored as a super
-                            // column that would
-                            // have just one column with the same name
-                            log.debug(e.getMessage()
-                                    + ". Possible case of entity column in a super column family. Will be treated as a super column.");
-                            superColumnObj = Bytes.toUTF8(value);
+                            String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(value);
+                            relations.put(name, valueAsStr);
                         }
+
                     }
                     PropertyAccessorHelper.set(entity, superColumnField, superColumnObj);
                 }
@@ -393,7 +413,7 @@ public class PelopsDataHandler extends DataHandler
 
         // EnhancedEntity e = EntityResolver.getEnhancedEntity(entity,
         // tr.getId(), foreignKeysMap);
-        return (E) entity;
+        return isWrapReq ? new EnhanceEntity(entity, tr.getId(), relations) : entity;
     }
 
     public Object populateEmbeddedObject(SuperColumn sc, EntityMetadata m) throws Exception

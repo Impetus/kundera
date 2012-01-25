@@ -707,6 +707,7 @@ public abstract class QueryImpl implements Query
         {
             if (object instanceof FilterClause)
             {
+                boolean appended=false;
                 FilterClause filter = (FilterClause) object;
                 sb.append("+");
                 // property
@@ -723,10 +724,33 @@ public abstract class QueryImpl implements Query
                     sb.append(":");
                     appender = "*";
                 }
+                else if(filter.getCondition().equalsIgnoreCase(">"))
+                {
+                    sb.append(appendRange(filter.getValue(),false,true));
+                    appended=true;
+                }
+                else if(filter.getCondition().equalsIgnoreCase(">="))
+                {
+                    sb.append(appendRange(filter.getValue(),true,true));
+                    appended=true;
+                }
+                else if(filter.getCondition().equalsIgnoreCase("<"))
+                {
+                    sb.append(appendRange(filter.getValue(),false,false));
+                    appended=true;
+                }
+                else if(filter.getCondition().equalsIgnoreCase("<="))
+                {
+                    sb.append(appendRange(filter.getValue(),true,false));
+                    appended=true;
+                }
 
-                // value
-                sb.append(filter.getValue());
-                sb.append(appender);
+                // value. if not already appended.
+                if(!appended)
+                {
+                    sb.append(filter.getValue());
+                    sb.append(appender);
+                }
             }
             else
             {
@@ -856,6 +880,22 @@ public abstract class QueryImpl implements Query
         return columnName;
     }
 
+    private String appendRange(String value, boolean inclusive, boolean isGreaterThan)
+    {
+        String appender=" ";
+        StringBuilder sb = new StringBuilder();
+        sb.append(":");
+        sb.append(inclusive?"[":"{");
+        sb.append(isGreaterThan?value:"*");
+        sb.append(appender);
+        sb.append("TO");
+        sb.append(appender);
+        sb.append(isGreaterThan?"null":value);
+        sb.append(inclusive?"]":"}");
+        return sb.toString();
+    }
+    
+    
     /**
      * Populate entities, Method to populate data in case no relation exist!.
      * 
