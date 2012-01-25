@@ -244,9 +244,10 @@ public abstract class DocumentIndexer implements Indexer
             luceneField = new Field(ENTITY_CLASS_FIELD, metadata.getEntityClazz().getCanonicalName().toLowerCase(),
                     Field.Store.YES, Field.Index.ANALYZED);
             document.add(luceneField);
-
-            luceneField = new Field("timestamp", System.currentTimeMillis()+"",Field.Store.YES, Field.Index.NO);
-            document.add(luceneField);
+//
+//            luceneField = new Field("timestamp", System.currentTimeMillis()+"",Field.Store.YES, Field.Index.NO);
+//            document.add(luceneField);
+            
             // index index name
             luceneField = new Field(ENTITY_INDEXNAME_FIELD, metadata.getIndexName(), Field.Store.NO,
                     Field.Index.ANALYZED_NO_NORMS);

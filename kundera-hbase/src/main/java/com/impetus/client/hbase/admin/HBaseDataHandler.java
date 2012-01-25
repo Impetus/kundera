@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +48,7 @@ import com.impetus.client.hbase.service.HBaseReader;
 import com.impetus.client.hbase.service.HBaseWriter;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
@@ -140,11 +142,11 @@ public class HBaseDataHandler implements DataHandler
     }
 
     @Override
-    public <E> E readData(final String tableName, Class<E> clazz, EntityMetadata m, final String rowKey)
+    public Object readData(final String tableName, Class clazz, EntityMetadata m, final String rowKey, List<String> relationNames)
             throws IOException
     {
 
-        E entity = null;
+        Object entity = null;
 
         HTable hTable = null;
 
@@ -158,7 +160,7 @@ public class HBaseDataHandler implements DataHandler
             HBaseData data = hbaseReader.LoadData(hTable, rowKey);
 
             // Populate raw data from HBase into entity
-            populateEntityFromHbaseData(entity, data, m, rowKey);
+            entity = populateEntityFromHbaseData(entity, data, m, rowKey, relationNames);
 
             // Map to hold property-name=>foreign-entity relations
             // Map<String, Set<String>> foreignKeysMap = new HashMap<String,
@@ -186,6 +188,7 @@ public class HBaseDataHandler implements DataHandler
                 puthTable(hTable);
             }
         }
+     
         return entity;
     }
 
@@ -401,7 +404,7 @@ public class HBaseDataHandler implements DataHandler
     }
 
     // TODO: Scope of performance improvement in this method
-    private void populateEntityFromHbaseData(Object entity, HBaseData hbaseData, EntityMetadata m, String rowKey)
+    private Object populateEntityFromHbaseData(Object entity, HBaseData hbaseData, EntityMetadata m, String rowKey, List<String> relationNames)
     {
         try
         {
@@ -411,7 +414,8 @@ public class HBaseDataHandler implements DataHandler
             // Raw data retrieved from HBase for a particular row key (contains
             // all column families)
             List<KeyValue> hbaseValues = hbaseData.getColumns();
-
+            
+            Map<String, Object> relations = new HashMap<String, Object>();
             /*
              * Populate columns data
              */
@@ -424,12 +428,16 @@ public class HBaseDataHandler implements DataHandler
                 for (KeyValue colData : hbaseValues)
                 {
                     String hbaseColumn = Bytes.toString(colData.getColumn());
+                    String colName = getColumnName(hbaseColumn);
                     if (hbaseColumn != null && hbaseColumn.startsWith(columnName))
                     {
                         byte[] hbaseColumnValue = colData.getValue();
                         PropertyAccessorHelper.set(entity, columnField, hbaseColumnValue);
 
                         break;
+                    } else if(relationNames != null && relationNames.contains(getColumnName(colName)))
+                    {
+                        relations.put(colName, Bytes.toString(colData.getValue()));
                     }
                 }
 
@@ -551,7 +559,12 @@ public class HBaseDataHandler implements DataHandler
                 }
 
             }
-
+            if(!relations.isEmpty())
+            {
+                return new EnhanceEntity(entity, rowKey, relations);
+            }
+            
+            return entity;
         }
         catch (PropertyAccessException e1)
         {
@@ -565,6 +578,7 @@ public class HBaseDataHandler implements DataHandler
         {
             throw new RuntimeException(e1.getMessage());
         }
+        
     }
 
     private void setHBaseDataIntoObject(KeyValue colData, Field columnFamilyField,
@@ -591,4 +605,8 @@ public class HBaseDataHandler implements DataHandler
 
     }
 
+    private String getColumnName(String hbaseColumn)
+    {
+        return hbaseColumn != null?hbaseColumn.substring(hbaseColumn.indexOf(0)+1):null;
+    }
 }

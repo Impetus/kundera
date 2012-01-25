@@ -86,7 +86,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         // columnFamily has a different meaning for HBase, so it won't be used
         // here
         String tableName = entityMetadata.getTableName();
-        Object enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId);
+        Object enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId, relationNames);
         return (E) enhancedEntity;
     }
 
@@ -98,7 +98,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         for (String rowKey : rowIds)
         {
             E e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(), entityMetadata,
-                    rowKey);
+                    rowKey, null);
             entities.add(e);
         }
         return entities;
@@ -114,7 +114,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         {
             String entityId = col.get(columnFamilyName);
             E e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(), entityMetadata,
-                    entityId);
+                    entityId, null);
 
             Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName.substring(0,
                     columnFamilyName.indexOf("|")));
@@ -334,7 +334,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         Object enhancedEntity = null;
         try
         {
-            enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId);
+            enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId, relationNames);
         }
         catch (IOException e)
         {
