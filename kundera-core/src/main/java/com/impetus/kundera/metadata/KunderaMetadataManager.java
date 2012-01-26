@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author amresh.singh
- * 
+ *
  */
 public class KunderaMetadataManager
 {
@@ -83,7 +83,7 @@ public class KunderaMetadataManager
 
     /**
      * Finds ands returns Entity metadata for a given array of PUs
-     * 
+     *
      * @param entityClass
      * @param persistenceUnits
      * @return

@@ -27,12 +27,13 @@ import java.util.Set;
 import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.utils.ReflectUtils;
 
 // TODO: Auto-generated Javadoc
 /**
  * Helper class to access fields.
- * 
+ *
  * @author animesh.kumar
  */
 public class PropertyAccessorHelper
@@ -40,14 +41,14 @@ public class PropertyAccessorHelper
 
     /**
      * Sets a byte-array onto a field.
-     * 
+     *
      * @param target
      *            the target
      * @param field
      *            the field
      * @param bytes
      *            the bytes
-     * 
+     *
      * @throws PropertyAccessException
      *             the property access exception
      */
@@ -61,14 +62,14 @@ public class PropertyAccessorHelper
 
     /**
      * Sets an object onto a field.
-     * 
+     *
      * @param target
      *            the target
      * @param field
      *            the field
      * @param value
      *            the value
-     * 
+     *
      * @throws PropertyAccessException
      *             the property access exception
      */
@@ -95,14 +96,14 @@ public class PropertyAccessorHelper
 
     /**
      * Gets object from field.
-     * 
+     *
      * @param from
      *            the from
      * @param field
      *            the field
-     * 
+     *
      * @return the object
-     * 
+     *
      * @throws PropertyAccessException
      *             the property access exception
      */
@@ -130,14 +131,14 @@ public class PropertyAccessorHelper
 
     /**
      * Gets the string.
-     * 
+     *
      * @param from
      *            the from
      * @param field
      *            the field
-     * 
+     *
      * @return the string
-     * 
+     *
      * @throws PropertyAccessException
      *             the property access exception
      */
@@ -152,14 +153,14 @@ public class PropertyAccessorHelper
 
     /**
      * Gets field value as byte-array.
-     * 
+     *
      * @param from
      *            the from
      * @param field
      *            the field
-     * 
+     *
      * @return the byte[]
-     * 
+     *
      * @throws PropertyAccessException
      *             the property access exception
      */
@@ -171,43 +172,33 @@ public class PropertyAccessorHelper
 
     /**
      * Get identifier of an entity object by invoking getXXX() method.
-     * 
-     * 
+     *
+     *
      * @param entity
      *            the entity
      * @param metadata
      *            the metadata
-     * 
+     *
      * @return the id
-     * 
+     *
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static String getId(Object entity, EntityMetadata metadata) throws PropertyAccessException
-    {
-        try
-        {
-            // Always read from method. that way, even LazyInitialized
-            // Proxy classes can be worked upon.
-            return "" + metadata.getReadIdentifierMethod().invoke(entity, new Object[] {});
-        }
-        catch (IllegalArgumentException iarg)
-        {
-            throw new PropertyAccessException(iarg);
-        }
-        catch (IllegalAccessException iacc)
-        {
-            throw new PropertyAccessException(iacc);
-        }
-        catch (InvocationTargetException ite)
-        {
-            throw new PropertyAccessException(ite);
-        }
+  public static String getId (Object entity, EntityMetadata metadata) throws PropertyAccessException {
+
+    // If an Entity has been wrapped in a Proxy, we can call the Proxy classes' getId() method
+    if (entity instanceof EnhancedEntity) {
+
+      return ((EnhancedEntity)entity).getId();
     }
+
+    // Otherwise, as Kundera currently supports only field access, access the underlying Entity's id field
+    return getString(entity, metadata.getIdColumn().getField());
+  }
 
     /**
      * Sets Primary Key (Row key) into entity field that was annotated with @Id
-     * 
+     *
      * @param entity
      * @param metadata
      * @param rowKey
@@ -239,7 +230,7 @@ public class PropertyAccessorHelper
 
     /**
      * Gets the embedded object.
-     * 
+     *
      * @param obj
      *            the obj
      * @param fieldName
@@ -316,7 +307,7 @@ public class PropertyAccessorHelper
 
     /**
      * Retrieves Generic class from a collection field.
-     * 
+     *
      * @param collectionField
      *            the collection field
      * @return the generic class
@@ -346,7 +337,7 @@ public class PropertyAccessorHelper
 
     /**
      * Gets the declared fields.
-     * 
+     *
      * @param relationalField
      *            the relational field
      * @return the declared fields

@@ -29,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
 
-import com.eaio.uuid.UUID;
 import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -46,7 +45,7 @@ import com.impetus.kundera.query.exception.QueryHandlerException;
 
 /**
  * The Class CassQuery.
- * 
+ *
  * @author vivek.mishra
  */
 public class CassQuery extends QueryImpl implements Query
@@ -59,7 +58,7 @@ public class CassQuery extends QueryImpl implements Query
 
     /**
      * Instantiates a new cass query.
-     * 
+     *
      * @param query
      *            the query
      * @param persistenceDelegator
@@ -76,7 +75,7 @@ public class CassQuery extends QueryImpl implements Query
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
      * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
@@ -126,7 +125,7 @@ public class CassQuery extends QueryImpl implements Query
                     clauses.add(indexClause);
                     indexClause = Selector.newIndexClause(Bytes.EMPTY, Integer.SIZE);
                     expr = new ArrayList<IndexExpression>();
-*/                 
+*/
                     log.error("Support for OR clause is not enabled with in cassandra");
                     throw new QueryHandlerException("unsupported clause " + opr + " for cassandra");
                  }
@@ -143,7 +142,7 @@ public class CassQuery extends QueryImpl implements Query
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera
      * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client,
@@ -194,7 +193,7 @@ public class CassQuery extends QueryImpl implements Query
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.impetus.kundera.query.QueryImpl#getReader()
      */
     @Override
@@ -208,33 +207,33 @@ public class CassQuery extends QueryImpl implements Query
         return reader;
     }
 
-    
+
     private Bytes getBytesValue(String fieldName, EntityMetadata m, String value)
     {
         Column col = m.getColumn(fieldName);
         Field f = col.getField();
-        
+
        if(f.getType() != null)
        {
         if(f.getType().isAssignableFrom(String.class))
         {
             return Bytes.fromByteArray(value.getBytes());
-        } else if(f.getType().isAssignableFrom(Integer.class))
+        } else if(f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
         {
             return Bytes.fromInt(Integer.parseInt(value));
-        } else if(f.getType().isAssignableFrom(Long.class))
+        } else if(f.getType().equals(long.class) || f.getType().isAssignableFrom(Long.class))
         {
             return Bytes.fromLong(Long.parseLong(value));
-        } else if(f.getType().isAssignableFrom(Boolean.class))
+        } else if(f.getType().equals(boolean.class) || f.getType().isAssignableFrom(Boolean.class))
         {
             return Bytes.fromBoolean(Boolean.valueOf(value));
-        } else if(f.getType().isAssignableFrom(Double.class))
+        } else if(f.getType().equals(double.class) || f.getType().isAssignableFrom(Double.class))
         {
             return Bytes.fromDouble(Double.valueOf(value));
         } else if(f.getType().isAssignableFrom(java.util.UUID.class))
         {
             return Bytes.fromUuid(value);
-        } else if(f.getType().isAssignableFrom(Float.class))
+        } else if(f.getType().equals(float.class) || f.getType().isAssignableFrom(Float.class))
         {
             return Bytes.fromFloat(Float.valueOf(value));
         } else
