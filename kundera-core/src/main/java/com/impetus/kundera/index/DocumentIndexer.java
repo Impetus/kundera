@@ -36,7 +36,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * The Class KunderaIndexer.
- * 
+ *
  * @author animesh.kumar
  */
 public abstract class DocumentIndexer implements Indexer
@@ -88,7 +88,7 @@ public abstract class DocumentIndexer implements Indexer
 
     /**
      * Instantiates a new lucandra indexer.
-     * 
+     *
      * @param client
      *            the client
      * @param analyzer
@@ -103,7 +103,7 @@ public abstract class DocumentIndexer implements Indexer
 
     /**
      * Prepare document.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @param object
@@ -142,7 +142,7 @@ public abstract class DocumentIndexer implements Indexer
 
     /**
      * Index super column.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @param object
@@ -174,7 +174,7 @@ public abstract class DocumentIndexer implements Indexer
 
     /**
      * Index super column name.
-     * 
+     *
      * @param superColumnName
      *            the super column name
      * @param currentDoc
@@ -188,7 +188,7 @@ public abstract class DocumentIndexer implements Indexer
 
     /**
      * Adds the index properties.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @param object
@@ -210,7 +210,7 @@ public abstract class DocumentIndexer implements Indexer
 
     /**
      * Prepare index document.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @param object
@@ -260,7 +260,7 @@ public abstract class DocumentIndexer implements Indexer
 
     /**
      * Index field.
-     * 
+     *
      * @param object
      *            the object
      * @param document
@@ -277,7 +277,8 @@ public abstract class DocumentIndexer implements Indexer
     {
         try
         {
-            String value = PropertyAccessorHelper.getObject(object, field).toString();
+            Object obj =  PropertyAccessorHelper.getObject(object, field);
+            String value = (obj == null) ? null : obj.toString();
             if (value != null)
             {
                 Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), value, Field.Store.YES,
@@ -297,12 +298,12 @@ public abstract class DocumentIndexer implements Indexer
 
     /**
      * Gets the kundera id.
-     * 
+     *
      * @param metadata
      *            the metadata
      * @param id
      *            the id
-     * 
+     *
      * @return the kundera id
      */
     protected String getKunderaId(EntityMetadata metadata, String id)
@@ -312,12 +313,12 @@ public abstract class DocumentIndexer implements Indexer
 
     /**
      * Gets the cannonical property name.
-     * 
+     *
      * @param indexName
      *            the index name
      * @param propertyName
      *            the property name
-     * 
+     *
      * @return the cannonical property name
      */
     private String getCannonicalPropertyName(String indexName, String propertyName)
