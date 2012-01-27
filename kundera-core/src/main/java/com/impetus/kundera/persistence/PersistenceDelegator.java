@@ -36,8 +36,8 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Query;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
@@ -65,7 +65,7 @@ public class PersistenceDelegator
 {
 
     /** The Constant log. */
-    private static Logger logger = LoggerFactory.getLogger(PersistenceDelegator.class);
+    private static final Log log = LogFactory.getLog(PersistenceDelegator.class);
 
     /** The closed. */
     private boolean closed = false;
@@ -307,7 +307,7 @@ public class PersistenceDelegator
             // save each one
             for (EnhancedEntity o : reachableEntities)
             {
-                logger.debug("Merging Entity : " + o);
+                log.debug("Merging Entity : " + o);
 
                 EntityMetadata m = KunderaMetadataManager.getEntityMetadata(o.getEntity().getClass(),
                         getPersistenceUnits());
@@ -355,7 +355,7 @@ public class PersistenceDelegator
                 // If parent entity is marked for delete
             }
             getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
-            logger.debug("Data removed successfully for entity : " + e.getClass());
+            log.debug("Data removed successfully for entity : " + e.getClass());
         }
 
         catch (Exception exp)
@@ -480,7 +480,7 @@ public class PersistenceDelegator
 
             // Invoke Post Persist Events
             getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
-            logger.debug("Data persisted successfully for entity : " + e.getClass());
+            log.debug("Data persisted successfully for entity : " + e.getClass());
         }
         catch (Exception exp)
         {
@@ -511,7 +511,7 @@ public class PersistenceDelegator
 
             if (null != e)
             {
-                logger.debug(entityClass.getName() + "_" + primaryKey + " is loaded from cache!");
+                log.debug(entityClass.getName() + "_" + primaryKey + " is loaded from cache!");
                 return e;
             }
 
@@ -699,7 +699,7 @@ public class PersistenceDelegator
         {
             Collection<?> childCol = (Collection<?>) childEntity;
             for (Object ch : childCol)
-            {                
+            {
                 persistOneChildEntity(ch, objectGraph);
             }
 
@@ -722,21 +722,9 @@ public class PersistenceDelegator
      */
     private void persistOneChildEntity(Object child, EntitySaveGraph objectGraph)
     {
-        EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
-        String childId = null;
-        try
+        if (objectGraph.getChildId() != null || getSession().lookup(child.getClass(), objectGraph.getChildId()) == null)
         {
-            childId = PropertyAccessorHelper.getId(child, metadata);
-        }
-        catch (PropertyAccessException e)
-        {    
-            logger.error("Could not fetch Primary key of child entity " + child + ". Child entity won't be persisted!");
-            return;
-        }
-        
-        if (getSession().lookup(child.getClass(), childId)  == null)
-        {
-            
+            EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
 
             boolean imChildProcessed = false;
 
