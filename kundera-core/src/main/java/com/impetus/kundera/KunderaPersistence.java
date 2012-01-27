@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Class KunderaPersistence.
- * 
+ *
  * @author animesh.kumar
  */
 @SuppressWarnings("unchecked")
@@ -80,7 +80,7 @@ public class KunderaPersistence implements PersistenceProvider
 
     /**
      * One time initialization at Application and Client level
-     * 
+     *
      * @param persistenceUnit
      *            Persistence Unit/ Comma separated persistence units
      */
