@@ -279,10 +279,10 @@ public abstract class DocumentIndexer implements Indexer
         try
         {
             Object obj =  PropertyAccessorHelper.getObject(object, field);
-            String value = (obj == null) ? null : obj.toString();
-            if (value != null)
+//            String value = (obj == null) ? null : obj.toString();
+            if (obj != null)
             {
-                Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), value, Field.Store.YES,
+                Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), obj.toString(), Field.Store.YES,
                         Field.Index.ANALYZED_NO_NORMS);
                 document.add(luceneField);
             }
@@ -328,21 +328,5 @@ public abstract class DocumentIndexer implements Indexer
     }
 
     protected abstract void indexDocument(EntityMetadata metadata, Document currentDoc);
-
-    public Field getLuceneField(String name, String value)
-    {
-        // try
-        // {
-        // tokenizer = new StandardTokenizer(Version.LUCENE_34,new
-        // CharArrayReader(value.toCharArray()));
-        // tokenizer.reset(new CharArrayReader(value.toCharArray()));
-        // return new Field(name, tokenizer);
-        // }
-        // catch (IOException e)
-        // {
-        // throw new IndexingException(e.getMessage());
-        // }
-        return new Field(name, value, Field.Store.YES, Field.Index.ANALYZED_NO_NORMS);
-    }
 
 }
