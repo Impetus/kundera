@@ -252,7 +252,7 @@ public class MetadataUtils
             return clientMetadata.getLuceneIndexDir();
         }
         
-        throw new PersistenceException("Usage of default indexing is not set!, please ensure index_home_dir is set for persistence unit" + persistenceUnit);
+        return null;
     }
 
 }
