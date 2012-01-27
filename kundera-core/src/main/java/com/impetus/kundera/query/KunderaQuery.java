@@ -45,13 +45,13 @@ public class KunderaQuery
             "GROUP BY", "HAVING", "ORDER BY" };
 
     /** The Constant INTER_CLAUSE_OPERATORS. */
-    public static final String[] INTER_CLAUSE_OPERATORS = { "AND", "OR" };
+    public static final String[] INTER_CLAUSE_OPERATORS = { "AND", "OR", "BETWEEN" };
 
     /** The Constant INTRA_CLAUSE_OPERATORS. */
     public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE", ">", ">=", "<", "<=" };
 
     /** The INTER pattern. */
-    private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile("\\band\\b|\\bor\\b", Pattern.CASE_INSENSITIVE);
+    private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile("\\band\\b|\\bor\\b|\\bbetween\\b", Pattern.CASE_INSENSITIVE);
 
     /** The INTRA pattern. */
     private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b|>=|>|<=|<",
@@ -277,9 +277,12 @@ public class KunderaQuery
         {
             return;
         }
-
+        
         List<String> clauses = tokenize(filter, INTER_CLAUSE_PATTERN);
-        // clauses must be alternate Inter and Intra conbination, starting with
+        
+        //parse and structure for "between" clause , if present, else it will return original clause
+        clauses = parseFilterForBetweenClause(clauses, indexName);
+        // clauses must be alternate Inter and Intra combination, starting with
         // Intra.
         boolean newClause = true;
         for (String clause : clauses)
@@ -529,7 +532,7 @@ public class KunderaQuery
             s = where.substring(lastIndex, matcher.start()).trim();
             split.add(s);
             s = matcher.group();
-            split.add(s);
+            split.add(s.toUpperCase());
             lastIndex = matcher.end();
             // count++;
         }
@@ -670,4 +673,39 @@ public class KunderaQuery
  DESC;
     }
 
+    /**
+     * Return parsed token string.
+     * @param tokens            inter claues token string.
+     * @param indexName         table name  
+     * @return                  tokens converted to "<=" and ">=" clause
+     */
+    private List<String> parseFilterForBetweenClause(List<String> tokens, String indexName)
+    {
+        final String between="BETWEEN";
+
+        if(tokens.contains(between))
+        {
+            // change token set to parse and compile.
+            int idxOfBetween = tokens.indexOf(between);
+            String property = tokens.get(idxOfBetween-1);
+//            property = property.substring((entityAlias + ".").length());
+//            property = indexName + "." + property;
+            Matcher match = INTRA_CLAUSE_PATTERN.matcher(property);
+            //in case any intra clause given along with column name.
+            if(match.find())
+            {
+                logger.error("bad jpa query:");
+                throw new KunderaQueryParserException("invalid column name" + property);
+            }
+            String minValue = tokens.get(idxOfBetween+1);
+            String maxValue = tokens.get(idxOfBetween+3);
+            
+            tokens.set(idxOfBetween+1, property+">="+minValue);
+            tokens.set(idxOfBetween+3, property+"<="+maxValue);
+            tokens.remove(idxOfBetween-1);
+            tokens.remove(idxOfBetween-1);
+        }
+        
+        return tokens;
+    }
 }

@@ -5,6 +5,8 @@ import javax.persistence.PersistenceException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,9 +51,8 @@ public abstract class GenericClientFactory implements Loader
         if (KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit) == null)
         {
             ClientMetadata clientMetadata = new ClientMetadata();
-            String secIndex = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getPersistenceUnitMetadata(persistenceUnit).getProperty("use_secondry_index");
-            clientMetadata.setUseSecondryIndex(secIndex == null || !secIndex.equals("true") ? false : true);
+            String secIndex = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit).getProperty("index_home_dir");
+            clientMetadata.setLuceneIndexDir(secIndex);
             KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
         }
     }

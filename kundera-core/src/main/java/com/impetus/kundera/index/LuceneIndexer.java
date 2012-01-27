@@ -73,16 +73,18 @@ public class LuceneIndexer extends DocumentIndexer
     private static LuceneIndexer indexer;
 
     private static boolean readyForCommit;
+    
+    private static String luceneDirPath;
 
     /**
      * @param analyzer
      */
-    private LuceneIndexer(Analyzer analyzer)
+    private LuceneIndexer(Analyzer analyzer, String lucDirPath)
     {
         super(analyzer);
         try
         {
-
+            luceneDirPath = lucDirPath;
             index = new RAMDirectory();/*
                                         * FSDirectory.open(getIndexDirectory( ))
                                         */
@@ -115,12 +117,12 @@ public class LuceneIndexer extends DocumentIndexer
      * @param client
      * @param analyzer
      */
-    public static synchronized LuceneIndexer getInstance(Analyzer analyzer)
+    public static synchronized LuceneIndexer getInstance(Analyzer analyzer, String lucDirPath)
     {
         // super(analyzer);
         if (indexer == null)
         {
-            indexer = new LuceneIndexer(analyzer);
+            indexer = new LuceneIndexer(analyzer, lucDirPath);
 
         }
         return indexer;
@@ -176,8 +178,8 @@ public class LuceneIndexer extends DocumentIndexer
      */
     private File getIndexDirectory()
     {
-        String filePath = System.getProperty("user.home") + "/" + Constants.LUCENE_INDEX_DIRECTORY_NAME;
-        File file = new File(filePath);
+//        String filePath = System.getProperty("user.home") + "/" + Constants.LUCENE_INDEX_DIRECTORY_NAME;
+        File file = new File(luceneDirPath);
         if (!file.isDirectory())
         {
             file.mkdir();

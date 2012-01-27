@@ -14,6 +14,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityReader;
@@ -36,7 +37,8 @@ public class MongoDBClientFactory extends GenericClientFactory
     @Override
     protected void initializeClient()
     {
-        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34)));
+        String luceneDirPath = MetadataUtils.getLuceneDirectory(getPersistenceUnit());
+        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34), luceneDirPath));
         reader = new MongoEntityReader();
     }
 

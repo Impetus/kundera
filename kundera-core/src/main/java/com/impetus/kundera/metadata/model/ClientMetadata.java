@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * @author amresh.singh
  * 
@@ -25,8 +27,8 @@ public class ClientMetadata
 
     private String indexImplementor;
 
-    private boolean useSecondryIndex;
-
+    private String LuceneIndexDir;
+    
     /**
      * @return the clientImplementor
      */
@@ -66,16 +68,25 @@ public class ClientMetadata
      */
     public boolean isUseSecondryIndex()
     {
-        return useSecondryIndex;
+        return StringUtils.isEmpty(LuceneIndexDir) && StringUtils.isBlank(LuceneIndexDir);
+    }
+
+    
+    /**
+     * @return the luceneIndexDir
+     */
+    public String getLuceneIndexDir()
+    {
+        return LuceneIndexDir;
     }
 
     /**
-     * @param useSecondryIndex
-     *            the useSecondryIndex to set
+     * @param luceneIndexDir the luceneIndexDir to set
      */
-    public void setUseSecondryIndex(boolean useSecondryIndex)
+    public void setLuceneIndexDir(String luceneIndexDir)
     {
-        this.useSecondryIndex = useSecondryIndex;
+        LuceneIndexDir = luceneIndexDir;
     }
 
+    
 }

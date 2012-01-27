@@ -228,18 +228,31 @@ public class MetadataUtils
         }
     }
 
-    /*
-     * public static void main(String[] args) { String schemaStr =
-     * "KunderaExamples@twibase"; if(schemaStr.indexOf("@") > 0) {
-     * System.out.println(schemaStr.substring(0, schemaStr.indexOf("@")));
-     * System.out.println(schemaStr.substring(schemaStr.indexOf("@") + 1,
-     * schemaStr.length())); } else { System.out.println(schemaStr); } }
+    /**
+     * Returns true, if use of secondry index is available, else false.
+     * @param persistenceUnit persistence unit name
+     * @return    true, if usage is true in pu. else false.
      */
-
     public static boolean useSecondryIndex(String persistenceUnit)
     {
         ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
         return clientMetadata != null? clientMetadata.isUseSecondryIndex() : false;
+    }
+    
+    /**
+     * Returns lucene indexing directory.
+     * @param persistenceUnit      persistence unit name
+     * @return  lucene directory
+     */
+    public static String getLuceneDirectory(String persistenceUnit)
+    {
+        if(!useSecondryIndex(persistenceUnit))
+        {
+            ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
+            return clientMetadata.getLuceneIndexDir();
+        }
+        
+        throw new PersistenceException("Usage of default indexing is not set!, please ensure index_home_dir is set for persistence unit" + persistenceUnit);
     }
 
 }
