@@ -264,7 +264,7 @@ public class MongoDBClient implements Client
 
         BasicDBObject document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(
                 entityMetadata, entity, relations);
-        dbCollection.insert(document);
+        dbCollection.save(document);
 
     }
 
