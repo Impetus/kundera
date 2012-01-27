@@ -147,7 +147,7 @@ public class PropertyAccessorHelper
 
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
         Object object = getObject(from, field);
-        return object != null ? accessor.toString() : null;
+        return object != null ? accessor.toString(object) : null;
 
     }
 
