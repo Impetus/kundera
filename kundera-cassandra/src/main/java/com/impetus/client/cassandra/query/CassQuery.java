@@ -214,34 +214,41 @@ public class CassQuery extends QueryImpl implements Query
         Field f = col.getField();
 
        if(f.getType() != null)
-       {
-        if(f.getType().isAssignableFrom(String.class))
         {
-            return Bytes.fromByteArray(value.getBytes());
-        } else if(f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
-        {
-            return Bytes.fromInt(Integer.parseInt(value));
-        } else if(f.getType().equals(long.class) || f.getType().isAssignableFrom(Long.class))
-        {
-            return Bytes.fromLong(Long.parseLong(value));
-        } else if(f.getType().equals(boolean.class) || f.getType().isAssignableFrom(Boolean.class))
-        {
-            return Bytes.fromBoolean(Boolean.valueOf(value));
-        } else if(f.getType().equals(double.class) || f.getType().isAssignableFrom(Double.class))
-        {
-            return Bytes.fromDouble(Double.valueOf(value));
-        } else if(f.getType().isAssignableFrom(java.util.UUID.class))
-        {
-            return Bytes.fromUuid(value);
-        } else if(f.getType().equals(float.class) || f.getType().isAssignableFrom(Float.class))
-        {
-            return Bytes.fromFloat(Float.valueOf(value));
-        } else
-        {
-            log.error("Error while handling data type for:" + fieldName);
-            throw new QueryHandlerException("unsupported data type:" + f.getType());
-        }
-       }else
+            if (f.getType().isAssignableFrom(String.class))
+            {
+                return Bytes.fromByteArray(value.getBytes());
+            }
+            else if (f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
+            {
+                return Bytes.fromInt(Integer.parseInt(value));
+            }
+            else if (f.getType().equals(long.class) || f.getType().isAssignableFrom(Long.class))
+            {
+                return Bytes.fromLong(Long.parseLong(value));
+            }
+            else if (f.getType().equals(boolean.class) || f.getType().isAssignableFrom(Boolean.class))
+            {
+                return Bytes.fromBoolean(Boolean.valueOf(value));
+            }
+            else if (f.getType().equals(double.class) || f.getType().isAssignableFrom(Double.class))
+            {
+                return Bytes.fromDouble(Double.valueOf(value));
+            }
+            else if (f.getType().isAssignableFrom(java.util.UUID.class))
+            {
+                return Bytes.fromUuid(value);
+            }
+            else if (f.getType().equals(float.class) || f.getType().isAssignableFrom(Float.class))
+            {
+                return Bytes.fromFloat(Float.valueOf(value));
+            }
+            else
+            {
+                log.error("Error while handling data type for:" + fieldName);
+                throw new QueryHandlerException("unsupported data type:" + f.getType());
+            }
+        }else
        {
            log.error("Error while handling data type for:" + fieldName);
            throw new QueryHandlerException("field type is null for:" + fieldName);
