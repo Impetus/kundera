@@ -46,6 +46,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
+import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
@@ -599,22 +600,25 @@ public abstract class QueryImpl implements Query
         // if it does not then it means it is a parent.
         List<Object> result = null;
         Map<Object, Object> relationalValues = new HashMap<Object, Object>();
-        for (EnhanceEntity e : enhanceEntities)
-        {
-            if (result == null)
+        if(enhanceEntities != null) {
+            for (EnhanceEntity e : enhanceEntities)
             {
-                result = new ArrayList<Object>(enhanceEntities.size());
+                if (result == null)
+                {
+                    result = new ArrayList<Object>(enhanceEntities.size());
+                }
+                try
+                {
+                    result.add(getReader().computeGraph(e, graphs, relationalValues, client, m, persistenceDelegeator));
+                }
+                catch (Exception ex)
+                {
+                    log.error("Error on computing relations:" + ex.getMessage());
+                    throw new QueryHandlerException(ex.getMessage());
+                }
             }
-            try
-            {
-                result.add(getReader().computeGraph(e, graphs, relationalValues, client, m, persistenceDelegeator));
-            }
-            catch (Exception ex)
-            {
-                log.error("Error on computing relations:" + ex.getMessage());
-                throw new QueryHandlerException(ex.getMessage());
-            }
-        }
+        }        
+        
         return result;
     }
 

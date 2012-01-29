@@ -445,15 +445,49 @@ public class PersistenceDelegator
      */
     private void onClientDelete(Object child, EntitySaveGraph objectGraph) throws Exception
     {
+        // If child entity doesn't have any further relations, just delete it from database
+        // Otherwise treat it as parent entity for its related entities,
+        // determine graph and delete that graph recursively.
+
         EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
-        String id = getId(child, metadata);
-        objectGraph.setChildId(id);
-        // if (getSession().lookup(child.getClass(), id) == null)
-        // {
-        Client chClient = getClient(metadata);
-        chClient.delete(child, id, metadata);
-        // session.store(id, child);
-        // }
+        List<Relation> relations = metadata.getRelations();
+        
+        boolean imChildProcessed = false;
+        
+        List<EntitySaveGraph> objectGraphs = getGraph(child, metadata);
+        if (!((relations == null || relations.isEmpty()) || objectGraph.isIsswapped()))
+        {
+            for (EntitySaveGraph graph : objectGraphs)
+            {
+                // This this graph is for an entity that has it's own
+                // parent,
+                // set reverse Foreign Key
+                // i.e. Foreign key that refers to its parent
+                if (!graph.equals(objectGraph))
+                {
+                    graph.setRevFKeyName(objectGraph.getfKeyName());
+                    graph.setRevFKeyValue(objectGraph.getParentId());
+                    graph.setRevParentClass(objectGraph.getParentClass());
+                    imChildProcessed = true;
+                    removeGraph(graph);
+                }
+            }
+        }
+
+        // In case immediate child is not yet processed!
+        if (!imChildProcessed)
+        {           
+            String id = getId(child, metadata);
+            objectGraph.setChildId(id);
+            // if (getSession().lookup(child.getClass(), id) == null)
+            // {
+            Client chClient = getClient(metadata);
+            chClient.delete(child, id, metadata);
+            // session.store(id, child);
+            // }
+        }  
+        
+        
     }
 
     /**
@@ -532,6 +566,10 @@ public class PersistenceDelegator
             EnhanceEntity enhanceEntity = reader.findById(rowKey, entityMetadata, relationNames, client);
 
             Map<Object, Object> relationalValues = new HashMap<Object, Object>();
+            if(enhanceEntity == null || enhanceEntity.getEntity() == null)
+            {
+                return null;
+            }
             E entity = (E) enhanceEntity.getEntity();
             if (relationNames.isEmpty() && !entityMetadata.isRelationViaJoinTable())
             {
@@ -880,7 +918,7 @@ public class PersistenceDelegator
      *            the client
      * @return the reader
      */
-    private EntityReader getReader(Client client)
+    public EntityReader getReader(Client client)
     {
         return client.getReader();
     }

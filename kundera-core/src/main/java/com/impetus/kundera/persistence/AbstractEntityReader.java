@@ -69,15 +69,15 @@ public class AbstractEntityReader
         Client childClient = null;
         Class<?> childClazz = null;
         EntityMetadata childMetadata = null;
-            // means it is holding associations
-            // read graph for all the association
-            for (EntitySaveGraph g : graphs)
+        // means it is holding associations
+        // read graph for all the association
+        for (EntitySaveGraph g : graphs)
         {
             Relation relation = m.getRelation(g.getProperty().getName());
             if (relation.isRelatedViaJoinTable())
             {
-                computeJoinTableRelations(e, client, m, g, persistenceDelegeator, relation);              
-               
+                computeJoinTableRelations(e, client, m, g, persistenceDelegeator, relation);
+
             }
             else
             {
@@ -86,12 +86,18 @@ public class AbstractEntityReader
                     String relationName = g.getfKeyName();
                     Object relationalValue = e.getRelations().get(relationName);
                     childClazz = g.getParentClass();
+                    childMetadata = persistenceDelegeator.getMetadata(childClazz);              
+                    
+                    
                     Field f = g.getProperty();
+                    
                     if (!collectionHolder.containsKey(relationalValue))
                     {
-                        childMetadata = persistenceDelegeator.getMetadata(childClazz);
+                        
                         childClient = persistenceDelegeator.getClient(childMetadata);
-                        Object child = childClient.find(childClazz, childMetadata, relationalValue.toString(), null);
+                        
+                        //Object child = childClient.find(childClazz, childMetadata, relationalValue.toString(), null);
+                        Object child = persistenceDelegeator.find(childClazz, relationalValue.toString());
                         collectionHolder.put(relationalValue, child);
                         // If entity is holding association it means it can not
                         // be a
@@ -110,6 +116,7 @@ public class AbstractEntityReader
                 {
                     childClazz = g.getChildClass();
                     childMetadata = persistenceDelegeator.getMetadata(childClazz);
+
                     childClient = persistenceDelegeator.getClient(childMetadata);
                     String relationName = g.getfKeyName();
                     String relationalValue = e.getEntityId();
@@ -122,7 +129,9 @@ public class AbstractEntityReader
                         if (MetadataUtils.useSecondryIndex(childMetadata.getPersistenceUnit()))
                         {
                             childs = childClient.find(relationName, relationalValue, childMetadata);
-                            // pass this entity id as a value to be searched for
+                            
+                            // pass this entity id as a value to be searched
+                            // for
                             // for
                         }
                         else
@@ -130,7 +139,8 @@ public class AbstractEntityReader
                             if (g.isSharedPrimaryKey())
                             {
                                 childs = new ArrayList();
-                                childs.add(childClient.find(childClazz, childMetadata, e.getEntityId(), null));
+                                //childs.add(childClient.find(childClazz, childMetadata, e.getEntityId(), null));
+                                childs.add(persistenceDelegeator.find(childClazz, relationalValue.toString()));
                             }
                             else
                             {
@@ -143,7 +153,8 @@ public class AbstractEntityReader
                                         e.getEntityId());
                                 Map<String, String> results = childClient.getIndexManager().search(query);
                                 Set<String> rsSet = new HashSet<String>(results.values());
-                                childs = (List<Object>) childClient.find(childClazz, rsSet.toArray(new String[] {}));
+                                //childs = (List<Object>) childClient.find(childClazz, rsSet.toArray(new String[] {}));
+                                childs = (List<Object>) persistenceDelegeator.find(childClazz, rsSet.toArray(new String[] {}));
 
                             }
                         }
@@ -151,18 +162,18 @@ public class AbstractEntityReader
                         // create sql query for hibernate client.
                         // f = g.getProperty();
                         collectionHolder.put(relationalValue, childs);
-                        if(childs != null)
+                        if (childs != null)
                         {
                             for (Object child : childs)
                             {
-                                onBiDirection(e, client, g, m, child, childMetadata,
-                                        childClient);
+                                onBiDirection(e, client, g, m, child, childMetadata, childClient);
                             }
                         }
                     }
                     // handle bi direction here.
 
                     onReflect(e.getEntity(), f, (List) collectionHolder.get(relationalValue));
+
                 }
 
             }
@@ -296,19 +307,20 @@ public class AbstractEntityReader
                     }
                     else
                     {
-                    	Map<String, String> keys = null;
-                    	if(relation.getType().equals(ForeignKey.ONE_TO_MANY))
-                    	{
-                        query = getQuery(DocumentIndexer.PARENT_ID_CLASS, child.getClass().getCanonicalName()
-                                .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, id);
-                        keys = client.getIndexManager().search(query);
-                    	} else
-                    	{
+                        Map<String, String> keys = null;
+                        if (relation.getType().equals(ForeignKey.ONE_TO_MANY))
+                        {
+                            query = getQuery(DocumentIndexer.PARENT_ID_CLASS, child.getClass().getCanonicalName()
+                                    .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, id);
+                            keys = client.getIndexManager().search(query);
+                        }
+                        else
+                        {
                             query = getQuery(DocumentIndexer.ENTITY_CLASS_FIELD, child.getClass().getCanonicalName()
                                     .toLowerCase(), DocumentIndexer.ENTITY_ID_FIELD, id);
                             keys = client.getIndexManager().fetchRelation(query);
-                    		
-                    	}
+
+                        }
                         Set<String> uqSet = new HashSet<String>(keys.values());
                         results = new ArrayList<Object>();
                         for (String rowKey : uqSet)
@@ -346,7 +358,8 @@ public class AbstractEntityReader
                     }
 
                 }
-            }else
+            }
+            else
             {
                 obj.add(e.getEntity());
             }
@@ -366,28 +379,34 @@ public class AbstractEntityReader
         }
     }
 
-    protected void onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
+    protected List<EnhanceEntity> onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
     {
+        
         Set<String> rSet = fetchDataFromLucene(client);
         try
         {
             List resultList = client.find(m.getEntityClazz(), rSet.toArray(new String[] {}));
-            transform(m, ls, resultList);
+            return transform(m, ls, resultList);
         }
         catch (Exception e)
-        {
+        {           
             log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
             throw new QueryHandlerException(e.getMessage());
         }
+        
     }
 
-    protected void transform(EntityMetadata m, List<EnhanceEntity> ls, List resultList)
-    {
+    protected List<EnhanceEntity>  transform(EntityMetadata m, List<EnhanceEntity> ls, List resultList)
+    {    
+        if((ls == null || ls.isEmpty()) && resultList != null && !resultList.isEmpty()) {
+            ls = new ArrayList<EnhanceEntity>(resultList.size());
+        }
         for (Object r : resultList)
         {
             EnhanceEntity e = new EnhanceEntity(r, getId(r, m), null);
             ls.add(e);
         }
+        return ls;
     }
 
     protected Set<String> fetchDataFromLucene(Client client)
@@ -422,12 +441,12 @@ public class AbstractEntityReader
 
     }
 
-    private void computeJoinTableRelations(EnhanceEntity e, Client client, EntityMetadata entityMetadata, EntitySaveGraph objectGraph,
-            PersistenceDelegator delegator, Relation relation)
+    private void computeJoinTableRelations(EnhanceEntity e, Client client, EntityMetadata entityMetadata,
+            EntitySaveGraph objectGraph, PersistenceDelegator delegator, Relation relation)
     {
 
-    	Object entity = e.getEntity();
-    	
+        Object entity = e.getEntity();
+
         objectGraph.setParentId(getId(entity, entityMetadata));
         JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
         String joinTableName = jtMetadata.getJoinTableName();
@@ -452,9 +471,9 @@ public class AbstractEntityReader
                 EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
                 Client childClient = delegator.getClient(childMetadata);
                 Object child = childClient.find(relation.getTargetEntity(), childMetadata, (String) foreignKey, null);
-                
+
                 onBiDirection(e, client, objectGraph, entityMetadata, child, childMetadata, childClient);
-                
+
                 childrenEntities.add(child);
 
             }
@@ -477,8 +496,7 @@ public class AbstractEntityReader
         catch (PropertyAccessException ex)
         {
             ex.printStackTrace();
-        }     
-        
+        }
 
     }
 
