@@ -182,4 +182,18 @@ public class HBaseWriter implements Writer
 
         hTable.put(p);
     }
+
+    public void delete(HTable hTable, String rowKey, String columnFamily)
+    {
+        try
+        {
+            hTable.deleteAll(rowKey);
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
 }

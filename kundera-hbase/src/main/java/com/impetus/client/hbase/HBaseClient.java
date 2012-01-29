@@ -86,7 +86,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         // columnFamily has a different meaning for HBase, so it won't be used
         // here
         String tableName = entityMetadata.getTableName();
-        Object enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId, relationNames);
+        Object enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId,
+                relationNames);
         return (E) enhancedEntity;
     }
 
@@ -334,7 +335,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         Object enhancedEntity = null;
         try
         {
-            enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId, relationNames);
+            enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId,
+                    relationNames);
         }
         catch (IOException e)
         {
@@ -352,8 +354,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     @Override
     public void delete(Object entity, Object pKey, EntityMetadata metadata) throws Exception
     {
-        // TODO Auto-generated method stub
-
+        handler.deleteRow(pKey.toString(), metadata.getTableName());
     }
 
     public List<Object> find(String colName, String colValue, EntityMetadata m)

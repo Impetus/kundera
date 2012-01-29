@@ -87,4 +87,12 @@ public interface DataHandler
      * Shutdown.
      */
     void shutdown();
+
+    /**
+     * Delete specific row.
+     * @param rowKey
+     * @param tableName
+     * @throws IOException
+     */
+    void deleteRow(String rowKey, String tableName) throws IOException;
 }

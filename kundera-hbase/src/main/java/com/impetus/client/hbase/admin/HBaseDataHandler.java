@@ -142,8 +142,8 @@ public class HBaseDataHandler implements DataHandler
     }
 
     @Override
-    public Object readData(final String tableName, Class clazz, EntityMetadata m, final String rowKey, List<String> relationNames)
-            throws IOException
+    public Object readData(final String tableName, Class clazz, EntityMetadata m, final String rowKey,
+            List<String> relationNames) throws IOException
     {
 
         Object entity = null;
@@ -188,7 +188,7 @@ public class HBaseDataHandler implements DataHandler
                 puthTable(hTable);
             }
         }
-     
+
         return entity;
     }
 
@@ -404,7 +404,8 @@ public class HBaseDataHandler implements DataHandler
     }
 
     // TODO: Scope of performance improvement in this method
-    private Object populateEntityFromHbaseData(Object entity, HBaseData hbaseData, EntityMetadata m, String rowKey, List<String> relationNames)
+    private Object populateEntityFromHbaseData(Object entity, HBaseData hbaseData, EntityMetadata m, String rowKey,
+            List<String> relationNames)
     {
         try
         {
@@ -414,7 +415,7 @@ public class HBaseDataHandler implements DataHandler
             // Raw data retrieved from HBase for a particular row key (contains
             // all column families)
             List<KeyValue> hbaseValues = hbaseData.getColumns();
-            
+
             Map<String, Object> relations = new HashMap<String, Object>();
             /*
              * Populate columns data
@@ -435,7 +436,8 @@ public class HBaseDataHandler implements DataHandler
                         PropertyAccessorHelper.set(entity, columnField, hbaseColumnValue);
 
                         break;
-                    } else if(relationNames != null && relationNames.contains(getColumnName(colName)))
+                    }
+                    else if (relationNames != null && relationNames.contains(getColumnName(colName)))
                     {
                         relations.put(colName, Bytes.toString(colData.getValue()));
                     }
@@ -479,12 +481,12 @@ public class HBaseDataHandler implements DataHandler
                         // count>
                         if (!cfInHbase.startsWith(columnFamily.getName()))
                         {
-                        	 if(relationNames != null && relationNames.contains(cfInHbase))
-                             {
-                                 relations.put(cfInHbase, Bytes.toString(colData.getValue()));
-                             } 
-                            	 continue;
-                             
+                            if (relationNames != null && relationNames.contains(cfInHbase))
+                            {
+                                relations.put(cfInHbase, Bytes.toString(colData.getValue()));
+                            }
+                            continue;
+
                         }
 
                         String cfNamePostfix = MetadataUtils.getEmbeddedCollectionPostfix(cfInHbase);
@@ -533,12 +535,12 @@ public class HBaseDataHandler implements DataHandler
 
                         if (!cfInHbase.equals(columnFamily.getName()))
                         {
-                        	if(relationNames != null && relationNames.contains(cfInHbase))
+                            if (relationNames != null && relationNames.contains(cfInHbase))
                             {
                                 relations.put(cfInHbase, Bytes.toString(colData.getValue()));
                             }
-                           	 continue;
-                            
+                            continue;
+
                         }
                         // Set Hbase data into the column family object
                         // setHBaseDataIntoObject(colData,
@@ -569,11 +571,11 @@ public class HBaseDataHandler implements DataHandler
                 }
 
             }
-            if(!relations.isEmpty())
+            if (!relations.isEmpty())
             {
                 return new EnhanceEntity(entity, rowKey, relations);
             }
-            
+
             return entity;
         }
         catch (PropertyAccessException e1)
@@ -588,7 +590,7 @@ public class HBaseDataHandler implements DataHandler
         {
             throw new RuntimeException(e1.getMessage());
         }
-        
+
     }
 
     private void setHBaseDataIntoObject(KeyValue colData, Field columnFamilyField,
@@ -617,6 +619,12 @@ public class HBaseDataHandler implements DataHandler
 
     private String getColumnName(String hbaseColumn)
     {
-        return hbaseColumn != null?hbaseColumn.substring(hbaseColumn.indexOf(0)+1):null;
+        return hbaseColumn != null ? hbaseColumn.substring(hbaseColumn.indexOf(0) + 1) : null;
+    }
+
+    public void deleteRow(String rowKey, String tableName) throws IOException
+    {
+        hbaseWriter.delete(gethTable(tableName), rowKey, tableName);
+
     }
 }
