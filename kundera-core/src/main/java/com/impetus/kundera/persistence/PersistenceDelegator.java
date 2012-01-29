@@ -305,24 +305,24 @@ public class PersistenceDelegator
                     .resolve(e, CascadeType.MERGE, getPersistenceUnits());
 
             // save each one
-            for (EnhancedEntity o : reachableEntities)
-            {
-                log.debug("Merging Entity : " + o);
+//            for (EnhancedEntity o : reachableEntities)
+//            {
+                log.debug("Merging Entity : " + e);
 
-                EntityMetadata m = KunderaMetadataManager.getEntityMetadata(o.getEntity().getClass(),
+                EntityMetadata m = KunderaMetadataManager.getEntityMetadata(e.getClass(),
                         getPersistenceUnits());
 
                 // TODO: throw OptisticLockException if wrong version and
                 // optimistic locking enabled
 
                 // fire PreUpdate events
-                getEventDispatcher().fireEventListeners(m, o, PreUpdate.class);
+                getEventDispatcher().fireEventListeners(m, e, PreUpdate.class);
 
-                persist(o.getEntity());
+                persist(e);
 
                 // fire PreUpdate events
-                getEventDispatcher().fireEventListeners(m, o, PostUpdate.class);
-            }
+                getEventDispatcher().fireEventListeners(m, e, PostUpdate.class);
+//            }
         }
         catch (Exception exp)
         {

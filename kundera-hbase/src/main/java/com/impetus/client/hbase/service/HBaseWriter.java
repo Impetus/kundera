@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.Get;
@@ -182,4 +184,24 @@ public class HBaseWriter implements Writer
 
         hTable.put(p);
     }
+
+    /**
+     * Support for delete over HBase.
+     */
+    /* (non-Javadoc)
+     * @see com.impetus.client.hbase.Writer#delete(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.lang.String)
+     */
+    public void delete(HTable hTable, String rowKey, String columnFamily)
+    {
+        try
+        {
+            hTable.deleteAll(rowKey);
+        }
+        catch (IOException e)
+        {
+            log.error("Error while delete on hbase for : " + rowKey);
+            throw new PersistenceException(e.getMessage());
+        }
+    }
+
 }
