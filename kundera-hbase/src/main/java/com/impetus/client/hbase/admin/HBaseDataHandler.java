@@ -695,3 +695,4 @@ public class HBaseDataHandler implements DataHandler
 
     }
 }
+

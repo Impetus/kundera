@@ -188,6 +188,7 @@ public class HibernateClient implements Client
         Transaction tx = s.beginTransaction();
         s.delete(entity);
         tx.commit();
+        s.close();
         getIndexManager().remove(metadata, entity, pKey.toString());
 
     }
@@ -459,9 +460,15 @@ public class HibernateClient implements Client
     @Override
     public Object find(Class<?> clazz, EntityMetadata metadata, String rowId, List<String> relations)
     {
-        Session s = sf.openSession();
-        s.beginTransaction();
-        return s.get(clazz, rowId);
+        if (s == null)
+        {
+            s = sf.openStatelessSession();
+
+            s.beginTransaction();
+        }
+        Object result = s.get(clazz, rowId);
+      //  s.close();
+        return result;
     }
 
     public List find(String nativeQuery, List<String> relations, Class clazz)

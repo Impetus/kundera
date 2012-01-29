@@ -151,10 +151,10 @@ public class PelopsDataHandler extends DataHandler
     {
 
         // Instantiate a new instance
-        E e = clazz.newInstance();
+        E e = null;
 
         // Set row-key. Note:
-        PropertyAccessorHelper.setId(e, m, tr.getId());
+//        PropertyAccessorHelper.setId(e, m, tr.getId());
 
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
@@ -165,6 +165,14 @@ public class PelopsDataHandler extends DataHandler
         Field embeddedCollectionField = null;
         for (SuperColumn sc : tr.getColumns())
         {
+            if(e == null)
+            {
+                // Instantiate a new instance
+                e = clazz.newInstance();
+
+                // Set row-key. Note:
+                PropertyAccessorHelper.setId(e, m, tr.getId());
+            }
 
             String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
             String scNamePrefix = null;
@@ -239,17 +247,24 @@ public class PelopsDataHandler extends DataHandler
     {
 
         // Instantiate a new instance
-        Object entity = clazz.newInstance();
+        Object entity = null;
         Map<String, Object> relations = new HashMap<String, Object>();
 
         // Set row-key.
-        PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
+      //  PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
         // PropertyAccessorHelper.set(entity, m.getIdColumn().getField(),
         // thriftRow.getId());
 
         // Iterate through each column
         for (Column c : thriftRow.getColumns())
         {
+            if(entity == null)
+            {
+                entity = clazz.newInstance();
+                // Set row-key
+                PropertyAccessorHelper.setId(entity, m,  thriftRow.getId());
+            }
+
             String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(c.getName());
             byte[] thriftColumnValue = c.getValue();
 
@@ -294,13 +309,11 @@ public class PelopsDataHandler extends DataHandler
     {
 
         // Instantiate a new instance
-        Object entity = clazz.newInstance();
+        Object entity = null;
 
         // Map to hold property-name=>foreign-entity relations
         Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
-        // Set row-key
-        PropertyAccessorHelper.setId(entity, m, tr.getId());
 
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
@@ -314,6 +327,12 @@ public class PelopsDataHandler extends DataHandler
 
         for (SuperColumn sc : tr.getSuperColumns())
         {
+            if(entity == null)
+            {
+                entity = clazz.newInstance();
+                // Set row-key
+                PropertyAccessorHelper.setId(entity, m, tr.getId());
+            }
             String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
             String scNamePrefix = null;
 

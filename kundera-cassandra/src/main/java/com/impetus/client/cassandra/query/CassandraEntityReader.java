@@ -153,7 +153,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                 }
                 else
                 {
-                    onAssociationUsingLucene(m, client, ls);
+                    ls = onAssociationUsingLucene(m, client, ls);
                 }
             }
         }
