@@ -1046,7 +1046,8 @@ public class PersistenceDelegator
             if (!imChildProcessed)
             {
                 saveImmediateChild(child, objectGraph, metadata);
-            }
+            }            
+       
         }
     }
 

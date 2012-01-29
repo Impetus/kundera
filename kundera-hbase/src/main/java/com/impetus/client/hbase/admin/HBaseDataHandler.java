@@ -574,9 +574,11 @@ public class HBaseDataHandler implements DataHandler
             if (!relations.isEmpty())
             {
                 return new EnhanceEntity(entity, rowKey, relations);
+            } else {
+            return new EnhanceEntity(entity, rowKey, null);
             }
 
-            return entity;
+            
         }
         catch (PropertyAccessException e1)
         {

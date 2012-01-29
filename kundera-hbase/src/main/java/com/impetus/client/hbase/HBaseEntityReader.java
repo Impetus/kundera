@@ -24,6 +24,7 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * The Class HBaseEntityReader.
@@ -62,7 +63,7 @@ public class HBaseEntityReader extends AbstractEntityReader implements EntityRea
         try
         {
             Object o = client.find(m.getEntityClazz(), primaryKey, relationNames);
-            return new EnhanceEntity(o, getId(o, m), null);
+            return (EnhanceEntity)o;
         }
         catch (Exception e)
         {
