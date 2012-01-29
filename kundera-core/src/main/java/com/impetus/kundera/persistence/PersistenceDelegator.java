@@ -920,24 +920,38 @@ public class PersistenceDelegator
      */
     private void saveGraph(EntitySaveGraph objectGraph)
     {
-
-        // Persist parent entity
-        Object parentEntity = objectGraph.getParentEntity();
+    	Object parentEntity = objectGraph.getParentEntity();
         EntityMetadata metadata = getMetadata(objectGraph.getParentClass());
-        if (parentEntity != null)
-        {
+    	
+        List<EntitySaveGraph> relationGraphs = null;
+        
+    	//If this is a swapped graph and parent has further relations, persist before the parent
+        if(objectGraph.isIsswapped() && ! metadata.getRelations().isEmpty()) {
+        	
+        	relationGraphs = getGraph(parentEntity, metadata);       	
+        	
+        	for(EntitySaveGraph g : relationGraphs) {
+        		saveGraph(g);
+        	}     	
+        	
+        } 
+        
+		//Persist parent entity 
+		if (parentEntity != null) {
 
-            objectGraph.setParentId(getId(parentEntity, metadata));
+			objectGraph.setParentId(getId(parentEntity, metadata));
 
-//            if (getSession().lookup(parentEntity.getClass(), objectGraph.getParentId()) == null)
-//            {
-                Client pClient = getClient(metadata);
-                pClient.persist(objectGraph, metadata);
-                session.store(objectGraph.getParentId(), objectGraph.getParentEntity());
+			// if (getSession().lookup(parentEntity.getClass(),
+			// objectGraph.getParentId()) == null)
+			// {
+			Client pClient = getClient(metadata);
+			pClient.persist(objectGraph, metadata);
+			session.store(objectGraph.getParentId(),
+					objectGraph.getParentEntity());
 
-//            }
-        }
-
+			// }
+		}
+        
         // Persist child entity(ies)
         Object childEntity = objectGraph.getChildEntity();
         if (childEntity != null)
@@ -1053,13 +1067,13 @@ public class PersistenceDelegator
 
     private void saveImmediateChild(Object child, EntitySaveGraph objectGraph, EntityMetadata metadata)
     {
-        String id = getId(child, metadata);
-        objectGraph.setChildId(id);
-//                    if (getSession().lookup(child.getClass(), id) == null)
-//                    {
-            Client chClient = getClient(metadata);
-            chClient.persist(child, objectGraph, metadata);
-            session.store(id, child);
+		String id = getId(child, metadata);
+		objectGraph.setChildId(id);
+		// if (getSession().lookup(child.getClass(), id) == null)
+		// {
+		Client chClient = getClient(metadata);
+		chClient.persist(child, objectGraph, metadata);
+		session.store(id, child);
     }
 
     /**
