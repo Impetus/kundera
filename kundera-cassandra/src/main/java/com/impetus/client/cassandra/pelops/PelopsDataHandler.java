@@ -88,8 +88,6 @@ public class PelopsDataHandler extends DataHandler
         }
         else
         {
-            // TODO: this needs attention, once we finalize on how to determine
-            // SuperColmun Family.
 
             List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
             ByteBuffer rKeyAsByte = ByteBufferUtil.bytes(rowKey);

@@ -26,10 +26,13 @@ import java.util.Map;
 import javax.persistence.PersistenceException;
 
 import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.KeyRange;
+import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.logging.Log;
@@ -40,6 +43,7 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.impetus.client.cassandra.pelops.PelopsDataHandler.ThriftRow;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
@@ -489,24 +493,73 @@ public class PelopsClient implements Client
         List<Object> entities = null;
         if (ixClause.isEmpty())
         {
-            Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(), new KeyRange(
-                    Integer.MAX_VALUE), slicePredicate, ConsistencyLevel.ONE);
+            Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(), selector.newKeyRange("","", 100), slicePredicate, ConsistencyLevel.ONE);
             entities = new ArrayList<Object>(qResults.size());
             populateData(m, qResults, entities, isRelation, relations);
-        }
-
+        } else {
+        entities = new ArrayList<Object>();
         for (IndexClause ix : ixClause)
         {
             Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
                     ConsistencyLevel.ONE);
-            entities = new ArrayList<Object>(qResults.size());
             // iterate through complete map and
             populateData(m, qResults, entities, isRelation, relations);
         }
-
+    }
         return entities;
     }
 
+    public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations) throws Exception
+    {
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+
+        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
+        List<Object> entities = null;
+
+        List<KeySlice> keys = selector.getKeySlices(new ColumnParent(m.getTableName()), selector.newKeyRange(Bytes.fromByteArray(minVal), Bytes.fromByteArray(maxVal), 10000), slicePredicate, ConsistencyLevel.ONE);
+        
+        List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
+        
+        List results = null;
+        if(keys != null)
+        {
+            results = new ArrayList(keys.size());
+            for (KeySlice key : keys)
+            {
+                List<ColumnOrSuperColumn> columns = key.getColumns();
+                byte[] rowKey = key.getKey();
+
+                if (!superColumnNames.isEmpty())
+                {
+                    List<SuperColumn> superColumns = new ArrayList<SuperColumn>(columns.size());
+
+                    for (ColumnOrSuperColumn supCol : columns)
+                    {
+                        superColumns.add(supCol.getSuper_column());
+                    }
+
+                    Object r = dataHandler.fromSuperColumnThriftRow(m.getEntityClazz(), m, dataHandler.new ThriftRow(new String(
+                            rowKey), m.getTableName(), null, superColumns), relations, isWrapReq);
+                    results.add(r);
+                    // List<SuperColumn> superCol = columns.
+                }
+                else
+                {
+                    List<Column> cols = new ArrayList<Column>(columns.size());
+                    for (ColumnOrSuperColumn supCol : columns)
+                    {
+                        cols.add(supCol.getColumn());
+                    }
+
+                    Object r = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m, dataHandler.new ThriftRow(new String(rowKey),
+                            m.getTableName(), cols, null), relations, isWrapReq);
+                    results.add(r);
+                }
+            }
+        }
+        
+        return results;
+    }
     /**
      * Populate data.
      * 

@@ -15,11 +15,15 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.query;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
 import org.apache.cassandra.thrift.IndexClause;
+import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -33,20 +37,32 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
 /**
+ * The Class CassandraEntityReader.
+ *
  * @author vivek.mishra
- * 
  */
 public class CassandraEntityReader extends AbstractEntityReader implements EntityReader
 {
-    List<IndexClause> conditions = new ArrayList<IndexClause>();
+    
+    /** The conditions. */
+    Map<Boolean, List<IndexClause>> conditions = new HashMap<Boolean, List<IndexClause>>();
 
+    /** The log. */
     private static Log log = LogFactory.getLog(CassandraEntityReader.class);
 
+    /**
+     * Instantiates a new cassandra entity reader.
+     *
+     * @param luceneQuery the lucene query
+     */
     public CassandraEntityReader(String luceneQuery)
     {
         this.luceneQueryFromJPAQuery = luceneQuery;
     }
 
+    /**
+     * Instantiates a new cassandra entity reader.
+     */
     public CassandraEntityReader()
     {
 
@@ -69,11 +85,10 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error while handling find by id");
+            throw new PersistenceException(e.getMessage());
         }
 
-        return null;
     }
 
     /**
@@ -96,44 +111,86 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
             Client client)
     {
         List<EnhanceEntity> ls = null;
-        if (!isParent)
+
+        boolean isRowKeyQuery = conditions.keySet().iterator().next();
+
+        // If Query is not for find by range.
+        if (!isRowKeyQuery)
         {
-            if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+            // If holding associations.
+            if (!isParent)
             {
-                ls = ((PelopsClient) client).find(m, relationNames, this.conditions);
+                // In case need to use secondary indexes.
+                if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+                {
+                    ls = ((PelopsClient) client).find(m, relationNames, this.conditions.get(isRowKeyQuery));
+                }
+                else
+                {
+                    // prepare lucene query and find.
+                    Set<String> rSet = fetchDataFromLucene(client);
+
+                    try
+                    {
+                        ls = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(), relationNames,
+                                true, m, rSet.toArray(new String[] {}));
+                    }
+                    catch (Exception e)
+                    {
+                        log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
+                        throw new QueryHandlerException(e.getMessage());
+                    }
+                }
             }
             else
             {
-                // prepare lucene query and find.
-                Set<String> rSet = fetchDataFromLucene(client);
-
-                try
+                if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
                 {
-                    ls = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(), relationNames, true, m,
-                            rSet.toArray(new String[] {}));
+                    // in case need to search on secondry columns and it is not
+                    // set
+                    // to true!
+                    ls = ((PelopsClient) client).find(this.conditions.get(isRowKeyQuery), m, true, null);
                 }
-                catch (Exception e)
+                else
                 {
-                    log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
-                    throw new QueryHandlerException(e.getMessage());
+                    onAssociationUsingLucene(m, client, ls);
                 }
             }
         }
         else
         {
-            if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
-            {
-                // in case need to search on secondry columns and it is not set
-                // to true!
-                ls = ((PelopsClient) client).find(this.conditions, m, true, null);
-            }
-            else
-            {
-                onAssociationUsingLucene(m, client, ls);
-            }
+            // List<Object> results = new ArrayList<Object>();
+            ls = handleFindByRange(m, client, ls, conditions, isRowKeyQuery);
+            // ls = (List<EnhanceEntity>) results;
         }
-
         return ls;
+    }
+
+    /**
+     * Handle find by range.
+     *
+     * @param m the m
+     * @param client the client
+     * @param result the result
+     * @param ixClause the ix clause
+     * @param isRowKeyQuery the is row key query
+     * @return the list
+     */
+    public List handleFindByRange(EntityMetadata m, Client client, List result, Map<Boolean, List<IndexClause>> ixClause, boolean isRowKeyQuery)
+    {
+        List<IndexExpression> expressions = ixClause.get(isRowKeyQuery).get(0).getExpressions();
+        byte[] minValue = expressions.get(0).getValue();
+        byte[] maxVal = expressions.get(1).getValue();
+        try
+        {
+            result = ((PelopsClient) client).findByRange(minValue, maxVal, m, false, null);
+        }
+        catch (Exception e)
+        {
+            log.error("Error while executing find by range");
+            throw new QueryHandlerException(e.getMessage());
+        }
+        return result;
     }
 
     /**
@@ -142,7 +199,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
      * @param conditions
      *            index conditions.
      */
-    public void setConditions(List<IndexClause> conditions)
+    public void setConditions(Map<Boolean, List<IndexClause>> conditions)
     {
         this.conditions = conditions;
     }

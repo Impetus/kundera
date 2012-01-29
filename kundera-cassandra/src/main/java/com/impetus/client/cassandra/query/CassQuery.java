@@ -17,13 +17,16 @@ package com.impetus.client.cassandra.query;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Query;
 
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
@@ -45,7 +48,7 @@ import com.impetus.kundera.query.exception.QueryHandlerException;
 
 /**
  * The Class CassQuery.
- *
+ * 
  * @author vivek.mishra
  */
 public class CassQuery extends QueryImpl implements Query
@@ -54,17 +57,16 @@ public class CassQuery extends QueryImpl implements Query
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(CassQuery.class);
 
+    /** The reader. */
     private EntityReader reader;
 
     /**
      * Instantiates a new cass query.
      *
-     * @param query
-     *            the query
-     * @param persistenceDelegator
-     *            the persistence delegator
-     * @param persistenceUnits
-     *            the persistence units
+     * @param query the query
+     * @param kunderaQuery the kundera query
+     * @param persistenceDelegator the persistence delegator
+     * @param persistenceUnits the persistence units
      */
     public CassQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
             String[] persistenceUnits)
@@ -75,7 +77,7 @@ public class CassQuery extends QueryImpl implements Query
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
      * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
@@ -88,9 +90,17 @@ public class CassQuery extends QueryImpl implements Query
         if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
         {
 
-            List<IndexClause> ixClause = prepareIndexClause(m);
-
-            result = ((PelopsClient) client).find(ixClause, m, false, null);
+            Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m);
+            boolean isRowKeyQuery = ixClause.keySet().iterator().next();
+            if (!isRowKeyQuery)
+            {
+                result = ((PelopsClient) client).find(ixClause.get(isRowKeyQuery), m, false, null);
+            }
+            else
+            {
+                result = ((CassandraEntityReader) getReader()).handleFindByRange(m, client, result, ixClause,
+                        isRowKeyQuery);
+            }
         }
         else
         {
@@ -100,20 +110,46 @@ public class CassQuery extends QueryImpl implements Query
         return result;
     }
 
-    private List<IndexClause> prepareIndexClause(EntityMetadata m)
+    /**
+     * Prepare index clause.
+     *
+     * @param m the m
+     * @return the map
+     */
+    private Map<Boolean, List<IndexClause>> prepareIndexClause(EntityMetadata m)
     {
         IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, 10000);
         List<IndexClause> clauses = new ArrayList<IndexClause>();
         List<IndexExpression> expr = new ArrayList<IndexExpression>();
+        Map<Boolean, List<IndexClause>> idxClauses = new HashMap<Boolean, List<IndexClause>>(1);
+        // check if id column are mixed with other columns or not?
+        String idColumn = m.getIdColumn().getName();
+        boolean idPresent = false;
         for (Object o : getKunderaQuery().getFilterClauseQueue())
         {
             if (o instanceof FilterClause)
             {
                 FilterClause clause = ((FilterClause) o);
                 String fieldName = getColumnName(clause.getProperty());
+
+                // in case id column matches with field name, set it for first
+                // time.
+                if (!idPresent && idColumn.equalsIgnoreCase(fieldName))
+                {
+                    idPresent = true;
+                }
+
+                if (idPresent & !idColumn.equalsIgnoreCase(fieldName))
+                {
+                    log.error("Support for search on rowKey and indexed column is not enabled with in cassandra");
+                    throw new QueryHandlerException("unsupported query operation clause for cassandra");
+
+                }
                 String condition = clause.getCondition();
                 String value = clause.getValue();
-                expr.add(Selector.newIndexExpression(fieldName, getOperator(condition),getBytesValue(fieldName, m, value)));
+
+                expr.add(Selector.newIndexExpression(fieldName, getOperator(condition, idPresent),
+                        getBytesValue(fieldName, m, value)));
             }
             else
             {
@@ -121,28 +157,26 @@ public class CassQuery extends QueryImpl implements Query
                 String opr = o.toString();
                 if (opr.equalsIgnoreCase("or"))
                 {
-/*                    indexClause.setExpressions(expr);
-                    clauses.add(indexClause);
-                    indexClause = Selector.newIndexClause(Bytes.EMPTY, Integer.SIZE);
-                    expr = new ArrayList<IndexExpression>();
-*/
                     log.error("Support for OR clause is not enabled with in cassandra");
                     throw new QueryHandlerException("unsupported clause " + opr + " for cassandra");
-                 }
-
-                // TODO need to handle scenario for AND + OR .
+                }
 
             }
         }
-        indexClause.setExpressions(expr);
-        clauses.add(indexClause);
 
-        return clauses;
+        if (!StringUtils.isBlank(getKunderaQuery().getFilter()))
+        {
+            indexClause.setExpressions(expr);
+            clauses.add(indexClause);
+        }
+            idxClauses.put(idPresent, clauses);
+        
+         return idxClauses;
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera
      * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client,
@@ -152,8 +186,8 @@ public class CassQuery extends QueryImpl implements Query
     protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
             List<String> relationNames, boolean isParent)
     {
-        log.debug("on handleAssociations rdbms query");
-        List<IndexClause> ixClause = prepareIndexClause(m);
+        log.debug("on handleAssociations cassandra query");
+        Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m);
 
         ((CassandraEntityReader) getReader()).setConditions(ixClause);
 
@@ -162,17 +196,24 @@ public class CassQuery extends QueryImpl implements Query
         return handleGraph(ls, graphs, client, m);
     }
 
-    private IndexOperator getOperator(String condition)
+    /**
+     * Gets the operator.
+     *
+     * @param condition the condition
+     * @param idPresent the id present
+     * @return the operator
+     */
+    private IndexOperator getOperator(String condition, boolean idPresent)
     {
-        if (condition.equals("="))
+        if (!idPresent && condition.equals("="))
         {
             return IndexOperator.EQ;
         }
-        else if (condition.equals(">"))
+        else if (!idPresent && condition.equals(">"))
         {
             return IndexOperator.GT;
         }
-        else if (condition.equals("<"))
+        else if (!idPresent && condition.equals("<"))
         {
             return IndexOperator.LT;
         }
@@ -186,14 +227,23 @@ public class CassQuery extends QueryImpl implements Query
         }
         else
         {
-            throw new UnsupportedOperationException(" Condition " + condition + " is not suported in  cassandra!");
+            if (!idPresent)
+            {
+                throw new UnsupportedOperationException(" Condition " + condition + " is not suported in  cassandra!");
+            }
+            else
+            {
+                throw new UnsupportedOperationException(" Condition " + condition
+                        + " is not suported for query on row key!");
+
+            }
         }
 
     }
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see com.impetus.kundera.query.QueryImpl#getReader()
      */
     @Override
@@ -207,13 +257,32 @@ public class CassQuery extends QueryImpl implements Query
         return reader;
     }
 
-
+    /**
+     * Returns bytes value for given value.
+     * 
+     * @param fieldName
+     *            field name.
+     * @param m
+     *            entity metadata
+     * @param value
+     *            value.
+     * @return bytes value.
+     */
     private Bytes getBytesValue(String fieldName, EntityMetadata m, String value)
     {
-        Column col = m.getColumn(fieldName);
-        Field f = col.getField();
+        Column idCol = m.getIdColumn();
+        Field f = null;
+        if (idCol.getName().equals(fieldName))
+        {
+            f = idCol.getField();
+        }
+        else
+        {
+            Column col = m.getColumn(fieldName);
+            f = col.getField();
+        }
 
-       if(f.getType() != null)
+        if (f != null && f.getType() != null)
         {
             if (f.getType().isAssignableFrom(String.class))
             {
@@ -248,10 +317,11 @@ public class CassQuery extends QueryImpl implements Query
                 log.error("Error while handling data type for:" + fieldName);
                 throw new QueryHandlerException("unsupported data type:" + f.getType());
             }
-        }else
-       {
-           log.error("Error while handling data type for:" + fieldName);
-           throw new QueryHandlerException("field type is null for:" + fieldName);
-       }
+        }
+        else
+        {
+            log.error("Error while handling data type for:" + fieldName);
+            throw new QueryHandlerException("field type is null for:" + fieldName);
+        }
     }
 }
