@@ -88,16 +88,14 @@ public class IndexProcessor implements MetadataProcessor
         {
             if (f.isAnnotationPresent(Id.class))
             {
-                metadata.addIndexProperty(new PropertyIndex(f, f.getName()));
+            	String alias = f.getName();
+            	alias = getIndexName(f, alias);
+                metadata.addIndexProperty(new PropertyIndex(f, alias));
             }
             else if (f.isAnnotationPresent(Column.class))
             {
-                Column c = f.getAnnotation(Column.class);
-                String alias = c.name().trim();
-                if (alias.isEmpty())
-                {
-                    alias = f.getName();
-                }
+                String alias = f.getName();
+                alias = getIndexName(f, alias);
 
                 if (columnsToBeIndexed.isEmpty() || columnsToBeIndexed.contains(alias))
                 {
@@ -106,5 +104,19 @@ public class IndexProcessor implements MetadataProcessor
 
             }
         }
+    }
+
+    private String getIndexName(Field f, String alias)
+    {
+        if(f.isAnnotationPresent(Column.class))
+        {
+        	 Column c = f.getAnnotation(Column.class);
+        	 alias = c.name().trim();
+             if (alias.isEmpty())
+             {
+                 alias = f.getName();
+             }
+        }
+        return alias;
     }
 }
