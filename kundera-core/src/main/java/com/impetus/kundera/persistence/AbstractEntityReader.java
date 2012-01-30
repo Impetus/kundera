@@ -97,7 +97,15 @@ public class AbstractEntityReader
                         childClient = persistenceDelegeator.getClient(childMetadata);
                         
                         //Object child = childClient.find(childClazz, childMetadata, relationalValue.toString(), null);
-                        Object child = childClazz.equals(e.getEntity().getClass()) ?childClient.find(childClazz, childMetadata, relationalValue.toString(), null):persistenceDelegeator.find(childClazz, relationalValue.toString());
+                        Object child = null;
+                        
+                        if(childClazz.equals(e.getEntity().getClass())) {
+                            child = childClient.find(childClazz, childMetadata, relationalValue.toString(), null);
+                        } else {
+                            child = persistenceDelegeator.find(childClazz, relationalValue.toString());
+                        }
+                        
+                        
                         collectionHolder.put(relationalValue, child);
                         // If entity is holding association it means it can not
                         // be a

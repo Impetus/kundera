@@ -458,26 +458,23 @@ public class EntitySaveGraph
     {
 
         StringBuilder strBuilder = new StringBuilder();
-        strBuilder.append("parentEntity:");
+        strBuilder.append("\tparentClass:");
         strBuilder.append(getParentClass());
         strBuilder.append("\n");
-        strBuilder.append("\tchildEntity:");
+        strBuilder.append("\tchildClass:");
         strBuilder.append(getChildClass());
         strBuilder.append("\n");
         strBuilder.append("\tfKeyName:");
         strBuilder.append(fKeyName);
         strBuilder.append("\n");
         strBuilder.append("\tfKeyValue:");
-        strBuilder.append(parentId);
+        strBuilder.append(fKeyValue);
         strBuilder.append("\n");
         strBuilder.append("\trevFKeyName:");
         strBuilder.append(revFKeyName);
         strBuilder.append("\n");
         strBuilder.append("\trevFKeyValue:");
-        strBuilder.append(revFKeyValue);
-        strBuilder.append("\n");
-        strBuilder.append("\trevFKeyValue:");
-        strBuilder.append(revFKeyValue);
+        strBuilder.append(revFKeyValue);        
         strBuilder.append("\n");
         strBuilder.append("\trevParentClass:");
         strBuilder.append(revParentClass);
@@ -496,6 +493,7 @@ public class EntitySaveGraph
         strBuilder.append("\n");
         strBuilder.append("\tchildId:");
         strBuilder.append(childId);
+        strBuilder.append("\n");
         strBuilder.append("\tproperty:");
         strBuilder.append(property != null ? property.getType() : null);
         strBuilder.append("\n");

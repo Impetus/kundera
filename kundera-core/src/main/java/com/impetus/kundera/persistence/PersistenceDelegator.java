@@ -414,12 +414,31 @@ public class PersistenceDelegator
 
         session.remove(parentEntity.getClass(), objectGraph.getParentEntity());
 
-        // } else
-        // {
-        // // throw new
-        // PersistenceException("invalid operation on detached entity:" +
-        // parentEntity.getClass() + " for id :" + objectGraph.getParentId());
-        // }
+       //Delete data from Join Table if any 
+       /*if(metadata.isRelationViaJoinTable()) {
+            for (Relation relation : metadata.getRelations())
+            {
+                if (relation.isRelatedViaJoinTable())
+                {
+
+                    JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
+                    String joinTableName = jtMetadata.getJoinTableName();
+
+                    Set<String> joinColumns = jtMetadata.getJoinColumns();
+                    Set<String> inverseJoinColumns = jtMetadata.getInverseJoinColumns();
+
+                    String joinColumnName = (String) joinColumns.toArray()[0];
+                    String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
+
+                    EntityMetadata relMetadata = getMetadata(objectGraph.getChildClass());
+
+                    Client pClient = getClient(metadata);
+                    pClient.persistJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, objectGraph);
+
+                }
+            }
+        }
+*/        
 
     }
 
@@ -975,7 +994,10 @@ public class PersistenceDelegator
 
             for (EntitySaveGraph g : relationGraphs)
             {
-                saveGraph(g);
+                if(!(objectGraph.getChildClass().equals(g.getParentClass()) || objectGraph.getChildClass().equals(g.getChildClass()))) {
+                    saveGraph(g);
+                }             
+                
             }
 
         }
