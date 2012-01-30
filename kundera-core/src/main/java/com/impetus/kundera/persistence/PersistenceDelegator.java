@@ -926,15 +926,18 @@ public class PersistenceDelegator
         List<EntitySaveGraph> relationGraphs = null;
         
     	//If this is a swapped graph and parent has further relations, persist before the parent
-        if(objectGraph.isIsswapped() && ! metadata.getRelations().isEmpty() && !objectGraph.getChildClass().equals(objectGraph.getParentClass())) {
-        	
-        	relationGraphs = getGraph(parentEntity, metadata);       	
-        	
-        	for(EntitySaveGraph g : relationGraphs) {
-        		saveGraph(g);
-        	}     	
-        	
-        } 
+        if (objectGraph.isIsswapped() && !metadata.getRelations().isEmpty()
+                && !objectGraph.getChildClass().equals(objectGraph.getParentClass()))
+        {
+
+            relationGraphs = getGraph(parentEntity, metadata);
+
+            for (EntitySaveGraph g : relationGraphs)
+            {
+                saveGraph(g);
+            }
+
+        }
         
 		//Persist parent entity 
 		if (parentEntity != null) {
@@ -954,7 +957,7 @@ public class PersistenceDelegator
         
         // Persist child entity(ies)
         Object childEntity = objectGraph.getChildEntity();
-        if (childEntity != null)
+        if (objectGraph.getParentEntity() != null && childEntity != null)
         {
             persistChildEntity(objectGraph, childEntity);
         }

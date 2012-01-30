@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -424,7 +423,7 @@ public class HibernateClient implements Client
     {
         if (!entitySaveGraph.isSharedPrimaryKey())
         {
-            getIndexManager().write(metadata, childEntity, rlValue, entitySaveGraph.getParentEntity().getClass());
+            getIndexManager().write(metadata, childEntity, rlValue, entitySaveGraph.getParentClass());
         }
         else
         {
