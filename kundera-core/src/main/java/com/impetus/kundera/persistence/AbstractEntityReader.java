@@ -97,7 +97,7 @@ public class AbstractEntityReader
                         childClient = persistenceDelegeator.getClient(childMetadata);
                         
                         //Object child = childClient.find(childClazz, childMetadata, relationalValue.toString(), null);
-                        Object child = persistenceDelegeator.find(childClazz, relationalValue.toString());
+                        Object child = childClazz.equals(e.getEntity().getClass()) ?childClient.find(childClazz, childMetadata, relationalValue.toString(), null):persistenceDelegeator.find(childClazz, relationalValue.toString());
                         collectionHolder.put(relationalValue, child);
                         // If entity is holding association it means it can not
                         // be a
@@ -140,7 +140,7 @@ public class AbstractEntityReader
                             {
                                 childs = new ArrayList();
                                 //childs.add(childClient.find(childClazz, childMetadata, e.getEntityId(), null));
-                                childs.add(persistenceDelegeator.find(childClazz, relationalValue.toString()));
+                                childs.add(childClazz.equals(e.getEntity().getClass())?childs.add(childClient.find(childClazz, childMetadata, e.getEntityId(), null)):persistenceDelegeator.find(childClazz, relationalValue.toString()));
                             }
                             else
                             {
@@ -154,7 +154,7 @@ public class AbstractEntityReader
                                 Map<String, String> results = childClient.getIndexManager().search(query);
                                 Set<String> rsSet = new HashSet<String>(results.values());
                                 //childs = (List<Object>) childClient.find(childClazz, rsSet.toArray(new String[] {}));
-                                childs = (List<Object>) persistenceDelegeator.find(childClazz, rsSet.toArray(new String[] {}));
+                                childs = (List<Object>) (childClazz.equals(e.getEntity().getClass())?childClient.find(childClazz, rsSet.toArray(new String[] {})):persistenceDelegeator.find(childClazz, rsSet.toArray(new String[] {})));
 
                             }
                         }

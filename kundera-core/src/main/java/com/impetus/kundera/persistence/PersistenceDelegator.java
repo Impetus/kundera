@@ -545,14 +545,14 @@ public class PersistenceDelegator
         try
         {
             // Look up in session first
-            E e = getSession().lookup(entityClass, primaryKey);
+            E e = null/*getSession().lookup(entityClass, primaryKey)*/;
             isRelationViaJoinTable = false;
 
-            if (null != e)
-            {
-                log.debug(entityClass.getName() + "_" + primaryKey + " is loaded from cache!");
-                return e;
-            }
+//            if (null != e)
+//            {
+//                log.debug(entityClass.getName() + "_" + primaryKey + " is loaded from cache!");
+//                return e;
+//            }
 
             // Find top level entity first
             EntityMetadata entityMetadata = KunderaMetadataManager
