@@ -61,10 +61,12 @@ public class MongoEntityReader extends AbstractEntityReader implements EntityRea
     {
         try
         {
-            return (EnhanceEntity) client.find(m.getEntityClazz(), primaryKey, relationNames);
+            Object o = client.find(m.getEntityClazz(), m, primaryKey, relationNames);
+            return o instanceof EnhanceEntity ? (EnhanceEntity) o: new EnhanceEntity(o, getId(o, m), null);
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             throw new PersistenceException(e.getMessage());
         }
     }

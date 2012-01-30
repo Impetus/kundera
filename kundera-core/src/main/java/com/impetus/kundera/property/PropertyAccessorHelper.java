@@ -60,6 +60,28 @@ public class PropertyAccessorHelper
         set(target, field, value);
     }
 
+    
+    /**
+     * Sets a byte-array onto a field.
+     *
+     * @param target
+     *            the target
+     * @param field
+     *            the field
+     * @param fieldVal
+     *            the field value
+     *
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    public static void set(Object target, Field field, String fieldVal) throws PropertyAccessException
+    {
+
+        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
+        Object value = accessor.fromString(fieldVal);
+        set(target, field, value);
+    }
+
     /**
      * Sets an object onto a field.
      *
