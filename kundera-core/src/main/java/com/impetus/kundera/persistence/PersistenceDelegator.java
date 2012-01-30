@@ -87,6 +87,7 @@ public class PersistenceDelegator
     private EntityEventDispatcher eventDispatcher;
 
     boolean isRelationViaJoinTable;
+
     /**
      * Instantiates a new persistence delegator.
      * 
@@ -309,24 +310,23 @@ public class PersistenceDelegator
                     .resolve(e, CascadeType.MERGE, getPersistenceUnits());
 
             // save each one
-//            for (EnhancedEntity o : reachableEntities)
-//            {
-                log.debug("Merging Entity : " + e);
+            // for (EnhancedEntity o : reachableEntities)
+            // {
+            log.debug("Merging Entity : " + e);
 
-                EntityMetadata m = KunderaMetadataManager.getEntityMetadata(e.getClass(),
-                        getPersistenceUnits());
+            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(e.getClass(), getPersistenceUnits());
 
-                // TODO: throw OptisticLockException if wrong version and
-                // optimistic locking enabled
+            // TODO: throw OptisticLockException if wrong version and
+            // optimistic locking enabled
 
-                // fire PreUpdate events
-                getEventDispatcher().fireEventListeners(m, e, PreUpdate.class);
+            // fire PreUpdate events
+            getEventDispatcher().fireEventListeners(m, e, PreUpdate.class);
 
-                persist(e);
+            persist(e);
 
-                // fire PreUpdate events
-                getEventDispatcher().fireEventListeners(m, e, PostUpdate.class);
-//            }
+            // fire PreUpdate events
+            getEventDispatcher().fireEventListeners(m, e, PostUpdate.class);
+            // }
         }
         catch (Exception exp)
         {
@@ -378,23 +378,34 @@ public class PersistenceDelegator
      */
     private void removeGraph(EntitySaveGraph objectGraph) throws Exception
     {
-        EntityMetadata metadata = null;
+        EntityMetadata metadata = getMetadata(objectGraph.getParentClass());
         Object parentEntity = objectGraph.getParentEntity();
-        if (parentEntity != null)
+        
+        // If this is a swapped graph and parent has further relations, delete
+        // them before the parent
+        List<EntitySaveGraph> relationGraphs = null;
+        if (objectGraph.isIsswapped() && !metadata.getRelations().isEmpty()
+                && !objectGraph.getChildClass().equals(objectGraph.getParentClass()))
         {
-            metadata = getMetadata(objectGraph.getParentClass());
+            relationGraphs = getGraph(parentEntity, metadata);
+            for (EntitySaveGraph g : relationGraphs)
+            {
+                removeGraph(g);
+            }
+        }
+        
+        //Delete parent entity
+        if (parentEntity != null)
+        {            
             objectGraph.setParentId(getId(parentEntity, metadata));
+            
+            Client pClient = getClient(metadata);
+            pClient.delete(parentEntity, objectGraph.getParentId(), metadata);
         }
 
-
-        // if (getSession().lookup(parentEntity.getClass(),
-        // objectGraph.getParentId()) != null)
-        // {
-        Client pClient = getClient(metadata);
-        pClient.delete(parentEntity, objectGraph.getParentId(), metadata);
-
+        
+        //Delete child entity
         Object childEntity = objectGraph.getChildEntity();
-
         // If any association exists.
         if (childEntity != null)
         {
@@ -451,15 +462,16 @@ public class PersistenceDelegator
      */
     private void onClientDelete(Object child, EntitySaveGraph objectGraph) throws Exception
     {
-        // If child entity doesn't have any further relations, just delete it from database
+        // If child entity doesn't have any further relations, just delete it
+        // from database
         // Otherwise treat it as parent entity for its related entities,
         // determine graph and delete that graph recursively.
 
         EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
         List<Relation> relations = metadata.getRelations();
-        
+
         boolean imChildProcessed = false;
-        
+
         List<EntitySaveGraph> objectGraphs = getGraph(child, metadata);
         if (!((relations == null || relations.isEmpty()) || objectGraph.isIsswapped()))
         {
@@ -482,7 +494,7 @@ public class PersistenceDelegator
 
         // In case immediate child is not yet processed!
         if (!imChildProcessed)
-        {           
+        {
             String id = getId(child, metadata);
             objectGraph.setChildId(id);
             // if (getSession().lookup(child.getClass(), id) == null)
@@ -491,7 +503,7 @@ public class PersistenceDelegator
             chClient.delete(child, id, metadata);
             // session.store(id, child);
             // }
-        }          
+        }
 
     }
 
@@ -545,14 +557,15 @@ public class PersistenceDelegator
         try
         {
             // Look up in session first
-            E e = null/*getSession().lookup(entityClass, primaryKey)*/;
+            E e = null/* getSession().lookup(entityClass, primaryKey) */;
             isRelationViaJoinTable = false;
 
-//            if (null != e)
-//            {
-//                log.debug(entityClass.getName() + "_" + primaryKey + " is loaded from cache!");
-//                return e;
-//            }
+            // if (null != e)
+            // {
+            // log.debug(entityClass.getName() + "_" + primaryKey +
+            // " is loaded from cache!");
+            // return e;
+            // }
 
             // Find top level entity first
             EntityMetadata entityMetadata = KunderaMetadataManager
@@ -571,7 +584,7 @@ public class PersistenceDelegator
             EnhanceEntity enhanceEntity = reader.findById(rowKey, entityMetadata, relationNames, client);
 
             Map<Object, Object> relationalValues = new HashMap<Object, Object>();
-            if(enhanceEntity == null || enhanceEntity.getEntity() == null)
+            if (enhanceEntity == null || enhanceEntity.getEntity() == null)
             {
                 return null;
             }
@@ -647,12 +660,17 @@ public class PersistenceDelegator
 
     /**
      * On compute graph.
-     *
-     * @param entity the entity
-     * @param objectGraph the object graph
-     * @param client the client
-     * @param rowId the row id
-     * @param entityClass the entity class
+     * 
+     * @param entity
+     *            the entity
+     * @param objectGraph
+     *            the object graph
+     * @param client
+     *            the client
+     * @param rowId
+     *            the row id
+     * @param entityClass
+     *            the entity class
      */
 
     private void onComputeGraph(Object entity, EntitySaveGraph objectGraph, Client client, String rowId,
@@ -668,15 +686,15 @@ public class PersistenceDelegator
 
             if (entity.getClass().equals(objectGraph.getChildClass()))
             {
-                String query = AssociationBuilder.getQuery(DocumentIndexer.PARENT_ID_CLASS, 
-                                                           objectGraph.getParentClass().getCanonicalName().toLowerCase(), 
-                                                           DocumentIndexer.ENTITY_ID_FIELD, rowId);
-                
+                String query = AssociationBuilder.getQuery(DocumentIndexer.PARENT_ID_CLASS, objectGraph
+                        .getParentClass().getCanonicalName().toLowerCase(), DocumentIndexer.ENTITY_ID_FIELD, rowId);
+
                 childClazz = objectGraph.getParentClass();
                 childMetadata = getMetadata(childClazz);
                 childClient = getClient(childMetadata);
 
-                chids = populateAssociation(entity, objectGraph.getProperty(), childClient, query, objectGraph.getParentClass(), true);
+                chids = populateAssociation(entity, objectGraph.getProperty(), childClient, query,
+                        objectGraph.getParentClass(), true);
 
             }
             else
@@ -685,24 +703,24 @@ public class PersistenceDelegator
                 childMetadata = getMetadata(childClazz);
                 childClient = getClient(childMetadata);
 
-                String query = AssociationBuilder.getQuery(DocumentIndexer.PARENT_ID_CLASS, 
-                                                           entity.getClass().getCanonicalName().toLowerCase(), 
-                                                           DocumentIndexer.PARENT_ID_FIELD, rowId);
-               
-                //if it is a case of shared primary key then it will share same primary key!
-                
-                if(objectGraph.isSharedPrimaryKey())
+                String query = AssociationBuilder.getQuery(DocumentIndexer.PARENT_ID_CLASS, entity.getClass()
+                        .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, rowId);
+
+                // if it is a case of shared primary key then it will share same
+                // primary key!
+
+                if (objectGraph.isSharedPrimaryKey())
                 {
                     List c = new ArrayList();
                     c.add(childClient.find(childClazz, rowId));
-                    chids =  onReflect(entity, objectGraph.getProperty(), c);
+                    chids = onReflect(entity, objectGraph.getProperty(), c);
                 }
                 else
                 {
-                    chids = populateAssociation(entity, objectGraph.getProperty(), childClient, query, childClazz, false);
+                    chids = populateAssociation(entity, objectGraph.getProperty(), childClient, query, childClazz,
+                            false);
                 }
             }
-
 
             onBiDirection(entity, objectGraph, client, rowId, entityClass, chids, childMetadata, childClient);
         }
@@ -716,65 +734,77 @@ public class PersistenceDelegator
 
     /**
      * Populate association.
-     *
-     * @param entity the entity
-     * @param f the f
-     * @param childClient the child client
-     * @param query the query
-     * @param clazz the clazz
+     * 
+     * @param entity
+     *            the entity
+     * @param f
+     *            the f
+     * @param childClient
+     *            the child client
+     * @param query
+     *            the query
+     * @param clazz
+     *            the clazz
      * @return the sets the
-     * @throws PropertyAccessException the property access exception
+     * @throws PropertyAccessException
+     *             the property access exception
      */
-    private Set<?> populateAssociation(Object entity, Field f, Client childClient, String query, Class<?> clazz, boolean fetchRelation)
-            throws PropertyAccessException
+    private Set<?> populateAssociation(Object entity, Field f, Client childClient, String query, Class<?> clazz,
+            boolean fetchRelation) throws PropertyAccessException
     {
-//        Set<?> chids;
+        // Set<?> chids;
         List<?> childs = onAssociation(clazz, childClient, fetchRelation, query, false, null);
-//        chids = new HashSet(childs);
-//        Field f = objectGraph.getProperty();
-        
-//        PropertyAccessorHelper.set(entity, f, PropertyAccessorHelper.isCollection(f.getType()) ? getFieldInstance(childs, f)
-//                : childs.get(0));
+        // chids = new HashSet(childs);
+        // Field f = objectGraph.getProperty();
+
+        // PropertyAccessorHelper.set(entity, f,
+        // PropertyAccessorHelper.isCollection(f.getType()) ?
+        // getFieldInstance(childs, f)
+        // : childs.get(0));
         return onReflect(entity, f, childs);
     }
 
-    
-    private Set<?>  onReflect(Object entity, Field f, List<?> childs) throws PropertyAccessException
+    private Set<?> onReflect(Object entity, Field f, List<?> childs) throws PropertyAccessException
     {
         Set chids = new HashSet();
-        if(childs != null)
+        if (childs != null)
         {
-        chids = new HashSet(childs);
-        //TODO: need to store object in sesion.
-//        getSession().store(id, entity)
-        PropertyAccessorHelper.set(entity, f, PropertyAccessorHelper.isCollection(f.getType()) ? getFieldInstance(childs, f)
-                : childs.get(0));
+            chids = new HashSet(childs);
+            // TODO: need to store object in sesion.
+            // getSession().store(id, entity)
+            PropertyAccessorHelper.set(entity, f,
+                    PropertyAccessorHelper.isCollection(f.getType()) ? getFieldInstance(childs, f) : childs.get(0));
         }
-        return chids; 
+        return chids;
     }
-    
+
     /**
      * On association.
-     *
-     * @param clazz the clazz
-     * @param client the client
-     * @param fetchRelation the fetch relation
-     * @param query the query
+     * 
+     * @param clazz
+     *            the clazz
+     * @param client
+     *            the client
+     * @param fetchRelation
+     *            the fetch relation
+     * @param query
+     *            the query
      * @return the list
      */
-    private List<Object> onAssociation(Class<?> clazz, Client client, boolean fetchRelation, String query, boolean biDirectional, String rowId)
+    private List<Object> onAssociation(Class<?> clazz, Client client, boolean fetchRelation, String query,
+            boolean biDirectional, String rowId)
     {
         try
         {
             IndexManager ixManager = client.getIndexManager();
             Map<String, String> results = fetchRelation ? ixManager.fetchRelation(query) : ixManager.search(query);
-//            System.out.println(results);
+            // System.out.println(results);
             Set<String> rsSet = new HashSet<String>(results.values());
-            if(biDirectional)
+            if (biDirectional)
             {
                 rsSet.remove(rowId);
             }
-            return rsSet.isEmpty()? null:(List<Object>) client.find(clazz, rsSet.toArray(new String[] {}));
+            return rsSet.isEmpty() ? null : (List<Object>) client.find(clazz, rsSet.toArray(new String[] {}));
         }
         catch (Exception e)
         {
@@ -783,19 +813,28 @@ public class PersistenceDelegator
 
         return null;
     }
-    
+
     /**
      * On bi direction.
-     *
-     * @param entity the entity
-     * @param objectGraph the object graph
-     * @param client the client
-     * @param rowId the row id
-     * @param entityClass the entity class
-     * @param chids the chids
-     * @param childMetadata the child metadata
-     * @param childClient the child client
-     * @throws Exception the exception
+     * 
+     * @param entity
+     *            the entity
+     * @param objectGraph
+     *            the object graph
+     * @param client
+     *            the client
+     * @param rowId
+     *            the row id
+     * @param entityClass
+     *            the entity class
+     * @param chids
+     *            the chids
+     * @param childMetadata
+     *            the child metadata
+     * @param childClient
+     *            the child client
+     * @throws Exception
+     *             the exception
      */
     private void onBiDirection(Object entity, EntitySaveGraph objectGraph, Client client, String rowId,
             Class<?> entityClass, Set<?> chids, EntityMetadata childMetadata, Client childClient) throws Exception
@@ -806,17 +845,16 @@ public class PersistenceDelegator
 
             for (Object child : chids)
             {
-                //Add original fetched entity.
+                // Add original fetched entity.
                 List obj = new ArrayList();
                 obj.add(entity);
 
                 Relation relation = childMetadata.getRelation(objectGraph.getBidirectionalProperty().getName());
-         
-                
-                //If relation is One to Many or MANY TO MANY for associated entity. Require to fetch all associated entity
+
+                // If relation is One to Many or MANY TO MANY for associated
+                // entity. Require to fetch all associated entity
                 if (relation.getType().equals(ForeignKey.ONE_TO_MANY)
-                        || 
-                    relation.getType().equals(ForeignKey.MANY_TO_MANY))
+                        || relation.getType().equals(ForeignKey.MANY_TO_MANY))
                 {
                     String query = null;
                     try
@@ -825,16 +863,18 @@ public class PersistenceDelegator
                         query = AssociationBuilder.getQuery(DocumentIndexer.PARENT_ID_CLASS, child.getClass()
                                 .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, id);
                         List<Object> results = onAssociation(entityClass, client, false, query, true, rowId);
-						if (results != null) {
-							obj.addAll(results);
-						}
+                        if (results != null)
+                        {
+                            obj.addAll(results);
+                        }
                     }
                     catch (PropertyAccessException e)
                     {
                         throw new RuntimeException(e.getMessage());
                     }
-                    
-                    //In case of other parent object found for given bidirectional.
+
+                    // In case of other parent object found for given
+                    // bidirectional.
                     for (Object o : obj)
                     {
                         Field f = objectGraph.getProperty();
@@ -854,10 +894,11 @@ public class PersistenceDelegator
                 }
                 try
                 {
-                    PropertyAccessorHelper.set(child, objectGraph.getBidirectionalProperty(),
-                                                PropertyAccessorHelper.isCollection(
-                                                objectGraph.getBidirectionalProperty().getType()) ? 
-                                                getFieldInstance(obj, objectGraph.getBidirectionalProperty()): entity);
+                    PropertyAccessorHelper
+                            .set(child, objectGraph.getBidirectionalProperty(),
+                                    PropertyAccessorHelper.isCollection(objectGraph.getBidirectionalProperty()
+                                            .getType()) ? getFieldInstance(obj, objectGraph.getBidirectionalProperty())
+                                            : entity);
                 }
                 catch (PropertyAccessException e)
                 {
@@ -867,12 +908,13 @@ public class PersistenceDelegator
         }
     }
 
-
     /**
      * Gets the field instance.
-     *
-     * @param chids the chids
-     * @param f the f
+     * 
+     * @param chids
+     *            the chids
+     * @param f
+     *            the f
      * @return the field instance
      */
     private Object getFieldInstance(List chids, Field f)
@@ -885,8 +927,6 @@ public class PersistenceDelegator
         }
         return chids;
     }
-
-   
 
     /**
      * Gets the persistence units.
@@ -920,12 +960,13 @@ public class PersistenceDelegator
      */
     private void saveGraph(EntitySaveGraph objectGraph)
     {
-    	Object parentEntity = objectGraph.getParentEntity();
+        Object parentEntity = objectGraph.getParentEntity();
         EntityMetadata metadata = getMetadata(objectGraph.getParentClass());
-    	
+
         List<EntitySaveGraph> relationGraphs = null;
-        
-    	//If this is a swapped graph and parent has further relations, persist before the parent
+
+        // If this is a swapped graph and parent has further relations, persist
+        // before the parent
         if (objectGraph.isIsswapped() && !metadata.getRelations().isEmpty()
                 && !objectGraph.getChildClass().equals(objectGraph.getParentClass()))
         {
@@ -938,23 +979,23 @@ public class PersistenceDelegator
             }
 
         }
-        
-		//Persist parent entity 
-		if (parentEntity != null) {
 
-			objectGraph.setParentId(getId(parentEntity, metadata));
+        // Persist parent entity
+        if (parentEntity != null)
+        {
 
-			// if (getSession().lookup(parentEntity.getClass(),
-			// objectGraph.getParentId()) == null)
-			// {
-			Client pClient = getClient(metadata);
-			pClient.persist(objectGraph, metadata);
-			session.store(objectGraph.getParentId(),
-					objectGraph.getParentEntity());
+            objectGraph.setParentId(getId(parentEntity, metadata));
 
-			// }
-		}
-        
+            // if (getSession().lookup(parentEntity.getClass(),
+            // objectGraph.getParentId()) == null)
+            // {
+            Client pClient = getClient(metadata);
+            pClient.persist(objectGraph, metadata);
+            session.store(objectGraph.getParentId(), objectGraph.getParentEntity());
+
+            // }
+        }
+
         // Persist child entity(ies)
         Object childEntity = objectGraph.getChildEntity();
         if (objectGraph.getParentEntity() != null && childEntity != null)
@@ -1063,20 +1104,20 @@ public class PersistenceDelegator
             if (!imChildProcessed)
             {
                 saveImmediateChild(child, objectGraph, metadata);
-            }            
-       
+            }
+
         }
     }
 
     private void saveImmediateChild(Object child, EntitySaveGraph objectGraph, EntityMetadata metadata)
     {
-		String id = getId(child, metadata);
-		objectGraph.setChildId(id);
-		// if (getSession().lookup(child.getClass(), id) == null)
-		// {
-		Client chClient = getClient(metadata);
-		chClient.persist(child, objectGraph, metadata);
-		session.store(id, child);
+        String id = getId(child, metadata);
+        objectGraph.setChildId(id);
+        // if (getSession().lookup(child.getClass(), id) == null)
+        // {
+        Client chClient = getClient(metadata);
+        chClient.persist(child, objectGraph, metadata);
+        session.store(id, child);
     }
 
     /**
