@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.rdbms;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -38,6 +39,8 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessor;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
@@ -61,17 +64,18 @@ public class HibernateClient implements Client
     /** The index manager. */
     private IndexManager indexManager;
 
+    /** The s. */
     private StatelessSession s;
 
+    /** The reader. */
     private EntityReader reader;
 
     /**
      * Instantiates a new hibernate client.
-     * 
-     * @param persistenceUnit
-     *            the persistence unit
-     * @param indexManager
-     *            the index manager
+     *
+     * @param persistenceUnit the persistence unit
+     * @param indexManager the index manager
+     * @param reader the reader
      */
     public HibernateClient(final String persistenceUnit, IndexManager indexManager, EntityReader reader)
     {
@@ -227,11 +231,36 @@ public class HibernateClient implements Client
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), arg0);
 
+        Object[] pKeys = getDataType(entityMetadata, arg1);
         String id = entityMetadata.getIdColumn().getField().getName();
+
         Criteria c = s.createCriteria(arg0);
-        c.add(Restrictions.in(id, arg1));
+
+        c.add(Restrictions.in(id, pKeys));
 
         return c.list();
+    }
+
+    /**
+     * Gets the data type.
+     *
+     * @param entityMetadata the entity metadata
+     * @param arg1 the arg1
+     * @return the data type
+     * @throws PropertyAccessException the property access exception
+     */
+    private Object[] getDataType(EntityMetadata entityMetadata, String... arg1) throws PropertyAccessException
+    {
+        Field idField = entityMetadata.getIdColumn().getField();
+        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(idField);
+
+        Object[] pKeys = new Object[arg1.length];
+        int cnt = 0;
+        for (String r : arg1)
+        {
+            pKeys[cnt++] = accessor.fromString(r);
+        }
+        return pKeys;
     }
 
     /*
@@ -260,16 +289,18 @@ public class HibernateClient implements Client
     {
 
         Session s;
-		Transaction tx;
-		try {
-			s = getSessionInstance();
-			tx = s.beginTransaction();
-			s.persist(entityGraph.getParentEntity());
-                        tx.commit();
-		} catch (org.hibernate.exception.ConstraintViolationException e) {
-			e.printStackTrace();
-		}
-
+        Transaction tx;
+        try
+        {
+            s = getSessionInstance();
+            tx = s.beginTransaction();
+            s.persist(entityGraph.getParentEntity());
+            tx.commit();
+        }
+        catch (org.hibernate.exception.ConstraintViolationException e)
+        {
+            e.printStackTrace();
+        }
 
         // If entity has a parent entity, update foreign key
         if (entityGraph.getRevFKeyName() != null)
@@ -296,6 +327,9 @@ public class HibernateClient implements Client
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#persist(java.lang.Object, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph, com.impetus.kundera.metadata.model.EntityMetadata)
+     */
     @Override
     public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
     {
@@ -322,7 +356,13 @@ public class HibernateClient implements Client
     }
 
     /**
-     * Inserts records into JoinTable for the given relationship
+     * Inserts records into JoinTable for the given relationship.
+     *
+     * @param joinTableName the join table name
+     * @param joinColumnName the join column name
+     * @param inverseJoinColumnName the inverse join column name
+     * @param relMetadata the rel metadata
+     * @param objectGraph the object graph
      */
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
@@ -349,6 +389,9 @@ public class HibernateClient implements Client
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getForeignKeysFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+     */
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
             String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
@@ -374,12 +417,14 @@ public class HibernateClient implements Client
     }
 
     /**
-     * @param joinTableName
-     * @param joinColumnName
-     * @param inverseJoinColumnName
-     * @param relMetadata
-     * @param parentId
-     * @param child
+     * Insert record in join table.
+     *
+     * @param joinTableName the join table name
+     * @param joinColumnName the join column name
+     * @param inverseJoinColumnName the inverse join column name
+     * @param relMetadata the rel metadata
+     * @param parentId the parent id
+     * @param child the child
      */
     private void insertRecordInJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, String parentId, Object child)
@@ -466,10 +511,18 @@ public class HibernateClient implements Client
             s.beginTransaction();
         }
         Object result = s.get(clazz, rowId);
-      //  s.close();
+        // s.close();
         return result;
     }
 
+    /**
+     * Find.
+     *
+     * @param nativeQuery the native query
+     * @param relations the relations
+     * @param clazz the clazz
+     * @return the list
+     */
     public List find(String nativeQuery, List<String> relations, Class clazz)
     {
         // Session s = getSessionInstance();
@@ -489,6 +542,9 @@ public class HibernateClient implements Client
         return q.list();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#find(java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
+     */
     public List<Object> find(String colName, String colValue, EntityMetadata m)
     {
         String tableName = m.getTableName();
@@ -510,6 +566,9 @@ public class HibernateClient implements Client
         return q.list();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getReader()
+     */
     public EntityReader getReader()
     {
         return reader;
