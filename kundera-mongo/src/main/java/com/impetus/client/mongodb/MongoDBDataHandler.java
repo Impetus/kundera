@@ -86,7 +86,7 @@ public class MongoDBDataHandler
             List<Column> columns = m.getColumnsAsList();
             for (Column column : columns)
             {
-                PropertyAccessorHelper.set(entity, column.getField(), document.get(column.getName()));
+                PropertyAccessorHelper.set(entity, column.getField(), document.get(column.getName()).toString());
             }
 
             // Populate @Embedded objects and collections

@@ -160,6 +160,7 @@ public class MongoDBQuery extends QueryImpl
                 // TODO: Query should actually be in a format
                 // documentName.embeddedDocumentName.column, remove below if
                 // block once this is decided
+
                 String enclosingDocumentName = getEnclosingDocumentName(m, property);
                 if (enclosingDocumentName != null)
                 {
@@ -173,24 +174,58 @@ public class MongoDBQuery extends QueryImpl
                 else if (condition.equalsIgnoreCase("like"))
                 {
                     query.append(property, Pattern.compile(value));
-                } 
-                else if(condition.equalsIgnoreCase(">"))
-                {
-                    query.append(property, new BasicDBObject("$gt", value));
-                    
-                } else if(condition.equalsIgnoreCase(">="))
-                {
-                    query.append(property, new BasicDBObject("$gte", value));
-                    
-                } else if(condition.equalsIgnoreCase("<"))
-                {
-                    query.append(property, new BasicDBObject("$lt", value));
-
-                } else if(condition.equalsIgnoreCase("<="))
-                {
-                    query.append(property, new BasicDBObject("$lte", value));
                 }
-                
+                else if (condition.equalsIgnoreCase(">"))
+                {
+                    if (query.containsField(property))
+                    {
+                        query.get(property);
+                        query.put(property, ((BasicDBObject) query.get(property)).append("$gt", value));
+                    }
+                    else
+                    {
+                        query.append(property, new BasicDBObject("$gt", value));
+                    }
+
+                }
+                else if (condition.equalsIgnoreCase(">="))
+                {
+                    if (query.containsField(property))
+                    {
+                        query.get(property);
+                        query.put(property, ((BasicDBObject) query.get(property)).append("$gte", value));
+                    }
+                    else
+                    {
+                        query.append(property, new BasicDBObject("$gte", value));
+                    }
+
+                }
+                else if (condition.equalsIgnoreCase("<"))
+                {
+                    if (query.containsField(property))
+                    {
+                        query.get(property);
+                        query.put(property, ((BasicDBObject) query.get(property)).append("$lt", value));
+                    }
+                    else
+                    {
+                        query.append(property, new BasicDBObject("$lt", value));
+                    }
+                }
+                else if (condition.equalsIgnoreCase("<="))
+                {
+                    if (query.containsField(property))
+                    {
+                        query.get(property);
+                        query.put(property, ((BasicDBObject) query.get(property)).append("$lte", value));
+                    }
+                    else
+                    {
+                        query.append(property, new BasicDBObject("$lte", value));
+                    }
+                }
+
                 // TODO: Add support for other operators like >, <, >=, <=,
                 // order by asc/ desc, limit, skip, count etc
             }
