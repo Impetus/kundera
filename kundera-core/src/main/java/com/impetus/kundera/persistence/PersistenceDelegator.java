@@ -407,7 +407,7 @@ public class PersistenceDelegator
         //Delete child entity
         Object childEntity = objectGraph.getChildEntity();
         // If any association exists.
-        if (childEntity != null)
+        if (objectGraph.getParentEntity() != null && childEntity != null)
         {
             onClientHandle(objectGraph, childEntity);
         }
