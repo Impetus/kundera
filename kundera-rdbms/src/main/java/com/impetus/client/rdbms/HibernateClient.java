@@ -15,11 +15,14 @@
  ******************************************************************************/
 package com.impetus.client.rdbms;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import javax.persistence.PersistenceException;
 
 import org.hibernate.Criteria;
 import org.hibernate.SQLQuery;
@@ -33,6 +36,7 @@ import org.hibernate.criterion.Restrictions;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -43,6 +47,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
+import com.sun.org.apache.bcel.internal.generic.INSTANCEOF;
 
 /**
  * The Class HibernateClient.
@@ -192,8 +197,11 @@ public class HibernateClient implements Client
         s.delete(entity);
         tx.commit();
         s.close();
-        getIndexManager().remove(metadata, entity, pKey.toString());
-
+        
+        if(!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
+        {
+            getIndexManager().remove(metadata, entity, pKey.toString());
+        }
     }
 
     /*
@@ -203,12 +211,13 @@ public class HibernateClient implements Client
      * java.lang.String)
      */
     @Override
-    public <E> E find(Class<E> arg0, String arg1, List<String> relationNames) throws Exception
+    public <E> E find(Class<E> arg0, Object key, List<String> relationNames) throws Exception
     {
 
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), arg0);
         Session s = getSessionInstance();
         Transaction tx = s.beginTransaction();
-        E object = (E) s.get(arg0, arg1);
+        E object = (E) s.get(arg0, getKey(key,entityMetadata.getIdColumn().getField()));
         tx.commit();
 
         return object;
@@ -221,7 +230,7 @@ public class HibernateClient implements Client
      * java.lang.String[])
      */
     @Override
-    public <E> List<E> find(Class<E> arg0, String... arg1) throws Exception
+    public <E> List<E> findAll(Class<E> arg0, Object... arg1) throws Exception
     {
         // TODO: Vivek correct it. unfortunately i need to open a new session
         // for each finder to avoid lazy loading.
@@ -249,17 +258,18 @@ public class HibernateClient implements Client
      * @return the data type
      * @throws PropertyAccessException the property access exception
      */
-    private Object[] getDataType(EntityMetadata entityMetadata, String... arg1) throws PropertyAccessException
+    private Object[] getDataType(EntityMetadata entityMetadata, Object... arg1) throws PropertyAccessException
     {
         Field idField = entityMetadata.getIdColumn().getField();
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(idField);
 
         Object[] pKeys = new Object[arg1.length];
         int cnt = 0;
-        for (String r : arg1)
+        for (Object r : arg1)
         {
-            pKeys[cnt++] = accessor.fromString(r);
+            pKeys[cnt++] = accessor.fromString(r.toString());
         }
+        
         return pKeys;
     }
 
@@ -314,15 +324,19 @@ public class HibernateClient implements Client
             tx.commit();
         }
 
-        if (entityGraph.getRevParentClass() != null)
+        if(!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
         {
-            getIndexManager().write(metadata, entityGraph.getParentEntity(), entityGraph.getRevFKeyValue(),
-                    entityGraph.getRevParentClass());
+            if (entityGraph.getRevParentClass() != null)
+            {
+                getIndexManager().write(metadata, entityGraph.getParentEntity(), entityGraph.getRevFKeyValue(),
+                        entityGraph.getRevParentClass());
+            }
+            else
+            {
+                getIndexManager().write(metadata, entityGraph.getParentEntity());
+            }
         }
-        else
-        {
-            getIndexManager().write(metadata, entityGraph.getParentEntity());
-        }
+        
         return null;
 
     }
@@ -466,13 +480,16 @@ public class HibernateClient implements Client
      */
     private void onIndex(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata, String rlValue)
     {
-        if (!entitySaveGraph.isSharedPrimaryKey())
+        if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
         {
-            getIndexManager().write(metadata, childEntity, rlValue, entitySaveGraph.getParentClass());
-        }
-        else
-        {
-            getIndexManager().write(metadata, childEntity);
+            if (!entitySaveGraph.isSharedPrimaryKey())
+            {
+                getIndexManager().write(metadata, childEntity, rlValue, entitySaveGraph.getParentClass());
+            }
+            else
+            {
+                getIndexManager().write(metadata, childEntity);
+            }
         }
     }
 
@@ -502,7 +519,7 @@ public class HibernateClient implements Client
      * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
     @Override
-    public Object find(Class<?> clazz, EntityMetadata metadata, String rowId, List<String> relations)
+    public Object find(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relations)
     {
         if (s == null)
         {
@@ -510,7 +527,7 @@ public class HibernateClient implements Client
 
             s.beginTransaction();
         }
-        Object result = s.get(clazz, rowId);
+        Object result = s.get(clazz, getKey(rowId,metadata.getIdColumn().getField()));
         // s.close();
         return result;
     }
@@ -572,5 +589,39 @@ public class HibernateClient implements Client
     public EntityReader getReader()
     {
         return reader;
+    }
+
+
+
+    private Serializable getKey(Object pKey, Field f)
+    {
+     
+        if(pKey != null)
+        {
+            if(f.getType().isAssignableFrom(long.class) || f.getType().isAssignableFrom(Long.class))
+            {
+                return (Long) pKey;
+            } else if(f.getType().isAssignableFrom(int.class) || f.getType().isAssignableFrom(Integer.class))
+            {
+                return (Integer) pKey;
+            } else if(f.getType().isAssignableFrom(String.class))
+            {
+                return (String) pKey;
+            } else if(f.getType().isAssignableFrom(boolean.class) || f.getType().isAssignableFrom(Boolean.class))
+            {
+                return (Boolean) pKey;
+            } else if(f.getType().isAssignableFrom(double.class) || f.getType().isAssignableFrom(Double.class))
+            {
+                return (Double) pKey;
+            } else if(f.getType().isAssignableFrom(float.class) || f.getType().isAssignableFrom(Float.class))
+            {
+                return (Float) pKey;
+            } else
+            {
+                throw new PersistenceException("Unsupported type:" + pKey.getClass());
+            }
+        }
+        
+        return null;
     }
 }
