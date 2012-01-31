@@ -524,29 +524,27 @@ public class EntitySaveGraph
             EqualsBuilder equalsBuilder = new EqualsBuilder();
             equalsBuilder.append(getParentClass(), g.getParentClass());
             equalsBuilder.append(getChildClass(), g.getChildClass());
-            equalsBuilder.append(this.fKeyName, g.getfKeyName());
-//            equalsBuilder.append(this.fKeyValue, g.getfKeyValue());
+           /* equalsBuilder.append(this.fKeyName, g.getfKeyName());
+            equalsBuilder.append(this.fKeyValue, g.getfKeyValue());
             equalsBuilder.append(this.revFKeyName, g.getRevFKeyName());
-//            equalsBuilder.append(this.revFKeyValue, g.getRevFKeyValue());
+            equalsBuilder.append(this.revFKeyValue, g.getRevFKeyValue());
             equalsBuilder.append(this.revParentClass, g.getRevParentClass());
             equalsBuilder.append(this.isSharedPrimaryKey, g.isSharedPrimaryKey());
             equalsBuilder.append(this.isUniDirectional, g.isUniDirectional());
             equalsBuilder.append(this.isRelatedViaJoinTable, g.isRelatedViaJoinTable());
-//            equalsBuilder.append(this.parentId, g.getParentId());
-//            equalsBuilder.append(this.childId, g.getChildId());
-            // this is to handle bi directional scenario. as it will be exact opposite of what it is.
+            equalsBuilder.append(this.parentId, g.getParentId());
+            equalsBuilder.append(this.childId, g.getChildId());
+             //this is to handle bi directional scenario. as it will be exact opposite of what it is.
             equalsBuilder.append(this.property, g.getBidirectionalProperty());
             equalsBuilder.append(this.bidirectionalProperty, g.getProperty());
-//            equalsBuilder.append(this.isswapped, g.isIsswapped());
+            equalsBuilder.append(this.isswapped, g.isIsswapped());*/
             return equalsBuilder.isEquals();
         }
         
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
+
     @Override
     public int hashCode()
     {

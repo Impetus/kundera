@@ -388,7 +388,8 @@ public class PersistenceDelegator
                 && !objectGraph.getChildClass().equals(objectGraph.getParentClass()))
         {
             relationGraphs = getGraph(parentEntity, metadata);
-            for (EntitySaveGraph g : relationGraphs)
+            List<EntitySaveGraph> uniqueGraphs = getDisjointGraph(objectGraph, relationGraphs);
+            for (EntitySaveGraph g : uniqueGraphs)
             {
                 removeGraph(g);
             }
@@ -558,6 +559,97 @@ public class PersistenceDelegator
             throw new PersistenceException(exp);
 
         }
+    }
+    
+    /**
+     * Find.
+     * 
+     * @param <E>
+     *            the element type
+     * @param entityClass
+     *            the entity class
+     * @param primaryKey
+     *            the primary key
+     * @return the e
+     */
+    public <E> E find(Class<E> entityClass, Object primaryKey, EntitySaveGraph excludeGraph)
+    {
+        try
+        {
+            // Look up in session first
+            E e = null/* getSession().lookup(entityClass, primaryKey) */;
+            isRelationViaJoinTable = false;
+
+            // if (null != e)
+            // {
+            // log.debug(entityClass.getName() + "_" + primaryKey +
+            // " is loaded from cache!");
+            // return e;
+            // }
+
+            // Find top level entity first
+            EntityMetadata entityMetadata = KunderaMetadataManager
+                    .getEntityMetadata(entityClass, getPersistenceUnits());
+
+            Client client = getClient(entityMetadata);
+
+            List<EntitySaveGraph> objectGraphs = getGraph(entityMetadata.getEntityClazz().newInstance(), entityMetadata);
+            List<EntitySaveGraph> graphs = getDisjointGraph(excludeGraph, objectGraphs);           
+            
+            
+            Map<Boolean, List<String>> relations = getRelations(graphs, entityMetadata.getEntityClazz());
+
+            EntityReader reader = getReader(client);
+            List<String> relationNames = relations.values().iterator().next();
+
+            String rowKey = primaryKey + "";
+
+            EnhanceEntity enhanceEntity = reader.findById(rowKey, entityMetadata, relationNames, client);
+
+            Map<Object, Object> relationalValues = new HashMap<Object, Object>();
+            if (enhanceEntity == null || enhanceEntity.getEntity() == null)
+            {
+                return null;
+            }
+            E entity = (E) enhanceEntity.getEntity();
+            if (relationNames.isEmpty() && !entityMetadata.isRelationViaJoinTable())
+            {
+                return entity;
+            }
+            else
+            {
+                entity = (E) reader.computeGraph(enhanceEntity, graphs, relationalValues, client, entityMetadata,
+                        this);
+            }
+            boolean isCacheableToL2 = entityMetadata.isCacheable();
+            getSession().store(primaryKey, entity, isCacheableToL2);
+
+            // Populate Association,
+            return entity;
+        }
+        catch (Exception exception)
+        {
+            exception.printStackTrace();
+            throw new PersistenceException(exception);
+        }
+    }
+
+    /**
+     * @param excludeGraph
+     * @param objectGraphs
+     * @return
+     */
+    private List<EntitySaveGraph> getDisjointGraph(EntitySaveGraph excludeGraph, List<EntitySaveGraph> objectGraphs)
+    {
+        List<EntitySaveGraph> graphs = new ArrayList<EntitySaveGraph>();
+        
+        for(EntitySaveGraph g : objectGraphs) {
+            if(!((g.getParentClass().equals(excludeGraph.getParentClass()) || g.getParentClass().equals(excludeGraph.getChildClass()))
+                   && (g.getChildClass().equals(excludeGraph.getParentClass()) || g.getChildClass().equals(excludeGraph.getChildClass())))) {
+                graphs.add(g);
+            }
+        }
+        return graphs;
     }
 
     /**
@@ -1110,8 +1202,8 @@ public class PersistenceDelegator
                     // This this graph is for an entity that has it's own
                     // parent,
                     // set reverse Foreign Key
-                    // i.e. Foreign key that refers to its parent
-                    if (!graph.equals(objectGraph))
+                    // i.e. Foreign key that refers to its parent                    
+                    if (!graph.equals(objectGraph))                        
                     {
                         graph.setRevFKeyName(objectGraph.getfKeyName());
                         graph.setRevFKeyValue(objectGraph.getParentId());
