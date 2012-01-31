@@ -77,11 +77,11 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
      * com.impetus.kundera.client.Client)
      */
     @Override
-    public EnhanceEntity findById(String primaryKey, EntityMetadata m, List<String> relationNames, Client client)
+    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client)
     {
         try
         {
-            return (EnhanceEntity) client.find(m.getEntityClazz(), m, primaryKey, relationNames);
+            return (EnhanceEntity) client.find(m.getEntityClazz(), m, primaryKey.toString(), relationNames);
         }
         catch (Exception e)
         {

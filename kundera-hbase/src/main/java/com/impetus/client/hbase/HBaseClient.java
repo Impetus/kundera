@@ -81,26 +81,26 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     }
 
     @Override
-    public <E> E find(Class<E> entityClass, String rowId, List<String> relationNames) throws Exception
+    public <E> E find(Class<E> entityClass, Object rowId, List<String> relationNames) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         // columnFamily has a different meaning for HBase, so it won't be used
         // here
         String tableName = entityMetadata.getTableName();
-        Object enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId,
+        Object enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId != null?rowId.toString():null,
                 relationNames);
         return (E) enhancedEntity;
     }
 
     @Override
-    public <E> List<E> find(Class<E> entityClass, String... rowIds) throws Exception
+    public <E> List<E> findAll(Class<E> entityClass, Object... rowIds) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         List<E> entities = new ArrayList<E>();
-        for (String rowKey : rowIds)
+        for (Object rowKey : rowIds)
         {
             E e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(), entityMetadata,
-                    rowKey, null);
+                    rowKey.toString(), null);
             entities.add(e);
         }
         return entities;
@@ -330,13 +330,13 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
     @Override
-    public Object find(Class<?> clazz, EntityMetadata entityMetadata, String rowId, List<String> relationNames)
+    public Object find(Class<?> clazz, EntityMetadata entityMetadata, Object rowId, List<String> relationNames)
     {
         String tableName = entityMetadata.getTableName();
         Object enhancedEntity = null;
         try
         {
-            enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId,
+            enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId !=null?rowId.toString():null,
                     relationNames);
         }
         catch (IOException e)

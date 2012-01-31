@@ -58,7 +58,7 @@ public class HBaseEntityReader extends AbstractEntityReader implements EntityRea
      * com.impetus.kundera.client.Client)
      */
     @Override
-    public EnhanceEntity findById(String primaryKey, EntityMetadata m, List<String> relationNames, Client client)
+    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client)
     {
         try
         {

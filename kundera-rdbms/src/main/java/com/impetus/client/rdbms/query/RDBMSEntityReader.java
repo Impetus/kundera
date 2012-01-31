@@ -103,7 +103,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         {
             // if it is not a parent.
             String sqlQuery = null;
-            if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+            if (MetadataUtils.useSecondryIndex(client.getPersistenceUnit()))
             {
                 sqlQuery = getSqlQueryFromJPA(m, relationNames, null);
             }
@@ -121,7 +121,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
         else
         {
-            if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+            if (MetadataUtils.useSecondryIndex(client.getPersistenceUnit()))
             {
                 try
                 {
@@ -159,19 +159,25 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             String sqlQuery)
     {
         List<EnhanceEntity> ls = null;
-        List<Object[]> result = ((HibernateClient) client).find(sqlQuery, relationNames, m.getEntityClazz());
+        List result = ((HibernateClient) client).find(sqlQuery, relationNames, m.getEntityClazz());
 
-        if(!result.isEmpty())
+        if (!result.isEmpty())
         {
-        ls = new ArrayList<EnhanceEntity>(result.size());
-        for (Object[] o : result)
-        {
-            EnhanceEntity e = new EnhanceEntity(o[0], getId(o[0], m), populateRelations(relationNames, o));
-            ls.add(e);
-        }
+            ls = new ArrayList<EnhanceEntity>(result.size());
+            for (Object o : result)
+            {
+                Class clazz = m.getEntityClazz();
+                
+                if(!o.getClass().isAssignableFrom(m.getEntityClazz()))
+                {
+                    o = ((Object[])o)[0];
+                }
+                EnhanceEntity e = new EnhanceEntity(o, getId(o, m), populateRelations(relationNames, o));
+                ls.add(e);
+            }
         }
         return ls;
-        
+
     }
 
     /**
@@ -225,11 +231,12 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         queryBuilder.append(entityMetadata.getTableName());
         queryBuilder.append(" ");
         queryBuilder.append(aliasName);
-
+        System.out.println("aaa");
         // add conditions
         if (filter != null)
         {
             queryBuilder.append(" Where ");
+//            queryBuilder.append(filter);
         }
 
         if (primaryKeys == null)
@@ -242,7 +249,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                     FilterClause clause = ((FilterClause) o);
                     String fieldName = getColumnName(clause.getProperty());
                     boolean isString = isStringProperty(entityMetadata, fieldName);
-                    appendStringPrefix(queryBuilder, isString);
+                    
                     queryBuilder.append(StringUtils.replace(clause.getProperty(),
                             clause.getProperty().substring(0, clause.getProperty().indexOf(".")), aliasName));
                     queryBuilder.append(" ");
@@ -253,7 +260,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                         queryBuilder.append("%");
                     }
                     queryBuilder.append(" ");
-
+                    appendStringPrefix(queryBuilder, isString);
                     queryBuilder.append(clause.getValue());
                     appendStringPrefix(queryBuilder, isString);
                 }
@@ -341,7 +348,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
      *            the o
      * @return the map
      */
-    private Map<String, Object> populateRelations(List<String> relations, Object[] o)
+    private Map<String, Object> populateRelations(List<String> relations, Object...o)
     {
         Map<String, Object> relationVal = new HashMap<String, Object>(relations.size());
         int counter = 1;
@@ -361,12 +368,12 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
      * com.impetus.kundera.client.Client)
      */
     @Override
-    public EnhanceEntity findById(String primaryKey, EntityMetadata m, List<String> relationNames, Client client)
+    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client)
     {
         if (relationNames != null && !relationNames.isEmpty())
         {
             Set<String> keys = new HashSet<String>(1);
-            keys.add(primaryKey);
+            keys.add(primaryKey.toString());
             String query = getSqlQueryFromJPA(m, relationNames, keys);
             return populateEnhanceEntities(m, relationNames, client, query).get(0);
         }

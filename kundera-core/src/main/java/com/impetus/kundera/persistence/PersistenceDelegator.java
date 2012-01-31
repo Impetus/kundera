@@ -16,7 +16,6 @@
 
 package com.impetus.kundera.persistence;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,15 +44,12 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.client.EnhanceEntity;
-import com.impetus.kundera.index.DocumentIndexer;
-import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
-import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 import com.impetus.kundera.persistence.handler.impl.EntityInterceptor;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
@@ -690,9 +686,9 @@ public class PersistenceDelegator
             EntityReader reader = getReader(client);
             List<String> relationNames = relations.values().iterator().next();
 
-            String rowKey = primaryKey + "";
+//            String rowKey = primaryKey + "";
 
-            EnhanceEntity enhanceEntity = reader.findById(rowKey, entityMetadata, relationNames, client);
+            EnhanceEntity enhanceEntity = reader.findById(primaryKey, entityMetadata, relationNames, client);
 
             Map<Object, Object> relationalValues = new HashMap<Object, Object>();
             if (enhanceEntity == null || enhanceEntity.getEntity() == null)
@@ -769,275 +765,6 @@ public class PersistenceDelegator
         closed = true;
     }
 
-    /**
-     * On compute graph.
-     * 
-     * @param entity
-     *            the entity
-     * @param objectGraph
-     *            the object graph
-     * @param client
-     *            the client
-     * @param rowId
-     *            the row id
-     * @param entityClass
-     *            the entity class
-     */
-
-    private void onComputeGraph(Object entity, EntitySaveGraph objectGraph, Client client, String rowId,
-            Class<?> entityClass)
-    {
-        IndexManager mgr = null;
-        Set<?> chids = new HashSet();
-        EntityMetadata childMetadata = null;
-        Client childClient = null;
-        Class<?> childClazz = null;
-        try
-        {
-
-            if (entity.getClass().equals(objectGraph.getChildClass()))
-            {
-                String query = AssociationBuilder.getQuery(DocumentIndexer.PARENT_ID_CLASS, objectGraph
-                        .getParentClass().getCanonicalName().toLowerCase(), DocumentIndexer.ENTITY_ID_FIELD, rowId);
-
-                childClazz = objectGraph.getParentClass();
-                childMetadata = getMetadata(childClazz);
-                childClient = getClient(childMetadata);
-
-                chids = populateAssociation(entity, objectGraph.getProperty(), childClient, query,
-                        objectGraph.getParentClass(), true);
-
-            }
-            else
-            {
-                childClazz = objectGraph.getChildClass();
-                childMetadata = getMetadata(childClazz);
-                childClient = getClient(childMetadata);
-
-                String query = AssociationBuilder.getQuery(DocumentIndexer.PARENT_ID_CLASS, entity.getClass()
-                        .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, rowId);
-
-                // if it is a case of shared primary key then it will share same
-                // primary key!
-
-                if (objectGraph.isSharedPrimaryKey())
-                {
-                    List c = new ArrayList();
-                    c.add(childClient.find(childClazz, rowId));
-                    chids = onReflect(entity, objectGraph.getProperty(), c);
-                }
-                else
-                {
-                    chids = populateAssociation(entity, objectGraph.getProperty(), childClient, query, childClazz,
-                            false);
-                }
-            }
-
-            onBiDirection(entity, objectGraph, client, rowId, entityClass, chids, childMetadata, childClient);
-        }
-        catch (Exception e)
-        {
-            // TODO Proper handling is must.
-            e.printStackTrace();
-        }
-
-    }
-
-    /**
-     * Populate association.
-     * 
-     * @param entity
-     *            the entity
-     * @param f
-     *            the f
-     * @param childClient
-     *            the child client
-     * @param query
-     *            the query
-     * @param clazz
-     *            the clazz
-     * @return the sets the
-     * @throws PropertyAccessException
-     *             the property access exception
-     */
-    private Set<?> populateAssociation(Object entity, Field f, Client childClient, String query, Class<?> clazz,
-            boolean fetchRelation) throws PropertyAccessException
-    {
-        // Set<?> chids;
-        List<?> childs = onAssociation(clazz, childClient, fetchRelation, query, false, null);
-        // chids = new HashSet(childs);
-        // Field f = objectGraph.getProperty();
-
-        // PropertyAccessorHelper.set(entity, f,
-        // PropertyAccessorHelper.isCollection(f.getType()) ?
-        // getFieldInstance(childs, f)
-        // : childs.get(0));
-        return onReflect(entity, f, childs);
-    }
-
-    private Set<?> onReflect(Object entity, Field f, List<?> childs) throws PropertyAccessException
-    {
-        Set chids = new HashSet();
-        if (childs != null)
-        {
-            chids = new HashSet(childs);
-            // TODO: need to store object in sesion.
-            // getSession().store(id, entity)
-            PropertyAccessorHelper.set(entity, f,
-                    PropertyAccessorHelper.isCollection(f.getType()) ? getFieldInstance(childs, f) : childs.get(0));
-        }
-        return chids;
-    }
-
-    /**
-     * On association.
-     * 
-     * @param clazz
-     *            the clazz
-     * @param client
-     *            the client
-     * @param fetchRelation
-     *            the fetch relation
-     * @param query
-     *            the query
-     * @return the list
-     */
-    private List<Object> onAssociation(Class<?> clazz, Client client, boolean fetchRelation, String query,
-            boolean biDirectional, String rowId)
-    {
-        try
-        {
-            IndexManager ixManager = client.getIndexManager();
-            Map<String, String> results = fetchRelation ? ixManager.fetchRelation(query) : ixManager.search(query);
-            // System.out.println(results);
-            Set<String> rsSet = new HashSet<String>(results.values());
-            if (biDirectional)
-            {
-                rsSet.remove(rowId);
-            }
-            return rsSet.isEmpty() ? null : (List<Object>) client.find(clazz, rsSet.toArray(new String[] {}));
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    /**
-     * On bi direction.
-     * 
-     * @param entity
-     *            the entity
-     * @param objectGraph
-     *            the object graph
-     * @param client
-     *            the client
-     * @param rowId
-     *            the row id
-     * @param entityClass
-     *            the entity class
-     * @param chids
-     *            the chids
-     * @param childMetadata
-     *            the child metadata
-     * @param childClient
-     *            the child client
-     * @throws Exception
-     *             the exception
-     */
-    private void onBiDirection(Object entity, EntitySaveGraph objectGraph, Client client, String rowId,
-            Class<?> entityClass, Set<?> chids, EntityMetadata childMetadata, Client childClient) throws Exception
-    {
-        IndexManager mgr;
-        if (!objectGraph.isUniDirectional())
-        {
-
-            for (Object child : chids)
-            {
-                // Add original fetched entity.
-                List obj = new ArrayList();
-                obj.add(entity);
-
-                Relation relation = childMetadata.getRelation(objectGraph.getBidirectionalProperty().getName());
-
-                // If relation is One to Many or MANY TO MANY for associated
-                // entity. Require to fetch all associated entity
-                if (relation.getType().equals(ForeignKey.ONE_TO_MANY)
-                        || relation.getType().equals(ForeignKey.MANY_TO_MANY))
-                {
-                    String query = null;
-                    try
-                    {
-                        String id = PropertyAccessorHelper.getId(child, childMetadata);
-                        query = AssociationBuilder.getQuery(DocumentIndexer.PARENT_ID_CLASS, child.getClass()
-                                .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, id);
-                        List<Object> results = onAssociation(entityClass, client, false, query, true, rowId);
-                        if (results != null)
-                        {
-                            obj.addAll(results);
-                        }
-                    }
-                    catch (PropertyAccessException e)
-                    {
-                        throw new RuntimeException(e.getMessage());
-                    }
-
-                    // In case of other parent object found for given
-                    // bidirectional.
-                    for (Object o : obj)
-                    {
-                        Field f = objectGraph.getProperty();
-                        if (PropertyAccessorHelper.isCollection(f.getType()))
-                        {
-                            List l = new ArrayList();
-                            l.add(child);
-                            Object oo = getFieldInstance(l, f);
-                            PropertyAccessorHelper.set(o, f, oo);
-                        }
-                        else
-                        {
-                            PropertyAccessorHelper.set(o, f, child);
-                        }
-
-                    }
-                }
-                try
-                {
-                    PropertyAccessorHelper
-                            .set(child, objectGraph.getBidirectionalProperty(),
-                                    PropertyAccessorHelper.isCollection(objectGraph.getBidirectionalProperty()
-                                            .getType()) ? getFieldInstance(obj, objectGraph.getBidirectionalProperty())
-                                            : entity);
-                }
-                catch (PropertyAccessException e)
-                {
-                    throw new RuntimeException(e.getMessage());
-                }
-            }
-        }
-    }
-
-    /**
-     * Gets the field instance.
-     * 
-     * @param chids
-     *            the chids
-     * @param f
-     *            the f
-     * @return the field instance
-     */
-    private Object getFieldInstance(List chids, Field f)
-    {
-
-        if (Set.class.isAssignableFrom(f.getType()))
-        {
-            Set col = new HashSet(chids);
-            return col;
-        }
-        return chids;
-    }
 
     /**
      * Gets the persistence units.

@@ -643,7 +643,7 @@ public abstract class QueryImpl implements Query
             String[] primaryKeys = searchFilter.values().toArray(new String[] {});
             try
             {
-                result = (List<Object>) client.find(m.getEntityClazz(), primaryKeys);
+                result = (List<Object>) client.findAll(m.getEntityClazz(), primaryKeys);
             }
             catch (Exception e)
             {
@@ -855,7 +855,7 @@ public abstract class QueryImpl implements Query
         Set<String> rSet = fetchDataFromLucene(client);
         try
         {
-            List resultList = client.find(m.getEntityClazz(), rSet.toArray(new String[] {}));
+            List resultList = client.findAll(m.getEntityClazz(), rSet.toArray(new String[] {}));
             transform(m, ls, resultList);
         }
         catch (Exception e)

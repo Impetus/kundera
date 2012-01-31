@@ -120,11 +120,11 @@ public class LuceneIndexer extends DocumentIndexer
     public static synchronized LuceneIndexer getInstance(Analyzer analyzer, String lucDirPath)
     {
         // super(analyzer);
-        if (indexer == null)
+        if (indexer == null && lucDirPath != null)
         {
             indexer = new LuceneIndexer(analyzer, lucDirPath);
 
-        }
+        } 
         return indexer;
     }
 

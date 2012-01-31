@@ -276,7 +276,7 @@ public class MongoDBClient implements Client
      * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public <E> E find(Class<E> entityClass, String key, List<String> relationNames) throws Exception
+    public <E> E find(Class<E> entityClass, Object key, List<String> relationNames) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
 
@@ -306,7 +306,7 @@ public class MongoDBClient implements Client
     }
 
     @Override
-    public <E> List<E> find(Class<E> entityClass, String... keys) throws Exception
+    public <E> List<E> findAll(Class<E> entityClass, Object... keys) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
 
@@ -469,7 +469,7 @@ public class MongoDBClient implements Client
      * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
     @Override
-    public Object find(Class<?> clazz, EntityMetadata entityMetadata, String rowId, List<String> relationNames)
+    public Object find(Class<?> clazz, EntityMetadata entityMetadata, Object rowId, List<String> relationNames)
     {
 
         log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + rowId);

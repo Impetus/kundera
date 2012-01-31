@@ -137,7 +137,7 @@ public class AbstractEntityReader
                         // create a finder and pass metadata, relationName,
                         // relationalValue.
                         List<Object> childs = null;
-                        if (MetadataUtils.useSecondryIndex(childMetadata.getPersistenceUnit()))
+                        if (MetadataUtils.useSecondryIndex(childClient.getPersistenceUnit()))
                         {
                             childs = childClient.find(relationName, relationalValue, childMetadata);
                             
@@ -165,12 +165,10 @@ public class AbstractEntityReader
                                 Map<String, String> results = childClient.getIndexManager().search(query);
                                 Set<String> rsSet = new HashSet<String>(results.values());
                                 //childs = (List<Object>) childClient.find(childClazz, rsSet.toArray(new String[] {}));
-                                
-                                if(childClazz.equals(e.getEntity().getClass())) {
-                                    childs = (List<Object>)childClient.find(childClazz, rsSet.toArray(new String[] {}));
-                                } else {
-                                    childs = (List<Object>)persistenceDelegeator.find(childClazz, rsSet.toArray(new String[] {}));
-                                }
+
+                                childs = (List<Object>) (childClazz.equals(e.getEntity().getClass())?childClient.findAll(childClazz, rsSet.toArray(new String[] {})):persistenceDelegeator.find(childClazz, rsSet.toArray(new String[] {})));
+
+
                             }
                         }
                         // secondary indexes.
@@ -316,7 +314,7 @@ public class AbstractEntityReader
                     String id = PropertyAccessorHelper.getId(child, childMetadata);
                     List<Object> results = null;
 
-                    if (MetadataUtils.useSecondryIndex(origMetadata.getPersistenceUnit()))
+                    if (MetadataUtils.useSecondryIndex(client.getPersistenceUnit()))
                     {
                         results = client.find(objectGraph.getfKeyName(), id, origMetadata);
                     }
@@ -400,7 +398,7 @@ public class AbstractEntityReader
         Set<String> rSet = fetchDataFromLucene(client);
         try
         {
-            List resultList = client.find(m.getEntityClazz(), rSet.toArray(new String[] {}));
+            List resultList = client.findAll(m.getEntityClazz(), rSet.toArray(new String[] {}));
             return transform(m, ls, resultList);
         }
         catch (Exception e)

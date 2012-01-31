@@ -119,10 +119,10 @@ public class PelopsClient implements Client
      */
     @Override
     @Deprecated
-    public final <E> E find(Class<E> entityClass, String rowId, List<String> relationNames) throws Exception
+    public final <E> E find(Class<E> entityClass, Object rowId, List<String> relationNames) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
-        return (E) find(entityClass, entityMetadata, rowId, relationNames);
+        return (E) find(entityClass, entityMetadata, rowId != null?rowId.toString():null, relationNames);
     }
 
     /*
@@ -131,13 +131,13 @@ public class PelopsClient implements Client
      * @see com.impetus.kundera.client.Client#find(java.lang.Class,
      * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
-    public final Object find(Class<?> clazz, EntityMetadata metadata, String rowId, List<String> relationNames)
+    public final Object find(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relationNames)
     {
 
         List<Object> result = null;
         try
         {
-            result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata, rowId);
+            result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata, rowId != null?rowId.toString():null);
         }
         catch (Exception e)
         {
@@ -155,13 +155,13 @@ public class PelopsClient implements Client
      * java.lang.String[])
      */
     @Override
-    public final <E> List<E> find(Class<E> entityClass, String... rowIds) throws Exception
+    public final <E> List<E> findAll(Class<E> entityClass, Object... rowIds) throws Exception
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         List<E> results = new ArrayList<E>();
-        for (String rowKey : rowIds)
+        for (Object rowKey : rowIds)
         {
-            E r = (E) find(entityClass, entityMetadata, rowKey, null);
+            E r = (E) find(entityClass, entityMetadata, rowKey.toString(), null);
             if (r != null)
             {
                 results.add(r);
