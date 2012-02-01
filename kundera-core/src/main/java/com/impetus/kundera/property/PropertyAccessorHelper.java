@@ -335,8 +335,12 @@ public class PropertyAccessorHelper
      * @return the generic class
      */
     public static Class<?> getGenericClass(Field collectionField)
-    {
+    {        
         Class<?> genericClass = null;
+        if (collectionField == null)
+        {
+            return genericClass;
+        }
         if (isCollection(collectionField.getType()))
         {
 

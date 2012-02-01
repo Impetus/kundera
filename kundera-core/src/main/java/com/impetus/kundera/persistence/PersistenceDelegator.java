@@ -261,6 +261,17 @@ public class PersistenceDelegator
         }
         return entities;
     }
+    
+    public <E> List<E> find(Class<E> entityClass, EntitySaveGraph excludeGraph, Object... primaryKeys)
+    {
+        List<E> entities = new ArrayList<E>();
+        Set pKeys = new HashSet(Arrays.asList(primaryKeys));
+        for (Object primaryKey : pKeys)
+        {
+            entities.add(find(entityClass, primaryKey, excludeGraph));
+        }
+        return entities;
+    }
 
     /**
      * Find.
@@ -640,8 +651,8 @@ public class PersistenceDelegator
         List<EntitySaveGraph> graphs = new ArrayList<EntitySaveGraph>();
         
         for(EntitySaveGraph g : objectGraphs) {
-            if(!((g.getParentClass().equals(excludeGraph.getParentClass()) || g.getParentClass().equals(excludeGraph.getChildClass()))
-                   && (g.getChildClass().equals(excludeGraph.getParentClass()) || g.getChildClass().equals(excludeGraph.getChildClass())))) {
+            if(!((excludeGraph.getParentClass().equals(g.getParentClass()) || excludeGraph.getChildClass().equals(g.getParentClass()))
+                   && (excludeGraph.getParentClass().equals(g.getChildClass()) || excludeGraph.getChildClass().equals(g.getChildClass())))) {
                 graphs.add(g);
             }
         }
