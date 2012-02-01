@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.query;
 
+import java.nio.charset.CharacterCodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -175,10 +176,12 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
      * @param ixClause the ix clause
      * @param isRowKeyQuery the is row key query
      * @return the list
+     * @throws CharacterCodingException 
      */
     public List handleFindByRange(EntityMetadata m, Client client, List result, Map<Boolean, List<IndexClause>> ixClause, boolean isRowKeyQuery)
     {
         List<IndexExpression> expressions = ixClause.get(isRowKeyQuery).get(0).getExpressions();
+
         byte[] minValue = expressions.get(0).getValue();
         byte[] maxVal = expressions.get(1).getValue();
         try
@@ -187,6 +190,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             log.error("Error while executing find by range");
             throw new QueryHandlerException(e.getMessage());
         }

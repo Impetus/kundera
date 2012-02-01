@@ -60,6 +60,7 @@ public class CassQuery extends QueryImpl implements Query
     /** The reader. */
     private EntityReader reader;
 
+    
     /**
      * Instantiates a new cass query.
      *
@@ -147,7 +148,7 @@ public class CassQuery extends QueryImpl implements Query
                 }
                 String condition = clause.getCondition();
                 String value = clause.getValue();
-
+//                value.e
                 expr.add(Selector.newIndexExpression(fieldName, getOperator(condition, idPresent),
                         getBytesValue(fieldName, m, value)));
             }
@@ -272,9 +273,11 @@ public class CassQuery extends QueryImpl implements Query
     {
         Column idCol = m.getIdColumn();
         Field f = null;
+        boolean isId=false;
         if (idCol.getName().equals(fieldName))
         {
             f = idCol.getField();
+            isId=true;
         }
         else
         {
@@ -284,9 +287,10 @@ public class CassQuery extends QueryImpl implements Query
 
         if (f != null && f.getType() != null)
         {
-            if (f.getType().isAssignableFrom(String.class))
+            if (isId || f.getType().isAssignableFrom(String.class))
             {
-                return Bytes.fromByteArray(value.getBytes());
+                
+                return Bytes.fromByteArray(value.trim().getBytes());
             }
             else if (f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
             {
@@ -294,6 +298,7 @@ public class CassQuery extends QueryImpl implements Query
             }
             else if (f.getType().equals(long.class) || f.getType().isAssignableFrom(Long.class))
             {
+                
                 return Bytes.fromLong(Long.parseLong(value));
             }
             else if (f.getType().equals(boolean.class) || f.getType().isAssignableFrom(Boolean.class))

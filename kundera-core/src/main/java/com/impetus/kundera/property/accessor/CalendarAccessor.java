@@ -34,7 +34,7 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
 {
 
     /** The Constant DATE_FORMATTER. */
-    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd-MM-yy HH:mm:ss", Locale.ENGLISH);    
+    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);    
     
     @Override
     public Calendar fromBytes(byte[] b) throws PropertyAccessException
@@ -42,6 +42,7 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
         String s;
         try
         {
+            String s1 = new String(b);
             s = new String(b, Constants.ENCODING);
         }
         catch (UnsupportedEncodingException e)
@@ -58,7 +59,7 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
         Calendar cal = (Calendar) object;
-        return DATE_FORMATTER.format(cal.getTime()).getBytes();
+        return DateAccessor.getFormattedObect(cal.getTime().toString()).getBytes();
     }
 
 
@@ -75,14 +76,8 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
     {
         Calendar cal = Calendar.getInstance();
         Date d;
-        try
-        {
-            d = (Date)DATE_FORMATTER.parse(s);
-        }
-        catch (ParseException e)
-        {
-            throw new PropertyAccessException(e.getMessage());
-        }
+//            d = (Date)DATE_FORMATTER.parse(s);
+            d = DateAccessor.getDateByPattern(s);
         cal.setTime(d);
         return cal;
     }

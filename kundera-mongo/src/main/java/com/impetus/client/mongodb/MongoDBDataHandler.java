@@ -17,6 +17,7 @@ package com.impetus.client.mongodb;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -86,6 +87,9 @@ public class MongoDBDataHandler
             List<Column> columns = m.getColumnsAsList();
             for (Column column : columns)
             {
+                System.out.println(document.get(column.getName()).toString());
+                System.out.println(column.getName());
+                
                 PropertyAccessorHelper.set(entity, column.getField(), document.get(column.getName()).toString());
             }
 
@@ -275,7 +279,9 @@ public class MongoDBDataHandler
         }
         else
         {
-            dbObj.put(column.getName(), PropertyAccessorHelper.getObject(entity, column.getField()).toString());
+            //TODO : this should have been handled by DocumentObjectMapper.
+            Object valObj = PropertyAccessorHelper.getObject(entity, column.getField());
+            dbObj.put(column.getName(), valObj instanceof Calendar ? ((Calendar)valObj).getTime().toString():PropertyAccessorHelper.getObject(entity, column.getField()).toString());
         }
     }
 
