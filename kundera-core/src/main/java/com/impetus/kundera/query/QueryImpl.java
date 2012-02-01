@@ -17,6 +17,7 @@ package com.impetus.kundera.query;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -641,9 +642,13 @@ public abstract class QueryImpl implements Query
         if (kunderaQuery.isAliasOnly())
         {
             String[] primaryKeys = searchFilter.values().toArray(new String[] {});
+            Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
+            
             try
             {
-                result = (List<Object>) client.findAll(m.getEntityClazz(), primaryKeys);
+                //result = (List<Object>) client.findAll(m.getEntityClazz(), uniquePKs.toArray());
+                result = (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), uniquePKs.toArray());
+                
             }
             catch (Exception e)
             {

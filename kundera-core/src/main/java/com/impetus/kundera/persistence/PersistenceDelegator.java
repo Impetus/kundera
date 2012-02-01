@@ -392,6 +392,7 @@ public class PersistenceDelegator
         // them before the parent
         List<EntitySaveGraph> relationGraphs = null;
         if (objectGraph.isIsswapped() && !metadata.getRelations().isEmpty()
+                && parentEntity != null
                 && !objectGraph.getChildClass().equals(objectGraph.getParentClass()))
         {
             relationGraphs = getGraph(parentEntity, metadata);
@@ -409,18 +410,20 @@ public class PersistenceDelegator
             
             Client pClient = getClient(metadata);
             pClient.delete(parentEntity, objectGraph.getParentId(), metadata);
+            
+            session.remove(parentEntity.getClass(), objectGraph.getParentEntity());
         }
 
         
         //Delete child entity
         Object childEntity = objectGraph.getChildEntity();
         // If any association exists.
-        if (objectGraph.getParentEntity() != null && childEntity != null)
+        if (childEntity != null)
         {
             onClientHandle(objectGraph, childEntity);
         }
 
-        session.remove(parentEntity.getClass(), objectGraph.getParentEntity());
+        
 
        //Delete data from Join Table if any 
        /*if(metadata.isRelationViaJoinTable()) {
@@ -467,13 +470,17 @@ public class PersistenceDelegator
             Collection<?> childCol = (Collection<?>) childEntity;
             for (Object ch : childCol)
             {
-                onClientDelete(ch, objectGraph);
+                if(ch != null) {
+                    onClientDelete(ch, objectGraph);
+                }                
             }
-
         }
         else
         {
-            onClientDelete(childEntity, objectGraph);
+            if(childEntity != null) {
+                onClientDelete(childEntity, objectGraph);
+            }
+            
         }
     }
 

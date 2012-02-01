@@ -488,8 +488,9 @@ public class AbstractEntityReader
             {
                 EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
                 Client childClient = delegator.getClient(childMetadata);
-                Object child = childClient.find(relation.getTargetEntity(), childMetadata, (String) foreignKey, null);
-
+                //Object child = childClient.find(relation.getTargetEntity(), childMetadata, (String) foreignKey, null);
+                Object child = delegator.find(relation.getTargetEntity(), foreignKey);
+                
                 onBiDirection(e, client, objectGraph, entityMetadata, child, childMetadata, childClient);
 
                 childrenEntities.add(child);
