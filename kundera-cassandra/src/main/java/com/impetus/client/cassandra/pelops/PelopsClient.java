@@ -31,7 +31,6 @@ import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexOperator;
-import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -43,7 +42,6 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 
-import com.impetus.client.cassandra.pelops.PelopsDataHandler.ThriftRow;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
@@ -85,6 +83,7 @@ public class PelopsClient implements Client
 
     /** The timestamp. */
     private long timestamp;
+
 
     /**
      * default constructor.
@@ -517,7 +516,7 @@ public class PelopsClient implements Client
         List<Object> entities = null;
 
         List<KeySlice> keys = selector.getKeySlices(new ColumnParent(m.getTableName()), selector.newKeyRange(Bytes.fromByteArray(minVal), Bytes.fromByteArray(maxVal), 10000), slicePredicate, ConsistencyLevel.ONE);
-        
+
         List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
         
         List results = null;
@@ -757,6 +756,7 @@ public class PelopsClient implements Client
         List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
         if (thriftColumns != null && !thriftColumns.isEmpty())
         {
+//            Bytes.fromL
             mutator.writeColumns(metadata.getTableName(), new Bytes(tf.getId().getBytes()),
                     Arrays.asList(tf.getColumns().toArray(new Column[0])));
         }

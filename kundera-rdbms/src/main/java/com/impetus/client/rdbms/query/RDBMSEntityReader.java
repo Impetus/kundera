@@ -231,7 +231,6 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         queryBuilder.append(entityMetadata.getTableName());
         queryBuilder.append(" ");
         queryBuilder.append(aliasName);
-        System.out.println("aaa");
         // add conditions
         if (filter != null)
         {
