@@ -87,9 +87,6 @@ public class MongoDBDataHandler
             List<Column> columns = m.getColumnsAsList();
             for (Column column : columns)
             {
-                System.out.println(document.get(column.getName()).toString());
-                System.out.println(column.getName());
-                
                 PropertyAccessorHelper.set(entity, column.getField(), document.get(column.getName()).toString());
             }
 
