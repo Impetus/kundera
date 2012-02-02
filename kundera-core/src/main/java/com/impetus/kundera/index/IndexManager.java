@@ -214,7 +214,10 @@ public class IndexManager
      */
     public void flush()
     {
-        indexer.flush();
+        if (indexer != null)
+        {
+            indexer.flush();
+        }
     }
 
     /**
@@ -222,6 +225,9 @@ public class IndexManager
      */
     public void close()
     {
-        indexer.close();
-    }
+        if (indexer != null)
+        {
+            indexer.close();
+        }
+  }
 }
