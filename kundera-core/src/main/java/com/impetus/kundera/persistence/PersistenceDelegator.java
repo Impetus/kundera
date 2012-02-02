@@ -819,7 +819,8 @@ public class PersistenceDelegator
         Object parentEntity = objectGraph.getParentEntity();
         EntityMetadata metadata = getMetadata(objectGraph.getParentClass());
 
-        List<EntitySaveGraph> relationGraphs = null;
+        List<EntitySaveGraph> relationGraphs = null;       
+        
 
         // If this is a swapped graph and parent has further relations, persist
         // before the parent
@@ -839,20 +840,17 @@ public class PersistenceDelegator
 
         }
 
+        
         // Persist parent entity
         if (parentEntity != null)
         {
-
             objectGraph.setParentId(getId(parentEntity, metadata));
-
-            // if (getSession().lookup(parentEntity.getClass(),
-            // objectGraph.getParentId()) == null)
-            // {
-            Client pClient = getClient(metadata);
-            pClient.persist(objectGraph, metadata);
-            session.store(objectGraph.getParentId(), objectGraph.getParentEntity());
-
-            // }
+            
+            if(getSession().lookup(objectGraph.getParentClass(), objectGraph.getParentId()) == null) {
+                Client pClient = getClient(metadata);
+                pClient.persist(objectGraph, metadata);
+                session.store(objectGraph.getParentId(), objectGraph.getParentEntity());
+            }           
         }
 
         // Persist child entity(ies)
@@ -860,6 +858,7 @@ public class PersistenceDelegator
         if (objectGraph.getParentEntity() != null && childEntity != null)
         {
             persistChildEntity(objectGraph, childEntity);
+            
         }
 
         // Persist Join Table

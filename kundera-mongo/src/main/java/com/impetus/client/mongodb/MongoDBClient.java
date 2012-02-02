@@ -110,9 +110,8 @@ public class MongoDBClient implements Client
         String id = entityGraph.getParentId();
 
         try
-        {
-            onPersist(entityMetadata, entity, id, RelationHolder.addRelation(entityGraph, entityGraph.getRevFKeyName(),
-                    entityGraph.getRevFKeyValue()));
+        {           
+            onPersist(entityMetadata, entity, id, RelationHolder.addRelation(entityGraph, entityGraph.getRevFKeyName(), entityGraph.getRevFKeyValue()));
 
             if (entityGraph.getRevParentClass() != null)
             {
