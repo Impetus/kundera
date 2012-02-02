@@ -76,10 +76,13 @@ public class HibernateClient implements Client
 
     /**
      * Instantiates a new hibernate client.
-     *
-     * @param persistenceUnit the persistence unit
-     * @param indexManager the index manager
-     * @param reader the reader
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
+     * @param indexManager
+     *            the index manager
+     * @param reader
+     *            the reader
      */
     public HibernateClient(final String persistenceUnit, IndexManager indexManager, EntityReader reader)
     {
@@ -196,8 +199,8 @@ public class HibernateClient implements Client
         s.delete(entity);
         tx.commit();
         s.close();
-        
-        if(!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
+
+        if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
         {
             getIndexManager().remove(metadata, entity, pKey.toString());
         }
@@ -216,7 +219,7 @@ public class HibernateClient implements Client
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), arg0);
         Session s = getSessionInstance();
         Transaction tx = s.beginTransaction();
-        E object = (E) s.get(arg0, getKey(key,entityMetadata.getIdColumn().getField()));
+        E object = (E) s.get(arg0, getKey(key, entityMetadata.getIdColumn().getField()));
         tx.commit();
 
         return object;
@@ -251,11 +254,14 @@ public class HibernateClient implements Client
 
     /**
      * Gets the data type.
-     *
-     * @param entityMetadata the entity metadata
-     * @param arg1 the arg1
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param arg1
+     *            the arg1
      * @return the data type
-     * @throws PropertyAccessException the property access exception
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     private Object[] getDataType(EntityMetadata entityMetadata, Object... arg1) throws PropertyAccessException
     {
@@ -268,7 +274,7 @@ public class HibernateClient implements Client
         {
             pKeys[cnt++] = accessor.fromString(r.toString());
         }
-        
+
         return pKeys;
     }
 
@@ -323,7 +329,7 @@ public class HibernateClient implements Client
             tx.commit();
         }
 
-        if(!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
+        if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
         {
             if (entityGraph.getRevParentClass() != null)
             {
@@ -335,13 +341,17 @@ public class HibernateClient implements Client
                 getIndexManager().write(metadata, entityGraph.getParentEntity());
             }
         }
-        
+
         return null;
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#persist(java.lang.Object, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
+     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph,
+     * com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
     public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
@@ -370,12 +380,17 @@ public class HibernateClient implements Client
 
     /**
      * Inserts records into JoinTable for the given relationship.
-     *
-     * @param joinTableName the join table name
-     * @param joinColumnName the join column name
-     * @param inverseJoinColumnName the inverse join column name
-     * @param relMetadata the rel metadata
-     * @param objectGraph the object graph
+     * 
+     * @param joinTableName
+     *            the join table name
+     * @param joinColumnName
+     *            the join column name
+     * @param inverseJoinColumnName
+     *            the inverse join column name
+     * @param relMetadata
+     *            the rel metadata
+     * @param objectGraph
+     *            the object graph
      */
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
@@ -402,8 +417,14 @@ public class HibernateClient implements Client
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#getForeignKeysFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#getForeignKeysFromJoinTable(java.lang
+     * .String, java.lang.String, java.lang.String,
+     * com.impetus.kundera.metadata.model.EntityMetadata,
+     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
@@ -431,13 +452,19 @@ public class HibernateClient implements Client
 
     /**
      * Insert record in join table.
-     *
-     * @param joinTableName the join table name
-     * @param joinColumnName the join column name
-     * @param inverseJoinColumnName the inverse join column name
-     * @param relMetadata the rel metadata
-     * @param parentId the parent id
-     * @param child the child
+     * 
+     * @param joinTableName
+     *            the join table name
+     * @param joinColumnName
+     *            the join column name
+     * @param inverseJoinColumnName
+     *            the inverse join column name
+     * @param relMetadata
+     *            the rel metadata
+     * @param parentId
+     *            the parent id
+     * @param child
+     *            the child
      */
     private void insertRecordInJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, String parentId, Object child)
@@ -526,17 +553,20 @@ public class HibernateClient implements Client
 
             s.beginTransaction();
         }
-        Object result = s.get(clazz, getKey(rowId,metadata.getIdColumn().getField()));
+        Object result = s.get(clazz, getKey(rowId, metadata.getIdColumn().getField()));
         // s.close();
         return result;
     }
 
     /**
      * Find.
-     *
-     * @param nativeQuery the native query
-     * @param relations the relations
-     * @param clazz the clazz
+     * 
+     * @param nativeQuery
+     *            the native query
+     * @param relations
+     *            the relations
+     * @param clazz
+     *            the clazz
      * @return the list
      */
     public List find(String nativeQuery, List<String> relations, Class clazz)
@@ -558,8 +588,11 @@ public class HibernateClient implements Client
         return q.list();
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#find(java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.String,
+     * java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     public List<Object> find(String colName, String colValue, EntityMetadata m)
     {
@@ -582,7 +615,9 @@ public class HibernateClient implements Client
         return q.list();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.client.Client#getReader()
      */
     public EntityReader getReader()
@@ -590,37 +625,40 @@ public class HibernateClient implements Client
         return reader;
     }
 
-
-
     private Serializable getKey(Object pKey, Field f)
     {
-     
-        if(pKey != null)
+        if (pKey != null)
         {
-            if(f.getType().isAssignableFrom(long.class) || f.getType().isAssignableFrom(Long.class))
+            if (f.getType().isAssignableFrom(long.class) || f.getType().isAssignableFrom(Long.class))
             {
-                return (Long) pKey;
-            } else if(f.getType().isAssignableFrom(int.class) || f.getType().isAssignableFrom(Integer.class))
+                return Long.valueOf(pKey.toString());
+            }
+            else if (f.getType().isAssignableFrom(int.class) || f.getType().isAssignableFrom(Integer.class))
             {
-                return (Integer) pKey;
-            } else if(f.getType().isAssignableFrom(String.class))
+                return Integer.valueOf(pKey.toString());
+            }
+            else if (f.getType().isAssignableFrom(String.class))
             {
                 return (String) pKey;
-            } else if(f.getType().isAssignableFrom(boolean.class) || f.getType().isAssignableFrom(Boolean.class))
+            }
+            else if (f.getType().isAssignableFrom(boolean.class) || f.getType().isAssignableFrom(Boolean.class))
             {
-                return (Boolean) pKey;
-            } else if(f.getType().isAssignableFrom(double.class) || f.getType().isAssignableFrom(Double.class))
+                return Boolean.valueOf(pKey.toString());
+            }
+            else if (f.getType().isAssignableFrom(double.class) || f.getType().isAssignableFrom(Double.class))
             {
-                return (Double) pKey;
-            } else if(f.getType().isAssignableFrom(float.class) || f.getType().isAssignableFrom(Float.class))
+                return Double.valueOf(pKey.toString());
+            }
+            else if (f.getType().isAssignableFrom(float.class) || f.getType().isAssignableFrom(Float.class))
             {
-                return (Float) pKey;
-            } else
+                return Float.valueOf(pKey.toString());
+            }
+            else
             {
                 throw new PersistenceException("Unsupported type:" + pKey.getClass());
             }
         }
-        
+
         return null;
     }
 }
