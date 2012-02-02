@@ -161,7 +161,8 @@ public class AbstractEntityReader
                                 // that's it!
                                 String query = getQuery(DocumentIndexer.PARENT_ID_CLASS, e.getEntity().getClass()
                                         .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD,
-                                        e.getEntityId());
+                                        e.getEntityId(), childClazz.getCanonicalName().toLowerCase());
+//                                System.out.println(query);
                                 Map<String, String> results = childClient.getIndexManager().search(query);
                                 Set<String> rsSet = new HashSet<String>(results.values());
                                 //childs = (List<Object>) childClient.find(childClazz, rsSet.toArray(new String[] {}));
@@ -260,7 +261,7 @@ public class AbstractEntityReader
      *            lucene id field value
      * @return query lucene query.
      */
-    protected static String getQuery(String clazzFieldName, String clazzName, String idFieldName, String idFieldValue)
+    protected static String getQuery(String clazzFieldName, String clazzName, String idFieldName, String idFieldValue, String entityClazz)
     {
         StringBuffer sb = new StringBuffer("+");
         sb.append(clazzFieldName);
@@ -271,6 +272,14 @@ public class AbstractEntityReader
         sb.append(idFieldName);
         sb.append(":");
         sb.append(idFieldValue);
+        if(entityClazz !=null)
+        {
+            sb.append(" AND ");
+            sb.append("+");
+            sb.append(DocumentIndexer.ENTITY_CLASS_FIELD);
+            sb.append(":");
+            sb.append(entityClazz);
+        }
         return sb.toString();
     }
 
@@ -300,7 +309,9 @@ public class AbstractEntityReader
             EntityMetadata origMetadata, Object child, EntityMetadata childMetadata, Client childClient)
             throws Exception
     {
-        if (!objectGraph.isUniDirectional())
+        //Process bidirectional processing only if it's a bidirectional graph and child exists (there is a possibility that this
+        // child make already have been deleted
+        if (!objectGraph.isUniDirectional() && child != null)
         {
             // Add original fetched entity.
             List obj = new ArrayList();
@@ -329,13 +340,15 @@ public class AbstractEntityReader
                         if (relation.getType().equals(ForeignKey.ONE_TO_MANY))
                         {
                             query = getQuery(DocumentIndexer.PARENT_ID_CLASS, child.getClass().getCanonicalName()
-                                    .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, id);
+                                    .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, id, e.getEntity().getClass().getCanonicalName().toLowerCase());
+                      //      System.out.println(query);
                             keys = client.getIndexManager().search(query);
                         }
                         else
                         {
                             query = getQuery(DocumentIndexer.ENTITY_CLASS_FIELD, child.getClass().getCanonicalName()
-                                    .toLowerCase(), DocumentIndexer.ENTITY_ID_FIELD, id);
+                                    .toLowerCase(), DocumentIndexer.ENTITY_ID_FIELD, id,null);
+                          //  System.out.println(query);
                             keys = client.getIndexManager().fetchRelation(query);
 
                         }

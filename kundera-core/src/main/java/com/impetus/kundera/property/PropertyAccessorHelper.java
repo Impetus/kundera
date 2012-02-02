@@ -148,7 +148,7 @@ public class PropertyAccessorHelper
         catch (IllegalAccessException iacc)
         {
             throw new PropertyAccessException(iacc);
-        }
+        } 
     }
 
     /**

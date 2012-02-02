@@ -939,9 +939,12 @@ public class PersistenceDelegator
             // Otherwise treat it as parent entity for its related entities,
             // determine graph and save that graph recursively.
 
+            //List<EntitySaveGraph> objectGraphs = getDisjointGraph(objectGraph, getGraph(child, metadata));
             List<EntitySaveGraph> objectGraphs = getGraph(child, metadata);
             if (!((relations == null || relations.isEmpty()) || objectGraph.isIsswapped()))
             {
+                
+                
                 for (EntitySaveGraph graph : objectGraphs)
                 {
                     // This this graph is for an entity that has it's own

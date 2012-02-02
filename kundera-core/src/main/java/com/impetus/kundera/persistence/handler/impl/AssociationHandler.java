@@ -148,7 +148,7 @@ class AssociationHandler
                     for (Object entityObj : entityCollection)
                     {
                         PropertyAccessorHelper.set(entityObj, field, setNull || entity == null ? null
-                                : Set.class.isAssignableFrom(field.getType()) ? null:associationEntity.getClass().newInstance());
+                                : Collection.class.isAssignableFrom(field.getType()) ? null:associationEntity.getClass().newInstance());
                     }
 
                 } else

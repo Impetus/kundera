@@ -124,7 +124,7 @@ public abstract class DocumentIndexer implements Indexer
         // Add super column name to document
         addSuperColumnNameToDocument(embeddedColumnName, currentDoc);
 
-//        indexParentKey(parentId, currentDoc, clazz);
+        indexParentKey(parentId, currentDoc, clazz);
         return currentDoc;
     }
 
