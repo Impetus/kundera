@@ -394,13 +394,13 @@ public class HibernateClient implements Client
      */
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, EntitySaveGraph objectGraph)
+            EntityMetadata relMetadata,  Object primaryKey, Object childEntity)
     {
 
-        String parentId = objectGraph.getParentId();
-        if (Collection.class.isAssignableFrom(objectGraph.getChildEntity().getClass()))
+        String parentId = (String)primaryKey;
+        if (Collection.class.isAssignableFrom(childEntity.getClass()))
         {
-            Collection children = (Collection) objectGraph.getChildEntity();
+            Collection children = (Collection) childEntity;
 
             for (Object child : children)
             {
@@ -410,9 +410,8 @@ public class HibernateClient implements Client
 
         }
         else
-        {
-            Object child = objectGraph.getChildEntity();
-            insertRecordInJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, parentId, child);
+        {            
+            insertRecordInJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, parentId, childEntity);
         }
 
     }
