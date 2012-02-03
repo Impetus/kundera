@@ -59,7 +59,9 @@ public class ManyToManyHandler extends AssociationHandler implements MappingHand
     private EntitySaveGraph getDirectionalGraph(Object entity, EntityMetadata metadata, Object associationEntity,
             Relation relation)
     {
-        EntitySaveGraph objectGraph = new EntitySaveGraph(relation.getProperty());
+        EntitySaveGraph objectGraph = new EntitySaveGraph(relation.getProperty());      
+        
+        
         objectGraph.setChildEntity(associationEntity);
         objectGraph.setParentEntity(entity);
         

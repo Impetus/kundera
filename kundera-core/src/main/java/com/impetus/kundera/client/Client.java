@@ -162,11 +162,11 @@ public interface Client
      * @param inverseJoinColumnName Name of Inverse Join Column
      * @param relMetadata Entity metadata for the child entity (i.e. entity at the other
      * side of the relationship)
-     * @param objectGraph Object graph of the persistence (Includes parent and child
-     * data and other related info)
+     * @param primaryKey TODO
+     * @param childEntity TODO
      */
     void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, EntitySaveGraph objectGraph);
+            EntityMetadata relMetadata, Object primaryKey, Object childEntity);
 
     /**
      * Retrieves a list of foreign keys from a join table for a given primary

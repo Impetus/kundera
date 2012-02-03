@@ -84,7 +84,7 @@ public class AbstractEntityReader
                 
                 if (e.getEntity().getClass().equals(g.getChildClass()))
                 {
-                   //Forward relationship (not swapped)
+                    //Swapped relationship
                     String relationName = g.getfKeyName();
                     Object relationalValue = e.getRelations().get(relationName);
                     childClazz = g.getParentClass();
@@ -375,17 +375,20 @@ public class AbstractEntityReader
                 // bidirectional.
                 for (Object o : obj)
                 {
-                    Field f = objectGraph.getProperty();
-                    if (PropertyAccessorHelper.isCollection(f.getType()))
+                    if(o != null)
                     {
-                        List l = new ArrayList();
-                        l.add(child);
-                        Object oo = getFieldInstance(l, f);
-                        PropertyAccessorHelper.set(o, f, oo);
-                    }
-                    else
-                    {
-                        PropertyAccessorHelper.set(o, f, child);
+                        Field f = objectGraph.getProperty();
+                        if (PropertyAccessorHelper.isCollection(f.getType()))
+                        {
+                            List l = new ArrayList();
+                            l.add(child);
+                            Object oo = getFieldInstance(l, f);
+                            PropertyAccessorHelper.set(o, f, oo);
+                        }
+                        else
+                        {
+                            PropertyAccessorHelper.set(o, f, child);
+                        }
                     }
 
                 }

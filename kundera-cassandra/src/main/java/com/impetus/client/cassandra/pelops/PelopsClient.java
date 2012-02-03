@@ -403,17 +403,17 @@ public class PelopsClient implements Client
 
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, EntitySaveGraph objectGraph)
+            EntityMetadata relMetadata, Object primaryKey, Object childEntity)
     {
 
         Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
-        String parentId = objectGraph.getParentId();
+        String parentId = (String)primaryKey;
         List<Column> columns = new ArrayList<Column>();
 
-        if (Collection.class.isAssignableFrom(objectGraph.getChildEntity().getClass()))
+        if (Collection.class.isAssignableFrom(childEntity.getClass()))
         {
-            Collection children = (Collection) objectGraph.getChildEntity();
+            Collection children = (Collection) childEntity;
 
             for (Object child : children)
             {
@@ -423,9 +423,8 @@ public class PelopsClient implements Client
 
         }
         else
-        {
-            Object child = objectGraph.getChildEntity();
-            addColumnsToJoinTable(inverseJoinColumnName, relMetadata, columns, child);
+        {            
+            addColumnsToJoinTable(inverseJoinColumnName, relMetadata, columns, childEntity);
         }
 
         mutator.writeColumns(joinTableName, new Bytes(parentId.getBytes()),

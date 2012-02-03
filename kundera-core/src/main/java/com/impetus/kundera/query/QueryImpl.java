@@ -154,8 +154,9 @@ public abstract class QueryImpl implements Query
             List<String> relationNames = relationHolder.values().iterator().next();
             boolean isParent = relationHolder.keySet().iterator().next();
 
-            if (relationNames.isEmpty())
+            if (relationNames.isEmpty() && !m.isRelationViaJoinTable())
             {
+                
                 // There is no association so simply return list of entities.
                 results = populateEntities(m, client);
             }

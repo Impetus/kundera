@@ -825,7 +825,7 @@ public class PersistenceDelegator
         // If this is a swapped graph and parent has further relations, persist
         // before the parent
         if (objectGraph.isIsswapped() && !metadata.getRelations().isEmpty()
-                && !objectGraph.getChildClass().equals(objectGraph.getParentClass()))
+                && !objectGraph.getChildClass().equals(objectGraph.getParentClass()) && parentEntity != null)
         {
 
             relationGraphs = getGraph(parentEntity, metadata);
@@ -834,7 +834,7 @@ public class PersistenceDelegator
             {
                 if(!(objectGraph.getChildClass().equals(g.getParentClass()) || objectGraph.getChildClass().equals(g.getChildClass()))) {
                     saveGraph(g);
-                }             
+                }            
                 
             }
 
@@ -862,6 +862,7 @@ public class PersistenceDelegator
         }
 
         // Persist Join Table
+
         for (Relation relation : metadata.getRelations())
         {
             if (relation.isRelatedViaJoinTable())
@@ -876,13 +877,17 @@ public class PersistenceDelegator
                 String joinColumnName = (String) joinColumns.toArray()[0];
                 String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
 
-                EntityMetadata relMetadata = getMetadata(objectGraph.getChildClass());
+                EntityMetadata relMetadata = getMetadata(relation.getTargetEntity());
+                
+                Object child = objectGraph.getChildEntity();               
+                
 
                 Client pClient = getClient(metadata);
-                pClient.persistJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, objectGraph);
+                pClient.persistJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, objectGraph.getParentId(), child);
 
             }
         }
+        
 
     }
 
