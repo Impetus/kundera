@@ -111,8 +111,10 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             {
                 // prepare lucene query and find.
                 Set<String> rSet = fetchDataFromLucene(client);
+                if(rSet != null && !rSet.isEmpty()) {
+                    filter = "WHERE";
+                }                
                 sqlQuery = getSqlQueryFromJPA(m, relationNames, rSet);
-
             }
             // call client with relation name list and convert to sql query.
 
@@ -161,22 +163,36 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         List<EnhanceEntity> ls = null;
         List result = ((HibernateClient) client).find(sqlQuery, relationNames, m.getEntityClazz());
 
-        if (!result.isEmpty())
+        try
         {
-            ls = new ArrayList<EnhanceEntity>(result.size());
-            for (Object o : result)
+            if (!result.isEmpty())
             {
-                Class clazz = m.getEntityClazz();
-                
-                if(!o.getClass().isAssignableFrom(m.getEntityClazz()))
+                ls = new ArrayList<EnhanceEntity>(result.size());
+                for (Object o : result)
                 {
-                    o = ((Object[])o)[0];
+                    Class clazz = m.getEntityClazz();
+                    Object entity = clazz.newInstance();
+                    if(!o.getClass().isAssignableFrom(clazz))
+                    {
+                        entity = ((Object[])o)[0];
+                    }
+                    EnhanceEntity e = new EnhanceEntity(entity, getId(entity, m), populateRelations(relationNames, (Object[]) o));
+                    ls.add(e);
                 }
-                EnhanceEntity e = new EnhanceEntity(o, getId(o, m), populateRelations(relationNames, o));
-                ls.add(e);
             }
         }
+        catch (InstantiationException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IllegalAccessException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return ls;
+
 
     }
 
@@ -347,7 +363,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
      *            the o
      * @return the map
      */
-    private Map<String, Object> populateRelations(List<String> relations, Object...o)
+    private Map<String, Object> populateRelations(List<String> relations, Object[] o)
     {
         Map<String, Object> relationVal = new HashMap<String, Object>(relations.size());
         int counter = 1;
@@ -357,6 +373,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
         return relationVal;
     }
+
 
     /*
      * (non-Javadoc)

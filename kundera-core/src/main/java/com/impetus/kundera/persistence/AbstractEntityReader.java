@@ -418,7 +418,7 @@ public class AbstractEntityReader
         
         Set<String> rSet = fetchDataFromLucene(client);
         try
-        {
+        {            
             List resultList = client.findAll(m.getEntityClazz(), rSet.toArray(new String[] {}));
             return transform(m, ls, resultList);
         }
