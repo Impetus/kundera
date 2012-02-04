@@ -179,24 +179,17 @@ public class HBaseDataHandler implements DataHandler
 
         try
         {
-            entity = clazz.newInstance(); // Entity Object
-
             hTable = gethTable(tableName);
 
             // Load raw data from HBase
             HBaseData data = hbaseReader.LoadData(hTable, rowKey);
 
-            // Populate raw data from HBase into entity
-            entity = populateEntityFromHbaseData(entity, data, m, rowKey, relationNames);
-
-            // Map to hold property-name=>foreign-entity relations
-            // Map<String, Set<String>> foreignKeysMap = new HashMap<String,
-            // Set<String>>();
-
-            // Set entity object and foreign key map into enhanced entity and
-            // return
-            // enhancedEntity = (E) EntityResolver.getEnhancedEntity(entity,
-            // rowKey, foreignKeysMap);
+            // Populate raw data from HBase into entity            
+           
+           if(data.getColumns() != null) {
+               entity = clazz.newInstance(); // Entity Object
+               entity = populateEntityFromHbaseData(entity, data, m, rowKey, relationNames);
+            }
         }
         catch (InstantiationException e1)
         {
@@ -207,6 +200,8 @@ public class HBaseDataHandler implements DataHandler
         {
             log.error("Illegal Access while reading data from " + tableName + ";Details: " + e1.getMessage());
             // return enhancedEntity;
+        } catch(Exception e) {
+            e.printStackTrace();
         }
         finally
         {
@@ -214,8 +209,8 @@ public class HBaseDataHandler implements DataHandler
             {
                 puthTable(hTable);
             }
-        }
-
+            
+        }    
         return entity;
     }
 
@@ -483,10 +478,9 @@ public class HBaseDataHandler implements DataHandler
                     {
                         byte[] hbaseColumnValue = colData.getValue();
                         PropertyAccessorHelper.set(entity, columnField, hbaseColumnValue);
-
-                        break;
+                        
                     }
-                    else if (relationNames != null && relationNames.contains(getColumnName(colName)))
+                    else if (relationNames != null && relationNames.contains(colName))
                     {
                         relations.put(colName, Bytes.toString(colData.getValue()));
                     }
@@ -683,7 +677,7 @@ public class HBaseDataHandler implements DataHandler
      */
     private String getColumnName(String hbaseColumn)
     {
-        return hbaseColumn != null ? hbaseColumn.substring(hbaseColumn.indexOf(0) + 1) : null;
+        return hbaseColumn != null ? hbaseColumn.substring(0,hbaseColumn.indexOf(":") ) : null;
     }
 
     /* (non-Javadoc)

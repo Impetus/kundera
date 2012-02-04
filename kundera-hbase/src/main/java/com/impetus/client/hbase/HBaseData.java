@@ -80,7 +80,7 @@ public class HBaseData implements DataWrapper
      */
     public List<KeyValue> getColumns()
     {
-        return Collections.unmodifiableList(columns);
+        return columns != null ? Collections.unmodifiableList(columns) : null;
     }
 
     /**

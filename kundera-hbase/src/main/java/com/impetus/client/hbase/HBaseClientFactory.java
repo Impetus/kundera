@@ -84,6 +84,8 @@ public class HBaseClientFactory extends GenericClientFactory
     {
         // TODO destroy pool
         // hTablePool = null;
+        
+        indexManager.close();
     }
 
 }
