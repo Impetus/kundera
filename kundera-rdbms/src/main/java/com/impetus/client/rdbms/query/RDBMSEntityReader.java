@@ -140,7 +140,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             }
             else
             {
-                onAssociationUsingLucene(m, client, ls);
+                ls = onAssociationUsingLucene(m, client, ls);
             }
 
         }
