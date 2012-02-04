@@ -247,12 +247,12 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      */
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+
             EntityMetadata relMetadata, Object primaryKey, Object childEntity)
+
     {
         String parentId = (String) primaryKey;
-
         Map<String, String> columns = new HashMap<String, String>();
-
         try
         {
             if (Collection.class.isAssignableFrom(childEntity.getClass()))

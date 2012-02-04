@@ -70,16 +70,19 @@ public class MongoDBClient implements Client
 
     /** The reader. */
     private EntityReader reader;
-    
+
     /** The log. */
     private static Log log = LogFactory.getLog(MongoDBClient.class);
 
     /**
      * Instantiates a new mongo db client.
-     *
-     * @param mongo the mongo
-     * @param mgr the mgr
-     * @param reader the reader
+     * 
+     * @param mongo
+     *            the mongo
+     * @param mgr
+     *            the mgr
+     * @param reader
+     *            the reader
      */
     public MongoDBClient(Object mongo, IndexManager mgr, EntityReader reader)
     {
@@ -90,8 +93,11 @@ public class MongoDBClient implements Client
         this.reader = reader;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.proxy.EnhancedEntity)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.proxy.
+     * EnhancedEntity)
      */
     @Override
     @Deprecated
@@ -100,8 +106,13 @@ public class MongoDBClient implements Client
         throw new PersistenceException("Not Implemented");
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.persistence.handler.impl.EntitySaveGraph, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#persist(com.impetus.kundera.persistence
+     * .handler.impl.EntitySaveGraph,
+     * com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
     public String persist(EntitySaveGraph entityGraph, EntityMetadata entityMetadata)
@@ -110,8 +121,9 @@ public class MongoDBClient implements Client
         String id = entityGraph.getParentId();
 
         try
-        {           
-            onPersist(entityMetadata, entity, id, RelationHolder.addRelation(entityGraph, entityGraph.getRevFKeyName(), entityGraph.getRevFKeyValue()));
+        {
+            onPersist(entityMetadata, entity, id, RelationHolder.addRelation(entityGraph, entityGraph.getRevFKeyName(),
+                    entityGraph.getRevFKeyValue()));
 
             if (entityGraph.getRevParentClass() != null)
             {
@@ -137,8 +149,12 @@ public class MongoDBClient implements Client
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#persist(java.lang.Object, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
+     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph,
+     * com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
     public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
@@ -165,8 +181,13 @@ public class MongoDBClient implements Client
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String,
+     * java.lang.String, java.lang.String,
+     * com.impetus.kundera.metadata.model.EntityMetadata,
+     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
@@ -176,7 +197,7 @@ public class MongoDBClient implements Client
 
         List<BasicDBObject> documents = new ArrayList<BasicDBObject>();
 
-        String parentId = (String)primaryKey;
+        String parentId = (String) primaryKey;
         try
         {
             if (Collection.class.isAssignableFrom(childEntity.getClass()))
@@ -188,15 +209,14 @@ public class MongoDBClient implements Client
 
                     addColumnsToJoinTable(joinColumnName, inverseJoinColumnName, relMetadata, documents, parentId,
                             child);
-
                 }
 
             }
             else
-            {                
 
-                addColumnsToJoinTable(joinColumnName, inverseJoinColumnName, relMetadata, documents, parentId, childEntity);
-
+            {
+                addColumnsToJoinTable(joinColumnName, inverseJoinColumnName, relMetadata, documents, parentId,
+                        childEntity);
             }
         }
         catch (PropertyAccessException e)
@@ -207,8 +227,14 @@ public class MongoDBClient implements Client
         dbCollection.insert(documents.toArray(new BasicDBObject[0]));
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#getForeignKeysFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#getForeignKeysFromJoinTable(java.lang
+     * .String, java.lang.String, java.lang.String,
+     * com.impetus.kundera.metadata.model.EntityMetadata,
+     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
@@ -237,14 +263,21 @@ public class MongoDBClient implements Client
 
     /**
      * Adds the columns to join table.
-     *
-     * @param joinColumnName the join column name
-     * @param inverseJoinColumnName the inverse join column name
-     * @param relMetadata the rel metadata
-     * @param documents the documents
-     * @param parentId the parent id
-     * @param child the child
-     * @throws PropertyAccessException the property access exception
+     * 
+     * @param joinColumnName
+     *            the join column name
+     * @param inverseJoinColumnName
+     *            the inverse join column name
+     * @param relMetadata
+     *            the rel metadata
+     * @param documents
+     *            the documents
+     * @param parentId
+     *            the parent id
+     * @param child
+     *            the child
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     private void addColumnsToJoinTable(String joinColumnName, String inverseJoinColumnName, EntityMetadata relMetadata,
             List<BasicDBObject> documents, String parentId, Object child) throws PropertyAccessException
@@ -283,13 +316,19 @@ public class MongoDBClient implements Client
 
     /**
      * On persist.
-     *
-     * @param entityMetadata the entity metadata
-     * @param entity the entity
-     * @param id the id
-     * @param relations the relations
-     * @throws Exception the exception
-     * @throws PropertyAccessException the property access exception
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param entity
+     *            the entity
+     * @param id
+     *            the id
+     * @param relations
+     *            the relations
+     * @throws Exception
+     *             the exception
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     private void onPersist(EntityMetadata entityMetadata, Object entity, String id, List<RelationHolder> relations)
             throws Exception, PropertyAccessException
@@ -343,8 +382,11 @@ public class MongoDBClient implements Client
         return (E) enhancedEntity;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findAll(java.lang.Class, java.lang.Object[])
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findAll(java.lang.Class,
+     * java.lang.Object[])
      */
     @Override
     public <E> List<E> findAll(Class<E> entityClass, Object... keys) throws Exception
@@ -356,7 +398,7 @@ public class MongoDBClient implements Client
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
 
         BasicDBObject query = new BasicDBObject();
-        
+
         query.put(entityMetadata.getIdColumn().getName(), new BasicDBObject("$in", getString(keys)));
 
         DBCursor cursor = dbCollection.find(query);
@@ -375,17 +417,25 @@ public class MongoDBClient implements Client
     /**
      * Loads columns from multiple rows restricting results to conditions stored
      * in <code>filterClauseQueue</code>.
-     *
-     * @param <E> the element type
-     * @param entityMetadata the entity metadata
-     * @param mongoQuery the mongo query
-     * @param result the result
-     * @param relationNames the relation names
-     * @param orderBy the order by
+     * 
+     * @param <E>
+     *            the element type
+     * @param entityMetadata
+     *            the entity metadata
+     * @param mongoQuery
+     *            the mongo query
+     * @param result
+     *            the result
+     * @param relationNames
+     *            the relation names
+     * @param orderBy
+     *            the order by
      * @return the list
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
-    public <E> List<E> loadData(EntityMetadata entityMetadata, BasicDBObject mongoQuery,String result, List<String> relationNames, BasicDBObject orderBy) throws Exception
+    public <E> List<E> loadData(EntityMetadata entityMetadata, BasicDBObject mongoQuery, String result,
+            List<String> relationNames, BasicDBObject orderBy) throws Exception
     {
         String documentName = entityMetadata.getTableName();
         String dbName = entityMetadata.getSchema();
@@ -409,12 +459,13 @@ public class MongoDBClient implements Client
         {
             log.debug("Fetching data from " + documentName + " for Filter " + mongoQuery.toString());
 
-            DBCursor cursor = orderBy != null? dbCollection.find(mongoQuery).sort(orderBy):dbCollection.find(mongoQuery);
+            DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery).sort(orderBy) : dbCollection
+                    .find(mongoQuery);
             MongoDBDataHandler handler = new MongoDBDataHandler(this, getPersistenceUnit());
             while (cursor.hasNext())
             {
                 DBObject fetchedDocument = cursor.next();
-                Object entity = handler.getEntityFromDocument(clazz,entityMetadata, fetchedDocument, relationNames);
+                Object entity = handler.getEntityFromDocument(clazz, entityMetadata, fetchedDocument, relationNames);
                 entities.add(entity);
             }
         }
@@ -422,8 +473,11 @@ public class MongoDBClient implements Client
         return entities;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#delete(java.lang.Object, java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
+     * java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
     public void delete(Object entity, Object pKey, EntityMetadata entityMetadata) throws Exception
@@ -439,7 +493,9 @@ public class MongoDBClient implements Client
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.client.Client#close()
      */
     @Override
@@ -486,8 +542,11 @@ public class MongoDBClient implements Client
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#find(java.lang.Class, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.util.Map)
      */
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> col) throws Exception
@@ -495,7 +554,9 @@ public class MongoDBClient implements Client
         throw new NotImplementedException("Not yet implemented");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.client.Client#getPersistenceUnit()
      */
     @Override
@@ -504,7 +565,9 @@ public class MongoDBClient implements Client
         return persistenceUnit;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.client.Client#getIndexManager()
      */
     @Override
@@ -513,8 +576,11 @@ public class MongoDBClient implements Client
         return indexManager;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#setPersistenceUnit(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#setPersistenceUnit(java.lang.String)
      */
     @Override
     public void setPersistenceUnit(String persistenceUnit)
@@ -560,10 +626,13 @@ public class MongoDBClient implements Client
 
     /**
      * Method to find entity for given association name and association value.
-     *
-     * @param colName the col name
-     * @param colValue the col value
-     * @param m the m
+     * 
+     * @param colName
+     *            the col name
+     * @param colValue
+     *            the col value
+     * @param m
+     *            the m
      * @return the list
      */
     public List<Object> find(String colName, String colValue, EntityMetadata m)
@@ -600,28 +669,28 @@ public class MongoDBClient implements Client
         return reader;
     }
 
-    
     /**
      * Gets the string.
-     *
-     * @param pKeys the keys
+     * 
+     * @param pKeys
+     *            the keys
      * @return the string
      */
     private String[] getString(Object[] pKeys)
     {
-        
-        if(pKeys != null)
+
+        if (pKeys != null)
         {
             String[] arr = new String[pKeys.length];
             int counter = 0;
-            for(Object o : pKeys)
+            for (Object o : pKeys)
             {
                 arr[counter++] = o.toString();
             }
-            
+
             return arr;
         }
-        
+
         return null;
     }
 }

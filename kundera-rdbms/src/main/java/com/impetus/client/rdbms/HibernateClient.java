@@ -392,10 +392,10 @@ public class HibernateClient implements Client
      */
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, Object primaryKey, Object childEntity)
+            EntityMetadata relMetadata,  Object primaryKey, Object childEntity)
     {
 
-        String parentId = (String) primaryKey;
+        String parentId = (String)primaryKey;
         if (Collection.class.isAssignableFrom(childEntity.getClass()))
         {
             Collection children = (Collection) childEntity;
