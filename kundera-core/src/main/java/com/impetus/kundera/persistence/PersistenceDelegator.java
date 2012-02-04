@@ -984,13 +984,15 @@ public class PersistenceDelegator
 
     private void saveImmediateChild(Object child, EntitySaveGraph objectGraph, EntityMetadata metadata)
     {
-        String id = getId(child, metadata);
-        objectGraph.setChildId(id);
-        // if (getSession().lookup(child.getClass(), id) == null)
-        // {
-        Client chClient = getClient(metadata);
-        chClient.persist(child, objectGraph, metadata);
-        session.store(id, child);
+        String id = getId(child, metadata);        
+        if(getSession().lookup(child.getClass(), id) == null) {
+            objectGraph.setChildId(id);
+            // if (getSession().lookup(child.getClass(), id) == null)
+            // {
+            Client chClient = getClient(metadata);
+            chClient.persist(child, objectGraph, metadata);
+            session.store(id, child);
+        }        
     }
 
     /**
