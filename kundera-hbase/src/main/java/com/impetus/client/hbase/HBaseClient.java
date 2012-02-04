@@ -247,17 +247,17 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      */
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, EntitySaveGraph objectGraph)
+            EntityMetadata relMetadata, Object primaryKey, Object childEntity)
     {
-        String parentId = objectGraph.getParentId();
+        String parentId = (String) primaryKey;
 
         Map<String, String> columns = new HashMap<String, String>();
 
         try
         {
-            if (Collection.class.isAssignableFrom(objectGraph.getChildEntity().getClass()))
+            if (Collection.class.isAssignableFrom(childEntity.getClass()))
             {
-                Collection children = (Collection) objectGraph.getChildEntity();
+                Collection children = (Collection) childEntity;
 
                 for (Object child : children)
                 {
@@ -267,9 +267,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
             }
             else
-            {
-                Object child = objectGraph.getChildEntity();
-                String childId = PropertyAccessorHelper.getId(child, relMetadata);
+            {                
+                String childId = PropertyAccessorHelper.getId(childEntity, relMetadata);
                 columns.put(inverseJoinColumnName + "_" + childId, childId);
             }
 
