@@ -375,14 +375,6 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
     }
 
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.persistence.EntityReader#findById(java.lang.String,
-     * com.impetus.kundera.metadata.model.EntityMetadata, java.util.List,
-     * com.impetus.kundera.client.Client)
-     */
     @Override
     public EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client)
     {
@@ -391,7 +383,8 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             Set<String> keys = new HashSet<String>(1);
             keys.add(primaryKey.toString());
             String query = getSqlQueryFromJPA(m, relationNames, keys);
-            return populateEnhanceEntities(m, relationNames, client, query).get(0);
+            List<EnhanceEntity> results = populateEnhanceEntities(m, relationNames, client, query);
+            return results != null && !results.isEmpty()?results.get(0):null;
         }
         else
         {
@@ -407,6 +400,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             return o != null ? new EnhanceEntity(o, getId(o, m), null) : null;
         }
     }
+
 
     /**
      * Returns column name from the filter property which is in the form

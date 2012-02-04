@@ -547,6 +547,10 @@ public class HibernateClient implements Client
         else
         {
             s = sf.getCurrentSession();
+            if (s.isOpen())
+            {
+                s = sf.openSession();
+            }
         }
         return s;
     }
