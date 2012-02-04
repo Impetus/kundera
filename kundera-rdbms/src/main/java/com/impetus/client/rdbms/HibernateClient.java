@@ -446,6 +446,22 @@ public class HibernateClient implements Client
 
         return foreignKeys;
     }
+    
+    @Override
+    public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+            EntityMetadata relMetadata, EntitySaveGraph objectGraph)
+    {
+        String primaryKey = objectGraph.getParentId();
+        
+        StringBuffer query = new StringBuffer();
+        query.append("DELETE FROM ").append(joinTableName).append(" WHERE ").append(joinColumnName).append("=")
+                .append("'").append(primaryKey).append("'");
+
+        Session s = getSessionInstance();
+        Transaction tx = s.beginTransaction();
+        s.createSQLQuery(query.toString()).executeUpdate();
+        tx.commit();        
+    }
 
     /**
      * Insert record in join table.

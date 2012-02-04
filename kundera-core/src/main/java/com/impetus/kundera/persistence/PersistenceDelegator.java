@@ -421,36 +421,43 @@ public class PersistenceDelegator
         if (childEntity != null)
         {
             onClientHandle(objectGraph, childEntity);
-        }
-
+        }       
         
+        //Delete data from Join Table
+        deleteFromJoinTable(objectGraph, metadata);       
 
-       //Delete data from Join Table if any 
-       /*if(metadata.isRelationViaJoinTable()) {
-            for (Relation relation : metadata.getRelations())
-            {
-                if (relation.isRelatedViaJoinTable())
+    }
+
+    /**
+     * @param objectGraph
+     * @param metadata
+     */
+    private void deleteFromJoinTable(EntitySaveGraph objectGraph, EntityMetadata metadata)
+    {
+        //Delete data from Join Table if any 
+           if(metadata.isRelationViaJoinTable()) {
+                for (Relation relation : metadata.getRelations())
                 {
+                    if (relation.isRelatedViaJoinTable())
+                    {
 
-                    JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
-                    String joinTableName = jtMetadata.getJoinTableName();
+                        JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
+                        String joinTableName = jtMetadata.getJoinTableName();
 
-                    Set<String> joinColumns = jtMetadata.getJoinColumns();
-                    Set<String> inverseJoinColumns = jtMetadata.getInverseJoinColumns();
+                        Set<String> joinColumns = jtMetadata.getJoinColumns();
+                        Set<String> inverseJoinColumns = jtMetadata.getInverseJoinColumns();
 
-                    String joinColumnName = (String) joinColumns.toArray()[0];
-                    String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
+                        String joinColumnName = (String) joinColumns.toArray()[0];
+                        String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
 
-                    EntityMetadata relMetadata = getMetadata(objectGraph.getChildClass());
+                        EntityMetadata relMetadata = getMetadata(objectGraph.getChildClass());
 
-                    Client pClient = getClient(metadata);
-                    pClient.persistJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, objectGraph);
+                        Client pClient = getClient(metadata);
+                        pClient.deleteFromJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, objectGraph);
 
+                    }
                 }
             }
-        }
-*/        
-
     }
 
     /**

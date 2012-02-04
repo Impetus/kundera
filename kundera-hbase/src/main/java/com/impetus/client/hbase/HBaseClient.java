@@ -297,6 +297,21 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return handler.getForeignKeysFromJoinTable(joinTableName, parentId, inverseJoinColumnName);
 
     }
+    
+    @Override
+    public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+            EntityMetadata relMetadata, EntitySaveGraph objectGraph)
+    {
+        String pKey = objectGraph.getParentId();
+        try
+        {
+            handler.deleteRow(pKey.toString(), joinTableName);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * On index.

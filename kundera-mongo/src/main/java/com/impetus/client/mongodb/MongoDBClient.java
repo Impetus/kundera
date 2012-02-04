@@ -33,6 +33,7 @@ import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -260,6 +261,8 @@ public class MongoDBClient implements Client
         }
         return foreignKeys;
     }
+    
+    
 
     /**
      * Adds the columns to join table.
@@ -288,6 +291,47 @@ public class MongoDBClient implements Client
         dbObj.put(inverseJoinColumnName, childId);
 
         documents.add(dbObj);
+    }
+    
+    @Override
+    public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+            EntityMetadata relMetadata, EntitySaveGraph objectGraph)
+    {
+        String primaryKey = objectGraph.getParentId();
+        DBCollection dbCollection = mongoDb.getCollection(joinTableName);  
+        
+        /*Set<String> childIds = new HashSet<String>();        
+        Object childObject = objectGraph.getChildEntity();        
+        try
+        {
+            if(Collection.class.isAssignableFrom(childObject.getClass())) {
+                for(Object child : (Collection)childObject) {
+                    if(child != null) {
+                        String childId = PropertyAccessorHelper.getId(child, relMetadata);
+                        childIds.add(childId);
+                    }
+                    
+                }
+            } else {
+                String childId = PropertyAccessorHelper.getId(childObject, relMetadata);
+                childIds.add(childId);
+            }
+        }
+        catch (PropertyAccessException e)
+        {            
+            e.printStackTrace();
+        }
+        
+        if(childIds.isEmpty() || primaryKey == null) {
+            return;
+        }*/
+        
+        
+        BasicDBObject query = new BasicDBObject();        
+        query.put(joinColumnName, primaryKey.toString());
+        //query.put(inverseJoinColumnName, new BasicDBObject("$in", childIds.toArray()));
+        
+        dbCollection.remove(query);        
     }
 
     /**
@@ -693,4 +737,5 @@ public class MongoDBClient implements Client
 
         return null;
     }
+   
 }

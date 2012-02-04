@@ -445,6 +445,21 @@ public class PelopsClient implements Client
         List<E> foreignKeys = handler.getForeignKeysFromJoinTable(inverseJoinColumnName, columns);
         return foreignKeys;
     }
+    
+    @Override
+    public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+            EntityMetadata relMetadata, EntitySaveGraph objectGraph)
+    {
+        if (!isOpen())
+        {
+            throw new PersistenceException("PelopsClient is closed.");
+        }
+
+        String pKey = objectGraph.getParentId();
+        
+        RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        rowDeletor.deleteRow(joinTableName, pKey, ConsistencyLevel.ONE);
+    }
 
     /**
      * @param inverseJoinColumnName
