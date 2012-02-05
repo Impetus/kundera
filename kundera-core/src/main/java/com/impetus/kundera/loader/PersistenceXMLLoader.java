@@ -13,35 +13,47 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
+
+
+
 package com.impetus.kundera.loader;
+
+//~--- non-JDK imports --------------------------------------------------------
+
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXParseException;
+
+//~--- JDK imports ------------------------------------------------------------
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import java.net.URL;
 import java.net.URLConnection;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceUnitTransactionType;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXParseException;
-
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-
 /**
  * @author amresh.singh
- * 
+ *
  */
 public class PersistenceXMLLoader
 {
@@ -57,31 +69,36 @@ public class PersistenceXMLLoader
 
     /**
      * Gets the document.
-     * 
+     *
      * @param configURL
      *            the config url
      * @return the document
      * @throws Exception
      *             the exception
      */
-    private static Document getDocument(URL configURL) throws Exception
+    private static Document getDocument(URL configURL)
+        throws Exception
     {
         InputStream is = null;
+
         if (configURL != null)
         {
             URLConnection conn = configURL.openConnection();
-            conn.setUseCaches(false); // avoid JAR locking on Windows and Tomcat
+
+            conn.setUseCaches(false);    // avoid JAR locking on Windows and Tomcat
             is = conn.getInputStream();
         }
+
         if (is == null)
         {
             throw new IOException("Failed to obtain InputStream from url: " + configURL);
         }
 
         DocumentBuilderFactory docBuilderFactory = null;
+
         docBuilderFactory = DocumentBuilderFactory.newInstance();
-        docBuilderFactory.setValidating(true);
-        docBuilderFactory.setNamespaceAware(true);
+        docBuilderFactory.setValidating(false);
+        docBuilderFactory.setNamespaceAware(false);
 
         try
         {
@@ -96,37 +113,43 @@ public class PersistenceXMLLoader
 
         InputSource source = new InputSource(is);
         DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-        // docBuilder.setEntityResolver( resolver );
 
+        // docBuilder.setEntityResolver( resolver );
         List errors = new ArrayList();
+
         docBuilder.setErrorHandler(new ErrorLogger("XML InputStream", errors));
+
         Document doc = docBuilder.parse(source);
 
-        if (errors.size() != 0)
-        {
-            throw new PersistenceException("invalid persistence.xml", (Throwable) errors.get(0));
-        }
-        is.close(); // Close input Stream
+        /*
+         * if (errors.size() != 0)
+         * {
+         *   throw new PersistenceException("invalid persistence.xml", (Throwable) errors.get(0));
+         * }
+         */
+        is.close();    // Close input Stream
+
         return doc;
     }
 
     /**
      * Find persistence units.
-     * 
+     *
      * @param url
      *            the url
      * @return the list
      * @throws Exception
      *             the exception
      */
-    public static List<PersistenceUnitMetadata> findPersistenceUnits(URL url) throws Exception
+    public static List<PersistenceUnitMetadata> findPersistenceUnits(URL url)
+        throws Exception
     {
         return findPersistenceUnits(url, PersistenceUnitTransactionType.JTA);
     }
 
     /**
      * Find persistence units.
-     * 
+     *
      * @param url
      *            the url
      * @param defaultTransactionType
@@ -136,9 +159,9 @@ public class PersistenceXMLLoader
      *             the exception
      */
     public static List<PersistenceUnitMetadata> findPersistenceUnits(URL url,
-            PersistenceUnitTransactionType defaultTransactionType) throws Exception
+            PersistenceUnitTransactionType defaultTransactionType)
+        throws Exception
     {
-
         Document doc = getDocument(url);
         Element top = doc.getDocumentElement();
         NodeList children = top.getChildNodes();
@@ -150,31 +173,35 @@ public class PersistenceXMLLoader
             {
                 Element element = (Element) children.item(i);
                 String tag = element.getTagName();
+
                 // look for "persistence-unit" element
                 if (tag.equals("persistence-unit"))
                 {
                     PersistenceUnitMetadata metadata = parsePersistenceUnit(element);
+
                     units.add(metadata);
                 }
             }
         }
+
         return units;
     }
 
     /**
      * Parses the persistence unit.
-     * 
+     *
      * @param top
      *            the top
      * @return the persistence metadata
      * @throws Exception
      *             the exception
      */
-    private static PersistenceUnitMetadata parsePersistenceUnit(Element top) throws Exception
+    private static PersistenceUnitMetadata parsePersistenceUnit(Element top)
+        throws Exception
     {
         PersistenceUnitMetadata metadata = new PersistenceUnitMetadata();
-
         String puName = top.getAttribute("name");
+
         if (!isEmpty(puName))
         {
             log.trace("Persistent Unit name from persistence.xml: " + puName);
@@ -182,6 +209,7 @@ public class PersistenceXMLLoader
         }
 
         NodeList children = top.getChildNodes();
+
         for (int i = 0; i < children.getLength(); i++)
         {
             if (children.item(i).getNodeType() == Node.ELEMENT_NODE)
@@ -196,11 +224,13 @@ public class PersistenceXMLLoader
                 else if (tag.equals("properties"))
                 {
                     NodeList props = element.getChildNodes();
+
                     for (int j = 0; j < props.getLength(); j++)
                     {
                         if (props.item(j).getNodeType() == Node.ELEMENT_NODE)
                         {
                             Element propElement = (Element) props.item(j);
+
                             // if element is not "property" then skip
                             if (!"property".equals(propElement.getTagName()))
                             {
@@ -209,14 +239,17 @@ public class PersistenceXMLLoader
 
                             String propName = propElement.getAttribute("name").trim();
                             String propValue = propElement.getAttribute("value").trim();
+
                             if (isEmpty(propValue))
                             {
                                 propValue = getElementContent(propElement, "");
                             }
+
                             metadata.getProperties().put(propName, propValue);
                         }
                     }
                 }
+
                 // Kundera doesn't support "class", "jar-file" and
                 // "excluded-unlisted-classes" for now.. but will someday.
                 // let's parse it for now.
@@ -234,7 +267,9 @@ public class PersistenceXMLLoader
                 }
             }
         }
+
         PersistenceUnitTransactionType transactionType = getTransactionType(top.getAttribute("transaction-type"));
+
         if (transactionType != null)
         {
             metadata.setTransactionType(transactionType);
@@ -245,15 +280,14 @@ public class PersistenceXMLLoader
 
     /**
      * Gets the transaction type.
-     * 
+     *
      * @param elementContent
      *            the element content
      * @return the transaction type
      */
     public static PersistenceUnitTransactionType getTransactionType(String elementContent)
     {
-
-        if (elementContent == null || elementContent.isEmpty())
+        if ((elementContent == null) || elementContent.isEmpty())
         {
             return null;
         }
@@ -272,20 +306,81 @@ public class PersistenceXMLLoader
     }
 
     /**
+     * Checks if is empty.
+     *
+     * @param str
+     *            the str
+     * @return true, if is empty
+     */
+    private static boolean isEmpty(String str)
+    {
+        return (null == str) || str.isEmpty();
+    }
+
+    /**
+     * Gets the element content.
+     *
+     * @param element
+     *            the element
+     * @return the element content
+     * @throws Exception
+     *             the exception
+     */
+    public static String getElementContent(final Element element)
+        throws Exception
+    {
+        return getElementContent(element, null);
+    }
+
+    /**
+     * Get the content of the given element.
+     *
+     * @param element
+     *            The element to get the content for.
+     * @param defaultStr
+     *            The default to return when there is no content.
+     * @return The content of the element or the default.
+     * @throws Exception
+     *             the exception
+     */
+    private static String getElementContent(Element element, String defaultStr)
+        throws Exception
+    {
+        if (element == null)
+        {
+            return defaultStr;
+        }
+
+        NodeList children = element.getChildNodes();
+        StringBuilder result = new StringBuilder("");
+
+        for (int i = 0; i < children.getLength(); i++)
+        {
+            if ((children.item(i).getNodeType() == Node.TEXT_NODE)
+                    || (children.item(i).getNodeType() == Node.CDATA_SECTION_NODE))
+            {
+                result.append(children.item(i).getNodeValue());
+            }
+        }
+
+        return result.toString().trim();
+    }
+
+    /**
      * The Class ErrorLogger.
      */
-    public static class ErrorLogger implements ErrorHandler
+    public static class ErrorLogger
+        implements ErrorHandler
     {
+        /** The errors. */
+        private List errors;
 
         /** The file. */
         private String file;
 
-        /** The errors. */
-        private List errors;
-
         /**
          * Instantiates a new error logger.
-         * 
+         *
          * @param file
          *            the file
          * @param errors
@@ -319,62 +414,5 @@ public class PersistenceXMLLoader
         {
             log.warn("Warning parsing XML: " + file + '(' + warn.getLineNumber() + ") " + warn.getMessage());
         }
-    }
-
-    /**
-     * Checks if is empty.
-     * 
-     * @param str
-     *            the str
-     * @return true, if is empty
-     */
-    private static boolean isEmpty(String str)
-    {
-        return null == str || str.isEmpty();
-    }
-
-    /**
-     * Gets the element content.
-     * 
-     * @param element
-     *            the element
-     * @return the element content
-     * @throws Exception
-     *             the exception
-     */
-    public static String getElementContent(final Element element) throws Exception
-    {
-        return getElementContent(element, null);
-    }
-
-    /**
-     * Get the content of the given element.
-     * 
-     * @param element
-     *            The element to get the content for.
-     * @param defaultStr
-     *            The default to return when there is no content.
-     * @return The content of the element or the default.
-     * @throws Exception
-     *             the exception
-     */
-    private static String getElementContent(Element element, String defaultStr) throws Exception
-    {
-        if (element == null)
-        {
-            return defaultStr;
-        }
-
-        NodeList children = element.getChildNodes();
-        StringBuilder result = new StringBuilder("");
-        for (int i = 0; i < children.getLength(); i++)
-        {
-            if (children.item(i).getNodeType() == Node.TEXT_NODE
-                    || children.item(i).getNodeType() == Node.CDATA_SECTION_NODE)
-            {
-                result.append(children.item(i).getNodeValue());
-            }
-        }
-        return result.toString().trim();
     }
 }

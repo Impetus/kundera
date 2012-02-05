@@ -1,5 +1,7 @@
 package com.impetus.client.onetomany.bi;
 
+//~--- JDK imports ------------------------------------------------------------
+
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -8,29 +10,31 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.impetus.client.entity.Person;
-
+//import com.impetus.client.entity.Person;
 @Entity
-@Table(name = "ADDRESS", schema = "KunderaKeyspace@kcassandra")
+@Table(
+    name = "ADDRESS",
+    schema = "KunderaKeyspace@kcassandra"
+)
 public class OTMBAddress
 {
     @Id
     @Column(name = "ADDRESS_ID")
     private String addressId;
+    @OneToMany(mappedBy = "address")
 
+    // pointing Person's address field
+    @Column(name = "PERSON_ID")
+
+    // inverse=true
+    private Set<OTMBNPerson> people;
     @Column(name = "STREET")
     private String street;
 
-    @OneToMany(mappedBy = "address")
-    // pointing Person's address field
-    @Column(name = "PERSON_ID")
-    // inverse=true
-    private Set<OTMBNPerson> people;
-
     public OTMBAddress()
     {
-        
     }
+
     public String getAddressId()
     {
         return addressId;
@@ -66,5 +70,4 @@ public class OTMBAddress
     {
         this.people = people;
     }
-
 }

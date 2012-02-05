@@ -276,10 +276,11 @@ public abstract class DocumentIndexer implements Indexer
     {
         try
         {
-            String value = PropertyAccessorHelper.getObject(object, field).toString();
+            Object value = PropertyAccessorHelper.getObject(object, field);
             if (value != null)
             {
-                Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), value,Field.Store.YES,Field.Index.ANALYZED_NO_NORMS);
+                String valString = value.toString();
+                Field luceneField = new Field(getCannonicalPropertyName(indexName, colName), valString,Field.Store.YES,Field.Index.ANALYZED_NO_NORMS);
                 document.add(luceneField);
             }
             else

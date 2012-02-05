@@ -1,18 +1,15 @@
-/*******************************************************************************
- * * Copyright 2011 Impetus Infotech.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- ******************************************************************************/
+/**
+ * *****************************************************************************
+ * * Copyright 2011 Impetus Infotech. * * Licensed under the Apache License,
+ * Version 2.0 (the "License"); * you may not use this file except in compliance
+ * with the License. * You may obtain a copy of the License at * *
+ * http://www.apache.org/licenses/LICENSE-2.0 * * Unless required by applicable
+ * law or agreed to in writing, software * distributed under the License is
+ * distributed on an "AS IS" BASIS, * WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. * See the License for the specific language
+ * governing permissions and * limitations under the License.
+ *****************************************************************************
+ */
 package com.impetus.kundera.query;
 
 import java.util.List;
@@ -31,33 +28,36 @@ import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import java.util.*;
 
 /**
  * The Class LuceneQuery.
- * 
+ *
  * @author animesh.kumar
  */
 public class LuceneQuery extends QueryImpl implements Query
 {
 
-    /** the log used by this class. */
+    /**
+     * the log used by this class.
+     */
     private static Log log = LogFactory.getLog(MetadataBuilder.class);
-
-    /** The max result. */
+    /**
+     * The max result.
+     */
     int maxResult = Constants.INVALID;
-
-    /** The lucene query. */
+    /**
+     * The lucene query.
+     */
     String luceneQuery;
+    private int startPosition = 0;
 
     /**
      * Instantiates a new lucene query.
-     * 
-     * @param em
-     *            the em
-     * @param metadataManager
-     *            the metadata manager
-     * @param jpaQuery
-     *            the jpa query
+     *
+     * @param em the em
+     * @param metadataManager the metadata manager
+     * @param jpaQuery the jpa query
      */
     public LuceneQuery(String jpaQuery, KunderaQuery kunderaQuery, PersistenceDelegator pd, String... persistenceUnits)
     {
@@ -67,9 +67,8 @@ public class LuceneQuery extends QueryImpl implements Query
 
     /**
      * Sets the lucene query.
-     * 
-     * @param luceneQuery
-     *            the new lucene query
+     *
+     * @param luceneQuery the new lucene query
      */
     public void setLuceneQuery(String luceneQuery)
     {
@@ -93,22 +92,21 @@ public class LuceneQuery extends QueryImpl implements Query
 
         EntityMetadata m = kunderaQuery.getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
-        Map<String, String> searchFilter = client.getIndexManager().search(q, -1, maxResult);        
         
+        Map<String, String> searchFilter = client.getIndexManager().search(q, startPosition, maxResult);
+
         try
         {
             if (kunderaQuery.isAliasOnly())
             {
-                String[] primaryKeys = searchFilter.values().toArray(new String[] {});
+                String[] primaryKeys = searchFilter.values().toArray(new String[]{});
                 return persistenceDelegeator.find(m.getEntityClazz(), primaryKeys);
-            }
-            else
+            } else
             {
                 return persistenceDelegeator.find(m.getEntityClazz(), searchFilter);
 
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             throw new PersistenceException(e);
         }
@@ -125,7 +123,7 @@ public class LuceneQuery extends QueryImpl implements Query
 
     /**
      * Gets the lucene query from jpa query.
-     * 
+     *
      * @return the lucene query from jpa query
      */
     private String getLuceneQueryFromJPAQuery()
@@ -146,18 +144,19 @@ public class LuceneQuery extends QueryImpl implements Query
                 if (filter.getCondition().equals("="))
                 {
                     sb.append(":");
-                }
-                else if (filter.getCondition().equalsIgnoreCase("like"))
+                } else
                 {
-                    sb.append(":");
-                    appender = "*";
+                    if (filter.getCondition().equalsIgnoreCase("like"))
+                    {
+                        sb.append(":");
+                        appender = "*";
+                    }
                 }
 
                 // value
                 sb.append(filter.getValue());
                 sb.append(appender);
-            }
-            else
+            } else
             {
                 sb.append(" " + object + " ");
             }
@@ -173,8 +172,39 @@ public class LuceneQuery extends QueryImpl implements Query
         sb.append(":");
         // sb.append(getEntityClass().getName());
         sb.append(kunderaQuery.getEntityClass().getCanonicalName().toLowerCase());
+        
 
         return sb.toString();
+    }
+
+    @Override
+    public Query setFirstResult(int startPosition)
+    {
+        this.startPosition = startPosition;
+        return this;
+    }
+
+    private String[] getMaxMin(String[] primaryKeys)
+    {
+        if (startPosition == 0 && maxResult == Constants.INVALID)
+        {
+            return primaryKeys;
+        }
+        //TODO: Sort for faster time
+        //Arrays.sort(primaryKeys);
+        List<String> result = new ArrayList<String>();
+
+        for (String pk : primaryKeys)
+        {
+            int intVal = Integer.parseInt(pk);
+            if (startPosition <= intVal && startPosition <= maxResult)
+            {
+                result.add(pk);
+            }
+
+        }
+
+        return result.toArray(new String[result.size()]);
     }
 
     private class SearchInterpretor
@@ -182,8 +212,6 @@ public class LuceneQuery extends QueryImpl implements Query
 
         void getSearchType()
         {
-
         }
-
     }
 }

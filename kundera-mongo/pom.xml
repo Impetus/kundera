@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.impetus</groupId>
 		<artifactId>kundera</artifactId>
-		<version>2.0.4</version>
+		<version>2.0.4.5</version>
 	</parent>
 	<groupId>com.impetus.client</groupId>
 	<artifactId>kundera-mongo</artifactId>
@@ -20,7 +20,7 @@
 		<dependency>
 			<groupId>com.impetus.core</groupId>
 			<artifactId>kundera-core</artifactId>
-			<version>2.0.4</version>
+			<version>2.0.4.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.mongodb</groupId>

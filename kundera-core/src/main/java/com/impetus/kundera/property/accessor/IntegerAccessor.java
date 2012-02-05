@@ -13,18 +13,24 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
+
+
+
 package com.impetus.kundera.property.accessor;
 
+//~--- non-JDK imports --------------------------------------------------------
+
+import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * The Class IntegerAccessor.
- * 
+ *
  * @author animesh.kumar
  */
-public class IntegerAccessor implements PropertyAccessor<Integer>
+public class IntegerAccessor
+    implements PropertyAccessor<Integer>
 {
-
     /* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
     @Override
     public final Integer fromBytes(byte[] b)
@@ -38,9 +44,19 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
      */
     @Override
     public final byte[] toBytes(Object val)
+        throws PropertyAccessException
     {
-        Integer value = (Integer) (val);
-        return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value.intValue() };
+        try
+        {
+            Integer value = (Integer) (val);
+
+            return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8),
+                                (byte) value.intValue() };
+        }
+        catch (Exception e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
     }
 
     /*
