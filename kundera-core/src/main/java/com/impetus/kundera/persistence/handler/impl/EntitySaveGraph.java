@@ -521,9 +521,9 @@ public class EntitySaveGraph
         if(obj.getClass().isAssignableFrom(EntitySaveGraph.class))
         {
             EntitySaveGraph g = (EntitySaveGraph) obj;
-            EqualsBuilder equalsBuilder = new EqualsBuilder();
+            /*EqualsBuilder equalsBuilder = new EqualsBuilder();
             equalsBuilder.append(getParentClass(), g.getParentClass());
-            equalsBuilder.append(getChildClass(), g.getChildClass());
+            equalsBuilder.append(getChildClass(), g.getChildClass());*/
            /* equalsBuilder.append(this.fKeyName, g.getfKeyName());
             equalsBuilder.append(this.fKeyValue, g.getfKeyValue());
             equalsBuilder.append(this.revFKeyName, g.getRevFKeyName());
@@ -538,7 +538,9 @@ public class EntitySaveGraph
             equalsBuilder.append(this.property, g.getBidirectionalProperty());
             equalsBuilder.append(this.bidirectionalProperty, g.getProperty());
             equalsBuilder.append(this.isswapped, g.isIsswapped());*/
-            return equalsBuilder.isEquals();
+            //return equalsBuilder.isEquals();
+            return (g.parentClass.equals(getParentClass()) && g.childClass.equals(getChildClass()))
+            || (g.childClass.equals(getParentClass()) && g.parentClass.equals(getChildClass()));
         }
         
         return false;

@@ -80,7 +80,13 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
         }
 
         metadata.addRelation(relationField.getName(), relation);       
-        metadata.setRelationViaJoinTable(relation.isRelatedViaJoinTable());
+        
+        //Set whether this entity has at least one Join table relation, if not already set
+        if(!metadata.isRelationViaJoinTable())
+        {
+        	metadata.setRelationViaJoinTable(relation.isRelatedViaJoinTable());
+        }
+        
 
     }
 
