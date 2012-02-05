@@ -24,7 +24,10 @@ import java.util.Map;
 
 import javax.persistence.PersistenceException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -41,6 +44,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
@@ -73,6 +77,8 @@ public class HibernateClient implements Client
 
     /** The reader. */
     private EntityReader reader;
+    
+    private static final Log log = LogFactory.getLog(HibernateClient.class);
 
     /**
      * Instantiates a new hibernate client.
@@ -312,9 +318,13 @@ public class HibernateClient implements Client
             s.persist(entityGraph.getParentEntity());
             tx.commit();
         }
+        //TODO: Bad code, get rid of these exceptions, currently necessary for handling many to one case        
         catch (org.hibernate.exception.ConstraintViolationException e)
-        {
-            e.printStackTrace();
+        {        	
+            log.info(e.getMessage());
+        }
+        catch(HibernateException e) {
+        	log.info(e.getMessage());
         }
 
         // If entity has a parent entity, update foreign key
@@ -357,11 +367,18 @@ public class HibernateClient implements Client
     public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
     {
         // String rlName = entitySaveGraph.getfKeyName();
-        String rlValue = entitySaveGraph.getParentId();
-        Session s = getSessionInstance();
-        Transaction tx = s.beginTransaction();
-        s.persist(childEntity);
-        tx.commit();
+        String rlValue = entitySaveGraph.getParentId(); ;
+		Session s;
+		Transaction tx;
+		try {			
+			s = getSessionInstance();
+			tx = s.beginTransaction();
+			s.persist(childEntity);
+			tx.commit();
+		//TODO: Bad code, get rid of these exceptions, currently necessary for handling many to one case	
+		} catch (HibernateException e) {
+			log.info(e.getMessage());
+		}
 
         // Update foreign key value
         if (entitySaveGraph.getfKeyName() != null)
