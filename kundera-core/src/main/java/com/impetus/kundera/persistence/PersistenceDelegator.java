@@ -84,6 +84,8 @@ public class PersistenceDelegator
 
     boolean isRelationViaJoinTable;
 
+    private boolean noSessionLookup;
+
     /**
      * Instantiates a new persistence delegator.
      * 
@@ -329,10 +331,16 @@ public class PersistenceDelegator
             // fire PreUpdate events
             getEventDispatcher().fireEventListeners(m, e, PreUpdate.class);
 
+            // Currently session look-up is not required for merge operation.
+            //Once session implementation is mature this will not be required.
+            noSessionLookup=true;
             persist(e);
 
             // fire PreUpdate events
             getEventDispatcher().fireEventListeners(m, e, PostUpdate.class);
+            
+            //reset session lookup.
+            noSessionLookup=false;
             // }
         }
         catch (Exception exp)
@@ -853,7 +861,7 @@ public class PersistenceDelegator
         {
             objectGraph.setParentId(getId(parentEntity, metadata));
             
-            if(getSession().lookup(objectGraph.getParentClass(), objectGraph.getParentId()) == null) {
+            if(!noSessionLookup && (getSession().lookup(objectGraph.getParentClass(), objectGraph.getParentId()) == null)) {
                 Client pClient = getClient(metadata);
                 pClient.persist(objectGraph, metadata);
                 session.store(objectGraph.getParentId(), objectGraph.getParentEntity());
@@ -936,7 +944,7 @@ public class PersistenceDelegator
      */
     private void persistOneChildEntity(Object child, EntitySaveGraph objectGraph)
     {
-        if (objectGraph.getChildId() != null || getSession().lookup(child.getClass(), objectGraph.getChildId()) == null)
+        if (!noSessionLookup && (objectGraph.getChildId() != null || getSession().lookup(child.getClass(), objectGraph.getChildId()) == null))
         {
             EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
 
@@ -985,7 +993,7 @@ public class PersistenceDelegator
     private void saveImmediateChild(Object child, EntitySaveGraph objectGraph, EntityMetadata metadata)
     {
         String id = getId(child, metadata);        
-        if(getSession().lookup(child.getClass(), id) == null) {
+        if(!noSessionLookup && (getSession().lookup(child.getClass(), id) == null)) {
             objectGraph.setChildId(id);
             // if (getSession().lookup(child.getClass(), id) == null)
             // {
