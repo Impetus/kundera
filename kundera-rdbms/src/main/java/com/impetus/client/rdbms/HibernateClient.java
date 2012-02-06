@@ -650,7 +650,9 @@ public class HibernateClient implements Client
         queryBuilder.append(" Where ");
         queryBuilder.append(colName);
         queryBuilder.append(" = ");
+        queryBuilder.append("'");
         queryBuilder.append(colValue);
+        queryBuilder.append("'");
         Session s = getSessionInstance();
         s.beginTransaction();
         SQLQuery q = s.createSQLQuery(queryBuilder.toString()).addEntity(m.getEntityClazz());

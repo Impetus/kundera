@@ -10,18 +10,13 @@
   <name>kundera</name>
   <url>http://kundera.googlecode.com</url>
 
-  <!-- <scm>
+   <scm>
     <connection>scm:svn:http://kundera.googlecode.com/svn/trunk</connection>
     <developerConnection>scm:svn:https://kundera.googlecode.com/svn/trunk</developerConnection>
     <url>http://kundera.googlecode.com/svn/trunk</url>
   </scm>
--->
- <scm>
-    <url>http://svn.apache.org/viewcvs.cgi/maven</url>
-    <connection>http://svn.apache.org/viewcvs.cgi/maven</connection>
-  </scm>
 
-  <developers>
+   <developers>
     <developer>
       <id>vivek.mishra</id>
       <name>Vivek Mishra</name>
@@ -34,7 +29,7 @@
     <url>http://code.google.com/p/kundera/issues/list</url>
   </issueManagement>
 
-<!--  <distributionManagement>
+  <distributionManagement>
     <site>
       <id>website</id>
       <url>http://kundera.googlecode.com/svn/trunk</url>
@@ -49,12 +44,12 @@
       <uniqueVersion>false</uniqueVersion>
     </snapshotRepository>
   </distributionManagement>
--->
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <!--<repositories>
+  <repositories>
     <repository>
       <id>kundera-missing</id>
       <name>Kundera Public Missing Resources Repository</name>
@@ -80,7 +75,7 @@
       </snapshots>
     </repository>
   </repositories>
--->
+
   <!-- Build profiles -->
   <profiles>
 
