@@ -27,6 +27,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
+
 /**
  * The Class DateAccessor.
  * 
@@ -39,6 +40,7 @@ public class DateAccessor implements PropertyAccessor<Date>
     private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd MMM yyyy HH:mm:ss:S Z",
             Locale.ENGLISH);
 
+    /** The patterns. */
     private static List<String> patterns = new ArrayList<String>(15);
 
     static
@@ -84,6 +86,9 @@ public class DateAccessor implements PropertyAccessor<Date>
         patterns.add("dd-MMM-yyyy");
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
+     */
     @Override
     public final Date fromBytes(byte[] bytes) throws PropertyAccessException
     {
@@ -99,6 +104,9 @@ public class DateAccessor implements PropertyAccessor<Date>
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+     */
     @Override
     public final byte[] toBytes(Object date) throws PropertyAccessException
     {
@@ -112,12 +120,18 @@ public class DateAccessor implements PropertyAccessor<Date>
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+     */
     @Override
     public final String toString(Object object)
     {
         return object.toString();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+     */
     @Override
     public Date fromString(String s) throws PropertyAccessException
     {
@@ -133,13 +147,11 @@ public class DateAccessor implements PropertyAccessor<Date>
     }
 
     /**
-     * Get Date from given below formats
-     * 
-     * @param date
-     *            Date pattern
+     * Get Date from given below formats.
+     *
+     * @param date Date pattern
      * @return date instance
-     * @throws PropertyAccessException
-     *             throws only if invalid format is supplied.
+     * @throws PropertyAccessException throws only if invalid format is supplied.
      */
     public static Date getDateByPattern(String date) throws PropertyAccessException
     {

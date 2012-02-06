@@ -22,12 +22,21 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+
 /**
+ * A factory for creating RelationMetadataProcessor objects.
+ *
  * @author Amresh Singh
  */
 public class RelationMetadataProcessorFactory
 {
 
+    /**
+     * Gets the relation metadata processor.
+     *
+     * @param relationField the relation field
+     * @return the relation metadata processor
+     */
     public static RelationMetadataProcessor getRelationMetadataProcessor(Field relationField)
     {
         RelationMetadataProcessor relProcessor = null;

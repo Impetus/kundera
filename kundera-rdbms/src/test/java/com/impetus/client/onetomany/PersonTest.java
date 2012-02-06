@@ -20,21 +20,28 @@ import java.util.Set;
 
 import org.junit.Test;
 
+
 /**
+ * The Class PersonTest.
+ *
  * @author vivek.mishra
- * 
  */
 public class PersonTest
 {
 
     // @Test
+    /**
+     * Test persist.
+     */
     public void testPersist()
     {
 
     }
 
     /**
-     * @return
+     * Prepare object.
+     *
+     * @return the object
      */
     private Object prepareObject()
     {
@@ -51,6 +58,9 @@ public class PersonTest
         return person;
     }
 
+    /**
+     * Test find by id.
+     */
     @Test
     public void testFindById()
     {

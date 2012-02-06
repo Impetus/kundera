@@ -25,6 +25,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
 
+
 /**
  * The Class HBaseEntityReader.
  * 

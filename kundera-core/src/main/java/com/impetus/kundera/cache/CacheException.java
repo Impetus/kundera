@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.cache;
 
+
 /**
  * When something goes wrong in cache.
  * 
@@ -24,9 +25,7 @@ package com.impetus.kundera.cache;
 public class CacheException extends Exception
 {
 
-    /**
-     *
-     */
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
     /**

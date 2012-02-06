@@ -24,9 +24,10 @@ import java.util.Map;
 import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.persistence.event.CallbackMethod;
 
+
 /**
- * Holds metadata for entities
- * 
+ * Holds metadata for entities.
+ *
  * @author animesh.kumar
  */
 public final class EntityMetadata
@@ -45,7 +46,7 @@ public final class EntityMetadata
     /** database name. */
     private String schema;
 
-    /** Persistence unit of database this entity is to be persisted */
+    /** Persistence unit of database this entity is to be persisted. */
     private String persistenceUnit;
 
     /** The index name. */
@@ -70,10 +71,10 @@ public final class EntityMetadata
     /** The write identifier method. */
     private Method writeIdentifierMethod;
 
-    /** Maps of column name and their metadata */
+    /** Maps of column name and their metadata. */
     private Map<String, Column> columnsMap = new HashMap<String, Column>();
 
-    /** Map of embedded column names and their metadata */
+    /** Map of embedded column names and their metadata. */
     private Map<String, EmbeddedColumn> embeddedColumnsMap = new HashMap<String, EmbeddedColumn>();
 
     /** The index prperties. */
@@ -98,6 +99,7 @@ public final class EntityMetadata
     /** type. */
     private Type type;
 
+    /** The is relation via join table. */
     private boolean isRelationViaJoinTable;
 
     /**
@@ -256,6 +258,8 @@ public final class EntityMetadata
     }
 
     /**
+     * Gets the persistence unit.
+     *
      * @return the persistenceUnit
      */
     public String getPersistenceUnit()
@@ -264,8 +268,9 @@ public final class EntityMetadata
     }
 
     /**
-     * @param persistenceUnit
-     *            the persistenceUnit to set
+     * Sets the persistence unit.
+     *
+     * @param persistenceUnit the persistenceUnit to set
      */
     public void setPersistenceUnit(String persistenceUnit)
     {
@@ -626,6 +631,9 @@ public final class EntityMetadata
         this.cacheable = cacheable;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString()
     {
@@ -747,8 +755,8 @@ public final class EntityMetadata
     }
 
     /**
-     * Getter method for isRelatedViaJoinTable
-     * 
+     * Getter method for isRelatedViaJoinTable.
+     *
      * @return true, if holds join table relation, else false.
      */
     public boolean isRelationViaJoinTable()
@@ -757,9 +765,9 @@ public final class EntityMetadata
     }
 
     /**
-     * Setter method for isRelatedViaJoinTable
-     * 
-     * @param isRelationViaJoinTable
+     * Setter method for isRelatedViaJoinTable.
+     *
+     * @param isRelationViaJoinTable the new relation via join table
      */
     public void setRelationViaJoinTable(boolean isRelationViaJoinTable)
     {

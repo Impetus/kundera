@@ -21,16 +21,24 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
+ * The Class ApplicationLoader.
+ *
  * @author amresh.singh
- * 
  */
 public class ApplicationLoader implements Loader
 {
+    
+    /** The log. */
     private static Logger log = LoggerFactory.getLogger(ApplicationLoader.class);
 
+    /** The application loaders. */
     List<ApplicationLoader> applicationLoaders = new ArrayList<ApplicationLoader>();
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.Loader#load(java.lang.String[])
+     */
     @Override
     public void load(String... persistenceUnits)
     {
@@ -45,6 +53,9 @@ public class ApplicationLoader implements Loader
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.Loader#unload(java.lang.String[])
+     */
     @Override
     public void unload(String... persistenceUnits)
     {

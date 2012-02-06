@@ -58,6 +58,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.QueryResolver;
 
+
 /**
  * The Class PersistenceDelegator.
  */
@@ -82,8 +83,10 @@ public class PersistenceDelegator
     /** The event dispatcher. */
     private EntityEventDispatcher eventDispatcher;
 
+    /** The is relation via join table. */
     boolean isRelationViaJoinTable;
 
+    /** The no session lookup. */
     private boolean noSessionLookup;
 
     /**
@@ -264,6 +267,15 @@ public class PersistenceDelegator
         return entities;
     }
 
+    /**
+     * Find.
+     *
+     * @param <E> the element type
+     * @param entityClass the entity class
+     * @param excludeGraph the exclude graph
+     * @param primaryKeys the primary keys
+     * @return the list
+     */
     public <E> List<E> find(Class<E> entityClass, EntitySaveGraph excludeGraph, Object... primaryKeys)
     {
         List<E> entities = new ArrayList<E>();
@@ -435,8 +447,10 @@ public class PersistenceDelegator
     }
 
     /**
-     * @param objectGraph
-     * @param metadata
+     * Delete from join table.
+     *
+     * @param objectGraph the object graph
+     * @param metadata the metadata
      */
     private void deleteFromJoinTable(EntitySaveGraph objectGraph, EntityMetadata metadata)
     {
@@ -594,13 +608,11 @@ public class PersistenceDelegator
 
     /**
      * Find.
-     * 
-     * @param <E>
-     *            the element type
-     * @param entityClass
-     *            the entity class
-     * @param primaryKey
-     *            the primary key
+     *
+     * @param <E> the element type
+     * @param entityClass the entity class
+     * @param primaryKey the primary key
+     * @param excludeGraph the exclude graph
      * @return the e
      */
     public <E> E find(Class<E> entityClass, Object primaryKey, EntitySaveGraph excludeGraph)
@@ -664,9 +676,11 @@ public class PersistenceDelegator
     }
 
     /**
-     * @param excludeGraph
-     * @param objectGraphs
-     * @return
+     * Gets the disjoint graph.
+     *
+     * @param excludeGraph the exclude graph
+     * @param objectGraphs the object graphs
+     * @return the disjoint graph
      */
     private List<EntitySaveGraph> getDisjointGraph(EntitySaveGraph excludeGraph, List<EntitySaveGraph> objectGraphs)
     {
@@ -994,6 +1008,13 @@ public class PersistenceDelegator
         }
     }
 
+    /**
+     * Save immediate child.
+     *
+     * @param child the child
+     * @param objectGraph the object graph
+     * @param metadata the metadata
+     */
     private void saveImmediateChild(Object child, EntitySaveGraph objectGraph, EntityMetadata metadata)
     {
         String id = getId(child, metadata);

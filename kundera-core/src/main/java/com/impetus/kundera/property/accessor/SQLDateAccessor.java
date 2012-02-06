@@ -22,13 +22,18 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
+
 /**
+ * The Class SQLDateAccessor.
+ *
  * @author amresh.singh
- * 
  */
 public class SQLDateAccessor implements PropertyAccessor<Date>
 {
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
+     */
     @Override
     public Date fromBytes(byte[] b) throws PropertyAccessException
     {
@@ -45,6 +50,9 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
         return fromString(s);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+     */
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
@@ -52,12 +60,18 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
         return d.toString().getBytes();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+     */
     @Override
     public String toString(Object object)
     {
         return object.toString();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+     */
     @Override
     public Date fromString(String s) throws PropertyAccessException
     {

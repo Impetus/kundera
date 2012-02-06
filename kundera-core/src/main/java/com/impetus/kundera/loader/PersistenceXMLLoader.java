@@ -39,9 +39,11 @@ import org.xml.sax.SAXParseException;
 
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
+
 /**
+ * The Class PersistenceXMLLoader.
+ *
  * @author amresh.singh
- * 
  */
 public class PersistenceXMLLoader
 {
@@ -298,6 +300,9 @@ public class PersistenceXMLLoader
         }
 
         /* @see org.xml.sax.ErrorHandler#error(org.xml.sax.SAXParseException) */
+        /* (non-Javadoc)
+         * @see org.xml.sax.ErrorHandler#error(org.xml.sax.SAXParseException)
+         */
         public void error(SAXParseException error)
         {
             log.error("Error parsing XML: " + file + '(' + error.getLineNumber() + ") " + error.getMessage());
@@ -308,6 +313,9 @@ public class PersistenceXMLLoader
          * @see
          * org.xml.sax.ErrorHandler#fatalError(org.xml.sax.SAXParseException)
          */
+        /* (non-Javadoc)
+         * @see org.xml.sax.ErrorHandler#fatalError(org.xml.sax.SAXParseException)
+         */
         public void fatalError(SAXParseException error)
         {
             log.error("Error parsing XML: " + file + '(' + error.getLineNumber() + ") " + error.getMessage());
@@ -315,6 +323,9 @@ public class PersistenceXMLLoader
         }
 
         /* @see org.xml.sax.ErrorHandler#warning(org.xml.sax.SAXParseException) */
+        /* (non-Javadoc)
+         * @see org.xml.sax.ErrorHandler#warning(org.xml.sax.SAXParseException)
+         */
         public void warning(SAXParseException warn)
         {
             log.warn("Warning parsing XML: " + file + '(' + warn.getLineNumber() + ") " + warn.getMessage());

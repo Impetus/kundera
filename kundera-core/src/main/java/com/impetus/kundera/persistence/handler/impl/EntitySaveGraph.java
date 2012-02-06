@@ -23,7 +23,7 @@ import org.hibernate.proxy.HibernateProxy;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-// TODO: Auto-generated Javadoc
+
 /**
  * The Class EntitySaveGraph.
  * 
@@ -529,10 +529,12 @@ public class EntitySaveGraph
     /**
      * Purpose to override this is to handle bi direction scenario only As of
      * now.
-     * 
+     *
+     * @param obj the obj
+     * @return true, if successful
      * @see PersistenceDelegator @{persistOneChildEntity} method. Any change to
-     *      this method will broke it. In case it is required to compare exact
-     *      clone. please create a new method to handle bi-directional.
+     * this method will broke it. In case it is required to compare exact
+     * clone. please create a new method to handle bi-directional.
      */
     @Override
     public boolean equals(Object obj)
@@ -574,6 +576,9 @@ public class EntitySaveGraph
         return false;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode()
     {

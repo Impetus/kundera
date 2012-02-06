@@ -26,29 +26,41 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+
 //@Entity
+/**
+ * The Class Department.
+ */
 @Table(name = "Department", schema = "Blog")
 @Cacheable(true)
 public class Department
 {
 
+    /** The name. */
     @Id
     private String name;
 
+    /** The address. */
     @Column
     private String address;
 
+    /** The employees. */
     @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
     private List<Employee> employees = new ArrayList<Employee>();
 
+    /**
+     * Instantiates a new department.
+     */
     public Department()
     {
 
     }
 
     /**
-     * @param name
-     * @param address
+     * Instantiates a new department.
+     *
+     * @param name the name
+     * @param address the address
      */
     public Department(String name, String address)
     {
@@ -58,6 +70,8 @@ public class Department
     }
 
     /**
+     * Gets the name.
+     *
      * @return the name
      */
     public String getName()
@@ -66,8 +80,9 @@ public class Department
     }
 
     /**
-     * @param name
-     *            the name to set
+     * Sets the name.
+     *
+     * @param name the name to set
      */
     public void setName(String name)
     {
@@ -75,6 +90,8 @@ public class Department
     }
 
     /**
+     * Gets the address.
+     *
      * @return the address
      */
     public String getAddress()
@@ -83,8 +100,9 @@ public class Department
     }
 
     /**
-     * @param address
-     *            the address to set
+     * Sets the address.
+     *
+     * @param address the address to set
      */
     public void setAddress(String address)
     {
@@ -92,6 +110,8 @@ public class Department
     }
 
     /**
+     * Gets the employees.
+     *
      * @return the employees
      */
     public List<Employee> getEmployees()
@@ -100,14 +120,20 @@ public class Department
     }
 
     /**
-     * @param employees
-     *            the employees to set
+     * Sets the employees.
+     *
+     * @param employees the employees to set
      */
     public void setEmployees(List<Employee> employees)
     {
         this.employees = employees;
     }
 
+    /**
+     * Adds the employee.
+     *
+     * @param e the e
+     */
     public void addEmployee(Employee... e)
     {
         for (Employee e_ : e)
@@ -115,6 +141,9 @@ public class Department
     }
 
     /* @see java.lang.Object#toString() */
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString()
     {

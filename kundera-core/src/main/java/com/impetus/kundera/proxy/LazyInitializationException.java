@@ -15,15 +15,14 @@
  ******************************************************************************/
 package com.impetus.kundera.proxy;
 
+
 /**
  * The Class LazyInitializationException.
  */
 public class LazyInitializationException extends RuntimeException
 {
 
-    /**
-     *
-     */
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
     /**

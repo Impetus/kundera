@@ -22,13 +22,18 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
+
 /**
+ * The Class BigDecimalAccessor.
+ *
  * @author amresh.singh
- * 
  */
 public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
 {
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
+     */
     @Override
     public BigDecimal fromBytes(byte[] b) throws PropertyAccessException
     {
@@ -44,6 +49,9 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
         return fromString(s);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+     */
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
@@ -51,12 +59,18 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
         return b.toString().getBytes();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+     */
     @Override
     public String toString(Object object)
     {
         return object.toString();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+     */
     @Override
     public BigDecimal fromString(String s) throws PropertyAccessException
     {

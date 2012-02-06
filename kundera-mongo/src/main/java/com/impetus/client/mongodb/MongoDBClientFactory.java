@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.client.mongodb;
 
 import java.net.UnknownHostException;
@@ -23,17 +38,27 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.MongoOptions;
 
+
+/**
+ * A factory for creating MongoDBClient objects.
+ */
 public class MongoDBClientFactory extends GenericClientFactory
 {
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(MongoDBClientFactory.class);
 
+    /** The index manager. */
     IndexManager indexManager;
 
+    /** The mongo db. */
     private DB mongoDB;
 
+    /** The reader. */
     private EntityReader reader;
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.GenericClientFactory#initializeClient()
+     */
     @Override
     protected void initializeClient()
     {
@@ -43,6 +68,9 @@ public class MongoDBClientFactory extends GenericClientFactory
         reader = new MongoEntityReader();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
+     */
     @Override
     protected Object createPoolOrConnection()
     {
@@ -51,6 +79,9 @@ public class MongoDBClientFactory extends GenericClientFactory
         return mongoDB;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient()
+     */
     @Override
     protected Client instantiateClient()
     {
@@ -59,6 +90,11 @@ public class MongoDBClientFactory extends GenericClientFactory
         return new MongoDBClient(mongoDB, indexManager, reader);
     }
 
+    /**
+     * Gets the connection.
+     *
+     * @return the connection
+     */
     private DB getConnection()
     {
 
@@ -103,12 +139,18 @@ public class MongoDBClientFactory extends GenericClientFactory
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.GenericClientFactory#isClientThreadSafe()
+     */
     @Override
     protected boolean isClientThreadSafe()
     {
         return false;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.Loader#unload(java.lang.String[])
+     */
     @Override
     public void unload(String... persistenceUnits)
     {

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera;
 
+
 /**
  * Constants.
  * 
@@ -47,34 +48,25 @@ public final class Constants
     /** The Constant TO_ONE_SUPER_COL_NAME. */
     public static final String FOREIGN_KEY_EMBEDDED_COLUMN_NAME = "FKey-TO";
 
+    /** The Constant KUNDERA_SECONDARY_CACHE_NAME. */
     public static final String KUNDERA_SECONDARY_CACHE_NAME = "Kundera";
 
+    /** The Constant PERSISTENCE_UNIT_NAME. */
     public static final String PERSISTENCE_UNIT_NAME = "persistenceUnitName";
 
+    /** The Constant LUCENE_INDEX_DIRECTORY_NAME. */
     public static final String LUCENE_INDEX_DIRECTORY_NAME = "lucene";
 
-    /**
-     * Separator used for providing persistence unit alongwith schema on entity
-     * class (applicable in case of cross-datastore persistence)
-     */
+    /** Separator used for providing persistence unit alongwith schema on entity class (applicable in case of cross-datastore persistence). */
     public static final String SCHEMA_PERSISTENCE_UNIT_SEPARATOR = "@";
 
-    /**
-     * Separator used for providing a list of persistence units while creating
-     * EMF
-     */
+    /** Separator used for providing a list of persistence units while creating EMF. */
     public final static String PERSISTENCE_UNIT_SEPARATOR = ",";
 
-    /**
-     * Meta data for all entities that are not specified specific to any
-     * persistence unit, are stored under this name
-     */
+    /** Meta data for all entities that are not specified specific to any persistence unit, are stored under this name. */
     public final static String COMMON_ENTITY_METADATAS = "commonEntityMetadatas";
 
-    /**
-     * Name of column family(HBase) or super column(cassandra) which houses all
-     * join columns
-     */
+    /** Name of column family(HBase) or super column(cassandra) which houses all join columns. */
     public final static String JOIN_COLUMNS_FAMILY_NAME = "JoinColumns";
 
 }

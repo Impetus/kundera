@@ -17,13 +17,18 @@ package com.impetus.client.manytomany;
 
 import org.junit.Test;
 
+
 /**
+ * The Class PersonTest.
+ *
  * @author vivek.mishra
- * 
  */
 public class PersonTest
 {
 
+    /**
+     * Test persist.
+     */
     @Test
     public void testPersist()
     {
@@ -31,7 +36,9 @@ public class PersonTest
     }
 
     /**
-     * @return
+     * Prepare object.
+     *
+     * @return the object
      */
     private Object prepareObject()
     {

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
+
 /**
  * The Class KunderaQueryParserException.
  * 

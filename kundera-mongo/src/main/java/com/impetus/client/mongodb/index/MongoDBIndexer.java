@@ -30,6 +30,7 @@ import com.impetus.kundera.index.Indexer;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PropertyIndex;
 
+
 /**
  * Provides indexing functionality for MongoDB database.
  * 
@@ -111,6 +112,9 @@ public class MongoDBIndexer implements Indexer
                 "Invalid method call! When you search on a column, MongoDB will automatically search in index if that exists.");
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.index.Indexer#close()
+     */
     @Override
     public void close()
     {
@@ -118,6 +122,9 @@ public class MongoDBIndexer implements Indexer
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.index.Indexer#flush()
+     */
     @Override
     public void flush()
     {

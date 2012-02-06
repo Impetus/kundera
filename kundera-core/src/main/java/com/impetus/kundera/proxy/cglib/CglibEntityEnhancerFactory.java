@@ -23,6 +23,7 @@ import net.sf.cglib.proxy.Enhancer;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.proxy.EntityEnhancerFactory;
 
+
 /**
  * Implementation of EntityEnhancerFactory using cglib library.
  * 
@@ -35,6 +36,9 @@ public class CglibEntityEnhancerFactory implements EntityEnhancerFactory
      * @see
      * com.impetus.kundera.proxy.EntityEnhancerFactory#getProxy(java.lang.Object
      * , java.lang.String, java.util.Map)
+     */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.proxy.EntityEnhancerFactory#getProxy(java.lang.Object, java.lang.String, java.util.Map)
      */
     @Override
     public EnhancedEntity getProxy(Object entity, String id, Map<String, Set<String>> foreignKeyMap)

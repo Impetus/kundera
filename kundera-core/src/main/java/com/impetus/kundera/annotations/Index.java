@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+
 /**
  * Indicates and validates a class for use as Cassandra Entity.
  * 
@@ -41,16 +42,16 @@ public @interface Index
     boolean index() default true;
 
     /**
-     * Index name (if not provided, defualt is entity name)
-     * 
-     * @return
+     * Index name (if not provided, defualt is entity name).
+     *
+     * @return the string
      */
     String name() default "";
 
     /**
-     * List of columns to index
-     * 
-     * @return
+     * List of columns to index.
+     *
+     * @return the string[]
      */
     String[] columns() default {};
 }

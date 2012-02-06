@@ -17,25 +17,36 @@ package com.impetus.client.onetoone;
 
 import org.junit.Test;
 
+
 /**
+ * The Class PersonTest.
+ *
  * @author vivek.mishra
- * 
  */
 public class PersonTest
 {
 
     // @Test
+    /**
+     * Test persist.
+     */
     public void testPersist()
     {
 
     }
 
     // @Test
+    /**
+     * Test shared by pk persist.
+     */
     public void testSharedByPKPersist()
     {
 
     }
 
+    /**
+     * Test find by id.
+     */
     @Test
     public void testFindById()
     {
@@ -43,7 +54,9 @@ public class PersonTest
     }
 
     /**
-     * @return
+     * Prepare pk object.
+     *
+     * @return the object
      */
     private Object preparePKObject()
     {
@@ -58,7 +71,9 @@ public class PersonTest
     }
 
     /**
-     * @return
+     * Prepare object.
+     *
+     * @return the object
      */
     private Object prepareObject()
     {

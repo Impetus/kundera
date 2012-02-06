@@ -18,6 +18,7 @@ package com.impetus.kundera.proxy;
 import java.util.Map;
 import java.util.Set;
 
+
 /**
  * Interface EntityEnhancerFactory.
  * 

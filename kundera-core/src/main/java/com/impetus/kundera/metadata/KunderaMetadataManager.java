@@ -26,19 +26,35 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.proxy.EntityEnhancerFactory;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
 
+
 /**
+ * The Class KunderaMetadataManager.
+ *
  * @author amresh.singh
- * 
  */
 public class KunderaMetadataManager
 {
+    
+    /** The log. */
     private static Logger log = LoggerFactory.getLogger(KunderaMetadataManager.class);
 
+    /**
+     * Gets the persistence unit metadata.
+     *
+     * @param persistenceUnit the persistence unit
+     * @return the persistence unit metadata
+     */
     public static PersistenceUnitMetadata getPersistenceUnitMetadata(String persistenceUnit)
     {
         return KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
     }
 
+    /**
+     * Gets the metamodel.
+     *
+     * @param persistenceUnit the persistence unit
+     * @return the metamodel
+     */
     public static MetamodelImpl getMetamodel(String persistenceUnit)
     {
         KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
@@ -54,6 +70,12 @@ public class KunderaMetadataManager
         return metamodel;
     }
 
+    /**
+     * Gets the metamodel.
+     *
+     * @param persistenceUnits the persistence units
+     * @return the metamodel
+     */
     public static MetamodelImpl getMetamodel(String... persistenceUnits)
     {
         KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
@@ -77,17 +99,24 @@ public class KunderaMetadataManager
         return metamodel;
     }
 
+    /**
+     * Gets the entity metadata.
+     *
+     * @param persistenceUnit the persistence unit
+     * @param entityClass the entity class
+     * @return the entity metadata
+     */
     public static EntityMetadata getEntityMetadata(String persistenceUnit, Class entityClass)
     {
         return getMetamodel(persistenceUnit).getEntityMetadata(entityClass);
     }
 
     /**
-     * Finds ands returns Entity metadata for a given array of PUs
-     * 
-     * @param entityClass
-     * @param persistenceUnits
-     * @return
+     * Finds ands returns Entity metadata for a given array of PUs.
+     *
+     * @param entityClass the entity class
+     * @param persistenceUnits the persistence units
+     * @return the entity metadata
      */
     public static EntityMetadata getEntityMetadata(Class entityClass, String... persistenceUnits)
     {
@@ -108,11 +137,21 @@ public class KunderaMetadataManager
 
     }
 
+    /**
+     * Gets the lazy initializer factory.
+     *
+     * @return the lazy initializer factory
+     */
     public static LazyInitializerFactory getLazyInitializerFactory()
     {
         return KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory();
     }
 
+    /**
+     * Gets the entity enhancer factory.
+     *
+     * @return the entity enhancer factory
+     */
     public static EntityEnhancerFactory getEntityEnhancerFactory()
     {
         return KunderaMetadata.INSTANCE.getCoreMetadata().getEnhancedProxyFactory();

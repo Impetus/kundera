@@ -16,17 +16,22 @@ import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.persistence.EntityReader;
 
+
 /**
+ * A factory for creating RDBMSClient objects.
+ *
  * @author impadmin
- * 
  */
 public class RDBMSClientFactory extends GenericClientFactory
 {
 
+    /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(RDBMSClientFactory.class);
 
+    /** The index manager. */
     IndexManager indexManager;
 
+    /** The reader. */
     private EntityReader reader;
 
     /*

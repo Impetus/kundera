@@ -25,6 +25,7 @@ import com.impetus.kundera.persistence.handler.api.MappingHandler;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+
 /**
  * The Class ManyToManyHandler.
  * 
@@ -55,6 +56,15 @@ public class ManyToManyHandler extends AssociationHandler implements MappingHand
         return objectGraph;
     }
 
+    /**
+     * Gets the directional graph.
+     *
+     * @param entity the entity
+     * @param metadata the metadata
+     * @param associationEntity the association entity
+     * @param relation the relation
+     * @return the directional graph
+     */
     private EntitySaveGraph getDirectionalGraph(Object entity, EntityMetadata metadata, Object associationEntity,
             Relation relation)
     {

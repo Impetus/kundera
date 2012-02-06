@@ -57,7 +57,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-// TODO: Auto-generated Javadoc
+
 /**
  * The Class HBaseDataHandler.
  * 

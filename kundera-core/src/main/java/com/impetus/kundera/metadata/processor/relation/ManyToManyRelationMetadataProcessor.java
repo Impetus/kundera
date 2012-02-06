@@ -30,18 +30,27 @@ import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+
 /**
+ * The Class ManyToManyRelationMetadataProcessor.
+ *
  * @author Amresh Singh
  */
 public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProcessor implements
         RelationMetadataProcessor
 {
 
+    /**
+     * Instantiates a new many to many relation metadata processor.
+     */
     public ManyToManyRelationMetadataProcessor()
     {
         validator = new EntityValidatorImpl();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor#addRelationIntoMetadata(java.lang.reflect.Field, com.impetus.kundera.metadata.model.EntityMetadata)
+     */
     @Override
     public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata)
     {
@@ -91,6 +100,9 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata)
+     */
     @Override
     public void process(Class<?> clazz, EntityMetadata metadata)
     {

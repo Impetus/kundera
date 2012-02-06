@@ -43,6 +43,7 @@ import com.impetus.kundera.property.accessor.SQLTimestampAccessor;
 import com.impetus.kundera.property.accessor.ShortAccessor;
 import com.impetus.kundera.property.accessor.StringAccessor;
 
+
 /**
  * The Class PropertyAccessorFactory.
  * 

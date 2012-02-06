@@ -33,17 +33,24 @@ import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
+
 /**
+ * The Class PersistenceUnitLoader.
+ *
  * @author amresh.singh
- * 
  */
 public class PersistenceUnitLoader extends ApplicationLoader
 {
+    
+    /** The log. */
     private static Logger log = LoggerFactory.getLogger(PersistenceUnitLoader.class);
 
     /** The Constant PROVIDER_IMPLEMENTATION_NAME. */
     private static final String PROVIDER_IMPLEMENTATION_NAME = KunderaPersistence.class.getName();
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.ApplicationLoader#load(java.lang.String[])
+     */
     @Override
     public void load(String... persistenceUnits)
     {

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.index;
 
+
 /**
  * Captures any indexing related exceptions.
  * 

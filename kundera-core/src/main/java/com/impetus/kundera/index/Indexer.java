@@ -19,6 +19,7 @@ import java.util.Map;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
+
 /**
  * Interface to define the behavior of an Indexer.
  * 
@@ -64,13 +65,11 @@ public interface Indexer
     /**
      * Searches for an object. Note that the "query" must be in Indexer
      * specified form.
-     * 
-     * @param query
-     *            the query
-     * @param start
-     *            the start
-     * @param count
-     *            the count
+     *
+     * @param luceneQuery the lucene query
+     * @param start the start
+     * @param count the count
+     * @param fetchRelation the fetch relation
      * @return the list
      */
 

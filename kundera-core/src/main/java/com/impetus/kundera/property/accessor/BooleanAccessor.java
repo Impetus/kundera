@@ -18,19 +18,27 @@ package com.impetus.kundera.property.accessor;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
+
 /**
+ * The Class BooleanAccessor.
+ *
  * @author Amresh Singh
- * 
  */
 public class BooleanAccessor implements PropertyAccessor<Boolean>
 {
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
+     */
     @Override
     public Boolean fromBytes(byte[] data) throws PropertyAccessException
     {
         return (data == null || data.length == 0) ? false : data[0] != 0x00;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+     */
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
@@ -44,12 +52,18 @@ public class BooleanAccessor implements PropertyAccessor<Boolean>
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+     */
     @Override
     public String toString(Object object)
     {
         return object.toString();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+     */
     @Override
     public Boolean fromString(String s) throws PropertyAccessException
     {

@@ -22,13 +22,18 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
+
 /**
+ * The Class SQLTimeAccessor.
+ *
  * @author amresh.singh
- * 
  */
 public class SQLTimeAccessor implements PropertyAccessor<Time>
 {
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
+     */
     @Override
     public Time fromBytes(byte[] b) throws PropertyAccessException
     {
@@ -44,6 +49,9 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
         return fromString(s);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+     */
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
@@ -51,12 +59,18 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
         return t.toString().getBytes();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+     */
     @Override
     public String toString(Object object)
     {
         return object.toString();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+     */
     @Override
     public Time fromString(String s) throws PropertyAccessException
     {

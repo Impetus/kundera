@@ -21,26 +21,39 @@ import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.entity.PersonnelDTO;
 
+
 /**
+ * The Class EntityManagerSessionTest.
+ *
  * @author amresh.singh
- * 
  */
 public class EntityManagerSessionTest extends TestCase
 {
+    
+    /** The ems. */
     EntityManagerSession ems;
 
+    /** The cache provider. */
     CacheProvider cacheProvider;
 
+    /** The cache. */
     Cache cache;
 
+    /** The cache resource. */
     String cacheResource = "/ehcache-test.xml";;
 
+    /** The cache provider class name. */
     String cacheProviderClassName = "com.impetus.kundera.cache.ehcache.EhCacheProvider";
 
+    /** The person1. */
     PersonnelDTO person1;
 
+    /** The person2. */
     PersonnelDTO person2;
 
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#setUp()
+     */
     protected void setUp() throws Exception
     {
         super.setUp();
@@ -56,12 +69,18 @@ public class EntityManagerSessionTest extends TestCase
         person2 = new PersonnelDTO("2", "Vivek", "Mishra");
     }
 
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#tearDown()
+     */
     protected void tearDown() throws Exception
     {
         super.tearDown();
         ems.clear();
     }
 
+    /**
+     * Test.
+     */
     public void test()
     {
         assertNotNull(ems);

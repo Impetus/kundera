@@ -51,9 +51,10 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+
 /**
- * Provides indexing functionality using lucene library
- * 
+ * Provides indexing functionality using lucene library.
+ *
  * @author amresh.singh
  */
 public class LuceneIndexer extends DocumentIndexer
@@ -62,22 +63,32 @@ public class LuceneIndexer extends DocumentIndexer
     /** log for this class. */
     private static Log log = LogFactory.getLog(LuceneIndexer.class);
 
+    /** The w. */
     private static IndexWriter w;
 
+    /** The reader. */
     private static IndexReader reader;
 
+    /** The index. */
     private static Directory index;
 
+    /** The is initialized. */
     private static boolean isInitialized;
 
+    /** The indexer. */
     private static LuceneIndexer indexer;
 
+    /** The ready for commit. */
     private static boolean readyForCommit;
 
+    /** The lucene dir path. */
     private static String luceneDirPath;
 
     /**
-     * @param analyzer
+     * Instantiates a new lucene indexer.
+     *
+     * @param analyzer the analyzer
+     * @param lucDirPath the luc dir path
      */
     private LuceneIndexer(Analyzer analyzer, String lucDirPath)
     {
@@ -114,8 +125,11 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     /**
-     * @param client
-     * @param analyzer
+     * Gets the single instance of LuceneIndexer.
+     *
+     * @param analyzer the analyzer
+     * @param lucDirPath the luc dir path
+     * @return single instance of LuceneIndexer
      */
     public static synchronized LuceneIndexer getInstance(Analyzer analyzer, String lucDirPath)
     {
@@ -189,6 +203,9 @@ public class LuceneIndexer extends DocumentIndexer
         return file;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object)
+     */
     @Override
     public final void index(EntityMetadata metadata, Object object)
     {
@@ -196,6 +213,9 @@ public class LuceneIndexer extends DocumentIndexer
         onCommit();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.index.Indexer#unindex(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
+     */
     @Override
     public final void unindex(EntityMetadata metadata, String id)
     {
@@ -215,6 +235,9 @@ public class LuceneIndexer extends DocumentIndexer
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int, boolean)
+     */
     @SuppressWarnings("deprecation")
     @Override
     public final Map<String, String> search(String luceneQuery, int start, int count, boolean fetchRelation)
@@ -307,11 +330,9 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     /**
-     * Indexes document in file system using lucene
-     * 
-     * @param document
-     * @throws CorruptIndexException
-     * @throws IOException
+     * Indexes document in file system using lucene.
+     *
+     * @param document the document
      */
     private void indexDocumentUsingLucene(Document document)
     {
@@ -334,6 +355,9 @@ public class LuceneIndexer extends DocumentIndexer
         }
     }
 
+    /**
+     * Flush internal.
+     */
     private void flushInternal()
     {
         try
@@ -380,6 +404,9 @@ public class LuceneIndexer extends DocumentIndexer
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.index.Indexer#flush()
+     */
     @Override
     public void flush()
     {
@@ -420,6 +447,15 @@ public class LuceneIndexer extends DocumentIndexer
         onCommit();
     }
 
+    /**
+     * Index document.
+     *
+     * @param metadata the metadata
+     * @param object the object
+     * @param parentId the parent id
+     * @param clazz the clazz
+     * @return the document
+     */
     private Document indexDocument(EntityMetadata metadata, Object object, String parentId, Class<?> clazz)
     {
         if (!metadata.isIndexable())
@@ -541,6 +577,9 @@ public class LuceneIndexer extends DocumentIndexer
         return currentDoc;
     }
 
+    /**
+     * On commit.
+     */
     private void onCommit()
     {
         // TODO: Sadly this required to keep lucene happy, in case of indexing

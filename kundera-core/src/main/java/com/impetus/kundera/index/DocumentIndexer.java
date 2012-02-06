@@ -34,6 +34,7 @@ import com.impetus.kundera.metadata.model.PropertyIndex;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+
 /**
  * The Class KunderaIndexer.
  * 
@@ -74,8 +75,10 @@ public abstract class DocumentIndexer implements Indexer
     /** The Constant SUPERCOLUMN_INDEX. */
     protected static final String SUPERCOLUMN_INDEX = UUID + ".entity.super.indexname";
 
+    /** The Constant PARENT_ID_FIELD. */
     public static final String PARENT_ID_FIELD = UUID + ".parent.id";
 
+    /** The Constant PARENT_ID_CLASS. */
     public static final String PARENT_ID_CLASS = UUID + ".parent.class";
 
     /** The doc number. */
@@ -84,15 +87,13 @@ public abstract class DocumentIndexer implements Indexer
     /** The analyzer. */
     protected Analyzer analyzer;
 
+    /** The tokenizer. */
     protected Tokenizer tokenizer;
 
     /**
      * Instantiates a new lucandra indexer.
-     * 
-     * @param client
-     *            the client
-     * @param analyzer
-     *            the analyzer
+     *
+     * @param analyzer the analyzer
      */
     public DocumentIndexer(Analyzer analyzer)
     {
@@ -103,13 +104,12 @@ public abstract class DocumentIndexer implements Indexer
 
     /**
      * Prepare document.
-     * 
-     * @param metadata
-     *            the metadata
-     * @param object
-     *            the object
-     * @param embeddedColumnName
-     *            the super column name
+     *
+     * @param metadata the metadata
+     * @param object the object
+     * @param embeddedColumnName the super column name
+     * @param parentId the parent id
+     * @param clazz the clazz
      * @return the document
      */
     protected Document prepareDocumentForSuperColumn(EntityMetadata metadata, Object object, String embeddedColumnName,
@@ -128,6 +128,13 @@ public abstract class DocumentIndexer implements Indexer
         return currentDoc;
     }
 
+    /**
+     * Index parent key.
+     *
+     * @param parentId the parent id
+     * @param currentDoc the current doc
+     * @param clazz the clazz
+     */
     protected void indexParentKey(String parentId, Document currentDoc, Class<?> clazz)
     {
         if (parentId != null)
@@ -327,6 +334,12 @@ public abstract class DocumentIndexer implements Indexer
         return indexName + "." + propertyName;
     }
 
+    /**
+     * Index document.
+     *
+     * @param metadata the metadata
+     * @param currentDoc the current doc
+     */
     protected abstract void indexDocument(EntityMetadata metadata, Document currentDoc);
 
 }

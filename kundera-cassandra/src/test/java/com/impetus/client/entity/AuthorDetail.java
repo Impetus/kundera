@@ -20,6 +20,10 @@ import javax.persistence.Embeddable;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+
+/**
+ * The Class AuthorDetail.
+ */
 @Embeddable
 public class AuthorDetail
 {
@@ -27,14 +31,20 @@ public class AuthorDetail
     @Column(name = "authorname")
     public String name;
 
+    /** The email. */
     @Column(name = "email")
     public String email;
 
+    /**
+     * Instantiates a new author detail.
+     */
     public AuthorDetail()
     {
     }
 
     /**
+     * Gets the author.
+     *
      * @return the author
      */
     public String getAuthor()
@@ -43,8 +53,9 @@ public class AuthorDetail
     }
 
     /**
-     * @param author
-     *            the author to set
+     * Sets the author.
+     *
+     * @param author the author to set
      */
     public void setAuthor(String author)
     {
@@ -52,6 +63,8 @@ public class AuthorDetail
     }
 
     /**
+     * Gets the email.
+     *
      * @return the email
      */
     public String getEmail()
@@ -60,14 +73,18 @@ public class AuthorDetail
     }
 
     /**
-     * @param email
-     *            the email to set
+     * Sets the email.
+     *
+     * @param email the email to set
      */
     public void setEmail(String email)
     {
         this.email = email;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode()
     {

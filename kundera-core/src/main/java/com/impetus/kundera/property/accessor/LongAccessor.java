@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
+
 /**
  * The Class LongAccessor.
  * 
@@ -29,6 +30,9 @@ public class LongAccessor implements PropertyAccessor<Long>
 {
 
     /* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
+     */
     @Override
     public final Long fromBytes(byte[] bytes) throws PropertyAccessException
     {
@@ -43,6 +47,9 @@ public class LongAccessor implements PropertyAccessor<Long>
      * @see
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+     */
     @Override
     public final byte[] toBytes(Object object)
     {
@@ -52,12 +59,18 @@ public class LongAccessor implements PropertyAccessor<Long>
         return buffer.array();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+     */
     @Override
     public final String toString(Object object)
     {
         return object.toString();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+     */
     @Override
     public Long fromString(String s) throws PropertyAccessException
     {

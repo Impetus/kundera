@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2011 Impetus Infotech.
+ * * Copyright 2012 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
+
 /**
  * Client implementation using Pelops. http://code.google.com/p/pelops/
  * 
@@ -76,6 +77,7 @@ public class PelopsClient implements Client
     /** The index manager. */
     private IndexManager indexManager;
 
+    /** The reader. */
     private EntityReader reader;
 
     /** The persistence unit. */
@@ -86,9 +88,9 @@ public class PelopsClient implements Client
 
     /**
      * default constructor.
-     * 
-     * @param indexManager
-     *            the index manager
+     *
+     * @param indexManager the index manager
+     * @param reader the reader
      */
     public PelopsClient(IndexManager indexManager, EntityReader reader)
     {
@@ -171,25 +173,17 @@ public class PelopsClient implements Client
     }
 
     /**
-     * Method to return list of entities for given below attributes:
-     * 
-     * @param <E>
-     *            entity to be returned
-     * @param entityClass
-     *            entity class
-     * @param relationNames
-     *            relation names
-     * @param isWrapReq
-     *            true, in case it needs to populate enhance entity.
-     * @param metadata
-     *            entity metadata.
-     * @param rowIds
-     *            array of row key s
+     * Method to return list of entities for given below attributes:.
+     *
+     * @param entityClass entity class
+     * @param relationNames relation names
+     * @param isWrapReq true, in case it needs to populate enhance entity.
+     * @param metadata entity metadata.
+     * @param rowIds array of row key s
      * @return list of wrapped entities.
-     * @throws Exception
-     *             throws exception. don't know why TODO: why is it throwing
-     *             exception. need to take care as part of exception handling
-     *             exercise.
+     * @throws Exception throws exception. don't know why TODO: why is it throwing
+     * exception. need to take care as part of exception handling
+     * exercise.
      */
     public final List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
             String... rowIds) throws Exception
@@ -374,6 +368,9 @@ public class PelopsClient implements Client
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#persist(java.lang.Object, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph, com.impetus.kundera.metadata.model.EntityMetadata)
+     */
     @Override
     public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
     {
@@ -400,6 +397,9 @@ public class PelopsClient implements Client
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object, java.lang.Object)
+     */
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, Object primaryKey, Object childEntity)
@@ -431,6 +431,9 @@ public class PelopsClient implements Client
         mutator.execute(ConsistencyLevel.ONE);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getForeignKeysFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+     */
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
             String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
@@ -445,6 +448,9 @@ public class PelopsClient implements Client
         return foreignKeys;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#deleteFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+     */
     @Override
     public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, EntitySaveGraph objectGraph)
@@ -461,11 +467,12 @@ public class PelopsClient implements Client
     }
 
     /**
-     * @param inverseJoinColumnName
-     * @param relMetadata
-     * @param columns
-     * @param child
-     * @throws PropertyAccessException
+     * Adds the columns to join table.
+     *
+     * @param inverseJoinColumnName the inverse join column name
+     * @param relMetadata the rel metadata
+     * @param columns the columns
+     * @param child the child
      */
     private void addColumnsToJoinTable(String inverseJoinColumnName, EntityMetadata relMetadata, List<Column> columns,
             Object child)
@@ -489,11 +496,11 @@ public class PelopsClient implements Client
 
     /**
      * Find.
-     * 
-     * @param ixClause
-     *            the ix clause
-     * @param m
-     *            the m
+     *
+     * @param ixClause the ix clause
+     * @param m the m
+     * @param isRelation the is relation
+     * @param relations the relations
      * @return the list
      */
     public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations)
@@ -524,6 +531,17 @@ public class PelopsClient implements Client
         return entities;
     }
 
+    /**
+     * Find by range.
+     *
+     * @param minVal the min val
+     * @param maxVal the max val
+     * @param m the m
+     * @param isWrapReq the is wrap req
+     * @param relations the relations
+     * @return the list
+     * @throws Exception the exception
+     */
     public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations)
             throws Exception
     {
@@ -581,13 +599,12 @@ public class PelopsClient implements Client
 
     /**
      * Populate data.
-     * 
-     * @param m
-     *            the m
-     * @param qResults
-     *            the q results
-     * @param entities
-     *            the entities
+     *
+     * @param m the m
+     * @param qResults the q results
+     * @param entities the entities
+     * @param isRelational the is relational
+     * @param relationNames the relation names
      */
     private void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities,
             boolean isRelational, List<String> relationNames)
@@ -640,6 +657,14 @@ public class PelopsClient implements Client
         return entities;
     }
 
+    /**
+     * Find.
+     *
+     * @param m the m
+     * @param relationNames the relation names
+     * @param conditions the conditions
+     * @return the list
+     */
     public List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames, List<IndexClause> conditions)
     {
 
@@ -672,17 +697,13 @@ public class PelopsClient implements Client
 
     /**
      * Adds the relation.
-     * 
-     * @param entitySaveGraph
-     *            the entity save graph
-     * @param rlName
-     *            the rl name
-     * @param rlValue
-     *            the rl value
-     * @param tf
-     *            the tf
-     * @throws PropertyAccessException
-     *             the property access exception
+     *
+     * @param entitySaveGraph the entity save graph
+     * @param m the m
+     * @param rlName the rl name
+     * @param rlValue the rl value
+     * @param tf the tf
+     * @throws PropertyAccessException the property access exception
      */
     private void addRelation(EntitySaveGraph entitySaveGraph, EntityMetadata m, String rlName, String rlValue,
             PelopsDataHandler.ThriftRow tf) throws PropertyAccessException

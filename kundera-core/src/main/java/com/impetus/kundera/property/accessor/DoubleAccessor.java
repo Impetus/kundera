@@ -18,13 +18,18 @@ package com.impetus.kundera.property.accessor;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
+
 /**
+ * The Class DoubleAccessor.
+ *
  * @author Amresh Singh
- * 
  */
 public class DoubleAccessor implements PropertyAccessor<Double>
 {
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
+     */
     @Override
     public Double fromBytes(byte[] data) throws PropertyAccessException
     {
@@ -34,18 +39,30 @@ public class DoubleAccessor implements PropertyAccessor<Double>
         return Double.longBitsToDouble(toLong(data));
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+     */
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
         return fromLong(Double.doubleToRawLongBits((Double) object));
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+     */
     @Override
     public String toString(Object object)
     {
         return object.toString();
     }
 
+    /**
+     * To long.
+     *
+     * @param data the data
+     * @return the long
+     */
     private long toLong(byte[] data)
     {
         if (data == null || data.length != 8)
@@ -59,6 +76,12 @@ public class DoubleAccessor implements PropertyAccessor<Double>
                 | (long) (0xff & data[6]) << 8 | (long) (0xff & data[7]) << 0);
     }
 
+    /**
+     * From long.
+     *
+     * @param data the data
+     * @return the byte[]
+     */
     private byte[] fromLong(long data)
     {
         return new byte[] { (byte) ((data >> 56) & 0xff), (byte) ((data >> 48) & 0xff), (byte) ((data >> 40) & 0xff),
@@ -66,6 +89,9 @@ public class DoubleAccessor implements PropertyAccessor<Double>
                 (byte) ((data >> 8) & 0xff), (byte) ((data >> 0) & 0xff), };
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+     */
     @Override
     public Double fromString(String s) throws PropertyAccessException
     {

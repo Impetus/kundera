@@ -40,27 +40,32 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
+
 /**
+ * The Class AbstractEntityReader.
+ *
  * @author vivek.mishra
- * 
  */
 public class AbstractEntityReader
 {
 
+    /** The log. */
     private static Log log = LogFactory.getLog(AbstractEntityReader.class);
 
+    /** The lucene query from jpa query. */
     protected String luceneQueryFromJPAQuery;
 
     /**
      * Compute graph.
-     * 
-     * @param e
-     *            the e
-     * @param graphs
-     *            the graphs
+     *
+     * @param e the e
+     * @param graphs the graphs
+     * @param collectionHolder the collection holder
+     * @param client the client
+     * @param m the m
+     * @param persistenceDelegeator the persistence delegeator
      * @return the object
-     * @throws Exception
-     *             the exception
+     * @throws Exception the exception
      */
     public Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder,
             Client client, EntityMetadata m, PersistenceDelegator persistenceDelegeator) throws Exception
@@ -260,15 +265,12 @@ public class AbstractEntityReader
 
     /**
      * Returns lucene based query.
-     * 
-     * @param clazzFieldName
-     *            lucene field name for class
-     * @param clazzName
-     *            class name
-     * @param idFieldName
-     *            lucene id field name
-     * @param idFieldValue
-     *            lucene id field value
+     *
+     * @param clazzFieldName lucene field name for class
+     * @param clazzName class name
+     * @param idFieldName lucene id field name
+     * @param idFieldValue lucene id field value
+     * @param entityClazz the entity clazz
      * @return query lucene query.
      */
     protected static String getQuery(String clazzFieldName, String clazzName, String idFieldName, String idFieldValue,
@@ -296,25 +298,15 @@ public class AbstractEntityReader
 
     /**
      * On bi direction.
-     * 
-     * @param entity
-     *            the entity
-     * @param objectGraph
-     *            the object graph
-     * @param client
-     *            the client
-     * @param rowId
-     *            the row id
-     * @param entityClass
-     *            the entity class
-     * @param chids
-     *            the chids
-     * @param childMetadata
-     *            the child metadata
-     * @param childClient
-     *            the child client
-     * @throws Exception
-     *             the exception
+     *
+     * @param e the e
+     * @param client the client
+     * @param objectGraph the object graph
+     * @param origMetadata the orig metadata
+     * @param child the child
+     * @param childMetadata the child metadata
+     * @param childClient the child client
+     * @throws Exception the exception
      */
     private void onBiDirection(EnhanceEntity e, Client client, EntitySaveGraph objectGraph,
             EntityMetadata origMetadata, Object child, EntityMetadata childMetadata, Client childClient)
@@ -426,6 +418,14 @@ public class AbstractEntityReader
         }
     }
 
+    /**
+     * On association using lucene.
+     *
+     * @param m the m
+     * @param client the client
+     * @param ls the ls
+     * @return the list
+     */
     protected List<EnhanceEntity> onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
     {
 
@@ -443,6 +443,14 @@ public class AbstractEntityReader
 
     }
 
+    /**
+     * Transform.
+     *
+     * @param m the m
+     * @param ls the ls
+     * @param resultList the result list
+     * @return the list
+     */
     protected List<EnhanceEntity> transform(EntityMetadata m, List<EnhanceEntity> ls, List resultList)
     {
         if ((ls == null || ls.isEmpty()) && resultList != null && !resultList.isEmpty())
@@ -457,6 +465,12 @@ public class AbstractEntityReader
         return ls;
     }
 
+    /**
+     * Fetch data from lucene.
+     *
+     * @param client the client
+     * @return the sets the
+     */
     protected Set<String> fetchDataFromLucene(Client client)
     {
         // use lucene to query and get Pk's only.
@@ -489,6 +503,16 @@ public class AbstractEntityReader
 
     }
 
+    /**
+     * Compute join table relations.
+     *
+     * @param e the e
+     * @param client the client
+     * @param entityMetadata the entity metadata
+     * @param objectGraph the object graph
+     * @param delegator the delegator
+     * @param relation the relation
+     */
     private void computeJoinTableRelations(EnhanceEntity e, Client client, EntityMetadata entityMetadata,
             EntitySaveGraph objectGraph, PersistenceDelegator delegator, Relation relation)
     {

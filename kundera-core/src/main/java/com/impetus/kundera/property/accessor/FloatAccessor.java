@@ -18,13 +18,18 @@ package com.impetus.kundera.property.accessor;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
+
 /**
+ * The Class FloatAccessor.
+ *
  * @author Amresh Singh
- * 
  */
 public class FloatAccessor implements PropertyAccessor<Float>
 {
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
+     */
     @Override
     public Float fromBytes(byte[] data) throws PropertyAccessException
     {
@@ -34,24 +39,42 @@ public class FloatAccessor implements PropertyAccessor<Float>
         return Float.intBitsToFloat(toInt(data));
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+     */
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
         return fromInt(Float.floatToRawIntBits((Float) object));
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+     */
     @Override
     public String toString(Object object)
     {
         return object.toString();
     }
 
+    /**
+     * From int.
+     *
+     * @param data the data
+     * @return the byte[]
+     */
     private byte[] fromInt(int data)
     {
         return new byte[] { (byte) ((data >> 24) & 0xff), (byte) ((data >> 16) & 0xff), (byte) ((data >> 8) & 0xff),
                 (byte) ((data >> 0) & 0xff), };
     }
 
+    /**
+     * To int.
+     *
+     * @param data the data
+     * @return the int
+     */
     private int toInt(byte[] data)
     {
         if (data == null || data.length != 4)
@@ -61,6 +84,9 @@ public class FloatAccessor implements PropertyAccessor<Float>
         (0xff & data[0]) << 24 | (0xff & data[1]) << 16 | (0xff & data[2]) << 8 | (0xff & data[3]) << 0);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+     */
     @Override
     public Float fromString(String s) throws PropertyAccessException
     {

@@ -19,12 +19,21 @@ import java.lang.reflect.Field;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
+
 /**
+ * The Interface RelationMetadataProcessor.
+ *
  * @author Amresh Singh
  */
 public interface RelationMetadataProcessor
 {
 
+    /**
+     * Adds the relation into metadata.
+     *
+     * @param relationField the relation field
+     * @param metadata the metadata
+     */
     void addRelationIntoMetadata(Field relationField, EntityMetadata metadata);
 
 }

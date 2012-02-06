@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
+
 /**
  * The Class ReaderResolverException.
  * 

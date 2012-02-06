@@ -28,6 +28,7 @@ import com.impetus.kundera.KunderaPersistence;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
+
 /**
  * Builds EmtityManagerFactory instances from classpath.
  * 

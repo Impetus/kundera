@@ -24,6 +24,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+
 /**
  * Manager responsible to co-ordinate with an Indexer. It is bound with
  * EntityManager.
@@ -38,9 +39,8 @@ public class IndexManager
 
     /**
      * The Constructor.
-     * 
-     * @param manager
-     *            the manager
+     *
+     * @param indexer the indexer
      */
     @SuppressWarnings("deprecation")
     public IndexManager(Indexer indexer)
@@ -195,13 +195,11 @@ public class IndexManager
 
     /**
      * Search.
-     * 
-     * @param query
-     *            the query
-     * @param start
-     *            the start
-     * @param count
-     *            the count
+     *
+     * @param query the query
+     * @param start the start
+     * @param count the count
+     * @param fetchRelation the fetch relation
      * @return the list
      */
     public final Map<String, String> search(String query, int start, int count, boolean fetchRelation)

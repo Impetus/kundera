@@ -22,23 +22,33 @@ import junit.framework.TestCase;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.entity.PersonnelDTO;
 
+
 /**
+ * The Class EhCacheProviderTest.
+ *
  * @author amresh.singh
- * 
  */
 public class EhCacheProviderTest extends TestCase
 {
 
+    /** The cache provider. */
     EhCacheProvider cacheProvider;
 
+    /** The cache resource. */
     String cacheResource = "/ehcache-test.xml";;
 
+    /** The cache name. */
     String cacheName = "Kundera";
 
+    /** The person1. */
     PersonnelDTO person1;
 
+    /** The person2. */
     PersonnelDTO person2;
 
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#setUp()
+     */
     protected void setUp() throws Exception
     {
         super.setUp();
@@ -50,6 +60,9 @@ public class EhCacheProviderTest extends TestCase
 
     }
 
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#tearDown()
+     */
     protected void tearDown() throws Exception
     {
         super.tearDown();
@@ -57,7 +70,8 @@ public class EhCacheProviderTest extends TestCase
     }
 
     /**
-     * Test method for
+     * Test method for.
+     *
      * {@link com.impetus.kundera.cache.ehcache.EhCacheProvider#createCache(java.lang.String)}
      * .
      */

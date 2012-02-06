@@ -33,6 +33,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
+
 /**
  * Provides functionality for mapping between MongoDB documents and POJOs.
  * Contains utility methods for converting one form into another.
@@ -41,13 +42,18 @@ import com.mongodb.BasicDBObject;
  */
 public class DocumentObjectMapper
 {
+    
+    /** The log. */
     private static Log log = LogFactory.getLog(DocumentObjectMapper.class);
 
     /**
      * Creates a MongoDB document object wrt a given Java object. columns in the
      * document correspond Columns provided as List.
-     * 
-     * @throws PropertyAccessException
+     *
+     * @param obj the obj
+     * @param columns the columns
+     * @return the document from object
+     * @throws PropertyAccessException the property access exception
      */
     public static BasicDBObject getDocumentFromObject(Object obj, List<Column> columns) throws PropertyAccessException
     {
@@ -77,8 +83,11 @@ public class DocumentObjectMapper
     /**
      * Creates a MongoDB document list from a given java collection. columns in
      * the document correspond Columns provided as List.
-     * 
-     * @throws PropertyAccessException
+     *
+     * @param coll the coll
+     * @param columns the columns
+     * @return the document list from collection
+     * @throws PropertyAccessException the property access exception
      */
     public static BasicDBObject[] getDocumentListFromCollection(Collection coll, List<Column> columns)
             throws PropertyAccessException
@@ -97,6 +106,11 @@ public class DocumentObjectMapper
      * Creates an instance of <code>clazz</code> and populates fields fetched
      * from MongoDB document object. Field names are determined from
      * <code>columns</code>
+     *
+     * @param documentObj the document obj
+     * @param clazz the clazz
+     * @param columns the columns
+     * @return the object from document
      */
     public static Object getObjectFromDocument(BasicDBObject documentObj, Class clazz, List<Column> columns)
     {
@@ -130,6 +144,12 @@ public class DocumentObjectMapper
      * wherein each element is java object representation of MongoDB document
      * object contained in <code>documentList</code>. Field names are determined
      * from <code>columns</code>.
+     *
+     * @param documentList the document list
+     * @param embeddedCollectionClass the embedded collection class
+     * @param embeddedObjectClass the embedded object class
+     * @param columns the columns
+     * @return the collection from document list
      */
     public static Collection<?> getCollectionFromDocumentList(BasicDBList documentList, Class embeddedCollectionClass,
             Class embeddedObjectClass, List<Column> columns)

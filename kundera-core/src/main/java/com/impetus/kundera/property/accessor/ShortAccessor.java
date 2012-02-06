@@ -18,13 +18,18 @@ package com.impetus.kundera.property.accessor;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
+
 /**
+ * The Class ShortAccessor.
+ *
  * @author Amresh Singh
- * 
  */
 public class ShortAccessor implements PropertyAccessor<Short>
 {
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
+     */
     @Override
     public Short fromBytes(byte[] data) throws PropertyAccessException
     {
@@ -34,6 +39,9 @@ public class ShortAccessor implements PropertyAccessor<Short>
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+     */
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
@@ -45,12 +53,18 @@ public class ShortAccessor implements PropertyAccessor<Short>
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+     */
     @Override
     public String toString(Object object)
     {
         return object.toString();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+     */
     @Override
     public Short fromString(String s) throws PropertyAccessException
     {

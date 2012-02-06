@@ -24,6 +24,7 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
+
 /**
  * The Interface Client.
  * 
@@ -216,20 +217,15 @@ public interface Client
             EntityMetadata relMetadata, EntitySaveGraph objectGraph);
 
     /**
-     * Delete records from Join Table for a given primary key
-     * 
-     * @param joinTableName
-     *            Name of Join Table
-     * @param joinColumnName
-     *            Name of Join Column
-     * @param inverseJoinColumnName
-     *            Name of Inverse Join Column
-     * @param relMetadata
-     *            Entity metadata for the child entity (i.e. entity at the other
-     *            side of the relationship)
-     * @param objectGraph
-     *            Object graph of the persistence (Includes parent and child
-     *            data and other related info)
+     * Delete records from Join Table for a given primary key.
+     *
+     * @param joinTableName Name of Join Table
+     * @param joinColumnName Name of Join Column
+     * @param inverseJoinColumnName Name of Inverse Join Column
+     * @param relMetadata Entity metadata for the child entity (i.e. entity at the other
+     * side of the relationship)
+     * @param objectGraph Object graph of the persistence (Includes parent and child
+     * data and other related info)
      */
     void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, EntitySaveGraph objectGraph);

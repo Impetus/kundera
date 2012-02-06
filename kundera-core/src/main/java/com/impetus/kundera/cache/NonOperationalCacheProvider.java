@@ -19,6 +19,7 @@ import java.util.Map;
 
 import javax.persistence.Cache;
 
+
 /**
  * NonOperational cache provider.
  * 
@@ -38,6 +39,9 @@ public class NonOperationalCacheProvider implements CacheProvider
     }
 
     /* @see com.impetus.kundera.cache.CacheProvider#init(java.util.Map) */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.cache.CacheProvider#init(java.util.Map)
+     */
     @Override
     public void init(Map<?, ?> properties)
     {
@@ -47,12 +51,18 @@ public class NonOperationalCacheProvider implements CacheProvider
      * @see
      * com.impetus.kundera.cache.CacheProvider#createCache(java.lang.String)
      */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.cache.CacheProvider#createCache(java.lang.String)
+     */
     @Override
     public Cache createCache(String name)
     {
         return cache;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.cache.CacheProvider#getCache(java.lang.String)
+     */
     @Override
     public Cache getCache(String name) throws CacheException
     {
@@ -60,11 +70,17 @@ public class NonOperationalCacheProvider implements CacheProvider
     }
 
     /* @see com.impetus.kundera.cache.CacheProvider#shutdown() */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.cache.CacheProvider#shutdown()
+     */
     @Override
     public void shutdown()
     {
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.cache.CacheProvider#init(java.lang.String)
+     */
     @Override
     public void init(String cacheResourceName) throws CacheException
     {

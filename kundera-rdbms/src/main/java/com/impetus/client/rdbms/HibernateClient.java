@@ -51,6 +51,7 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
+
 /**
  * The Class HibernateClient.
  * 
@@ -77,6 +78,7 @@ public class HibernateClient implements Client
     /** The reader. */
     private EntityReader reader;
 
+    /** The Constant log. */
     private static final Log log = LogFactory.getLog(HibernateClient.class);
 
     /**
@@ -403,15 +405,13 @@ public class HibernateClient implements Client
 
     /**
      * Inserts records into JoinTable for the given relationship.
-     * 
-     * @param joinTableName
-     *            the join table name
-     * @param joinColumnName
-     *            the join column name
-     * @param inverseJoinColumnName
-     *            the inverse join column name
-     * @param relMetadata
-     *            the rel metadata
+     *
+     * @param joinTableName the join table name
+     * @param joinColumnName the join column name
+     * @param inverseJoinColumnName the inverse join column name
+     * @param relMetadata the rel metadata
+     * @param primaryKey the primary key
+     * @param childEntity the child entity
      */
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
@@ -471,6 +471,9 @@ public class HibernateClient implements Client
         return foreignKeys;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#deleteFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+     */
     @Override
     public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, EntitySaveGraph objectGraph)
@@ -601,13 +604,10 @@ public class HibernateClient implements Client
 
     /**
      * Find.
-     * 
-     * @param nativeQuery
-     *            the native query
-     * @param relations
-     *            the relations
-     * @param clazz
-     *            the clazz
+     *
+     * @param nativeQuery the native query
+     * @param relations the relations
+     * @param m the m
      * @return the list
      */
     public List find(String nativeQuery, List<String> relations, EntityMetadata m)
@@ -667,6 +667,13 @@ public class HibernateClient implements Client
         return reader;
     }
 
+    /**
+     * Gets the key.
+     *
+     * @param pKey the key
+     * @param f the f
+     * @return the key
+     */
     private Serializable getKey(Object pKey, Field f)
     {
         if (pKey != null)

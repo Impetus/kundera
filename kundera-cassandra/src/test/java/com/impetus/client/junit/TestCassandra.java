@@ -19,6 +19,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 
+
 /**
  * Test case for CRUD operations on Cassandra database using Kundera.
  */
@@ -28,9 +29,14 @@ public class TestCassandra extends BaseTest
     /** The manager. */
     private EntityManager manager;
 
+    /** The logger. */
     private static Logger logger = Logger.getLogger(TestCassandra.class);
 
-    /** The embedded server cassandra. */
+    /**
+     * The embedded server cassandra.
+     *
+     * @throws Exception the exception
+     */
     // private static EmbeddedCassandraService cassandra;
 
     public void startCassandraServer() throws Exception
@@ -40,11 +46,8 @@ public class TestCassandra extends BaseTest
 
     /**
      * Sets the up.
-     * 
-     * @throws java.lang.Exception
-     *             * @throws Exception the exception
-     * @throws Exception
-     *             the exception
+     *
+     * @throws Exception the exception
      */
     public void setUp() throws Exception
     {
@@ -60,11 +63,8 @@ public class TestCassandra extends BaseTest
 
     /**
      * Tear down.
-     * 
-     * @throws java.lang.Exception
-     *             * @throws Exception the exception
-     * @throws Exception
-     *             the exception
+     *
+     * @throws Exception the exception
      */
     public void tearDown() throws Exception
     {
@@ -121,9 +121,7 @@ public class TestCassandra extends BaseTest
      * "IIIPL-0001"); System.out.println(user); manager.remove(user); }
      *//**
      * Test save authors.
-     * 
-     * @throws Exception
-     *             the exception
+     *
      */
     /*
      * 

@@ -11,7 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-// TODO: Auto-generated Javadoc
+
 /**
  * The Class Player.
  */

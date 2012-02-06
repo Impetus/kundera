@@ -26,9 +26,11 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
+
 /**
+ * The Class ApplicationMetadata.
+ *
  * @author amresh.singh
- * 
  */
 public class ApplicationMetadata
 {
@@ -42,8 +44,11 @@ public class ApplicationMetadata
     private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
 
     /**
-     * @param metamodelMap
-     *            the entityMetadataMap to set
+     * Adds the entity metadata.
+     *
+     * @param persistenceUnit the persistence unit
+     * @param clazz the clazz
+     * @param entityMetadata the entity metadata
      */
     public void addEntityMetadata(String persistenceUnit, Class<?> clazz, EntityMetadata entityMetadata)
     {
@@ -61,8 +66,10 @@ public class ApplicationMetadata
     }
 
     /**
-     * @param persistenceUnitMetadataMap
-     *            the persistenceUnitMetadataMap to set
+     * Adds the persistence unit metadata.
+     *
+     * @param persistenceUnit the persistence unit
+     * @param persistenceUnitMetadata the persistence unit metadata
      */
     public void addPersistenceUnitMetadata(String persistenceUnit, PersistenceUnitMetadata persistenceUnitMetadata)
     {
@@ -70,6 +77,8 @@ public class ApplicationMetadata
     }
 
     /**
+     * Gets the metamodel map.
+     *
      * @return the entityMetadataMap
      */
     public Map<String, Metamodel> getMetamodelMap()
@@ -81,11 +90,23 @@ public class ApplicationMetadata
         return metamodelMap;
     }
 
+    /**
+     * Gets the persistence unit metadata.
+     *
+     * @param persistenceUnit the persistence unit
+     * @return the persistence unit metadata
+     */
     public PersistenceUnitMetadata getPersistenceUnitMetadata(String persistenceUnit)
     {
         return getPersistenceUnitMetadataMap().get(persistenceUnit);
     }
 
+    /**
+     * Gets the metamodel.
+     *
+     * @param persistenceUnit the persistence unit
+     * @return the metamodel
+     */
     public Metamodel getMetamodel(String persistenceUnit)
     {
         Map<String, Metamodel> model = getMetamodelMap();
@@ -93,6 +114,8 @@ public class ApplicationMetadata
     }
 
     /**
+     * Gets the persistence unit metadata map.
+     *
      * @return the persistenceUnitMetadataMap
      */
     public Map<String, PersistenceUnitMetadata> getPersistenceUnitMetadataMap()

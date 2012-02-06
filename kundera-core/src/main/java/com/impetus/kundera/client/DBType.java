@@ -18,14 +18,25 @@ package com.impetus.kundera.client;
 import java.util.HashMap;
 import java.util.Map;
 
+
 /**
- * 
+ * The Enum DBType.
+ *
  * @author impetus
- * 
  */
 public enum DBType
 {
-    HBASE, MONGODB, CASSANDRA, RDBMS;
+    
+    /** The HBASE. */
+    HBASE, 
+ /** The MONGODB. */
+ MONGODB, 
+ /** The CASSANDRA. */
+ CASSANDRA, 
+ /** The RDBMS. */
+ RDBMS;
+    
+    /** The coll. */
     static Map<String, DBType> coll = new HashMap<String, DBType>();
 
     /**

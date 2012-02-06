@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.client.cassandra.pelops;
 
 import java.util.Properties;
@@ -11,10 +26,22 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
+
+/**
+ * The Class PelopsUtils.
+ */
 public class PelopsUtils
 {
+    
+    /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(PelopsUtils.class);
 
+    /**
+     * Generate pool name.
+     *
+     * @param persistenceUnit the persistence unit
+     * @return the string
+     */
     public static String generatePoolName(String persistenceUnit)
     {
         PersistenceUnitMetadata persistenceUnitMetadatata = KunderaMetadata.INSTANCE.getApplicationMetadata()
@@ -27,6 +54,12 @@ public class PelopsUtils
         return contactNodes + ":" + defaultPort + ":" + keyspace;
     }
 
+    /**
+     * Gets the pool config policy.
+     *
+     * @param persistenceUnitMetadata the persistence unit metadata
+     * @return the pool config policy
+     */
     public static Policy getPoolConfigPolicy(PersistenceUnitMetadata persistenceUnitMetadata)
     {
         Policy policy = new Policy();

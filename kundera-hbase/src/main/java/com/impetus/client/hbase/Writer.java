@@ -25,6 +25,7 @@ import org.apache.hadoop.hbase.client.HTable;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.model.Column;
 
+
 /**
  * HBase data writer.
  * 
@@ -33,19 +34,29 @@ import com.impetus.kundera.metadata.model.Column;
 public interface Writer
 {
 
+    /**
+     * Write column.
+     *
+     * @param htable the htable
+     * @param columnFamily the column family
+     * @param rowKey the row key
+     * @param column the column
+     * @param columnObj the column obj
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     void writeColumn(HTable htable, String columnFamily, String rowKey, Column column, Object columnObj)
             throws IOException;
 
     /**
      * Writes a column family with name <code>columnFamily</code>, into a table
-     * whose columns are <code>columns</code>
-     * 
-     * @param columnFamily
-     *            Column Family Name
-     * @param rowKey
-     *            Row Key
-     * @param columns
-     *            Columns for a given column family
+     * whose columns are <code>columns</code>.
+     *
+     * @param htable the htable
+     * @param columnFamily Column Family Name
+     * @param rowKey Row Key
+     * @param columns Columns for a given column family
+     * @param columnFamilyObj the column family obj
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns, Object columnFamilyObj)
             throws IOException;
@@ -53,16 +64,24 @@ public interface Writer
     /**
      * Writes Columns <code>columns</code> into a given table. Each columns is
      * written in their own column family(name same as column name)
-     * 
-     * @param htable
-     * @param rowKey
-     * @param columns
-     *            Columns of a given table (No column family given)
-     * @param entity
-     * @throws IOException
+     *
+     * @param htable the htable
+     * @param rowKey the row key
+     * @param columns Columns of a given table (No column family given)
+     * @param entity the entity
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity) throws IOException;
 
+    /**
+     * Write relations.
+     *
+     * @param htable the htable
+     * @param rowKey the row key
+     * @param containsEmbeddedObjectsOnly the contains embedded objects only
+     * @param relations the relations
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     void writeRelations(HTable htable, String rowKey, boolean containsEmbeddedObjectsOnly,
             List<RelationHolder> relations) throws IOException;
 
@@ -70,12 +89,12 @@ public interface Writer
      * Writes foreign keys along with a database table. They are stored into a
      * column family named FKey-TO. Each column corresponds to foreign key field
      * name and values are actual foreign keys (separated by ~ if applicable)
-     * 
+     *
+     * @param hTable the h table
+     * @param rowKey the row key
+     * @param foreignKeyMap the foreign key map
+     * @throws IOException Signals that an I/O exception has occurred.
      * @deprecated
-     * @param hTable
-     * @param rowKey
-     * @param foreignKeyMap
-     * @throws IOException
      */
     public void writeForeignKeys(HTable hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
             throws IOException;
@@ -83,13 +102,20 @@ public interface Writer
     /**
      * Writes columns data to HBase table, supplied as a map in Key/ value pair;
      * key and value representing column name and value respectively.
-     * 
-     * @param htable
-     * @param rowKey
-     * @param columns
-     * @throws IOException
+     *
+     * @param htable the htable
+     * @param rowKey the row key
+     * @param columns the columns
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     void writeColumns(HTable htable, String rowKey, Map<String, String> columns) throws IOException;
 
+    /**
+     * Delete.
+     *
+     * @param hTable the h table
+     * @param rowKey the row key
+     * @param columnFamily the column family
+     */
     void delete(HTable hTable, String rowKey, String columnFamily);
 }
