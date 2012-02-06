@@ -474,7 +474,7 @@ public class HBaseDataHandler implements DataHandler
                 {
                     String hbaseColumn = Bytes.toString(colData.getColumn());
                     String colName = getColumnName(hbaseColumn);
-                    if (hbaseColumn != null && hbaseColumn.startsWith(columnName))
+                    if (colName != null && colName.equals(columnName))
                     {
                         byte[] hbaseColumnValue = colData.getValue();
                         PropertyAccessorHelper.set(entity, columnField, hbaseColumnValue);
@@ -689,4 +689,3 @@ public class HBaseDataHandler implements DataHandler
 
     }
 }
-
