@@ -36,7 +36,8 @@ public class HBaseClientFactory extends GenericClientFactory
     {
         // Initialize Index Manager
         String luceneDirPath = MetadataUtils.getLuceneDirectory(getPersistenceUnit());
-        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34), luceneDirPath));
+        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
+                luceneDirPath));
 
         // Initialize HBase configuration
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(getPersistenceUnit());
@@ -84,7 +85,7 @@ public class HBaseClientFactory extends GenericClientFactory
     {
         // TODO destroy pool
         // hTablePool = null;
-        
+
         indexManager.close();
     }
 

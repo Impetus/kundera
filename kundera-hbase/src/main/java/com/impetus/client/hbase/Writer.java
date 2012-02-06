@@ -91,6 +91,5 @@ public interface Writer
      */
     void writeColumns(HTable htable, String rowKey, Map<String, String> columns) throws IOException;
 
-
     void delete(HTable hTable, String rowKey, String columnFamily);
 }

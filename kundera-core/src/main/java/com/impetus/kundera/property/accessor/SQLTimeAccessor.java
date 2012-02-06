@@ -24,7 +24,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class SQLTimeAccessor implements PropertyAccessor<Time>
 {
@@ -53,7 +53,7 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
 
     @Override
     public String toString(Object object)
-    {        
+    {
         return object.toString();
     }
 
@@ -63,5 +63,5 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
         Time t = Time.valueOf(s);
         return t;
     }
-    
+
 }

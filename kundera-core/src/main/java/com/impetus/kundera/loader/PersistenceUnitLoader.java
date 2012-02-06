@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class PersistenceUnitLoader extends ApplicationLoader
 {
@@ -67,7 +67,7 @@ public class PersistenceUnitLoader extends ApplicationLoader
 
     /**
      * Gets the persistence metadata.
-     *
+     * 
      * @param persistenceUnit
      *            the persistence unit name
      * @return the persistence metadata
@@ -105,7 +105,7 @@ public class PersistenceUnitLoader extends ApplicationLoader
 
     /**
      * Find persistence metadatas.
-     *
+     * 
      * @return the list
      */
     private List<PersistenceUnitMetadata> findPersistenceMetadatas()
@@ -167,7 +167,7 @@ public class PersistenceUnitLoader extends ApplicationLoader
 
     /**
      * Checks if is empty.
-     *
+     * 
      * @param str
      *            the str
      * @return true, if is empty

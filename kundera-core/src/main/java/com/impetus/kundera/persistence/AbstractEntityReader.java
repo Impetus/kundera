@@ -81,35 +81,37 @@ public class AbstractEntityReader
             }
             else
             {
-                
+
                 if (e.getEntity().getClass().equals(g.getChildClass()))
                 {
-                    //Swapped relationship
+                    // Swapped relationship
                     String relationName = g.getfKeyName();
                     Object relationalValue = e.getRelations().get(relationName);
                     childClazz = g.getParentClass();
-                    childMetadata = persistenceDelegeator.getMetadata(childClazz);              
-                    
-                    
+                    childMetadata = persistenceDelegeator.getMetadata(childClazz);
+
                     Field f = g.getProperty();
-                    
+
                     if (!collectionHolder.containsKey(relationalValue))
                     {
-                        
+
                         childClient = persistenceDelegeator.getClient(childMetadata);
-                        
-                        //Object child = childClient.find(childClazz, childMetadata, relationalValue.toString(), null);
+
+                        // Object child = childClient.find(childClazz,
+                        // childMetadata, relationalValue.toString(), null);
                         Object child = null;
-                        
-                        if(childClazz.equals(e.getEntity().getClass())) {
+
+                        if (childClazz.equals(e.getEntity().getClass()))
+                        {
                             child = childClient.find(childClazz, childMetadata, relationalValue.toString(), null);
-                        } else {
+                        }
+                        else
+                        {
                             child = persistenceDelegeator.find(childClazz, relationalValue.toString(), g);
                         }
-                        
-                        
-                        collectionHolder.put(relationalValue, child);         
-                        
+
+                        collectionHolder.put(relationalValue, child);
+
                         // If entity is holding association it means it can not
                         // be a
                         // collection.
@@ -140,7 +142,7 @@ public class AbstractEntityReader
                         if (MetadataUtils.useSecondryIndex(childClient.getPersistenceUnit()))
                         {
                             childs = childClient.find(relationName, relationalValue, childMetadata);
-                            
+
                             // pass this entity id as a value to be searched
                             // for
                             // for
@@ -150,8 +152,11 @@ public class AbstractEntityReader
                             if (g.isSharedPrimaryKey())
                             {
                                 childs = new ArrayList();
-                                //childs.add(childClient.find(childClazz, childMetadata, e.getEntityId(), null));
-                                childs.add(childClazz.equals(e.getEntity().getClass())?childs.add(childClient.find(childClazz, childMetadata, e.getEntityId(), null)):persistenceDelegeator.find(childClazz, relationalValue.toString()));
+                                // childs.add(childClient.find(childClazz,
+                                // childMetadata, e.getEntityId(), null));
+                                childs.add(childClazz.equals(e.getEntity().getClass()) ? childs.add(childClient.find(
+                                        childClazz, childMetadata, e.getEntityId(), null)) : persistenceDelegeator
+                                        .find(childClazz, relationalValue.toString()));
                             }
                             else
                             {
@@ -162,18 +167,23 @@ public class AbstractEntityReader
                                 String query = getQuery(DocumentIndexer.PARENT_ID_CLASS, e.getEntity().getClass()
                                         .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD,
                                         e.getEntityId(), childClazz.getCanonicalName().toLowerCase());
-//                                System.out.println(query);
+                                // System.out.println(query);
                                 Map<String, String> results = childClient.getIndexManager().search(query);
                                 Set<String> rsSet = new HashSet<String>(results.values());
-                                //childs = (List<Object>) childClient.find(childClazz, rsSet.toArray(new String[] {}));
+                                // childs = (List<Object>)
+                                // childClient.find(childClazz,
+                                // rsSet.toArray(new String[] {}));
 
-                                if(childClazz.equals(e.getEntity().getClass())) {
-                                    childs = (List<Object>)childClient.findAll(childClazz, rsSet.toArray(new String[] {}));
+                                if (childClazz.equals(e.getEntity().getClass()))
+                                {
+                                    childs = (List<Object>) childClient.findAll(childClazz,
+                                            rsSet.toArray(new String[] {}));
                                 }
-                                else {
-                                    childs = (List<Object>) persistenceDelegeator.find(childClazz, g, rsSet.toArray(new String[] {}));
-                                } 
-
+                                else
+                                {
+                                    childs = (List<Object>) persistenceDelegeator.find(childClazz, g,
+                                            rsSet.toArray(new String[] {}));
+                                }
 
                             }
                         }
@@ -261,7 +271,8 @@ public class AbstractEntityReader
      *            lucene id field value
      * @return query lucene query.
      */
-    protected static String getQuery(String clazzFieldName, String clazzName, String idFieldName, String idFieldValue, String entityClazz)
+    protected static String getQuery(String clazzFieldName, String clazzName, String idFieldName, String idFieldValue,
+            String entityClazz)
     {
         StringBuffer sb = new StringBuffer("+");
         sb.append(clazzFieldName);
@@ -272,7 +283,7 @@ public class AbstractEntityReader
         sb.append(idFieldName);
         sb.append(":");
         sb.append(idFieldValue);
-        if(entityClazz !=null)
+        if (entityClazz != null)
         {
             sb.append(" AND ");
             sb.append("+");
@@ -309,7 +320,8 @@ public class AbstractEntityReader
             EntityMetadata origMetadata, Object child, EntityMetadata childMetadata, Client childClient)
             throws Exception
     {
-        //Process bidirectional processing only if it's a bidirectional graph and child exists (there is a possibility that this
+        // Process bidirectional processing only if it's a bidirectional graph
+        // and child exists (there is a possibility that this
         // child make already have been deleted
         if (!objectGraph.isUniDirectional() && child != null)
         {
@@ -340,15 +352,16 @@ public class AbstractEntityReader
                         if (relation.getType().equals(ForeignKey.ONE_TO_MANY))
                         {
                             query = getQuery(DocumentIndexer.PARENT_ID_CLASS, child.getClass().getCanonicalName()
-                                    .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, id, e.getEntity().getClass().getCanonicalName().toLowerCase());
-                      //      System.out.println(query);
+                                    .toLowerCase(), DocumentIndexer.PARENT_ID_FIELD, id, e.getEntity().getClass()
+                                    .getCanonicalName().toLowerCase());
+                            // System.out.println(query);
                             keys = client.getIndexManager().search(query);
                         }
                         else
                         {
                             query = getQuery(DocumentIndexer.ENTITY_CLASS_FIELD, child.getClass().getCanonicalName()
-                                    .toLowerCase(), DocumentIndexer.ENTITY_ID_FIELD, id,null);
-                          //  System.out.println(query);
+                                    .toLowerCase(), DocumentIndexer.ENTITY_ID_FIELD, id, null);
+                            // System.out.println(query);
                             keys = client.getIndexManager().fetchRelation(query);
 
                         }
@@ -375,7 +388,7 @@ public class AbstractEntityReader
                 // bidirectional.
                 for (Object o : obj)
                 {
-                    if(o != null)
+                    if (o != null)
                     {
                         Field f = objectGraph.getProperty();
                         if (PropertyAccessorHelper.isCollection(f.getType()))
@@ -415,24 +428,25 @@ public class AbstractEntityReader
 
     protected List<EnhanceEntity> onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
     {
-        
+
         Set<String> rSet = fetchDataFromLucene(client);
         try
-        {            
+        {
             List resultList = client.findAll(m.getEntityClazz(), rSet.toArray(new String[] {}));
             return transform(m, ls, resultList);
         }
         catch (Exception e)
-        {           
+        {
             log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
             throw new QueryHandlerException(e.getMessage());
         }
-        
+
     }
 
-    protected List<EnhanceEntity>  transform(EntityMetadata m, List<EnhanceEntity> ls, List resultList)
-    {    
-        if((ls == null || ls.isEmpty()) && resultList != null && !resultList.isEmpty()) {
+    protected List<EnhanceEntity> transform(EntityMetadata m, List<EnhanceEntity> ls, List resultList)
+    {
+        if ((ls == null || ls.isEmpty()) && resultList != null && !resultList.isEmpty())
+        {
             ls = new ArrayList<EnhanceEntity>(resultList.size());
         }
         for (Object r : resultList)
@@ -504,9 +518,10 @@ public class AbstractEntityReader
             {
                 EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
                 Client childClient = delegator.getClient(childMetadata);
-                //Object child = childClient.find(relation.getTargetEntity(), childMetadata, (String) foreignKey, null);
+                // Object child = childClient.find(relation.getTargetEntity(),
+                // childMetadata, (String) foreignKey, null);
                 Object child = delegator.find(relation.getTargetEntity(), foreignKey);
-                
+
                 onBiDirection(e, client, objectGraph, entityMetadata, child, childMetadata, childClient);
 
                 childrenEntities.add(child);

@@ -102,7 +102,7 @@ public class EnhanceEntity
      */
     public Map<String, Object> getRelations()
     {
-        return relations != null ?Collections.unmodifiableMap(relations):null;
+        return relations != null ? Collections.unmodifiableMap(relations) : null;
     }
 
     /**

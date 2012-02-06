@@ -86,7 +86,8 @@ public class MongoDBQuery extends QueryImpl
         try
         {
             BasicDBObject orderByClause = getOrderByClause();
-            return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()), getKunderaQuery().getResult(),null, orderByClause);
+            return ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
+                    getKunderaQuery().getResult(), null, orderByClause);
         }
         catch (Exception e)
         {
@@ -104,25 +105,27 @@ public class MongoDBQuery extends QueryImpl
      * java.util.List, java.util.List, boolean)
      */
     @Override
-    protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs, List<String> relationNames, boolean isParent)
+    protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
+            List<String> relationNames, boolean isParent)
     {
         // TODO : required to modify client return relation.
         // if it is a parent..then find data related to it only
         // else u need to load for associated fields too.
         List<EnhanceEntity> ls = new ArrayList<EnhanceEntity>();
 
-            try
-            {
-                BasicDBObject orderByClause = getOrderByClause();    
-                ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),getKunderaQuery().getResult(),relationNames, orderByClause);
-            }
-            catch (Exception e)
-            {
-                throw new QueryHandlerException(e.getMessage());
-            }
-            
-        return handleGraph(ls, graphs,client, m);
-        
+        try
+        {
+            BasicDBObject orderByClause = getOrderByClause();
+            ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
+                    getKunderaQuery().getResult(), relationNames, orderByClause);
+        }
+        catch (Exception e)
+        {
+            throw new QueryHandlerException(e.getMessage());
+        }
+
+        return handleGraph(ls, graphs, client, m);
+
     }
 
     /*
@@ -136,7 +139,6 @@ public class MongoDBQuery extends QueryImpl
         return new MongoEntityReader();
     }
 
-    
     /**
      * Creates MongoDB Query object from filterClauseQueue
      * 
@@ -233,27 +235,28 @@ public class MongoDBQuery extends QueryImpl
         return query;
     }
 
-    
     /**
      * Prepare order by clause
+     * 
      * @return order by clause.
      */
     private BasicDBObject getOrderByClause()
     {
         BasicDBObject orderByClause = null;
-        
+
         List<SortOrdering> orders = kunderaQuery.getOrdering();
-        if(orders != null)
+        if (orders != null)
         {
             orderByClause = new BasicDBObject();
             for (SortOrdering order : orders)
             {
-                orderByClause.append(order.getColumnName(), order.getColumnName().equals(SortOrder.ASC)?1:-1);
+                orderByClause.append(order.getColumnName(), order.getColumnName().equals(SortOrder.ASC) ? 1 : -1);
             }
         }
-        
+
         return orderByClause;
     }
+
     /**
      * @param m
      * @param columnName
@@ -283,4 +286,3 @@ public class MongoDBQuery extends QueryImpl
         return enclosingDocumentName;
     }
 }
-

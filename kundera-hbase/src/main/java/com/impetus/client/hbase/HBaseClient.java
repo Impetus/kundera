@@ -1,4 +1,3 @@
-
 /*******************************************************************************
  * * Copyright 2011 Impetus Infotech.
  *  *
@@ -87,8 +86,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         // columnFamily has a different meaning for HBase, so it won't be used
         // here
         String tableName = entityMetadata.getTableName();
-        Object enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId != null?rowId.toString():null,
-                relationNames);
+        Object enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata,
+                rowId != null ? rowId.toString() : null, relationNames);
         return (E) enhancedEntity;
     }
 
@@ -248,7 +247,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
 
-            EntityMetadata relMetadata, Object primaryKey, Object childEntity)
+    EntityMetadata relMetadata, Object primaryKey, Object childEntity)
 
     {
         String parentId = (String) primaryKey;
@@ -267,7 +266,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
             }
             else
-            {                
+            {
                 String childId = PropertyAccessorHelper.getId(childEntity, relMetadata);
                 columns.put(inverseJoinColumnName + "_" + childId, childId);
             }
@@ -297,7 +296,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return handler.getForeignKeysFromJoinTable(joinTableName, parentId, inverseJoinColumnName);
 
     }
-    
+
     @Override
     public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, EntitySaveGraph objectGraph)
@@ -350,8 +349,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         Object enhancedEntity = null;
         try
         {
-            enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId !=null?rowId.toString():null,
-                    relationNames);
+            enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata,
+                    rowId != null ? rowId.toString() : null, relationNames);
         }
         catch (IOException e)
         {

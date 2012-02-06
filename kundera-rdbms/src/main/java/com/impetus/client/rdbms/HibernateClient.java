@@ -77,7 +77,7 @@ public class HibernateClient implements Client
 
     /** The reader. */
     private EntityReader reader;
-    
+
     private static final Log log = LogFactory.getLog(HibernateClient.class);
 
     /**
@@ -318,13 +318,15 @@ public class HibernateClient implements Client
             s.persist(entityGraph.getParentEntity());
             tx.commit();
         }
-        //TODO: Bad code, get rid of these exceptions, currently necessary for handling many to one case        
+        // TODO: Bad code, get rid of these exceptions, currently necessary for
+        // handling many to one case
         catch (org.hibernate.exception.ConstraintViolationException e)
-        {        	
+        {
             log.info(e.getMessage());
         }
-        catch(HibernateException e) {
-        	log.info(e.getMessage());
+        catch (HibernateException e)
+        {
+            log.info(e.getMessage());
         }
 
         // If entity has a parent entity, update foreign key
@@ -367,18 +369,23 @@ public class HibernateClient implements Client
     public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
     {
         // String rlName = entitySaveGraph.getfKeyName();
-        String rlValue = entitySaveGraph.getParentId(); ;
-		Session s;
-		Transaction tx;
-		try {			
-			s = getSessionInstance();
-			tx = s.beginTransaction();
-			s.persist(childEntity);
-			tx.commit();
-		//TODO: Bad code, get rid of these exceptions, currently necessary for handling many to one case	
-		} catch (HibernateException e) {
-			log.info(e.getMessage());
-		}
+        String rlValue = entitySaveGraph.getParentId();
+        ;
+        Session s;
+        Transaction tx;
+        try
+        {
+            s = getSessionInstance();
+            tx = s.beginTransaction();
+            s.persist(childEntity);
+            tx.commit();
+            // TODO: Bad code, get rid of these exceptions, currently necessary
+            // for handling many to one case
+        }
+        catch (HibernateException e)
+        {
+            log.info(e.getMessage());
+        }
 
         // Update foreign key value
         if (entitySaveGraph.getfKeyName() != null)
@@ -409,10 +416,10 @@ public class HibernateClient implements Client
      */
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata,  Object primaryKey, Object childEntity)
+            EntityMetadata relMetadata, Object primaryKey, Object childEntity)
     {
 
-        String parentId = (String)primaryKey;
+        String parentId = (String) primaryKey;
         if (Collection.class.isAssignableFrom(childEntity.getClass()))
         {
             Collection children = (Collection) childEntity;
@@ -425,8 +432,9 @@ public class HibernateClient implements Client
 
         }
         else
-        {            
-            insertRecordInJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, parentId, childEntity);
+        {
+            insertRecordInJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, parentId,
+                    childEntity);
         }
 
     }
@@ -463,13 +471,13 @@ public class HibernateClient implements Client
 
         return foreignKeys;
     }
-    
+
     @Override
     public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, EntitySaveGraph objectGraph)
     {
         String primaryKey = objectGraph.getParentId();
-        
+
         StringBuffer query = new StringBuffer();
         query.append("DELETE FROM ").append(joinTableName).append(" WHERE ").append(joinColumnName).append("=")
                 .append("'").append(primaryKey).append("'");
@@ -477,7 +485,7 @@ public class HibernateClient implements Client
         Session s = getSessionInstance();
         Transaction tx = s.beginTransaction();
         s.createSQLQuery(query.toString()).executeUpdate();
-        tx.commit();        
+        tx.commit();
     }
 
     /**
@@ -607,14 +615,14 @@ public class HibernateClient implements Client
     {
         // Session s = getSessionInstance();
         List<Object[]> result = new ArrayList<Object[]>();
-        
-            s = sf.openStatelessSession();
 
-            s.beginTransaction();
+        s = sf.openStatelessSession();
+
+        s.beginTransaction();
         SQLQuery q = s.createSQLQuery(nativeQuery).addEntity(m.getEntityClazz());
         for (String r : relations)
         {
-            if( !m.getIdColumn().getName().equalsIgnoreCase(r))
+            if (!m.getIdColumn().getName().equalsIgnoreCase(r))
             {
                 q.addScalar(r);
             }
@@ -622,7 +630,7 @@ public class HibernateClient implements Client
 
         return q.list();
     }
-    
+
     /*
      * (non-Javadoc)
      * 

@@ -24,7 +24,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
 {
@@ -32,7 +32,7 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
     @Override
     public Timestamp fromBytes(byte[] b) throws PropertyAccessException
     {
-        
+
         String s;
         try
         {
@@ -64,5 +64,5 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
         Timestamp t = Timestamp.valueOf(s);
         return t;
     }
-    
+
 }

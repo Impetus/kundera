@@ -51,7 +51,8 @@ public abstract class GenericClientFactory implements Loader
         if (KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit) == null)
         {
             ClientMetadata clientMetadata = new ClientMetadata();
-            String secIndex = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit).getProperty("index_home_dir");
+            String secIndex = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(persistenceUnit).getProperty("index_home_dir");
             clientMetadata.setLuceneIndexDir(secIndex);
             KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
         }

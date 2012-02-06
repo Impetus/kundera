@@ -276,9 +276,10 @@ public class MongoDBDataHandler
         }
         else
         {
-            //TODO : this should have been handled by DocumentObjectMapper.
+            // TODO : this should have been handled by DocumentObjectMapper.
             Object valObj = PropertyAccessorHelper.getObject(entity, column.getField());
-            dbObj.put(column.getName(), valObj instanceof Calendar ? ((Calendar)valObj).getTime().toString():PropertyAccessorHelper.getObject(entity, column.getField()).toString());
+            dbObj.put(column.getName(), valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString()
+                    : PropertyAccessorHelper.getObject(entity, column.getField()).toString());
         }
     }
 
@@ -354,7 +355,7 @@ public class MongoDBDataHandler
         String enclosingDocumentName = getEnclosingDocumentName(m, columnName);
 
         // Query for fetching entities based on user specified criteria
-        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery).sort(orderBy):dbCollection.find(mongoQuery);
+        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery).sort(orderBy) : dbCollection.find(mongoQuery);
 
         EmbeddedColumn superColumn = m.getEmbeddedColumn(enclosingDocumentName);
         Field superColumnField = superColumn.getField();

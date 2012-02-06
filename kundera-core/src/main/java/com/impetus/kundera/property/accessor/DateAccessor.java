@@ -38,8 +38,9 @@ public class DateAccessor implements PropertyAccessor<Date>
     /** The Constant DATE_FORMATTER. */
     private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd MMM yyyy HH:mm:ss:S Z",
             Locale.ENGLISH);
+
     private static List<String> patterns = new ArrayList<String>(15);
- 
+
     static
     {
         patterns.add("E MMM dd HH:mm:ss z yyyy");
@@ -74,7 +75,6 @@ public class DateAccessor implements PropertyAccessor<Date>
         patterns.add("MMM-dd-yyyy H:mm:ss");
         patterns.add("dd-MMM-yyyy H:mm:ss");
 
-
         patterns.add("MM-dd-yyyy");
         patterns.add("MM/dd/yyyy");
         patterns.add("dd/MM/yyyy");
@@ -83,13 +83,14 @@ public class DateAccessor implements PropertyAccessor<Date>
         patterns.add("MMM-dd-yyyy");
         patterns.add("dd-MMM-yyyy");
     }
-    
+
     @Override
     public final Date fromBytes(byte[] bytes) throws PropertyAccessException
     {
         try
         {
-//            return DATE_FORMATTER.parse(new String(bytes, Constants.ENCODING));
+            // return DATE_FORMATTER.parse(new String(bytes,
+            // Constants.ENCODING));
             return getDateByPattern(new String(bytes, Constants.ENCODING));
         }
         catch (Exception e)
@@ -97,7 +98,6 @@ public class DateAccessor implements PropertyAccessor<Date>
             throw new PropertyAccessException(e.getMessage());
         }
     }
-
 
     @Override
     public final byte[] toBytes(Object date) throws PropertyAccessException
@@ -132,17 +132,18 @@ public class DateAccessor implements PropertyAccessor<Date>
         }
     }
 
-
-
     /**
      * Get Date from given below formats
-     * @param date  Date pattern
-     * @return       date instance 
-     * @throws PropertyAccessException throws only if invalid format is supplied.
+     * 
+     * @param date
+     *            Date pattern
+     * @return date instance
+     * @throws PropertyAccessException
+     *             throws only if invalid format is supplied.
      */
     public static Date getDateByPattern(String date) throws PropertyAccessException
     {
-        for(String p : patterns)
+        for (String p : patterns)
         {
             try
             {
@@ -150,28 +151,31 @@ public class DateAccessor implements PropertyAccessor<Date>
                 Date dt = formatter.parse(date);
                 return dt;
             }
-            catch(IllegalArgumentException iae)
+            catch (IllegalArgumentException iae)
             {
-                //Do nothing.
-                //move to next pattern.
+                // Do nothing.
+                // move to next pattern.
             }
             catch (ParseException e)
             {
-                //Do nothing.
-              //move to next pattern.
+                // Do nothing.
+                // move to next pattern.
             }
 
         }
-        
+
         throw new PropertyAccessException("Required Date format is not supported!" + date);
     }
-    
+
     /**
-     * Just to verify with supported types of date pattern.
-     * Get Date from given below formats
-     * @param date  Date pattern
-     * @return       date instance 
-     * @throws PropertyAccessException throws only if invalid format is supplied.
+     * Just to verify with supported types of date pattern. Get Date from given
+     * below formats
+     * 
+     * @param date
+     *            Date pattern
+     * @return date instance
+     * @throws PropertyAccessException
+     *             throws only if invalid format is supplied.
      */
     public static String getFormattedObect(String date) throws PropertyAccessException
     {

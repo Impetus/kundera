@@ -49,7 +49,8 @@ public class RDBMSClientFactory extends GenericClientFactory
     protected void initializeClient()
     {
         String luceneDirPath = MetadataUtils.getLuceneDirectory(getPersistenceUnit());
-        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34), luceneDirPath));
+        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
+                luceneDirPath));
         reader = new RDBMSEntityReader();
         ((RDBMSEntityReader) reader).setFilter("where");
     }

@@ -28,7 +28,7 @@ public class ClientMetadata
     private String indexImplementor;
 
     private String LuceneIndexDir;
-    
+
     /**
      * @return the clientImplementor
      */
@@ -71,7 +71,6 @@ public class ClientMetadata
         return StringUtils.isEmpty(LuceneIndexDir) && StringUtils.isBlank(LuceneIndexDir);
     }
 
-    
     /**
      * @return the luceneIndexDir
      */
@@ -81,12 +80,12 @@ public class ClientMetadata
     }
 
     /**
-     * @param luceneIndexDir the luceneIndexDir to set
+     * @param luceneIndexDir
+     *            the luceneIndexDir to set
      */
     public void setLuceneIndexDir(String luceneIndexDir)
     {
         LuceneIndexDir = luceneIndexDir;
     }
 
-    
 }

@@ -117,17 +117,15 @@ public class RDBMSQuery extends QueryImpl implements Query
             {
                 List<String> relations = new ArrayList<String>();
                 List r = ((HibernateClient) client).find(
-                        ((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, relations, null), relations,
-                        m);
+                        ((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, relations, null), relations, m);
                 result = new ArrayList<Object>(r.size());
-
 
                 for (Object o : r)
                 {
                     Class clazz = m.getEntityClazz();
-                    if(!o.getClass().isAssignableFrom(m.getEntityClazz()))
+                    if (!o.getClass().isAssignableFrom(m.getEntityClazz()))
                     {
-                        o = ((Object[])o)[0];
+                        o = ((Object[]) o)[0];
                     }
                     result.add(o);
                 }

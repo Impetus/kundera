@@ -28,14 +28,14 @@ import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class CalendarAccessor implements PropertyAccessor<Calendar>
 {
 
     /** The Constant DATE_FORMATTER. */
-    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);    
-    
+    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);
+
     @Override
     public Calendar fromBytes(byte[] b) throws PropertyAccessException
     {
@@ -49,11 +49,10 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
         {
             throw new PropertyAccessException(e.getMessage());
         }
-        
-        return fromString(s);
-        
-    }
 
+        return fromString(s);
+
+    }
 
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
@@ -62,7 +61,6 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
         return DateAccessor.getFormattedObect(cal.getTime().toString()).getBytes();
     }
 
-
     @Override
     public String toString(Object object)
     {
@@ -70,16 +68,15 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
         return object.toString();
     }
 
-
     @Override
     public Calendar fromString(String s) throws PropertyAccessException
     {
         Calendar cal = Calendar.getInstance();
         Date d;
-//            d = (Date)DATE_FORMATTER.parse(s);
-            d = DateAccessor.getDateByPattern(s);
+        // d = (Date)DATE_FORMATTER.parse(s);
+        d = DateAccessor.getDateByPattern(s);
         cal.setTime(d);
         return cal;
     }
-    
+
 }

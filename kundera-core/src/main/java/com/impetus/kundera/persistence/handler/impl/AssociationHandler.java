@@ -127,9 +127,10 @@ class AssociationHandler
 
         return null;
     }
-    
+
     /**
      * Removed association entit(ies) from the enclosing entity
+     * 
      * @param entity
      * @param associationEntity
      * @param field
@@ -146,32 +147,34 @@ class AssociationHandler
                 {
                     Collection<?> entityCollection = (Collection<?>) entity;
                     for (Object entityObj : entityCollection)
-                    {                        
-                        if(entityObj != null)
+                    {
+                        if (entityObj != null)
                         {
                             PropertyAccessorHelper.set(entityObj, field, setNull || entity == null ? null
-                                    : Collection.class.isAssignableFrom(field.getType()) ? null:associationEntity.getClass().newInstance());
+                                    : Collection.class.isAssignableFrom(field.getType()) ? null : associationEntity
+                                            .getClass().newInstance());
                         }
-                        
+
                     }
 
-                } else
+                }
+                else
                 {
-                PropertyAccessorHelper.set(entity, field, setNull || associationEntity == null ? null
-                        : associationEntity.getClass().newInstance());
+                    PropertyAccessorHelper.set(entity, field, setNull || associationEntity == null ? null
+                            : associationEntity.getClass().newInstance());
                 }
             }
         }
         catch (PropertyAccessException e)
-        {            
+        {
             e.printStackTrace();
         }
         catch (InstantiationException e)
-        {            
+        {
             e.printStackTrace();
         }
         catch (IllegalAccessException e)
-        {            
+        {
             e.printStackTrace();
         }
     }

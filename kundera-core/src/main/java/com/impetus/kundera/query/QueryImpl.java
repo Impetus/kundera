@@ -156,7 +156,7 @@ public abstract class QueryImpl implements Query
 
             if (relationNames.isEmpty() && !m.isRelationViaJoinTable())
             {
-                
+
                 // There is no association so simply return list of entities.
                 results = populateEntities(m, client);
             }
@@ -185,7 +185,7 @@ public abstract class QueryImpl implements Query
           // if entity is not parent then pass retrieved relation key value to
           // specific client for find by id.
 
-        return results !=null && !results.isEmpty()?results:null;
+        return results != null && !results.isEmpty() ? results : null;
 
     }
 
@@ -602,7 +602,8 @@ public abstract class QueryImpl implements Query
         // if it does not then it means it is a parent.
         List<Object> result = null;
         Map<Object, Object> relationalValues = new HashMap<Object, Object>();
-        if(enhanceEntities != null) {
+        if (enhanceEntities != null)
+        {
             for (EnhanceEntity e : enhanceEntities)
             {
                 if (result == null)
@@ -619,8 +620,8 @@ public abstract class QueryImpl implements Query
                     throw new QueryHandlerException(ex.getMessage());
                 }
             }
-        }        
-        
+        }
+
         return result;
     }
 
@@ -644,12 +645,13 @@ public abstract class QueryImpl implements Query
         {
             String[] primaryKeys = searchFilter.values().toArray(new String[] {});
             Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
-            
+
             try
             {
-                //result = (List<Object>) client.findAll(m.getEntityClazz(), uniquePKs.toArray());
+                // result = (List<Object>) client.findAll(m.getEntityClazz(),
+                // uniquePKs.toArray());
                 result = (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), uniquePKs.toArray());
-                
+
             }
             catch (Exception e)
             {
@@ -717,7 +719,7 @@ public abstract class QueryImpl implements Query
         {
             if (object instanceof FilterClause)
             {
-                boolean appended=false;
+                boolean appended = false;
                 FilterClause filter = (FilterClause) object;
                 sb.append("+");
                 // property
@@ -734,29 +736,29 @@ public abstract class QueryImpl implements Query
                     sb.append(":");
                     appender = "*";
                 }
-                else if(filter.getCondition().equalsIgnoreCase(">"))
+                else if (filter.getCondition().equalsIgnoreCase(">"))
                 {
-                    sb.append(appendRange(filter.getValue(),false,true));
-                    appended=true;
+                    sb.append(appendRange(filter.getValue(), false, true));
+                    appended = true;
                 }
-                else if(filter.getCondition().equalsIgnoreCase(">="))
+                else if (filter.getCondition().equalsIgnoreCase(">="))
                 {
-                    sb.append(appendRange(filter.getValue(),true,true));
-                    appended=true;
+                    sb.append(appendRange(filter.getValue(), true, true));
+                    appended = true;
                 }
-                else if(filter.getCondition().equalsIgnoreCase("<"))
+                else if (filter.getCondition().equalsIgnoreCase("<"))
                 {
-                    sb.append(appendRange(filter.getValue(),false,false));
-                    appended=true;
+                    sb.append(appendRange(filter.getValue(), false, false));
+                    appended = true;
                 }
-                else if(filter.getCondition().equalsIgnoreCase("<="))
+                else if (filter.getCondition().equalsIgnoreCase("<="))
                 {
-                    sb.append(appendRange(filter.getValue(),true,false));
-                    appended=true;
+                    sb.append(appendRange(filter.getValue(), true, false));
+                    appended = true;
                 }
 
                 // value. if not already appended.
-                if(!appended)
+                if (!appended)
                 {
                     sb.append(filter.getValue());
                     sb.append(appender);
@@ -892,20 +894,19 @@ public abstract class QueryImpl implements Query
 
     private String appendRange(String value, boolean inclusive, boolean isGreaterThan)
     {
-        String appender=" ";
+        String appender = " ";
         StringBuilder sb = new StringBuilder();
         sb.append(":");
-        sb.append(inclusive?"[":"{");
-        sb.append(isGreaterThan?value:"*");
+        sb.append(inclusive ? "[" : "{");
+        sb.append(isGreaterThan ? value : "*");
         sb.append(appender);
         sb.append("TO");
         sb.append(appender);
-        sb.append(isGreaterThan?"null":value);
-        sb.append(inclusive?"]":"}");
+        sb.append(isGreaterThan ? "null" : value);
+        sb.append(inclusive ? "]" : "}");
         return sb.toString();
     }
-    
-    
+
     /**
      * Populate entities, Method to populate data in case no relation exist!.
      * 

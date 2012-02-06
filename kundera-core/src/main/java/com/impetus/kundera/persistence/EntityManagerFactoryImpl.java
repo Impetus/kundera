@@ -119,7 +119,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         {
             ClientResolver.getClientFactory(pu).load(pu);
         }
-        
+
         logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
 
@@ -209,7 +209,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     private CacheProvider initSecondLevelCache()
     {
         String classResourceName = (String) getProperties().get(PersistenceProperties.KUNDERA_CACHE_CONFIG_RESOURCE);
-        String cacheProviderClassName = (String) getProperties().get(PersistenceProperties.KUNDERA_CACHE_PROVIDER_CLASS);
+        String cacheProviderClassName = (String) getProperties()
+                .get(PersistenceProperties.KUNDERA_CACHE_PROVIDER_CLASS);
 
         CacheProvider cacheProvider = null;
         if (cacheProviderClassName != null)

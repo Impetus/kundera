@@ -97,7 +97,7 @@ public final class EntityMetadata
 
     /** type. */
     private Type type;
-    
+
     private boolean isRelationViaJoinTable;
 
     /**
@@ -748,6 +748,7 @@ public final class EntityMetadata
 
     /**
      * Getter method for isRelatedViaJoinTable
+     * 
      * @return true, if holds join table relation, else false.
      */
     public boolean isRelationViaJoinTable()
@@ -757,7 +758,7 @@ public final class EntityMetadata
 
     /**
      * Setter method for isRelatedViaJoinTable
-     *   
+     * 
      * @param isRelationViaJoinTable
      */
     public void setRelationViaJoinTable(boolean isRelationViaJoinTable)
@@ -765,5 +766,4 @@ public final class EntityMetadata
         this.isRelationViaJoinTable = isRelationViaJoinTable;
     }
 
-    
 }

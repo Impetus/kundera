@@ -83,7 +83,8 @@ public class PelopsDataHandler extends DataHandler
         {
             List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(), rowKey,
                     Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
-            e = fromSuperColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null, thriftSuperColumns), relationNames, isWrapReq);
+            e = fromSuperColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null, thriftSuperColumns),
+                    relationNames, isWrapReq);
 
         }
         else
@@ -154,7 +155,7 @@ public class PelopsDataHandler extends DataHandler
         E e = null;
 
         // Set row-key. Note:
-//        PropertyAccessorHelper.setId(e, m, tr.getId());
+        // PropertyAccessorHelper.setId(e, m, tr.getId());
 
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
@@ -165,7 +166,7 @@ public class PelopsDataHandler extends DataHandler
         Field embeddedCollectionField = null;
         for (SuperColumn sc : tr.getColumns())
         {
-            if(e == null)
+            if (e == null)
             {
                 // Instantiate a new instance
                 e = clazz.newInstance();
@@ -251,18 +252,18 @@ public class PelopsDataHandler extends DataHandler
         Map<String, Object> relations = new HashMap<String, Object>();
 
         // Set row-key.
-      //  PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
+        // PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
         // PropertyAccessorHelper.set(entity, m.getIdColumn().getField(),
         // thriftRow.getId());
 
         // Iterate through each column
         for (Column c : thriftRow.getColumns())
         {
-            if(entity == null)
+            if (entity == null)
             {
                 entity = clazz.newInstance();
                 // Set row-key
-                PropertyAccessorHelper.setId(entity, m,  thriftRow.getId());
+                PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
             }
 
             String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(c.getName());
@@ -305,7 +306,8 @@ public class PelopsDataHandler extends DataHandler
      * Fetches data held in Thrift row super columns and populates to Entity
      * objects
      */
-    public Object fromSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr, List<String> relationNames, boolean isWrapReq) throws Exception
+    public Object fromSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr, List<String> relationNames,
+            boolean isWrapReq) throws Exception
     {
 
         // Instantiate a new instance
@@ -313,7 +315,6 @@ public class PelopsDataHandler extends DataHandler
 
         // Map to hold property-name=>foreign-entity relations
         Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
-
 
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
@@ -327,7 +328,7 @@ public class PelopsDataHandler extends DataHandler
 
         for (SuperColumn sc : tr.getSuperColumns())
         {
-            if(entity == null)
+            if (entity == null)
             {
                 entity = clazz.newInstance();
                 // Set row-key
@@ -357,14 +358,13 @@ public class PelopsDataHandler extends DataHandler
                     {
                         continue;
                     }
-                    
-                    
+
                     Field columnField = columnNameToFieldMap.get(name);
-                    if(columnField != null)
+                    if (columnField != null)
                     {
                         PropertyAccessorHelper.set(embeddedObject, columnField, value);
                     }
-                    else if(relationNames != null && !relationNames.isEmpty() && relationNames.contains(name))
+                    else if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(name))
                     {
                         String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(value);
                         relations.put(name, valueAsStr);
@@ -382,11 +382,12 @@ public class PelopsDataHandler extends DataHandler
                 // add them to parent entity
                 Field superColumnField = superColumnNameToFieldMap.get(scName);
                 Object superColumnObj = null;
-                if (superColumnField != null || (relationNames != null && !relationNames.isEmpty() && relationNames.contains(scName)))
+                if (superColumnField != null
+                        || (relationNames != null && !relationNames.isEmpty() && relationNames.contains(scName)))
                 {
 
-                	Class  superColumnClass = superColumnField!=null? superColumnField.getType():null;
-                	superColumnObj = superColumnClass!= null? superColumnClass.newInstance():null;
+                    Class superColumnClass = superColumnField != null ? superColumnField.getType() : null;
+                    superColumnObj = superColumnClass != null ? superColumnClass.newInstance() : null;
                     for (Column column : sc.getColumns())
                     {
                         String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
@@ -408,21 +409,21 @@ public class PelopsDataHandler extends DataHandler
                                         + ". Possible case of entity column in a super column family. Will be treated as a super column.");
                                 superColumnObj = Bytes.toUTF8(value);
                             }
-                            
-                        } 
-                        else 
+
+                        }
+                        else
                         {
                             String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(value);
                             relations.put(name, valueAsStr);
                         }
 
                     }
-                 
+
                 }
-                
-                if(superColumnField !=null)
-                {	
-                	PropertyAccessorHelper.set(entity, superColumnField, superColumnObj);
+
+                if (superColumnField != null)
+                {
+                    PropertyAccessorHelper.set(entity, superColumnField, superColumnObj);
                 }
 
             }

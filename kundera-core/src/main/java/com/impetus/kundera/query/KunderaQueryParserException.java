@@ -17,7 +17,7 @@ package com.impetus.kundera.query;
 
 /**
  * The Class KunderaQueryParserException.
- *
+ * 
  * @author vivek.mishra
  */
 public class KunderaQueryParserException extends RuntimeException
@@ -28,8 +28,9 @@ public class KunderaQueryParserException extends RuntimeException
 
     /**
      * Instantiates a new kundera query parser exception.
-     *
-     * @param errMsg the err msg
+     * 
+     * @param errMsg
+     *            the err msg
      */
     public KunderaQueryParserException(String errMsg)
     {

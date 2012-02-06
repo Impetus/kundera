@@ -51,7 +51,8 @@ public class KunderaQuery
     public static final String[] INTRA_CLAUSE_OPERATORS = { "=", "LIKE", ">", ">=", "<", "<=" };
 
     /** The INTER pattern. */
-    private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile("\\band\\b|\\bor\\b|\\bbetween\\b", Pattern.CASE_INSENSITIVE);
+    private static final Pattern INTER_CLAUSE_PATTERN = Pattern.compile("\\band\\b|\\bor\\b|\\bbetween\\b",
+            Pattern.CASE_INSENSITIVE);
 
     /** The INTRA pattern. */
     private static final Pattern INTRA_CLAUSE_PATTERN = Pattern.compile("=|\\blike\\b|>=|>|<=|<",
@@ -94,8 +95,9 @@ public class KunderaQuery
 
     /**
      * Instantiates a new kundera query.
-     *
-     * @param persistenceUnits the persistence units
+     * 
+     * @param persistenceUnits
+     *            the persistence units
      */
     public KunderaQuery(String... persistenceUnits)
     {
@@ -277,10 +279,11 @@ public class KunderaQuery
         {
             return;
         }
-        
+
         List<String> clauses = tokenize(filter, INTER_CLAUSE_PATTERN);
-        
-        //parse and structure for "between" clause , if present, else it will return original clause
+
+        // parse and structure for "between" clause , if present, else it will
+        // return original clause
         clauses = parseFilterForBetweenClause(clauses, indexName);
         // clauses must be alternate Inter and Intra combination, starting with
         // Intra.
@@ -370,7 +373,7 @@ public class KunderaQuery
 
     /**
      * Gets the entity metadata.
-     *
+     * 
      * @return the entity metadata
      */
     public final EntityMetadata getEntityMetadata()
@@ -464,7 +467,9 @@ public class KunderaQuery
         }
 
         /* @see java.lang.Object#toString() */
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.lang.Object#toString()
          */
         @Override
@@ -483,7 +488,9 @@ public class KunderaQuery
     }
 
     /* @see java.lang.Object#clone() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#clone()
      */
     @Override
@@ -493,7 +500,9 @@ public class KunderaQuery
     }
 
     /* @see java.lang.Object#toString() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
@@ -543,7 +552,7 @@ public class KunderaQuery
 
     /**
      * Gets the metamodel.
-     *
+     * 
      * @return the metamodel
      */
     private MetamodelImpl getMetamodel()
@@ -553,7 +562,7 @@ public class KunderaQuery
 
     /**
      * Gets the persistence units.
-     *
+     * 
      * @return the persistenceUnits
      */
     public String[] getPersistenceUnits()
@@ -563,8 +572,9 @@ public class KunderaQuery
 
     /**
      * Sets the persistence units.
-     *
-     * @param persistenceUnits the persistenceUnits to set
+     * 
+     * @param persistenceUnits
+     *            the persistenceUnits to set
      */
     public void setPersistenceUnits(String[] persistenceUnits)
     {
@@ -573,8 +583,9 @@ public class KunderaQuery
 
     /**
      * Parses the ordering @See Order By Clause.
-     *
-     * @param ordering the ordering
+     * 
+     * @param ordering
+     *            the ordering
      */
     private void parseOrdering(String ordering)
     {
@@ -595,7 +606,7 @@ public class KunderaQuery
             while (token.hasMoreElements())
             {
 
-               String nextOrder = (String) token.nextElement();
+                String nextOrder = (String) token.nextElement();
 
                 // more spaces given.
                 if (StringUtils.isNotBlank(nextOrder))
@@ -621,7 +632,7 @@ public class KunderaQuery
      */
     public class SortOrdering
     {
-        
+
         /** The column name. */
         String columnName;
 
@@ -630,9 +641,11 @@ public class KunderaQuery
 
         /**
          * Instantiates a new sort ordering.
-         *
-         * @param columnName the column name
-         * @param order the order
+         * 
+         * @param columnName
+         *            the column name
+         * @param order
+         *            the order
          */
         public SortOrdering(String columnName, SortOrder order)
         {
@@ -642,7 +655,7 @@ public class KunderaQuery
 
         /**
          * Gets the column name.
-         *
+         * 
          * @return the column name
          */
         public String getColumnName()
@@ -652,7 +665,7 @@ public class KunderaQuery
 
         /**
          * Gets the order.
-         *
+         * 
          * @return the order
          */
         public SortOrder getOrder()
@@ -666,46 +679,49 @@ public class KunderaQuery
      */
     public enum SortOrder
     {
-        
+
         /** The ASC. */
-        ASC, 
- /** The DESC. */
- DESC;
+        ASC,
+        /** The DESC. */
+        DESC;
     }
 
     /**
      * Return parsed token string.
-     * @param tokens            inter claues token string.
-     * @param indexName         table name  
-     * @return                  tokens converted to "<=" and ">=" clause
+     * 
+     * @param tokens
+     *            inter claues token string.
+     * @param indexName
+     *            table name
+     * @return tokens converted to "<=" and ">=" clause
      */
     private List<String> parseFilterForBetweenClause(List<String> tokens, String indexName)
     {
-        final String between="BETWEEN";
+        final String between = "BETWEEN";
 
-        if(tokens.contains(between))
+        if (tokens.contains(between))
         {
             // change token set to parse and compile.
             int idxOfBetween = tokens.indexOf(between);
-            String property = tokens.get(idxOfBetween-1);
-//            property = property.substring((entityAlias + ".").length());
-//            property = indexName + "." + property;
+            String property = tokens.get(idxOfBetween - 1);
+            // property = property.substring((entityAlias + ".").length());
+            // property = indexName + "." + property;
             Matcher match = INTRA_CLAUSE_PATTERN.matcher(property);
-            //in case any intra clause given along with column name.
-            if(match.find())
+            // in case any intra clause given along with column name.
+            if (match.find())
             {
                 logger.error("bad jpa query:");
                 throw new KunderaQueryParserException("invalid column name" + property);
             }
-            String minValue = tokens.get(idxOfBetween+1);
-            String maxValue = tokens.get(idxOfBetween+3);
-            
-            tokens.set(idxOfBetween+1, property+">="+minValue);
-            tokens.set(idxOfBetween+3, property+"<="+maxValue);
-            tokens.remove(idxOfBetween-1);
-            tokens.remove(idxOfBetween-1);
+            String minValue = tokens.get(idxOfBetween + 1);
+            String maxValue = tokens.get(idxOfBetween + 3);
+
+            tokens.set(idxOfBetween + 1, property + ">=" + minValue);
+            tokens.set(idxOfBetween + 3, property + "<=" + maxValue);
+            tokens.remove(idxOfBetween - 1);
+            tokens.remove(idxOfBetween - 1);
         }
-        
+
         return tokens;
     }
 }

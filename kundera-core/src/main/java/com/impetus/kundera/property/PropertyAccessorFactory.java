@@ -45,7 +45,7 @@ import com.impetus.kundera.property.accessor.StringAccessor;
 
 /**
  * The Class PropertyAccessorFactory.
- *
+ * 
  * @author animesh.kumar
  */
 
@@ -54,7 +54,7 @@ public class PropertyAccessorFactory
 
     /** The map. */
     public static Map<Class<?>, PropertyAccessor<?>> map = new HashMap<Class<?>, PropertyAccessor<?>>();
-    
+
     static
     {
         // Premitive Type accessors
@@ -75,7 +75,7 @@ public class PropertyAccessorFactory
         map.put(Integer.class, new IntegerAccessor());
         map.put(Long.class, new LongAccessor());
         map.put(Float.class, new FloatAccessor());
-        map.put(Double.class, new DoubleAccessor());      
+        map.put(Double.class, new DoubleAccessor());
 
         // Date/ Time type accessors
         map.put(Date.class, new DateAccessor());
@@ -83,11 +83,11 @@ public class PropertyAccessorFactory
         map.put(Time.class, new SQLTimeAccessor());
         map.put(Timestamp.class, new SQLTimestampAccessor());
         map.put(Calendar.class, new CalendarAccessor());
-        
-        //Accessors for Math classes
+
+        // Accessors for Math classes
         map.put(BigInteger.class, new BigIntegerAccessor());
         map.put(BigDecimal.class, new BigDecimalAccessor());
-        
+
         // String class Accessor
         map.put(String.class, new StringAccessor());
 

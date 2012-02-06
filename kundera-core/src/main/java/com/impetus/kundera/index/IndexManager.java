@@ -86,7 +86,7 @@ public class IndexManager
     {
         try
         {
-            if(!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+            if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
             {
 
                 String id = PropertyAccessorHelper.getId(entity, metadata);
@@ -110,7 +110,7 @@ public class IndexManager
      */
     public final void write(EntityMetadata metadata, Object entity)
     {
-        if(!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+        if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
         {
             indexer.index(metadata, entity);
         }
@@ -130,7 +130,7 @@ public class IndexManager
      */
     public final void write(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz)
     {
-        if(!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+        if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
         {
             indexer.index(metadata, entity, parentId, clazz);
         }
@@ -229,5 +229,5 @@ public class IndexManager
         {
             indexer.close();
         }
-  }
+    }
 }

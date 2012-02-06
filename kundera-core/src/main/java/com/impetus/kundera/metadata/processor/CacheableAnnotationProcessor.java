@@ -42,7 +42,6 @@ public class CacheableAnnotationProcessor implements MetadataProcessor
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(CacheableAnnotationProcessor.class);
 
-
     @Override
     public final void process(final Class<?> entityClass, EntityMetadata metadata)
     {

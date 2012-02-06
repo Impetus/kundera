@@ -22,7 +22,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
 {
@@ -43,7 +43,7 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
     @Override
     public String toString(Object object)
     {
-        
+
         return object.toString();
     }
 
@@ -52,5 +52,5 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
     {
         return new BigInteger(s);
     }
-    
+
 }

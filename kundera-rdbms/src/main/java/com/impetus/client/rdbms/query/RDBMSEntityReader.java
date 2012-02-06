@@ -111,9 +111,10 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             {
                 // prepare lucene query and find.
                 Set<String> rSet = fetchDataFromLucene(client);
-                if(rSet != null && !rSet.isEmpty()) {
+                if (rSet != null && !rSet.isEmpty())
+                {
                     filter = "WHERE";
-                }                
+                }
                 sqlQuery = getSqlQueryFromJPA(m, relationNames, rSet);
             }
             // call client with relation name list and convert to sql query.
@@ -127,8 +128,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             {
                 try
                 {
-                    List entities = ((HibernateClient) client).find(jpaQuery, new ArrayList<String>(),
-                            m);
+                    List entities = ((HibernateClient) client).find(jpaQuery, new ArrayList<String>(), m);
                     ls = new ArrayList<EnhanceEntity>(entities.size());
                     transform(m, ls, entities);
                 }
@@ -150,11 +150,15 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
 
     /**
      * Populate enhance entities.
-     *
-     * @param m the m
-     * @param relationNames the relation names
-     * @param client the client
-     * @param sqlQuery the sql query
+     * 
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param client
+     *            the client
+     * @param sqlQuery
+     *            the sql query
      * @return the list
      */
     private List<EnhanceEntity> populateEnhanceEntities(EntityMetadata m, List<String> relationNames, Client client,
@@ -172,16 +176,18 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                 {
                     Class clazz = m.getEntityClazz();
                     Object entity = clazz.newInstance();
-                    boolean noRelationFound=true;
-                    if(!o.getClass().isAssignableFrom(clazz))
+                    boolean noRelationFound = true;
+                    if (!o.getClass().isAssignableFrom(clazz))
                     {
-                        entity = ((Object[])o)[0];
-                        noRelationFound=false;
-                    }else
+                        entity = ((Object[]) o)[0];
+                        noRelationFound = false;
+                    }
+                    else
                     {
                         entity = o;
                     }
-                    EnhanceEntity e = new EnhanceEntity(entity, getId(entity, m), noRelationFound? null:populateRelations(relationNames, (Object[]) o));
+                    EnhanceEntity e = new EnhanceEntity(entity, getId(entity, m), noRelationFound ? null
+                            : populateRelations(relationNames, (Object[]) o));
                     ls.add(e);
                 }
             }
@@ -197,7 +203,6 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             e.printStackTrace();
         }
         return ls;
-
 
     }
 
@@ -245,7 +250,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
 
         for (String relation : relations)
         {
-            if( !entityMetadata.getIdColumn().getName().equalsIgnoreCase(relation))
+            if (!entityMetadata.getIdColumn().getName().equalsIgnoreCase(relation))
             {
                 queryBuilder.append(", ");
                 queryBuilder.append(aliasName);
@@ -261,7 +266,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         if (filter != null)
         {
             queryBuilder.append(" Where ");
-//            queryBuilder.append(filter);
+            // queryBuilder.append(filter);
         }
 
         if (primaryKeys == null)
@@ -274,7 +279,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                     FilterClause clause = ((FilterClause) o);
                     String fieldName = getColumnName(clause.getProperty());
                     boolean isString = isStringProperty(entityMetadata, fieldName);
-                    
+
                     queryBuilder.append(StringUtils.replace(clause.getProperty(),
                             clause.getProperty().substring(0, clause.getProperty().indexOf(".")), aliasName));
                     queryBuilder.append(" ");
@@ -330,9 +335,11 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
 
     /**
      * Append string prefix.
-     *
-     * @param queryBuilder the query builder
-     * @param isString the is string
+     * 
+     * @param queryBuilder
+     *            the query builder
+     * @param isString
+     *            the is string
      */
     private void appendStringPrefix(StringBuilder queryBuilder, boolean isString)
     {
@@ -384,7 +391,6 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         return relationVal;
     }
 
-
     @Override
     public EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client)
     {
@@ -394,7 +400,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             keys.add(primaryKey.toString());
             String query = getSqlQueryFromJPA(m, relationNames, keys);
             List<EnhanceEntity> results = populateEnhanceEntities(m, relationNames, client, query);
-            return results != null && !results.isEmpty()?results.get(0):null;
+            return results != null && !results.isEmpty() ? results.get(0) : null;
         }
         else
         {
@@ -411,12 +417,12 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
     }
 
-
     /**
      * Returns column name from the filter property which is in the form
      * dbName.columnName
-     *
-     * @param filterProperty the filter property
+     * 
+     * @param filterProperty
+     *            the filter property
      * @return the column name
      */
     private String getColumnName(String filterProperty)
@@ -433,9 +439,11 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
 
     /**
      * Checks if is string property.
-     *
-     * @param m the m
-     * @param fieldName the field name
+     * 
+     * @param m
+     *            the m
+     * @param fieldName
+     *            the field name
      * @return true, if is string property
      */
     private boolean isStringProperty(EntityMetadata m, String fieldName)

@@ -24,7 +24,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class SQLDateAccessor implements PropertyAccessor<Date>
 {
@@ -41,7 +41,7 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
         {
             throw new PropertyAccessException(e.getMessage());
         }
-        
+
         return fromString(s);
     }
 
@@ -64,5 +64,5 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
         Date d = Date.valueOf(s);
         return d;
     }
-    
+
 }

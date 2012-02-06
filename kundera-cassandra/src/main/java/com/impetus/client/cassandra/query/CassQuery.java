@@ -60,14 +60,17 @@ public class CassQuery extends QueryImpl implements Query
     /** The reader. */
     private EntityReader reader;
 
-    
     /**
      * Instantiates a new cass query.
-     *
-     * @param query the query
-     * @param kunderaQuery the kundera query
-     * @param persistenceDelegator the persistence delegator
-     * @param persistenceUnits the persistence units
+     * 
+     * @param query
+     *            the query
+     * @param kunderaQuery
+     *            the kundera query
+     * @param persistenceDelegator
+     *            the persistence delegator
+     * @param persistenceUnits
+     *            the persistence units
      */
     public CassQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
             String[] persistenceUnits)
@@ -113,8 +116,9 @@ public class CassQuery extends QueryImpl implements Query
 
     /**
      * Prepare index clause.
-     *
-     * @param m the m
+     * 
+     * @param m
+     *            the m
      * @return the map
      */
     private Map<Boolean, List<IndexClause>> prepareIndexClause(EntityMetadata m)
@@ -148,7 +152,7 @@ public class CassQuery extends QueryImpl implements Query
                 }
                 String condition = clause.getCondition();
                 String value = clause.getValue();
-//                value.e
+                // value.e
                 expr.add(Selector.newIndexExpression(fieldName, getOperator(condition, idPresent),
                         getBytesValue(fieldName, m, value)));
             }
@@ -170,9 +174,9 @@ public class CassQuery extends QueryImpl implements Query
             indexClause.setExpressions(expr);
             clauses.add(indexClause);
         }
-            idxClauses.put(idPresent, clauses);
-        
-         return idxClauses;
+        idxClauses.put(idPresent, clauses);
+
+        return idxClauses;
     }
 
     /*
@@ -199,9 +203,11 @@ public class CassQuery extends QueryImpl implements Query
 
     /**
      * Gets the operator.
-     *
-     * @param condition the condition
-     * @param idPresent the id present
+     * 
+     * @param condition
+     *            the condition
+     * @param idPresent
+     *            the id present
      * @return the operator
      */
     private IndexOperator getOperator(String condition, boolean idPresent)
@@ -273,11 +279,11 @@ public class CassQuery extends QueryImpl implements Query
     {
         Column idCol = m.getIdColumn();
         Field f = null;
-        boolean isId=false;
+        boolean isId = false;
         if (idCol.getName().equals(fieldName))
         {
             f = idCol.getField();
-            isId=true;
+            isId = true;
         }
         else
         {
@@ -289,7 +295,7 @@ public class CassQuery extends QueryImpl implements Query
         {
             if (isId || f.getType().isAssignableFrom(String.class))
             {
-                
+
                 return Bytes.fromByteArray(value.trim().getBytes());
             }
             else if (f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
@@ -298,7 +304,7 @@ public class CassQuery extends QueryImpl implements Query
             }
             else if (f.getType().equals(long.class) || f.getType().isAssignableFrom(Long.class))
             {
-                
+
                 return Bytes.fromLong(Long.parseLong(value));
             }
             else if (f.getType().equals(boolean.class) || f.getType().isAssignableFrom(Boolean.class))

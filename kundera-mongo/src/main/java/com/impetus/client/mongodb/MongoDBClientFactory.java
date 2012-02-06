@@ -31,14 +31,15 @@ public class MongoDBClientFactory extends GenericClientFactory
     IndexManager indexManager;
 
     private DB mongoDB;
-    
+
     private EntityReader reader;
 
     @Override
     protected void initializeClient()
     {
         String luceneDirPath = MetadataUtils.getLuceneDirectory(getPersistenceUnit());
-        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34), luceneDirPath));
+        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
+                luceneDirPath));
         reader = new MongoEntityReader();
     }
 

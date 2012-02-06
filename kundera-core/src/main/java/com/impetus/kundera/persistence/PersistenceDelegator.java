@@ -263,7 +263,7 @@ public class PersistenceDelegator
         }
         return entities;
     }
-    
+
     public <E> List<E> find(Class<E> entityClass, EntitySaveGraph excludeGraph, Object... primaryKeys)
     {
         List<E> entities = new ArrayList<E>();
@@ -332,15 +332,15 @@ public class PersistenceDelegator
             getEventDispatcher().fireEventListeners(m, e, PreUpdate.class);
 
             // Currently session look-up is not required for merge operation.
-            //Once session implementation is mature this will not be required.
-            noSessionLookup=true;
+            // Once session implementation is mature this will not be required.
+            noSessionLookup = true;
             persist(e);
 
             // fire PreUpdate events
             getEventDispatcher().fireEventListeners(m, e, PostUpdate.class);
-            
-            //reset session lookup.
-            noSessionLookup=false;
+
+            // reset session lookup.
+            noSessionLookup = false;
             // }
         }
         catch (Exception exp)
@@ -395,12 +395,11 @@ public class PersistenceDelegator
     {
         EntityMetadata metadata = getMetadata(objectGraph.getParentClass());
         Object parentEntity = objectGraph.getParentEntity();
-        
+
         // If this is a swapped graph and parent has further relations, delete
         // them before the parent
         List<EntitySaveGraph> relationGraphs = null;
-        if (objectGraph.isIsswapped() && !metadata.getRelations().isEmpty()
-                && parentEntity != null
+        if (objectGraph.isIsswapped() && !metadata.getRelations().isEmpty() && parentEntity != null
                 && !objectGraph.getChildClass().equals(objectGraph.getParentClass()))
         {
             relationGraphs = getGraph(parentEntity, metadata);
@@ -410,29 +409,28 @@ public class PersistenceDelegator
                 removeGraph(g);
             }
         }
-        
-        //Delete parent entity
+
+        // Delete parent entity
         if (parentEntity != null)
-        {            
+        {
             objectGraph.setParentId(getId(parentEntity, metadata));
-            
+
             Client pClient = getClient(metadata);
             pClient.delete(parentEntity, objectGraph.getParentId(), metadata);
-            
+
             session.remove(parentEntity.getClass(), objectGraph.getParentEntity());
         }
 
-        
-        //Delete child entity
+        // Delete child entity
         Object childEntity = objectGraph.getChildEntity();
         // If any association exists.
         if (childEntity != null)
         {
             onClientHandle(objectGraph, childEntity);
-        }       
-        
-        //Delete data from Join Table
-        deleteFromJoinTable(objectGraph, metadata);       
+        }
+
+        // Delete data from Join Table
+        deleteFromJoinTable(objectGraph, metadata);
 
     }
 
@@ -442,30 +440,32 @@ public class PersistenceDelegator
      */
     private void deleteFromJoinTable(EntitySaveGraph objectGraph, EntityMetadata metadata)
     {
-        //Delete data from Join Table if any 
-           if(metadata.isRelationViaJoinTable()) {
-                for (Relation relation : metadata.getRelations())
+        // Delete data from Join Table if any
+        if (metadata.isRelationViaJoinTable())
+        {
+            for (Relation relation : metadata.getRelations())
+            {
+                if (relation.isRelatedViaJoinTable())
                 {
-                    if (relation.isRelatedViaJoinTable())
-                    {
 
-                        JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
-                        String joinTableName = jtMetadata.getJoinTableName();
+                    JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
+                    String joinTableName = jtMetadata.getJoinTableName();
 
-                        Set<String> joinColumns = jtMetadata.getJoinColumns();
-                        Set<String> inverseJoinColumns = jtMetadata.getInverseJoinColumns();
+                    Set<String> joinColumns = jtMetadata.getJoinColumns();
+                    Set<String> inverseJoinColumns = jtMetadata.getInverseJoinColumns();
 
-                        String joinColumnName = (String) joinColumns.toArray()[0];
-                        String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
+                    String joinColumnName = (String) joinColumns.toArray()[0];
+                    String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
 
-                        EntityMetadata relMetadata = getMetadata(objectGraph.getChildClass());
+                    EntityMetadata relMetadata = getMetadata(objectGraph.getChildClass());
 
-                        Client pClient = getClient(metadata);
-                        pClient.deleteFromJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, objectGraph);
+                    Client pClient = getClient(metadata);
+                    pClient.deleteFromJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata,
+                            objectGraph);
 
-                    }
                 }
             }
+        }
     }
 
     /**
@@ -485,17 +485,19 @@ public class PersistenceDelegator
             Collection<?> childCol = (Collection<?>) childEntity;
             for (Object ch : childCol)
             {
-                if(ch != null) {
+                if (ch != null)
+                {
                     onClientDelete(ch, objectGraph);
-                }                
+                }
             }
         }
         else
         {
-            if(childEntity != null) {
+            if (childEntity != null)
+            {
                 onClientDelete(childEntity, objectGraph);
             }
-            
+
         }
     }
 
@@ -589,7 +591,7 @@ public class PersistenceDelegator
 
         }
     }
-    
+
     /**
      * Find.
      * 
@@ -623,9 +625,8 @@ public class PersistenceDelegator
             Client client = getClient(entityMetadata);
 
             List<EntitySaveGraph> objectGraphs = getGraph(entityMetadata.getEntityClazz().newInstance(), entityMetadata);
-            List<EntitySaveGraph> graphs = getDisjointGraph(excludeGraph, objectGraphs);           
-            
-            
+            List<EntitySaveGraph> graphs = getDisjointGraph(excludeGraph, objectGraphs);
+
             Map<Boolean, List<String>> relations = getRelations(graphs, entityMetadata.getEntityClazz());
 
             EntityReader reader = getReader(client);
@@ -647,8 +648,7 @@ public class PersistenceDelegator
             }
             else
             {
-                entity = (E) reader.computeGraph(enhanceEntity, graphs, relationalValues, client, entityMetadata,
-                        this);
+                entity = (E) reader.computeGraph(enhanceEntity, graphs, relationalValues, client, entityMetadata, this);
             }
             boolean isCacheableToL2 = entityMetadata.isCacheable();
             getSession().store(primaryKey, entity, isCacheableToL2);
@@ -671,10 +671,13 @@ public class PersistenceDelegator
     private List<EntitySaveGraph> getDisjointGraph(EntitySaveGraph excludeGraph, List<EntitySaveGraph> objectGraphs)
     {
         List<EntitySaveGraph> graphs = new ArrayList<EntitySaveGraph>();
-        
-        for(EntitySaveGraph g : objectGraphs) {
-            if(!((excludeGraph.getParentClass().equals(g.getParentClass()) || excludeGraph.getChildClass().equals(g.getParentClass()))
-                   && (excludeGraph.getParentClass().equals(g.getChildClass()) || excludeGraph.getChildClass().equals(g.getChildClass())))) {
+
+        for (EntitySaveGraph g : objectGraphs)
+        {
+            if (!((excludeGraph.getParentClass().equals(g.getParentClass()) || excludeGraph.getChildClass().equals(
+                    g.getParentClass())) && (excludeGraph.getParentClass().equals(g.getChildClass()) || excludeGraph
+                    .getChildClass().equals(g.getChildClass()))))
+            {
                 graphs.add(g);
             }
         }
@@ -719,7 +722,7 @@ public class PersistenceDelegator
             EntityReader reader = getReader(client);
             List<String> relationNames = relations.values().iterator().next();
 
-//            String rowKey = primaryKey + "";
+            // String rowKey = primaryKey + "";
 
             EnhanceEntity enhanceEntity = reader.findById(primaryKey, entityMetadata, relationNames, client);
 
@@ -798,7 +801,6 @@ public class PersistenceDelegator
         closed = true;
     }
 
-
     /**
      * Gets the persistence units.
      * 
@@ -834,8 +836,7 @@ public class PersistenceDelegator
         Object parentEntity = objectGraph.getParentEntity();
         EntityMetadata metadata = getMetadata(objectGraph.getParentClass());
 
-        List<EntitySaveGraph> relationGraphs = null;       
-        
+        List<EntitySaveGraph> relationGraphs = null;
 
         // If this is a swapped graph and parent has further relations, persist
         // before the parent
@@ -847,25 +848,28 @@ public class PersistenceDelegator
 
             for (EntitySaveGraph g : relationGraphs)
             {
-                if(!(objectGraph.getChildClass().equals(g.getParentClass()) || objectGraph.getChildClass().equals(g.getChildClass()))) {
+                if (!(objectGraph.getChildClass().equals(g.getParentClass()) || objectGraph.getChildClass().equals(
+                        g.getChildClass())))
+                {
                     saveGraph(g);
-                }            
-                
+                }
+
             }
 
         }
 
-        
         // Persist parent entity
         if (parentEntity != null)
         {
             objectGraph.setParentId(getId(parentEntity, metadata));
-            
-            if(noSessionLookup || (getSession().lookup(objectGraph.getParentClass(), objectGraph.getParentId()) == null)) {
+
+            if (noSessionLookup
+                    || (getSession().lookup(objectGraph.getParentClass(), objectGraph.getParentId()) == null))
+            {
                 Client pClient = getClient(metadata);
                 pClient.persist(objectGraph, metadata);
                 session.store(objectGraph.getParentId(), objectGraph.getParentEntity());
-            }           
+            }
         }
 
         // Persist child entity(ies)
@@ -873,7 +877,7 @@ public class PersistenceDelegator
         if (objectGraph.getParentEntity() != null && childEntity != null)
         {
             persistChildEntity(objectGraph, childEntity);
-            
+
         }
 
         // Persist Join Table
@@ -893,16 +897,15 @@ public class PersistenceDelegator
                 String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
 
                 EntityMetadata relMetadata = getMetadata(relation.getTargetEntity());
-                
-                Object child = objectGraph.getChildEntity();               
-                
+
+                Object child = objectGraph.getChildEntity();
 
                 Client pClient = getClient(metadata);
-                pClient.persistJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, objectGraph.getParentId(), child);
+                pClient.persistJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata,
+                        objectGraph.getParentId(), child);
 
             }
         }
-        
 
     }
 
@@ -944,7 +947,8 @@ public class PersistenceDelegator
      */
     private void persistOneChildEntity(Object child, EntitySaveGraph objectGraph)
     {
-        if (noSessionLookup || (objectGraph.getChildId() != null || getSession().lookup(child.getClass(), objectGraph.getChildId()) == null))
+        if (noSessionLookup
+                || (objectGraph.getChildId() != null || getSession().lookup(child.getClass(), objectGraph.getChildId()) == null))
         {
             EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
 
@@ -958,19 +962,19 @@ public class PersistenceDelegator
             // Otherwise treat it as parent entity for its related entities,
             // determine graph and save that graph recursively.
 
-            //List<EntitySaveGraph> objectGraphs = getDisjointGraph(objectGraph, getGraph(child, metadata));
+            // List<EntitySaveGraph> objectGraphs =
+            // getDisjointGraph(objectGraph, getGraph(child, metadata));
             List<EntitySaveGraph> objectGraphs = getGraph(child, metadata);
             if (!((relations == null || relations.isEmpty()) || objectGraph.isIsswapped()))
             {
-                
-                
+
                 for (EntitySaveGraph graph : objectGraphs)
                 {
                     // This this graph is for an entity that has it's own
                     // parent,
                     // set reverse Foreign Key
-                    // i.e. Foreign key that refers to its parent                    
-                    if (!graph.equals(objectGraph))                        
+                    // i.e. Foreign key that refers to its parent
+                    if (!graph.equals(objectGraph))
                     {
                         graph.setRevFKeyName(objectGraph.getfKeyName());
                         graph.setRevFKeyValue(objectGraph.getParentId());
@@ -992,15 +996,16 @@ public class PersistenceDelegator
 
     private void saveImmediateChild(Object child, EntitySaveGraph objectGraph, EntityMetadata metadata)
     {
-        String id = getId(child, metadata);        
-        if(noSessionLookup || (getSession().lookup(child.getClass(), id) == null)) {
+        String id = getId(child, metadata);
+        if (noSessionLookup || (getSession().lookup(child.getClass(), id) == null))
+        {
             objectGraph.setChildId(id);
             // if (getSession().lookup(child.getClass(), id) == null)
             // {
             Client chClient = getClient(metadata);
             chClient.persist(child, objectGraph, metadata);
             session.store(id, child);
-        }        
+        }
     }
 
     /**

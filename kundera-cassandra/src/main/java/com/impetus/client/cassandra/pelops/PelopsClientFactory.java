@@ -46,10 +46,11 @@ public class PelopsClientFactory extends GenericClientFactory
         // * )
         // * )
         // *//*)*/);
-        
+
         String luceneDirPath = MetadataUtils.getLuceneDirectory(getPersistenceUnit());
-        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34), luceneDirPath));
-        
+        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
+                luceneDirPath));
+
         reader = new CassandraEntityReader();
 
     }
@@ -70,16 +71,17 @@ public class PelopsClientFactory extends GenericClientFactory
         {
             Cluster cluster = new Cluster(contactNodes,
                     new IConnection.Config(Integer.parseInt(defaultPort), true, -1), false);
-            
-            Policy policy = PelopsUtils.getPoolConfigPolicy(persistenceUnitMetadata);          
-            
-            //Add pool with specified policy. null means default operand policy.
-            Pelops.addPool(poolName, cluster, keyspace, policy, null);            
-            
+
+            Policy policy = PelopsUtils.getPoolConfigPolicy(persistenceUnitMetadata);
+
+            // Add pool with specified policy. null means default operand
+            // policy.
+            Pelops.addPool(poolName, cluster, keyspace, policy, null);
+
         }
         // TODO return a thrift pool
         return null;
-    }	
+    }
 
     @Override
     protected Client instantiateClient()
@@ -97,7 +99,7 @@ public class PelopsClientFactory extends GenericClientFactory
     public void unload(String... persistenceUnits)
     {
         indexManager.close();
-      //  Pelops.shutdown();
+        // Pelops.shutdown();
     }
 
 }

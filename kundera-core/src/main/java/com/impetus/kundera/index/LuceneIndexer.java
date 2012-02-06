@@ -73,7 +73,7 @@ public class LuceneIndexer extends DocumentIndexer
     private static LuceneIndexer indexer;
 
     private static boolean readyForCommit;
-    
+
     private static String luceneDirPath;
 
     /**
@@ -124,7 +124,7 @@ public class LuceneIndexer extends DocumentIndexer
         {
             indexer = new LuceneIndexer(analyzer, lucDirPath);
 
-        } 
+        }
         return indexer;
     }
 
@@ -144,10 +144,10 @@ public class LuceneIndexer extends DocumentIndexer
      * @return index reader.
      */
     private IndexReader getIndexReader()
-    {    	
-    	flushInternal();
-    	
-    	if (reader == null)
+    {
+        flushInternal();
+
+        if (reader == null)
         {
             try
             {
@@ -179,7 +179,8 @@ public class LuceneIndexer extends DocumentIndexer
      */
     private File getIndexDirectory()
     {
-//        String filePath = System.getProperty("user.home") + "/" + Constants.LUCENE_INDEX_DIRECTORY_NAME;
+        // String filePath = System.getProperty("user.home") + "/" +
+        // Constants.LUCENE_INDEX_DIRECTORY_NAME;
         File file = new File(luceneDirPath);
         if (!file.isDirectory())
         {

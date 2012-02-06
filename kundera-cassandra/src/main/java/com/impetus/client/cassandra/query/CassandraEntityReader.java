@@ -39,12 +39,12 @@ import com.impetus.kundera.query.exception.QueryHandlerException;
 
 /**
  * The Class CassandraEntityReader.
- *
+ * 
  * @author vivek.mishra
  */
 public class CassandraEntityReader extends AbstractEntityReader implements EntityReader
 {
-    
+
     /** The conditions. */
     Map<Boolean, List<IndexClause>> conditions = new HashMap<Boolean, List<IndexClause>>();
 
@@ -53,8 +53,9 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
     /**
      * Instantiates a new cassandra entity reader.
-     *
-     * @param luceneQuery the lucene query
+     * 
+     * @param luceneQuery
+     *            the lucene query
      */
     public CassandraEntityReader(String luceneQuery)
     {
@@ -169,16 +170,22 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
     /**
      * Handle find by range.
-     *
-     * @param m the m
-     * @param client the client
-     * @param result the result
-     * @param ixClause the ix clause
-     * @param isRowKeyQuery the is row key query
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param result
+     *            the result
+     * @param ixClause
+     *            the ix clause
+     * @param isRowKeyQuery
+     *            the is row key query
      * @return the list
-     * @throws CharacterCodingException 
+     * @throws CharacterCodingException
      */
-    public List handleFindByRange(EntityMetadata m, Client client, List result, Map<Boolean, List<IndexClause>> ixClause, boolean isRowKeyQuery)
+    public List handleFindByRange(EntityMetadata m, Client client, List result,
+            Map<Boolean, List<IndexClause>> ixClause, boolean isRowKeyQuery)
     {
         List<IndexExpression> expressions = ixClause.get(isRowKeyQuery).get(0).getExpressions();
 

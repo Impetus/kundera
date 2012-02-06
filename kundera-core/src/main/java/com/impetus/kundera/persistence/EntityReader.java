@@ -25,9 +25,9 @@ import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 
 /**
  * The Interface EntityReader.
- *
+ * 
  * @author vivek.mishra Interface to provide declarations for methods
- * responsible for entity read operations.(Except queries).
+ *         responsible for entity read operations.(Except queries).
  */
 public interface EntityReader
 {
@@ -50,26 +50,37 @@ public interface EntityReader
 
     /**
      * Returns populated entity along with all relational value.
-     *
-     * @param e enhance entity
-     * @param graphs entity graph
-     * @param collectionHolder collection holder.
-     * @param client client
-     * @param m entity meta data
-     * @param persistenceDelegeator persistence delegator.
+     * 
+     * @param e
+     *            enhance entity
+     * @param graphs
+     *            entity graph
+     * @param collectionHolder
+     *            collection holder.
+     * @param client
+     *            client
+     * @param m
+     *            entity meta data
+     * @param persistenceDelegeator
+     *            persistence delegator.
      * @return populate entity.
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder,
             Client client, EntityMetadata m, PersistenceDelegator persistenceDelegeator) throws Exception;
 
     /**
      * Find by id.
-     *
-     * @param primaryKey the primary key
-     * @param m the m
-     * @param relationNames the relation names
-     * @param client the client
+     * 
+     * @param primaryKey
+     *            the primary key
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param client
+     *            the client
      * @return the enhance entity
      */
     EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client);

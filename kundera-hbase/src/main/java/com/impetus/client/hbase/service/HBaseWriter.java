@@ -188,8 +188,12 @@ public class HBaseWriter implements Writer
     /**
      * Support for delete over HBase.
      */
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#delete(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#delete(org.apache.hadoop.hbase.client
+     * .HTable, java.lang.String, java.lang.String)
      */
     public void delete(HTable hTable, String rowKey, String columnFamily)
     {

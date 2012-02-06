@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
-
 import junit.framework.Assert;
 
 import org.junit.After;
@@ -26,12 +25,13 @@ import com.impetus.kundera.property.PropertyAccessException;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 public class DateAccessorTest
 {
 
     private DateAccessor accessor;
+
     /**
      * @throws java.lang.Exception
      */
@@ -41,13 +41,11 @@ public class DateAccessorTest
         accessor = new DateAccessor();
     }
 
-   
-    
     @Test
     public void testDateFromString() throws PropertyAccessException
     {
         String dateInMMddYYHHmmss = "02/01/2012 00:00:00";
-        String newDateAsStr="Wed Feb 01 07:58:02 IST 2012";
+        String newDateAsStr = "Wed Feb 01 07:58:02 IST 2012";
         String dateInMMddYY = "02/01/2012";
         String dateInMMddYYDash = "02-01-2012";
         String dateInMMMddYYYY = "Feb/02/2012";
@@ -57,7 +55,7 @@ public class DateAccessorTest
         Assert.assertNotNull(accessor.fromString(dateInMMMddYYYY));
         Assert.assertNotNull(accessor.fromString(dateInMMddYY));
     }
-    
+
     /**
      * @throws java.lang.Exception
      */

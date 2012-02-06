@@ -52,7 +52,10 @@ public class EntitySaveGraph
     /** Foreign Key value for Parent -> Its Parent. */
     private String revFKeyValue;
 
-    /** If this entity was child of another entity (Transitive persistence case), class of its parent. */
+    /**
+     * If this entity was child of another entity (Transitive persistence case),
+     * class of its parent.
+     */
     private Class<?> revParentClass;
 
     /** The is shared primary key. */
@@ -87,8 +90,9 @@ public class EntitySaveGraph
 
     /**
      * Instantiates a new entity save graph.
-     *
-     * @param type the type
+     * 
+     * @param type
+     *            the type
      */
     public EntitySaveGraph(Field type)
     {
@@ -189,7 +193,7 @@ public class EntitySaveGraph
 
     /**
      * Gets the rev f key name.
-     *
+     * 
      * @return the revFKeyName
      */
     public String getRevFKeyName()
@@ -199,8 +203,9 @@ public class EntitySaveGraph
 
     /**
      * Sets the rev f key name.
-     *
-     * @param revFKeyName the revFKeyName to set
+     * 
+     * @param revFKeyName
+     *            the revFKeyName to set
      */
     public void setRevFKeyName(String revFKeyName)
     {
@@ -209,7 +214,7 @@ public class EntitySaveGraph
 
     /**
      * Gets the rev f key value.
-     *
+     * 
      * @return the revFKeyValue
      */
     public String getRevFKeyValue()
@@ -219,8 +224,9 @@ public class EntitySaveGraph
 
     /**
      * Sets the rev f key value.
-     *
-     * @param revFKeyValue the revFKeyValue to set
+     * 
+     * @param revFKeyValue
+     *            the revFKeyValue to set
      */
     public void setRevFKeyValue(String revFKeyValue)
     {
@@ -229,7 +235,7 @@ public class EntitySaveGraph
 
     /**
      * Gets the rev parent class.
-     *
+     * 
      * @return the revParentClass
      */
     public Class<?> getRevParentClass()
@@ -239,8 +245,9 @@ public class EntitySaveGraph
 
     /**
      * Sets the rev parent class.
-     *
-     * @param revParentClass the revParentClass to set
+     * 
+     * @param revParentClass
+     *            the revParentClass to set
      */
     public void setRevParentClass(Class<?> revParentClass)
     {
@@ -249,7 +256,7 @@ public class EntitySaveGraph
 
     /**
      * Checks if is shared primary key.
-     *
+     * 
      * @return the isSharedPrimaryKey
      */
     public boolean isSharedPrimaryKey()
@@ -259,8 +266,9 @@ public class EntitySaveGraph
 
     /**
      * Sets the shared primary key.
-     *
-     * @param isSharedPrimaryKey the isSharedPrimaryKey to set
+     * 
+     * @param isSharedPrimaryKey
+     *            the isSharedPrimaryKey to set
      */
     public void setSharedPrimaryKey(boolean isSharedPrimaryKey)
     {
@@ -269,7 +277,7 @@ public class EntitySaveGraph
 
     /**
      * Checks if is uni directional.
-     *
+     * 
      * @return the isUniDirectional
      */
     public boolean isUniDirectional()
@@ -279,8 +287,9 @@ public class EntitySaveGraph
 
     /**
      * Sets the uni directional.
-     *
-     * @param isUniDirectional the isUniDirectional to set
+     * 
+     * @param isUniDirectional
+     *            the isUniDirectional to set
      */
     public void setUniDirectional(boolean isUniDirectional)
     {
@@ -289,7 +298,7 @@ public class EntitySaveGraph
 
     /**
      * Checks if is related via join table.
-     *
+     * 
      * @return the isRelatedViaJoinTable
      */
     public boolean isRelatedViaJoinTable()
@@ -299,8 +308,9 @@ public class EntitySaveGraph
 
     /**
      * Sets the related via join table.
-     *
-     * @param isRelatedViaJoinTable the isRelatedViaJoinTable to set
+     * 
+     * @param isRelatedViaJoinTable
+     *            the isRelatedViaJoinTable to set
      */
     public void setRelatedViaJoinTable(boolean isRelatedViaJoinTable)
     {
@@ -309,7 +319,7 @@ public class EntitySaveGraph
 
     /**
      * Gets the parent id.
-     *
+     * 
      * @return the parentId
      */
     public String getParentId()
@@ -319,8 +329,9 @@ public class EntitySaveGraph
 
     /**
      * Sets the parent id.
-     *
-     * @param parentId the parentId to set
+     * 
+     * @param parentId
+     *            the parentId to set
      */
     public void setParentId(String parentId)
     {
@@ -329,7 +340,7 @@ public class EntitySaveGraph
 
     /**
      * Gets the child id.
-     *
+     * 
      * @return the childId
      */
     public String getChildId()
@@ -339,8 +350,9 @@ public class EntitySaveGraph
 
     /**
      * Sets the child id.
-     *
-     * @param childId the childId to set
+     * 
+     * @param childId
+     *            the childId to set
      */
     public void setChildId(String childId)
     {
@@ -349,7 +361,7 @@ public class EntitySaveGraph
 
     /**
      * Gets the parent class.
-     *
+     * 
      * @return the isSwapped
      */
 
@@ -373,7 +385,7 @@ public class EntitySaveGraph
 
     /**
      * Gets the child class.
-     *
+     * 
      * @return the childClass
      */
     public Class<?> getChildClass()
@@ -392,7 +404,7 @@ public class EntitySaveGraph
 
     /**
      * Gets the property.
-     *
+     * 
      * @return the property
      */
     public Field getProperty()
@@ -402,8 +414,9 @@ public class EntitySaveGraph
 
     /**
      * Sets the property.
-     *
-     * @param property the property to set
+     * 
+     * @param property
+     *            the property to set
      */
     public void setProperty(Field property)
     {
@@ -412,7 +425,7 @@ public class EntitySaveGraph
 
     /**
      * Gets the bidirectional property.
-     *
+     * 
      * @return the bidirectionalProperty
      */
     public Field getBidirectionalProperty()
@@ -422,8 +435,9 @@ public class EntitySaveGraph
 
     /**
      * Sets the bidirectional property.
-     *
-     * @param bidirectionalProperty the bidirectionalProperty to set
+     * 
+     * @param bidirectionalProperty
+     *            the bidirectionalProperty to set
      */
     public void setBidirectionalProperty(Field bidirectionalProperty)
     {
@@ -432,7 +446,7 @@ public class EntitySaveGraph
 
     /**
      * Checks if is isswapped.
-     *
+     * 
      * @return the isswapped
      */
     public boolean isIsswapped()
@@ -442,15 +456,18 @@ public class EntitySaveGraph
 
     /**
      * Sets the isswapped.
-     *
-     * @param isswapped the isswapped to set
+     * 
+     * @param isswapped
+     *            the isswapped to set
      */
     public void setIsswapped(boolean isswapped)
     {
         this.isswapped = isswapped;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
@@ -474,7 +491,7 @@ public class EntitySaveGraph
         strBuilder.append(revFKeyName);
         strBuilder.append("\n");
         strBuilder.append("\trevFKeyValue:");
-        strBuilder.append(revFKeyValue);        
+        strBuilder.append(revFKeyValue);
         strBuilder.append("\n");
         strBuilder.append("\trevParentClass:");
         strBuilder.append(revParentClass);
@@ -506,46 +523,58 @@ public class EntitySaveGraph
         return strBuilder.toString();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     /**
-     * Purpose to override this is to handle bi direction scenario only As of now. 
-     * @see PersistenceDelegator @{persistOneChildEntity} method.
-     * Any change to this method will broke it. 
-     *  In case it is required to compare exact clone. please create a new method to handle bi-directional.
+     * Purpose to override this is to handle bi direction scenario only As of
+     * now.
+     * 
+     * @see PersistenceDelegator @{persistOneChildEntity} method. Any change to
+     *      this method will broke it. In case it is required to compare exact
+     *      clone. please create a new method to handle bi-directional.
      */
     @Override
     public boolean equals(Object obj)
     {
-        if(obj.getClass().isAssignableFrom(EntitySaveGraph.class))
+        if (obj.getClass().isAssignableFrom(EntitySaveGraph.class))
         {
             EntitySaveGraph g = (EntitySaveGraph) obj;
-            /*EqualsBuilder equalsBuilder = new EqualsBuilder();
-            equalsBuilder.append(getParentClass(), g.getParentClass());
-            equalsBuilder.append(getChildClass(), g.getChildClass());*/
-           /* equalsBuilder.append(this.fKeyName, g.getfKeyName());
-            equalsBuilder.append(this.fKeyValue, g.getfKeyValue());
-            equalsBuilder.append(this.revFKeyName, g.getRevFKeyName());
-            equalsBuilder.append(this.revFKeyValue, g.getRevFKeyValue());
-            equalsBuilder.append(this.revParentClass, g.getRevParentClass());
-            equalsBuilder.append(this.isSharedPrimaryKey, g.isSharedPrimaryKey());
-            equalsBuilder.append(this.isUniDirectional, g.isUniDirectional());
-            equalsBuilder.append(this.isRelatedViaJoinTable, g.isRelatedViaJoinTable());
-            equalsBuilder.append(this.parentId, g.getParentId());
-            equalsBuilder.append(this.childId, g.getChildId());
-             //this is to handle bi directional scenario. as it will be exact opposite of what it is.
-            equalsBuilder.append(this.property, g.getBidirectionalProperty());
-            equalsBuilder.append(this.bidirectionalProperty, g.getProperty());
-            equalsBuilder.append(this.isswapped, g.isIsswapped());*/
-            //return equalsBuilder.isEquals();
+            /*
+             * EqualsBuilder equalsBuilder = new EqualsBuilder();
+             * equalsBuilder.append(getParentClass(), g.getParentClass());
+             * equalsBuilder.append(getChildClass(), g.getChildClass());
+             */
+            /*
+             * equalsBuilder.append(this.fKeyName, g.getfKeyName());
+             * equalsBuilder.append(this.fKeyValue, g.getfKeyValue());
+             * equalsBuilder.append(this.revFKeyName, g.getRevFKeyName());
+             * equalsBuilder.append(this.revFKeyValue, g.getRevFKeyValue());
+             * equalsBuilder.append(this.revParentClass, g.getRevParentClass());
+             * equalsBuilder.append(this.isSharedPrimaryKey,
+             * g.isSharedPrimaryKey());
+             * equalsBuilder.append(this.isUniDirectional,
+             * g.isUniDirectional());
+             * equalsBuilder.append(this.isRelatedViaJoinTable,
+             * g.isRelatedViaJoinTable()); equalsBuilder.append(this.parentId,
+             * g.getParentId()); equalsBuilder.append(this.childId,
+             * g.getChildId()); //this is to handle bi directional scenario. as
+             * it will be exact opposite of what it is.
+             * equalsBuilder.append(this.property,
+             * g.getBidirectionalProperty());
+             * equalsBuilder.append(this.bidirectionalProperty,
+             * g.getProperty()); equalsBuilder.append(this.isswapped,
+             * g.isIsswapped());
+             */
+            // return equalsBuilder.isEquals();
             return (g.parentClass.equals(getParentClass()) && g.childClass.equals(getChildClass()))
-            || (g.childClass.equals(getParentClass()) && g.parentClass.equals(getChildClass()));
+                    || (g.childClass.equals(getParentClass()) && g.parentClass.equals(getChildClass()));
         }
-        
+
         return false;
     }
-
 
     @Override
     public int hashCode()

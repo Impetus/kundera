@@ -24,7 +24,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
 {
@@ -53,7 +53,7 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
 
     @Override
     public String toString(Object object)
-    {        
+    {
         return object.toString();
     }
 
@@ -62,5 +62,5 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
     {
         return new BigDecimal(s);
     }
-    
+
 }

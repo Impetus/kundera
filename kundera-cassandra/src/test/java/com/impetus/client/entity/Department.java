@@ -26,7 +26,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-
 //@Entity
 @Table(name = "Department", schema = "Blog")
 @Cacheable(true)

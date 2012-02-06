@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.cache.ehcache;
 
-
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -34,7 +33,7 @@ import com.impetus.kundera.query.KunderaQueryParserException;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 public class KunderaQueryParserTest
 {
@@ -46,19 +45,18 @@ public class KunderaQueryParserTest
     public void setUp() throws Exception
     {
     }
-   
+
     @Test
-    
     public void onQueryParse()
     {
         KunderaQuery kunderQuery = new KunderaQuery("rdbms");
-        
-        //Valid Query with clause.
+
+        // Valid Query with clause.
         String validQuery = "SELECT c FROM Country c ORDER BY c.currency, c.population DESC";
-        
+
         KunderaQueryParser parser = new KunderaQueryParser(kunderQuery, validQuery);
         parser.parse();
-        
+
         List<SortOrdering> sortOrders = kunderQuery.getOrdering();
         Assert.assertNotNull(sortOrders);
         Assert.assertEquals(2, sortOrders.size());
@@ -67,12 +65,12 @@ public class KunderaQueryParserTest
         Assert.assertEquals("c.population", sortOrders.get(1).getColumnName());
         Assert.assertEquals(SortOrder.DESC.name(), sortOrders.get(1).getOrder().name());
 
-        //valid query with default ASC clause.
+        // valid query with default ASC clause.
         String validQueryWithDefaultClause = "SELECT c FROM Country c ORDER BY c.currency, c.population";
-        
+
         parser = new KunderaQueryParser(kunderQuery, validQueryWithDefaultClause);
         parser.parse();
-        
+
         sortOrders = kunderQuery.getOrdering();
         Assert.assertNotNull(sortOrders);
         Assert.assertEquals(2, sortOrders.size());
@@ -82,23 +80,25 @@ public class KunderaQueryParserTest
         Assert.assertEquals(SortOrder.ASC.name(), sortOrders.get(1).getOrder().name());
 
         String invalidQuery = "SELECT c FROM Country c ORDER BY c.currency, c.population DESCS";
-        
+
         try
         {
-        parser = new KunderaQueryParser(kunderQuery, validQueryWithDefaultClause);
-        parser.parse();
-        } catch(KunderaQueryParserException e)
+            parser = new KunderaQueryParser(kunderQuery, validQueryWithDefaultClause);
+            parser.parse();
+        }
+        catch (KunderaQueryParserException e)
         {
-           Assert.assertNotNull(e);
+            Assert.assertNotNull(e);
         }
     }
+
     /**
      * @throws java.lang.Exception
      */
     @After
     public void tearDown() throws Exception
     {
-  
+
     }
 
 }

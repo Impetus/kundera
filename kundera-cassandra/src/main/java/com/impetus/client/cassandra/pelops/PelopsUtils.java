@@ -13,8 +13,8 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 public class PelopsUtils
 {
-	private static Logger logger = LoggerFactory.getLogger(PelopsUtils.class);
-	
+    private static Logger logger = LoggerFactory.getLogger(PelopsUtils.class);
+
     public static String generatePoolName(String persistenceUnit)
     {
         PersistenceUnitMetadata persistenceUnitMetadatata = KunderaMetadata.INSTANCE.getApplicationMetadata()
@@ -26,41 +26,47 @@ public class PelopsUtils
 
         return contactNodes + ":" + defaultPort + ":" + keyspace;
     }
-    
-    public static Policy getPoolConfigPolicy(PersistenceUnitMetadata persistenceUnitMetadata) {
-		Policy policy = new Policy();	
-		
-		Properties props = persistenceUnitMetadata.getProperties();
-		
-		String maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
-		String maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
-		String minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
-		String maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
-		
-		try {
-			if(! StringUtils.isEmpty(maxActivePerNode)) {
-				policy.setMaxActivePerNode(Integer.parseInt(maxActivePerNode));
-			}
-			
-			if(! StringUtils.isEmpty(maxIdlePerNode)) {
-				policy.setMaxActivePerNode(Integer.parseInt(maxIdlePerNode));
-			}
-			
-			if(! StringUtils.isEmpty(minIdlePerNode)) {
-				policy.setMaxActivePerNode(Integer.parseInt(minIdlePerNode));
-			}
-			
-			if(! StringUtils.isEmpty(maxTotal)) {
-				policy.setMaxActivePerNode(Integer.parseInt(maxTotal));
-			}
-		} catch (NumberFormatException e) {
-			logger.warn("Some Connection pool related property for " + persistenceUnitMetadata.getPersistenceUnitName() 
-					+ " persistence unit couldn't be parsed. Default pool policy would be used");
-			policy = null;
-		}
-		return policy;
-	}
-    
-    
+
+    public static Policy getPoolConfigPolicy(PersistenceUnitMetadata persistenceUnitMetadata)
+    {
+        Policy policy = new Policy();
+
+        Properties props = persistenceUnitMetadata.getProperties();
+
+        String maxActivePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
+        String maxIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_IDLE);
+        String minIdlePerNode = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MIN_IDLE);
+        String maxTotal = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_TOTAL);
+
+        try
+        {
+            if (!StringUtils.isEmpty(maxActivePerNode))
+            {
+                policy.setMaxActivePerNode(Integer.parseInt(maxActivePerNode));
+            }
+
+            if (!StringUtils.isEmpty(maxIdlePerNode))
+            {
+                policy.setMaxActivePerNode(Integer.parseInt(maxIdlePerNode));
+            }
+
+            if (!StringUtils.isEmpty(minIdlePerNode))
+            {
+                policy.setMaxActivePerNode(Integer.parseInt(minIdlePerNode));
+            }
+
+            if (!StringUtils.isEmpty(maxTotal))
+            {
+                policy.setMaxActivePerNode(Integer.parseInt(maxTotal));
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            logger.warn("Some Connection pool related property for " + persistenceUnitMetadata.getPersistenceUnitName()
+                    + " persistence unit couldn't be parsed. Default pool policy would be used");
+            policy = null;
+        }
+        return policy;
+    }
 
 }

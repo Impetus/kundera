@@ -57,7 +57,8 @@ public interface DataHandler
     /**
      * Populates data for give column family, column name, and HBase table name.
      */
-    Object readData(String tableName, Class clazz, EntityMetadata m, String rowKey, List<String>relationNames) throws IOException;
+    Object readData(String tableName, Class clazz, EntityMetadata m, String rowKey, List<String> relationNames)
+            throws IOException;
 
     void writeData(String tableName, EntityMetadata m, Object entity, String rowId, List<RelationHolder> relations)
             throws IOException;
@@ -90,6 +91,7 @@ public interface DataHandler
 
     /**
      * Delete specific row.
+     * 
      * @param rowKey
      * @param tableName
      * @throws IOException
