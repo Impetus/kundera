@@ -17,7 +17,6 @@ package com.impetus.kundera.metadata.model;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 

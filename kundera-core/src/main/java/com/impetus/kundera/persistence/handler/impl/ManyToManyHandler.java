@@ -18,7 +18,6 @@ package com.impetus.kundera.persistence.handler.impl;
 import java.lang.reflect.Field;
 
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;

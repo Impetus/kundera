@@ -25,12 +25,13 @@ import java.util.Set;
 import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.kundera.KunderaPersistence;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author amresh.singh

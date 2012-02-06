@@ -15,10 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence.handler.impl;
 
-import java.beans.PersistenceDelegate;
 import java.lang.reflect.Field;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.hibernate.proxy.HibernateProxy;
 

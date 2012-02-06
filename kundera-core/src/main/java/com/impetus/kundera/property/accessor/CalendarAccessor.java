@@ -16,7 +16,6 @@
 package com.impetus.kundera.property.accessor;
 
 import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
