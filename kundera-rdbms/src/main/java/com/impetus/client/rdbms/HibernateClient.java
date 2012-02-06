@@ -603,25 +603,26 @@ public class HibernateClient implements Client
      *            the clazz
      * @return the list
      */
-    public List find(String nativeQuery, List<String> relations, Class clazz)
+    public List find(String nativeQuery, List<String> relations, EntityMetadata m)
     {
         // Session s = getSessionInstance();
         List<Object[]> result = new ArrayList<Object[]>();
-        if (s == null)
-        {
+        
             s = sf.openStatelessSession();
 
             s.beginTransaction();
-        }
-        SQLQuery q = s.createSQLQuery(nativeQuery).addEntity(clazz);
+        SQLQuery q = s.createSQLQuery(nativeQuery).addEntity(m.getEntityClazz());
         for (String r : relations)
         {
-            q.addScalar(r);
+            if( !m.getIdColumn().getName().equalsIgnoreCase(r))
+            {
+                q.addScalar(r);
+            }
         }
 
         return q.list();
     }
-
+    
     /*
      * (non-Javadoc)
      * 

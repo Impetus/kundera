@@ -128,7 +128,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                 try
                 {
                     List entities = ((HibernateClient) client).find(jpaQuery, new ArrayList<String>(),
-                            m.getEntityClazz());
+                            m);
                     ls = new ArrayList<EnhanceEntity>(entities.size());
                     transform(m, ls, entities);
                 }
@@ -161,7 +161,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             String sqlQuery)
     {
         List<EnhanceEntity> ls = null;
-        List result = ((HibernateClient) client).find(sqlQuery, relationNames, m.getEntityClazz());
+        List result = ((HibernateClient) client).find(sqlQuery, relationNames, m);
 
         try
         {
@@ -172,11 +172,16 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                 {
                     Class clazz = m.getEntityClazz();
                     Object entity = clazz.newInstance();
+                    boolean noRelationFound=true;
                     if(!o.getClass().isAssignableFrom(clazz))
                     {
                         entity = ((Object[])o)[0];
+                        noRelationFound=false;
+                    }else
+                    {
+                        entity = o;
                     }
-                    EnhanceEntity e = new EnhanceEntity(entity, getId(entity, m), populateRelations(relationNames, (Object[]) o));
+                    EnhanceEntity e = new EnhanceEntity(entity, getId(entity, m), noRelationFound? null:populateRelations(relationNames, (Object[]) o));
                     ls.add(e);
                 }
             }
@@ -240,8 +245,13 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
 
         for (String relation : relations)
         {
-            queryBuilder.append(", ");
-            queryBuilder.append(relation);
+            if( !entityMetadata.getIdColumn().getName().equalsIgnoreCase(relation))
+            {
+                queryBuilder.append(", ");
+                queryBuilder.append(aliasName);
+                queryBuilder.append(".");
+                queryBuilder.append(relation);
+            }
         }
         queryBuilder.append(" From ");
         queryBuilder.append(entityMetadata.getTableName());
