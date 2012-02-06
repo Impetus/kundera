@@ -861,7 +861,7 @@ public class PersistenceDelegator
         {
             objectGraph.setParentId(getId(parentEntity, metadata));
             
-            if(!noSessionLookup && (getSession().lookup(objectGraph.getParentClass(), objectGraph.getParentId()) == null)) {
+            if(noSessionLookup || (getSession().lookup(objectGraph.getParentClass(), objectGraph.getParentId()) == null)) {
                 Client pClient = getClient(metadata);
                 pClient.persist(objectGraph, metadata);
                 session.store(objectGraph.getParentId(), objectGraph.getParentEntity());
@@ -944,7 +944,7 @@ public class PersistenceDelegator
      */
     private void persistOneChildEntity(Object child, EntitySaveGraph objectGraph)
     {
-        if (!noSessionLookup && (objectGraph.getChildId() != null || getSession().lookup(child.getClass(), objectGraph.getChildId()) == null))
+        if (noSessionLookup || (objectGraph.getChildId() != null || getSession().lookup(child.getClass(), objectGraph.getChildId()) == null))
         {
             EntityMetadata metadata = getMetadata(objectGraph.getChildClass());
 
@@ -993,7 +993,7 @@ public class PersistenceDelegator
     private void saveImmediateChild(Object child, EntitySaveGraph objectGraph, EntityMetadata metadata)
     {
         String id = getId(child, metadata);        
-        if(!noSessionLookup && (getSession().lookup(child.getClass(), id) == null)) {
+        if(noSessionLookup || (getSession().lookup(child.getClass(), id) == null)) {
             objectGraph.setChildId(id);
             // if (getSession().lookup(child.getClass(), id) == null)
             // {
