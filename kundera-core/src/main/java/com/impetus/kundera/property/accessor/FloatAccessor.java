@@ -45,7 +45,14 @@ public class FloatAccessor implements PropertyAccessor<Float>
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
-        return fromInt(Float.floatToRawIntBits((Float) object));
+        try
+        {
+            return fromInt(Float.floatToRawIntBits((Float) object));
+        }
+        catch (Exception e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
     }
 
     /* (non-Javadoc)

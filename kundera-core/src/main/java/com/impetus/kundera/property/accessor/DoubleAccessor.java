@@ -45,7 +45,14 @@ public class DoubleAccessor implements PropertyAccessor<Double>
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
-        return fromLong(Double.doubleToRawLongBits((Double) object));
+        try
+        {
+            return fromLong(Double.doubleToRawLongBits((Double) object));
+        }
+        catch (Exception e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
     }
 
     /* (non-Javadoc)
