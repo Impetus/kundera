@@ -23,81 +23,146 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
+
+/**
+ * The Class Profile.
+ */
 @Entity
 @Table(name = "Profile", schema = "Blog")
 public class Profile
 {
 
+    /** The profile id. */
     @Id
     private String profileId;
 
+    /** The address. */
     @Column
     private String address;
 
+    /** The website. */
     @Column
     private String website;
 
+    /** The blog. */
     @Column
     private String blog;
 
+    /** The person. */
     @OneToOne(cascade = { CascadeType.ALL })
-    private Person person;
+    private Person2 person;
 
+    /**
+     * Instantiates a new profile.
+     */
     public Profile()
     {
 
     }
 
-    public Person getPerson()
+    /**
+     * Gets the person.
+     *
+     * @return the person
+     */
+    public Person2 getPerson()
     {
         return person;
     }
 
-    public void setPerson(Person person)
+    /**
+     * Sets the person.
+     *
+     * @param person the new person
+     */
+    public void setPerson(Person2 person)
     {
         this.person = person;
     }
 
+    /**
+     * Gets the profile id.
+     *
+     * @return the profile id
+     */
     public String getProfileId()
     {
         return profileId;
     }
 
+    /**
+     * Sets the profile id.
+     *
+     * @param profileId the new profile id
+     */
     public void setProfileId(String profileId)
     {
         this.profileId = profileId;
     }
 
+    /**
+     * Gets the address.
+     *
+     * @return the address
+     */
     public String getAddress()
     {
         return address;
     }
 
+    /**
+     * Sets the address.
+     *
+     * @param address the new address
+     */
     public void setAddress(String address)
     {
         this.address = address;
     }
 
+    /**
+     * Gets the website.
+     *
+     * @return the website
+     */
     public String getWebsite()
     {
         return website;
     }
 
+    /**
+     * Sets the website.
+     *
+     * @param website the new website
+     */
     public void setWebsite(String website)
     {
         this.website = website;
     }
 
+    /**
+     * Gets the blog.
+     *
+     * @return the blog
+     */
     public String getBlog()
     {
         return blog;
     }
 
+    /**
+     * Sets the blog.
+     *
+     * @param blog the new blog
+     */
     public void setBlog(String blog)
     {
         this.blog = blog;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString()
     {
@@ -116,6 +181,9 @@ public class Profile
         return builder.toString();
     }
 
+    /**
+     * Pre.
+     */
     @PrePersist
     public void pre()
     {

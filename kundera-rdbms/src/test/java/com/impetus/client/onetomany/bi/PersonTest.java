@@ -15,45 +15,24 @@
  ******************************************************************************/
 package com.impetus.client.onetomany.bi;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
 import org.junit.Test;
 
+
 /**
- * @author vivek.mishra
+ * The Class PersonTest.
  *
+ * @author vivek.mishra
  */
 public class PersonTest
 {
 
+    /**
+     * Test persist.
+     */
     @Test
     public void testPersist()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-        
-        EntityManager em = emf.createEntityManager();
-        em.persist(prepareObject());
 
     }
-
-    /**
-     * @return
-     */
-    private Object prepareObject()
-    {
-        OTMBNPerson person = new OTMBNPerson();
-        person.setPersonId("b_p");
-        person.setPersonName("bVivs");
-        OTMBAddress address = new OTMBAddress();
-        address.setAddressId("b_a");
-        address.setStreet("bsadak");
-        person.setAddress(address);
-        return person;
-    }
-
-    
-    
 
 }

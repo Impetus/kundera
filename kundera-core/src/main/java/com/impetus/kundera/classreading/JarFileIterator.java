@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
+
 /**
  * Iterates through a Jar file for each file resource.
  * 
@@ -110,6 +111,9 @@ public final class JarFileIterator implements ResourceIterator
     }
 
     /* @see com.impetus.kundera.classreading.ResourceIterator#next() */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.classreading.ResourceIterator#next()
+     */
     public InputStream next()
     {
         if (closed || (next == null && !initial))
@@ -121,6 +125,9 @@ public final class JarFileIterator implements ResourceIterator
     }
 
     /* @see com.impetus.kundera.classreading.ResourceIterator#close() */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.classreading.ResourceIterator#close()
+     */
     public void close()
     {
         try
@@ -156,54 +163,81 @@ public final class JarFileIterator implements ResourceIterator
         }
 
         /* @see java.io.InputStream#read() */
+        /* (non-Javadoc)
+         * @see java.io.InputStream#read()
+         */
         public int read() throws IOException
         {
             return delegate.read();
         }
 
         /* @see java.io.InputStream#read(byte[]) */
+        /* (non-Javadoc)
+         * @see java.io.InputStream#read(byte[])
+         */
         public int read(byte[] bytes) throws IOException
         {
             return delegate.read(bytes);
         }
 
         /* @see java.io.InputStream#read(byte[], int, int) */
+        /* (non-Javadoc)
+         * @see java.io.InputStream#read(byte[], int, int)
+         */
         public int read(byte[] bytes, int i, int i1) throws IOException
         {
             return delegate.read(bytes, i, i1);
         }
 
         /* @see java.io.InputStream#skip(long) */
+        /* (non-Javadoc)
+         * @see java.io.InputStream#skip(long)
+         */
         public long skip(long l) throws IOException
         {
             return delegate.skip(l);
         }
 
         /* @see java.io.InputStream#available() */
+        /* (non-Javadoc)
+         * @see java.io.InputStream#available()
+         */
         public int available() throws IOException
         {
             return delegate.available();
         }
 
         /* @see java.io.InputStream#close() */
+        /* (non-Javadoc)
+         * @see java.io.InputStream#close()
+         */
         public void close() throws IOException
         {
             // ignored
         }
 
         /* @see java.io.InputStream#mark(int) */
+        /* (non-Javadoc)
+         * @see java.io.InputStream#mark(int)
+         */
         public void mark(int i)
         {
             delegate.mark(i);
         }
 
         /* @see java.io.InputStream#reset() */
+        /* (non-Javadoc)
+         * @see java.io.InputStream#reset()
+         */
         public void reset() throws IOException
         {
             delegate.reset();
         }
 
         /* @see java.io.InputStream#markSupported() */
+        /* (non-Javadoc)
+         * @see java.io.InputStream#markSupported()
+         */
         public boolean markSupported()
         {
             return delegate.markSupported();

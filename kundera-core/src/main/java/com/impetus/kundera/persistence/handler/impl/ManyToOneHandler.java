@@ -23,6 +23,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.handler.api.MappingHandler;
 
+
 /**
  * The Class ManyToOneHandler.
  * 
@@ -48,12 +49,12 @@ public class ManyToOneHandler extends AssociationHandler implements MappingHandl
         EntitySaveGraph objectGraph = populateDefaultGraph(entity, associationEntity, relation.getProperty());
         Field field = computeDirection(entity, relation.getProperty(), objectGraph, OneToMany.class);
         onDetach(entity, associationEntity, relation.getProperty(), true);
-        if(!objectGraph.isUniDirectional())
+        if (!objectGraph.isUniDirectional())
         {
-            onDetach(associationEntity, entity, field, true);
+            onDetach(associationEntity, entity, objectGraph.getBidirectionalProperty(), true);
         }
+        objectGraph.setIsswapped(true);
         return objectGraph;
     }
-    
-    
+
 }

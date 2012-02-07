@@ -15,28 +15,84 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence.handler.impl;
 
+import java.lang.reflect.Field;
+
+import javax.persistence.ManyToMany;
+
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.handler.api.MappingHandler;
+import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessorHelper;
+
 
 /**
  * The Class ManyToManyHandler.
+ * 
  * @author vivek.mishra
  */
 public class ManyToManyHandler extends AssociationHandler implements MappingHandler
 {
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.persistence.handler.api.MappingHandler#handleAssociation(java.lang.Object, java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.metadata.model.Relation)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.handler.api.MappingHandler#handleAssociation
+     * (java.lang.Object, java.lang.Object,
+     * com.impetus.kundera.metadata.model.EntityMetadata,
+     * com.impetus.kundera.metadata.model.Relation)
      */
     @Override
-    public EntitySaveGraph handleAssociation(Object entity, Object associationEntity, EntityMetadata metadata,Relation relation)
+    public EntitySaveGraph handleAssociation(Object entity, Object associationEntity, EntityMetadata metadata,
+            Relation relation)
     {
         // Many to many is case of mapping table.
-        //It is only possible via join table.
-        //which means need to populate child entity explicitly.
-        
-        return populateDefaultGraph(associationEntity, entity, relation.getProperty());
+        // It is only possible via join table.
+        // which means need to populate child entity explicitly.
+
+        EntitySaveGraph objectGraph = getDirectionalGraph(entity, metadata, associationEntity, relation);
+
+        return objectGraph;
+    }
+
+    /**
+     * Gets the directional graph.
+     *
+     * @param entity the entity
+     * @param metadata the metadata
+     * @param associationEntity the association entity
+     * @param relation the relation
+     * @return the directional graph
+     */
+    private EntitySaveGraph getDirectionalGraph(Object entity, EntityMetadata metadata, Object associationEntity,
+            Relation relation)
+    {
+        EntitySaveGraph objectGraph = new EntitySaveGraph(relation.getProperty());
+
+        objectGraph.setChildEntity(associationEntity);
+        objectGraph.setParentEntity(entity);
+
+        Field field = computeDirection(entity, relation.getProperty(), objectGraph, ManyToMany.class);
+
+        onDetach(entity, associationEntity, relation.getProperty(), false);
+        if (!objectGraph.isUniDirectional())
+        {
+            onDetach(associationEntity, entity, objectGraph.getBidirectionalProperty(), false);
+            return objectGraph;
+        }
+
+        objectGraph.setRelatedViaJoinTable(true);
+        try
+        {
+            objectGraph.setParentId(PropertyAccessorHelper.getId(entity, metadata));
+        }
+        catch (PropertyAccessException e)
+        {
+            e.printStackTrace();
+        }
+
+        return objectGraph;
     }
 
 }

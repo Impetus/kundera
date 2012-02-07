@@ -19,31 +19,41 @@ import java.io.IOException;
 
 import org.apache.hadoop.hbase.client.HTable;
 
+
+/**
+ * The Interface Reader.
+ */
 public interface Reader
 {
 
     /**
      * Populates HBase data for given family name.
-     * 
-     * @param hTable
-     *            HBase table
-     * @param columnFamily
-     *            HBase column family
-     * @param columnName
-     *            HBase column name.
-     * @param rowKey
-     *            HBase row key.
+     *
+     * @param hTable HBase table
+     * @param columnFamily HBase column family
+     * @param rowKey HBase row key.
      * @return HBase data wrapper containing all column names along with values.
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     HBaseData LoadData(HTable hTable, String columnFamily, String rowKey) throws IOException;
 
+    /**
+     * Load data.
+     *
+     * @param hTable the h table
+     * @param rowKey the row key
+     * @return the h base data
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     HBaseData LoadData(HTable hTable, String rowKey) throws IOException;
 
     /**
-     * 
-     * @param hTable
-     * @param qualifiers
-     * @return
+     * Load all.
+     *
+     * @param hTable the h table
+     * @param qualifiers the qualifiers
+     * @return the h base data
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     HBaseData loadAll(HTable hTable, String... qualifiers) throws IOException;
 

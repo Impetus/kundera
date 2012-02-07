@@ -50,37 +50,54 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import java.util.Locale;
 import org.apache.lucene.search.*;
 
+
 /**
- * Provides indexing functionality using lucene library
+ * Provides indexing functionality using lucene library.
  *
  * @author amresh.singh
  */
 public class LuceneIndexer extends DocumentIndexer
 {
 
-    /**
-     * log for this class.
-     */
+    /** log for this class. */
     private static Log log = LogFactory.getLog(LuceneIndexer.class);
+
+    /** The w. */
     private static IndexWriter w;
+
+    /** The reader. */
     private static IndexReader reader;
+
+    /** The index. */
     private static Directory index;
+
+    /** The is initialized. */
     private static boolean isInitialized;
+
+    /** The indexer. */
     private static LuceneIndexer indexer;
+
+    /** The ready for commit. */
     private static boolean readyForCommit;
 
+    /** The lucene dir path. */
+    private static String luceneDirPath;
+
     /**
-     * @param analyzer
+     * Instantiates a new lucene indexer.
+     *
+     * @param analyzer the analyzer
+     * @param lucDirPath the luc dir path
      */
-    private LuceneIndexer(Analyzer analyzer)
+    private LuceneIndexer(Analyzer analyzer, String lucDirPath)
     {
         super(analyzer);
         try
         {
-
+            luceneDirPath = lucDirPath;
             index = new RAMDirectory();/*
-             * FSDirectory.open(getIndexDirectory( ))
-             */
+                                        * FSDirectory.open(getIndexDirectory( ))
+                                        */
             // isInitialized
             /*
              * writer
@@ -102,20 +119,24 @@ public class LuceneIndexer extends DocumentIndexer
         {
             throw new IndexingException(e.getMessage());
         }
-//        throw new IndexingException("This should be instantiated via getInstance() method");
-//        // TODO Auto-generated constructor stub
+        // throw new
+        // IndexingException("This should be instantiated via getInstance() method");
+        // // TODO Auto-generated constructor stub
     }
 
     /**
-     * @param client
-     * @param analyzer
+     * Gets the single instance of LuceneIndexer.
+     *
+     * @param analyzer the analyzer
+     * @param lucDirPath the luc dir path
+     * @return single instance of LuceneIndexer
      */
-    public static synchronized LuceneIndexer getInstance(Analyzer analyzer)
+    public static synchronized LuceneIndexer getInstance(Analyzer analyzer, String lucDirPath)
     {
         // super(analyzer);
-        if (indexer == null)
+        if (indexer == null && lucDirPath != null)
         {
-            indexer = new LuceneIndexer(analyzer);
+            indexer = new LuceneIndexer(analyzer, lucDirPath);
 
         }
         return indexer;
@@ -172,8 +193,9 @@ public class LuceneIndexer extends DocumentIndexer
      */
     private File getIndexDirectory()
     {
-        String filePath = System.getProperty("user.home") + "/" + Constants.LUCENE_INDEX_DIRECTORY_NAME;
-        File file = new File(filePath);
+        // String filePath = System.getProperty("user.home") + "/" +
+        // Constants.LUCENE_INDEX_DIRECTORY_NAME;
+        File file = new File(luceneDirPath);
         if (!file.isDirectory())
         {
             file.mkdir();
@@ -181,15 +203,19 @@ public class LuceneIndexer extends DocumentIndexer
         return file;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object)
+     */
     @Override
     public final void index(EntityMetadata metadata, Object object)
     {
-
         indexDocument(metadata, object, null, null);
         onCommit();
-
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.index.Indexer#unindex(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
+     */
     @Override
     public final void unindex(EntityMetadata metadata, String id)
     {
@@ -209,6 +235,9 @@ public class LuceneIndexer extends DocumentIndexer
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.index.Indexer#search(java.lang.String, int, int, boolean)
+     */
     @SuppressWarnings("deprecation")
     @Override
     public final Map<String, String> search(String luceneQuery, int start, int count, boolean fetchRelation)
@@ -240,7 +269,8 @@ public class LuceneIndexer extends DocumentIndexer
          * }
          */ IndexSearcher searcher = new IndexSearcher(reader);
 
-        QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(Version.LUCENE_34));
+        QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(
+                Version.LUCENE_34));
 
         try
         {
@@ -301,15 +331,12 @@ public class LuceneIndexer extends DocumentIndexer
 
         log.debug("Indexing document in file system using lucene: " + document);
         indexDocumentUsingLucene(document);
-
     }
 
     /**
-     * Indexes document in file system using lucene
+     * Indexes document in file system using lucene.
      *
-     * @param document
-     * @throws CorruptIndexException
-     * @throws IOException
+     * @param document the document
      */
     private void indexDocumentUsingLucene(Document document)
     {
@@ -330,6 +357,9 @@ public class LuceneIndexer extends DocumentIndexer
         }
     }
 
+    /**
+     * Flush internal.
+     */
     private void flushInternal()
     {
         try
@@ -340,7 +370,9 @@ public class LuceneIndexer extends DocumentIndexer
                 index.copy(index, FSDirectory.open(getIndexDirectory()), false);
                 readyForCommit = false;
             }
-        } catch (CorruptIndexException e)
+        }
+
+        catch (CorruptIndexException e)
         {
             log.error("Error while indexing document " + " into Lucene. Details:" + e.getMessage());
         } catch (IOException e)
@@ -370,27 +402,31 @@ public class LuceneIndexer extends DocumentIndexer
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.index.Indexer#flush()
+     */
     @Override
     public void flush()
     {
-//        try
-//        {
+        // try
+        // {
         if (w != null)
         {
-//                w.commit();
+
+            // w.commit();
             // w.close();
             // index.copy(index, FSDirectory.open(getIndexDirectory()),
             // false);
         }
-//        }
-//        catch (CorruptIndexException e)
-//        {
-//            e.printStackTrace();
-//        }
-//        catch (IOException e)
-//        {
-//            e.printStackTrace();
-//        }
+        // }
+        // catch (CorruptIndexException e)
+        // {
+        // e.printStackTrace();
+        // }
+        // catch (IOException e)
+        // {
+        // e.printStackTrace();
+        // }
 
     }
 
@@ -404,11 +440,20 @@ public class LuceneIndexer extends DocumentIndexer
     @Override
     public void index(EntityMetadata metadata, Object object, String parentId, Class<?> clazz)
     {
+
         indexDocument(metadata, object, parentId, clazz);
         onCommit();
-
     }
 
+    /**
+     * Index document.
+     *
+     * @param metadata the metadata
+     * @param object the object
+     * @param parentId the parent id
+     * @param clazz the clazz
+     * @return the document
+     */
     private Document indexDocument(EntityMetadata metadata, Object object, String parentId, Class<?> clazz)
     {
         if (!metadata.isIndexable())
@@ -495,7 +540,8 @@ public class LuceneIndexer extends DocumentIndexer
 
                     } else
                     {
-                        currentDoc = prepareDocumentForSuperColumn(metadata, object, embeddedColumnName, parentId, clazz);
+                        currentDoc = prepareDocumentForSuperColumn(metadata, object, embeddedColumnName, parentId,
+                                clazz);
                         indexSuperColumn(metadata, object, currentDoc,
                                 metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object,
                                 embeddedColumn);
@@ -524,24 +570,27 @@ public class LuceneIndexer extends DocumentIndexer
         return currentDoc;
     }
 
+    /**
+     * On commit.
+     */
     private void onCommit()
     {
         // TODO: Sadly this required to keep lucene happy, in case of indexing
         // and searching with same entityManager.
         // Other alternative would be to issue flush on each search
-//        try
-//        {
-//            w.commit();
+        // try
+        // {
+        // w.commit();
         isInitialized = true;
         readyForCommit = true;
-//        }
-//        catch (CorruptIndexException e)
-//        {
-//            throw new IndexingException(e.getMessage());
-//        }
-//        catch (IOException e)
-//        {
-//            throw new IndexingException(e.getMessage());
-//        }
+        // }
+        // catch (CorruptIndexException e)
+        // {
+        // throw new IndexingException(e.getMessage());
+        // }
+        // catch (IOException e)
+        // {
+        // throw new IndexingException(e.getMessage());
+        // }
     }
 }

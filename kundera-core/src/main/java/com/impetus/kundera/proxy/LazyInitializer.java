@@ -19,6 +19,7 @@ import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.persistence.PersistenceDelegator;
 
+
 /**
  * Handles fetching of the underlying entity for a proxy.
  * 

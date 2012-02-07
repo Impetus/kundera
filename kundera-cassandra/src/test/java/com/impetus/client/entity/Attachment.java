@@ -20,9 +20,10 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+
 /**
- * Entity class for Email attachment
- * 
+ * Entity class for Email attachment.
+ *
  * @author amresh.singh
  */
 
@@ -31,24 +32,33 @@ import javax.persistence.Table;
 public class Attachment
 {
 
+    /** The attachment id. */
     @Id
     private String attachmentId;
 
+    /** The file name. */
     @Column(name = "file_name")
     private String fileName;
 
+    /** The file type. */
     @Column(name = "file_type")
     private String fileType;
 
+    /** The file location. */
     @Column(name = "file_location")
     private String fileLocation;
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     public String toString()
     {
         return "ID: " + attachmentId + "\tName: " + fileName + "\tType: " + fileType + "\tLocation: " + fileLocation;
     }
 
     /**
+     * Gets the attachment id.
+     *
      * @return the attachmentId
      */
     public String getAttachmentId()
@@ -57,8 +67,9 @@ public class Attachment
     }
 
     /**
-     * @param attachmentId
-     *            the attachmentId to set
+     * Sets the attachment id.
+     *
+     * @param attachmentId the attachmentId to set
      */
     public void setAttachmentId(String attachmentId)
     {
@@ -66,6 +77,8 @@ public class Attachment
     }
 
     /**
+     * Gets the file name.
+     *
      * @return the fileName
      */
     public String getFileName()
@@ -74,8 +87,9 @@ public class Attachment
     }
 
     /**
-     * @param fileName
-     *            the fileName to set
+     * Sets the file name.
+     *
+     * @param fileName the fileName to set
      */
     public void setFileName(String fileName)
     {
@@ -83,6 +97,8 @@ public class Attachment
     }
 
     /**
+     * Gets the file type.
+     *
      * @return the fileType
      */
     public String getFileType()
@@ -91,8 +107,9 @@ public class Attachment
     }
 
     /**
-     * @param fileType
-     *            the fileType to set
+     * Sets the file type.
+     *
+     * @param fileType the fileType to set
      */
     public void setFileType(String fileType)
     {
@@ -100,6 +117,8 @@ public class Attachment
     }
 
     /**
+     * Gets the file location.
+     *
      * @return the fileLocation
      */
     public String getFileLocation()
@@ -108,8 +127,9 @@ public class Attachment
     }
 
     /**
-     * @param fileLocation
-     *            the fileLocation to set
+     * Sets the file location.
+     *
+     * @param fileLocation the fileLocation to set
      */
     public void setFileLocation(String fileLocation)
     {

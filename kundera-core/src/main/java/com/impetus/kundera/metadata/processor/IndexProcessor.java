@@ -31,6 +31,7 @@ import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PropertyIndex;
 
+
 /**
  * The Class BaseMetadataProcessor.
  * 
@@ -46,6 +47,9 @@ public class IndexProcessor implements MetadataProcessor
      * @see
      * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
      * com.impetus.kundera.metadata.EntityMetadata)
+     */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     public final void process(final Class<?> clazz, EntityMetadata metadata)
     {
@@ -88,16 +92,14 @@ public class IndexProcessor implements MetadataProcessor
         {
             if (f.isAnnotationPresent(Id.class))
             {
-                metadata.addIndexProperty(new PropertyIndex(f, f.getName()));
+                String alias = f.getName();
+                alias = getIndexName(f, alias);
+                metadata.addIndexProperty(new PropertyIndex(f, alias));
             }
             else if (f.isAnnotationPresent(Column.class))
             {
-                Column c = f.getAnnotation(Column.class);
-                String alias = c.name().trim();
-                if (alias.isEmpty())
-                {
-                    alias = f.getName();
-                }
+                String alias = f.getName();
+                alias = getIndexName(f, alias);
 
                 if (columnsToBeIndexed.isEmpty() || columnsToBeIndexed.contains(alias))
                 {
@@ -106,5 +108,26 @@ public class IndexProcessor implements MetadataProcessor
 
             }
         }
+    }
+
+    /**
+     * Gets the index name.
+     *
+     * @param f the f
+     * @param alias the alias
+     * @return the index name
+     */
+    private String getIndexName(Field f, String alias)
+    {
+        if (f.isAnnotationPresent(Column.class))
+        {
+            Column c = f.getAnnotation(Column.class);
+            alias = c.name().trim();
+            if (alias.isEmpty())
+            {
+                alias = f.getName();
+            }
+        }
+        return alias;
     }
 }

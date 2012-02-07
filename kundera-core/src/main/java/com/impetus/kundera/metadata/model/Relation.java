@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.kundera.metadata.model;
 
 import java.lang.reflect.Field;
@@ -35,6 +50,18 @@ public final class Relation
 
     /** The type. */
     private Relation.ForeignKey type;
+
+    /** Join column name for this relationship. */
+    private String joinColumnName;
+
+    /** Whether this relationship is through a Join Table. */
+    private boolean isRelatedViaJoinTable;
+
+    /** Metadata for JoinTable, applicable only if isRelatedViaJoinTable==true. */
+    private JoinTableMetadata joinTableMetadata;
+
+    /** Whether this relationship is joined by primary key, only applicable for OneToOne. */
+    private boolean isJoinedByPrimaryKey;
 
     /**
      * 
@@ -169,6 +196,86 @@ public final class Relation
     public Relation.ForeignKey getType()
     {
         return type;
+    }
+
+    /**
+     * Gets the join column name.
+     *
+     * @return the joinColumnName
+     */
+    public String getJoinColumnName()
+    {
+        return joinColumnName;
+    }
+
+    /**
+     * Sets the join column name.
+     *
+     * @param joinColumnName the joinColumnName to set
+     */
+    public void setJoinColumnName(String joinColumnName)
+    {
+        this.joinColumnName = joinColumnName;
+    }
+
+    /**
+     * Checks if is related via join table.
+     *
+     * @return the isRelatedViaJoinTable
+     */
+    public boolean isRelatedViaJoinTable()
+    {
+        return isRelatedViaJoinTable;
+    }
+
+    /**
+     * Sets the related via join table.
+     *
+     * @param isRelatedViaJoinTable the isRelatedViaJoinTable to set
+     */
+    public void setRelatedViaJoinTable(boolean isRelatedViaJoinTable)
+    {
+        this.isRelatedViaJoinTable = isRelatedViaJoinTable;
+    }
+
+    /**
+     * Gets the join table metadata.
+     *
+     * @return the joinTableMetadata
+     */
+    public JoinTableMetadata getJoinTableMetadata()
+    {
+        return joinTableMetadata;
+    }
+
+    /**
+     * Sets the join table metadata.
+     *
+     * @param joinTableMetadata the joinTableMetadata to set
+     */
+    public void setJoinTableMetadata(JoinTableMetadata joinTableMetadata)
+    {
+        this.joinTableMetadata = joinTableMetadata;
+    }
+
+    /**
+     * Checks if is joined by primary key.
+     *
+     * @return the isJoinedByPrimaryKey
+     */
+    public boolean isJoinedByPrimaryKey()
+    {
+        return isJoinedByPrimaryKey;
+    }
+
+    /**
+     * Sets the joined by primary key.
+     *
+     * @param isJoinedByPrimaryKey the isJoinedByPrimaryKey to set
+     */
+    public void setJoinedByPrimaryKey(boolean isJoinedByPrimaryKey)
+    {
+        this.isJoinedByPrimaryKey = isJoinedByPrimaryKey;
     }
 
     /**

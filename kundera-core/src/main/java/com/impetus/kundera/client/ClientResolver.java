@@ -18,22 +18,28 @@ package com.impetus.kundera.client;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
+
 /**
+ * The Class ClientResolver.
+ *
  * @author impetus
  */
 public final class ClientResolver
 {
 
+    /** The client factories. */
     static Map<String, GenericClientFactory> clientFactories = new ConcurrentHashMap<String, GenericClientFactory>();
 
     /**
-     * 
-     * @param clientIdentifier
-     * @return
+     * Gets the client.
+     *
+     * @param persistenceUnit the persistence unit
+     * @return the client
      */
     public static Client getClient(String persistenceUnit)
     {
@@ -41,6 +47,12 @@ public final class ClientResolver
     }
 
     // TODO To move this method to client dicoverer
+    /**
+     * Gets the client factory.
+     *
+     * @param persistenceUnit the persistence unit
+     * @return the client factory
+     */
     public static GenericClientFactory getClientFactory(String persistenceUnit)
     {
         GenericClientFactory loader = clientFactories.get(persistenceUnit);
@@ -50,7 +62,8 @@ public final class ClientResolver
 
         PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
-        String kunderaClientName = (String) persistenceUnitMetadata.getProperties().get("kundera.client");
+        String kunderaClientName = (String) persistenceUnitMetadata.getProperties().get(
+                PersistenceProperties.KUNDERA_CLIENT);
         ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());
 
         try
@@ -74,10 +87,11 @@ public final class ClientResolver
             {
                 loader = (GenericClientFactory) Class.forName("com.impetus.client.mongodb.MongoDBClientFactory")
                         .newInstance();
-            } else if(clientType.equals(ClientType.RDBMS))
+            }
+            else if (clientType.equals(ClientType.RDBMS))
             {
                 loader = (GenericClientFactory) Class.forName("com.impetus.client.rdbms.RDBMSClientFactory")
-                .newInstance();
+                        .newInstance();
             }
         }
         catch (InstantiationException e)

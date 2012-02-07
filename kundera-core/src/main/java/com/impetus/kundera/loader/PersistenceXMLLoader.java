@@ -51,9 +51,11 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+
 /**
- * @author amresh.singh
+ * The Class PersistenceXMLLoader.
  *
+ * @author amresh.singh
  */
 public class PersistenceXMLLoader
 {
@@ -306,6 +308,65 @@ public class PersistenceXMLLoader
     }
 
     /**
+     * The Class ErrorLogger.
+     */
+    public static class ErrorLogger implements ErrorHandler
+    {
+
+        /** The file. */
+        private String file;
+
+        /** The errors. */
+        private List errors;
+
+        /**
+         * Instantiates a new error logger.
+         * 
+         * @param file
+         *            the file
+         * @param errors
+         *            the errors
+         */
+        ErrorLogger(String file, List errors)
+        {
+            this.file = file;
+            this.errors = errors;
+        }
+
+        /* @see org.xml.sax.ErrorHandler#error(org.xml.sax.SAXParseException) */
+        /* (non-Javadoc)
+         * @see org.xml.sax.ErrorHandler#error(org.xml.sax.SAXParseException)
+         */
+        public void error(SAXParseException error)
+        {
+            log.error("Error parsing XML: " + file + '(' + error.getLineNumber() + ") " + error.getMessage());
+            errors.add(error);
+        }
+
+        /*
+         * @see
+         * org.xml.sax.ErrorHandler#fatalError(org.xml.sax.SAXParseException)
+         */
+        /* (non-Javadoc)
+         * @see org.xml.sax.ErrorHandler#fatalError(org.xml.sax.SAXParseException)
+         */
+        public void fatalError(SAXParseException error)
+        {
+            log.error("Error parsing XML: " + file + '(' + error.getLineNumber() + ") " + error.getMessage());
+            errors.add(error);
+        }
+
+        /* @see org.xml.sax.ErrorHandler#warning(org.xml.sax.SAXParseException) */
+        /* (non-Javadoc)
+         * @see org.xml.sax.ErrorHandler#warning(org.xml.sax.SAXParseException)
+         */
+        public void warning(SAXParseException warn)
+        {
+            log.warn("Warning parsing XML: " + file + '(' + warn.getLineNumber() + ") " + warn.getMessage());
+        }
+    }
+
+    /**
      * Checks if is empty.
      *
      * @param str
@@ -366,53 +427,5 @@ public class PersistenceXMLLoader
         return result.toString().trim();
     }
 
-    /**
-     * The Class ErrorLogger.
-     */
-    public static class ErrorLogger
-        implements ErrorHandler
-    {
-        /** The errors. */
-        private List errors;
-
-        /** The file. */
-        private String file;
-
-        /**
-         * Instantiates a new error logger.
-         *
-         * @param file
-         *            the file
-         * @param errors
-         *            the errors
-         */
-        ErrorLogger(String file, List errors)
-        {
-            this.file = file;
-            this.errors = errors;
-        }
-
-        /* @see org.xml.sax.ErrorHandler#error(org.xml.sax.SAXParseException) */
-        public void error(SAXParseException error)
-        {
-            log.error("Error parsing XML: " + file + '(' + error.getLineNumber() + ") " + error.getMessage());
-            errors.add(error);
-        }
-
-        /*
-         * @see
-         * org.xml.sax.ErrorHandler#fatalError(org.xml.sax.SAXParseException)
-         */
-        public void fatalError(SAXParseException error)
-        {
-            log.error("Error parsing XML: " + file + '(' + error.getLineNumber() + ") " + error.getMessage());
-            errors.add(error);
-        }
-
-        /* @see org.xml.sax.ErrorHandler#warning(org.xml.sax.SAXParseException) */
-        public void warning(SAXParseException warn)
-        {
-            log.warn("Warning parsing XML: " + file + '(' + warn.getLineNumber() + ") " + warn.getMessage());
-        }
-    }
+    
 }

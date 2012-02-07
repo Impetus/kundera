@@ -26,6 +26,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -33,16 +34,33 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 
+
 /**
+ * The Class QueryResolver.
+ * 
  * @author amresh.singh
  * 
  */
 public class QueryResolver
 {
+
+    /** The log. */
     private static Log log = LogFactory.getLog(QueryResolver.class);
 
+    /** The kundera query. */
     KunderaQuery kunderaQuery;
 
+    /**
+     * Gets the query implementation.
+     * 
+     * @param jpaQuery
+     *            the jpa query
+     * @param persistenceDelegator
+     *            the persistence delegator
+     * @param persistenceUnits
+     *            the persistence units
+     * @return the query implementation
+     */
     public Query getQueryImplementation(String jpaQuery, PersistenceDelegator persistenceDelegator,
             String... persistenceUnits)
     {
@@ -50,7 +68,7 @@ public class QueryResolver
         KunderaQueryParser parser = new KunderaQueryParser(kunderaQuery, jpaQuery);
         parser.parse();
         kunderaQuery.postParsingInit();
-        
+
         EntityMetadata entityMetadata = kunderaQuery.getEntityMetadata();
 
         String pu = null;
@@ -69,7 +87,7 @@ public class QueryResolver
             for (PersistenceUnitMetadata puMetadata : puMetadataMap.values())
             {
                 Properties props = puMetadata.getProperties();
-                String clientName = props.getProperty("kundera.client");
+                String clientName = props.getProperty(PersistenceProperties.KUNDERA_CLIENT);
                 if (ClientType.RDBMS.name().equalsIgnoreCase(clientName))
                 {
                     pu = puMetadata.getPersistenceUnitName();
@@ -80,30 +98,14 @@ public class QueryResolver
         }
 
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
-        String kunderaClientName = (String) puMetadata.getProperties().get("kundera.client");
+        String kunderaClientName = (String) puMetadata.getProperties().get(PersistenceProperties.KUNDERA_CLIENT);
         ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());
 
         Query query = null;
 
         try
         {
-            if (clientType.equals(ClientType.PELOPS) || clientType.equals(ClientType.THRIFT)
-                    || clientType.equals(ClientType.HBASE) || clientType.equals(ClientType.RDBMS))
-            {
-                Class clazz = Class.forName("com.impetus.kundera.query.LuceneQuery");
-                Constructor constructor = clazz.getConstructor(String.class, KunderaQuery.class,
-                        PersistenceDelegator.class, String[].class);
-                query = (Query) constructor.newInstance(jpaQuery, kunderaQuery, persistenceDelegator, persistenceUnits);
-
-            }
-
-            else if (clientType.equals(ClientType.MONGODB))
-            {
-                Class clazz = Class.forName("com.impetus.client.mongodb.query.MongoDBQuery");
-                Constructor constructor = clazz.getConstructor(String.class, KunderaQuery.class,
-                        PersistenceDelegator.class, String[].class);
-                query = (Query) constructor.newInstance(jpaQuery, kunderaQuery, persistenceDelegator, persistenceUnits);
-            }
+            query = getQuery(clientType, jpaQuery, persistenceDelegator, persistenceUnits);
         }
         catch (SecurityException e)
         {
@@ -138,4 +140,73 @@ public class QueryResolver
 
     }
 
+    /**
+     * Gets the query.
+     * 
+     * @param clientType
+     *            the client type
+     * @param jpaQuery
+     *            the jpa query
+     * @param persistenceDelegator
+     *            the persistence delegator
+     * @param persistenceUnits
+     *            the persistence units
+     * @return the query
+     * @throws ClassNotFoundException
+     *             the class not found exception
+     * @throws SecurityException
+     *             the security exception
+     * @throws NoSuchMethodException
+     *             the no such method exception
+     * @throws IllegalArgumentException
+     *             the illegal argument exception
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     * @throws InvocationTargetException
+     *             the invocation target exception
+     */
+    public Query getQuery(ClientType clientType, String jpaQuery, PersistenceDelegator persistenceDelegator,
+            String... persistenceUnits) throws ClassNotFoundException, SecurityException, NoSuchMethodException,
+            IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException
+    {
+        Query query;
+        Class clazz = null;
+        switch (clientType)
+        {
+        case HBASE:
+            clazz = Class.forName("com.impetus.kundera.query.LuceneQuery");
+
+            break;
+        case MONGODB:
+            clazz = Class.forName("com.impetus.client.mongodb.query.MongoDBQuery");
+            break;
+        case PELOPS:
+            clazz = Class.forName("com.impetus.client.cassandra.query.CassQuery");
+
+            break;
+        case THRIFT:
+            clazz = Class.forName("com.impetus.client.cassandra.query.CassQuery");
+
+            break;
+
+        case RDBMS:
+            clazz = Class.forName("com.impetus.client.rdbms.query.RDBMSQuery");
+
+            break;
+
+        default:
+            throw new ClassNotFoundException("Invalid Client type" + clientType);
+            // break;
+        }
+
+        @SuppressWarnings("rawtypes")
+        Constructor constructor = clazz.getConstructor(String.class, KunderaQuery.class, PersistenceDelegator.class,
+                String[].class);
+        query = (Query) constructor.newInstance(jpaQuery, kunderaQuery, persistenceDelegator, persistenceUnits);
+
+        return query;
+
+    }
 }

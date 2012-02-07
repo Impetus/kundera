@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.cache;
 
+
 /**
  * NonOperational Cache implementation.
  * 
@@ -25,6 +26,9 @@ public class NonOperationalCache implements Cache, javax.persistence.Cache
 {
 
     /* @see com.impetus.kundera.cache.Cache#size() */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.cache.Cache#size()
+     */
     @Override
     public int size()
     {
@@ -35,34 +39,52 @@ public class NonOperationalCache implements Cache, javax.persistence.Cache
      * @see com.impetus.kundera.cache.Cache#put(java.lang.Object,
      * java.lang.Object)
      */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.cache.Cache#put(java.lang.Object, java.lang.Object)
+     */
     @Override
     public void put(final Object key, final Object value)
     {
     }
 
     /* @see com.impetus.kundera.cache.Cache#get(java.lang.Object) */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.cache.Cache#get(java.lang.Object)
+     */
     @Override
     public Object get(final Object key)
     {
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see javax.persistence.Cache#contains(java.lang.Class, java.lang.Object)
+     */
     @Override
     public boolean contains(Class paramClass, Object paramObject)
     {
         return false;
     }
 
+    /* (non-Javadoc)
+     * @see javax.persistence.Cache#evict(java.lang.Class, java.lang.Object)
+     */
     @Override
     public void evict(Class paramClass, Object paramObject)
     {
     }
 
+    /* (non-Javadoc)
+     * @see javax.persistence.Cache#evict(java.lang.Class)
+     */
     @Override
     public void evict(Class paramClass)
     {
     }
 
+    /* (non-Javadoc)
+     * @see javax.persistence.Cache#evictAll()
+     */
     @Override
     public void evictAll()
     {

@@ -19,6 +19,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
+
 /**
  * The Class StringAccessor.
  * 
@@ -28,6 +29,9 @@ public class StringAccessor implements PropertyAccessor<String>
 {
 
     /* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
+     */
     @Override
     public final String fromBytes(byte[] bytes) throws PropertyAccessException
     {
@@ -42,9 +46,8 @@ public class StringAccessor implements PropertyAccessor<String>
         }
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
     public final byte[] toBytes(Object s) throws PropertyAccessException
@@ -59,14 +62,22 @@ public class StringAccessor implements PropertyAccessor<String>
         }
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
      */
     @Override
     public final String toString(Object object)
     {
         return (String) object;
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+     */
+    @Override
+    public String fromString(String s) throws PropertyAccessException
+    {
+        return s;
     }
 
 }

@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManagerFactory;
@@ -24,12 +23,13 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.ProviderUtil;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.loader.ApplicationLoader;
 import com.impetus.kundera.loader.CoreLoader;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+
 
 /**
  * The Class KunderaPersistence.
@@ -41,8 +41,9 @@ public class KunderaPersistence implements PersistenceProvider
 {
 
     /** The logger. */
-    private static Logger logger = Logger.getLogger(KunderaPersistence.class);
+    private static Logger logger = LoggerFactory.getLogger(KunderaPersistence.class);
 
+    /** The loaded. */
     private static Boolean loaded = false;
 
     /**
@@ -55,12 +56,18 @@ public class KunderaPersistence implements PersistenceProvider
         new CoreLoader().load();
     }
 
+    /* (non-Javadoc)
+     * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
+     */
     @Override
     public final EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map)
     {
         return createEntityManagerFactory(info.getPersistenceUnitName(), map);
     }
 
+    /* (non-Javadoc)
+     * @see javax.persistence.spi.PersistenceProvider#createEntityManagerFactory(java.lang.String, java.util.Map)
+     */
     @Override
     public synchronized final EntityManagerFactory createEntityManagerFactory(String persistenceUnit, Map map)
     {
@@ -79,10 +86,9 @@ public class KunderaPersistence implements PersistenceProvider
     }
 
     /**
-     * One time initialization at Application and Client level
-     * 
-     * @param persistenceUnit
-     *            Persistence Unit/ Comma separated persistence units
+     * One time initialization at Application and Client level.
+     *
+     * @param persistenceUnit Persistence Unit/ Comma separated persistence units
      */
     private void initializeKundera(String persistenceUnit)
     {
@@ -94,15 +100,11 @@ public class KunderaPersistence implements PersistenceProvider
 
         (new ApplicationLoader()).load(persistenceUnits);
 
-        // Invoke Client Loaders
-        logger.info("Loading Client(s) For Persistence Unit(s) " + persistenceUnit);
-        for (String pu : persistenceUnits)
-        {
-            ClientResolver.getClientFactory(pu).load(pu);
-        }
-
     }
 
+    /* (non-Javadoc)
+     * @see javax.persistence.spi.PersistenceProvider#getProviderUtil()
+     */
     @Override
     public ProviderUtil getProviderUtil()
     {

@@ -24,6 +24,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.handler.api.MappingHandler;
 
+
 /**
  * The Class OneToManyHandler.
  */
@@ -52,15 +53,10 @@ class OneToManyHandler extends AssociationHandler implements MappingHandler
 
     /**
      * Gets the directional graph.
-     * 
-     * @param entity
-     *            the entity
-     * @param fields
-     *            the fields
-     * @param associationEntity
-     *            the association entity
-     * @param relation
-     *            the relation
+     *
+     * @param entity the entity
+     * @param associationEntity the association entity
+     * @param relation the relation
      * @return the directional graph
      */
     private EntitySaveGraph getDirectionalGraph(Object entity, Object associationEntity, Relation relation)
@@ -69,20 +65,19 @@ class OneToManyHandler extends AssociationHandler implements MappingHandler
         objectGraph.setChildEntity(associationEntity);
         objectGraph.setParentEntity(entity);
         Field field = computeDirection(entity, relation.getProperty(), objectGraph, ManyToOne.class);
-//        objectGraph.setProperty(rField);
+        // objectGraph.setProperty(rField);
 
-//        objectGraph.setParentClass(PropertyAccessorHelper.getGenericClass(relation.getProperty()));
-//        objectGraph.setChildClass(entity.getClass());
-
+        // objectGraph.setParentClass(PropertyAccessorHelper.getGenericClass(relation.getProperty()));
+        // objectGraph.setChildClass(entity.getClass());
+        onDetach(entity, associationEntity, relation.getProperty(), false);
         if (!objectGraph.isUniDirectional())
         {
             objectGraph.setfKeyName(getJoinColumnName(field));
-            onDetach(entity, associationEntity, relation.getProperty(), false);
-            // onDetach(associationEntity, entity, field, false);
+            onDetach(associationEntity, entity, objectGraph.getBidirectionalProperty(), false);
+
             return objectGraph;
         }
 
-        onDetach(entity, associationEntity, relation.getProperty(), false);
         // in case of uni-directional.
         objectGraph.setfKeyName(getJoinColumnName(relation.getProperty()));
         return objectGraph;

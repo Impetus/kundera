@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.Get;
@@ -36,6 +38,7 @@ import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+
 /**
  * The Class HBaseWriter.
  * 
@@ -46,6 +49,9 @@ public class HBaseWriter implements Writer
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseWriter.class);
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.lang.String, java.util.List, java.lang.Object)
+     */
     @Override
     public void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns,
             Object columnFamilyObj) throws IOException
@@ -68,19 +74,24 @@ public class HBaseWriter implements Writer
         }
         htable.put(p);
     }
-    
+
+    /* (non-Javadoc)
+     * @see com.impetus.client.hbase.Writer#writeColumn(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.Column, java.lang.Object)
+     */
     @Override
-    public void writeColumn(HTable htable, String columnFamily, String rowKey, Column column, Object columnObj) throws IOException
+    public void writeColumn(HTable htable, String columnFamily, String rowKey, Column column, Object columnObj)
+            throws IOException
     {
-        Put p = new Put(Bytes.toBytes(rowKey));       
-        
-        
+        Put p = new Put(Bytes.toBytes(rowKey));
+
         p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(column.getName()), Bytes.toBytes(columnObj.toString()));
-                        
-                
+
         htable.put(p);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.util.List, java.lang.Object)
+     */
     @Override
     public void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity) throws IOException
     {
@@ -100,36 +111,61 @@ public class HBaseWriter implements Writer
             {
                 throw new IOException(e1.getMessage());
             }
-        }        
+        }
         htable.put(p);
-    } 
-    
+    }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.util.Map)
+     */
     @Override
-	public void writeRelations(HTable htable, String rowKey, boolean containsEmbeddedObjectsOnly, List<RelationHolder> relations) throws IOException {
-    	Put p = new Put(Bytes.toBytes(rowKey));
-    	
-		for (RelationHolder r : relations) {
-			if (r != null) {
-				if(containsEmbeddedObjectsOnly) {
-					p.add(Bytes.toBytes(r.getRelationName()),
-							Bytes.toBytes(r.getRelationName()),
-							Bytes.toBytes(r.getRelationValue()));
-				} else {
-					p.add(Bytes.toBytes(r.getRelationName()),
-							System.currentTimeMillis(),
-							Bytes.toBytes(r.getRelationValue()));
-				}
-				
+    public void writeColumns(HTable htable, String rowKey, Map<String, String> columns) throws IOException
+    {
 
-			}
-		}		
-    	
-    	htable.put(p);
-	}
-	
+        Put p = new Put(Bytes.toBytes(rowKey));
+
+        for (String columnName : columns.keySet())
+        {
+            p.add(Bytes.toBytes(Constants.JOIN_COLUMNS_FAMILY_NAME), Bytes.toBytes(columnName), columns.get(columnName)
+                    .getBytes());
+        }
+        htable.put(p);
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.client.hbase.Writer#writeRelations(org.apache.hadoop.hbase.client.HTable, java.lang.String, boolean, java.util.List)
+     */
+    @Override
+    public void writeRelations(HTable htable, String rowKey, boolean containsEmbeddedObjectsOnly,
+            List<RelationHolder> relations) throws IOException
+    {
+        Put p = new Put(Bytes.toBytes(rowKey));
+
+        for (RelationHolder r : relations)
+        {
+            if (r != null)
+            {
+                if (containsEmbeddedObjectsOnly)
+                {
+                    p.add(Bytes.toBytes(r.getRelationName()), Bytes.toBytes(r.getRelationName()),
+                            Bytes.toBytes(r.getRelationValue()));
+                }
+                else
+                {
+                    p.add(Bytes.toBytes(r.getRelationName()), System.currentTimeMillis(),
+                            Bytes.toBytes(r.getRelationValue()));
+                }
+
+            }
+        }
+
+        htable.put(p);
+    }
 
     // TODO: Scope of performance improvement in this code
+    /* (non-Javadoc)
+     * @see com.impetus.client.hbase.Writer#writeForeignKeys(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.util.Map)
+     */
     @Override
     public void writeForeignKeys(HTable hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
             throws IOException
@@ -167,4 +203,32 @@ public class HBaseWriter implements Writer
 
         hTable.put(p);
     }
- }
+
+    /**
+     * Support for delete over HBase.
+     *
+     * @param hTable the h table
+     * @param rowKey the row key
+     * @param columnFamily the column family
+     */
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#delete(org.apache.hadoop.hbase.client
+     * .HTable, java.lang.String, java.lang.String)
+     */
+    public void delete(HTable hTable, String rowKey, String columnFamily)
+    {
+        try
+        {
+            hTable.deleteAll(rowKey);
+        }
+        catch (IOException e)
+        {
+            log.error("Error while delete on hbase for : " + rowKey);
+            throw new PersistenceException(e.getMessage());
+        }
+    }
+
+}

@@ -24,9 +24,10 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+
 /**
- * Entity class for Email
- * 
+ * Entity class for Email.
+ *
  * @author amresh.singh
  */
 
@@ -35,38 +36,55 @@ import javax.persistence.Table;
 public class Email
 {
 
+    /** The message id. */
     @Id
     private String messageId;
 
+    /** The subject. */
     @Column(name = "subject_email")
     private String subject;
 
+    /** The body. */
     @Column(name = "body_email")
     private String body;
 
     // @OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+    /** The from. */
     @Embedded
     private Contact from;
 
     // @OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+    /** The to. */
     @Embedded
     private Contact to;
 
     // @OneToMany (cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+    /** The attachments. */
     @Embedded
     private List<Attachment> attachments;
 
+    /**
+     * Instantiates a new email.
+     */
     public Email()
     {
 
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     public String toString()
     {
         return "MessageId: " + messageId + "\tFrom:" + from + "\tTo: " + to + "\tSubject: " + subject + "\tBody: "
                 + body + "\tAttachments: " + attachments;
     }
 
+    /**
+     * Adds the attachment.
+     *
+     * @param attchment the attchment
+     */
     public void addAttachment(Attachment attchment)
     {
         if (this.attachments == null || this.attachments.isEmpty())
@@ -77,6 +95,8 @@ public class Email
     }
 
     /**
+     * Gets the message id.
+     *
      * @return the messageId
      */
     public String getMessageId()
@@ -85,8 +105,9 @@ public class Email
     }
 
     /**
-     * @param messageId
-     *            the messageId to set
+     * Sets the message id.
+     *
+     * @param messageId the messageId to set
      */
     public void setMessageId(String messageId)
     {
@@ -94,6 +115,8 @@ public class Email
     }
 
     /**
+     * Gets the from.
+     *
      * @return the from
      */
     public Contact getFrom()
@@ -102,8 +125,9 @@ public class Email
     }
 
     /**
-     * @param from
-     *            the from to set
+     * Sets the from.
+     *
+     * @param from the from to set
      */
     public void setFrom(Contact from)
     {
@@ -111,6 +135,8 @@ public class Email
     }
 
     /**
+     * Gets the to.
+     *
      * @return the to
      */
     public Contact getTo()
@@ -119,8 +145,9 @@ public class Email
     }
 
     /**
-     * @param to
-     *            the to to set
+     * Sets the to.
+     *
+     * @param to the to to set
      */
     public void setTo(Contact to)
     {
@@ -128,6 +155,8 @@ public class Email
     }
 
     /**
+     * Gets the subject.
+     *
      * @return the subject
      */
     public String getSubject()
@@ -136,8 +165,9 @@ public class Email
     }
 
     /**
-     * @param subject
-     *            the subject to set
+     * Sets the subject.
+     *
+     * @param subject the subject to set
      */
     public void setSubject(String subject)
     {
@@ -145,6 +175,8 @@ public class Email
     }
 
     /**
+     * Gets the body.
+     *
      * @return the body
      */
     public String getBody()
@@ -153,8 +185,9 @@ public class Email
     }
 
     /**
-     * @param body
-     *            the body to set
+     * Sets the body.
+     *
+     * @param body the body to set
      */
     public void setBody(String body)
     {
@@ -162,6 +195,8 @@ public class Email
     }
 
     /**
+     * Gets the attachments.
+     *
      * @return the attachments
      */
     public List<Attachment> getAttachments()
@@ -170,8 +205,9 @@ public class Email
     }
 
     /**
-     * @param attachments
-     *            the attachments to set
+     * Sets the attachments.
+     *
+     * @param attachments the attachments to set
      */
     public void setAttachments(List<Attachment> attachments)
     {

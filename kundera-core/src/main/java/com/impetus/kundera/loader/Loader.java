@@ -15,13 +15,26 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
+
 /**
+ * The Interface Loader.
+ *
  * @author amresh.singh
- * 
  */
 public interface Loader
 {
+    
+    /**
+     * Load.
+     *
+     * @param persistenceUnits the persistence units
+     */
     void load(String... persistenceUnits);
 
+    /**
+     * Unload.
+     *
+     * @param persistenceUnits the persistence units
+     */
     void unload(String... persistenceUnits);
 }

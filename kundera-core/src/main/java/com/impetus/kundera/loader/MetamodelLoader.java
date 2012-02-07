@@ -31,7 +31,8 @@ import javax.persistence.Entity;
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Metamodel;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.classreading.ClasspathReader;
@@ -44,14 +45,21 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
+
 /**
+ * The Class MetamodelLoader.
+ *
  * @author amresh.singh
- * 
  */
 public class MetamodelLoader extends ApplicationLoader
 {
-    private static Logger log = Logger.getLogger(MetamodelLoader.class);
+    
+    /** The log. */
+    private static Logger log = LoggerFactory.getLogger(MetamodelLoader.class);
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.ApplicationLoader#load(java.lang.String[])
+     */
     @Override
     public void load(String... persistenceUnits)
     {
@@ -72,6 +80,11 @@ public class MetamodelLoader extends ApplicationLoader
 
     }
 
+    /**
+     * Load entity metadata.
+     *
+     * @param persistenceUnit the persistence unit
+     */
     private void loadEntityMetadata(String persistenceUnit)
     {
         if (persistenceUnit == null)
@@ -165,6 +178,15 @@ public class MetamodelLoader extends ApplicationLoader
         appMetadata.getMetamodelMap().put(persistenceUnit, metamodel);
     }
 
+    /**
+     * Scan class and put metadata.
+     *
+     * @param bits the bits
+     * @param reader the reader
+     * @param entityMetadataMap the entity metadata map
+     * @param entityNameToClassMap the entity name to class map
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     private void scanClassAndPutMetadata(InputStream bits, Reader reader,
             Map<Class<?>, EntityMetadata> entityMetadataMap, Map<String, Class<?>> entityNameToClassMap)
             throws IOException

@@ -1,2 +1,7 @@
+*.*~
+*.iws
+*.iml
+*.ipr
 target/
-*.class
+test-output/
+

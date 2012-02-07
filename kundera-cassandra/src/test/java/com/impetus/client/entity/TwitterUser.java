@@ -29,9 +29,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+
 /**
- * Entity Class for User object
- * 
+ * Entity Class for User object.
+ *
  * @author amresh.singh
  */
 
@@ -39,26 +40,34 @@ import javax.persistence.Table;
 @Table(name = "users", schema = "Blog")
 public class TwitterUser
 {
+    
+    /** The user id. */
     @Id
     private String userId; // PK
 
     // Embedded object, will persist co-located
+    /** The personal detail. */
     @Embedded
     private PersonalDetail personalDetail;
 
     // Embedded collection, will persist co-located
+    /** The tweets. */
     @Embedded
     private List<UserTweet> tweets;
 
     // One-to-one, will be persisted separately
+    /** The preference. */
     @OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
     private UserPreference preference;
 
     // One to many, will be persisted separately
+    /** The im details. */
     @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
     private Set<IMDetail> imDetails;
 
     /**
+     * Gets the user id.
+     *
      * @return the userId
      */
     public String getUserId()
@@ -67,8 +76,9 @@ public class TwitterUser
     }
 
     /**
-     * @param userId
-     *            the userId to set
+     * Sets the user id.
+     *
+     * @param userId the userId to set
      */
     public void setUserId(String userId)
     {
@@ -76,6 +86,8 @@ public class TwitterUser
     }
 
     /**
+     * Gets the personal detail.
+     *
      * @return the personalDetail
      */
     public PersonalDetail getPersonalDetail()
@@ -84,8 +96,9 @@ public class TwitterUser
     }
 
     /**
-     * @param personalDetail
-     *            the personalDetail to set
+     * Sets the personal detail.
+     *
+     * @param personalDetail the personalDetail to set
      */
     public void setPersonalDetail(PersonalDetail personalDetail)
     {
@@ -93,6 +106,8 @@ public class TwitterUser
     }
 
     /**
+     * Gets the tweets.
+     *
      * @return the tweets
      */
     public List<UserTweet> getTweets()
@@ -101,8 +116,9 @@ public class TwitterUser
     }
 
     /**
-     * @param tweets
-     *            the tweets to set
+     * Adds the tweet.
+     *
+     * @param tweet the tweet
      */
     public void addTweet(UserTweet tweet)
     {
@@ -114,6 +130,8 @@ public class TwitterUser
     }
 
     /**
+     * Gets the preference.
+     *
      * @return the preference
      */
     public UserPreference getPreference()
@@ -122,8 +140,9 @@ public class TwitterUser
     }
 
     /**
-     * @param preference
-     *            the preference to set
+     * Sets the preference.
+     *
+     * @param preference the preference to set
      */
     public void setPreference(UserPreference preference)
     {
@@ -131,6 +150,8 @@ public class TwitterUser
     }
 
     /**
+     * Gets the im details.
+     *
      * @return the imDetails
      */
     public Set<IMDetail> getImDetails()
@@ -139,8 +160,9 @@ public class TwitterUser
     }
 
     /**
-     * @param imDetails
-     *            the imDetails to set
+     * Adds the im detail.
+     *
+     * @param imDetail the im detail
      */
     public void addImDetail(IMDetail imDetail)
     {

@@ -15,12 +15,14 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.processor;
 
+import javax.persistence.Cacheable;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.annotations.Cacheable;
 import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+
 
 /**
  * The MetadataProcessor implementation to scan for EntityListener class/method
@@ -41,10 +43,8 @@ public class CacheableAnnotationProcessor implements MetadataProcessor
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(CacheableAnnotationProcessor.class);
 
-    /*
-     * @see
-     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-     * com.impetus.kundera.metadata.EntityMetadata)
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
     public final void process(final Class<?> entityClass, EntityMetadata metadata)

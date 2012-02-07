@@ -27,23 +27,28 @@ import java.util.Set;
 import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+
 /**
- * Utility class for entity metadata related funcntionality
- * 
+ * Utility class for entity metadata related funcntionality.
+ *
  * @author amresh.singh
  */
 public class MetadataUtils
 {
 
     /**
-     * @param m
-     * @param columnNameToFieldMap
-     * @param superColumnNameToFieldMap
+     * Populate column and super column maps.
+     *
+     * @param m the m
+     * @param columnNameToFieldMap the column name to field map
+     * @param superColumnNameToFieldMap the super column name to field map
      */
     public static void populateColumnAndSuperColumnMaps(EntityMetadata m, Map<String, Field> columnNameToFieldMap,
             Map<String, Field> superColumnNameToFieldMap)
@@ -60,9 +65,11 @@ public class MetadataUtils
     }
 
     /**
-     * @param m
-     * @param columnNameToFieldMap
-     * @param superColumnNameToFieldMap
+     * Creates the columns field map.
+     *
+     * @param m the m
+     * @param superColumn the super column
+     * @return the map
      */
     public static Map<String, Field> createColumnsFieldMap(EntityMetadata m, EmbeddedColumn superColumn)
     {
@@ -76,9 +83,10 @@ public class MetadataUtils
     }
 
     /**
-     * @param m
-     * @param columnNameToFieldMap
-     * @param superColumnNameToFieldMap
+     * Creates the super columns field map.
+     *
+     * @param m the m
+     * @return the map
      */
     public static Map<String, Field> createSuperColumnsFieldMap(EntityMetadata m)
     {
@@ -93,6 +101,12 @@ public class MetadataUtils
 
     }
 
+    /**
+     * Gets the embedded collection instance.
+     *
+     * @param embeddedCollectionField the embedded collection field
+     * @return the embedded collection instance
+     */
     public static Collection getEmbeddedCollectionInstance(Field embeddedCollectionField)
     {
         Collection embeddedCollection = null;
@@ -117,6 +131,12 @@ public class MetadataUtils
         return embeddedCollection;
     }
 
+    /**
+     * Gets the embedded generic object instance.
+     *
+     * @param embeddedCollectionField the embedded collection field
+     * @return the embedded generic object instance
+     */
     public static Object getEmbeddedGenericObjectInstance(Field embeddedCollectionField)
     {
         Class<?> embeddedClass = PropertyAccessorHelper.getGenericClass(embeddedCollectionField);
@@ -144,12 +164,24 @@ public class MetadataUtils
         return embeddedObject;
     }
 
+    /**
+     * Gets the embedded collection prefix.
+     *
+     * @param embeddedCollectionName the embedded collection name
+     * @return the embedded collection prefix
+     */
     public static String getEmbeddedCollectionPrefix(String embeddedCollectionName)
     {
         return embeddedCollectionName.substring(0,
                 embeddedCollectionName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER));
     }
 
+    /**
+     * Gets the embedded collection postfix.
+     *
+     * @param embeddedCollectionName the embedded collection name
+     * @return the embedded collection postfix
+     */
     public static String getEmbeddedCollectionPostfix(String embeddedCollectionName)
     {
         return embeddedCollectionName.substring(
@@ -211,6 +243,12 @@ public class MetadataUtils
         return keys;
     }
 
+    /**
+     * Sets the schema and persistence unit.
+     *
+     * @param m the m
+     * @param schemaStr the schema str
+     */
     public static void setSchemaAndPersistenceUnit(EntityMetadata m, String schemaStr)
     {
 
@@ -226,12 +264,35 @@ public class MetadataUtils
         }
     }
 
-    /*
-     * public static void main(String[] args) { String schemaStr =
-     * "KunderaExamples@twibase"; if(schemaStr.indexOf("@") > 0) {
-     * System.out.println(schemaStr.substring(0, schemaStr.indexOf("@")));
-     * System.out.println(schemaStr.substring(schemaStr.indexOf("@") + 1,
-     * schemaStr.length())); } else { System.out.println(schemaStr); } }
+    /**
+     * Returns true, if use of secondry index is available, else false.
+     * 
+     * @param persistenceUnit
+     *            persistence unit name
+     * @return true, if usage is true in pu. else false.
      */
+    public static boolean useSecondryIndex(String persistenceUnit)
+    {
+        ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
+        return clientMetadata != null ? clientMetadata.isUseSecondryIndex() : false;
+    }
+
+    /**
+     * Returns lucene indexing directory.
+     * 
+     * @param persistenceUnit
+     *            persistence unit name
+     * @return lucene directory
+     */
+    public static String getLuceneDirectory(String persistenceUnit)
+    {
+        if (!useSecondryIndex(persistenceUnit))
+        {
+            ClientMetadata clientMetadata = KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit);
+            return clientMetadata.getLuceneIndexDir();
+        }
+
+        return null;
+    }
 
 }

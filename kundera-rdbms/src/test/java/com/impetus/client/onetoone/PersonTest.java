@@ -15,52 +15,48 @@
  ******************************************************************************/
 package com.impetus.client.onetoone;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
 import org.junit.Test;
 
+
 /**
- * @author vivek.mishra
+ * The Class PersonTest.
  *
+ * @author vivek.mishra
  */
 public class PersonTest
 {
 
-//    @Test
+    // @Test
+    /**
+     * Test persist.
+     */
     public void testPersist()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-        
-        EntityManager em = emf.createEntityManager();
-        em.persist(prepareObject());
-        emf.close();
 
     }
 
-//    @Test
+    // @Test
+    /**
+     * Test shared by pk persist.
+     */
     public void testSharedByPKPersist()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-        
-        EntityManager em = emf.createEntityManager();
-        em.persist(preparePKObject());
 
     }
 
-
+    /**
+     * Test find by id.
+     */
     @Test
     public void testFindById()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-        
-        EntityManager em = emf.createEntityManager();
-        Object obj = em.find(OTONPerson.class, "1_p");
-        System.out.println(obj.getClass());
+
     }
+
     /**
-     * @return
+     * Prepare pk object.
+     *
+     * @return the object
      */
     private Object preparePKObject()
     {
@@ -75,7 +71,9 @@ public class PersonTest
     }
 
     /**
-     * @return
+     * Prepare object.
+     *
+     * @return the object
      */
     private Object prepareObject()
     {
@@ -88,6 +86,5 @@ public class PersonTest
         person.setAddress(address);
         return person;
     }
-
 
 }

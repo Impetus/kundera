@@ -30,77 +30,130 @@ import javax.persistence.Table;
 
 import com.impetus.kundera.annotations.Index;
 
+
 /**
+ * The Class Person2.
+ *
  * @author animesh.kumar
- * 
  */
 @Entity
 @Table(name = "Person", schema = "Blog")
 @Index(index = false)
-public class Person implements Serializable
+public class Person2 implements Serializable
 {
 
+    /** The username. */
     @Id
     private String username;
 
+    /** The password. */
     @Column
     private String password;
 
+    /** The profile. */
     @OneToOne(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private Profile profile;
 
+    /** The public profile. */
     @OneToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
     private Profile publicProfile;
 
+    /** The post. */
     @OneToMany(cascade = { CascadeType.ALL })
     // (targetEntity=Post.class)
     private Set<Post> post = new HashSet<Post>();
 
-    public Person()
+    /**
+     * Instantiates a new person2.
+     */
+    public Person2()
     {
 
     }
 
+    /**
+     * Gets the username.
+     *
+     * @return the username
+     */
     public String getUsername()
     {
         return username;
     }
 
+    /**
+     * Sets the username.
+     *
+     * @param username the new username
+     */
     public void setUsername(String username)
     {
         this.username = username;
     }
 
+    /**
+     * Gets the password.
+     *
+     * @return the password
+     */
     public String getPassword()
     {
         return password;
     }
 
+    /**
+     * Sets the password.
+     *
+     * @param password the new password
+     */
     public void setPassword(String password)
     {
         this.password = password;
     }
 
+    /**
+     * Gets the profile.
+     *
+     * @return the profile
+     */
     public Profile getProfile()
     {
         return profile;
     }
 
+    /**
+     * Sets the profile.
+     *
+     * @param profile the new profile
+     */
     public void setProfile(Profile profile)
     {
         this.profile = profile;
     }
 
+    /**
+     * Gets the public profile.
+     *
+     * @return the public profile
+     */
     public Profile getPublicProfile()
     {
         return publicProfile;
     }
 
+    /**
+     * Sets the public profile.
+     *
+     * @param publicProfile the new public profile
+     */
     public void setPublicProfile(Profile publicProfile)
     {
         this.publicProfile = publicProfile;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString()
     {
@@ -119,6 +172,9 @@ public class Person implements Serializable
         return builder.toString();
     }
 
+    /**
+     * Pre.
+     */
     @PrePersist
     public void pre()
     {
@@ -126,8 +182,10 @@ public class Person implements Serializable
     }
 
     /**
-     * @param e
-     * @return
+     * Adds the post.
+     *
+     * @param e the e
+     * @return true, if successful
      * @see java.util.Set#add(java.lang.Object)
      */
     public boolean addPost(Post e)
@@ -135,6 +193,11 @@ public class Person implements Serializable
         return post.add(e);
     }
 
+    /**
+     * Size.
+     *
+     * @return the int
+     */
     public int size()
     {
         return post.size();

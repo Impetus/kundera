@@ -8,26 +8,34 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+
 /**
+ * The Class SnsUser.
+ *
  * @author vivek.mishra
- * 
  */
 @Entity
-@Table(name = "snsusers", schema = "Blog")
+@Table(name = "snsusers", schema = "Blog@cassandra")
 public class SnsUser
 {
+    
+    /** The snsuid. */
     @Id
     private String snsuid;
 
+    /** The blessuid. */
     @Column(name = "blessuid")
     private String blessuid;
 
+    /** The snstype. */
     @Column(name = "snstype")
     private String snstype;
 
+    /** The local id. */
     @Column(name = "localId")
     private String localId;
 
+    /** The account name. */
     @Column(name = "accountName")
     private String accountName;
 
@@ -39,6 +47,8 @@ public class SnsUser
     }
 
     /**
+     * Gets the snsuid.
+     *
      * @return the snsuid
      */
     public String getSnsuid()
@@ -47,6 +57,8 @@ public class SnsUser
     }
 
     /**
+     * Gets the blessuid.
+     *
      * @return the blessuid
      */
     public String getBlessuid()
@@ -55,6 +67,8 @@ public class SnsUser
     }
 
     /**
+     * Gets the snstype.
+     *
      * @return the snstype
      */
     public String getSnstype()
@@ -63,6 +77,8 @@ public class SnsUser
     }
 
     /**
+     * Gets the local id.
+     *
      * @return the localId
      */
     public String getLocalId()
@@ -71,6 +87,8 @@ public class SnsUser
     }
 
     /**
+     * Gets the account name.
+     *
      * @return the accountName
      */
     public String getAccountName()
@@ -79,8 +97,9 @@ public class SnsUser
     }
 
     /**
-     * @param snsuid
-     *            the snsuid to set
+     * Sets the snsuid.
+     *
+     * @param snsuid the snsuid to set
      */
     public void setSnsuid(String snsuid)
     {
@@ -88,8 +107,9 @@ public class SnsUser
     }
 
     /**
-     * @param blessuid
-     *            the blessuid to set
+     * Sets the blessuid.
+     *
+     * @param blessuid the blessuid to set
      */
     public void setBlessuid(String blessuid)
     {
@@ -97,8 +117,9 @@ public class SnsUser
     }
 
     /**
-     * @param snstype
-     *            the snstype to set
+     * Sets the snstype.
+     *
+     * @param snstype the snstype to set
      */
     public void setSnstype(String snstype)
     {
@@ -106,8 +127,9 @@ public class SnsUser
     }
 
     /**
-     * @param localId
-     *            the localId to set
+     * Sets the local id.
+     *
+     * @param localId the localId to set
      */
     public void setLocalId(String localId)
     {
@@ -115,8 +137,9 @@ public class SnsUser
     }
 
     /**
-     * @param accountName
-     *            the accountName to set
+     * Sets the account name.
+     *
+     * @param accountName the accountName to set
      */
     public void setAccountName(String accountName)
     {

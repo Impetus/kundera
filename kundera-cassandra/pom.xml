@@ -1,19 +1,31 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>com.impetus</groupId>
 		<artifactId>kundera</artifactId>
-		<version>2.0.4.5</version>
+		<version>2.0.5.5</version>
 	</parent>
 
-	<groupId>com.impetus.client</groupId>
-	<artifactId>kundera-cassandra</artifactId>
-	<packaging>jar</packaging>
+  <groupId>com.impetus.client</groupId>
+  <artifactId>kundera-cassandra</artifactId>
+  <packaging>jar</packaging>
+  <version>2.0.5</version>
+  <name>kundera-cassandra</name>
+  <url>http://maven.apache.org</url>
 
-	<name>kundera-cassandra</name>
-	<url>http://maven.apache.org</url>
+  <repositories>
+    <repository>
+      <id>cassandra-dependency</id>
+      <name>Cassandra Dependencies</name>
+      <url>http://repo1.maven.org/maven2</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
 
 
         <!-- Dependencies -->
@@ -21,7 +33,7 @@
 		<dependency>
 			<groupId>com.impetus.core</groupId>
 			<artifactId>kundera-core</artifactId>
-			<version>2.0.4.5</version>
+			<version>2.0.5.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>

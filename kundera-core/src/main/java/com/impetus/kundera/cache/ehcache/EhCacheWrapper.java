@@ -21,6 +21,7 @@ import org.apache.commons.lang.NotImplementedException;
 
 import com.impetus.kundera.cache.Cache;
 
+
 /**
  * Cache implementation using Ehcache.
  * 
@@ -44,6 +45,9 @@ public class EhCacheWrapper implements Cache
     }
 
     /* @see com.impetus.kundera.cache.Cache#get(java.lang.Object) */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.cache.Cache#get(java.lang.Object)
+     */
     @Override
     public Object get(Object key)
     {
@@ -55,6 +59,9 @@ public class EhCacheWrapper implements Cache
      * @see com.impetus.kundera.cache.Cache#put(java.lang.Object,
      * java.lang.Object)
      */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.cache.Cache#put(java.lang.Object, java.lang.Object)
+     */
     @Override
     public void put(Object key, Object value)
     {
@@ -62,18 +69,27 @@ public class EhCacheWrapper implements Cache
     }
 
     /* @see com.impetus.kundera.cache.Cache#size() */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.cache.Cache#size()
+     */
     @Override
     public int size()
     {
         return ehcache.getSize();
     }
 
+    /* (non-Javadoc)
+     * @see javax.persistence.Cache#contains(java.lang.Class, java.lang.Object)
+     */
     @Override
     public boolean contains(Class arg0, Object arg1)
     {
         return (ehcache.get(arg1) != null);
     }
 
+    /* (non-Javadoc)
+     * @see javax.persistence.Cache#evict(java.lang.Class)
+     */
     @Override
     public void evict(Class arg0)
     {
@@ -81,6 +97,9 @@ public class EhCacheWrapper implements Cache
         throw new NotImplementedException("TODO");
     }
 
+    /* (non-Javadoc)
+     * @see javax.persistence.Cache#evict(java.lang.Class, java.lang.Object)
+     */
     @Override
     public void evict(Class arg0, Object arg1)
     {
@@ -88,6 +107,9 @@ public class EhCacheWrapper implements Cache
         ehcache.remove(arg1);
     }
 
+    /* (non-Javadoc)
+     * @see javax.persistence.Cache#evictAll()
+     */
     @Override
     public void evictAll()
     {

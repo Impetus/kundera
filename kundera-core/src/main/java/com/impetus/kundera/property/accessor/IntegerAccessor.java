@@ -18,10 +18,9 @@
 
 package com.impetus.kundera.property.accessor;
 
-//~--- non-JDK imports --------------------------------------------------------
-
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
+
 
 /**
  * The Class IntegerAccessor.
@@ -32,40 +31,54 @@ public class IntegerAccessor
     implements PropertyAccessor<Integer>
 {
     /* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
+     */
     @Override
     public final Integer fromBytes(byte[] b)
     {
         return ((b[0] << 24) + ((b[1] & 0xFF) << 16) + ((b[2] & 0xFF) << 8) + (b[3] & 0xFF));
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
     public final byte[] toBytes(Object val)
         throws PropertyAccessException
     {
-        try
+        if (val != null)
         {
             Integer value = (Integer) (val);
-
             return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8),
-                                (byte) value.intValue() };
+                    (byte) value.intValue() };
         }
-        catch (Exception e)
-        {
-            throw new PropertyAccessException(e.getMessage());
-        }
+        return null;
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
      */
     @Override
     public String toString(Object object)
     {
         return object.toString();
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+     */
+    @Override
+    public Integer fromString(String s) throws PropertyAccessException
+    {
+        try
+        {
+            Integer i = new Integer(s);
+            return i;
+        }
+        catch (NumberFormatException e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
     }
 }

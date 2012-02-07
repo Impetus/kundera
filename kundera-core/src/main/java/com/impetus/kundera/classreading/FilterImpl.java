@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.classreading;
 
+
 /**
  * Basic implementation to skip well-known packages and allow only *.class files
  * 
@@ -27,6 +28,9 @@ public class FilterImpl implements Filter
     private transient String[] ignoredPackages = { "javax", "java", "sun", "com.sun", "javassist" };
 
     /* @see com.impetus.kundera.classreading.Filter#accepts(java.lang.String) */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.classreading.Filter#accepts(java.lang.String)
+     */
     @Override
     public final boolean accepts(String filename)
     {

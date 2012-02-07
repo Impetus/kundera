@@ -17,6 +17,7 @@ package com.impetus.kundera.classreading;
 
 import java.io.InputStream;
 
+
 /**
  * Interface for Resource Iterator, usually files.
  * 

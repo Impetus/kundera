@@ -23,12 +23,12 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
-import java.util.*;
+import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
+
 
 /**
  * The Class LuceneQuery.
@@ -55,9 +55,10 @@ public class LuceneQuery extends QueryImpl implements Query
     /**
      * Instantiates a new lucene query.
      *
-     * @param em the em
-     * @param metadataManager the metadata manager
      * @param jpaQuery the jpa query
+     * @param kunderaQuery the kundera query
+     * @param pd the pd
+     * @param persistenceUnits the persistence units
      */
     public LuceneQuery(String jpaQuery, KunderaQuery kunderaQuery, PersistenceDelegator pd, String... persistenceUnits)
     {
@@ -76,6 +77,9 @@ public class LuceneQuery extends QueryImpl implements Query
     }
 
     // @see com.impetus.kundera.query.QueryImpl#getResultList()
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.query.QueryImpl#getResultList()
+     */
     @Override
     public List<?> getResultList()
     {
@@ -92,8 +96,7 @@ public class LuceneQuery extends QueryImpl implements Query
 
         EntityMetadata m = kunderaQuery.getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
-        
-        Map<String, String> searchFilter = client.getIndexManager().search(q, startPosition, maxResult);
+        Map<String, String> searchFilter = client.getIndexManager().search(q, -1, maxResult);
 
         try
         {
@@ -114,6 +117,9 @@ public class LuceneQuery extends QueryImpl implements Query
     }
 
     // @see com.impetus.kundera.query.QueryImpl#setMaxResults(int)
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.query.QueryImpl#setMaxResults(int)
+     */
     @Override
     public Query setMaxResults(int maxResult)
     {
@@ -121,97 +127,43 @@ public class LuceneQuery extends QueryImpl implements Query
         return this;
     }
 
-    /**
-     * Gets the lucene query from jpa query.
-     *
-     * @return the lucene query from jpa query
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
      */
-    private String getLuceneQueryFromJPAQuery()
-    {
-        StringBuffer sb = new StringBuffer();
-
-        for (Object object : kunderaQuery.getFilterClauseQueue())
-        {
-            if (object instanceof FilterClause)
-            {
-                FilterClause filter = (FilterClause) object;
-                sb.append("+");
-                // property
-                sb.append(filter.getProperty());
-
-                // joiner
-                String appender = "";
-                if (filter.getCondition().equals("="))
-                {
-                    sb.append(":");
-                } else
-                {
-                    if (filter.getCondition().equalsIgnoreCase("like"))
-                    {
-                        sb.append(":");
-                        appender = "*";
-                    }
-                }
-
-                // value
-                sb.append(filter.getValue());
-                sb.append(appender);
-            } else
-            {
-                sb.append(" " + object + " ");
-            }
-        }
-
-        // add Entity_CLASS field too.
-        if (sb.length() > 0)
-        {
-            sb.append(" AND ");
-        }
-        sb.append("+");
-        sb.append(DocumentIndexer.ENTITY_CLASS_FIELD);
-        sb.append(":");
-        // sb.append(getEntityClass().getName());
-        sb.append(kunderaQuery.getEntityClass().getCanonicalName().toLowerCase());
-        
-
-        return sb.toString();
-    }
-
     @Override
-    public Query setFirstResult(int startPosition)
+    protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
-        this.startPosition = startPosition;
-        return this;
+        throw new UnsupportedOperationException("Method not supported for default indexing");
     }
 
-    private String[] getMaxMin(String[] primaryKeys)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera
+     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client,
+     * java.util.List, java.util.List, boolean)
+     */
+    @Override
+    protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
+            List<String> relationNames, boolean isParent)
     {
-        if (startPosition == 0 && maxResult == Constants.INVALID)
-        {
-            return primaryKeys;
-        }
-        //TODO: Sort for faster time
-        //Arrays.sort(primaryKeys);
-        List<String> result = new ArrayList<String>();
+        throw new UnsupportedOperationException("Method not supported for default indexing");
 
-        for (String pk : primaryKeys)
-        {
-            int intVal = Integer.parseInt(pk);
-            if (startPosition <= intVal && startPosition <= maxResult)
-            {
-                result.add(pk);
-            }
-
-        }
-
-        return result.toArray(new String[result.size()]);
     }
 
-    private class SearchInterpretor
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.query.QueryImpl#getReader()
+     */
+    @Override
+    protected EntityReader getReader()
     {
-
-        void getSearchType()
-        {
-        }
+        throw new UnsupportedOperationException("Method not supported for default indexing");
     }
 }

@@ -31,6 +31,20 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
+#### 06-Feb-2012 - Kundera 2.0.5 released
+This release includes bug fixes and the following new features compared to version 2.0.4:
+
+* Cassandra 1.x migration.
+* Support for Many-to-Many relationship (via Join table)
+* Transitive persistence.
+* Datastore native secondary index support in addition to Lucene based indexing. An optional switch provided to change between two.
+* Query support for >, < , >=,<=,!=, like, order by, like, logical operators and between.
+* Connection pooling settings provided for all datastores.
+* Support for all data types as required by JPA.
+* Range queries for cassandra (via between clause in JPA-QL)
+* Bug fixes related to self join. 
+
+
 #### 09-Dec-2011 - Kundera 2.0.4 released
 This release includes bug fixes, performance improvements and the following new features compared to version 2.0.3:
 
@@ -59,6 +73,11 @@ This release includes bug fixes and the following new features compared to initi
 
 [Downloads] (https://github.com/impetus-opensource/Kundera/wiki/Kundera-releases "Downloads")
 
+Builds
+========
+This project is  ![built-and-tested-by-cloudbees](https://docs.google.com/uc?id=0B7bEs21Ugk11MGE3NmUyODQtNTkzNi00N2I3LTg2YmEtYTFlMjViNDBkZWVk).
+
+The public CI instance is available at https://impetus-opensource.ci.cloudbees.com/job/kundera-github/
 
 About Us
 ========

@@ -17,7 +17,6 @@ package com.impetus.kundera.metadata.processor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -26,10 +25,6 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
 import javax.persistence.Table;
 
@@ -40,13 +35,15 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
-import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor;
+import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessorFactory;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+
 /**
- * Metadata processor class for persistent entities
- * 
+ * Metadata processor class for persistent entities.
+ *
  * @author amresh.singh
  */
 public class TableProcessor extends AbstractEntityFieldProcessor
@@ -55,11 +52,17 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     /** The Constant log. */
     private static final Log LOG = LogFactory.getLog(TableProcessor.class);
 
+    /**
+     * Instantiates a new table processor.
+     */
     public TableProcessor()
     {
         validator = new EntityValidatorImpl();
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata)
+     */
     @Override
     public void process(Class<?> clazz, EntityMetadata metadata)
     {
@@ -72,6 +75,12 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         populateMetadata(metadata, clazz);
     }
 
+    /**
+     * Populate metadata.
+     *
+     * @param metadata the metadata
+     * @param clazz the clazz
+     */
     private void populateMetadata(EntityMetadata metadata, Class<?> clazz)
     {
         Table table = clazz.getAnnotation(Table.class);
@@ -188,6 +197,13 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
     }
 
+    /**
+     * Populate embedded field into metadata.
+     *
+     * @param metadata the metadata
+     * @param embeddedField the embedded field
+     * @param embeddedFieldClass the embedded field class
+     */
     private void populateEmbeddedFieldIntoMetadata(EntityMetadata metadata, Field embeddedField,
             Class embeddedFieldClass)
     {
@@ -206,6 +222,13 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         addEmbeddedColumnInMetadata(metadata, embeddedField, embeddedFieldClass, embeddedFieldName);
     }
 
+    /**
+     * Populate element collection into metadata.
+     *
+     * @param metadata the metadata
+     * @param embeddedField the embedded field
+     * @param embeddedFieldClass the embedded field class
+     */
     private void populateElementCollectionIntoMetadata(EntityMetadata metadata, Field embeddedField,
             Class embeddedFieldClass)
     {
@@ -246,12 +269,12 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
     /**
      * TODO: Change method name once we change the name "Super Column" in entity
-     * metadata
-     * 
-     * @param metadata
-     * @param embeddedField
-     * @param embeddedFieldClass
-     * @param embeddedFieldName
+     * metadata.
+     *
+     * @param metadata the metadata
+     * @param embeddedField the embedded field
+     * @param embeddedFieldClass the embedded field class
+     * @param embeddedFieldName the embedded field name
      */
     private void addEmbeddedColumnInMetadata(EntityMetadata metadata, Field embeddedField, Class embeddedFieldClass,
             String embeddedFieldName)
@@ -276,118 +299,32 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
     /**
      * Adds relationship info into metadata for a given field
-     * <code>relationField</code>
+     * <code>relationField</code>.
+     *
+     * @param entityClass the entity class
+     * @param relationField the relation field
+     * @param metadata the metadata
      */
-    private void addRelationIntoMetadata(Class<?> entity, Field relationField, EntityMetadata metadata)
+    private void addRelationIntoMetadata(Class<?> entityClass, Field relationField, EntityMetadata metadata)
     {
+        RelationMetadataProcessor relProcessor = null;
 
-        // OneToOne
-        if (relationField.isAnnotationPresent(OneToOne.class))
-        {
-            // taking field's type as foreign entity, ignoring
-            // "targetEntity"
-            Class<?> targetEntity = relationField.getType();
-            try
-            {
-                // TODO: Add code to check whether this entity has already been
-                // validated, at all placed below
-                validate(targetEntity);
-                OneToOne ann = relationField.getAnnotation(OneToOne.class);
-
-                Relation relation = new Relation(relationField, targetEntity, null, ann.fetch(), Arrays.asList(ann
-                        .cascade()), ann.optional(), ann.mappedBy(), Relation.ForeignKey.ONE_TO_ONE);
-
-                metadata.addRelation(relationField.getName(), relation);
-            }
-            catch (PersistenceException pe)
-            {
-                throw new PersistenceException("Error with @OneToOne in @Entity(" + entity + "."
-                        + relationField.getName() + "), reason: " + pe.getMessage());
-            }
-        }
-
-        // OneToMany
-        else if (relationField.isAnnotationPresent(OneToMany.class))
+        try
         {
 
-            OneToMany ann = relationField.getAnnotation(OneToMany.class);
+            relProcessor = RelationMetadataProcessorFactory.getRelationMetadataProcessor(relationField);
 
-            Class<?> targetEntity = PropertyAccessorHelper.getGenericClass(relationField);
-
-            // now, check annotations
-            if (null != ann.targetEntity() && !ann.targetEntity().getSimpleName().equals("void"))
+            if (relProcessor != null)
             {
-                targetEntity = ann.targetEntity();
+                relProcessor.addRelationIntoMetadata(relationField, metadata);
             }
 
-            try
-            {
-                validate(targetEntity);
-                Relation relation = new Relation(relationField, targetEntity, relationField.getType(), ann.fetch(),
-                        Arrays.asList(ann.cascade()), Boolean.TRUE, ann.mappedBy(), Relation.ForeignKey.ONE_TO_MANY);
-
-                metadata.addRelation(relationField.getName(), relation);
-            }
-            catch (PersistenceException pe)
-            {
-                throw new PersistenceException("Error with @OneToMany in @Entity(" + entity.getName() + "."
-                        + relationField.getName() + "), reason: " + pe.getMessage());
-            }
         }
-
-        // ManyToOne
-        else if (relationField.isAnnotationPresent(ManyToOne.class))
+        catch (PersistenceException pe)
         {
-            // taking field's type as foreign entity, ignoring
-            // "targetEntity"
-            Class<?> targetEntity = relationField.getType();
-            try
-            {
-                validate(targetEntity);
-                ManyToOne ann = relationField.getAnnotation(ManyToOne.class);
-
-                Relation relation = new Relation(relationField, targetEntity, null, ann.fetch(), Arrays.asList(ann
-                        .cascade()), ann.optional(), null, // mappedBy is
-                                                           // null
-                        Relation.ForeignKey.MANY_TO_ONE);
-
-                metadata.addRelation(relationField.getName(), relation);
-            }
-            catch (PersistenceException pe)
-            {
-                throw new PersistenceException("Error with @OneToOne in @Entity(" + entity.getName() + "."
-                        + relationField.getName() + "), reason: " + pe.getMessage());
-            }
+            throw new PersistenceException("Error with relationship in @Entity(" + entityClass + "."
+                    + relationField.getName() + "), reason: " + pe.getMessage());
         }
-
-        // ManyToMany
-        else if (relationField.isAnnotationPresent(ManyToMany.class))
-        {
-
-            ManyToMany ann = relationField.getAnnotation(ManyToMany.class);
-
-            Class<?> targetEntity = PropertyAccessorHelper.getGenericClass(relationField);
-            // now, check annotations
-            if (null != ann.targetEntity() && !ann.targetEntity().getSimpleName().equals("void"))
-            {
-                targetEntity = ann.targetEntity();
-            }
-
-            try
-            {
-                validate(targetEntity);
-                Relation relation = new Relation(relationField, targetEntity, relationField.getType(), ann.fetch(),
-                        Arrays.asList(ann.cascade()), Boolean.TRUE, ann.mappedBy(), Relation.ForeignKey.MANY_TO_MANY);
-
-                metadata.addRelation(relationField.getName(), relation);
-            }
-            catch (PersistenceException pe)
-            {
-                throw new PersistenceException("Error with @OneToMany in @Entity(" + entity.getName() + "."
-                        + relationField.getName() + "), reason: " + pe.getMessage());
-            }
-        }
-
     }
 
 }

@@ -18,33 +18,30 @@ package com.impetus.client.onetomany;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
 import org.junit.Test;
 
-import com.impetus.client.onetoone.OTONPerson;
 
 /**
- * @author vivek.mishra
+ * The Class PersonTest.
  *
+ * @author vivek.mishra
  */
 public class PersonTest
 {
 
-//    @Test
+    // @Test
+    /**
+     * Test persist.
+     */
     public void testPersist()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-        
-        EntityManager em = emf.createEntityManager();
-        em.persist(prepareObject());
-        emf.close(); 
+
     }
 
     /**
-     * @return
+     * Prepare object.
+     *
+     * @return the object
      */
     private Object prepareObject()
     {
@@ -54,22 +51,19 @@ public class PersonTest
         OTMAddress address = new OTMAddress();
         address.setAddressId("oma");
         address.setStreet("sadak");
-        
+
         Set<OTMAddress> addresses = new HashSet<OTMAddress>(1);
         addresses.add(address);
         person.setAddresses(addresses);
         return person;
     }
 
-
+    /**
+     * Test find by id.
+     */
     @Test
     public void testFindById()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-        
-        EntityManager em = emf.createEntityManager();
-        OTMNPerson obj = em.find(OTMNPerson.class, "omp");
-        OTMAddress address =  obj.getAddresses().iterator().next();
-        System.out.println(obj.getClass());
+
     }
 }

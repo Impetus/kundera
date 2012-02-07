@@ -22,16 +22,22 @@ import org.apache.hadoop.hbase.KeyValue;
 
 import com.impetus.kundera.DataWrapper;
 
+
 /**
+ * The Class HBaseData.
+ *
  * @author impetus
  */
 public class HBaseData implements DataWrapper
 {
 
+    /** The column family. */
     private String columnFamily;
 
+    /** The row key. */
     private String rowKey;
 
+    /** The columns. */
     private List<KeyValue> columns;
 
     /**
@@ -48,14 +54,19 @@ public class HBaseData implements DataWrapper
         this.rowKey = rowKey;
     }
 
+    /**
+     * Instantiates a new h base data.
+     *
+     * @param rowKey the row key
+     */
     public HBaseData(String rowKey)
     {
         this.rowKey = rowKey;
     }
 
     /**
-     * Getter column family
-     * 
+     * Getter column family.
+     *
      * @return columnFamily column family
      */
     public String getColumnFamily()
@@ -64,8 +75,8 @@ public class HBaseData implements DataWrapper
     }
 
     /**
-     * Getter for row key
-     * 
+     * Getter for row key.
+     *
      * @return rowKey
      */
     public String getRowKey()
@@ -80,11 +91,13 @@ public class HBaseData implements DataWrapper
      */
     public List<KeyValue> getColumns()
     {
-        return Collections.unmodifiableList(columns);
+        return columns != null ? Collections.unmodifiableList(columns) : null;
     }
 
     /**
-     * @param columns
+     * Sets the columns.
+     *
+     * @param columns the new columns
      */
     public void setColumns(List<KeyValue> columns)
     {

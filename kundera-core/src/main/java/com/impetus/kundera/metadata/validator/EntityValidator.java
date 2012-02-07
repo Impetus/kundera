@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.validator;
 
+
 /**
  * Interface to validate an entity.
  * 

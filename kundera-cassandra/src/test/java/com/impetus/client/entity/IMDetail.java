@@ -20,9 +20,10 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+
 /**
- * Entity class for user's IM details
- * 
+ * Entity class for user's IM details.
+ *
  * @author amresh.singh
  */
 
@@ -31,20 +32,33 @@ import javax.persistence.Table;
 public class IMDetail
 {
 
+    /** The im detail id. */
     @Id
     private String imDetailId;
 
+    /** The im type. */
     @Column(name = "im_type")
     private String imType;
 
+    /** The im detail. */
     @Column(name = "im_detail")
     private String imDetail;
 
+    /**
+     * Instantiates a new iM detail.
+     */
     public IMDetail()
     {
 
     }
 
+    /**
+     * Instantiates a new iM detail.
+     *
+     * @param id the id
+     * @param type the type
+     * @param detail the detail
+     */
     public IMDetail(String id, String type, String detail)
     {
         this.imDetailId = id;
@@ -53,6 +67,8 @@ public class IMDetail
     }
 
     /**
+     * Gets the im detail id.
+     *
      * @return the imDetailId
      */
     public String getImDetailId()
@@ -61,8 +77,9 @@ public class IMDetail
     }
 
     /**
-     * @param imDetailId
-     *            the imDetailId to set
+     * Sets the im detail id.
+     *
+     * @param imDetailId the imDetailId to set
      */
     public void setImDetailId(String imDetailId)
     {
@@ -70,6 +87,8 @@ public class IMDetail
     }
 
     /**
+     * Gets the im type.
+     *
      * @return the imType
      */
     public String getImType()
@@ -78,8 +97,9 @@ public class IMDetail
     }
 
     /**
-     * @param imType
-     *            the imType to set
+     * Sets the im type.
+     *
+     * @param imType the imType to set
      */
     public void setImType(String imType)
     {
@@ -87,6 +107,8 @@ public class IMDetail
     }
 
     /**
+     * Gets the im detail.
+     *
      * @return the imDetail
      */
     public String getImDetail()
@@ -95,8 +117,9 @@ public class IMDetail
     }
 
     /**
-     * @param imDetail
-     *            the imDetail to set
+     * Sets the im detail.
+     *
+     * @param imDetail the imDetail to set
      */
     public void setImDetail(String imDetail)
     {

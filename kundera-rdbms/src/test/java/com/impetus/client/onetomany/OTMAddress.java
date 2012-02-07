@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.client.onetomany;
 
 import javax.persistence.Column;
@@ -8,43 +23,71 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 
+/**
+ * The Class OTMAddress.
+ */
 @Entity
-@Table(name="ADDRESS", schema="KunderaKeyspace@kcassandra")
+@Table(name = "ADDRESS", schema = "KunderaKeyspace@kcassandra")
 public class OTMAddress
 {
-    @Id    
+    
+    /** The address id. */
+    @Id
     @Column(name = "ADDRESS_ID")
-    private String addressId;   
-   
+    private String addressId;
 
+    /** The street. */
     @Column(name = "STREET")
-    private String street;   
-    
+    private String street;
+
+    /** The person. */
     @ManyToOne
-    @JoinColumn(name="PERSON_ID")
-    private OTMNPerson person; 
-    
-    	
+    @JoinColumn(name = "PERSON_ID")
+    private OTMNPerson person;
 
-	public String getAddressId() {
-		return addressId;
-	}
+    /**
+     * Gets the address id.
+     *
+     * @return the address id
+     */
+    public String getAddressId()
+    {
+        return addressId;
+    }
 
-	public void setAddressId(String addressId) {
-		this.addressId = addressId;
-	}
+    /**
+     * Sets the address id.
+     *
+     * @param addressId the new address id
+     */
+    public void setAddressId(String addressId)
+    {
+        this.addressId = addressId;
+    }
 
-	public String getStreet()
+    /**
+     * Gets the street.
+     *
+     * @return the street
+     */
+    public String getStreet()
     {
         return street;
     }
 
+    /**
+     * Sets the street.
+     *
+     * @param street the new street
+     */
     public void setStreet(String street)
     {
         this.street = street;
     }
 
     /**
+     * Gets the person.
+     *
      * @return the person
      */
     public OTMNPerson getPerson()
@@ -53,12 +96,13 @@ public class OTMAddress
     }
 
     /**
+     * Sets the person.
+     *
      * @param person the person to set
      */
     public void setPerson(OTMNPerson person)
     {
         this.person = person;
-    }  
+    }
 
-    
 }

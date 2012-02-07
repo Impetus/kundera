@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * The Class ClassFileIterator.
  * 
@@ -57,6 +58,11 @@ public class ClassFileIterator implements ResourceIterator
         }
     }
 
+    /**
+     * Instantiates a new class file iterator.
+     *
+     * @param fileToAdd the file to add
+     */
     public ClassFileIterator(File fileToAdd)
     {
         files = new ArrayList<File>();
@@ -96,6 +102,9 @@ public class ClassFileIterator implements ResourceIterator
     }
 
     /* @see com.impetus.kundera.classreading.ResourceIterator#next() */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.classreading.ResourceIterator#next()
+     */
     public final InputStream next()
     {
         if (index >= files.size())
@@ -112,6 +121,9 @@ public class ClassFileIterator implements ResourceIterator
     }
 
     /* @see com.impetus.kundera.classreading.ResourceIterator#close() */
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.classreading.ResourceIterator#close()
+     */
     public void close()
     {
     }

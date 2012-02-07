@@ -17,52 +17,55 @@ package com.impetus.client.mongodb;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.regex.Pattern;
 
 import javax.persistence.Embedded;
 import javax.persistence.PersistenceException;
-import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.client.mongodb.query.MongoDBQuery;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.persistence.EntityResolver;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.proxy.EnhancedEntity;
-import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
+
 /**
- * Provides utility methods for handling data held in MongoDB
- * 
+ * Provides utility methods for handling data held in MongoDB.
+ *
  * @author amresh.singh
  */
 public class MongoDBDataHandler
 {
+    
+    /** The client. */
     private Client client;
 
+    /** The persistence unit. */
     private String persistenceUnit;
 
+    /**
+     * Instantiates a new mongo db data handler.
+     *
+     * @param client the client
+     * @param persistenceUnit the persistence unit
+     */
     public MongoDBDataHandler(Client client, String persistenceUnit)
     {
         super();
@@ -70,29 +73,41 @@ public class MongoDBDataHandler
         this.persistenceUnit = persistenceUnit;
     }
 
+    /** The log. */
     private static Log log = LogFactory.getLog(MongoDBDataHandler.class);
 
-    public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document)
+    /**
+     * Gets the entity from document.
+     *
+     * @param entityClass the entity class
+     * @param m the m
+     * @param document the document
+     * @param relations the relations
+     * @return the entity from document
+     */
+    public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document,
+            List<String> relations)
     {
         // Entity object
         Object entity = null;
 
         // Map to hold property-name=>foreign-entity relations
-//        Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+        // Map<String, Set<String>> foreignKeysMap = new HashMap<String,
+        // Set<String>>();
 
         try
         {
             entity = entityClass.newInstance();
 
             // Populate primary key column
-            String rowKey = (String) document.get(m.getIdColumn().getName());
-            PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), rowKey);
+            String rowKey = (String) document.get("_id");
+            PropertyAccessorHelper.setId(entity, m, rowKey);
 
             // Populate entity columns
             List<Column> columns = m.getColumnsAsList();
             for (Column column : columns)
             {
-                PropertyAccessorHelper.set(entity, column.getField(), document.get(column.getName()));
+                PropertyAccessorHelper.set(entity, column.getField(), document.get(column.getName()).toString());
             }
 
             // Populate @Embedded objects and collections
@@ -115,18 +130,19 @@ public class MongoDBDataHandler
                     }
                     else if (embeddedDocumentObject instanceof BasicDBObject)
                     {
-                    	Object embeddedObject = null;
-                    	if(embeddedColumnField.isAnnotationPresent(Embedded.class))
-                    	{
-                        embeddedObject = DocumentObjectMapper.getObjectFromDocument(
-                                (BasicDBObject) embeddedDocumentObject, embeddedColumn.getField().getType(),
-                                embeddedColumn.getColumns());
-                    	} else
-                    	{
-                            
-                    		embeddedObject =((BasicDBObject) embeddedDocumentObject).get(embeddedColumn.getName()) ;
-                    		
-                    	}
+                        Object embeddedObject = null;
+                        if (embeddedColumnField.isAnnotationPresent(Embedded.class))
+                        {
+                            embeddedObject = DocumentObjectMapper.getObjectFromDocument(
+                                    (BasicDBObject) embeddedDocumentObject, embeddedColumn.getField().getType(),
+                                    embeddedColumn.getColumns());
+                        }
+                        else
+                        {
+
+                            embeddedObject = ((BasicDBObject) embeddedDocumentObject).get(embeddedColumn.getName());
+
+                        }
                         PropertyAccessorHelper.set(entity, embeddedColumnField, embeddedObject);
 
                     }
@@ -139,36 +155,23 @@ public class MongoDBDataHandler
 
             }
 
-//            // Check whether there is an embedded document for foreign keys, if
-//            // it is there, put data
-//            // into foreign keys map
-//            Object foreignKeyObj = document.get(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME);
-//            if (foreignKeyObj != null && foreignKeyObj instanceof BasicDBObject)
-//            {
-//                BasicDBObject dbObj = (BasicDBObject) foreignKeyObj;
-//
-//                Set<String> foreignKeySet = dbObj.keySet();
-//                for (String foreignKey : foreignKeySet)
-//                {
-//                    String foreignKeyValues = (String) dbObj.get(foreignKey); // Foreign
-//                                                                              // key
-//                                                                              // values
-//                                                                              // are
-//                                                                              // stored
-//                                                                              // as
-//                                                                              // list
-//
-//                    Set<String> foreignKeysSet = MetadataUtils.deserializeKeys(foreignKeyValues);
-//
-//                    foreignKeysMap.put(foreignKey, foreignKeysSet);
-//
-//                }
-//
-//            }
+            if (relations != null)
+            {
+                EnhanceEntity e = null;
+                Map<String, Object> relationValue = new HashMap<String, Object>();
+                for (String r : relations)
+                {
+                    if (relationValue == null)
+                    {
+                        relationValue = new HashMap<String, Object>();
+                    }
+                    Object colValue = document.get(r);
+                    relationValue.put(r, colValue);
+                }
 
-            // Set entity object and foreign key map into enhanced entity and
-            // return
-//            EnhancedEntity e = EntityResolver.getEnhancedEntity(entity, rowKey, foreignKeysMap);
+                e = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationValue);
+                return e;
+            }
             return entity;
 
         }
@@ -190,23 +193,44 @@ public class MongoDBDataHandler
 
     }
 
+    /**
+     * Gets the client.
+     *
+     * @return the client
+     */
     private Client getClient()
     {
         return client;
     }
 
+    /**
+     * Gets the persistence unit.
+     *
+     * @return the persistence unit
+     */
     private String getPersistenceUnit()
     {
         return persistenceUnit;
     }
 
-    public BasicDBObject getDocumentFromEntity(EntityMetadata m, Object entity, List<RelationHolder> relations) throws PropertyAccessException
+    /**
+     * Gets the document from entity.
+     *
+     * @param m the m
+     * @param entity the entity
+     * @param relations the relations
+     * @return the document from entity
+     * @throws PropertyAccessException the property access exception
+     */
+    public BasicDBObject getDocumentFromEntity(EntityMetadata m, Object entity, List<RelationHolder> relations)
+            throws PropertyAccessException
     {
         List<Column> columns = m.getColumnsAsList();
         BasicDBObject dbObj = new BasicDBObject();
 
         // Populate Row Key
-        extractEntityField(entity, dbObj, m.getIdColumn());
+        dbObj.put("_id", PropertyAccessorHelper.getId(entity, m));
+        dbObj.put(m.getIdColumn().getName(), PropertyAccessorHelper.getId(entity, m));
 
         // Populate columns
         for (Column column : columns)
@@ -242,58 +266,40 @@ public class MongoDBDataHandler
                 }
                 else
                 {
-                	if(superColumnField.isAnnotationPresent(Embedded.class))
-                	{
-                		dbObj.put(superColumnField.getName(),
-                				DocumentObjectMapper.getDocumentFromObject(embeddedObject, embeddedColumn.getColumns()));
-                	} else 
-                	{
-                		dbObj.put(superColumnField.getName(),
-                				DocumentObjectMapper.getDocumentFromObject(entity, embeddedColumn.getColumns()));
-                		
-                	}
+                    if (superColumnField.isAnnotationPresent(Embedded.class))
+                    {
+                        dbObj.put(superColumnField.getName(),
+                                DocumentObjectMapper.getDocumentFromObject(embeddedObject, embeddedColumn.getColumns()));
+                    }
+                    else
+                    {
+                        dbObj.put(superColumnField.getName(),
+                                DocumentObjectMapper.getDocumentFromObject(entity, embeddedColumn.getColumns()));
+
+                    }
                 }
             }
         }
-        
-        //Populate foreign keys
-        if(relations != null) {
-        	for(RelationHolder rh : relations) {
-        		dbObj.put(rh.getRelationName(), rh.getRelationValue());
-        	}
-        }
 
-        /*// Check foreign keys and set as list column on document object
-        Map<String, Set<String>> foreignKeyMap = e.getForeignKeysMap();
-        if (foreignKeyMap != null && !foreignKeyMap.isEmpty())
+        // Populate foreign keys
+        if (relations != null)
         {
-
-            DBObject foreignKeyObj = new BasicDBObject(); // A document
-                                                          // containing all
-                                                          // foreign keys as
-                                                          // columns
-
-            Set foreignKeyNameSet = foreignKeyMap.keySet();
-            for (Object foreignKeyName : foreignKeyNameSet)
+            for (RelationHolder rh : relations)
             {
-                Set<String> valueSet = foreignKeyMap.get(foreignKeyName);
-
-                String foreignKeyValues = MetadataUtils.serializeKeys(valueSet);
-
-                foreignKeyObj.put((String) foreignKeyName, foreignKeyValues);
+                dbObj.put(rh.getRelationName(), rh.getRelationValue());
             }
-
-            dbObj.put(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME, foreignKeyObj);
         }
-*/
+
         return dbObj;
     }
 
     /**
-     * @param entity
-     * @param dbObj
-     * @param column
-     * @throws PropertyAccessException
+     * Extract entity field.
+     *
+     * @param entity the entity
+     * @param dbObj the db obj
+     * @param column the column
+     * @throws PropertyAccessException the property access exception
      */
     private void extractEntityField(Object entity, BasicDBObject dbObj, Column column) throws PropertyAccessException
     {
@@ -311,16 +317,19 @@ public class MongoDBDataHandler
         }
         else
         {
-            dbObj.put(column.getName(), PropertyAccessorHelper.getObject(entity, column.getField()).toString());            
+            // TODO : this should have been handled by DocumentObjectMapper.
+            Object valObj = PropertyAccessorHelper.getObject(entity, column.getField());
+            dbObj.put(column.getName(), valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString()
+                    : PropertyAccessorHelper.getObject(entity, column.getField()).toString());
         }
     }
 
     /**
      * Returns column name from the filter property which is in the form
      * dbName.columnName
-     * 
-     * @param filterProperty
-     * @return
+     *
+     * @param filterProperty the filter property
+     * @return the column name
      */
     public String getColumnName(String filterProperty)
     {
@@ -335,55 +344,11 @@ public class MongoDBDataHandler
     }
 
     /**
-     * Creates MongoDB Query object from filterClauseQueue
-     * 
-     * @param filterClauseQueue
-     * @return
-     */
-    public BasicDBObject createMongoQuery(EntityMetadata m, Queue filterClauseQueue)
-    {
-        BasicDBObject query = new BasicDBObject();
-        for (Object object : filterClauseQueue)
-        {
-            if (object instanceof FilterClause)
-            {
-                FilterClause filter = (FilterClause) object;
-                String property = new MongoDBDataHandler(getClient(), getPersistenceUnit()).getColumnName(filter
-                        .getProperty());
-                String condition = filter.getCondition();
-                String value = filter.getValue();
-
-                // Property, if doesn't exist in entity, may be there in a
-                // document embedded within it, so we have to check that
-                // TODO: Query should actually be in a format
-                // documentName.embeddedDocumentName.column, remove below if
-                // block once this is decided
-                String enclosingDocumentName = getEnclosingDocumentName(m, property);
-                if (enclosingDocumentName != null)
-                {
-                    property = enclosingDocumentName + "." + property;
-                }
-
-                if (condition.equals("="))
-                {
-                    query.append(property, value);
-                }
-                else if (condition.equalsIgnoreCase("like"))
-                {
-                    query.append(property, Pattern.compile(value));
-                }
-                // TODO: Add support for other operators like >, <, >=, <=,
-                // order by asc/ desc, limit, skip, count etc
-            }
-        }
-        return query;
-    }
-
-    /**
-     * @param m
-     * @param columnName
-     * @param embeddedDocumentName
-     * @return
+     * Gets the enclosing document name.
+     *
+     * @param m the m
+     * @param columnName the column name
+     * @return the enclosing document name
      */
     public String getEnclosingDocumentName(EntityMetadata m, String columnName)
     {
@@ -415,16 +380,22 @@ public class MongoDBDataHandler
      * "Select alias.columnName from EntityName alias". However, correct query
      * to be supported is
      * "Select alias.superColumnName.columnName from EntityName alias"
+     *
+     * @param dbCollection the db collection
+     * @param m the m
+     * @param documentName the document name
+     * @param mongoQuery the mongo query
+     * @param result the result
+     * @param orderBy the order by
+     * @return the embedded object list
+     * @throws PropertyAccessException the property access exception
      */
-    public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName, Query query)
-            throws PropertyAccessException
+    public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
+            BasicDBObject mongoQuery, String result, BasicDBObject orderBy) throws PropertyAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned
 
-        // Query parameters,
-        MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
-        Queue filterClauseQueue = mongoDBQuery.getKunderaQuery().getFilterClauseQueue();
-        String result = mongoDBQuery.getKunderaQuery().getResult();
+        // MongoDBQuery mongoDBQuery = (MongoDBQuery) query;
 
         // Specified after entity alias in query
         String columnName = getColumnName(result);
@@ -435,8 +406,7 @@ public class MongoDBDataHandler
         String enclosingDocumentName = getEnclosingDocumentName(m, columnName);
 
         // Query for fetching entities based on user specified criteria
-        BasicDBObject mongoQuery = createMongoQuery(m, filterClauseQueue);
-        DBCursor cursor = dbCollection.find(mongoQuery);
+        DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery).sort(orderBy) : dbCollection.find(mongoQuery);
 
         EmbeddedColumn superColumn = m.getEmbeddedColumn(enclosingDocumentName);
         Field superColumnField = superColumn.getField();
@@ -456,35 +426,26 @@ public class MongoDBDataHandler
                                 embeddedObjectClass, superColumn.getColumns());
                         Object fieldValue = PropertyAccessorHelper.getObject(embeddedObject, columnName);
 
-                        for (Object object : filterClauseQueue)
-                        {
-                            if (object instanceof FilterClause)
-                            {
-                                FilterClause filter = (FilterClause) object;
-                                String value = filter.getValue();
-                                String condition = filter.getCondition();
-
-                                // This is not an ideal and complete
-                                // implementation. A similar logic exists in
-                                // createMongoQuery method. Need to find a way
-                                // to combine them
-                                if (condition.equals("="))
-                                {
-                                    if (value.equals(fieldValue))
-                                    {
-                                        list.add(embeddedObject);
-                                    }
-                                }
-                                else if (condition.equalsIgnoreCase("like"))
-                                {
-                                    if (fieldValue.toString().indexOf(value) >= 0)
-                                    {
-                                        list.add(embeddedObject);
-                                    }
-                                }
-
-                            }
-                        }
+                        // TODO : discussion required with amresh on this.
+                        /*
+                         * for (Object object : filterClauseQueue) { if (object
+                         * instanceof FilterClause) { FilterClause filter =
+                         * (FilterClause) object; String value =
+                         * filter.getValue(); String condition =
+                         * filter.getCondition();
+                         * 
+                         * // This is not an ideal and complete //
+                         * implementation. A similar logic exists in //
+                         * createMongoQuery method. Need to find a way // to
+                         * combine them if (condition.equals("=")) { if
+                         * (value.equals(fieldValue)) {
+                         * list.add(embeddedObject); } } else if
+                         * (condition.equalsIgnoreCase("like")) { if
+                         * (fieldValue.toString().indexOf(value) >= 0) {
+                         * list.add(embeddedObject); } }
+                         * 
+                         * } }
+                         */
                     }
 
                 }

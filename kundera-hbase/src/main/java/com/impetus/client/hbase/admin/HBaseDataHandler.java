@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
@@ -39,6 +38,7 @@ import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.HBaseData;
@@ -48,17 +48,19 @@ import com.impetus.client.hbase.service.HBaseReader;
 import com.impetus.client.hbase.service.HBaseWriter;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.persistence.EntityResolver;
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+
 /**
+ * The Class HBaseDataHandler.
+ * 
  * @author impetus
  */
 public class HBaseDataHandler implements DataHandler
@@ -66,19 +68,35 @@ public class HBaseDataHandler implements DataHandler
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseDataHandler.class);
 
+    /** The admin. */
     private HBaseAdmin admin;
 
+    /** The conf. */
     private HBaseConfiguration conf;
 
+    /** The h table pool. */
+    private HTablePool hTablePool;
+
+    /** The hbase reader. */
     private Reader hbaseReader = new HBaseReader();
 
+    /** The hbase writer. */
     private Writer hbaseWriter = new HBaseWriter();
 
-    public HBaseDataHandler(HBaseConfiguration conf)
+    /**
+     * Instantiates a new h base data handler.
+     * 
+     * @param conf
+     *            the conf
+     * @param hTablePool
+     *            the h table pool
+     */
+    public HBaseDataHandler(HBaseConfiguration conf, HTablePool hTablePool)
     {
         try
         {
             this.conf = conf;
+            this.hTablePool = hTablePool;
             this.admin = new HBaseAdmin(conf);
         }
         catch (Exception e)
@@ -88,6 +106,13 @@ public class HBaseDataHandler implements DataHandler
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.admin.DataHandler#createTableIfDoesNotExist(
+     * java.lang.String, java.lang.String[])
+     */
     @Override
     public void createTableIfDoesNotExist(final String tableName, final String... colFamily)
             throws MasterNotRunningException, IOException
@@ -105,6 +130,16 @@ public class HBaseDataHandler implements DataHandler
         }
     }
 
+    /**
+     * Adds the column family to table.
+     * 
+     * @param tableName
+     *            the table name
+     * @param columnFamilyName
+     *            the column family name
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
     private void addColumnFamilyToTable(String tableName, String columnFamilyName) throws IOException
     {
         HColumnDescriptor cfDesciptor = new HColumnDescriptor(columnFamilyName);
@@ -139,46 +174,77 @@ public class HBaseDataHandler implements DataHandler
 
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.admin.DataHandler#readData(java.lang.String,
+     * java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata,
+     * java.lang.String, java.util.List)
+     */
     @Override
-    public <E> E readData(final String tableName, Class<E> clazz, EntityMetadata m, final String rowKey)
-            throws IOException
+    public Object readData(final String tableName, Class clazz, EntityMetadata m, final String rowKey,
+            List<String> relationNames) throws IOException
     {
 
-        E entity = null;
+        Object entity = null;
+
+        HTable hTable = null;
+
         try
         {
-
-            entity = clazz.newInstance(); // Entity Object
+            hTable = gethTable(tableName);
 
             // Load raw data from HBase
-            HBaseData data = hbaseReader.LoadData(gethTable(tableName), rowKey);            
+            HBaseData data = hbaseReader.LoadData(hTable, rowKey);
 
             // Populate raw data from HBase into entity
-            populateEntityFromHbaseData(entity, data, m, rowKey);
 
-            // Map to hold property-name=>foreign-entity relations
-//            Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
-
-            // Set entity object and foreign key map into enhanced entity and
-            // return
-//            enhancedEntity = (E) EntityResolver.getEnhancedEntity(entity, rowKey, foreignKeysMap);
+            if (data.getColumns() != null)
+            {
+                entity = clazz.newInstance(); // Entity Object
+                entity = populateEntityFromHbaseData(entity, data, m, rowKey, relationNames);
+            }
         }
         catch (InstantiationException e1)
         {
             log.error("Error while creating an instance of " + clazz);
-//            return enhancedEntity;
+            // return enhancedEntity;
         }
         catch (IllegalAccessException e1)
         {
             log.error("Illegal Access while reading data from " + tableName + ";Details: " + e1.getMessage());
-//            return enhancedEntity;
+            // return enhancedEntity;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            if (hTable != null)
+            {
+                puthTable(hTable);
+            }
+
         }
         return entity;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.admin.DataHandler#writeData(java.lang.String,
+     * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object,
+     * java.lang.String, java.util.List)
+     */
     @Override
-    public void writeData(String tableName, EntityMetadata m, Object entity, String rowId, List<RelationHolder> relations) throws IOException
+    public void writeData(String tableName, EntityMetadata m, Object entity, String rowId,
+            List<RelationHolder> relations) throws IOException
     {
+
+        HTable hTable = gethTable(tableName);
 
         // Now persist column families in the table. For HBase, embedded columns
         // are called column families
@@ -191,11 +257,16 @@ public class HBaseDataHandler implements DataHandler
             Object columnFamilyObject = null;
             try
             {
-                columnFamilyObject = PropertyAccessorHelper.getObject(entity/*.getEntity()*/, columnFamilyField);
+                columnFamilyObject = PropertyAccessorHelper.getObject(entity/*
+                                                                             * .
+                                                                             * getEntity
+                                                                             * (
+                                                                             * )
+                                                                             */, columnFamilyField);
             }
             catch (PropertyAccessException e1)
             {
-                log.error("Error while getting " + columnFamilyName + " field from entity " + entity/*.getEntity()*/);
+                log.error("Error while getting " + columnFamilyName + " field from entity " + entity);
                 return;
             }
 
@@ -208,6 +279,7 @@ public class HBaseDataHandler implements DataHandler
 
             // TODO: Handle Embedded collections differently
             // Write Column family which was Embedded collection in entity
+
             if (columnFamilyObject instanceof Collection)
             {
                 String dynamicCFName = null;
@@ -222,7 +294,7 @@ public class HBaseDataHandler implements DataHandler
                         dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
                         addColumnFamilyToTable(tableName, dynamicCFName);
 
-                        hbaseWriter.writeColumns(gethTable(tableName), dynamicCFName, rowId, columns, obj);
+                        hbaseWriter.writeColumns(hTable, dynamicCFName, rowId, columns, obj);
                         count++;
                     }
 
@@ -251,16 +323,16 @@ public class HBaseDataHandler implements DataHandler
             }
             else
             {
-                // Write Column family which was Embedded object in entity            	
-        		if(columnFamilyField.isAnnotationPresent(Embedded.class)) {
-        			hbaseWriter
-                    .writeColumns(gethTable(tableName), columnFamilyName, rowId, columns, columnFamilyObject);
-        		} else {
-        			hbaseWriter.writeColumn(gethTable(tableName), columnFamilyName, rowId, columns.get(0), columnFamilyObject);
-        		}
-            	
-            	
-                
+                // Write Column family which was Embedded object in entity
+                if (columnFamilyField.isAnnotationPresent(Embedded.class))
+                {
+                    hbaseWriter.writeColumns(hTable, columnFamilyName, rowId, columns, columnFamilyObject);
+                }
+                else
+                {
+                    hbaseWriter.writeColumn(hTable, columnFamilyName, rowId, columns.get(0), columnFamilyObject);
+                }
+
             }
 
         }
@@ -269,23 +341,119 @@ public class HBaseDataHandler implements DataHandler
         List<Column> columns = m.getColumnsAsList();
         if (columns != null && !columns.isEmpty())
         {
-            
-            hbaseWriter.writeColumns(gethTable(tableName), rowId, columns, entity);
+
+            hbaseWriter.writeColumns(hTable, rowId, columns, entity);
         }
-        
-        //Persist relationships as a column in newly created Column family by Kundera
-        boolean containsEmbeddedObjectsOnly = (columns == null || columns.isEmpty()); 
-        if(relations != null && ! relations.isEmpty()) {
-        	hbaseWriter.writeRelations(gethTable(tableName), rowId, containsEmbeddedObjectsOnly, relations);
+
+        // Persist relationships as a column in newly created Column family by
+        // Kundera
+        boolean containsEmbeddedObjectsOnly = (columns == null || columns.isEmpty());
+        if (relations != null && !relations.isEmpty())
+        {
+            hbaseWriter.writeRelations(hTable, rowId, containsEmbeddedObjectsOnly, relations);
         }
-       
+
+        puthTable(hTable);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.admin.DataHandler#writeJoinTableData(java.lang
+     * .String, java.lang.String, java.util.Map)
+     */
+    @Override
+    public void writeJoinTableData(String tableName, String rowId, Map<String, String> columns) throws IOException
+    {
+        HTable hTable = gethTable(tableName);
+
+        hbaseWriter.writeColumns(hTable, rowId, columns);
+
+        puthTable(hTable);
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.admin.DataHandler#getForeignKeysFromJoinTable
+     * (java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String rowKey, String inverseJoinColumnName)
+    {
+        List<E> foreignKeys = new ArrayList<E>();
+
+        HTable hTable = null;
+
+        // Load raw data from Join Table in HBase
+        try
+        {
+            hTable = gethTable(joinTableName);
+
+            HBaseData data = hbaseReader.LoadData(hTable, Constants.JOIN_COLUMNS_FAMILY_NAME, rowKey);
+            List<KeyValue> hbaseValues = data.getColumns();
+
+            for (KeyValue colData : hbaseValues)
+            {
+                String hbaseColumn = Bytes.toString(colData.getColumn());
+
+                if (hbaseColumn.startsWith(Constants.JOIN_COLUMNS_FAMILY_NAME + ":" + inverseJoinColumnName))
+                {
+                    byte[] val = colData.getValue();
+                    String hbaseColumnValue = Bytes.toString(val);
+
+                    foreignKeys.add((E) hbaseColumnValue);
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            return foreignKeys;
+        }
+        finally
+        {
+            if (hTable != null)
+            {
+                puthTable(hTable);
+            }
+        }
+        return foreignKeys;
+    }
+
+    /**
+     * Selects an HTable from the pool and returns.
+     * 
+     * @param tableName
+     *            Name of HBase table
+     * @return the h table
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
     private HTable gethTable(final String tableName) throws IOException
     {
-        return new HTable(conf, tableName);
+        // return new HTable(conf, tableName);
+        return hTablePool.getTable(tableName);
     }
 
+    /**
+     * Puts HTable back into the HBase table pool.
+     * 
+     * @param hTable
+     *            HBase Table instance
+     */
+    private void puthTable(HTable hTable)
+    {
+        hTablePool.putTable(hTable);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.client.hbase.admin.DataHandler#shutdown()
+     */
     @Override
     public void shutdown()
     {
@@ -301,44 +469,65 @@ public class HBaseDataHandler implements DataHandler
          * 
          * } catch (IOException e) { throw new RuntimeException(e.getMessage());
          * }
-         */}
+         */
+    }
 
     // TODO: Scope of performance improvement in this method
-    private void populateEntityFromHbaseData(Object entity, HBaseData hbaseData, EntityMetadata m, String rowKey)
+    /**
+     * Populate entity from hbase data.
+     * 
+     * @param entity
+     *            the entity
+     * @param hbaseData
+     *            the hbase data
+     * @param m
+     *            the m
+     * @param rowKey
+     *            the row key
+     * @param relationNames
+     *            the relation names
+     * @return the object
+     */
+    private Object populateEntityFromHbaseData(Object entity, HBaseData hbaseData, EntityMetadata m, String rowKey,
+            List<String> relationNames)
     {
         try
         {
             /* Set Row Key */
-            PropertyAccessorHelper.set(entity, m.getIdColumn().getField(), rowKey);
-
-            
+            PropertyAccessorHelper.setId(entity, m, rowKey);
 
             // Raw data retrieved from HBase for a particular row key (contains
             // all column families)
             List<KeyValue> hbaseValues = hbaseData.getColumns();
-            
-            
+
+            Map<String, Object> relations = new HashMap<String, Object>();
             /*
              * Populate columns data
              */
             List<Column> columns = m.getColumnsAsList();
-            for(Column column : columns) {
+            for (Column column : columns)
+            {
                 Field columnField = column.getField();
                 String columnName = column.getName();
-                
-                for(KeyValue colData : hbaseValues) {
+
+                for (KeyValue colData : hbaseValues)
+                {
                     String hbaseColumn = Bytes.toString(colData.getColumn());
-                    if(hbaseColumn != null && hbaseColumn.startsWith(columnName)) {
+                    String colName = getColumnName(hbaseColumn);
+                    if (colName != null && colName.equals(columnName))
+                    {
                         byte[] hbaseColumnValue = colData.getValue();
                         PropertyAccessorHelper.set(entity, columnField, hbaseColumnValue);
-                        
-                        break;
+
                     }
-                }              
-                
+                    else if (relationNames != null && relationNames.contains(colName))
+                    {
+                        relations.put(colName, Bytes.toString(colData.getValue()));
+                    }
+                }
+
             }
-            
-            
+
             /*
              * Set each column families, for HBase embedded columns are called
              * columns families
@@ -375,7 +564,12 @@ public class HBaseDataHandler implements DataHandler
                         // count>
                         if (!cfInHbase.startsWith(columnFamily.getName()))
                         {
+                            if (relationNames != null && relationNames.contains(cfInHbase))
+                            {
+                                relations.put(cfInHbase, Bytes.toString(colData.getValue()));
+                            }
                             continue;
+
                         }
 
                         String cfNamePostfix = MetadataUtils.getEmbeddedCollectionPostfix(cfInHbase);
@@ -424,32 +618,48 @@ public class HBaseDataHandler implements DataHandler
 
                         if (!cfInHbase.equals(columnFamily.getName()))
                         {
-                        	continue;
-                        }   
-                        // Set Hbase data into the column family object                        	                            
-                    	//setHBaseDataIntoObject(colData, columnFamilyFieldInEntity, columnNameToFieldMap, columnFamilyObj);
+                            if (relationNames != null && relationNames.contains(cfInHbase))
+                            {
+                                relations.put(cfInHbase, Bytes.toString(colData.getValue()));
+                            }
+                            continue;
+
+                        }
+                        // Set Hbase data into the column family object
+                        // setHBaseDataIntoObject(colData,
+                        // columnFamilyFieldInEntity, columnNameToFieldMap,
+                        // columnFamilyObj);
 
                         String colName = Bytes.toString(colData.getQualifier());
-                        byte[] columnValue = colData.getValue();                       
+                        byte[] columnValue = colData.getValue();
 
                         // Get Column from metadata
                         Field columnField = columnNameToFieldMap.get(colName);
-                        if(columnField != null) {
-                        	if(columnFamilyFieldInEntity.isAnnotationPresent(Embedded.class) || columnFamilyFieldInEntity.isAnnotationPresent(ElementCollection.class)) {
-                        		PropertyAccessorHelper.set(columnFamilyObj, columnField, columnValue);
-                            } else {
-                            	columnFamilyObj = Bytes.toString(columnValue);
+                        if (columnField != null)
+                        {
+                            if (columnFamilyFieldInEntity.isAnnotationPresent(Embedded.class)
+                                    || columnFamilyFieldInEntity.isAnnotationPresent(ElementCollection.class))
+                            {
+                                PropertyAccessorHelper.set(columnFamilyObj, columnField, columnValue);
                             }
-                        }  
-              
+                            else
+                            {
+                                columnFamilyObj = Bytes.toString(columnValue);
+                            }
+                        }
+
                     }
-                    PropertyAccessorHelper.set(entity, columnFamilyFieldInEntity, columnFamilyObj);    
-                    
-                    
+                    PropertyAccessorHelper.set(entity, columnFamilyFieldInEntity, columnFamilyObj);
+
                 }
 
             }
+            if (!relations.isEmpty())
+            {
+                return new EnhanceEntity(entity, rowKey, relations);
+            }
 
+            return entity;
         }
         catch (PropertyAccessException e1)
         {
@@ -463,27 +673,69 @@ public class HBaseDataHandler implements DataHandler
         {
             throw new RuntimeException(e1.getMessage());
         }
+
     }
 
-    private void setHBaseDataIntoObject(KeyValue colData, Field columnFamilyField, Map<String, Field> columnNameToFieldMap,
-            Object columnFamilyObj) throws PropertyAccessException
+    /**
+     * Sets the h base data into object.
+     * 
+     * @param colData
+     *            the col data
+     * @param columnFamilyField
+     *            the column family field
+     * @param columnNameToFieldMap
+     *            the column name to field map
+     * @param columnFamilyObj
+     *            the column family obj
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    private void setHBaseDataIntoObject(KeyValue colData, Field columnFamilyField,
+            Map<String, Field> columnNameToFieldMap, Object columnFamilyObj) throws PropertyAccessException
     {
 
-    	String colName = Bytes.toString(colData.getQualifier());
+        String colName = Bytes.toString(colData.getQualifier());
         byte[] columnValue = colData.getValue();
-        
 
         // Get Column from metadata
         Field columnField = columnNameToFieldMap.get(colName);
-        if(columnField != null) {
-        	if(columnFamilyField.isAnnotationPresent(Embedded.class) || columnFamilyField.isAnnotationPresent(ElementCollection.class)) {
-        		PropertyAccessorHelper.set(columnFamilyObj, columnField, columnValue);
-            } else {
-            	columnFamilyObj = Bytes.toString(columnValue);
+        if (columnField != null)
+        {
+            if (columnFamilyField.isAnnotationPresent(Embedded.class)
+                    || columnFamilyField.isAnnotationPresent(ElementCollection.class))
+            {
+                PropertyAccessorHelper.set(columnFamilyObj, columnField, columnValue);
             }
-        } 
-       
+            else
+            {
+                columnFamilyObj = Bytes.toString(columnValue);
+            }
+        }
+
     }
 
-    
+    /**
+     * Gets the column name.
+     * 
+     * @param hbaseColumn
+     *            the hbase column
+     * @return the column name
+     */
+    private String getColumnName(String hbaseColumn)
+    {
+        return hbaseColumn != null ? hbaseColumn.substring(0, hbaseColumn.indexOf(":")) : null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.admin.DataHandler#deleteRow(java.lang.String,
+     * java.lang.String)
+     */
+    public void deleteRow(String rowKey, String tableName) throws IOException
+    {
+        hbaseWriter.delete(gethTable(tableName), rowKey, tableName);
+
+    }
 }

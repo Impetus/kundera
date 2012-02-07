@@ -15,17 +15,29 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model;
 
+import org.apache.commons.lang.StringUtils;
+
+
 /**
+ * The Class ClientMetadata.
+ *
  * @author amresh.singh
- * 
  */
 public class ClientMetadata
 {
+    
+    /** The client implementor. */
     private String clientImplementor;
 
+    /** The index implementor. */
     private String indexImplementor;
 
+    /** The Lucene index dir. */
+    private String LuceneIndexDir;
+
     /**
+     * Gets the client implementor.
+     *
      * @return the clientImplementor
      */
     public String getClientImplementor()
@@ -34,8 +46,9 @@ public class ClientMetadata
     }
 
     /**
-     * @param clientImplementor
-     *            the clientImplementor to set
+     * Sets the client implementor.
+     *
+     * @param clientImplementor the clientImplementor to set
      */
     public void setClientImplementor(String clientImplementor)
     {
@@ -43,6 +56,8 @@ public class ClientMetadata
     }
 
     /**
+     * Gets the index implementor.
+     *
      * @return the indexImplementor
      */
     public String getIndexImplementor()
@@ -51,12 +66,43 @@ public class ClientMetadata
     }
 
     /**
-     * @param indexImplementor
-     *            the indexImplementor to set
+     * Sets the index implementor.
+     *
+     * @param indexImplementor the indexImplementor to set
      */
     public void setIndexImplementor(String indexImplementor)
     {
         this.indexImplementor = indexImplementor;
+    }
+
+    /**
+     * Checks if is use secondry index.
+     *
+     * @return the useSecondryIndex
+     */
+    public boolean isUseSecondryIndex()
+    {
+        return StringUtils.isEmpty(LuceneIndexDir) && StringUtils.isBlank(LuceneIndexDir);
+    }
+
+    /**
+     * Gets the lucene index dir.
+     *
+     * @return the luceneIndexDir
+     */
+    public String getLuceneIndexDir()
+    {
+        return LuceneIndexDir;
+    }
+
+    /**
+     * Sets the lucene index dir.
+     *
+     * @param luceneIndexDir the luceneIndexDir to set
+     */
+    public void setLuceneIndexDir(String luceneIndexDir)
+    {
+        LuceneIndexDir = luceneIndexDir;
     }
 
 }

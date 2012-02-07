@@ -20,6 +20,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+
 /**
  * The Class Post.
  * 
@@ -35,9 +36,11 @@ public class Post
     // row identifier
     String permalink;
 
+    /** The data. */
     @Embedded
     private PostData data = new PostData();
 
+    /** The author. */
     @Embedded
     private AuthorDetail author = new AuthorDetail();
 
@@ -207,6 +210,8 @@ public class Post
     }
 
     /**
+     * Gets the data.
+     *
      * @return the data
      */
     public PostData getData()
@@ -215,8 +220,9 @@ public class Post
     }
 
     /**
-     * @param data
-     *            the data to set
+     * Sets the data.
+     *
+     * @param data the data to set
      */
     public void setData(PostData data)
     {
@@ -224,6 +230,8 @@ public class Post
     }
 
     /**
+     * Gets the author.
+     *
      * @return the author
      */
     public AuthorDetail getAuthor()
@@ -232,8 +240,9 @@ public class Post
     }
 
     /**
-     * @param author
-     *            the author to set
+     * Sets the author.
+     *
+     * @param author the author to set
      */
     public void setAuthor(AuthorDetail author)
     {

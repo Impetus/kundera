@@ -18,23 +18,39 @@ package com.impetus.kundera.client;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+
 /**
+ * The Class ClientIdentifier.
+ *
  * @author impetus
- * 
  */
 public class ClientIdentifier
 {
 
+    /** The node. */
     private String[] node;
 
+    /** The port. */
     private int port;
 
+    /** The keyspace. */
     private String keyspace;
 
+    /** The client type. */
     private ClientType clientType;
 
+    /** The persistence unit. */
     private String persistenceUnit;
 
+    /**
+     * Instantiates a new client identifier.
+     *
+     * @param contactNodes the contact nodes
+     * @param port the port
+     * @param keyspace the keyspace
+     * @param clientType the client type
+     * @param persistenceUnit the persistence unit
+     */
     public ClientIdentifier(String[] contactNodes, int port, String keyspace, ClientType clientType,
             String persistenceUnit)
     {
@@ -45,27 +61,49 @@ public class ClientIdentifier
         this.persistenceUnit = persistenceUnit;
     }
 
+    /**
+     * Gets the node.
+     *
+     * @return the node
+     */
     public String[] getNode()
     {
         return node;
     }
 
+    /**
+     * Gets the port.
+     *
+     * @return the port
+     */
     public int getPort()
     {
         return port;
     }
 
+    /**
+     * Gets the keyspace.
+     *
+     * @return the keyspace
+     */
     public String getKeyspace()
     {
         return keyspace;
     }
 
+    /**
+     * Gets the client type.
+     *
+     * @return the client type
+     */
     public ClientType getClientType()
     {
         return clientType;
     }
 
     /**
+     * Gets the persistence unit.
+     *
      * @return the persistenceUnit
      */
     public String getPersistenceUnit()
@@ -73,6 +111,9 @@ public class ClientIdentifier
         return persistenceUnit;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(Object client)
     {
@@ -90,12 +131,18 @@ public class ClientIdentifier
 
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString()
     {
         return ToStringBuilder.reflectionToString(this);
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode()
     {

@@ -15,16 +15,16 @@
  ******************************************************************************/
 package com.impetus.kundera.client;
 
+
 /**
+ * The Class ClientResolverException.
+ *
  * @author impetus
- * 
  */
 public class ClientResolverException extends RuntimeException
 {
 
-    /**
-	 *
-	 */
+    /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
     /**

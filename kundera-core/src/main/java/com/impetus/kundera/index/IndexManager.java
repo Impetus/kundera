@@ -20,8 +20,10 @@ import java.util.Map;
 import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+
 
 /**
  * Manager responsible to co-ordinate with an Indexer. It is bound with
@@ -37,9 +39,8 @@ public class IndexManager
 
     /**
      * The Constructor.
-     * 
-     * @param manager
-     *            the manager
+     *
+     * @param indexer the indexer
      */
     @SuppressWarnings("deprecation")
     public IndexManager(Indexer indexer)
@@ -61,7 +62,11 @@ public class IndexManager
     {
         try
         {
-            indexer.unindex(metadata, key);
+            if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+            {
+
+                indexer.unindex(metadata, key);
+            }
         }
         catch (Exception e)
         {
@@ -81,9 +86,13 @@ public class IndexManager
     {
         try
         {
-            String id = PropertyAccessorHelper.getId(entity, metadata);
-            indexer.unindex(metadata, id);
-            indexer.index(metadata, entity);
+            if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+            {
+
+                String id = PropertyAccessorHelper.getId(entity, metadata);
+                indexer.unindex(metadata, id);
+                indexer.index(metadata, entity);
+            }
         }
         catch (Exception e)
         {
@@ -101,7 +110,10 @@ public class IndexManager
      */
     public final void write(EntityMetadata metadata, Object entity)
     {
-        indexer.index(metadata, entity);
+        if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+        {
+            indexer.index(metadata, entity);
+        }
     }
 
     /**
@@ -112,16 +124,18 @@ public class IndexManager
      * @param entity
      *            the entity
      * @param parentId
-     *            parent Id.           
+     *            parent Id.
      * @param clazz
-     *            class name           
+     *            class name
      */
     public final void write(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz)
     {
-        indexer.index(metadata, entity, parentId, clazz);
+        if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
+        {
+            indexer.index(metadata, entity, parentId, clazz);
+        }
     }
 
-    
     /**
      * Searches on the index. Note: Query must be in Indexer's understandable
      * format
@@ -181,13 +195,11 @@ public class IndexManager
 
     /**
      * Search.
-     * 
-     * @param query
-     *            the query
-     * @param start
-     *            the start
-     * @param count
-     *            the count
+     *
+     * @param query the query
+     * @param start the start
+     * @param count the count
+     * @param fetchRelation the fetch relation
      * @return the list
      */
     public final Map<String, String> search(String query, int start, int count, boolean fetchRelation)
@@ -200,7 +212,10 @@ public class IndexManager
      */
     public void flush()
     {
-        indexer.flush();
+        if (indexer != null)
+        {
+            indexer.flush();
+        }
     }
 
     /**
@@ -208,6 +223,9 @@ public class IndexManager
      */
     public void close()
     {
-        indexer.close();
+        if (indexer != null)
+        {
+            indexer.close();
+        }
     }
 }

@@ -20,38 +20,55 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+
 /**
+ * The Class PersonnelDTO.
+ *
  * @author amresh.singh
- * 
  */
 
 @Entity
 @Table(name = "person", schema = "KunderaTest")
-public class PersonDTO
+public class PersonnelDTO
 {
 
+    /** The person id. */
     @Id
     private String personId;
 
+    /** The first name. */
     @Column(name = "first_name")
     private String firstName;
 
+    /** The last name. */
     @Column(name = "last_name")
     private String lastName;
 
-    public PersonDTO(String personId, String firstName, String lastName)
+    /**
+     * Instantiates a new personnel dto.
+     *
+     * @param personId the person id
+     * @param firstName the first name
+     * @param lastName the last name
+     */
+    public PersonnelDTO(String personId, String firstName, String lastName)
     {
         this.personId = personId;
         this.firstName = firstName;
         this.lastName = lastName;
     }
 
-    public PersonDTO()
+    /**
+     * Instantiates a new personnel dto.
+     */
+    public PersonnelDTO()
     {
 
     }
 
     /**
+     * Gets the person id.
+     *
      * @return the personId
      */
     public String getPersonId()
@@ -60,8 +77,9 @@ public class PersonDTO
     }
 
     /**
-     * @param personId
-     *            the personId to set
+     * Sets the person id.
+     *
+     * @param personId the personId to set
      */
     public void setPersonId(String personId)
     {
@@ -69,6 +87,8 @@ public class PersonDTO
     }
 
     /**
+     * Gets the first name.
+     *
      * @return the firstName
      */
     public String getFirstName()
@@ -77,8 +97,9 @@ public class PersonDTO
     }
 
     /**
-     * @param firstName
-     *            the firstName to set
+     * Sets the first name.
+     *
+     * @param firstName the firstName to set
      */
     public void setFirstName(String firstName)
     {
@@ -86,6 +107,8 @@ public class PersonDTO
     }
 
     /**
+     * Gets the last name.
+     *
      * @return the lastName
      */
     public String getLastName()
@@ -94,8 +117,9 @@ public class PersonDTO
     }
 
     /**
-     * @param lastName
-     *            the lastName to set
+     * Sets the last name.
+     *
+     * @param lastName the lastName to set
      */
     public void setLastName(String lastName)
     {

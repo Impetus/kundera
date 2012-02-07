@@ -19,15 +19,17 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
 
 import javax.persistence.JoinColumn;
 
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+
 /**
  * The Class AssociationHandler.
- *
+ * 
  * @author vivek.mishra
  */
 class AssociationHandler
@@ -60,16 +62,18 @@ class AssociationHandler
         return columnName != null ? columnName : relation.getName();
     }
 
- 
     /**
      * Populate default graph.
-     *
-     * @param entity the entity
-     * @param associatedEntity the associated entity
-     * @param rField the r field
+     * 
+     * @param entity
+     *            the entity
+     * @param associatedEntity
+     *            the associated entity
+     * @param rField
+     *            the r field
      * @return the entity save graph
      */
-    
+
     protected EntitySaveGraph populateDefaultGraph(Object entity, Object associatedEntity, Field rField)
     {
         EntitySaveGraph objectGraph = new EntitySaveGraph(rField);
@@ -79,35 +83,36 @@ class AssociationHandler
         return objectGraph;
     }
 
-
     /**
      * Compute direction.
      *
+     * @param <T> the generic type
      * @param entity the entity
-     * @param associatedEntity the associated entity
+     * @param relationalField the relational field
      * @param objectGraph the object graph
+     * @param clazz the clazz
      * @return the field
      */
 
-    //TODO: this can be moved to metadata level.
-    protected <T extends Annotation> Field computeDirection(Object entity, Field relationalField, EntitySaveGraph objectGraph, Class<T> clazz)
+    // TODO: this can be moved to metadata level.
+    protected <T extends Annotation> Field computeDirection(Object entity, Field relationalField,
+            EntitySaveGraph objectGraph, Class<T> clazz)
     {
-    Field[] fields = PropertyAccessorHelper.getDeclaredFields(relationalField);
+        Field[] fields = PropertyAccessorHelper.getDeclaredFields(relationalField);
 
-        
         Class<?> clazzz = null;
         for (Field field : fields)
         {
             if (field.isAnnotationPresent(clazz))
             {
-                clazzz=field.getType();
-                if(PropertyAccessorHelper.isCollection(clazzz))
+                clazzz = field.getType();
+                if (PropertyAccessorHelper.isCollection(clazzz))
                 {
-                        ParameterizedType type = (ParameterizedType) field.getGenericType();
-                        Type[] types = type.getActualTypeArguments();
-                        clazzz = (Class<?>) types[0];
+                    ParameterizedType type = (ParameterizedType) field.getGenericType();
+                    Type[] types = type.getActualTypeArguments();
+                    clazzz = (Class<?>) types[0];
                 }
-                    
+
                 if (clazzz.equals(entity.getClass()))
                 {
                     // then it is a case of bi directional.
@@ -118,37 +123,59 @@ class AssociationHandler
             }
 
         }
-        
+
         return null;
     }
 
-    
+    /**
+     * Removed association entit(ies) from the enclosing entity.
+     *
+     * @param entity the entity
+     * @param associationEntity the association entity
+     * @param field the field
+     * @param setNull the set null
+     */
     protected void onDetach(Object entity, Object associationEntity, Field field, boolean setNull)
     {
 
         try
         {
-        	if(entity != null)
-        	{
-        		PropertyAccessorHelper.set(entity, field, setNull || associationEntity == null? null:associationEntity.getClass().newInstance());
-        	}
+            if (entity != null)
+            {
+                if (entity instanceof Collection<?>)
+                {
+                    Collection<?> entityCollection = (Collection<?>) entity;
+                    for (Object entityObj : entityCollection)
+                    {
+                        if (entityObj != null)
+                        {
+                            PropertyAccessorHelper.set(entityObj, field, setNull || entity == null ? null
+                                    : Collection.class.isAssignableFrom(field.getType()) ? null : associationEntity
+                                            .getClass().newInstance());
+                        }
+
+                    }
+
+                }
+                else
+                {
+                    PropertyAccessorHelper.set(entity, field, setNull || associationEntity == null ? null
+                            : associationEntity.getClass().newInstance());
+                }
+            }
         }
         catch (PropertyAccessException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         catch (InstantiationException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         catch (IllegalAccessException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
-        } 
+        }
     }
-
 
 }

@@ -15,34 +15,30 @@
  ******************************************************************************/
 package com.impetus.client.manytomany;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
 import org.junit.Test;
 
+
 /**
- * @author vivek.mishra
+ * The Class PersonTest.
  *
+ * @author vivek.mishra
  */
 public class PersonTest
 {
 
+    /**
+     * Test persist.
+     */
     @Test
     public void testPersist()
     {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("testHibernate,kcassandra");
-        
-        EntityManager em = emf.createEntityManager();
-        em.persist(prepareObject());
 
     }
 
     /**
-     * @return
+     * Prepare object.
+     *
+     * @return the object
      */
     private Object prepareObject()
     {
@@ -52,13 +48,12 @@ public class PersonTest
         MTMAddress address = new MTMAddress();
         address.setAddressId("2_a");
         address.setStreet("sadak");
-        
-//        Set<Address> addresses = new HashSet<Address>(1);
-//        addresses.add(address);
-//        person.setAddresses(addresses);
+
+        // Set<Address> addresses = new HashSet<Address>(1);
+        // addresses.add(address);
+        // person.setAddresses(addresses);
         person.setAddress(address);
         return person;
     }
-
 
 }
