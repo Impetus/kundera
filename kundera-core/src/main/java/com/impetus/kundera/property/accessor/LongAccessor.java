@@ -51,12 +51,21 @@ public class LongAccessor implements PropertyAccessor<Long>
      * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public final byte[] toBytes(Object object)
+    public final byte[] toBytes(Object object) throws PropertyAccessException
     {
-        Long l = (Long) object;
-        ByteBuffer buffer = ByteBuffer.allocate(8);
-        buffer.putLong(l);
-        return buffer.array();
+        try
+        {
+            Long l = (Long) object;
+            ByteBuffer buffer = ByteBuffer.allocate(8);
+
+            buffer.putLong(l);
+
+            return buffer.array();
+        }
+        catch (Exception e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
     }
 
     /* (non-Javadoc)

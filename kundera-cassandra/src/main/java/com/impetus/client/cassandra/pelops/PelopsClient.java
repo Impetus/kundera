@@ -797,7 +797,6 @@ public class PelopsClient implements Client
         List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
         if (thriftColumns != null && !thriftColumns.isEmpty())
         {
-            // Bytes.fromL
             mutator.writeColumns(metadata.getTableName(), new Bytes(tf.getId().getBytes()),
                     Arrays.asList(tf.getColumns().toArray(new Column[0])));
         }

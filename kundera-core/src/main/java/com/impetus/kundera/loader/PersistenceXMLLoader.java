@@ -104,10 +104,13 @@ public class PersistenceXMLLoader
         docBuilder.setErrorHandler(new ErrorLogger("XML InputStream", errors));
         Document doc = docBuilder.parse(source);
 
+        /*
         if (errors.size() != 0)
         {
             throw new PersistenceException("invalid persistence.xml", (Throwable) errors.get(0));
         }
+        * 
+        */
         is.close(); // Close input Stream
         return doc;
     }
