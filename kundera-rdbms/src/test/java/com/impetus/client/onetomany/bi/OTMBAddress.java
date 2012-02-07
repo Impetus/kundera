@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.onetomany.bi;
 
+//~--- JDK imports ------------------------------------------------------------
+
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -28,7 +30,10 @@ import javax.persistence.Table;
  * The Class OTMBAddress.
  */
 @Entity
-@Table(name = "ADDRESS", schema = "KunderaKeyspace@kcassandra")
+@Table(
+    name = "ADDRESS",
+    schema = "KunderaKeyspace@kcassandra"
+)
 public class OTMBAddress
 {
     
@@ -43,8 +48,10 @@ public class OTMBAddress
 
     /** The people. */
     @OneToMany(mappedBy = "address")
+
     // pointing Person's address field
     @Column(name = "PERSON_ID")
+
     // inverse=true
     private Set<OTMBNPerson> people;
 
@@ -115,5 +122,4 @@ public class OTMBAddress
     {
         this.people = people;
     }
-
 }

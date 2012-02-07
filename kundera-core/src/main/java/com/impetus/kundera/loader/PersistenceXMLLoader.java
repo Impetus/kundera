@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -37,7 +38,6 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
 
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 
 /**

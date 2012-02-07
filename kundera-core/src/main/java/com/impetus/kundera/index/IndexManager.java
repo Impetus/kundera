@@ -146,7 +146,7 @@ public class IndexManager
      */
     public final Map<String, String> search(String query)
     {
-        return search(query, Constants.INVALID, Constants.INVALID, false);
+        return search(query, 0, Constants.INVALID, false);
     }
 
     /**
@@ -159,8 +159,8 @@ public class IndexManager
      */
     public final Map<String, String> fetchRelation(String query)
     {
-        // TODO: need to return list.
-        return search(query, Constants.INVALID, Constants.INVALID, true);
+        //TODO: need to return list.
+        return search(query, 0, Constants.INVALID, true);
     }
 
     /**
@@ -174,7 +174,7 @@ public class IndexManager
      */
     public final Map<String, String> search(String query, int count)
     {
-        return search(query, Constants.INVALID, count, false);
+        return search(query, 0, count, false);
     }
 
     /**
