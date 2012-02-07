@@ -260,7 +260,7 @@ public class LuceneIndexer extends DocumentIndexer
             int nullCount = 0;
             // Assuming Supercol will be null in case if alias only.
             // This is a quick fix
-            for (int i = start; i < docs.scoreDocs.length; i++)
+            for (int i = (start<0?0:start); i < docs.scoreDocs.length; i++)
             {
                 ScoreDoc sc = docs.scoreDocs[i];
                 Document doc = searcher.doc(sc.doc);
