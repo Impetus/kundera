@@ -51,6 +51,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import java.util.*;
 import javax.persistence.PersistenceException;
 
 
@@ -113,8 +114,8 @@ public class PelopsDataHandler
         {
 
             List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
-            ByteBuffer rKeyAsByte = ByteBufferUtil.bytes(rowKey);
-            rowKeys.add(ByteBufferUtil.bytes(rowKey));
+            ByteBuffer rKeyAsByte = getByteBuffer(rowKey);
+            rowKeys.add(rKeyAsByte);
 
             Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow = selector
                     .getColumnOrSuperColumnsFromRows(new ColumnParent(m.getTableName()), rowKeys,
@@ -853,6 +854,19 @@ public class PelopsDataHandler
 
         }
         return foreignKeys;
+    }
+
+    private ByteBuffer getByteBuffer(String rowKey)
+    {
+        try
+        {
+            UUID uuid = UUID.fromString(rowKey);
+            return ByteBuffer.wrap(Bytes.fromUuid(uuid).toByteArray());
+        }
+        catch(IllegalArgumentException ex)
+        {
+            return ByteBufferUtil.bytes(rowKey);
+        }
     }
 
     /**
