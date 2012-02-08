@@ -54,6 +54,7 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
+import java.util.*;
 
 
 /**
@@ -796,7 +797,8 @@ public class PelopsClient implements Client
         List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
         if (thriftColumns != null && !thriftColumns.isEmpty())
         {
-            mutator.writeColumns(metadata.getTableName(), new Bytes(tf.getId().getBytes()),
+            Bytes keyBytes = getKeyBytes(tf.getId());
+            mutator.writeColumns(metadata.getTableName(), keyBytes,
                     Arrays.asList(tf.getColumns().toArray(new Column[0])));
         }
 
@@ -824,6 +826,19 @@ public class PelopsClient implements Client
     public EntityReader getReader()
     {
         return reader;
+    }
+
+    private Bytes getKeyBytes(String id)
+    {
+        try
+        {
+            UUID uuid = UUID.fromString(id);
+            return Bytes.fromUuid(uuid);
+        }
+        catch(IllegalArgumentException ex)
+        {
+            return Bytes.fromByteArray(id.getBytes());
+        }
     }
 
 }
