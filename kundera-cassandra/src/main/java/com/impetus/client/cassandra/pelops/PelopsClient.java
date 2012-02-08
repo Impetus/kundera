@@ -616,8 +616,9 @@ public class PelopsClient implements Client
             List<Column> columns = qResults.get(rowKey);
             try
             {
+                String rowKeyStr = bytesToString(rowKey);
                 Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m,
-                        dataHandler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null),
+                        dataHandler.new ThriftRow(rowKeyStr, m.getTableName(), columns, null),
                         relationNames, isRelational);
                 entities.add(e);
             }
@@ -838,6 +839,19 @@ public class PelopsClient implements Client
         catch(IllegalArgumentException ex)
         {
             return Bytes.fromByteArray(id.getBytes());
+        }
+    }
+
+    private String bytesToString(Bytes rowKey)
+    {
+        try
+        {
+            UUID uuid = rowKey.toUuid();
+            return uuid.toString();
+        }
+        catch(IllegalStateException ex)
+        {
+            return Bytes.toUTF8(rowKey.toByteArray());
         }
     }
 
