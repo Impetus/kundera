@@ -15,9 +15,11 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
+import org.scale7.cassandra.pelops.Bytes;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
+import java.util.UUID;
 
 
 /**
@@ -37,13 +39,23 @@ public class StringAccessor implements PropertyAccessor<String>
     {
         try
         {
-            return new String(bytes, Constants.ENCODING);
+            UUID uuid = Bytes.fromByteArray(bytes).toUuid();
+            return uuid.toString();
         }
-        catch (Exception e)
+        catch(Exception ex)
         {
-            e.printStackTrace();
-            throw new PropertyAccessException(e.getMessage());
+            try
+            {
+                return new String(bytes, Constants.ENCODING);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                throw new PropertyAccessException(e.getMessage());
+            }
         }
+        
+        
     }
 
     /* (non-Javadoc)
@@ -54,12 +66,22 @@ public class StringAccessor implements PropertyAccessor<String>
     {
         try
         {
-            return ((String) s).getBytes(Constants.ENCODING);
+            UUID uuid = UUID.fromString(((String) s));
+            return Bytes.fromUuid(uuid).toByteArray();
         }
-        catch (Exception e)
+        catch(Exception ex)
         {
-            throw new PropertyAccessException(e.getMessage());
+            try
+            {
+                return ((String) s).getBytes(Constants.ENCODING);
+                //return Bytes.fromByteArray(id.getBytes());
+            }
+            catch (Exception e)
+            {
+                throw new PropertyAccessException(e.getMessage());
+            }
         }
+        
     }
 
     /* (non-Javadoc)
