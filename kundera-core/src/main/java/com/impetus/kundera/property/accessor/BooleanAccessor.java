@@ -42,14 +42,15 @@ public class BooleanAccessor implements PropertyAccessor<Boolean>
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
-        if (object != null)
+        try
         {
-
             Boolean b = (Boolean) object;
-
             return new byte[] { (byte) (b ? 0x01 : 0x00) }; // bool -> {1 byte}
         }
-        return null;
+        catch (Exception e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
     }
 
     /* (non-Javadoc)

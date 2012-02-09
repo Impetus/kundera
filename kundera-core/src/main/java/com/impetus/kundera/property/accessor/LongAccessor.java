@@ -43,7 +43,9 @@ public class LongAccessor
     {
         if (bytes.length != 8)
         {
-            throw new PropertyAccessException("must be 8 bytes");
+            //FIXME: This is a hack.
+            return null;
+            //throw new PropertyAccessException("must be 8 bytes");
         }
 
         return (ByteBuffer.wrap(bytes).getLong());

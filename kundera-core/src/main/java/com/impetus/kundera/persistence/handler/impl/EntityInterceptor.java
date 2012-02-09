@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence.handler.impl;
 
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +33,6 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 public final class EntityInterceptor
 {
-
     /**
      * ON handling relations.
      * 
@@ -77,6 +77,28 @@ public final class EntityInterceptor
 
             objectGraph = handler.handleAssociation(entity, rlEntity, metadata, relation);
             objectGraphs.add(objectGraph);
+            
+            /*Recursion
+            EntityMetadata entityMetadata = KunderaMetadataManager
+                    .getEntityMetadata(objectGraph.getChildClass(), metadata.getPersistenceUnit());
+            
+            List<EntitySaveGraph> recursiveRelations;
+            try
+            {
+                recursiveRelations = handleRelation(
+                    objectGraph.getChildClass().newInstance(), entityMetadata);
+                
+                objectGraphs.addAll(recursiveRelations);
+            }
+            catch (InstantiationException ex)
+            {
+                throw new RuntimeException(ex.getMessage());
+            }
+            catch (IllegalAccessException ex)
+            {
+                throw new RuntimeException(ex.getMessage());
+            }
+            */
 
             // object graph
             // If it is unidirectional, then detach child from parent.

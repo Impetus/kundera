@@ -143,7 +143,7 @@ public class PelopsClient implements Client
         }
         catch (Exception e)
         {
-            log.error("Error on retrieval" + e.getMessage());
+            log.error("Error on retrieval" + e.getMessage(), e);
             throw new PersistenceException(e.getMessage());
         }
 
@@ -267,7 +267,8 @@ public class PelopsClient implements Client
         }
 
         RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        rowDeletor.deleteRow(metadata.getTableName(), pKey.toString(), ConsistencyLevel.ONE);
+        Bytes pKeyBytes = getKeyBytes(pKey.toString());
+        rowDeletor.deleteRow(metadata.getTableName(), pKeyBytes, ConsistencyLevel.ONE);
         getIndexManager().remove(metadata, entity, pKey.toString());
     }
 
@@ -647,8 +648,9 @@ public class PelopsClient implements Client
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         List<Object> entities = null;
+        Bytes bytes = getKeyBytes(colValue);
         IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000,
-                Selector.newIndexExpression(colName, IndexOperator.EQ, Bytes.fromByteArray(colValue.getBytes())));
+                Selector.newIndexExpression(colName, IndexOperator.EQ, bytes));
         Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
                 ConsistencyLevel.ONE);
         entities = new ArrayList<Object>(qResults.size());
@@ -745,7 +747,7 @@ public class PelopsClient implements Client
     {
         Column col = new Column();
         col.setName(PropertyAccessorFactory.STRING.toBytes(rlName));
-        col.setValue(rlValue.getBytes());
+        col.setValue(getKeyBytes(rlValue).toByteArray());
         col.setTimestamp(timestamp);
         return col;
     }
@@ -807,7 +809,7 @@ public class PelopsClient implements Client
         {
             for (SuperColumn sc : thriftSuperColumns)
             {
-                mutator.writeSubColumns(metadata.getTableName(), tf.getId(), Bytes.toUTF8(sc.getName()),
+                mutator.writeSubColumns(metadata.getTableName(), tf.getId(), byteArrayToString(sc.getName()),
                         sc.getColumns());
 
             }
@@ -853,6 +855,11 @@ public class PelopsClient implements Client
         {
             return Bytes.toUTF8(rowKey.toByteArray());
         }
+    }
+    
+    private String byteArrayToString(byte[] byteArray)
+    {
+        return bytesToString(Bytes.fromByteArray(byteArray));
     }
 
 }

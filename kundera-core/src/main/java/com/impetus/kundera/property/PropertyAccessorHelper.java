@@ -54,7 +54,6 @@ public class PropertyAccessorHelper
      */
     public static void set(Object target, Field field, byte[] bytes) throws PropertyAccessException
     {
-
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
         Object value = accessor.fromBytes(bytes);
         set(target, field, value);
