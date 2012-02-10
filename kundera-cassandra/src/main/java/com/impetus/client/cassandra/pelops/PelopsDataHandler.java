@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.pelops;
 
-import com.impetus.client.cassandra.pelops.PelopsClient;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -32,7 +31,6 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
@@ -51,7 +49,7 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import java.util.*;
+import com.impetus.kundera.utils.ByteUtils;
 import javax.persistence.PersistenceException;
 
 
@@ -114,7 +112,7 @@ public class PelopsDataHandler
         {
 
             List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
-            ByteBuffer rKeyAsByte = getByteBuffer(rowKey);
+            ByteBuffer rKeyAsByte = ByteUtils.getByteBuffer(rowKey);
             rowKeys.add(rKeyAsByte);
 
             Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow = selector
@@ -854,19 +852,6 @@ public class PelopsDataHandler
 
         }
         return foreignKeys;
-    }
-
-    private ByteBuffer getByteBuffer(String rowKey)
-    {
-        try
-        {
-            UUID uuid = UUID.fromString(rowKey);
-            return ByteBuffer.wrap(Bytes.fromUuid(uuid).toByteArray());
-        }
-        catch(IllegalArgumentException ex)
-        {
-            return ByteBufferUtil.bytes(rowKey);
-        }
     }
 
     /**

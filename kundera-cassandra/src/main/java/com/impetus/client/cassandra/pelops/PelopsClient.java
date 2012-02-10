@@ -54,7 +54,7 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
-import java.util.*;
+import com.impetus.kundera.utils.ByteUtils;
 
 
 /**
@@ -267,7 +267,7 @@ public class PelopsClient implements Client
         }
 
         RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        Bytes pKeyBytes = getKeyBytes(pKey.toString());
+        Bytes pKeyBytes = ByteUtils.getKeyBytes(pKey.toString());
         rowDeletor.deleteRow(metadata.getTableName(), pKeyBytes, ConsistencyLevel.ONE);
         getIndexManager().remove(metadata, entity, pKey.toString());
     }
@@ -617,7 +617,7 @@ public class PelopsClient implements Client
             List<Column> columns = qResults.get(rowKey);
             try
             {
-                String rowKeyStr = bytesToString(rowKey);
+                String rowKeyStr = ByteUtils.bytesToString(rowKey);
                 Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m,
                         dataHandler.new ThriftRow(rowKeyStr, m.getTableName(), columns, null),
                         relationNames, isRelational);
@@ -648,7 +648,7 @@ public class PelopsClient implements Client
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         List<Object> entities = null;
-        Bytes bytes = getKeyBytes(colValue);
+        Bytes bytes = ByteUtils.getKeyBytes(colValue);
         IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000,
                 Selector.newIndexExpression(colName, IndexOperator.EQ, bytes));
         Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
@@ -747,7 +747,7 @@ public class PelopsClient implements Client
     {
         Column col = new Column();
         col.setName(PropertyAccessorFactory.STRING.toBytes(rlName));
-        col.setValue(getKeyBytes(rlValue).toByteArray());
+        col.setValue(ByteUtils.getKeyBytes(rlValue).toByteArray());
         col.setTimestamp(timestamp);
         return col;
     }
@@ -800,7 +800,7 @@ public class PelopsClient implements Client
         List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
         if (thriftColumns != null && !thriftColumns.isEmpty())
         {
-            Bytes keyBytes = getKeyBytes(tf.getId());
+            Bytes keyBytes = ByteUtils.getKeyBytes(tf.getId());
             mutator.writeColumns(metadata.getTableName(), keyBytes,
                     Arrays.asList(tf.getColumns().toArray(new Column[0])));
         }
@@ -809,7 +809,7 @@ public class PelopsClient implements Client
         {
             for (SuperColumn sc : thriftSuperColumns)
             {
-                mutator.writeSubColumns(metadata.getTableName(), tf.getId(), byteArrayToString(sc.getName()),
+                mutator.writeSubColumns(metadata.getTableName(), tf.getId(), ByteUtils.byteArrayToString(sc.getName()),
                         sc.getColumns());
 
             }
@@ -829,37 +829,6 @@ public class PelopsClient implements Client
     public EntityReader getReader()
     {
         return reader;
-    }
-
-    private Bytes getKeyBytes(String id)
-    {
-        try
-        {
-            UUID uuid = UUID.fromString(id);
-            return Bytes.fromUuid(uuid);
-        }
-        catch(IllegalArgumentException ex)
-        {
-            return Bytes.fromByteArray(id.getBytes());
-        }
-    }
-
-    private String bytesToString(Bytes rowKey)
-    {
-        try
-        {
-            UUID uuid = rowKey.toUuid();
-            return uuid.toString();
-        }
-        catch(IllegalStateException ex)
-        {
-            return Bytes.toUTF8(rowKey.toByteArray());
-        }
-    }
-    
-    private String byteArrayToString(byte[] byteArray)
-    {
-        return bytesToString(Bytes.fromByteArray(byteArray));
     }
 
 }

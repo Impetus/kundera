@@ -45,6 +45,7 @@ import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.query.exception.QueryHandlerException;
+import com.impetus.kundera.utils.ByteUtils;
 import java.util.*;
 
 
@@ -297,16 +298,7 @@ public class CassQuery extends QueryImpl implements Query
         {
             if (isId || f.getType().isAssignableFrom(String.class))
             {
-                //FIXME: This is taken from Pelops client and should be moved to a util class along with similiar methods.
-                try
-                {
-                    UUID uuid = UUID.fromString(value.trim());
-                    return Bytes.fromUuid(uuid);
-                }
-                catch(IllegalArgumentException ex)
-                {
-                    return Bytes.fromByteArray(value.trim().getBytes());
-                }
+                return ByteUtils.getKeyBytes(value.trim());
             }
             else if (f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
             {
