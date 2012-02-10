@@ -35,7 +35,7 @@ public class ByteUtils
      * @param str
      * @return 
      */
-    public static Bytes getKeyBytes(String str)
+    public static Bytes stringToBytes(String str)
     {
         try
         {
@@ -111,7 +111,7 @@ public class ByteUtils
      * @param str
      * @return 
      */
-    public static ByteBuffer getByteBuffer(String str)
+    public static ByteBuffer stringToByteBuffer(String str)
     {
         try
         {

@@ -112,7 +112,7 @@ public class PelopsDataHandler
         {
 
             List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
-            ByteBuffer rKeyAsByte = ByteUtils.getByteBuffer(rowKey);
+            ByteBuffer rKeyAsByte = ByteUtils.stringToByteBuffer(rowKey);
             rowKeys.add(rKeyAsByte);
 
             Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow = selector

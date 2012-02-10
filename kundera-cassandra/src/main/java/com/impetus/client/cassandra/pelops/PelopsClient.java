@@ -267,7 +267,7 @@ public class PelopsClient implements Client
         }
 
         RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        Bytes pKeyBytes = ByteUtils.getKeyBytes(pKey.toString());
+        Bytes pKeyBytes = ByteUtils.stringToBytes(pKey.toString());
         rowDeletor.deleteRow(metadata.getTableName(), pKeyBytes, ConsistencyLevel.ONE);
         getIndexManager().remove(metadata, entity, pKey.toString());
     }
@@ -648,7 +648,7 @@ public class PelopsClient implements Client
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         List<Object> entities = null;
-        Bytes bytes = ByteUtils.getKeyBytes(colValue);
+        Bytes bytes = ByteUtils.stringToBytes(colValue);
         IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000,
                 Selector.newIndexExpression(colName, IndexOperator.EQ, bytes));
         Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
@@ -747,7 +747,7 @@ public class PelopsClient implements Client
     {
         Column col = new Column();
         col.setName(PropertyAccessorFactory.STRING.toBytes(rlName));
-        col.setValue(ByteUtils.getKeyBytes(rlValue).toByteArray());
+        col.setValue(ByteUtils.stringToBytes(rlValue).toByteArray());
         col.setTimestamp(timestamp);
         return col;
     }
@@ -800,7 +800,7 @@ public class PelopsClient implements Client
         List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
         if (thriftColumns != null && !thriftColumns.isEmpty())
         {
-            Bytes keyBytes = ByteUtils.getKeyBytes(tf.getId());
+            Bytes keyBytes = ByteUtils.stringToBytes(tf.getId());
             mutator.writeColumns(metadata.getTableName(), keyBytes,
                     Arrays.asList(tf.getColumns().toArray(new Column[0])));
         }

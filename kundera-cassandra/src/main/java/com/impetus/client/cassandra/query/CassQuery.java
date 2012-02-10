@@ -298,7 +298,7 @@ public class CassQuery extends QueryImpl implements Query
         {
             if (isId || f.getType().isAssignableFrom(String.class))
             {
-                return ByteUtils.getKeyBytes(value.trim());
+                return ByteUtils.stringToBytes(value.trim());
             }
             else if (f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
             {
