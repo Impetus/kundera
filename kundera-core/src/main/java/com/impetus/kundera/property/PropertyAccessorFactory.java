@@ -42,6 +42,8 @@ import com.impetus.kundera.property.accessor.SQLTimeAccessor;
 import com.impetus.kundera.property.accessor.SQLTimestampAccessor;
 import com.impetus.kundera.property.accessor.ShortAccessor;
 import com.impetus.kundera.property.accessor.StringAccessor;
+import com.impetus.kundera.property.accessor.UuidAccessor;
+import java.util.UUID;
 
 
 /**
@@ -94,6 +96,9 @@ public class PropertyAccessorFactory
 
         // Accessor for the generic object
         map.put(Object.class, new ObjectAccessor());
+        
+        // UUID class Accessor
+        map.put(UUID.class, new UuidAccessor());
 
     }
 
