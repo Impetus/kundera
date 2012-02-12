@@ -128,9 +128,9 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             {
                 try
                 {
-                    List entities = ((HibernateClient) client).find(jpaQuery, new ArrayList<String>(), m);
+                    List entities = ((HibernateClient) client).find(getSqlQueryFromJPA(m, relationNames, null), new ArrayList<String>(), m);
                     ls = new ArrayList<EnhanceEntity>(entities.size());
-                    transform(m, ls, entities);
+                    ls = transform(m, ls, entities);
                 }
                 catch (Exception e)
                 {
