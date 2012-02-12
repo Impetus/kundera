@@ -243,11 +243,11 @@ public class CassQuery extends QueryImpl implements Query
         {
             if (!idPresent)
             {
-                throw new UnsupportedOperationException(" Condition " + condition + " is not suported in  cassandra!");
+                throw new UnsupportedOperationException("Condition " + condition + " is not suported in  cassandra!");
             }
             else
             {
-                throw new UnsupportedOperationException(" Condition " + condition
+                throw new UnsupportedOperationException("Condition " + condition
                         + " is not suported for query on row key!");
 
             }
