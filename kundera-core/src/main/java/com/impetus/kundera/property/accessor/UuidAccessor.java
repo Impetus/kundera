@@ -43,7 +43,7 @@ public class UuidAccessor implements PropertyAccessor<UUID>
     {
         try
         {
-            UUID uuid = UUID.fromString(((String)object));
+            UUID uuid = (UUID)object;
             return Bytes.fromUuid(uuid).toByteArray();
         }
         catch (Exception e)

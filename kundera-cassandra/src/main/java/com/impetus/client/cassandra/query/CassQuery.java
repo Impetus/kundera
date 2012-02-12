@@ -63,6 +63,9 @@ public class CassQuery extends QueryImpl implements Query
     /** The reader. */
     private EntityReader reader;
 
+    private int maxResult = 10000;
+    
+    private int startPosition = 0;
     /**
      * Instantiates a new cass query.
      * 
@@ -126,7 +129,7 @@ public class CassQuery extends QueryImpl implements Query
      */
     private Map<Boolean, List<IndexClause>> prepareIndexClause(EntityMetadata m)
     {
-        IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, 10000);
+        IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, maxResult);
         List<IndexClause> clauses = new ArrayList<IndexClause>();
         List<IndexExpression> expr = new ArrayList<IndexExpression>();
         Map<Boolean, List<IndexClause>> idxClauses = new HashMap<Boolean, List<IndexClause>>(1);
@@ -177,6 +180,7 @@ public class CassQuery extends QueryImpl implements Query
             indexClause.setExpressions(expr);
             clauses.add(indexClause);
         }
+        
         idxClauses.put(idPresent, clauses);
 
         return idxClauses;
@@ -298,7 +302,7 @@ public class CassQuery extends QueryImpl implements Query
         {
             if (isId || f.getType().isAssignableFrom(String.class))
             {
-                return ByteUtils.stringToBytes(value.trim());
+                return Bytes.fromByteArray(value.trim().getBytes());
             }
             else if (f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
             {
@@ -306,7 +310,6 @@ public class CassQuery extends QueryImpl implements Query
             }
             else if (f.getType().equals(long.class) || f.getType().isAssignableFrom(Long.class))
             {
-
                 return Bytes.fromLong(Long.parseLong(value));
             }
             else if (f.getType().equals(boolean.class) || f.getType().isAssignableFrom(Boolean.class))
@@ -337,4 +340,20 @@ public class CassQuery extends QueryImpl implements Query
             throw new QueryHandlerException("field type is null for:" + fieldName);
         }
     }
+
+    @Override
+    public Query setMaxResults(int maxResult)
+    {
+        this.maxResult = maxResult;
+        return this;
+    }
+
+    @Override
+    public Query setFirstResult(int startPosition)
+    {
+        this.startPosition = startPosition;
+        return this;
+    }
+    
+    
 }

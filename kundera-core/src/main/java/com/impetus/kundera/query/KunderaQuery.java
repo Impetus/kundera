@@ -712,7 +712,7 @@ public class KunderaQuery
             if (match.find())
             {
                 logger.error("bad jpa query:");
-                throw new KunderaQueryParserException("invalid column name" + property);
+                throw new KunderaQueryParserException("invalid column name " + property);
             }
             String minValue = tokens.get(idxOfBetween + 1);
             String maxValue = tokens.get(idxOfBetween + 3);
