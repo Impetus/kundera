@@ -45,7 +45,7 @@ import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.query.exception.QueryHandlerException;
-import com.impetus.kundera.utils.ByteUtils;
+import com.impetus.client.cassandra.pelops.ByteUtils;
 import java.util.*;
 
 
@@ -65,7 +65,6 @@ public class CassQuery extends QueryImpl implements Query
 
     private int maxResult = 10000;
     
-    private int startPosition = 0;
     /**
      * Instantiates a new cass query.
      * 
@@ -345,13 +344,6 @@ public class CassQuery extends QueryImpl implements Query
     public Query setMaxResults(int maxResult)
     {
         this.maxResult = maxResult;
-        return this;
-    }
-
-    @Override
-    public Query setFirstResult(int startPosition)
-    {
-        this.startPosition = startPosition;
         return this;
     }
     
