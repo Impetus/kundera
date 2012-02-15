@@ -19,7 +19,6 @@ import java.util.Map;
 
 import javax.persistence.Cache;
 
-
 /**
  * CacheProvider.
  * 
@@ -40,9 +39,11 @@ public interface CacheProvider
 
     /**
      * Inits the.
-     *
-     * @param cacheResourceName the cache resource name
-     * @throws CacheException the cache exception
+     * 
+     * @param cacheResourceName
+     *            the cache resource name
+     * @throws CacheException
+     *             the cache exception
      */
     void init(String cacheResourceName) throws CacheException;
 
@@ -59,10 +60,12 @@ public interface CacheProvider
 
     /**
      * Returns cache for a given cache name.
-     *
-     * @param name Cache Name
+     * 
+     * @param name
+     *            Cache Name
      * @return the cache
-     * @throws CacheException the cache exception
+     * @throws CacheException
+     *             the cache exception
      */
     Cache getCache(String name) throws CacheException;
 

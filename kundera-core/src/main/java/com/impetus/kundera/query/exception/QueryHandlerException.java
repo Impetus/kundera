@@ -15,13 +15,12 @@
  ******************************************************************************/
 package com.impetus.kundera.query.exception;
 
-
 /**
  * The Class QueryHandlerException.
- *
+ * 
  * @author vivek.mishra
  * 
- * Runtime exception handler for query interpretation
+ *         Runtime exception handler for query interpretation
  */
 public class QueryHandlerException extends RuntimeException
 {
@@ -31,8 +30,9 @@ public class QueryHandlerException extends RuntimeException
 
     /**
      * Instantiates a new query handler exception.
-     *
-     * @param errMsg the err msg
+     * 
+     * @param errMsg
+     *            the err msg
      */
     public QueryHandlerException(String errMsg)
     {

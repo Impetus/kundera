@@ -48,7 +48,6 @@ import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
-
 /**
  * The Class QueryImpl.
  * 
@@ -874,8 +873,9 @@ public abstract class QueryImpl implements Query
     /**
      * Returns column name from the filter property which is in the form
      * dbName.columnName
-     *
-     * @param filterProperty the filter property
+     * 
+     * @param filterProperty
+     *            the filter property
      * @return the column name
      */
     protected String getColumnName(String filterProperty)
@@ -892,10 +892,13 @@ public abstract class QueryImpl implements Query
 
     /**
      * Append range.
-     *
-     * @param value the value
-     * @param inclusive the inclusive
-     * @param isGreaterThan the is greater than
+     * 
+     * @param value
+     *            the value
+     * @param inclusive
+     *            the inclusive
+     * @param isGreaterThan
+     *            the is greater than
      * @return the string
      */
     private String appendRange(String value, boolean inclusive, boolean isGreaterThan)

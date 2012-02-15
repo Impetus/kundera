@@ -24,10 +24,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * Entity class for Email.
- *
+ * 
  * @author amresh.singh
  */
 
@@ -71,7 +70,9 @@ public class Email
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     public String toString()
@@ -82,8 +83,9 @@ public class Email
 
     /**
      * Adds the attachment.
-     *
-     * @param attchment the attchment
+     * 
+     * @param attchment
+     *            the attchment
      */
     public void addAttachment(Attachment attchment)
     {
@@ -96,7 +98,7 @@ public class Email
 
     /**
      * Gets the message id.
-     *
+     * 
      * @return the messageId
      */
     public String getMessageId()
@@ -106,8 +108,9 @@ public class Email
 
     /**
      * Sets the message id.
-     *
-     * @param messageId the messageId to set
+     * 
+     * @param messageId
+     *            the messageId to set
      */
     public void setMessageId(String messageId)
     {
@@ -116,7 +119,7 @@ public class Email
 
     /**
      * Gets the from.
-     *
+     * 
      * @return the from
      */
     public Contact getFrom()
@@ -126,8 +129,9 @@ public class Email
 
     /**
      * Sets the from.
-     *
-     * @param from the from to set
+     * 
+     * @param from
+     *            the from to set
      */
     public void setFrom(Contact from)
     {
@@ -136,7 +140,7 @@ public class Email
 
     /**
      * Gets the to.
-     *
+     * 
      * @return the to
      */
     public Contact getTo()
@@ -146,8 +150,9 @@ public class Email
 
     /**
      * Sets the to.
-     *
-     * @param to the to to set
+     * 
+     * @param to
+     *            the to to set
      */
     public void setTo(Contact to)
     {
@@ -156,7 +161,7 @@ public class Email
 
     /**
      * Gets the subject.
-     *
+     * 
      * @return the subject
      */
     public String getSubject()
@@ -166,8 +171,9 @@ public class Email
 
     /**
      * Sets the subject.
-     *
-     * @param subject the subject to set
+     * 
+     * @param subject
+     *            the subject to set
      */
     public void setSubject(String subject)
     {
@@ -176,7 +182,7 @@ public class Email
 
     /**
      * Gets the body.
-     *
+     * 
      * @return the body
      */
     public String getBody()
@@ -186,8 +192,9 @@ public class Email
 
     /**
      * Sets the body.
-     *
-     * @param body the body to set
+     * 
+     * @param body
+     *            the body to set
      */
     public void setBody(String body)
     {
@@ -196,7 +203,7 @@ public class Email
 
     /**
      * Gets the attachments.
-     *
+     * 
      * @return the attachments
      */
     public List<Attachment> getAttachments()
@@ -206,8 +213,9 @@ public class Email
 
     /**
      * Sets the attachments.
-     *
-     * @param attachments the attachments to set
+     * 
+     * @param attachments
+     *            the attachments to set
      */
     public void setAttachments(List<Attachment> attachments)
     {

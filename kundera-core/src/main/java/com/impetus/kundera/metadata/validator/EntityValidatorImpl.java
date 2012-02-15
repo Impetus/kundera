@@ -27,10 +27,9 @@ import javax.persistence.Table;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
 /**
  * Validates entity for JPA rules.
- *
+ * 
  * @author animesh.kumar
  */
 public class EntityValidatorImpl implements EntityValidator

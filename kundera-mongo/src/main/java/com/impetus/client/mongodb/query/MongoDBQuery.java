@@ -43,10 +43,9 @@ import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 import com.mongodb.BasicDBObject;
 
-
 /**
  * Query class for MongoDB data store.
- *
+ * 
  * @author amresh.singh
  */
 public class MongoDBQuery extends QueryImpl
@@ -56,11 +55,15 @@ public class MongoDBQuery extends QueryImpl
 
     /**
      * Instantiates a new mongo db query.
-     *
-     * @param jpaQuery the jpa query
-     * @param kunderaQuery the kundera query
-     * @param persistenceDelegator the persistence delegator
-     * @param persistenceUnits the persistence units
+     * 
+     * @param jpaQuery
+     *            the jpa query
+     * @param kunderaQuery
+     *            the kundera query
+     * @param persistenceDelegator
+     *            the persistence delegator
+     * @param persistenceUnits
+     *            the persistence units
      */
     public MongoDBQuery(String jpaQuery, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
             String... persistenceUnits)
@@ -69,7 +72,9 @@ public class MongoDBQuery extends QueryImpl
         this.kunderaQuery = kunderaQuery;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.QueryImpl#executeUpdate()
      */
     @Override
@@ -78,7 +83,9 @@ public class MongoDBQuery extends QueryImpl
         return super.executeUpdate();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.QueryImpl#setMaxResults(int)
      */
     @Override
@@ -156,9 +163,11 @@ public class MongoDBQuery extends QueryImpl
 
     /**
      * Creates MongoDB Query object from filterClauseQueue.
-     *
-     * @param m the m
-     * @param filterClauseQueue the filter clause queue
+     * 
+     * @param m
+     *            the m
+     * @param filterClauseQueue
+     *            the filter clause queue
      * @return the basic db object
      */
     private BasicDBObject createMongoQuery(EntityMetadata m, Queue filterClauseQueue)
@@ -253,7 +262,7 @@ public class MongoDBQuery extends QueryImpl
 
     /**
      * Prepare order by clause.
-     *
+     * 
      * @return order by clause.
      */
     private BasicDBObject getOrderByClause()
@@ -275,9 +284,11 @@ public class MongoDBQuery extends QueryImpl
 
     /**
      * Gets the enclosing document name.
-     *
-     * @param m the m
-     * @param columnName the column name
+     * 
+     * @param m
+     *            the m
+     * @param columnName
+     *            the column name
      * @return the enclosing document name
      */
     private String getEnclosingDocumentName(EntityMetadata m, String columnName)

@@ -18,10 +18,9 @@ package com.impetus.kundera.metadata.model;
 import com.impetus.kundera.proxy.EntityEnhancerFactory;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
 
-
 /**
  * The Class CoreMetadata.
- *
+ * 
  * @author amresh.singh
  */
 public class CoreMetadata
@@ -35,7 +34,7 @@ public class CoreMetadata
 
     /**
      * Gets the enhanced proxy factory.
-     *
+     * 
      * @return the enhanced proxy factory
      */
     public EntityEnhancerFactory getEnhancedProxyFactory()
@@ -45,8 +44,9 @@ public class CoreMetadata
 
     /**
      * Sets the enhanced proxy factory.
-     *
-     * @param enhancedProxyFactory the new enhanced proxy factory
+     * 
+     * @param enhancedProxyFactory
+     *            the new enhanced proxy factory
      */
     public void setEnhancedProxyFactory(EntityEnhancerFactory enhancedProxyFactory)
     {
@@ -55,7 +55,7 @@ public class CoreMetadata
 
     /**
      * Gets the lazy initializer factory.
-     *
+     * 
      * @return the lazy initializer factory
      */
     public LazyInitializerFactory getLazyInitializerFactory()
@@ -65,8 +65,9 @@ public class CoreMetadata
 
     /**
      * Sets the lazy initializer factory.
-     *
-     * @param lazyInitializerFactory the new lazy initializer factory
+     * 
+     * @param lazyInitializerFactory
+     *            the new lazy initializer factory
      */
     public void setLazyInitializerFactory(LazyInitializerFactory lazyInitializerFactory)
     {

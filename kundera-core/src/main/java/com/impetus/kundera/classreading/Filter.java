@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.classreading;
 
-
 /**
  * Interface to filter out filenames.
  * 

@@ -21,15 +21,14 @@ import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.entity.PersonnelDTO;
 
-
 /**
  * The Class EntityManagerSessionTest.
- *
+ * 
  * @author amresh.singh
  */
 public class EntityManagerSessionTest extends TestCase
 {
-    
+
     /** The ems. */
     EntityManagerSession ems;
 
@@ -51,7 +50,9 @@ public class EntityManagerSessionTest extends TestCase
     /** The person2. */
     PersonnelDTO person2;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see junit.framework.TestCase#setUp()
      */
     protected void setUp() throws Exception
@@ -69,7 +70,9 @@ public class EntityManagerSessionTest extends TestCase
         person2 = new PersonnelDTO("2", "Vivek", "Mishra");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see junit.framework.TestCase#tearDown()
      */
     protected void tearDown() throws Exception

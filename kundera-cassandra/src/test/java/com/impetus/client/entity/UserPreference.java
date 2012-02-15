@@ -20,10 +20,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * Entity class for User Preferences.
- *
+ * 
  * @author amresh.singh
  */
 
@@ -54,10 +53,13 @@ public class UserPreference
 
     /**
      * Instantiates a new user preference.
-     *
-     * @param prefId the pref id
-     * @param theme the theme
-     * @param privacyLevel the privacy level
+     * 
+     * @param prefId
+     *            the pref id
+     * @param theme
+     *            the theme
+     * @param privacyLevel
+     *            the privacy level
      */
     public UserPreference(String prefId, String theme, String privacyLevel)
     {
@@ -68,7 +70,7 @@ public class UserPreference
 
     /**
      * Gets the preference id.
-     *
+     * 
      * @return the preferenceId
      */
     public String getPreferenceId()
@@ -78,8 +80,9 @@ public class UserPreference
 
     /**
      * Sets the preference id.
-     *
-     * @param preferenceId the preferenceId to set
+     * 
+     * @param preferenceId
+     *            the preferenceId to set
      */
     public void setPreferenceId(String preferenceId)
     {
@@ -88,7 +91,7 @@ public class UserPreference
 
     /**
      * Gets the website theme.
-     *
+     * 
      * @return the websiteTheme
      */
     public String getWebsiteTheme()
@@ -98,8 +101,9 @@ public class UserPreference
 
     /**
      * Sets the website theme.
-     *
-     * @param websiteTheme the websiteTheme to set
+     * 
+     * @param websiteTheme
+     *            the websiteTheme to set
      */
     public void setWebsiteTheme(String websiteTheme)
     {
@@ -108,7 +112,7 @@ public class UserPreference
 
     /**
      * Gets the privacy level.
-     *
+     * 
      * @return the privacyLevel
      */
     public String getPrivacyLevel()
@@ -118,8 +122,9 @@ public class UserPreference
 
     /**
      * Sets the privacy level.
-     *
-     * @param privacyLevel the privacyLevel to set
+     * 
+     * @param privacyLevel
+     *            the privacyLevel to set
      */
     public void setPrivacyLevel(String privacyLevel)
     {

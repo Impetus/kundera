@@ -15,10 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
-
 /**
  * The Class AssociationBuilder.
- *
+ * 
  * @author vivek.mishra
  */
 final class AssociationBuilder

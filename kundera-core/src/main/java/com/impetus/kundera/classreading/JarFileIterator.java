@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-
 /**
  * Iterates through a Jar file for each file resource.
  * 
@@ -111,7 +110,9 @@ public final class JarFileIterator implements ResourceIterator
     }
 
     /* @see com.impetus.kundera.classreading.ResourceIterator#next() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.classreading.ResourceIterator#next()
      */
     public InputStream next()
@@ -125,7 +126,9 @@ public final class JarFileIterator implements ResourceIterator
     }
 
     /* @see com.impetus.kundera.classreading.ResourceIterator#close() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.classreading.ResourceIterator#close()
      */
     public void close()
@@ -163,7 +166,9 @@ public final class JarFileIterator implements ResourceIterator
         }
 
         /* @see java.io.InputStream#read() */
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.io.InputStream#read()
          */
         public int read() throws IOException
@@ -172,7 +177,9 @@ public final class JarFileIterator implements ResourceIterator
         }
 
         /* @see java.io.InputStream#read(byte[]) */
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.io.InputStream#read(byte[])
          */
         public int read(byte[] bytes) throws IOException
@@ -181,7 +188,9 @@ public final class JarFileIterator implements ResourceIterator
         }
 
         /* @see java.io.InputStream#read(byte[], int, int) */
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.io.InputStream#read(byte[], int, int)
          */
         public int read(byte[] bytes, int i, int i1) throws IOException
@@ -190,7 +199,9 @@ public final class JarFileIterator implements ResourceIterator
         }
 
         /* @see java.io.InputStream#skip(long) */
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.io.InputStream#skip(long)
          */
         public long skip(long l) throws IOException
@@ -199,7 +210,9 @@ public final class JarFileIterator implements ResourceIterator
         }
 
         /* @see java.io.InputStream#available() */
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.io.InputStream#available()
          */
         public int available() throws IOException
@@ -208,7 +221,9 @@ public final class JarFileIterator implements ResourceIterator
         }
 
         /* @see java.io.InputStream#close() */
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.io.InputStream#close()
          */
         public void close() throws IOException
@@ -217,7 +232,9 @@ public final class JarFileIterator implements ResourceIterator
         }
 
         /* @see java.io.InputStream#mark(int) */
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.io.InputStream#mark(int)
          */
         public void mark(int i)
@@ -226,7 +243,9 @@ public final class JarFileIterator implements ResourceIterator
         }
 
         /* @see java.io.InputStream#reset() */
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.io.InputStream#reset()
          */
         public void reset() throws IOException
@@ -235,7 +254,9 @@ public final class JarFileIterator implements ResourceIterator
         }
 
         /* @see java.io.InputStream#markSupported() */
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.io.InputStream#markSupported()
          */
         public boolean markSupported()

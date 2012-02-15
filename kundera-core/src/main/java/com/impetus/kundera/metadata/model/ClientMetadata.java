@@ -17,15 +17,14 @@ package com.impetus.kundera.metadata.model;
 
 import org.apache.commons.lang.StringUtils;
 
-
 /**
  * The Class ClientMetadata.
- *
+ * 
  * @author amresh.singh
  */
 public class ClientMetadata
 {
-    
+
     /** The client implementor. */
     private String clientImplementor;
 
@@ -37,7 +36,7 @@ public class ClientMetadata
 
     /**
      * Gets the client implementor.
-     *
+     * 
      * @return the clientImplementor
      */
     public String getClientImplementor()
@@ -47,8 +46,9 @@ public class ClientMetadata
 
     /**
      * Sets the client implementor.
-     *
-     * @param clientImplementor the clientImplementor to set
+     * 
+     * @param clientImplementor
+     *            the clientImplementor to set
      */
     public void setClientImplementor(String clientImplementor)
     {
@@ -57,7 +57,7 @@ public class ClientMetadata
 
     /**
      * Gets the index implementor.
-     *
+     * 
      * @return the indexImplementor
      */
     public String getIndexImplementor()
@@ -67,8 +67,9 @@ public class ClientMetadata
 
     /**
      * Sets the index implementor.
-     *
-     * @param indexImplementor the indexImplementor to set
+     * 
+     * @param indexImplementor
+     *            the indexImplementor to set
      */
     public void setIndexImplementor(String indexImplementor)
     {
@@ -77,7 +78,7 @@ public class ClientMetadata
 
     /**
      * Checks if is use secondry index.
-     *
+     * 
      * @return the useSecondryIndex
      */
     public boolean isUseSecondryIndex()
@@ -87,7 +88,7 @@ public class ClientMetadata
 
     /**
      * Gets the lucene index dir.
-     *
+     * 
      * @return the luceneIndexDir
      */
     public String getLuceneIndexDir()
@@ -97,8 +98,9 @@ public class ClientMetadata
 
     /**
      * Sets the lucene index dir.
-     *
-     * @param luceneIndexDir the luceneIndexDir to set
+     * 
+     * @param luceneIndexDir
+     *            the luceneIndexDir to set
      */
     public void setLuceneIndexDir(String luceneIndexDir)
     {

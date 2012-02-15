@@ -29,10 +29,9 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 
-
 /**
  * The Class OneToOneRelationMetadataProcessor.
- *
+ * 
  * @author Amresh Singh
  */
 public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProcessor implements
@@ -47,8 +46,13 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
         validator = new EntityValidatorImpl();
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor#addRelationIntoMetadata(java.lang.reflect.Field, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor
+     * #addRelationIntoMetadata(java.lang.reflect.Field,
+     * com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
     public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata)
@@ -97,8 +101,12 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
         metadata.addRelation(relationField.getName(), relation);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
+     * com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
     public void process(Class<?> clazz, EntityMetadata metadata)

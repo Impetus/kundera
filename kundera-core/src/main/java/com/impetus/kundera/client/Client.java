@@ -20,10 +20,10 @@ import java.util.Map;
 
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.proxy.EnhancedEntity;
-
 
 /**
  * The Interface Client.
@@ -216,16 +216,24 @@ public interface Client
     <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, EntitySaveGraph objectGraph);
 
+    <E> List<E> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
+            String joinColumnName, String inverseJoinColumnName, Object childId);
+
     /**
      * Delete records from Join Table for a given primary key.
-     *
-     * @param joinTableName Name of Join Table
-     * @param joinColumnName Name of Join Column
-     * @param inverseJoinColumnName Name of Inverse Join Column
-     * @param relMetadata Entity metadata for the child entity (i.e. entity at the other
-     * side of the relationship)
-     * @param objectGraph Object graph of the persistence (Includes parent and child
-     * data and other related info)
+     * 
+     * @param joinTableName
+     *            Name of Join Table
+     * @param joinColumnName
+     *            Name of Join Column
+     * @param inverseJoinColumnName
+     *            Name of Inverse Join Column
+     * @param relMetadata
+     *            Entity metadata for the child entity (i.e. entity at the other
+     *            side of the relationship)
+     * @param objectGraph
+     *            Object graph of the persistence (Includes parent and child
+     *            data and other related info)
      */
     void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, EntitySaveGraph objectGraph);

@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
-
 /**
  * The MetadataProcessor implementation to scan for EntityListener class/method
  * JPA Specifications: 1. EntityListeners classes must have a no-argument
@@ -43,8 +42,12 @@ public class CacheableAnnotationProcessor implements MetadataProcessor
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(CacheableAnnotationProcessor.class);
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
+     * com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
     public final void process(final Class<?> entityClass, EntityMetadata metadata)

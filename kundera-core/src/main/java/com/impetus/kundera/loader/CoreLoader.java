@@ -23,15 +23,14 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.proxy.cglib.CglibEntityEnhancerFactory;
 import com.impetus.kundera.proxy.cglib.CglibLazyInitializerFactory;
 
-
 /**
  * The Class CoreLoader.
- *
+ * 
  * @author amresh.singh
  */
 public class CoreLoader
 {
-    
+
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(CoreLoader.class);
 

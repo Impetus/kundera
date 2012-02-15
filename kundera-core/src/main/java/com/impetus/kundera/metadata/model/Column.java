@@ -17,10 +17,9 @@ package com.impetus.kundera.metadata.model;
 
 import java.lang.reflect.Field;
 
-
 /**
  * Holds metadata for entity column.
- *
+ * 
  * @author animesh.kumar
  */
 public final class Column
@@ -71,7 +70,7 @@ public final class Column
 
     /**
      * Checks if is indexable.
-     *
+     * 
      * @return the isIndexable
      */
     public boolean isIndexable()
@@ -81,8 +80,9 @@ public final class Column
 
     /**
      * Sets the indexable.
-     *
-     * @param isIndexable the isIndexable to set
+     * 
+     * @param isIndexable
+     *            the isIndexable to set
      */
     public void setIndexable(boolean isIndexable)
     {

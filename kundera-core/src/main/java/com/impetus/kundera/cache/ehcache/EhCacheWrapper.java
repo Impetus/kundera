@@ -21,7 +21,6 @@ import org.apache.commons.lang.NotImplementedException;
 
 import com.impetus.kundera.cache.Cache;
 
-
 /**
  * Cache implementation using Ehcache.
  * 
@@ -45,7 +44,9 @@ public class EhCacheWrapper implements Cache
     }
 
     /* @see com.impetus.kundera.cache.Cache#get(java.lang.Object) */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.cache.Cache#get(java.lang.Object)
      */
     @Override
@@ -59,8 +60,11 @@ public class EhCacheWrapper implements Cache
      * @see com.impetus.kundera.cache.Cache#put(java.lang.Object,
      * java.lang.Object)
      */
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.cache.Cache#put(java.lang.Object, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.cache.Cache#put(java.lang.Object,
+     * java.lang.Object)
      */
     @Override
     public void put(Object key, Object value)
@@ -69,7 +73,9 @@ public class EhCacheWrapper implements Cache
     }
 
     /* @see com.impetus.kundera.cache.Cache#size() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.cache.Cache#size()
      */
     @Override
@@ -78,7 +84,9 @@ public class EhCacheWrapper implements Cache
         return ehcache.getSize();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.Cache#contains(java.lang.Class, java.lang.Object)
      */
     @Override
@@ -87,7 +95,9 @@ public class EhCacheWrapper implements Cache
         return (ehcache.get(arg1) != null);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.Cache#evict(java.lang.Class)
      */
     @Override
@@ -97,7 +107,9 @@ public class EhCacheWrapper implements Cache
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.Cache#evict(java.lang.Class, java.lang.Object)
      */
     @Override
@@ -107,7 +119,9 @@ public class EhCacheWrapper implements Cache
         ehcache.remove(arg1);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.Cache#evictAll()
      */
     @Override

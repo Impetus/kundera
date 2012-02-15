@@ -19,7 +19,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-
 /**
  * The Class PlayerTest.
  */
@@ -36,8 +35,9 @@ public class PlayerTest
 
     /**
      * Sets the up.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Before
     public void setUp() throws Exception
@@ -46,8 +46,9 @@ public class PlayerTest
 
     /**
      * Tear down.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @After
     public void tearDown() throws Exception
@@ -56,7 +57,7 @@ public class PlayerTest
 
     /**
      * Prepare object.
-     *
+     * 
      * @return the player
      */
     private Player prepareObject()

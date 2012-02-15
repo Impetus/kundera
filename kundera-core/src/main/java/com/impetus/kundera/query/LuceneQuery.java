@@ -32,7 +32,6 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 
-
 /**
  * The Class LuceneQuery.
  * 
@@ -52,11 +51,15 @@ public class LuceneQuery extends QueryImpl implements Query
 
     /**
      * Instantiates a new lucene query.
-     *
-     * @param jpaQuery the jpa query
-     * @param kunderaQuery the kundera query
-     * @param pd the pd
-     * @param persistenceUnits the persistence units
+     * 
+     * @param jpaQuery
+     *            the jpa query
+     * @param kunderaQuery
+     *            the kundera query
+     * @param pd
+     *            the pd
+     * @param persistenceUnits
+     *            the persistence units
      */
     public LuceneQuery(String jpaQuery, KunderaQuery kunderaQuery, PersistenceDelegator pd, String... persistenceUnits)
     {
@@ -76,7 +79,9 @@ public class LuceneQuery extends QueryImpl implements Query
     }
 
     // @see com.impetus.kundera.query.QueryImpl#getResultList()
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.QueryImpl#getResultList()
      */
     @Override
@@ -118,7 +123,9 @@ public class LuceneQuery extends QueryImpl implements Query
     }
 
     // @see com.impetus.kundera.query.QueryImpl#setMaxResults(int)
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.QueryImpl#setMaxResults(int)
      */
     @Override

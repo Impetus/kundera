@@ -31,7 +31,6 @@ import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 
-
 /**
  * Concrete implementation of IMetadataManager.
  * 
@@ -55,7 +54,7 @@ public class MetadataBuilder
 
     /**
      * Instantiates a new metadata manager.
-     *
+     * 
      */
     public MetadataBuilder()
     {
@@ -85,8 +84,9 @@ public class MetadataBuilder
 
     /**
      * Process.
-     *
-     * @param clazz the clazz
+     * 
+     * @param clazz
+     *            the clazz
      * @return the entity metadata
      */
     public EntityMetadata buildEntityMetadata(Class<?> clazz)

@@ -29,15 +29,14 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
-
 /**
  * The Class PersistenceUnitMetadata.
- *
+ * 
  * @author amresh.singh
  */
 public class PersistenceUnitMetadata implements PersistenceUnitInfo
 {
-    
+
     /** Persistence Unit name. */
     private String persistenceUnitName;
 
@@ -62,7 +61,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     /** The exclude unlisted classes. */
     private boolean excludeUnlistedClasses = false;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.spi.PersistenceUnitInfo#getPersistenceUnitName()
      */
     @Override
@@ -73,8 +74,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
 
     /**
      * Sets the persistence unit name.
-     *
-     * @param persistenceUnitName the persistenceUnitName to set
+     * 
+     * @param persistenceUnitName
+     *            the persistenceUnitName to set
      */
     public void setPersistenceUnitName(String persistenceUnitName)
     {
@@ -202,7 +204,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     }
 
     /* @see java.lang.Object#toString() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
@@ -229,8 +233,12 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return builder.toString();
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.spi.PersistenceUnitInfo#getPersistenceProviderClassName()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.spi.PersistenceUnitInfo#getPersistenceProviderClassName
+     * ()
      */
     @Override
     public String getPersistenceProviderClassName()
@@ -238,7 +246,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.spi.PersistenceUnitInfo#getTransactionType()
      */
     @Override
@@ -247,7 +257,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.spi.PersistenceUnitInfo#getJtaDataSource()
      */
     @Override
@@ -256,7 +268,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.spi.PersistenceUnitInfo#getNonJtaDataSource()
      */
     @Override
@@ -265,7 +279,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.spi.PersistenceUnitInfo#getMappingFileNames()
      */
     @Override
@@ -274,7 +290,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.spi.PersistenceUnitInfo#getJarFileUrls()
      */
     @Override
@@ -283,8 +301,11 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.spi.PersistenceUnitInfo#getPersistenceUnitRootUrl()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.spi.PersistenceUnitInfo#getPersistenceUnitRootUrl()
      */
     @Override
     public URL getPersistenceUnitRootUrl()
@@ -292,7 +313,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.spi.PersistenceUnitInfo#getManagedClassNames()
      */
     @Override
@@ -301,7 +324,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.spi.PersistenceUnitInfo#excludeUnlistedClasses()
      */
     @Override
@@ -310,7 +335,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.spi.PersistenceUnitInfo#getSharedCacheMode()
      */
     @Override
@@ -319,7 +346,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.spi.PersistenceUnitInfo#getValidationMode()
      */
     @Override
@@ -328,7 +357,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.spi.PersistenceUnitInfo#getProperties()
      */
     @Override
@@ -343,16 +374,21 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
 
     /**
      * Sets the properties.
-     *
-     * @param properties the properties to set
+     * 
+     * @param properties
+     *            the properties to set
      */
     public void setProperties(Properties properties)
     {
         this.properties = properties;
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.spi.PersistenceUnitInfo#getPersistenceXMLSchemaVersion()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.spi.PersistenceUnitInfo#getPersistenceXMLSchemaVersion
+     * ()
      */
     @Override
     public String getPersistenceXMLSchemaVersion()
@@ -360,7 +396,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.spi.PersistenceUnitInfo#getClassLoader()
      */
     @Override
@@ -369,15 +407,21 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.spi.PersistenceUnitInfo#addTransformer(javax.persistence.spi.ClassTransformer)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.spi.PersistenceUnitInfo#addTransformer(javax.persistence
+     * .spi.ClassTransformer)
      */
     @Override
     public void addTransformer(ClassTransformer paramClassTransformer)
     {
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.spi.PersistenceUnitInfo#getNewTempClassLoader()
      */
     @Override
@@ -388,8 +432,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
 
     /**
      * Gets the property.
-     *
-     * @param prop the prop
+     * 
+     * @param prop
+     *            the prop
      * @return the property
      */
     public String getProperty(String prop)

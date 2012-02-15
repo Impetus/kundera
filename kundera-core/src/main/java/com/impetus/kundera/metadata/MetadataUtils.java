@@ -34,10 +34,9 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-
 /**
  * Utility class for entity metadata related funcntionality.
- *
+ * 
  * @author amresh.singh
  */
 public class MetadataUtils
@@ -45,10 +44,13 @@ public class MetadataUtils
 
     /**
      * Populate column and super column maps.
-     *
-     * @param m the m
-     * @param columnNameToFieldMap the column name to field map
-     * @param superColumnNameToFieldMap the super column name to field map
+     * 
+     * @param m
+     *            the m
+     * @param columnNameToFieldMap
+     *            the column name to field map
+     * @param superColumnNameToFieldMap
+     *            the super column name to field map
      */
     public static void populateColumnAndSuperColumnMaps(EntityMetadata m, Map<String, Field> columnNameToFieldMap,
             Map<String, Field> superColumnNameToFieldMap)
@@ -66,9 +68,11 @@ public class MetadataUtils
 
     /**
      * Creates the columns field map.
-     *
-     * @param m the m
-     * @param superColumn the super column
+     * 
+     * @param m
+     *            the m
+     * @param superColumn
+     *            the super column
      * @return the map
      */
     public static Map<String, Field> createColumnsFieldMap(EntityMetadata m, EmbeddedColumn superColumn)
@@ -84,8 +88,9 @@ public class MetadataUtils
 
     /**
      * Creates the super columns field map.
-     *
-     * @param m the m
+     * 
+     * @param m
+     *            the m
      * @return the map
      */
     public static Map<String, Field> createSuperColumnsFieldMap(EntityMetadata m)
@@ -103,8 +108,9 @@ public class MetadataUtils
 
     /**
      * Gets the embedded collection instance.
-     *
-     * @param embeddedCollectionField the embedded collection field
+     * 
+     * @param embeddedCollectionField
+     *            the embedded collection field
      * @return the embedded collection instance
      */
     public static Collection getEmbeddedCollectionInstance(Field embeddedCollectionField)
@@ -133,8 +139,9 @@ public class MetadataUtils
 
     /**
      * Gets the embedded generic object instance.
-     *
-     * @param embeddedCollectionField the embedded collection field
+     * 
+     * @param embeddedCollectionField
+     *            the embedded collection field
      * @return the embedded generic object instance
      */
     public static Object getEmbeddedGenericObjectInstance(Field embeddedCollectionField)
@@ -166,8 +173,9 @@ public class MetadataUtils
 
     /**
      * Gets the embedded collection prefix.
-     *
-     * @param embeddedCollectionName the embedded collection name
+     * 
+     * @param embeddedCollectionName
+     *            the embedded collection name
      * @return the embedded collection prefix
      */
     public static String getEmbeddedCollectionPrefix(String embeddedCollectionName)
@@ -178,8 +186,9 @@ public class MetadataUtils
 
     /**
      * Gets the embedded collection postfix.
-     *
-     * @param embeddedCollectionName the embedded collection name
+     * 
+     * @param embeddedCollectionName
+     *            the embedded collection name
      * @return the embedded collection postfix
      */
     public static String getEmbeddedCollectionPostfix(String embeddedCollectionName)
@@ -245,9 +254,11 @@ public class MetadataUtils
 
     /**
      * Sets the schema and persistence unit.
-     *
-     * @param m the m
-     * @param schemaStr the schema str
+     * 
+     * @param m
+     *            the m
+     * @param schemaStr
+     *            the schema str
      */
     public static void setSchemaAndPersistenceUnit(EntityMetadata m, String schemaStr)
     {

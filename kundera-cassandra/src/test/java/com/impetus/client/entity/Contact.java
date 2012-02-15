@@ -20,10 +20,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * The Contact Entity Class.
- *
+ * 
  * @author amresh.singh
  */
 
@@ -31,7 +30,7 @@ import javax.persistence.Table;
 @Table(name = "contact", schema = "Blog")
 public class Contact
 {
-    
+
     /** The contact id. */
     @Id
     String contactId;
@@ -58,11 +57,15 @@ public class Contact
 
     /**
      * Instantiates a new contact.
-     *
-     * @param contactId the contact id
-     * @param firstName the first name
-     * @param lastName the last name
-     * @param emailId the email id
+     * 
+     * @param contactId
+     *            the contact id
+     * @param firstName
+     *            the first name
+     * @param lastName
+     *            the last name
+     * @param emailId
+     *            the email id
      */
     public Contact(String contactId, String firstName, String lastName, String emailId)
     {
@@ -72,7 +75,9 @@ public class Contact
         this.emailId = emailId;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     public String toString()
@@ -82,7 +87,7 @@ public class Contact
 
     /**
      * Gets the contact id.
-     *
+     * 
      * @return the contactId
      */
     public String getContactId()
@@ -92,8 +97,9 @@ public class Contact
 
     /**
      * Sets the contact id.
-     *
-     * @param contactId the contactId to set
+     * 
+     * @param contactId
+     *            the contactId to set
      */
     public void setContactId(String contactId)
     {
@@ -102,7 +108,7 @@ public class Contact
 
     /**
      * Gets the last name.
-     *
+     * 
      * @return the lastName
      */
     public String getLastName()
@@ -112,8 +118,9 @@ public class Contact
 
     /**
      * Sets the last name.
-     *
-     * @param lastName the lastName to set
+     * 
+     * @param lastName
+     *            the lastName to set
      */
     public void setLastName(String lastName)
     {
@@ -122,7 +129,7 @@ public class Contact
 
     /**
      * Gets the first name.
-     *
+     * 
      * @return the firstName
      */
     public String getFirstName()
@@ -132,8 +139,9 @@ public class Contact
 
     /**
      * Sets the first name.
-     *
-     * @param firstName the firstName to set
+     * 
+     * @param firstName
+     *            the firstName to set
      */
     public void setFirstName(String firstName)
     {
@@ -142,7 +150,7 @@ public class Contact
 
     /**
      * Gets the email id.
-     *
+     * 
      * @return the emailId
      */
     public String getEmailId()
@@ -152,8 +160,9 @@ public class Contact
 
     /**
      * Sets the email id.
-     *
-     * @param emailId the emailId to set
+     * 
+     * @param emailId
+     *            the emailId to set
      */
     public void setEmailId(String emailId)
     {

@@ -17,7 +17,6 @@ package com.impetus.kundera.property;
 
 import java.lang.reflect.Field;
 
-
 /**
  * Interface to access {@link Field} property of a java class.
  * 
@@ -67,11 +66,13 @@ public interface PropertyAccessor<T>
 
     /**
      * Converts string representation to the data object whose type is T.
-     *
-     * @param s the s
+     * 
+     * @param s
+     *            the s
      * @return the t
-     * @throws PropertyAccessException When string can't be converted to specified type, usually as
-     * a result of NumberFormatException
+     * @throws PropertyAccessException
+     *             When string can't be converted to specified type, usually as
+     *             a result of NumberFormatException
      */
     T fromString(String s) throws PropertyAccessException;
 }

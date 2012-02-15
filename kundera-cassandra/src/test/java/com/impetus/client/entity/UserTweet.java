@@ -17,10 +17,9 @@ package com.impetus.client.entity;
 
 import javax.persistence.Embeddable;
 
-
 /**
  * Class for Tweets.
- *
+ * 
  * @author amresh.singh
  */
 
@@ -39,10 +38,13 @@ public class UserTweet
 
     /**
      * Instantiates a new user tweet.
-     *
-     * @param tweetId the tweet id
-     * @param body the body
-     * @param device the device
+     * 
+     * @param tweetId
+     *            the tweet id
+     * @param body
+     *            the body
+     * @param device
+     *            the device
      */
     public UserTweet(String tweetId, String body, String device)
     {
@@ -61,7 +63,7 @@ public class UserTweet
 
     /**
      * Gets the tweet id.
-     *
+     * 
      * @return the tweetId
      */
     public String getTweetId()
@@ -71,8 +73,9 @@ public class UserTweet
 
     /**
      * Sets the tweet id.
-     *
-     * @param tweetId the tweetId to set
+     * 
+     * @param tweetId
+     *            the tweetId to set
      */
     public void setTweetId(String tweetId)
     {
@@ -81,7 +84,7 @@ public class UserTweet
 
     /**
      * Gets the body.
-     *
+     * 
      * @return the body
      */
     public String getBody()
@@ -91,8 +94,9 @@ public class UserTweet
 
     /**
      * Sets the body.
-     *
-     * @param body the body to set
+     * 
+     * @param body
+     *            the body to set
      */
     public void setBody(String body)
     {
@@ -101,7 +105,7 @@ public class UserTweet
 
     /**
      * Gets the device.
-     *
+     * 
      * @return the device
      */
     public String getDevice()
@@ -111,8 +115,9 @@ public class UserTweet
 
     /**
      * Sets the device.
-     *
-     * @param device the device to set
+     * 
+     * @param device
+     *            the device to set
      */
     public void setDevice(String device)
     {

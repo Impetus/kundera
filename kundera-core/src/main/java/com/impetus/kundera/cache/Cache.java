@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.cache;
 
-
 /**
  * Implementors define a caching algorithm. All implementors <b>must</b> be
  * threadsafe.

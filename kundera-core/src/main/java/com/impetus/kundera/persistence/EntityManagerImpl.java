@@ -35,7 +35,6 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.Cache;
 
-
 /**
  * The Class EntityManagerImpl.
  * 
@@ -64,8 +63,9 @@ public class EntityManagerImpl implements EntityManager
 
     /**
      * Instantiates a new entity manager impl.
-     *
-     * @param factory the factory
+     * 
+     * @param factory
+     *            the factory
      */
     public EntityManagerImpl(EntityManagerFactory factory)
     {
@@ -80,9 +80,11 @@ public class EntityManagerImpl implements EntityManager
 
     /**
      * Instantiates a new entity manager impl.
-     *
-     * @param factory the factory
-     * @param properties the properties
+     * 
+     * @param factory
+     *            the factory
+     * @param properties
+     *            the properties
      */
     public EntityManagerImpl(EntityManagerFactory factory, Map properties)
     {
@@ -90,8 +92,11 @@ public class EntityManagerImpl implements EntityManager
         this.properties = properties;
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#find(java.lang.Class,
+     * java.lang.Object)
      */
     @Override
     public final <E> E find(Class<E> entityClass, Object primaryKey)
@@ -106,7 +111,9 @@ public class EntityManagerImpl implements EntityManager
         return getPersistenceDelegator().find(entityClass, primaryKey);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#remove(java.lang.Object)
      */
     @Override
@@ -122,7 +129,9 @@ public class EntityManagerImpl implements EntityManager
         getPersistenceDelegator().remove(e);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#merge(java.lang.Object)
      */
     @Override
@@ -137,7 +146,9 @@ public class EntityManagerImpl implements EntityManager
         return getPersistenceDelegator().merge(e);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#persist(java.lang.Object)
      */
     @Override
@@ -152,7 +163,9 @@ public class EntityManagerImpl implements EntityManager
         getPersistenceDelegator().persist(e);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#clear()
      */
     @Override
@@ -163,7 +176,9 @@ public class EntityManagerImpl implements EntityManager
         // TODO Do we need a client and persistenceDelegator close here?
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#close()
      */
     @Override
@@ -176,7 +191,9 @@ public class EntityManagerImpl implements EntityManager
         closed = true;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#contains(java.lang.Object)
      */
     @Override
@@ -185,7 +202,9 @@ public class EntityManagerImpl implements EntityManager
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#createQuery(java.lang.String)
      */
     @Override
@@ -194,7 +213,9 @@ public class EntityManagerImpl implements EntityManager
         return persistenceDelegator.createQuery(query);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#flush()
      */
     @Override
@@ -203,7 +224,9 @@ public class EntityManagerImpl implements EntityManager
         // always flushed to cassandra anyway! relax.
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#getDelegate()
      */
     @Override
@@ -212,7 +235,9 @@ public class EntityManagerImpl implements EntityManager
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#createNamedQuery(java.lang.String)
      */
     @Override
@@ -221,7 +246,9 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String)
      */
     @Override
@@ -230,8 +257,11 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String,
+     * java.lang.Class)
      */
     @Override
     public final Query createNativeQuery(String sqlString, Class resultClass)
@@ -239,8 +269,11 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#createNativeQuery(java.lang.String,
+     * java.lang.String)
      */
     @Override
     public final Query createNativeQuery(String sqlString, String resultSetMapping)
@@ -248,8 +281,11 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#getReference(java.lang.Class, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#getReference(java.lang.Class,
+     * java.lang.Object)
      */
     @Override
     public final <T> T getReference(Class<T> entityClass, Object primaryKey)
@@ -257,7 +293,9 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#getFlushMode()
      */
     @Override
@@ -266,7 +304,9 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#getTransaction()
      */
     @Override
@@ -275,7 +315,9 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#joinTransaction()
      */
     @Override
@@ -284,8 +326,11 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#lock(java.lang.Object, javax.persistence.LockModeType)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#lock(java.lang.Object,
+     * javax.persistence.LockModeType)
      */
     @Override
     public final void lock(Object entity, LockModeType lockMode)
@@ -293,7 +338,9 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#refresh(java.lang.Object)
      */
     @Override
@@ -302,8 +349,11 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#find(java.lang.Class,
+     * java.lang.Object, java.util.Map)
      */
     @Override
     public <T> T find(Class<T> paramClass, Object paramObject, Map<String, Object> paramMap)
@@ -311,8 +361,11 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object, javax.persistence.LockModeType)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#find(java.lang.Class,
+     * java.lang.Object, javax.persistence.LockModeType)
      */
     @Override
     public <T> T find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType)
@@ -320,8 +373,11 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object, javax.persistence.LockModeType, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#find(java.lang.Class,
+     * java.lang.Object, javax.persistence.LockModeType, java.util.Map)
      */
     @Override
     public <T> T find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType,
@@ -330,8 +386,11 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#lock(java.lang.Object, javax.persistence.LockModeType, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#lock(java.lang.Object,
+     * javax.persistence.LockModeType, java.util.Map)
      */
     @Override
     public void lock(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
@@ -339,8 +398,11 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#refresh(java.lang.Object, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#refresh(java.lang.Object,
+     * java.util.Map)
      */
     @Override
     public void refresh(Object paramObject, Map<String, Object> paramMap)
@@ -349,8 +411,11 @@ public class EntityManagerImpl implements EntityManager
 
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#refresh(java.lang.Object, javax.persistence.LockModeType)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#refresh(java.lang.Object,
+     * javax.persistence.LockModeType)
      */
     @Override
     public void refresh(Object paramObject, LockModeType paramLockModeType)
@@ -359,8 +424,11 @@ public class EntityManagerImpl implements EntityManager
 
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#refresh(java.lang.Object, javax.persistence.LockModeType, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#refresh(java.lang.Object,
+     * javax.persistence.LockModeType, java.util.Map)
      */
     @Override
     public void refresh(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
@@ -368,7 +436,9 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#detach(java.lang.Object)
      */
     @Override
@@ -378,7 +448,9 @@ public class EntityManagerImpl implements EntityManager
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#getLockMode(java.lang.Object)
      */
     @Override
@@ -387,8 +459,11 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#setProperty(java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#setProperty(java.lang.String,
+     * java.lang.Object)
      */
     @Override
     public void setProperty(String paramString, Object paramObject)
@@ -397,8 +472,12 @@ public class EntityManagerImpl implements EntityManager
 
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#createQuery(javax.persistence.criteria.CriteriaQuery)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.EntityManager#createQuery(javax.persistence.criteria
+     * .CriteriaQuery)
      */
     @Override
     public <T> TypedQuery<T> createQuery(CriteriaQuery<T> paramCriteriaQuery)
@@ -406,8 +485,11 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#createQuery(java.lang.String, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#createQuery(java.lang.String,
+     * java.lang.Class)
      */
     @Override
     public <T> TypedQuery<T> createQuery(String paramString, Class<T> paramClass)
@@ -415,8 +497,11 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#createNamedQuery(java.lang.String, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#createNamedQuery(java.lang.String,
+     * java.lang.Class)
      */
     @Override
     public <T> TypedQuery<T> createNamedQuery(String paramString, Class<T> paramClass)
@@ -424,7 +509,9 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#unwrap(java.lang.Class)
      */
     @Override
@@ -433,8 +520,12 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManager#setFlushMode(javax.persistence.FlushModeType)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.EntityManager#setFlushMode(javax.persistence.FlushModeType
+     * )
      */
     @Override
     public final void setFlushMode(FlushModeType flushMode)
@@ -442,7 +533,9 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#getProperties()
      */
     @Override
@@ -451,7 +544,9 @@ public class EntityManagerImpl implements EntityManager
         return properties;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#getEntityManagerFactory()
      */
     @Override
@@ -460,7 +555,9 @@ public class EntityManagerImpl implements EntityManager
         return factory;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#getCriteriaBuilder()
      */
     @Override
@@ -469,7 +566,9 @@ public class EntityManagerImpl implements EntityManager
         return factory.getCriteriaBuilder();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#getMetamodel()
      */
     @Override
@@ -478,7 +577,9 @@ public class EntityManagerImpl implements EntityManager
         return factory.getMetamodel();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManager#isOpen()
      */
     @Override
@@ -500,7 +601,7 @@ public class EntityManagerImpl implements EntityManager
 
     /**
      * Returns Persistence unit (or comma separated units) associated with EMF.
-     *
+     * 
      * @return the persistence unit
      */
     private String getPersistenceUnit()
@@ -510,7 +611,7 @@ public class EntityManagerImpl implements EntityManager
 
     /**
      * Gets the session.
-     *
+     * 
      * @return the session
      */
     private EntityManagerSession getSession()
@@ -520,7 +621,7 @@ public class EntityManagerImpl implements EntityManager
 
     /**
      * Gets the persistence delegator.
-     *
+     * 
      * @return the persistence delegator
      */
     private PersistenceDelegator getPersistenceDelegator()

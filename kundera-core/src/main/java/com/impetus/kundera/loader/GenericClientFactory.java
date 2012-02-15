@@ -24,7 +24,6 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 
-
 // Client Loaders are more of
 /**
  * A factory for creating GenericClient objects.
@@ -43,7 +42,9 @@ public abstract class GenericClientFactory implements Loader
     /** The connection pool or connection. */
     private Object connectionPoolOrConnection;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.Loader#load(java.lang.String[])
      */
     @Override
@@ -54,8 +55,9 @@ public abstract class GenericClientFactory implements Loader
 
     /**
      * Load.
-     *
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
      */
     public void load(String persistenceUnit)
     {
@@ -97,14 +99,14 @@ public abstract class GenericClientFactory implements Loader
 
     /**
      * Creates a new GenericClient object.
-     *
+     * 
      * @return the object
      */
     protected abstract Object createPoolOrConnection();
 
     /**
      * Gets the client instance.
-     *
+     * 
      * @return the client instance
      */
     public Client getClientInstance()
@@ -135,21 +137,21 @@ public abstract class GenericClientFactory implements Loader
 
     /**
      * Instantiate client.
-     *
+     * 
      * @return the client
      */
     protected abstract Client instantiateClient();
 
     /**
      * Checks if is client thread safe.
-     *
+     * 
      * @return true, if is client thread safe
      */
     protected abstract boolean isClientThreadSafe();
 
     /**
      * Gets the persistence unit.
-     *
+     * 
      * @return the persistence unit
      */
     protected String getPersistenceUnit()
@@ -159,7 +161,7 @@ public abstract class GenericClientFactory implements Loader
 
     /**
      * Gets the connection pool or connection.
-     *
+     * 
      * @return the connection pool or connection
      */
     protected Object getConnectionPoolOrConnection()
@@ -169,8 +171,9 @@ public abstract class GenericClientFactory implements Loader
 
     /**
      * Sets the persistence unit.
-     *
-     * @param persistenceUnit the new persistence unit
+     * 
+     * @param persistenceUnit
+     *            the new persistence unit
      */
     private void setPersistenceUnit(String persistenceUnit)
     {

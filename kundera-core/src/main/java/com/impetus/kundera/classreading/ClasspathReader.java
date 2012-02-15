@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-
 /**
  * The Class ClasspathReader.
  * 
@@ -52,8 +51,9 @@ public class ClasspathReader extends Reader
 
     /**
      * Instantiates a new classpath reader.
-     *
-     * @param classesToScan the classes to scan
+     * 
+     * @param classesToScan
+     *            the classes to scan
      */
     public ClasspathReader(List<String> classesToScan)
     {
@@ -126,7 +126,7 @@ public class ClasspathReader extends Reader
 
     /**
      * Scan class resources into a basePackagetoScan path.
-     *
+     * 
      * @return list of class path included in the base package
      */
 
@@ -169,7 +169,9 @@ public class ClasspathReader extends Reader
         return list.toArray(new URL[list.size()]);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.classreading.Reader#findResources()
      */
     @Override

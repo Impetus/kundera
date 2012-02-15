@@ -30,7 +30,6 @@ import com.impetus.kundera.persistence.handler.api.MappingHandler;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-
 //TODO need to think of multiple relationships. 
 //A->B = output says( B->A) and other relation says (A->C). so overall output is : C->B->A (need to look into this later).
 
@@ -80,12 +79,17 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
 
     /**
      * Checks if is shared by primary key.
-     *
-     * @param entity the entity
-     * @param rField the r field
-     * @param objectGraph the object graph
-     * @param associatedEntity the associated entity
-     * @param metadata the metadata
+     * 
+     * @param entity
+     *            the entity
+     * @param rField
+     *            the r field
+     * @param objectGraph
+     *            the object graph
+     * @param associatedEntity
+     *            the associated entity
+     * @param metadata
+     *            the metadata
      */
     private void isSharedByPrimaryKey(Object entity, Field rField, EntitySaveGraph objectGraph,
             Object associatedEntity, EntityMetadata metadata)
@@ -112,10 +116,13 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
 
     /**
      * Populate p key.
-     *
-     * @param entity the entity
-     * @param associatedEntity the associated entity
-     * @param metadata the metadata
+     * 
+     * @param entity
+     *            the entity
+     * @param associatedEntity
+     *            the associated entity
+     * @param metadata
+     *            the metadata
      */
     private void populatePKey(Object entity, Object associatedEntity, EntityMetadata metadata)
     {
@@ -153,9 +160,11 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
 
     /**
      * Gets the id.
-     *
-     * @param entity the entity
-     * @param metadata the metadata
+     * 
+     * @param entity
+     *            the entity
+     * @param metadata
+     *            the metadata
      * @return the id
      */
     private String getId(Object entity, EntityMetadata metadata)

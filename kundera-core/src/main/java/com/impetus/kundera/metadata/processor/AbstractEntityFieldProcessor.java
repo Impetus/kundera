@@ -34,7 +34,6 @@ import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 
-
 /**
  * The Class AbstractEntityFieldProcessor.
  * 
@@ -51,10 +50,12 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
 
     /**
      * Gets the valid jpa column.
-     *
-     * @param clazz the clazz
+     * 
+     * @param clazz
+     *            the clazz
      * @return the valid jpa column
-     * @throws PersistenceException the persistence exception
+     * @throws PersistenceException
+     *             the persistence exception
      */
 
     /**
@@ -73,9 +74,11 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
 
     /**
      * Gets the valid jpa column name.
-     *
-     * @param entity the entity
-     * @param f the f
+     * 
+     * @param entity
+     *            the entity
+     * @param f
+     *            the f
      * @return the valid jpa column name
      */
     protected final String getValidJPAColumnName(Class<?> entity, Field f)
@@ -151,10 +154,13 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
 
     /**
      * Populate id column.
-     *
-     * @param metadata the metadata
-     * @param clazz the clazz
-     * @param f the f
+     * 
+     * @param metadata
+     *            the metadata
+     * @param clazz
+     *            the clazz
+     * @param f
+     *            the f
      */
     protected final void populateIdColumn(EntityMetadata metadata, Class<?> clazz, Field f)
     {

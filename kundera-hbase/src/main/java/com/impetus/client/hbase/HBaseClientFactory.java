@@ -32,13 +32,12 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 
-
 /**
  * A factory for creating HBaseClient objects.
  */
 public class HBaseClientFactory extends GenericClientFactory
 {
-    
+
     /** The index manager. */
     private IndexManager indexManager;
 
@@ -57,7 +56,9 @@ public class HBaseClientFactory extends GenericClientFactory
     /** The pool size. */
     int poolSize;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#initializeClient()
      */
     @Override
@@ -90,8 +91,11 @@ public class HBaseClientFactory extends GenericClientFactory
         reader = new HBaseEntityReader();
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
      */
     @Override
     protected Object createPoolOrConnection()
@@ -100,7 +104,9 @@ public class HBaseClientFactory extends GenericClientFactory
         return hTablePool;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient()
      */
     @Override
@@ -109,7 +115,9 @@ public class HBaseClientFactory extends GenericClientFactory
         return new HBaseClient(indexManager, conf, hTablePool, reader);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#isClientThreadSafe()
      */
     @Override
@@ -118,7 +126,9 @@ public class HBaseClientFactory extends GenericClientFactory
         return true;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.Loader#unload(java.lang.String[])
      */
     @Override

@@ -29,10 +29,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-
 /**
  * Entity Class for User object.
- *
+ * 
  * @author amresh.singh
  */
 
@@ -40,7 +39,7 @@ import javax.persistence.Table;
 @Table(name = "users", schema = "Blog")
 public class TwitterUser
 {
-    
+
     /** The user id. */
     @Id
     private String userId; // PK
@@ -67,7 +66,7 @@ public class TwitterUser
 
     /**
      * Gets the user id.
-     *
+     * 
      * @return the userId
      */
     public String getUserId()
@@ -77,8 +76,9 @@ public class TwitterUser
 
     /**
      * Sets the user id.
-     *
-     * @param userId the userId to set
+     * 
+     * @param userId
+     *            the userId to set
      */
     public void setUserId(String userId)
     {
@@ -87,7 +87,7 @@ public class TwitterUser
 
     /**
      * Gets the personal detail.
-     *
+     * 
      * @return the personalDetail
      */
     public PersonalDetail getPersonalDetail()
@@ -97,8 +97,9 @@ public class TwitterUser
 
     /**
      * Sets the personal detail.
-     *
-     * @param personalDetail the personalDetail to set
+     * 
+     * @param personalDetail
+     *            the personalDetail to set
      */
     public void setPersonalDetail(PersonalDetail personalDetail)
     {
@@ -107,7 +108,7 @@ public class TwitterUser
 
     /**
      * Gets the tweets.
-     *
+     * 
      * @return the tweets
      */
     public List<UserTweet> getTweets()
@@ -117,8 +118,9 @@ public class TwitterUser
 
     /**
      * Adds the tweet.
-     *
-     * @param tweet the tweet
+     * 
+     * @param tweet
+     *            the tweet
      */
     public void addTweet(UserTweet tweet)
     {
@@ -131,7 +133,7 @@ public class TwitterUser
 
     /**
      * Gets the preference.
-     *
+     * 
      * @return the preference
      */
     public UserPreference getPreference()
@@ -141,8 +143,9 @@ public class TwitterUser
 
     /**
      * Sets the preference.
-     *
-     * @param preference the preference to set
+     * 
+     * @param preference
+     *            the preference to set
      */
     public void setPreference(UserPreference preference)
     {
@@ -151,7 +154,7 @@ public class TwitterUser
 
     /**
      * Gets the im details.
-     *
+     * 
      * @return the imDetails
      */
     public Set<IMDetail> getImDetails()
@@ -161,8 +164,9 @@ public class TwitterUser
 
     /**
      * Adds the im detail.
-     *
-     * @param imDetail the im detail
+     * 
+     * @param imDetail
+     *            the im detail
      */
     public void addImDetail(IMDetail imDetail)
     {

@@ -34,7 +34,6 @@ import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializationException;
 import com.impetus.kundera.proxy.LazyInitializer;
 
-
 /**
  * A <tt>LazyInitializer</tt> implemented using the CGLIB bytecode generation
  * library.
@@ -96,16 +95,24 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Gets the proxy.
-     *
-     * @param entityName the entity name
-     * @param persistentClass the persistent class
-     * @param interfaces the interfaces
-     * @param getIdentifierMethod the get identifier method
-     * @param setIdentifierMethod the set identifier method
-     * @param id the id
-     * @param persistenceDelegator the persistence delegator
+     * 
+     * @param entityName
+     *            the entity name
+     * @param persistentClass
+     *            the persistent class
+     * @param interfaces
+     *            the interfaces
+     * @param getIdentifierMethod
+     *            the get identifier method
+     * @param setIdentifierMethod
+     *            the set identifier method
+     * @param id
+     *            the id
+     * @param persistenceDelegator
+     *            the persistence delegator
      * @return the proxy
-     * @throws PersistenceException the persistence exception
+     * @throws PersistenceException
+     *             the persistence exception
      */
     public static KunderaProxy getProxy(final String entityName, final Class<?> persistentClass,
             final Class<?>[] interfaces, final Method getIdentifierMethod, final Method setIdentifierMethod,
@@ -183,14 +190,21 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
 
     /**
      * Instantiates a new cglib lazy initializer.
-     *
-     * @param entityName the entity name
-     * @param persistentClass the persistent class
-     * @param interfaces the interfaces
-     * @param id the id
-     * @param getIdentifierMethod the get identifier method
-     * @param setIdentifierMethod the set identifier method
-     * @param persistenceDelegator the persistence delegator
+     * 
+     * @param entityName
+     *            the entity name
+     * @param persistentClass
+     *            the persistent class
+     * @param interfaces
+     *            the interfaces
+     * @param id
+     *            the id
+     * @param getIdentifierMethod
+     *            the get identifier method
+     * @param setIdentifierMethod
+     *            the set identifier method
+     * @param persistenceDelegator
+     *            the persistence delegator
      */
     private CglibLazyInitializer(final String entityName, final Class<?> persistentClass, final Class<?>[] interfaces,
             final String id, final Method getIdentifierMethod, final Method setIdentifierMethod,
@@ -210,8 +224,11 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
      * @see net.sf.cglib.proxy.InvocationHandler#invoke(java.lang.Object,
      * java.lang.reflect.Method, java.lang.Object[])
      */
-    /* (non-Javadoc)
-     * @see net.sf.cglib.proxy.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.cglib.proxy.InvocationHandler#invoke(java.lang.Object,
+     * java.lang.reflect.Method, java.lang.Object[])
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
@@ -273,7 +290,9 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     }
 
     /* @see com.impetus.kundera.proxy.LazyInitializer#getPersistentClass() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.proxy.LazyInitializer#getPersistentClass()
      */
     public final Class<?> getPersistentClass()

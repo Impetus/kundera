@@ -20,10 +20,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * Entity class for user's IM details.
- *
+ * 
  * @author amresh.singh
  */
 
@@ -54,10 +53,13 @@ public class IMDetail
 
     /**
      * Instantiates a new iM detail.
-     *
-     * @param id the id
-     * @param type the type
-     * @param detail the detail
+     * 
+     * @param id
+     *            the id
+     * @param type
+     *            the type
+     * @param detail
+     *            the detail
      */
     public IMDetail(String id, String type, String detail)
     {
@@ -68,7 +70,7 @@ public class IMDetail
 
     /**
      * Gets the im detail id.
-     *
+     * 
      * @return the imDetailId
      */
     public String getImDetailId()
@@ -78,8 +80,9 @@ public class IMDetail
 
     /**
      * Sets the im detail id.
-     *
-     * @param imDetailId the imDetailId to set
+     * 
+     * @param imDetailId
+     *            the imDetailId to set
      */
     public void setImDetailId(String imDetailId)
     {
@@ -88,7 +91,7 @@ public class IMDetail
 
     /**
      * Gets the im type.
-     *
+     * 
      * @return the imType
      */
     public String getImType()
@@ -98,8 +101,9 @@ public class IMDetail
 
     /**
      * Sets the im type.
-     *
-     * @param imType the imType to set
+     * 
+     * @param imType
+     *            the imType to set
      */
     public void setImType(String imType)
     {
@@ -108,7 +112,7 @@ public class IMDetail
 
     /**
      * Gets the im detail.
-     *
+     * 
      * @return the imDetail
      */
     public String getImDetail()
@@ -118,8 +122,9 @@ public class IMDetail
 
     /**
      * Sets the im detail.
-     *
-     * @param imDetail the imDetail to set
+     * 
+     * @param imDetail
+     *            the imDetail to set
      */
     public void setImDetail(String imDetail)
     {

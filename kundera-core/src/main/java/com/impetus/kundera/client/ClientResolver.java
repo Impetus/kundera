@@ -23,10 +23,9 @@ import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
-
 /**
  * The Class ClientResolver.
- *
+ * 
  * @author impetus
  */
 public final class ClientResolver
@@ -37,8 +36,9 @@ public final class ClientResolver
 
     /**
      * Gets the client.
-     *
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
      * @return the client
      */
     public static Client getClient(String persistenceUnit)
@@ -49,8 +49,9 @@ public final class ClientResolver
     // TODO To move this method to client dicoverer
     /**
      * Gets the client factory.
-     *
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
      * @return the client factory
      */
     public static GenericClientFactory getClientFactory(String persistenceUnit)

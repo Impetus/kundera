@@ -30,7 +30,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.utils.ReflectUtils;
 
-
 /**
  * Helper class to access fields.
  * 
@@ -223,11 +222,15 @@ public class PropertyAccessorHelper
 
     /**
      * Sets Primary Key (Row key) into entity field that was annotated with @Id.
-     *
-     * @param entity the entity
-     * @param metadata the metadata
-     * @param rowKey the row key
-     * @throws PropertyAccessException the property access exception
+     * 
+     * @param entity
+     *            the entity
+     * @param metadata
+     *            the metadata
+     * @param rowKey
+     *            the row key
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     public static void setId(Object entity, EntityMetadata metadata, String rowKey) throws PropertyAccessException
     {
@@ -387,8 +390,9 @@ public class PropertyAccessorHelper
 
     /**
      * Checks if is collection.
-     *
-     * @param clazz the clazz
+     * 
+     * @param clazz
+     *            the clazz
      * @return true, if is collection
      */
     public static final boolean isCollection(Class<?> clazz)

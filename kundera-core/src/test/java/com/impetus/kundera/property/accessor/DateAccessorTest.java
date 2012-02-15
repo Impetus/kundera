@@ -23,10 +23,9 @@ import org.junit.Test;
 
 import com.impetus.kundera.property.PropertyAccessException;
 
-
 /**
  * The Class DateAccessorTest.
- *
+ * 
  * @author vivek.mishra
  */
 public class DateAccessorTest
@@ -37,8 +36,9 @@ public class DateAccessorTest
 
     /**
      * Sets the up.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Before
     public void setUp() throws Exception
@@ -48,8 +48,9 @@ public class DateAccessorTest
 
     /**
      * Test date from string.
-     *
-     * @throws PropertyAccessException the property access exception
+     * 
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     @Test
     public void testDateFromString() throws PropertyAccessException
@@ -68,8 +69,9 @@ public class DateAccessorTest
 
     /**
      * Tear down.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @After
     public void tearDown() throws Exception

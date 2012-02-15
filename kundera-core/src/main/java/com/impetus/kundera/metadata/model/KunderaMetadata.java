@@ -18,10 +18,9 @@ package com.impetus.kundera.metadata.model;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * The Class KunderaMetadata.
- *
+ * 
  * @author amresh.singh
  */
 public class KunderaMetadata
@@ -56,7 +55,7 @@ public class KunderaMetadata
      */
     /**
      * Gets the application metadata.
-     *
+     * 
      * @return the applicationMetadata
      */
     public ApplicationMetadata getApplicationMetadata()
@@ -70,7 +69,7 @@ public class KunderaMetadata
 
     /**
      * Gets the core metadata.
-     *
+     * 
      * @return the coreMetadata
      */
     public CoreMetadata getCoreMetadata()
@@ -80,8 +79,9 @@ public class KunderaMetadata
 
     /**
      * Sets the application metadata.
-     *
-     * @param applicationMetadata the applicationMetadata to set
+     * 
+     * @param applicationMetadata
+     *            the applicationMetadata to set
      */
     public void setApplicationMetadata(ApplicationMetadata applicationMetadata)
     {
@@ -90,8 +90,9 @@ public class KunderaMetadata
 
     /**
      * Sets the core metadata.
-     *
-     * @param coreMetadata the coreMetadata to set
+     * 
+     * @param coreMetadata
+     *            the coreMetadata to set
      */
     public void setCoreMetadata(CoreMetadata coreMetadata)
     {
@@ -100,8 +101,9 @@ public class KunderaMetadata
 
     /**
      * Gets the client metadata.
-     *
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
      * @return the client metadata
      */
     public ClientMetadata getClientMetadata(String persistenceUnit)
@@ -111,9 +113,11 @@ public class KunderaMetadata
 
     /**
      * Adds the client metadata.
-     *
-     * @param persistenceUnit the persistence unit
-     * @param clientMetadata the client metadata
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
+     * @param clientMetadata
+     *            the client metadata
      */
     public void addClientMetadata(String persistenceUnit, ClientMetadata clientMetadata)
     {

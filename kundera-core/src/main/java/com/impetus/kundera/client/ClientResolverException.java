@@ -15,10 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.client;
 
-
 /**
  * The Class ClientResolverException.
- *
+ * 
  * @author impetus
  */
 public class ClientResolverException extends RuntimeException

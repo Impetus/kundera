@@ -45,15 +45,14 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
-
 /**
  * Provides utility methods for handling data held in MongoDB.
- *
+ * 
  * @author amresh.singh
  */
 public class MongoDBDataHandler
 {
-    
+
     /** The client. */
     private Client client;
 
@@ -62,9 +61,11 @@ public class MongoDBDataHandler
 
     /**
      * Instantiates a new mongo db data handler.
-     *
-     * @param client the client
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param client
+     *            the client
+     * @param persistenceUnit
+     *            the persistence unit
      */
     public MongoDBDataHandler(Client client, String persistenceUnit)
     {
@@ -78,11 +79,15 @@ public class MongoDBDataHandler
 
     /**
      * Gets the entity from document.
-     *
-     * @param entityClass the entity class
-     * @param m the m
-     * @param document the document
-     * @param relations the relations
+     * 
+     * @param entityClass
+     *            the entity class
+     * @param m
+     *            the m
+     * @param document
+     *            the document
+     * @param relations
+     *            the relations
      * @return the entity from document
      */
     public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document,
@@ -195,7 +200,7 @@ public class MongoDBDataHandler
 
     /**
      * Gets the client.
-     *
+     * 
      * @return the client
      */
     private Client getClient()
@@ -205,7 +210,7 @@ public class MongoDBDataHandler
 
     /**
      * Gets the persistence unit.
-     *
+     * 
      * @return the persistence unit
      */
     private String getPersistenceUnit()
@@ -215,12 +220,16 @@ public class MongoDBDataHandler
 
     /**
      * Gets the document from entity.
-     *
-     * @param m the m
-     * @param entity the entity
-     * @param relations the relations
+     * 
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @param relations
+     *            the relations
      * @return the document from entity
-     * @throws PropertyAccessException the property access exception
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     public BasicDBObject getDocumentFromEntity(EntityMetadata m, Object entity, List<RelationHolder> relations)
             throws PropertyAccessException
@@ -295,11 +304,15 @@ public class MongoDBDataHandler
 
     /**
      * Extract entity field.
-     *
-     * @param entity the entity
-     * @param dbObj the db obj
-     * @param column the column
-     * @throws PropertyAccessException the property access exception
+     * 
+     * @param entity
+     *            the entity
+     * @param dbObj
+     *            the db obj
+     * @param column
+     *            the column
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     private void extractEntityField(Object entity, BasicDBObject dbObj, Column column) throws PropertyAccessException
     {
@@ -327,8 +340,9 @@ public class MongoDBDataHandler
     /**
      * Returns column name from the filter property which is in the form
      * dbName.columnName
-     *
-     * @param filterProperty the filter property
+     * 
+     * @param filterProperty
+     *            the filter property
      * @return the column name
      */
     public String getColumnName(String filterProperty)
@@ -345,9 +359,11 @@ public class MongoDBDataHandler
 
     /**
      * Gets the enclosing document name.
-     *
-     * @param m the m
-     * @param columnName the column name
+     * 
+     * @param m
+     *            the m
+     * @param columnName
+     *            the column name
      * @return the enclosing document name
      */
     public String getEnclosingDocumentName(EntityMetadata m, String columnName)
@@ -380,15 +396,22 @@ public class MongoDBDataHandler
      * "Select alias.columnName from EntityName alias". However, correct query
      * to be supported is
      * "Select alias.superColumnName.columnName from EntityName alias"
-     *
-     * @param dbCollection the db collection
-     * @param m the m
-     * @param documentName the document name
-     * @param mongoQuery the mongo query
-     * @param result the result
-     * @param orderBy the order by
+     * 
+     * @param dbCollection
+     *            the db collection
+     * @param m
+     *            the m
+     * @param documentName
+     *            the document name
+     * @param mongoQuery
+     *            the mongo query
+     * @param result
+     *            the result
+     * @param orderBy
+     *            the order by
      * @return the embedded object list
-     * @throws PropertyAccessException the property access exception
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
             BasicDBObject mongoQuery, String result, BasicDBObject orderBy) throws PropertyAccessException

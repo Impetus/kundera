@@ -17,10 +17,9 @@ package com.impetus.client.onetoone;
 
 import org.junit.Test;
 
-
 /**
  * The Class PersonTest.
- *
+ * 
  * @author vivek.mishra
  */
 public class PersonTest
@@ -55,7 +54,7 @@ public class PersonTest
 
     /**
      * Prepare pk object.
-     *
+     * 
      * @return the object
      */
     private Object preparePKObject()
@@ -72,7 +71,7 @@ public class PersonTest
 
     /**
      * Prepare object.
-     *
+     * 
      * @return the object
      */
     private Object prepareObject()

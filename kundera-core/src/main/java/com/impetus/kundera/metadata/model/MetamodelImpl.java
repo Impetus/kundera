@@ -24,22 +24,23 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
 
-
 /**
  * The Class MetamodelImpl.
- *
+ * 
  * @author amresh.singh
  */
 public class MetamodelImpl implements Metamodel
 {
-    
+
     /** The entity metadata map. */
     Map<Class<?>, EntityMetadata> entityMetadataMap;
 
     /** The entity name to class map. */
     Map<String, Class<?>> entityNameToClassMap;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.Metamodel#entity(java.lang.Class)
      */
     @Override
@@ -48,7 +49,9 @@ public class MetamodelImpl implements Metamodel
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.Metamodel#managedType(java.lang.Class)
      */
     @Override
@@ -57,7 +60,9 @@ public class MetamodelImpl implements Metamodel
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.Metamodel#embeddable(java.lang.Class)
      */
     @Override
@@ -66,7 +71,9 @@ public class MetamodelImpl implements Metamodel
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.Metamodel#getManagedTypes()
      */
     @Override
@@ -75,7 +82,9 @@ public class MetamodelImpl implements Metamodel
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.Metamodel#getEntities()
      */
     @Override
@@ -84,7 +93,9 @@ public class MetamodelImpl implements Metamodel
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.Metamodel#getEmbeddables()
      */
     @Override
@@ -104,7 +115,7 @@ public class MetamodelImpl implements Metamodel
 
     /**
      * Gets the entity metadata map.
-     *
+     * 
      * @return the entityMetadataMap
      */
     public Map<Class<?>, EntityMetadata> getEntityMetadataMap()
@@ -118,8 +129,9 @@ public class MetamodelImpl implements Metamodel
 
     /**
      * Sets the entity metadata map.
-     *
-     * @param entityMetadataMap the entityMetadataMap to set
+     * 
+     * @param entityMetadataMap
+     *            the entityMetadataMap to set
      */
     public void setEntityMetadataMap(Map<Class<?>, EntityMetadata> entityMetadataMap)
     {
@@ -128,9 +140,11 @@ public class MetamodelImpl implements Metamodel
 
     /**
      * Adds the entity metadata.
-     *
-     * @param clazz the clazz
-     * @param entityMetadata the entity metadata
+     * 
+     * @param clazz
+     *            the clazz
+     * @param entityMetadata
+     *            the entity metadata
      */
     public void addEntityMetadata(Class<?> clazz, EntityMetadata entityMetadata)
     {
@@ -139,8 +153,9 @@ public class MetamodelImpl implements Metamodel
 
     /**
      * Gets the entity metadata.
-     *
-     * @param entityClass the entity class
+     * 
+     * @param entityClass
+     *            the entity class
      * @return the entity metadata
      */
     public EntityMetadata getEntityMetadata(Class<?> entityClass)
@@ -150,7 +165,7 @@ public class MetamodelImpl implements Metamodel
 
     /**
      * Gets the entity name to class map.
-     *
+     * 
      * @return the entityNameToClassMap
      */
     public Map<String, Class<?>> getEntityNameToClassMap()
@@ -164,8 +179,9 @@ public class MetamodelImpl implements Metamodel
 
     /**
      * Sets the entity name to class map.
-     *
-     * @param entityNameToClassMap the entityNameToClassMap to set
+     * 
+     * @param entityNameToClassMap
+     *            the entityNameToClassMap to set
      */
     public void setEntityNameToClassMap(Map<String, Class<?>> entityNameToClassMap)
     {
@@ -174,9 +190,11 @@ public class MetamodelImpl implements Metamodel
 
     /**
      * Adds the entity name to class mapping.
-     *
-     * @param className the class name
-     * @param entityClass the entity class
+     * 
+     * @param className
+     *            the class name
+     * @param entityClass
+     *            the entity class
      */
     public void addEntityNameToClassMapping(String className, Class<?> entityClass)
     {
@@ -185,8 +203,9 @@ public class MetamodelImpl implements Metamodel
 
     /**
      * Gets the entity class.
-     *
-     * @param className the class name
+     * 
+     * @param className
+     *            the class name
      * @return the entity class
      */
     public Class<?> getEntityClass(String className)
@@ -194,7 +213,9 @@ public class MetamodelImpl implements Metamodel
         return getEntityNameToClassMap().get(className);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     public String toString()

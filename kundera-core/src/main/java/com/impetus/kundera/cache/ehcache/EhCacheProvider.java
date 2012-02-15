@@ -33,7 +33,6 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
 
-
 /**
  * Cache provider implementation using Ehcache.
  * 
@@ -60,7 +59,9 @@ public class EhCacheProvider implements CacheProvider
     /** The listeners. */
     private List<CacheEventListener> listeners = new ArrayList<CacheEventListener>();
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.cache.CacheProvider#init(java.lang.String)
      */
     @Override
@@ -112,7 +113,9 @@ public class EhCacheProvider implements CacheProvider
     }
 
     /* @see com.impetus.kundera.cache.CacheProvider#init(java.util.Map) */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.cache.CacheProvider#init(java.util.Map)
      */
     @Override
@@ -202,8 +205,11 @@ public class EhCacheProvider implements CacheProvider
      * @see
      * com.impetus.kundera.cache.CacheProvider#createCache(java.lang.String)
      */
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.cache.CacheProvider#createCache(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.cache.CacheProvider#createCache(java.lang.String)
      */
     @Override
     public Cache createCache(String name) throws CacheException
@@ -251,7 +257,9 @@ public class EhCacheProvider implements CacheProvider
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.cache.CacheProvider#getCache(java.lang.String)
      */
     @Override
@@ -266,7 +274,9 @@ public class EhCacheProvider implements CacheProvider
     }
 
     /* @see com.impetus.kundera.cache.CacheProvider#shutdown() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.cache.CacheProvider#shutdown()
      */
     @Override

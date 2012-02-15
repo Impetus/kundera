@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
 
-
 /**
  * Cache for holding element collection column names and corresponding objects
  * This is a singleton class TODO: Improve singleton implementation code, think
@@ -55,7 +54,7 @@ public class ElementCollectionCacheManager
 
     /**
      * Gets the single instance of ElementCollectionCacheManager.
-     *
+     * 
      * @return single instance of ElementCollectionCacheManager
      */
     public static synchronized ElementCollectionCacheManager getInstance()
@@ -67,12 +66,15 @@ public class ElementCollectionCacheManager
         return instance;
     }
 
-    /** Mapping between Row Key and (Map of element collection objects and element collection object name). */
+    /**
+     * Mapping between Row Key and (Map of element collection objects and
+     * element collection object name).
+     */
     private static Map<String, Map<Object, String>> elementCollectionCache;
 
     /**
      * Gets the element collection cache.
-     *
+     * 
      * @return the elementCollectionCache
      */
     public Map<String, Map<Object, String>> getElementCollectionCache()
@@ -86,7 +88,7 @@ public class ElementCollectionCacheManager
 
     /**
      * Checks if is cache empty.
-     *
+     * 
      * @return true, if is cache empty
      */
     public boolean isCacheEmpty()
@@ -96,10 +98,13 @@ public class ElementCollectionCacheManager
 
     /**
      * Adds the element collection cache mapping.
-     *
-     * @param rowKey the row key
-     * @param elementCollectionObject the element collection object
-     * @param elementCollObjectName the element coll object name
+     * 
+     * @param rowKey
+     *            the row key
+     * @param elementCollectionObject
+     *            the element collection object
+     * @param elementCollObjectName
+     *            the element coll object name
      */
     public void addElementCollectionCacheMapping(String rowKey, Object elementCollectionObject,
             String elementCollObjectName)
@@ -118,9 +123,11 @@ public class ElementCollectionCacheManager
 
     /**
      * Gets the element collection object name.
-     *
-     * @param rowKey the row key
-     * @param elementCollectionObject the element collection object
+     * 
+     * @param rowKey
+     *            the row key
+     * @param elementCollectionObject
+     *            the element collection object
      * @return the element collection object name
      */
     public String getElementCollectionObjectName(String rowKey, Object elementCollectionObject)
@@ -148,8 +155,9 @@ public class ElementCollectionCacheManager
 
     /**
      * Gets the last element collection object count.
-     *
-     * @param rowKey the row key
+     * 
+     * @param rowKey
+     *            the row key
      * @return the last element collection object count
      */
     public int getLastElementCollectionObjectCount(String rowKey)

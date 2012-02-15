@@ -22,25 +22,36 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
+import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexOperator;
+import org.apache.cassandra.thrift.IndexType;
+import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeySlice;
+import org.apache.cassandra.thrift.KsDef;
+import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Mutator;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
+import org.scale7.cassandra.pelops.Validation;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -48,13 +59,16 @@ import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.JoinTableMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.property.accessor.ByteAccessor;
 import com.impetus.kundera.proxy.EnhancedEntity;
-
 
 /**
  * Client implementation using Pelops. http://code.google.com/p/pelops/
@@ -88,9 +102,11 @@ public class PelopsClient implements Client
 
     /**
      * default constructor.
-     *
-     * @param indexManager the index manager
-     * @param reader the reader
+     * 
+     * @param indexManager
+     *            the index manager
+     * @param reader
+     *            the reader
      */
     public PelopsClient(IndexManager indexManager, EntityReader reader)
     {
@@ -174,16 +190,22 @@ public class PelopsClient implements Client
 
     /**
      * Method to return list of entities for given below attributes:.
-     *
-     * @param entityClass entity class
-     * @param relationNames relation names
-     * @param isWrapReq true, in case it needs to populate enhance entity.
-     * @param metadata entity metadata.
-     * @param rowIds array of row key s
+     * 
+     * @param entityClass
+     *            entity class
+     * @param relationNames
+     *            relation names
+     * @param isWrapReq
+     *            true, in case it needs to populate enhance entity.
+     * @param metadata
+     *            entity metadata.
+     * @param rowIds
+     *            array of row key s
      * @return list of wrapped entities.
-     * @throws Exception throws exception. don't know why TODO: why is it throwing
-     * exception. need to take care as part of exception handling
-     * exercise.
+     * @throws Exception
+     *             throws exception. don't know why TODO: why is it throwing
+     *             exception. need to take care as part of exception handling
+     *             exercise.
      */
     public final List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
             String... rowIds) throws Exception
@@ -368,8 +390,12 @@ public class PelopsClient implements Client
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#persist(java.lang.Object, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
+     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph,
+     * com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
     public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
@@ -397,15 +423,14 @@ public class PelopsClient implements Client
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object, java.lang.Object)
-     */
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, Object primaryKey, Object childEntity)
     {
 
-        Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit());
+
+        Mutator mutator = Pelops.createMutator(poolName);
 
         String parentId = (String) primaryKey;
         List<Column> columns = new ArrayList<Column>();
@@ -426,14 +451,106 @@ public class PelopsClient implements Client
             addColumnsToJoinTable(inverseJoinColumnName, relMetadata, columns, childEntity);
         }
 
+        createIndexesOnColumns(joinTableName, poolName, columns);
+
+        // Pelops.createColumnFamilyManager(cluster, keyspace)
         mutator.writeColumns(joinTableName, new Bytes(parentId.getBytes()),
                 Arrays.asList(columns.toArray(new Column[0])));
         mutator.execute(ConsistencyLevel.ONE);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#getForeignKeysFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+    /**
+     * Creates secondary indexes on columns if not already created
+     * 
+     * @param tableName
+     *            Column family name
+     * @param poolName
+     *            Pool Name
+     * @param columns
+     *            List of columns
      */
+    private void createIndexesOnColumns(String tableName, String poolName, List<Column> columns)
+    {
+        String keysapce = Pelops.getDbConnPool(poolName).getKeyspace();
+        try
+        {
+            Cassandra.Client api = Pelops.getDbConnPool(poolName).getConnection().getAPI();
+            KsDef ksDef = api.describe_keyspace(keysapce);
+            List<CfDef> cfDefs = ksDef.getCf_defs();
+
+            // Column family definition on which secondary index creation is
+            // required
+            CfDef columnFamilyDefToUpdate = null;
+            for (CfDef cfDef : cfDefs)
+            {
+                if (cfDef.getName().equals(tableName))
+                {
+                    columnFamilyDefToUpdate = cfDef;
+                    break;
+                }
+            }
+
+            // Get list of indexes already created
+            List<ColumnDef> columnMetadataList = columnFamilyDefToUpdate.getColumn_metadata();
+            List<String> indexList = new ArrayList<String>();
+            for (ColumnDef columnDef : columnMetadataList)
+            {
+                indexList.add(columnDef.getIndex_name());
+            }
+
+            // Iterate over all columns for creating secondary index on them
+            for (Column column : columns)
+            {
+
+                ColumnDef columnDef = new ColumnDef();
+
+                columnDef.setName(column.getName());
+                columnDef.setValidation_class("UTF8Type");
+                columnDef.setIndex_type(IndexType.KEYS);
+
+                String indexName = PelopsUtils.getSecondaryIndexName(tableName, column);
+
+                // Add secondary index only if it's not already created
+                // (if already created, it would be there in column family
+                // definition)
+                if (!indexList.contains(indexName))
+                {
+                    columnFamilyDefToUpdate.addToColumn_metadata(columnDef);
+                }
+            }
+
+            // Finally, update column family with modified column family
+            // definition
+            api.system_update_column_family(columnFamilyDefToUpdate);
+
+        }
+        catch (InvalidRequestException e)
+        {
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+
+        }
+        catch (SchemaDisagreementException e)
+        {
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+
+        }
+        catch (TException e)
+        {
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+
+        }
+        catch (NotFoundException e)
+        {
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+
+        }
+        catch (PropertyAccessException e)
+        {
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+
+        }
+    }
+
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
             String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
@@ -448,8 +565,63 @@ public class PelopsClient implements Client
         return foreignKeys;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#deleteFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+    @Override
+    public List<Object> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
+            String joinColumnName, String inverseJoinColumnName, Object childId)
+    {
+
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
+
+        String childIdStr = (String) childId;
+
+        List<Object> entities = null;
+        IndexClause ix = Selector.newIndexClause(
+                Bytes.EMPTY,
+                10000,
+                Selector.newIndexExpression(inverseJoinColumnName + "_" + childIdStr, IndexOperator.EQ,
+                        Bytes.fromByteArray(childIdStr.getBytes())));
+
+        Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(joinTableName, ix, slicePredicate,
+                ConsistencyLevel.ONE);
+
+        List<Object> rowKeys = new ArrayList<Object>();
+        entities = new ArrayList<Object>(qResults.size());
+
+        try
+        {
+            // iterate through complete map and
+            Iterator<Bytes> rowIter = qResults.keySet().iterator();
+            while (rowIter.hasNext())
+            {
+                Bytes rowKey = rowIter.next();
+
+                PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(parentMetadata.getIdColumn()
+                        .getField());
+                Object value = accessor.fromBytes(rowKey.toByteArray());
+
+                rowKeys.add(value);
+            }
+
+            entities.addAll(findAll(parentMetadata.getEntityClazz(), rowKeys.toArray(new Object[0])));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return entities;
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#deleteFromJoinTable(java.lang.String,
+     * java.lang.String, java.lang.String,
+     * com.impetus.kundera.metadata.model.EntityMetadata,
+     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
     public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
@@ -468,11 +640,15 @@ public class PelopsClient implements Client
 
     /**
      * Adds the columns to join table.
-     *
-     * @param inverseJoinColumnName the inverse join column name
-     * @param relMetadata the rel metadata
-     * @param columns the columns
-     * @param child the child
+     * 
+     * @param inverseJoinColumnName
+     *            the inverse join column name
+     * @param relMetadata
+     *            the rel metadata
+     * @param columns
+     *            the columns
+     * @param child
+     *            the child
      */
     private void addColumnsToJoinTable(String inverseJoinColumnName, EntityMetadata relMetadata, List<Column> columns,
             Object child)
@@ -485,6 +661,7 @@ public class PelopsClient implements Client
             col.setName(PropertyAccessorFactory.STRING.toBytes(inverseJoinColumnName + "_" + childId));
             col.setValue(PropertyAccessorFactory.STRING.toBytes(childId));
             col.setTimestamp(System.currentTimeMillis());
+
             columns.add(col);
         }
         catch (PropertyAccessException e)
@@ -496,11 +673,15 @@ public class PelopsClient implements Client
 
     /**
      * Find.
-     *
-     * @param ixClause the ix clause
-     * @param m the m
-     * @param isRelation the is relation
-     * @param relations the relations
+     * 
+     * @param ixClause
+     *            the ix clause
+     * @param m
+     *            the m
+     * @param isRelation
+     *            the is relation
+     * @param relations
+     *            the relations
      * @return the list
      */
     public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations)
@@ -533,14 +714,20 @@ public class PelopsClient implements Client
 
     /**
      * Find by range.
-     *
-     * @param minVal the min val
-     * @param maxVal the max val
-     * @param m the m
-     * @param isWrapReq the is wrap req
-     * @param relations the relations
+     * 
+     * @param minVal
+     *            the min val
+     * @param maxVal
+     *            the max val
+     * @param m
+     *            the m
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
      * @return the list
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations)
             throws Exception
@@ -599,12 +786,17 @@ public class PelopsClient implements Client
 
     /**
      * Populate data.
-     *
-     * @param m the m
-     * @param qResults the q results
-     * @param entities the entities
-     * @param isRelational the is relational
-     * @param relationNames the relation names
+     * 
+     * @param m
+     *            the m
+     * @param qResults
+     *            the q results
+     * @param entities
+     *            the entities
+     * @param isRelational
+     *            the is relational
+     * @param relationNames
+     *            the relation names
      */
     private void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities,
             boolean isRelational, List<String> relationNames)
@@ -659,10 +851,13 @@ public class PelopsClient implements Client
 
     /**
      * Find.
-     *
-     * @param m the m
-     * @param relationNames the relation names
-     * @param conditions the conditions
+     * 
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param conditions
+     *            the conditions
      * @return the list
      */
     public List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames, List<IndexClause> conditions)
@@ -697,13 +892,19 @@ public class PelopsClient implements Client
 
     /**
      * Adds the relation.
-     *
-     * @param entitySaveGraph the entity save graph
-     * @param m the m
-     * @param rlName the rl name
-     * @param rlValue the rl value
-     * @param tf the tf
-     * @throws PropertyAccessException the property access exception
+     * 
+     * @param entitySaveGraph
+     *            the entity save graph
+     * @param m
+     *            the m
+     * @param rlName
+     *            the rl name
+     * @param rlValue
+     *            the rl value
+     * @param tf
+     *            the tf
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     private void addRelation(EntitySaveGraph entitySaveGraph, EntityMetadata m, String rlName, String rlValue,
             PelopsDataHandler.ThriftRow tf) throws PropertyAccessException

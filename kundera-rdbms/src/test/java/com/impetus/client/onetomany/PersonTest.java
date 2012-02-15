@@ -20,10 +20,9 @@ import java.util.Set;
 
 import org.junit.Test;
 
-
 /**
  * The Class PersonTest.
- *
+ * 
  * @author vivek.mishra
  */
 public class PersonTest
@@ -40,7 +39,7 @@ public class PersonTest
 
     /**
      * Prepare object.
-     *
+     * 
      * @return the object
      */
     private Object prepareObject()

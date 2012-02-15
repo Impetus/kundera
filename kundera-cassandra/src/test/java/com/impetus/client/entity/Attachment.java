@@ -20,10 +20,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * Entity class for Email attachment.
- *
+ * 
  * @author amresh.singh
  */
 
@@ -48,7 +47,9 @@ public class Attachment
     @Column(name = "file_location")
     private String fileLocation;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     public String toString()
@@ -58,7 +59,7 @@ public class Attachment
 
     /**
      * Gets the attachment id.
-     *
+     * 
      * @return the attachmentId
      */
     public String getAttachmentId()
@@ -68,8 +69,9 @@ public class Attachment
 
     /**
      * Sets the attachment id.
-     *
-     * @param attachmentId the attachmentId to set
+     * 
+     * @param attachmentId
+     *            the attachmentId to set
      */
     public void setAttachmentId(String attachmentId)
     {
@@ -78,7 +80,7 @@ public class Attachment
 
     /**
      * Gets the file name.
-     *
+     * 
      * @return the fileName
      */
     public String getFileName()
@@ -88,8 +90,9 @@ public class Attachment
 
     /**
      * Sets the file name.
-     *
-     * @param fileName the fileName to set
+     * 
+     * @param fileName
+     *            the fileName to set
      */
     public void setFileName(String fileName)
     {
@@ -98,7 +101,7 @@ public class Attachment
 
     /**
      * Gets the file type.
-     *
+     * 
      * @return the fileType
      */
     public String getFileType()
@@ -108,8 +111,9 @@ public class Attachment
 
     /**
      * Sets the file type.
-     *
-     * @param fileType the fileType to set
+     * 
+     * @param fileType
+     *            the fileType to set
      */
     public void setFileType(String fileType)
     {
@@ -118,7 +122,7 @@ public class Attachment
 
     /**
      * Gets the file location.
-     *
+     * 
      * @return the fileLocation
      */
     public String getFileLocation()
@@ -128,8 +132,9 @@ public class Attachment
 
     /**
      * Sets the file location.
-     *
-     * @param fileLocation the fileLocation to set
+     * 
+     * @param fileLocation
+     *            the fileLocation to set
      */
     public void setFileLocation(String fileLocation)
     {

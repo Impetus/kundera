@@ -30,7 +30,6 @@ import com.impetus.kundera.loader.ApplicationLoader;
 import com.impetus.kundera.loader.CoreLoader;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
-
 /**
  * The Class KunderaPersistence.
  * 
@@ -56,8 +55,12 @@ public class KunderaPersistence implements PersistenceProvider
         new CoreLoader().load();
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
+     * (javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
      */
     @Override
     public final EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map)
@@ -65,8 +68,12 @@ public class KunderaPersistence implements PersistenceProvider
         return createEntityManagerFactory(info.getPersistenceUnitName(), map);
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.spi.PersistenceProvider#createEntityManagerFactory(java.lang.String, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.spi.PersistenceProvider#createEntityManagerFactory(
+     * java.lang.String, java.util.Map)
      */
     @Override
     public synchronized final EntityManagerFactory createEntityManagerFactory(String persistenceUnit, Map map)
@@ -87,8 +94,9 @@ public class KunderaPersistence implements PersistenceProvider
 
     /**
      * One time initialization at Application and Client level.
-     *
-     * @param persistenceUnit Persistence Unit/ Comma separated persistence units
+     * 
+     * @param persistenceUnit
+     *            Persistence Unit/ Comma separated persistence units
      */
     private void initializeKundera(String persistenceUnit)
     {
@@ -102,7 +110,9 @@ public class KunderaPersistence implements PersistenceProvider
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.spi.PersistenceProvider#getProviderUtil()
      */
     @Override

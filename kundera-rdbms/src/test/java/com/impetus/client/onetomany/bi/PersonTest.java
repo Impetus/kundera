@@ -17,10 +17,9 @@ package com.impetus.client.onetomany.bi;
 
 import org.junit.Test;
 
-
 /**
  * The Class PersonTest.
- *
+ * 
  * @author vivek.mishra
  */
 public class PersonTest

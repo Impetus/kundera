@@ -29,7 +29,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 import com.impetus.client.hbase.HBaseData;
 import com.impetus.client.hbase.Reader;
 
-
 /**
  * HBase reader.
  * 
@@ -38,8 +37,12 @@ import com.impetus.client.hbase.Reader;
 public class HBaseReader implements Reader
 {
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Reader#LoadData(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Reader#LoadData(org.apache.hadoop.hbase.client
+     * .HTable, java.lang.String, java.lang.String)
      */
     @SuppressWarnings("unused")
     @Override
@@ -59,8 +62,12 @@ public class HBaseReader implements Reader
         return data;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Reader#LoadData(org.apache.hadoop.hbase.client.HTable, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Reader#LoadData(org.apache.hadoop.hbase.client
+     * .HTable, java.lang.String)
      */
     @Override
     public HBaseData LoadData(HTable hTable, String rowKey) throws IOException
@@ -78,8 +85,12 @@ public class HBaseReader implements Reader
 
     // TODO: for first version this solution is for 1 column family per table
     // Later need to add support for more than 1 column family.
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Reader#loadAll(org.apache.hadoop.hbase.client.HTable, java.lang.String[])
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Reader#loadAll(org.apache.hadoop.hbase.client
+     * .HTable, java.lang.String[])
      */
     @Override
     public HBaseData loadAll(HTable hTable, String... qualifiers) throws IOException

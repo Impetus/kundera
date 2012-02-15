@@ -22,7 +22,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
 /**
  * The Class OTMBNPerson.
  */
@@ -30,7 +29,7 @@ import javax.persistence.Table;
 @Table(name = "PERSON", schema = "test")
 public class OTMBNPerson
 {
-    
+
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
@@ -55,7 +54,7 @@ public class OTMBNPerson
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -65,7 +64,7 @@ public class OTMBNPerson
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -75,8 +74,9 @@ public class OTMBNPerson
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -85,8 +85,9 @@ public class OTMBNPerson
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -95,7 +96,7 @@ public class OTMBNPerson
 
     /**
      * Gets the address.
-     *
+     * 
      * @return the address
      */
     public OTMBAddress getAddress()
@@ -105,8 +106,9 @@ public class OTMBNPerson
 
     /**
      * Sets the address.
-     *
-     * @param address the address to set
+     * 
+     * @param address
+     *            the address to set
      */
     public void setAddress(OTMBAddress address)
     {

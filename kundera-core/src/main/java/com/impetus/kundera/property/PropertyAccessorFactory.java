@@ -33,6 +33,7 @@ import com.impetus.kundera.property.accessor.CalendarAccessor;
 import com.impetus.kundera.property.accessor.CharAccessor;
 import com.impetus.kundera.property.accessor.DateAccessor;
 import com.impetus.kundera.property.accessor.DoubleAccessor;
+import com.impetus.kundera.property.accessor.EnumAccessor;
 import com.impetus.kundera.property.accessor.FloatAccessor;
 import com.impetus.kundera.property.accessor.IntegerAccessor;
 import com.impetus.kundera.property.accessor.LongAccessor;
@@ -42,7 +43,6 @@ import com.impetus.kundera.property.accessor.SQLTimeAccessor;
 import com.impetus.kundera.property.accessor.SQLTimestampAccessor;
 import com.impetus.kundera.property.accessor.ShortAccessor;
 import com.impetus.kundera.property.accessor.StringAccessor;
-
 
 /**
  * The Class PropertyAccessorFactory.
@@ -94,6 +94,9 @@ public class PropertyAccessorFactory
 
         // Accessor for the generic object
         map.put(Object.class, new ObjectAccessor());
+
+        // Accessor for Enum types
+        map.put(Enum.class, new EnumAccessor());
 
     }
 

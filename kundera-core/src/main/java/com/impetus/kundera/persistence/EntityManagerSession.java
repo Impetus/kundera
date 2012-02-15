@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.cache.Cache;
 
-
 /**
  * The Class EntityManagerSession.
  */
@@ -41,8 +40,9 @@ public class EntityManagerSession
 
     /**
      * Instantiates a new entity manager cache.
-     *
-     * @param cache the cache
+     * 
+     * @param cache
+     *            the cache
      */
     public EntityManagerSession(Cache cache)
     {
@@ -201,7 +201,7 @@ public class EntityManagerSession
 
     /**
      * Gets the l2 cache.
-     *
+     * 
      * @return the l2Cache
      */
     public Cache getL2Cache()
@@ -211,8 +211,9 @@ public class EntityManagerSession
 
     /**
      * Sets the l2 cache.
-     *
-     * @param l2Cache the l2Cache to set
+     * 
+     * @param l2Cache
+     *            the l2Cache to set
      */
     public void setL2Cache(Cache l2Cache)
     {

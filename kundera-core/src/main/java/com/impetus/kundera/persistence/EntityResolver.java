@@ -38,7 +38,6 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
-
 /**
  * The Class EntityReachabilityResolver.
  * 
@@ -52,10 +51,13 @@ public class EntityResolver
 
     /**
      * Resolve all reachable entities from entity.
-     *
-     * @param entity the entity
-     * @param cascadeType the cascade type
-     * @param persistenceUnits the persistence units
+     * 
+     * @param entity
+     *            the entity
+     * @param cascadeType
+     *            the cascade type
+     * @param persistenceUnits
+     *            the persistence units
      * @return the all reachable entities
      */
     public static List<EnhancedEntity> resolve(Object entity, CascadeType cascadeType, String... persistenceUnits)
@@ -86,13 +88,18 @@ public class EntityResolver
 
     /**
      * helper method to recursively build reachable object list.
-     *
-     * @param object the o
-     * @param cascadeType the cascade type
-     * @param entities the entities
-     * @param persistenceUnits the persistence units
+     * 
+     * @param object
+     *            the o
+     * @param cascadeType
+     *            the cascade type
+     * @param entities
+     *            the entities
+     * @param persistenceUnits
+     *            the persistence units
      * @return the all reachable entities
-     * @throws PropertyAccessException the property access exception
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     private static void recursivelyResolveEntities(Object object, CascadeType cascadeType,
             Map<String, EnhancedEntity> entities, String... persistenceUnits) throws PropertyAccessException

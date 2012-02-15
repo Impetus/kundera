@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.classreading;
 
-
 /**
  * The Interface AnnotationDiscoveryListener.
  * 
@@ -26,8 +25,9 @@ public interface AnnotationDiscoveryListener
 
     /**
      * Discovered.
-     *
-     * @param className the class name
+     * 
+     * @param className
+     *            the class name
      */
     void discovered(String className);
 }

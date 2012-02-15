@@ -26,22 +26,22 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.proxy.EntityEnhancerFactory;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
 
-
 /**
  * The Class KunderaMetadataManager.
- *
+ * 
  * @author amresh.singh
  */
 public class KunderaMetadataManager
 {
-    
+
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(KunderaMetadataManager.class);
 
     /**
      * Gets the persistence unit metadata.
-     *
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
      * @return the persistence unit metadata
      */
     public static PersistenceUnitMetadata getPersistenceUnitMetadata(String persistenceUnit)
@@ -51,8 +51,9 @@ public class KunderaMetadataManager
 
     /**
      * Gets the metamodel.
-     *
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
      * @return the metamodel
      */
     public static MetamodelImpl getMetamodel(String persistenceUnit)
@@ -72,8 +73,9 @@ public class KunderaMetadataManager
 
     /**
      * Gets the metamodel.
-     *
-     * @param persistenceUnits the persistence units
+     * 
+     * @param persistenceUnits
+     *            the persistence units
      * @return the metamodel
      */
     public static MetamodelImpl getMetamodel(String... persistenceUnits)
@@ -101,9 +103,11 @@ public class KunderaMetadataManager
 
     /**
      * Gets the entity metadata.
-     *
-     * @param persistenceUnit the persistence unit
-     * @param entityClass the entity class
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
+     * @param entityClass
+     *            the entity class
      * @return the entity metadata
      */
     public static EntityMetadata getEntityMetadata(String persistenceUnit, Class entityClass)
@@ -113,9 +117,11 @@ public class KunderaMetadataManager
 
     /**
      * Finds ands returns Entity metadata for a given array of PUs.
-     *
-     * @param entityClass the entity class
-     * @param persistenceUnits the persistence units
+     * 
+     * @param entityClass
+     *            the entity class
+     * @param persistenceUnits
+     *            the persistence units
      * @return the entity metadata
      */
     public static EntityMetadata getEntityMetadata(Class entityClass, String... persistenceUnits)
@@ -139,7 +145,7 @@ public class KunderaMetadataManager
 
     /**
      * Gets the lazy initializer factory.
-     *
+     * 
      * @return the lazy initializer factory
      */
     public static LazyInitializerFactory getLazyInitializerFactory()
@@ -149,7 +155,7 @@ public class KunderaMetadataManager
 
     /**
      * Gets the entity enhancer factory.
-     *
+     * 
      * @return the entity enhancer factory
      */
     public static EntityEnhancerFactory getEntityEnhancerFactory()

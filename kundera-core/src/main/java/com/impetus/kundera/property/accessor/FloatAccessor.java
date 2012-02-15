@@ -18,16 +18,17 @@ package com.impetus.kundera.property.accessor;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
-
 /**
  * The Class FloatAccessor.
- *
+ * 
  * @author Amresh Singh
  */
 public class FloatAccessor implements PropertyAccessor<Float>
 {
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
@@ -39,8 +40,11 @@ public class FloatAccessor implements PropertyAccessor<Float>
         return Float.intBitsToFloat(toInt(data));
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
@@ -48,8 +52,11 @@ public class FloatAccessor implements PropertyAccessor<Float>
         return fromInt(Float.floatToRawIntBits((Float) object));
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
      */
     @Override
     public String toString(Object object)
@@ -59,8 +66,9 @@ public class FloatAccessor implements PropertyAccessor<Float>
 
     /**
      * From int.
-     *
-     * @param data the data
+     * 
+     * @param data
+     *            the data
      * @return the byte[]
      */
     private byte[] fromInt(int data)
@@ -71,8 +79,9 @@ public class FloatAccessor implements PropertyAccessor<Float>
 
     /**
      * To int.
-     *
-     * @param data the data
+     * 
+     * @param data
+     *            the data
      * @return the int
      */
     private int toInt(byte[] data)
@@ -84,8 +93,12 @@ public class FloatAccessor implements PropertyAccessor<Float>
         (0xff & data[0]) << 24 | (0xff & data[1]) << 16 | (0xff & data[2]) << 8 | (0xff & data[3]) << 0);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String
+     * )
      */
     @Override
     public Float fromString(String s) throws PropertyAccessException

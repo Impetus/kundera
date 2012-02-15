@@ -51,7 +51,6 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
-
 /**
  * The Class HibernateClient.
  * 
@@ -405,13 +404,19 @@ public class HibernateClient implements Client
 
     /**
      * Inserts records into JoinTable for the given relationship.
-     *
-     * @param joinTableName the join table name
-     * @param joinColumnName the join column name
-     * @param inverseJoinColumnName the inverse join column name
-     * @param relMetadata the rel metadata
-     * @param primaryKey the primary key
-     * @param childEntity the child entity
+     * 
+     * @param joinTableName
+     *            the join table name
+     * @param joinColumnName
+     *            the join column name
+     * @param inverseJoinColumnName
+     *            the inverse join column name
+     * @param relMetadata
+     *            the rel metadata
+     * @param primaryKey
+     *            the primary key
+     * @param childEntity
+     *            the child entity
      */
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
@@ -471,8 +476,53 @@ public class HibernateClient implements Client
         return foreignKeys;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#deleteFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+    @Override
+    public List<Object> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
+            String joinColumnName, String inverseJoinColumnName, Object childId)
+    {
+
+        String childIdStr = (String) childId;
+
+        StringBuffer sqlQuery = new StringBuffer();
+        sqlQuery.append("SELECT ").append(joinColumnName).append(" FROM ").append(joinTableName).append(" WHERE ")
+                .append(inverseJoinColumnName).append("='").append(childIdStr).append("'");
+
+        Session s = sf.openSession();
+        Transaction tx = s.beginTransaction();
+
+        SQLQuery query = s.createSQLQuery(sqlQuery.toString());
+
+        List<Object> primaryKeys = new ArrayList<Object>();
+
+        primaryKeys = query.list();
+
+        s.close();
+
+        List<Object> entities = null;
+        try
+        {
+            if (primaryKeys != null && !primaryKeys.isEmpty())
+            {
+                entities = new ArrayList<Object>();
+                entities.addAll(findAll(parentMetadata.getEntityClazz(), primaryKeys.toArray(new Object[0])));
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return entities;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#deleteFromJoinTable(java.lang.String,
+     * java.lang.String, java.lang.String,
+     * com.impetus.kundera.metadata.model.EntityMetadata,
+     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
     public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
@@ -604,10 +654,13 @@ public class HibernateClient implements Client
 
     /**
      * Find.
-     *
-     * @param nativeQuery the native query
-     * @param relations the relations
-     * @param m the m
+     * 
+     * @param nativeQuery
+     *            the native query
+     * @param relations
+     *            the relations
+     * @param m
+     *            the m
      * @return the list
      */
     public List find(String nativeQuery, List<String> relations, EntityMetadata m)
@@ -671,9 +724,11 @@ public class HibernateClient implements Client
 
     /**
      * Gets the key.
-     *
-     * @param pKey the key
-     * @param f the f
+     * 
+     * @param pKey
+     *            the key
+     * @param f
+     *            the f
      * @return the key
      */
     private Serializable getKey(Object pKey, Field f)

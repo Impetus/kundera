@@ -23,7 +23,6 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-
 /**
  * The Class OTMBAddress.
  */
@@ -31,7 +30,7 @@ import javax.persistence.Table;
 @Table(name = "ADDRESS", schema = "KunderaKeyspace@kcassandra")
 public class OTMBAddress
 {
-    
+
     /** The address id. */
     @Id
     @Column(name = "ADDRESS_ID")
@@ -58,7 +57,7 @@ public class OTMBAddress
 
     /**
      * Gets the address id.
-     *
+     * 
      * @return the address id
      */
     public String getAddressId()
@@ -68,8 +67,9 @@ public class OTMBAddress
 
     /**
      * Sets the address id.
-     *
-     * @param addressId the new address id
+     * 
+     * @param addressId
+     *            the new address id
      */
     public void setAddressId(String addressId)
     {
@@ -78,7 +78,7 @@ public class OTMBAddress
 
     /**
      * Gets the street.
-     *
+     * 
      * @return the street
      */
     public String getStreet()
@@ -88,8 +88,9 @@ public class OTMBAddress
 
     /**
      * Sets the street.
-     *
-     * @param street the new street
+     * 
+     * @param street
+     *            the new street
      */
     public void setStreet(String street)
     {
@@ -98,7 +99,7 @@ public class OTMBAddress
 
     /**
      * Gets the people.
-     *
+     * 
      * @return the people
      */
     public Set<OTMBNPerson> getPeople()
@@ -108,8 +109,9 @@ public class OTMBAddress
 
     /**
      * Sets the people.
-     *
-     * @param people the people to set
+     * 
+     * @param people
+     *            the people to set
      */
     public void setPeople(Set<OTMBNPerson> people)
     {

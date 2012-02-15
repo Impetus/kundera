@@ -18,10 +18,9 @@ package com.impetus.kundera.client;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-
 /**
  * The Class ClientIdentifier.
- *
+ * 
  * @author impetus
  */
 public class ClientIdentifier
@@ -44,12 +43,17 @@ public class ClientIdentifier
 
     /**
      * Instantiates a new client identifier.
-     *
-     * @param contactNodes the contact nodes
-     * @param port the port
-     * @param keyspace the keyspace
-     * @param clientType the client type
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param contactNodes
+     *            the contact nodes
+     * @param port
+     *            the port
+     * @param keyspace
+     *            the keyspace
+     * @param clientType
+     *            the client type
+     * @param persistenceUnit
+     *            the persistence unit
      */
     public ClientIdentifier(String[] contactNodes, int port, String keyspace, ClientType clientType,
             String persistenceUnit)
@@ -63,7 +67,7 @@ public class ClientIdentifier
 
     /**
      * Gets the node.
-     *
+     * 
      * @return the node
      */
     public String[] getNode()
@@ -73,7 +77,7 @@ public class ClientIdentifier
 
     /**
      * Gets the port.
-     *
+     * 
      * @return the port
      */
     public int getPort()
@@ -83,7 +87,7 @@ public class ClientIdentifier
 
     /**
      * Gets the keyspace.
-     *
+     * 
      * @return the keyspace
      */
     public String getKeyspace()
@@ -93,7 +97,7 @@ public class ClientIdentifier
 
     /**
      * Gets the client type.
-     *
+     * 
      * @return the client type
      */
     public ClientType getClientType()
@@ -103,7 +107,7 @@ public class ClientIdentifier
 
     /**
      * Gets the persistence unit.
-     *
+     * 
      * @return the persistenceUnit
      */
     public String getPersistenceUnit()
@@ -111,7 +115,9 @@ public class ClientIdentifier
         return persistenceUnit;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -131,7 +137,9 @@ public class ClientIdentifier
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
@@ -140,7 +148,9 @@ public class ClientIdentifier
         return ToStringBuilder.reflectionToString(this);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override

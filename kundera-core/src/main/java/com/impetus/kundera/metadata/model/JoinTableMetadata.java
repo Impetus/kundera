@@ -22,10 +22,9 @@ import java.util.Set;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 
-
 /**
  * The Class JoinTableMetadata.
- *
+ * 
  * @author Amresh Singh
  */
 public class JoinTableMetadata
@@ -45,8 +44,9 @@ public class JoinTableMetadata
 
     /**
      * Instantiates a new join table metadata.
-     *
-     * @param relationField the relation field
+     * 
+     * @param relationField
+     *            the relation field
      */
     public JoinTableMetadata(Field relationField)
     {
@@ -68,7 +68,7 @@ public class JoinTableMetadata
 
     /**
      * Gets the join table name.
-     *
+     * 
      * @return the joinTableName
      */
     public String getJoinTableName()
@@ -78,8 +78,9 @@ public class JoinTableMetadata
 
     /**
      * Sets the join table name.
-     *
-     * @param joinTableName the joinTableName to set
+     * 
+     * @param joinTableName
+     *            the joinTableName to set
      */
     public void setJoinTableName(String joinTableName)
     {
@@ -88,7 +89,7 @@ public class JoinTableMetadata
 
     /**
      * Gets the join table schema.
-     *
+     * 
      * @return the joinTableSchema
      */
     public String getJoinTableSchema()
@@ -98,8 +99,9 @@ public class JoinTableMetadata
 
     /**
      * Sets the join table schema.
-     *
-     * @param joinTableSchema the joinTableSchema to set
+     * 
+     * @param joinTableSchema
+     *            the joinTableSchema to set
      */
     public void setJoinTableSchema(String joinTableSchema)
     {
@@ -108,7 +110,7 @@ public class JoinTableMetadata
 
     /**
      * Gets the join columns.
-     *
+     * 
      * @return the joinColumns
      */
     public Set<String> getJoinColumns()
@@ -118,8 +120,9 @@ public class JoinTableMetadata
 
     /**
      * Adds the join columns.
-     *
-     * @param joinColumn the joinColumns to add
+     * 
+     * @param joinColumn
+     *            the joinColumns to add
      */
     public void addJoinColumns(String joinColumn)
     {
@@ -132,7 +135,7 @@ public class JoinTableMetadata
 
     /**
      * Gets the inverse join columns.
-     *
+     * 
      * @return the inverseJoinColumns
      */
     public Set<String> getInverseJoinColumns()
@@ -142,8 +145,9 @@ public class JoinTableMetadata
 
     /**
      * Adds the inverse join columns.
-     *
-     * @param inverseJoinColumn the inverseJoinColumns to add
+     * 
+     * @param inverseJoinColumn
+     *            the inverseJoinColumns to add
      */
     public void addInverseJoinColumns(String inverseJoinColumn)
     {

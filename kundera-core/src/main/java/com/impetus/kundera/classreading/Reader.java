@@ -28,7 +28,6 @@ import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.annotation.Annotation;
 
-
 /**
  * Base class-reader.
  * 
@@ -232,14 +231,14 @@ public abstract class Reader
 
     /**
      * Find resources by context loader.
-     *
+     * 
      * @return the uR l[]
      */
     public abstract URL[] findResourcesByContextLoader();
 
     /**
      * Find resources by classpath.
-     *
+     * 
      * @return the uR l[]
      */
     public abstract URL[] findResourcesByClasspath();

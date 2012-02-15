@@ -37,13 +37,12 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 
-
 /**
  * A factory for creating PelopsClient objects.
  */
 public class PelopsClientFactory extends GenericClientFactory
 {
-    
+
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(PelopsClientFactory.class);
 
@@ -53,7 +52,9 @@ public class PelopsClientFactory extends GenericClientFactory
     /** The reader. */
     private EntityReader reader;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#initializeClient()
      */
     @Override
@@ -79,8 +80,11 @@ public class PelopsClientFactory extends GenericClientFactory
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
      */
     @Override
     protected Object createPoolOrConnection()
@@ -110,7 +114,9 @@ public class PelopsClientFactory extends GenericClientFactory
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient()
      */
     @Override
@@ -119,7 +125,9 @@ public class PelopsClientFactory extends GenericClientFactory
         return new PelopsClient(indexManager, reader);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#isClientThreadSafe()
      */
     @Override
@@ -128,7 +136,9 @@ public class PelopsClientFactory extends GenericClientFactory
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.Loader#unload(java.lang.String[])
      */
     @Override

@@ -30,10 +30,9 @@ import javax.persistence.Table;
 
 import com.impetus.kundera.annotations.Index;
 
-
 /**
  * The Class Person2.
- *
+ * 
  * @author animesh.kumar
  */
 @Entity
@@ -73,7 +72,7 @@ public class Person2 implements Serializable
 
     /**
      * Gets the username.
-     *
+     * 
      * @return the username
      */
     public String getUsername()
@@ -83,8 +82,9 @@ public class Person2 implements Serializable
 
     /**
      * Sets the username.
-     *
-     * @param username the new username
+     * 
+     * @param username
+     *            the new username
      */
     public void setUsername(String username)
     {
@@ -93,7 +93,7 @@ public class Person2 implements Serializable
 
     /**
      * Gets the password.
-     *
+     * 
      * @return the password
      */
     public String getPassword()
@@ -103,8 +103,9 @@ public class Person2 implements Serializable
 
     /**
      * Sets the password.
-     *
-     * @param password the new password
+     * 
+     * @param password
+     *            the new password
      */
     public void setPassword(String password)
     {
@@ -113,7 +114,7 @@ public class Person2 implements Serializable
 
     /**
      * Gets the profile.
-     *
+     * 
      * @return the profile
      */
     public Profile getProfile()
@@ -123,8 +124,9 @@ public class Person2 implements Serializable
 
     /**
      * Sets the profile.
-     *
-     * @param profile the new profile
+     * 
+     * @param profile
+     *            the new profile
      */
     public void setProfile(Profile profile)
     {
@@ -133,7 +135,7 @@ public class Person2 implements Serializable
 
     /**
      * Gets the public profile.
-     *
+     * 
      * @return the public profile
      */
     public Profile getPublicProfile()
@@ -143,15 +145,18 @@ public class Person2 implements Serializable
 
     /**
      * Sets the public profile.
-     *
-     * @param publicProfile the new public profile
+     * 
+     * @param publicProfile
+     *            the new public profile
      */
     public void setPublicProfile(Profile publicProfile)
     {
         this.publicProfile = publicProfile;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
@@ -183,8 +188,9 @@ public class Person2 implements Serializable
 
     /**
      * Adds the post.
-     *
-     * @param e the e
+     * 
+     * @param e
+     *            the e
      * @return true, if successful
      * @see java.util.Set#add(java.lang.Object)
      */
@@ -195,7 +201,7 @@ public class Person2 implements Serializable
 
     /**
      * Size.
-     *
+     * 
      * @return the int
      */
     public int size()

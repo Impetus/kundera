@@ -40,10 +40,9 @@ import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-
 /**
  * Metadata processor class for persistent entities.
- *
+ * 
  * @author amresh.singh
  */
 public class TableProcessor extends AbstractEntityFieldProcessor
@@ -60,8 +59,12 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         validator = new EntityValidatorImpl();
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
+     * com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
     public void process(Class<?> clazz, EntityMetadata metadata)
@@ -77,9 +80,11 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
     /**
      * Populate metadata.
-     *
-     * @param metadata the metadata
-     * @param clazz the clazz
+     * 
+     * @param metadata
+     *            the metadata
+     * @param clazz
+     *            the clazz
      */
     private void populateMetadata(EntityMetadata metadata, Class<?> clazz)
     {
@@ -199,10 +204,13 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
     /**
      * Populate embedded field into metadata.
-     *
-     * @param metadata the metadata
-     * @param embeddedField the embedded field
-     * @param embeddedFieldClass the embedded field class
+     * 
+     * @param metadata
+     *            the metadata
+     * @param embeddedField
+     *            the embedded field
+     * @param embeddedFieldClass
+     *            the embedded field class
      */
     private void populateEmbeddedFieldIntoMetadata(EntityMetadata metadata, Field embeddedField,
             Class embeddedFieldClass)
@@ -224,10 +232,13 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
     /**
      * Populate element collection into metadata.
-     *
-     * @param metadata the metadata
-     * @param embeddedField the embedded field
-     * @param embeddedFieldClass the embedded field class
+     * 
+     * @param metadata
+     *            the metadata
+     * @param embeddedField
+     *            the embedded field
+     * @param embeddedFieldClass
+     *            the embedded field class
      */
     private void populateElementCollectionIntoMetadata(EntityMetadata metadata, Field embeddedField,
             Class embeddedFieldClass)
@@ -270,11 +281,15 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     /**
      * TODO: Change method name once we change the name "Super Column" in entity
      * metadata.
-     *
-     * @param metadata the metadata
-     * @param embeddedField the embedded field
-     * @param embeddedFieldClass the embedded field class
-     * @param embeddedFieldName the embedded field name
+     * 
+     * @param metadata
+     *            the metadata
+     * @param embeddedField
+     *            the embedded field
+     * @param embeddedFieldClass
+     *            the embedded field class
+     * @param embeddedFieldName
+     *            the embedded field name
      */
     private void addEmbeddedColumnInMetadata(EntityMetadata metadata, Field embeddedField, Class embeddedFieldClass,
             String embeddedFieldName)
@@ -300,10 +315,13 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     /**
      * Adds relationship info into metadata for a given field
      * <code>relationField</code>.
-     *
-     * @param entityClass the entity class
-     * @param relationField the relation field
-     * @param metadata the metadata
+     * 
+     * @param entityClass
+     *            the entity class
+     * @param relationField
+     *            the relation field
+     * @param metadata
+     *            the metadata
      */
     private void addRelationIntoMetadata(Class<?> entityClass, Field relationField, EntityMetadata metadata)
     {

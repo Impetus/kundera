@@ -29,10 +29,9 @@ import com.impetus.kundera.query.KunderaQuery.SortOrdering;
 import com.impetus.kundera.query.KunderaQueryParser;
 import com.impetus.kundera.query.KunderaQueryParserException;
 
-
 /**
  * The Class KunderaQueryParserTest.
- *
+ * 
  * @author vivek.mishra
  */
 public class KunderaQueryParserTest
@@ -40,8 +39,9 @@ public class KunderaQueryParserTest
 
     /**
      * Sets the up.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Before
     public void setUp() throws Exception
@@ -99,8 +99,9 @@ public class KunderaQueryParserTest
 
     /**
      * Tear down.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @After
     public void tearDown() throws Exception

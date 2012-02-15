@@ -24,10 +24,9 @@ import java.util.Map;
 import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.persistence.event.CallbackMethod;
 
-
 /**
  * Holds metadata for entities.
- *
+ * 
  * @author animesh.kumar
  */
 public final class EntityMetadata
@@ -259,7 +258,7 @@ public final class EntityMetadata
 
     /**
      * Gets the persistence unit.
-     *
+     * 
      * @return the persistenceUnit
      */
     public String getPersistenceUnit()
@@ -269,8 +268,9 @@ public final class EntityMetadata
 
     /**
      * Sets the persistence unit.
-     *
-     * @param persistenceUnit the persistenceUnit to set
+     * 
+     * @param persistenceUnit
+     *            the persistenceUnit to set
      */
     public void setPersistenceUnit(String persistenceUnit)
     {
@@ -631,7 +631,9 @@ public final class EntityMetadata
         this.cacheable = cacheable;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
@@ -756,7 +758,7 @@ public final class EntityMetadata
 
     /**
      * Getter method for isRelatedViaJoinTable.
-     *
+     * 
      * @return true, if holds join table relation, else false.
      */
     public boolean isRelationViaJoinTable()
@@ -766,8 +768,9 @@ public final class EntityMetadata
 
     /**
      * Setter method for isRelatedViaJoinTable.
-     *
-     * @param isRelationViaJoinTable the new relation via join table
+     * 
+     * @param isRelationViaJoinTable
+     *            the new relation via join table
      */
     public void setRelationViaJoinTable(boolean isRelationViaJoinTable)
     {

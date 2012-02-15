@@ -44,7 +44,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
-
 /**
  * CLient class for MongoDB database.
  * 
@@ -227,15 +226,6 @@ public class MongoDBClient implements Client
         dbCollection.insert(documents.toArray(new BasicDBObject[0]));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#getForeignKeysFromJoinTable(java.lang
-     * .String, java.lang.String, java.lang.String,
-     * com.impetus.kundera.metadata.model.EntityMetadata,
-     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
-     */
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
             String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
@@ -259,6 +249,46 @@ public class MongoDBClient implements Client
             foreignKeys.add((E) foreignKey);
         }
         return foreignKeys;
+    }
+
+    @Override
+    public List<Object> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
+            String joinColumnName, String inverseJoinColumnName, Object childId)
+    {
+
+        String childIdStr = (String) childId;
+
+        List<Object> primaryKeys = new ArrayList<Object>();
+
+        DBCollection dbCollection = mongoDb.getCollection(joinTableName);
+        BasicDBObject query = new BasicDBObject();
+
+        query.put(inverseJoinColumnName, childIdStr);
+
+        DBCursor cursor = dbCollection.find(query);
+        DBObject fetchedDocument = null;
+
+        while (cursor.hasNext())
+        {
+            fetchedDocument = cursor.next();
+            String primaryKey = (String) fetchedDocument.get(joinColumnName);
+            primaryKeys.add(primaryKey);
+        }
+
+        List<Object> entities = null;
+        try
+        {
+            if (!primaryKeys.isEmpty())
+            {
+                entities = new ArrayList<Object>();
+                entities.addAll(findAll(parentMetadata.getEntityClazz(), primaryKeys.toArray(new Object[0])));
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return entities;
     }
 
     /**
@@ -290,8 +320,14 @@ public class MongoDBClient implements Client
         documents.add(dbObj);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#deleteFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#deleteFromJoinTable(java.lang.String,
+     * java.lang.String, java.lang.String,
+     * com.impetus.kundera.metadata.model.EntityMetadata,
+     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
     public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,

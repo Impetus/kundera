@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
-
 /**
  * The Class InternalCallbackMethod.
  * 
@@ -37,9 +36,11 @@ public final class InternalCallbackMethod implements CallbackMethod
 
     /**
      * Instantiates a new internal callback method.
-     *
-     * @param entityMetadata TODO
-     * @param method the method
+     * 
+     * @param entityMetadata
+     *            TODO
+     * @param method
+     *            the method
      */
     public InternalCallbackMethod(EntityMetadata entityMetadata, Method method)
     {

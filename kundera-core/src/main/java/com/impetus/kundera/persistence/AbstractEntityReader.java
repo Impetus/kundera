@@ -40,10 +40,9 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
-
 /**
  * The Class AbstractEntityReader.
- *
+ * 
  * @author vivek.mishra
  */
 public class AbstractEntityReader
@@ -57,15 +56,22 @@ public class AbstractEntityReader
 
     /**
      * Compute graph.
-     *
-     * @param e the e
-     * @param graphs the graphs
-     * @param collectionHolder the collection holder
-     * @param client the client
-     * @param m the m
-     * @param persistenceDelegeator the persistence delegeator
+     * 
+     * @param e
+     *            the e
+     * @param graphs
+     *            the graphs
+     * @param collectionHolder
+     *            the collection holder
+     * @param client
+     *            the client
+     * @param m
+     *            the m
+     * @param persistenceDelegeator
+     *            the persistence delegeator
      * @return the object
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     public Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder,
             Client client, EntityMetadata m, PersistenceDelegator persistenceDelegeator) throws Exception
@@ -265,12 +271,17 @@ public class AbstractEntityReader
 
     /**
      * Returns lucene based query.
-     *
-     * @param clazzFieldName lucene field name for class
-     * @param clazzName class name
-     * @param idFieldName lucene id field name
-     * @param idFieldValue lucene id field value
-     * @param entityClazz the entity clazz
+     * 
+     * @param clazzFieldName
+     *            lucene field name for class
+     * @param clazzName
+     *            class name
+     * @param idFieldName
+     *            lucene id field name
+     * @param idFieldValue
+     *            lucene id field value
+     * @param entityClazz
+     *            the entity clazz
      * @return query lucene query.
      */
     protected static String getQuery(String clazzFieldName, String clazzName, String idFieldName, String idFieldValue,
@@ -298,15 +309,23 @@ public class AbstractEntityReader
 
     /**
      * On bi direction.
-     *
-     * @param e the e
-     * @param client the client
-     * @param objectGraph the object graph
-     * @param origMetadata the orig metadata
-     * @param child the child
-     * @param childMetadata the child metadata
-     * @param childClient the child client
-     * @throws Exception the exception
+     * 
+     * @param e
+     *            the e
+     * @param client
+     *            the client
+     * @param objectGraph
+     *            the object graph
+     * @param origMetadata
+     *            the orig metadata
+     * @param child
+     *            the child
+     * @param childMetadata
+     *            the child metadata
+     * @param childClient
+     *            the child client
+     * @throws Exception
+     *             the exception
      */
     private void onBiDirection(EnhanceEntity e, Client client, EntitySaveGraph objectGraph,
             EntityMetadata origMetadata, Object child, EntityMetadata childMetadata, Client childClient)
@@ -336,7 +355,37 @@ public class AbstractEntityReader
 
                     if (MetadataUtils.useSecondryIndex(client.getPersistenceUnit()))
                     {
-                        results = client.find(objectGraph.getfKeyName(), id, origMetadata);
+                        if (origMetadata.isRelationViaJoinTable())
+                        {
+                            Relation joinTableRelation = origMetadata.getRelation(objectGraph.getProperty().getName());
+                            JoinTableMetadata jtMetadata = joinTableRelation.getJoinTableMetadata();
+                            String joinTableName = jtMetadata.getJoinTableName();
+
+                            Set<String> joinColumns = jtMetadata.getJoinColumns();
+                            Set<String> inverseJoinColumns = jtMetadata.getInverseJoinColumns();
+
+                            String joinColumnName = (String) joinColumns.toArray()[0];
+                            String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
+
+                            List<Object> parentEntities = client.findParentEntityFromJoinTable(origMetadata,
+                                    joinTableName, joinColumnName, inverseJoinColumnName, id);
+
+                            if (results == null)
+                            {
+                                results = new ArrayList<Object>();
+                            }
+
+                            if (parentEntities != null)
+                            {
+                                results.addAll(parentEntities);
+                            }
+
+                        }
+                        else
+                        {
+                            results = client.find(objectGraph.getfKeyName(), id, origMetadata);
+                        }
+
                     }
                     else
                     {
@@ -420,10 +469,13 @@ public class AbstractEntityReader
 
     /**
      * On association using lucene.
-     *
-     * @param m the m
-     * @param client the client
-     * @param ls the ls
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param ls
+     *            the ls
      * @return the list
      */
     protected List<EnhanceEntity> onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
@@ -445,10 +497,13 @@ public class AbstractEntityReader
 
     /**
      * Transform.
-     *
-     * @param m the m
-     * @param ls the ls
-     * @param resultList the result list
+     * 
+     * @param m
+     *            the m
+     * @param ls
+     *            the ls
+     * @param resultList
+     *            the result list
      * @return the list
      */
     protected List<EnhanceEntity> transform(EntityMetadata m, List<EnhanceEntity> ls, List resultList)
@@ -467,8 +522,9 @@ public class AbstractEntityReader
 
     /**
      * Fetch data from lucene.
-     *
-     * @param client the client
+     * 
+     * @param client
+     *            the client
      * @return the sets the
      */
     protected Set<String> fetchDataFromLucene(Client client)
@@ -505,13 +561,19 @@ public class AbstractEntityReader
 
     /**
      * Compute join table relations.
-     *
-     * @param e the e
-     * @param client the client
-     * @param entityMetadata the entity metadata
-     * @param objectGraph the object graph
-     * @param delegator the delegator
-     * @param relation the relation
+     * 
+     * @param e
+     *            the e
+     * @param client
+     *            the client
+     * @param entityMetadata
+     *            the entity metadata
+     * @param objectGraph
+     *            the object graph
+     * @param delegator
+     *            the delegator
+     * @param relation
+     *            the relation
      */
     private void computeJoinTableRelations(EnhanceEntity e, Client client, EntityMetadata entityMetadata,
             EntitySaveGraph objectGraph, PersistenceDelegator delegator, Relation relation)

@@ -25,7 +25,6 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-
 /**
  * The Class OTMNPerson.
  */
@@ -33,7 +32,7 @@ import javax.persistence.Table;
 @Table(name = "PERSON", schema = "test")
 public class OTMNPerson
 {
-    
+
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
@@ -51,7 +50,7 @@ public class OTMNPerson
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -61,7 +60,7 @@ public class OTMNPerson
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -71,8 +70,9 @@ public class OTMNPerson
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -81,8 +81,9 @@ public class OTMNPerson
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -91,7 +92,7 @@ public class OTMNPerson
 
     /**
      * Gets the addresses.
-     *
+     * 
      * @return the addresses
      */
     public Set<OTMAddress> getAddresses()
@@ -101,8 +102,9 @@ public class OTMNPerson
 
     /**
      * Sets the addresses.
-     *
-     * @param addresses the new addresses
+     * 
+     * @param addresses
+     *            the new addresses
      */
     public void setAddresses(Set<OTMAddress> addresses)
     {

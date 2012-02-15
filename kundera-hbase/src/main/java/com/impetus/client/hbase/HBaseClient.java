@@ -45,7 +45,6 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
-
 /**
  * HBase client.
  * 
@@ -70,11 +69,15 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     /**
      * Instantiates a new h base client.
-     *
-     * @param indexManager the index manager
-     * @param conf the conf
-     * @param hTablePool the h table pool
-     * @param reader the reader
+     * 
+     * @param indexManager
+     *            the index manager
+     * @param conf
+     *            the conf
+     * @param hTablePool
+     *            the h table pool
+     * @param reader
+     *            the reader
      */
     public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool, EntityReader reader)
     {
@@ -83,8 +86,11 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         this.reader = reader;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.proxy.EnhancedEntity)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.proxy.
+     * EnhancedEntity)
      */
     @Override
     public void persist(EnhancedEntity enhancedEntity) throws Exception
@@ -93,8 +99,11 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         throw new PersistenceException("method not supported");
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#find(java.lang.Class, java.lang.Object, java.util.List)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.lang.Object, java.util.List)
      */
     @Override
     public <E> E find(Class<E> entityClass, Object rowId, List<String> relationNames) throws Exception
@@ -108,8 +117,11 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return (E) enhancedEntity;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findAll(java.lang.Class, java.lang.Object[])
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findAll(java.lang.Class,
+     * java.lang.Object[])
      */
     @Override
     public <E> List<E> findAll(Class<E> entityClass, Object... rowIds) throws Exception
@@ -125,8 +137,11 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return entities;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#find(java.lang.Class, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+     * java.util.Map)
      */
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> col) throws Exception
@@ -155,7 +170,9 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return entities;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.client.Client#close()
      */
     @Override
@@ -171,7 +188,9 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      * 
      * }
      */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.client.Client#getIndexManager()
      */
     @Override
@@ -180,7 +199,9 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return indexManager;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.client.Client#getPersistenceUnit()
      */
     @Override
@@ -189,8 +210,11 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return persistenceUnit;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#setPersistenceUnit(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#setPersistenceUnit(java.lang.String)
      */
     @Override
     public void setPersistenceUnit(String persistenceUnit)
@@ -198,8 +222,13 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         this.persistenceUnit = persistenceUnit;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.persistence.handler.impl.EntitySaveGraph, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#persist(com.impetus.kundera.persistence
+     * .handler.impl.EntitySaveGraph,
+     * com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
     public String persist(EntitySaveGraph entityGraph, EntityMetadata entityMetadata)
@@ -223,8 +252,12 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#persist(java.lang.Object, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
+     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph,
+     * com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
     public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata entityMetadata)
@@ -238,11 +271,15 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     /**
      * On persist.
-     *
-     * @param entityMetadata the entity metadata
-     * @param entity the entity
-     * @param id the id
-     * @param relations the relations
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param entity
+     *            the entity
+     * @param id
+     *            the id
+     * @param relations
+     *            the relations
      */
     private void onPersist(EntityMetadata entityMetadata, Object entity, String id, List<RelationHolder> relations)
     {
@@ -337,9 +374,6 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#getForeignKeysFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
-     */
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
             String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
@@ -349,9 +383,14 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#deleteFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
-     */
+    @Override
+    public <E> List<E> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
+            String joinColumnName, String inverseJoinColumnName, Object childId)
+    {
+
+        return null;
+    }
+
     @Override
     public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, EntitySaveGraph objectGraph)
@@ -426,8 +465,11 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         handler.deleteRow(pKey.toString(), metadata.getTableName());
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#find(java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#find(java.lang.String,
+     * java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     public List<Object> find(String colName, String colValue, EntityMetadata m)
     {

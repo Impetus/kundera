@@ -20,7 +20,6 @@ import junit.framework.TestSuite;
 
 import com.impetus.kundera.persistence.JPAImplementationTestSuite;
 
-
 /**
  * The Class AllTestSuites.
  */
@@ -29,7 +28,7 @@ public class AllTestSuites
 
     /**
      * Suite.
-     *
+     * 
      * @return the test
      */
     public static Test suite()

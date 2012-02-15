@@ -38,7 +38,6 @@ import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-
 /**
  * The Class HBaseWriter.
  * 
@@ -49,8 +48,13 @@ public class HBaseWriter implements Writer
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseWriter.class);
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.lang.String, java.util.List, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.
+     * client.HTable, java.lang.String, java.lang.String, java.util.List,
+     * java.lang.Object)
      */
     @Override
     public void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns,
@@ -75,8 +79,13 @@ public class HBaseWriter implements Writer
         htable.put(p);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#writeColumn(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.Column, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#writeColumn(org.apache.hadoop.hbase.client
+     * .HTable, java.lang.String, java.lang.String,
+     * com.impetus.kundera.metadata.model.Column, java.lang.Object)
      */
     @Override
     public void writeColumn(HTable htable, String columnFamily, String rowKey, Column column, Object columnObj)
@@ -89,8 +98,12 @@ public class HBaseWriter implements Writer
         htable.put(p);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.util.List, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.
+     * client.HTable, java.lang.String, java.util.List, java.lang.Object)
      */
     @Override
     public void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity) throws IOException
@@ -115,8 +128,12 @@ public class HBaseWriter implements Writer
         htable.put(p);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#writeColumns(org.apache.hadoop.hbase.
+     * client.HTable, java.lang.String, java.util.Map)
      */
     @Override
     public void writeColumns(HTable htable, String rowKey, Map<String, String> columns) throws IOException
@@ -132,8 +149,12 @@ public class HBaseWriter implements Writer
         htable.put(p);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#writeRelations(org.apache.hadoop.hbase.client.HTable, java.lang.String, boolean, java.util.List)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#writeRelations(org.apache.hadoop.hbase
+     * .client.HTable, java.lang.String, boolean, java.util.List)
      */
     @Override
     public void writeRelations(HTable htable, String rowKey, boolean containsEmbeddedObjectsOnly,
@@ -163,8 +184,12 @@ public class HBaseWriter implements Writer
     }
 
     // TODO: Scope of performance improvement in this code
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#writeForeignKeys(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#writeForeignKeys(org.apache.hadoop.hbase
+     * .client.HTable, java.lang.String, java.util.Map)
      */
     @Override
     public void writeForeignKeys(HTable hTable, String rowKey, Map<String, Set<String>> foreignKeyMap)
@@ -206,10 +231,13 @@ public class HBaseWriter implements Writer
 
     /**
      * Support for delete over HBase.
-     *
-     * @param hTable the h table
-     * @param rowKey the row key
-     * @param columnFamily the column family
+     * 
+     * @param hTable
+     *            the h table
+     * @param rowKey
+     *            the row key
+     * @param columnFamily
+     *            the column family
      */
     /*
      * (non-Javadoc)

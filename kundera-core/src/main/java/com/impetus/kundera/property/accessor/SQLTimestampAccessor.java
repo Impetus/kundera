@@ -22,16 +22,17 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
-
 /**
  * The Class SQLTimestampAccessor.
- *
+ * 
  * @author amresh.singh
  */
 public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
 {
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
@@ -50,8 +51,11 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
         return fromString(s);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
@@ -60,8 +64,11 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
         return t.toString().getBytes();
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
      */
     @Override
     public String toString(Object object)
@@ -69,8 +76,12 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
         return object.toString();
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String
+     * )
      */
     @Override
     public Timestamp fromString(String s) throws PropertyAccessException

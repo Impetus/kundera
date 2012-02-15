@@ -17,17 +17,16 @@ package com.impetus.client.entity;
 
 import javax.persistence.Embeddable;
 
-
 /**
  * Entity class for user's personal details.
- *
+ * 
  * @author amresh.singh
  */
 
 @Embeddable
 public class PersonalDetail
 {
-    
+
     /** The personal detail id. */
     private String personalDetailId;
 
@@ -42,7 +41,7 @@ public class PersonalDetail
 
     /**
      * Gets the personal detail id.
-     *
+     * 
      * @return the personalDetailId
      */
     public String getPersonalDetailId()
@@ -52,8 +51,9 @@ public class PersonalDetail
 
     /**
      * Sets the personal detail id.
-     *
-     * @param personalDetailId the personalDetailId to set
+     * 
+     * @param personalDetailId
+     *            the personalDetailId to set
      */
     public void setPersonalDetailId(String personalDetailId)
     {
@@ -62,7 +62,7 @@ public class PersonalDetail
 
     /**
      * Gets the name.
-     *
+     * 
      * @return the name
      */
     public String getName()
@@ -72,8 +72,9 @@ public class PersonalDetail
 
     /**
      * Sets the name.
-     *
-     * @param name the name to set
+     * 
+     * @param name
+     *            the name to set
      */
     public void setName(String name)
     {
@@ -82,7 +83,7 @@ public class PersonalDetail
 
     /**
      * Gets the password.
-     *
+     * 
      * @return the password
      */
     public String getPassword()
@@ -92,8 +93,9 @@ public class PersonalDetail
 
     /**
      * Sets the password.
-     *
-     * @param password the password to set
+     * 
+     * @param password
+     *            the password to set
      */
     public void setPassword(String password)
     {
@@ -102,7 +104,7 @@ public class PersonalDetail
 
     /**
      * Gets the relationship status.
-     *
+     * 
      * @return the relationshipStatus
      */
     public String getRelationshipStatus()
@@ -112,8 +114,9 @@ public class PersonalDetail
 
     /**
      * Sets the relationship status.
-     *
-     * @param relationshipStatus the relationshipStatus to set
+     * 
+     * @param relationshipStatus
+     *            the relationshipStatus to set
      */
     public void setRelationshipStatus(String relationshipStatus)
     {

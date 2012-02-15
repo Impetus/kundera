@@ -60,7 +60,10 @@ public final class Relation
     /** Metadata for JoinTable, applicable only if isRelatedViaJoinTable==true. */
     private JoinTableMetadata joinTableMetadata;
 
-    /** Whether this relationship is joined by primary key, only applicable for OneToOne. */
+    /**
+     * Whether this relationship is joined by primary key, only applicable for
+     * OneToOne.
+     */
     private boolean isJoinedByPrimaryKey;
 
     /**
@@ -200,7 +203,7 @@ public final class Relation
 
     /**
      * Gets the join column name.
-     *
+     * 
      * @return the joinColumnName
      */
     public String getJoinColumnName()
@@ -210,8 +213,9 @@ public final class Relation
 
     /**
      * Sets the join column name.
-     *
-     * @param joinColumnName the joinColumnName to set
+     * 
+     * @param joinColumnName
+     *            the joinColumnName to set
      */
     public void setJoinColumnName(String joinColumnName)
     {
@@ -220,7 +224,7 @@ public final class Relation
 
     /**
      * Checks if is related via join table.
-     *
+     * 
      * @return the isRelatedViaJoinTable
      */
     public boolean isRelatedViaJoinTable()
@@ -230,8 +234,9 @@ public final class Relation
 
     /**
      * Sets the related via join table.
-     *
-     * @param isRelatedViaJoinTable the isRelatedViaJoinTable to set
+     * 
+     * @param isRelatedViaJoinTable
+     *            the isRelatedViaJoinTable to set
      */
     public void setRelatedViaJoinTable(boolean isRelatedViaJoinTable)
     {
@@ -240,7 +245,7 @@ public final class Relation
 
     /**
      * Gets the join table metadata.
-     *
+     * 
      * @return the joinTableMetadata
      */
     public JoinTableMetadata getJoinTableMetadata()
@@ -250,8 +255,9 @@ public final class Relation
 
     /**
      * Sets the join table metadata.
-     *
-     * @param joinTableMetadata the joinTableMetadata to set
+     * 
+     * @param joinTableMetadata
+     *            the joinTableMetadata to set
      */
     public void setJoinTableMetadata(JoinTableMetadata joinTableMetadata)
     {
@@ -260,7 +266,7 @@ public final class Relation
 
     /**
      * Checks if is joined by primary key.
-     *
+     * 
      * @return the isJoinedByPrimaryKey
      */
     public boolean isJoinedByPrimaryKey()
@@ -270,8 +276,9 @@ public final class Relation
 
     /**
      * Sets the joined by primary key.
-     *
-     * @param isJoinedByPrimaryKey the isJoinedByPrimaryKey to set
+     * 
+     * @param isJoinedByPrimaryKey
+     *            the isJoinedByPrimaryKey to set
      */
     public void setJoinedByPrimaryKey(boolean isJoinedByPrimaryKey)
     {

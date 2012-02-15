@@ -25,10 +25,9 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
-
 /**
  * The Class CalendarAccessor.
- *
+ * 
  * @author amresh.singh
  */
 public class CalendarAccessor implements PropertyAccessor<Calendar>
@@ -37,7 +36,9 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
     /** The Constant DATE_FORMATTER. */
     private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
@@ -58,8 +59,11 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
@@ -68,8 +72,11 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
         return DateAccessor.getFormattedObect(cal.getTime().toString()).getBytes();
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
      */
     @Override
     public String toString(Object object)
@@ -78,8 +85,12 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
         return object.toString();
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String
+     * )
      */
     @Override
     public Calendar fromString(String s) throws PropertyAccessException

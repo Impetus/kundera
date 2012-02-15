@@ -35,7 +35,6 @@ import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
-
 /**
  * The Class RDBMSQuery.
  * 
@@ -51,11 +50,15 @@ public class RDBMSQuery extends QueryImpl implements Query
 
     /**
      * Instantiates a new rDBMS query.
-     *
-     * @param query the query
-     * @param kunderaQuery the kundera query
-     * @param persistenceDelegator the persistence delegator
-     * @param persistenceUnits the persistence units
+     * 
+     * @param query
+     *            the query
+     * @param kunderaQuery
+     *            the kundera query
+     * @param persistenceDelegator
+     *            the persistence delegator
+     * @param persistenceUnits
+     *            the persistence units
      */
     public RDBMSQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
             String[] persistenceUnits)
@@ -66,12 +69,17 @@ public class RDBMSQuery extends QueryImpl implements Query
 
     /**
      * Handle associations.
-     *
-     * @param m the m
-     * @param client the client
-     * @param graphs the graphs
-     * @param relationNames the relation names
-     * @param isParent the is parent
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param graphs
+     *            the graphs
+     * @param relationNames
+     *            the relation names
+     * @param isParent
+     *            the is parent
      * @return the list
      */
     protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,

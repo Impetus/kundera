@@ -37,7 +37,6 @@ import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
-
 /**
  * The Class CassandraEntityReader.
  * 
@@ -171,12 +170,17 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
     /**
      * Handle find by range.
-     *
-     * @param m the m
-     * @param client the client
-     * @param result the result
-     * @param ixClause the ix clause
-     * @param isRowKeyQuery the is row key query
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param result
+     *            the result
+     * @param ixClause
+     *            the ix clause
+     * @param isRowKeyQuery
+     *            the is row key query
      * @return the list
      */
     public List handleFindByRange(EntityMetadata m, Client client, List result,

@@ -22,7 +22,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
 /**
  * The Class OTMAddress.
  */
@@ -30,7 +29,7 @@ import javax.persistence.Table;
 @Table(name = "ADDRESS", schema = "KunderaKeyspace@kcassandra")
 public class OTMAddress
 {
-    
+
     /** The address id. */
     @Id
     @Column(name = "ADDRESS_ID")
@@ -47,7 +46,7 @@ public class OTMAddress
 
     /**
      * Gets the address id.
-     *
+     * 
      * @return the address id
      */
     public String getAddressId()
@@ -57,8 +56,9 @@ public class OTMAddress
 
     /**
      * Sets the address id.
-     *
-     * @param addressId the new address id
+     * 
+     * @param addressId
+     *            the new address id
      */
     public void setAddressId(String addressId)
     {
@@ -67,7 +67,7 @@ public class OTMAddress
 
     /**
      * Gets the street.
-     *
+     * 
      * @return the street
      */
     public String getStreet()
@@ -77,8 +77,9 @@ public class OTMAddress
 
     /**
      * Sets the street.
-     *
-     * @param street the new street
+     * 
+     * @param street
+     *            the new street
      */
     public void setStreet(String street)
     {
@@ -87,7 +88,7 @@ public class OTMAddress
 
     /**
      * Gets the person.
-     *
+     * 
      * @return the person
      */
     public OTMNPerson getPerson()
@@ -97,8 +98,9 @@ public class OTMAddress
 
     /**
      * Sets the person.
-     *
-     * @param person the person to set
+     * 
+     * @param person
+     *            the person to set
      */
     public void setPerson(OTMNPerson person)
     {

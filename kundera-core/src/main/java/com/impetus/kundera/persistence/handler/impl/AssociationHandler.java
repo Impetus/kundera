@@ -26,7 +26,6 @@ import javax.persistence.JoinColumn;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-
 /**
  * The Class AssociationHandler.
  * 
@@ -85,12 +84,17 @@ class AssociationHandler
 
     /**
      * Compute direction.
-     *
-     * @param <T> the generic type
-     * @param entity the entity
-     * @param relationalField the relational field
-     * @param objectGraph the object graph
-     * @param clazz the clazz
+     * 
+     * @param <T>
+     *            the generic type
+     * @param entity
+     *            the entity
+     * @param relationalField
+     *            the relational field
+     * @param objectGraph
+     *            the object graph
+     * @param clazz
+     *            the clazz
      * @return the field
      */
 
@@ -129,11 +133,15 @@ class AssociationHandler
 
     /**
      * Removed association entit(ies) from the enclosing entity.
-     *
-     * @param entity the entity
-     * @param associationEntity the association entity
-     * @param field the field
-     * @param setNull the set null
+     * 
+     * @param entity
+     *            the entity
+     * @param associationEntity
+     *            the association entity
+     * @param field
+     *            the field
+     * @param setNull
+     *            the set null
      */
     protected void onDetach(Object entity, Object associationEntity, Field field, boolean setNull)
     {

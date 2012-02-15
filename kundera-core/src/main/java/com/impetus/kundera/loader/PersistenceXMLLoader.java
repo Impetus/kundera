@@ -39,10 +39,9 @@ import org.xml.sax.SAXParseException;
 
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
-
 /**
  * The Class PersistenceXMLLoader.
- *
+ * 
  * @author amresh.singh
  */
 public class PersistenceXMLLoader
@@ -300,7 +299,9 @@ public class PersistenceXMLLoader
         }
 
         /* @see org.xml.sax.ErrorHandler#error(org.xml.sax.SAXParseException) */
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see org.xml.sax.ErrorHandler#error(org.xml.sax.SAXParseException)
          */
         public void error(SAXParseException error)
@@ -313,8 +314,11 @@ public class PersistenceXMLLoader
          * @see
          * org.xml.sax.ErrorHandler#fatalError(org.xml.sax.SAXParseException)
          */
-        /* (non-Javadoc)
-         * @see org.xml.sax.ErrorHandler#fatalError(org.xml.sax.SAXParseException)
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * org.xml.sax.ErrorHandler#fatalError(org.xml.sax.SAXParseException)
          */
         public void fatalError(SAXParseException error)
         {
@@ -323,7 +327,9 @@ public class PersistenceXMLLoader
         }
 
         /* @see org.xml.sax.ErrorHandler#warning(org.xml.sax.SAXParseException) */
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see org.xml.sax.ErrorHandler#warning(org.xml.sax.SAXParseException)
          */
         public void warning(SAXParseException warn)

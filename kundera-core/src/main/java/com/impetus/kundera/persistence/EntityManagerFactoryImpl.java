@@ -38,7 +38,6 @@ import com.impetus.kundera.cache.NonOperationalCacheProvider;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 
-
 /**
  * The Class EntityManagerFactoryImpl.
  * 
@@ -84,9 +83,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Use this if you want to construct this directly.
-     *
-     * @param persistenceUnit used to prefix the Cassandra domains
-     * @param properties the properties
+     * 
+     * @param persistenceUnit
+     *            used to prefix the Cassandra domains
+     * @param properties
+     *            the properties
      */
     public EntityManagerFactoryImpl(String persistenceUnit, Map<String, Object> properties)
     {
@@ -123,7 +124,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManagerFactory#close()
      */
     @Override
@@ -143,7 +146,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManagerFactory#createEntityManager()
      */
     @Override
@@ -152,8 +157,11 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         return new EntityManagerImpl(this);
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
      */
     @Override
     public final EntityManager createEntityManager(Map map)
@@ -161,7 +169,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         return new EntityManagerImpl(this, map);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManagerFactory#isOpen()
      */
     @Override
@@ -170,7 +180,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         return !closed;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManagerFactory#getCriteriaBuilder()
      */
     @Override
@@ -179,7 +191,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         throw new NotImplementedException("TODO");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManagerFactory#getMetamodel()
      */
     @Override
@@ -188,7 +202,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         return KunderaMetadataManager.getMetamodel(getPersistenceUnits());
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManagerFactory#getProperties()
      */
     @Override
@@ -197,7 +213,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         return properties;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManagerFactory#getCache()
      */
     @Override
@@ -214,7 +232,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.EntityManagerFactory#getPersistenceUnitUtil()
      */
     @Override
@@ -225,7 +245,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Inits the second level cache.
-     *
+     * 
      * @return the cache provider
      */
     @SuppressWarnings("unchecked")
@@ -258,7 +278,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     /**
      * Gets the persistence units.
-     *
+     * 
      * @return the persistence units
      */
     private String[] getPersistenceUnits()

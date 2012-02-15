@@ -20,10 +20,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * The Class PersonnelDTO.
- *
+ * 
  * @author amresh.singh
  */
 
@@ -46,10 +45,13 @@ public class PersonnelDTO
 
     /**
      * Instantiates a new personnel dto.
-     *
-     * @param personId the person id
-     * @param firstName the first name
-     * @param lastName the last name
+     * 
+     * @param personId
+     *            the person id
+     * @param firstName
+     *            the first name
+     * @param lastName
+     *            the last name
      */
     public PersonnelDTO(String personId, String firstName, String lastName)
     {
@@ -68,7 +70,7 @@ public class PersonnelDTO
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the personId
      */
     public String getPersonId()
@@ -78,8 +80,9 @@ public class PersonnelDTO
 
     /**
      * Sets the person id.
-     *
-     * @param personId the personId to set
+     * 
+     * @param personId
+     *            the personId to set
      */
     public void setPersonId(String personId)
     {
@@ -88,7 +91,7 @@ public class PersonnelDTO
 
     /**
      * Gets the first name.
-     *
+     * 
      * @return the firstName
      */
     public String getFirstName()
@@ -98,8 +101,9 @@ public class PersonnelDTO
 
     /**
      * Sets the first name.
-     *
-     * @param firstName the firstName to set
+     * 
+     * @param firstName
+     *            the firstName to set
      */
     public void setFirstName(String firstName)
     {
@@ -108,7 +112,7 @@ public class PersonnelDTO
 
     /**
      * Gets the last name.
-     *
+     * 
      * @return the lastName
      */
     public String getLastName()
@@ -118,8 +122,9 @@ public class PersonnelDTO
 
     /**
      * Sets the last name.
-     *
-     * @param lastName the lastName to set
+     * 
+     * @param lastName
+     *            the lastName to set
      */
     public void setLastName(String lastName)
     {

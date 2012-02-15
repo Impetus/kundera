@@ -38,7 +38,6 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.MongoOptions;
 
-
 /**
  * A factory for creating MongoDBClient objects.
  */
@@ -56,7 +55,9 @@ public class MongoDBClientFactory extends GenericClientFactory
     /** The reader. */
     private EntityReader reader;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#initializeClient()
      */
     @Override
@@ -68,8 +69,11 @@ public class MongoDBClientFactory extends GenericClientFactory
         reader = new MongoEntityReader();
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
      */
     @Override
     protected Object createPoolOrConnection()
@@ -79,7 +83,9 @@ public class MongoDBClientFactory extends GenericClientFactory
         return mongoDB;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient()
      */
     @Override
@@ -92,7 +98,7 @@ public class MongoDBClientFactory extends GenericClientFactory
 
     /**
      * Gets the connection.
-     *
+     * 
      * @return the connection
      */
     private DB getConnection()
@@ -139,7 +145,9 @@ public class MongoDBClientFactory extends GenericClientFactory
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.GenericClientFactory#isClientThreadSafe()
      */
     @Override
@@ -148,7 +156,9 @@ public class MongoDBClientFactory extends GenericClientFactory
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.loader.Loader#unload(java.lang.String[])
      */
     @Override

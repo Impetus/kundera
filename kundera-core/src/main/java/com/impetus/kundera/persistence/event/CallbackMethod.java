@@ -17,7 +17,6 @@ package com.impetus.kundera.persistence.event;
 
 import java.lang.reflect.InvocationTargetException;
 
-
 /**
  * Interface that defines how JPA Entity Listeners can be called.
  * 

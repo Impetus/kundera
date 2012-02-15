@@ -17,6 +17,7 @@ package com.impetus.client.cassandra.pelops;
 
 import java.util.Properties;
 
+import org.apache.cassandra.thrift.Column;
 import org.apache.commons.lang.StringUtils;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
 import org.slf4j.Logger;
@@ -25,21 +26,23 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-
+import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 
 /**
  * The Class PelopsUtils.
  */
 public class PelopsUtils
 {
-    
+
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(PelopsUtils.class);
 
     /**
      * Generate pool name.
-     *
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param persistenceUnit
+     *            the persistence unit
      * @return the string
      */
     public static String generatePoolName(String persistenceUnit)
@@ -56,8 +59,9 @@ public class PelopsUtils
 
     /**
      * Gets the pool config policy.
-     *
-     * @param persistenceUnitMetadata the persistence unit metadata
+     * 
+     * @param persistenceUnitMetadata
+     *            the persistence unit metadata
      * @return the pool config policy
      */
     public static Policy getPoolConfigPolicy(PersistenceUnitMetadata persistenceUnitMetadata)
@@ -100,6 +104,20 @@ public class PelopsUtils
             policy = null;
         }
         return policy;
+    }
+
+    /**
+     * Generates Secondary index name for a given column on a table
+     * 
+     * @param tableName
+     * @param column
+     * @return
+     * @throws PropertyAccessException
+     */
+    public static String getSecondaryIndexName(String tableName, Column column) throws PropertyAccessException
+    {
+        String indexName = tableName + "_" + PropertyAccessorFactory.STRING.fromBytes(column.getName()) + "_idx";
+        return indexName;
     }
 
 }

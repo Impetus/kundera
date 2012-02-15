@@ -22,10 +22,9 @@ import org.apache.hadoop.hbase.KeyValue;
 
 import com.impetus.kundera.DataWrapper;
 
-
 /**
  * The Class HBaseData.
- *
+ * 
  * @author impetus
  */
 public class HBaseData implements DataWrapper
@@ -56,8 +55,9 @@ public class HBaseData implements DataWrapper
 
     /**
      * Instantiates a new h base data.
-     *
-     * @param rowKey the row key
+     * 
+     * @param rowKey
+     *            the row key
      */
     public HBaseData(String rowKey)
     {
@@ -66,7 +66,7 @@ public class HBaseData implements DataWrapper
 
     /**
      * Getter column family.
-     *
+     * 
      * @return columnFamily column family
      */
     public String getColumnFamily()
@@ -76,7 +76,7 @@ public class HBaseData implements DataWrapper
 
     /**
      * Getter for row key.
-     *
+     * 
      * @return rowKey
      */
     public String getRowKey()
@@ -96,8 +96,9 @@ public class HBaseData implements DataWrapper
 
     /**
      * Sets the columns.
-     *
-     * @param columns the new columns
+     * 
+     * @param columns
+     *            the new columns
      */
     public void setColumns(List<KeyValue> columns)
     {

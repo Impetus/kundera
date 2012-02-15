@@ -23,7 +23,6 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 
-
 /**
  * The Interface EntityReader.
  * 

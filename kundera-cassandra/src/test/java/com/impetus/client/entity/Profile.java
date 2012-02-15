@@ -23,7 +23,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
-
 /**
  * The Class Profile.
  */
@@ -62,7 +61,7 @@ public class Profile
 
     /**
      * Gets the person.
-     *
+     * 
      * @return the person
      */
     public Person2 getPerson()
@@ -72,8 +71,9 @@ public class Profile
 
     /**
      * Sets the person.
-     *
-     * @param person the new person
+     * 
+     * @param person
+     *            the new person
      */
     public void setPerson(Person2 person)
     {
@@ -82,7 +82,7 @@ public class Profile
 
     /**
      * Gets the profile id.
-     *
+     * 
      * @return the profile id
      */
     public String getProfileId()
@@ -92,8 +92,9 @@ public class Profile
 
     /**
      * Sets the profile id.
-     *
-     * @param profileId the new profile id
+     * 
+     * @param profileId
+     *            the new profile id
      */
     public void setProfileId(String profileId)
     {
@@ -102,7 +103,7 @@ public class Profile
 
     /**
      * Gets the address.
-     *
+     * 
      * @return the address
      */
     public String getAddress()
@@ -112,8 +113,9 @@ public class Profile
 
     /**
      * Sets the address.
-     *
-     * @param address the new address
+     * 
+     * @param address
+     *            the new address
      */
     public void setAddress(String address)
     {
@@ -122,7 +124,7 @@ public class Profile
 
     /**
      * Gets the website.
-     *
+     * 
      * @return the website
      */
     public String getWebsite()
@@ -132,8 +134,9 @@ public class Profile
 
     /**
      * Sets the website.
-     *
-     * @param website the new website
+     * 
+     * @param website
+     *            the new website
      */
     public void setWebsite(String website)
     {
@@ -142,7 +145,7 @@ public class Profile
 
     /**
      * Gets the blog.
-     *
+     * 
      * @return the blog
      */
     public String getBlog()
@@ -152,15 +155,18 @@ public class Profile
 
     /**
      * Sets the blog.
-     *
-     * @param blog the new blog
+     * 
+     * @param blog
+     *            the new blog
      */
     public void setBlog(String blog)
     {
         this.blog = blog;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override

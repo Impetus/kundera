@@ -24,7 +24,6 @@ import net.sf.cglib.proxy.InvocationHandler;
 
 import com.impetus.kundera.proxy.EnhancedEntity;
 
-
 /**
  * Implementation of EnhancedEntity using cglib library.
  * 
@@ -63,8 +62,11 @@ public class CglibEnhancedEntity implements InvocationHandler, EnhancedEntity
      * @see net.sf.cglib.proxy.InvocationHandler#invoke(java.lang.Object,
      * java.lang.reflect.Method, java.lang.Object[])
      */
-    /* (non-Javadoc)
-     * @see net.sf.cglib.proxy.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+    /*
+     * (non-Javadoc)
+     * 
+     * @see net.sf.cglib.proxy.InvocationHandler#invoke(java.lang.Object,
+     * java.lang.reflect.Method, java.lang.Object[])
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
@@ -94,7 +96,9 @@ public class CglibEnhancedEntity implements InvocationHandler, EnhancedEntity
     }
 
     /* @see com.impetus.kundera.proxy.EnhancedEntity#getForeignKeysMap() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.proxy.EnhancedEntity#getForeignKeysMap()
      */
     public Map<String, Set<String>> getForeignKeysMap()
@@ -103,7 +107,9 @@ public class CglibEnhancedEntity implements InvocationHandler, EnhancedEntity
     }
 
     /* @see com.impetus.kundera.proxy.EnhancedEntity#getEntity() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.proxy.EnhancedEntity#getEntity()
      */
     @Override
@@ -124,7 +130,9 @@ public class CglibEnhancedEntity implements InvocationHandler, EnhancedEntity
     }
 
     /* @see java.lang.Object#toString() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override

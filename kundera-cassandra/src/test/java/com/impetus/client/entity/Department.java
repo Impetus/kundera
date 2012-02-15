@@ -26,7 +26,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-
 //@Entity
 /**
  * The Class Department.
@@ -58,9 +57,11 @@ public class Department
 
     /**
      * Instantiates a new department.
-     *
-     * @param name the name
-     * @param address the address
+     * 
+     * @param name
+     *            the name
+     * @param address
+     *            the address
      */
     public Department(String name, String address)
     {
@@ -71,7 +72,7 @@ public class Department
 
     /**
      * Gets the name.
-     *
+     * 
      * @return the name
      */
     public String getName()
@@ -81,8 +82,9 @@ public class Department
 
     /**
      * Sets the name.
-     *
-     * @param name the name to set
+     * 
+     * @param name
+     *            the name to set
      */
     public void setName(String name)
     {
@@ -91,7 +93,7 @@ public class Department
 
     /**
      * Gets the address.
-     *
+     * 
      * @return the address
      */
     public String getAddress()
@@ -101,8 +103,9 @@ public class Department
 
     /**
      * Sets the address.
-     *
-     * @param address the address to set
+     * 
+     * @param address
+     *            the address to set
      */
     public void setAddress(String address)
     {
@@ -111,7 +114,7 @@ public class Department
 
     /**
      * Gets the employees.
-     *
+     * 
      * @return the employees
      */
     public List<Employee> getEmployees()
@@ -121,8 +124,9 @@ public class Department
 
     /**
      * Sets the employees.
-     *
-     * @param employees the employees to set
+     * 
+     * @param employees
+     *            the employees to set
      */
     public void setEmployees(List<Employee> employees)
     {
@@ -131,8 +135,9 @@ public class Department
 
     /**
      * Adds the employee.
-     *
-     * @param e the e
+     * 
+     * @param e
+     *            the e
      */
     public void addEmployee(Employee... e)
     {
@@ -141,7 +146,9 @@ public class Department
     }
 
     /* @see java.lang.Object#toString() */
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override

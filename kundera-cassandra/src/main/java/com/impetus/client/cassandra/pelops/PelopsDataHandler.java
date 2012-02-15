@@ -52,15 +52,14 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-
 /**
  * Provides Pelops utility methods for data held in Column family based stores.
- *
+ * 
  * @author amresh.singh
  */
 public class PelopsDataHandler extends DataHandler
 {
-    
+
     /** The client. */
     private Client client;
 
@@ -69,8 +68,9 @@ public class PelopsDataHandler extends DataHandler
 
     /**
      * Instantiates a new pelops data handler.
-     *
-     * @param client the client
+     * 
+     * @param client
+     *            the client
      */
     public PelopsDataHandler(Client client)
     {
@@ -83,15 +83,22 @@ public class PelopsDataHandler extends DataHandler
 
     /**
      * From thrift row.
-     *
-     * @param selector the selector
-     * @param clazz the clazz
-     * @param m the m
-     * @param rowKey the row key
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
+     * 
+     * @param selector
+     *            the selector
+     * @param clazz
+     *            the clazz
+     * @param m
+     *            the m
+     * @param rowKey
+     *            the row key
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
      * @return the object
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     public Object fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String rowKey,
             List<String> relationNames, boolean isWrapReq) throws Exception
@@ -142,15 +149,22 @@ public class PelopsDataHandler extends DataHandler
 
     /**
      * From thrift row.
-     *
-     * @param selector the selector
-     * @param clazz the clazz
-     * @param m the m
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
-     * @param rowIds the row ids
+     * 
+     * @param selector
+     *            the selector
+     * @param clazz
+     *            the clazz
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param rowIds
+     *            the row ids
      * @return the list
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     public List<Object> fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, List<String> relationNames,
             boolean isWrapReq, String... rowIds) throws Exception
@@ -260,14 +274,20 @@ public class PelopsDataHandler extends DataHandler
 
     /**
      * Fetches data held in Thrift row columns and populates to Entity objects.
-     *
-     * @param clazz the clazz
-     * @param m the m
-     * @param thriftRow the cr
-     * @param relationNames the relation names
-     * @param isWrapperReq the is wrapper req
+     * 
+     * @param clazz
+     *            the clazz
+     * @param m
+     *            the m
+     * @param thriftRow
+     *            the cr
+     * @param relationNames
+     *            the relation names
+     * @param isWrapperReq
+     *            the is wrapper req
      * @return the e
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
             List<String> relationNames, boolean isWrapperReq) throws Exception
@@ -331,14 +351,20 @@ public class PelopsDataHandler extends DataHandler
     /**
      * Fetches data held in Thrift row super columns and populates to Entity
      * objects.
-     *
-     * @param clazz the clazz
-     * @param m the m
-     * @param tr the tr
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
+     * 
+     * @param clazz
+     *            the clazz
+     * @param m
+     *            the m
+     * @param tr
+     *            the tr
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
      * @return the object
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     public Object fromSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr, List<String> relationNames,
             boolean isWrapReq) throws Exception
@@ -476,11 +502,14 @@ public class PelopsDataHandler extends DataHandler
 
     /**
      * Populate embedded object.
-     *
-     * @param sc the sc
-     * @param m the m
+     * 
+     * @param sc
+     *            the sc
+     * @param m
+     *            the m
      * @return the object
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     public Object populateEmbeddedObject(SuperColumn sc, EntityMetadata m) throws Exception
     {
@@ -557,14 +586,20 @@ public class PelopsDataHandler extends DataHandler
 
     /**
      * Helper method to convert @Entity to ThriftRow.
-     *
-     * @param client the client
-     * @param e the e
-     * @param id the id
-     * @param m the m
-     * @param columnFamily the colmun family
+     * 
+     * @param client
+     *            the client
+     * @param e
+     *            the e
+     * @param id
+     *            the id
+     * @param m
+     *            the m
+     * @param columnFamily
+     *            the colmun family
      * @return the base data accessor. thrift row
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     public ThriftRow toThriftRow(PelopsClient client, Object e, String id, EntityMetadata m, String columnFamily)
             throws Exception
@@ -595,12 +630,17 @@ public class PelopsDataHandler extends DataHandler
 
     /**
      * Adds the columns to thrift row.
-     *
-     * @param timestamp the timestamp
-     * @param tr the tr
-     * @param m the m
-     * @param e the e
-     * @throws Exception the exception
+     * 
+     * @param timestamp
+     *            the timestamp
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param e
+     *            the e
+     * @throws Exception
+     *             the exception
      */
     private void addColumnsToThriftRow(long timestamp, ThriftRow tr, EntityMetadata m, Object e) throws Exception
     {
@@ -637,14 +677,21 @@ public class PelopsDataHandler extends DataHandler
 
     /**
      * Adds the super columns to thrift row.
-     *
-     * @param timestamp the timestamp
-     * @param client the client
-     * @param tr the tr
-     * @param m the m
-     * @param e the e
-     * @param id the id
-     * @throws Exception the exception
+     * 
+     * @param timestamp
+     *            the timestamp
+     * @param client
+     *            the client
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param e
+     *            the e
+     * @param id
+     *            the id
+     * @throws Exception
+     *             the exception
      */
     private void addSuperColumnsToThriftRow(long timestamp, PelopsClient client, ThriftRow tr, EntityMetadata m,
             Object e, String id) throws Exception
@@ -722,13 +769,18 @@ public class PelopsDataHandler extends DataHandler
 
     /**
      * Builds the thrift super column.
-     *
-     * @param superColumnName the super column name
-     * @param timestamp the timestamp
-     * @param superColumn the super column
-     * @param superColumnObject the super column object
+     * 
+     * @param superColumnName
+     *            the super column name
+     * @param timestamp
+     *            the timestamp
+     * @param superColumn
+     *            the super column
+     * @param superColumnObject
+     *            the super column object
      * @return the super column
-     * @throws PropertyAccessException the property access exception
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     private SuperColumn buildThriftSuperColumn(String superColumnName, long timestamp, EmbeddedColumn superColumn,
             Object superColumnObject) throws PropertyAccessException
@@ -771,10 +823,13 @@ public class PelopsDataHandler extends DataHandler
 
     /**
      * Gets the foreign keys from join table.
-     *
-     * @param <E> the element type
-     * @param inverseJoinColumnName the inverse join column name
-     * @param columns the columns
+     * 
+     * @param <E>
+     *            the element type
+     * @param inverseJoinColumnName
+     *            the inverse join column name
+     * @param columns
+     *            the columns
      * @return the foreign keys from join table
      */
     public <E> List<E> getForeignKeysFromJoinTable(String inverseJoinColumnName, List<Column> columns)
@@ -982,7 +1037,7 @@ public class PelopsDataHandler extends DataHandler
 
     /**
      * Gets the timestamp.
-     *
+     * 
      * @return the timestamp
      */
     public long getTimestamp()

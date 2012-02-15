@@ -38,7 +38,6 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
 
-
 /**
  * Implementation of LazyInitializerFactory using cglib library.
  * 
@@ -53,8 +52,13 @@ public class CglibLazyInitializerFactory implements LazyInitializerFactory
      * , java.lang.Class, java.lang.reflect.Method, java.lang.reflect.Method,
      * java.lang.String, com.impetus.kundera.ejb.EntityManagerImpl)
      */
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.proxy.LazyInitializerFactory#getProxy(java.lang.String, java.lang.Class, java.lang.reflect.Method, java.lang.reflect.Method, java.lang.String, com.impetus.kundera.persistence.PersistenceDelegator)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.proxy.LazyInitializerFactory#getProxy(java.lang.String
+     * , java.lang.Class, java.lang.reflect.Method, java.lang.reflect.Method,
+     * java.lang.String, com.impetus.kundera.persistence.PersistenceDelegator)
      */
     @Override
     public KunderaProxy getProxy(String entityName, Class<?> persistentClass, Method getIdentifierMethod,

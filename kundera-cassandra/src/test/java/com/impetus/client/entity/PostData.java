@@ -22,7 +22,6 @@ import javax.persistence.Embeddable;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-
 /**
  * The Class PostData.
  */
@@ -50,7 +49,7 @@ public class PostData
 
     /**
      * Gets the title.
-     *
+     * 
      * @return the title
      */
     public String getTitle()
@@ -60,8 +59,9 @@ public class PostData
 
     /**
      * Sets the title.
-     *
-     * @param title the title to set
+     * 
+     * @param title
+     *            the title to set
      */
     public void setTitle(String title)
     {
@@ -70,7 +70,7 @@ public class PostData
 
     /**
      * Gets the body.
-     *
+     * 
      * @return the body
      */
     public String getBody()
@@ -80,8 +80,9 @@ public class PostData
 
     /**
      * Sets the body.
-     *
-     * @param body the body to set
+     * 
+     * @param body
+     *            the body to set
      */
     public void setBody(String body)
     {
@@ -90,7 +91,7 @@ public class PostData
 
     /**
      * Gets the created.
-     *
+     * 
      * @return the created
      */
     public Date getCreated()
@@ -100,15 +101,18 @@ public class PostData
 
     /**
      * Sets the created.
-     *
-     * @param created the created to set
+     * 
+     * @param created
+     *            the created to set
      */
     public void setCreated(Date created)
     {
         this.created = created;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override

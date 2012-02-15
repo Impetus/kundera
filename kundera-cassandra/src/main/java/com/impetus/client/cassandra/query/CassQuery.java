@@ -46,7 +46,6 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
-
 /**
  * The Class CassQuery.
  * 

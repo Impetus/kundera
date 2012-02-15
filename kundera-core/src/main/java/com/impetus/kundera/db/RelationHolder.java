@@ -21,15 +21,14 @@ import java.util.List;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 
-
 /**
  * The Class RelationHolder.
- *
+ * 
  * @author vivek.mishra
  */
 public class RelationHolder
 {
-    
+
     /** The relation name. */
     private String relationName;
 
@@ -38,9 +37,11 @@ public class RelationHolder
 
     /**
      * Instantiates a new relation holder.
-     *
-     * @param relationName the relation name
-     * @param relationValue the relation value
+     * 
+     * @param relationName
+     *            the relation name
+     * @param relationValue
+     *            the relation value
      */
     public RelationHolder(String relationName, String relationValue)
     {
@@ -50,7 +51,7 @@ public class RelationHolder
 
     /**
      * Gets the relation name.
-     *
+     * 
      * @return the relationName
      */
     public String getRelationName()
@@ -60,7 +61,7 @@ public class RelationHolder
 
     /**
      * Gets the relation value.
-     *
+     * 
      * @return the relationValue
      */
     public String getRelationValue()
@@ -70,10 +71,13 @@ public class RelationHolder
 
     /**
      * Adds the relation.
-     *
-     * @param entitySaveGraph the entity save graph
-     * @param rlName the rl name
-     * @param rlValue the rl value
+     * 
+     * @param entitySaveGraph
+     *            the entity save graph
+     * @param rlName
+     *            the rl name
+     * @param rlValue
+     *            the rl value
      * @return the list
      */
     public static List<RelationHolder> addRelation(EntitySaveGraph entitySaveGraph, String rlName, String rlValue)

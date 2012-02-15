@@ -18,16 +18,17 @@ package com.impetus.kundera.property.accessor;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
-
 /**
  * The Class DoubleAccessor.
- *
+ * 
  * @author Amresh Singh
  */
 public class DoubleAccessor implements PropertyAccessor<Double>
 {
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
@@ -39,8 +40,11 @@ public class DoubleAccessor implements PropertyAccessor<Double>
         return Double.longBitsToDouble(toLong(data));
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
@@ -48,8 +52,11 @@ public class DoubleAccessor implements PropertyAccessor<Double>
         return fromLong(Double.doubleToRawLongBits((Double) object));
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
      */
     @Override
     public String toString(Object object)
@@ -59,8 +66,9 @@ public class DoubleAccessor implements PropertyAccessor<Double>
 
     /**
      * To long.
-     *
-     * @param data the data
+     * 
+     * @param data
+     *            the data
      * @return the long
      */
     private long toLong(byte[] data)
@@ -78,8 +86,9 @@ public class DoubleAccessor implements PropertyAccessor<Double>
 
     /**
      * From long.
-     *
-     * @param data the data
+     * 
+     * @param data
+     *            the data
      * @return the byte[]
      */
     private byte[] fromLong(long data)
@@ -89,8 +98,12 @@ public class DoubleAccessor implements PropertyAccessor<Double>
                 (byte) ((data >> 8) & 0xff), (byte) ((data >> 0) & 0xff), };
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String
+     * )
      */
     @Override
     public Double fromString(String s) throws PropertyAccessException

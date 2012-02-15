@@ -22,7 +22,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
 /**
  * The Class NPerson.
  */
@@ -30,7 +29,7 @@ import javax.persistence.Table;
 @Table(name = "PERSON", schema = "test")
 public class NPerson
 {
-    
+
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
@@ -51,7 +50,7 @@ public class NPerson
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -61,7 +60,7 @@ public class NPerson
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -71,8 +70,9 @@ public class NPerson
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -81,8 +81,9 @@ public class NPerson
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -100,7 +101,7 @@ public class NPerson
 
     /**
      * Gets the address.
-     *
+     * 
      * @return the address
      */
     public Address getAddress()
@@ -110,8 +111,9 @@ public class NPerson
 
     /**
      * Sets the address.
-     *
-     * @param address the address to set
+     * 
+     * @param address
+     *            the address to set
      */
     public void setAddress(Address address)
     {

@@ -43,7 +43,6 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
-
 /**
  * The Class RDBMSEntityReader.
  * 
@@ -128,7 +127,8 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             {
                 try
                 {
-                    List entities = ((HibernateClient) client).find(getSqlQueryFromJPA(m, relationNames, null), new ArrayList<String>(), m);
+                    List entities = ((HibernateClient) client).find(getSqlQueryFromJPA(m, relationNames, null),
+                            new ArrayList<String>(), m);
                     ls = new ArrayList<EnhanceEntity>(entities.size());
                     ls = transform(m, ls, entities);
                 }
@@ -391,8 +391,13 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         return relationVal;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.persistence.EntityReader#findById(java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata, java.util.List, com.impetus.kundera.client.Client)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.EntityReader#findById(java.lang.Object,
+     * com.impetus.kundera.metadata.model.EntityMetadata, java.util.List,
+     * com.impetus.kundera.client.Client)
      */
     @Override
     public EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client)

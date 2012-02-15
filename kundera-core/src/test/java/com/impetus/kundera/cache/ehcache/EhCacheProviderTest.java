@@ -22,10 +22,9 @@ import junit.framework.TestCase;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.entity.PersonnelDTO;
 
-
 /**
  * The Class EhCacheProviderTest.
- *
+ * 
  * @author amresh.singh
  */
 public class EhCacheProviderTest extends TestCase
@@ -46,7 +45,9 @@ public class EhCacheProviderTest extends TestCase
     /** The person2. */
     PersonnelDTO person2;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see junit.framework.TestCase#setUp()
      */
     protected void setUp() throws Exception
@@ -60,7 +61,9 @@ public class EhCacheProviderTest extends TestCase
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see junit.framework.TestCase#tearDown()
      */
     protected void tearDown() throws Exception
@@ -71,7 +74,7 @@ public class EhCacheProviderTest extends TestCase
 
     /**
      * Test method for.
-     *
+     * 
      * {@link com.impetus.kundera.cache.ehcache.EhCacheProvider#createCache(java.lang.String)}
      * .
      */
