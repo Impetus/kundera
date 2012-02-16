@@ -181,6 +181,27 @@
                     </filesets>
                 </configuration>
             </plugin>
+            
+            <plugin>
+                <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+                <artifactId>maven-java-formatter-plugin</artifactId>
+                <version>0.3.1</version>
+                <configuration>
+                    <configFile>${project.parent.basedir}/cassandra_code_style.xml</configFile>
+                    <overrideConfigCompilerVersion>true</overrideConfigCompilerVersion>
+                    <compilerSource>1.6</compilerSource>
+                    <compilerCompliance>1.6</compilerCompliance>
+                    <compilerTargetPlatform>1.6</compilerTargetPlatform>
+                </configuration>
+                <executions>
+                <execution>
+                    <goals>
+                    <goal>format</goal>
+                    </goals>
+                </execution>
+                </executions>
+            </plugin>
+            
         </plugins>
     </build>
 
