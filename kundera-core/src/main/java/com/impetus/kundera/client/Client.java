@@ -20,7 +20,6 @@ import java.util.Map;
 
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.proxy.EnhancedEntity;

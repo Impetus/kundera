@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.query;
 
-import java.nio.charset.CharacterCodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

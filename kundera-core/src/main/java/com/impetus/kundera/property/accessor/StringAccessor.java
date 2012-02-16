@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
-import java.lang.reflect.Field;
-
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;

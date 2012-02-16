@@ -387,8 +387,9 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     public <E> List<E> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
             String joinColumnName, String inverseJoinColumnName, Object childId)
     {
+        return handler.findParentEntityFromJoinTable(parentMetadata, joinTableName, joinColumnName,
+                inverseJoinColumnName, childId);
 
-        return null;
     }
 
     @Override

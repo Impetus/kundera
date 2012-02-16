@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
@@ -51,7 +50,6 @@ import org.scale7.cassandra.pelops.Mutator;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
-import org.scale7.cassandra.pelops.Validation;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -59,15 +57,12 @@ import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.JoinTableMetadata;
-import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.property.accessor.ByteAccessor;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**

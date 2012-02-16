@@ -373,13 +373,6 @@ public class HBaseDataHandler implements DataHandler
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.client.hbase.admin.DataHandler#getForeignKeysFromJoinTable
-     * (java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String rowKey, String inverseJoinColumnName)
     {
@@ -420,6 +413,14 @@ public class HBaseDataHandler implements DataHandler
             }
         }
         return foreignKeys;
+    }
+
+    @Override
+    public List<Object> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
+            String joinColumnName, String inverseJoinColumnName, Object childId)
+    {
+
+        throw new PersistenceException("Not applicable for HBase");
     }
 
     /**

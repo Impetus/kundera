@@ -647,8 +647,16 @@ public class HibernateClient implements Client
 
             s.beginTransaction();
         }
-        Object result = s.get(clazz, getKey(rowId, metadata.getIdColumn().getField()));
-        // s.close();
+
+        Object result = null;
+        try
+        {
+            result = s.get(clazz, getKey(rowId, metadata.getIdColumn().getField()));
+        }
+        catch (Exception e)
+        {
+            log.info(e.getMessage());
+        }
         return result;
     }
 

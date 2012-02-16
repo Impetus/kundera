@@ -38,6 +38,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
@@ -258,6 +259,18 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                 queryBuilder.append(relation);
             }
         }
+
+        for (Relation r : entityMetadata.getRelations())
+        {
+            if (r.getJoinColumnName() != null)
+            {
+                queryBuilder.append(", ");
+                queryBuilder.append(aliasName);
+                queryBuilder.append(".");
+                queryBuilder.append(r.getJoinColumnName());
+            }
+        }
+
         queryBuilder.append(" From ");
         queryBuilder.append(entityMetadata.getTableName());
         queryBuilder.append(" ");

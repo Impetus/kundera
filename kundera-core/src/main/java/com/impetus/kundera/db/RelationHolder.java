@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
-import com.impetus.kundera.property.PropertyAccessException;
 
 /**
  * The Class RelationHolder.

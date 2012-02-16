@@ -402,7 +402,6 @@ public class AbstractEntityReader
                         {
                             query = getQuery(DocumentIndexer.ENTITY_CLASS_FIELD, child.getClass().getCanonicalName()
                                     .toLowerCase(), DocumentIndexer.ENTITY_ID_FIELD, id, null);
-                            // System.out.println(query);
                             keys = client.getIndexManager().fetchRelation(query);
 
                         }
@@ -410,7 +409,12 @@ public class AbstractEntityReader
                         results = new ArrayList<Object>();
                         for (String rowKey : uqSet)
                         {
-                            results.add(client.find(e.getEntity().getClass(), origMetadata, rowKey, null));
+                            Object result = client.find(e.getEntity().getClass(), origMetadata, rowKey, null);
+                            if (result != null)
+                            {
+                                results.add(result);
+                            }
+
                         }
                     }
 

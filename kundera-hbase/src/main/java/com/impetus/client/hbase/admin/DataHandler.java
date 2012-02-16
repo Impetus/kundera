@@ -124,6 +124,9 @@ public interface DataHandler
      */
     <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String rowKey, String inverseJoinColumnName);
 
+    <E> List<E> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
+            String joinColumnName, String inverseJoinColumnName, Object childId);
+
     /**
      * Shutdown.
      */
