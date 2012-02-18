@@ -126,7 +126,12 @@ public class PropertyAccessorFactory
         // allow fall-back to Object streamer.
         if (null == accessor)
         {
-            accessor = map.get(Object.class);
+        	if(clazz.getName().indexOf("$") > 0) {
+        		accessor = map.get(Enum.class);
+        	} else {
+        		accessor = map.get(Object.class);
+        	}    	
+            
         }
         return accessor;
     }

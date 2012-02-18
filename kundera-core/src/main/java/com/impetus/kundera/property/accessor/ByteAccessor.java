@@ -34,7 +34,7 @@ public class ByteAccessor implements PropertyAccessor<Byte>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Byte fromBytes(byte[] b) throws PropertyAccessException
+    public Byte fromBytes(Class targetClass, byte[] b) throws PropertyAccessException
     {
         try
         {
@@ -83,7 +83,7 @@ public class ByteAccessor implements PropertyAccessor<Byte>
      * )
      */
     @Override
-    public Byte fromString(String s) throws PropertyAccessException
+    public Byte fromString(Class targetClass, String s) throws PropertyAccessException
     {
         try
         {

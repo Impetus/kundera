@@ -32,7 +32,7 @@ public class FloatAccessor implements PropertyAccessor<Float>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Float fromBytes(byte[] data) throws PropertyAccessException
+    public Float fromBytes(Class targetClass, byte[] data) throws PropertyAccessException
     {
         if (data == null || data.length != 4)
             return (float) 0x0;
@@ -101,7 +101,7 @@ public class FloatAccessor implements PropertyAccessor<Float>
      * )
      */
     @Override
-    public Float fromString(String s) throws PropertyAccessException
+    public Float fromString(Class targetClass, String s) throws PropertyAccessException
     {
         try
         {

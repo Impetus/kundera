@@ -116,7 +116,7 @@ public class PelopsUtils
      */
     public static String getSecondaryIndexName(String tableName, Column column) throws PropertyAccessException
     {
-        String indexName = tableName + "_" + PropertyAccessorFactory.STRING.fromBytes(column.getName()) + "_idx";
+        String indexName = tableName + "_" + PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName()) + "_idx";
         return indexName;
     }
 

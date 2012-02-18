@@ -33,7 +33,7 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public final Integer fromBytes(byte[] b)
+    public final Integer fromBytes(Class targetClass, byte[] b)
     {
         return ((b[0] << 24) + ((b[1] & 0xFF) << 16) + ((b[2] & 0xFF) << 8) + (b[3] & 0xFF));
     }
@@ -76,7 +76,7 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
      * )
      */
     @Override
-    public Integer fromString(String s) throws PropertyAccessException
+    public Integer fromString(Class targetClass, String s) throws PropertyAccessException
     {
         try
         {

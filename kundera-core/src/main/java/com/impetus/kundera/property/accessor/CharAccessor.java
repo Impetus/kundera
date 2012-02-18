@@ -32,7 +32,7 @@ public class CharAccessor implements PropertyAccessor<Character>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Character fromBytes(byte[] data) throws PropertyAccessException
+    public Character fromBytes(Class targetClass, byte[] data) throws PropertyAccessException
     {
         if (data == null || data.length != 2)
             return 0x0;
@@ -73,7 +73,7 @@ public class CharAccessor implements PropertyAccessor<Character>
      * )
      */
     @Override
-    public Character fromString(String s) throws PropertyAccessException
+    public Character fromString(Class targetClass, String s) throws PropertyAccessException
     {
         try
         {

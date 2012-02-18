@@ -593,7 +593,8 @@ public class PelopsClient implements Client
 
                 PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(parentMetadata.getIdColumn()
                         .getField());
-                Object value = accessor.fromBytes(rowKey.toByteArray());
+                Object value = accessor.fromBytes(parentMetadata.getIdColumn()
+                        .getField().getClass(), rowKey.toByteArray());
 
                 rowKeys.add(value);
             }

@@ -35,7 +35,7 @@ public class LongAccessor implements PropertyAccessor<Long>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public final Long fromBytes(byte[] bytes) throws PropertyAccessException
+    public final Long fromBytes(Class targetClass, byte[] bytes) throws PropertyAccessException
     {
         if (bytes.length != 8)
         {
@@ -83,7 +83,7 @@ public class LongAccessor implements PropertyAccessor<Long>
      * )
      */
     @Override
-    public Long fromString(String s) throws PropertyAccessException
+    public Long fromString(Class targetClass, String s) throws PropertyAccessException
     {
         try
         {

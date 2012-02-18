@@ -36,7 +36,7 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public BigDecimal fromBytes(byte[] b) throws PropertyAccessException
+    public BigDecimal fromBytes(Class targetClass, byte[] b) throws PropertyAccessException
     {
         String s;
         try
@@ -47,7 +47,7 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
         {
             throw new PropertyAccessException(e.getMessage());
         }
-        return fromString(s);
+        return fromString(targetClass, s);
     }
 
     /*
@@ -83,7 +83,7 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
      * )
      */
     @Override
-    public BigDecimal fromString(String s) throws PropertyAccessException
+    public BigDecimal fromString(Class targetClass, String s) throws PropertyAccessException
     {
         return new BigDecimal(s);
     }

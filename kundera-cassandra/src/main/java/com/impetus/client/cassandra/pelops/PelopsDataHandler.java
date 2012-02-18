@@ -221,7 +221,7 @@ public class PelopsDataHandler extends DataHandler
                 PropertyAccessorHelper.setId(e, m, tr.getId());
             }
 
-            String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
+            String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, sc.getName());
             String scNamePrefix = null;
 
             if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
@@ -244,7 +244,7 @@ public class PelopsDataHandler extends DataHandler
 
                 for (Column column : sc.getColumns())
                 {
-                    String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
+                    String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
                     byte[] value = column.getValue();
 
                     if (value == null)
@@ -256,7 +256,7 @@ public class PelopsDataHandler extends DataHandler
                     {
                         Relation relation = m.getRelation(name);
 
-                        String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(value);
+                        String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(String.class, value);
                         Set<String> keys = MetadataUtils.deserializeKeys(foreignKeys);
                     }
                     else
@@ -312,7 +312,7 @@ public class PelopsDataHandler extends DataHandler
                 PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
             }
 
-            String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(c.getName());
+            String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, c.getName());
             byte[] thriftColumnValue = c.getValue();
 
             if (null == thriftColumnValue)
@@ -339,7 +339,7 @@ public class PelopsDataHandler extends DataHandler
                 if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
                 {
                     // relations = new HashMap<String, Object>();
-                    String value = PropertyAccessorFactory.STRING.fromBytes(thriftColumnValue);
+                    String value = PropertyAccessorFactory.STRING.fromBytes(String.class, thriftColumnValue);
                     relations.put(thriftColumnName, value);
                     // prepare EnhanceEntity and return it
                 }
@@ -394,7 +394,7 @@ public class PelopsDataHandler extends DataHandler
                 // Set row-key
                 PropertyAccessorHelper.setId(entity, m, tr.getId());
             }
-            String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
+            String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, sc.getName());
             String scNamePrefix = null;
 
             // If this super column is variable in number (name#sequence format)
@@ -412,7 +412,7 @@ public class PelopsDataHandler extends DataHandler
 
                 for (Column column : sc.getColumns())
                 {
-                    String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
+                    String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
                     byte[] value = column.getValue();
                     if (value == null)
                     {
@@ -426,7 +426,7 @@ public class PelopsDataHandler extends DataHandler
                     }
                     else if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(name))
                     {
-                        String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(value);
+                        String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(String.class, value);
                         relations.put(name, valueAsStr);
                     }
                 }
@@ -450,7 +450,7 @@ public class PelopsDataHandler extends DataHandler
                     superColumnObj = superColumnClass != null ? superColumnClass.newInstance() : null;
                     for (Column column : sc.getColumns())
                     {
-                        String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
+                        String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
                         byte[] value = column.getValue();
                         Field columnField = columnNameToFieldMap.get(name);
                         if (columnField != null)
@@ -473,7 +473,7 @@ public class PelopsDataHandler extends DataHandler
                         }
                         else
                         {
-                            String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(value);
+                            String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(String.class, value);
                             relations.put(name, valueAsStr);
                         }
 
@@ -515,7 +515,7 @@ public class PelopsDataHandler extends DataHandler
     {
         Field embeddedCollectionField = null;
         Object embeddedObject = null;
-        String scName = PropertyAccessorFactory.STRING.fromBytes(sc.getName());
+        String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, sc.getName());
         String scNamePrefix = null;
 
         // Get a name->field map for super-columns
@@ -549,7 +549,7 @@ public class PelopsDataHandler extends DataHandler
 
             for (Column column : sc.getColumns())
             {
-                String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
+                String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
                 byte[] value = column.getValue();
                 if (value == null)
                 {
@@ -568,7 +568,7 @@ public class PelopsDataHandler extends DataHandler
 
             for (Column column : sc.getColumns())
             {
-                String name = PropertyAccessorFactory.STRING.fromBytes(column.getName());
+                String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
                 byte[] value = column.getValue();
 
                 if (value == null)
@@ -846,7 +846,7 @@ public class PelopsDataHandler extends DataHandler
             try
             {
                 // Thrift Column name
-                String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(c.getName());
+                String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, c.getName());
 
                 // Thrift Column Value
                 byte[] thriftColumnValue = c.getValue();
@@ -857,7 +857,7 @@ public class PelopsDataHandler extends DataHandler
 
                 if (thriftColumnName != null && thriftColumnName.startsWith(inverseJoinColumnName))
                 {
-                    String val = PropertyAccessorFactory.STRING.fromBytes(thriftColumnValue);
+                    String val = PropertyAccessorFactory.STRING.fromBytes(String.class, thriftColumnValue);
                     foreignKeys.add((E) val);
                 }
             }

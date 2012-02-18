@@ -38,7 +38,7 @@ public interface PropertyAccessor<T>
      * @throws PropertyAccessException
      *             the property access exception
      */
-    T fromBytes(byte[] b) throws PropertyAccessException;
+    T fromBytes(Class targetClass, byte[] b) throws PropertyAccessException;
 
     /**
      * To bytes.
@@ -74,5 +74,5 @@ public interface PropertyAccessor<T>
      *             When string can't be converted to specified type, usually as
      *             a result of NumberFormatException
      */
-    T fromString(String s) throws PropertyAccessException;
+    T fromString(Class targetClass, String s) throws PropertyAccessException;
 }

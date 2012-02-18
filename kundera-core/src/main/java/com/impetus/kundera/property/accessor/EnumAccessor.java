@@ -30,10 +30,16 @@ public class EnumAccessor implements PropertyAccessor<Enum>
 {
 
     @Override
-    public Enum fromBytes(byte[] b) throws PropertyAccessException
+    public Enum fromBytes(Class targetClass, byte[] b) throws PropertyAccessException
     {
-
-        return null;
+    	String s = null;
+		try {
+			s = new String(b, Constants.ENCODING);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return null;
+		}
+    	return fromString(targetClass, s);
     }
 
     @Override
@@ -58,14 +64,18 @@ public class EnumAccessor implements PropertyAccessor<Enum>
     }
 
     @Override
-    public Enum fromString(String string) throws PropertyAccessException
+    public Enum fromString(Class targetClass, String string) throws PropertyAccessException
     {
-        /*
-         * Class c = f.getType(); if( c != null && string != null ) { try {
-         * return Enum.valueOf(c, string.trim().toUpperCase()); }
-         * catch(IllegalArgumentException ex) { throw new
-         * PropertyAccessException(ex.getMessage()); } }
-         */
+        
+		
+		if (targetClass != null && string != null) {
+			try {
+				return Enum.valueOf(targetClass, string.trim().toUpperCase());
+			} catch (IllegalArgumentException ex) {
+				throw new PropertyAccessException(ex.getMessage());
+			}
+		}
+         
         return null;
     }
 

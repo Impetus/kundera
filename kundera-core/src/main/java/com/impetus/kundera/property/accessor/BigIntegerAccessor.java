@@ -34,7 +34,7 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public BigInteger fromBytes(byte[] b) throws PropertyAccessException
+    public BigInteger fromBytes(Class targetClass, byte[] b) throws PropertyAccessException
     {
         return new BigInteger(b);
     }
@@ -73,7 +73,7 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
      * )
      */
     @Override
-    public BigInteger fromString(String s) throws PropertyAccessException
+    public BigInteger fromString(Class targetClass, String s) throws PropertyAccessException
     {
         return new BigInteger(s);
     }

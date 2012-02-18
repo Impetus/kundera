@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
+import java.util.Date;
+
 import junit.framework.Assert;
 
 import org.junit.After;
@@ -60,11 +62,11 @@ public class DateAccessorTest
         String dateInMMddYY = "02/01/2012";
         String dateInMMddYYDash = "02-01-2012";
         String dateInMMMddYYYY = "Feb/02/2012";
-        Assert.assertNotNull(accessor.fromString(dateInMMddYYDash));
-        Assert.assertNotNull(accessor.fromString(dateInMMddYYHHmmss));
-        Assert.assertNotNull(accessor.fromString(newDateAsStr));
-        Assert.assertNotNull(accessor.fromString(dateInMMMddYYYY));
-        Assert.assertNotNull(accessor.fromString(dateInMMddYY));
+        Assert.assertNotNull(accessor.fromString(Date.class, dateInMMddYYDash));
+        Assert.assertNotNull(accessor.fromString(Date.class, dateInMMddYYHHmmss));
+        Assert.assertNotNull(accessor.fromString(Date.class, newDateAsStr));
+        Assert.assertNotNull(accessor.fromString(Date.class, dateInMMMddYYYY));
+        Assert.assertNotNull(accessor.fromString(Date.class, dateInMMddYY));
     }
 
     /**

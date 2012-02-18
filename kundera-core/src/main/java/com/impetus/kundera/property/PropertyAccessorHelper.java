@@ -55,7 +55,7 @@ public class PropertyAccessorHelper
     {
 
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
-        Object value = accessor.fromBytes(bytes);
+        Object value = accessor.fromBytes(field.getType(), bytes);
         set(target, field, value);
     }
 
@@ -76,7 +76,7 @@ public class PropertyAccessorHelper
     {
 
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
-        Object value = accessor.fromString(fieldVal);
+        Object value = accessor.fromString(target.getClass(), fieldVal);
         set(target, field, value);
     }
 
@@ -236,9 +236,9 @@ public class PropertyAccessorHelper
     {
         try
         {
-            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn()
-                    .getField());
-            Object obj = accessor.fromString(rowKey);
+        	Field idField = metadata.getIdColumn().getField();
+            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(idField);
+            Object obj = accessor.fromString(idField.getClass(), rowKey);
 
             metadata.getWriteIdentifierMethod().invoke(entity, obj);
         }

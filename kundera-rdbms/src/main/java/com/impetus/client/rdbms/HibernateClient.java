@@ -278,7 +278,7 @@ public class HibernateClient implements Client
         int cnt = 0;
         for (Object r : arg1)
         {
-            pKeys[cnt++] = accessor.fromString(r.toString());
+            pKeys[cnt++] = accessor.fromString(idField.getClass(), r.toString());
         }
 
         return pKeys;

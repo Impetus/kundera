@@ -32,7 +32,7 @@ public class ShortAccessor implements PropertyAccessor<Short>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Short fromBytes(byte[] data) throws PropertyAccessException
+    public Short fromBytes(Class targetClass, byte[] data) throws PropertyAccessException
     {
         if (data == null || data.length != 2)
             return 0x0;
@@ -77,7 +77,7 @@ public class ShortAccessor implements PropertyAccessor<Short>
      * )
      */
     @Override
-    public Short fromString(String s) throws PropertyAccessException
+    public Short fromString(Class targetClass, String s) throws PropertyAccessException
     {
         try
         {

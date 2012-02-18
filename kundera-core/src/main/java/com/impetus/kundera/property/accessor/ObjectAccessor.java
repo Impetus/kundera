@@ -38,7 +38,7 @@ public class ObjectAccessor implements PropertyAccessor<Object>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public final Object fromBytes(byte[] bytes) throws PropertyAccessException
+    public final Object fromBytes(Class targetClass, byte[] bytes) throws PropertyAccessException
     {
         try
         {
@@ -101,7 +101,7 @@ public class ObjectAccessor implements PropertyAccessor<Object>
      * )
      */
     @Override
-    public Object fromString(String s) throws PropertyAccessException
+    public Object fromString(Class targetClass, String s) throws PropertyAccessException
     {
         try
         {

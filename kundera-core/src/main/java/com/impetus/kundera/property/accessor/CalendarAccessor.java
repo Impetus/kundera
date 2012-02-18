@@ -42,7 +42,7 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Calendar fromBytes(byte[] b) throws PropertyAccessException
+    public Calendar fromBytes(Class targetClass, byte[] b) throws PropertyAccessException
     {
         String s;
         try
@@ -55,7 +55,7 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
             throw new PropertyAccessException(e.getMessage());
         }
 
-        return fromString(s);
+        return fromString(targetClass, s);
 
     }
 
@@ -93,7 +93,7 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
      * )
      */
     @Override
-    public Calendar fromString(String s) throws PropertyAccessException
+    public Calendar fromString(Class targetClass, String s) throws PropertyAccessException
     {
         Calendar cal = Calendar.getInstance();
         Date d;
