@@ -73,6 +73,7 @@ public class RDBMSQuery extends QueryImpl implements Query
      * @param isParent the is parent
      * @return the list
      */
+    @Override
     protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
             List<String> relationNames, boolean isParent)
     {
@@ -96,6 +97,7 @@ public class RDBMSQuery extends QueryImpl implements Query
      * com.impetus.kundera.query.QueryImpl#populateEntities(com.impetus.kundera
      * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client)
      */
+    @Override
     protected List<Object> populateEntities(EntityMetadata m, Client client)
     {
         log.debug("on start of fetching non associated entities");
