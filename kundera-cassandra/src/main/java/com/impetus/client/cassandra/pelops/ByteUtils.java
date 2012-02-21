@@ -58,6 +58,13 @@ public class ByteUtils
     {
         try
         {
+            // Check that length is 32 first. Sometimes if using two or more UUIDs
+            // as a composite key will still convert to a UUID string which
+            // is wrong.
+            if(bytes.length() != 16)
+            {
+                return Bytes.toUTF8(bytes.toByteArray());
+            }
             UUID uuid = bytes.toUuid();
             return uuid.toString();
         }
