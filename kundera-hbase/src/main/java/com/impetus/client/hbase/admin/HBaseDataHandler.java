@@ -57,7 +57,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-
 /**
  * The Class HBaseDataHandler.
  * 
@@ -547,11 +546,11 @@ public class HBaseDataHandler implements DataHandler
 
                     Field embeddedCollectionField = columnFamily.getField();
                     Object[] embeddedObjectArr = new Object[hbaseValues.size()]; // Array
-                                                                                 // to
-                                                                                 // hold
-                                                                                 // column
-                                                                                 // family
-                                                                                 // objects
+                    // to
+                    // hold
+                    // column
+                    // family
+                    // objects
 
                     Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
                     int prevCFNameCounter = 0; // Previous CF name counter

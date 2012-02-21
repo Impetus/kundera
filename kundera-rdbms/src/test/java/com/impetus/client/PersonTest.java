@@ -17,7 +17,6 @@ package com.impetus.client;
 
 import org.junit.Test;
 
-
 /**
  * The Class PersonTest.
  *

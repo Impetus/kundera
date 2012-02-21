@@ -35,7 +35,6 @@ import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
-
 /**
  * The Class RDBMSQuery.
  * 
@@ -112,8 +111,8 @@ public class RDBMSQuery extends QueryImpl implements Query
             if (MetadataUtils.useSecondryIndex(client.getPersistenceUnit()))
             {
                 List<String> relations = new ArrayList<String>();
-                List r = ((HibernateClient) client).find(
-                        ((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, relations, null), relations, m);
+                List r = ((HibernateClient) client).find(((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m,
+                        relations, null), relations, m);
                 result = new ArrayList<Object>(r.size());
 
                 for (Object o : r)

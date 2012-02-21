@@ -20,7 +20,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * The Class MTOAddress.
  */
@@ -28,7 +27,7 @@ import javax.persistence.Table;
 @Table(name = "ADDRESS", schema = "KunderaKeyspace@kcassandra")
 public class MTOAddress
 {
-    
+
     /** The address id. */
     @Id
     @Column(name = "ADDRESS_ID")

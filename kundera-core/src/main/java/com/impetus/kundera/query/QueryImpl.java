@@ -48,7 +48,6 @@ import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
-
 /**
  * The Class QueryImpl.
  * 
@@ -174,14 +173,14 @@ public abstract class QueryImpl implements Query
             log.error("error while returing query result:" + e.getMessage());
             throw new QueryHandlerException(e.getMessage());
         } // Query is parsed.
-          // get Graph
-          // If there is any relation and entity is not parent,
-          // get client from persistenceDelegator and find that object.
-          // set that object in graph
-          // Populate child entities according to graph.
-          // if entity is parent pass it as foreign key id for client
-          // if entity is not parent then pass retrieved relation key value to
-          // specific client for find by id.
+        // get Graph
+        // If there is any relation and entity is not parent,
+        // get client from persistenceDelegator and find that object.
+        // set that object in graph
+        // Populate child entities according to graph.
+        // if entity is parent pass it as foreign key id for client
+        // if entity is not parent then pass retrieved relation key value to
+        // specific client for find by id.
 
         return results != null && !results.isEmpty() ? results : null;
 

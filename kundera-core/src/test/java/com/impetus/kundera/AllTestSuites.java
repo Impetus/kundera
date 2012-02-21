@@ -20,7 +20,6 @@ import junit.framework.TestSuite;
 
 import com.impetus.kundera.persistence.JPAImplementationTestSuite;
 
-
 /**
  * The Class AllTestSuites.
  */

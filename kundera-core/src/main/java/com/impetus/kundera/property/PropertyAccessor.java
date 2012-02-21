@@ -17,7 +17,6 @@ package com.impetus.kundera.property;
 
 import java.lang.reflect.Field;
 
-
 /**
  * Interface to access {@link Field} property of a java class.
  * 

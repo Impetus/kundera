@@ -23,7 +23,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
-
 /**
  * The Class Profile.
  */

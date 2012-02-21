@@ -43,7 +43,7 @@ public class UuidAccessor implements PropertyAccessor<UUID>
     {
         try
         {
-            UUID uuid = (UUID)object;
+            UUID uuid = (UUID) object;
             return Bytes.fromUuid(uuid).toByteArray();
         }
         catch (Exception e)
@@ -55,7 +55,7 @@ public class UuidAccessor implements PropertyAccessor<UUID>
     @Override
     public String toString(Object object)
     {
-        return ((UUID)object).toString();
+        return ((UUID) object).toString();
     }
 
     @Override
@@ -71,5 +71,5 @@ public class UuidAccessor implements PropertyAccessor<UUID>
             throw new PropertyAccessException(e.getMessage());
         }
     }
-    
+
 }

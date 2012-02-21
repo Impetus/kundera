@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
-
 /**
  * The MetadataProcessor implementation to scan for EntityListener class/method
  * JPA Specifications: 1. EntityListeners classes must have a no-argument

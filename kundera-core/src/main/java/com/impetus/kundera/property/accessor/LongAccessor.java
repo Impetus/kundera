@@ -14,8 +14,6 @@
  *  * limitations under the License.
  ******************************************************************************/
 
-
-
 package com.impetus.kundera.property.accessor;
 
 //~--- non-JDK imports --------------------------------------------------------
@@ -24,22 +22,19 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import java.nio.ByteBuffer;
 
-
 /**
  * The Class LongAccessor.
  *
  * @author animesh.kumar
  */
-public class LongAccessor
-    implements PropertyAccessor<Long>
+public class LongAccessor implements PropertyAccessor<Long>
 {
     /* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
     /* (non-Javadoc)
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public final Long fromBytes(byte[] bytes)
-        throws PropertyAccessException
+    public final Long fromBytes(byte[] bytes) throws PropertyAccessException
     {
         if (bytes.length != 8)
         {
@@ -59,8 +54,7 @@ public class LongAccessor
      * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public final byte[] toBytes(Object object)
-        throws PropertyAccessException
+    public final byte[] toBytes(Object object) throws PropertyAccessException
     {
         try
         {

@@ -29,7 +29,6 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 
-
 /**
  * The Class LuceneQuery.
  *
@@ -42,14 +41,17 @@ public class LuceneQuery extends QueryImpl implements Query
      * the log used by this class.
      */
     private static Log log = LogFactory.getLog(MetadataBuilder.class);
+
     /**
      * The max result.
      */
     int maxResult = Constants.INVALID;
+
     /**
      * The lucene query.
      */
     String luceneQuery;
+
     private int startPosition = 0;
 
     /**
@@ -102,14 +104,16 @@ public class LuceneQuery extends QueryImpl implements Query
         {
             if (kunderaQuery.isAliasOnly())
             {
-                String[] primaryKeys = searchFilter.values().toArray(new String[]{});
+                String[] primaryKeys = searchFilter.values().toArray(new String[] {});
                 return persistenceDelegeator.find(m.getEntityClazz(), primaryKeys);
-            } else
+            }
+            else
             {
                 return persistenceDelegeator.find(m.getEntityClazz(), searchFilter);
 
             }
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             throw new PersistenceException(e);
         }

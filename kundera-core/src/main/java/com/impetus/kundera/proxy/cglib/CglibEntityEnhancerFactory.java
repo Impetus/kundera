@@ -23,7 +23,6 @@ import net.sf.cglib.proxy.Enhancer;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.proxy.EntityEnhancerFactory;
 
-
 /**
  * Implementation of EntityEnhancerFactory using cglib library.
  * 

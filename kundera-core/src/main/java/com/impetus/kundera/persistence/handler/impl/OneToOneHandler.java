@@ -30,7 +30,6 @@ import com.impetus.kundera.persistence.handler.api.MappingHandler;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-
 //TODO need to think of multiple relationships. 
 //A->B = output says( B->A) and other relation says (A->C). so overall output is : C->B->A (need to look into this later).
 

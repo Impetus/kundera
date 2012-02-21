@@ -43,7 +43,6 @@ import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 import com.mongodb.BasicDBObject;
 
-
 /**
  * Query class for MongoDB data store.
  *

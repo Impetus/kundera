@@ -29,7 +29,6 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
-
 /**
  * The Class PersistenceUnitMetadata.
  *
@@ -37,7 +36,7 @@ import javax.sql.DataSource;
  */
 public class PersistenceUnitMetadata implements PersistenceUnitInfo
 {
-    
+
     /** Persistence Unit name. */
     private String persistenceUnitName;
 

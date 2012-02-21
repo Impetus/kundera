@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
-
 /**
  * The Class InternalCallbackMethod.
  * 

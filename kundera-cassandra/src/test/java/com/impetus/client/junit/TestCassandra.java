@@ -19,7 +19,6 @@ import javax.persistence.EntityManager;
 
 import org.apache.log4j.Logger;
 
-
 /**
  * Test case for CRUD operations on Cassandra database using Kundera.
  */
@@ -120,9 +119,9 @@ public class TestCassandra extends BaseTest
      * public void testDeleteUser() { User user = manager.find(User.class,
      * "IIIPL-0001"); System.out.println(user); manager.remove(user); }
      *//**
-     * Test save authors.
-     *
-     */
+       * Test save authors.
+       *
+       */
     /*
      * 
      * public void testSaveAuthors() throws Exception {
@@ -133,11 +132,11 @@ public class TestCassandra extends BaseTest
      * // check if saved? Author animesh_db = manager.find(Author.class, key);
      * assertEquals(animesh, animesh_db); }
      *//**
-     * Test save posts.
-     * 
-     * @throws Exception
-     *             the exception
-     */
+       * Test save posts.
+       * 
+       * @throws Exception
+       *             the exception
+       */
     /*
      * public void testSavePosts() throws Exception {
      * logger.info("onTestSavePosts"); String key = System.currentTimeMillis() +
@@ -160,11 +159,11 @@ public class TestCassandra extends BaseTest
      * // check if saved? Post post_db = manager.find(Post.class, key);
      * assertEquals(post, post_db); }
      *//**
-     * _test delete authors.
-     * 
-     * @throws Exception
-     *             the exception
-     */
+       * _test delete authors.
+       * 
+       * @throws Exception
+       *             the exception
+       */
     /*
      * 
      * public void testDeleteAuthors() throws Exception {
@@ -180,19 +179,19 @@ public class TestCassandra extends BaseTest
      * // check if deleted? Author animesh_db = manager.find(Author.class, key);
      * assertEquals(null, animesh_db); }
      *//**
-     * Creates the author.
-     * 
-     * @param username
-     *            the user name
-     * @param email
-     *            the email
-     * @param country
-     *            the country
-     * @param registeredSince
-     *            the registered since
-     * 
-     * @return the author
-     */
+       * Creates the author.
+       * 
+       * @param username
+       *            the user name
+       * @param email
+       *            the email
+       * @param country
+       *            the country
+       * @param registeredSince
+       *            the registered since
+       * 
+       * @return the author
+       */
     /*
      * 
      * private static Author createAuthor(String username, String email, String
@@ -201,23 +200,23 @@ public class TestCassandra extends BaseTest
      * author.setEmailAddress(email); author.setRegistered(registeredSince);
      * return author; }
      *//**
-     * Creates the post.
-     * 
-     * @param permalink
-     *            the permalink
-     * @param title
-     *            the title
-     * @param body
-     *            the body
-     * @param author
-     *            the author
-     * @param created
-     *            the created
-     * @param tags
-     *            the tags
-     * 
-     * @return the post
-     */
+       * Creates the post.
+       * 
+       * @param permalink
+       *            the permalink
+       * @param title
+       *            the title
+       * @param body
+       *            the body
+       * @param author
+       *            the author
+       * @param created
+       *            the created
+       * @param tags
+       *            the tags
+       * 
+       * @return the post
+       */
     /*
      * private static Post createPost(String permalink, String title, String
      * body, String author, Date created, String... tags) { Post post = new

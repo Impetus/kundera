@@ -18,7 +18,6 @@ package com.impetus.kundera.property.accessor;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
-
 /**
  * The Class IntegerAccessor.
  * 
@@ -48,7 +47,7 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
             Integer value = (Integer) (val);
 
             return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8),
-                                (byte) value.intValue() };
+                    (byte) value.intValue() };
         }
         catch (Exception e)
         {

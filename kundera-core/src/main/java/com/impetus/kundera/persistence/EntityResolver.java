@@ -38,7 +38,6 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
-
 /**
  * The Class EntityReachabilityResolver.
  * 

@@ -42,7 +42,6 @@ import com.impetus.kundera.persistence.event.ExternalCallbackMethod;
 import com.impetus.kundera.persistence.event.InternalCallbackMethod;
 import com.impetus.kundera.utils.ReflectUtils;
 
-
 /**
  * The MetadataProcessor implementation to scan for EntityListener class/method
  * JPA Specifications: 1. EntityListeners classes must have a no-argument

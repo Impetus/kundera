@@ -30,7 +30,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.utils.ReflectUtils;
 
-
 /**
  * Helper class to access fields.
  * 

@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.query.exception;
 
-
 /**
  * The Class QueryHandlerException.
  *

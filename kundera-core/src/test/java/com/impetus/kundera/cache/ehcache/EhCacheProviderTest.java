@@ -22,7 +22,6 @@ import junit.framework.TestCase;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.entity.PersonnelDTO;
 
-
 /**
  * The Class EhCacheProviderTest.
  *

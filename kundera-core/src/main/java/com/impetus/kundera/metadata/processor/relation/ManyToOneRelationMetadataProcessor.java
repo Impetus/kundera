@@ -28,7 +28,6 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 
-
 /**
  * The Class ManyToOneRelationMetadataProcessor.
  *
@@ -61,7 +60,7 @@ public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProce
 
         Relation relation = new Relation(relationField, targetEntity, null, ann.fetch(), Arrays.asList(ann.cascade()),
                 ann.optional(), null, // mappedBy is
-                                      // null
+                // null
                 Relation.ForeignKey.MANY_TO_ONE);
 
         boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);

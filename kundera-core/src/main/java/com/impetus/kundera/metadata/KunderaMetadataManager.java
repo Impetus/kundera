@@ -26,7 +26,6 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.proxy.EntityEnhancerFactory;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
 
-
 /**
  * The Class KunderaMetadataManager.
  *
@@ -34,7 +33,7 @@ import com.impetus.kundera.proxy.LazyInitializerFactory;
  */
 public class KunderaMetadataManager
 {
-    
+
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(KunderaMetadataManager.class);
 

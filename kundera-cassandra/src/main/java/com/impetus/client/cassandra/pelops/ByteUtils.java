@@ -28,7 +28,7 @@ import org.apache.cassandra.utils.ByteBufferUtil;
  */
 public class ByteUtils
 {
-    
+
     /**
      * Converts a string to a Bytes object taking into consideration that the
      * string may be a UUID.
@@ -42,12 +42,12 @@ public class ByteUtils
             UUID uuid = UUID.fromString(str);
             return Bytes.fromUuid(uuid);
         }
-        catch(IllegalArgumentException ex)
+        catch (IllegalArgumentException ex)
         {
             return Bytes.fromByteArray(str.getBytes());
         }
     }
-    
+
     /**
      * Converts a Bytes object into a string taking into consideration that the
      * Bytes object may be a UUID.
@@ -61,12 +61,12 @@ public class ByteUtils
             UUID uuid = bytes.toUuid();
             return uuid.toString();
         }
-        catch(IllegalStateException ex)
+        catch (IllegalStateException ex)
         {
             return Bytes.toUTF8(bytes.toByteArray());
         }
     }
-    
+
     /**
      * Converts a byte array into a string taking into consideration that the
      * byte array may be a UUID.
@@ -77,7 +77,7 @@ public class ByteUtils
     {
         return bytesToString(Bytes.fromByteArray(byteArray));
     }
-    
+
     /**
      * COnverts a string to a byte array taking into consideration that the
      * string may be a UUID.
@@ -92,7 +92,7 @@ public class ByteUtils
             UUID uuid = UUID.fromString(((String) str));
             return Bytes.fromUuid(uuid).toByteArray();
         }
-        catch(IllegalArgumentException ex)
+        catch (IllegalArgumentException ex)
         {
             try
             {
@@ -104,7 +104,7 @@ public class ByteUtils
             }
         }
     }
-    
+
     /**
      * Converts a string into a ByteBuffer object taking into consideration that the
      * string may be a UUID.
@@ -118,7 +118,7 @@ public class ByteUtils
             UUID uuid = UUID.fromString(str);
             return ByteBuffer.wrap(Bytes.fromUuid(uuid).toByteArray());
         }
-        catch(IllegalArgumentException ex)
+        catch (IllegalArgumentException ex)
         {
             return ByteBufferUtil.bytes(str);
         }
