@@ -23,9 +23,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
+import java.nio.ByteBuffer;
 
 /**
  * The Class DateAccessor.
@@ -93,9 +93,9 @@ public class DateAccessor implements PropertyAccessor<Date>
     {
         try
         {
-            // return DATE_FORMATTER.parse(new String(bytes,
-            // Constants.ENCODING));
-            return getDateByPattern(new String(bytes, Constants.ENCODING));
+            Long ts = (ByteBuffer.wrap(bytes).getLong());
+            return new Date(ts);
+            //return getDateByPattern(new String(bytes, Constants.ENCODING));
         }
         catch (Exception e)
         {
@@ -111,7 +111,13 @@ public class DateAccessor implements PropertyAccessor<Date>
     {
         try
         {
-            return DATE_FORMATTER.format(((Date) date)).getBytes(Constants.ENCODING);
+            long ts = ((Date) date).getTime();
+            
+            ByteBuffer buffer = ByteBuffer.allocate(8);
+            buffer.putLong(ts);
+
+            return buffer.array();
+            //return DATE_FORMATTER.format(((Date) date)).getBytes(Constants.ENCODING);
         }
         catch (Exception e)
         {
