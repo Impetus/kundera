@@ -557,7 +557,7 @@ public class KunderaQuery
      */
     private MetamodelImpl getMetamodel()
     {
-        return KunderaMetadataManager.getMetamodel(persistenceUnits);
+        return KunderaMetadataManager.getMetamodel(entityName, persistenceUnits);
     }
 
     /**
@@ -607,6 +607,7 @@ public class KunderaQuery
             {
 
                 String nextOrder = (String) token.nextElement();
+                nextOrder = nextOrder.trim().toUpperCase();
 
                 // more spaces given.
                 if (StringUtils.isNotBlank(nextOrder))

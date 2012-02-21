@@ -184,7 +184,10 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Metamodel getMetamodel()
     {
-        return KunderaMetadataManager.getMetamodel(getPersistenceUnits());
+        // FIXME: This is not right since it will only get the first metamode
+        // if multiple datastores are used.
+        //return KunderaMetadataManager.getMetamodel(getPersistenceUnits());
+        throw new NotImplementedException("TODO");
     }
 
     /* (non-Javadoc)

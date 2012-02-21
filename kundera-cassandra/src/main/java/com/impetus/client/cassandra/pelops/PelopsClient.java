@@ -612,22 +612,28 @@ public class PelopsClient implements Client
         {
             Bytes rowKey = rowIter.next();
             List<Column> columns = qResults.get(rowKey);
-            try
+
+            // If columns are empty, this is a "tombstoned" entry associated
+            // with distributed deletes
+            if (!columns.isEmpty())
             {
-                String rowKeyStr = ByteUtils.bytesToString(rowKey);
-                Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m, dataHandler.new ThriftRow(rowKeyStr,
-                        m.getTableName(), columns, null), relationNames, isRelational);
-                entities.add(e);
-            }
-            catch (IllegalStateException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            catch (Exception e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                try
+                {
+                    String rowKeyStr = ByteUtils.bytesToString(rowKey);
+                    Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m, dataHandler.new ThriftRow(
+                            rowKeyStr, m.getTableName(), columns, null), relationNames, isRelational);
+                    entities.add(e);
+                }
+                catch (IllegalStateException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                catch (Exception e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         }
     }

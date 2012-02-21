@@ -75,7 +75,7 @@ public class KunderaMetadataManager
      * @param persistenceUnits the persistence units
      * @return the metamodel
      */
-    public static MetamodelImpl getMetamodel(String... persistenceUnits)
+    public static MetamodelImpl getMetamodel(String entityName, String... persistenceUnits)
     {
         KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
 
@@ -84,17 +84,16 @@ public class KunderaMetadataManager
         {
             metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(pu);
 
-            if (metamodel != null)
+            if (metamodel != null && metamodel.getEntityClass(entityName) != null)
             {
                 return metamodel;
             }
         }
 
-        if (metamodel == null)
-        {
-            metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                    Constants.COMMON_ENTITY_METADATAS);
-        }
+        //If not in specified in any persistence unit, it should be here.
+        metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+                Constants.COMMON_ENTITY_METADATAS);
+
         return metamodel;
     }
 
