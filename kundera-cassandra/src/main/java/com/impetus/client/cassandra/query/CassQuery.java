@@ -304,7 +304,7 @@ public class CassQuery extends QueryImpl implements Query
             Column col = m.getColumn(fieldName);
             if (col == null)
             {
-                throw new QueryHandlerException("column type is null for: " + fieldName);
+                throw new QueryHandlerException("Column type is null for: " + fieldName);
             }
             f = col.getField();
         }

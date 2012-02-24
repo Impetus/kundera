@@ -15,8 +15,8 @@ package com.impetus.kundera.property.accessor;
 
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
+import java.nio.ByteBuffer;
 import java.util.UUID;
-import org.scale7.cassandra.pelops.Bytes;
 
 /**
  *
@@ -30,7 +30,12 @@ public class UuidAccessor implements PropertyAccessor<UUID>
     {
         try
         {
-            return Bytes.fromByteArray(bytes).toUuid();
+            ByteBuffer bb = ByteBuffer.wrap(bytes);
+            long msb = bb.getLong();
+            long lsb = bb.getLong();
+
+            return new UUID(msb, lsb);
+            //return Bytes.fromByteArray(bytes).toUuid();
         }
         catch (Exception e)
         {
@@ -44,7 +49,11 @@ public class UuidAccessor implements PropertyAccessor<UUID>
         try
         {
             UUID uuid = (UUID) object;
-            return Bytes.fromUuid(uuid).toByteArray();
+            ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+            bb.putLong(uuid.getMostSignificantBits());
+            bb.putLong(uuid.getLeastSignificantBits());
+            return bb.array();
+            //return Bytes.fromUuid(uuid).toByteArray();
         }
         catch (Exception e)
         {
@@ -67,7 +76,6 @@ public class UuidAccessor implements PropertyAccessor<UUID>
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             throw new PropertyAccessException(e.getMessage());
         }
     }
