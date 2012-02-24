@@ -15,25 +15,53 @@
  ******************************************************************************/
 package com.impetus.kundera.client;
 
+import com.impetus.kundera.KunderaException;
+
 /**
+ * Exception class for error scenarios involving resolution of clients.
  * The Class ClientResolverException.
  * 
  * @author impetus
  */
-public class ClientResolverException extends RuntimeException
+public class ClientResolverException extends KunderaException
 {
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
     /**
-     * Default constructor using fields.
      * 
-     * @param errorMsg
-     *            error message.
      */
-    public ClientResolverException(String errorMsg)
+    public ClientResolverException()
     {
-        super(errorMsg);
+        super();        
     }
+
+    /**
+     * @param arg0
+     * @param arg1
+     */
+    public ClientResolverException(String arg0, Throwable arg1)
+    {
+        super(arg0, arg1);
+        
+    }
+
+    /**
+     * @param arg0
+     */
+    public ClientResolverException(String arg0)
+    {
+        super(arg0);
+        
+    }
+
+    /**
+     * @param arg0
+     */
+    public ClientResolverException(Throwable arg0)
+    {
+        super(arg0);
+        
+    }    
 }

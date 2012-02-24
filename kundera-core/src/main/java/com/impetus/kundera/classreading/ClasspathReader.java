@@ -25,6 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The Class ClasspathReader.
  * 
@@ -32,6 +35,7 @@ import java.util.StringTokenizer;
  */
 public class ClasspathReader extends Reader
 {
+    private static Logger logger = LoggerFactory.getLogger(ClasspathReader.class);
 
     /**
      * The filter.
@@ -61,11 +65,6 @@ public class ClasspathReader extends Reader
         this.classesToScan = classesToScan;
     }
 
-    /*
-     * (non-Javadoc) TODO: MOVED to startup package, delete this
-     * 
-     * @see com.impetus.kundera.classreading.Reader#read()
-     */
 
     @Override
     public final void read()
@@ -73,6 +72,7 @@ public class ClasspathReader extends Reader
         URL[] resources = findResources();
         for (URL resource : resources)
         {
+
             try
             {
                 ResourceIterator itr = getResourceIterator(resource, getFilter());
@@ -85,8 +85,8 @@ public class ClasspathReader extends Reader
             }
             catch (IOException e)
             {
-                // TODO: Do something with this exception
-                e.printStackTrace();
+                logger.error(e.getMessage());
+                throw new ResourceReadingException(e);
             }
         }
     }
@@ -99,7 +99,7 @@ public class ClasspathReader extends Reader
      */
     @SuppressWarnings("deprecation")
     @Override
-    public final URL[] findResourcesByClasspath()
+    public final URL[] findResourcesByClasspath() 
     {
         List<URL> list = new ArrayList<URL>();
         String classpath = System.getProperty("java.class.path");
@@ -111,14 +111,14 @@ public class ClasspathReader extends Reader
 
             File fp = new File(path);
             if (!fp.exists())
-                throw new RuntimeException("File in java.class.path does not exist: " + fp);
+                throw new ResourceReadingException("File in java.class.path does not exist: " + fp);
             try
             {
                 list.add(fp.toURL());
             }
             catch (MalformedURLException e)
             {
-                throw new RuntimeException(e);
+                throw new ResourceReadingException(e);
             }
         }
         return list.toArray(new URL[list.size()]);
@@ -131,7 +131,7 @@ public class ClasspathReader extends Reader
      */
 
     @Override
-    public final URL[] findResourcesByContextLoader()
+    public final URL[] findResourcesByContextLoader() 
     {
         List<URL> list = new ArrayList<URL>();
 
@@ -157,7 +157,7 @@ public class ClasspathReader extends Reader
                         }
                         catch (MalformedURLException e)
                         {
-                            e.printStackTrace();
+                            throw new ResourceReadingException(e);
                         }
                     }
                 }
@@ -175,7 +175,7 @@ public class ClasspathReader extends Reader
      * @see com.impetus.kundera.classreading.Reader#findResources()
      */
     @Override
-    public URL[] findResources()
+    public URL[] findResources() 
     {
         URL[] result = null;
 

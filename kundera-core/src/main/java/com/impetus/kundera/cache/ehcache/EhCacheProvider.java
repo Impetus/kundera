@@ -65,7 +65,7 @@ public class EhCacheProvider implements CacheProvider
      * @see com.impetus.kundera.cache.CacheProvider#init(java.lang.String)
      */
     @Override
-    public void init(String cacheResourceName) throws CacheException
+    public void init(String cacheResourceName) 
     {
         if (manager != null)
         {
@@ -119,7 +119,7 @@ public class EhCacheProvider implements CacheProvider
      * @see com.impetus.kundera.cache.CacheProvider#init(java.util.Map)
      */
     @Override
-    public synchronized void init(Map<?, ?> properties) throws CacheException
+    public synchronized void init(Map<?, ?> properties) 
     {
         if (manager != null)
         {
@@ -160,7 +160,7 @@ public class EhCacheProvider implements CacheProvider
             }
             else
             {
-                throw e;
+                throw new CacheException(e);
             }
         }
         finally
@@ -201,18 +201,9 @@ public class EhCacheProvider implements CacheProvider
         return url;
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.cache.CacheProvider#createCache(java.lang.String)
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.cache.CacheProvider#createCache(java.lang.String)
-     */
+
     @Override
-    public Cache createCache(String name) throws CacheException
+    public Cache createCache(String name) 
     {
         if (manager == null)
         {

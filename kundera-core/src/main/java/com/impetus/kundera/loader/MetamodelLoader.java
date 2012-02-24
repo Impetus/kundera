@@ -92,7 +92,7 @@ public class MetamodelLoader extends ApplicationLoader
     {
         if (persistenceUnit == null)
         {
-            throw new IllegalArgumentException("Must have a persistenceUnitName in order to load entity metadata!");
+            throw new MetamodelLoaderException("Must have a persistenceUnitName in order to load entity metadata, you provided:" + persistenceUnit);
         }
 
         KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
@@ -106,7 +106,7 @@ public class MetamodelLoader extends ApplicationLoader
         {
             log.error("It is necessary to load Persistence Unit metadata  for persistence unit " + persistenceUnit
                     + " first before loading entity metadata.");
-            throw new PersistenceException("load Persistence Unit metadata  for persistence unit " + persistenceUnit
+            throw new MetamodelLoaderException("load Persistence Unit metadata  for persistence unit " + persistenceUnit
                     + " first before loading entity metadata.");
         }
         else
@@ -174,7 +174,8 @@ public class MetamodelLoader extends ApplicationLoader
             {
                 // TODO: Do something with this exception
                 log.error("Error while retreiving and storing entity metadata. Details:" + e.getMessage());
-                e.printStackTrace();
+                throw new MetamodelLoaderException("Error while retreiving and storing entity metadata");
+                
             }
         }
         ((MetamodelImpl) metamodel).setEntityMetadataMap(entityMetadataMap);

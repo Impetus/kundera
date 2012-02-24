@@ -20,6 +20,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -129,42 +130,52 @@ public abstract class Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    public ResourceIterator getResourceIterator(URL url, Filter filter) throws IOException
+    public ResourceIterator getResourceIterator(URL url, Filter filter) 
     {
         String urlString = url.toString();
-        if (urlString.endsWith("!/"))
+        try
         {
-            urlString = urlString.substring(4);
-            urlString = urlString.substring(0, urlString.length() - 2);
-            url = new URL(urlString);
-        }
-
-        if (urlString.endsWith(".class"))
-        {
-            File f = new File(url.getPath());
-            return new ClassFileIterator(f);
-        }
-        else if (!urlString.endsWith("/"))
-        {
-            return new JarFileIterator(url.openStream(), filter);
-        }
-        else
-        {
-
-            if (!url.getProtocol().equals("file"))
+            if (urlString.endsWith("!/"))
             {
-                throw new IOException("Unable to understand protocol: " + url.getProtocol());
+                urlString = urlString.substring(4);
+                urlString = urlString.substring(0, urlString.length() - 2);
+                url = new URL(urlString);
             }
 
-            File f = new File(url.getPath());
-            if (f.isDirectory())
+            if (urlString.endsWith(".class"))
             {
-                return new ClassFileIterator(f, filter);
+                File f = new File(url.getPath());
+                return new ClassFileIterator(f);
             }
-            else
+            else if (!urlString.endsWith("/"))
             {
                 return new JarFileIterator(url.openStream(), filter);
             }
+            else
+            {
+                if (!url.getProtocol().equals("file"))
+                {
+                    throw new ResourceReadingException("Unable to understand protocol: " + url.getProtocol());
+                }
+
+                File f = new File(url.getPath());
+                if (f.isDirectory())
+                {
+                    return new ClassFileIterator(f, filter);
+                }
+                else
+                {
+                    return new JarFileIterator(url.openStream(), filter);
+                }
+            }
+        }
+        catch (MalformedURLException e)
+        {
+            throw new ResourceReadingException(e);
+        }
+        catch (IOException e)
+        {
+            throw new ResourceReadingException(e);
         }
     }
 

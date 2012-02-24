@@ -39,7 +39,7 @@ public class CoreLoader
      */
     public void load()
     {
-        log.info("Loading factories ... ");
+        log.info("Loading Kundera Core Metdata ... ");
 
         CoreMetadata coreMetadata = new CoreMetadata();
         coreMetadata.setEnhancedProxyFactory(new CglibEntityEnhancerFactory());
