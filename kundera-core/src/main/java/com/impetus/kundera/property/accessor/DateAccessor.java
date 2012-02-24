@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
+import com.impetus.kundera.Constants;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -93,9 +94,10 @@ public class DateAccessor implements PropertyAccessor<Date>
     {
         try
         {
+            //Date format validation
+            getDateByPattern(new String(bytes, Constants.ENCODING));
             Long ts = (ByteBuffer.wrap(bytes).getLong());
             return new Date(ts);
-            //return getDateByPattern(new String(bytes, Constants.ENCODING));
         }
         catch (Exception e)
         {

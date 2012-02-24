@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.property.PropertyAccessException;
+import java.util.Date;
 
 /**
  * The Class DateAccessorTest.
@@ -58,11 +59,68 @@ public class DateAccessorTest
         String dateInMMddYY = "02/01/2012";
         String dateInMMddYYDash = "02-01-2012";
         String dateInMMMddYYYY = "Feb/02/2012";
-        Assert.assertNotNull(accessor.fromString(dateInMMddYYDash));
-        Assert.assertNotNull(accessor.fromString(dateInMMddYYHHmmss));
-        Assert.assertNotNull(accessor.fromString(newDateAsStr));
-        Assert.assertNotNull(accessor.fromString(dateInMMMddYYYY));
-        Assert.assertNotNull(accessor.fromString(dateInMMddYY));
+        String dateWithErr = "Geb/32/012/ LJJ";
+        byte[] bytes = new byte[32];
+        
+        Date date = accessor.fromString(dateInMMddYYDash);
+        Assert.assertNotNull(date);
+        accessor.toBytes(date);
+        
+        date = accessor.fromString(dateInMMddYYHHmmss);
+        Assert.assertNotNull(date);
+        accessor.toBytes(date);
+        
+        date = accessor.fromString(newDateAsStr);
+        Assert.assertNotNull(date);
+        accessor.toBytes(date);
+        
+        date = accessor.fromString(dateInMMMddYYYY);
+        Assert.assertNotNull(date);
+        accessor.toBytes(date);
+        
+        date = accessor.fromString(dateInMMddYY);
+        Assert.assertNotNull(date);
+        accessor.toBytes(date);
+        
+        boolean caught = false;
+        
+        try
+        {
+            accessor.fromString(dateWithErr);
+        }
+        catch(PropertyAccessException ex)
+        {
+            caught = true;
+        }
+        
+        assert caught;
+        
+        caught = false;
+        
+        try
+        {
+            accessor.toBytes(new Object());
+        }
+        catch(PropertyAccessException ex)
+        {
+            caught = true;
+        }
+        
+        assert caught;
+        
+        caught = false;
+        
+        try
+        {
+            accessor.fromBytes(bytes);
+        }
+        catch(PropertyAccessException ex)
+        {
+            caught = true;
+        }
+        
+        assert caught;
+        
     }
 
     /**
