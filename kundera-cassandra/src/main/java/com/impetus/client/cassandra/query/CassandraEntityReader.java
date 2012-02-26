@@ -34,7 +34,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
-import com.impetus.kundera.query.exception.QueryHandlerException;
+import com.impetus.kundera.query.QueryHandlerException;
 
 /**
  * The Class CassandraEntityReader.

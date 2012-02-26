@@ -41,8 +41,8 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
-import com.impetus.kundera.query.exception.QueryHandlerException;
 
 /**
  * The Class RDBMSEntityReader.

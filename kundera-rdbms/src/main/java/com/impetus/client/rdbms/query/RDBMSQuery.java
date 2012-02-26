@@ -32,8 +32,8 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.query.KunderaQuery;
+import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
-import com.impetus.kundera.query.exception.QueryHandlerException;
 
 /**
  * The Class RDBMSQuery.
