@@ -15,11 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
-import javax.persistence.PersistenceException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -29,8 +28,9 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
  * A factory for creating GenericClient objects.
  */
 public abstract class GenericClientFactory implements Loader
-{
-    /** The logger. */
+{    
+
+	/** The logger. */
     private static Logger logger = LoggerFactory.getLogger(GenericClientFactory.class);
 
     /** The client. */
@@ -46,7 +46,8 @@ public abstract class GenericClientFactory implements Loader
     @Override
     public void load(String... persistenceUnits)
     {
-        throw new PersistenceException();
+        throw new ClientLoaderException("Invalid load method call for Client Loader." +
+        		" Use overloaded version instead");
     }
 
     /**
@@ -82,7 +83,7 @@ public abstract class GenericClientFactory implements Loader
         {
             ClientMetadata clientMetadata = new ClientMetadata();
             String secIndex = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getPersistenceUnitMetadata(persistenceUnit).getProperty("index_home_dir");
+                    .getPersistenceUnitMetadata(persistenceUnit).getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
             clientMetadata.setLuceneIndexDir(secIndex);
             KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
         }

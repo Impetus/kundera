@@ -64,4 +64,7 @@ public interface PersistenceProperties
     // Cap on the total number of instances from all nodes combined.
     /** The Constant KUNDERA_POOL_SIZE_MAX_TOTAL. */
     public static final String KUNDERA_POOL_SIZE_MAX_TOTAL = "kundera.pool.size.max.total";
+    
+    /** Home directory for alternative secondary indexing, Lucene to be specific. */
+    public static final String KUNDERA_INDEX_HOME_DIR = "index_home_dir";
 }

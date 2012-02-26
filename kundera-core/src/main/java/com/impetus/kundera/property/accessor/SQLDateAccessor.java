@@ -36,7 +36,7 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Date fromBytes(Class targetClass, byte[] b) throws PropertyAccessException
+    public Date fromBytes(Class targetClass, byte[] b) 
     {
         String s;
         try
@@ -45,7 +45,7 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
         }
         catch (UnsupportedEncodingException e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
 
         return fromString(targetClass, s);
@@ -58,7 +58,7 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public byte[] toBytes(Object object) throws PropertyAccessException
+    public byte[] toBytes(Object object)
     {
         Date d = (Date) object;
         return d.toString().getBytes();
@@ -84,7 +84,7 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
      * )
      */
     @Override
-    public Date fromString(Class targetClass, String s) throws PropertyAccessException
+    public Date fromString(Class targetClass, String s) 
     {
         Date d = Date.valueOf(s);
         return d;

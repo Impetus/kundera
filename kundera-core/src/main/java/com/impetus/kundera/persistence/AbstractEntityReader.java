@@ -38,7 +38,7 @@ import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.exception.QueryHandlerException;
+import com.impetus.kundera.query.QueryHandlerException;
 
 /**
  * The Class AbstractEntityReader.
@@ -328,8 +328,7 @@ public class AbstractEntityReader
      *             the exception
      */
     private void onBiDirection(EnhanceEntity e, Client client, EntitySaveGraph objectGraph,
-            EntityMetadata origMetadata, Object child, EntityMetadata childMetadata, Client childClient)
-            throws Exception
+            EntityMetadata origMetadata, Object child, EntityMetadata childMetadata, Client childClient)            
     {
         // Process bidirectional processing only if it's a bidirectional graph
         // and child exists (there is a possibility that this
@@ -425,8 +424,8 @@ public class AbstractEntityReader
                 }
                 catch (PropertyAccessException ex)
                 {
-                    log.error("error on handling bi direction:" + ex.getMessage());
-                    throw new QueryHandlerException(ex.getMessage());
+                    log.error("Error while fetching data for reverse bidirectional relationship. Details:" + ex.getMessage());
+                    throw new EntityReaderException("Error while fetching data for reverse bidirectional relationship", ex);
                 }
 
                 // In case of other parent object found for given
@@ -436,16 +435,25 @@ public class AbstractEntityReader
                     if (o != null)
                     {
                         Field f = objectGraph.getProperty();
-                        if (PropertyAccessorHelper.isCollection(f.getType()))
+                        
+                        try
                         {
-                            List l = new ArrayList();
-                            l.add(child);
-                            Object oo = getFieldInstance(l, f);
-                            PropertyAccessorHelper.set(o, f, oo);
+                            if (PropertyAccessorHelper.isCollection(f.getType()))
+                            {
+                                List l = new ArrayList();
+                                l.add(child);
+                                Object oo = getFieldInstance(l, f);
+                                PropertyAccessorHelper.set(o, f, oo);
+                            }
+                            else
+                            {
+                                PropertyAccessorHelper.set(o, f, child);
+                            }
                         }
-                        else
+                        catch (PropertyAccessException e1)
                         {
-                            PropertyAccessorHelper.set(o, f, child);
+                            log.error("Error while fetching data for reverse bidirectional relationship. Details:" + e1.getMessage());
+                            throw new EntityReaderException("Error while fetching data for reverse bidirectional relationship", e1);
                         }
                     }
 
@@ -465,8 +473,8 @@ public class AbstractEntityReader
             }
             catch (PropertyAccessException ex)
             {
-                log.error("error on handling bi direction:" + ex.getMessage());
-                throw new QueryHandlerException(ex.getMessage());
+                log.error("Error while fetching data for reverse bidirectional relationship. Details:" + ex.getMessage());
+                throw new EntityReaderException("Error while fetching data for reverse bidirectional relationship", ex);
             }
         }
     }
@@ -484,21 +492,11 @@ public class AbstractEntityReader
      */
     protected List<EnhanceEntity> onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
     {
-
-        Set<String> rSet = fetchDataFromLucene(client);
-        try
-        {
-            List resultList = client.findAll(m.getEntityClazz(), rSet.toArray(new String[] {}));
-            return transform(m, ls, resultList);
-        }
-        catch (Exception e)
-        {
-            log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
-            throw new QueryHandlerException(e.getMessage());
-        }
-
+        Set<String> rSet = fetchDataFromLucene(client);        
+        List resultList = client.findAll(m.getEntityClazz(), rSet.toArray(new String[] {}));
+        return transform(m, ls, resultList);
     }
-
+            
     /**
      * Transform.
      * 
@@ -558,7 +556,8 @@ public class AbstractEntityReader
         }
         catch (PropertyAccessException e)
         {
-            throw new PersistenceException(e.getMessage());
+            log.error("Error while Getting ID. Details:" + e.getMessage());
+            throw new EntityReaderException("Error while Getting ID for entity " + entity, e);
         }
 
     }
@@ -603,24 +602,16 @@ public class AbstractEntityReader
 
         List childrenEntities = new ArrayList();
         for (Object foreignKey : foreignKeys)
-        {
-            try
-            {
-                EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
-                Client childClient = delegator.getClient(childMetadata);
-                // Object child = childClient.find(relation.getTargetEntity(),
-                // childMetadata, (String) foreignKey, null);
-                Object child = delegator.find(relation.getTargetEntity(), foreignKey);
+        {            
+            EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
+            Client childClient = delegator.getClient(childMetadata);
+            // Object child = childClient.find(relation.getTargetEntity(),
+            // childMetadata, (String) foreignKey, null);
+            Object child = delegator.find(relation.getTargetEntity(), foreignKey);
 
-                onBiDirection(e, client, objectGraph, entityMetadata, child, childMetadata, childClient);
+            onBiDirection(e, client, objectGraph, entityMetadata, child, childMetadata, childClient);
 
-                childrenEntities.add(child);
-
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
+            childrenEntities.add(child);            
         }
 
         Field childField = objectGraph.getProperty();
@@ -634,8 +625,8 @@ public class AbstractEntityReader
                             childField) : childrenEntities.get(0));
         }
         catch (PropertyAccessException ex)
-        {
-            ex.printStackTrace();
+        {            
+            throw new EntityReaderException(ex);
         }
 
     }

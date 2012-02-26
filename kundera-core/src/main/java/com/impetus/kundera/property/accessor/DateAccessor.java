@@ -91,7 +91,7 @@ public class DateAccessor implements PropertyAccessor<Date>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public final Date fromBytes(Class targetClass, byte[] bytes) throws PropertyAccessException
+    public final Date fromBytes(Class targetClass, byte[] bytes)
     {
         try
         {
@@ -101,7 +101,7 @@ public class DateAccessor implements PropertyAccessor<Date>
         }
         catch (Exception e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
     }
 
@@ -112,7 +112,7 @@ public class DateAccessor implements PropertyAccessor<Date>
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public final byte[] toBytes(Object date) throws PropertyAccessException
+    public final byte[] toBytes(Object date)
     {
         try
         {
@@ -120,7 +120,7 @@ public class DateAccessor implements PropertyAccessor<Date>
         }
         catch (Exception e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
     }
 
@@ -144,7 +144,7 @@ public class DateAccessor implements PropertyAccessor<Date>
      * )
      */
     @Override
-    public Date fromString(Class targetClass, String s) throws PropertyAccessException
+    public Date fromString(Class targetClass, String s)
     {
         try
         {
@@ -153,7 +153,7 @@ public class DateAccessor implements PropertyAccessor<Date>
         }
         catch (NumberFormatException e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
     }
 
@@ -166,7 +166,7 @@ public class DateAccessor implements PropertyAccessor<Date>
      * @throws PropertyAccessException
      *             throws only if invalid format is supplied.
      */
-    public static Date getDateByPattern(String date) throws PropertyAccessException
+    public static Date getDateByPattern(String date) 
     {
         for (String p : patterns)
         {
@@ -202,7 +202,7 @@ public class DateAccessor implements PropertyAccessor<Date>
      * @throws PropertyAccessException
      *             throws only if invalid format is supplied.
      */
-    public static String getFormattedObect(String date) throws PropertyAccessException
+    public static String getFormattedObect(String date) 
     {
         return getDateByPattern(date).toString();
     }

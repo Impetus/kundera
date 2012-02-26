@@ -18,6 +18,9 @@ package com.impetus.kundera.client;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.utils.InvalidConfigurationException;
+
 /**
  * The Enum ClientType.
  * 
@@ -59,7 +62,7 @@ public enum ClientType
      *            client type
      * @return clientType enum value.
      */
-    public static ClientType getValue(String clientType) 
+    public static ClientType getValue(String clientType) throws InvalidConfigurationException
     {
         if (clientType == null)
         {
@@ -69,9 +72,11 @@ public enum ClientType
         ClientType client = coll.get(clientType);
         
         if(client != null) {
-            return coll.get(clientType);
+            return client;
         } else {
-            throw new ClientResolverException("Not Client configured in Kundera for " + clientType);
+            throw new InvalidConfigurationException("Not Client configured in Kundera for " + clientType 
+            		+ ". Check whether you specified correct " + PersistenceProperties.KUNDERA_CLIENT
+            		+ " in persistence.xml");
         }        
     }
 }

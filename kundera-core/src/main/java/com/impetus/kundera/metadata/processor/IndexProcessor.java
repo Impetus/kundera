@@ -42,18 +42,7 @@ public class IndexProcessor implements MetadataProcessor
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(IndexProcessor.class);
 
-    /*
-     * @see
-     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-     * com.impetus.kundera.metadata.EntityMetadata)
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
+
     public final void process(final Class<?> clazz, EntityMetadata metadata)
     {
         metadata.setIndexName(clazz.getSimpleName());

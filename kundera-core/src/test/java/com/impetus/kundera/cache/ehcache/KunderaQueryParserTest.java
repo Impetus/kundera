@@ -27,7 +27,6 @@ import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.SortOrder;
 import com.impetus.kundera.query.KunderaQuery.SortOrdering;
 import com.impetus.kundera.query.KunderaQueryParser;
-import com.impetus.kundera.query.KunderaQueryParserException;
 
 /**
  * The Class KunderaQueryParserTest.
@@ -86,15 +85,9 @@ public class KunderaQueryParserTest
 
         String invalidQuery = "SELECT c FROM Country c ORDER BY c.currency, c.population DESCS";
 
-        try
-        {
-            parser = new KunderaQueryParser(kunderQuery, validQueryWithDefaultClause);
-            parser.parse();
-        }
-        catch (KunderaQueryParserException e)
-        {
-            Assert.assertNotNull(e);
-        }
+        parser = new KunderaQueryParser(kunderQuery, validQueryWithDefaultClause);
+        parser.parse();
+       
     }
 
     /**

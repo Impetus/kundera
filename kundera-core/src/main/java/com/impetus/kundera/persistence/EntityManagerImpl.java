@@ -105,17 +105,12 @@ public class EntityManagerImpl implements EntityManager
         // TODO Check for validity also as per JPA
         if (primaryKey == null)
         {
-            throw new IllegalArgumentException("primaryKey value must not be null.");
+            throw new IllegalArgumentException("PrimaryKey value must not be null for object you want to find.");
         }
 
         return getPersistenceDelegator().find(entityClass, primaryKey);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#remove(java.lang.Object)
-     */
     @Override
     public final void remove(Object e)
     {
@@ -123,7 +118,7 @@ public class EntityManagerImpl implements EntityManager
         // TODO Check for validity also as per JPA
         if (e == null)
         {
-            throw new IllegalArgumentException("Entity must not be null.");
+            throw new IllegalArgumentException("Entity to be removed must not be null.");
         }
 
         getPersistenceDelegator().remove(e);
@@ -140,7 +135,7 @@ public class EntityManagerImpl implements EntityManager
         checkClosed();
         if (e == null)
         {
-            throw new IllegalArgumentException("Entity must not be null.");
+            throw new IllegalArgumentException("Entity to be merged must not be null.");
         }
 
         return getPersistenceDelegator().merge(e);
@@ -157,7 +152,7 @@ public class EntityManagerImpl implements EntityManager
         checkClosed();
         if (e == null)
         {
-            throw new IllegalArgumentException("Entity must not be null.");
+            throw new IllegalArgumentException("Entity to be persisted must not be null.");
         }
 
         getPersistenceDelegator().persist(e);
@@ -595,7 +590,7 @@ public class EntityManagerImpl implements EntityManager
     {
         if (!isOpen())
         {
-            throw new IllegalStateException("EntityManager has been closed.");
+            throw new IllegalStateException("EntityManager has already been closed.");
         }
     }
 

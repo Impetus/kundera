@@ -135,8 +135,9 @@ public class KunderaMetadataManager
                 return metadata;
             }
         }
-        log.warn("Something is terribly wrong, No Entity metadata found for the class " + entityClass
-                + ". If your entity is for RDBMS, make sure you put fully qualified entity class"
+        log.warn("No Entity metadata found for the class " + entityClass
+                + ". Any CRUD operation on this entity will fail."
+                + "If your entity is for RDBMS, make sure you put fully qualified entity class"
                 + " name under <class></class> tag in persistence.xml for RDBMS "
                 + "persistence unit. Returning null value.");
         return null;

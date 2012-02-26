@@ -58,20 +58,29 @@ public final class InternalCallbackMethod implements CallbackMethod
      * @see
      * com.impetus.kundera.ejb.event.CallbackMethod#invoke(java.lang.Object)
      */
-    public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException,
-            InvocationTargetException, InstantiationException
+    public void invoke(Object entity) throws EventListenerException
     {
         if (!method.isAccessible())
             method.setAccessible(true);
-        method.invoke(entity, new Object[] {});
+        try
+        {
+            method.invoke(entity, new Object[] {});
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new EventListenerException(e);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw new EventListenerException(e);
+        }
+        catch (InvocationTargetException e)
+        {
+            throw new EventListenerException(e);
+        }
     }
 
-    /* @see java.lang.Object#toString() */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
+
     @Override
     public String toString()
     {

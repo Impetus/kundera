@@ -35,7 +35,6 @@ import javax.persistence.metamodel.Metamodel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
 import com.impetus.kundera.classreading.ResourceIterator;
@@ -93,7 +92,7 @@ public class MetamodelLoader extends ApplicationLoader
     {
         if (persistenceUnit == null)
         {
-            throw new MetamodelLoaderException("Must have a persistenceUnitName in order to load entity metadata, you provided:" + persistenceUnit);
+            throw new IllegalArgumentException("Must have a persistenceUnitName in order to load entity metadata, you provided:" + persistenceUnit);
         }
 
         KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
@@ -239,8 +238,10 @@ public class MetamodelLoader extends ApplicationLoader
 
                     if (entityNameToClassMap.containsKey(clazz.getSimpleName()))
                     {
-                        throw new PersistenceException("Name conflict between classes "
-                                + entityNameToClassMap.get(clazz.getSimpleName()).getName() + " and " + clazz.getName());
+                        throw new MetamodelLoaderException("Name conflict between classes "
+                                + entityNameToClassMap.get(clazz.getSimpleName()).getName() + " and " 
+                                + clazz.getName() + ". Make sure no two entity classes with the same name "
+                                + " are specified for persistence unit " + persistenceUnit);
                     }
                     
                     //This is required just to keep hibernate happy. 
@@ -276,10 +277,7 @@ public class MetamodelLoader extends ApplicationLoader
         catch (ClassNotFoundException e)
         {
             log.error("Class " + className + " not found, it won't be loaded as entity");
-        } catch(Exception ex)
-        {
-            log.error("Error while loading metadata:");
-        }
+        } 
         finally
         {
             dstream.close();

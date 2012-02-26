@@ -51,7 +51,7 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static void set(Object target, Field field, byte[] bytes) throws PropertyAccessException
+    public static void set(Object target, Field field, byte[] bytes)
     {
 
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
@@ -72,7 +72,7 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static void set(Object target, Field field, String fieldVal) throws PropertyAccessException
+    public static void set(Object target, Field field, String fieldVal) 
     {
 
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
@@ -93,7 +93,7 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static void set(Object target, Field field, Object value) throws PropertyAccessException
+    public static void set(Object target, Field field, Object value)
     {
 
         if (!field.isAccessible())
@@ -127,7 +127,7 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static Object getObject(Object from, Field field) throws PropertyAccessException
+    public static Object getObject(Object from, Field field) 
     {
 
         if (!field.isAccessible())
@@ -162,7 +162,7 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static String getString(Object from, Field field) throws PropertyAccessException
+    public static String getString(Object from, Field field) 
     {
 
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
@@ -184,7 +184,7 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static byte[] get(Object from, Field field) throws PropertyAccessException
+    public static byte[] get(Object from, Field field) 
     {
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
         return accessor.toBytes(getObject(from, field));
@@ -204,7 +204,7 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static String getId(Object entity, EntityMetadata metadata) throws PropertyAccessException
+    public static String getId(Object entity, EntityMetadata metadata)
     {
 
         // If an Entity has been wrapped in a Proxy, we can call the Proxy
@@ -232,7 +232,7 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static void setId(Object entity, EntityMetadata metadata, String rowKey) throws PropertyAccessException
+    public static void setId(Object entity, EntityMetadata metadata, String rowKey) 
     {
         try
         {
@@ -269,7 +269,7 @@ public class PropertyAccessorHelper
      */
     @SuppressWarnings("null")
     // TODO: Too much code, improve this, possibly by breaking it
-    public static final Object getObject(Object obj, String fieldName) throws PropertyAccessException
+    public static final Object getObject(Object obj, String fieldName) 
     {
         Field embeddedField;
         try
@@ -307,7 +307,7 @@ public class PropertyAccessorHelper
             }
             else
             {
-                throw new RuntimeException("Embedded object not found: " + fieldName);
+                throw new PropertyAccessException("Embedded object not found: " + fieldName);
             }
 
         }
@@ -359,7 +359,7 @@ public class PropertyAccessorHelper
                 }
                 else
                 {
-                    throw new PersistenceException(
+                    throw new PropertyAccessException(
                             "Can't determine generic class from a field that has two parameters.");
                 }
             }
@@ -397,11 +397,7 @@ public class PropertyAccessorHelper
      */
     public static final boolean isCollection(Class<?> clazz)
     {
-        return Collection.class.isAssignableFrom(clazz) /*
-                                                         * ||
-                                                         * clazz.isAssignableFrom
-                                                         * (Set.class)
-                                                         */;
+        return Collection.class.isAssignableFrom(clazz);
 
     }
 

@@ -34,7 +34,7 @@ public class ByteAccessor implements PropertyAccessor<Byte>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Byte fromBytes(Class targetClass, byte[] b) throws PropertyAccessException
+    public Byte fromBytes(Class targetClass, byte[] b) 
     {
         try
         {
@@ -55,7 +55,7 @@ public class ByteAccessor implements PropertyAccessor<Byte>
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public byte[] toBytes(Object object) throws PropertyAccessException
+    public byte[] toBytes(Object object)
     {
         Byte b = (Byte) object;
         ByteBuffer buffer = ByteBuffer.allocate(8);
@@ -83,7 +83,7 @@ public class ByteAccessor implements PropertyAccessor<Byte>
      * )
      */
     @Override
-    public Byte fromString(Class targetClass, String s) throws PropertyAccessException
+    public Byte fromString(Class targetClass, String s)
     {
         try
         {
@@ -92,7 +92,7 @@ public class ByteAccessor implements PropertyAccessor<Byte>
         }
         catch (NumberFormatException e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
     }
 

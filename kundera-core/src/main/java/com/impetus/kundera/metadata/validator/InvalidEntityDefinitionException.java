@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2011 Impetus Infotech.
+ * * Copyright 2012 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -13,53 +13,54 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.persistence;
+package com.impetus.kundera.metadata.validator;
 
 import com.impetus.kundera.KunderaException;
 
-/**
- * The Class ReaderResolverException.
- * 
- * @author vivek.mishra
- */
-public class ReaderResolverException extends KunderaException
-{
 
-    /** The Constant serialVersionUID. */
-    private static final long serialVersionUID = -348290906946430547L;
+/**
+ * @author amresh
+ *
+ */
+public class InvalidEntityDefinitionException extends KunderaException
+{
 
     /**
      * 
      */
-    public ReaderResolverException()
+    private static final long serialVersionUID = 944429642343486327L;
+
+    /**
+     * 
+     */
+    public InvalidEntityDefinitionException()
     {
-        super();        
+
     }
 
     /**
-     * @param arg0
-     * @param arg1
+     * @param paramString
      */
-    public ReaderResolverException(String arg0, Throwable arg1)
+    public InvalidEntityDefinitionException(String paramString)
     {
-        super(arg0, arg1);       
+        super(paramString);
     }
 
     /**
-     * @param arg0
+     * @param paramThrowable
      */
-    public ReaderResolverException(String arg0)
+    public InvalidEntityDefinitionException(Throwable paramThrowable)
     {
-        super(arg0);        
+        super(paramThrowable);
     }
 
     /**
-     * @param arg0
+     * @param paramString
+     * @param paramThrowable
      */
-    public ReaderResolverException(Throwable arg0)
+    public InvalidEntityDefinitionException(String paramString, Throwable paramThrowable)
     {
-        super(arg0);       
+        super(paramString, paramThrowable);
     }
 
-    
 }

@@ -46,7 +46,7 @@ public class EntityEventDispatcher
      * @throws PersistenceException
      *             the persistence exception
      */
-    public void fireEventListeners(EntityMetadata metadata, Object entity, Class<?> event) throws PersistenceException
+    public void fireEventListeners(EntityMetadata metadata, Object entity, Class<?> event) 
     {
 
         // handle external listeners first
@@ -58,14 +58,9 @@ public class EntityEventDispatcher
             for (CallbackMethod callback : callBackMethods)
             {
                 log.debug("Firing >> " + callback);
-                try
-                {
-                    callback.invoke(entity);
-                }
-                catch (Exception e)
-                {
-                    throw new PersistenceException(e);
-                }
+
+                callback.invoke(entity);
+               
             }
         }
     }

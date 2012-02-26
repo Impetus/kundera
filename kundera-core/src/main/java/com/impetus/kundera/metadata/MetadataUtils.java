@@ -32,6 +32,7 @@ import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -130,7 +131,7 @@ public class MetadataUtils
             }
             else
             {
-                throw new PersistenceException("Field " + embeddedCollectionField.getName()
+                throw new InvalidEntityDefinitionException("Field " + embeddedCollectionField.getName()
                         + " must be either instance of List or Set");
             }
         }

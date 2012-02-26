@@ -30,6 +30,7 @@ import javax.persistence.Temporal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.validator.EntityValidator;
@@ -148,7 +149,7 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
         }
         catch (IntrospectionException e)
         {
-            throw new RuntimeException(e);
+            throw new MetamodelLoaderException(e);
         }
     }
 

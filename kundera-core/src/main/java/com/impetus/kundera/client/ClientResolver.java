@@ -22,6 +22,7 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * The Class ClientResolver.
@@ -65,7 +66,7 @@ public final class ClientResolver
                 .getPersistenceUnitMetadata(persistenceUnit);
         String kunderaClientName = (String) persistenceUnitMetadata.getProperties().get(
                 PersistenceProperties.KUNDERA_CLIENT);
-        ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());
+        ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());		
 
         try
         {

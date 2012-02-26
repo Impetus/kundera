@@ -21,6 +21,8 @@ import java.lang.reflect.Type;
 
 import javax.persistence.PersistenceException;
 
+import com.impetus.kundera.KunderaException;
+
 /**
  * The Class ReflectUtils.
  * 
@@ -157,7 +159,7 @@ public class ReflectUtils
         }
         catch (ClassNotFoundException e)
         {
-            throw new PersistenceException(e);
+            throw new KunderaException(e);
         }
     }
 

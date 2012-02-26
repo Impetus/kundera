@@ -13,52 +13,56 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.persistence;
-
-import com.impetus.kundera.KunderaException;
+package com.impetus.kundera.query;
 
 /**
- * The Class ReaderResolverException.
+ * The Class QueryHandlerException.
  * 
  * @author vivek.mishra
+ * 
+ *         Runtime exception handler for query interpretation
  */
-public class ReaderResolverException extends KunderaException
+public class QueryHandlerException extends RuntimeException
 {
 
-    /** The Constant serialVersionUID. */
-    private static final long serialVersionUID = -348290906946430547L;
+    /** Default Serial Version UID. */
+    private static final long serialVersionUID = 1L;
 
     /**
      * 
      */
-    public ReaderResolverException()
+    public QueryHandlerException()
     {
-        super();        
+        super();
+        // TODO Auto-generated constructor stub
     }
 
     /**
-     * @param arg0
-     * @param arg1
+     * @param paramString
+     * @param paramThrowable
      */
-    public ReaderResolverException(String arg0, Throwable arg1)
+    public QueryHandlerException(String paramString, Throwable paramThrowable)
     {
-        super(arg0, arg1);       
+        super(paramString, paramThrowable);
+        // TODO Auto-generated constructor stub
     }
 
     /**
-     * @param arg0
+     * @param paramString
      */
-    public ReaderResolverException(String arg0)
+    public QueryHandlerException(String paramString)
     {
-        super(arg0);        
+        super(paramString);
+        // TODO Auto-generated constructor stub
     }
 
     /**
-     * @param arg0
+     * @param paramThrowable
      */
-    public ReaderResolverException(Throwable arg0)
+    public QueryHandlerException(Throwable paramThrowable)
     {
-        super(arg0);       
+        super(paramThrowable);
+        // TODO Auto-generated constructor stub
     }
 
     

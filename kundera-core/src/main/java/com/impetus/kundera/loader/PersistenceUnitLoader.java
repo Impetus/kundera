@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -32,6 +33,7 @@ import com.impetus.kundera.KunderaPersistence;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * The Class PersistenceUnitLoader.
@@ -54,14 +56,19 @@ public class PersistenceUnitLoader extends ApplicationLoader
      * com.impetus.kundera.loader.ApplicationLoader#load(java.lang.String[])
      */
     @Override
-    public void load(String... persistenceUnits)
+    public void load(String... persistenceUnits) 
     {
         log.debug("Loading Metadata from persistence.xml...");
         KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
 
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
-        List<PersistenceUnitMetadata> metadatas = findPersistenceMetadatas();
+        List<PersistenceUnitMetadata> metadatas;
+		try {
+			metadatas = findPersistenceMetadatas();
+		} catch (InvalidConfigurationException e) {
+			throw new PersistenceLoaderException(e);
+		}
 
         for (String persistenceUnit : persistenceUnits)
         {
@@ -99,7 +106,8 @@ public class PersistenceUnitLoader extends ApplicationLoader
         // up
         if (isEmpty(persistenceUnit))
         {
-            throw new PersistenceException("No name provided and several persistence units found");
+            throw new IllegalArgumentException("No name provided and several persistence units found. " +
+            		"Check whether you correctly provided persistence unit name");
         }
 
         // Look for one that interests us
@@ -111,7 +119,7 @@ public class PersistenceUnitLoader extends ApplicationLoader
             }
         }
 
-        throw new PersistenceException("Could not find persistence unit in the classpath for name: " + persistenceUnit);
+        throw new PersistenceLoaderException("Could not find persistence unit in the classpath for name: " + persistenceUnit);
     }
 
     /**
@@ -119,16 +127,21 @@ public class PersistenceUnitLoader extends ApplicationLoader
      * 
      * @return the list
      */
-    private List<PersistenceUnitMetadata> findPersistenceMetadatas()
+    private List<PersistenceUnitMetadata> findPersistenceMetadatas() throws InvalidConfigurationException
     {
-        try
-        {
-            Enumeration<URL> xmls = Thread.currentThread().getContextClassLoader()
-                    .getResources("META-INF/persistence.xml");
+        
+            Enumeration<URL> xmls = null;
+			try {
+				xmls = Thread.currentThread().getContextClassLoader()
+				        .getResources("META-INF/persistence.xml");
+			} catch (IOException e) {
+				
+			}
 
             if (!xmls.hasMoreElements())
             {
-                log.info("Could not find any META-INF/persistence.xml " + "file in the classpath");
+                log.info("Could not find any META-INF/persistence.xml " + " file in the classpath");
+                throw new InvalidConfigurationException("Could not find any META-INF/persistence.xml " + " file in the classpath");
             }
 
             Set<String> persistenceUnitNames = new HashSet<String>();
@@ -136,10 +149,9 @@ public class PersistenceUnitLoader extends ApplicationLoader
 
             while (xmls.hasMoreElements())
             {
-                URL url = xmls.nextElement();
+                URL url = xmls.nextElement();                
                 
-                
-                log.trace("Analyse of persistence.xml: " + url);
+                log.trace("Analysing persistence.xml: " + url);
                 List<PersistenceUnitMetadata> metadataFiles = PersistenceXMLLoader.findPersistenceUnits(url,
                         PersistenceUnitTransactionType.RESOURCE_LOCAL);
 
@@ -156,26 +168,16 @@ public class PersistenceUnitLoader extends ApplicationLoader
                     // check for unique names
                     if (persistenceUnitNames.contains(metadata.getPersistenceUnitName()))
                     {
-                        throw new PersistenceException("Duplicate persistence-units for name: "
-                                + metadata.getPersistenceUnitName());
+                        throw new InvalidConfigurationException("Duplicate persistence-units for name: "
+                                + metadata.getPersistenceUnitName() + ". verify your persistence.xml file");
                     }
                     persistenceUnitNames.add(metadata.getPersistenceUnitName());
                 }
             }
 
             return persistenceUnits;
-        }
-        catch (Exception e)
-        {
-            if (e instanceof PersistenceException)
-            {
-                throw (PersistenceException) e;
-            }
-            else
-            {
-                throw new PersistenceException(e);
-            }
-        }
+        
+        
     }
 
     /**

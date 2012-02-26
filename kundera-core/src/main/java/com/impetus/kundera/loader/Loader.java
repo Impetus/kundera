@@ -29,7 +29,7 @@ public interface Loader
      * @param persistenceUnits
      *            the persistence units
      */
-    void load(String... persistenceUnits) throws LoaderException;
+    void load(String... persistenceUnits);
 
     /**
      * Unload.
@@ -37,5 +37,5 @@ public interface Loader
      * @param persistenceUnits
      *            the persistence units
      */
-    void unload(String... persistenceUnits) throws LoaderException;
+    void unload(String... persistenceUnits);
 }

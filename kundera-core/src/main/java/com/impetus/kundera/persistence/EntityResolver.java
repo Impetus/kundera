@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
-import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,7 +71,7 @@ public class EntityResolver
         }
         catch (PropertyAccessException e)
         {
-            throw new PersistenceException(e.getMessage());
+            throw new ReaderResolverException(e);
         }
 
         if (LOG.isDebugEnabled())
@@ -105,15 +104,9 @@ public class EntityResolver
             Map<String, EnhancedEntity> entities) throws PropertyAccessException
     {
 
-        EntityMetadata entityMetaData = null;
-        try
-        {
-            entityMetaData = KunderaMetadataManager.getEntityMetadata(object.getClass());
-        }
-        catch (Exception e)
-        {
-            // Object might already be an enhanced entity
-        }
+        EntityMetadata entityMetaData = null;        
+        entityMetaData = KunderaMetadataManager.getEntityMetadata(object.getClass());
+        
 
         if (entityMetaData == null)
         {
@@ -125,7 +118,7 @@ public class EntityResolver
         // Ensure that @Id is set
         if (null == id || id.trim().isEmpty())
         {
-            throw new PersistenceException("Missing primary key >> " + entityMetaData.getEntityClazz().getName() + "#"
+            throw new ReaderResolverException("Missing primary key >> " + entityMetaData.getEntityClazz().getName() + "#"
                     + entityMetaData.getIdColumn().getField().getName());
         }
 
@@ -215,7 +208,7 @@ public class EntityResolver
                 // halt, if this was a non-optional property
                 if (!optional)
                 {
-                    throw new PersistenceException("Missing " + targetClass.getName() + "." + targetField.getName());
+                    throw new ReaderResolverException("Missing " + targetClass.getName() + "." + targetField.getName());
                 }
             }
         }

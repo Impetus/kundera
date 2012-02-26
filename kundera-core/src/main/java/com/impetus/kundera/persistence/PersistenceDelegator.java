@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -35,20 +34,16 @@ import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Query;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolver;
-import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 import com.impetus.kundera.persistence.handler.impl.EntityInterceptor;
@@ -305,15 +300,9 @@ public class PersistenceDelegator
     {
         EntityMetadata entityMetadata = getMetadata(entityClass);
 
-        List<E> entities = new ArrayList<E>();
-        try
-        {
-            entities = getClient(entityMetadata).find(entityClass, embeddedColumnMap);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        List<E> entities = new ArrayList<E>();        
+        entities = getClient(entityMetadata).find(entityClass, embeddedColumnMap);
+        
         return entities;
     }
 
@@ -328,40 +317,34 @@ public class PersistenceDelegator
      */
     public <E> E merge(E e)
     {
-        try
-        {
-            List<EnhancedEntity> reachableEntities = EntityResolver
-                    .resolve(e, CascadeType.MERGE);
+        
+        List<EnhancedEntity> reachableEntities = EntityResolver.resolve(e, CascadeType.MERGE);
 
-            // save each one
-            // for (EnhancedEntity o : reachableEntities)
-            // {
-            log.debug("Merging Entity : " + e);
+        // save each one
+        // for (EnhancedEntity o : reachableEntities)
+        // {
+        log.debug("Merging Entity : " + e);
 
-            EntityMetadata m = getMetadata(e.getClass());
+        EntityMetadata m = getMetadata(e.getClass());
 
-            // TODO: throw OptisticLockException if wrong version and
-            // optimistic locking enabled
+        // TODO: throw OptisticLockException if wrong version and
+        // optimistic locking enabled
 
-            // fire PreUpdate events
-            getEventDispatcher().fireEventListeners(m, e, PreUpdate.class);
+        // fire PreUpdate events
+        getEventDispatcher().fireEventListeners(m, e, PreUpdate.class);
 
-            // Currently session look-up is not required for merge operation.
-            // Once session implementation is mature this will not be required.
-            noSessionLookup = true;
-            persist(e);
+        // Currently session look-up is not required for merge operation.
+        // Once session implementation is mature this will not be required.
+        noSessionLookup = true;
+        persist(e);
 
-            // fire PreUpdate events
-            getEventDispatcher().fireEventListeners(m, e, PostUpdate.class);
+        // fire PreUpdate events
+        getEventDispatcher().fireEventListeners(m, e, PostUpdate.class);
 
-            // reset session lookup.
-            noSessionLookup = false;
-            // }
-        }
-        catch (Exception exp)
-        {
-            throw new PersistenceException(exp);
-        }
+        // reset session lookup.
+        noSessionLookup = false;
+        // }
+        
 
         return e;
     }
@@ -374,28 +357,22 @@ public class PersistenceDelegator
      */
     public void remove(Object e)
     {
-        try
-        {
-            EntityMetadata metadata = getMetadata(e.getClass());
-            getEventDispatcher().fireEventListeners(metadata, e, PreRemove.class);
+       
+        EntityMetadata metadata = getMetadata(e.getClass());
+        getEventDispatcher().fireEventListeners(metadata, e, PreRemove.class);
 
-            EntityInterceptor interceptor = new EntityInterceptor();
-            List<EntitySaveGraph> objectGraphs = interceptor.handleRelation(e, metadata);
-            for (EntitySaveGraph objectGraph : objectGraphs)
-            {
-                removeGraph(objectGraph);
-                // If cascade delete then delete parent and child. Else delete
-                // marked entity only.
-                // If parent entity is marked for delete
-            }
-            getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
-            log.debug("Data removed successfully for entity : " + e.getClass());
-        }
-
-        catch (Exception exp)
+        EntityInterceptor interceptor = new EntityInterceptor();
+        List<EntitySaveGraph> objectGraphs = interceptor.handleRelation(e, metadata);
+        for (EntitySaveGraph objectGraph : objectGraphs)
         {
-            throw new PersistenceException(exp);
+            removeGraph(objectGraph);
+            // If cascade delete then delete parent and child. Else delete
+            // marked entity only.
+            // If parent entity is marked for delete
         }
+        getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
+        log.debug("Data removed successfully for entity : " + e.getClass());
+        
     }
 
     /**
@@ -406,7 +383,7 @@ public class PersistenceDelegator
      * @throws Exception
      *             the exception
      */
-    private void removeGraph(EntitySaveGraph objectGraph) throws Exception
+    private void removeGraph(EntitySaveGraph objectGraph) 
     {
         EntityMetadata metadata = getMetadata(objectGraph.getParentClass());
         Object parentEntity = objectGraph.getParentEntity();
@@ -497,7 +474,7 @@ public class PersistenceDelegator
      * @throws Exception
      *             the exception
      */
-    private void onClientHandle(EntitySaveGraph objectGraph, Object childEntity) throws Exception
+    private void onClientHandle(EntitySaveGraph objectGraph, Object childEntity) 
     {
         if (childEntity instanceof Collection<?>)
         {
@@ -530,7 +507,7 @@ public class PersistenceDelegator
      * @throws Exception
      *             the exception
      */
-    private void onClientDelete(Object child, EntitySaveGraph objectGraph) throws Exception
+    private void onClientDelete(Object child, EntitySaveGraph objectGraph)
     {
         // If child entity doesn't have any further relations, just delete it
         // from database
@@ -584,31 +561,23 @@ public class PersistenceDelegator
      *            the e
      */
     public void persist(Object e)
-    {
-        try
+    {       
+        // Invoke Pre Persist Events
+        EntityMetadata metadata = getMetadata(e.getClass());
+        getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
+
+        // Get Object graph list for this top level entity, and save them
+        // one by one.
+        List<EntitySaveGraph> objectGraphs = getGraph(e, metadata);
+        for (EntitySaveGraph objectGraph : objectGraphs)
         {
-            // Invoke Pre Persist Events
-            EntityMetadata metadata = getMetadata(e.getClass());
-            getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
-
-            // Get Object graph list for this top level entity, and save them
-            // one by one.
-            List<EntitySaveGraph> objectGraphs = getGraph(e, metadata);
-            for (EntitySaveGraph objectGraph : objectGraphs)
-            {
-                saveGraph(objectGraph);
-            }
-
-            // Invoke Post Persist Events
-            getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
-            log.debug("Data persisted successfully for entity : " + e.getClass());
+            saveGraph(objectGraph);
         }
-        catch (Exception exp)
-        {
-            exp.printStackTrace();
-            throw new PersistenceException(exp);
 
-        }
+        // Invoke Post Persist Events
+        getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
+        log.debug("Data persisted successfully for entity : " + e.getClass());
+      
     }
 
     /**
@@ -626,61 +595,68 @@ public class PersistenceDelegator
      */
     public <E> E find(Class<E> entityClass, Object primaryKey, EntitySaveGraph excludeGraph)
     {
+        // Look up in session first
+        E e = null/* getSession().lookup(entityClass, primaryKey) */;
+        isRelationViaJoinTable = false;
+
+        // if (null != e)
+        // {
+        // log.debug(entityClass.getName() + "_" + primaryKey +
+        // " is loaded from cache!");
+        // return e;
+        // }
+
+        // Find top level entity first
+        EntityMetadata entityMetadata = getMetadata(entityClass);
+
+        Client client = getClient(entityMetadata);
+        
+        Object object;
         try
         {
-            // Look up in session first
-            E e = null/* getSession().lookup(entityClass, primaryKey) */;
-            isRelationViaJoinTable = false;
+            object = entityMetadata.getEntityClazz().newInstance();
+        }
+        catch (InstantiationException e1)
+        {
+            throw new KunderaException("Error while finding object", e1);
+        }
+        catch (IllegalAccessException e1)
+        {
+            throw new KunderaException("Error while finding object", e1);
+        }
+        
+        List<EntitySaveGraph> objectGraphs = getGraph(object, entityMetadata);
+        List<EntitySaveGraph> graphs = getDisjointGraph(excludeGraph, objectGraphs);
 
-            // if (null != e)
-            // {
-            // log.debug(entityClass.getName() + "_" + primaryKey +
-            // " is loaded from cache!");
-            // return e;
-            // }
+        Map<Boolean, List<String>> relations = getRelations(graphs, entityMetadata.getEntityClazz());
 
-            // Find top level entity first
-            EntityMetadata entityMetadata = getMetadata(entityClass);
+        EntityReader reader = getReader(client);
+        List<String> relationNames = relations.values().iterator().next();
 
-            Client client = getClient(entityMetadata);
+        String rowKey = primaryKey + "";
 
-            List<EntitySaveGraph> objectGraphs = getGraph(entityMetadata.getEntityClazz().newInstance(), entityMetadata);
-            List<EntitySaveGraph> graphs = getDisjointGraph(excludeGraph, objectGraphs);
+        EnhanceEntity enhanceEntity = reader.findById(rowKey, entityMetadata, relationNames, client);
 
-            Map<Boolean, List<String>> relations = getRelations(graphs, entityMetadata.getEntityClazz());
-
-            EntityReader reader = getReader(client);
-            List<String> relationNames = relations.values().iterator().next();
-
-            String rowKey = primaryKey + "";
-
-            EnhanceEntity enhanceEntity = reader.findById(rowKey, entityMetadata, relationNames, client);
-
-            Map<Object, Object> relationalValues = new HashMap<Object, Object>();
-            if (enhanceEntity == null || enhanceEntity.getEntity() == null)
-            {
-                return null;
-            }
-            E entity = (E) enhanceEntity.getEntity();
-            if (relationNames.isEmpty() && !entityMetadata.isRelationViaJoinTable())
-            {
-                return entity;
-            }
-            else
-            {
-                entity = (E) reader.computeGraph(enhanceEntity, graphs, relationalValues, client, entityMetadata, this);
-            }
-            boolean isCacheableToL2 = entityMetadata.isCacheable();
-            getSession().store(primaryKey, entity, isCacheableToL2);
-
-            // Populate Association,
+        Map<Object, Object> relationalValues = new HashMap<Object, Object>();
+        if (enhanceEntity == null || enhanceEntity.getEntity() == null)
+        {
+            return null;
+        }
+        E entity = (E) enhanceEntity.getEntity();
+        if (relationNames.isEmpty() && !entityMetadata.isRelationViaJoinTable())
+        {
             return entity;
         }
-        catch (Exception exception)
+        else
         {
-            exception.printStackTrace();
-            throw new PersistenceException(exception);
+            entity = (E) reader.computeGraph(enhanceEntity, graphs, relationalValues, client, entityMetadata, this);
         }
+        boolean isCacheableToL2 = entityMetadata.isCacheable();
+        getSession().store(primaryKey, entity, isCacheableToL2);
+
+        // Populate Association,
+        return entity;
+       
     }
 
     /**
@@ -721,60 +697,66 @@ public class PersistenceDelegator
      */
     public <E> E find(Class<E> entityClass, Object primaryKey)
     {
+        // Look up in session first
+        E e = null/* getSession().lookup(entityClass, primaryKey) */;
+        isRelationViaJoinTable = false;
+
+        // if (null != e)
+        // {
+        // log.debug(entityClass.getName() + "_" + primaryKey +
+        // " is loaded from cache!");
+        // return e;
+        // }
+
+        // Find top level entity first
+        EntityMetadata entityMetadata = getMetadata(entityClass);
+
+        Client client = getClient(entityMetadata);
+
+        Object object;
         try
         {
-            // Look up in session first
-            E e = null/* getSession().lookup(entityClass, primaryKey) */;
-            isRelationViaJoinTable = false;
+            object = entityMetadata.getEntityClazz().newInstance();
+        }
+        catch (InstantiationException e1)
+        {
+            throw new KunderaException("Error while finding object", e1);
+        }
+        catch (IllegalAccessException e1)
+        {
+            throw new KunderaException("Error while finding object", e1);
+        }
+        List<EntitySaveGraph> objectGraphs = getGraph(object, entityMetadata);
+        Map<Boolean, List<String>> relations = getRelations(objectGraphs, entityMetadata.getEntityClazz());
 
-            // if (null != e)
-            // {
-            // log.debug(entityClass.getName() + "_" + primaryKey +
-            // " is loaded from cache!");
-            // return e;
-            // }
+        EntityReader reader = getReader(client);
+        List<String> relationNames = relations.values().iterator().next();
 
-            // Find top level entity first
-            EntityMetadata entityMetadata = getMetadata(entityClass);
+        // String rowKey = primaryKey + "";
 
-            Client client = getClient(entityMetadata);
+        EnhanceEntity enhanceEntity = reader.findById(primaryKey, entityMetadata, relationNames, client);
 
-            List<EntitySaveGraph> objectGraphs = getGraph(entityMetadata.getEntityClazz().newInstance(), entityMetadata);
-            Map<Boolean, List<String>> relations = getRelations(objectGraphs, entityMetadata.getEntityClazz());
-
-            EntityReader reader = getReader(client);
-            List<String> relationNames = relations.values().iterator().next();
-
-            // String rowKey = primaryKey + "";
-
-            EnhanceEntity enhanceEntity = reader.findById(primaryKey, entityMetadata, relationNames, client);
-
-            Map<Object, Object> relationalValues = new HashMap<Object, Object>();
-            if (enhanceEntity == null || enhanceEntity.getEntity() == null)
-            {
-                return null;
-            }
-            E entity = (E) enhanceEntity.getEntity();
-            if (relationNames.isEmpty() && !entityMetadata.isRelationViaJoinTable())
-            {
-                return entity;
-            }
-            else
-            {
-                entity = (E) reader.computeGraph(enhanceEntity, objectGraphs, relationalValues, client, entityMetadata,
-                        this);
-            }
-            boolean isCacheableToL2 = entityMetadata.isCacheable();
-            getSession().store(primaryKey, entity, isCacheableToL2);
-
-            // Populate Association,
+        Map<Object, Object> relationalValues = new HashMap<Object, Object>();
+        if (enhanceEntity == null || enhanceEntity.getEntity() == null)
+        {
+            return null;
+        }
+        E entity = (E) enhanceEntity.getEntity();
+        if (relationNames.isEmpty() && !entityMetadata.isRelationViaJoinTable())
+        {
             return entity;
         }
-        catch (Exception exception)
+        else
         {
-            exception.printStackTrace();
-            throw new PersistenceException(exception);
+            entity = (E) reader.computeGraph(enhanceEntity, objectGraphs, relationalValues, client, entityMetadata,
+                    this);
         }
+        boolean isCacheableToL2 = entityMetadata.isCacheable();
+        getSession().store(primaryKey, entity, isCacheableToL2);
+
+        // Populate Association,
+        return entity;
+     
     }
 
     /**
@@ -787,7 +769,6 @@ public class PersistenceDelegator
     public Query createQuery(String jpaQuery)
     {
         Query query = new QueryResolver().getQueryImplementation(jpaQuery, this, persistenceUnits);
-
         return query;
 
     }
@@ -1058,7 +1039,7 @@ public class PersistenceDelegator
         }
         catch (PropertyAccessException e)
         {
-            throw new PersistenceException(e.getMessage());
+            throw new KunderaException(e);
         }
 
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2011 Impetus Infotech.
+ * * Copyright 2012 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -18,48 +18,46 @@ package com.impetus.kundera.persistence;
 import com.impetus.kundera.KunderaException;
 
 /**
- * The Class ReaderResolverException.
- * 
- * @author vivek.mishra
+ * @author amresh
+ *
  */
-public class ReaderResolverException extends KunderaException
+public class EntityReaderException extends KunderaException
 {
-
-    /** The Constant serialVersionUID. */
-    private static final long serialVersionUID = -348290906946430547L;
 
     /**
      * 
      */
-    public ReaderResolverException()
+    public EntityReaderException()
     {
-        super();        
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * @param arg0
+     */
+    public EntityReaderException(String arg0)
+    {
+        super(arg0);
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * @param arg0
+     */
+    public EntityReaderException(Throwable arg0)
+    {
+        super(arg0);
+        // TODO Auto-generated constructor stub
     }
 
     /**
      * @param arg0
      * @param arg1
      */
-    public ReaderResolverException(String arg0, Throwable arg1)
+    public EntityReaderException(String arg0, Throwable arg1)
     {
-        super(arg0, arg1);       
+        super(arg0, arg1);
+        // TODO Auto-generated constructor stub
     }
 
-    /**
-     * @param arg0
-     */
-    public ReaderResolverException(String arg0)
-    {
-        super(arg0);        
-    }
-
-    /**
-     * @param arg0
-     */
-    public ReaderResolverException(Throwable arg0)
-    {
-        super(arg0);       
-    }
-
-    
 }

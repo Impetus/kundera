@@ -273,7 +273,7 @@ public abstract class DocumentIndexer implements Indexer
         }
         catch (PropertyAccessException e)
         {
-            throw new IllegalArgumentException("Id could not be read.");
+            throw new IllegalArgumentException("Id could not be read from object " + object);
         }
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2011 Impetus Infotech.
+ * * Copyright 2012 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -13,29 +13,42 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.query.exception;
+package com.impetus.kundera.utils;
+
+import com.impetus.kundera.KunderaException;
 
 /**
- * The Class QueryHandlerException.
- * 
- * @author vivek.mishra
- * 
- *         Runtime exception handler for query interpretation
+ * @author amresh
+ *
  */
-public class QueryHandlerException extends RuntimeException
-{
+public class InvalidConfigurationException extends KunderaException {
 
-    /** Default Serial Version UID. */
-    private static final long serialVersionUID = 1L;
+	/**
+	 * 
+	 */
+	public InvalidConfigurationException() {		
+	}
 
-    /**
-     * Instantiates a new query handler exception.
-     * 
-     * @param errMsg
-     *            the err msg
-     */
-    public QueryHandlerException(String errMsg)
-    {
-        super(errMsg);
-    }
+	/**
+	 * @param paramString
+	 */
+	public InvalidConfigurationException(String paramString) {
+		super(paramString);		
+	}
+
+	/**
+	 * @param paramThrowable
+	 */
+	public InvalidConfigurationException(Throwable paramThrowable) {
+		super(paramThrowable);		
+	}
+
+	/**
+	 * @param paramString
+	 * @param paramThrowable
+	 */
+	public InvalidConfigurationException(String paramString,
+			Throwable paramThrowable) {
+	}
+
 }

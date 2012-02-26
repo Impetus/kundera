@@ -136,7 +136,7 @@ public class KunderaQueryParser
             {
                 if (isKeyword(keyword))
                 {
-                    throw new RuntimeException("out of order keyword: " + keyword);
+                    throw new JPQLParseException("out of order keyword: " + keyword);
                 }
             }
         }
@@ -214,7 +214,7 @@ public class KunderaQueryParser
             // content cannot be empty
             if (content.length() == 0)
             {
-                throw new RuntimeException("keyword without value[WHERE]");
+                throw new JPQLParseException("keyword without value[WHERE]");
             }
             query.setFilter(content);
         }
@@ -228,7 +228,7 @@ public class KunderaQueryParser
             // content cannot be empty
             if (content.length() == 0)
             {
-                throw new RuntimeException("keyword without value: GROUP BY");
+                throw new JPQLParseException("keyword without value: GROUP BY");
             }
             groupingClause = content;
         }
@@ -242,7 +242,7 @@ public class KunderaQueryParser
             // content cannot be empty
             if (content.length() == 0)
             {
-                throw new RuntimeException("keyword without value: HAVING");
+                throw new JPQLParseException("keyword without value: HAVING");
             }
             if (groupingClause != null)
             {
@@ -263,7 +263,7 @@ public class KunderaQueryParser
             // content cannot be empty
             if (content.length() == 0)
             {
-                throw new RuntimeException("keyword without value: ORDER BY");
+                throw new JPQLParseException("keyword without value: ORDER BY");
             }
             query.setOrdering(content);
         }

@@ -29,6 +29,7 @@ import net.sf.cglib.proxy.NoOp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializationException;
@@ -119,21 +120,18 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
             final String id, final PersistenceDelegator persistenceDelegator) throws PersistenceException
     {
 
-        try
-        {
+        
             final CglibLazyInitializer instance = new CglibLazyInitializer(entityName, persistentClass, interfaces, id,
                     getIdentifierMethod, setIdentifierMethod, persistenceDelegator);
 
             final KunderaProxy proxy;
             Class factory = getProxyFactory(persistentClass, interfaces);
+            
             proxy = getProxyInstance(factory, instance);
+            
             instance.constructed = true;
             return proxy;
-        }
-        catch (Throwable t)
-        {
-            throw new PersistenceException("CGLIB Enhancement failed: " + entityName, t);
-        }
+        
     }
 
     /**
@@ -149,14 +147,21 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
      * @throws IllegalAccessException
      *             the illegal access exception
      */
-    private static KunderaProxy getProxyInstance(Class factory, CglibLazyInitializer instance)
-            throws InstantiationException, IllegalAccessException
+    private static KunderaProxy getProxyInstance(Class factory, CglibLazyInitializer instance)           
     {
         KunderaProxy proxy;
         try
         {
             Enhancer.registerCallbacks(factory, new Callback[] { instance, null });
             proxy = (KunderaProxy) factory.newInstance();
+        } 
+        catch(IllegalAccessException e)
+        {
+            throw new LazyInitializationException(e);
+        }
+        catch(InstantiationException e)
+        {
+            throw new LazyInitializationException(e);
         }
         finally
         {
@@ -278,7 +283,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
             }
             catch (InvocationTargetException ite)
             {
-                throw ite.getTargetException();
+                throw new LazyInitializationException(ite);
             }
         }
         else

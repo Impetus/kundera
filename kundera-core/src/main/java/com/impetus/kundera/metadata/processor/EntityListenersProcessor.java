@@ -35,8 +35,10 @@ import javax.persistence.PreUpdate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.persistence.event.CallbackMethod;
 import com.impetus.kundera.persistence.event.ExternalCallbackMethod;
 import com.impetus.kundera.persistence.event.InternalCallbackMethod;
@@ -67,18 +69,7 @@ public class EntityListenersProcessor implements MetadataProcessor
     private static final List<Class<? extends Annotation>> JPAListenersAnnotations = Arrays.asList(PrePersist.class,
             PostPersist.class, PreUpdate.class, PostUpdate.class, PreRemove.class, PostRemove.class, PostLoad.class);
 
-    /*
-     * @see
-     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-     * com.impetus.kundera.metadata.EntityMetadata)
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
+
     @Override
     public final void process(final Class<?> entityClass, EntityMetadata metadata)
     {
@@ -101,7 +92,7 @@ public class EntityListenersProcessor implements MetadataProcessor
                     }
                     catch (NoSuchMethodException nsme)
                     {
-                        throw new PersistenceException("Skipped method(" + entityListener.getName()
+                        throw new MetamodelLoaderException("Skipped method(" + entityListener.getName()
                                 + ") must have a default no-argument constructor.");
                     }
 

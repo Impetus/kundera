@@ -30,20 +30,22 @@ public class EnumAccessor implements PropertyAccessor<Enum>
 {
 
     @Override
-    public Enum fromBytes(Class targetClass, byte[] b) throws PropertyAccessException
+    public Enum fromBytes(Class targetClass, byte[] b)
     {
     	String s = null;
-		try {
-			s = new String(b, Constants.ENCODING);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return null;
-		}
+        try
+        {
+            s = new String(b, Constants.ENCODING);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new PropertyAccessException(e);
+        }
     	return fromString(targetClass, s);
     }
 
     @Override
-    public byte[] toBytes(Object object) throws PropertyAccessException
+    public byte[] toBytes(Object object) 
     {
         String s = toString(object);
         try
@@ -52,7 +54,7 @@ public class EnumAccessor implements PropertyAccessor<Enum>
         }
         catch (UnsupportedEncodingException e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
     }
 
@@ -64,17 +66,19 @@ public class EnumAccessor implements PropertyAccessor<Enum>
     }
 
     @Override
-    public Enum fromString(Class targetClass, String string) throws PropertyAccessException
-    {
-        
-		
-		if (targetClass != null && string != null) {
-			try {
-				return Enum.valueOf(targetClass, string.trim().toUpperCase());
-			} catch (IllegalArgumentException ex) {
-				throw new PropertyAccessException(ex.getMessage());
-			}
-		}
+    public Enum fromString(Class targetClass, String string) 
+    {        
+        if (targetClass != null && string != null)
+        {
+            try
+            {
+                return Enum.valueOf(targetClass, string.trim().toUpperCase());
+            }
+            catch (IllegalArgumentException ex)
+            {
+                throw new PropertyAccessException(ex);
+            }
+        }
          
         return null;
     }

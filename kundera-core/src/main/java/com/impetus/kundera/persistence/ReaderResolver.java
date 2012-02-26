@@ -43,15 +43,15 @@ final class ReaderResolver
         }
         catch (InstantiationException e)
         {
-            throw new ReaderResolverException(e.getMessage());
+            throw new ReaderResolverException(e);
         }
         catch (IllegalAccessException e)
         {
-            throw new ReaderResolverException(e.getMessage());
+            throw new ReaderResolverException(e);
         }
         catch (ClassNotFoundException e)
         {
-            throw new ReaderResolverException(e.getMessage());
+            throw new ReaderResolverException(e);
         }
     }
 

@@ -46,7 +46,6 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
-import com.impetus.kundera.query.exception.QueryHandlerException;
 
 /**
  * The Class QueryImpl.
@@ -607,15 +606,9 @@ public abstract class QueryImpl implements Query
                 {
                     result = new ArrayList<Object>(enhanceEntities.size());
                 }
-                try
-                {
-                    result.add(getReader().computeGraph(e, graphs, relationalValues, client, m, persistenceDelegeator));
-                }
-                catch (Exception ex)
-                {
-                    log.error("Error on computing relations:" + ex.getMessage());
-                    throw new QueryHandlerException(ex.getMessage());
-                }
+               
+                result.add(getReader().computeGraph(e, graphs, relationalValues, client, m, persistenceDelegeator));
+                
             }
         }
 
@@ -643,17 +636,10 @@ public abstract class QueryImpl implements Query
             String[] primaryKeys = searchFilter.values().toArray(new String[] {});
             Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
 
-            try
-            {
-                // result = (List<Object>) client.findAll(m.getEntityClazz(),
-                // uniquePKs.toArray());
-                result = (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), uniquePKs.toArray());
+            // result = (List<Object>) client.findAll(m.getEntityClazz(),
+            // uniquePKs.toArray());
+            result = (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), uniquePKs.toArray());
 
-            }
-            catch (Exception e)
-            {
-
-            }
         }
         else
         {
@@ -858,16 +844,10 @@ public abstract class QueryImpl implements Query
     protected void onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
     {
         Set<String> rSet = fetchDataFromLucene(client);
-        try
-        {
-            List resultList = client.findAll(m.getEntityClazz(), rSet.toArray(new String[] {}));
-            transform(m, ls, resultList);
-        }
-        catch (Exception e)
-        {
-            log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
-            throw new QueryHandlerException(e.getMessage());
-        }
+
+        List resultList = client.findAll(m.getEntityClazz(), rSet.toArray(new String[] {}));
+        transform(m, ls, resultList);
+     
     }
 
     /**

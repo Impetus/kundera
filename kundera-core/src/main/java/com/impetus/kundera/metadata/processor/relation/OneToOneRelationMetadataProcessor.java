@@ -23,6 +23,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 
+import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
@@ -46,14 +47,6 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
         validator = new EntityValidatorImpl();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor
-     * #addRelationIntoMetadata(java.lang.reflect.Field,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
     @Override
     public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata)
     {
@@ -62,7 +55,7 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
         validate(targetEntity);
 
         // TODO: Add code to check whether this entity has already been
-        // validated, at all placed below
+        // validated, at all places below
 
         OneToOne oneToOneAnn = relationField.getAnnotation(OneToOne.class);
 
@@ -101,17 +94,11 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
         metadata.addRelation(relationField.getName(), relation);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
+
     @Override
     public void process(Class<?> clazz, EntityMetadata metadata)
     {
-
+        throw new MetamodelLoaderException("Method call not applicable for Relation processors");
     }
 
 }

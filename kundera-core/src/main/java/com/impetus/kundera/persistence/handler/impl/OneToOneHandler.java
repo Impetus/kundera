@@ -26,6 +26,7 @@ import org.hibernate.proxy.HibernateProxy;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.persistence.PersistenceObjectGraphBuilderException;
 import com.impetus.kundera.persistence.handler.api.MappingHandler;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -153,7 +154,8 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
             }
             catch (PropertyAccessException e)
             {
-                throw new PersistenceException(e.getMessage());
+                throw new PersistenceObjectGraphBuilderException("Error while populating PKEY field for entity "
+                        + entity + " in object graph", e);
             }
         }
     }

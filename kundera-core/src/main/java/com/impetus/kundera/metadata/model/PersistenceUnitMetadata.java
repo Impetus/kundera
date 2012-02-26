@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.loader.PersistenceLoaderException;
 
 /**
  * The Class PersistenceUnitMetadata.

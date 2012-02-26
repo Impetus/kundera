@@ -68,7 +68,7 @@ public interface EntityReader
      *             the exception
      */
     Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder,
-            Client client, EntityMetadata m, PersistenceDelegator persistenceDelegeator) throws Exception;
+            Client client, EntityMetadata m, PersistenceDelegator persistenceDelegeator); 
 
     /**
      * Find by id.

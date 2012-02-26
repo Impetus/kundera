@@ -40,6 +40,5 @@ public interface CallbackMethod
      * @throws InstantiationException
      *             the instantiation exception
      */
-    public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException,
-            InvocationTargetException, InstantiationException;
+    public void invoke(Object entity) throws EventListenerException;
 }

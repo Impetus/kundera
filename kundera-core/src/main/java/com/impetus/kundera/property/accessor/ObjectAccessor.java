@@ -17,6 +17,7 @@ package com.impetus.kundera.property.accessor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
@@ -38,20 +39,26 @@ public class ObjectAccessor implements PropertyAccessor<Object>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public final Object fromBytes(Class targetClass, byte[] bytes) throws PropertyAccessException
+    public final Object fromBytes(Class targetClass, byte[] bytes) 
     {
-        try
-        {
-            ObjectInputStream ois;
-            ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
-            Object o = ois.readObject();
-            ois.close();
-            return o;
-        }
-        catch (Exception ioe)
-        {
-            throw new PropertyAccessException(ioe.getMessage());
-        }
+       
+            try
+            {
+                ObjectInputStream ois;
+                ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+                Object o = ois.readObject();
+                ois.close();
+                return o;
+            }
+            catch (IOException e)
+            {
+                throw new PropertyAccessException(e);
+            }
+            catch (ClassNotFoundException e)
+            {
+                throw new PropertyAccessException(e);
+            }
+        
     }
 
     /*
@@ -65,8 +72,9 @@ public class ObjectAccessor implements PropertyAccessor<Object>
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public final byte[] toBytes(Object o) throws PropertyAccessException
+    public final byte[] toBytes(Object o) 
     {
+
         try
         {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -75,10 +83,11 @@ public class ObjectAccessor implements PropertyAccessor<Object>
             oos.close();
             return baos.toByteArray();
         }
-        catch (Exception ioe)
+        catch (IOException e)
         {
-            throw new PropertyAccessException(ioe.getMessage());
+            throw new PropertyAccessException(e);
         }
+        
     }
 
     /*
@@ -101,7 +110,7 @@ public class ObjectAccessor implements PropertyAccessor<Object>
      * )
      */
     @Override
-    public Object fromString(Class targetClass, String s) throws PropertyAccessException
+    public Object fromString(Class targetClass, String s)
     {
         try
         {
@@ -110,7 +119,7 @@ public class ObjectAccessor implements PropertyAccessor<Object>
         }
         catch (NumberFormatException e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
     }
 

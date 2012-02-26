@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2011 Impetus Infotech.
+ * * Copyright 2012 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -13,27 +13,48 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.metadata.model;
+package com.impetus.kundera.persistence.event;
+
+import com.impetus.kundera.KunderaException;
 
 /**
- * The Class PersistenceLoaderException.
- * 
- * @author vivek.mishra
+ * @author amresh
+ *
  */
-public class PersistenceLoaderException extends RuntimeException
+public class EventListenerException extends KunderaException
 {
 
-    /** The Constant serialVersionUID. */
-    private static final long serialVersionUID = -6638085289492246684L;
+    /**
+     * 
+     */
+    public EventListenerException()
+    {
+        
+    }
 
     /**
-     * Instantiates a new persistence loader exception.
-     * 
-     * @param errMsg
-     *            the err msg
+     * @param arg0
      */
-    public PersistenceLoaderException(String errMsg)
+    public EventListenerException(String arg0)
     {
-        super(errMsg);
+        super(arg0);       
     }
+
+    /**
+     * @param arg0
+     */
+    public EventListenerException(Throwable arg0)
+    {
+        super(arg0);       
+    }
+
+    /**
+     * @param arg0
+     * @param arg1
+     */
+    public EventListenerException(String arg0, Throwable arg1)
+    {
+        super(arg0, arg1);        
+    }
+
 }

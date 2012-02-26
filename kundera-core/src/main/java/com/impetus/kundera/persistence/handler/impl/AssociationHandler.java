@@ -23,6 +23,7 @@ import java.util.Collection;
 
 import javax.persistence.JoinColumn;
 
+import com.impetus.kundera.persistence.PersistenceObjectGraphBuilderException;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -174,15 +175,15 @@ class AssociationHandler
         }
         catch (PropertyAccessException e)
         {
-            e.printStackTrace();
+            throw new PersistenceObjectGraphBuilderException("Error while detaching associated entity from parent entity", e);
         }
         catch (InstantiationException e)
         {
-            e.printStackTrace();
+            throw new PersistenceObjectGraphBuilderException("Error while detaching associated entity from parent entity", e);
         }
         catch (IllegalAccessException e)
         {
-            e.printStackTrace();
+            throw new PersistenceObjectGraphBuilderException("Error while detaching associated entity from parent entity", e);
         }
     }
 

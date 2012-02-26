@@ -242,7 +242,7 @@ public class KunderaQuery
             String token = tokenizer.nextToken();
             if (!StringUtils.containsAny(fromArray[1] + ".", token))
             {
-                throw new RuntimeException("bad query format with invalid alias:" + token);
+                throw new QueryHandlerException("bad query format with invalid alias:" + token);
             }
         }
         /*
@@ -256,12 +256,13 @@ public class KunderaQuery
 
         if (null == entityClass)
         {
-            throw new PersistenceException("No entity found by the name: " + entityName);
+            throw new QueryHandlerException("No entity found by the name: " + entityName);
         }
         EntityMetadata metadata = getMetamodel().getEntityMetadata(entityClass);
         if (!metadata.isIndexable())
         {
-            throw new PersistenceException(entityClass + " is not indexed. What are you searching for dude?");
+            throw new QueryHandlerException(entityClass + " is not indexed. Not possible to run a query on it." +
+            		" Check whether it was properly annotated for indexing.");
         }
     }
 
@@ -308,7 +309,7 @@ public class KunderaQuery
                 String condition = tokens.get(1);
                 if (!Arrays.asList(INTRA_CLAUSE_OPERATORS).contains(condition.toUpperCase()))
                 {
-                    throw new PersistenceException("bad jpa query: " + clause);
+                    throw new JPQLParseException("Bad JPA query: " + clause );
                 }
 
                 filtersQueue.add(new FilterClause(property, condition, tokens.get(2)));
@@ -324,7 +325,7 @@ public class KunderaQuery
                 }
                 else
                 {
-                    throw new PersistenceException("bad jpa query: " + clause);
+                    throw new JPQLParseException("bad jpa query: " + clause);
                 }
             }
         }
@@ -357,7 +358,7 @@ public class KunderaQuery
         }
         if (!found)
         {
-            throw new PersistenceException("invalid parameter: " + name);
+            throw new QueryHandlerException("invalid parameter: " + name);
         }
     }
 
@@ -618,7 +619,7 @@ public class KunderaQuery
                     catch (IllegalArgumentException e)
                     {
                         logger.error("Error while parsing order by clause:");
-                        throw new KunderaQueryParserException("Invalid sort order provided:" + nextOrder);
+                        throw new JPQLParseException("Invalid sort order provided:" + nextOrder);
                     }
                 }
             }
@@ -711,7 +712,7 @@ public class KunderaQuery
             if (match.find())
             {
                 logger.error("bad jpa query:");
-                throw new KunderaQueryParserException("invalid column name" + property);
+                throw new JPQLParseException("invalid column name" + property);
             }
             String minValue = tokens.get(idxOfBetween + 1);
             String maxValue = tokens.get(idxOfBetween + 3);

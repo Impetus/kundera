@@ -76,7 +76,7 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
      * )
      */
     @Override
-    public Integer fromString(Class targetClass, String s) throws PropertyAccessException
+    public Integer fromString(Class targetClass, String s) 
     {
         try
         {
@@ -85,7 +85,7 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
         }
         catch (NumberFormatException e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
     }
 }

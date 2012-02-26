@@ -36,7 +36,7 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Timestamp fromBytes(Class targetClass, byte[] b) throws PropertyAccessException
+    public Timestamp fromBytes(Class targetClass, byte[] b) 
     {
 
         String s;
@@ -46,7 +46,7 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
         }
         catch (UnsupportedEncodingException e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
         return fromString(targetClass, s);
     }
@@ -58,7 +58,7 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public byte[] toBytes(Object object) throws PropertyAccessException
+    public byte[] toBytes(Object object) 
     {
         Timestamp t = (Timestamp) object;
         return t.toString().getBytes();
@@ -84,7 +84,7 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
      * )
      */
     @Override
-    public Timestamp fromString(Class targetClass, String s) throws PropertyAccessException
+    public Timestamp fromString(Class targetClass, String s) 
     {
         Timestamp t = Timestamp.valueOf(s);
         return t;

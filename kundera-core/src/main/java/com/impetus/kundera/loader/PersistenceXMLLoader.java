@@ -28,6 +28,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -38,9 +39,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
  * The Class PersistenceXMLLoader.
@@ -68,49 +71,70 @@ public class PersistenceXMLLoader
      * @throws Exception
      *             the exception
      */
-    private static Document getDocument(URL configURL) throws Exception
+    private static Document getDocument(URL configURL) throws InvalidConfigurationException
     {
         InputStream is = null;
-        if (configURL != null)
-        {
-            URLConnection conn = configURL.openConnection();
-            conn.setUseCaches(false); // avoid JAR locking on Windows and Tomcat
-            is = conn.getInputStream();
-        }
-        if (is == null)
-        {
-            throw new IOException("Failed to obtain InputStream from url: " + configURL);
-        }
+		Document doc;
+		try {
+			is = null;
+			if (configURL != null)
+			{
+			    URLConnection conn = configURL.openConnection();
+			    conn.setUseCaches(false); // avoid JAR locking on Windows and Tomcat
+			    is = conn.getInputStream();
+			}
+			if (is == null)
+			{
+			    throw new IOException("Failed to obtain InputStream from url: " + configURL);
+			}
 
-        DocumentBuilderFactory docBuilderFactory = null;
-        docBuilderFactory = DocumentBuilderFactory.newInstance();
-        docBuilderFactory.setValidating(true);
-        docBuilderFactory.setNamespaceAware(true);
+			DocumentBuilderFactory docBuilderFactory = null;
+			docBuilderFactory = DocumentBuilderFactory.newInstance();
+			docBuilderFactory.setValidating(true);
+			docBuilderFactory.setNamespaceAware(true);
 
-        try
-        {
-            // otherwise Xerces fails in validation
-            docBuilderFactory.setAttribute("http://apache.org/xml/features/validation/schema", true);
-        }
-        catch (IllegalArgumentException e)
-        {
-            docBuilderFactory.setValidating(false);
-            docBuilderFactory.setNamespaceAware(false);
-        }
+			try
+			{
+			    // otherwise Xerces fails in validation
+			    docBuilderFactory.setAttribute("http://apache.org/xml/features/validation/schema", true);
+			}
+			catch (IllegalArgumentException e)
+			{
+			    docBuilderFactory.setValidating(false);
+			    docBuilderFactory.setNamespaceAware(false);
+			}
 
-        InputSource source = new InputSource(is);
-        DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-        // docBuilder.setEntityResolver( resolver );
+			InputSource source = new InputSource(is);
+			DocumentBuilder docBuilder = null;
+			try {
+				docBuilder = docBuilderFactory.newDocumentBuilder();
+			} catch (ParserConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			// docBuilder.setEntityResolver( resolver );
 
-        List errors = new ArrayList();
-        docBuilder.setErrorHandler(new ErrorLogger("XML InputStream", errors));
-        Document doc = docBuilder.parse(source);
+			List errors = new ArrayList();
+			docBuilder.setErrorHandler(new ErrorLogger("XML InputStream", errors));
+			doc = docBuilder.parse(source);
 
-        if (errors.size() != 0)
-        {
-            throw new PersistenceException("invalid persistence.xml", (Throwable) errors.get(0));
-        }
-        is.close(); // Close input Stream
+			if (errors.size() != 0)
+			{
+			    throw new InvalidConfigurationException("invalid persistence.xml", (Throwable) errors.get(0));
+			}
+		} catch (IOException e) {
+			throw new InvalidConfigurationException(e);
+		} catch (SAXException e) {
+			throw new InvalidConfigurationException(e);
+		} finally {
+			try {
+				is.close(); // Close input Stream
+			} catch (IOException e) {
+				throw new InvalidConfigurationException(e);
+			}
+		}
+        
+        
         return doc;
     }
 
@@ -140,10 +164,15 @@ public class PersistenceXMLLoader
      *             the exception
      */
     public static List<PersistenceUnitMetadata> findPersistenceUnits(URL url,
-            PersistenceUnitTransactionType defaultTransactionType) throws Exception
+            PersistenceUnitTransactionType defaultTransactionType) throws InvalidConfigurationException 
     {
 
-        Document doc = getDocument(url);
+        Document doc;
+		try {
+			doc = getDocument(url);
+		} catch (InvalidConfigurationException e) {
+			throw e;
+		}
         Element top = doc.getDocumentElement();
         NodeList children = top.getChildNodes();
         ArrayList<PersistenceUnitMetadata> units = new ArrayList<PersistenceUnitMetadata>();
@@ -176,7 +205,7 @@ public class PersistenceXMLLoader
      * @throws Exception
      *             the exception
      */
-    private static PersistenceUnitMetadata parsePersistenceUnit(Element top) throws Exception
+    private static PersistenceUnitMetadata parsePersistenceUnit(Element top)
     {
         PersistenceUnitMetadata metadata = new PersistenceUnitMetadata();
 
@@ -364,7 +393,7 @@ public class PersistenceXMLLoader
      * @throws Exception
      *             the exception
      */
-    public static String getElementContent(final Element element) throws Exception
+    public static String getElementContent(final Element element) 
     {
         return getElementContent(element, null);
     }
@@ -380,7 +409,7 @@ public class PersistenceXMLLoader
      * @throws Exception
      *             the exception
      */
-    private static String getElementContent(Element element, String defaultStr) throws Exception
+    private static String getElementContent(Element element, String defaultStr) 
     {
         if (element == null)
         {

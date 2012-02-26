@@ -192,7 +192,8 @@ public class LuceneIndexer extends DocumentIndexer
      */
     private File getIndexDirectory()
     {
-        File file = new File(luceneDirPath);
+        File file = new File(luceneDirPath);       
+        
         if (!file.isDirectory())
         {
             file.mkdir();
@@ -279,14 +280,13 @@ public class LuceneIndexer extends DocumentIndexer
         }
         catch (ParseException e)
         {
-            throw new LuceneIndexingException(e);
+            throw new LuceneIndexingException("Error while parsing Lucene Query " + luceneQuery, e);
         }
         catch (IOException e)
         {
             throw new LuceneIndexingException(e);
         }
-
-        // log.debug("Result[" + entityIds + "]");
+        
         reader = null;
         return indexCol;
     }

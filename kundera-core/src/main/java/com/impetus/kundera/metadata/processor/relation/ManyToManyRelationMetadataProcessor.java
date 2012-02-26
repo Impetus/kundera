@@ -21,13 +21,14 @@ import java.util.Arrays;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.PersistenceException;
 
+import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
+import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -47,16 +48,8 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
         validator = new EntityValidatorImpl();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor
-     * #addRelationIntoMetadata(java.lang.reflect.Field,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
     @Override
-    public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata)
+    public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata) 
     {
         ManyToMany ann = relationField.getAnnotation(ManyToMany.class);
 
@@ -76,7 +69,7 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
 
         if (isJoinedByFK)
         {
-            throw new PersistenceException(
+            throw new InvalidEntityDefinitionException(
                     "@JoinColumn not allowed for ManyToMany relationship. Use @JoinTable instead");
 
         }
@@ -89,7 +82,7 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
         }
         else if (relation.getMappedBy() == null || relation.getMappedBy().isEmpty())
         {
-            throw new PersistenceException(
+            throw new InvalidEntityDefinitionException(
                     "It's manadatory to use @JoinTable with parent side of ManyToMany relationship.");
         }
 
@@ -104,17 +97,11 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
+
     @Override
     public void process(Class<?> clazz, EntityMetadata metadata)
     {
-
+        throw new MetamodelLoaderException("Method call not applicable for Relation processors");
     }
 
 }

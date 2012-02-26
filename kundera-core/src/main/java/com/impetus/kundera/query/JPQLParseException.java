@@ -1,5 +1,5 @@
 /*******************************************************************************
- * * Copyright 2011 Impetus Infotech.
+ * * Copyright 2012 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -16,24 +16,47 @@
 package com.impetus.kundera.query;
 
 /**
- * The Class KunderaQueryParserException.
- * 
- * @author vivek.mishra
+ * @author amresh
+ *
  */
-public class KunderaQueryParserException extends RuntimeException
+public class JPQLParseException extends QueryHandlerException
 {
 
-    /** The Constant serialVersionUID. */
-    private static final long serialVersionUID = 8316378123611399510L;
+    /**
+     * 
+     */
+    public JPQLParseException()
+    {
+        super();
+        // TODO Auto-generated constructor stub
+    }
 
     /**
-     * Instantiates a new kundera query parser exception.
-     * 
-     * @param errMsg
-     *            the err msg
+     * @param paramString
+     * @param paramThrowable
      */
-    public KunderaQueryParserException(String errMsg)
+    public JPQLParseException(String paramString, Throwable paramThrowable)
+    {
+        super(paramString, paramThrowable);
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * @param paramThrowable
+     */
+    public JPQLParseException(Throwable paramThrowable)
+    {
+        super(paramThrowable);
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * @param errMsg
+     */
+    public JPQLParseException(String errMsg)
     {
         super(errMsg);
+        // TODO Auto-generated constructor stub
     }
+
 }

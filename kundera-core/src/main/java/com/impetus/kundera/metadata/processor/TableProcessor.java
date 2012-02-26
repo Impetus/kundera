@@ -31,6 +31,7 @@ import javax.persistence.Table;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -38,6 +39,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessorFactory;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
+import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -67,7 +69,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
      * com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
-    public void process(Class<?> clazz, EntityMetadata metadata)
+    public void process(Class<?> clazz, EntityMetadata metadata) 
     {
         if (!clazz.isAnnotationPresent(Table.class))
         {
@@ -76,7 +78,9 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         }
 
         LOG.debug("Processing @Entity(" + clazz.getName() + ") for Persistence Object.");
+        
         populateMetadata(metadata, clazz);
+        
     }
 
     /**
@@ -87,7 +91,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
      * @param clazz
      *            the clazz
      */
-    private void populateMetadata(EntityMetadata metadata, Class<?> clazz)
+    private void populateMetadata(EntityMetadata metadata, Class<?> clazz) 
     {
         Table table = clazz.getAnnotation(Table.class);
         boolean isEmbeddable = false;
@@ -100,7 +104,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         {
             LOG.error("It is mandatory to specify Schema alongwith Table name:" + table.name()
                     + ". This entity won't be persisted");
-            throw new PersistenceException("It is mandatory to specify Schema alongwith Table name:" + table.name()
+            throw new InvalidEntityDefinitionException("It is mandatory to specify Schema alongwith Table name:" + table.name()
                     + ". This entity won't be persisted");
         }
         MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr);
@@ -341,7 +345,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         }
         catch (PersistenceException pe)
         {
-            throw new PersistenceException("Error with relationship in @Entity(" + entityClass + "."
+            throw new MetamodelLoaderException("Error with relationship in @Entity(" + entityClass + "."
                     + relationField.getName() + "), reason: " + pe.getMessage());
         }
     }

@@ -15,23 +15,53 @@
  ******************************************************************************/
 package com.impetus.kundera.proxy;
 
+import com.impetus.kundera.KunderaException;
+
 /**
  * The Class LazyInitializationException.
  */
-public class LazyInitializationException extends RuntimeException
+public class LazyInitializationException extends KunderaException
 {
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 1L;
 
     /**
-     * Instantiates a new lazy initialization exception.
      * 
-     * @param m
-     *            the m
      */
-    public LazyInitializationException(String m)
+    public LazyInitializationException()
     {
-        super(m);
+        super();
+        // TODO Auto-generated constructor stub
     }
+
+    /**
+     * @param arg0
+     * @param arg1
+     */
+    public LazyInitializationException(String arg0, Throwable arg1)
+    {
+        super(arg0, arg1);
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * @param arg0
+     */
+    public LazyInitializationException(String arg0)
+    {
+        super(arg0);
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * @param arg0
+     */
+    public LazyInitializationException(Throwable arg0)
+    {
+        super(arg0);
+        // TODO Auto-generated constructor stub
+    }
+    
+    
 }

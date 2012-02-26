@@ -32,7 +32,7 @@ public class DoubleAccessor implements PropertyAccessor<Double>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Double fromBytes(Class targetClass, byte[] data) throws PropertyAccessException
+    public Double fromBytes(Class targetClass, byte[] data) 
     {
         if (data == null || data.length != 8)
             return (double) 0x0;
@@ -106,7 +106,7 @@ public class DoubleAccessor implements PropertyAccessor<Double>
      * )
      */
     @Override
-    public Double fromString(Class targetClass, String s) throws PropertyAccessException
+    public Double fromString(Class targetClass, String s) 
     {
         try
         {
@@ -115,7 +115,7 @@ public class DoubleAccessor implements PropertyAccessor<Double>
         }
         catch (NumberFormatException e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
     }
 

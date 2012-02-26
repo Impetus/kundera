@@ -15,12 +15,14 @@
  ******************************************************************************/
 package com.impetus.kundera.property;
 
+import com.impetus.kundera.KunderaException;
+
 /**
  * The Class PropertyAccessException.
  * 
  * @author animesh.kumar
  */
-public class PropertyAccessException extends Exception
+public class PropertyAccessException extends KunderaException
 {
 
     /** The Constant serialVersionUID. */

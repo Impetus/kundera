@@ -21,6 +21,7 @@ import javax.persistence.ManyToMany;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.persistence.PersistenceObjectGraphBuilderException;
 import com.impetus.kundera.persistence.handler.api.MappingHandler;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -92,7 +93,7 @@ public class ManyToManyHandler extends AssociationHandler implements MappingHand
         }
         catch (PropertyAccessException e)
         {
-            e.printStackTrace();
+            throw new PersistenceObjectGraphBuilderException("Error while getting relational graph for object " + entity, e);
         }
 
         return objectGraph;

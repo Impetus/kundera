@@ -22,6 +22,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 
+import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
@@ -46,27 +47,13 @@ public class OneToManyRelationMetadataProcessor extends AbstractEntityFieldProce
         validator = new EntityValidatorImpl();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.metadata.MetadataProcessor#process(java.lang.Class,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
     @Override
     public void process(Class<?> clazz, EntityMetadata metadata)
     {
-
+        throw new MetamodelLoaderException("Method call not applicable for Relation processors");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor
-     * #addRelationIntoMetadata(java.lang.reflect.Field,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
+
     @Override
     public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata)
     {

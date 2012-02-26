@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
+import java.io.UnsupportedEncodingException;
+
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
@@ -34,17 +36,18 @@ public class StringAccessor implements PropertyAccessor<String>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public final String fromBytes(Class targetClass, byte[] bytes) throws PropertyAccessException
+    public final String fromBytes(Class targetClass, byte[] bytes)
     {
+
         try
         {
             return new String(bytes, Constants.ENCODING);
         }
-        catch (Exception e)
+        catch (UnsupportedEncodingException e)
         {
-            e.printStackTrace();
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
+
     }
 
     /*
@@ -56,14 +59,16 @@ public class StringAccessor implements PropertyAccessor<String>
     @Override
     public final byte[] toBytes(Object s) throws PropertyAccessException
     {
+
         try
         {
             return ((String) s).getBytes(Constants.ENCODING);
         }
-        catch (Exception e)
+        catch (UnsupportedEncodingException e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
+
     }
 
     /*
@@ -86,7 +91,7 @@ public class StringAccessor implements PropertyAccessor<String>
      * )
      */
     @Override
-    public String fromString(Class targetClass, String s) throws PropertyAccessException
+    public String fromString(Class targetClass, String s) 
     {
         return s;
     }

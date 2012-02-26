@@ -46,30 +46,34 @@ public final class ExternalCallbackMethod implements CallbackMethod
         this.method = method;
     }
 
-    /*
-     * @see
-     * com.impetus.kundera.ejb.event.CallbackMethod#invoke(java.lang.Object)
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.ejb.event.CallbackMethod#invoke(java.lang.Object)
-     */
-    public void invoke(Object entity) throws IllegalArgumentException, IllegalAccessException,
-            InvocationTargetException, InstantiationException
+
+    public void invoke(Object entity) throws EventListenerException
     {
         if (!method.isAccessible())
             method.setAccessible(true);
-        method.invoke(clazz.newInstance(), new Object[] { entity });
+        try
+        {
+            method.invoke(clazz.newInstance(), new Object[] { entity });
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new EventListenerException(e);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw new EventListenerException(e);
+        }
+        catch (InvocationTargetException e)
+        {
+            throw new EventListenerException(e);
+        }
+        catch (InstantiationException e)
+        {
+            throw new EventListenerException(e);
+        }
     }
 
-    /* @see java.lang.Object#toString() */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
+
     @Override
     public String toString()
     {

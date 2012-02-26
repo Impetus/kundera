@@ -102,16 +102,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         this.persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
 
         // Initialize L2 cache
-        cacheProvider = initSecondLevelCache();
-        try
-        {
-            cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
-        }
-        catch (CacheException e)
-        {
-            logger.warn("Error while creating L2 cache. Entities won't be stored in L2 cache. Details:"
-                    + e.getMessage());
-        }
+        cacheProvider = initSecondLevelCache();        
+        cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
 
         // Invoke Client Loaders
         logger.info("Loading Client(s) For Persistence Unit(s) " + persistenceUnit);
@@ -221,15 +213,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Cache getCache()
     {
-        try
-        {
-            return cacheProvider.getCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
-        }
-        catch (CacheException e)
-        {
-            logger.error("Error while getting cache. Details:" + e.getMessage());
-            return null;
-        }
+        return cacheProvider.getCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);       
     }
 
     /*
@@ -258,16 +242,27 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         CacheProvider cacheProvider = null;
         if (cacheProviderClassName != null)
         {
+
             try
             {
                 Class<CacheProvider> cacheProviderClass = (Class<CacheProvider>) Class.forName(cacheProviderClassName);
                 cacheProvider = cacheProviderClass.newInstance();
                 cacheProvider.init(classResourceName);
             }
-            catch (Exception e)
+            catch (ClassNotFoundException e)
             {
-                throw new RuntimeException(e);
+                throw new CacheException("Could not find class " + cacheProviderClassName 
+                        + ". Check whether you spelled it correctly in persistence.xml", e);
             }
+            catch (InstantiationException e)
+            {
+                throw new CacheException("Could not instantiate " + cacheProviderClassName, e);
+            }
+            catch (IllegalAccessException e)
+            {
+                throw new CacheException(e);
+            }
+            
         }
         if (cacheProvider == null)
         {

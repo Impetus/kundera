@@ -109,30 +109,37 @@ public class QueryResolver
         catch (SecurityException e)
         {
             log.error(e.getMessage());
+            throw new QueryHandlerException(e);
         }
         catch (IllegalArgumentException e)
         {
             log.error(e.getMessage());
+            throw new QueryHandlerException(e);
         }
         catch (ClassNotFoundException e)
         {
             log.error(e.getMessage());
+            throw new QueryHandlerException(e);
         }
         catch (NoSuchMethodException e)
         {
             log.error(e.getMessage());
+            throw new QueryHandlerException(e);
         }
         catch (InstantiationException e)
         {
             log.error(e.getMessage());
+            throw new QueryHandlerException(e);
         }
         catch (IllegalAccessException e)
         {
             log.error(e.getMessage());
+            throw new QueryHandlerException(e);
         }
         catch (InvocationTargetException e)
         {
             log.error(e.getMessage());
+            throw new QueryHandlerException(e);
         }
 
         return query;

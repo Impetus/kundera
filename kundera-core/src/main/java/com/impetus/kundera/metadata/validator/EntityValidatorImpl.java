@@ -27,6 +27,7 @@ import javax.persistence.Table;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+
 /**
  * Validates entity for JPA rules.
  * 
@@ -64,7 +65,7 @@ public class EntityValidatorImpl implements EntityValidator
         // Is Entity?
         if (!clazz.isAnnotationPresent(Entity.class))
         {
-            throw new PersistenceException(clazz.getName() + " is not annotated with @Entity");
+            throw new InvalidEntityDefinitionException(clazz.getName() + " is not annotated with @Entity");
         }
 
         // must have a default no-argument constructor
@@ -74,13 +75,13 @@ public class EntityValidatorImpl implements EntityValidator
         }
         catch (NoSuchMethodException nsme)
         {
-            throw new PersistenceException(clazz.getName() + " must have a default no-argument constructor.");
+            throw new InvalidEntityDefinitionException(clazz.getName() + " must have a default no-argument constructor.");
         }
 
         // Must be annotated with @Table
         if (!clazz.isAnnotationPresent(Table.class))
         {
-            throw new PersistenceException(clazz.getName() + " must be annotated with @Table");
+            throw new InvalidEntityDefinitionException(clazz.getName() + " must be annotated with @Table");
         }
 
         // Check for @Key and ensure that there is just 1 @Key field of String
@@ -96,11 +97,11 @@ public class EntityValidatorImpl implements EntityValidator
 
         if (keys.size() == 0)
         {
-            throw new PersistenceException(clazz.getName() + " must have an @Id field.");
+            throw new InvalidEntityDefinitionException(clazz.getName() + " must have an @Id field.");
         }
         else if (keys.size() > 1)
         {
-            throw new PersistenceException(clazz.getName() + " can only have 1 @Id field.");
+            throw new InvalidEntityDefinitionException(clazz.getName() + " can only have 1 @Id field.");
         }
 
         // if (!keys.get(0).getType().equals(String.class))
