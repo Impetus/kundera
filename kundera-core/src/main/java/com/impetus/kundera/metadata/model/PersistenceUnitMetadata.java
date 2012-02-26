@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model;
 
+
+import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,6 +32,11 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.impetus.kundera.PersistenceProperties;
+
 /**
  * The Class PersistenceUnitMetadata.
  * 
@@ -36,6 +44,8 @@ import javax.sql.DataSource;
  */
 public class PersistenceUnitMetadata implements PersistenceUnitInfo
 {
+    /** logger instance. */ 
+    private static Logger log = LoggerFactory.getLogger(PersistenceUnitMetadata.class);
 
     /** Persistence Unit name. */
     private String persistenceUnitName;
@@ -53,7 +63,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     private List<String> packages = new ArrayList<String>();
 
     /** The jar files. */
-    private Set<String> jarFiles = new HashSet<String>();
+    private Set<String> jarFiles;
+    
+    private Set<URL> jarUrls;
 
     /** The properties. */
     private Properties properties = new Properties();
@@ -61,6 +73,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     /** The exclude unlisted classes. */
     private boolean excludeUnlistedClasses = false;
 
+    private URL rootUrl;
+
+    
     /*
      * (non-Javadoc)
      * 
@@ -177,10 +192,17 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
      * @param jarFiles
      *            the new jar files
      */
-    public void setJarFiles(Set<String> jarFiles)
+    public void addJarFile(String jarFile)
     {
-        this.jarFiles = jarFiles;
+        if(jarFiles == null)
+        {
+            jarFiles = new HashSet<String>();
+        }
+        this.jarFiles.add(jarFile);
+        addJarFileUrl(jarFile);
+        
     }
+
 
     /**
      * Gets the exclude unlisted classes.
@@ -298,7 +320,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     @Override
     public List<URL> getJarFileUrls()
     {
-        return null;
+        return jarUrls != null ?new ArrayList<URL>(jarUrls): null;
     }
 
     /*
@@ -310,7 +332,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     @Override
     public URL getPersistenceUnitRootUrl()
     {
-        return null;
+        return rootUrl;
     }
 
     /*
@@ -321,7 +343,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     @Override
     public List<String> getManagedClassNames()
     {
-        return null;
+        return classes;
     }
 
     /*
@@ -442,4 +464,75 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         // assuming Properties are initialized with this call
         return prop != null ? getProperties().getProperty(prop) : null;
     }
+
+    /**
+     * Returns list of managed urls.
+     * @return
+     */
+    public List<URL> getManagedURLs()
+    {
+        // should we cache it?
+        List<URL> managedURL = getJarFileUrls();
+        if(managedURL == null && !getExcludeUnlistedClasses())
+        {
+            managedURL = new ArrayList<URL>(1);
+            managedURL.add(getPersistenceUnitRootUrl());
+        }
+        return managedURL;
+    }
+    /**
+     * Setter for persistence unit root url 
+     * 
+     * @param url   persistence unit root url.
+     */
+     public void setPersistenceUnitRootUrl(URL url)
+    {
+        this.rootUrl = url;
+    }
+
+     /**
+      * Adds jar file URL.
+      * 
+      * @param jarFile jar file path
+      */
+     private void addJarFileUrl(String jarFile)
+     {
+         if (jarUrls == null)
+         {
+             jarUrls = new HashSet<URL>();
+         }
+         try
+         {
+             jarUrls.add(new File(jarFile).toURI().toURL());
+         }
+         catch (MalformedURLException e)
+         {
+             log.error("Error while mapping jar-file url" + jarFile + "caused by:" + e.getMessage());
+             throw new IllegalArgumentException("Invalid jar-file URL:" + jarFile + "caused by: " + e.getMessage());
+         }
+     }
+
+     
+     /**
+      * Gets the client.
+      * In case client is not configure, it throws IllegalArgumentException.
+      *
+      * @return the client
+      */
+     public String getClient()
+     {
+         String client=null;
+         if(this.properties != null)
+         {
+             client = (String) this.properties.get(PersistenceProperties.KUNDERA_CLIENT);
+         }
+         
+         if(client == null)
+         {
+             log.error("kundera.client property is missing for persistence unit:"+ persistenceUnitName);
+             throw new IllegalArgumentException("kundera.client property is missing for persistence unit:"+ persistenceUnitName);
+         }
+         
+         return client;
+     }
 }

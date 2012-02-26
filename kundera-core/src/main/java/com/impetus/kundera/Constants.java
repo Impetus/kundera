@@ -69,12 +69,6 @@ public final class Constants
     public final static String PERSISTENCE_UNIT_SEPARATOR = ",";
 
     /**
-     * Meta data for all entities that are not specified specific to any
-     * persistence unit, are stored under this name.
-     */
-    public final static String COMMON_ENTITY_METADATAS = "commonEntityMetadatas";
-
-    /**
      * Name of column family(HBase) or super column(cassandra) which houses all
      * join columns.
      */

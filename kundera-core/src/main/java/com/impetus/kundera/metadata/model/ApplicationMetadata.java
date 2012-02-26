@@ -16,6 +16,7 @@
 package com.impetus.kundera.metadata.model;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,6 +42,12 @@ public class ApplicationMetadata
 
     /** The Constant log. */
     private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
+
+    /**
+     *  Collection instance to hold clazz's full name to persistence unit mapping.
+     *  Valid Assumption: 1 class can belong to 1 pu only. Reason is @table needs to give pu name!
+     */
+    private Map<String, List<String>> clazzToPuMap;
 
     /**
      * Adds the entity metadata.
@@ -128,4 +135,32 @@ public class ApplicationMetadata
     {
         return persistenceUnitMetadataMap;
     }
+
+    /**
+     * Sets the clazz to pu map.
+     *
+     * @param map the map
+     */
+    public void setClazzToPuMap(Map<String, List<String>> map)
+    {
+        if(clazzToPuMap == null)
+        {
+            this.clazzToPuMap = map;
+        } else
+        {
+            clazzToPuMap.putAll(map);
+        }
+    }
+    
+    /**
+     * Gets the mapped persistence unit.
+     *
+     * @param clazz the clazz
+     * @return the mapped persistence unit
+     */
+    public List<String> getMappedPersistenceUnit(String clazz)
+    {
+        return this.clazzToPuMap.get(clazz);
+    }
+
 }

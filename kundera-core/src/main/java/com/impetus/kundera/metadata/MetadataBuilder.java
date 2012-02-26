@@ -23,6 +23,7 @@ import javax.persistence.PersistenceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.processor.CacheableAnnotationProcessor;
 import com.impetus.kundera.metadata.processor.EntityListenersProcessor;
@@ -52,12 +53,21 @@ public class MetadataBuilder
     /** The instantiated. */
     private boolean instantiated = false;
 
+    /** persistence unit */
+    private String persistenceUnit;
+
+    /** kundera client */
+    private String client;
+
     /**
      * Instantiates a new metadata manager.
      * 
      */
-    public MetadataBuilder()
+
+    public MetadataBuilder(String puName, String client)
     {
+        this.persistenceUnit = puName;
+        this.client = client;
         validator = new EntityValidatorImpl();
         metadataProcessors = new ArrayList<MetadataProcessor>();
 
@@ -99,21 +109,36 @@ public class MetadataBuilder
 
         for (MetadataProcessor processor : metadataProcessors)
         {
+            // in case it is not intend for current persistence unit.
             processor.process(clazz, metadata);
+            metadata = belongsToPersistenceUnit(metadata);
+            if (metadata == null)
+            {
+                break;
+            }
         }
 
         return metadata;
     }
 
     /**
-     * Build Inter/Intra @Entity relationships.
+     * If parameterised metadata is not for intended persistence unit, assign it to null.
+     * @param metadata entity metadata
+     * @return  metadata.
      */
-    /*
-     * public void build() { log.debug("Building @Entity's foreign relations.");
-     * for (EntityMetadata metadata : getEntityMetadatasAsList()) {
-     * processRelations(metadata.getEntityClazz());
-     * log.debug("Metadata for @Entity " + metadata.getEntityClazz() + "\n" +
-     * metadata); } instantiated = true; }
-     */
-
+    private EntityMetadata belongsToPersistenceUnit(EntityMetadata metadata)
+    {
+        // if pu is null and client is not rdbms OR metadata pu does not match
+        // with configured one. don't process for anything.
+        if ((metadata.getPersistenceUnit() == null && !ClientType.RDBMS.name().equals(client.toUpperCase()))
+                || metadata.getPersistenceUnit() != null && !metadata.getPersistenceUnit().equals(persistenceUnit))
+        {
+            metadata = null;
+        } else if(metadata.getPersistenceUnit() == null && ClientType.RDBMS.name().equals(client.toUpperCase()))
+        {
+            // no more "null" as persistence unit for RDBMS scenarios!
+            metadata.setPersistenceUnit(persistenceUnit);
+        }
+        return metadata;
+    }
 }

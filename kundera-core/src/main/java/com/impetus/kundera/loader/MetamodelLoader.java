@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -101,7 +102,8 @@ public class MetamodelLoader extends ApplicationLoader
 
         /** Classes to scan */
         List<String> classesToScan;
-
+        URL[] resources = null;
+        String client=null;
         if (persistentUnitMetadataMap == null || persistentUnitMetadataMap.isEmpty())
         {
             log.error("It is necessary to load Persistence Unit metadata  for persistence unit " + persistenceUnit
@@ -112,8 +114,13 @@ public class MetamodelLoader extends ApplicationLoader
         else
         {
             PersistenceUnitMetadata puMetadata = persistentUnitMetadataMap.get(persistenceUnit);
-            classesToScan = puMetadata.getClasses();
-
+            classesToScan = puMetadata.getManagedClassNames();
+            List<URL> managedURLs = puMetadata.getManagedURLs();
+            client = puMetadata.getClient();
+            if(managedURLs != null)
+            {
+                resources = managedURLs.toArray(new URL[]{});
+            }
         }
 
         /*
@@ -121,7 +128,6 @@ public class MetamodelLoader extends ApplicationLoader
          * yes, load them. Otherwise load them from classpath/ context path
          */
         Reader reader;
-        URL[] resources;
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
         if (classesToScan == null || classesToScan.isEmpty())
         {
@@ -129,7 +135,7 @@ public class MetamodelLoader extends ApplicationLoader
                     + ". Entities will be loaded from classpath/ context-path");
             // Entity metadata is not related to any PU, and hence will be
             // stored at common place
-            persistenceUnit = Constants.COMMON_ENTITY_METADATAS;
+//            persistenceUnit = Constants.COMMON_ENTITY_METADATAS;
 
             // Check whether all common entity metadata have already been loaded
             if (appMetadata.getMetamodelMap().get(persistenceUnit) != null)
@@ -139,12 +145,12 @@ public class MetamodelLoader extends ApplicationLoader
             }
 
             reader = new ClasspathReader();
-            resources = reader.findResourcesByClasspath();
+//            resources = reader.findResourcesByClasspath();
         }
         else
         {
             reader = new ClasspathReader(classesToScan);
-            resources = reader.findResourcesByContextLoader();
+//            resources = reader.findResourcesByContextLoader();
         }
         // All entities to load should be annotated with @Entity
         reader.addValidAnnotations(Entity.class.getName());
@@ -157,28 +163,32 @@ public class MetamodelLoader extends ApplicationLoader
 
         Map<Class<?>, EntityMetadata> entityMetadataMap = ((MetamodelImpl) metamodel).getEntityMetadataMap();
         Map<String, Class<?>> entityNameToClassMap = ((MetamodelImpl) metamodel).getEntityNameToClassMap();
-
-        for (URL resource : resources)
+        Map<String, List<String>> puToClazzMap = new HashMap<String, List<String>>();
+        if (resources != null)
         {
-            try
+            for (URL resource : resources)
             {
-                ResourceIterator itr = reader.getResourceIterator(resource, reader.getFilter());
-
-                InputStream is = null;
-                while ((is = itr.next()) != null)
+                try
                 {
-                    scanClassAndPutMetadata(is, reader, entityMetadataMap, entityNameToClassMap);
+                    ResourceIterator itr = reader.getResourceIterator(resource, reader.getFilter());
+
+                    InputStream is = null;
+                    while ((is = itr.next()) != null)
+                    {
+                        scanClassAndPutMetadata(is, reader, entityMetadataMap, entityNameToClassMap, persistenceUnit,client,puToClazzMap);
+                    }
                 }
-            }
-            catch (IOException e)
-            {
-                // TODO: Do something with this exception
-                log.error("Error while retreiving and storing entity metadata. Details:" + e.getMessage());
-                e.printStackTrace();
+                catch (IOException e)
+                {
+                    // TODO: Do something with this exception
+                    log.error("Error while retreiving and storing entity metadata. Details:" + e.getMessage());
+                    e.printStackTrace();
+                }
             }
         }
         ((MetamodelImpl) metamodel).setEntityMetadataMap(entityMetadataMap);
         appMetadata.getMetamodelMap().put(persistenceUnit, metamodel);
+        appMetadata.setClazzToPuMap(puToClazzMap);
     }
 
     /**
@@ -192,11 +202,14 @@ public class MetamodelLoader extends ApplicationLoader
      *            the entity metadata map
      * @param entityNameToClassMap
      *            the entity name to class map
+     * @param  persistence unit
+     *            the persistence unit.           
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
     private void scanClassAndPutMetadata(InputStream bits, Reader reader,
-            Map<Class<?>, EntityMetadata> entityMetadataMap, Map<String, Class<?>> entityNameToClassMap)
+            Map<Class<?>, EntityMetadata> entityMetadataMap, Map<String, Class<?>> entityNameToClassMap,String persistenceUnit, String client
+            ,Map<String, List<String>> clazzToPuMap)
             throws IOException
     {
         DataInputStream dstream = new DataInputStream(new BufferedInputStream(bits));
@@ -228,6 +241,10 @@ public class MetamodelLoader extends ApplicationLoader
                         throw new PersistenceException("Name conflict between classes "
                                 + entityNameToClassMap.get(clazz.getSimpleName()).getName() + " and " + clazz.getName());
                     }
+                    
+                    //This is required just to keep hibernate happy. 
+                   //As somehow it complains for lazily loading of entities while building session factory.
+                    
                     entityNameToClassMap.put(clazz.getSimpleName(), clazz);
 
                     EntityMetadata metadata = entityMetadataMap.get(clazz);
@@ -239,9 +256,15 @@ public class MetamodelLoader extends ApplicationLoader
                         {
                             if (null == metadata)
                             {
-                                MetadataBuilder metadataBuilder = new MetadataBuilder();
+                                MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit,client);
                                 metadata = metadataBuilder.buildEntityMetadata(clazz);
-                                entityMetadataMap.put(clazz, metadata);
+                                
+                                //in case entity's pu does not belong to parse persistence unit, it will be null.
+                                if(metadata != null)
+                                {
+                                 entityMetadataMap.put(clazz, metadata);
+                                 mapClazztoPu(clazz, persistenceUnit, clazzToPuMap);
+                                }
                             }
                         }
                     }
@@ -252,6 +275,9 @@ public class MetamodelLoader extends ApplicationLoader
         catch (ClassNotFoundException e)
         {
             log.error("Class " + className + " not found, it won't be loaded as entity");
+        } catch(Exception ex)
+        {
+            log.error("Error while loading metadata:");
         }
         finally
         {
@@ -260,4 +286,37 @@ public class MetamodelLoader extends ApplicationLoader
         }
     }
 
+
+    /**
+     * Method to prepare class simple name to list of pu's mapping.
+     * 1 class can be mapped to multiple persistence units, in case of RDBMS, in other cases it will only be 1!
+     * 
+     * @param clazz   entity class to be mapped.
+     * @param pu      current persistence unit name
+     * @param clazzToPuMap   collection holding mapping.
+     * @return   map holding mapping.
+     */
+    private Map<String, List<String>> mapClazztoPu(Class<?> clazz, String pu, Map<String, List<String>> clazzToPuMap)
+    {
+        List<String> puCol = new ArrayList<String>(1);
+        if (clazzToPuMap == null)
+        {
+            clazzToPuMap = new HashMap<String, List<String>>();
+        }
+        else
+        {
+            if (clazzToPuMap.containsKey(clazz.getName()))
+            {
+                puCol = clazzToPuMap.get(clazz.getName());
+            }
+        }
+        
+        if(!puCol.contains(pu))
+        {
+            puCol.add(pu);
+            clazzToPuMap.put(clazz.getName(), puCol);
+        }
+
+        return clazzToPuMap;
+    }
 }

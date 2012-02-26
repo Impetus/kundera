@@ -15,10 +15,11 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -62,12 +63,7 @@ public class KunderaMetadataManager
 
         MetamodelImpl metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
                 .getMetamodel(persistenceUnit);
-        if (metamodel == null)
-        {
-            metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                    Constants.COMMON_ENTITY_METADATAS);
-        }
-
+        
         return metamodel;
     }
 
@@ -93,11 +89,12 @@ public class KunderaMetadataManager
             }
         }
 
-        if (metamodel == null)
-        {
-            metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-                    Constants.COMMON_ENTITY_METADATAS);
-        }
+        // FIXME: I need to verify this why we need common entity metadata now!
+//        if (metamodel == null)
+//        {
+//            metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
+//                    Constants.COMMON_ENTITY_METADATAS);
+//        }
         return metamodel;
     }
 
@@ -124,13 +121,16 @@ public class KunderaMetadataManager
      *            the persistence units
      * @return the entity metadata
      */
-    public static EntityMetadata getEntityMetadata(Class entityClass, String... persistenceUnits)
+    public static EntityMetadata getEntityMetadata(Class entityClass)
     {
+        List<String> persistenceUnits = KunderaMetadata.INSTANCE.getApplicationMetadata().getMappedPersistenceUnit(entityClass.getName());
+        
+        // persistence units will only have more than 1 persistence unit in case of RDBMS.
         for (String pu : persistenceUnits)
         {
             MetamodelImpl metamodel = getMetamodel(pu);
             EntityMetadata metadata = metamodel.getEntityMetadata(entityClass);
-            if (metadata != null)
+            if (metadata != null )
             {
                 return metadata;
             }

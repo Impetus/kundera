@@ -15,8 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -27,8 +29,9 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -47,7 +50,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 public class PersistenceXMLLoader
 {
     /** The log. */
-    private static Log log = LogFactory.getLog(PersistenceXMLLoader.class);
+    private static Logger log = LoggerFactory.getLogger(PersistenceXMLLoader.class);
 
     /**
      * Instantiates a new persistence xml loader.
@@ -145,6 +148,7 @@ public class PersistenceXMLLoader
         NodeList children = top.getChildNodes();
         ArrayList<PersistenceUnitMetadata> units = new ArrayList<PersistenceUnitMetadata>();
 
+        // parse for persistenceUnitRootInfoURL.
         for (int i = 0; i < children.getLength(); i++)
         {
             if (children.item(i).getNodeType() == Node.ELEMENT_NODE)
@@ -155,6 +159,7 @@ public class PersistenceXMLLoader
                 if (tag.equals("persistence-unit"))
                 {
                     PersistenceUnitMetadata metadata = parsePersistenceUnit(element);
+                    metadata.setPersistenceUnitRootUrl(getPersistenceRootUrl(url));
                     units.add(metadata);
                 }
             }
@@ -227,7 +232,7 @@ public class PersistenceXMLLoader
                 }
                 else if (tag.equals("jar-file"))
                 {
-                    metadata.getJarFiles().add(getElementContent(element));
+                    metadata.addJarFile(getElementContent(element));
                 }
                 else if (tag.equals("exclude-unlisted-classes"))
                 {
@@ -394,4 +399,104 @@ public class PersistenceXMLLoader
         }
         return result.toString().trim();
     }
+
+    /**
+     * Returns persistence unit root url
+     * 
+     * @param url   raw url
+     * @return rootUrl   rootUrl 
+     */
+    private static URL getPersistenceRootUrl(URL url)
+    {
+
+        String f = url.getFile();
+        f = parseFilePath(f);
+        URL jarUrl = url;
+        try
+        {
+            if (AllowedProtocol.isJarProtocol(url.getProtocol()))
+            {
+                jarUrl = new URL(f);
+                if (jarUrl.getProtocol() != null
+                        && AllowedProtocol.FILE.name().equals(jarUrl.getProtocol().toUpperCase())
+                        && StringUtils.contains(f, " "))
+                {
+                    jarUrl = new File(f).toURI().toURL();
+                }
+            }
+            else if (AllowedProtocol.isValidProtocol(url.getProtocol()))
+            {
+                if(StringUtils.contains(f, " "))
+                {
+                    jarUrl = new File(f).toURI().toURL();
+                } else
+                {
+                    jarUrl = new File(f).toURL();
+                }
+            }
+        }
+        catch (MalformedURLException mex)
+        {
+            log.error(mex.getMessage());
+            throw new IllegalArgumentException("invalid jar URL[] provided!" + url);
+        }
+        
+        return jarUrl;
+    }
+
+    /**
+     * Parse and exclude path till META-INF
+     * @param file raw file path.
+     * @return  extracted/parsed file path.
+     */
+    private static String parseFilePath(String file)
+    {
+        final String excludePattern = "/META-INF/persistence.xml";
+        file = file.substring(0, file.length() - excludePattern.length());
+
+        // in case protocol is "file".
+        file = file.endsWith("!") ? file.substring(0, file.length() - 1) : file;
+
+        return file;
+    }
+
+    
+    /**
+     * Allowed protocols
+     */
+    private enum AllowedProtocol
+    {
+        WSJAR, JAR, ZIP, FILE;
+
+        
+        /**
+         * In case it is jar protocol
+         * 
+         * @param protocol
+         * @return
+         */
+        public static boolean isJarProtocol(String protocol)
+        {
+            return protocol != null && (protocol.toUpperCase().equals(JAR.name()) || protocol.toUpperCase().equals(WSJAR.name()));
+        }
+
+        /**
+         * If provided protocol is within allowed protocol.
+         * 
+         * @param protocol protocol
+         * @return true, if it is in allowed protocol.
+         */
+        public static boolean isValidProtocol(String protocol)
+        {
+            try
+            {
+                AllowedProtocol.valueOf(protocol.toUpperCase());
+                return true;
+            } catch(IllegalArgumentException iex)
+            {
+                return false;
+            }
+        }
+    }
+
 }

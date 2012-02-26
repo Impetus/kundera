@@ -117,87 +117,87 @@ public class PersistenceDelegator
         Client client = null;
 
         // Persistence Unit used to retrieve client
-        String persistenceUnit = null;
+        String persistenceUnit = m.getPersistenceUnit();
 
-        if (getPersistenceUnits().length == 1)
-        {
-            //
-            persistenceUnit = getPersistenceUnits()[0];
-
-            String puInMetadata = m.getPersistenceUnit();
-
-            // Case if pu is blank or pu passed is not equal '@'
-            if (!StringUtils.isBlank(puInMetadata))
-            {
-                if (StringUtils.isBlank(persistenceUnit) || !persistenceUnit.equals(puInMetadata))
-                {
-                    throw new PersistenceException(
-                            "Persistence Unit defined at entity can't differ from the one provided for EMF");
-                }
-            }
-            else
-            {
-                // If '@' not given and pu supplied is not of RDBMS
-                Map<String, PersistenceUnitMetadata> puMetadataMap = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                        .getPersistenceUnitMetadataMap();
-                boolean found = false;
-                for (PersistenceUnitMetadata puMetadata : puMetadataMap.values())
-                {
-                    Properties props = puMetadata.getProperties();
-                    String clientName = props.getProperty(PersistenceProperties.KUNDERA_CLIENT);
-                    if (ClientType.RDBMS.name().equalsIgnoreCase(clientName))
-                    {
-                        if (persistenceUnit.equals(puMetadata.getPersistenceUnitName()))
-                        {
-                            found = true;
-                            break;
-
-                        }
-                    }
-
-                }
-
-                if (!found)
-                {
-                    throw new PersistenceException(
-                            "Invalid persistence unit configuration! should be intended for RDBMS, else must annotate @Table(name = table_col_family_name, schema = keyspace@pu");
-                }
-
-            }
-
-        }
-        else
-        {
-            // TODO : this must not be handled here.
-            String puInMetadata = m.getPersistenceUnit();
-
-            if (StringUtils.isEmpty(puInMetadata))
-            {
-                Map<String, PersistenceUnitMetadata> puMetadataMap = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                        .getPersistenceUnitMetadataMap();
-                for (PersistenceUnitMetadata puMetadata : puMetadataMap.values())
-                {
-                    Properties props = puMetadata.getProperties();
-                    String clientName = props.getProperty(PersistenceProperties.KUNDERA_CLIENT);
-                    if (ClientType.RDBMS.name().equalsIgnoreCase(clientName))
-                    {
-                        persistenceUnit = puMetadata.getPersistenceUnitName();
-                        break;
-                    }
-
-                }
-            }
-            else
-            {
-                persistenceUnit = puInMetadata;
-            }
-
-            if (persistenceUnit == null || !Arrays.asList(getPersistenceUnits()).contains(persistenceUnit))
-            {
-                throw new PersistenceException("Invalid persistence configuration!");
-            }
-
-        }
+//        if (getPersistenceUnits().length == 1)
+//        {
+//            //
+//            persistenceUnit = getPersistenceUnits()[0];
+//
+//            String puInMetadata = m.getPersistenceUnit();
+//
+//            // Case if pu is blank or pu passed is not equal '@'
+//            if (!StringUtils.isBlank(puInMetadata))
+//            {
+//                if (StringUtils.isBlank(persistenceUnit) || !persistenceUnit.equals(puInMetadata))
+//                {
+//                    throw new PersistenceException(
+//                            "Persistence Unit defined at entity can't differ from the one provided for EMF");
+//                }
+//            }
+//            else
+//            {
+//                // If '@' not given and pu supplied is not of RDBMS
+//                Map<String, PersistenceUnitMetadata> puMetadataMap = KunderaMetadata.INSTANCE.getApplicationMetadata()
+//                        .getPersistenceUnitMetadataMap();
+//                boolean found = false;
+//                for (PersistenceUnitMetadata puMetadata : puMetadataMap.values())
+//                {
+//                    Properties props = puMetadata.getProperties();
+//                    String clientName = props.getProperty(PersistenceProperties.KUNDERA_CLIENT);
+//                    if (ClientType.RDBMS.name().equalsIgnoreCase(clientName))
+//                    {
+//                        if (persistenceUnit.equals(puMetadata.getPersistenceUnitName()))
+//                        {
+//                            found = true;
+//                            break;
+//
+//                        }
+//                    }
+//
+//                }
+//
+//                if (!found)
+//                {
+//                    throw new PersistenceException(
+//                            "Invalid persistence unit configuration! should be intended for RDBMS, else must annotate @Table(name = table_col_family_name, schema = keyspace@pu");
+//                }
+//
+//            }
+//
+//        }
+//        else
+//        {
+//            // TODO : this must not be handled here.
+//            String puInMetadata = m.getPersistenceUnit();
+//
+//            if (StringUtils.isEmpty(puInMetadata))
+//            {
+//                Map<String, PersistenceUnitMetadata> puMetadataMap = KunderaMetadata.INSTANCE.getApplicationMetadata()
+//                        .getPersistenceUnitMetadataMap();
+//                for (PersistenceUnitMetadata puMetadata : puMetadataMap.values())
+//                {
+//                    Properties props = puMetadata.getProperties();
+//                    String clientName = props.getProperty(PersistenceProperties.KUNDERA_CLIENT);
+//                    if (ClientType.RDBMS.name().equalsIgnoreCase(clientName))
+//                    {
+//                        persistenceUnit = puMetadata.getPersistenceUnitName();
+//                        break;
+//                    }
+//
+//                }
+//            }
+//            else
+//            {
+//                persistenceUnit = puInMetadata;
+//            }
+//
+//            if (persistenceUnit == null || !Arrays.asList(getPersistenceUnits()).contains(persistenceUnit))
+//            {
+//                throw new PersistenceException("Invalid persistence configuration!");
+//            }
+//
+//        }
 
         // single persistence unit given and entity is annotated with '@'.
         // validate persistence unit given is same
@@ -303,7 +303,7 @@ public class PersistenceDelegator
      */
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass, getPersistenceUnits());
+        EntityMetadata entityMetadata = getMetadata(entityClass);
 
         List<E> entities = new ArrayList<E>();
         try
@@ -331,14 +331,14 @@ public class PersistenceDelegator
         try
         {
             List<EnhancedEntity> reachableEntities = EntityResolver
-                    .resolve(e, CascadeType.MERGE, getPersistenceUnits());
+                    .resolve(e, CascadeType.MERGE);
 
             // save each one
             // for (EnhancedEntity o : reachableEntities)
             // {
             log.debug("Merging Entity : " + e);
 
-            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(e.getClass(), getPersistenceUnits());
+            EntityMetadata m = getMetadata(e.getClass());
 
             // TODO: throw OptisticLockException if wrong version and
             // optimistic locking enabled
@@ -640,8 +640,7 @@ public class PersistenceDelegator
             // }
 
             // Find top level entity first
-            EntityMetadata entityMetadata = KunderaMetadataManager
-                    .getEntityMetadata(entityClass, getPersistenceUnits());
+            EntityMetadata entityMetadata = getMetadata(entityClass);
 
             Client client = getClient(entityMetadata);
 
@@ -736,8 +735,7 @@ public class PersistenceDelegator
             // }
 
             // Find top level entity first
-            EntityMetadata entityMetadata = KunderaMetadataManager
-                    .getEntityMetadata(entityClass, getPersistenceUnits());
+            EntityMetadata entityMetadata = getMetadata(entityClass);
 
             Client client = getClient(entityMetadata);
 
@@ -845,7 +843,7 @@ public class PersistenceDelegator
      */
     public EntityMetadata getMetadata(Class<?> clazz)
     {
-        return KunderaMetadataManager.getEntityMetadata(clazz, getPersistenceUnits());
+        return KunderaMetadataManager.getEntityMetadata(clazz);
     }
 
     /**

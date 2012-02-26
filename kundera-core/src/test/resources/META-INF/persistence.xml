@@ -5,6 +5,9 @@
 
 	<persistence-unit name="kunderatest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>		
+		<jar-file>/home/impetus/perf_n.jar</jar-file>
+		<jar-file>/home/impetus/perf.jar</jar-file>
+		<class>com.impetus.kundera.Person</class>
 		<properties>			
 			<property name="kundera.nodes" value="localhost"/>
 			<property name="kundera.port" value="9160"/>

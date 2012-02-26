@@ -71,6 +71,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     {
         if (!clazz.isAnnotationPresent(Table.class))
         {
+            // FIXME: why return? why not throw run time exception?
             return;
         }
 

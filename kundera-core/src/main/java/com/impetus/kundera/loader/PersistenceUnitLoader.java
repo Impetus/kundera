@@ -61,6 +61,8 @@ public class PersistenceUnitLoader extends ApplicationLoader
 
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
+        List<PersistenceUnitMetadata> metadatas = findPersistenceMetadatas();
+
         for (String persistenceUnit : persistenceUnits)
         {
             if (appMetadata.getPersistenceUnitMetadataMap().get(persistenceUnit) != null)
@@ -70,7 +72,7 @@ public class PersistenceUnitLoader extends ApplicationLoader
             }
             else
             {
-                appMetadata.addPersistenceUnitMetadata(persistenceUnit, getPersistenceMetadata(persistenceUnit));
+                appMetadata.addPersistenceUnitMetadata(persistenceUnit, getPersistenceMetadata(metadatas,persistenceUnit));
             }
         }
     }
@@ -82,10 +84,9 @@ public class PersistenceUnitLoader extends ApplicationLoader
      *            the persistence unit name
      * @return the persistence metadata
      */
-    private PersistenceUnitMetadata getPersistenceMetadata(String persistenceUnit)
+    private PersistenceUnitMetadata getPersistenceMetadata(List<PersistenceUnitMetadata> metadatas,String persistenceUnit)
     {
         log.info("Looking up for persistence unit: " + persistenceUnit);
-        List<PersistenceUnitMetadata> metadatas = findPersistenceMetadatas();
 
         // If there is just ONE persistenceUnit, then use this irrespective of
         // the name
@@ -136,6 +137,8 @@ public class PersistenceUnitLoader extends ApplicationLoader
             while (xmls.hasMoreElements())
             {
                 URL url = xmls.nextElement();
+                
+                
                 log.trace("Analyse of persistence.xml: " + url);
                 List<PersistenceUnitMetadata> metadataFiles = PersistenceXMLLoader.findPersistenceUnits(url,
                         PersistenceUnitTransactionType.RESOURCE_LOCAL);
