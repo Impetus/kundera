@@ -116,7 +116,7 @@ public class HibernateClient implements Client
      */
     // TODO: This needs to be deleted.
     @Override
-    public void persist(EnhancedEntity enhanceEntity) throws Exception
+    public void persist(EnhancedEntity enhanceEntity)
     {
         Session s = getSessionInstance();
         Transaction tx = s.beginTransaction();
@@ -198,7 +198,7 @@ public class HibernateClient implements Client
      * java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
-    public void delete(Object entity, Object pKey, EntityMetadata metadata) throws Exception
+    public void delete(Object entity, Object pKey, EntityMetadata metadata)
     {
         Session s = getSessionInstance();
         Transaction tx = s.beginTransaction();
@@ -219,7 +219,7 @@ public class HibernateClient implements Client
      * java.lang.String)
      */
     @Override
-    public <E> E find(Class<E> arg0, Object key, List<String> relationNames) throws Exception
+    public <E> E find(Class<E> arg0, Object key, List<String> relationNames)
     {
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), arg0);
@@ -238,7 +238,7 @@ public class HibernateClient implements Client
      * java.lang.String[])
      */
     @Override
-    public <E> List<E> findAll(Class<E> arg0, Object... arg1) throws Exception
+    public <E> List<E> findAll(Class<E> arg0, Object... arg1)
     {
         // TODO: Vivek correct it. unfortunately i need to open a new session
         // for each finder to avoid lazy loading.
@@ -292,7 +292,7 @@ public class HibernateClient implements Client
      */
     @Override
     @Deprecated
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap) throws Exception
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
         return null;
     }

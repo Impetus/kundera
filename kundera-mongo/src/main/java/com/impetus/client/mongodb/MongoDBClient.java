@@ -28,6 +28,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
@@ -100,9 +101,9 @@ public class MongoDBClient implements Client
      */
     @Override
     @Deprecated
-    public void persist(EnhancedEntity enhancedEntity) throws Exception
+    public void persist(EnhancedEntity enhancedEntity) 
     {
-        throw new PersistenceException("Not Implemented");
+        throw new KunderaException("Not Implemented");
     }
 
     /*
@@ -137,12 +138,12 @@ public class MongoDBClient implements Client
         catch (PropertyAccessException e)
         {
             log.error(e.getMessage());
-            throw new PersistenceException(e.getMessage());
+            throw new KunderaException(e);
         }
         catch (Exception e)
         {
             log.error(e.getMessage());
-            throw new PersistenceException(e.getMessage());
+            throw new KunderaException(e);
         }
 
         return null;
@@ -168,15 +169,15 @@ public class MongoDBClient implements Client
             onIndex(childEntity, entitySaveGraph, metadata, rlValue);
         }
         catch (PropertyAccessException e)
-        {
-            e.printStackTrace();
+        {        
+            
             log.error(e.getMessage());
-            throw new PersistenceException(e.getMessage());
+            throw new KunderaException(e);
         }
         catch (Exception e)
         {
             log.error(e.getMessage());
-            throw new PersistenceException(e.getMessage());
+            throw new KunderaException(e);
         }
     }
 
@@ -220,7 +221,7 @@ public class MongoDBClient implements Client
         }
         catch (PropertyAccessException e)
         {
-            e.printStackTrace();
+            throw new KunderaException(e);
         }
 
         dbCollection.insert(documents.toArray(new BasicDBObject[0]));
@@ -286,7 +287,7 @@ public class MongoDBClient implements Client
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            throw new KunderaException(e);
         }
         return entities;
     }
@@ -422,7 +423,7 @@ public class MongoDBClient implements Client
      * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public <E> E find(Class<E> entityClass, Object key, List<String> relationNames) throws Exception
+    public <E> E find(Class<E> entityClass, Object key, List<String> relationNames)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
 
@@ -458,7 +459,7 @@ public class MongoDBClient implements Client
      * java.lang.Object[])
      */
     @Override
-    public <E> List<E> findAll(Class<E> entityClass, Object... keys) throws Exception
+    public <E> List<E> findAll(Class<E> entityClass, Object... keys)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
 
@@ -549,7 +550,7 @@ public class MongoDBClient implements Client
      * java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
-    public void delete(Object entity, Object pKey, EntityMetadata entityMetadata) throws Exception
+    public void delete(Object entity, Object pKey, EntityMetadata entityMetadata)
     {
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
 
@@ -618,7 +619,7 @@ public class MongoDBClient implements Client
      * java.util.Map)
      */
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> col) throws Exception
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> col)
     {
         throw new NotImplementedException("Not yet implemented");
     }

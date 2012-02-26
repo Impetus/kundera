@@ -51,6 +51,7 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
@@ -117,7 +118,7 @@ public class PelopsClient implements Client
      * EnhancedEntity)
      */
     @Override
-    public void persist(EnhancedEntity enhancedEntity) throws Exception
+    public void persist(EnhancedEntity enhancedEntity)
     {
         // DELETE it.
     }
@@ -130,7 +131,7 @@ public class PelopsClient implements Client
      */
     @Override
     @Deprecated
-    public final <E> E find(Class<E> entityClass, Object rowId, List<String> relationNames) throws Exception
+    public final <E> E find(Class<E> entityClass, Object rowId, List<String> relationNames) 
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         return (E) find(entityClass, entityMetadata, rowId != null ? rowId.toString() : null, relationNames);
@@ -167,7 +168,7 @@ public class PelopsClient implements Client
      * java.lang.String[])
      */
     @Override
-    public final <E> List<E> findAll(Class<E> entityClass, Object... rowIds) throws Exception
+    public final <E> List<E> findAll(Class<E> entityClass, Object... rowIds) 
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         List<E> results = new ArrayList<E>();
@@ -203,7 +204,7 @@ public class PelopsClient implements Client
      *             exercise.
      */
     public final List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
-            String... rowIds) throws Exception
+            String... rowIds)
     {
         if (!isOpen())
         {
@@ -214,7 +215,15 @@ public class PelopsClient implements Client
 
         PelopsDataHandler handler = new PelopsDataHandler(this);
 
-        List entities = handler.fromThriftRow(selector, entityClass, metadata, relationNames, isWrapReq, rowIds);
+        List entities = null;
+        try
+        {
+            entities = handler.fromThriftRow(selector, entityClass, metadata, relationNames, isWrapReq, rowIds);
+        }
+        catch (Exception e)
+        {
+            throw new KunderaException(e);
+        }
 
         return entities;
     }
@@ -226,19 +235,27 @@ public class PelopsClient implements Client
      * java.util.Map)
      */
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> superColumnMap) throws Exception
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> superColumnMap) 
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
-        List<E> entities = new ArrayList<E>();
-        for (String superColumnName : superColumnMap.keySet())
+        List<E> entities = null;
+        try
         {
-            String entityId = superColumnMap.get(superColumnName);
-            List<SuperColumn> superColumnList = loadSuperColumns(entityMetadata.getSchema(),
-                    entityMetadata.getTableName(), entityId,
-                    new String[] { superColumnName.substring(0, superColumnName.indexOf("|")) });
-            E e = (E) dataHandler.fromThriftRow(entityMetadata.getEntityClazz(), entityMetadata,
-                    new DataRow<SuperColumn>(entityId, entityMetadata.getTableName(), superColumnList));
-            entities.add(e);
+            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
+            entities = new ArrayList<E>();
+            for (String superColumnName : superColumnMap.keySet())
+            {
+                String entityId = superColumnMap.get(superColumnName);
+                List<SuperColumn> superColumnList = loadSuperColumns(entityMetadata.getSchema(),
+                        entityMetadata.getTableName(), entityId,
+                        new String[] { superColumnName.substring(0, superColumnName.indexOf("|")) });
+                E e = (E) dataHandler.fromThriftRow(entityMetadata.getEntityClazz(), entityMetadata,
+                        new DataRow<SuperColumn>(entityId, entityMetadata.getTableName(), superColumnList));
+                entities.add(e);
+            }
+        }
+        catch (Exception e)
+        {
+            throw new KunderaException(e);
         }
         return entities;
     }
@@ -259,7 +276,7 @@ public class PelopsClient implements Client
      *             the exception
      */
     private final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
-            String... superColumnNames) throws Exception
+            String... superColumnNames) 
     {
         if (!isOpen())
             throw new PersistenceException("PelopsClient is closed.");
@@ -275,7 +292,7 @@ public class PelopsClient implements Client
      * java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
-    public void delete(Object entity, Object pKey, EntityMetadata metadata) throws Exception
+    public void delete(Object entity, Object pKey, EntityMetadata metadata)
     {
         if (!isOpen())
         {
@@ -378,9 +395,8 @@ public class PelopsClient implements Client
 
         }
         catch (Exception e)
-        {
-            e.printStackTrace();
-            throw new PersistenceException(e.getMessage());
+        {            
+            throw new KunderaException(e);
         }
         return null;
     }
@@ -412,8 +428,7 @@ public class PelopsClient implements Client
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            new PersistenceException(e.getMessage());
+            throw new KunderaException(e);
         }
 
     }
@@ -603,7 +618,7 @@ public class PelopsClient implements Client
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            throw new KunderaException(e);
         }
 
         return entities;
@@ -662,7 +677,7 @@ public class PelopsClient implements Client
         }
         catch (PropertyAccessException e)
         {
-            e.printStackTrace();
+            throw new KunderaException(e);
         }
 
     }
@@ -811,14 +826,11 @@ public class PelopsClient implements Client
             }
             catch (IllegalStateException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new KunderaException(e);
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+                throw new KunderaException(e);            }
         }
     }
 

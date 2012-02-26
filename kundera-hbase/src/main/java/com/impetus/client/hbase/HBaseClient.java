@@ -33,6 +33,7 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -93,10 +94,10 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      * EnhancedEntity)
      */
     @Override
-    public void persist(EnhancedEntity enhancedEntity) throws Exception
+    public void persist(EnhancedEntity enhancedEntity)
     {
         log.error("persist method on enhance entity is not supported now!");
-        throw new PersistenceException("method not supported");
+        throw new KunderaException("method not supported");
     }
 
     /*
@@ -106,14 +107,22 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      * java.lang.Object, java.util.List)
      */
     @Override
-    public <E> E find(Class<E> entityClass, Object rowId, List<String> relationNames) throws Exception
+    public <E> E find(Class<E> entityClass, Object rowId, List<String> relationNames)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         // columnFamily has a different meaning for HBase, so it won't be used
         // here
         String tableName = entityMetadata.getTableName();
-        Object enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata,
-                rowId != null ? rowId.toString() : null, relationNames);
+        Object enhancedEntity = null;
+        try
+        {
+            enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata,
+                    rowId != null ? rowId.toString() : null, relationNames);
+        }
+        catch (IOException e)
+        {
+            throw new KunderaException(e);
+        }
         return (E) enhancedEntity;
     }
 
@@ -124,14 +133,22 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      * java.lang.Object[])
      */
     @Override
-    public <E> List<E> findAll(Class<E> entityClass, Object... rowIds) throws Exception
+    public <E> List<E> findAll(Class<E> entityClass, Object... rowIds) 
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         List<E> entities = new ArrayList<E>();
         for (Object rowKey : rowIds)
         {
-            E e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(), entityMetadata,
-                    rowKey.toString(), null);
+            E e = null;
+            try
+            {
+                e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(), entityMetadata,
+                        rowKey.toString(), null);
+            }
+            catch (IOException e1)
+            {
+                throw new KunderaException(e1);
+            }
             entities.add(e);
         }
         return entities;
@@ -144,7 +161,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      * java.util.Map)
      */
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> col) throws Exception
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> col) 
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         List<E> entities = new ArrayList<E>();
@@ -152,8 +169,16 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         for (String columnFamilyName : col.keySet())
         {
             String entityId = col.get(columnFamilyName);
-            E e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(), entityMetadata,
-                    entityId, null);
+            E e = null;
+            try
+            {
+                e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(), entityMetadata,
+                        entityId, null);
+            }
+            catch (IOException e1)
+            {
+                throw new KunderaException(e1);
+            }
 
             Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName.substring(0,
                     columnFamilyName.indexOf("|")));
@@ -461,9 +486,16 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      * java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
-    public void delete(Object entity, Object pKey, EntityMetadata metadata) throws Exception
+    public void delete(Object entity, Object pKey, EntityMetadata metadata) 
     {
-        handler.deleteRow(pKey.toString(), metadata.getTableName());
+        try
+        {
+            handler.deleteRow(pKey.toString(), metadata.getTableName());
+        }
+        catch (IOException e)
+        {
+            throw new KunderaException(e);
+        }
     }
 
     /*
