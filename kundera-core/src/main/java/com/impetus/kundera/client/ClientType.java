@@ -59,12 +59,19 @@ public enum ClientType
      *            client type
      * @return clientType enum value.
      */
-    public static ClientType getValue(String clientType)
+    public static ClientType getValue(String clientType) 
     {
         if (clientType == null)
         {
-            throw new EnumConstantNotPresentException(null, clientType);
+            throw new ClientResolverException(clientType + " can't be resolved");
         }
-        return coll.get(clientType);
+        
+        ClientType client = coll.get(clientType);
+        
+        if(client != null) {
+            return coll.get(clientType);
+        } else {
+            throw new ClientResolverException("Not Client configured in Kundera for " + clientType);
+        }        
     }
 }

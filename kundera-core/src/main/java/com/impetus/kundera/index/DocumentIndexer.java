@@ -17,8 +17,6 @@ package com.impetus.kundera.index;
 
 import java.io.CharArrayReader;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.LetterTokenizer;
 import org.apache.lucene.analysis.Tokenizer;
@@ -26,6 +24,8 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.util.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
@@ -43,7 +43,7 @@ public abstract class DocumentIndexer implements Indexer
 {
 
     /** log for this class. */
-    private static final Log LOG = LogFactory.getLog(DocumentIndexer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DocumentIndexer.class);
 
     /** The INDEX_NAME. */
     protected static final String INDEX_NAME = "kundera-alpha";// is
@@ -172,6 +172,7 @@ public abstract class DocumentIndexer implements Indexer
     protected void indexSuperColumn(EntityMetadata metadata, Object object, Document currentDoc, Object embeddedObject,
             EmbeddedColumn superColumn)
     {
+        
         // Add all super column fields into document
         for (Column col : superColumn.getColumns())
         {
@@ -185,6 +186,7 @@ public abstract class DocumentIndexer implements Indexer
 
         // Store document into Index
         indexDocument(metadata, currentDoc);
+       
     }
 
     /**
@@ -211,16 +213,17 @@ public abstract class DocumentIndexer implements Indexer
      * @param document
      *            the document
      */
-    protected void addEntityFieldsToDocument(EntityMetadata metadata, Object object, Document document)
+    protected void addEntityFieldsToDocument(EntityMetadata metadata, Object object, Document document) 
     {
         String indexName = metadata.getIndexName();
+        
         for (PropertyIndex index : metadata.getIndexProperties())
         {
-
             java.lang.reflect.Field property = index.getProperty();
             String propertyName = index.getName();
             addFieldToDocument(object, document, property, propertyName, indexName);
         }
+        
     }
 
     /**
@@ -309,6 +312,7 @@ public abstract class DocumentIndexer implements Indexer
         catch (PropertyAccessException e)
         {
             LOG.error("Error in accessing field:" + e.getMessage());
+            throw new LuceneIndexingException("Error in accessing field:" + field.getName(), e);
         }
     }
 

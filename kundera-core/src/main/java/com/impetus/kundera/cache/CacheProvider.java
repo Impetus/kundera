@@ -35,7 +35,7 @@ public interface CacheProvider
      * @throws CacheException
      *             the cache exception
      */
-    void init(Map<?, ?> properties) throws CacheException;
+    void init(Map<?, ?> properties);
 
     /**
      * Inits the.
@@ -45,7 +45,7 @@ public interface CacheProvider
      * @throws CacheException
      *             the cache exception
      */
-    void init(String cacheResourceName) throws CacheException;
+    void init(String cacheResourceName);
 
     /**
      * Creates cache for a given name.
@@ -56,7 +56,7 @@ public interface CacheProvider
      * @throws CacheException
      *             the cache exception
      */
-    Cache createCache(String name) throws CacheException;
+    Cache createCache(String name);
 
     /**
      * Returns cache for a given cache name.
@@ -67,7 +67,7 @@ public interface CacheProvider
      * @throws CacheException
      *             the cache exception
      */
-    Cache getCache(String name) throws CacheException;
+    Cache getCache(String name);
 
     /**
      * Shutdown cache.

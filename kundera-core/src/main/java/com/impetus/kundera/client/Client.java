@@ -41,7 +41,7 @@ public interface Client
      *             the exception
      */
     @Deprecated
-    void persist(EnhancedEntity e) throws Exception;
+    void persist(EnhancedEntity e);
 
     /**
      * Retrieve columns from a column-family row.
@@ -58,7 +58,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    <E> E find(Class<E> entityClass, Object key, List<String> relationNames) throws Exception;
+    <E> E find(Class<E> entityClass, Object key, List<String> relationNames);
 
     /**
      * Retrieve columns from multiple rows of a column-family.
@@ -73,7 +73,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    <E> List<E> findAll(Class<E> entityClass, Object... keys) throws Exception;
+    <E> List<E> findAll(Class<E> entityClass, Object... keys);
 
     /**
      * Load data.
@@ -88,7 +88,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap) throws Exception;
+    <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap);
 
     /**
      * Shutdown.
@@ -107,7 +107,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
-    void delete(Object entity, Object pKey, EntityMetadata metadata) throws Exception;
+    void delete(Object entity, Object pKey, EntityMetadata metadata);
 
     /**
      * Gets the persistence unit.

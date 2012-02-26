@@ -17,11 +17,10 @@ package com.impetus.kundera.index;
 
 import java.util.Map;
 
-import javax.persistence.PersistenceException;
-
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -58,20 +57,13 @@ public class IndexManager
      * @param key
      *            the key
      */
-    public final void remove(EntityMetadata metadata, Object entity, String key)
+    public final void remove(EntityMetadata metadata, Object entity, String key) 
     {
-        try
+        if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
         {
-            if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
-            {
-
-                indexer.unindex(metadata, key);
-            }
+            indexer.unindex(metadata, key);
         }
-        catch (Exception e)
-        {
-            throw new PersistenceException(e.getMessage());
-        }
+        
     }
 
     /**
@@ -82,8 +74,9 @@ public class IndexManager
      * @param entity
      *            the entity
      */
-    public final void update(EntityMetadata metadata, Object entity)
+    public final void update(EntityMetadata metadata, Object entity) 
     {
+        
         try
         {
             if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
@@ -93,11 +86,11 @@ public class IndexManager
                 indexer.unindex(metadata, id);
                 indexer.index(metadata, entity);
             }
-        }
-        catch (Exception e)
+        }       
+        catch (PropertyAccessException e)
         {
-            throw new PersistenceException(e.getMessage());
-        }
+            throw new IndexingException("Can't access ID from entity class " + metadata.getEntityClazz(), e);
+        }        
     }
 
     /**
@@ -108,12 +101,12 @@ public class IndexManager
      * @param entity
      *            the entity
      */
-    public final void write(EntityMetadata metadata, Object entity)
-    {
+    public final void write(EntityMetadata metadata, Object entity) 
+    {        
         if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
         {
             indexer.index(metadata, entity);
-        }
+        }      
     }
 
     /**
@@ -128,12 +121,12 @@ public class IndexManager
      * @param clazz
      *            class name
      */
-    public final void write(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz)
-    {
+    public final void write(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz) 
+    {        
         if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
         {
             indexer.index(metadata, entity, parentId, clazz);
-        }
+        }       
     }
 
     /**
@@ -144,9 +137,9 @@ public class IndexManager
      *            the query
      * @return the list
      */
-    public final Map<String, String> search(String query)
-    {
-        return search(query, Constants.INVALID, Constants.INVALID, false);
+    public final Map<String, String> search(String query) 
+    {        
+        return search(query, Constants.INVALID, Constants.INVALID, false);      
     }
 
     /**
@@ -157,10 +150,10 @@ public class IndexManager
      *            the query
      * @return the list
      */
-    public final Map<String, String> fetchRelation(String query)
+    public final Map<String, String> fetchRelation(String query) 
     {
-        // TODO: need to return list.
-        return search(query, Constants.INVALID, Constants.INVALID, true);
+        // TODO: need to return list.       
+        return search(query, Constants.INVALID, Constants.INVALID, true);       
     }
 
     /**
@@ -172,9 +165,9 @@ public class IndexManager
      *            the count
      * @return the list
      */
-    public final Map<String, String> search(String query, int count)
-    {
-        return search(query, Constants.INVALID, count, false);
+    public final Map<String, String> search(String query, int count) 
+    {        
+        return search(query, Constants.INVALID, count, false);       
     }
 
     /**
@@ -188,9 +181,9 @@ public class IndexManager
      *            the count
      * @return the list
      */
-    public final Map<String, String> search(String query, int start, int count)
-    {
-        return indexer.search(query, start, count, false);
+    public final Map<String, String> search(String query, int start, int count) 
+    {       
+        return indexer.search(query, start, count, false);       
     }
 
     /**
@@ -206,30 +199,30 @@ public class IndexManager
      *            the fetch relation
      * @return the list
      */
-    public final Map<String, String> search(String query, int start, int count, boolean fetchRelation)
-    {
-        return indexer.search(query, start, count, fetchRelation);
+    public final Map<String, String> search(String query, int start, int count, boolean fetchRelation) 
+    {      
+        return indexer.search(query, start, count, fetchRelation);      
     }
 
     /**
      * Flushes out the indexes, keeping RAM directory open.
      */
-    public void flush()
+    public void flush() throws IndexingException
     {
         if (indexer != null)
         {
             indexer.flush();
-        }
+        } 
     }
 
     /**
      * Closes the transaction alongwith RAM directory.
      */
-    public void close()
-    {
+    public void close() throws IndexingException
+    {       
         if (indexer != null)
         {
             indexer.close();
-        }
+        } 
     }
 }

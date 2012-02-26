@@ -15,25 +15,52 @@
  ******************************************************************************/
 package com.impetus.kundera.index;
 
+import com.impetus.kundera.KunderaException;
+
 /**
- * Captures any indexing related exceptions.
- * 
+ * Captures any indexing related exceptions. 
  * @author animesh.kumar
  */
-public class IndexingException extends RuntimeException
+public class IndexingException extends KunderaException
 {
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 7917821486831927353L;
 
     /**
-     * Instantiates a new indexing exception.
      * 
-     * @param message
-     *            the message
      */
-    public IndexingException(String message)
+    public IndexingException()
     {
-        super(message);
+        super();
+        
     }
+
+    /**
+     * @param arg0
+     * @param arg1
+     */
+    public IndexingException(String arg0, Throwable arg1)
+    {
+        super(arg0, arg1);
+        
+    }
+
+    /**
+     * @param arg0
+     */
+    public IndexingException(String arg0)
+    {
+        super(arg0);
+        
+    }
+
+    /**
+     * @param arg0
+     */
+    public IndexingException(Throwable arg0)
+    {
+        super(arg0);
+        
+    }    
 }

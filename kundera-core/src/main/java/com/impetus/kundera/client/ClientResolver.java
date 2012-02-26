@@ -97,15 +97,15 @@ public final class ClientResolver
         }
         catch (InstantiationException e)
         {
-            throw new ClientResolverException(e.getMessage());
+            throw new ClientResolverException("Couldn't instantiate class", e);
         }
         catch (IllegalAccessException e)
         {
-            throw new ClientResolverException(e.getMessage());
+            throw new ClientResolverException(e);
         }
         catch (ClassNotFoundException e)
         {
-            throw new ClientResolverException(e.getMessage());
+            throw new ClientResolverException(e);
         }
 
         if (loader == null)

@@ -42,11 +42,7 @@ public abstract class GenericClientFactory implements Loader
     /** The connection pool or connection. */
     private Object connectionPoolOrConnection;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.loader.Loader#load(java.lang.String[])
-     */
+
     @Override
     public void load(String... persistenceUnits)
     {

@@ -47,14 +47,8 @@ public class ClassFileIterator implements ResourceIterator
     public ClassFileIterator(File file, Filter filter)
     {
         files = new ArrayList<File>();
-        try
-        {
-            init(files, file, filter);
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(e);
-        }
+        
+        init(files, file, filter);        
     }
 
     /**
@@ -82,7 +76,7 @@ public class ClassFileIterator implements ResourceIterator
      * @throws Exception
      *             the exception
      */
-    private static void init(List<File> list, File dir, Filter filter) throws Exception
+    private static void init(List<File> list, File dir, Filter filter) 
     {
         File[] files = dir.listFiles();
         for (int i = 0; i < files.length; i++)
@@ -101,12 +95,6 @@ public class ClassFileIterator implements ResourceIterator
         }
     }
 
-    /* @see com.impetus.kundera.classreading.ResourceIterator#next() */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.classreading.ResourceIterator#next()
-     */
     public final InputStream next()
     {
         if (index >= files.size())
@@ -117,17 +105,12 @@ public class ClassFileIterator implements ResourceIterator
             return new FileInputStream(fp);
         }
         catch (FileNotFoundException e)
-        {
-            throw new RuntimeException(e);
+        {            
+            throw new ResourceReadingException("Couldn't read file " + fp, e);
         }
     }
 
-    /* @see com.impetus.kundera.classreading.ResourceIterator#close() */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.classreading.ResourceIterator#close()
-     */
+
     public void close()
     {
     }
