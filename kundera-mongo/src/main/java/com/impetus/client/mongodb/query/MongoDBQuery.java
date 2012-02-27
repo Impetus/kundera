@@ -65,10 +65,9 @@ public class MongoDBQuery extends QueryImpl
      * @param persistenceUnits
      *            the persistence units
      */
-    public MongoDBQuery(String jpaQuery, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
-            String... persistenceUnits)
+    public MongoDBQuery(String jpaQuery, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(jpaQuery, persistenceDelegator, persistenceUnits);
+        super(jpaQuery, persistenceDelegator);
         this.kunderaQuery = kunderaQuery;
     }
 

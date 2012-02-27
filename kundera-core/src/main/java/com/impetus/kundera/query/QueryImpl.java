@@ -77,7 +77,7 @@ public abstract class QueryImpl implements Query
      * @param persistenceUnits
      *            the persistence units
      */
-    public QueryImpl(String query, PersistenceDelegator persistenceDelegator, String... persistenceUnits)
+    public QueryImpl(String query, PersistenceDelegator persistenceDelegator)
     {
 
         this.query = query;

@@ -18,6 +18,7 @@ package com.impetus.kundera.metadata.model;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.metamodel.Metamodel;
@@ -156,11 +157,64 @@ public class ApplicationMetadata
      * Gets the mapped persistence unit.
      *
      * @param clazz the clazz
+     * 
      * @return the mapped persistence unit
      */
-    public List<String> getMappedPersistenceUnit(String clazz)
+    public List<String> getMappedPersistenceUnit(Class<?> clazz)
     {
-        return this.clazzToPuMap.get(clazz);
+        return this.clazzToPuMap.get(clazz.getName());
     }
 
+    /**
+     * returns mapped persistence unit.
+     * 
+     * @param clazzName  clazz name.
+     * 
+     * @return mapped persistence unit.
+     */
+    public String getMappedPersistenceUnit(String clazzName)
+    {
+        
+        List<String> pus = clazzToPuMap.get(clazzName);
+        
+        final int _first=0;
+        String pu=null;
+        
+        if(pus != null && !pus.isEmpty())
+        {
+            if(pus.size() == 2)
+            {
+                onError(clazzName);
+            }
+           return pus.get(_first); 
+        } else
+        {
+            Set<String> mappedClasses = this.clazzToPuMap.keySet();
+            boolean found=false;
+            for(String clazz : mappedClasses)
+            {
+                if(found && clazz.endsWith("."+clazzName))
+                {
+                    onError(clazzName);
+                } else if(clazz.endsWith("." + clazzName))
+                {
+                    pu = clazzToPuMap.get(clazz).get(_first);
+                    found=true;
+                }
+            }
+        }
+        
+        return pu;
+    }
+
+    /**
+     * Handler error and log statements.
+     * 
+     * @param clazzName  class name.
+     */
+    private void onError(String clazzName)
+    {
+        logger.error("Duplicate name:" +  clazzName + "Please provide entity with complete package name.");
+        throw new ApplicationLoaderException("Duplicate name:" +  clazzName + "Please provide entity with complete package name");
+    }
 }

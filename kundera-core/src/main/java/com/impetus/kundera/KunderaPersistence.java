@@ -42,8 +42,8 @@ public class KunderaPersistence implements PersistenceProvider
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(KunderaPersistence.class);
 
-    /** The loaded. */
-    private static Boolean loaded = false;
+//    /** The loaded. */
+//    private static Boolean loaded = false;
 
     /**
      * Instantiates a new kundera persistence.
@@ -80,12 +80,12 @@ public class KunderaPersistence implements PersistenceProvider
     {
         synchronized (persistenceUnit)
         {
-            if (!loaded)
-            {
-                loaded = true;
+//            if (!loaded)
+//            {
+//                loaded = true;
                 initializeKundera(persistenceUnit);
 
-            }
+//            }
             EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, map);
 
             return emf;

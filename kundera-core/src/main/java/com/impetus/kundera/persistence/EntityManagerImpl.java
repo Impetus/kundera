@@ -73,8 +73,7 @@ public class EntityManagerImpl implements EntityManager
         logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
         session = new EntityManagerSession((Cache) factory.getCache());
 
-        persistenceDelegator = new PersistenceDelegator(session, getPersistenceUnit().split(
-                Constants.PERSISTENCE_UNIT_SEPARATOR));
+        persistenceDelegator = new PersistenceDelegator(session);
         logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
     }
 

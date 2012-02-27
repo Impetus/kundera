@@ -53,7 +53,7 @@ public class KunderaQueryParserTest
     @Test
     public void onQueryParse()
     {
-        KunderaQuery kunderQuery = new KunderaQuery("rdbms");
+        KunderaQuery kunderQuery = new KunderaQuery();
 
         // Valid Query with clause.
         String validQuery = "SELECT c FROM Country c ORDER BY c.currency, c.population DESC";

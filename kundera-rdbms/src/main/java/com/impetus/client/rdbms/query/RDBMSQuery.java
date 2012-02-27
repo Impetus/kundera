@@ -60,10 +60,9 @@ public class RDBMSQuery extends QueryImpl implements Query
      * @param persistenceUnits
      *            the persistence units
      */
-    public RDBMSQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator,
-            String[] persistenceUnits)
+    public RDBMSQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
-        super(query, persistenceDelegator, persistenceUnits);
+        super(query, persistenceDelegator);
         this.kunderaQuery = kunderaQuery;
     }
 

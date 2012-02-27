@@ -60,41 +60,40 @@ public class QueryResolver
      *            the persistence units
      * @return the query implementation
      */
-    public Query getQueryImplementation(String jpaQuery, PersistenceDelegator persistenceDelegator,
-            String... persistenceUnits)
+    public Query getQueryImplementation(String jpaQuery, PersistenceDelegator persistenceDelegator)
     {
-        kunderaQuery = new KunderaQuery(persistenceUnits);
+        kunderaQuery = new KunderaQuery();
         KunderaQueryParser parser = new KunderaQueryParser(kunderaQuery, jpaQuery);
         parser.parse();
         kunderaQuery.postParsingInit();
 
-        EntityMetadata entityMetadata = kunderaQuery.getEntityMetadata();
+//        EntityMetadata entityMetadata = kunderaQuery.getEntityMetadata();
 
-        String pu = null;
-        if (persistenceUnits.length == 1)
-        {
-            pu = persistenceUnits[0];
-        }
-        else
-        {
-            pu = entityMetadata.getPersistenceUnit();
-        }
-        if (StringUtils.isEmpty(pu))
-        {
-            Map<String, PersistenceUnitMetadata> puMetadataMap = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getPersistenceUnitMetadataMap();
-            for (PersistenceUnitMetadata puMetadata : puMetadataMap.values())
-            {
-                Properties props = puMetadata.getProperties();
-                String clientName = props.getProperty(PersistenceProperties.KUNDERA_CLIENT);
-                if (ClientType.RDBMS.name().equalsIgnoreCase(clientName))
-                {
-                    pu = puMetadata.getPersistenceUnitName();
-                    break;
-                }
-
-            }
-        }
+        String pu = kunderaQuery.getPersistenceUnit();
+//        if (persistenceUnits.length == 1)
+//        {
+//            pu = persistenceUnits[0];
+//        }
+//        else
+//        {
+//            pu = entityMetadata.getPersistenceUnit();
+//        }
+//        if (StringUtils.isEmpty(pu))
+//        {
+//            Map<String, PersistenceUnitMetadata> puMetadataMap = KunderaMetadata.INSTANCE.getApplicationMetadata()
+//                    .getPersistenceUnitMetadataMap();
+//            for (PersistenceUnitMetadata puMetadata : puMetadataMap.values())
+//            {
+//                Properties props = puMetadata.getProperties();
+//                String clientName = props.getProperty(PersistenceProperties.KUNDERA_CLIENT);
+//                if (ClientType.RDBMS.name().equalsIgnoreCase(clientName))
+//                {
+//                    pu = puMetadata.getPersistenceUnitName();
+//                    break;
+//                }
+//
+//            }
+//        }
 
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
         String kunderaClientName = (String) puMetadata.getProperties().get(PersistenceProperties.KUNDERA_CLIENT);
@@ -104,7 +103,7 @@ public class QueryResolver
 
         try
         {
-            query = getQuery(clientType, jpaQuery, persistenceDelegator, persistenceUnits);
+            query = getQuery(clientType, jpaQuery, persistenceDelegator);
         }
         catch (SecurityException e)
         {
@@ -173,8 +172,7 @@ public class QueryResolver
      * @throws InvocationTargetException
      *             the invocation target exception
      */
-    public Query getQuery(ClientType clientType, String jpaQuery, PersistenceDelegator persistenceDelegator,
-            String... persistenceUnits) throws ClassNotFoundException, SecurityException, NoSuchMethodException,
+    public Query getQuery(ClientType clientType, String jpaQuery, PersistenceDelegator persistenceDelegator) throws ClassNotFoundException, SecurityException, NoSuchMethodException,
             IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException
     {
         Query query;
@@ -208,9 +206,8 @@ public class QueryResolver
         }
 
         @SuppressWarnings("rawtypes")
-        Constructor constructor = clazz.getConstructor(String.class, KunderaQuery.class, PersistenceDelegator.class,
-                String[].class);
-        query = (Query) constructor.newInstance(jpaQuery, kunderaQuery, persistenceDelegator, persistenceUnits);
+        Constructor constructor = clazz.getConstructor(String.class, KunderaQuery.class, PersistenceDelegator.class);
+        query = (Query) constructor.newInstance(jpaQuery, kunderaQuery, persistenceDelegator);
 
         return query;
 

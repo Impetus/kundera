@@ -133,7 +133,7 @@ public class PelopsClient implements Client
     @Deprecated
     public final <E> E find(Class<E> entityClass, Object rowId, List<String> relationNames) 
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         return (E) find(entityClass, entityMetadata, rowId != null ? rowId.toString() : null, relationNames);
     }
 
@@ -170,7 +170,7 @@ public class PelopsClient implements Client
     @Override
     public final <E> List<E> findAll(Class<E> entityClass, Object... rowIds) 
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<E> results = new ArrayList<E>();
         for (Object rowKey : rowIds)
         {

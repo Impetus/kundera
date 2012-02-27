@@ -123,7 +123,7 @@ public class KunderaMetadataManager
      */
     public static EntityMetadata getEntityMetadata(Class entityClass)
     {
-        List<String> persistenceUnits = KunderaMetadata.INSTANCE.getApplicationMetadata().getMappedPersistenceUnit(entityClass.getName());
+        List<String> persistenceUnits = KunderaMetadata.INSTANCE.getApplicationMetadata().getMappedPersistenceUnit(entityClass);
         
         // persistence units will only have more than 1 persistence unit in case of RDBMS.
         for (String pu : persistenceUnits)

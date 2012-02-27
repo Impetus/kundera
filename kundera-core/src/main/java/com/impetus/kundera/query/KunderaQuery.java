@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 
 /**
@@ -86,7 +87,9 @@ public class KunderaQuery
     private List<SortOrdering> sortOrders;
 
     /** Persistence Unit(s). */
-    String[] persistenceUnits;
+//    String[] persistenceUnits;
+    
+    String persistenceUnit;
 
     // contains a Queue of alternate FilterClause object and Logical Strings
     // (AND, OR etc.)
@@ -99,9 +102,9 @@ public class KunderaQuery
      * @param persistenceUnits
      *            the persistence units
      */
-    public KunderaQuery(String... persistenceUnits)
+    public KunderaQuery(/*String... persistenceUnits*/)
     {
-        this.persistenceUnits = persistenceUnits;
+//        this.persistenceUnits = persistenceUnits;
     }
 
     /**
@@ -252,13 +255,24 @@ public class KunderaQuery
         this.entityName = fromArray[0];
         this.entityAlias = fromArray[1];
 
-        entityClass = getMetamodel().getEntityClass(entityName);
+        persistenceUnit = KunderaMetadata.INSTANCE.getApplicationMetadata().getMappedPersistenceUnit(entityName);
 
+        //Get specific metamodel.
+        MetamodelImpl  model = getMetamodel(persistenceUnit);
+        
+        if(model != null)
+        {
+            entityClass = model.getEntityClass(entityName);
+        }
+        
         if (null == entityClass)
         {
             throw new QueryHandlerException("No entity found by the name: " + entityName);
         }
-        EntityMetadata metadata = getMetamodel().getEntityMetadata(entityClass);
+        
+        
+        EntityMetadata metadata = model.getEntityMetadata(entityClass);
+        
         if (!metadata.isIndexable())
         {
             throw new QueryHandlerException(entityClass + " is not indexed. Not possible to run a query on it." +
@@ -556,9 +570,9 @@ public class KunderaQuery
      * 
      * @return the metamodel
      */
-    private MetamodelImpl getMetamodel()
+    private MetamodelImpl getMetamodel(String pu)
     {
-        return KunderaMetadataManager.getMetamodel(persistenceUnits);
+        return KunderaMetadataManager.getMetamodel(pu);
     }
 
     /**
@@ -566,21 +580,21 @@ public class KunderaQuery
      * 
      * @return the persistenceUnits
      */
-    public String[] getPersistenceUnits()
+    public String getPersistenceUnit()
     {
-        return persistenceUnits;
+        return persistenceUnit;
     }
-
-    /**
-     * Sets the persistence units.
-     * 
-     * @param persistenceUnits
-     *            the persistenceUnits to set
-     */
-    public void setPersistenceUnits(String[] persistenceUnits)
-    {
-        this.persistenceUnits = persistenceUnits;
-    }
+//
+//    /**
+//     * Sets the persistence units.
+//     * 
+//     * @param persistenceUnits
+//     *            the persistenceUnits to set
+//     */
+//    public void setPersistenceUnits(String[] persistenceUnits)
+//    {
+//        this.persistenceUnits = persistenceUnits;
+//    }
 
     /**
      * Parses the ordering @See Order By Clause.

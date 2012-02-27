@@ -71,9 +71,6 @@ public class PersistenceDelegator
     /** The client map. */
     private Map<String, Client> clientMap;
 
-    /** The persistence units. */
-    String[] persistenceUnits;
-
     /** The event dispatcher. */
     private EntityEventDispatcher eventDispatcher;
 
@@ -91,10 +88,8 @@ public class PersistenceDelegator
      * @param persistenceUnits
      *            the persistence units
      */
-    public PersistenceDelegator(EntityManagerSession session, String... persistenceUnits)
+    public PersistenceDelegator(EntityManagerSession session)
     {
-        super();
-        this.persistenceUnits = persistenceUnits;
         this.session = session;
         eventDispatcher = new EntityEventDispatcher();
     }
@@ -768,7 +763,7 @@ public class PersistenceDelegator
      */
     public Query createQuery(String jpaQuery)
     {
-        Query query = new QueryResolver().getQueryImplementation(jpaQuery, this, persistenceUnits);
+        Query query = new QueryResolver().getQueryImplementation(jpaQuery, this);
         return query;
 
     }
@@ -789,7 +784,6 @@ public class PersistenceDelegator
     public final void close()
     {
         eventDispatcher = null;
-        persistenceUnits = null;
 
         // Close all clients created in this session
         if (clientMap != null && !clientMap.isEmpty())
@@ -803,16 +797,6 @@ public class PersistenceDelegator
         }
 
         closed = true;
-    }
-
-    /**
-     * Gets the persistence units.
-     * 
-     * @return the persistence units
-     */
-    private String[] getPersistenceUnits()
-    {
-        return persistenceUnits;
     }
 
     /**
