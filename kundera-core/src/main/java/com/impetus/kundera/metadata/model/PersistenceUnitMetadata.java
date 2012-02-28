@@ -474,9 +474,13 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     {
         // should we cache it?
         List<URL> managedURL = getJarFileUrls();
-        if(managedURL == null && !getExcludeUnlistedClasses())
+        if(managedURL == null)
         {
             managedURL = new ArrayList<URL>(1);
+        }
+        
+        if(!getExcludeUnlistedClasses())
+        {
             managedURL.add(getPersistenceUnitRootUrl());
         }
         return managedURL;
