@@ -315,7 +315,7 @@ public class PelopsDataHandler extends DataHandler
                 }
                 catch (PropertyAccessException pae)
                 {
-                    log.warn(pae.getMessage());
+                    log.trace(pae.getMessage());
                 }
             }
             else
@@ -642,7 +642,7 @@ public class PelopsDataHandler extends DataHandler
                 }
                 catch (PropertyAccessException exp)
                 {
-                    log.warn(exp.getMessage());
+                    log.trace(exp.getMessage());
                 }
             }
         }
