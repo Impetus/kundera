@@ -19,11 +19,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Class ClasspathReader.
@@ -32,7 +36,7 @@ import java.util.StringTokenizer;
  */
 public class ClasspathReader extends Reader
 {
-
+    private static org.slf4j.Logger log = LoggerFactory.getLogger(ClasspathReader.class);
     /**
      * The filter.
      */
@@ -100,7 +104,30 @@ public class ClasspathReader extends Reader
     @Override
     public final URL[] findResourcesByClasspath()
     {
-        List<URL> list = new ArrayList<URL>();
+        //Get the correct resource (which has the persistence info and entity classes)
+        URL url = getClass().getClassLoader().getResource("META-INF/persistence.xml");
+        File f;
+        try 
+        {
+            f = new File(url.toURI());
+        }
+        catch (URISyntaxException e)
+        {
+            f = new File(url.getPath());
+        }
+        
+        try
+        {
+            return new URL[]{ f.getParentFile().getParentFile().toURI().toURL() };
+        }
+        catch (MalformedURLException ex)
+        {
+            Logger.getLogger(ClasspathReader.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return new URL[0];
+        
+        /*
         String classpath = System.getProperty("java.class.path");
         StringTokenizer tokenizer = new StringTokenizer(classpath, File.pathSeparator);
 
@@ -121,6 +148,7 @@ public class ClasspathReader extends Reader
             }
         }
         return list.toArray(new URL[list.size()]);
+        */
     }
 
     /**
