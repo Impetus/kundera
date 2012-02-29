@@ -15,11 +15,13 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
+import com.impetus.kundera.KunderaException;
+
 /**
  * @author amresh.singh
  *
  */
-public class MetamodelLoaderException extends LoaderException
+public class MetamodelLoaderException extends KunderaException
 {
 
     /**

@@ -15,11 +15,13 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
+import com.impetus.kundera.KunderaException;
+
 /**
  * @author amresh.singh
  *
  */
-public class PersistenceLoaderException extends LoaderException
+public class PersistenceLoaderException extends KunderaException
 {
 
     /**
