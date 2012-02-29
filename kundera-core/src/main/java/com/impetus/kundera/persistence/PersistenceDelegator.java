@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
-import javax.persistence.PersistenceException;
 import javax.persistence.PostPersist;
 import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
@@ -109,86 +108,6 @@ public class PersistenceDelegator
         // Persistence Unit used to retrieve client
         String persistenceUnit = m.getPersistenceUnit();
 
-//        if (getPersistenceUnits().length == 1)
-//        {
-//            //
-//            persistenceUnit = getPersistenceUnits()[0];
-//
-//            String puInMetadata = m.getPersistenceUnit();
-//
-//            // Case if pu is blank or pu passed is not equal '@'
-//            if (!StringUtils.isBlank(puInMetadata))
-//            {
-//                if (StringUtils.isBlank(persistenceUnit) || !persistenceUnit.equals(puInMetadata))
-//                {
-//                    throw new PersistenceException(
-//                            "Persistence Unit defined at entity can't differ from the one provided for EMF");
-//                }
-//            }
-//            else
-//            {
-//                // If '@' not given and pu supplied is not of RDBMS
-//                Map<String, PersistenceUnitMetadata> puMetadataMap = KunderaMetadata.INSTANCE.getApplicationMetadata()
-//                        .getPersistenceUnitMetadataMap();
-//                boolean found = false;
-//                for (PersistenceUnitMetadata puMetadata : puMetadataMap.values())
-//                {
-//                    Properties props = puMetadata.getProperties();
-//                    String clientName = props.getProperty(PersistenceProperties.KUNDERA_CLIENT);
-//                    if (ClientType.RDBMS.name().equalsIgnoreCase(clientName))
-//                    {
-//                        if (persistenceUnit.equals(puMetadata.getPersistenceUnitName()))
-//                        {
-//                            found = true;
-//                            break;
-//
-//                        }
-//                    }
-//
-//                }
-//
-//                if (!found)
-//                {
-//                    throw new PersistenceException(
-//                            "Invalid persistence unit configuration! should be intended for RDBMS, else must annotate @Table(name = table_col_family_name, schema = keyspace@pu");
-//                }
-//
-//            }
-//
-//        }
-//        else
-//        {
-//            // TODO : this must not be handled here.
-//            String puInMetadata = m.getPersistenceUnit();
-//
-//            if (StringUtils.isEmpty(puInMetadata))
-//            {
-//                Map<String, PersistenceUnitMetadata> puMetadataMap = KunderaMetadata.INSTANCE.getApplicationMetadata()
-//                        .getPersistenceUnitMetadataMap();
-//                for (PersistenceUnitMetadata puMetadata : puMetadataMap.values())
-//                {
-//                    Properties props = puMetadata.getProperties();
-//                    String clientName = props.getProperty(PersistenceProperties.KUNDERA_CLIENT);
-//                    if (ClientType.RDBMS.name().equalsIgnoreCase(clientName))
-//                    {
-//                        persistenceUnit = puMetadata.getPersistenceUnitName();
-//                        break;
-//                    }
-//
-//                }
-//            }
-//            else
-//            {
-//                persistenceUnit = puInMetadata;
-//            }
-//
-//            if (persistenceUnit == null || !Arrays.asList(getPersistenceUnits()).contains(persistenceUnit))
-//            {
-//                throw new PersistenceException("Invalid persistence configuration!");
-//            }
-//
-//        }
-
         // single persistence unit given and entity is annotated with '@'.
         // validate persistence unit given is same
 
@@ -197,13 +116,13 @@ public class PersistenceDelegator
         if (clientMap == null || clientMap.isEmpty())
         {
             clientMap = new HashMap<String, Client>();
-            client = ClientResolver.getClient(persistenceUnit);
+            client = ClientResolver.discoverClient(persistenceUnit);
             clientMap.put(persistenceUnit, client);
 
         }
         else if (clientMap.get(persistenceUnit) == null)
         {
-            client = ClientResolver.getClient(persistenceUnit);
+            client = ClientResolver.discoverClient(persistenceUnit);
             clientMap.put(persistenceUnit, client);
         }
         else
@@ -295,9 +214,9 @@ public class PersistenceDelegator
     {
         EntityMetadata entityMetadata = getMetadata(entityClass);
 
-        List<E> entities = new ArrayList<E>();        
+        List<E> entities = new ArrayList<E>();
         entities = getClient(entityMetadata).find(entityClass, embeddedColumnMap);
-        
+
         return entities;
     }
 
@@ -312,7 +231,7 @@ public class PersistenceDelegator
      */
     public <E> E merge(E e)
     {
-        
+
         List<EnhancedEntity> reachableEntities = EntityResolver.resolve(e, CascadeType.MERGE);
 
         // save each one
@@ -339,7 +258,6 @@ public class PersistenceDelegator
         // reset session lookup.
         noSessionLookup = false;
         // }
-        
 
         return e;
     }
@@ -352,7 +270,7 @@ public class PersistenceDelegator
      */
     public void remove(Object e)
     {
-       
+
         EntityMetadata metadata = getMetadata(e.getClass());
         getEventDispatcher().fireEventListeners(metadata, e, PreRemove.class);
 
@@ -367,7 +285,7 @@ public class PersistenceDelegator
         }
         getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
         log.debug("Data removed successfully for entity : " + e.getClass());
-        
+
     }
 
     /**
@@ -378,7 +296,7 @@ public class PersistenceDelegator
      * @throws Exception
      *             the exception
      */
-    private void removeGraph(EntitySaveGraph objectGraph) 
+    private void removeGraph(EntitySaveGraph objectGraph)
     {
         EntityMetadata metadata = getMetadata(objectGraph.getParentClass());
         Object parentEntity = objectGraph.getParentEntity();
@@ -469,7 +387,7 @@ public class PersistenceDelegator
      * @throws Exception
      *             the exception
      */
-    private void onClientHandle(EntitySaveGraph objectGraph, Object childEntity) 
+    private void onClientHandle(EntitySaveGraph objectGraph, Object childEntity)
     {
         if (childEntity instanceof Collection<?>)
         {
@@ -556,7 +474,7 @@ public class PersistenceDelegator
      *            the e
      */
     public void persist(Object e)
-    {       
+    {
         // Invoke Pre Persist Events
         EntityMetadata metadata = getMetadata(e.getClass());
         getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
@@ -572,7 +490,7 @@ public class PersistenceDelegator
         // Invoke Post Persist Events
         getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
         log.debug("Data persisted successfully for entity : " + e.getClass());
-      
+
     }
 
     /**
@@ -605,7 +523,7 @@ public class PersistenceDelegator
         EntityMetadata entityMetadata = getMetadata(entityClass);
 
         Client client = getClient(entityMetadata);
-        
+
         Object object;
         try
         {
@@ -619,7 +537,7 @@ public class PersistenceDelegator
         {
             throw new KunderaException("Error while finding object", e1);
         }
-        
+
         List<EntitySaveGraph> objectGraphs = getGraph(object, entityMetadata);
         List<EntitySaveGraph> graphs = getDisjointGraph(excludeGraph, objectGraphs);
 
@@ -651,7 +569,7 @@ public class PersistenceDelegator
 
         // Populate Association,
         return entity;
-       
+
     }
 
     /**
@@ -751,7 +669,7 @@ public class PersistenceDelegator
 
         // Populate Association,
         return entity;
-     
+
     }
 
     /**

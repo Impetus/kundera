@@ -23,14 +23,16 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 
-// Client Loaders are more of
 /**
- * A factory for creating GenericClient objects.
+ * Abstract class to hold generic definitions for client factory
+ * implementations.
+ * 
+ * @vivek.mishra
  */
-public abstract class GenericClientFactory implements Loader
-{    
+public abstract class GenericClientFactory implements ClientFactory, ClientLifeCycleManager
+{
 
-	/** The logger. */
+    /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(GenericClientFactory.class);
 
     /** The client. */
@@ -42,20 +44,13 @@ public abstract class GenericClientFactory implements Loader
     /** The connection pool or connection. */
     private Object connectionPoolOrConnection;
 
-
-    @Override
-    public void load(String... persistenceUnits)
-    {
-        throw new ClientLoaderException("Invalid load method call for Client Loader." +
-        		" Use overloaded version instead");
-    }
-
     /**
      * Load.
      * 
      * @param persistenceUnit
      *            the persistence unit
      */
+    @Override
     public void load(String persistenceUnit)
     {
 
@@ -67,7 +62,7 @@ public abstract class GenericClientFactory implements Loader
 
         // initialize the client
         logger.info("Initializing client for persistence unit : " + persistenceUnit);
-        initializeClient();
+        initialize();
 
         // Construct Pool
         logger.info("Constructing pool for persistence unit : " + persistenceUnit);
@@ -83,7 +78,8 @@ public abstract class GenericClientFactory implements Loader
         {
             ClientMetadata clientMetadata = new ClientMetadata();
             String secIndex = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getPersistenceUnitMetadata(persistenceUnit).getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
+                    .getPersistenceUnitMetadata(persistenceUnit)
+                    .getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
             clientMetadata.setLuceneIndexDir(secIndex);
             KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
         }
@@ -92,7 +88,7 @@ public abstract class GenericClientFactory implements Loader
     /**
      * Initialize client.
      */
-    protected abstract void initializeClient();
+    public abstract void initialize();
 
     /**
      * Creates a new GenericClient object.
@@ -106,12 +102,13 @@ public abstract class GenericClientFactory implements Loader
      * 
      * @return the client instance
      */
+    @Override
     public Client getClientInstance()
     {
         // if threadsafe recycle the same single instance; if not create a new
         // instance
 
-        if (isClientThreadSafe())
+        if (isThreadSafe())
         {
             logger.info("Returning threadsafe used client instance for persistence unit : " + persistenceUnit);
             if (client == null)
@@ -144,7 +141,7 @@ public abstract class GenericClientFactory implements Loader
      * 
      * @return true, if is client thread safe
      */
-    protected abstract boolean isClientThreadSafe();
+    public abstract boolean isThreadSafe();
 
     /**
      * Gets the persistence unit.

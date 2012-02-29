@@ -26,7 +26,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.loader.ApplicationLoader;
+import com.impetus.kundera.configure.Configurator;
 import com.impetus.kundera.loader.CoreLoader;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
@@ -42,8 +42,8 @@ public class KunderaPersistence implements PersistenceProvider
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(KunderaPersistence.class);
 
-//    /** The loaded. */
-//    private static Boolean loaded = false;
+    // /** The loaded. */
+    // private static Boolean loaded = false;
 
     /**
      * Instantiates a new kundera persistence.
@@ -80,12 +80,12 @@ public class KunderaPersistence implements PersistenceProvider
     {
         synchronized (persistenceUnit)
         {
-//            if (!loaded)
-//            {
-//                loaded = true;
-                initializeKundera(persistenceUnit);
+            // if (!loaded)
+            // {
+            // loaded = true;
+            initializeKundera(persistenceUnit);
 
-//            }
+            // }
             EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, map);
 
             return emf;
@@ -106,7 +106,9 @@ public class KunderaPersistence implements PersistenceProvider
 
         String[] persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
 
-        (new ApplicationLoader()).load(persistenceUnits);
+        // (new ApplicationLoader()).load(persistenceUnits);
+
+        new Configurator(persistenceUnits).configure();
 
     }
 

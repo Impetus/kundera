@@ -47,7 +47,7 @@ public class PelopsClientFactory extends GenericClientFactory
     private static Logger logger = LoggerFactory.getLogger(PelopsClientFactory.class);
 
     /** The index manager. */
-    IndexManager indexManager;
+    private IndexManager indexManager;
 
     /** The reader. */
     private EntityReader reader;
@@ -58,19 +58,11 @@ public class PelopsClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.GenericClientFactory#initializeClient()
      */
     @Override
-    protected void initializeClient()
+    public void initialize()
     {
         // TODO StandardAnalyzer is thread safe. So it looks like indexManager
         // is threadsafe an hence using a single instance
         logger.info("Initializing Threadsafe Indexmanager. Is it really threadsafe?");
-        // indexManager = new IndexManager(new LuceneIndexer(new
-        // KeywordAnalyzer()/*new StandardAnalyzer(Version.LUCENE_34*/)/*
-        // * new
-        // * KeywordAnalyzer
-        // * (
-        // * )
-        // * )
-        // *//*)*/);
 
         String luceneDirPath = MetadataUtils.getLuceneDirectory(getPersistenceUnit());
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
@@ -131,7 +123,7 @@ public class PelopsClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.GenericClientFactory#isClientThreadSafe()
      */
     @Override
-    protected boolean isClientThreadSafe()
+    public boolean isThreadSafe()
     {
         return false;
     }
@@ -142,7 +134,7 @@ public class PelopsClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.Loader#unload(java.lang.String[])
      */
     @Override
-    public void unload(String... persistenceUnits)
+    public void destroy()
     {
         indexManager.close();
         // Pelops.shutdown();

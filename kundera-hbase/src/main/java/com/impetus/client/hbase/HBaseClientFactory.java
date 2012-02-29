@@ -33,7 +33,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 
 /**
- * A factory for creating HBaseClient objects.
+ * HBaseClientFactory, instantiates client for HBase
  */
 public class HBaseClientFactory extends GenericClientFactory
 {
@@ -54,7 +54,7 @@ public class HBaseClientFactory extends GenericClientFactory
     private static final int DEFAULT_POOL_SIZE = 100;
 
     /** The pool size. */
-    int poolSize;
+    private int poolSize;
 
     /*
      * (non-Javadoc)
@@ -62,7 +62,7 @@ public class HBaseClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.GenericClientFactory#initializeClient()
      */
     @Override
-    protected void initializeClient()
+    public void initialize()
     {
         // Initialize Index Manager
         String luceneDirPath = MetadataUtils.getLuceneDirectory(getPersistenceUnit());
@@ -121,7 +121,7 @@ public class HBaseClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.GenericClientFactory#isClientThreadSafe()
      */
     @Override
-    protected boolean isClientThreadSafe()
+    public boolean isThreadSafe()
     {
         return true;
     }
@@ -132,7 +132,7 @@ public class HBaseClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.Loader#unload(java.lang.String[])
      */
     @Override
-    public void unload(String... persistenceUnits)
+    public void destroy()
     {
         // TODO destroy pool
         // hTablePool = null;

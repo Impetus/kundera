@@ -13,7 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.loader;
+package com.impetus.kundera.configure;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -29,7 +29,6 @@ import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
 
 import javax.persistence.Entity;
-import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Metamodel;
 
 import org.slf4j.Logger;
@@ -38,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import com.impetus.kundera.classreading.ClasspathReader;
 import com.impetus.kundera.classreading.Reader;
 import com.impetus.kundera.classreading.ResourceIterator;
+import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.MetadataBuilder;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -46,31 +46,43 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
- * The Class MetamodelLoader.
+ * The Metamodel configurer:
+ *   a) Configure application meta data
+ *   b) loads entity metadata and maps metadata.
  * 
- * @author amresh.singh
+ * @author vivek.mishra
  */
-public class MetamodelLoader extends ApplicationLoader
+class MetamodelConfiguration  implements Configuration
 {
 
     /** The log. */
-    private static Logger log = LoggerFactory.getLogger(MetamodelLoader.class);
+    private static Logger log = LoggerFactory.getLogger(MetamodelConfiguration.class);
 
-    /*
-     * (non-Javadoc)
+    /** Holding persistence unit instances. */
+    private String[] persistenceUnits;
+
+    /**
+     * Constructor using persistence units as parameter.
      * 
-     * @see
-     * com.impetus.kundera.loader.ApplicationLoader#load(java.lang.String[])
+     * @param persistenceUnits  persistence units.
+     */
+    MetamodelConfiguration(String... persistenceUnits)
+    {
+        this.persistenceUnits = persistenceUnits;
+    }
+    
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.configure.Configuration#configure()
      */
     @Override
-    public void load(String... persistenceUnits)
+    public void configure()
     {
         log.debug("Loading Entity Metadata...");
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 
         for (String persistenceUnit : persistenceUnits)
         {
-            if (appMetadata.getMetamodelMap().get(persistenceUnit) != null)
+            if (appMetadata.getMetamodelMap().get(persistenceUnit.trim()) != null)
             {
                 log.debug("Metadata already exists for the Persistence Unit " + persistenceUnit + ". Nothing to do");
             }
@@ -318,4 +330,5 @@ public class MetamodelLoader extends ApplicationLoader
 
         return clazzToPuMap;
     }
+
 }

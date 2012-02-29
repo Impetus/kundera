@@ -61,7 +61,7 @@ public class MongoDBClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.GenericClientFactory#initializeClient()
      */
     @Override
-    protected void initializeClient()
+    public void initialize()
     {
         String luceneDirPath = MetadataUtils.getLuceneDirectory(getPersistenceUnit());
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
@@ -78,7 +78,6 @@ public class MongoDBClientFactory extends GenericClientFactory
     @Override
     protected Object createPoolOrConnection()
     {
-        // TODO implement pool
         mongoDB = getConnection();
         return mongoDB;
     }
@@ -91,8 +90,6 @@ public class MongoDBClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient()
     {
-        // TODO To change this one pool is implemented
-
         return new MongoDBClient(mongoDB, indexManager, reader);
     }
 
@@ -151,7 +148,7 @@ public class MongoDBClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.GenericClientFactory#isClientThreadSafe()
      */
     @Override
-    protected boolean isClientThreadSafe()
+    public boolean isThreadSafe()
     {
         return false;
     }
@@ -162,7 +159,7 @@ public class MongoDBClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.Loader#unload(java.lang.String[])
      */
     @Override
-    public void unload(String... persistenceUnits)
+    public void destroy()
     {
         indexManager.close();
         if (mongoDB != null)

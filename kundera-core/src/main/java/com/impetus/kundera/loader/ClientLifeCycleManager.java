@@ -15,27 +15,30 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
+
 /**
- * The Interface Loader.
- * 
- * @author amresh.singh
+ * Interface to define for client life cycle manager.
+ *  
+ * @author vivek.mishra
+ *
  */
-public interface Loader
+public interface ClientLifeCycleManager
 {
+    
+    /**
+     * Initialize configured client.
+     */
+    void initialize();
+    
+    /**
+     * Returns true if client is thread safe, else false.
+     * 
+     * @return  true if client is thread safe.
+     */
+    boolean isThreadSafe();
 
     /**
-     * Load.
-     * 
-     * @param persistenceUnits
-     *            the persistence units
+     * Unloads/destroy configured client instance.
      */
-    void load(String... persistenceUnits);
-
-    /**
-     * Unload.
-     * 
-     * @param persistenceUnits
-     *            the persistence units
-     */
-    void unload(String... persistenceUnits);
+    void destroy();
 }

@@ -18,22 +18,27 @@ package com.impetus.kundera.client;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.loader.GenericClientFactory;
+import com.impetus.kundera.loader.ClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
- * The Class ClientResolver.
+ * Resolver class for client. It instantiates client factory and discover specific client.
  * 
- * @author impetus
+ * @author vivek.mishra
  */
 public final class ClientResolver
 {
 
     /** The client factories. */
-    static Map<String, GenericClientFactory> clientFactories = new ConcurrentHashMap<String, GenericClientFactory>();
+    static Map<String, ClientFactory> clientFactories = new ConcurrentHashMap<String, ClientFactory>();
+
+    /** logger instance. */
+    private static final Logger logger = LoggerFactory.getLogger(ClientResolver.class);
 
     /**
      * Gets the client.
@@ -42,12 +47,12 @@ public final class ClientResolver
      *            the persistence unit
      * @return the client
      */
-    public static Client getClient(String persistenceUnit)
+    public static Client discoverClient(String persistenceUnit)
     {
+        logger.info("Returning client instance for:" + persistenceUnit);
         return clientFactories.get(persistenceUnit).getClientInstance();
     }
 
-    // TODO To move this method to client dicoverer
     /**
      * Gets the client factory.
      * 
@@ -55,67 +60,73 @@ public final class ClientResolver
      *            the persistence unit
      * @return the client factory
      */
-    public static GenericClientFactory getClientFactory(String persistenceUnit)
+    public static ClientFactory getClientFactory(String persistenceUnit)
     {
-        GenericClientFactory loader = clientFactories.get(persistenceUnit);
+        ClientFactory clientFactory = clientFactories.get(persistenceUnit);
 
-        if (loader != null)
-            return loader;
+        if (clientFactory != null)
+            return clientFactory;
 
+        logger.info("Initializing client factory for: " + persistenceUnit);
         PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
         String kunderaClientName = (String) persistenceUnitMetadata.getProperties().get(
                 PersistenceProperties.KUNDERA_CLIENT);
-        ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());		
+        ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());
 
         try
         {
             if (clientType.equals(ClientType.HBASE))
             {
-                loader = (GenericClientFactory) Class.forName("com.impetus.client.hbase.HBaseClientFactory")
+                clientFactory = (ClientFactory) Class.forName("com.impetus.client.hbase.HBaseClientFactory")
                         .newInstance();
             }
             else if (clientType.equals(ClientType.PELOPS))
             {
-                loader = (GenericClientFactory) Class
+                clientFactory = (ClientFactory) Class
                         .forName("com.impetus.client.cassandra.pelops.PelopsClientFactory").newInstance();
             }
             else if (clientType.equals(ClientType.THRIFT))
             {
-                loader = (GenericClientFactory) Class
+                clientFactory = (ClientFactory) Class
                         .forName("com.impetus.client.cassandra.thrift.ThriftClientFactory").newInstance();
             }
             else if (clientType.equals(ClientType.MONGODB))
             {
-                loader = (GenericClientFactory) Class.forName("com.impetus.client.mongodb.MongoDBClientFactory")
+                clientFactory = (ClientFactory) Class.forName("com.impetus.client.mongodb.MongoDBClientFactory")
                         .newInstance();
             }
             else if (clientType.equals(ClientType.RDBMS))
             {
-                loader = (GenericClientFactory) Class.forName("com.impetus.client.rdbms.RDBMSClientFactory")
+                clientFactory = (ClientFactory) Class.forName("com.impetus.client.rdbms.RDBMSClientFactory")
                         .newInstance();
             }
         }
         catch (InstantiationException e)
         {
+            logger.error("Error while initializing client factory, Caused b: " + e.getMessage());
             throw new ClientResolverException("Couldn't instantiate class", e);
         }
         catch (IllegalAccessException e)
         {
+            logger.error("Error while initializing client factory, Caused b: " + e.getMessage());
             throw new ClientResolverException(e);
         }
         catch (ClassNotFoundException e)
         {
+            logger.error("Error while initializing client factory, Caused b: " + e.getMessage());
             throw new ClientResolverException(e);
         }
 
-        if (loader == null)
+        if (clientFactory == null)
         {
+            logger.error("Client Factory Not Configured For Specified Client Type : ");
             throw new ClientResolverException("Client Factory Not Configured For Specified Client Type.");
         }
 
-        clientFactories.put(persistenceUnit, loader);
+        clientFactories.put(persistenceUnit, clientFactory);
 
-        return loader;
+        logger.info("Finishing factory initialization");
+        return clientFactory;
     }
 }

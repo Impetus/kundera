@@ -36,6 +36,7 @@ import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.cache.NonOperationalCacheProvider;
 import com.impetus.kundera.client.ClientResolver;
+import com.impetus.kundera.loader.ClientLifeCycleManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 
 /**
@@ -102,7 +103,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         this.persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
 
         // Initialize L2 cache
-        cacheProvider = initSecondLevelCache();        
+        cacheProvider = initSecondLevelCache();
         cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
 
         // Invoke Client Loaders
@@ -134,7 +135,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
         for (String pu : persistenceUnits)
         {
-            ClientResolver.getClientFactory(pu).unload(pu);
+            ((ClientLifeCycleManager) ClientResolver.getClientFactory(pu)).destroy();
         }
     }
 
@@ -213,7 +214,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Cache getCache()
     {
-        return cacheProvider.getCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);       
+        return cacheProvider.getCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
     }
 
     /*
@@ -251,7 +252,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
             }
             catch (ClassNotFoundException e)
             {
-                throw new CacheException("Could not find class " + cacheProviderClassName 
+                throw new CacheException("Could not find class " + cacheProviderClassName
                         + ". Check whether you spelled it correctly in persistence.xml", e);
             }
             catch (InstantiationException e)
@@ -262,7 +263,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
             {
                 throw new CacheException(e);
             }
-            
+
         }
         if (cacheProvider == null)
         {

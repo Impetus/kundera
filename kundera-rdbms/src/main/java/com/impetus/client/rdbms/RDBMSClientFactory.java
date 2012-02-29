@@ -39,7 +39,7 @@ public class RDBMSClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.Loader#unload(java.lang.String[])
      */
     @Override
-    public void unload(String... paramArrayOfString)
+    public void destroy()
     {
         indexManager.close();
     }
@@ -50,7 +50,7 @@ public class RDBMSClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.GenericClientFactory#initializeClient()
      */
     @Override
-    protected void initializeClient()
+    public void initialize()
     {
         String luceneDirPath = MetadataUtils.getLuceneDirectory(getPersistenceUnit());
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
@@ -68,8 +68,10 @@ public class RDBMSClientFactory extends GenericClientFactory
     @Override
     protected Object createPoolOrConnection()
     {
-        // TODO Auto-generated method stub
+        
+        //Do nothing.
         return null;
+//        throw new UnsupportedOperationException("Method not supported,as hibernate is used as an client interface for RDBMS");
     }
 
     /*
@@ -80,7 +82,6 @@ public class RDBMSClientFactory extends GenericClientFactory
     @Override
     protected Client instantiateClient()
     {
-        // TODO Auto-generated method stub
         return new HibernateClient(getPersistenceUnit(), indexManager, reader);
     }
 
@@ -90,7 +91,7 @@ public class RDBMSClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.GenericClientFactory#isClientThreadSafe()
      */
     @Override
-    protected boolean isClientThreadSafe()
+    public boolean isThreadSafe()
     {
         return true;
     }
