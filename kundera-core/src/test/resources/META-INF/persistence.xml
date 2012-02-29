@@ -5,15 +5,15 @@
 
 	<persistence-unit name="kunderatest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>		
-		<jar-file>/home/impetus/perf_n.jar</jar-file>
+<!-- 		<jar-file>/home/impetus/perf_n.jar</jar-file>
 		<jar-file>/home/impetus/perf.jar</jar-file>
-		<class>com.impetus.kundera.Person</class>
+ -->		<class>com.impetus.kundera.entity.PersonnelDTO</class>
 		<properties>			
 			<property name="kundera.nodes" value="localhost"/>
 			<property name="kundera.port" value="9160"/>
 			<property name="kundera.keyspace" value="KunderaTest"/>
-			<property name="kundera.dialect" value="cassandra"/>
-			<property name="kundera.client" value="Pelops"/>
+			<property name="kundera.dialect" value="rdbms"/>
+			<property name="kundera.client" value="rdbms"/>
 			<property name="kundera.cache.provider.class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider"/>
             <property name="kundera.cache.config.resource" value="/ehcache-test.xml"/>   			
 		</properties>

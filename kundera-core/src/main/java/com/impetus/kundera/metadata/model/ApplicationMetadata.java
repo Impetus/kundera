@@ -83,9 +83,9 @@ public class ApplicationMetadata
      * @param persistenceUnitMetadata
      *            the persistence unit metadata
      */
-    public void addPersistenceUnitMetadata(String persistenceUnit, PersistenceUnitMetadata persistenceUnitMetadata)
+    public void addPersistenceUnitMetadata(Map<String, PersistenceUnitMetadata> metadata)
     {
-        getPersistenceUnitMetadataMap().put(persistenceUnit, persistenceUnitMetadata);
+        getPersistenceUnitMetadataMap().putAll(metadata);
     }
 
     /**
