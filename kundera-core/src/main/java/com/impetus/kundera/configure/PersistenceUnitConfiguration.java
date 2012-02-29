@@ -38,16 +38,16 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
- * The Class PersistenceUnitLoader: 1) Find and load/configure persistence unit
+ * The Class PersistenceUnitConfiguration: 1) Find and load/configure persistence unit
  * meta data.
- * 
+ * Earlier it was PersistenceUnitLoader.
  * @author vivek.mishra
  */
 
 class PersistenceUnitConfiguration implements Configuration
 {
 
-    /** The log. */
+    /** The log instance. */
     private static Logger log = LoggerFactory.getLogger(PersistenceUnitConfiguration.class);
 
     /** The Constant PROVIDER_IMPLEMENTATION_NAME. */
