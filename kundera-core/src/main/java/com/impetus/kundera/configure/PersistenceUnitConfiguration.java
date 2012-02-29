@@ -17,10 +17,11 @@ package com.impetus.kundera.configure;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.spi.PersistenceUnitTransactionType;
@@ -55,93 +56,51 @@ class PersistenceUnitConfiguration implements Configuration
     /** Holding instance for persistence units. */
     private String[] persistenceUnits;
 
-    
     /**
-     * Constructor parameterised with persistence units. 
-     * @param persistenceUnits persistence units.
+     * Constructor parameterised with persistence units.
+     * 
+     * @param persistenceUnits
+     *            persistence units.
      */
-    PersistenceUnitConfiguration(String...persistenceUnits)
+    PersistenceUnitConfiguration(String... persistenceUnits)
     {
-     this.persistenceUnits = persistenceUnits;
+        this.persistenceUnits = persistenceUnits;
     }
-    
+
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.impetus.kundera.configure.Configuration#configure()
+     * @see com.impetus.kundera.configure.Configuration#configure()
      */
     @Override
     public void configure()
     {
-        log.debug("Loading Metadata from persistence.xml...");
+        log.info("Loading Metadata from persistence.xml ...");
         KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
 
         ApplicationMetadata appMetadata = kunderaMetadata.getApplicationMetadata();
 
-        List<PersistenceUnitMetadata> metadatas;
+        Map<String, PersistenceUnitMetadata> metadatas;
         try
         {
             metadatas = findPersistenceMetadatas();
+            for (String persistenceUnit : persistenceUnits)
+            {
+                if (!metadatas.containsKey(persistenceUnit))
+                {
+                    log.error("Unconfigured persistence unit: " + persistenceUnit
+                            + "please validate with persistence.xml");
+                    throw new IllegalArgumentException("Invalid persistence unit: " + persistenceUnit + " provided");
+                }
+            }
+            log.info("Finishing persistence unit metadata configuration ...");
+            appMetadata.addPersistenceUnitMetadata(metadatas);
         }
         catch (InvalidConfigurationException e)
         {
             throw new PersistenceLoaderException(e);
         }
 
-        for (String persistenceUnit : persistenceUnits)
-        {
-            if (appMetadata.getPersistenceUnitMetadataMap().get(persistenceUnit.trim()) != null)
-            {
-                log.debug("Metadata already exists for the Persistence Unit " + persistenceUnit + ". Nothing to do");
-
-            }
-            else
-            {
-                appMetadata.addPersistenceUnitMetadata(persistenceUnit,
-                        getPersistenceMetadata(metadatas, persistenceUnit));
-            }
-        }
-    }
-
-    /**
-     * Configure and load the persistence metadata.
-     * 
-     * @param persistenceUnit
-     *            the persistence unit name
-     * @return the persistence metadata
-     */
-    private PersistenceUnitMetadata getPersistenceMetadata(List<PersistenceUnitMetadata> metadatas,
-            String persistenceUnit)
-    {
-        log.info("Looking up for persistence unit: " + persistenceUnit);
-
-        // If there is just ONE persistenceUnit, then use this irrespective of
-        // the name
-        if (metadatas.size() == 1)
-        {
-            return metadatas.get(0);
-        }
-
-        // Since there is more persistenceUnits, you must provide a name to look
-        // up
-        if (isEmpty(persistenceUnit))
-        {
-            throw new IllegalArgumentException("No name provided and several persistence units found. "
-                    + "Check whether you correctly provided persistence unit name");
-        }
-
-        // Look for one that interests us
-        for (PersistenceUnitMetadata metadata : metadatas)
-        {
-            if (metadata.getPersistenceUnitName().equals(persistenceUnit))
-            {
-                return metadata;
-            }
-        }
-
-        throw new PersistenceLoaderException("Could not find persistence unit in the classpath for name: "
-                + persistenceUnit);
     }
 
     /**
@@ -151,7 +110,7 @@ class PersistenceUnitConfiguration implements Configuration
      * 
      * @return the list configure persistence unit meta data.
      */
-    private List<PersistenceUnitMetadata> findPersistenceMetadatas() throws InvalidConfigurationException
+    private Map<String, PersistenceUnitMetadata> findPersistenceMetadatas() throws InvalidConfigurationException
     {
 
         Enumeration<URL> xmls = null;
@@ -172,8 +131,7 @@ class PersistenceUnitConfiguration implements Configuration
         }
 
         Set<String> persistenceUnitNames = new HashSet<String>();
-        List<PersistenceUnitMetadata> persistenceUnits = new ArrayList<PersistenceUnitMetadata>();
-
+        Map<String, PersistenceUnitMetadata> persistenceUnitMap = new HashMap<String, PersistenceUnitMetadata>();
         while (xmls.hasMoreElements())
         {
             URL url = xmls.nextElement();
@@ -185,37 +143,26 @@ class PersistenceUnitConfiguration implements Configuration
             // Pick only those that have Kundera Provider
             for (PersistenceUnitMetadata metadata : metadataFiles)
             {
-                // check for provider
-                if (metadata.getProvider() == null
-                        || PROVIDER_IMPLEMENTATION_NAME.equalsIgnoreCase(metadata.getProvider()))
-                {
-                    persistenceUnits.add(metadata);
-                }
-
                 // check for unique names
                 if (persistenceUnitNames.contains(metadata.getPersistenceUnitName()))
                 {
                     throw new InvalidConfigurationException("Duplicate persistence-units for name: "
                             + metadata.getPersistenceUnitName() + ". verify your persistence.xml file");
                 }
+
+                // check for provider
+                if (metadata.getProvider() == null
+                        || PROVIDER_IMPLEMENTATION_NAME.equalsIgnoreCase(metadata.getProvider()))
+                {
+                    persistenceUnitMap.put(metadata.getPersistenceUnitName(), metadata);
+                }
+
+                // add to check for duplicate persistence unit.
                 persistenceUnitNames.add(metadata.getPersistenceUnitName());
             }
         }
 
-        return persistenceUnits;
+        return persistenceUnitMap;
 
     }
-
-    /**
-     * Checks if is empty.
-     * 
-     * @param str
-     *            the str
-     * @return true, if is empty
-     */
-    private static boolean isEmpty(String str)
-    {
-        return null == str || str.isEmpty();
-    }
-
 }
