@@ -137,7 +137,10 @@ public abstract class QueryImpl implements Query
     @Override
     public List<?> getResultList()
     {
-        log.info("On getResultList() executing query: " + query);
+        if(log.isDebugEnabled())
+        {
+            log.debug("On getResultList() executing query: " + query);
+        }
         List results = null;
         try
         {
