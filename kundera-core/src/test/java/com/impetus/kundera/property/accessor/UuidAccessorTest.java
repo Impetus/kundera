@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
  */
 public class UuidAccessorTest
 {
-    
+
     public UuidAccessorTest()
     {
     }
@@ -29,36 +29,36 @@ public class UuidAccessorTest
     public static void tearDownClass() throws Exception
     {
     }
-    
+
     @Before
     public void setUp()
     {
     }
-    
+
     @After
     public void tearDown()
     {
     }
-    
+
     @Test
     public void testUuidAccessor() throws PropertyAccessException
     {
         UUID uuid = UUID.randomUUID();
-        
+
         UuidAccessor uuidAccessor = new UuidAccessor();
-        
+
         byte[] bytes = uuidAccessor.toBytes(uuid);
-        
+
         String str = uuidAccessor.toString(uuid);
-        
+
         assert uuid.toString().equals(str);
-        
+
         UUID fromBytes = uuidAccessor.fromBytes(bytes);
-        
+
         assert uuid.equals(fromBytes);
-        
+
         UUID fromString = uuidAccessor.fromString(str);
-        
+
         assert uuid.equals(fromString);
     }
 }

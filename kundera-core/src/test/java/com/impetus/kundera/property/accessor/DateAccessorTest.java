@@ -61,66 +61,66 @@ public class DateAccessorTest
         String dateInMMMddYYYY = "Feb/02/2012";
         String dateWithErr = "Geb/32/012/ LJJ";
         byte[] bytes = new byte[32];
-        
+
         Date date = accessor.fromString(dateInMMddYYDash);
         Assert.assertNotNull(date);
         accessor.toBytes(date);
-        
+
         date = accessor.fromString(dateInMMddYYHHmmss);
         Assert.assertNotNull(date);
         accessor.toBytes(date);
-        
+
         date = accessor.fromString(newDateAsStr);
         Assert.assertNotNull(date);
         accessor.toBytes(date);
-        
+
         date = accessor.fromString(dateInMMMddYYYY);
         Assert.assertNotNull(date);
         accessor.toBytes(date);
-        
+
         date = accessor.fromString(dateInMMddYY);
         Assert.assertNotNull(date);
         accessor.toBytes(date);
-        
+
         boolean caught = false;
-        
+
         try
         {
             accessor.fromString(dateWithErr);
         }
-        catch(PropertyAccessException ex)
+        catch (PropertyAccessException ex)
         {
             caught = true;
         }
-        
+
         assert caught;
-        
+
         caught = false;
-        
+
         try
         {
             accessor.toBytes(new Object());
         }
-        catch(PropertyAccessException ex)
+        catch (PropertyAccessException ex)
         {
             caught = true;
         }
-        
+
         assert caught;
-        
+
         caught = false;
-        
+
         try
         {
             accessor.fromBytes(bytes);
         }
-        catch(PropertyAccessException ex)
+        catch (PropertyAccessException ex)
         {
             caught = true;
         }
-        
+
         assert caught;
-        
+
     }
 
     /**

@@ -47,7 +47,7 @@ public class PersistenceXMLLoader
 {
     /** The log. */
     private static Log log = LogFactory.getLog(PersistenceXMLLoader.class);
-    
+
     /**
      * Instantiates a new persistence xml loader.
      */
@@ -79,7 +79,7 @@ public class PersistenceXMLLoader
         }
 
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-        
+
         /*
         docBuilderFactory.setValidating(false);
         docBuilderFactory.setNamespaceAware(true);
@@ -94,7 +94,7 @@ public class PersistenceXMLLoader
             docBuilderFactory.setValidating(false);
             docBuilderFactory.setNamespaceAware(false);
         }
-        */
+         */
         InputSource source = new InputSource(is);
         DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
         //docBuilder.setEntityResolver(schemaLoader);

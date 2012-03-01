@@ -134,10 +134,10 @@ public class CassQuery extends QueryImpl implements Query
         Map<Boolean, List<IndexClause>> idxClauses = new HashMap<Boolean, List<IndexClause>>(1);
         // check if id column are mixed with other columns or not?
         String idColumn = m.getIdColumn().getName();
-        
+
         boolean idPresent = false;
         boolean idxColumnPresent = false;
-        
+
         for (Object o : getKunderaQuery().getFilterClauseQueue())
         {
             if (o instanceof FilterClause)
@@ -151,8 +151,8 @@ public class CassQuery extends QueryImpl implements Query
                 {
                     idPresent = true;
                 }
-                
-                if(!idxColumnPresent && !idColumn.equalsIgnoreCase(fieldName))
+
+                if (!idxColumnPresent && !idColumn.equalsIgnoreCase(fieldName))
                 {
                     idxColumnPresent = true;
                 }

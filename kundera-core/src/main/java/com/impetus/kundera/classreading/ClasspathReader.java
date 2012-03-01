@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 public class ClasspathReader extends Reader
 {
     private static org.slf4j.Logger log = LoggerFactory.getLogger(ClasspathReader.class);
+
     /**
      * The filter.
      */
@@ -107,7 +108,7 @@ public class ClasspathReader extends Reader
         //Get the correct resource (which has the persistence info and entity classes)
         URL url = getClass().getClassLoader().getResource("META-INF/persistence.xml");
         File f;
-        try 
+        try
         {
             f = new File(url.toURI());
         }
@@ -115,18 +116,18 @@ public class ClasspathReader extends Reader
         {
             f = new File(url.getPath());
         }
-        
+
         try
         {
-            return new URL[]{ f.getParentFile().getParentFile().toURI().toURL() };
+            return new URL[] { f.getParentFile().getParentFile().toURI().toURL() };
         }
         catch (MalformedURLException ex)
         {
             Logger.getLogger(ClasspathReader.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         return new URL[0];
-        
+
         /*
         String classpath = System.getProperty("java.class.path");
         StringTokenizer tokenizer = new StringTokenizer(classpath, File.pathSeparator);
@@ -148,7 +149,7 @@ public class ClasspathReader extends Reader
             }
         }
         return list.toArray(new URL[list.size()]);
-        */
+         */
     }
 
     /**

@@ -112,7 +112,7 @@ public class DateAccessor implements PropertyAccessor<Date>
         try
         {
             long ts = ((Date) date).getTime();
-            
+
             ByteBuffer buffer = ByteBuffer.allocate(8);
             buffer.putLong(ts);
 
