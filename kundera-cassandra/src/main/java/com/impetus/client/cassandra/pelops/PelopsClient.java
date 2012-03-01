@@ -483,7 +483,7 @@ public class PelopsClient implements Client
             Column col = new Column();
             col.setName(PropertyAccessorFactory.STRING.toBytes(inverseJoinColumnName + "_" + childId));
             col.setValue(PropertyAccessorFactory.STRING.toBytes(childId));
-            col.setTimestamp(System.currentTimeMillis());
+            col.setTimestamp(System.currentTimeMillis() * 1000);
             columns.add(col);
         }
         catch (PropertyAccessException e)
@@ -819,6 +819,7 @@ public class PelopsClient implements Client
         }
 
         mutator.execute(ConsistencyLevel.ONE);
+        mutator = null;
         tf = null;
     }
 

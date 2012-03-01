@@ -62,7 +62,7 @@ public class PelopsDataHandler extends DataHandler
     private Client client;
 
     /** The timestamp. */
-    private long timestamp = System.currentTimeMillis();
+    private long timestamp = System.currentTimeMillis() * 1000;
 
     /**
      * Instantiates a new pelops data handler.
