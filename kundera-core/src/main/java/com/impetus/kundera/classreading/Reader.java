@@ -28,7 +28,6 @@ import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.annotation.Annotation;
 
-
 /**
  * Base class-reader.
  * 
@@ -71,8 +70,8 @@ public abstract class Reader
             List<String> annotations = new ArrayList<String>();
 
             accumulateAnnotations(annotations, (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.visibleTag));
-            accumulateAnnotations(annotations,
-                    (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.invisibleTag));
+            accumulateAnnotations(annotations, (AnnotationsAttribute) cf
+                    .getAttribute(AnnotationsAttribute.invisibleTag));
 
             // iterate through all valid annotations
             for (String validAnn : getValidAnnotations())

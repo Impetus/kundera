@@ -1,18 +1,15 @@
-/*******************************************************************************
- * * Copyright 2011 Impetus Infotech.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- ******************************************************************************/
+/**
+ * *****************************************************************************
+ * * Copyright 2011 Impetus Infotech. * * Licensed under the Apache License,
+ * Version 2.0 (the "License"); * you may not use this file except in compliance
+ * with the License. * You may obtain a copy of the License at * *
+ * http://www.apache.org/licenses/LICENSE-2.0 * * Unless required by applicable
+ * law or agreed to in writing, software * distributed under the License is
+ * distributed on an "AS IS" BASIS, * WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. * See the License for the specific language
+ * governing permissions and * limitations under the License.
+ * ****************************************************************************
+ */
 package com.impetus.kundera.index;
 
 import java.io.File;
@@ -50,7 +47,8 @@ import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-
+import java.util.Locale;
+import org.apache.lucene.search.*;
 
 /**
  * Provides indexing functionality using lucene library.
@@ -100,9 +98,13 @@ public class LuceneIndexer extends DocumentIndexer
                                         * FSDirectory.open(getIndexDirectory( ))
                                         */
             // isInitialized
-            /* writer */
+            /*
+             * writer
+             */
             w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
-            /* reader = */
+            /*
+             * reader =
+             */
             w.setMergePolicy(new LogDocMergePolicy());
             w.setMergeFactor(1000);
             w.getConfig().setRAMBufferSizeMB(32);
@@ -144,7 +146,7 @@ public class LuceneIndexer extends DocumentIndexer
 
     /**
      * Added for HBase support.
-     * 
+     *
      * @return default index writer
      */
     private IndexWriter getIndexWriter()
@@ -154,7 +156,7 @@ public class LuceneIndexer extends DocumentIndexer
 
     /**
      * Returns default index reader.
-     * 
+     *
      * @return index reader.
      */
     private IndexReader getIndexReader()
@@ -172,7 +174,9 @@ public class LuceneIndexer extends DocumentIndexer
                     isInitialized = true;
                 }
                 reader = IndexReader.open(
-                /* FSDirectory.open(getIndexDirectory()) */index, true);
+                /*
+                 * FSDirectory.open(getIndexDirectory())
+                 */index, true);
             }
             catch (CorruptIndexException e)
             {
@@ -188,7 +192,7 @@ public class LuceneIndexer extends DocumentIndexer
 
     /**
      * Creates a Lucene index directory if it does not exist.
-     * 
+     *
      * @return the index directory
      */
     private File getIndexDirectory()
@@ -222,7 +226,9 @@ public class LuceneIndexer extends DocumentIndexer
         log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
         try
         {
-            /* String indexName, Query query, boolean autoCommit */
+            /*
+             * String indexName, Query query, boolean autoCommit
+             */
             getIndexWriter().deleteDocuments(new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));
         }
         catch (CorruptIndexException e)
@@ -260,11 +266,11 @@ public class LuceneIndexer extends DocumentIndexer
         }
         /*
          * org.apache.lucene.index.IndexReader indexReader = null;
-         * 
+         *
          * try {
-         * 
+         *
          * indexReader = getIndexReader();
-         * 
+         *
          * } catch (Exception e) { throw new IndexingException(e.getMessage());
          * }
          */IndexSearcher searcher = new IndexSearcher(reader);
@@ -278,13 +284,21 @@ public class LuceneIndexer extends DocumentIndexer
             qp.setAllowLeadingWildcard(true);
             // qp.set
             Query q = qp.parse(luceneQuery);
-            TopDocs docs = searcher.search(q, count);
+            /*
+            Sort sort = new Sort(new SortField[]
+            {
+                SortField.FIELD_SCORE,
+                new SortField(, SortField.INT)
+            });
+             */
+            TopDocs docs = searcher.search(q, count);//, sort);
 
             int nullCount = 0;
             // Assuming Supercol will be null in case if alias only.
             // This is a quick fix
-            for (ScoreDoc sc : docs.scoreDocs)
+            for (int i = (start < 0 ? 0 : start); i < docs.scoreDocs.length; i++)
             {
+                ScoreDoc sc = docs.scoreDocs[i];
                 Document doc = searcher.doc(sc.doc);
                 String entityId = doc.get(fetchRelation ? PARENT_ID_FIELD : ENTITY_ID_FIELD);
                 String superCol = doc.get(SUPERCOLUMN_INDEX);
@@ -314,11 +328,9 @@ public class LuceneIndexer extends DocumentIndexer
     /**
      * Indexes document. For Cassandra it uses Lucandra library, for others it
      * simply indexes into file system using Lucene
-     * 
-     * @param metadata
-     *            the metadata
-     * @param document
-     *            the document
+     *
+     * @param metadata the metadata
+     * @param document the document
      */
     public void indexDocument(EntityMetadata metadata, Document document)
     {
@@ -393,7 +405,6 @@ public class LuceneIndexer extends DocumentIndexer
                 index.copy(index, FSDirectory.open(getIndexDirectory()), false);
             }
         }
-
         catch (CorruptIndexException e)
         {
             log.error("Error while indexing document " + " into Lucene. Details:" + e.getMessage());
@@ -434,7 +445,7 @@ public class LuceneIndexer extends DocumentIndexer
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.impetus.kundera.index.Indexer#index(com.impetus.kundera.metadata.
      * model.EntityMetadata, java.lang.Object, java.lang.String)
@@ -504,7 +515,7 @@ public class LuceneIndexer extends DocumentIndexer
                         // Check whether it's first time insert or updation
                         if (ecCacheHandler.isCacheEmpty())
                         { // First time
-                          // insert
+                            // insert
                             int count = 0;
                             for (Object obj : (Collection<?>) embeddedObject)
                             {
@@ -531,7 +542,7 @@ public class LuceneIndexer extends DocumentIndexer
                                         rowKey, obj);
                                 if (elementCollectionObjectName == null)
                                 { // Fresh
-                                  // row
+                                    // row
                                     elementCollectionObjectName = embeddedColumnName
                                             + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + (++lastEmbeddedObjectCount);
                                 }
@@ -600,5 +611,4 @@ public class LuceneIndexer extends DocumentIndexer
         // throw new IndexingException(e.getMessage());
         // }
     }
-
 }

@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.cache;
 
-
 /**
  * When something goes wrong in cache.
  * 

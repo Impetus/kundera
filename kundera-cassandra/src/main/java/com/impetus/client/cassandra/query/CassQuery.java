@@ -45,7 +45,9 @@ import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.query.exception.QueryHandlerException;
-
+import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.accessor.DateAccessor;
+import java.util.*;
 
 /**
  * The Class CassQuery.
@@ -60,6 +62,8 @@ public class CassQuery extends QueryImpl implements Query
 
     /** The reader. */
     private EntityReader reader;
+
+    private int maxResult = 10000;
 
     /**
      * Instantiates a new cass query.
@@ -124,13 +128,16 @@ public class CassQuery extends QueryImpl implements Query
      */
     private Map<Boolean, List<IndexClause>> prepareIndexClause(EntityMetadata m)
     {
-        IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, 10000);
+        IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, maxResult);
         List<IndexClause> clauses = new ArrayList<IndexClause>();
         List<IndexExpression> expr = new ArrayList<IndexExpression>();
         Map<Boolean, List<IndexClause>> idxClauses = new HashMap<Boolean, List<IndexClause>>(1);
         // check if id column are mixed with other columns or not?
         String idColumn = m.getIdColumn().getName();
+
         boolean idPresent = false;
+        boolean idxColumnPresent = false;
+
         for (Object o : getKunderaQuery().getFilterClauseQueue())
         {
             if (o instanceof FilterClause)
@@ -145,7 +152,12 @@ public class CassQuery extends QueryImpl implements Query
                     idPresent = true;
                 }
 
-                if (idPresent & !idColumn.equalsIgnoreCase(fieldName))
+                if (!idxColumnPresent && !idColumn.equalsIgnoreCase(fieldName))
+                {
+                    idxColumnPresent = true;
+                }
+
+                if (idPresent && idxColumnPresent)
                 {
                     log.error("Support for search on rowKey and indexed column is not enabled with in cassandra");
                     throw new QueryHandlerException("unsupported query operation clause for cassandra");
@@ -154,8 +166,8 @@ public class CassQuery extends QueryImpl implements Query
                 String condition = clause.getCondition();
                 String value = clause.getValue();
                 // value.e
-                expr.add(Selector.newIndexExpression(fieldName, getOperator(condition, idPresent),
-                        getBytesValue(fieldName, m, value)));
+                expr.add(Selector.newIndexExpression(fieldName, getOperator(condition, idPresent), getBytesValue(
+                        fieldName, m, value)));
             }
             else
             {
@@ -175,6 +187,7 @@ public class CassQuery extends QueryImpl implements Query
             indexClause.setExpressions(expr);
             clauses.add(indexClause);
         }
+
         idxClauses.put(idPresent, clauses);
 
         return idxClauses;
@@ -237,11 +250,11 @@ public class CassQuery extends QueryImpl implements Query
         {
             if (!idPresent)
             {
-                throw new UnsupportedOperationException(" Condition " + condition + " is not suported in  cassandra!");
+                throw new UnsupportedOperationException("Condition " + condition + " is not suported in  cassandra!");
             }
             else
             {
-                throw new UnsupportedOperationException(" Condition " + condition
+                throw new UnsupportedOperationException("Condition " + condition
                         + " is not suported for query on row key!");
 
             }
@@ -289,6 +302,10 @@ public class CassQuery extends QueryImpl implements Query
         else
         {
             Column col = m.getColumn(fieldName);
+            if (col == null)
+            {
+                throw new QueryHandlerException("Column type is null for: " + fieldName);
+            }
             f = col.getField();
         }
 
@@ -296,7 +313,6 @@ public class CassQuery extends QueryImpl implements Query
         {
             if (isId || f.getType().isAssignableFrom(String.class))
             {
-
                 return Bytes.fromByteArray(value.trim().getBytes());
             }
             else if (f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
@@ -305,7 +321,6 @@ public class CassQuery extends QueryImpl implements Query
             }
             else if (f.getType().equals(long.class) || f.getType().isAssignableFrom(Long.class))
             {
-
                 return Bytes.fromLong(Long.parseLong(value));
             }
             else if (f.getType().equals(boolean.class) || f.getType().isAssignableFrom(Boolean.class))
@@ -324,6 +339,19 @@ public class CassQuery extends QueryImpl implements Query
             {
                 return Bytes.fromFloat(Float.valueOf(value));
             }
+            else if (f.getType().equals(Date.class) || f.getType().isAssignableFrom(Date.class))
+            {
+                try
+                {
+                    Date date = DateAccessor.getDateByPattern(value);
+                    return Bytes.fromLong(date.getTime());
+                }
+                catch (PropertyAccessException ex)
+                {
+                    log.error("Error while handling data type for:" + fieldName);
+                    throw new QueryHandlerException(ex.getMessage());
+                }
+            }
             else
             {
                 log.error("Error while handling data type for:" + fieldName);
@@ -336,4 +364,12 @@ public class CassQuery extends QueryImpl implements Query
             throw new QueryHandlerException("field type is null for:" + fieldName);
         }
     }
+
+    @Override
+    public Query setMaxResults(int maxResult)
+    {
+        this.maxResult = maxResult;
+        return this;
+    }
+
 }

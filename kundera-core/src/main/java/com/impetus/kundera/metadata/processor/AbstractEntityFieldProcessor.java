@@ -34,7 +34,6 @@ import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 
-
 /**
  * The Class AbstractEntityFieldProcessor.
  * 

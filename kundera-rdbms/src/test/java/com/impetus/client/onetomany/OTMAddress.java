@@ -22,7 +22,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
 /**
  * The Class OTMAddress.
  */
@@ -30,7 +29,7 @@ import javax.persistence.Table;
 @Table(name = "ADDRESS", schema = "KunderaKeyspace@kcassandra")
 public class OTMAddress
 {
-    
+
     /** The address id. */
     @Id
     @Column(name = "ADDRESS_ID")

@@ -18,7 +18,6 @@ package com.impetus.kundera.client;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * The Enum ClientType.
  *
@@ -26,18 +25,18 @@ import java.util.Map;
  */
 public enum ClientType
 {
-    
+
     /** The HBASE. */
-    HBASE, 
- /** The PELOPS. */
- PELOPS, 
- /** The MONGODB. */
- MONGODB, 
- /** The THRIFT. */
- THRIFT, 
- /** The RDBMS. */
- RDBMS;
-    
+    HBASE,
+    /** The PELOPS. */
+    PELOPS,
+    /** The MONGODB. */
+    MONGODB,
+    /** The THRIFT. */
+    THRIFT,
+    /** The RDBMS. */
+    RDBMS;
+
     /** The coll. */
     static Map<String, ClientType> coll = new HashMap<String, ClientType>();
 

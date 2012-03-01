@@ -17,7 +17,6 @@ package com.impetus.kundera.metadata.model;
 
 import java.lang.reflect.Field;
 
-
 /**
  * Holds metadata for entity column.
  *

@@ -22,7 +22,6 @@ import java.util.Set;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 
-
 /**
  * The Class JoinTableMetadata.
  *

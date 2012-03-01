@@ -51,7 +51,6 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
-
 /**
  * The Class HibernateClient.
  * 
@@ -454,8 +453,8 @@ public class HibernateClient implements Client
         String parentId = objectGraph.getParentId();
 
         StringBuffer sqlQuery = new StringBuffer();
-        sqlQuery.append("SELECT ").append(inverseJoinColumnName).append(" FROM ").append(joinTableName)
-                .append(" WHERE ").append(joinColumnName).append("='").append(parentId).append("'");
+        sqlQuery.append("SELECT ").append(inverseJoinColumnName).append(" FROM ").append(joinTableName).append(
+                " WHERE ").append(joinColumnName).append("='").append(parentId).append("'");
 
         Session s = sf.openSession();
         Transaction tx = s.beginTransaction();
@@ -481,8 +480,8 @@ public class HibernateClient implements Client
         String primaryKey = objectGraph.getParentId();
 
         StringBuffer query = new StringBuffer();
-        query.append("DELETE FROM ").append(joinTableName).append(" WHERE ").append(joinColumnName).append("=")
-                .append("'").append(primaryKey).append("'");
+        query.append("DELETE FROM ").append(joinTableName).append(" WHERE ").append(joinColumnName).append("=").append(
+                "'").append(primaryKey).append("'");
 
         Session s = getSessionInstance();
         Transaction tx = s.beginTransaction();
@@ -521,9 +520,9 @@ public class HibernateClient implements Client
         }
 
         StringBuffer query = new StringBuffer();
-        query.append("INSERT INTO ").append(joinTableName).append("(").append(joinColumnName).append(",")
-                .append(inverseJoinColumnName).append(")").append(" VALUES('").append(parentId).append("','")
-                .append(childId).append("')");
+        query.append("INSERT INTO ").append(joinTableName).append("(").append(joinColumnName).append(",").append(
+                inverseJoinColumnName).append(")").append(" VALUES('").append(parentId).append("','").append(childId)
+                .append("')");
 
         Session s = getSessionInstance();
         Transaction tx = s.beginTransaction();

@@ -17,7 +17,6 @@ package com.impetus.client.onetoone;
 
 import org.junit.Test;
 
-
 /**
  * The Class PersonTest.
  *

@@ -8,7 +8,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * The Class SnsUser.
  *
@@ -18,7 +17,7 @@ import javax.persistence.Table;
 @Table(name = "snsusers", schema = "Blog@cassandra")
 public class SnsUser
 {
-    
+
     /** The snsuid. */
     @Id
     private String snsuid;

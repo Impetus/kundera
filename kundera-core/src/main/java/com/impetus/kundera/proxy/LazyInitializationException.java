@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.proxy;
 
-
 /**
  * The Class LazyInitializationException.
  */

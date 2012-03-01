@@ -21,7 +21,6 @@ import java.util.List;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 
-
 /**
  * The Class RelationHolder.
  *
@@ -29,7 +28,7 @@ import com.impetus.kundera.property.PropertyAccessException;
  */
 public class RelationHolder
 {
-    
+
     /** The relation name. */
     private String relationName;
 

@@ -1,6 +1,4 @@
 /*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
- *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
  *  * You may obtain a copy of the License at
@@ -15,66 +13,71 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
-import java.io.UnsupportedEncodingException;
-import java.sql.Time;
-
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
+import java.nio.ByteBuffer;
+import java.util.UUID;
 
 /**
- * The Class SQLTimeAccessor.
  *
- * @author amresh.singh
+ * @author kcarlson
  */
-public class SQLTimeAccessor implements PropertyAccessor<Time>
+public class UuidAccessor implements PropertyAccessor<UUID>
 {
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
-     */
     @Override
-    public Time fromBytes(byte[] b) throws PropertyAccessException
+    public UUID fromBytes(byte[] bytes) throws PropertyAccessException
     {
-        String s;
         try
         {
-            s = new String(b, Constants.ENCODING);
+            ByteBuffer bb = ByteBuffer.wrap(bytes);
+            long msb = bb.getLong();
+            long lsb = bb.getLong();
+
+            return new UUID(msb, lsb);
+            //return Bytes.fromByteArray(bytes).toUuid();
         }
-        catch (UnsupportedEncodingException e)
+        catch (Exception e)
         {
             throw new PropertyAccessException(e.getMessage());
         }
-        return fromString(s);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
-     */
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
-        Time t = (Time) object;
-        return t.toString().getBytes();
+        try
+        {
+            UUID uuid = (UUID) object;
+            ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+            bb.putLong(uuid.getMostSignificantBits());
+            bb.putLong(uuid.getLeastSignificantBits());
+            return bb.array();
+            //return Bytes.fromUuid(uuid).toByteArray();
+        }
+        catch (Exception e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
-     */
     @Override
     public String toString(Object object)
     {
-        return object.toString();
+        return ((UUID) object).toString();
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.String)
-     */
     @Override
-    public Time fromString(String s) throws PropertyAccessException
+    public UUID fromString(String s) throws PropertyAccessException
     {
-        Time t = Time.valueOf(s);
-        return t;
+        try
+        {
+            return UUID.fromString(s);
+        }
+        catch (Exception e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
     }
 
 }

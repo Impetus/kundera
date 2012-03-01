@@ -19,7 +19,6 @@ import java.lang.reflect.Field;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
-
 /**
  * The Interface RelationMetadataProcessor.
  *

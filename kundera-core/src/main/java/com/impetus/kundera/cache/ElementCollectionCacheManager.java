@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
 
-
 /**
  * Cache for holding element collection column names and corresponding objects
  * This is a singleton class TODO: Improve singleton implementation code, think
@@ -199,7 +198,8 @@ public class ElementCollectionCacheManager
         }
         catch (Throwable e)
         {
-            log.warn("Unable to reclaim memory while clearing ElementCollection cache. Nothing to worry, will be taken care of by GC");
+            log
+                    .warn("Unable to reclaim memory while clearing ElementCollection cache. Nothing to worry, will be taken care of by GC");
         }
     }
     /*

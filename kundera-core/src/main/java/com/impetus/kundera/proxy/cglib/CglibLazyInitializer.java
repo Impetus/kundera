@@ -34,7 +34,6 @@ import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializationException;
 import com.impetus.kundera.proxy.LazyInitializer;
 
-
 /**
  * A <tt>LazyInitializer</tt> implemented using the CGLIB bytecode generation
  * library.

@@ -34,7 +34,6 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 
-
 /**
  * The Class KunderaQuery.
  */
@@ -558,7 +557,7 @@ public class KunderaQuery
      */
     private MetamodelImpl getMetamodel()
     {
-        return KunderaMetadataManager.getMetamodel(persistenceUnits);
+        return KunderaMetadataManager.getMetamodel(entityName, persistenceUnits);
     }
 
     /**
@@ -608,6 +607,7 @@ public class KunderaQuery
             {
 
                 String nextOrder = (String) token.nextElement();
+                nextOrder = nextOrder.trim().toUpperCase();
 
                 // more spaces given.
                 if (StringUtils.isNotBlank(nextOrder))
@@ -712,7 +712,7 @@ public class KunderaQuery
             if (match.find())
             {
                 logger.error("bad jpa query:");
-                throw new KunderaQueryParserException("invalid column name" + property);
+                throw new KunderaQueryParserException("invalid column name " + property);
             }
             String minValue = tokens.get(idxOfBetween + 1);
             String maxValue = tokens.get(idxOfBetween + 3);

@@ -18,7 +18,6 @@ package com.impetus.kundera.client;
 import java.util.Collections;
 import java.util.Map;
 
-
 /**
  * The Class EnhanceEntity.
  * 

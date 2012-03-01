@@ -32,13 +32,12 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 
-
 /**
  * A factory for creating HBaseClient objects.
  */
 public class HBaseClientFactory extends GenericClientFactory
 {
-    
+
     /** The index manager. */
     private IndexManager indexManager;
 

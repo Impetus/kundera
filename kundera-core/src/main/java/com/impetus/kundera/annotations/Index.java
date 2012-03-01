@@ -21,14 +21,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * Indicates and validates a class for use as Cassandra Entity.
  * 
  * @author animesh.kumar
  * @since 0.1
  */
-@Target({ ElementType.TYPE, ElementType.FIELD })
+@Target( { ElementType.TYPE, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Index

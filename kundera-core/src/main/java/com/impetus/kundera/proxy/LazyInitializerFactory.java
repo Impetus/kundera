@@ -21,7 +21,6 @@ import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.persistence.PersistenceDelegator;
 
-
 /**
  * Interface LazyInitializerFactory
  * 

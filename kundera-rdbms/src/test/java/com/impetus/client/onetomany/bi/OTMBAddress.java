@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.client.onetomany.bi;
 
+//~--- JDK imports ------------------------------------------------------------
+
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -23,7 +25,6 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-
 /**
  * The Class OTMBAddress.
  */
@@ -31,7 +32,7 @@ import javax.persistence.Table;
 @Table(name = "ADDRESS", schema = "KunderaKeyspace@kcassandra")
 public class OTMBAddress
 {
-    
+
     /** The address id. */
     @Id
     @Column(name = "ADDRESS_ID")
@@ -115,5 +116,4 @@ public class OTMBAddress
     {
         this.people = people;
     }
-
 }

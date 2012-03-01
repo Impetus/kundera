@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
-
 /**
  * The Interface Loader.
  *
@@ -23,7 +22,7 @@ package com.impetus.kundera.loader;
  */
 public interface Loader
 {
-    
+
     /**
      * Load.
      *

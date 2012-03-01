@@ -33,7 +33,6 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
-
 /**
  * Provides functionality for mapping between MongoDB documents and POJOs.
  * Contains utility methods for converting one form into another.
@@ -42,7 +41,7 @@ import com.mongodb.BasicDBObject;
  */
 public class DocumentObjectMapper
 {
-    
+
     /** The log. */
     private static Log log = LogFactory.getLog(DocumentObjectMapper.class);
 

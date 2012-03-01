@@ -34,7 +34,6 @@ import com.impetus.kundera.metadata.model.PropertyIndex;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-
 /**
  * The Class KunderaIndexer.
  * 

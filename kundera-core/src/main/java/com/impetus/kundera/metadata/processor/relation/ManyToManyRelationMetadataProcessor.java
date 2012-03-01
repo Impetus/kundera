@@ -30,7 +30,6 @@ import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-
 /**
  * The Class ManyToManyRelationMetadataProcessor.
  *
@@ -64,8 +63,8 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
         }
 
         validate(targetEntity);
-        Relation relation = new Relation(relationField, targetEntity, relationField.getType(), ann.fetch(),
-                Arrays.asList(ann.cascade()), Boolean.TRUE, ann.mappedBy(), Relation.ForeignKey.MANY_TO_MANY);
+        Relation relation = new Relation(relationField, targetEntity, relationField.getType(), ann.fetch(), Arrays
+                .asList(ann.cascade()), Boolean.TRUE, ann.mappedBy(), Relation.ForeignKey.MANY_TO_MANY);
 
         boolean isJoinedByFK = relationField.isAnnotationPresent(JoinColumn.class);
         boolean isJoinedByTable = relationField.isAnnotationPresent(JoinTable.class);

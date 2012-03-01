@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-
 /**
  * Iterates through a Jar file for each file resource.
  * 

@@ -20,7 +20,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * The Class Post.
  * 
@@ -66,63 +65,63 @@ public class Post
     }
 
     /*  *//**
-     * Gets the title.
-     * 
-     * @return the title
-     */
+            * Gets the title.
+            * 
+            * @return the title
+            */
     /*
      * public String getTitle() { return data.title; }
      *//**
-     * Sets the title.
-     * 
-     * @param title
-     *            the title to set
-     */
+       * Sets the title.
+       * 
+       * @param title
+       *            the title to set
+       */
     /*
      * public void setTitle(String title) { this.data.title = title; }
      *//**
-     * Gets the body.
-     * 
-     * @return the body
-     */
+       * Gets the body.
+       * 
+       * @return the body
+       */
     /*
      * public String getBody() { return data.body; }
      *//**
-     * Sets the body.
-     * 
-     * @param body
-     *            the body to set
-     */
+       * Sets the body.
+       * 
+       * @param body
+       *            the body to set
+       */
     /*
      * public void setBody(String body) { this.data.body = body; }
      *//**
-     * Gets the author.
-     * 
-     * @return the author
-     */
+       * Gets the author.
+       * 
+       * @return the author
+       */
     /*
      * public String getAuthor() { return author.name; }
      *//**
-     * Sets the author.
-     * 
-     * @param author
-     *            the author to set
-     */
+       * Sets the author.
+       * 
+       * @param author
+       *            the author to set
+       */
     /*
      * public void setAuthor(String author) { this.author.name = author; }
      *//**
-     * Gets the created.
-     * 
-     * @return the created
-     */
+       * Gets the created.
+       * 
+       * @return the created
+       */
     /*
      * public Date getCreated() { return data.created; }
      *//**
-     * Sets the created.
-     * 
-     * @param created
-     *            the created to set
-     */
+       * Sets the created.
+       * 
+       * @param created
+       *            the created to set
+       */
     /*
      * public void setCreated(Date created) { this.data.created = created; }
      */

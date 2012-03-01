@@ -29,7 +29,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 import com.impetus.client.hbase.HBaseData;
 import com.impetus.client.hbase.Reader;
 
-
 /**
  * HBase reader.
  * 

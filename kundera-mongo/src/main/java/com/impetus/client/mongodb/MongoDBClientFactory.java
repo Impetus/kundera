@@ -38,7 +38,6 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.MongoOptions;
 
-
 /**
  * A factory for creating MongoDBClient objects.
  */

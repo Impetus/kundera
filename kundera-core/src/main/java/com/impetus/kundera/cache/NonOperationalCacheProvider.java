@@ -19,7 +19,6 @@ import java.util.Map;
 
 import javax.persistence.Cache;
 
-
 /**
  * NonOperational cache provider.
  * 

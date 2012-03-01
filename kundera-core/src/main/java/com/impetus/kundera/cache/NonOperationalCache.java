@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.cache;
 
-
 /**
  * NonOperational Cache implementation.
  * 

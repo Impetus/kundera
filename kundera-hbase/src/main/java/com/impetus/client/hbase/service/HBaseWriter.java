@@ -38,7 +38,6 @@ import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-
 /**
  * The Class HBaseWriter.
  * 
@@ -64,8 +63,8 @@ public class HBaseWriter implements Writer
             try
             {
 
-                p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier),
-                        PropertyAccessorHelper.get(columnFamilyObj, column.getField()));
+                p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), PropertyAccessorHelper.get(
+                        columnFamilyObj, column.getField()));
             }
             catch (PropertyAccessException e1)
             {
@@ -103,8 +102,8 @@ public class HBaseWriter implements Writer
             try
             {
 
-                p.add(Bytes.toBytes(qualifier), System.currentTimeMillis(),
-                        PropertyAccessorHelper.get(entity, column.getField()));
+                p.add(Bytes.toBytes(qualifier), System.currentTimeMillis(), PropertyAccessorHelper.get(entity, column
+                        .getField()));
 
             }
             catch (PropertyAccessException e1)
@@ -147,13 +146,13 @@ public class HBaseWriter implements Writer
             {
                 if (containsEmbeddedObjectsOnly)
                 {
-                    p.add(Bytes.toBytes(r.getRelationName()), Bytes.toBytes(r.getRelationName()),
-                            Bytes.toBytes(r.getRelationValue()));
+                    p.add(Bytes.toBytes(r.getRelationName()), Bytes.toBytes(r.getRelationName()), Bytes.toBytes(r
+                            .getRelationValue()));
                 }
                 else
                 {
-                    p.add(Bytes.toBytes(r.getRelationName()), System.currentTimeMillis(),
-                            Bytes.toBytes(r.getRelationValue()));
+                    p.add(Bytes.toBytes(r.getRelationName()), System.currentTimeMillis(), Bytes.toBytes(r
+                            .getRelationValue()));
                 }
 
             }
@@ -184,19 +183,19 @@ public class HBaseWriter implements Writer
 
             // Check if there was any existing foreign key value, if yes, append
             // it
-            byte[] value = r.getValue(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME),
-                    Bytes.toBytes(property));
+            byte[] value = r.getValue(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes
+                    .toBytes(property));
             String existingForeignKey = Bytes.toString(value);
 
             if (existingForeignKey == null || existingForeignKey.isEmpty())
             {
-                p.add(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes.toBytes(property),
-                        Bytes.toBytes(keys));
+                p.add(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes.toBytes(property), Bytes
+                        .toBytes(keys));
             }
             else
             {
-                p.add(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes.toBytes(property),
-                        Bytes.toBytes(existingForeignKey + Constants.FOREIGN_KEY_SEPARATOR + keys));
+                p.add(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes.toBytes(property), Bytes
+                        .toBytes(existingForeignKey + Constants.FOREIGN_KEY_SEPARATOR + keys));
             }
 
         }
