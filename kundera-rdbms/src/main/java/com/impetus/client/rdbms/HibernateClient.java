@@ -108,21 +108,6 @@ public class HibernateClient implements Client
         this.reader = reader;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.proxy.
-     * EnhancedEntity)
-     */
-    // TODO: This needs to be deleted.
-    @Override
-    public void persist(EnhancedEntity enhanceEntity)
-    {
-        Session s = getSessionInstance();
-        Transaction tx = s.beginTransaction();
-        s.persist(enhanceEntity.getEntity());
-        tx.commit();
-    }
 
     /*
      * (non-Javadoc)

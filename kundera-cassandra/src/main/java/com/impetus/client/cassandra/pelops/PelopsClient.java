@@ -114,18 +114,6 @@ public class PelopsClient implements Client
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.proxy.
-     * EnhancedEntity)
-     */
-    @Override
-    public void persist(EnhancedEntity enhancedEntity)
-    {
-        // DELETE it.
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.impetus.kundera.client.Client#find(java.lang.Class,
      * java.lang.String)
      */

@@ -87,18 +87,6 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         this.reader = reader;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.proxy.
-     * EnhancedEntity)
-     */
-    @Override
-    public void persist(EnhancedEntity enhancedEntity)
-    {
-        log.error("persist method on enhance entity is not supported now!");
-        throw new KunderaException("method not supported");
-    }
 
     /*
      * (non-Javadoc)

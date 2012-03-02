@@ -22,26 +22,14 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
-import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * The Interface Client.
  * 
- * @author impetus
+ * @author vivek.mishra
  */
 public interface Client
 {
-
-    /**
-     * Writes Multiple columns.
-     * 
-     * @param e
-     *            Ehanced Entity
-     * @throws Exception
-     *             the exception
-     */
-    @Deprecated
-    void persist(EnhancedEntity e);
 
     /**
      * Retrieve columns from a column-family row.

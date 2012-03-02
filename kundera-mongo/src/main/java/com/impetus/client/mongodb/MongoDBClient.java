@@ -96,19 +96,6 @@ public class MongoDBClient implements Client
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.proxy.
-     * EnhancedEntity)
-     */
-    @Override
-    @Deprecated
-    public void persist(EnhancedEntity enhancedEntity) 
-    {
-        throw new KunderaException("Not Implemented");
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see
      * com.impetus.kundera.client.Client#persist(com.impetus.kundera.persistence
      * .handler.impl.EntitySaveGraph,
@@ -142,6 +129,7 @@ public class MongoDBClient implements Client
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             log.error(e.getMessage());
             throw new KunderaException(e);
         }

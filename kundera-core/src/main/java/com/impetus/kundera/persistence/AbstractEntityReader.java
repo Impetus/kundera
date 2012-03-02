@@ -103,7 +103,7 @@ public class AbstractEntityReader
 
                     Field f = g.getProperty();
 
-                    if (!collectionHolder.containsKey(relationalValue))
+                    if (!collectionHolder.containsKey(relationalValue+childClazz.getName()))
                     {
 
                         childClient = persistenceDelegeator.getClient(childMetadata);
@@ -121,17 +121,17 @@ public class AbstractEntityReader
                             child = persistenceDelegeator.find(childClazz, relationalValue.toString(), g);
                         }
 
-                        collectionHolder.put(relationalValue, child);
+                        collectionHolder.put(relationalValue+childClazz.getName(), child);
 
                         // If entity is holding association it means it can not
                         // be a
                         // collection.
                     }
 
-                    onBiDirection(e, client, g, m, collectionHolder.get(relationalValue), childMetadata, childClient);
+                    onBiDirection(e, client, g, m, collectionHolder.get(relationalValue+childClazz.getName()), childMetadata, childClient);
 
                     List<Object> collection = new ArrayList<Object>(1);
-                    collection.add(collectionHolder.get(relationalValue));
+                    collection.add(collectionHolder.get(relationalValue+childClazz.getName()));
                     PropertyAccessorHelper.set(e.getEntity(), f,
                             PropertyAccessorHelper.isCollection(f.getType()) ? getFieldInstance(collection, f)
                                     : collection.get(0));
@@ -145,7 +145,7 @@ public class AbstractEntityReader
                     String relationName = g.getfKeyName();
                     String relationalValue = e.getEntityId();
                     Field f = g.getProperty();
-                    if (!collectionHolder.containsKey(relationalValue))
+                    if (!collectionHolder.containsKey(relationalValue+childClazz.getName()))
                     {
                         // create a finder and pass metadata, relationName,
                         // relationalValue.
@@ -201,7 +201,7 @@ public class AbstractEntityReader
                         // secondary indexes.
                         // create sql query for hibernate client.
                         // f = g.getProperty();
-                        collectionHolder.put(relationalValue, childs);
+                        collectionHolder.put(relationalValue+childClazz.getName(), childs);
                         if (childs != null)
                         {
                             for (Object child : childs)
@@ -212,7 +212,7 @@ public class AbstractEntityReader
                     }
                     // handle bi direction here.
 
-                    onReflect(e.getEntity(), f, (List) collectionHolder.get(relationalValue));
+                    onReflect(e.getEntity(), f, (List) collectionHolder.get(relationalValue+childClazz.getName()));
 
                 }
 
