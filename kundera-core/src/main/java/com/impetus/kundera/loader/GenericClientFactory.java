@@ -113,18 +113,16 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
             logger.info("Returning threadsafe used client instance for persistence unit : " + persistenceUnit);
             if (client == null)
             {
-                client = instantiateClient();
+                client = instantiateClient(persistenceUnit);
             }
 
         }
         else
         {
             logger.debug("Returning fresh client instance for persistence unit : " + persistenceUnit);
-            client = instantiateClient();
+            client = instantiateClient(persistenceUnit);
         }
 
-        // Construct Client using persistenceunit
-        client.setPersistenceUnit(persistenceUnit);
         return client;
 
     }
@@ -134,7 +132,7 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
      * 
      * @return the client
      */
-    protected abstract Client instantiateClient();
+    protected abstract Client instantiateClient(String persistenceUnit);
 
     /**
      * Checks if is client thread safe.

@@ -110,9 +110,9 @@ public class HBaseClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient()
      */
     @Override
-    protected Client instantiateClient()
+    protected Client instantiateClient(String persistenceUnit)
     {
-        return new HBaseClient(indexManager, conf, hTablePool, reader);
+        return new HBaseClient(indexManager, conf, hTablePool, reader, persistenceUnit);
     }
 
     /*

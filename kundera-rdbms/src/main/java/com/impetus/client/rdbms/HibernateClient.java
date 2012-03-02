@@ -49,7 +49,6 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * The Class HibernateClient.
@@ -95,6 +94,8 @@ public class HibernateClient implements Client
         conf = new Configuration().addProperties(HibernateUtils.getProperties(persistenceUnit));
         Collection<Class<?>> classes = ((MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 persistenceUnit)).getEntityNameToClassMap().values();
+        // to keep hibernate happy! As in our case all scanned classes are not meant for rdbms, so initally i have set depth to zero!
+        conf.setProperty("hibernate.max_fetch_depth", "0");
         for (Class<?> c : classes)
         {
             conf.addAnnotatedClass(c);
@@ -133,20 +134,6 @@ public class HibernateClient implements Client
         return persistenceUnit;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#setPersistenceUnit(java.lang.String)
-     */
-    @Override
-    @Deprecated
-    public void setPersistenceUnit(String arg0)
-    {
-        // throw new
-        // NotImplementedException("This support is already depricated");
-
-    }
 
     /*
      * (non-Javadoc)

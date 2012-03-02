@@ -114,14 +114,6 @@ public interface Client
     IndexManager getIndexManager();
 
     /**
-     * Sets the persistence unit.
-     * 
-     * @param persistenceUnit
-     *            the new persistence unit
-     */
-    void setPersistenceUnit(String persistenceUnit);
-
-    /**
      * On persistence.
      * 
      * @param entitySaveGraph

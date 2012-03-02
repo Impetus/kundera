@@ -104,7 +104,7 @@ public class PelopsClient implements Client
      * @param reader
      *            the reader
      */
-    public PelopsClient(IndexManager indexManager, EntityReader reader)
+    public PelopsClient(IndexManager indexManager, EntityReader reader, String persistenceUnit)
     {
         this.indexManager = indexManager;
         this.dataHandler = new PelopsDataHandler(this);
@@ -336,18 +336,6 @@ public class PelopsClient implements Client
         this.dataHandler = null;
         closed = true;
 
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#setPersistenceUnit(java.lang.String)
-     */
-    @Override
-    public void setPersistenceUnit(String persistenceUnit)
-    {
-        this.persistenceUnit = persistenceUnit;
     }
 
     /*

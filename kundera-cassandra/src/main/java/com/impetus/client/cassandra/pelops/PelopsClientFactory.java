@@ -106,15 +106,11 @@ public class PelopsClientFactory extends GenericClientFactory
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient()
-     */
+
     @Override
-    protected Client instantiateClient()
+    protected Client instantiateClient(String persistenceUnit)
     {
-        return new PelopsClient(indexManager, reader);
+        return new PelopsClient(indexManager, reader, persistenceUnit);
     }
 
     /*

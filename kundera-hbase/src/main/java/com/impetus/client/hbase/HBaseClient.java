@@ -80,11 +80,12 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      * @param reader
      *            the reader
      */
-    public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool, EntityReader reader)
+    public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool, EntityReader reader, String persistenceUnit)
     {
         this.indexManager = indexManager;
         this.handler = new HBaseDataHandler(conf, hTablePool);
         this.reader = reader;
+        this.persistenceUnit=persistenceUnit;
     }
 
 
@@ -221,18 +222,6 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     public String getPersistenceUnit()
     {
         return persistenceUnit;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#setPersistenceUnit(java.lang.String)
-     */
-    @Override
-    public void setPersistenceUnit(String persistenceUnit)
-    {
-        this.persistenceUnit = persistenceUnit;
     }
 
     /*

@@ -88,9 +88,9 @@ public class MongoDBClientFactory extends GenericClientFactory
      * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient()
      */
     @Override
-    protected Client instantiateClient()
+    protected Client instantiateClient(String persistenceUnit)
     {
-        return new MongoDBClient(mongoDB, indexManager, reader);
+        return new MongoDBClient(mongoDB, indexManager, reader, persistenceUnit);
     }
 
     /**

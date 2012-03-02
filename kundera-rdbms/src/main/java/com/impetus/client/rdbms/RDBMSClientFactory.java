@@ -71,16 +71,14 @@ public class RDBMSClientFactory extends GenericClientFactory
         
         //Do nothing.
         return null;
-//        throw new UnsupportedOperationException("Method not supported,as hibernate is used as an client interface for RDBMS");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient()
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient(java.lang.String)
      */
     @Override
-    protected Client instantiateClient()
+    protected Client instantiateClient(String persistenceUnit)
     {
         return new HibernateClient(getPersistenceUnit(), indexManager, reader);
     }

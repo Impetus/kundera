@@ -84,13 +84,14 @@ public class MongoDBClient implements Client
      * @param reader
      *            the reader
      */
-    public MongoDBClient(Object mongo, IndexManager mgr, EntityReader reader)
+    public MongoDBClient(Object mongo, IndexManager mgr, EntityReader reader, String persistenceUnit)
     {
         // TODO: This could be a constly call, see how connection pooling is
         // relevant here
         this.mongoDb = (DB) mongo;
         this.indexManager = mgr;
         this.reader = reader;
+        this.persistenceUnit = persistenceUnit;
     }
 
     /*
@@ -632,19 +633,6 @@ public class MongoDBClient implements Client
     public IndexManager getIndexManager()
     {
         return indexManager;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#setPersistenceUnit(java.lang.String)
-     */
-    @Override
-    public void setPersistenceUnit(String persistenceUnit)
-    {
-        this.persistenceUnit = persistenceUnit;
-
     }
 
     /*
