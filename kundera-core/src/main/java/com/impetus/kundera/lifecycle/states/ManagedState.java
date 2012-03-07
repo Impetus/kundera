@@ -28,24 +28,29 @@ public class ManagedState extends EntityState
     public void persist(EntityStateManagerImpl context)
     {
         //Ignored, entity remains in the same state
+        //TODO: Cascade persist operation for related entities for whom cascade=ALL or PERSIST
     }   
 
     @Override
     public void remove(EntityStateManagerImpl context)
     {
         context.setCurrentEntityState(new RemovedState());
+        //TODO: Mark entity for removal in persistence context
+        //TODO: Recurse remove operation for all related entities for whom cascade=ALL or REMOVE
     }
 
     @Override
     public void refresh(EntityStateManagerImpl context)
     {
         //TODO: Refresh entity state from the database
+        //TODO: Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
     }
 
     @Override
     public void merge(EntityStateManagerImpl context)
     {
       //Ignored, entity remains in the same state
+      //TODO: Cascade manage operation for all related entities for whom cascade=ALL or MERGE
     }
     
     @Override
@@ -66,7 +71,15 @@ public class ManagedState extends EntityState
 
     @Override
     public void flush(EntityStateManagerImpl context)
-    {
+    {        
+        //TODO: Check for flush mode, if commit do nothing (state will be updated at commit)
+        //else if AUTO, synchronize with DB
+        
+        //Entity state to remain as Managed
+        
+        //Cascade flush for all related entities for whom cascade=ALL or PERSIST
+        
+        
     }
 
     @Override
@@ -91,8 +104,19 @@ public class ManagedState extends EntityState
         //If persistence context is EXTENDED
         context.setCurrentEntityState(new TransientState());
         
-        //If persistence context is EXTENDED
+        //If persistence context is TRANSACTIONAL
         //context.setCurrentEntityState(new DetachedState());
     }
+
+    @Override
+    public void getReference(EntityStateManagerImpl context)
+    {
+    }
+
+    @Override
+    public void contains(EntityStateManagerImpl context)
+    {
+    }   
+    
     
 }

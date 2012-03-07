@@ -23,20 +23,26 @@ import com.impetus.kundera.lifecycle.EntityStateManagerImpl;
  */
 public abstract class EntityState
 {
+    //Life cycle Management
     public abstract void persist(EntityStateManagerImpl context);    
     public abstract void remove(EntityStateManagerImpl context);
     public abstract void refresh(EntityStateManagerImpl context);    
-    public abstract void merge(EntityStateManagerImpl context);
-    public abstract void find(EntityStateManagerImpl context);
+    public abstract void merge(EntityStateManagerImpl context);    
     public abstract void detach(EntityStateManagerImpl context);
     
-    public abstract void close(EntityStateManagerImpl context);
-    public abstract void clear(EntityStateManagerImpl context);
-    public abstract void flush(EntityStateManagerImpl context);
-    public abstract void lock(EntityStateManagerImpl context);
-    
+    public abstract void close(EntityStateManagerImpl context);    
+    public abstract void lock(EntityStateManagerImpl context);    
     
     public abstract void commit(EntityStateManagerImpl context);
     public abstract void rollback(EntityStateManagerImpl context);
+    
+    //Identity Management
+    public abstract void find(EntityStateManagerImpl context);
+    public abstract void getReference(EntityStateManagerImpl context);
+    public abstract void contains(EntityStateManagerImpl context);
+    
+    //Cache Management
+    public abstract void clear(EntityStateManagerImpl context);
+    public abstract void flush(EntityStateManagerImpl context);
     
 }

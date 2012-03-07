@@ -19,7 +19,7 @@ import com.impetus.kundera.lifecycle.states.EntityState;
 
 /**
  * @author amresh
- *
+ * 
  */
 public interface EntityStateManager
 {

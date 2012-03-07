@@ -28,18 +28,21 @@ public class RemovedState extends EntityState
     public void persist(EntityStateManagerImpl context)
     {
         context.setCurrentEntityState(new ManagedState());
+        //TODO: Recurse persist operation on all related entities for whom cascade=ALL or PERSIST
     }    
 
     @Override
     public void remove(EntityStateManagerImpl context)
     {
         //Ignored, entity will remain in removed state
+        //TODO: Recurse remove operation for all related entities for whom cascade=ALL or REMOVE
     }
 
     @Override
     public void refresh(EntityStateManagerImpl context)
     {
       //Ignored, entity will remain in removed state
+      //TODO: Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
     }
 
     @Override
@@ -93,5 +96,16 @@ public class RemovedState extends EntityState
         //If Persistence Context is TRANSACTIONAL
         //context.setCurrentEntityState(new DetachedState());
     }
+
+    @Override
+    public void getReference(EntityStateManagerImpl context)
+    {
+    }
+
+    @Override
+    public void contains(EntityStateManagerImpl context)
+    {
+    }   
+    
     
 }

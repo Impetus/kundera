@@ -47,7 +47,8 @@ public class DetachedState extends EntityState
     {
         context.setCurrentEntityState(new ManagedState());
         //TODO: Copy detached entity's current state to existing managed instance of the 
-        // same entity identity (if one exists), or create a new manaed copy
+        // same entity identity (if one exists), or create a new managed copy
+        //TODO: Cascade manage operation for all related entities for whom cascade=ALL or MERGE
     }
     
     @Override
@@ -89,6 +90,17 @@ public class DetachedState extends EntityState
     public void rollback(EntityStateManagerImpl context)
     {
     }
+
+    @Override
+    public void getReference(EntityStateManagerImpl context)
+    {
+    }
+
+    @Override
+    public void contains(EntityStateManagerImpl context)
+    {
+    } 
+    
     
 
 }

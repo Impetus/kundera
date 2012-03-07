@@ -28,18 +28,22 @@ public class TransientState extends EntityState
     public void persist(EntityStateManagerImpl context)
     {
         context.setCurrentEntityState(new ManagedState());
+        //TODO: Mark this entity for saving in database
+        //TODO: Recurse persist operation on all managed entities for whom cascade=ALL or PERSIST
     }   
 
     @Override
     public void remove(EntityStateManagerImpl context)
     {
         //Ignored, Entity will remain in the Transient state
+        //TODO: Recurse remove operation for all related entities for whom cascade=ALL or REMOVE
     }
 
     @Override
     public void refresh(EntityStateManagerImpl context)
     {
-      //Ignored, Entity will remain in the Transient state
+        //Ignored, Entity will remain in the Transient state
+        //TODO: Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
     }
 
     @Override
@@ -87,7 +91,15 @@ public class TransientState extends EntityState
     public void rollback(EntityStateManagerImpl context)
     {
     }
-    
-    
+
+    @Override
+    public void getReference(EntityStateManagerImpl context)
+    {
+    }
+
+    @Override
+    public void contains(EntityStateManagerImpl context)
+    {
+    }    
     
 }

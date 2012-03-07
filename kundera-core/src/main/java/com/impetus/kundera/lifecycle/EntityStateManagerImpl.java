@@ -20,18 +20,19 @@ import com.impetus.kundera.lifecycle.states.TransientState;
 
 /**
  * @author amresh
- *
+ * 
  */
 public class EntityStateManagerImpl implements EntityStateManager
 {
-    private EntityState currentEntityState;  
-    
-    
-    public EntityStateManagerImpl(EntityState entityState) {
+    private EntityState currentEntityState;
+
+    public EntityStateManagerImpl(EntityState entityState)
+    {
         this.currentEntityState = entityState;
     }
-    
-    public EntityStateManagerImpl() {
+
+    public EntityStateManagerImpl()
+    {
         this(new TransientState());
     }
 
@@ -43,13 +44,13 @@ public class EntityStateManagerImpl implements EntityStateManager
         return currentEntityState;
     }
 
-
     /**
-     * @param currentEntityState the currentEntityState to set
+     * @param currentEntityState
+     *            the currentEntityState to set
      */
     public void setCurrentEntityState(EntityState currentEntityState)
     {
         this.currentEntityState = currentEntityState;
     }
-    
+
 }
