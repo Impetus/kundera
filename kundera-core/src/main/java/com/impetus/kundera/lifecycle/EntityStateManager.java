@@ -24,4 +24,25 @@ import com.impetus.kundera.lifecycle.states.EntityState;
 public interface EntityStateManager
 {
     EntityState getCurrentEntityState();
+
+    // Life cycle Management
+    void persist();
+    void remove();
+    void refresh();
+    void merge();
+    void detach();
+    void close();
+    void lock();
+    void commit();
+    void rollback();
+
+    // Identity Management
+    void find();
+    void getReference();
+    void contains();
+
+    // Cache Management
+    void clear();
+    void flush();
+
 }

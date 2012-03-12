@@ -25,14 +25,14 @@ public class ManagedState extends EntityState
 {
 
     @Override
-    public void persist(EntityStateManagerImpl context)
+    public void handlePersist(EntityStateManagerImpl context)
     {
         //Ignored, entity remains in the same state
         //TODO: Cascade persist operation for related entities for whom cascade=ALL or PERSIST
     }   
 
     @Override
-    public void remove(EntityStateManagerImpl context)
+    public void handleRemove(EntityStateManagerImpl context)
     {
         context.setCurrentEntityState(new RemovedState());
         //TODO: Mark entity for removal in persistence context
@@ -40,37 +40,37 @@ public class ManagedState extends EntityState
     }
 
     @Override
-    public void refresh(EntityStateManagerImpl context)
+    public void handleRefresh(EntityStateManagerImpl context)
     {
         //TODO: Refresh entity state from the database
         //TODO: Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
     }
 
     @Override
-    public void merge(EntityStateManagerImpl context)
+    public void handleMerge(EntityStateManagerImpl context)
     {
       //Ignored, entity remains in the same state
       //TODO: Cascade manage operation for all related entities for whom cascade=ALL or MERGE
     }
     
     @Override
-    public void find(EntityStateManagerImpl context)
+    public void handleFind(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void close(EntityStateManagerImpl context)
+    public void handleClose(EntityStateManagerImpl context)
     {
         context.setCurrentEntityState(new DetachedState());
     }
 
     @Override
-    public void clear(EntityStateManagerImpl context)
+    public void handleClear(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void flush(EntityStateManagerImpl context)
+    public void handleFlush(EntityStateManagerImpl context)
     {        
         //TODO: Check for flush mode, if commit do nothing (state will be updated at commit)
         //else if AUTO, synchronize with DB
@@ -83,23 +83,23 @@ public class ManagedState extends EntityState
     }
 
     @Override
-    public void lock(EntityStateManagerImpl context)
+    public void handleLock(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void detach(EntityStateManagerImpl context)
+    public void handleDetach(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void commit(EntityStateManagerImpl context)
+    public void handleCommit(EntityStateManagerImpl context)
     {
         context.setCurrentEntityState(new DetachedState());
     }
 
     @Override
-    public void rollback(EntityStateManagerImpl context)
+    public void handleRollback(EntityStateManagerImpl context)
     {
         //If persistence context is EXTENDED
         context.setCurrentEntityState(new TransientState());
@@ -109,12 +109,12 @@ public class ManagedState extends EntityState
     }
 
     @Override
-    public void getReference(EntityStateManagerImpl context)
+    public void handleGetReference(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void contains(EntityStateManagerImpl context)
+    public void handleContains(EntityStateManagerImpl context)
     {
     }   
     

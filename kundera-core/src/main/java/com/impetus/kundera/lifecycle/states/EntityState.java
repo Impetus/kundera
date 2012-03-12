@@ -24,25 +24,25 @@ import com.impetus.kundera.lifecycle.EntityStateManagerImpl;
 public abstract class EntityState
 {
     //Life cycle Management
-    public abstract void persist(EntityStateManagerImpl context);    
-    public abstract void remove(EntityStateManagerImpl context);
-    public abstract void refresh(EntityStateManagerImpl context);    
-    public abstract void merge(EntityStateManagerImpl context);    
-    public abstract void detach(EntityStateManagerImpl context);
+    public abstract void handlePersist(EntityStateManagerImpl context);    
+    public abstract void handleRemove(EntityStateManagerImpl context);
+    public abstract void handleRefresh(EntityStateManagerImpl context);    
+    public abstract void handleMerge(EntityStateManagerImpl context);    
+    public abstract void handleDetach(EntityStateManagerImpl context);
     
-    public abstract void close(EntityStateManagerImpl context);    
-    public abstract void lock(EntityStateManagerImpl context);    
+    public abstract void handleClose(EntityStateManagerImpl context);    
+    public abstract void handleLock(EntityStateManagerImpl context);    
     
-    public abstract void commit(EntityStateManagerImpl context);
-    public abstract void rollback(EntityStateManagerImpl context);
+    public abstract void handleCommit(EntityStateManagerImpl context);
+    public abstract void handleRollback(EntityStateManagerImpl context);
     
     //Identity Management
-    public abstract void find(EntityStateManagerImpl context);
-    public abstract void getReference(EntityStateManagerImpl context);
-    public abstract void contains(EntityStateManagerImpl context);
+    public abstract void handleFind(EntityStateManagerImpl context);
+    public abstract void handleGetReference(EntityStateManagerImpl context);
+    public abstract void handleContains(EntityStateManagerImpl context);
     
     //Cache Management
-    public abstract void clear(EntityStateManagerImpl context);
-    public abstract void flush(EntityStateManagerImpl context);
+    public abstract void handleClear(EntityStateManagerImpl context);
+    public abstract void handleFlush(EntityStateManagerImpl context);
     
 }

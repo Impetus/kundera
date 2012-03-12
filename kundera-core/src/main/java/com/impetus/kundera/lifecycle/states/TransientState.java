@@ -25,7 +25,7 @@ public class TransientState extends EntityState
 {
 
     @Override
-    public void persist(EntityStateManagerImpl context)
+    public void handlePersist(EntityStateManagerImpl context)
     {
         context.setCurrentEntityState(new ManagedState());
         //TODO: Mark this entity for saving in database
@@ -33,72 +33,72 @@ public class TransientState extends EntityState
     }   
 
     @Override
-    public void remove(EntityStateManagerImpl context)
+    public void handleRemove(EntityStateManagerImpl context)
     {
         //Ignored, Entity will remain in the Transient state
         //TODO: Recurse remove operation for all related entities for whom cascade=ALL or REMOVE
     }
 
     @Override
-    public void refresh(EntityStateManagerImpl context)
+    public void handleRefresh(EntityStateManagerImpl context)
     {
         //Ignored, Entity will remain in the Transient state
         //TODO: Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
     }
 
     @Override
-    public void merge(EntityStateManagerImpl context)
+    public void handleMerge(EntityStateManagerImpl context)
     {
         //TODO: create a new managed entity and copy state of original entity into this one.
     }
     
     @Override
-    public void find(EntityStateManagerImpl context)
+    public void handleFind(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void close(EntityStateManagerImpl context)
+    public void handleClose(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void clear(EntityStateManagerImpl context)
+    public void handleClear(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void flush(EntityStateManagerImpl context)
+    public void handleFlush(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void lock(EntityStateManagerImpl context)
+    public void handleLock(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void detach(EntityStateManagerImpl context)
+    public void handleDetach(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void commit(EntityStateManagerImpl context)
+    public void handleCommit(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void rollback(EntityStateManagerImpl context)
+    public void handleRollback(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void getReference(EntityStateManagerImpl context)
+    public void handleGetReference(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void contains(EntityStateManagerImpl context)
+    public void handleContains(EntityStateManagerImpl context)
     {
     }    
     

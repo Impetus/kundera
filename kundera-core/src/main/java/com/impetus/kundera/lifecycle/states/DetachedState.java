@@ -25,25 +25,25 @@ public class DetachedState extends EntityState
 {
 
     @Override
-    public void persist(EntityStateManagerImpl context)
+    public void handlePersist(EntityStateManagerImpl context)
     {
         throw new IllegalArgumentException("Persist operation not allowed in Detached state");
     }   
 
     @Override
-    public void remove(EntityStateManagerImpl context)
+    public void handleRemove(EntityStateManagerImpl context)
     {
         throw new IllegalArgumentException("Remove operation not allowed in Detached state");
     }
 
     @Override
-    public void refresh(EntityStateManagerImpl context)
+    public void handleRefresh(EntityStateManagerImpl context)
     {
         throw new IllegalArgumentException("Refresh operation not allowed in Detached state");
     }
 
     @Override
-    public void merge(EntityStateManagerImpl context)
+    public void handleMerge(EntityStateManagerImpl context)
     {
         context.setCurrentEntityState(new ManagedState());
         //TODO: Copy detached entity's current state to existing managed instance of the 
@@ -52,52 +52,52 @@ public class DetachedState extends EntityState
     }
     
     @Override
-    public void find(EntityStateManagerImpl context)
+    public void handleFind(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void close(EntityStateManagerImpl context)
+    public void handleClose(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void clear(EntityStateManagerImpl context)
+    public void handleClear(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void flush(EntityStateManagerImpl context)
+    public void handleFlush(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void lock(EntityStateManagerImpl context)
+    public void handleLock(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void detach(EntityStateManagerImpl context)
+    public void handleDetach(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void commit(EntityStateManagerImpl context)
+    public void handleCommit(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void rollback(EntityStateManagerImpl context)
+    public void handleRollback(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void getReference(EntityStateManagerImpl context)
+    public void handleGetReference(EntityStateManagerImpl context)
     {
     }
 
     @Override
-    public void contains(EntityStateManagerImpl context)
+    public void handleContains(EntityStateManagerImpl context)
     {
     } 
     

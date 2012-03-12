@@ -53,4 +53,82 @@ public class EntityStateManagerImpl implements EntityStateManager
         this.currentEntityState = currentEntityState;
     }
 
+    @Override
+    public void persist()
+    {
+        getCurrentEntityState().handlePersist(this);
+    }
+
+    @Override
+    public void remove()
+    {
+        getCurrentEntityState().handleRemove(this);
+    }
+
+    @Override
+    public void refresh()
+    {
+    }
+
+    @Override
+    public void merge()
+    {
+    }
+
+    @Override
+    public void detach()
+    {
+    }
+
+    @Override
+    public void close()
+    {
+    }
+
+    @Override
+    public void lock()
+    {
+    }
+
+    @Override
+    public void commit()
+    {
+    }
+
+    @Override
+    public void rollback()
+    {
+    }
+
+    @Override
+    public void find()
+    {
+    }
+
+    @Override
+    public void getReference()
+    {
+    }
+
+    @Override
+    public void contains()
+    {
+    }
+
+    @Override
+    public void clear()
+    {
+    }
+
+    @Override
+    public void flush()
+    {
+    }
+    
+    
+    
+    
+    
+    
+
 }

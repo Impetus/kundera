@@ -154,7 +154,7 @@ public class EntityManagerImpl implements EntityManager
             throw new IllegalArgumentException("Entity to be persisted must not be null.");
         }
 
-        getPersistenceDelegator().persist(e);
+        getPersistenceDelegator().persist(e);        
     }
 
     /*
