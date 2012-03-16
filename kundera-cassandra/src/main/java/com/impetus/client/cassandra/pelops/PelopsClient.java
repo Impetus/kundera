@@ -106,6 +106,7 @@ public class PelopsClient implements Client
      */
     public PelopsClient(IndexManager indexManager, EntityReader reader, String persistenceUnit)
     {
+    	this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
         this.dataHandler = new PelopsDataHandler(this);
         this.reader = reader;
