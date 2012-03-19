@@ -237,7 +237,7 @@ public class EntityManagerImpl implements EntityManager
     @Override
     public final Query createNamedQuery(String name)
     {
-        throw new NotImplementedException("TODO");
+        return persistenceDelegator.createQuery(name);
     }
 
     /*

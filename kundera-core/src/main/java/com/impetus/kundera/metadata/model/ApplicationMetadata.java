@@ -237,7 +237,7 @@ public class ApplicationMetadata
         {
             namedNativeQueries.put(queryName, query);
         }
-        else
+        else if(!namedNativeQueries.get(queryName).equals(query))
         {
             logger.error("Duplicate named/native query with name:" + queryName
                     + "found! Already there is a query with same name:" + namedNativeQueries.get(queryName));
