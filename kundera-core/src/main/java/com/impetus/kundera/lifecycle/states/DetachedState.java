@@ -23,6 +23,10 @@ import com.impetus.kundera.lifecycle.EntityStateManagerImpl;
  */
 public class DetachedState extends EntityState
 {
+    @Override
+    public void initialize(EntityStateManagerImpl context)
+    {
+    }
 
     @Override
     public void handlePersist(EntityStateManagerImpl context)

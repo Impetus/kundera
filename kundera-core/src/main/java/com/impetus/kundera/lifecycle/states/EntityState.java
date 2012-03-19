@@ -23,6 +23,8 @@ import com.impetus.kundera.lifecycle.EntityStateManagerImpl;
  */
 public abstract class EntityState
 {
+    public abstract void initialize(EntityStateManagerImpl context);
+    
     //Life cycle Management
     public abstract void handlePersist(EntityStateManagerImpl context);    
     public abstract void handleRemove(EntityStateManagerImpl context);
