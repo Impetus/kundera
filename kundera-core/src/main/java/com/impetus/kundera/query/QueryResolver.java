@@ -63,8 +63,12 @@ public class QueryResolver
     public Query getQueryImplementation(String jpaQuery, PersistenceDelegator persistenceDelegator)
     {
         kunderaQuery = new KunderaQuery();
-        KunderaQueryParser parser = new KunderaQueryParser(kunderaQuery, jpaQuery);
+        String mappedQuery = KunderaMetadata.INSTANCE.getApplicationMetadata().getQuery(jpaQuery);
+        
+        KunderaQueryParser parser = new KunderaQueryParser(kunderaQuery, mappedQuery != null? mappedQuery: jpaQuery);
+        
         parser.parse();
+        
         kunderaQuery.postParsingInit();
 
 //        EntityMetadata entityMetadata = kunderaQuery.getEntityMetadata();

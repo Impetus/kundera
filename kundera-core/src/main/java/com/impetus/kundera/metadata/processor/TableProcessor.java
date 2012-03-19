@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.processor;
 
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -25,6 +26,10 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.Id;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.PersistenceException;
 import javax.persistence.Table;
 
@@ -33,9 +38,11 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor;
 import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessorFactory;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
@@ -97,7 +104,8 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         boolean isEmbeddable = false;
         // Set Name of persistence object
         metadata.setTableName(table.name());
-
+        //Add named/native query related application metadata.
+         addNamedNativeQueryMetadata(clazz);
         // set schema name and persistence unit name (if provided)
         String schemaStr = table.schema();
         if (schemaStr == null)
@@ -347,6 +355,50 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         {
             throw new MetamodelLoaderException("Error with relationship in @Entity(" + entityClass + "."
                     + relationField.getName() + "), reason: " + pe.getMessage());
+        }
+    }
+
+    /**
+     * Add named/native query annotated fields to application meta data.
+     * 
+     * @param clazz entity class.
+     */
+    private void addNamedNativeQueryMetadata(Class clazz)
+    {
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        String name,query=null;
+        if(clazz.isAnnotationPresent(NamedQuery.class))
+        {
+            NamedQuery ann = (NamedQuery) clazz.getAnnotation(NamedQuery.class);
+            appMetadata.addQueryToCollection(ann.name(),ann.query());
+        }
+        
+        if(clazz.isAnnotationPresent(NamedQueries.class))
+        {
+            NamedQueries ann = (NamedQueries) clazz.getAnnotation(NamedQueries.class);
+            
+            NamedQuery[] anns = ann.value();
+            for(NamedQuery a : anns)
+            {
+                appMetadata.addQueryToCollection(a.name(),a.query());
+            }
+        }
+        
+        if(clazz.isAnnotationPresent(NamedNativeQuery.class))
+        {
+            NamedNativeQuery ann = (NamedNativeQuery) clazz.getAnnotation(NamedNativeQuery.class);
+            appMetadata.addQueryToCollection(ann.name(),ann.query());
+        }
+        
+        if(clazz.isAnnotationPresent(NamedNativeQueries.class))
+        {
+            NamedNativeQueries ann = (NamedNativeQueries) clazz.getAnnotation(NamedNativeQueries.class);
+            
+            NamedNativeQuery[] anns = ann.value();
+            for(NamedNativeQuery a : anns)
+            {
+                appMetadata.addQueryToCollection(a.name(), a.query());
+            }
         }
     }
 

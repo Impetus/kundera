@@ -29,7 +29,8 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
- * The Class ApplicationMetadata.
+ * Application metadata refers to metdata specific to application(e.g. metamodel collection, persistence unit metdatas)
+ * Any reference which is out of persistence unit metadata and entity specific metadata is held by this class.
  * 
  * @author amresh.singh
  */
@@ -45,10 +46,13 @@ public class ApplicationMetadata
     private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
 
     /**
-     *  Collection instance to hold clazz's full name to persistence unit mapping.
-     *  Valid Assumption: 1 class can belong to 1 pu only. Reason is @table needs to give pu name!
+     * Collection instance to hold clazz's full name to persistence unit
+     * mapping. Valid Assumption: 1 class can belong to 1 pu only. Reason is @table
+     * needs to give pu name!
      */
     private Map<String, List<String>> clazzToPuMap;
+
+    private Map<String, String> namedNativeQueries;
 
     /**
      * Adds the entity metadata.
@@ -139,24 +143,27 @@ public class ApplicationMetadata
 
     /**
      * Sets the clazz to pu map.
-     *
-     * @param map the map
+     * 
+     * @param map
+     *            the map
      */
     public void setClazzToPuMap(Map<String, List<String>> map)
     {
-        if(clazzToPuMap == null)
+        if (clazzToPuMap == null)
         {
             this.clazzToPuMap = map;
-        } else
+        }
+        else
         {
             clazzToPuMap.putAll(map);
         }
     }
-    
+
     /**
      * Gets the mapped persistence unit.
-     *
-     * @param clazz the clazz
+     * 
+     * @param clazz
+     *            the clazz
      * 
      * @return the mapped persistence unit
      */
@@ -168,53 +175,99 @@ public class ApplicationMetadata
     /**
      * returns mapped persistence unit.
      * 
-     * @param clazzName  clazz name.
+     * @param clazzName
+     *            clazz name.
      * 
      * @return mapped persistence unit.
      */
     public String getMappedPersistenceUnit(String clazzName)
     {
-        
+
         List<String> pus = clazzToPuMap.get(clazzName);
-        
-        final int _first=0;
-        String pu=null;
-        
-        if(pus != null && !pus.isEmpty())
+
+        final int _first = 0;
+        String pu = null;
+
+        if (pus != null && !pus.isEmpty())
         {
-            if(pus.size() == 2)
+            if (pus.size() == 2)
             {
                 onError(clazzName);
             }
-           return pus.get(_first); 
-        } else
+            return pus.get(_first);
+        }
+        else
         {
             Set<String> mappedClasses = this.clazzToPuMap.keySet();
-            boolean found=false;
-            for(String clazz : mappedClasses)
+            boolean found = false;
+            for (String clazz : mappedClasses)
             {
-                if(found && clazz.endsWith("."+clazzName))
+                if (found && clazz.endsWith("." + clazzName))
                 {
                     onError(clazzName);
-                } else if(clazz.endsWith("." + clazzName))
+                }
+                else if (clazz.endsWith("." + clazzName))
                 {
                     pu = clazzToPuMap.get(clazz).get(_first);
-                    found=true;
+                    found = true;
                 }
             }
         }
-        
+
         return pu;
+    }
+
+    /**
+     * Adds parameterised query with given name into collection. Throws
+     * exception if duplicate name is provided.
+     * 
+     * @param queryName
+     *            query name.
+     * @param query
+     *            named/native query.
+     * 
+     */
+    public void addQueryToCollection(String queryName, String query)
+    {
+        if (namedNativeQueries == null)
+        {
+            namedNativeQueries = new HashMap<String, String>();
+        }
+        if (!namedNativeQueries.containsKey(queryName))
+        {
+            namedNativeQueries.put(queryName, query);
+        }
+        else
+        {
+            logger.error("Duplicate named/native query with name:" + queryName
+                    + "found! Already there is a query with same name:" + namedNativeQueries.get(queryName));
+            throw new ApplicationLoaderException("Duplicate named/native query with name:" + queryName
+                    + "found! Already there is a query with same name:" + namedNativeQueries.get(queryName));
+        }
+    }
+
+    /**
+     * Returns query interface.
+     * 
+     * @param name
+     *            query name.
+     * @return query.
+     */
+    public String getQuery(String name)
+    {
+        return namedNativeQueries.get(name);
     }
 
     /**
      * Handler error and log statements.
      * 
-     * @param clazzName  class name.
+     * @param clazzName
+     *            class name.
      */
     private void onError(String clazzName)
     {
-        logger.error("Duplicate name:" +  clazzName + "Please provide entity with complete package name.");
-        throw new ApplicationLoaderException("Duplicate name:" +  clazzName + "Please provide entity with complete package name");
+        logger.error("Duplicate name:" + clazzName + "Please provide entity with complete package name.");
+        throw new ApplicationLoaderException("Duplicate name:" + clazzName
+                + "Please provide entity with complete package name");
     }
 }
