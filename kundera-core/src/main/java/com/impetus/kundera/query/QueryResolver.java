@@ -17,19 +17,15 @@ package com.impetus.kundera.query;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
-import java.util.Properties;
 
 import javax.persistence.Query;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -71,33 +67,8 @@ public class QueryResolver
         
         kunderaQuery.postParsingInit();
 
-//        EntityMetadata entityMetadata = kunderaQuery.getEntityMetadata();
 
         String pu = kunderaQuery.getPersistenceUnit();
-//        if (persistenceUnits.length == 1)
-//        {
-//            pu = persistenceUnits[0];
-//        }
-//        else
-//        {
-//            pu = entityMetadata.getPersistenceUnit();
-//        }
-//        if (StringUtils.isEmpty(pu))
-//        {
-//            Map<String, PersistenceUnitMetadata> puMetadataMap = KunderaMetadata.INSTANCE.getApplicationMetadata()
-//                    .getPersistenceUnitMetadataMap();
-//            for (PersistenceUnitMetadata puMetadata : puMetadataMap.values())
-//            {
-//                Properties props = puMetadata.getProperties();
-//                String clientName = props.getProperty(PersistenceProperties.KUNDERA_CLIENT);
-//                if (ClientType.RDBMS.name().equalsIgnoreCase(clientName))
-//                {
-//                    pu = puMetadata.getPersistenceUnitName();
-//                    break;
-//                }
-//
-//            }
-//        }
 
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
         String kunderaClientName = (String) puMetadata.getProperties().get(PersistenceProperties.KUNDERA_CLIENT);

@@ -41,6 +41,7 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -112,7 +113,7 @@ public class MongoDBDataHandler
             List<Column> columns = m.getColumnsAsList();
             for (Column column : columns)
             {
-                PropertyAccessorHelper.set(entity, column.getField(), document.get(column.getName()).toString());
+                setColumnValue(document, entity, column);
             }
 
             // Populate @Embedded objects and collections
@@ -196,6 +197,25 @@ public class MongoDBDataHandler
             return entity;
         }
 
+    }
+
+    /**
+     * Setter for column value, by default converted from string value, in case of map it is automatically converted into map using BasicDBObject.
+     * 
+     * @param document mongo document
+     * @param entity   searched entity.
+     * @param column   column field.
+     */
+    private void setColumnValue(DBObject document, Object entity, Column column)
+    {
+        if(column.getField().getType().isAssignableFrom(Map.class))
+        {
+            PropertyAccessorHelper.set(entity, column.getField(), ((BasicDBObject)document.get(column.getName())).toMap());
+        } 
+        else
+        {
+            PropertyAccessorHelper.set(entity, column.getField(), document.get(column.getName()).toString());
+        }
     }
 
     /**
@@ -318,7 +338,7 @@ public class MongoDBDataHandler
     {
         // A column field may be a collection(not defined as 1-to-M
         // relationship)
-        if (column.getField().getType().equals(List.class) || column.getField().getType().equals(Set.class))
+        if (column.getField().getType().isAssignableFrom(List.class) || column.getField().getType().isAssignableFrom(Set.class))
         {
             Collection collection = (Collection) PropertyAccessorHelper.getObject(entity, column.getField());
             BasicDBList basicDBList = new BasicDBList();
@@ -327,6 +347,11 @@ public class MongoDBDataHandler
                 basicDBList.add(o);
             }
             dbObj.put(column.getName(), basicDBList);
+        } else if(column.getField().getType().isAssignableFrom(Map.class))
+        {
+            Map mapObj = (Map) PropertyAccessorHelper.getObject(entity, column.getField());
+            BasicDBObjectBuilder builder = BasicDBObjectBuilder.start(mapObj);
+            dbObj.put(column.getName(), builder.get());
         }
         else
         {
