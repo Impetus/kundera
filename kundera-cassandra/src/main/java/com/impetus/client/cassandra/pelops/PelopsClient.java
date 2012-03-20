@@ -201,6 +201,7 @@ public class PelopsClient implements Client
         }
 
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+//        selector.
 
         PelopsDataHandler handler = new PelopsDataHandler(this);
 

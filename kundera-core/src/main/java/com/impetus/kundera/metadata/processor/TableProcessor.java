@@ -370,7 +370,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         if(clazz.isAnnotationPresent(NamedQuery.class))
         {
             NamedQuery ann = (NamedQuery) clazz.getAnnotation(NamedQuery.class);
-            appMetadata.addQueryToCollection(ann.name(),ann.query());
+            appMetadata.addQueryToCollection(ann.name(),ann.query(), false, clazz);
         }
         
         if(clazz.isAnnotationPresent(NamedQueries.class))
@@ -380,14 +380,14 @@ public class TableProcessor extends AbstractEntityFieldProcessor
             NamedQuery[] anns = ann.value();
             for(NamedQuery a : anns)
             {
-                appMetadata.addQueryToCollection(a.name(),a.query());
+                appMetadata.addQueryToCollection(a.name(),a.query(), false,clazz);
             }
         }
         
         if(clazz.isAnnotationPresent(NamedNativeQuery.class))
         {
             NamedNativeQuery ann = (NamedNativeQuery) clazz.getAnnotation(NamedNativeQuery.class);
-            appMetadata.addQueryToCollection(ann.name(),ann.query());
+            appMetadata.addQueryToCollection(ann.name(),ann.query(), true,clazz);
         }
         
         if(clazz.isAnnotationPresent(NamedNativeQueries.class))
@@ -397,7 +397,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
             NamedNativeQuery[] anns = ann.value();
             for(NamedNativeQuery a : anns)
             {
-                appMetadata.addQueryToCollection(a.name(), a.query());
+                appMetadata.addQueryToCollection(a.name(), a.query(), true,clazz);
             }
         }
     }

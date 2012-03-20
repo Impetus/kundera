@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -59,17 +60,27 @@ public class QueryResolver
     public Query getQueryImplementation(String jpaQuery, PersistenceDelegator persistenceDelegator)
     {
         kunderaQuery = new KunderaQuery();
-        String mappedQuery = KunderaMetadata.INSTANCE.getApplicationMetadata().getQuery(jpaQuery);
-        
-        KunderaQueryParser parser = new KunderaQueryParser(kunderaQuery, mappedQuery != null? mappedQuery: jpaQuery);
-        
-        parser.parse();
-        
-        kunderaQuery.postParsingInit();
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        String mappedQuery = appMetadata.getQuery(jpaQuery);
+        boolean isNative = appMetadata.isNative(jpaQuery);
+        String pu = null;
+        // In case of named native query
+        if (!isNative)
+        {
+            KunderaQueryParser parser = new KunderaQueryParser(kunderaQuery, mappedQuery != null ? mappedQuery
+                    : jpaQuery);
 
+            parser.parse();
 
-        String pu = kunderaQuery.getPersistenceUnit();
-
+            kunderaQuery.postParsingInit();
+            pu = kunderaQuery.getPersistenceUnit();
+        } else
+        {
+            Class mappedClass = appMetadata.getMappedClass(jpaQuery);
+            
+            pu = appMetadata.getMappedPersistenceUnit(mappedClass).get(0);
+        }
+        
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
         String kunderaClientName = (String) puMetadata.getProperties().get(PersistenceProperties.KUNDERA_CLIENT);
         ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());
@@ -147,8 +158,9 @@ public class QueryResolver
      * @throws InvocationTargetException
      *             the invocation target exception
      */
-    public Query getQuery(ClientType clientType, String jpaQuery, PersistenceDelegator persistenceDelegator) throws ClassNotFoundException, SecurityException, NoSuchMethodException,
-            IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException
+    public Query getQuery(ClientType clientType, String jpaQuery, PersistenceDelegator persistenceDelegator)
+            throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException,
+            InstantiationException, IllegalAccessException, InvocationTargetException
     {
         Query query;
         Class clazz = null;

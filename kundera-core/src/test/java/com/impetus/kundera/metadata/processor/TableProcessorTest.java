@@ -63,9 +63,9 @@ public class TableProcessorTest
         final String native_query1 = "Select native1 from TestEntity native1 where native1.field = :field";
         final String native_query2 = "Select native2 from TestEntity native2 where native2.field = :field";
         
-        EntityMetadata metadata = new EntityMetadata(TestEntity.class);
+        EntityMetadata metadata = new EntityMetadata(EntitySample.class);
         TableProcessor tableProcessor = new TableProcessor();
-        tableProcessor.process(TestEntity.class, metadata);
+        tableProcessor.process(EntitySample.class, metadata);
         
         //Get application metadata
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();

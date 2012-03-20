@@ -34,6 +34,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.Cache;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 
 /**
  * The Class EntityManagerImpl.
@@ -248,7 +250,7 @@ public class EntityManagerImpl implements EntityManager
     @Override
     public final Query createNativeQuery(String sqlString)
     {
-        throw new NotImplementedException("TODO");
+        throw new NotImplementedException("Please use createNativeQuery(String sqlString, Class resultClass) instead. ");
     }
 
     /*
@@ -260,7 +262,16 @@ public class EntityManagerImpl implements EntityManager
     @Override
     public final Query createNativeQuery(String sqlString, Class resultClass)
     {
-        throw new NotImplementedException("TODO");
+        // Add to meta data first.
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        
+        if(appMetadata.getQuery(sqlString) == null)
+        {
+            appMetadata.addQueryToCollection(sqlString, sqlString, true, resultClass);
+        }
+        
+        return persistenceDelegator.createQuery(sqlString);
+        
     }
 
     /*
