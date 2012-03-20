@@ -18,10 +18,11 @@ package com.impetus.kundera.lifecycle;
 import com.impetus.kundera.lifecycle.states.EntityState;
 
 /**
+ * State context of a given entity
  * @author amresh
  * 
  */
-public interface EntityStateManager
+public interface EntityStateContext
 {
     EntityState getCurrentEntityState();
 

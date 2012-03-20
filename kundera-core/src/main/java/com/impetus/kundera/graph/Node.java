@@ -18,11 +18,13 @@ package com.impetus.kundera.graph;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.impetus.kundera.lifecycle.EntityStateContextImpl;
+
 /**
  * Represents a node in object graph 
  * @author amresh.singh
  */
-public class Node
+public class Node extends EntityStateContextImpl
 {
     //ID of a node into object graph
     private String nodeId;
@@ -31,13 +33,16 @@ public class Node
     private Object data;
     
     //Class of actual node data
-    private Class dataClass;    
+    private Class<?> dataClass;    
     
     //All parents of this node, Key is Node Link info and value is node itself
     private Map<NodeLink, Node> parents;
     
     //All children of this node, Key is Node Link info and value is node itself
     private Map<NodeLink, Node> children;
+    
+    //Whether this node has been traversed
+    private boolean traversed;
     
     public Node() {
         
@@ -161,13 +166,27 @@ public class Node
             children = new HashMap<NodeLink, Node>();
         }
         children.put(nodeLink, node);
-    }
+    }   
     
+    /**
+     * @return the traversed
+     */
+    public boolean isTraversed()
+    {
+        return traversed;
+    }
+
+    /**
+     * @param traversed the traversed to set
+     */
+    public void setTraversed(boolean traversed)
+    {
+        this.traversed = traversed;
+    }
+
     @Override
     public String toString() {
         return "[" + nodeId + "," + data.getClass().getSimpleName() + "]";
-    }
-    
-    
+    }   
 
 }

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
-import com.impetus.kundera.lifecycle.EntityStateManagerImpl;
+import com.impetus.kundera.lifecycle.EntityStateContextImpl;
 
 /**
  * @author amresh
@@ -24,19 +24,19 @@ import com.impetus.kundera.lifecycle.EntityStateManagerImpl;
 public class ManagedState extends EntityState
 {
     @Override
-    public void initialize(EntityStateManagerImpl context)
+    public void initialize(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handlePersist(EntityStateManagerImpl context)
+    public void handlePersist(EntityStateContextImpl context)
     {
         //Ignored, entity remains in the same state
         //TODO: Cascade persist operation for related entities for whom cascade=ALL or PERSIST
     }   
 
     @Override
-    public void handleRemove(EntityStateManagerImpl context)
+    public void handleRemove(EntityStateContextImpl context)
     {
         context.setCurrentEntityState(new RemovedState());
         //TODO: Mark entity for removal in persistence context
@@ -44,37 +44,37 @@ public class ManagedState extends EntityState
     }
 
     @Override
-    public void handleRefresh(EntityStateManagerImpl context)
+    public void handleRefresh(EntityStateContextImpl context)
     {
         //TODO: Refresh entity state from the database
         //TODO: Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
     }
 
     @Override
-    public void handleMerge(EntityStateManagerImpl context)
+    public void handleMerge(EntityStateContextImpl context)
     {
       //Ignored, entity remains in the same state
       //TODO: Cascade manage operation for all related entities for whom cascade=ALL or MERGE
     }
     
     @Override
-    public void handleFind(EntityStateManagerImpl context)
+    public void handleFind(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handleClose(EntityStateManagerImpl context)
+    public void handleClose(EntityStateContextImpl context)
     {
         context.setCurrentEntityState(new DetachedState());
     }
 
     @Override
-    public void handleClear(EntityStateManagerImpl context)
+    public void handleClear(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handleFlush(EntityStateManagerImpl context)
+    public void handleFlush(EntityStateContextImpl context)
     {        
         //TODO: Check for flush mode, if commit do nothing (state will be updated at commit)
         //else if AUTO, synchronize with DB
@@ -87,23 +87,23 @@ public class ManagedState extends EntityState
     }
 
     @Override
-    public void handleLock(EntityStateManagerImpl context)
+    public void handleLock(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handleDetach(EntityStateManagerImpl context)
+    public void handleDetach(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handleCommit(EntityStateManagerImpl context)
+    public void handleCommit(EntityStateContextImpl context)
     {
         context.setCurrentEntityState(new DetachedState());
     }
 
     @Override
-    public void handleRollback(EntityStateManagerImpl context)
+    public void handleRollback(EntityStateContextImpl context)
     {
         //If persistence context is EXTENDED
         context.setCurrentEntityState(new TransientState());
@@ -113,12 +113,12 @@ public class ManagedState extends EntityState
     }
 
     @Override
-    public void handleGetReference(EntityStateManagerImpl context)
+    public void handleGetReference(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handleContains(EntityStateManagerImpl context)
+    public void handleContains(EntityStateContextImpl context)
     {
     }   
     

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
-import com.impetus.kundera.lifecycle.EntityStateManagerImpl;
+import com.impetus.kundera.lifecycle.EntityStateContextImpl;
 
 /**
  * @author amresh
@@ -24,30 +24,30 @@ import com.impetus.kundera.lifecycle.EntityStateManagerImpl;
 public class DetachedState extends EntityState
 {
     @Override
-    public void initialize(EntityStateManagerImpl context)
+    public void initialize(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handlePersist(EntityStateManagerImpl context)
+    public void handlePersist(EntityStateContextImpl context)
     {
         throw new IllegalArgumentException("Persist operation not allowed in Detached state");
     }   
 
     @Override
-    public void handleRemove(EntityStateManagerImpl context)
+    public void handleRemove(EntityStateContextImpl context)
     {
         throw new IllegalArgumentException("Remove operation not allowed in Detached state");
     }
 
     @Override
-    public void handleRefresh(EntityStateManagerImpl context)
+    public void handleRefresh(EntityStateContextImpl context)
     {
         throw new IllegalArgumentException("Refresh operation not allowed in Detached state");
     }
 
     @Override
-    public void handleMerge(EntityStateManagerImpl context)
+    public void handleMerge(EntityStateContextImpl context)
     {
         context.setCurrentEntityState(new ManagedState());
         //TODO: Copy detached entity's current state to existing managed instance of the 
@@ -56,52 +56,52 @@ public class DetachedState extends EntityState
     }
     
     @Override
-    public void handleFind(EntityStateManagerImpl context)
+    public void handleFind(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handleClose(EntityStateManagerImpl context)
+    public void handleClose(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handleClear(EntityStateManagerImpl context)
+    public void handleClear(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handleFlush(EntityStateManagerImpl context)
+    public void handleFlush(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handleLock(EntityStateManagerImpl context)
+    public void handleLock(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handleDetach(EntityStateManagerImpl context)
+    public void handleDetach(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handleCommit(EntityStateManagerImpl context)
+    public void handleCommit(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handleRollback(EntityStateManagerImpl context)
+    public void handleRollback(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handleGetReference(EntityStateManagerImpl context)
+    public void handleGetReference(EntityStateContextImpl context)
     {
     }
 
     @Override
-    public void handleContains(EntityStateManagerImpl context)
+    public void handleContains(EntityStateContextImpl context)
     {
     } 
     

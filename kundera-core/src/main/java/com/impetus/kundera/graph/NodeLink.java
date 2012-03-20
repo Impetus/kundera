@@ -18,8 +18,10 @@ package com.impetus.kundera.graph;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.impetus.kundera.metadata.model.Relation;
+
 /**
- * Holds link metadata for a unidirectional directed link from source node to target node. 
+ * Holds link meta data for a unidirectional directed link from source node to target node. 
  * @author amresh.singh
  */
 public class NodeLink
@@ -40,6 +42,8 @@ public class NodeLink
     private String sourceNodeId;
     private String targetNodeId;
     
+    //Multiplicity of relationship
+    private Relation.ForeignKey multiplicity;    
  
     //Contains all properties for this link
     private Map<LinkProperty, Object> linkProperties;
@@ -84,8 +88,23 @@ public class NodeLink
     public void setTargetNodeId(String targetNodeId)
     {
         this.targetNodeId = targetNodeId;
-    }  
-    
+    }     
+
+    /**
+     * @return the multiplicity
+     */
+    public Relation.ForeignKey getMultiplicity()
+    {
+        return multiplicity;
+    }
+
+    /**
+     * @param multiplicity the multiplicity to set
+     */
+    public void setMultiplicity(Relation.ForeignKey multiplicity)
+    {
+        this.multiplicity = multiplicity;
+    }
 
     /**
      * @return the linkProperties
@@ -151,7 +170,7 @@ public class NodeLink
     
     @Override
     public String toString() {
-        return sourceNodeId + "--->" + targetNodeId;
+        return sourceNodeId + "---(" + multiplicity + ")--->" + targetNodeId;
     }
     
 

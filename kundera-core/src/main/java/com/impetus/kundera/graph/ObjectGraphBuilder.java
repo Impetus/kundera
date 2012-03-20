@@ -19,8 +19,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import sun.security.action.GetLongAction;
-
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -34,7 +32,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 public class ObjectGraphBuilder
 {
-    public static ObjectGraph getObjectGraph(Object entity) {        
+    public ObjectGraph getObjectGraph(Object entity) {        
         //Initialize object graph
         ObjectGraph objectGraph = new ObjectGraph();   
         
@@ -55,7 +53,7 @@ public class ObjectGraphBuilder
      * @param entity
      * @return
      */
-    private static Node getNode(Object entity, ObjectGraph graph)
+    private Node getNode(Object entity, ObjectGraph graph)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);        
@@ -72,33 +70,50 @@ public class ObjectGraphBuilder
             
             //This child object could be either an entity(1-1 or M-1) or a collection of entities(1-M or M-M)
             if(Collection.class.isAssignableFrom(childObject.getClass())) {
-                //For each entity in the collection, construct a child node
+                //For each entity in the collection, construct a child node and add to graph
+                Collection childrenObjects = (Collection) childObject;
                 
+                for(Object childObj : childrenObjects) {
+                    addChildNodesToGraph(graph, node, relation, childObj);
+                }                
                 
                 
             } else {
-                //Construct child node for this child object via recursive call
-                Node childNode = getNode(childObject, graph);      
-                                
-                //Construct Node Link for this relationship
-                NodeLink nodeLink = new NodeLink(nodeId, childNode.getNodeId());
-                nodeLink.setLinkProperties(getLinkProperties(relation));
-                
-                //Add Parent node to this child
-                childNode.addParentNode(nodeLink, node);
-                
-                //Add child node to this node
-                node.addChildNode(nodeLink, childNode);
+                //Construct child node and add to graph
+                addChildNodesToGraph(graph, node, relation, childObject);
             }
             
-        }
-        
+        }        
         //Finally put this node into object graph
         graph.addNode(nodeId, node);
         return node;
     }
+
+
+    /**
+     * @param graph
+     * @param node
+     * @param relation
+     * @param childObject
+     */
+    private void addChildNodesToGraph(ObjectGraph graph, Node node, Relation relation, Object childObject)
+    {
+        //Construct child node for this child object via recursive call
+        Node childNode = getNode(childObject, graph);      
+                        
+        //Construct Node Link for this relationship
+        NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
+        nodeLink.setMultiplicity(relation.getType());
+        nodeLink.setLinkProperties(getLinkProperties(relation));
+        
+        //Add Parent node to this child
+        childNode.addParentNode(nodeLink, node);
+        
+        //Add child node to this node
+        node.addChildNode(nodeLink, childNode);
+    }
     
-    private static Map<LinkProperty, Object> getLinkProperties(Relation relation) {
+    private Map<LinkProperty, Object> getLinkProperties(Relation relation) {
         Map<LinkProperty, Object> linkProperties = new HashMap<NodeLink.LinkProperty, Object>();
         
         linkProperties.put(LinkProperty.JOIN_COLUMN_NAME, relation.getJoinColumnName());

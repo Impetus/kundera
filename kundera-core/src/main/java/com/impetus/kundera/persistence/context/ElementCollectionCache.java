@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.graph;
+package com.impetus.kundera.persistence.context;
 
 /**
- * Dummy person class 
+ * <Prove description of functionality provided by this Type> 
  * @author amresh.singh
  */
-public class Person
+public class ElementCollectionCache extends CacheBase
 {
 
 }

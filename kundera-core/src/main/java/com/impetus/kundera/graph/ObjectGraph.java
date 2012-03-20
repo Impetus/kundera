@@ -44,6 +44,15 @@ public class ObjectGraph
     public void addNode(String nodeId, Node node) {        
         nodeMapping.put(nodeId, node);        
     }
+    
+    /**
+     * Returns Node for a given node ID
+     * @param nodeId
+     * @return
+     */
+    public Node getNode(String nodeId) {
+        return nodeMapping.get(nodeId);
+    }
 
     /**
      * @return the headNode
@@ -59,6 +68,16 @@ public class ObjectGraph
     public void setHeadNode(Node headNode)
     {
         this.headNode = headNode;
-    }   
+    }
+
+    /**
+     * @return the nodeMapping
+     */
+    public Map<String, Node> getNodeMapping()
+    {
+        return nodeMapping;
+    } 
+    
+    
     
 }

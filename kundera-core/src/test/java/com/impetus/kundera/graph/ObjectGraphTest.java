@@ -54,43 +54,43 @@ public class ObjectGraphTest
     @Test
     public void testOneParentAndThreeChildNodes()
     {
-        Person person = new Person();
-        Address a1 = new Address();
-        Address a2 = new Address();
-        Address a3 = new Address();
+        Store store = new Store();
+        BillingCounter b1 = new BillingCounter();
+        BillingCounter b2 = new BillingCounter();
+        BillingCounter b3 = new BillingCounter();
         
-        String personId = ObjectGraphBuilder.getNodeId("1", person);
-        String a1Id = ObjectGraphBuilder.getNodeId("A1", a1);
-        String a2Id = ObjectGraphBuilder.getNodeId("A2", a2);
-        String a3Id = ObjectGraphBuilder.getNodeId("A3", a3);
+        String storeId = ObjectGraphBuilder.getNodeId("1", store);
+        String b1Id = ObjectGraphBuilder.getNodeId("A1", b1);
+        String b2Id = ObjectGraphBuilder.getNodeId("A2", b2);
+        String b3Id = ObjectGraphBuilder.getNodeId("A3", b3);
         
-        Node headNode = new Node(personId, person);       
+        Node headNode = new Node(storeId, store);       
         
-        Node child1 = new Node(a1Id, a1);
-        Node child2 = new Node(a2Id, a2);
-        Node child3 = new Node(a3Id, a3);
+        Node child1 = new Node(b1Id, b1);
+        Node child2 = new Node(b2Id, b2);
+        Node child3 = new Node(b3Id, b3);
         
-        NodeLink linkA1 = new NodeLink(personId, a1Id);
-        NodeLink linkA2 = new NodeLink(personId, a2Id);
-        NodeLink linkA3 = new NodeLink(personId, a3Id);
+        NodeLink linkB1 = new NodeLink(storeId, b1Id);
+        NodeLink linkB2 = new NodeLink(storeId, b2Id);
+        NodeLink linkB3 = new NodeLink(storeId, b3Id);
         
-        linkA1.addLinkProperty(LinkProperty.JOIN_COLUMN_NAME, "PERSON_ID");
-        linkA2.addLinkProperty(LinkProperty.JOIN_COLUMN_NAME, "PERSON_ID");
-        linkA3.addLinkProperty(LinkProperty.JOIN_COLUMN_NAME, "PERSON_ID");
+        linkB1.addLinkProperty(LinkProperty.JOIN_COLUMN_NAME, "STORE_ID");
+        linkB2.addLinkProperty(LinkProperty.JOIN_COLUMN_NAME, "STORE_ID");
+        linkB3.addLinkProperty(LinkProperty.JOIN_COLUMN_NAME, "STORE_ID");
         
-        headNode.addChildNode(linkA1, child1);
-        headNode.addChildNode(linkA2, child2);
-        headNode.addChildNode(linkA3, child3);
+        headNode.addChildNode(linkB1, child1);
+        headNode.addChildNode(linkB2, child2);
+        headNode.addChildNode(linkB3, child3);
         
-        child1.addParentNode(linkA1, headNode);
-        child2.addParentNode(linkA2, headNode);
-        child3.addParentNode(linkA3, headNode);
+        child1.addParentNode(linkB1, headNode);
+        child2.addParentNode(linkB2, headNode);
+        child3.addParentNode(linkB3, headNode);
         
-        assertEquals(personId, headNode.getNodeId());
+        assertEquals(storeId, headNode.getNodeId());
         assertNull(headNode.getParents());
         assertEquals(3, headNode.getChildren().size());
         
-        assertEquals(a1Id, child1.getNodeId());
+        assertEquals(b1Id, child1.getNodeId());
         assertNull(child1.getChildren());
         assertNotNull(child1.getParents());
         assertEquals(1, child1.getParents().size());

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
-import com.impetus.kundera.lifecycle.EntityStateManagerImpl;
+import com.impetus.kundera.lifecycle.EntityStateContextImpl;
 
 /**
  * @author amresh
@@ -23,28 +23,28 @@ import com.impetus.kundera.lifecycle.EntityStateManagerImpl;
  */
 public abstract class EntityState
 {
-    public abstract void initialize(EntityStateManagerImpl context);
+    public abstract void initialize(EntityStateContextImpl context);
     
     //Life cycle Management
-    public abstract void handlePersist(EntityStateManagerImpl context);    
-    public abstract void handleRemove(EntityStateManagerImpl context);
-    public abstract void handleRefresh(EntityStateManagerImpl context);    
-    public abstract void handleMerge(EntityStateManagerImpl context);    
-    public abstract void handleDetach(EntityStateManagerImpl context);
+    public abstract void handlePersist(EntityStateContextImpl context);    
+    public abstract void handleRemove(EntityStateContextImpl context);
+    public abstract void handleRefresh(EntityStateContextImpl context);    
+    public abstract void handleMerge(EntityStateContextImpl context);    
+    public abstract void handleDetach(EntityStateContextImpl context);
     
-    public abstract void handleClose(EntityStateManagerImpl context);    
-    public abstract void handleLock(EntityStateManagerImpl context);    
+    public abstract void handleClose(EntityStateContextImpl context);    
+    public abstract void handleLock(EntityStateContextImpl context);    
     
-    public abstract void handleCommit(EntityStateManagerImpl context);
-    public abstract void handleRollback(EntityStateManagerImpl context);
+    public abstract void handleCommit(EntityStateContextImpl context);
+    public abstract void handleRollback(EntityStateContextImpl context);
     
     //Identity Management
-    public abstract void handleFind(EntityStateManagerImpl context);
-    public abstract void handleGetReference(EntityStateManagerImpl context);
-    public abstract void handleContains(EntityStateManagerImpl context);
+    public abstract void handleFind(EntityStateContextImpl context);
+    public abstract void handleGetReference(EntityStateContextImpl context);
+    public abstract void handleContains(EntityStateContextImpl context);
     
     //Cache Management
-    public abstract void handleClear(EntityStateManagerImpl context);
-    public abstract void handleFlush(EntityStateManagerImpl context);
+    public abstract void handleClear(EntityStateContextImpl context);
+    public abstract void handleFlush(EntityStateContextImpl context);
     
 }
