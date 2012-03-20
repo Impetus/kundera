@@ -683,7 +683,6 @@ public class PersistenceDelegator
     {
         Query query = new QueryResolver().getQueryImplementation(jpaQuery, this);
         return query;
-
     }
 
     /**

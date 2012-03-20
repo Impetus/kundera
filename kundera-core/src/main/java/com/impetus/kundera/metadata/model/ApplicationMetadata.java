@@ -52,7 +52,7 @@ public class ApplicationMetadata
      */
     private Map<String, List<String>> clazzToPuMap;
 
-    private Map<String, String> namedNativeQueries;
+    private Map<String, QueryWrapper> namedNativeQueries;
 
     /**
      * Adds the entity metadata.
@@ -169,7 +169,7 @@ public class ApplicationMetadata
      */
     public List<String> getMappedPersistenceUnit(Class<?> clazz)
     {
-        return this.clazzToPuMap.get(clazz.getName());
+        return this.clazzToPuMap != null? this.clazzToPuMap.get(clazz.getName()):null;
     }
 
     /**
@@ -225,19 +225,22 @@ public class ApplicationMetadata
      *            query name.
      * @param query
      *            named/native query.
+     * @param isNativeQuery
+     *            true, if it is a namednativequery.           
      * 
      */
-    public void addQueryToCollection(String queryName, String query)
+    public void addQueryToCollection(String queryName, String query, boolean isNativeQuery, Class clazz)
     {
         if (namedNativeQueries == null)
         {
-            namedNativeQueries = new HashMap<String, String>();
+            namedNativeQueries = new HashMap<String, QueryWrapper>();
         }
         if (!namedNativeQueries.containsKey(queryName))
         {
-            namedNativeQueries.put(queryName, query);
+            namedNativeQueries.put(queryName, new QueryWrapper(queryName, query, isNativeQuery, clazz));
         }
-        else if(!namedNativeQueries.get(queryName).equals(query))
+        //No null check made as it will never hold null value 
+        else if(!getQuery(queryName).equals(query))
         {
             logger.error("Duplicate named/native query with name:" + queryName
                     + "found! Already there is a query with same name:" + namedNativeQueries.get(queryName));
@@ -255,9 +258,26 @@ public class ApplicationMetadata
      */
     public String getQuery(String name)
     {
-        return namedNativeQueries.get(name);
+        QueryWrapper wrapper= namedNativeQueries != null?namedNativeQueries.get(name):null;
+        return wrapper != null? wrapper.getQuery():null;
     }
 
+    /**
+     * Returns true, if query is named native or native, else false
+     * @param name mapped name.
+     * @return boolean value
+     */
+    public boolean isNative(String name)
+    {
+        QueryWrapper wrapper= namedNativeQueries.get(name);
+        return wrapper != null? wrapper.isNativeQuery():false;
+    }
+    
+    public Class getMappedClass(String name)
+    {
+        QueryWrapper wrapper= namedNativeQueries.get(name);
+        return wrapper != null ? wrapper.getMappedClazz():null;
+    }
     /**
      * Handler error and log statements.
      * 
@@ -269,5 +289,46 @@ public class ApplicationMetadata
         logger.error("Duplicate name:" + clazzName + "Please provide entity with complete package name.");
         throw new ApplicationLoaderException("Duplicate name:" + clazzName
                 + "Please provide entity with complete package name");
+    }
+    
+
+    private class QueryWrapper
+    {
+        String queryName;
+        String query;
+        boolean isNativeQuery;
+        Class entityClazz;
+        /**
+         * @param queryName
+         * @param query
+         * @param isNativeQuery
+         */
+        public QueryWrapper(String queryName, String query, boolean isNativeQuery, Class clazz)
+        {
+            this.queryName = queryName;
+            this.query = query;
+            this.isNativeQuery = isNativeQuery;
+            this.entityClazz = clazz;
+        }
+       
+        /**
+         * @return the query
+         */
+        String getQuery()
+        {
+            return query;
+        }
+        /**
+         * @return the isNativeQuery
+         */
+        boolean isNativeQuery()
+        {
+            return isNativeQuery;
+        }
+        
+        Class getMappedClazz()
+        {
+            return entityClazz;
+        }
     }
 }
