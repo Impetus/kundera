@@ -88,7 +88,7 @@ public class NodeLink
     public void setTargetNodeId(String targetNodeId)
     {
         this.targetNodeId = targetNodeId;
-    }     
+    }      
 
     /**
      * @return the multiplicity

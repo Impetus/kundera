@@ -15,6 +15,7 @@
  */
 package com.impetus.kundera.persistence.context;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,28 +55,68 @@ public class FlushStackManager
         
         Map<NodeLink, Node> children = node.getChildren();        
         
+        Map<NodeLink, Node> oneToOneChildren = new HashMap<NodeLink, Node>();
+        Map<NodeLink, Node> oneToManyChildren = new HashMap<NodeLink, Node>();
+        Map<NodeLink, Node> manyToOneChildren = new HashMap<NodeLink, Node>();
+        Map<NodeLink, Node> manyToManyChildren = new HashMap<NodeLink, Node>();
+        
+        
         for(NodeLink nodeLink : children.keySet()) {
             Relation.ForeignKey multiplicity = nodeLink.getMultiplicity();
             
-            switch(multiplicity) {
-                case ONE_TO_ONE:
-                    node.setTraversed(true);
-                    flushStack.push(node);
-                    addNodesToFlushStack(pc, nodeMappings.get(nodeLink.getTargetNodeId()));
-                    
-                case ONE_TO_MANY:
-                    
-                case MANY_TO_ONE:
-                    
-                case MANY_TO_MANY:
-                    
-                default:
-                    
+            switch (multiplicity)
+            {
+            case ONE_TO_ONE:
+                oneToOneChildren.put(nodeLink, children.get(nodeLink));
+            case ONE_TO_MANY:
+                oneToManyChildren.put(nodeLink, children.get(nodeLink));
+            case MANY_TO_ONE:
+                manyToOneChildren.put(nodeLink, children.get(nodeLink));
+            case MANY_TO_MANY: 
+                manyToManyChildren.put(nodeLink, children.get(nodeLink));
             }
+            
+        }
+        
+        //Process One-To-Many children
+        for (NodeLink nodeLink : oneToManyChildren.keySet())
+        {
+            //Process child node Graph recursively first
+            Node childNode = nodeMappings.get(nodeLink.getTargetNodeId());
+            addNodesToFlushStack(pc, childNode);
             
             
         }
         
+        //Process Many-To-Many children
+        for (NodeLink nodeLink : manyToManyChildren.keySet())
+        {
+            
+        }
+        //Process One-To-One children
+        for (NodeLink nodeLink : oneToOneChildren.keySet())
+        {
+            //Push this node to stack
+            node.setTraversed(true);
+            flushStack.push(node);
+            
+            //Process child node Graph recursively
+            Node childNode = nodeMappings.get(nodeLink.getTargetNodeId());
+            addNodesToFlushStack(pc, childNode);
+        }       
+        
+        //Process Many-To-One children
+        for (NodeLink nodeLink : manyToOneChildren.keySet())
+        {
+            
+        }
+        
+        //Finally, if this node itself is not traversed yet, (as may happen in 1-1 and M-1 
+        //cases), push it to stack
+        if(!node.isTraversed()) {
+            node.setTraversed(true);
+            flushStack.push(node);
+        }
         
     }
 }
