@@ -186,7 +186,7 @@ public class Node extends EntityStateContextImpl
 
     @Override
     public String toString() {
-        return "[" + nodeId + "," + data.getClass().getSimpleName() + "]";
+        return "[" + nodeId +  "]";
     }   
 
 }

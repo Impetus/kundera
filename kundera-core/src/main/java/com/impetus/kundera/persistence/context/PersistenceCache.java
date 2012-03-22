@@ -37,7 +37,17 @@ public class PersistenceCache
     
     FlushStackManager flushStackManager;
     
-    public void initialize() {
+    /**
+     * Stack containing Nodes to be flushed
+     * Entities are always flushed from the top, there way to bottom until stack is empty 
+     */
+    private FlushStack flushStack;   
+    
+    public PersistenceCache() {
+        initialize();
+    }
+    
+    private void initialize() {
         mainCache = new MainCache();
         embeddedCache = new EmbeddedCache();
         elementCollectionCache = new ElementCollectionCache();
@@ -46,15 +56,7 @@ public class PersistenceCache
         flushStack = new FlushStack();
         
         flushStackManager = new FlushStackManager();
-    }
-    
-    
-    /**
-     * Stack containing Nodes to be flushed
-     * Entities are always flushed from the top, there way to bottom until stack is empty 
-     */
-    private FlushStack flushStack;    
-    
+    }    
     
     /**
      * @return the mainCache
@@ -62,7 +64,7 @@ public class PersistenceCache
     public CacheBase getMainCache()
     {
         return mainCache;
-    }
+    } 
 
 
 
@@ -152,16 +154,6 @@ public class PersistenceCache
     public void setFlushStack(FlushStack flushStack)
     {
         this.flushStack = flushStack;
-    }
-
-
-
-    /**
-     * Builds flush stack 
-     */
-    public void buildFlushStack() {
-        flushStackManager.buildFlushStack(this);
-    }
-    
+    }    
 
 }

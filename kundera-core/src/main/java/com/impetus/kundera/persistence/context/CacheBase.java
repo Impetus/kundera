@@ -15,10 +15,13 @@
  */
 package com.impetus.kundera.persistence.context;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.ObjectGraph;
 
 /**
  * Base class for all cache required in persistence context 
@@ -26,15 +29,25 @@ import com.impetus.kundera.graph.Node;
  */
 public class CacheBase
 {
-    private Map<String, Node> nodeMappings;
-    
+    private Map<String, Node> nodeMappings;    
     private List<Node> headNodes;
+    
+    public CacheBase() {
+        headNodes = new ArrayList<Node>();
+        nodeMappings = new HashMap<String, Node>();
+    }
+    
+    public void addGraphToCache(ObjectGraph graph) {
+        getNodeMappings().putAll(graph.getNodeMapping());
+        getHeadNodes().add(graph.getHeadNode());
+    }
+    
 
     /**
      * @return the nodeMappings
      */
     public Map<String, Node> getNodeMappings()
-    {
+    {        
         return nodeMappings;
     }
 
@@ -54,12 +67,10 @@ public class CacheBase
         return headNodes;
     }
 
-    /**
-     * @param headNodes the headNodes to set
-     */
-    public void setHeadNodes(List<Node> headNodes)
-    {
-        this.headNodes = headNodes;
+    
+    public void addHeadNode(Node headNode)
+    {        
+        headNodes.add(headNode);
     }    
     
 }

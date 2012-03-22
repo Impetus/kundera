@@ -131,7 +131,7 @@ public class ObjectGraphBuilder
     
     
     public static String getNodeId(Object pk, Object nodeData) {
-        return nodeData.getClass().getName() + "_" + (String)pk;
+        return nodeData.getClass().getName() + "***" + (String)pk;
     }
     
 }
