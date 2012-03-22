@@ -93,9 +93,11 @@ public class NativeQueryTest
 
             EntityManager em = new EntityManagerImpl(emf);
             Query q = em.createNativeQuery(nativeSql, CassandraEntitySample.class);
-            q.getResultList();
+//            q.getResultList();
+            q.executeUpdate();
             q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
-            q.getResultList();
+//            q.getResultList();
+            q.executeUpdate();
             Assert.assertTrue(CassandraCli.keyspaceExist(schema));
             Assert.assertFalse(CassandraCli.keyspaceExist("invalidSchema"));
     }
@@ -112,23 +114,24 @@ public class NativeQueryTest
         // create column family
         String colFamilySql = "CREATE COLUMNFAMILY users (key varchar PRIMARY KEY,full_name varchar, birth_date int,state varchar)";
         Query q = em.createNativeQuery(colFamilySql, CassandraEntitySample.class);
-        q.getResultList();
+//        q.getResultList();
+        q.executeUpdate();
         Assert.assertTrue(CassandraCli.columnFamilyExist("users", "KunderaExamples"));
         
         //Add indexes
         String idxSql = "CREATE INDEX ON users (birth_date)";
         q = em.createNativeQuery(idxSql, CassandraEntitySample.class);
-        q.getResultList();
-
+//        q.getResultList();
+        q.executeUpdate();
         idxSql = "CREATE INDEX ON users (state)";
         q = em.createNativeQuery(idxSql, CassandraEntitySample.class);
-        q.getResultList();
-
+//        q.getResultList();
+        q.executeUpdate();
         // insert users.
         String insertSql = "INSERT INTO users (key, full_name, birth_date, state) VALUES ('bsanderson', 'Brandon Sanderson', 1975, 'UT')";
         q = em.createNativeQuery(insertSql, CassandraEntitySample.class);
-        q.getResultList();
-        
+//        q.getResultList();
+        q.executeUpdate();
         //select key and state 
         String selectSql = "SELECT key, state FROM users";
 

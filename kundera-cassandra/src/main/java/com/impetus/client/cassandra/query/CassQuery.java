@@ -123,6 +123,25 @@ public class CassQuery extends QueryImpl implements Query
     }
 
     /**
+     * On executeUpdate.
+     * @return zero
+     */
+    @Override
+    protected int onExecuteUpdate()
+    {
+        
+      EntityMetadata m = getEntityMetadata();
+      if(KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(getJPAQuery()))
+      {
+          ((PelopsClient) persistenceDelegeator.getClient(m)).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
+      } else
+      {
+          throw new QueryHandlerException("executeUpdate() is currently supported for native queries only");
+      }
+      
+      return 0;
+    }
+    /**
      * Prepare index clause.
      * 
      * @param m

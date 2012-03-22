@@ -18,7 +18,6 @@ package com.impetus.kundera.query;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
@@ -167,5 +166,14 @@ public class LuceneQuery extends QueryImpl implements Query
     protected EntityReader getReader()
     {
         throw new UnsupportedOperationException("Method not supported for default indexing");
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.query.QueryImpl#onExecuteUpdate()
+     */
+    @Override
+    protected int onExecuteUpdate()
+    {
+        throw new UnsupportedOperationException("executeUpdate not supported for HBase");
     }
 }

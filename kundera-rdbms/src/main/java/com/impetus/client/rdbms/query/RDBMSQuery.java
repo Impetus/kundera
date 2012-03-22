@@ -167,4 +167,14 @@ public class RDBMSQuery extends QueryImpl implements Query
         return reader;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.query.QueryImpl#onExecuteUpdate()
+     */
+    @Override
+    protected int onExecuteUpdate()
+    {
+        throw new UnsupportedOperationException("executeUpdate not supported for RDBMS");
+
+    }
+
 }

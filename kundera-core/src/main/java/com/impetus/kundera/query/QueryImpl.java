@@ -127,7 +127,7 @@ public abstract class QueryImpl implements Query
     @Override
     public int executeUpdate()
     {
-        throw new NotImplementedException("TODO");
+        return onExecuteUpdate();
     }
 
     /* @see javax.persistence.Query#getResultList() */
@@ -933,12 +933,14 @@ public abstract class QueryImpl implements Query
      * @return entityReader entity reader.
      */
     protected abstract EntityReader getReader();
+    
+    protected abstract int onExecuteUpdate();
 
     /**
      * Returns entity metadata, in case of native query mapped class is present within application metadata.
      * @return entityMetadata entity metadata.
      */
-    private EntityMetadata getEntityMetadata()
+    protected EntityMetadata getEntityMetadata()
     {
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         EntityMetadata m=null; 

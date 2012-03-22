@@ -312,4 +312,13 @@ public class MongoDBQuery extends QueryImpl
         }
         return enclosingDocumentName;
     }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.query.QueryImpl#onExecuteUpdate()
+     */
+    @Override
+    protected int onExecuteUpdate()
+    {
+        throw new UnsupportedOperationException("executeUpdate not supported for mongo");
+    }
 }
