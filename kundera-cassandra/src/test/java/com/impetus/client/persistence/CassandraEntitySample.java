@@ -32,20 +32,26 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "table", schema = "testSchema")
+@Table(name = "users", schema = "twissandra@KunderaExamples")
 public class CassandraEntitySample
 {
 
     @Id
-    private Integer key;
+    @Column(name="key")
+    private String key;
+    
+    @Column(name = "full_name")
+    private String full_name;
 
-    @Column(name = "field")
-    private String field;
+    @Column(name = "birth_date")
+    private Integer birth_date;
 
+    @Column(name = "state")
+    private String state;
     /**
      * @return the key
      */
-    public Integer getKey()
+    public String getKey()
     {
         return key;
     }
@@ -54,26 +60,59 @@ public class CassandraEntitySample
      * @param key
      *            the key to set
      */
-    public void setKey(Integer key)
+    public void setKey(String key)
     {
         this.key = key;
     }
 
+
     /**
-     * @return the field
+     * @return the full_name
      */
-    public String getField()
+    public String getFull_name()
     {
-        return field;
+        return full_name;
     }
 
     /**
-     * @param field
-     *            the field to set
+     * @param full_name the full_name to set
      */
-    public void setField(String field)
+    public void setFull_name(String full_name)
     {
-        this.field = field;
+        this.full_name = full_name;
     }
 
+    /**
+     * @return the birth_date
+     */
+    public Integer getBirth_date()
+    {
+        return birth_date;
+    }
+
+    /**
+     * @param birth_date the birth_date to set
+     */
+    public void setBirth_date(int birth_date)
+    {
+        this.birth_date = birth_date;
+    }
+
+    /**
+     * @return the state
+     */
+    public String getState()
+    {
+        return state;
+    }
+
+    /**
+     * @param state the state to set
+     */
+    public void setState(String state)
+    {
+        this.state = state;
+    }
+
+    
 }

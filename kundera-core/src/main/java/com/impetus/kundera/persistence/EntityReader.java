@@ -26,7 +26,9 @@ import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 /**
  * The Interface EntityReader.
  * 
- * @author vivek.mishra Interface to provide declarations for methods
+ * @author vivek.mishra 
+ * 
+ * Interface to provide declarations for methods
  *         responsible for entity read operations.(Except queries).
  */
 public interface EntityReader
@@ -85,4 +87,5 @@ public interface EntityReader
      */
     EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client);
 
+    
 }

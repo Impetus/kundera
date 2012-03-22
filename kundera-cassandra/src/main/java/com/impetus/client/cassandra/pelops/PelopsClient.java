@@ -32,6 +32,8 @@ import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.CqlResult;
+import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.IndexType;
@@ -42,6 +44,9 @@ import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.thrift.TimedOutException;
+import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
@@ -50,7 +55,9 @@ import org.scale7.cassandra.pelops.Mutator;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
+import org.scale7.cassandra.pelops.pool.IThriftPool;
 
+import com.impetus.client.cassandra.pelops.PelopsDataHandler.ThriftRow;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -58,13 +65,13 @@ import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.proxy.EnhancedEntity;
 
 /**
  * Client implementation using Pelops. http://code.google.com/p/pelops/
@@ -106,7 +113,7 @@ public class PelopsClient implements Client
      */
     public PelopsClient(IndexManager indexManager, EntityReader reader, String persistenceUnit)
     {
-    	this.persistenceUnit = persistenceUnit;
+        this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
         this.dataHandler = new PelopsDataHandler(this);
         this.reader = reader;
@@ -120,7 +127,7 @@ public class PelopsClient implements Client
      */
     @Override
     @Deprecated
-    public final <E> E find(Class<E> entityClass, Object rowId, List<String> relationNames) 
+    public final <E> E find(Class<E> entityClass, Object rowId, List<String> relationNames)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         return (E) find(entityClass, entityMetadata, rowId != null ? rowId.toString() : null, relationNames);
@@ -157,7 +164,7 @@ public class PelopsClient implements Client
      * java.lang.String[])
      */
     @Override
-    public final <E> List<E> findAll(Class<E> entityClass, Object... rowIds) 
+    public final <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<E> results = new ArrayList<E>();
@@ -201,7 +208,7 @@ public class PelopsClient implements Client
         }
 
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-//        selector.
+        // selector.
 
         PelopsDataHandler handler = new PelopsDataHandler(this);
 
@@ -225,7 +232,7 @@ public class PelopsClient implements Client
      * java.util.Map)
      */
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> superColumnMap) 
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> superColumnMap)
     {
         List<E> entities = null;
         try
@@ -266,7 +273,7 @@ public class PelopsClient implements Client
      *             the exception
      */
     private final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
-            String... superColumnNames) 
+            String... superColumnNames)
     {
         if (!isOpen())
             throw new PersistenceException("PelopsClient is closed.");
@@ -373,7 +380,7 @@ public class PelopsClient implements Client
 
         }
         catch (Exception e)
-        {            
+        {
             throw new KunderaException(e);
         }
         return null;
@@ -586,8 +593,8 @@ public class PelopsClient implements Client
 
                 PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(parentMetadata.getIdColumn()
                         .getField());
-                Object value = accessor.fromBytes(parentMetadata.getIdColumn()
-                        .getField().getClass(), rowKey.toByteArray());
+                Object value = accessor.fromBytes(parentMetadata.getIdColumn().getField().getClass(),
+                        rowKey.toByteArray());
 
                 rowKeys.add(value);
             }
@@ -808,7 +815,8 @@ public class PelopsClient implements Client
             }
             catch (Exception e)
             {
-                throw new KunderaException(e);            }
+                throw new KunderaException(e);
+            }
         }
     }
 
@@ -1015,4 +1023,75 @@ public class PelopsClient implements Client
         return reader;
     }
 
+    /**
+     * Method to execute cql query and return back entity/enhance entities.
+     * 
+     * @param cqlQuery           cql query to be executed.
+     * @param clazz              entity class. 
+     * @param relationalField    collection for relational fields.
+     * @return                   list of objects.
+     * 
+     */
+    public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField)
+    {
+        IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit()));
+//        thrift.get
+        org.apache.cassandra.thrift.Cassandra.Client thriftClient = thrift.getConnection().getAPI();
+        
+       EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
+       CqlResult result = null;
+       List returnedEntities = null;
+        try
+        {
+            result = thriftClient.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
+                    org.apache.cassandra.thrift.Compression.NONE);
+            if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
+            {
+                returnedEntities = new ArrayList<Object>(result.getRowsSize());
+                Iterator<CqlRow> iter = result.getRowsIterator();
+                while (iter.hasNext())
+                {
+                    CqlRow row = iter.next();
+                    String rowKey = Bytes.toUTF8(row.getKey());
+
+                    ThriftRow thriftRow = dataHandler.new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(), null);
+
+                    Object entity = dataHandler.fromColumnThriftRow(clazz, entityMetadata, thriftRow, relationalField, relationalField !=null && !relationalField.isEmpty());
+                    returnedEntities.add(entity);
+                }
+            }
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            throw new PersistenceException(e);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            throw new PersistenceException(e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            throw new PersistenceException(e);
+        }
+        catch (SchemaDisagreementException e)
+        {
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            throw new PersistenceException(e);
+        }
+        catch (TException e)
+        {
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            throw new PersistenceException(e);
+        }
+        catch (Exception e)
+        {
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            throw new PersistenceException(e);
+        }
+        
+        return returnedEntities;
+    }
 }

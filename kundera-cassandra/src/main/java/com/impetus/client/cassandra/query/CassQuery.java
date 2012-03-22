@@ -36,8 +36,10 @@ import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
@@ -90,25 +92,32 @@ public class CassQuery extends QueryImpl implements Query
     {
         log.debug("on populateEntities cassandra query");
         List<Object> result = null;
-        if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
+        ApplicationMetadata appMetadata =KunderaMetadata.INSTANCE.getApplicationMetadata();
+        if(appMetadata.isNative(getJPAQuery()))
         {
-
-            Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m);
-            boolean isRowKeyQuery = ixClause.keySet().iterator().next();
-            if (!isRowKeyQuery)
+            result = ((PelopsClient) client).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
+        } else
+        {
+            if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
             {
-                result = ((PelopsClient) client).find(ixClause.get(isRowKeyQuery), m, false, null);
+
+                Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m);
+                boolean isRowKeyQuery = ixClause.keySet().iterator().next();
+                if (!isRowKeyQuery)
+                {
+                    result = ((PelopsClient) client).find(ixClause.get(isRowKeyQuery), m, false, null);
+                }
+                else
+                {
+                    result = ((CassandraEntityReader) getReader()).handleFindByRange(m, client, result, ixClause,
+                            isRowKeyQuery);
+                }
             }
             else
             {
-                result = ((CassandraEntityReader) getReader()).handleFindByRange(m, client, result, ixClause,
-                        isRowKeyQuery);
-            }
-        }
-        else
-        {
-            result = populateUsingLucene(m, client, result);
+                result = populateUsingLucene(m, client, result);
 
+            }
         }
         return result;
     }
@@ -191,12 +200,20 @@ public class CassQuery extends QueryImpl implements Query
             List<String> relationNames, boolean isParent)
     {
         log.debug("on handleAssociations cassandra query");
-        Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m);
+        List<EnhanceEntity> ls = null;
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        if (appMetadata.isNative(getJPAQuery()))
+        {
+            ls = (List<EnhanceEntity>) ((PelopsClient) client).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
+        }
+        else
+        {
+            Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m);
 
-        ((CassandraEntityReader) getReader()).setConditions(ixClause);
+            ((CassandraEntityReader) getReader()).setConditions(ixClause);
 
-        List<EnhanceEntity> ls = reader.populateRelation(m, relationNames, isParent, client);
-
+            ls = reader.populateRelation(m, relationNames, isParent, client);
+        }
         return handleGraph(ls, graphs, client, m);
     }
 

@@ -41,7 +41,10 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.index.DocumentIndexer;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
@@ -140,7 +143,7 @@ public abstract class QueryImpl implements Query
         List results = null;
         try
         {
-            EntityMetadata m = kunderaQuery.getEntityMetadata();
+            EntityMetadata m = getEntityMetadata();
             Client client = persistenceDelegeator.getClient(m);
 
             // get Graph
@@ -184,7 +187,6 @@ public abstract class QueryImpl implements Query
         return results != null && !results.isEmpty() ? results : null;
 
     }
-
     /**
      * Gets the persistence delegeator.
      * 
@@ -931,4 +933,24 @@ public abstract class QueryImpl implements Query
      * @return entityReader entity reader.
      */
     protected abstract EntityReader getReader();
+
+    /**
+     * Returns entity metadata, in case of native query mapped class is present within application metadata.
+     * @return entityMetadata entity metadata.
+     */
+    private EntityMetadata getEntityMetadata()
+    {
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        EntityMetadata m=null; 
+        if (appMetadata.isNative(getJPAQuery()))
+        {
+            Class clazz = appMetadata.getMappedClass(getJPAQuery());
+            m = KunderaMetadataManager.getEntityMetadata(clazz);
+        }else
+        {
+            m = kunderaQuery.getEntityMetadata();
+        }
+        return m;
+    }
+
 }
