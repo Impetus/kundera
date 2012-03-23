@@ -57,7 +57,7 @@ public final class CassandraCli {
          * @throws TimedOutException the timed out exception
          * @throws SchemaDisagreementException the schema disagreement exception
          */
-        protected static void cassandraSetUp() throws IOException, TException,
+        public static void cassandraSetUp() throws IOException, TException,
 			InvalidRequestException, UnavailableException, TimedOutException,
 			SchemaDisagreementException {
 
@@ -72,7 +72,7 @@ public final class CassandraCli {
          * Create keyspace.
          * @param keyspaceName keyspace name.
          */
-        static void createKeySpace(String keyspaceName)
+        public static void createKeySpace(String keyspaceName)
         {
             String nativeSql="CREATE KEYSPACE " + keyspaceName+" with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
             try
@@ -119,7 +119,7 @@ public final class CassandraCli {
          *
          * @param keyspaceName keyspace name
          */
-        static void dropKeySpace(String keyspaceName)
+        public static void dropKeySpace(String keyspaceName)
         {
           try
           {
@@ -140,7 +140,7 @@ public final class CassandraCli {
 
         }
 
-        static boolean keyspaceExist(String keySpaceName)
+        public static boolean keyspaceExist(String keySpaceName)
         {
             try
             {
@@ -161,7 +161,7 @@ public final class CassandraCli {
             return false;
         }
         
-        static boolean columnFamilyExist(String columnfamilyName, String keyspaceName)
+        public static boolean columnFamilyExist(String columnfamilyName, String keyspaceName)
         {
             try
             {

@@ -71,6 +71,11 @@ public abstract class QueryImpl implements Query
     private static Log log = LogFactory.getLog(QueryImpl.class);
 
     /**
+     * Default maximum result to fetch.
+     */
+    protected int maxResult=100;
+    
+    /**
      * Instantiates a new query impl.
      * 
      * @param query
@@ -269,7 +274,8 @@ public abstract class QueryImpl implements Query
     @Override
     public Query setMaxResults(int maxResult)
     {
-        throw new NotImplementedException("TODO");
+        this.maxResult = maxResult;
+        return this;
     }
 
     /*

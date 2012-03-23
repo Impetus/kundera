@@ -24,6 +24,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import com.impetus.kundera.property.accessor.BigDecimalAccessor;
 import com.impetus.kundera.property.accessor.BigIntegerAccessor;
@@ -43,6 +44,7 @@ import com.impetus.kundera.property.accessor.SQLTimeAccessor;
 import com.impetus.kundera.property.accessor.SQLTimestampAccessor;
 import com.impetus.kundera.property.accessor.ShortAccessor;
 import com.impetus.kundera.property.accessor.StringAccessor;
+import com.impetus.kundera.property.accessor.UUIDAccessor;
 
 /**
  * The Class PropertyAccessorFactory.
@@ -98,6 +100,7 @@ public class PropertyAccessorFactory
         // Accessor for Enum types
         map.put(Enum.class, new EnumAccessor());
 
+        map.put(UUID.class, new UUIDAccessor());
     }
 
     /** Making String Accessor easy to access. */
