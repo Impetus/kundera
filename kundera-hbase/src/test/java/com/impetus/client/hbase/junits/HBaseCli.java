@@ -31,9 +31,9 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.property.PropertyAccessorHelper;
-
 /**
+ * Embedded HBase client.
+ * 
  * @author vivek.mishra
  *
  */
@@ -53,17 +53,13 @@ public class HBaseCli
         System.setProperty( "test.build.data", workingDirectory.getAbsolutePath() );
         conf.set( "test.build.data", new File( workingDirectory, "zookeeper" ).getAbsolutePath() );
         conf.set( "fs.default.name", "file:///" );
-        conf.set("hbase.regionserver.port", "60020");
-        conf.set("hbase.regionserver.info.port", "60030");
-        conf.set("hbase.regionserver.info.port.auto", "false");
-        conf.set("regionservers", "localhost");
         try
         {
             conf.set( HConstants.HBASE_DIR, new File( workingDirectory, "hbase" ).toURI().toURL().toString() );
         }
         catch (MalformedURLException e1)
         {
-            e1.printStackTrace();
+            logger.error(e1.getMessage());
         }
 
         Configuration hbaseConf = HBaseConfiguration.create(conf);
@@ -92,8 +88,7 @@ public class HBaseCli
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
 
