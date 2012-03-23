@@ -15,11 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.junit;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -35,16 +30,6 @@ import org.junit.Test;
 
 import com.impetus.client.entity.CassandraUUIDEntity;
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.client.persistence.CassandraEntitySample;
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.metadata.processor.TableProcessor;
-import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * Test case for CRUD operations on Cassandra database using Kundera.
