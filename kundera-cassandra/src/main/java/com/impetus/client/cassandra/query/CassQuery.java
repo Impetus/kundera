@@ -150,7 +150,7 @@ public class CassQuery extends QueryImpl implements Query
      */
     private Map<Boolean, List<IndexClause>> prepareIndexClause(EntityMetadata m)
     {
-        IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, 10000);
+        IndexClause indexClause = Selector.newIndexClause(Bytes.EMPTY, maxResult);
         List<IndexClause> clauses = new ArrayList<IndexClause>();
         List<IndexExpression> expr = new ArrayList<IndexExpression>();
         Map<Boolean, List<IndexClause>> idxClauses = new HashMap<Boolean, List<IndexClause>>(1);
@@ -323,6 +323,10 @@ public class CassQuery extends QueryImpl implements Query
         else
         {
             Column col = m.getColumn(fieldName);
+            if (col == null)
+            {
+                throw new QueryHandlerException("column type is null for: " + fieldName);
+            }
             f = col.getField();
         }
 
