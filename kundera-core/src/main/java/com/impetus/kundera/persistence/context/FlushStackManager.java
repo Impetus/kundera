@@ -140,9 +140,13 @@ public class FlushStackManager
                         
                         if(! parentNode.isTraversed()) {
                             addNodesToFlushStack(pc, parentNode);
-                        }
-                        
+                        }                        
                     }
+                }
+                
+                //Finally process this child node
+                if(!childNode.isTraversed()) {
+                    addNodesToFlushStack(pc, childNode);
                 }
             }
         }        
