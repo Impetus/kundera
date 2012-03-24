@@ -390,8 +390,7 @@ public class PelopsClient implements Client
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            new PersistenceException(e.getMessage());
+            throw new PersistenceException(e.getMessage());
         }
 
     }
@@ -425,7 +424,7 @@ public class PelopsClient implements Client
             addColumnsToJoinTable(inverseJoinColumnName, relMetadata, columns, childEntity);
         }
 
-        mutator.writeColumns(joinTableName, new Bytes(parentId.getBytes()), Arrays.asList(columns
+        mutator.writeColumns(joinTableName, ByteUtils.byteArrayToString(parentId.getBytes()), Arrays.asList(columns
                 .toArray(new Column[0])));
         mutator.execute(ConsistencyLevel.ONE);
     }
@@ -439,7 +438,7 @@ public class PelopsClient implements Client
     {
         String parentId = objectGraph.getParentId();
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        List<Column> columns = selector.getColumnsFromRow(joinTableName, new Bytes(parentId.getBytes()), Selector
+        List<Column> columns = selector.getColumnsFromRow(joinTableName, ByteUtils.byteArrayToString(parentId.getBytes()), Selector
                 .newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
 
         PelopsDataHandler handler = new PelopsDataHandler(this);
