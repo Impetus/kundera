@@ -438,8 +438,8 @@ public class PelopsClient implements Client
     {
         String parentId = objectGraph.getParentId();
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        List<Column> columns = selector.getColumnsFromRow(joinTableName, ByteUtils.byteArrayToString(parentId.getBytes()), Selector
-                .newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
+        List<Column> columns = selector.getColumnsFromRow(joinTableName, ByteUtils.byteArrayToString(parentId
+                .getBytes()), Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
 
         PelopsDataHandler handler = new PelopsDataHandler(this);
         List<E> foreignKeys = handler.getForeignKeysFromJoinTable(inverseJoinColumnName, columns);

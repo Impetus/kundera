@@ -323,7 +323,7 @@ public class PelopsDataHandler extends DataHandler
                 if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
                 {
                     // relations = new HashMap<String, Object>();
-                    String value = PropertyAccessorFactory.STRING.fromBytes(thriftColumnValue);
+                    String value = ByteUtils.byteArrayToString(thriftColumnValue);
                     relations.put(thriftColumnName, value);
                     // prepare EnhanceEntity and return it
                 }
@@ -405,7 +405,7 @@ public class PelopsDataHandler extends DataHandler
                     }
                     else if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(name))
                     {
-                        String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(value);
+                        String valueAsStr = ByteUtils.byteArrayToString(value);
                         relations.put(name, valueAsStr);
                     }
                 }
