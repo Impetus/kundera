@@ -38,7 +38,6 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
 
-
 /**
  * Implementation of LazyInitializerFactory using cglib library.
  * 

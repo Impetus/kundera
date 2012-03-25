@@ -55,7 +55,6 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
-
 /**
  * Client implementation using Pelops. http://code.google.com/p/pelops/
  * 
@@ -137,12 +136,12 @@ public class PelopsClient implements Client
         List<Object> result = null;
         try
         {
-            result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata,
-                    rowId != null ? rowId.toString() : null);
+            result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata, rowId != null ? rowId
+                    .toString() : null);
         }
         catch (Exception e)
         {
-            log.error("Error on retrieval" + e.getMessage());
+            log.error("Error on retrieval" + e.getMessage(), e);
             throw new PersistenceException(e.getMessage());
         }
 
@@ -216,9 +215,9 @@ public class PelopsClient implements Client
         for (String superColumnName : superColumnMap.keySet())
         {
             String entityId = superColumnMap.get(superColumnName);
-            List<SuperColumn> superColumnList = loadSuperColumns(entityMetadata.getSchema(),
-                    entityMetadata.getTableName(), entityId,
-                    new String[] { superColumnName.substring(0, superColumnName.indexOf("|")) });
+            List<SuperColumn> superColumnList = loadSuperColumns(entityMetadata.getSchema(), entityMetadata
+                    .getTableName(), entityId, new String[] { superColumnName
+                    .substring(0, superColumnName.indexOf("|")) });
             E e = (E) dataHandler.fromThriftRow(entityMetadata.getEntityClazz(), entityMetadata,
                     new DataRow<SuperColumn>(entityId, entityMetadata.getTableName(), superColumnList));
             entities.add(e);
@@ -266,7 +265,8 @@ public class PelopsClient implements Client
         }
 
         RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        rowDeletor.deleteRow(metadata.getTableName(), pKey.toString(), ConsistencyLevel.ONE);
+        Bytes pKeyBytes = ByteUtils.stringToBytes(pKey.toString());
+        rowDeletor.deleteRow(metadata.getTableName(), pKeyBytes, ConsistencyLevel.ONE);
         getIndexManager().remove(metadata, entity, pKey.toString());
     }
 
@@ -362,7 +362,6 @@ public class PelopsClient implements Client
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             throw new PersistenceException(e.getMessage());
         }
         return null;
@@ -391,8 +390,7 @@ public class PelopsClient implements Client
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            new PersistenceException(e.getMessage());
+            throw new PersistenceException(e.getMessage());
         }
 
     }
@@ -426,8 +424,8 @@ public class PelopsClient implements Client
             addColumnsToJoinTable(inverseJoinColumnName, relMetadata, columns, childEntity);
         }
 
-        mutator.writeColumns(joinTableName, new Bytes(parentId.getBytes()),
-                Arrays.asList(columns.toArray(new Column[0])));
+        mutator.writeColumns(joinTableName, ByteUtils.byteArrayToString(parentId.getBytes()), Arrays.asList(columns
+                .toArray(new Column[0])));
         mutator.execute(ConsistencyLevel.ONE);
     }
 
@@ -440,8 +438,8 @@ public class PelopsClient implements Client
     {
         String parentId = objectGraph.getParentId();
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        List<Column> columns = selector.getColumnsFromRow(joinTableName, new Bytes(parentId.getBytes()),
-                Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
+        List<Column> columns = selector.getColumnsFromRow(joinTableName, ByteUtils.byteArrayToString(parentId
+                .getBytes()), Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
 
         PelopsDataHandler handler = new PelopsDataHandler(this);
         List<E> foreignKeys = handler.getForeignKeysFromJoinTable(inverseJoinColumnName, columns);
@@ -484,7 +482,7 @@ public class PelopsClient implements Client
             Column col = new Column();
             col.setName(PropertyAccessorFactory.STRING.toBytes(inverseJoinColumnName + "_" + childId));
             col.setValue(PropertyAccessorFactory.STRING.toBytes(childId));
-            col.setTimestamp(System.currentTimeMillis());
+            col.setTimestamp(System.currentTimeMillis() * 1000);
             columns.add(col);
         }
         catch (PropertyAccessException e)
@@ -512,8 +510,8 @@ public class PelopsClient implements Client
         List<Object> entities = null;
         if (ixClause.isEmpty())
         {
-            Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(),
-                    selector.newKeyRange("", "", 100), slicePredicate, ConsistencyLevel.ONE);
+            Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(), selector.newKeyRange("",
+                    "", 100), slicePredicate, ConsistencyLevel.ONE);
             entities = new ArrayList<Object>(qResults.size());
             populateData(m, qResults, entities, isRelation, relations);
         }
@@ -550,9 +548,8 @@ public class PelopsClient implements Client
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
         List<Object> entities = null;
 
-        List<KeySlice> keys = selector.getKeySlices(new ColumnParent(m.getTableName()),
-                selector.newKeyRange(Bytes.fromByteArray(minVal), Bytes.fromByteArray(maxVal), 10000), slicePredicate,
-                ConsistencyLevel.ONE);
+        List<KeySlice> keys = selector.getKeySlices(new ColumnParent(m.getTableName()), selector.newKeyRange(Bytes
+                .fromByteArray(minVal), Bytes.fromByteArray(maxVal), 10000), slicePredicate, ConsistencyLevel.ONE);
 
         List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
 
@@ -614,22 +611,28 @@ public class PelopsClient implements Client
         {
             Bytes rowKey = rowIter.next();
             List<Column> columns = qResults.get(rowKey);
-            try
+
+            // If columns are empty, this is a "tombstoned" entry associated
+            // with distributed deletes
+            if (!columns.isEmpty())
             {
-                Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m,
-                        dataHandler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null),
-                        relationNames, isRelational);
-                entities.add(e);
-            }
-            catch (IllegalStateException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            catch (Exception e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                try
+                {
+                    String rowKeyStr = ByteUtils.bytesToString(rowKey);
+                    Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m, dataHandler.new ThriftRow(
+                            rowKeyStr, m.getTableName(), columns, null), relationNames, isRelational);
+                    entities.add(e);
+                }
+                catch (IllegalStateException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                catch (Exception e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -646,8 +649,9 @@ public class PelopsClient implements Client
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         List<Object> entities = null;
-        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000,
-                Selector.newIndexExpression(colName, IndexOperator.EQ, Bytes.fromByteArray(colValue.getBytes())));
+        Bytes bytes = ByteUtils.stringToBytes(colValue);
+        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, Selector.newIndexExpression(colName,
+                IndexOperator.EQ, bytes));
         Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
                 ConsistencyLevel.ONE);
         entities = new ArrayList<Object>(qResults.size());
@@ -744,7 +748,7 @@ public class PelopsClient implements Client
     {
         Column col = new Column();
         col.setName(PropertyAccessorFactory.STRING.toBytes(rlName));
-        col.setValue(rlValue.getBytes());
+        col.setValue(ByteUtils.stringToBytes(rlValue).toByteArray());
         col.setTimestamp(timestamp);
         return col;
     }
@@ -797,16 +801,16 @@ public class PelopsClient implements Client
         List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
         if (thriftColumns != null && !thriftColumns.isEmpty())
         {
-            // Bytes.fromL
-            mutator.writeColumns(metadata.getTableName(), new Bytes(tf.getId().getBytes()),
-                    Arrays.asList(tf.getColumns().toArray(new Column[0])));
+            Bytes keyBytes = ByteUtils.stringToBytes(tf.getId());
+            mutator.writeColumns(metadata.getTableName(), keyBytes, Arrays.asList(tf.getColumns()
+                    .toArray(new Column[0])));
         }
 
         if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
         {
             for (SuperColumn sc : thriftSuperColumns)
             {
-                mutator.writeSubColumns(metadata.getTableName(), tf.getId(), Bytes.toUTF8(sc.getName()),
+                mutator.writeSubColumns(metadata.getTableName(), tf.getId(), ByteUtils.byteArrayToString(sc.getName()),
                         sc.getColumns());
 
             }
@@ -814,6 +818,7 @@ public class PelopsClient implements Client
         }
 
         mutator.execute(ConsistencyLevel.ONE);
+        mutator = null;
         tf = null;
     }
 

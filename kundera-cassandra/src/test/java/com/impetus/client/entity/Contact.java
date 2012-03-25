@@ -20,7 +20,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * The Contact Entity Class.
  *
@@ -31,7 +30,7 @@ import javax.persistence.Table;
 @Table(name = "contact", schema = "Blog")
 public class Contact
 {
-    
+
     /** The contact id. */
     @Id
     String contactId;

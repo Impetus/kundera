@@ -29,7 +29,6 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.processor.AbstractEntityFieldProcessor;
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 
-
 /**
  * The Class OneToOneRelationMetadataProcessor.
  *
@@ -72,8 +71,8 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
          * ); }
          */
 
-        Relation relation = new Relation(relationField, targetEntity, null, oneToOneAnn.fetch(),
-                Arrays.asList(oneToOneAnn.cascade()), oneToOneAnn.optional(), oneToOneAnn.mappedBy(),
+        Relation relation = new Relation(relationField, targetEntity, null, oneToOneAnn.fetch(), Arrays
+                .asList(oneToOneAnn.cascade()), oneToOneAnn.optional(), oneToOneAnn.mappedBy(),
                 Relation.ForeignKey.ONE_TO_ONE);
 
         if (isJoinedByPK)

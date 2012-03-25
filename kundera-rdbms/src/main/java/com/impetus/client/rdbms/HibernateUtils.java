@@ -8,7 +8,6 @@ import java.util.Properties;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
-
 /**
  * The Class HibernateUtils.
  *

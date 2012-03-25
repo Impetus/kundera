@@ -45,7 +45,6 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
-
 /**
  * HBase client.
  * 
@@ -140,8 +139,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
             E e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(), entityMetadata,
                     entityId, null);
 
-            Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName.substring(0,
-                    columnFamilyName.indexOf("|")));
+            Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName.substring(0, columnFamilyName
+                    .indexOf("|")));
             Object columnFamilyValue = PropertyAccessorHelper.getObject(e, columnFamilyField);
             if (Collection.class.isAssignableFrom(columnFamilyField.getType()))
             {
@@ -206,8 +205,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     {
         Object entity = entityGraph.getParentEntity();
         String id = entityGraph.getParentId();
-        onPersist(entityMetadata, entity, id,
-                RelationHolder.addRelation(entityGraph, entityGraph.getRevFKeyName(), entityGraph.getRevFKeyValue()));
+        onPersist(entityMetadata, entity, id, RelationHolder.addRelation(entityGraph, entityGraph.getRevFKeyName(),
+                entityGraph.getRevFKeyValue()));
 
         if (entityGraph.getRevParentClass() != null)
         {
@@ -247,7 +246,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     private void onPersist(EntityMetadata entityMetadata, Object entity, String id, List<RelationHolder> relations)
     {
         String dbName = entityMetadata.getSchema(); // Has no meaning for HBase,
-                                                    // not used
+        // not used
         String tableName = entityMetadata.getTableName();
 
         List<String> columnFamilyNames = new ArrayList<String>();

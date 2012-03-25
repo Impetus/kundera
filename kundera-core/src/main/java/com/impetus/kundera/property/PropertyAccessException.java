@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.property;
 
-
 /**
  * The Class PropertyAccessException.
  * 

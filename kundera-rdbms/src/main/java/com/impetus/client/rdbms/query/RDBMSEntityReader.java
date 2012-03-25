@@ -43,7 +43,6 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.exception.QueryHandlerException;
 
-
 /**
  * The Class RDBMSEntityReader.
  * 
@@ -128,7 +127,8 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             {
                 try
                 {
-                    List entities = ((HibernateClient) client).find(getSqlQueryFromJPA(m, relationNames, null), new ArrayList<String>(), m);
+                    List entities = ((HibernateClient) client).find(getSqlQueryFromJPA(m, relationNames, null),
+                            new ArrayList<String>(), m);
                     ls = new ArrayList<EnhanceEntity>(entities.size());
                     ls = transform(m, ls, entities);
                 }
@@ -280,8 +280,8 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                     String fieldName = getColumnName(clause.getProperty());
                     boolean isString = isStringProperty(entityMetadata, fieldName);
 
-                    queryBuilder.append(StringUtils.replace(clause.getProperty(),
-                            clause.getProperty().substring(0, clause.getProperty().indexOf(".")), aliasName));
+                    queryBuilder.append(StringUtils.replace(clause.getProperty(), clause.getProperty().substring(0,
+                            clause.getProperty().indexOf(".")), aliasName));
                     queryBuilder.append(" ");
                     queryBuilder.append(clause.getCondition());
 

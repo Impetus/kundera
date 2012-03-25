@@ -20,7 +20,6 @@ import java.math.BigInteger;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
-
 /**
  * The Class BigIntegerAccessor.
  *

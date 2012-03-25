@@ -33,7 +33,6 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
 
-
 /**
  * Cache provider implementation using Ehcache.
  * 

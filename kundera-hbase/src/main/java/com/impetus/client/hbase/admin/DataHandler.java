@@ -22,7 +22,6 @@ import java.util.Map;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
-
 /**
  * Data handler for HBase queries.
  * 

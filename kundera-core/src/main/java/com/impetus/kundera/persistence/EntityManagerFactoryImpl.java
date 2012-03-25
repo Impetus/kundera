@@ -38,7 +38,6 @@ import com.impetus.kundera.cache.NonOperationalCacheProvider;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 
-
 /**
  * The Class EntityManagerFactoryImpl.
  * 
@@ -185,7 +184,10 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     @Override
     public Metamodel getMetamodel()
     {
-        return KunderaMetadataManager.getMetamodel(getPersistenceUnits());
+        // FIXME: This is not right since it will only get the first metamode
+        // if multiple datastores are used.
+        //return KunderaMetadataManager.getMetamodel(getPersistenceUnits());
+        throw new NotImplementedException("TODO");
     }
 
     /* (non-Javadoc)

@@ -40,7 +40,6 @@ import com.impetus.kundera.metadata.processor.relation.RelationMetadataProcessor
 import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-
 /**
  * Metadata processor class for persistent entities.
  *
@@ -121,8 +120,9 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
                 if (Collection.class.isAssignableFrom(embeddedFieldClass))
                 {
-                    LOG.warn(f.getName()
-                            + " was annotated with @Embedded, and shouldn't have been a java Collection field, it won't be persisted");
+                    LOG
+                            .warn(f.getName()
+                                    + " was annotated with @Embedded, and shouldn't have been a java Collection field, it won't be persisted");
                 }
                 else
                 {
@@ -153,8 +153,9 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                 }
                 else
                 {
-                    LOG.warn(f.getName()
-                            + " was annotated with @ElementCollection but wasn't a java Collection field, it won't be persisted");
+                    LOG
+                            .warn(f.getName()
+                                    + " was annotated with @ElementCollection but wasn't a java Collection field, it won't be persisted");
                 }
             }
             else

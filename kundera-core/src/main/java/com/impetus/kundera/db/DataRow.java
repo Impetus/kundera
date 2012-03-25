@@ -18,7 +18,6 @@ package com.impetus.kundera.db;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * Utility class that represents a row in Column family based datastores like
  * cassandra and HBase.

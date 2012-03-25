@@ -22,7 +22,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
 /**
  * The Class MTMNPerson.
  */
@@ -30,7 +29,7 @@ import javax.persistence.Table;
 @Table(name = "PERSON", schema = "test")
 public class MTMNPerson
 {
-    
+
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")

@@ -58,7 +58,6 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.QueryResolver;
 
-
 /**
  * The Class PersistenceDelegator.
  */
@@ -915,8 +914,8 @@ public class PersistenceDelegator
                 Object child = objectGraph.getChildEntity();
 
                 Client pClient = getClient(metadata);
-                pClient.persistJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata,
-                        objectGraph.getParentId(), child);
+                pClient.persistJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, objectGraph
+                        .getParentId(), child);
 
             }
         }

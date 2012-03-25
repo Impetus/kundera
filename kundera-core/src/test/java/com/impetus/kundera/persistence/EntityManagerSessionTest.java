@@ -21,7 +21,6 @@ import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.cache.CacheProvider;
 import com.impetus.kundera.entity.PersonnelDTO;
 
-
 /**
  * The Class EntityManagerSessionTest.
  *
@@ -29,7 +28,7 @@ import com.impetus.kundera.entity.PersonnelDTO;
  */
 public class EntityManagerSessionTest extends TestCase
 {
-    
+
     /** The ems. */
     EntityManagerSession ems;
 

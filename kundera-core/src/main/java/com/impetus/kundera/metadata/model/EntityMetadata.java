@@ -24,7 +24,6 @@ import java.util.Map;
 import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.persistence.event.CallbackMethod;
 
-
 /**
  * Holds metadata for entities.
  *

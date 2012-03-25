@@ -19,7 +19,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 
-
 /**
  * Interface to handle mapping.
  * 

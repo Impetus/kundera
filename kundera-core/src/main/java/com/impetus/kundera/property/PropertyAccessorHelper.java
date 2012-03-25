@@ -30,7 +30,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.utils.ReflectUtils;
 
-
 /**
  * Helper class to access fields.
  * 
@@ -54,7 +53,6 @@ public class PropertyAccessorHelper
      */
     public static void set(Object target, Field field, byte[] bytes) throws PropertyAccessException
     {
-
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
         Object value = accessor.fromBytes(bytes);
         set(target, field, value);

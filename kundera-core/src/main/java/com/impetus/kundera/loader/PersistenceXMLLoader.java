@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -36,9 +37,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
-
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-
 
 /**
  * The Class PersistenceXMLLoader.
@@ -80,9 +78,10 @@ public class PersistenceXMLLoader
             throw new IOException("Failed to obtain InputStream from url: " + configURL);
         }
 
-        DocumentBuilderFactory docBuilderFactory = null;
-        docBuilderFactory = DocumentBuilderFactory.newInstance();
-        docBuilderFactory.setValidating(true);
+        DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+
+        /*
+        docBuilderFactory.setValidating(false);
         docBuilderFactory.setNamespaceAware(true);
 
         try
@@ -95,19 +94,22 @@ public class PersistenceXMLLoader
             docBuilderFactory.setValidating(false);
             docBuilderFactory.setNamespaceAware(false);
         }
-
+         */
         InputSource source = new InputSource(is);
         DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-        // docBuilder.setEntityResolver( resolver );
+        //docBuilder.setEntityResolver(schemaLoader);
 
         List errors = new ArrayList();
         docBuilder.setErrorHandler(new ErrorLogger("XML InputStream", errors));
         Document doc = docBuilder.parse(source);
 
+        /*
         if (errors.size() != 0)
         {
             throw new PersistenceException("invalid persistence.xml", (Throwable) errors.get(0));
         }
+         * 
+         */
         is.close(); // Close input Stream
         return doc;
     }
@@ -140,7 +142,6 @@ public class PersistenceXMLLoader
     public static List<PersistenceUnitMetadata> findPersistenceUnits(URL url,
             PersistenceUnitTransactionType defaultTransactionType) throws Exception
     {
-
         Document doc = getDocument(url);
         Element top = doc.getDocumentElement();
         NodeList children = top.getChildNodes();

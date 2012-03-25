@@ -22,7 +22,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
 /**
  * The Class NPerson.
  */
@@ -30,7 +29,7 @@ import javax.persistence.Table;
 @Table(name = "PERSON", schema = "test")
 public class NPerson
 {
-    
+
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")

@@ -18,7 +18,6 @@ package com.impetus.kundera.property.accessor;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
-
 /**
  * The Class IntegerAccessor.
  * 
@@ -41,15 +40,19 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
      * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public final byte[] toBytes(Object val)
+    public final byte[] toBytes(Object val) throws PropertyAccessException
     {
-        if (val != null)
+        try
         {
             Integer value = (Integer) (val);
+
             return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8),
                     (byte) value.intValue() };
         }
-        return null;
+        catch (Exception e)
+        {
+            throw new PropertyAccessException(e.getMessage());
+        }
     }
 
     /* (non-Javadoc)

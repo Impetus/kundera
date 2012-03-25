@@ -18,7 +18,6 @@ package com.impetus.kundera.proxy;
 import java.util.Map;
 import java.util.Set;
 
-
 /**
  * Interface to proxy @Entity classes so as to introduce Foreign relations.
  * 

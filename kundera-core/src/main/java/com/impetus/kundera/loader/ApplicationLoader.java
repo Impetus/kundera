@@ -21,7 +21,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * The Class ApplicationLoader.
  *
@@ -29,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ApplicationLoader implements Loader
 {
-    
+
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(ApplicationLoader.class);
 

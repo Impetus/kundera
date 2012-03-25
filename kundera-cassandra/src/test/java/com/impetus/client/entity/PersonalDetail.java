@@ -17,7 +17,6 @@ package com.impetus.client.entity;
 
 import javax.persistence.Embeddable;
 
-
 /**
  * Entity class for user's personal details.
  *
@@ -27,7 +26,7 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class PersonalDetail
 {
-    
+
     /** The personal detail id. */
     private String personalDetailId;
 

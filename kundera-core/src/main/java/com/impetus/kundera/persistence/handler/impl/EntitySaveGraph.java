@@ -23,7 +23,6 @@ import org.hibernate.proxy.HibernateProxy;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
-
 /**
  * The Class EntitySaveGraph.
  * 
@@ -376,7 +375,8 @@ public class EntitySaveGraph
             }
 
             parentClass = parentEntity != null && !PropertyAccessorHelper.isCollection(parentEntity.getClass()) ? parentEntity
-                    .getClass() : PropertyAccessorHelper.getGenericClass(getProperty());
+                    .getClass()
+                    : PropertyAccessorHelper.getGenericClass(getProperty());
         }
         return parentClass;
     }
@@ -395,7 +395,8 @@ public class EntitySaveGraph
                 return childEntity.getClass().getSuperclass();
             }
             childClass = childEntity != null && !PropertyAccessorHelper.isCollection(childEntity.getClass()) ? childEntity
-                    .getClass() : PropertyAccessorHelper.getGenericClass(getProperty());
+                    .getClass()
+                    : PropertyAccessorHelper.getGenericClass(getProperty());
         }
         return childClass;
     }
