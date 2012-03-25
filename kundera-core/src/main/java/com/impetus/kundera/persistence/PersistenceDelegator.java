@@ -40,10 +40,16 @@ import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.client.EnhanceEntity;
+import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.ObjectGraph;
+import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.persistence.context.FlushStack;
+import com.impetus.kundera.persistence.context.FlushStackManager;
+import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 import com.impetus.kundera.persistence.handler.impl.EntityInterceptor;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
@@ -77,7 +83,14 @@ public class PersistenceDelegator
     boolean isRelationViaJoinTable;
 
     /** The no session lookup. */
-    private boolean noSessionLookup;
+    private boolean noSessionLookup; 
+    
+    private PersistenceCache pc;
+    
+    private ObjectGraphBuilder graphBuilder;
+    
+    private FlushStackManager flushStackManager;    
+    
 
     /**
      * Instantiates a new persistence delegator.
@@ -87,10 +100,13 @@ public class PersistenceDelegator
      * @param persistenceUnits
      *            the persistence units
      */
-    public PersistenceDelegator(EntityManagerSession session)
+    public PersistenceDelegator(EntityManagerSession session, PersistenceCache pc)
     {
         this.session = session;
+        this.pc = pc;
         eventDispatcher = new EntityEventDispatcher();
+        graphBuilder = new ObjectGraphBuilder();
+        flushStackManager = new FlushStackManager();
     }
 
     // TODO : This method needs serious attention!
@@ -491,6 +507,25 @@ public class PersistenceDelegator
         getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
         log.debug("Data persisted successfully for entity : " + e.getClass());
 
+    }
+    
+    public void persist2(Object e) {
+        //Invoke Pre Persist Events
+        EntityMetadata metadata = getMetadata(e.getClass());
+        getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
+        
+        //Create an object graph of the entity object
+        ObjectGraph graph = graphBuilder.getObjectGraph(e);
+        
+        //Put this graph into persistence cache associated with EM
+        pc.getMainCache().addGraphToCache(graph);  
+        
+        //TODO: not always, should be conditional
+        flush();
+        
+        //Invoke Post Persist Events
+        getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
+        log.debug("Data persisted successfully for entity : " + e.getClass());
     }
 
     /**
@@ -1031,6 +1066,26 @@ public class PersistenceDelegator
     public EntityReader getReader(Client client)
     {
         return client.getReader();
+    }
+    
+    /**
+     * Flushes Dirty objects in {@link PersistenceCache} to databases.
+     */
+    public void flush() {
+        //Build Flush Stack from the Persistence Cache        
+        flushStackManager.buildFlushStack(pc);
+        
+        //Get flush stack from Persistence Cache
+        FlushStack fs = pc.getFlushStack();
+        
+        //Flush each node in flush stack from top to bottom unit it's empty
+        log.debug("Flushing following flush stack to database(s) (showing stack objects from top to bottom):\n" + fs);        
+        while(!fs.isEmpty()) {
+            Node node = fs.pop();
+            node.flush();        
+            
+            //TODO: remove node from persistence cache
+        }
     }
 
 }

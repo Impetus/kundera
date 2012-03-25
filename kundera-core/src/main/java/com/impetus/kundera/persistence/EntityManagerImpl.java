@@ -36,6 +36,8 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.context.FlushStackManager;
+import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * The Class EntityManagerImpl.
@@ -62,6 +64,11 @@ public class EntityManagerImpl implements EntityManager
 
     /** Properties provided by user at the time of EntityManager Creation. */
     private PersistenceDelegator persistenceDelegator;
+    
+    /** Persistence context associated with this entity manager*/
+    private PersistenceCache pc;
+    
+    FlushStackManager flushStackManager;    
 
     /**
      * Instantiates a new entity manager impl.
@@ -75,7 +82,10 @@ public class EntityManagerImpl implements EntityManager
         logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
         session = new EntityManagerSession((Cache) factory.getCache());
 
-        persistenceDelegator = new PersistenceDelegator(session);
+        //Initialize persistence context associated with this entity manager
+        pc = new PersistenceCache();       
+        
+        persistenceDelegator = new PersistenceDelegator(session, pc);
         logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
     }
 
@@ -156,7 +166,8 @@ public class EntityManagerImpl implements EntityManager
             throw new IllegalArgumentException("Entity to be persisted must not be null.");
         }
 
-        getPersistenceDelegator().persist(e);        
+        getPersistenceDelegator().persist(e);  
+        
     }
 
     /*
@@ -169,14 +180,11 @@ public class EntityManagerImpl implements EntityManager
     {
         checkClosed();
         session.clear();
+        pc.clean();
         // TODO Do we need a client and persistenceDelegator close here?
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#close()
-     */
+
     @Override
     public final void close()
     {
@@ -184,6 +192,8 @@ public class EntityManagerImpl implements EntityManager
         session.clear();
         session = null;
         persistenceDelegator.close();
+        pc.clean();
+        pc = null;
         closed = true;
     }
 
@@ -209,15 +219,11 @@ public class EntityManagerImpl implements EntityManager
         return persistenceDelegator.createQuery(query);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#flush()
-     */
+
     @Override
     public final void flush()
     {
-        // always flushed to cassandra anyway! relax.
+        persistenceDelegator.flush();
     }
 
     /*

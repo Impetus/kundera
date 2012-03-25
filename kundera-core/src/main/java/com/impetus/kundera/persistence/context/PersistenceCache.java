@@ -58,6 +58,16 @@ public class PersistenceCache
         flushStackManager = new FlushStackManager();
     }    
     
+    public void clean() {
+        mainCache = null;
+        embeddedCache = null;
+        elementCollectionCache = null;
+        transactionalCache = null;
+        
+        flushStack.clear(); flushStack = null;
+        flushStackManager = null;
+    }
+    
     /**
      * @return the mainCache
      */

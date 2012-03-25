@@ -69,61 +69,73 @@ public class EntityStateContextImpl implements EntityStateContext
     @Override
     public void refresh()
     {
+        getCurrentEntityState().handleRefresh(this);
     }
 
     @Override
     public void merge()
     {
+        getCurrentEntityState().handleMerge(this);
     }
 
     @Override
     public void detach()
     {
+        getCurrentEntityState().handleDetach(this);
     }
 
     @Override
     public void close()
     {
+        getCurrentEntityState().handleClose(this);
     }
 
     @Override
     public void lock()
     {
+        getCurrentEntityState().handleLock(this);
     }
 
     @Override
     public void commit()
     {
+        getCurrentEntityState().handleCommit(this);
     }
 
     @Override
     public void rollback()
     {
+        getCurrentEntityState().handleRollback(this);
     }
 
     @Override
     public void find()
     {
+        getCurrentEntityState().handleFind(this);
     }
 
     @Override
     public void getReference()
     {
+        getCurrentEntityState().handleGetReference(this);
     }
 
     @Override
     public void contains()
     {
+        getCurrentEntityState().handleContains(this);
     }
 
     @Override
     public void clear()
     {
+        getCurrentEntityState().handleClear(this);
     }
 
     @Override
     public void flush()
     {
+        getCurrentEntityState().handleFlush(this);
     }   
 
 }
