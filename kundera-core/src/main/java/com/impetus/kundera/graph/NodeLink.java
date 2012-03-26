@@ -34,8 +34,8 @@ public class NodeLink
         IS_BIDIRECTIONAL,
         IS_RELATED_VIA_JOIN_TABLE,
         PROPERTY,
-        BIDIRECTIONAL_PROPERTY
-        
+        BIDIRECTIONAL_PROPERTY,
+        CASCADE
         //Add more if required
     };   
     

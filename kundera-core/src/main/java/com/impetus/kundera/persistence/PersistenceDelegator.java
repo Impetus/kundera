@@ -43,6 +43,8 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.lifecycle.EntityStateContext;
+import com.impetus.kundera.lifecycle.EntityStateContextImpl;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
@@ -518,7 +520,16 @@ public class PersistenceDelegator
         ObjectGraph graph = graphBuilder.getObjectGraph(e);
         
         //Put this graph into persistence cache associated with EM
-        pc.getMainCache().addGraphToCache(graph);  
+        //pc.getMainCache().addGraphToCache(graph);
+        //Call persist on each node in object graph
+        Node headNode = graph.getHeadNode();
+        headNode.persist();
+        
+        
+        /*for(String key : graph.getNodeMapping().keySet()) {
+            Node node = graph.getNode(key);
+            node.persist();
+        }*/
         
         //TODO: not always, should be conditional
         flush();

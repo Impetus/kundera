@@ -18,14 +18,16 @@ package com.impetus.kundera.graph;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.impetus.kundera.lifecycle.EntityStateContext;
 import com.impetus.kundera.lifecycle.EntityStateContextImpl;
 
 /**
  * Represents a node in object graph 
  * @author amresh.singh
  */
-public class Node extends EntityStateContextImpl
-{
+public class Node extends EntityStateContextImpl 
+{  
+    
     //ID of a node into object graph
     private String nodeId;
     
@@ -44,14 +46,17 @@ public class Node extends EntityStateContextImpl
     //Whether this node has been traversed
     private boolean traversed;
     
-    public Node() {
-        
+    //Whether this node is dirty
+    private boolean dirty;
+    
+    public Node() {        
     }
     
     public Node(String nodeId, Object data) {
         this.nodeId = nodeId;
         this.data = data;
-        this.dataClass = data.getClass();
+        this.dataClass = data.getClass();    
+
     }
 
     /**
@@ -92,7 +97,8 @@ public class Node extends EntityStateContextImpl
     public Class getDataClass()
     {
         return dataClass;
-    }
+    }  
+
 
     /**
      * @param dataClass the dataClass to set
@@ -182,6 +188,22 @@ public class Node extends EntityStateContextImpl
     public void setTraversed(boolean traversed)
     {
         this.traversed = traversed;
+    }   
+
+    /**
+     * @return the dirty
+     */
+    public boolean isDirty()
+    {
+        return dirty;
+    }
+
+    /**
+     * @param dirty the dirty to set
+     */
+    public void setDirty(boolean dirty)
+    {
+        this.dirty = dirty;
     }
 
     @Override

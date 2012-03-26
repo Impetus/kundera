@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle;
 
-import com.impetus.kundera.lifecycle.states.EntityState;
+import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.lifecycle.states.TransientState;
 
 /**
@@ -25,22 +25,22 @@ import com.impetus.kundera.lifecycle.states.TransientState;
  */
 public class EntityStateContextImpl implements EntityStateContext
 {
-    private EntityState currentEntityState;
+    private NodeState currentEntityState;
 
-    public EntityStateContextImpl(EntityState entityState)
+    public EntityStateContextImpl(NodeState entityState)
     {
         this.currentEntityState = entityState;
     }
 
     public EntityStateContextImpl()
-    {
-        this(new TransientState());
+    {        
+        this(new TransientState());       
     }
 
     /**
      * @return the currentEntityState
      */
-    public EntityState getCurrentEntityState()
+    public NodeState getCurrentEntityState()
     {
         return currentEntityState;
     }
@@ -49,93 +49,93 @@ public class EntityStateContextImpl implements EntityStateContext
      * @param currentEntityState
      *            the currentEntityState to set
      */
-    public void setCurrentEntityState(EntityState currentEntityState)
+    public void setCurrentEntityState(NodeState currentEntityState)
     {
         this.currentEntityState = currentEntityState;
-    }
+    }   
 
     @Override
     public void persist()
     {
-        getCurrentEntityState().handlePersist(this);
+        getCurrentEntityState().handlePersist(null);
     }
 
     @Override
     public void remove()
     {
-        getCurrentEntityState().handleRemove(this);
+        getCurrentEntityState().handleRemove(null);
     }
 
     @Override
     public void refresh()
     {
-        getCurrentEntityState().handleRefresh(this);
+        getCurrentEntityState().handleRefresh(null);
     }
 
     @Override
     public void merge()
     {
-        getCurrentEntityState().handleMerge(this);
+        getCurrentEntityState().handleMerge(null);
     }
 
     @Override
     public void detach()
     {
-        getCurrentEntityState().handleDetach(this);
+        getCurrentEntityState().handleDetach(null);
     }
 
     @Override
     public void close()
     {
-        getCurrentEntityState().handleClose(this);
+        getCurrentEntityState().handleClose(null);
     }
 
     @Override
     public void lock()
     {
-        getCurrentEntityState().handleLock(this);
+        getCurrentEntityState().handleLock(null);
     }
 
     @Override
     public void commit()
     {
-        getCurrentEntityState().handleCommit(this);
+        getCurrentEntityState().handleCommit(null);
     }
 
     @Override
     public void rollback()
     {
-        getCurrentEntityState().handleRollback(this);
+        getCurrentEntityState().handleRollback(null);
     }
 
     @Override
     public void find()
     {
-        getCurrentEntityState().handleFind(this);
+        getCurrentEntityState().handleFind(null);
     }
 
     @Override
     public void getReference()
     {
-        getCurrentEntityState().handleGetReference(this);
+        getCurrentEntityState().handleGetReference(null);
     }
 
     @Override
     public void contains()
     {
-        getCurrentEntityState().handleContains(this);
+        getCurrentEntityState().handleContains(null);
     }
 
     @Override
     public void clear()
     {
-        getCurrentEntityState().handleClear(this);
+        getCurrentEntityState().handleClear(null);
     }
 
     @Override
     public void flush()
     {
-        getCurrentEntityState().handleFlush(this);
+        getCurrentEntityState().handleFlush(null);
     }   
 
 }

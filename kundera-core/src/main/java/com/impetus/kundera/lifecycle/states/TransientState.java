@@ -15,95 +15,117 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
-import com.impetus.kundera.lifecycle.EntityStateContextImpl;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.CascadeType;
+
+import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.NodeLink;
+import com.impetus.kundera.graph.NodeLink.LinkProperty;
 
 /**
  * @author amresh
  *
  */
-public class TransientState extends EntityState
+public class TransientState extends NodeState
 {    
 
     @Override
-    public void initialize(EntityStateContextImpl context)
+    public void initialize(Node node)
     {
     }
 
     @Override
-    public void handlePersist(EntityStateContextImpl context)
+    public void handlePersist(Node node)
     {
-        context.setCurrentEntityState(new ManagedState());
-        //TODO: Mark this entity for saving in database
-        //TODO: Recurse persist operation on all managed entities for whom cascade=ALL or PERSIST
-    }   
+        //Transient ---> Managed
+        node.setCurrentEntityState(new ManagedState());      
+        
+        //Mark this entity for saving in database
+        node.setDirty(true);
+        
+        //Add this node into persistence cache
+
+        //Recurse persist operation on all managed entities for whom cascade=ALL or PERSIST
+        Map<NodeLink, Node> children = node.getChildren();
+        for(NodeLink nodeLink : children.keySet()) {
+            List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
+            if(cascadeTypes.contains(CascadeType.PERSIST) || cascadeTypes.contains(CascadeType.ALL)) {
+                Node childNode = children.get(nodeLink);                
+                childNode.persist();
+            }
+        }
+    }                
+                   
 
     @Override
-    public void handleRemove(EntityStateContextImpl context)
+    public void handleRemove(Node node)
     {
         //Ignored, Entity will remain in the Transient state
         //TODO: Recurse remove operation for all related entities for whom cascade=ALL or REMOVE
     }
 
     @Override
-    public void handleRefresh(EntityStateContextImpl context)
+    public void handleRefresh(Node node)
     {
         //Ignored, Entity will remain in the Transient state
         //TODO: Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
     }
 
     @Override
-    public void handleMerge(EntityStateContextImpl context)
+    public void handleMerge(Node node)
     {
         //TODO: create a new managed entity and copy state of original entity into this one.
     }
     
     @Override
-    public void handleFind(EntityStateContextImpl context)
+    public void handleFind(Node node)
     {
     }
 
     @Override
-    public void handleClose(EntityStateContextImpl context)
+    public void handleClose(Node node)
     {
     }
 
     @Override
-    public void handleClear(EntityStateContextImpl context)
+    public void handleClear(Node node)
     {
     }
 
     @Override
-    public void handleFlush(EntityStateContextImpl context)
+    public void handleFlush(Node node)
     {
     }
 
     @Override
-    public void handleLock(EntityStateContextImpl context)
+    public void handleLock(Node node)
     {
     }
 
     @Override
-    public void handleDetach(EntityStateContextImpl context)
+    public void handleDetach(Node node)
     {
     }
 
     @Override
-    public void handleCommit(EntityStateContextImpl context)
+    public void handleCommit(Node node)
     {
     }
 
     @Override
-    public void handleRollback(EntityStateContextImpl context)
+    public void handleRollback(Node node)
     {
     }
 
     @Override
-    public void handleGetReference(EntityStateContextImpl context)
+    public void handleGetReference(Node node)
     {
     }
 
     @Override
-    public void handleContains(EntityStateContextImpl context)
+    public void handleContains(Node node)
     {
     }    
     

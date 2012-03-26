@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle;
 
-import com.impetus.kundera.lifecycle.states.EntityState;
+import com.impetus.kundera.lifecycle.states.NodeState;
 
 /**
  * State context of a given entity
@@ -24,7 +24,7 @@ import com.impetus.kundera.lifecycle.states.EntityState;
  */
 public interface EntityStateContext
 {
-    EntityState getCurrentEntityState();
+    NodeState getCurrentEntityState();
 
     // Life cycle Management
     void persist();
