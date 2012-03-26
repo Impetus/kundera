@@ -35,14 +35,16 @@ import com.impetus.client.rdbms.HibernateClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
-import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.QueryHandlerException;
 
 /**
  * The Class RDBMSEntityReader.
@@ -99,6 +101,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             Client client)
     {
         List<EnhanceEntity> ls = null;
+        
         if (!isParent)
         {
             // if it is not a parent.
@@ -220,6 +223,12 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
      */
     public String getSqlQueryFromJPA(EntityMetadata entityMetadata, List<String> relations, Set<String> primaryKeys)
     {
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        if(appMetadata.isNative(jpaQuery))
+        {
+            return jpaQuery;
+        }
+        
         String aliasName = "_" + entityMetadata.getTableName();
 
         StringBuilder queryBuilder = new StringBuilder("Select ");

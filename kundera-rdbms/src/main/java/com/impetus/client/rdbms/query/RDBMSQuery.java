@@ -27,7 +27,9 @@ import com.impetus.client.rdbms.HibernateClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
@@ -87,10 +89,7 @@ public class RDBMSQuery extends QueryImpl implements Query
         // retrieve
         log.debug("On handleAssociation() retrieve associations ");
 
-        ((RDBMSEntityReader) getReader()).setConditions(getKunderaQuery().getFilterClauseQueue());
-
-        ((RDBMSEntityReader) getReader()).setFilter(getKunderaQuery().getFilter());
-
+        initializeReader();
         List<EnhanceEntity> ls = getReader().populateRelation(m, relationNames, isParent, client);
         // pass graph and list of enhanced entities and graph for association
         // population.
@@ -110,17 +109,14 @@ public class RDBMSQuery extends QueryImpl implements Query
 
         List<Object> result = null;
 
-        ((RDBMSEntityReader) getReader()).setConditions(getKunderaQuery().getFilterClauseQueue());
-
-        ((RDBMSEntityReader) getReader()).setFilter(getKunderaQuery().getFilter());
+        initializeReader();
 
         try
         {
             if (MetadataUtils.useSecondryIndex(client.getPersistenceUnit()))
             {
                 List<String> relations = new ArrayList<String>();
-                List r = ((HibernateClient) client).find(
-                        ((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, relations, null), relations, m);
+                List r = ((HibernateClient) client).find(((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, relations, null), relations, m);
                 result = new ArrayList<Object>(r.size());
 
                 for (Object o : r)
@@ -152,6 +148,7 @@ public class RDBMSQuery extends QueryImpl implements Query
         return result;
     }
 
+
     /*
      * (non-Javadoc)
      * 
@@ -175,6 +172,22 @@ public class RDBMSQuery extends QueryImpl implements Query
     {
         throw new UnsupportedOperationException("executeUpdate not supported for RDBMS");
 
+    }
+
+    /**
+     * Initializes reader with conditions and filter in case for JPA/Named query only!
+     * 
+     */
+    private void initializeReader()
+    {
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+
+        if (!appMetadata.isNative(getJPAQuery()))
+        {
+            ((RDBMSEntityReader) getReader()).setConditions(getKunderaQuery().getFilterClauseQueue());
+
+            ((RDBMSEntityReader) getReader()).setFilter(getKunderaQuery().getFilter());
+        }
     }
 
 }
