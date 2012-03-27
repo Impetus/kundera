@@ -19,8 +19,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.CascadeType;
+
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
+import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.metadata.model.Relation;
 
 /**
@@ -48,7 +51,7 @@ public class FlushStackManager
      * @param pc
      * @param node
      */
-    private void addNodesToFlushStack(PersistenceCache pc, Node node) {
+    public void addNodesToFlushStack(PersistenceCache pc, Node node) {
         FlushStack flushStack = pc.getFlushStack();
         MainCache mainCache = (MainCache)pc.getMainCache();
         Map<String, Node> nodeMappings = mainCache.getNodeMappings();  
@@ -68,7 +71,7 @@ public class FlushStackManager
                 
                 switch (multiplicity)
                 {
-                case ONE_TO_ONE:
+                case ONE_TO_ONE:                    
                     oneToOneChildren.put(nodeLink, children.get(nodeLink));
                     break;
                 case ONE_TO_MANY:

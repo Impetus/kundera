@@ -15,7 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
-import com.impetus.kundera.graph.Node;
+
+import com.impetus.kundera.lifecycle.NodeStateContext;
 
 /**
  * State machine class for Node state
@@ -24,28 +25,28 @@ import com.impetus.kundera.graph.Node;
  */
 public abstract class NodeState
 {
-    public abstract void initialize(Node node);
+    public abstract void initialize(NodeStateContext nodeStateContext);
     
     //Life cycle Management
-    public abstract void handlePersist(Node node);    
-    public abstract void handleRemove(Node node);
-    public abstract void handleRefresh(Node node);    
-    public abstract void handleMerge(Node node);    
-    public abstract void handleDetach(Node node);
+    public abstract void handlePersist(NodeStateContext nodeStateContext);    
+    public abstract void handleRemove(NodeStateContext nodeStateContext);
+    public abstract void handleRefresh(NodeStateContext nodeStateContext);    
+    public abstract void handleMerge(NodeStateContext nodeStateContext);    
+    public abstract void handleDetach(NodeStateContext nodeStateContext);
     
-    public abstract void handleClose(Node node);    
-    public abstract void handleLock(Node node);    
+    public abstract void handleClose(NodeStateContext nodeStateContext);    
+    public abstract void handleLock(NodeStateContext nodeStateContext);    
     
-    public abstract void handleCommit(Node node);
-    public abstract void handleRollback(Node node);
+    public abstract void handleCommit(NodeStateContext nodeStateContext);
+    public abstract void handleRollback(NodeStateContext nodeStateContext);
     
     //Identity Management
-    public abstract void handleFind(Node node);
-    public abstract void handleGetReference(Node node);
-    public abstract void handleContains(Node node);
+    public abstract void handleFind(NodeStateContext nodeStateContext);
+    public abstract void handleGetReference(NodeStateContext nodeStateContext);
+    public abstract void handleContains(NodeStateContext nodeStateContext);
     
     //Cache Management
-    public abstract void handleClear(Node node);
-    public abstract void handleFlush(Node node);
+    public abstract void handleClear(NodeStateContext nodeStateContext);
+    public abstract void handleFlush(NodeStateContext nodeStateContext);
     
 }

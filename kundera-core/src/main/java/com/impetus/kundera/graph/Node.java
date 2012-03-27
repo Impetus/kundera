@@ -18,14 +18,17 @@ package com.impetus.kundera.graph;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.impetus.kundera.lifecycle.EntityStateContext;
-import com.impetus.kundera.lifecycle.EntityStateContextImpl;
+
+import com.impetus.kundera.client.Client;
+import com.impetus.kundera.lifecycle.NodeStateContext;
+import com.impetus.kundera.lifecycle.states.NodeState;
+import com.impetus.kundera.lifecycle.states.TransientState;
 
 /**
  * Represents a node in object graph 
  * @author amresh.singh
  */
-public class Node extends EntityStateContextImpl 
+public class Node implements NodeStateContext
 {  
     
     //ID of a node into object graph
@@ -33,6 +36,9 @@ public class Node extends EntityStateContextImpl
     
     //Actual node data
     private Object data;
+    
+    //Current node state as defined in state machine
+    private NodeState currentNodeState;
     
     //Class of actual node data
     private Class<?> dataClass;    
@@ -49,6 +55,12 @@ public class Node extends EntityStateContextImpl
     //Whether this node is dirty
     private boolean dirty;
     
+    //Whether this is a head node
+    private boolean isHeadNode;
+    
+    /** Client for this node */
+    Client client;
+    
     public Node() {        
     }
     
@@ -56,12 +68,15 @@ public class Node extends EntityStateContextImpl
         this.nodeId = nodeId;
         this.data = data;
         this.dataClass = data.getClass();    
-
+        
+        //Initialize current node state to transient state
+        this.currentNodeState = new TransientState();
     }
 
     /**
      * @return the nodeId
      */
+    @Override
     public String getNodeId()
     {
         return nodeId;
@@ -70,6 +85,7 @@ public class Node extends EntityStateContextImpl
     /**
      * @param nodeId the nodeId to set
      */
+    @Override
     public void setNodeId(String nodeId)
     {
         this.nodeId = nodeId;
@@ -78,6 +94,7 @@ public class Node extends EntityStateContextImpl
     /**
      * @return the data
      */
+    @Override
     public Object getData()
     {
         return data;
@@ -86,6 +103,7 @@ public class Node extends EntityStateContextImpl
     /**
      * @param data the data to set
      */
+    @Override
     public void setData(Object data)
     {
         this.data = data;
@@ -94,23 +112,43 @@ public class Node extends EntityStateContextImpl
     /**
      * @return the dataClass
      */
+    @Override
     public Class getDataClass()
     {
         return dataClass;
-    }  
-
-
+    }    
+    
     /**
      * @param dataClass the dataClass to set
      */
+    @Override
     public void setDataClass(Class dataClass)
     {
         this.dataClass = dataClass;
     }
 
     /**
+     * @return the currentNodeState
+     */
+    @Override
+    public NodeState getCurrentNodeState()
+    {
+        return currentNodeState;
+    }
+
+    /**
+     * @param currentNodeState the currentNodeState to set
+     */
+    @Override
+    public void setCurrentNodeState(NodeState currentNodeState)
+    {
+        this.currentNodeState = currentNodeState;
+    }    
+
+    /**
      * @return the parents
      */
+    @Override
     public Map<NodeLink, Node> getParents()
     {
         return parents;
@@ -119,6 +157,7 @@ public class Node extends EntityStateContextImpl
     /**
      * @param parents the parents to set
      */
+    @Override
     public void setParents(Map<NodeLink, Node> parents)
     {
         this.parents = parents;
@@ -127,6 +166,7 @@ public class Node extends EntityStateContextImpl
     /**
      * @return the children
      */
+    @Override
     public Map<NodeLink, Node> getChildren()
     {
         return children;
@@ -135,11 +175,33 @@ public class Node extends EntityStateContextImpl
     /**
      * @param children the children to set
      */
+    @Override
     public void setChildren(Map<NodeLink, Node> children)
     {
         this.children = children;
-    }
+    }  
     
+    
+    /**
+     * @return the isHeadNode
+     */
+    public boolean isHeadNode()
+    {
+        return isHeadNode;
+    }
+
+    /**
+     * @param isHeadNode the isHeadNode to set
+     */
+    public void setHeadNode(boolean isHeadNode)
+    {
+        this.isHeadNode = isHeadNode;
+    }
+
+    /**
+     * Retrieves parent node of this node for a given parent node ID
+     */
+    @Override
     public Node getParentNode(String parentNodeId) {
         NodeLink link = new NodeLink(parentNodeId, getNodeId());
         
@@ -150,6 +212,11 @@ public class Node extends EntityStateContextImpl
         }
     }
     
+    /**
+     * Retrieves child node of this node for a given child node ID
+     */
+    
+    @Override
     public Node getChildNode(String childNodeId) {
         NodeLink link = new NodeLink(getNodeId(), childNodeId);
         
@@ -160,6 +227,7 @@ public class Node extends EntityStateContextImpl
         }
     }
     
+    @Override
     public void addParentNode(NodeLink nodeLink, Node node) {
         if(parents == null || parents.isEmpty()) {
             parents = new HashMap<NodeLink, Node>();
@@ -167,6 +235,7 @@ public class Node extends EntityStateContextImpl
         parents.put(nodeLink, node);
     }
     
+    @Override
     public void addChildNode(NodeLink nodeLink, Node node) {
         if(children == null || children.isEmpty()) {
             children = new HashMap<NodeLink, Node>();
@@ -177,6 +246,7 @@ public class Node extends EntityStateContextImpl
     /**
      * @return the traversed
      */
+    @Override
     public boolean isTraversed()
     {
         return traversed;
@@ -185,6 +255,7 @@ public class Node extends EntityStateContextImpl
     /**
      * @param traversed the traversed to set
      */
+    @Override
     public void setTraversed(boolean traversed)
     {
         this.traversed = traversed;
@@ -193,6 +264,7 @@ public class Node extends EntityStateContextImpl
     /**
      * @return the dirty
      */
+    @Override
     public boolean isDirty()
     {
         return dirty;
@@ -201,14 +273,121 @@ public class Node extends EntityStateContextImpl
     /**
      * @param dirty the dirty to set
      */
+    @Override
     public void setDirty(boolean dirty)
     {
         this.dirty = dirty;
+    }  
+    
+
+    /**
+     * @return the client
+     */
+    public Client getClient()
+    {
+        return client;
+    }
+
+    /**
+     * @param client the client to set
+     */
+    public void setClient(Client client)
+    {
+        this.client = client;
     }
 
     @Override
     public String toString() {
         return "[" + nodeId +  "]";
+    } 
+    
+    
+    //////////////////////////////////////////
+    /* CRUD related operations on this node */
+    //////////////////////////////////////////
+    
+    @Override
+    public void persist()
+    {
+        getCurrentNodeState().handlePersist(this);
+    }
+
+    @Override
+    public void remove()
+    {
+        getCurrentNodeState().handleRemove(this);
+    }
+
+    @Override
+    public void refresh()
+    {
+        getCurrentNodeState().handleRefresh(this);
+    }
+
+    @Override
+    public void merge()
+    {
+        getCurrentNodeState().handleMerge(this);
+    }
+
+    @Override
+    public void detach()
+    {
+        getCurrentNodeState().handleDetach(this);
+    }
+
+    @Override
+    public void close()
+    {
+        getCurrentNodeState().handleClose(this);
+    }
+
+    @Override
+    public void lock()
+    {
+        getCurrentNodeState().handleLock(this);
+    }
+
+    @Override
+    public void commit()
+    {
+        getCurrentNodeState().handleCommit(this);
+    }
+
+    @Override
+    public void rollback()
+    {
+        getCurrentNodeState().handleRollback(this);
+    }
+
+    @Override
+    public void find()
+    {
+        getCurrentNodeState().handleFind(this);
+    }
+
+    @Override
+    public void getReference()
+    {
+        getCurrentNodeState().handleGetReference(this);
+    }
+
+    @Override
+    public void contains()
+    {
+        getCurrentNodeState().handleContains(this);
+    }
+
+    @Override
+    public void clear()
+    {
+        getCurrentNodeState().handleClear(this);
+    }
+
+    @Override
+    public void flush()
+    {
+        getCurrentNodeState().handleFlush(this);
     }   
 
 }

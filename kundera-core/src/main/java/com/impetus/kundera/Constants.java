@@ -73,5 +73,7 @@ public final class Constants
      * join columns.
      */
     public final static String JOIN_COLUMNS_FAMILY_NAME = "JoinColumns";
+    
+    public final static String NODE_ID_SEPARATOR = "$";
 
 }

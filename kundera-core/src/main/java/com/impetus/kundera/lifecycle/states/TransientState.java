@@ -23,6 +23,8 @@ import javax.persistence.CascadeType;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
+import com.impetus.kundera.lifecycle.NodeStateContext;
+import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * @author amresh
@@ -32,100 +34,110 @@ public class TransientState extends NodeState
 {    
 
     @Override
-    public void initialize(Node node)
+    public void initialize(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handlePersist(Node node)
-    {
+    public void handlePersist(NodeStateContext nodeStateContext)
+    {        
+        
         //Transient ---> Managed
-        node.setCurrentEntityState(new ManagedState());      
+        nodeStateContext.setCurrentNodeState(new ManagedState());      
         
         //Mark this entity for saving in database
-        node.setDirty(true);
+        nodeStateContext.setDirty(true);
+        
+        //If it's a head node, add this to the list of head nodes in PC
+        if(nodeStateContext.isHeadNode()) {
+            PersistenceCache.INSTANCE.getMainCache().addHeadNode((Node)nodeStateContext);
+        }
         
         //Add this node into persistence cache
+        PersistenceCache.INSTANCE.getMainCache().addNodeToCache((Node)nodeStateContext);
 
         //Recurse persist operation on all managed entities for whom cascade=ALL or PERSIST
-        Map<NodeLink, Node> children = node.getChildren();
-        for(NodeLink nodeLink : children.keySet()) {
-            List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
-            if(cascadeTypes.contains(CascadeType.PERSIST) || cascadeTypes.contains(CascadeType.ALL)) {
-                Node childNode = children.get(nodeLink);                
-                childNode.persist();
+        Map<NodeLink, Node> children = nodeStateContext.getChildren();
+        if(children != null) {
+            for(NodeLink nodeLink : children.keySet()) {
+                List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
+                if(cascadeTypes.contains(CascadeType.PERSIST) || cascadeTypes.contains(CascadeType.ALL)) {
+                    Node childNode = children.get(nodeLink);                
+                    childNode.persist();
+                }
             }
         }
+        
     }                
                    
 
     @Override
-    public void handleRemove(Node node)
+    public void handleRemove(NodeStateContext nodeStateContext)
     {
         //Ignored, Entity will remain in the Transient state
         //TODO: Recurse remove operation for all related entities for whom cascade=ALL or REMOVE
     }
 
     @Override
-    public void handleRefresh(Node node)
+    public void handleRefresh(NodeStateContext nodeStateContext)
     {
         //Ignored, Entity will remain in the Transient state
         //TODO: Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
     }
 
     @Override
-    public void handleMerge(Node node)
+    public void handleMerge(NodeStateContext nodeStateContext)
     {
         //TODO: create a new managed entity and copy state of original entity into this one.
     }
     
     @Override
-    public void handleFind(Node node)
+    public void handleFind(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handleClose(Node node)
+    public void handleClose(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handleClear(Node node)
+    public void handleClear(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handleFlush(Node node)
+    public void handleFlush(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handleLock(Node node)
+    public void handleLock(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handleDetach(Node node)
+    public void handleDetach(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handleCommit(Node node)
+    public void handleCommit(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handleRollback(Node node)
+    public void handleRollback(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handleGetReference(Node node)
+    public void handleGetReference(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handleContains(Node node)
+    public void handleContains(NodeStateContext nodeStateContext)
     {
     }    
     

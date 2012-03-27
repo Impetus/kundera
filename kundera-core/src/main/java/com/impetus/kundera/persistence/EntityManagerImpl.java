@@ -55,6 +55,9 @@ public class EntityManagerImpl implements EntityManager
 
     /** The closed. */
     private boolean closed = false;
+    
+    /** Flush mode for this EM, default is AUTO.  */
+    FlushModeType flushMode = FlushModeType.AUTO;
 
     /** The session. */
     private EntityManagerSession session;
@@ -65,8 +68,6 @@ public class EntityManagerImpl implements EntityManager
     /** Properties provided by user at the time of EntityManager Creation. */
     private PersistenceDelegator persistenceDelegator;
     
-    /** Persistence context associated with this entity manager*/
-    private PersistenceCache pc;
     
     FlushStackManager flushStackManager;    
 
@@ -80,12 +81,8 @@ public class EntityManagerImpl implements EntityManager
     {
         this.factory = factory;
         logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
-        session = new EntityManagerSession((Cache) factory.getCache());
-
-        //Initialize persistence context associated with this entity manager
-        pc = new PersistenceCache();       
-        
-        persistenceDelegator = new PersistenceDelegator(session, pc);
+        session = new EntityManagerSession((Cache) factory.getCache());               
+        persistenceDelegator = new PersistenceDelegator(session);
         logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
     }
 
@@ -180,8 +177,9 @@ public class EntityManagerImpl implements EntityManager
     {
         checkClosed();
         session.clear();
-        pc.clean();
         // TODO Do we need a client and persistenceDelegator close here?
+        
+        //TODO: Move all nodes tied to this EM into detached state
     }
 
 
@@ -192,8 +190,8 @@ public class EntityManagerImpl implements EntityManager
         session.clear();
         session = null;
         persistenceDelegator.close();
-        pc.clean();
-        pc = null;
+        
+        //TODO: Move all nodes tied to this EM into detached state
         closed = true;
     }
 
@@ -304,15 +302,11 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#getFlushMode()
-     */
+
     @Override
     public final FlushModeType getFlushMode()
     {
-        throw new NotImplementedException("TODO");
+        return this.flushMode;
     }
 
     /*
@@ -531,17 +525,11 @@ public class EntityManagerImpl implements EntityManager
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * javax.persistence.EntityManager#setFlushMode(javax.persistence.FlushModeType
-     * )
-     */
     @Override
     public final void setFlushMode(FlushModeType flushMode)
     {
-        throw new NotImplementedException("TODO");
+        this.flushMode = flushMode;
+        persistenceDelegator.setFlushMode(flushMode);
     }
 
     /*

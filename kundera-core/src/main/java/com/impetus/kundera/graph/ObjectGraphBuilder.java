@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -68,20 +69,23 @@ public class ObjectGraphBuilder
             //child Object set in this entity
             Object childObject =  PropertyAccessorHelper.getObject(entity, relation.getProperty());
             
-            //This child object could be either an entity(1-1 or M-1) or a collection of entities(1-M or M-M)
-            if(Collection.class.isAssignableFrom(childObject.getClass())) {
-                //For each entity in the collection, construct a child node and add to graph
-                Collection childrenObjects = (Collection) childObject;
-                
-                for(Object childObj : childrenObjects) {
-                    addChildNodesToGraph(graph, node, relation, childObj);
-                }                
-                
-                
-            } else {
-                //Construct child node and add to graph
-                addChildNodesToGraph(graph, node, relation, childObject);
-            }
+            if(childObject != null) {
+              //This child object could be either an entity(1-1 or M-1) or a collection of entities(1-M or M-M)
+                if(Collection.class.isAssignableFrom(childObject.getClass())) {
+                    //For each entity in the collection, construct a child node and add to graph
+                    Collection childrenObjects = (Collection) childObject;
+                    
+                    for(Object childObj : childrenObjects) {
+                        addChildNodesToGraph(graph, node, relation, childObj);
+                    }                
+                    
+                    
+                } else {
+                    //Construct child node and add to graph
+                    addChildNodesToGraph(graph, node, relation, childObject);
+                }
+            }   
+            
             
         }        
         //Finally put this node into object graph
@@ -116,7 +120,7 @@ public class ObjectGraphBuilder
     private Map<LinkProperty, Object> getLinkProperties(Relation relation) {
         Map<LinkProperty, Object> linkProperties = new HashMap<NodeLink.LinkProperty, Object>();
         
-        linkProperties.put(LinkProperty.JOIN_COLUMN_NAME, relation.getJoinColumnName());
+        linkProperties.put(LinkProperty.LINK_NAME, relation.getJoinColumnName());
         linkProperties.put(LinkProperty.IS_SHARED_BY_PRIMARY_KEY, relation.isJoinedByPrimaryKey());
         linkProperties.put(LinkProperty.IS_BIDIRECTIONAL, !relation.isUnary());
         linkProperties.put(LinkProperty.IS_RELATED_VIA_JOIN_TABLE, relation.isRelatedViaJoinTable());
@@ -127,12 +131,17 @@ public class ObjectGraphBuilder
         //Add All link properties
         
         return linkProperties;      
-    }
-    
+    }    
     
     
     public static String getNodeId(Object pk, Object nodeData) {
-        return nodeData.getClass().getName() + "***" + (String)pk;
+        return nodeData.getClass().getName() + Constants.NODE_ID_SEPARATOR + (String)pk;
     }
+    
+    public static String getEntityId(String nodeId) {
+        
+        return nodeId.substring(nodeId.indexOf(Constants.NODE_ID_SEPARATOR) + 1, nodeId.length());
+    }
+    
     
 }

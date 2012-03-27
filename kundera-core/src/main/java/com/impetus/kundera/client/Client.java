@@ -18,6 +18,7 @@ package com.impetus.kundera.client;
 import java.util.List;
 import java.util.Map;
 
+import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
@@ -136,6 +137,8 @@ public interface Client
      * @return id id of persisted entity.
      */
     void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata);
+    
+    void persist(Node node);
 
     /**
      * Find.

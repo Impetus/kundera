@@ -62,6 +62,10 @@ import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
+import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.NodeLink;
+import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -385,6 +389,77 @@ public class PelopsClient implements Client
         }
         return null;
     }
+    
+    
+
+    @Override
+    public void persist(Node node)
+    {
+        Object entity = node.getData();
+        String id = ObjectGraphBuilder.getEntityId(node.getNodeId());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+        
+        try
+        {
+            //Populate thrift row for this entity
+            PelopsDataHandler.ThriftRow tf = populateTfRow(entity, id, metadata);
+                        
+            Map<NodeLink, Node> parents = node.getParents();
+            Map<NodeLink, Node> children = node.getChildren();
+            
+            //Add column value for all parent nodes linked to this node
+            if(parents != null && ! parents.isEmpty()) {
+                for(NodeLink parentNodeLink : parents.keySet()) {
+                    addNodeLinkToThriftRow(metadata, tf, parentNodeLink);
+                }
+            }
+            
+            //Add column value for all child nodes linked to this node
+            if(children != null && ! children.isEmpty()) {
+                for(NodeLink childNodeLink : children.keySet()) {
+                    addNodeLinkToThriftRow(metadata, tf, childNodeLink);
+                }
+            }
+            
+            onPersist(metadata, entity, tf);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }      
+        
+        
+        
+    }
+
+    /**
+     * @param metadata
+     * @param tf
+     * @param nodeLink
+     */
+    private void addNodeLinkToThriftRow(EntityMetadata metadata, PelopsDataHandler.ThriftRow tf, NodeLink nodeLink)
+    {
+        String linkName = (String)nodeLink.getLinkProperty(LinkProperty.LINK_NAME);
+        String linkValue = (String)nodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
+        Boolean isSharedByPrimaryKey = (Boolean)nodeLink.getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
+        
+        if(linkName != null && linkValue != null && ! isSharedByPrimaryKey) {
+            if (metadata.getEmbeddedColumnsAsList().isEmpty())
+            {
+                Column col = populateFkey(linkName, linkValue, timestamp);
+                tf.addColumn(col);
+            }
+            else
+            {
+                SuperColumn superColumn = new SuperColumn();
+                superColumn.setName(linkName.getBytes());
+                Column column = populateFkey(linkName, linkValue, timestamp);
+                superColumn.addToColumns(column);
+                tf.addSuperColumn(superColumn);
+            }
+        }
+    } 
+
 
     /*
      * (non-Javadoc)
@@ -900,6 +975,8 @@ public class PelopsClient implements Client
      * @throws PropertyAccessException
      *             the property access exception
      */
+    @Deprecated
+    //Delete this method after node implementation completes
     private void addRelation(EntitySaveGraph entitySaveGraph, EntityMetadata m, String rlName, String rlValue,
             PelopsDataHandler.ThriftRow tf) throws PropertyAccessException
     {

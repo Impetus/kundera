@@ -38,41 +38,52 @@ public class CacheBase
         nodeMappings = new HashMap<String, Node>();
     }
     
+    public void addNodeToCache(Node node) {
+       /* check if this node already exists in cache node mappings
+        * If yes, update parents and children links
+        * Otherwise, just simply add the node to cache node mappings
+       */
+       
+        if (getNodeMappings().containsKey(node.getNodeId()))
+        {            
+            Node existingNode = getNodeMappings().get(node.getNodeId());
+
+            if (existingNode.getParents() != null)
+            {
+                if (node.getParents() == null)
+                {
+                    node.setParents(new HashMap<NodeLink, Node>());
+                }
+                node.getParents().putAll(existingNode.getParents());
+            }
+
+            if (existingNode.getChildren() != null)
+            {
+                if (node.getChildren() == null)
+                {
+                    node.setChildren(new HashMap<NodeLink, Node>());
+                }
+                node.getChildren().putAll(existingNode.getChildren());
+            }
+
+            getNodeMappings().put(node.getNodeId(), node);
+        }
+        else
+        {
+            getNodeMappings().put(node.getNodeId(), node);
+        }
+    }   
+    
     public void addGraphToCache(ObjectGraph graph) {
         
         //Add head Node to list of head nodes
         getHeadNodes().add(graph.getHeadNode());
         
-        /*for each node in this graph, check if it already exists in cache node mappings
-         * If yes, update parents and children links
-         * Otherwise, just simply add the node to cache node mappings
-        */
-        for(String key : graph.getNodeMapping().keySet()) {
-            if(getNodeMappings().containsKey(key)) {
-                Node thisNode = graph.getNodeMapping().get(key);
-                Node existingNode = getNodeMappings().get(key);
-                
-                if(existingNode.getParents() != null) {
-                    if(thisNode.getParents() == null) {
-                        thisNode.setParents(new HashMap<NodeLink, Node>());
-                    }
-                    thisNode.getParents().putAll(existingNode.getParents());
-                }
-                
-                if(existingNode.getChildren() != null) {
-                    if(thisNode.getChildren() == null) {
-                        thisNode.setChildren(new HashMap<NodeLink, Node>());
-                    }
-                    thisNode.getChildren().putAll(existingNode.getChildren());
-                }
-                 
-                
-                
-                getNodeMappings().put(key, graph.getNodeMapping().get(key));
-            } else {
-                getNodeMappings().put(key, graph.getNodeMapping().get(key));
-            }
-        }      
+        //Add each node in the graph to cache
+        for(String key : graph.getNodeMapping().keySet()) {            
+            Node thisNode = graph.getNodeMapping().get(key);
+            addNodeToCache(thisNode);            
+        }
         
     }
     

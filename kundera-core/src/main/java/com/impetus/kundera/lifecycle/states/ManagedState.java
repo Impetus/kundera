@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
+
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.lifecycle.NodeStateContext;
 
 /**
  * @author amresh
@@ -24,101 +27,99 @@ import com.impetus.kundera.graph.Node;
 public class ManagedState extends NodeState
 {
     @Override
-    public void initialize(Node node)
+    public void initialize(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handlePersist(Node node)
+    public void handlePersist(NodeStateContext nodeStateContext)
     {
         //Ignored, entity remains in the same state
         //TODO: Cascade persist operation for related entities for whom cascade=ALL or PERSIST
     }   
 
     @Override
-    public void handleRemove(Node node)
+    public void handleRemove(NodeStateContext nodeStateContext)
     {
-        node.setCurrentEntityState(new RemovedState());
+        nodeStateContext.setCurrentNodeState(new RemovedState());
         //TODO: Mark entity for removal in persistence context
         //TODO: Recurse remove operation for all related entities for whom cascade=ALL or REMOVE
     }
 
     @Override
-    public void handleRefresh(Node node)
+    public void handleRefresh(NodeStateContext nodeStateContext)
     {
         //TODO: Refresh entity state from the database
         //TODO: Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
     }
 
     @Override
-    public void handleMerge(Node node)
+    public void handleMerge(NodeStateContext nodeStateContext)
     {
       //Ignored, entity remains in the same state
       //TODO: Cascade manage operation for all related entities for whom cascade=ALL or MERGE
     }
     
     @Override
-    public void handleFind(Node node)
+    public void handleFind(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handleClose(Node node)
+    public void handleClose(NodeStateContext nodeStateContext)
     {
-        node.setCurrentEntityState(new DetachedState());
+        nodeStateContext.setCurrentNodeState(new DetachedState());
     }
 
     @Override
-    public void handleClear(Node node)
+    public void handleClear(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handleFlush(Node node)
+    public void handleFlush(NodeStateContext nodeStateContext)
     {        
-        //TODO: Check for flush mode, if commit do nothing (state will be updated at commit)
-        //else if AUTO, synchronize with DB
+        //Entity state to remain as Managed     
         
-        //Entity state to remain as Managed
-        
-        //Cascade flush for all related entities for whom cascade=ALL or PERSIST
-        
+        //Flush this node to database      
+        Client client = nodeStateContext.getClient();
+        client.persist((Node)nodeStateContext);     
         
     }
 
     @Override
-    public void handleLock(Node node)
+    public void handleLock(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handleDetach(Node node)
+    public void handleDetach(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handleCommit(Node node)
+    public void handleCommit(NodeStateContext nodeStateContext)
     {
-        node.setCurrentEntityState(new DetachedState());
+        nodeStateContext.setCurrentNodeState(new DetachedState());
     }
 
     @Override
-    public void handleRollback(Node node)
+    public void handleRollback(NodeStateContext nodeStateContext)
     {
         //If persistence context is EXTENDED
-        node.setCurrentEntityState(new TransientState());
+        nodeStateContext.setCurrentNodeState(new TransientState());
         
         //If persistence context is TRANSACTIONAL
         //context.setCurrentEntityState(new DetachedState());
     }
 
     @Override
-    public void handleGetReference(Node node)
+    public void handleGetReference(NodeStateContext nodeStateContext)
     {
     }
 
     @Override
-    public void handleContains(Node node)
+    public void handleContains(NodeStateContext nodeStateContext)
     {
     }   
     

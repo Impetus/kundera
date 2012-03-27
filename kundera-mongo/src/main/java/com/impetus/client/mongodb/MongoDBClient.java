@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.PersistenceException;
-
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -38,7 +37,6 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.proxy.EnhancedEntity;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -137,6 +135,22 @@ public class MongoDBClient implements Client
 
         return null;
     }
+    
+    public void persist(Node node) {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+        
+        String dbName = entityMetadata.getSchema();
+        String documentName = entityMetadata.getTableName();
+
+        log.debug("Persisting data into " + dbName + "." + documentName + " for ID:" + node.getNodeId());
+        DBCollection dbCollection = mongoDb.getCollection(documentName);
+
+        BasicDBObject document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(
+                entityMetadata, node.getData(), null);
+        dbCollection.save(document);
+    }
+    
+   
 
     /*
      * (non-Javadoc)
@@ -402,7 +416,8 @@ public class MongoDBClient implements Client
                 entityMetadata, entity, relations);
         dbCollection.save(document);
 
-    }
+    }    
+    
 
     /*
      * (non-Javadoc)

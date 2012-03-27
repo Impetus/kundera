@@ -15,6 +15,12 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle;
 
+import java.util.Map;
+
+
+import com.impetus.kundera.client.Client;
+import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.lifecycle.states.NodeState;
 
 /**
@@ -22,10 +28,45 @@ import com.impetus.kundera.lifecycle.states.NodeState;
  * @author amresh
  * 
  */
-public interface EntityStateContext
-{
-    NodeState getCurrentEntityState();
-
+public interface NodeStateContext
+{    
+    //State methods    
+    NodeState getCurrentNodeState();
+    void setCurrentNodeState(NodeState nodeState); 
+    
+    String getNodeId();
+    void setNodeId(String nodeId);   
+    
+    Object getData();
+    void setData(Object data); 
+    
+    Class getDataClass();
+    void setDataClass(Class dataClass);
+    
+    Map<NodeLink, Node> getParents();
+    void setParents(Map<NodeLink, Node> parents);
+    
+    Map<NodeLink, Node> getChildren();
+    void setChildren(Map<NodeLink, Node> children);
+    
+    Node getParentNode(String parentNodeId);
+    Node getChildNode(String childNodeId);
+    
+    void addParentNode(NodeLink nodeLink, Node node);
+    void addChildNode(NodeLink nodeLink, Node node);
+    
+    boolean isTraversed();
+    void setTraversed(boolean traversed);
+    
+    boolean isDirty();
+    void setDirty(boolean dirty);
+    
+    boolean isHeadNode();
+    void setHeadNode(boolean isHeadNode);    
+    
+    Client getClient();
+    void setClient(Client client);
+    
     // Life cycle Management
     void persist();
     void remove();

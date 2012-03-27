@@ -74,9 +74,9 @@ public class ObjectGraphTest
         NodeLink linkB2 = new NodeLink(storeId, b2Id);
         NodeLink linkB3 = new NodeLink(storeId, b3Id);
         
-        linkB1.addLinkProperty(LinkProperty.JOIN_COLUMN_NAME, "STORE_ID");
-        linkB2.addLinkProperty(LinkProperty.JOIN_COLUMN_NAME, "STORE_ID");
-        linkB3.addLinkProperty(LinkProperty.JOIN_COLUMN_NAME, "STORE_ID");
+        linkB1.addLinkProperty(LinkProperty.LINK_NAME, "STORE_ID");
+        linkB2.addLinkProperty(LinkProperty.LINK_NAME, "STORE_ID");
+        linkB3.addLinkProperty(LinkProperty.LINK_NAME, "STORE_ID");
         
         headNode.addChildNode(linkB1, child1);
         headNode.addChildNode(linkB2, child2);

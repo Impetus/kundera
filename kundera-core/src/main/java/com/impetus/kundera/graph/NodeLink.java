@@ -28,8 +28,8 @@ public class NodeLink
 {
     //All possible node link properties
     public enum LinkProperty {
-        JOIN_COLUMN_NAME,
-        JOIN_COLUMN_VALUE,
+        LINK_NAME,
+        LINK_VALUE,
         IS_SHARED_BY_PRIMARY_KEY,
         IS_BIDIRECTIONAL,
         IS_RELATED_VIA_JOIN_TABLE,

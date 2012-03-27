@@ -16,6 +16,7 @@
 package com.impetus.kundera.persistence.context;
 
 
+
 /**
  * Implementation of Persistence Context as defined in JPA.
  * Acts as a cache of entities. 
@@ -36,6 +37,9 @@ public class PersistenceCache
     private CacheBase transactionalCache;
     
     FlushStackManager flushStackManager;
+    
+    /** one instance of this class */
+    public static final PersistenceCache INSTANCE = new PersistenceCache();
     
     /**
      * Stack containing Nodes to be flushed

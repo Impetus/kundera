@@ -35,6 +35,7 @@ import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -253,6 +254,14 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return null;
 
     }
+    
+    
+
+    @Override
+    public void persist(Node node)
+    {
+    }
+
 
     /*
      * (non-Javadoc)

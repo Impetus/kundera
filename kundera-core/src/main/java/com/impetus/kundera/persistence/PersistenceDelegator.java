@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.FlushModeType;
 import javax.persistence.PostPersist;
 import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
@@ -41,10 +42,10 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.NodeLink;
+import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
-import com.impetus.kundera.lifecycle.EntityStateContext;
-import com.impetus.kundera.lifecycle.EntityStateContextImpl;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
@@ -87,7 +88,8 @@ public class PersistenceDelegator
     /** The no session lookup. */
     private boolean noSessionLookup; 
     
-    private PersistenceCache pc;
+ 
+    private FlushModeType flushMode = FlushModeType.AUTO;
     
     private ObjectGraphBuilder graphBuilder;
     
@@ -102,10 +104,9 @@ public class PersistenceDelegator
      * @param persistenceUnits
      *            the persistence units
      */
-    public PersistenceDelegator(EntityManagerSession session, PersistenceCache pc)
+    public PersistenceDelegator(EntityManagerSession session)
     {
-        this.session = session;
-        this.pc = pc;
+        this.session = session;        
         eventDispatcher = new EntityEventDispatcher();
         graphBuilder = new ObjectGraphBuilder();
         flushStackManager = new FlushStackManager();
@@ -491,7 +492,7 @@ public class PersistenceDelegator
      * @param e
      *            the e
      */
-    public void persist(Object e)
+    public void persist2(Object e)
     {
         // Invoke Pre Persist Events
         EntityMetadata metadata = getMetadata(e.getClass());
@@ -511,7 +512,7 @@ public class PersistenceDelegator
 
     }
     
-    public void persist2(Object e) {
+    public void persist(Object e) {
         //Invoke Pre Persist Events
         EntityMetadata metadata = getMetadata(e.getClass());
         getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
@@ -523,6 +524,7 @@ public class PersistenceDelegator
         //pc.getMainCache().addGraphToCache(graph);
         //Call persist on each node in object graph
         Node headNode = graph.getHeadNode();
+        headNode.setHeadNode(true);
         headNode.persist();
         
         
@@ -1083,20 +1085,65 @@ public class PersistenceDelegator
      * Flushes Dirty objects in {@link PersistenceCache} to databases.
      */
     public void flush() {
-        //Build Flush Stack from the Persistence Cache        
-        flushStackManager.buildFlushStack(pc);
-        
-        //Get flush stack from Persistence Cache
-        FlushStack fs = pc.getFlushStack();
-        
-        //Flush each node in flush stack from top to bottom unit it's empty
-        log.debug("Flushing following flush stack to database(s) (showing stack objects from top to bottom):\n" + fs);        
-        while(!fs.isEmpty()) {
-            Node node = fs.pop();
-            node.flush();        
+        //Check for flush mode, if commit do nothing (state will be updated at commit)
+        //else if AUTO, synchronize with DB
+        if(FlushModeType.COMMIT.equals(getFlushMode())) {
+            //Do nothing
+        } else if(FlushModeType.AUTO.equals(getFlushMode())) {
+            //Build Flush Stack from the Persistence Cache        
+            //TODO: Cascade flush for only those related entities for whom cascade=ALL or PERSIST
+            flushStackManager.buildFlushStack(PersistenceCache.INSTANCE);
             
-            //TODO: remove node from persistence cache
+            //Get flush stack from Persistence Cache
+            FlushStack fs = PersistenceCache.INSTANCE.getFlushStack();
+            
+            //Flush each node in flush stack from top to bottom unit it's empty
+            log.debug("Flushing following flush stack to database(s) (showing stack objects from top to bottom):\n" + fs);        
+            while(!fs.isEmpty()) {
+                Node node = fs.pop();
+                
+                EntityMetadata metadata = getMetadata(node.getDataClass());
+                node.setClient(getClient(metadata));          
+                
+                node.flush();
+                
+                //Update Link value for all nodes attached to this one
+                Map<NodeLink, Node> parents = node.getParents();
+                Map<NodeLink, Node> children = node.getChildren();
+                
+                if(parents != null && ! parents.isEmpty()) {
+                    for(NodeLink parentNodeLink : parents.keySet()) {
+                        parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, ObjectGraphBuilder.getEntityId(node.getNodeId()));
+                    }
+                }
+                
+                if(children != null && ! children.isEmpty()) {
+                    for(NodeLink childNodeLink : children.keySet()) {
+                        childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, ObjectGraphBuilder.getEntityId(node.getNodeId()));
+                    }
+                }                
+                
+                //TODO: remove node from persistence cache
+            }
         }
+        
     }
+
+    /**
+     * @return the flushMode
+     */
+    public FlushModeType getFlushMode()
+    {
+        return flushMode;
+    }
+
+    /**
+     * @param flushMode the flushMode to set
+     */
+    public void setFlushMode(FlushModeType flushMode)
+    {
+        this.flushMode = flushMode;
+    }  
+    
 
 }
