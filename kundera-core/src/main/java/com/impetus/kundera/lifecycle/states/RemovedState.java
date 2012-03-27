@@ -15,99 +15,99 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
-import com.impetus.kundera.lifecycle.EntityStateContextImpl;
+import com.impetus.kundera.graph.Node;
 
 /**
  * @author amresh
  *
  */
-public class RemovedState extends EntityState
+public class RemovedState extends NodeState
 {
     @Override
-    public void initialize(EntityStateContextImpl context)
+    public void initialize(Node node)
     {
     }
 
     @Override
-    public void handlePersist(EntityStateContextImpl context)
+    public void handlePersist(Node node)
     {
-        context.setCurrentEntityState(new ManagedState());
+        node.setCurrentEntityState(new ManagedState());
         //TODO: Recurse persist operation on all related entities for whom cascade=ALL or PERSIST
     }    
 
     @Override
-    public void handleRemove(EntityStateContextImpl context)
+    public void handleRemove(Node node)
     {
         //Ignored, entity will remain in removed state
         //TODO: Recurse remove operation for all related entities for whom cascade=ALL or REMOVE
     }
 
     @Override
-    public void handleRefresh(EntityStateContextImpl context)
+    public void handleRefresh(Node node)
     {
       //Ignored, entity will remain in removed state
       //TODO: Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
     }
 
     @Override
-    public void handleMerge(EntityStateContextImpl context)
+    public void handleMerge(Node node)
     {
         throw new IllegalArgumentException("Merge operation not allowed in Removed state");
     }
     
     @Override
-    public void handleFind(EntityStateContextImpl context)
+    public void handleFind(Node node)
     {
     }
 
     @Override
-    public void handleClose(EntityStateContextImpl context)
+    public void handleClose(Node node)
     {
     }
 
     @Override
-    public void handleClear(EntityStateContextImpl context)
+    public void handleClear(Node node)
     {
     }
 
     @Override
-    public void handleFlush(EntityStateContextImpl context)
+    public void handleFlush(Node node)
     {
     }
 
     @Override
-    public void handleLock(EntityStateContextImpl context)
+    public void handleLock(Node node)
     {
     }
 
     @Override
-    public void handleDetach(EntityStateContextImpl context)
+    public void handleDetach(Node node)
     {
     }
 
     @Override
-    public void handleCommit(EntityStateContextImpl context)
+    public void handleCommit(Node node)
     {
-        context.setCurrentEntityState(new TransientState());
+        node.setCurrentEntityState(new TransientState());
     }
 
     @Override
-    public void handleRollback(EntityStateContextImpl context)
+    public void handleRollback(Node node)
     {
         //If Persistence Context is EXTENDED
-        context.setCurrentEntityState(new ManagedState());
+        node.setCurrentEntityState(new ManagedState());
         
         //If Persistence Context is TRANSACTIONAL
         //context.setCurrentEntityState(new DetachedState());
     }
 
     @Override
-    public void handleGetReference(EntityStateContextImpl context)
+    public void handleGetReference(Node node)
     {
     }
 
     @Override
-    public void handleContains(EntityStateContextImpl context)
+    public void handleContains(Node node)
     {
     }   
     

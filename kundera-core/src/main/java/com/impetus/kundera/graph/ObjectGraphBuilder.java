@@ -121,7 +121,8 @@ public class ObjectGraphBuilder
         linkProperties.put(LinkProperty.IS_BIDIRECTIONAL, !relation.isUnary());
         linkProperties.put(LinkProperty.IS_RELATED_VIA_JOIN_TABLE, relation.isRelatedViaJoinTable());
         linkProperties.put(LinkProperty.PROPERTY, relation.getProperty());
-        //linkProperties.put(LinkProperty.BIDIRECTIONAL_PROPERTY, relation.ge);        
+        //linkProperties.put(LinkProperty.BIDIRECTIONAL_PROPERTY, relation.ge); 
+        linkProperties.put(LinkProperty.CASCADE, relation.getCascades());
         
         //Add All link properties
         
