@@ -76,7 +76,7 @@ public class HBaseEntityReader extends AbstractEntityReader implements EntityRea
         }
         catch (Exception e)
         {
-            throw new PersistenceException("Error while reading findById for Hbase" + e.getMessage());
+            throw new PersistenceException(e);
         }
 
     }
