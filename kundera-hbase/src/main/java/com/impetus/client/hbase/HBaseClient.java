@@ -99,7 +99,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     @Override
     public <E> E find(Class<E> entityClass, Object rowId, List<String> relationNames)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         // columnFamily has a different meaning for HBase, so it won't be used
         // here
         String tableName = entityMetadata.getTableName();
