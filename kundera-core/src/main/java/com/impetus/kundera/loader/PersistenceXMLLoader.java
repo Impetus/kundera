@@ -26,6 +26,11 @@ import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,34 +87,55 @@ public class PersistenceXMLLoader
 
         DocumentBuilderFactory docBuilderFactory = null;
         docBuilderFactory = DocumentBuilderFactory.newInstance();
-        docBuilderFactory.setValidating(true);
         docBuilderFactory.setNamespaceAware(true);
 
-        try
-        {
-            // otherwise Xerces fails in validation
-            docBuilderFactory.setAttribute("http://apache.org/xml/features/validation/schema", true);
-        }
-        catch (IllegalArgumentException e)
-        {
-            docBuilderFactory.setValidating(false);
-            docBuilderFactory.setNamespaceAware(false);
-        }
+        final Schema v2Schema = SchemaFactory.newInstance( javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI )
+			.newSchema( new StreamSource( getStreamFromClasspath( "persistence_2_0.xsd" ) ) );
+	final Validator v2Validator = v2Schema.newValidator();
+	final Schema v1Schema = SchemaFactory.newInstance( javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI )
+			.newSchema( new StreamSource( getStreamFromClasspath( "persistence_1_0.xsd" ) ) );
+	final Validator v1Validator = v1Schema.newValidator();
 
         InputSource source = new InputSource(is);
         DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-        // docBuilder.setEntityResolver( resolver );
 
         List errors = new ArrayList();
         docBuilder.setErrorHandler(new ErrorLogger("XML InputStream", errors));
         Document doc = docBuilder.parse(source);
 
+        if (errors.size() == 0) {
+		v2Validator.setErrorHandler( new ErrorLogger("XML InputStream", errors ) );
+		v2Validator.validate( new DOMSource( doc ) );
+		boolean isV1Schema = false;
+		if ( errors.size() != 0 ) {
+			//v2 fails, it could be because the file is v1.
+			Exception exception = (Exception) errors.get( 0 );
+			final String errorMessage = exception.getMessage();
+			//is it a validation error due to a v1 schema validated by a v2
+			isV1Schema = errorMessage.contains("1.0")
+					&& errorMessage.contains("2.0")
+					&& errorMessage.contains("version");
+
+		}
+		if (isV1Schema) {
+			errors.clear();
+			v1Validator.setErrorHandler( new ErrorLogger("XML InputStream", errors ) );
+			v1Validator.validate( new DOMSource( doc ) );
+		}
+	}
+
         if (errors.size() != 0)
         {
             throw new PersistenceException("invalid persistence.xml", (Throwable) errors.get(0));
         }
-        is.close(); // Close input Stream
+        is.close();
         return doc;
+    }
+
+    private static InputStream getStreamFromClasspath(String fileName) {
+	String path = fileName;
+	InputStream dtdStream = PersistenceXMLLoader.class.getClassLoader().getResourceAsStream( path );
+	return dtdStream;
     }
 
     /**
