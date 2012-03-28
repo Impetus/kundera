@@ -31,6 +31,9 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
+#### 28-Mar-2012 - Kundera 2.0.5.1
+Planet Telex patch to load local persistence.xml XSD files from the classpath rather than the Internet.
+
 #### 06-Feb-2012 - Kundera 2.0.5 released
 This release includes bug fixes and the following new features compared to version 2.0.4:
 
