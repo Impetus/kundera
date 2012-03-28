@@ -24,6 +24,7 @@ import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 
@@ -60,8 +61,14 @@ public class ObjectGraphBuilder
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);        
         String nodeId = getNodeId(id, entity);
         
-        //Construct this Node first
-        Node node = new Node(nodeId, entity);
+        //Construct this Node first, if one not already there in Persistence Cache
+        Node node = null;
+        Node nodeInPersistenceCache = PersistenceCache.INSTANCE.getMainCache().getNodeMappings().get(nodeId);
+        if(nodeInPersistenceCache == null) {
+            node = new Node(nodeId, entity);
+        } else {
+            node = nodeInPersistenceCache;
+        }         
         
         //Iterate over relations and construct children nodes
         for(Relation relation : entityMetadata.getRelations()) {            
@@ -136,6 +143,10 @@ public class ObjectGraphBuilder
     
     public static String getNodeId(Object pk, Object nodeData) {
         return nodeData.getClass().getName() + Constants.NODE_ID_SEPARATOR + (String)pk;
+    }
+    
+    public static String getNodeId(Object pk, Class<?> objectClass) {
+        return objectClass.getName() + Constants.NODE_ID_SEPARATOR + (String)pk;
     }
     
     public static String getEntityId(String nodeId) {

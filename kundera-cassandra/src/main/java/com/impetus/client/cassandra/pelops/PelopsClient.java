@@ -421,7 +421,10 @@ public class PelopsClient implements Client
                 }
             }
             
-            onPersist(metadata, entity, tf);
+            onPersist(metadata, entity, tf);            
+            
+            //Index Entity 
+            getIndexManager().write(metadata, entity);
         }
         catch (Exception e)
         {

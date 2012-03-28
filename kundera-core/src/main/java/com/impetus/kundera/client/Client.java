@@ -123,6 +123,7 @@ public interface Client
      *            entity meta data
      * @return id id of persisted entity.
      */
+    @Deprecated
     String persist(EntitySaveGraph entitySaveGraph, EntityMetadata metadata);
 
     /**
@@ -136,6 +137,7 @@ public interface Client
      *            entity meta data
      * @return id id of persisted entity.
      */
+    @Deprecated
     void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata);
     
     void persist(Node node);

@@ -16,7 +16,12 @@
 package com.impetus.kundera.lifecycle.states;
 
 
+import com.impetus.kundera.client.Client;
+import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.lifecycle.NodeStateContext;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * @author amresh
@@ -74,6 +79,18 @@ public class RemovedState extends NodeState
     @Override
     public void handleFlush(NodeStateContext nodeStateContext)
     {
+        //Entity state to remain as Removed     
+        
+        //Flush this node to database       
+        Client client = nodeStateContext.getClient();
+        
+        Node node = (Node)nodeStateContext;
+        String entityId = ObjectGraphBuilder.getEntityId(node.getNodeId());
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+        client.delete(node.getData(), entityId, entityMetadata);
+        
+        //Since node is flushed, mark it as NOT dirty
+        nodeStateContext.setDirty(false);
     }
 
     @Override

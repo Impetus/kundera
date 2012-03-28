@@ -65,12 +65,31 @@ public class Node implements NodeStateContext
     }
     
     public Node(String nodeId, Object data) {
-        this.nodeId = nodeId;
-        this.data = data;
-        this.dataClass = data.getClass();    
+        initializeNode(nodeId, data);    
         
         //Initialize current node state to transient state
         this.currentNodeState = new TransientState();
+    }
+    
+    public Node(String nodeId, Object data, NodeState initialNodeState) {
+        initializeNode(nodeId, data);
+        
+        //Initialize current node state
+        this.currentNodeState = initialNodeState;
+    }
+    
+    public Node(String nodeId, Class<?> nodeDataClass, NodeState initialNodeState) {
+        this.nodeId = nodeId;
+        this.dataClass = nodeDataClass;
+        
+        //Initialize current node state
+        this.currentNodeState = initialNodeState;
+    }
+    
+    private void initializeNode(String nodeId, Object data) {
+        this.nodeId = nodeId;
+        this.data = data;
+        this.dataClass = data.getClass();
     }
 
     /**

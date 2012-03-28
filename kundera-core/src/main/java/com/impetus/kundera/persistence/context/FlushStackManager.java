@@ -19,11 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
-
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
-import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.metadata.model.Relation;
 
 /**

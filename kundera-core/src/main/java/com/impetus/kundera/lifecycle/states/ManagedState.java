@@ -16,9 +16,21 @@
 package com.impetus.kundera.lifecycle.states;
 
 
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.CascadeType;
+
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.NodeLink;
+import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.NodeStateContext;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * @author amresh
@@ -41,9 +53,23 @@ public class ManagedState extends NodeState
     @Override
     public void handleRemove(NodeStateContext nodeStateContext)
     {
+        // Managed ---> Removed
         nodeStateContext.setCurrentNodeState(new RemovedState());
-        //TODO: Mark entity for removal in persistence context
-        //TODO: Recurse remove operation for all related entities for whom cascade=ALL or REMOVE
+        
+        //Mark entity for removal in persistence context
+        nodeStateContext.setDirty(true);        
+        
+        //Recurse remove operation for all related entities for whom cascade=ALL or REMOVE      
+        Map<NodeLink, Node> children = nodeStateContext.getChildren();
+        if(children != null) {       //Nothing to do for leaf nodes
+            for(NodeLink nodeLink : children.keySet()) {
+                List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
+                if(cascadeTypes.contains(CascadeType.REMOVE) || cascadeTypes.contains(CascadeType.ALL)) {
+                    Node childNode = children.get(nodeLink);                
+                    childNode.remove();
+                }
+            }
+        }
     }
 
     @Override
@@ -63,6 +89,30 @@ public class ManagedState extends NodeState
     @Override
     public void handleFind(NodeStateContext nodeStateContext)
     {
+        //Fetch Node data from Client
+        Client client = nodeStateContext.getClient();
+        Class<?> nodeDataClass = nodeStateContext.getDataClass();
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass);
+        String entityId = ObjectGraphBuilder.getEntityId(nodeStateContext.getNodeId());
+        Object nodeData = client.find(nodeDataClass, entityMetadata, entityId, null);
+        
+        nodeStateContext.setData(nodeData);
+        
+        //This node is fresh and hence NOT dirty
+        nodeStateContext.setDirty(false);
+        
+        //Store this node into persistence cache (with ManagedState)
+        PersistenceCache.INSTANCE.getMainCache().addNodeToCache((Node)nodeStateContext);        
+        
+        //Node to remain in Managed state
+        
+        /**
+         * Find all child nodes for this node 
+         */
+        //Iterate over relations and construct children nodes
+        /*for(Relation relation : entityMetadata.getRelations()) {
+            Node childNode = new No
+        }*/
     }
 
     @Override
@@ -81,9 +131,12 @@ public class ManagedState extends NodeState
     {        
         //Entity state to remain as Managed     
         
-        //Flush this node to database      
+        //Flush this node to database       
         Client client = nodeStateContext.getClient();
-        client.persist((Node)nodeStateContext);     
+        client.persist((Node)nodeStateContext);
+        
+        //Since node is flushed, mark it as NOT dirty
+        nodeStateContext.setDirty(false);
         
     }
 

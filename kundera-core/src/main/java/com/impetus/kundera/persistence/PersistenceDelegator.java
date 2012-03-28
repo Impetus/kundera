@@ -28,6 +28,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.FlushModeType;
 import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
 import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
@@ -46,6 +47,7 @@ import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
@@ -86,15 +88,13 @@ public class PersistenceDelegator
     boolean isRelationViaJoinTable;
 
     /** The no session lookup. */
-    private boolean noSessionLookup; 
-    
- 
+    private boolean noSessionLookup;
+
     private FlushModeType flushMode = FlushModeType.AUTO;
-    
+
     private ObjectGraphBuilder graphBuilder;
-    
-    private FlushStackManager flushStackManager;    
-    
+
+    private FlushStackManager flushStackManager;
 
     /**
      * Instantiates a new persistence delegator.
@@ -106,7 +106,7 @@ public class PersistenceDelegator
      */
     public PersistenceDelegator(EntityManagerSession session)
     {
-        this.session = session;        
+        this.session = session;
         eventDispatcher = new EntityEventDispatcher();
         graphBuilder = new ObjectGraphBuilder();
         flushStackManager = new FlushStackManager();
@@ -287,6 +287,7 @@ public class PersistenceDelegator
      * @param e
      *            the e
      */
+    @Deprecated
     public void remove(Object e)
     {
 
@@ -492,7 +493,9 @@ public class PersistenceDelegator
      * @param e
      *            the e
      */
-    public void persist2(Object e)
+    // Old implementation, to be deleted
+    @Deprecated
+    public void persist(Object e)
     {
         // Invoke Pre Persist Events
         EntityMetadata metadata = getMetadata(e.getClass());
@@ -511,35 +514,8 @@ public class PersistenceDelegator
         log.debug("Data persisted successfully for entity : " + e.getClass());
 
     }
+
     
-    public void persist(Object e) {
-        //Invoke Pre Persist Events
-        EntityMetadata metadata = getMetadata(e.getClass());
-        getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
-        
-        //Create an object graph of the entity object
-        ObjectGraph graph = graphBuilder.getObjectGraph(e);
-        
-        //Put this graph into persistence cache associated with EM
-        //pc.getMainCache().addGraphToCache(graph);
-        //Call persist on each node in object graph
-        Node headNode = graph.getHeadNode();
-        headNode.setHeadNode(true);
-        headNode.persist();
-        
-        
-        /*for(String key : graph.getNodeMapping().keySet()) {
-            Node node = graph.getNode(key);
-            node.persist();
-        }*/
-        
-        //TODO: not always, should be conditional
-        flush();
-        
-        //Invoke Post Persist Events
-        getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
-        log.debug("Data persisted successfully for entity : " + e.getClass());
-    }
 
     /**
      * Find.
@@ -645,6 +621,8 @@ public class PersistenceDelegator
         return graphs;
     }
 
+    
+
     /**
      * Find.
      * 
@@ -656,18 +634,11 @@ public class PersistenceDelegator
      *            the primary key
      * @return the e
      */
+    @Deprecated    
     public <E> E find(Class<E> entityClass, Object primaryKey)
     {
-        // Look up in session first
-        E e = null/* getSession().lookup(entityClass, primaryKey) */;
-        isRelationViaJoinTable = false;
 
-        // if (null != e)
-        // {
-        // log.debug(entityClass.getName() + "_" + primaryKey +
-        // " is loaded from cache!");
-        // return e;
-        // }
+        isRelationViaJoinTable = false;
 
         // Find top level entity first
         EntityMetadata entityMetadata = getMetadata(entityClass);
@@ -1080,54 +1051,8 @@ public class PersistenceDelegator
     {
         return client.getReader();
     }
+
     
-    /**
-     * Flushes Dirty objects in {@link PersistenceCache} to databases.
-     */
-    public void flush() {
-        //Check for flush mode, if commit do nothing (state will be updated at commit)
-        //else if AUTO, synchronize with DB
-        if(FlushModeType.COMMIT.equals(getFlushMode())) {
-            //Do nothing
-        } else if(FlushModeType.AUTO.equals(getFlushMode())) {
-            //Build Flush Stack from the Persistence Cache        
-            //TODO: Cascade flush for only those related entities for whom cascade=ALL or PERSIST
-            flushStackManager.buildFlushStack(PersistenceCache.INSTANCE);
-            
-            //Get flush stack from Persistence Cache
-            FlushStack fs = PersistenceCache.INSTANCE.getFlushStack();
-            
-            //Flush each node in flush stack from top to bottom unit it's empty
-            log.debug("Flushing following flush stack to database(s) (showing stack objects from top to bottom):\n" + fs);        
-            while(!fs.isEmpty()) {
-                Node node = fs.pop();
-                
-                EntityMetadata metadata = getMetadata(node.getDataClass());
-                node.setClient(getClient(metadata));          
-                
-                node.flush();
-                
-                //Update Link value for all nodes attached to this one
-                Map<NodeLink, Node> parents = node.getParents();
-                Map<NodeLink, Node> children = node.getChildren();
-                
-                if(parents != null && ! parents.isEmpty()) {
-                    for(NodeLink parentNodeLink : parents.keySet()) {
-                        parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, ObjectGraphBuilder.getEntityId(node.getNodeId()));
-                    }
-                }
-                
-                if(children != null && ! children.isEmpty()) {
-                    for(NodeLink childNodeLink : children.keySet()) {
-                        childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, ObjectGraphBuilder.getEntityId(node.getNodeId()));
-                    }
-                }                
-                
-                //TODO: remove node from persistence cache
-            }
-        }
-        
-    }
 
     /**
      * @return the flushMode
@@ -1138,12 +1063,161 @@ public class PersistenceDelegator
     }
 
     /**
-     * @param flushMode the flushMode to set
+     * @param flushMode
+     *            the flushMode to set
      */
     public void setFlushMode(FlushModeType flushMode)
     {
         this.flushMode = flushMode;
-    }  
+    }
+
+    // /////////////////////////////New and Modified Implementations////////////////////////////////////
+    // ///////////////////////////////////////////////////////////////////////////////////
     
+    public void persist2(Object e)
+    {
+        // Invoke Pre Persist Events
+        EntityMetadata metadata = getMetadata(e.getClass());
+        getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
+
+        // Create an object graph of the entity object
+        ObjectGraph graph = graphBuilder.getObjectGraph(e);
+
+        // Put this graph into persistence cache associated with EM
+        // pc.getMainCache().addGraphToCache(graph);
+        // Call persist on each node in object graph
+        Node headNode = graph.getHeadNode();
+        headNode.setHeadNode(true);
+        headNode.persist();
+
+        // TODO: not always, should be conditional
+        flush();
+
+        // Invoke Post Persist Events
+        getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
+        log.debug("Data persisted successfully for entity : " + e.getClass());
+    }
+    
+    public <E> E find2(Class<E> entityClass, Object primaryKey)
+    {
+
+        EntityMetadata entityMetadata = getMetadata(entityClass);
+
+        String nodeId = ObjectGraphBuilder.getNodeId(primaryKey, entityClass);
+
+        Map<String, Node> nodeMappings = PersistenceCache.INSTANCE.getMainCache().getNodeMappings();
+        Node node = nodeMappings.get(nodeId);
+
+        // if node is not in persistence cache or is dirty, fetch from database
+        if (node == null || node.isDirty())
+        {
+
+            node = new Node(nodeId, entityClass, new ManagedState());
+            Client client = getClient(entityMetadata);
+            node.setClient(client);
+
+            node.find();
+
+            // TODO: Build entity from the node
+
+        }
+        
+        //Finally if this node doen't have any parent, it should be added to persistence cache
+        if (node.getParents() == null || node.getParents().isEmpty())
+        {
+            PersistenceCache.INSTANCE.getMainCache().addHeadNode(node); // This is a head node
+        }
+
+        return (E) node.getData();
+    }
+
+    /**
+     * Removes an entity object from persistence store(s)
+     * 
+     * @param e
+     */
+    public void remove2(Object e)
+    {
+
+        // Invoke Pre Remove Events
+        EntityMetadata metadata = getMetadata(e.getClass());
+        getEventDispatcher().fireEventListeners(metadata, e, PreRemove.class);
+
+        // Create an object graph of the entity object
+        ObjectGraph graph = graphBuilder.getObjectGraph(e);
+
+        Node headNode = graph.getHeadNode();
+        headNode.setHeadNode(true);
+
+        headNode.remove();
+
+        // TODO: not always, should be conditional
+        flush();
+
+        getEventDispatcher().fireEventListeners(metadata, e, PostRemove.class);
+        log.debug("Data removed successfully for entity : " + e.getClass());
+
+    }
+    
+    /**
+     * Flushes Dirty objects in {@link PersistenceCache} to databases.
+     */
+    public void flush()
+    {
+        // Check for flush mode, if commit do nothing (state will be updated at
+        // commit)
+        // else if AUTO, synchronize with DB
+        if (FlushModeType.COMMIT.equals(getFlushMode()))
+        {
+            // Do nothing
+        }
+        else if (FlushModeType.AUTO.equals(getFlushMode()))
+        {
+            // Build Flush Stack from the Persistence Cache
+            // TODO: Cascade flush for only those related entities for whom
+            // cascade=ALL or PERSIST
+            flushStackManager.buildFlushStack(PersistenceCache.INSTANCE);
+
+            // Get flush stack from Persistence Cache
+            FlushStack fs = PersistenceCache.INSTANCE.getFlushStack();
+
+            // Flush each node in flush stack from top to bottom unit it's empty
+            log.debug("Flushing following flush stack to database(s) (showing stack objects from top to bottom):\n"
+                    + fs);
+            while (!fs.isEmpty())
+            {
+                Node node = fs.pop();
+
+                EntityMetadata metadata = getMetadata(node.getDataClass());
+                node.setClient(getClient(metadata));
+
+                node.flush();
+
+                // Update Link value for all nodes attached to this one
+                Map<NodeLink, Node> parents = node.getParents();
+                Map<NodeLink, Node> children = node.getChildren();
+
+                if (parents != null && !parents.isEmpty())
+                {
+                    for (NodeLink parentNodeLink : parents.keySet())
+                    {
+                        parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
+                                ObjectGraphBuilder.getEntityId(node.getNodeId()));
+                    }
+                }
+
+                if (children != null && !children.isEmpty())
+                {
+                    for (NodeLink childNodeLink : children.keySet())
+                    {
+                        childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
+                                ObjectGraphBuilder.getEntityId(node.getNodeId()));
+                    }
+                }
+
+                // TODO: remove node from persistence cache
+            }
+        }
+    }
 
 }
