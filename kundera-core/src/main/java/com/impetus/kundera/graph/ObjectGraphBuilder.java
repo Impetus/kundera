@@ -21,6 +21,7 @@ import java.util.Map;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
+import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
@@ -34,12 +35,12 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 public class ObjectGraphBuilder
 {
-    public ObjectGraph getObjectGraph(Object entity) {        
+    public ObjectGraph getObjectGraph(Object entity, NodeState initialNodeState) {        
         //Initialize object graph
         ObjectGraph objectGraph = new ObjectGraph();   
         
         //Recursively build object graph and get head node.
-        Node headNode = getNode(entity, objectGraph);         
+        Node headNode = getNode(entity, objectGraph, initialNodeState);         
         
         //Set head node into object graph
         objectGraph.setHeadNode(headNode);
@@ -55,7 +56,7 @@ public class ObjectGraphBuilder
      * @param entity
      * @return
      */
-    private Node getNode(Object entity, ObjectGraph graph)
+    private Node getNode(Object entity, ObjectGraph graph, NodeState initialNodeState)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);        
@@ -63,9 +64,9 @@ public class ObjectGraphBuilder
         
         //Construct this Node first, if one not already there in Persistence Cache
         Node node = null;
-        Node nodeInPersistenceCache = PersistenceCache.INSTANCE.getMainCache().getNodeMappings().get(nodeId);
+        Node nodeInPersistenceCache = PersistenceCache.INSTANCE.getMainCache().getNodeFromCache(nodeId);
         if(nodeInPersistenceCache == null) {
-            node = new Node(nodeId, entity);
+            node = new Node(nodeId, entity, initialNodeState);
         } else {
             node = nodeInPersistenceCache;
         }         
@@ -83,13 +84,13 @@ public class ObjectGraphBuilder
                     Collection childrenObjects = (Collection) childObject;
                     
                     for(Object childObj : childrenObjects) {
-                        addChildNodesToGraph(graph, node, relation, childObj);
+                        addChildNodesToGraph(graph, node, relation, childObj, initialNodeState);
                     }                
                     
                     
                 } else {
                     //Construct child node and add to graph
-                    addChildNodesToGraph(graph, node, relation, childObject);
+                    addChildNodesToGraph(graph, node, relation, childObject, initialNodeState);
                 }
             }   
             
@@ -107,10 +108,10 @@ public class ObjectGraphBuilder
      * @param relation
      * @param childObject
      */
-    private void addChildNodesToGraph(ObjectGraph graph, Node node, Relation relation, Object childObject)
+    private void addChildNodesToGraph(ObjectGraph graph, Node node, Relation relation, Object childObject, NodeState initialNodeState)
     {
         //Construct child node for this child object via recursive call
-        Node childNode = getNode(childObject, graph);      
+        Node childNode = getNode(childObject, graph, initialNodeState);      
                         
         //Construct Node Link for this relationship
         NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());

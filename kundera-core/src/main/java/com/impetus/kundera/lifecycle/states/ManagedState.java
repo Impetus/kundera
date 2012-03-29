@@ -16,20 +16,24 @@
 package com.impetus.kundera.lifecycle.states;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
+import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
@@ -54,7 +58,9 @@ public class ManagedState extends NodeState
     public void handleRemove(NodeStateContext nodeStateContext)
     {
         // Managed ---> Removed
-        nodeStateContext.setCurrentNodeState(new RemovedState());
+        NodeState nextState = new RemovedState();
+        nodeStateContext.setCurrentNodeState(nextState);
+        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());       
         
         //Mark entity for removal in persistence context
         nodeStateContext.setDirty(true);        
@@ -94,25 +100,39 @@ public class ManagedState extends NodeState
         Class<?> nodeDataClass = nodeStateContext.getDataClass();
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass);
         String entityId = ObjectGraphBuilder.getEntityId(nodeStateContext.getNodeId());
-        Object nodeData = client.find(nodeDataClass, entityMetadata, entityId, null);
+        
+        List<String> linkNames = new ArrayList<String>();
+        for(Relation relation : entityMetadata.getRelations()) {
+            linkNames.add(relation.getJoinColumnName());
+        }         
+        
+        Object nodeData = null;   //Node data
+        
+        
+        EntityReader reader = client.getReader();
+        EnhanceEntity enhanceEntity = reader.findById(entityId, entityMetadata, linkNames, client);
+        
+        if (enhanceEntity != null && enhanceEntity.getEntity() != null)
+        {
+            Object entity = enhanceEntity.getEntity();
+            
+            if (linkNames.isEmpty() && !entityMetadata.isRelationViaJoinTable())
+            {
+                nodeData = entity;
+            }
+            else
+            {
+                nodeData = reader.recursivelyFindEntities(enhanceEntity, client, entityMetadata, nodeStateContext.getPersistenceDelegator());                
+            }            
+        }    
         
         nodeStateContext.setData(nodeData);
         
         //This node is fresh and hence NOT dirty
-        nodeStateContext.setDirty(false);
+        nodeStateContext.setDirty(false);      
         
-        //Store this node into persistence cache (with ManagedState)
-        PersistenceCache.INSTANCE.getMainCache().addNodeToCache((Node)nodeStateContext);        
-        
-        //Node to remain in Managed state
-        
-        /**
-         * Find all child nodes for this node 
-         */
-        //Iterate over relations and construct children nodes
-        /*for(Relation relation : entityMetadata.getRelations()) {
-            Node childNode = new No
-        }*/
+        //Node to remain in Managed state   
+       
     }
 
     @Override
@@ -133,7 +153,9 @@ public class ManagedState extends NodeState
         
         //Flush this node to database       
         Client client = nodeStateContext.getClient();
-        client.persist((Node)nodeStateContext);
+        client.persist((Node)nodeStateContext);        
+        
+        logNodeEvent("FLUSHED", this, nodeStateContext.getNodeId());
         
         //Since node is flushed, mark it as NOT dirty
         nodeStateContext.setDirty(false);

@@ -92,7 +92,7 @@ public class FlushStackManagerTest
         store.addCounter(new BillingCounter(2, "B"));
         store.addCounter(new BillingCounter(3, "C"));
         
-        ObjectGraph graph = graphBuilder.getObjectGraph(store);
+        ObjectGraph graph = graphBuilder.getObjectGraph(store, null);
         
         pc.getMainCache().addGraphToCache(graph);
         
@@ -101,7 +101,7 @@ public class FlushStackManagerTest
         Assert.assertNull(pc.getMainCache().getHeadNodes().get(0).getParents());
         Assert.assertEquals(3, pc.getMainCache().getHeadNodes().get(0).getChildren().size());
         
-        Assert.assertEquals(4, pc.getMainCache().getNodeMappings().size());
+        Assert.assertEquals(4, pc.getMainCache().size());
         
         
         flushStackManager.buildFlushStack(pc);        
@@ -118,7 +118,7 @@ public class FlushStackManagerTest
         PhotoUni_1_1_1_1 c = new PhotoUni_1_1_1_1(); c.setPhotoId("c1");       
         a.setAlbum(b); b.setPhoto(c);
         
-        ObjectGraph graph = graphBuilder.getObjectGraph(a);
+        ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
         pc.getMainCache().addGraphToCache(graph);
         flushStackManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
@@ -135,7 +135,7 @@ public class FlushStackManagerTest
         PhotoUni_1_1_1_M c3 = new PhotoUni_1_1_1_M(); c3.setPhotoId("c3");
         a.setAlbum(b); b.addPhoto(c1);b.addPhoto(c2);b.addPhoto(c3);
         
-        ObjectGraph graph = graphBuilder.getObjectGraph(a);
+        ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
         pc.getMainCache().addGraphToCache(graph);
         flushStackManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
@@ -154,9 +154,9 @@ public class FlushStackManagerTest
         PhotoUni_1_1_M_1 c = new PhotoUni_1_1_M_1(); c.setPhotoId("c");       
         a.setAlbum(b1); b1.setPhoto(c);b2.setPhoto(c);b3.setPhoto(c);
         
-        ObjectGraph graph = graphBuilder.getObjectGraph(a);        
-        ObjectGraph graphb2 = graphBuilder.getObjectGraph(b2);
-        ObjectGraph graphb3 = graphBuilder.getObjectGraph(b3);
+        ObjectGraph graph = graphBuilder.getObjectGraph(a, null);        
+        ObjectGraph graphb2 = graphBuilder.getObjectGraph(b2, null);
+        ObjectGraph graphb3 = graphBuilder.getObjectGraph(b3, null);
         
         pc.getMainCache().addGraphToCache(graph);
         pc.getMainCache().addGraphToCache(graphb2);
@@ -183,7 +183,7 @@ public class FlushStackManagerTest
         b1.addPhoto(c1);b1.addPhoto(c2);b2.addPhoto(c3);b2.addPhoto(c4);
         a.addAlbum(b1);a.addAlbum(b2);
         
-        ObjectGraph graph = graphBuilder.getObjectGraph(a);
+        ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
         pc.getMainCache().addGraphToCache(graph);
         flushStackManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
@@ -206,7 +206,7 @@ public class FlushStackManagerTest
         b1.addPhoto(c1);b1.addPhoto(c2);b2.addPhoto(c2);b2.addPhoto(c3);
         a.addAlbum(b1);a.addAlbum(b2);
         
-        ObjectGraph graph = graphBuilder.getObjectGraph(a);
+        ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
         pc.getMainCache().addGraphToCache(graph);
         flushStackManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
@@ -229,9 +229,9 @@ public class FlushStackManagerTest
         b.addPhoto(c1);b.addPhoto(c2);b.addPhoto(c3);
         a1.setAlbum(b);a2.setAlbum(b);a3.setAlbum(b);
         
-        ObjectGraph graph1 = graphBuilder.getObjectGraph(a1);
-        ObjectGraph graph2 = graphBuilder.getObjectGraph(a2);
-        ObjectGraph graph3 = graphBuilder.getObjectGraph(a3);
+        ObjectGraph graph1 = graphBuilder.getObjectGraph(a1, null);
+        ObjectGraph graph2 = graphBuilder.getObjectGraph(a2, null);
+        ObjectGraph graph3 = graphBuilder.getObjectGraph(a3, null);
         
         pc.getMainCache().addGraphToCache(graph1);
         pc.getMainCache().addGraphToCache(graph2);
@@ -261,8 +261,8 @@ public class FlushStackManagerTest
         a1.addAlbum(b1);a1.addAlbum(b2);
         a2.addAlbum(b2);a2.addAlbum(b3);
         
-        ObjectGraph graph1 = graphBuilder.getObjectGraph(a1);
-        ObjectGraph graph2 = graphBuilder.getObjectGraph(a2);        
+        ObjectGraph graph1 = graphBuilder.getObjectGraph(a1, null);
+        ObjectGraph graph2 = graphBuilder.getObjectGraph(a2, null);        
         
         pc.getMainCache().addGraphToCache(graph1);
         pc.getMainCache().addGraphToCache(graph2);        
@@ -291,8 +291,8 @@ public class FlushStackManagerTest
         b1.addPhoto(c1);b1.addPhoto(c2);b2.addPhoto(c2);b2.addPhoto(c3);b3.addPhoto(c3);b3.addPhoto(c4);        
         a1.addAlbum(b1);a1.addAlbum(b2);a2.addAlbum(b2);a2.addAlbum(b3);
         
-        ObjectGraph graph1 = graphBuilder.getObjectGraph(a1);
-        ObjectGraph graph2 = graphBuilder.getObjectGraph(a2);        
+        ObjectGraph graph1 = graphBuilder.getObjectGraph(a1, null);
+        ObjectGraph graph2 = graphBuilder.getObjectGraph(a2, null);        
         
         pc.getMainCache().addGraphToCache(graph1);
         pc.getMainCache().addGraphToCache(graph2);        

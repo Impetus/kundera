@@ -50,8 +50,7 @@ public class FlushStackManager
      */
     public void addNodesToFlushStack(PersistenceCache pc, Node node) {
         FlushStack flushStack = pc.getFlushStack();
-        MainCache mainCache = (MainCache)pc.getMainCache();
-        Map<String, Node> nodeMappings = mainCache.getNodeMappings();  
+        MainCache mainCache = (MainCache)pc.getMainCache();         
         
         Map<NodeLink, Node> children = node.getChildren();
         
@@ -88,7 +87,8 @@ public class FlushStackManager
             for (NodeLink nodeLink : oneToManyChildren.keySet())
             {
                 //Process child node Graph recursively first
-                Node childNode = nodeMappings.get(nodeLink.getTargetNodeId());
+                Node childNode = mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
+                    
                 if(!childNode.isTraversed()) {
                     addNodesToFlushStack(pc, childNode);
                 }                  
@@ -99,7 +99,7 @@ public class FlushStackManager
             for (NodeLink nodeLink : manyToManyChildren.keySet())
             {
                 //Process child node Graph recursively first
-                Node childNode = nodeMappings.get(nodeLink.getTargetNodeId());
+                Node childNode = mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
                 if(!childNode.isTraversed()) {
                     addNodesToFlushStack(pc, childNode);
                 }               
@@ -114,7 +114,7 @@ public class FlushStackManager
                     flushStack.push(node);
 
                     // Process child node Graph recursively
-                    Node childNode = nodeMappings.get(nodeLink.getTargetNodeId());
+                    Node childNode = mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
                     addNodesToFlushStack(pc, childNode);
                 }           
             }       
@@ -129,7 +129,7 @@ public class FlushStackManager
                 }          
                 
                 //Child node of this node
-                Node childNode = nodeMappings.get(nodeLink.getTargetNodeId());
+                Node childNode = mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
                 
                 //Process all parents of child node with Many-To-One relationship first
                 Map<NodeLink, Node> parents = childNode.getParents();

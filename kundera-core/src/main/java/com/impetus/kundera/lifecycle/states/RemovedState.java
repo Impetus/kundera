@@ -91,6 +91,8 @@ public class RemovedState extends NodeState
         
         //Since node is flushed, mark it as NOT dirty
         nodeStateContext.setDirty(false);
+        
+        logNodeEvent("DELETED", this, nodeStateContext.getNodeId());
     }
 
     @Override

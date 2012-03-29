@@ -22,6 +22,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.lifecycle.states.NodeState;
+import com.impetus.kundera.persistence.PersistenceDelegator;
 
 /**
  * State context of a given entity
@@ -66,6 +67,9 @@ public interface NodeStateContext
     
     Client getClient();
     void setClient(Client client);
+    
+    PersistenceDelegator getPersistenceDelegator();
+    void setPersistenceDelegator(PersistenceDelegator pd);
     
     // Life cycle Management
     void persist();

@@ -49,4 +49,12 @@ public abstract class NodeState
     public abstract void handleClear(NodeStateContext nodeStateContext);
     public abstract void handleFlush(NodeStateContext nodeStateContext);
     
+    public void logStateChangeEvent(NodeState prevState, NodeState nextState, String nodeId) {
+        System.out.println("Node: " + nodeId + ":: " + prevState.getClass().getSimpleName() + " >>> " + nextState.getClass().getSimpleName());
+    }
+    
+    public void logNodeEvent(String eventType, NodeState currentState, String nodeId) {
+        System.out.println("Node: " + nodeId + ":: " + eventType + " in state " + currentState.getClass().getSimpleName());
+    }
+    
 }

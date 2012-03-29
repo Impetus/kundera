@@ -23,6 +23,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.lifecycle.states.TransientState;
+import com.impetus.kundera.persistence.PersistenceDelegator;
 
 /**
  * Represents a node in object graph 
@@ -61,6 +62,8 @@ public class Node implements NodeStateContext
     /** Client for this node */
     Client client;
     
+    PersistenceDelegator pd;
+    
     public Node() {        
     }
     
@@ -75,7 +78,12 @@ public class Node implements NodeStateContext
         initializeNode(nodeId, data);
         
         //Initialize current node state
-        this.currentNodeState = initialNodeState;
+        if(initialNodeState == null) {
+            this.currentNodeState = new TransientState();
+        } else {
+            this.currentNodeState = initialNodeState;
+        }
+        
     }
     
     public Node(String nodeId, Class<?> nodeDataClass, NodeState initialNodeState) {
@@ -83,7 +91,11 @@ public class Node implements NodeStateContext
         this.dataClass = nodeDataClass;
         
         //Initialize current node state
-        this.currentNodeState = initialNodeState;
+        if(initialNodeState == null) {
+            this.currentNodeState = new TransientState();
+        } else {
+            this.currentNodeState = initialNodeState;
+        }
     }
     
     private void initializeNode(String nodeId, Object data) {
@@ -302,6 +314,7 @@ public class Node implements NodeStateContext
     /**
      * @return the client
      */
+    @Override
     public Client getClient()
     {
         return client;
@@ -310,9 +323,24 @@ public class Node implements NodeStateContext
     /**
      * @param client the client to set
      */
+    
+    @Override
     public void setClient(Client client)
     {
         this.client = client;
+    }
+    
+
+    @Override
+    public PersistenceDelegator getPersistenceDelegator()
+    {
+        return pd;
+    }
+
+    @Override
+    public void setPersistenceDelegator(PersistenceDelegator pd)
+    {
+        this.pd = pd;
     }
 
     @Override

@@ -38,15 +38,25 @@ public class CacheBase
         nodeMappings = new HashMap<String, Node>();
     }
     
+    public Node getNodeFromCache(String nodeId) {    
+        
+        Node node = nodeMappings.get(nodeId);
+        
+        if(node != null) {
+            logCacheEvent("FETCHED", nodeId);
+        }        
+        return node;
+    }
+    
     public void addNodeToCache(Node node) {
        /* check if this node already exists in cache node mappings
         * If yes, update parents and children links
         * Otherwise, just simply add the node to cache node mappings
        */
        
-        if (getNodeMappings().containsKey(node.getNodeId()))
+        if (nodeMappings.containsKey(node.getNodeId()))
         {            
-            Node existingNode = getNodeMappings().get(node.getNodeId());
+            Node existingNode = nodeMappings.get(node.getNodeId());
 
             if (existingNode.getParents() != null)
             {
@@ -65,12 +75,14 @@ public class CacheBase
                 }
                 node.getChildren().putAll(existingNode.getChildren());
             }
-
-            getNodeMappings().put(node.getNodeId(), node);
+            
+            logCacheEvent("Added", node.getNodeId());
+            nodeMappings.put(node.getNodeId(), node);
         }
         else
         {
-            getNodeMappings().put(node.getNodeId(), node);
+            logCacheEvent("Added", node.getNodeId());
+            nodeMappings.put(node.getNodeId(), node);
         }
     }   
     
@@ -87,14 +99,10 @@ public class CacheBase
         
     }
     
-
-    /**
-     * @return the nodeMappings
-     */
-    public Map<String, Node> getNodeMappings()
-    {        
-        return nodeMappings;
-    }
+    private void logCacheEvent(String eventType, String nodeId) {
+        System.out.println("***PERSISTENCE CACHE::" + nodeId + " - " + eventType);
+        System.out.println("Node: " + nodeId + ":: " + eventType + " from PC");
+    }    
 
     /**
      * @param nodeMappings the nodeMappings to set
@@ -117,5 +125,9 @@ public class CacheBase
     {        
         headNodes.add(headNode);
     }    
+    
+    public int size() {
+        return nodeMappings.size();
+    }
     
 }

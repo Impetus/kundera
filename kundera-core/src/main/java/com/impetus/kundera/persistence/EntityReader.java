@@ -69,6 +69,11 @@ public interface EntityReader
      * @throws Exception
      *             the exception
      */
+    
+    Object recursivelyFindEntities(EnhanceEntity e, Client client, EntityMetadata m, PersistenceDelegator pd);
+    
+    
+    @Deprecated
     Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder,
             Client client, EntityMetadata m, PersistenceDelegator persistenceDelegeator); 
 

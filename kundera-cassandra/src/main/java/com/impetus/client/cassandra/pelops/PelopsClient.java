@@ -424,7 +424,21 @@ public class PelopsClient implements Client
             onPersist(metadata, entity, tf);            
             
             //Index Entity 
-            getIndexManager().write(metadata, entity);
+            if (parents != null)
+            {
+                for(NodeLink parentNodeLink : parents.keySet()) {
+                    getIndexManager().write(metadata, entity, (String)parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
+                            parents.get(parentNodeLink).getDataClass());
+                }
+                
+            }
+            else
+            {
+                getIndexManager().write(metadata, entity);
+            }    
+            
+            
+            
         }
         catch (Exception e)
         {

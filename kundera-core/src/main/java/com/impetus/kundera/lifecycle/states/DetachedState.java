@@ -51,8 +51,10 @@ public class DetachedState extends NodeState
     public void handleMerge(NodeStateContext nodeStateContext)
     {
         nodeStateContext.setCurrentNodeState(new ManagedState());
+        
         //TODO: Copy detached entity's current state to existing managed instance of the 
         // same entity identity (if one exists), or create a new managed copy
+        
         //TODO: Cascade manage operation for all related entities for whom cascade=ALL or MERGE
     }
     

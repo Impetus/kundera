@@ -43,7 +43,9 @@ public class TransientState extends NodeState
     {        
         
         //Transient ---> Managed
-        nodeStateContext.setCurrentNodeState(new ManagedState());      
+        NodeState nextState = new ManagedState();
+        nodeStateContext.setCurrentNodeState(nextState); 
+        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());
         
         //Mark this entity for saving in database
         nodeStateContext.setDirty(true);

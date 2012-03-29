@@ -64,7 +64,7 @@ public class ObjectGraphBuilderTest
         store.addCounter(new BillingCounter(2, "B"));
         store.addCounter(new BillingCounter(3, "C"));
         
-        ObjectGraph graph = graphBuilder.getObjectGraph(store);
+        ObjectGraph graph = graphBuilder.getObjectGraph(store, null);
         
         Assert.assertNotNull(graph);
         Node headNode = graph.getHeadNode();

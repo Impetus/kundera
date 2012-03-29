@@ -48,12 +48,14 @@ import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.lifecycle.states.ManagedState;
+import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.context.FlushStack;
 import com.impetus.kundera.persistence.context.FlushStackManager;
+import com.impetus.kundera.persistence.context.MainCache;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 import com.impetus.kundera.persistence.handler.impl.EntityInterceptor;
@@ -1074,6 +1076,10 @@ public class PersistenceDelegator
     // /////////////////////////////New and Modified Implementations////////////////////////////////////
     // ///////////////////////////////////////////////////////////////////////////////////
     
+    /**
+     * Writes an entity into Persistence cache
+     */
+    
     public void persist2(Object e)
     {
         // Invoke Pre Persist Events
@@ -1081,7 +1087,7 @@ public class PersistenceDelegator
         getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
 
         // Create an object graph of the entity object
-        ObjectGraph graph = graphBuilder.getObjectGraph(e);
+        ObjectGraph graph = graphBuilder.getObjectGraph(e, new TransientState());
 
         // Put this graph into persistence cache associated with EM
         // pc.getMainCache().addGraphToCache(graph);
@@ -1098,6 +1104,13 @@ public class PersistenceDelegator
         log.debug("Data persisted successfully for entity : " + e.getClass());
     }
     
+    /**
+     * Finds an entity from persistence cache, if not there, fetches from database
+     * @param <E>
+     * @param entityClass
+     * @param primaryKey
+     * @return
+     */
     public <E> E find2(Class<E> entityClass, Object primaryKey)
     {
 
@@ -1105,8 +1118,8 @@ public class PersistenceDelegator
 
         String nodeId = ObjectGraphBuilder.getNodeId(primaryKey, entityClass);
 
-        Map<String, Node> nodeMappings = PersistenceCache.INSTANCE.getMainCache().getNodeMappings();
-        Node node = nodeMappings.get(nodeId);
+        MainCache mainCache = (MainCache)PersistenceCache.INSTANCE.getMainCache();
+        Node node = mainCache.getNodeFromCache(nodeId);
 
         // if node is not in persistence cache or is dirty, fetch from database
         if (node == null || node.isDirty())
@@ -1115,26 +1128,23 @@ public class PersistenceDelegator
             node = new Node(nodeId, entityClass, new ManagedState());
             Client client = getClient(entityMetadata);
             node.setClient(client);
+            node.setPersistenceDelegator(this);
 
             node.find();
-
-            // TODO: Build entity from the node
-
         }
         
-        //Finally if this node doen't have any parent, it should be added to persistence cache
-        if (node.getParents() == null || node.getParents().isEmpty())
-        {
-            PersistenceCache.INSTANCE.getMainCache().addHeadNode(node); // This is a head node
-        }
-
-        return (E) node.getData();
+        Object nodeData = node.getData();
+        
+        //Generate an object graph of this found entity and put it into cache with Managed state
+        ObjectGraph graph = graphBuilder.getObjectGraph(nodeData, new ManagedState());
+        PersistenceCache.INSTANCE.getMainCache().addGraphToCache(graph);       
+        
+        return (E) nodeData;
     }
-
+    
+   
     /**
-     * Removes an entity object from persistence store(s)
-     * 
-     * @param e
+     * Removes an entity object from persistence cache 
      */
     public void remove2(Object e)
     {
@@ -1144,7 +1154,7 @@ public class PersistenceDelegator
         getEventDispatcher().fireEventListeners(metadata, e, PreRemove.class);
 
         // Create an object graph of the entity object
-        ObjectGraph graph = graphBuilder.getObjectGraph(e);
+        ObjectGraph graph = graphBuilder.getObjectGraph(e, new ManagedState());
 
         Node headNode = graph.getHeadNode();
         headNode.setHeadNode(true);
@@ -1159,14 +1169,15 @@ public class PersistenceDelegator
 
     }
     
+    
+    
     /**
      * Flushes Dirty objects in {@link PersistenceCache} to databases.
      */
     public void flush()
     {
-        // Check for flush mode, if commit do nothing (state will be updated at
-        // commit)
-        // else if AUTO, synchronize with DB
+        // Check for flush mode, if commit, do nothing (state will be updated at
+        // commit) else if AUTO, synchronize with DB
         if (FlushModeType.COMMIT.equals(getFlushMode()))
         {
             // Do nothing
@@ -1218,6 +1229,26 @@ public class PersistenceDelegator
                 // TODO: remove node from persistence cache
             }
         }
+    }
+    
+    public <E> E merge2(E e)
+    {     
+
+        log.debug("Merging Entity : " + e);
+        EntityMetadata m = getMetadata(e.getClass());
+
+        // TODO: throw OptisticLockException if wrong version and
+        // optimistic locking enabled
+
+        //Fire PreUpdate events
+        getEventDispatcher().fireEventListeners(m, e, PreUpdate.class);
+
+
+
+        // fire PreUpdate events
+        getEventDispatcher().fireEventListeners(m, e, PostUpdate.class);    
+
+        return e;
     }
 
 }
