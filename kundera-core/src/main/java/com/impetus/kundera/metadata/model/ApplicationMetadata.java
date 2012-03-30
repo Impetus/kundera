@@ -269,13 +269,13 @@ public class ApplicationMetadata
      */
     public boolean isNative(String name)
     {
-        QueryWrapper wrapper= namedNativeQueries.get(name);
+        QueryWrapper wrapper= namedNativeQueries != null? namedNativeQueries.get(name):null;
         return wrapper != null? wrapper.isNativeQuery():false;
     }
     
     public Class getMappedClass(String name)
     {
-        QueryWrapper wrapper= namedNativeQueries.get(name);
+        QueryWrapper wrapper= namedNativeQueries !=null?namedNativeQueries.get(name):null;
         return wrapper != null ? wrapper.getMappedClazz():null;
     }
     /**
