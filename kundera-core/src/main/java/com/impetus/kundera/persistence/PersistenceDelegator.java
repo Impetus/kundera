@@ -57,6 +57,7 @@ import com.impetus.kundera.persistence.context.FlushStack;
 import com.impetus.kundera.persistence.context.FlushStackManager;
 import com.impetus.kundera.persistence.context.MainCache;
 import com.impetus.kundera.persistence.context.PersistenceCache;
+import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 import com.impetus.kundera.persistence.handler.impl.EntityInterceptor;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
@@ -250,7 +251,7 @@ public class PersistenceDelegator
      *            the e
      * @return the e
      */
-    public <E> E merge(E e)
+    public <E> E merge2(E e)
     {
 
         List<EnhancedEntity> reachableEntities = EntityResolver.resolve(e, CascadeType.MERGE);
@@ -290,7 +291,7 @@ public class PersistenceDelegator
      *            the e
      */
     @Deprecated
-    public void remove(Object e)
+    public void remove2(Object e)
     {
 
         EntityMetadata metadata = getMetadata(e.getClass());
@@ -497,7 +498,7 @@ public class PersistenceDelegator
      */
     // Old implementation, to be deleted
     @Deprecated
-    public void persist(Object e)
+    public void persist2(Object e)
     {
         // Invoke Pre Persist Events
         EntityMetadata metadata = getMetadata(e.getClass());
@@ -637,7 +638,7 @@ public class PersistenceDelegator
      * @return the e
      */
     @Deprecated    
-    public <E> E find(Class<E> entityClass, Object primaryKey)
+    public <E> E find2(Class<E> entityClass, Object primaryKey)
     {
 
         isRelationViaJoinTable = false;
@@ -733,8 +734,16 @@ public class PersistenceDelegator
             clientMap.clear();
             clientMap = null;
         }
-
+        
+        //TODO: Move all nodes tied to this EM into detached state
+        clear();
+        
         closed = true;
+    }
+    
+    public final void clear() {
+        //Move all nodes tied to this EM into detached state
+        PersistenceCacheManager.clearPersistenceCache();
     }
 
     /**
@@ -1080,7 +1089,7 @@ public class PersistenceDelegator
      * Writes an entity into Persistence cache
      */
     
-    public void persist2(Object e)
+    public void persist(Object e)
     {
         // Invoke Pre Persist Events
         EntityMetadata metadata = getMetadata(e.getClass());
@@ -1089,8 +1098,6 @@ public class PersistenceDelegator
         // Create an object graph of the entity object
         ObjectGraph graph = graphBuilder.getObjectGraph(e, new TransientState());
 
-        // Put this graph into persistence cache associated with EM
-        // pc.getMainCache().addGraphToCache(graph);
         // Call persist on each node in object graph
         Node headNode = graph.getHeadNode();
         headNode.setHeadNode(true);
@@ -1111,7 +1118,7 @@ public class PersistenceDelegator
      * @param primaryKey
      * @return
      */
-    public <E> E find2(Class<E> entityClass, Object primaryKey)
+    public <E> E find(Class<E> entityClass, Object primaryKey)
     {
 
         EntityMetadata entityMetadata = getMetadata(entityClass);
@@ -1133,11 +1140,7 @@ public class PersistenceDelegator
             node.find();
         }
         
-        Object nodeData = node.getData();
-        
-        //Generate an object graph of this found entity and put it into cache with Managed state
-        ObjectGraph graph = graphBuilder.getObjectGraph(nodeData, new ManagedState());
-        PersistenceCache.INSTANCE.getMainCache().addGraphToCache(graph);       
+        Object nodeData = node.getData();          
         
         return (E) nodeData;
     }
@@ -1146,7 +1149,7 @@ public class PersistenceDelegator
     /**
      * Removes an entity object from persistence cache 
      */
-    public void remove2(Object e)
+    public void remove(Object e)
     {
 
         // Invoke Pre Remove Events
@@ -1231,7 +1234,7 @@ public class PersistenceDelegator
         }
     }
     
-    public <E> E merge2(E e)
+    public <E> E merge(E e)
     {     
 
         log.debug("Merging Entity : " + e);
@@ -1242,7 +1245,17 @@ public class PersistenceDelegator
 
         //Fire PreUpdate events
         getEventDispatcher().fireEventListeners(m, e, PreUpdate.class);
+        
+        // Create an object graph of the entity object to be merged
+        ObjectGraph graph = graphBuilder.getObjectGraph(e, new ManagedState());
 
+        //Call merge on each node in object graph
+        Node headNode = graph.getHeadNode();
+        headNode.setHeadNode(true);
+        headNode.merge();
+
+        // TODO: not always, should be conditional
+        flush();
 
 
         // fire PreUpdate events
