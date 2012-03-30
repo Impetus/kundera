@@ -227,7 +227,7 @@ public class CassQuery extends QueryImpl implements Query
         }
         else
         {
-            Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m);
+            Map<Boolean, List<IndexClause>> ixClause = MetadataUtils.useSecondryIndex(m.getPersistenceUnit())?prepareIndexClause(m):null;
 
             ((CassandraEntityReader) getReader()).setConditions(ixClause);
 

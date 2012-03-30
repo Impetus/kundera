@@ -113,7 +113,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     {
         List<EnhanceEntity> ls = null;
 
-        boolean isRowKeyQuery = conditions.keySet().iterator().next();
+        boolean isRowKeyQuery = conditions!= null? conditions.keySet().iterator().next():false;
 
         // If Query is not for find by range.
         if (!isRowKeyQuery)

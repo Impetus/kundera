@@ -1034,6 +1034,7 @@ public class PersistenceDelegator
         // TODO need to check if there is any relation?
         for (EntitySaveGraph g : graphs)
         {
+            isParent = false;
             if (clazz.equals(g.getParentClass()))
             {
                 isParent = true;
