@@ -27,8 +27,8 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.ObjectGraph;
-import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
+import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -88,8 +88,30 @@ public class ManagedState extends NodeState
     @Override
     public void handleMerge(NodeStateContext nodeStateContext)
     {
-      //Ignored, entity remains in the same state
-      //TODO: Cascade manage operation for all related entities for whom cascade=ALL or MERGE
+        //Ignored, entity remains in the same state
+        
+        //Mark this entity for saving in database
+        nodeStateContext.setDirty(true);
+        
+        //If it's a head node, add this to the list of head nodes in PC
+        if(nodeStateContext.isHeadNode()) {
+            PersistenceCache.INSTANCE.getMainCache().addHeadNode((Node)nodeStateContext);
+        }
+        
+        //Add this node into persistence cache
+        PersistenceCache.INSTANCE.getMainCache().addNodeToCache((Node)nodeStateContext);
+        
+        //Cascade merge operation for all related entities for whom cascade=ALL or MERGE
+        Map<NodeLink, Node> children = nodeStateContext.getChildren();
+        if(children != null) {
+            for(NodeLink nodeLink : children.keySet()) {
+                List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
+                if(cascadeTypes.contains(CascadeType.MERGE) || cascadeTypes.contains(CascadeType.ALL)) {
+                    Node childNode = children.get(nodeLink);                
+                    childNode.merge();
+                }
+            }
+        }
     }
     
     @Override
@@ -131,19 +153,24 @@ public class ManagedState extends NodeState
         //This node is fresh and hence NOT dirty
         nodeStateContext.setDirty(false);      
         
-        //Node to remain in Managed state   
+        //Node to remain in Managed state  
+        
+        //Generate an object graph of this found entity and put it into cache with Managed state
+        ObjectGraph graph = new ObjectGraphBuilder().getObjectGraph(nodeData, new ManagedState());
+        PersistenceCache.INSTANCE.getMainCache().addGraphToCache(graph);
        
     }
 
     @Override
     public void handleClose(NodeStateContext nodeStateContext)
     {
-        nodeStateContext.setCurrentNodeState(new DetachedState());
+        handleDetach(nodeStateContext);
     }
 
     @Override
     public void handleClear(NodeStateContext nodeStateContext)
     {
+        handleDetach(nodeStateContext);
     }
 
     @Override
@@ -170,6 +197,10 @@ public class ManagedState extends NodeState
     @Override
     public void handleDetach(NodeStateContext nodeStateContext)
     {
+        // Managed ---> Detached
+        NodeState nextState = new DetachedState();
+        nodeStateContext.setCurrentNodeState(nextState);
+        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());
     }
 
     @Override

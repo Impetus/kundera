@@ -16,8 +16,8 @@
 package com.impetus.kundera.persistence.context;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
@@ -34,7 +34,7 @@ public class FlushStackManager
         //Process Main cache
         MainCache mainCache = (MainCache)pc.getMainCache();
         
-        List<Node> headNodes = mainCache.getHeadNodes();
+        Set<Node> headNodes = mainCache.getHeadNodes();
         
         for(Node headNode : headNodes) {
             addNodesToFlushStack(pc, headNode);

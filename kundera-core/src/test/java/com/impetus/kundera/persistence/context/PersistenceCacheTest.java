@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import com.impetus.kundera.configure.Configurator;
 import com.impetus.kundera.graph.BillingCounter;
+import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.graph.Store;
@@ -76,8 +77,11 @@ public class PersistenceCacheTest
         
         Assert.assertNotNull(pc.getMainCache());
         Assert.assertEquals(1, pc.getMainCache().getHeadNodes().size());
-        Assert.assertNull(pc.getMainCache().getHeadNodes().get(0).getParents());
-        Assert.assertEquals(3, pc.getMainCache().getHeadNodes().get(0).getChildren().size());
+        
+        Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphBuilder.getNodeId("1", Store.class));
+        
+        Assert.assertNull(headNode.getParents());
+        Assert.assertEquals(3, headNode.getChildren().size());
         
         Assert.assertEquals(4, pc.getMainCache().size());
         

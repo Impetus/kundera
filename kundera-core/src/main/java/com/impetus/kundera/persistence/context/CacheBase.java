@@ -15,10 +15,11 @@
  */
 package com.impetus.kundera.persistence.context;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
@@ -31,10 +32,10 @@ import com.impetus.kundera.graph.ObjectGraph;
 public class CacheBase
 {
     private Map<String, Node> nodeMappings;    
-    private List<Node> headNodes;
+    private Set<Node> headNodes;
     
     public CacheBase() {
-        headNodes = new ArrayList<Node>();
+        headNodes = new HashSet<Node>();
         nodeMappings = new HashMap<String, Node>();
     }
     
@@ -43,7 +44,7 @@ public class CacheBase
         Node node = nodeMappings.get(nodeId);
         
         if(node != null) {
-            logCacheEvent("FETCHED", nodeId);
+            logCacheEvent("FETCHED FROM ", nodeId);
         }        
         return node;
     }
@@ -76,12 +77,12 @@ public class CacheBase
                 node.getChildren().putAll(existingNode.getChildren());
             }
             
-            logCacheEvent("Added", node.getNodeId());
+            logCacheEvent("ADDED TO ", node.getNodeId());
             nodeMappings.put(node.getNodeId(), node);
         }
         else
         {
-            logCacheEvent("Added", node.getNodeId());
+            logCacheEvent("ADDED TO ", node.getNodeId());
             nodeMappings.put(node.getNodeId(), node);
         }
     }   
@@ -100,8 +101,7 @@ public class CacheBase
     }
     
     private void logCacheEvent(String eventType, String nodeId) {
-        System.out.println("***PERSISTENCE CACHE::" + nodeId + " - " + eventType);
-        System.out.println("Node: " + nodeId + ":: " + eventType + " from PC");
+        System.out.println("Node: " + nodeId + ":: " + eventType + " PC");
     }    
 
     /**
@@ -115,7 +115,7 @@ public class CacheBase
     /**
      * @return the headNodes
      */
-    public List<Node> getHeadNodes()
+    public Set<Node> getHeadNodes()
     {
         return headNodes;
     }
@@ -128,6 +128,10 @@ public class CacheBase
     
     public int size() {
         return nodeMappings.size();
+    }
+    
+    public Collection<Node> getAllNodes() {
+        return nodeMappings.values();
     }
     
 }
