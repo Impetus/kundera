@@ -251,6 +251,7 @@ public class AbstractEntityReader
 
                     Field f = g.getProperty();
 
+                    if(relationalValue != null) {
                     if (!collectionHolder.containsKey(relationalValue+childClazz.getName()))
                     {
 
@@ -260,7 +261,7 @@ public class AbstractEntityReader
                         // childMetadata, relationalValue.toString(), null);
                         Object child = null;
 
-                        if(relationalValue != null) {
+                        
                             if (childClazz.equals(e.getEntity().getClass()))
                             {
                                 child = childClient.find(childClazz, childMetadata, relationalValue.toString(), null);
@@ -269,7 +270,7 @@ public class AbstractEntityReader
                             {
                                 child = persistenceDelegeator.find(childClazz, relationalValue.toString(), g);
                             }
-                        }
+                        
                         
 
                         collectionHolder.put(relationalValue+childClazz.getName(), child);
@@ -286,6 +287,7 @@ public class AbstractEntityReader
                     PropertyAccessorHelper.set(e.getEntity(), f,
                             PropertyAccessorHelper.isCollection(f.getType()) ? getFieldInstance(collection, f)
                                     : collection.get(0));
+                    }
                 }
                 else
                 {
