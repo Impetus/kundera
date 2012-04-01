@@ -192,16 +192,28 @@ public class HibernateClient implements Client
      * java.lang.String)
      */
     @Override
-    public <E> E find(Class<E> arg0, Object key, List<String> relationNames)
+    public Object find(Class clazz, Object key)
     {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), clazz);
 
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), arg0);
-        Session s = getSessionInstance();
-        Transaction tx = s.beginTransaction();
-        E object = (E) s.get(arg0, getKey(key, entityMetadata.getIdColumn().getField()));
-        tx.commit();
+        if (s == null)
+        {
+            s = sf.openStatelessSession();
 
-        return object;
+            s.beginTransaction();
+        }
+
+        Object result = null;
+        try
+        {
+            result = s.get(clazz, getKey(key, entityMetadata.getIdColumn().getField()));
+        }
+        catch (Exception e)
+        {
+            log.info(e.getMessage());
+        }
+        return result;
+
     }
 
     /*
@@ -612,33 +624,33 @@ public class HibernateClient implements Client
         return s;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
-     * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
-     */
-    @Override
-    public Object find(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relations)
-    {
-        if (s == null)
-        {
-            s = sf.openStatelessSession();
-
-            s.beginTransaction();
-        }
-
-        Object result = null;
-        try
-        {
-            result = s.get(clazz, getKey(rowId, metadata.getIdColumn().getField()));
-        }
-        catch (Exception e)
-        {
-            log.info(e.getMessage());
-        }
-        return result;
-    }
+//    /*
+//     * (non-Javadoc)
+//     * 
+//     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+//     * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
+//     */
+//    @Override
+//    public Object find(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relations)
+//    {
+//        if (s == null)
+//        {
+//            s = sf.openStatelessSession();
+//
+//            s.beginTransaction();
+//        }
+//
+//        Object result = null;
+//        try
+//        {
+//            result = s.get(clazz, getKey(rowId, metadata.getIdColumn().getField()));
+//        }
+//        catch (Exception e)
+//        {
+//            log.info(e.getMessage());
+//        }
+//        return result;
+//    }
 
     /**
      * Find.
@@ -677,8 +689,9 @@ public class HibernateClient implements Client
      * @see com.impetus.kundera.client.Client#find(java.lang.String,
      * java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
      */
-    public List<Object> find(String colName, String colValue, EntityMetadata m)
+    public List<Object> findByRelation(String colName, String colValue, Class entityClazz)
     {
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
         String tableName = m.getTableName();
         String aliasName = "_" + tableName;
         StringBuilder queryBuilder = new StringBuilder("Select ");

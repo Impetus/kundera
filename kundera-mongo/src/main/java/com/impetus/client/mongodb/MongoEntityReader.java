@@ -61,7 +61,7 @@ public class MongoEntityReader extends AbstractEntityReader implements EntityRea
     {
         try
         {
-            Object o = client.find(m.getEntityClazz(), m, primaryKey, relationNames);
+            Object o = client.find(m.getEntityClazz(), primaryKey);
             if (o == null)
             {
                 // No entity found

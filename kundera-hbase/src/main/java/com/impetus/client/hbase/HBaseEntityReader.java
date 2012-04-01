@@ -61,7 +61,7 @@ public class HBaseEntityReader extends AbstractEntityReader implements EntityRea
     {
         try
         {
-            Object o = client.find(m.getEntityClazz(), primaryKey, relationNames);
+            Object o = client.find(m.getEntityClazz(), primaryKey);
 
             if (o == null)
             {
