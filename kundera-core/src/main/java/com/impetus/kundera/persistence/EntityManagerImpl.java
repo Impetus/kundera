@@ -179,7 +179,8 @@ public class EntityManagerImpl implements EntityManager
         session.clear();
         // TODO Do we need a client and persistenceDelegator close here?
         
-        //TODO: Move all nodes tied to this EM into detached state
+        persistenceDelegator.clear();
+        
     }
 
 
@@ -189,9 +190,7 @@ public class EntityManagerImpl implements EntityManager
         checkClosed();
         session.clear();
         session = null;
-        persistenceDelegator.close();
-        
-        //TODO: Move all nodes tied to this EM into detached state
+        persistenceDelegator.close();       
         closed = true;
     }
 

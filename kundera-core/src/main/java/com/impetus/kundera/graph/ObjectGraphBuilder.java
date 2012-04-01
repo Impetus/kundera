@@ -21,6 +21,7 @@ import java.util.Map;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
+import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -69,6 +70,13 @@ public class ObjectGraphBuilder
             node = new Node(nodeId, entity, initialNodeState);
         } else {
             node = nodeInPersistenceCache;
+            
+            //If node is NOT in managed state, its data needs to be 
+            //replaced with the one provided in entity object
+            if(! node.getCurrentNodeState().getClass().equals(ManagedState.class)) {
+                node.setData(entity);
+                node.setDirty(true);
+            }            
         }         
         
         //Iterate over relations and construct children nodes

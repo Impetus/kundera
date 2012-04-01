@@ -24,7 +24,7 @@ import com.impetus.kundera.lifecycle.NodeStateContext;
  *
  */
 public abstract class NodeState
-{
+{   
     public abstract void initialize(NodeStateContext nodeStateContext);
     
     //Life cycle Management

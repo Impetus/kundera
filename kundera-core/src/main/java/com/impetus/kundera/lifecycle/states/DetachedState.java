@@ -16,6 +16,14 @@
 package com.impetus.kundera.lifecycle.states;
 
 
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.CascadeType;
+
+import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.NodeLink;
+import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 
 /**
@@ -50,12 +58,26 @@ public class DetachedState extends NodeState
     @Override
     public void handleMerge(NodeStateContext nodeStateContext)
     {
-        nodeStateContext.setCurrentNodeState(new ManagedState());
+        // Detached ---> Managed
+        NodeState nextState = new ManagedState();
+        nodeStateContext.setCurrentNodeState(nextState); 
+        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());       
         
         //TODO: Copy detached entity's current state to existing managed instance of the 
-        // same entity identity (if one exists), or create a new managed copy
+        // same entity identity (if one exists), or create a new managed copy       
         
-        //TODO: Cascade manage operation for all related entities for whom cascade=ALL or MERGE
+        //Cascade manage operation for all related entities for whom cascade=ALL or MERGE
+        //Cascade merge operation for all related entities for whom cascade=ALL or MERGE
+        Map<NodeLink, Node> children = nodeStateContext.getChildren();
+        if(children != null) {
+            for(NodeLink nodeLink : children.keySet()) {
+                List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
+                if(cascadeTypes.contains(CascadeType.MERGE) || cascadeTypes.contains(CascadeType.ALL)) {
+                    Node childNode = children.get(nodeLink);                
+                    childNode.merge();
+                }
+            }
+        }
     }
     
     @Override
@@ -66,11 +88,13 @@ public class DetachedState extends NodeState
     @Override
     public void handleClose(NodeStateContext nodeStateContext)
     {
+      //Nothing to do, only entities in Managed state move to detached state
     }
 
     @Override
     public void handleClear(NodeStateContext nodeStateContext)
     {
+      //Nothing to do, only entities in Managed state move to detached state
     }
 
     @Override

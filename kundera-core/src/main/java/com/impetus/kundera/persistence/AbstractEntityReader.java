@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.PersistenceException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -40,7 +38,6 @@ import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.QueryHandlerException;
 
 /**
  * The Class AbstractEntityReader.
@@ -57,6 +54,14 @@ public class AbstractEntityReader
     protected String luceneQueryFromJPAQuery;
     
 
+    /**
+     * Recursively fetches child entities for a given entity contained in {@link EnhanceEntity}
+     * @param e
+     * @param client
+     * @param m
+     * @param pd
+     * @return
+     */
     public Object recursivelyFindEntities(EnhanceEntity e, Client client, EntityMetadata m, PersistenceDelegator pd) {
         Map<Object, Object> relationValuesMap = new HashMap<Object, Object>();
         
@@ -221,6 +226,8 @@ public class AbstractEntityReader
      * @throws Exception
      *             the exception
      */
+    
+    @Deprecated
     public Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder,
             Client client, EntityMetadata m, PersistenceDelegator persistenceDelegeator) 
     {
