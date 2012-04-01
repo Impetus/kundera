@@ -427,10 +427,12 @@ public class MongoDBClient implements Client
      * java.lang.String, com.impetus.kundera.metadata.EntityMetadata)
      */
     @Override
-    public <E> E find(Class<E> entityClass, Object key, List<String> relationNames)
+    public Object find(Class entityClass, Object key)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
 
+        List<String>relationNames = entityMetadata.getRelationNames();
+        
         log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
 
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
@@ -453,7 +455,7 @@ public class MongoDBClient implements Client
         Object enhancedEntity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
                 entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, relationNames);
 
-        return (E) enhancedEntity;
+        return enhancedEntity;
     }
 
     /*
@@ -650,40 +652,40 @@ public class MongoDBClient implements Client
         return indexManager;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
-     * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
-     */
-    @Override
-    public Object find(Class<?> clazz, EntityMetadata entityMetadata, Object rowId, List<String> relationNames)
-    {
-
-        log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + rowId);
-
-        DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
-
-        BasicDBObject query = new BasicDBObject();
-        query.put(entityMetadata.getIdColumn().getName(), rowId.toString());
-
-        DBCursor cursor = dbCollection.find(query);
-        DBObject fetchedDocument = null;
-
-        if (cursor.hasNext())
-        {
-            fetchedDocument = cursor.next();
-        }
-        else
-        {
-            return null;
-        }
-
-        Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
-                entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, relationNames);
-
-        return entity;
-    }
+//    /*
+//     * (non-Javadoc)
+//     * 
+//     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
+//     * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
+//     */
+//    @Override
+//    public Object find(Class<?> clazz, EntityMetadata entityMetadata, Object rowId, List<String> relationNames)
+//    {
+//
+//        log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + rowId);
+//
+//        DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
+//
+//        BasicDBObject query = new BasicDBObject();
+//        query.put(entityMetadata.getIdColumn().getName(), rowId.toString());
+//
+//        DBCursor cursor = dbCollection.find(query);
+//        DBObject fetchedDocument = null;
+//
+//        if (cursor.hasNext())
+//        {
+//            fetchedDocument = cursor.next();
+//        }
+//        else
+//        {
+//            return null;
+//        }
+//
+//        Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
+//                entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, relationNames);
+//
+//        return entity;
+//    }
 
     /**
      * Method to find entity for given association name and association value.
@@ -696,8 +698,9 @@ public class MongoDBClient implements Client
      *            the m
      * @return the list
      */
-    public List<Object> find(String colName, String colValue, EntityMetadata m)
+    public List<Object> findByRelation(String colName, String colValue, Class entityClazz)
     {
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
         // you got column name and column value.
         DBCollection dbCollection = mongoDb.getCollection(m.getTableName());
 

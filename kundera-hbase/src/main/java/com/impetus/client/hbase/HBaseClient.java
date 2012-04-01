@@ -97,9 +97,10 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      * java.lang.Object, java.util.List)
      */
     @Override
-    public <E> E find(Class<E> entityClass, Object rowId, List<String> relationNames)
+    public Object find(Class entityClass, Object rowId)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        List<String>relationNames = entityMetadata.getRelationNames();
         // columnFamily has a different meaning for HBase, so it won't be used
         // here
         String tableName = entityMetadata.getTableName();
@@ -113,7 +114,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         {
             throw new KunderaException(e);
         }
-        return (E) enhancedEntity;
+        return enhancedEntity;
     }
 
     /*
@@ -445,29 +446,6 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
-     * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
-     */
-    @Override
-    public Object find(Class<?> clazz, EntityMetadata entityMetadata, Object rowId, List<String> relationNames)
-    {
-        String tableName = entityMetadata.getTableName();
-        Object enhancedEntity = null;
-        try
-        {
-            enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata,
-                    rowId != null ? rowId.toString() : null, relationNames);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        return enhancedEntity;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
      * java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
      */
@@ -490,7 +468,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      * @see com.impetus.kundera.client.Client#find(java.lang.String,
      * java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
      */
-    public List<Object> find(String colName, String colValue, EntityMetadata m)
+    @Override
+    public List<Object> findByRelation(String colName, String colValue, Class entityClazz)
     {
         throw new UnsupportedOperationException("Method not supported");
     }

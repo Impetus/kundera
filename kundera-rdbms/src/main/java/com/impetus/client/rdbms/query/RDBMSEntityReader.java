@@ -437,7 +437,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             Object o;
             try
             {
-                o = client.find(m.getEntityClazz(), primaryKey, null);
+                o = client.find(m.getEntityClazz(), primaryKey);
             }
             catch (Exception e)
             {

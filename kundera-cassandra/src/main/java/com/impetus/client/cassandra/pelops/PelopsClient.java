@@ -130,11 +130,11 @@ public class PelopsClient implements Client
      * java.lang.String)
      */
     @Override
-    @Deprecated
-    public final <E> E find(Class<E> entityClass, Object rowId, List<String> relationNames)
+    public final Object find(Class entityClass, Object rowId)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
-        return (E) find(entityClass, entityMetadata, rowId != null ? rowId.toString() : null, relationNames);
+        List<String> relationNames = entityMetadata.getRelationNames();
+        return find(entityClass, entityMetadata, rowId != null ? rowId.toString() : null, relationNames);
     }
 
     /*
@@ -143,7 +143,7 @@ public class PelopsClient implements Client
      * @see com.impetus.kundera.client.Client#find(java.lang.Class,
      * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
      */
-    public final Object find(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relationNames)
+    private final Object find(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relationNames)
     {
 
         List<Object> result = null;
@@ -918,8 +918,10 @@ public class PelopsClient implements Client
      * @see com.impetus.kundera.client.Client#find(java.lang.String,
      * java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
      */
-    public List<Object> find(String colName, String colValue, EntityMetadata m)
+    @Override
+    public List<Object> findByRelation(String colName, String colValue, Class clazz)
     {
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(clazz);
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);

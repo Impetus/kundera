@@ -35,19 +35,17 @@ public interface Client
     /**
      * Retrieve columns from a column-family row.
      * 
-     * @param <E>
+     * @param 
      *            the element type
      * @param entityClass
      *            the entity class
      * @param key
      *            The key of the row
-     * @param relationNames
-     *            the relation names
      * @return A list of matching columns
      * @throws Exception
      *             the exception
      */
-    <E> E find(Class<E> entityClass, Object key, List<String> relationNames);
+    Object find(Class entityClass, Object key);
 
     /**
      * Retrieve columns from multiple rows of a column-family.
@@ -62,6 +60,7 @@ public interface Client
      * @throws Exception
      *             the exception
      */
+    //I will come to it LATER. 
     <E> List<E> findAll(Class<E> entityClass, Object... keys);
 
     /**
@@ -142,20 +141,20 @@ public interface Client
     
     void persist(Node node);
 
-    /**
-     * Find.
-     * 
-     * @param clazz
-     *            the clazz
-     * @param metadata
-     *            the metadata
-     * @param rowId
-     *            the row id
-     * @param relationNames
-     *            relation names
-     * @return entity.
-     */
-    Object find(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relationNames);
+//    /**
+//     * Find.
+//     * 
+//     * @param clazz
+//     *            the clazz
+//     * @param metadata
+//     *            the metadata
+//     * @param rowId
+//     *            the row id
+//     * @param relationNames
+//     *            relation names
+//     * @return entity.
+//     */
+//    Object find(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relationNames);
 
     /**
      * Inserts records into Join Table.
@@ -230,11 +229,11 @@ public interface Client
      *            the column name
      * @param colValue
      *            the column value
-     * @param m
-     *            the entity metadat
+     * @param entityClass
+     *            the entity class           
      * @return the list list of entities.
      */
-    List<Object> find(String colName, String colValue, EntityMetadata m);
+    List<Object> findByRelation(String colName, String colValue, Class entityClazz);
 
     /**
      * Returns entity reader instance bind to specific client.

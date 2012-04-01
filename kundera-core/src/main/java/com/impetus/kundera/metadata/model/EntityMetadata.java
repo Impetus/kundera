@@ -15,11 +15,15 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.persistence.JoinColumn;
+import javax.persistence.PrimaryKeyJoinColumn;
 
 import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.persistence.event.CallbackMethod;
@@ -90,7 +94,7 @@ public final class EntityMetadata
     private List<Class<?>> embeddableCollection = new ArrayList<Class<?>>();
 
     /** Relationship map, key=>property name, value=>relation. */
-    private Map<String, Relation> relationsMap = new HashMap<String, Relation>();
+    private Map<String, Relation> relationsMap;
 
     /** The db type. */
     private DBType dbType;
@@ -101,6 +105,7 @@ public final class EntityMetadata
     /** The is relation via join table. */
     private boolean isRelationViaJoinTable;
 
+    private List<String> relationNames = new ArrayList<String>();
     /**
      * The Enum Type.
      */
@@ -474,6 +479,7 @@ public final class EntityMetadata
     public void addRelation(String property, Relation relation)
     {
         relationsMap.put(property, relation);
+        addRelationName(relation);
     }
 
     /**
@@ -775,6 +781,62 @@ public final class EntityMetadata
     public void setRelationViaJoinTable(boolean isRelationViaJoinTable)
     {
         this.isRelationViaJoinTable = isRelationViaJoinTable;
+    }
+
+    public List<String> getRelationNames()
+    {
+        return relationNames;
+    }
+    /**
+     * Method to add specific relation name for given relational field.
+     * 
+     * @param rField relation object.
+     */
+    private void addRelationName(Relation rField)
+    {
+        String relationName=getJoinColumnName(rField.getProperty());
+        if(rField.getProperty().isAnnotationPresent(PrimaryKeyJoinColumn.class))
+        {
+            relationName = this.getIdColumn().getName();
+        }
+        addToRelationNameCollection(relationName);
+    }
+
+    /**
+     * Adds relation name to relation name collection.
+     * 
+     * @param relationName relational name
+     */
+    private void addToRelationNameCollection(String relationName)
+    {
+        if(relationNames == null)
+        {
+            relationNames = new ArrayList<String>();
+        }
+        if(relationName != null)
+        {
+        relationNames.add(relationName);
+        }
+    }
+    
+    
+    /**
+     * Gets the relation field name.
+     * 
+     * @param relation
+     *            the relation
+     * @return the relation field name
+     */
+    private String getJoinColumnName(Field relation)
+    {
+        String columnName = null;
+        JoinColumn ann = relation.getAnnotation(JoinColumn.class);
+        if (ann != null)
+        {
+            columnName = ann.name();
+
+        }
+        return columnName != null ? columnName : relation.getName();
     }
 
 }

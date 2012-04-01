@@ -91,7 +91,7 @@ public class AbstractEntityReader
                         if(relationValue != null) {
                             if (childClass.equals(e.getEntity().getClass()))
                             {
-                                child = childClient.find(childClass, childMetadata, relationValue.toString(), null);
+                                child = childClient.find(childClass, relationValue.toString());
                             }
                             else
                             {
@@ -128,7 +128,7 @@ public class AbstractEntityReader
                         List<Object> childs = null;
                         if (MetadataUtils.useSecondryIndex(childClient.getPersistenceUnit()))
                         {
-                            childs = childClient.find(relationName, relationalValue, childMetadata);
+                            childs = childClient.findByRelation(relationName, relationalValue, childClass);
 
                             // pass this entity id as a value to be searched
                             // for
@@ -142,7 +142,7 @@ public class AbstractEntityReader
                                 // childs.add(childClient.find(childClazz,
                                 // childMetadata, e.getEntityId(), null));
                                 childs.add(childClass.equals(e.getEntity().getClass()) ? childs.add(childClient.find(
-                                        childClass, childMetadata, e.getEntityId(), null)) : pd
+                                        childClass, e.getEntityId())) : pd
                                         .find(childClass, relationalValue.toString()));
                             }
                             else
@@ -264,7 +264,7 @@ public class AbstractEntityReader
                         
                             if (childClazz.equals(e.getEntity().getClass()))
                             {
-                                child = childClient.find(childClazz, childMetadata, relationalValue.toString(), null);
+                                child = childClient.find(childClazz, relationalValue.toString());
                             }
                             else
                             {
@@ -305,7 +305,7 @@ public class AbstractEntityReader
                         List<Object> childs = null;
                         if (MetadataUtils.useSecondryIndex(childClient.getPersistenceUnit()))
                         {
-                            childs = childClient.find(relationName, relationalValue, childMetadata);
+                            childs = childClient.findByRelation(relationName, relationalValue, childClazz);
 
                             // pass this entity id as a value to be searched
                             // for
@@ -319,7 +319,7 @@ public class AbstractEntityReader
                                 // childs.add(childClient.find(childClazz,
                                 // childMetadata, e.getEntityId(), null));
                                 childs.add(childClazz.equals(e.getEntity().getClass()) ? childs.add(childClient.find(
-                                        childClazz, childMetadata, e.getEntityId(), null)) : persistenceDelegeator
+                                        childClazz, e.getEntityId())) : persistenceDelegeator
                                         .find(childClazz, relationalValue.toString()));
                             }
                             else
@@ -535,7 +535,7 @@ public class AbstractEntityReader
                         }
                         else
                         {
-                            results = client.find(objectGraph.getfKeyName(), id, origMetadata);
+                            results = client.findByRelation(objectGraph.getfKeyName(), id, origMetadata.getEntityClazz());
                         }
 
                     }
@@ -561,7 +561,7 @@ public class AbstractEntityReader
                         results = new ArrayList<Object>();
                         for (String rowKey : uqSet)
                         {
-                            Object result = client.find(e.getEntity().getClass(), origMetadata, rowKey, null);
+                            Object result = client.find(e.getEntity().getClass(), rowKey);
                             if (result != null)
                             {
                                 results.add(result);

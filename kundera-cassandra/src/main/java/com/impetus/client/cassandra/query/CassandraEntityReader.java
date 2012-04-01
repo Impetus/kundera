@@ -82,7 +82,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     {
         try
         {
-            return (EnhanceEntity) client.find(m.getEntityClazz(), m, primaryKey.toString(), relationNames);
+            return (EnhanceEntity) client.find(m.getEntityClazz(), primaryKey.toString());
         }
         catch (Exception e)
         {
