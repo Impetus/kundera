@@ -151,27 +151,12 @@ public class HibernateClient implements Client
         }
     }
 
-    // /*
-    // * (non-Javadoc)
-    // *
-    // * @see
-    // com.impetus.kundera.client.Client#delete(com.impetus.kundera.proxy.
-    // * EnhancedEntity)
-    // */
-    // @Override
-    // public void delete(EnhancedEntity arg0) throws Exception
-    // {
-    //
-    // }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
-     * java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object, java.lang.Object)
      */
     @Override
-    public void delete(Object entity, Object pKey, EntityMetadata metadata)
+    public void delete(Object entity, Object pKey)
     {
         Session s = getSessionInstance();
         Transaction tx = s.beginTransaction();
@@ -179,6 +164,7 @@ public class HibernateClient implements Client
         tx.commit();
         s.close();
 
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
         if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
         {
             getIndexManager().remove(metadata, entity, pKey.toString());
@@ -344,6 +330,9 @@ public class HibernateClient implements Client
     }   
     
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.graph.Node)
+     */
     @Override
     public void persist(Node node)
     {
@@ -468,6 +457,9 @@ public class HibernateClient implements Client
         return foreignKeys;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#findParentEntityFromJoinTable(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+     */
     @Override
     public List<Object> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
             String joinColumnName, String inverseJoinColumnName, Object childId)

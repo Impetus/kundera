@@ -344,7 +344,7 @@ public class PersistenceDelegator
             objectGraph.setParentId(getId(parentEntity, metadata));
 
             Client pClient = getClient(metadata);
-            pClient.delete(parentEntity, objectGraph.getParentId(), metadata);
+            pClient.delete(parentEntity, objectGraph.getParentId());
 
             session.remove(parentEntity.getClass(), objectGraph.getParentEntity());
         }
@@ -483,7 +483,7 @@ public class PersistenceDelegator
             // if (getSession().lookup(child.getClass(), id) == null)
             // {
             Client chClient = getClient(metadata);
-            chClient.delete(child, id, metadata);
+            chClient.delete(child, id);
             // session.store(id, child);
             // }
         }

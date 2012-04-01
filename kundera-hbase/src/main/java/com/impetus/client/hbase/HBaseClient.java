@@ -47,6 +47,7 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.EnhancedEntity;
 
+// TODO: Auto-generated Javadoc
 /**
  * HBase client.
  * 
@@ -71,15 +72,12 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     /**
      * Instantiates a new h base client.
-     * 
-     * @param indexManager
-     *            the index manager
-     * @param conf
-     *            the conf
-     * @param hTablePool
-     *            the h table pool
-     * @param reader
-     *            the reader
+     *
+     * @param indexManager the index manager
+     * @param conf the conf
+     * @param hTablePool the h table pool
+     * @param reader the reader
+     * @param persistenceUnit the persistence unit
      */
     public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool, EntityReader reader, String persistenceUnit)
     {
@@ -258,6 +256,9 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     
     
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.graph.Node)
+     */
     @Override
     public void persist(Node node)
     {
@@ -386,6 +387,9 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getForeignKeysFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+     */
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
             String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
@@ -395,6 +399,9 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#findParentEntityFromJoinTable(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+     */
     @Override
     public <E> List<E> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
             String joinColumnName, String inverseJoinColumnName, Object childId)
@@ -404,6 +411,9 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#deleteFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+     */
     @Override
     public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, EntitySaveGraph objectGraph)
@@ -443,15 +453,15 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
-     * java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object, java.lang.Object)
      */
     @Override
-    public void delete(Object entity, Object pKey, EntityMetadata metadata) 
+    public void delete(Object entity, Object pKey) 
     {
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+
         try
         {
             handler.deleteRow(pKey.toString(), metadata.getTableName());

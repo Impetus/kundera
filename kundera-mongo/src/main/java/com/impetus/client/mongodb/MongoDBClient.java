@@ -549,15 +549,15 @@ public class MongoDBClient implements Client
         return entities;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
-     * java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object, java.lang.Object)
      */
     @Override
-    public void delete(Object entity, Object pKey, EntityMetadata entityMetadata)
+    public void delete(Object entity, Object pKey)
     {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
 
         // Find the DBObject to remove first

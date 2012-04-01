@@ -77,6 +77,7 @@ import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
+// TODO: Auto-generated Javadoc
 /**
  * Client implementation using Pelops. http://code.google.com/p/pelops/
  * 
@@ -109,11 +110,10 @@ public class PelopsClient implements Client
 
     /**
      * default constructor.
-     * 
-     * @param indexManager
-     *            the index manager
-     * @param reader
-     *            the reader
+     *
+     * @param indexManager the index manager
+     * @param reader the reader
+     * @param persistenceUnit the persistence unit
      */
     public PelopsClient(IndexManager indexManager, EntityReader reader, String persistenceUnit)
     {
@@ -142,6 +142,15 @@ public class PelopsClient implements Client
      * 
      * @see com.impetus.kundera.client.Client#find(java.lang.Class,
      * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
+     */
+    /**
+     * Find.
+     *
+     * @param clazz the clazz
+     * @param metadata the metadata
+     * @param rowId the row id
+     * @param relationNames the relation names
+     * @return the object
      */
     private final Object find(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relationNames)
     {
@@ -186,22 +195,13 @@ public class PelopsClient implements Client
 
     /**
      * Method to return list of entities for given below attributes:.
-     * 
-     * @param entityClass
-     *            entity class
-     * @param relationNames
-     *            relation names
-     * @param isWrapReq
-     *            true, in case it needs to populate enhance entity.
-     * @param metadata
-     *            entity metadata.
-     * @param rowIds
-     *            array of row key s
+     *
+     * @param entityClass entity class
+     * @param relationNames relation names
+     * @param isWrapReq true, in case it needs to populate enhance entity.
+     * @param metadata entity metadata.
+     * @param rowIds array of row key s
      * @return list of wrapped entities.
-     * @throws Exception
-     *             throws exception. don't know why TODO: why is it throwing
-     *             exception. need to take care as part of exception handling
-     *             exercise.
      */
     public final List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
             String... rowIds)
@@ -263,18 +263,12 @@ public class PelopsClient implements Client
 
     /**
      * Load super columns.
-     * 
-     * @param keyspace
-     *            the keyspace
-     * @param columnFamily
-     *            the column family
-     * @param rowId
-     *            the row id
-     * @param superColumnNames
-     *            the super column names
+     *
+     * @param keyspace the keyspace
+     * @param columnFamily the column family
+     * @param rowId the row id
+     * @param superColumnNames the super column names
      * @return the list
-     * @throws Exception
-     *             the exception
      */
     private final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
             String... superColumnNames)
@@ -286,19 +280,18 @@ public class PelopsClient implements Client
                 ConsistencyLevel.ONE);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
-     * java.lang.Object, com.impetus.kundera.metadata.model.EntityMetadata)
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object, java.lang.Object)
      */
     @Override
-    public void delete(Object entity, Object pKey, EntityMetadata metadata)
+    public void delete(Object entity, Object pKey)
     {
         if (!isOpen())
         {
             throw new PersistenceException("PelopsClient is closed.");
         }
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
 
         RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
         rowDeletor.deleteRow(metadata.getTableName(), pKey.toString(), ConsistencyLevel.ONE);
@@ -392,6 +385,9 @@ public class PelopsClient implements Client
     
     
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.graph.Node)
+     */
     @Override
     public void persist(Node node)
     {
@@ -450,9 +446,11 @@ public class PelopsClient implements Client
     }
 
     /**
-     * @param metadata
-     * @param tf
-     * @param nodeLink
+     * Adds the node link to thrift row.
+     *
+     * @param metadata the metadata
+     * @param tf the tf
+     * @param nodeLink the node link
      */
     private void addNodeLinkToThriftRow(EntityMetadata metadata, PelopsDataHandler.ThriftRow tf, NodeLink nodeLink)
     {
@@ -510,6 +508,9 @@ public class PelopsClient implements Client
 
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object, java.lang.Object)
+     */
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, Object primaryKey, Object childEntity)
@@ -547,14 +548,11 @@ public class PelopsClient implements Client
     }
 
     /**
-     * Creates secondary indexes on columns if not already created
-     * 
-     * @param tableName
-     *            Column family name
-     * @param poolName
-     *            Pool Name
-     * @param columns
-     *            List of columns
+     * Creates secondary indexes on columns if not already created.
+     *
+     * @param tableName Column family name
+     * @param poolName Pool Name
+     * @param columns List of columns
      */
     private void createIndexesOnColumns(String tableName, String poolName, List<Column> columns)
     {
@@ -638,6 +636,9 @@ public class PelopsClient implements Client
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getForeignKeysFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+     */
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
             String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
@@ -652,6 +653,9 @@ public class PelopsClient implements Client
         return foreignKeys;
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#findParentEntityFromJoinTable(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+     */
     @Override
     public List<Object> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
             String joinColumnName, String inverseJoinColumnName, Object childId)

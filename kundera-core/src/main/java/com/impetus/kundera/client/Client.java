@@ -90,12 +90,10 @@ public interface Client
      *            the entity
      * @param pKey
      *            the key
-     * @param metadata
-     *            the metadata
      * @throws Exception
      *             the exception
      */
-    void delete(Object entity, Object pKey, EntityMetadata metadata);
+    void delete(Object entity, Object pKey);
 
     /**
      * Gets the persistence unit.

@@ -88,8 +88,7 @@ public class RemovedState extends NodeState
         
         Node node = (Node)nodeStateContext;
         String entityId = ObjectGraphBuilder.getEntityId(node.getNodeId());
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-        client.delete(node.getData(), entityId, entityMetadata);
+        client.delete(node.getData(), entityId);
         
         //Since node is flushed, mark it as NOT dirty
         nodeStateContext.setDirty(false);
