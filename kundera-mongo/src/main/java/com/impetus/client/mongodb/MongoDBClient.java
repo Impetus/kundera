@@ -34,6 +34,7 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -228,6 +229,13 @@ public class MongoDBClient implements Client
         }
 
         dbCollection.insert(documents.toArray(new BasicDBObject[0]));
+    }
+    
+    
+
+    @Override
+    public void persistJoinTable(JoinTableData joinTableData)
+    {
     }
 
     @Override

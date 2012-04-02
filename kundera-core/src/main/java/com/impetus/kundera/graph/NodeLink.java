@@ -35,7 +35,8 @@ public class NodeLink
         IS_RELATED_VIA_JOIN_TABLE,
         PROPERTY,
         BIDIRECTIONAL_PROPERTY,
-        CASCADE
+        CASCADE,
+        JOIN_TABLE_METADATA
         //Add more if required
     };   
     

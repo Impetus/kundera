@@ -45,6 +45,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
@@ -423,6 +424,14 @@ public class HibernateClient implements Client
         }
 
     }
+
+    
+    
+    @Override
+    public void persistJoinTable(JoinTableData joinTableData)
+    {
+    }
+
 
     /*
      * (non-Javadoc)

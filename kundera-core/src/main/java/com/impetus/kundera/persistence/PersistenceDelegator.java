@@ -54,10 +54,11 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.context.FlushStack;
-import com.impetus.kundera.persistence.context.FlushStackManager;
+import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.MainCache;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.context.PersistenceCacheManager;
+import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 import com.impetus.kundera.persistence.handler.impl.EntityInterceptor;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
@@ -97,7 +98,7 @@ public class PersistenceDelegator
 
     private ObjectGraphBuilder graphBuilder;
 
-    private FlushStackManager flushStackManager;
+    private FlushManager flushManager;
 
     /**
      * Instantiates a new persistence delegator.
@@ -112,7 +113,7 @@ public class PersistenceDelegator
         this.session = session;
         eventDispatcher = new EntityEventDispatcher();
         graphBuilder = new ObjectGraphBuilder();
-        flushStackManager = new FlushStackManager();
+        flushManager = new FlushManager();
     }
 
     // TODO : This method needs serious attention!
@@ -1190,7 +1191,7 @@ public class PersistenceDelegator
             // Build Flush Stack from the Persistence Cache
             // TODO: Cascade flush for only those related entities for whom
             // cascade=ALL or PERSIST
-            flushStackManager.buildFlushStack(PersistenceCache.INSTANCE);
+            flushManager.buildFlushStack(PersistenceCache.INSTANCE);
 
             // Get flush stack from Persistence Cache
             FlushStack fs = PersistenceCache.INSTANCE.getFlushStack();
@@ -1231,6 +1232,15 @@ public class PersistenceDelegator
 
                 // TODO: remove node from persistence cache
             }
+            
+            //Flush Join Table data into database
+            Map<String, JoinTableData> joinTableDataMap = PersistenceCache.INSTANCE.getJoinTableDataMap();
+            for(JoinTableData jtData : joinTableDataMap.values()) {
+                EntityMetadata m = KunderaMetadataManager.getEntityMetadata(jtData.getEntityClass());
+                Client client = getClient(m);
+                client.persistJoinTable(jtData);
+            }
+            
         }
     }
     

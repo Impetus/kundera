@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
@@ -71,6 +72,7 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
@@ -508,9 +510,47 @@ public class PelopsClient implements Client
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object, java.lang.Object)
+
+
+    /**
+     * Persists records into Join Table
      */
+    public void persistJoinTable(JoinTableData joinTableData) {
+        
+        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit());
+        Mutator mutator = Pelops.createMutator(poolName);
+
+        String joinTableName = joinTableData.getJoinTableName();
+        String joinColumnName = joinTableData.getJoinColumnName();
+        String invJoinColumnName = joinTableData.getInverseJoinColumnName();
+        Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
+        
+        for(Object key : joinTableRecords.keySet()) {
+            Set<Object> values =  joinTableRecords.get(key);
+            
+            String joinColumnValue = (String) key;
+            
+            List<Column> columns = new ArrayList<Column>();
+            
+            for(Object value : values) {
+                Column column = new Column();
+                column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName + "_" + (String)value));
+                column.setValue(PropertyAccessorFactory.STRING.toBytes((String)value));
+                column.setTimestamp(System.currentTimeMillis());
+                
+                columns.add(column);
+            }
+            
+            createIndexesOnColumns(joinTableName, poolName, columns);
+            String pk = (String) key;
+            
+            mutator.writeColumns(joinTableName, new Bytes(pk.getBytes()), Arrays.asList(columns.toArray(new Column[0])));
+            mutator.execute(ConsistencyLevel.ONE);            
+        }    
+       
+    }
+    
+    @Deprecated
     @Override
     public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, Object primaryKey, Object childEntity)
@@ -734,6 +774,7 @@ public class PelopsClient implements Client
      * @param child
      *            the child
      */
+    @Deprecated
     private void addColumnsToJoinTable(String inverseJoinColumnName, EntityMetadata relMetadata, List<Column> columns,
             Object child)
     {

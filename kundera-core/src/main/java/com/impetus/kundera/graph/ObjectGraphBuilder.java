@@ -144,7 +144,11 @@ public class ObjectGraphBuilder
         //linkProperties.put(LinkProperty.BIDIRECTIONAL_PROPERTY, relation.ge); 
         linkProperties.put(LinkProperty.CASCADE, relation.getCascades());
         
-        //Add All link properties
+        if(relation.isRelatedViaJoinTable()) {
+            linkProperties.put(LinkProperty.JOIN_TABLE_METADATA, relation.getJoinTableMetadata());
+        }
+        
+        //TODO: Add more link properties as required
         
         return linkProperties;      
     }    

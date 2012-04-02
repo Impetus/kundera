@@ -22,6 +22,7 @@ import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 
 /**
@@ -140,6 +141,8 @@ public interface Client
     void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata);
     
     void persist(Node node);
+    
+    void persistJoinTable(JoinTableData joinTableData);
 
     /**
      * Inserts records into Join Table.
@@ -158,6 +161,7 @@ public interface Client
      * @param childEntity
      *            TODO
      */
+    @Deprecated
     void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             EntityMetadata relMetadata, Object primaryKey, Object childEntity);
 

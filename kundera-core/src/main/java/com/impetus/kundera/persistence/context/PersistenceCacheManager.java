@@ -37,5 +37,25 @@ public class PersistenceCacheManager
             node.clear();
         }
     }
+    
+    public static void markAllNodesNotTraversed() {        
+        for(Node node : PersistenceCache.INSTANCE.getMainCache().getAllNodes()) {
+            node.setTraversed(false);
+        }
+        
+        for(Node node : PersistenceCache.INSTANCE.getEmbeddedCache().getAllNodes()) {
+            node.setTraversed(false);
+        }
+        
+        for(Node node : PersistenceCache.INSTANCE.getElementCollectionCache().getAllNodes()) {
+            node.setTraversed(false);
+        }
+        
+        for(Node node : PersistenceCache.INSTANCE.getTransactionalCache().getAllNodes()) {
+            node.setTraversed(false);
+        }
+    }
+    
+   
 
 }

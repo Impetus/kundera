@@ -37,7 +37,7 @@ public class PersistenceCacheTest
 {
 
     PersistenceCache pc;
-    FlushStackManager flushStackManager;    
+    FlushManager flushManager;    
     ObjectGraphBuilder graphBuilder;    
     
     Configurator configurator = new Configurator("kunderatest");
@@ -49,7 +49,7 @@ public class PersistenceCacheTest
     public void setUp() throws Exception
     {
         pc = new PersistenceCache();
-        flushStackManager = new FlushStackManager();
+        flushManager = new FlushManager();
         graphBuilder = new ObjectGraphBuilder();
         
         configurator.configure();     

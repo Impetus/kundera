@@ -42,6 +42,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -388,6 +389,13 @@ public class HBaseClient implements com.impetus.kundera.client.Client
             e.printStackTrace();
         }
 
+    }
+    
+    
+
+    @Override
+    public void persistJoinTable(JoinTableData joinTableData)
+    {
     }
 
     /*

@@ -36,7 +36,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.persistence.context.FlushStackManager;
+import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
@@ -69,7 +69,7 @@ public class EntityManagerImpl implements EntityManager
     private PersistenceDelegator persistenceDelegator;
     
     
-    FlushStackManager flushStackManager;    
+    FlushManager flushStackManager;    
 
     /**
      * Instantiates a new entity manager impl.

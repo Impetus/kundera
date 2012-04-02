@@ -15,6 +15,12 @@
  */
 package com.impetus.kundera.persistence.context;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import com.impetus.kundera.persistence.context.jointable.JoinTableData;
+
 
 
 /**
@@ -36,7 +42,7 @@ public class PersistenceCache
     /* Cache of transactional objects */
     private CacheBase transactionalCache;
     
-    FlushStackManager flushStackManager;
+    FlushManager flushManager;
     
     /** one instance of this class */
     public static final PersistenceCache INSTANCE = new PersistenceCache();
@@ -45,7 +51,14 @@ public class PersistenceCache
      * Stack containing Nodes to be flushed
      * Entities are always flushed from the top, there way to bottom until stack is empty 
      */
-    private FlushStack flushStack;   
+    private FlushStack flushStack;  
+    
+    /**
+     * Map containing data required for inserting records for each join table.
+     * Key -> Name of Join Table
+     * Value -> records to be persisted in the join table
+     */
+    private Map<String, JoinTableData> joinTableDataMap;
     
     public PersistenceCache() {
         initialize();
@@ -58,8 +71,9 @@ public class PersistenceCache
         transactionalCache = new TransactionalCache();
         
         flushStack = new FlushStack();
+        joinTableDataMap = new HashMap<String, JoinTableData>();
         
-        flushStackManager = new FlushStackManager();
+        flushManager = new FlushManager();
     }    
     
     public void clean() {
@@ -69,7 +83,8 @@ public class PersistenceCache
         transactionalCache = null;
         
         flushStack.clear(); flushStack = null;
-        flushStackManager = null;
+        joinTableDataMap.clear(); joinTableDataMap = null;
+        flushManager = null;
     }
     
     /**
@@ -168,6 +183,32 @@ public class PersistenceCache
     public void setFlushStack(FlushStack flushStack)
     {
         this.flushStack = flushStack;
-    }    
+    }
+
+    /**
+     * @return the joinTableDataMap
+     */
+    public Map<String, JoinTableData> getJoinTableDataMap()
+    {
+        return joinTableDataMap;
+    }
+
+    /**
+     * @param joinTableDataMap the joinTableDataMap to set
+     */
+    public void addJoinTableDataIntoMap(String joinTableName, String joinColumnName, 
+            String invJoinColumnName, Class<?> entityClass, Object joinColumnValue, Set<Object> invJoinColumnValues)
+    {
+        JoinTableData joinTableData = joinTableDataMap.get(joinTableName);
+        if(joinTableData == null) {
+            joinTableData = new JoinTableData(joinTableName, joinColumnName, invJoinColumnName, entityClass);
+            joinTableData.addJoinTableRecord(joinColumnValue, invJoinColumnValues);
+            joinTableDataMap.put(joinTableName, joinTableData);
+        } else {
+            joinTableData.addJoinTableRecord(joinColumnValue, invJoinColumnValues);
+        }
+        
+    } 
+    
 
 }

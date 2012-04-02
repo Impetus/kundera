@@ -46,7 +46,8 @@ public class DetachedState extends NodeState
     @Override
     public void handleRemove(NodeStateContext nodeStateContext)
     {
-        throw new IllegalArgumentException("Remove operation not allowed in Detached state");
+        throw new IllegalArgumentException("Remove operation not allowed in Detached state." +
+        		" Possible reason: You may have closed entity manager before calling remove");
     }
 
     @Override

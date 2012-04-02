@@ -54,13 +54,13 @@ import com.impetus.kundera.persistence.context.entities.photographer.Photographe
 import com.impetus.kundera.persistence.context.entities.photographer.PhotographerUni_M_M_M_M;
 
 /**
- * Test case for {@link FlushStackManager} 
+ * Test case for {@link FlushManager} 
  * @author amresh.singh
  */
 public class FlushStackManagerTest
 {
     PersistenceCache pc;
-    FlushStackManager flushStackManager;    
+    FlushManager flushManager;    
     ObjectGraphBuilder graphBuilder;    
     
     Configurator configurator = new Configurator("kunderatest");
@@ -72,7 +72,7 @@ public class FlushStackManagerTest
     public void setUp() throws Exception
     {
         pc = new PersistenceCache();
-        flushStackManager = new FlushStackManager();
+        flushManager = new FlushManager();
         graphBuilder = new ObjectGraphBuilder();
         
         configurator.configure();   
@@ -108,7 +108,7 @@ public class FlushStackManagerTest
         Assert.assertEquals(4, pc.getMainCache().size());
         
         
-        flushStackManager.buildFlushStack(pc);        
+        flushManager.buildFlushStack(pc);        
         
         FlushStack fs = pc.getFlushStack();
         System.out.println(fs);
@@ -124,7 +124,7 @@ public class FlushStackManagerTest
         
         ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
         pc.getMainCache().addGraphToCache(graph);
-        flushStackManager.buildFlushStack(pc);  
+        flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
         System.out.println(fs);
         Assert.assertEquals(3, fs.size());
@@ -141,7 +141,7 @@ public class FlushStackManagerTest
         
         ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
         pc.getMainCache().addGraphToCache(graph);
-        flushStackManager.buildFlushStack(pc);  
+        flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
         System.out.println(fs);
         Assert.assertEquals(5, fs.size());
@@ -166,7 +166,7 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graphb2);
         pc.getMainCache().addGraphToCache(graphb3);
         
-        flushStackManager.buildFlushStack(pc);  
+        flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
         System.out.println(fs);
         Assert.assertEquals(5, fs.size());
@@ -189,7 +189,7 @@ public class FlushStackManagerTest
         
         ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
         pc.getMainCache().addGraphToCache(graph);
-        flushStackManager.buildFlushStack(pc);  
+        flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
         System.out.println(fs);
         Assert.assertEquals(7, fs.size());
@@ -212,7 +212,7 @@ public class FlushStackManagerTest
         
         ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
         pc.getMainCache().addGraphToCache(graph);
-        flushStackManager.buildFlushStack(pc);  
+        flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
         System.out.println(fs);
         Assert.assertEquals(6, fs.size());
@@ -241,7 +241,7 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graph2);
         pc.getMainCache().addGraphToCache(graph3);
         
-        flushStackManager.buildFlushStack(pc);  
+        flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
         System.out.println(fs);
         Assert.assertEquals(7, fs.size());
@@ -271,7 +271,7 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graph1);
         pc.getMainCache().addGraphToCache(graph2);        
         
-        flushStackManager.buildFlushStack(pc);  
+        flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
         System.out.println(fs);
         Assert.assertEquals(8, fs.size());
@@ -301,7 +301,7 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graph1);
         pc.getMainCache().addGraphToCache(graph2);        
         
-        flushStackManager.buildFlushStack(pc);  
+        flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
         System.out.println(fs);
         Assert.assertEquals(9, fs.size());
