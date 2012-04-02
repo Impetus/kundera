@@ -59,26 +59,7 @@ public class HBaseEntityReader extends AbstractEntityReader implements EntityRea
     @Override
     public EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client)
     {
-        try
-        {
-            Object o = client.find(m.getEntityClazz(), primaryKey);
-
-            if (o == null)
-            {
-                // No entity found
-                return null;
-            }
-            else
-            {
-                return o instanceof EnhanceEntity ? (EnhanceEntity) o : new EnhanceEntity(o, getId(o, m), null);
-            }
-
-        }
-        catch (Exception e)
-        {
-            throw new PersistenceException(e);
-        }
-
+        return super.findById(primaryKey, m, relationNames, client);
     }
 
 }

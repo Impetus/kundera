@@ -80,7 +80,9 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     @Override
     public EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client)
     {
-        try
+        return super.findById(primaryKey, m, relationNames, client);
+
+/*        try
         {
             return (EnhanceEntity) client.find(m.getEntityClazz(), primaryKey.toString());
         }
@@ -90,7 +92,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
             throw new PersistenceException(e.getMessage());
         }
 
-    }
+*/    }
 
     /**
      * Method responsible for reading bacl entity and relations using secondary

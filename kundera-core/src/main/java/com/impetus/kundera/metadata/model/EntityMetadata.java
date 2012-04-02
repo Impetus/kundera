@@ -94,7 +94,7 @@ public final class EntityMetadata
     private List<Class<?>> embeddableCollection = new ArrayList<Class<?>>();
 
     /** Relationship map, key=>property name, value=>relation. */
-    private Map<String, Relation> relationsMap;
+    private Map<String, Relation> relationsMap = new HashMap<String, Relation>();
 
     /** The db type. */
     private DBType dbType;
@@ -105,7 +105,7 @@ public final class EntityMetadata
     /** The is relation via join table. */
     private boolean isRelationViaJoinTable;
 
-    private List<String> relationNames = new ArrayList<String>();
+    private List<String> relationNames;
     /**
      * The Enum Type.
      */

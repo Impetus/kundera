@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.PersistenceException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -207,6 +209,40 @@ public class AbstractEntityReader
         return e.getEntity();
     }
 
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.EntityReader#findById(java.lang.String,
+     * com.impetus.kundera.metadata.model.EntityMetadata, java.util.List,
+     * com.impetus.kundera.client.Client)
+     */
+   
+    protected EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client)
+    {
+        try
+        {
+            Object o = client.find(m.getEntityClazz(), primaryKey);
+
+            if (o == null)
+            {
+                // No entity found
+                return null;
+            }
+            else
+            {
+                return o instanceof EnhanceEntity ? (EnhanceEntity) o : new EnhanceEntity(o, getId(o, m), null);
+            }
+
+        }
+        catch (Exception e)
+        {
+            throw new PersistenceException(e);
+        }
+
+    }
+    
     /**
      * Compute graph.
      * 

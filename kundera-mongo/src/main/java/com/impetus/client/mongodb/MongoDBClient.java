@@ -562,7 +562,7 @@ public class MongoDBClient implements Client
 
         // Find the DBObject to remove first
         BasicDBObject query = new BasicDBObject();
-        query.put(entityMetadata.getIdColumn().getName(), pKey.toString());
+        query.put(entityMetadata.getIdColumn().getName(), pKey.toString());        
 
         dbCollection.remove(query);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());

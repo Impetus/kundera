@@ -346,6 +346,7 @@ public class PelopsDataHandler extends DataHandler
             }
         }
         return isWrapperReq ? new EnhanceEntity(entity, thriftRow.getId(), relations) : entity;
+        //return new EnhanceEntity(entity, thriftRow.getId(), relations);
     }
 
     /**
@@ -498,6 +499,7 @@ public class PelopsDataHandler extends DataHandler
         // EnhancedEntity e = EntityResolver.getEnhancedEntity(entity,
         // tr.getId(), foreignKeysMap);
         return isWrapReq ? new EnhanceEntity(entity, tr.getId(), relations) : entity;
+        //return new EnhanceEntity(entity, tr.getId(), relations);
     }
 
     /**
