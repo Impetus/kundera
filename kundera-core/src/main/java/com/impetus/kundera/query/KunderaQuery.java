@@ -42,7 +42,7 @@ public class KunderaQuery
 {
 
     /** The Constant SINGLE_STRING_KEYWORDS. */
-    public static final String[] SINGLE_STRING_KEYWORDS = { "SELECT", "UPDATE", "DELETE", "UNIQUE", "FROM", "WHERE",
+    public static final String[] SINGLE_STRING_KEYWORDS = { "SELECT", "UPDATE", "SET", "DELETE", "UNIQUE", "FROM", "WHERE",
             "GROUP BY", "HAVING", "ORDER BY" };
 
     /** The Constant INTER_CLAUSE_OPERATORS. */
@@ -95,6 +95,10 @@ public class KunderaQuery
     // (AND, OR etc.)
     /** The filters queue. */
     private Queue filtersQueue = new LinkedList();
+
+    private String updateClause;
+
+    private boolean isDeleteUpdate;
 
     /**
      * Instantiates a new kundera query.
@@ -699,6 +703,37 @@ public class KunderaQuery
         ASC,
         /** The DESC. */
         DESC;
+    }
+
+    
+    /**
+     * @return the updateClause
+     */
+    public String getUpdateClause()
+    {
+        return updateClause;
+    }
+
+    /**
+     * @param updateClause the updateClause to set
+     */
+    public void setUpdateClause(String updateClause)
+    {
+        this.updateClause = updateClause;
+    }
+
+
+    /**
+     * @param b
+     */
+    public void setIsDeleteUpdate(boolean b)
+    {
+       this.isDeleteUpdate = b;   
+    }
+    
+    public boolean isDeleteUpdate()
+    {
+        return isDeleteUpdate;
     }
 
     /**

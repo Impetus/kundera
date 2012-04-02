@@ -17,6 +17,7 @@ package com.impetus.kundera.query;
 
 import java.util.StringTokenizer;
 
+// TODO: Auto-generated Javadoc
 /**
  * Parser for handling JPQL Single-String queries. Takes a JPQLQuery and the
  * query string and parses it into its constituent parts, updating the JPQLQuery
@@ -127,9 +128,11 @@ public class KunderaQueryParser
          */
         private void compile()
         {
-            // TODO Query can start "SELECT", "DELETE" or "UPDATE"
-            compileSelect();
-
+            // if it is not an update statement
+            if (!compileUpdate())
+            {
+                compileSelectOrDelete();
+            }
             // any keyword after compiling the SELECT is an error
             String keyword = tokenizer.parseKeyword();
             if (keyword != null)
@@ -142,20 +145,56 @@ public class KunderaQueryParser
         }
 
         /**
+         * Compile update.
+         *
+         * @return true, if successful
+         */
+        private boolean compileUpdate()
+        {
+            if (tokenizer.parseKeywordIgnoreCase("UPDATE"))
+            {
+                query.setIsDeleteUpdate(true);
+                compileFrom();
+
+                if (tokenizer.parseKeywordIgnoreCase("SET"))
+                {
+                    compileUpdateClause();
+                }
+
+                compilewhereClause();
+
+                return true;
+            }
+            return false;
+        }
+
+        /**
          * Compile select.
          */
-        // TODO: reduce Cyclomatic complexity
-        private void compileSelect()
+        private void compileSelectOrDelete()
         {
-            if (!tokenizer.parseKeywordIgnoreCase("SELECT"))
+            if (!(tokenizer.parseKeywordIgnoreCase("SELECT")))
             {
-                throw new RuntimeException("no select to start");
+                if (tokenizer.parseKeywordIgnoreCase("DELETE"))
+                {
+                    query.setIsDeleteUpdate(true);
+
+                }
             }
+            
             compileResult();
             if (tokenizer.parseKeywordIgnoreCase("FROM"))
             {
                 compileFrom();
             }
+            compilewhereClause();
+        }
+
+        /**
+         * Compilewhere clause.
+         */
+        private void compilewhereClause()
+        {
             if (tokenizer.parseKeywordIgnoreCase("WHERE"))
             {
                 compileWhere();
@@ -202,6 +241,19 @@ public class KunderaQueryParser
             if (content.length() > 0)
             {
                 query.setFrom(content);
+            }
+        }
+
+        /**
+         * Compile from.
+         */
+        private void compileUpdateClause()
+        {
+            String content = tokenizer.parseContent();
+            // content may be empty
+            if (content.length() > 0)
+            {
+                query.setUpdateClause(content);
             }
         }
 

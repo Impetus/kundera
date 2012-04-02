@@ -90,6 +90,34 @@ public class KunderaQueryParserTest
        
     }
 
+    @Test
+    public void onUpdateDeleteQueryParse()
+    {
+        KunderaQuery kunderaQuery = new KunderaQuery();
+        String updateQuery = "UPDATE Country SET population = 10 where currency = INR";
+
+        KunderaQueryParser parser = new KunderaQueryParser(kunderaQuery, updateQuery);
+        parser.parse();
+        
+        Assert.assertEquals("Country", kunderaQuery.getFrom());
+        Assert.assertEquals("currency = INR", kunderaQuery.getFilter());
+        Assert.assertNull(kunderaQuery.getResult());
+        Assert.assertNotNull(kunderaQuery.getUpdateClause());
+        Assert.assertEquals("population = 10", kunderaQuery.getUpdateClause());
+        Assert.assertEquals(true, kunderaQuery.isDeleteUpdate());
+
+        kunderaQuery = new KunderaQuery();
+        String deleteQuery = "Delete from Country where currency = INR";
+        
+        parser = new KunderaQueryParser(kunderaQuery, deleteQuery);
+        parser.parse();
+
+        Assert.assertEquals("Country", kunderaQuery.getFrom());
+        Assert.assertEquals("currency = INR", kunderaQuery.getFilter());
+        Assert.assertNull(kunderaQuery.getResult());
+        Assert.assertNull(kunderaQuery.getUpdateClause());
+        Assert.assertEquals(true, kunderaQuery.isDeleteUpdate());
+    }
     /**
      * Tear down.
      * 
