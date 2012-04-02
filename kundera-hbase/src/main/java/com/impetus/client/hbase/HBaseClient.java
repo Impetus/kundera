@@ -45,9 +45,7 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.proxy.EnhancedEntity;
 
-// TODO: Auto-generated Javadoc
 /**
  * HBase client.
  * 
@@ -72,21 +70,26 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     /**
      * Instantiates a new h base client.
-     *
-     * @param indexManager the index manager
-     * @param conf the conf
-     * @param hTablePool the h table pool
-     * @param reader the reader
-     * @param persistenceUnit the persistence unit
+     * 
+     * @param indexManager
+     *            the index manager
+     * @param conf
+     *            the conf
+     * @param hTablePool
+     *            the h table pool
+     * @param reader
+     *            the reader
+     * @param persistenceUnit
+     *            the persistence unit
      */
-    public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool, EntityReader reader, String persistenceUnit)
+    public HBaseClient(IndexManager indexManager, HBaseConfiguration conf, HTablePool hTablePool, EntityReader reader,
+            String persistenceUnit)
     {
         this.indexManager = indexManager;
         this.handler = new HBaseDataHandler(conf, hTablePool);
         this.reader = reader;
-        this.persistenceUnit=persistenceUnit;
+        this.persistenceUnit = persistenceUnit;
     }
-
 
     /*
      * (non-Javadoc)
@@ -98,7 +101,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
     public Object find(Class entityClass, Object rowId)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
-        List<String>relationNames = entityMetadata.getRelationNames();
+        List<String> relationNames = entityMetadata.getRelationNames();
         // columnFamily has a different meaning for HBase, so it won't be used
         // here
         String tableName = entityMetadata.getTableName();
@@ -122,7 +125,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      * java.lang.Object[])
      */
     @Override
-    public <E> List<E> findAll(Class<E> entityClass, Object... rowIds) 
+    public <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         List<E> entities = new ArrayList<E>();
@@ -131,8 +134,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
             E e = null;
             try
             {
-                e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(), entityMetadata,
-                        rowKey.toString(), null);
+                e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
+                        entityMetadata, rowKey.toString(), null);
             }
             catch (IOException e1)
             {
@@ -150,7 +153,7 @@ public class HBaseClient implements com.impetus.kundera.client.Client
      * java.util.Map)
      */
     @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> col) 
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> col)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
         List<E> entities = new ArrayList<E>();
@@ -161,8 +164,8 @@ public class HBaseClient implements com.impetus.kundera.client.Client
             E e = null;
             try
             {
-                e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(), entityMetadata,
-                        entityId, null);
+                e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
+                        entityMetadata, entityId, null);
             }
             catch (IOException e1)
             {
@@ -253,17 +256,17 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         return null;
 
     }
-    
-    
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#persist(com.impetus.kundera.graph.Node)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#persist(com.impetus.kundera.graph.Node)
      */
     @Override
     public void persist(Node node)
     {
     }
-
 
     /*
      * (non-Javadoc)
@@ -387,8 +390,14 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#getForeignKeysFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#getForeignKeysFromJoinTable(java.lang
+     * .String, java.lang.String, java.lang.String,
+     * com.impetus.kundera.metadata.model.EntityMetadata,
+     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
@@ -399,8 +408,13 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findParentEntityFromJoinTable(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.client.Client#findParentEntityFromJoinTable(com.impetus
+     * .kundera.metadata.model.EntityMetadata, java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
     public <E> List<E> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
@@ -411,21 +425,22 @@ public class HBaseClient implements com.impetus.kundera.client.Client
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#deleteFromJoinTable(java.lang.String, java.lang.String, java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.Object)
      */
-    @Override
-    public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, EntitySaveGraph objectGraph)
+    public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
-        String pKey = objectGraph.getParentId();
         try
         {
-            handler.deleteRow(pKey.toString(), joinTableName);
+            handler.deleteRow(columnValue.toString(), tableName);
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            log.error("Error during delete by key. Caused by:" + e.getMessage());
+            throw new PersistenceException(e);
         }
     }
 
@@ -453,23 +468,17 @@ public class HBaseClient implements com.impetus.kundera.client.Client
         }
     }
 
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#delete(java.lang.Object, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
+     * java.lang.Object)
      */
     @Override
-    public void delete(Object entity, Object pKey) 
+    public void delete(Object entity, Object pKey)
     {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-
-        try
-        {
-            handler.deleteRow(pKey.toString(), metadata.getTableName());
-        }
-        catch (IOException e)
-        {
-            throw new KunderaException(e);
-        }
+        deleteByColumn(metadata.getTableName(), metadata.getIdColumn().getName(), pKey);
     }
 
     /*

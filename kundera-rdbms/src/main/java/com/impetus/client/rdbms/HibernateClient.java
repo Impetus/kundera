@@ -499,31 +499,24 @@ public class HibernateClient implements Client
         return entities;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#deleteFromJoinTable(java.lang.String,
-     * java.lang.String, java.lang.String,
-     * com.impetus.kundera.metadata.model.EntityMetadata,
-     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.Object)
      */
-    @Override
-    public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, EntitySaveGraph objectGraph)
+    public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
-        String primaryKey = objectGraph.getParentId();
 
         StringBuffer query = new StringBuffer();
-        query.append("DELETE FROM ").append(joinTableName).append(" WHERE ").append(joinColumnName).append("=")
-                .append("'").append(primaryKey).append("'");
+        query.append("DELETE FROM ").append(tableName).append(" WHERE ").append(columnName).append("=")
+                .append("'").append(columnValue).append("'");
 
         Session s = getSessionInstance();
         Transaction tx = s.beginTransaction();
         s.createSQLQuery(query.toString()).executeUpdate();
         tx.commit();
+        
     }
-
+    
     /**
      * Insert record in join table.
      * 
