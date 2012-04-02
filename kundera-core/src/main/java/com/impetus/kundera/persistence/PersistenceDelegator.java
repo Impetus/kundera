@@ -392,8 +392,7 @@ public class PersistenceDelegator
                     EntityMetadata relMetadata = getMetadata(objectGraph.getChildClass());
 
                     Client pClient = getClient(metadata);
-                    pClient.deleteFromJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata,
-                            objectGraph);
+                    pClient.deleteByColumn(joinTableName, joinColumnName, objectGraph.getParentId());
 
                 }
             }

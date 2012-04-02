@@ -324,45 +324,6 @@ public class MongoDBClient implements Client
         documents.add(dbObj);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#deleteFromJoinTable(java.lang.String,
-     * java.lang.String, java.lang.String,
-     * com.impetus.kundera.metadata.model.EntityMetadata,
-     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
-     */
-    @Override
-    public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, EntitySaveGraph objectGraph)
-    {
-        String primaryKey = objectGraph.getParentId();
-        DBCollection dbCollection = mongoDb.getCollection(joinTableName);
-
-        /*
-         * Set<String> childIds = new HashSet<String>(); Object childObject =
-         * objectGraph.getChildEntity(); try {
-         * if(Collection.class.isAssignableFrom(childObject.getClass())) {
-         * for(Object child : (Collection)childObject) { if(child != null) {
-         * String childId = PropertyAccessorHelper.getId(child, relMetadata);
-         * childIds.add(childId); }
-         * 
-         * } } else { String childId = PropertyAccessorHelper.getId(childObject,
-         * relMetadata); childIds.add(childId); } } catch
-         * (PropertyAccessException e) { e.printStackTrace(); }
-         * 
-         * if(childIds.isEmpty() || primaryKey == null) { return; }
-         */
-
-        BasicDBObject query = new BasicDBObject();
-        query.put(joinColumnName, primaryKey.toString());
-        // query.put(inverseJoinColumnName, new BasicDBObject("$in",
-        // childIds.toArray()));
-
-        dbCollection.remove(query);
-    }
-
     /**
      * On index.
      * 
@@ -733,6 +694,20 @@ public class MongoDBClient implements Client
         return reader;
     }
 
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.Object)
+     */
+    public void deleteByColumn(String tableName, String columnName, Object columnValue)
+    {
+        DBCollection dbCollection = mongoDb.getCollection(tableName);
+        BasicDBObject query = new BasicDBObject();
+        query.put(columnName, columnValue);
+        dbCollection.remove(query);
+
+    }
+
+    
     /**
      * Gets the string.
      * 

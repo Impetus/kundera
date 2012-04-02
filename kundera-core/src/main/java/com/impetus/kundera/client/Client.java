@@ -25,7 +25,9 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 
 /**
- * The Interface Client.
+ * Client API. Defines methods which are required for to be implemented by various clients(pelops, Mongo).
+ * Any new addition of new client must implement this API to integrate new client with existing Kundera API. 
+ * It's an extension API to support extension of new client.
  * 
  * @author vivek.mishra
  */
@@ -139,21 +141,6 @@ public interface Client
     
     void persist(Node node);
 
-//    /**
-//     * Find.
-//     * 
-//     * @param clazz
-//     *            the clazz
-//     * @param metadata
-//     *            the metadata
-//     * @param rowId
-//     *            the row id
-//     * @param relationNames
-//     *            relation names
-//     * @return entity.
-//     */
-//    Object find(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relationNames);
-
     /**
      * Inserts records into Join Table.
      * 
@@ -201,24 +188,16 @@ public interface Client
             String joinColumnName, String inverseJoinColumnName, Object childId);
 
     /**
-     * Delete records from Join Table for a given primary key.
-     * 
-     * @param joinTableName
-     *            Name of Join Table
-     * @param joinColumnName
-     *            Name of Join Column
-     * @param inverseJoinColumnName
-     *            Name of Inverse Join Column
-     * @param relMetadata
-     *            Entity metadata for the child entity (i.e. entity at the other
-     *            side of the relationship)
-     * @param objectGraph
-     *            Object graph of the persistence (Includes parent and child
-     *            data and other related info)
+     * Delete rows from given table for given column name and corresponding value..
+     * @param tableName
+     *               Name of the table
+     * @param columnName
+     *               Name of the column
+     * @param columnValue
+     *               Name of column value                         
      */
-    void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, EntitySaveGraph objectGraph);
-
+    void deleteByColumn(String tableName, String columnName, Object columnValue);
+    
     /**
      * Find list of entities for given column name and column value, if index
      * support is provided..

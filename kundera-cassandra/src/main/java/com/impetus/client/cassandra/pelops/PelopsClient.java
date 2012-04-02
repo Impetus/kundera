@@ -706,30 +706,22 @@ public class PelopsClient implements Client
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#deleteFromJoinTable(java.lang.String,
-     * java.lang.String, java.lang.String,
-     * com.impetus.kundera.metadata.model.EntityMetadata,
-     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.Object)
      */
-    @Override
-    public void deleteFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, EntitySaveGraph objectGraph)
+    public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
+        
         if (!isOpen())
         {
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        String pKey = objectGraph.getParentId();
-
         RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        rowDeletor.deleteRow(joinTableName, pKey, ConsistencyLevel.ONE);
+        rowDeletor.deleteRow(tableName, columnValue.toString(), ConsistencyLevel.ONE);
     }
-
+    
     /**
      * Adds the columns to join table.
      * 
