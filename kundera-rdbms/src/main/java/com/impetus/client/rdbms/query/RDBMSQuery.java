@@ -170,8 +170,13 @@ public class RDBMSQuery extends QueryImpl implements Query
     @Override
     protected int onExecuteUpdate()
     {
-        throw new UnsupportedOperationException("executeUpdate not supported for RDBMS");
-
+        if(kunderaQuery.isDeleteUpdate())
+        {
+            List result = getResultList();
+            return result != null? result.size():0;
+        }
+        
+        return 0;
     }
 
     /**

@@ -253,8 +253,53 @@ public class KunderaQueryParser
             // content may be empty
             if (content.length() > 0)
             {
-                query.setUpdateClause(content);
+                String[] colArr = tokenizeColumn(content);
+                addUpdateClause(colArr);
+//                query.setUpdateClause(content);
             }
+        }
+
+        /**
+         * Tokenize column along with it's value using "," as tokenizer
+         * @param content      content
+         * @return  array of tokenized tuple.
+         */
+        private String[] tokenizeColumn(String content)
+        {
+            StringTokenizer tokenizer = new StringTokenizer(content,",");
+            String[] columnArr = tokenizer.countTokens() > 0?new String[tokenizer.countTokens()]:null;
+            int count=0;
+            while(tokenizer.hasMoreTokens())
+            {
+                columnArr[count++] = tokenizer.nextToken();
+            }
+            
+            return columnArr;
+        }
+        
+        private void addUpdateClause(final String[] clauseArr)
+        {
+            for(String columnTuple: clauseArr)
+            {
+                StringTokenizer tokenizer = new StringTokenizer(columnTuple, ".");
+                String value = getTokenizedValue(tokenizer);
+                StringTokenizer token = new StringTokenizer(value,"=");
+                while(token.hasMoreTokens())
+                  {
+                    query.addUpdateClause(token.nextToken(), token.nextToken());
+                  }
+            }
+        }
+        
+        private String getTokenizedValue(StringTokenizer tokenizer)
+        {
+            String value =null;
+            
+            while(tokenizer.hasMoreTokens())
+            {
+                value = tokenizer.nextToken();
+            }
+            return value;
         }
 
         /**
