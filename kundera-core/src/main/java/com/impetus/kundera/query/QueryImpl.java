@@ -43,12 +43,15 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.index.DocumentIndexer;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
+import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 
 /**
  * The Class QueryImpl.
@@ -189,9 +192,16 @@ public abstract class QueryImpl implements Query
           // if entity is not parent then pass retrieved relation key value to
           // specific client for find by id.
 
+        // If intended for delete/update.
+        if(kunderaQuery.isDeleteUpdate())
+        {
+            onDeleteOrUpdate(results);
+        }
         return results != null && !results.isEmpty() ? results : null;
 
     }
+    
+
     /**
      * Gets the persistence delegeator.
      * 
@@ -942,6 +952,7 @@ public abstract class QueryImpl implements Query
     
     protected abstract int onExecuteUpdate();
 
+    
     /**
      * Returns entity metadata, in case of native query mapped class is present within application metadata.
      * @return entityMetadata entity metadata.
@@ -960,5 +971,40 @@ public abstract class QueryImpl implements Query
         }
         return m;
     }
+
+    
+    /**
+     * Performs delete or update based on query.
+     * 
+     *  @param results list of objects to be merged/deleted.
+     */
+    private void onDeleteOrUpdate(List results)
+    {
+      if(!kunderaQuery.isUpdateClause())
+      {
+          //then case of delete
+          for(Object result : results)
+          {
+              persistenceDelegeator.remove(result);
+          }
+      } else
+      {
+          EntityMetadata entityMetadata = getEntityMetadata();
+          for(Object result : results)
+          {
+              for(UpdateClause c : kunderaQuery.getUpdateClauseQueue())
+              {
+                  String columnName = c.getProperty();
+                  Column column = entityMetadata.getColumn(columnName);
+                  
+                  PropertyAccessorHelper.set(result, column.getField(), c.getValue());
+                  persistenceDelegeator.merge(result);
+              }
+              
+          }
+      }
+          
+    }
+
 
 }

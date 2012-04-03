@@ -134,9 +134,11 @@ public class CassQuery extends QueryImpl implements Query
       if(KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(getJPAQuery()))
       {
           ((PelopsClient) persistenceDelegeator.getClient(m)).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
-      } else
+      } else if(kunderaQuery.isDeleteUpdate())
       {
-          throw new QueryHandlerException("executeUpdate() is currently supported for native queries only");
+             List result = getResultList();
+             return result != null? result.size():0;
+//          throw new QueryHandlerException("executeUpdate() is currently supported for native queries only");
       }
       
       return 0;

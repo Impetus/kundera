@@ -319,6 +319,12 @@ public class MongoDBQuery extends QueryImpl
     @Override
     protected int onExecuteUpdate()
     {
-        throw new UnsupportedOperationException("executeUpdate not supported for mongo");
+        if(kunderaQuery.isDeleteUpdate())
+        {
+            List result = getResultList();
+            return result != null? result.size():0;
+        }
+        
+        return 0;
     }
 }

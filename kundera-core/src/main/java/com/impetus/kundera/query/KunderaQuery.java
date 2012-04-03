@@ -34,6 +34,7 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 
 /**
  * The Class KunderaQuery.
@@ -96,10 +97,10 @@ public class KunderaQuery
     /** The filters queue. */
     private Queue filtersQueue = new LinkedList();
 
-    private String updateClause;
 
     private boolean isDeleteUpdate;
-
+    
+    private Queue<UpdateClause> updateClauseQueue = new LinkedList<UpdateClause>(); 
     /**
      * Instantiates a new kundera query.
      * 
@@ -243,13 +244,16 @@ public class KunderaQuery
             throw new PersistenceException("Bad query format: " + from);
         }
 
-        StringTokenizer tokenizer = new StringTokenizer(getResult(), ",");
-        while (tokenizer.hasMoreTokens())
+        if(!this.isDeleteUpdate)
         {
-            String token = tokenizer.nextToken();
-            if (!StringUtils.containsAny(fromArray[1] + ".", token))
+            StringTokenizer tokenizer = new StringTokenizer(getResult(), ",");
+            while (tokenizer.hasMoreTokens())
             {
-                throw new QueryHandlerException("bad query format with invalid alias:" + token);
+                String token = tokenizer.nextToken();
+                if (!StringUtils.containsAny(fromArray[1] + ".", token))
+                {
+                    throw new QueryHandlerException("bad query format with invalid alias:" + token);
+                }
             }
         }
         /*
@@ -410,6 +414,8 @@ public class KunderaQuery
         return filtersQueue;
     }
 
+    
+    
     // class to keep hold of a where clause predicate
     /**
      * The Class FilterClause.
@@ -504,6 +510,49 @@ public class KunderaQuery
             builder.append("]");
             return builder.toString();
         }
+    }
+    
+    public final class UpdateClause
+    {
+        private String property;
+        private String value;
+        
+        public UpdateClause(final String property, final String value)
+        {
+            this.property = property;
+            this.value = value;
+        }
+        
+        /**
+         * @return the property
+         */
+        public String getProperty()
+        {
+            return property;
+        }
+        /**
+         * @param property the property to set
+         */
+        public void setProperty(String property)
+        {
+            this.property = property;
+        }
+        /**
+         * @return the value
+         */
+        public String getValue()
+        {
+            return value;
+        }
+        /**
+         * @param value the value to set
+         */
+        public void setValue(String value)
+        {
+            this.value = value;
+        }
+        
+        
     }
 
     /* @see java.lang.Object#clone() */
@@ -706,23 +755,24 @@ public class KunderaQuery
     }
 
     
-    /**
-     * @return the updateClause
-     */
-    public String getUpdateClause()
-    {
-        return updateClause;
-    }
 
     /**
-     * @param updateClause the updateClause to set
+     * @return the updateClauseQueue
      */
-    public void setUpdateClause(String updateClause)
+    public Queue<UpdateClause> getUpdateClauseQueue()
     {
-        this.updateClause = updateClause;
+        return updateClauseQueue;
     }
 
-
+    public boolean isUpdateClause()
+    {
+        return !updateClauseQueue.isEmpty();
+    }
+    
+    public void addUpdateClause(final String property, final String value)
+    {
+        updateClauseQueue.add(new UpdateClause(property.trim(), value.trim()));
+    }
     /**
      * @param b
      */
@@ -774,4 +824,6 @@ public class KunderaQuery
 
         return tokens;
     }
+
+
 }
