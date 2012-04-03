@@ -59,6 +59,7 @@ import com.impetus.kundera.persistence.context.MainCache;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
+import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 import com.impetus.kundera.persistence.handler.impl.EntityInterceptor;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
@@ -252,7 +253,7 @@ public class PersistenceDelegator
      *            the e
      * @return the e
      */
-    public <E> E merge2(E e)
+    public <E> E merge(E e)
     {
 
         List<EnhancedEntity> reachableEntities = EntityResolver.resolve(e, CascadeType.MERGE);
@@ -292,7 +293,7 @@ public class PersistenceDelegator
      *            the e
      */
     @Deprecated
-    public void remove2(Object e)
+    public void remove(Object e)
     {
 
         EntityMetadata metadata = getMetadata(e.getClass());
@@ -498,7 +499,7 @@ public class PersistenceDelegator
      */
     // Old implementation, to be deleted
     @Deprecated
-    public void persist2(Object e)
+    public void persist(Object e)
     {
         // Invoke Pre Persist Events
         EntityMetadata metadata = getMetadata(e.getClass());
@@ -638,7 +639,7 @@ public class PersistenceDelegator
      * @return the e
      */
     @Deprecated    
-    public <E> E find2(Class<E> entityClass, Object primaryKey)
+    public <E> E find(Class<E> entityClass, Object primaryKey)
     {
 
         isRelationViaJoinTable = false;
@@ -1090,7 +1091,7 @@ public class PersistenceDelegator
      * Writes an entity into Persistence cache
      */
     
-    public void persist(Object e)
+    public void persist2(Object e)
     {
         // Invoke Pre Persist Events
         EntityMetadata metadata = getMetadata(e.getClass());
@@ -1119,7 +1120,7 @@ public class PersistenceDelegator
      * @param primaryKey
      * @return
      */
-    public <E> E find(Class<E> entityClass, Object primaryKey)
+    public <E> E find2(Class<E> entityClass, Object primaryKey)
     {
 
         EntityMetadata entityMetadata = getMetadata(entityClass);
@@ -1150,7 +1151,7 @@ public class PersistenceDelegator
     /**
      * Removes an entity object from persistence cache 
      */
-    public void remove(Object e)
+    public void remove2(Object e)
     {
 
         // Invoke Pre Remove Events
@@ -1238,13 +1239,22 @@ public class PersistenceDelegator
             for(JoinTableData jtData : joinTableDataMap.values()) {
                 EntityMetadata m = KunderaMetadataManager.getEntityMetadata(jtData.getEntityClass());
                 Client client = getClient(m);
-                client.persistJoinTable(jtData);
+                
+                if(OPERATION.INSERT.equals(jtData.getOperation())) {
+                    client.persistJoinTable(jtData);
+                } else if(OPERATION.DELETE.equals(jtData.getOperation())) {
+                    for(Object pk : jtData.getJoinTableRecords().keySet()) {
+                        client.deleteByColumn(jtData.getJoinTableName(), m.getIdColumn().getName(), pk);
+                    }                 
+                    
+                }
+                
             }
             
         }
     }
     
-    public <E> E merge(E e)
+    public <E> E merge2(E e)
     {     
 
         log.debug("Merging Entity : " + e);

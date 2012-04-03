@@ -24,9 +24,12 @@ import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.lifecycle.states.ManagedState;
+import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
+import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 
 /**
  * Provides utility methods for managing Flush Stack.
@@ -115,7 +118,14 @@ public class FlushManager
                 
                 Set<Object> childValues = new HashSet<Object>(); childValues.add(childId);
                 
-                pc.addJoinTableDataIntoMap(jtmd.getJoinTableName(), joinColumnName, inverseJoinColumnName, node.getDataClass(), entityId, childValues);
+                OPERATION operation = null;
+                if(node.getCurrentNodeState().getClass().equals(ManagedState.class)) {
+                    operation = OPERATION.INSERT;
+                } else if(node.getCurrentNodeState().getClass().equals(RemovedState.class)) {
+                    operation = OPERATION.DELETE;
+                }                
+                
+                pc.addJoinTableDataIntoMap(operation, jtmd.getJoinTableName(), joinColumnName, inverseJoinColumnName, node.getDataClass(), entityId, childValues);
                 
                 //Process child node Graph recursively first
                 if(!childNode.isTraversed()) {

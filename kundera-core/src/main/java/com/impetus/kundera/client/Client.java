@@ -186,7 +186,7 @@ public interface Client
      * @return the foreign keys from join table
      */
     <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, EntitySaveGraph objectGraph);
+            EntityMetadata relMetadata, String parentId);
 
     <E> List<E> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
             String joinColumnName, String inverseJoinColumnName, Object childId);
@@ -200,7 +200,8 @@ public interface Client
      * @param columnValue
      *               Name of column value                         
      */
-    void deleteByColumn(String tableName, String columnName, Object columnValue);
+    void deleteByColumn(String tableName, String columnName, Object columnValue);   
+    
     
     /**
      * Find list of entities for given column name and column value, if index

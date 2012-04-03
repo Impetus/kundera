@@ -21,6 +21,7 @@ import java.util.Map;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.lifecycle.NodeStateContext;
+import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -435,9 +436,14 @@ public class Node implements NodeStateContext
     public void flush()
     {
         getCurrentNodeState().handleFlush(this);
-    }  
+    } 
     
     
-    //Overridden methods from 
+    //Overridden methods from
+    
+    
+    
+    
+    
 
 }

@@ -63,6 +63,11 @@ public class ObjectGraphBuilder
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);        
         String nodeId = getNodeId(id, entity);
         
+        //If this node is already there in graph (may happen for bidirectional relationship, do nothing and return null)
+        if(graph.getNode(nodeId) != null) {
+            return null;
+        }
+        
         //Construct this Node first, if one not already there in Persistence Cache
         Node node = null;
         Node nodeInPersistenceCache = PersistenceCache.INSTANCE.getMainCache().getNodeFromCache(nodeId);
@@ -77,14 +82,18 @@ public class ObjectGraphBuilder
                 node.setData(entity);
                 node.setDirty(true);
             }            
-        }         
+        }   
+        
+        //Put this node into object graph
+        graph.addNode(nodeId, node);
         
         //Iterate over relations and construct children nodes
-        for(Relation relation : entityMetadata.getRelations()) {            
+        for(Relation relation : entityMetadata.getRelations()) {           
             
-            //child Object set in this entity
-            Object childObject =  PropertyAccessorHelper.getObject(entity, relation.getProperty());
-            
+            //Child Object set in this entity
+            Object childObject =  PropertyAccessorHelper.getObject(entity, relation.getProperty());            
+             
+                
             if(childObject != null) {
               //This child object could be either an entity(1-1 or M-1) or a collection of entities(1-M or M-M)
                 if(Collection.class.isAssignableFrom(childObject.getClass())) {
@@ -93,7 +102,7 @@ public class ObjectGraphBuilder
                     
                     for(Object childObj : childrenObjects) {
                         addChildNodesToGraph(graph, node, relation, childObj, initialNodeState);
-                    }                
+                    }    
                     
                     
                 } else {
@@ -104,8 +113,7 @@ public class ObjectGraphBuilder
             
             
         }        
-        //Finally put this node into object graph
-        graph.addNode(nodeId, node);
+
         return node;
     }
 
@@ -121,16 +129,18 @@ public class ObjectGraphBuilder
         //Construct child node for this child object via recursive call
         Node childNode = getNode(childObject, graph, initialNodeState);      
                         
-        //Construct Node Link for this relationship
-        NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
-        nodeLink.setMultiplicity(relation.getType());
-        nodeLink.setLinkProperties(getLinkProperties(relation));
-        
-        //Add Parent node to this child
-        childNode.addParentNode(nodeLink, node);
-        
-        //Add child node to this node
-        node.addChildNode(nodeLink, childNode);
+        if(childNode != null) {
+          //Construct Node Link for this relationship
+            NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
+            nodeLink.setMultiplicity(relation.getType());
+            nodeLink.setLinkProperties(getLinkProperties(relation));
+            
+            //Add Parent node to this child
+            childNode.addParentNode(nodeLink, node);
+            
+            //Add child node to this node
+            node.addChildNode(nodeLink, childNode);
+        }        
     }
     
     private Map<LinkProperty, Object> getLinkProperties(Relation relation) {

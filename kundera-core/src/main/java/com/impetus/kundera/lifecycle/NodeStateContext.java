@@ -90,5 +90,11 @@ public interface NodeStateContext
     // Cache Management
     void clear();
     void flush();
+    
+    /*public boolean isInTransientState();
+    public boolean isInManagedState();
+    public boolean isInDetachedState();
+    public boolean isInRemovedState();*/ 
+    
 
 }

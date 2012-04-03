@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
+import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 
 
 
@@ -196,12 +197,12 @@ public class PersistenceCache
     /**
      * @param joinTableDataMap the joinTableDataMap to set
      */
-    public void addJoinTableDataIntoMap(String joinTableName, String joinColumnName, 
+    public void addJoinTableDataIntoMap(OPERATION operation, String joinTableName, String joinColumnName, 
             String invJoinColumnName, Class<?> entityClass, Object joinColumnValue, Set<Object> invJoinColumnValues)
     {
         JoinTableData joinTableData = joinTableDataMap.get(joinTableName);
         if(joinTableData == null) {
-            joinTableData = new JoinTableData(joinTableName, joinColumnName, invJoinColumnName, entityClass);
+            joinTableData = new JoinTableData(operation, joinTableName, joinColumnName, invJoinColumnName, entityClass);
             joinTableData.addJoinTableRecord(joinColumnValue, invJoinColumnValues);
             joinTableDataMap.put(joinTableName, joinTableData);
         } else {

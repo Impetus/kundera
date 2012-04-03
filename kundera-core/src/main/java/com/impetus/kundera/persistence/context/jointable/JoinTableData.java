@@ -33,18 +33,32 @@ public class JoinTableData
     private String joinColumnName;
     
     private String inverseJoinColumnName;
+    
+    public static enum OPERATION
+    {        
+        INSERT,        
+        UPDATE,        
+        DELETE       
+    }
 
+    /**
+     * Operation to be performed on this Join Table data
+     * @See {@link OPERATION}
+     */
+    private OPERATION operation;
+    
     /**
      * Key -> Primary key of entity at the Join column side
      * Value -> Set of primary keys of entities at the inverse join column side
      */
     Map<Object, Set<Object>> joinTableRecords;
     
-    public JoinTableData(String joinTableName, String joinColumnName, String inverseJoinColumnName, Class<?> entityClass) {
+    public JoinTableData(OPERATION operation, String joinTableName, String joinColumnName, String inverseJoinColumnName, Class<?> entityClass) {
+        this.operation = operation;
         this.joinTableName = joinTableName;
         this.joinColumnName = joinColumnName;
         this.inverseJoinColumnName = inverseJoinColumnName;
-        this.entityClass = entityClass;
+        this.entityClass = entityClass;       
         
         joinTableRecords = new HashMap<Object, Set<Object>>();
     }
@@ -121,6 +135,23 @@ public class JoinTableData
     public void setEntityClass(Class<?> entityClass)
     {
         this.entityClass = entityClass;
+    }   
+    
+
+    /**
+     * @return the operation
+     */
+    public OPERATION getOperation()
+    {
+        return operation;
+    }
+
+    /**
+     * @param operation the operation to set
+     */
+    public void setOperation(OPERATION operation)
+    {
+        this.operation = operation;
     }
 
     /**

@@ -444,9 +444,8 @@ public class HibernateClient implements Client
      */
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
-            String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
-    {
-        String parentId = objectGraph.getParentId();
+            String inverseJoinColumnName, EntityMetadata relMetadata, String parentId)
+    {        
 
         StringBuffer sqlQuery = new StringBuffer();
         sqlQuery.append("SELECT ").append(inverseJoinColumnName).append(" FROM ").append(joinTableName)

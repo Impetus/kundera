@@ -681,9 +681,8 @@ public class PelopsClient implements Client
      */
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
-            String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
-    {
-        String parentId = objectGraph.getParentId();
+            String inverseJoinColumnName, EntityMetadata relMetadata, String parentId)
+    {        
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
         List<Column> columns = selector.getColumnsFromRow(joinTableName, new Bytes(parentId.getBytes()),
                 Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
@@ -750,6 +749,7 @@ public class PelopsClient implements Client
     /* (non-Javadoc)
      * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.Object)
      */
+    //Incorrect
     public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
         
@@ -759,8 +759,10 @@ public class PelopsClient implements Client
         }
 
         RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        rowDeletor.deleteRow(tableName, columnValue.toString(), ConsistencyLevel.ONE);
-    }
+        rowDeletor.deleteRow(tableName, columnValue.toString(), ConsistencyLevel.ONE);        
+    }   
+    
+    
     
     /**
      * Adds the columns to join table.

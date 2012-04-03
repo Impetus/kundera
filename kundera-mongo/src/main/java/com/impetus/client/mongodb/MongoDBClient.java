@@ -240,10 +240,8 @@ public class MongoDBClient implements Client
 
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
-            String inverseJoinColumnName, EntityMetadata relMetadata, EntitySaveGraph objectGraph)
-    {
-
-        String parentId = objectGraph.getParentId();
+            String inverseJoinColumnName, EntityMetadata relMetadata, String parentId)
+    {        
         List<E> foreignKeys = new ArrayList<E>();
 
         DBCollection dbCollection = mongoDb.getCollection(joinTableName);

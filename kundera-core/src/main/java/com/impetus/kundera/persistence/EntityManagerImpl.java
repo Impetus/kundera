@@ -171,7 +171,7 @@ public class EntityManagerImpl implements EntityManager
      * (non-Javadoc)
      * 
      * @see javax.persistence.EntityManager#clear()
-     */
+     */  
     @Override
     public final void clear()
     {

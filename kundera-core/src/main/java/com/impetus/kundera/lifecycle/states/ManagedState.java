@@ -123,10 +123,10 @@ public class ManagedState extends NodeState
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass);
         String entityId = ObjectGraphBuilder.getEntityId(nodeStateContext.getNodeId());
         
-        List<String> linkNames = new ArrayList<String>();
+        /*List<String> linkNames = new ArrayList<String>();
         for(Relation relation : entityMetadata.getRelations()) {
             linkNames.add(relation.getJoinColumnName());
-        }         
+        }*/         
         
         Object nodeData = null;   //Node data
         
@@ -138,7 +138,7 @@ public class ManagedState extends NodeState
         {
             Object entity = enhanceEntity.getEntity();
             
-            if (linkNames.isEmpty() && !entityMetadata.isRelationViaJoinTable())
+            if ((entityMetadata.getRelationNames() == null || entityMetadata.getRelationNames().isEmpty()) && !entityMetadata.isRelationViaJoinTable())
             {
                 nodeData = entity;
             }
