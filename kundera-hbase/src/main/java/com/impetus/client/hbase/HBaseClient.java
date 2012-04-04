@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
@@ -38,6 +39,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -269,6 +271,15 @@ public class HBaseClient extends ClientBase implements Client
     @Override
     public void persist(Node node)
     {
+        Object entity = node.getData();
+        String id = ObjectGraphBuilder.getEntityId(node.getNodeId());
+        
+        List<RelationHolder> relationHolders = getRelationHolders(node);   
+        
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass()); 
+        
+        onPersist(entityMetadata, entity, id, relationHolders);
+        indexNode(node, entityMetadata, getIndexManager());        
     }
 
     /*
@@ -398,6 +409,36 @@ public class HBaseClient extends ClientBase implements Client
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
+        String joinTableName = joinTableData.getJoinTableName();
+        String joinColumnName = joinTableData.getJoinColumnName();
+        String invJoinColumnName = joinTableData.getInverseJoinColumnName();
+        Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();        
+                
+        for(Object key : joinTableRecords.keySet()) {
+            Set<Object> values =  joinTableRecords.get(key);            
+            String joinColumnValue = (String) key;      
+            
+            Map<String, String> columns = new HashMap<String, String>();
+            for(Object childValue : values) {
+                String invJoinColumnValue = (String)childValue;
+                columns.put(invJoinColumnName + "_" + invJoinColumnValue, invJoinColumnValue);
+            }
+            
+            if (columns != null && !columns.isEmpty())
+            {
+                try
+                {
+                    handler.createTableIfDoesNotExist(joinTableName, Constants.JOIN_COLUMNS_FAMILY_NAME);
+                    handler.writeJoinTableData(joinTableName, joinColumnValue, columns);
+                }
+                catch (IOException e)
+                {
+                    throw new PersistenceException(e);
+                }
+            }          
+            
+        }    
+        
     }
 
     /*

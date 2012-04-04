@@ -338,6 +338,7 @@ public class HibernateClient extends ClientBase implements Client
     @Override
     public void persist(Node node)
     {
+        
     }
 
 
