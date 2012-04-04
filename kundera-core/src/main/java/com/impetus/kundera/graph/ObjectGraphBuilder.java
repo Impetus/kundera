@@ -40,7 +40,7 @@ public class ObjectGraphBuilder
         //Initialize object graph
         ObjectGraph objectGraph = new ObjectGraph();   
         
-        //Recursively build object graph and get head node.
+        //Recursively build object graph and get head node.        
         Node headNode = getNode(entity, objectGraph, initialNodeState);         
         
         //Set head node into object graph
@@ -101,9 +101,10 @@ public class ObjectGraphBuilder
                     Collection childrenObjects = (Collection) childObject;
                     
                     for(Object childObj : childrenObjects) {
-                        addChildNodesToGraph(graph, node, relation, childObj, initialNodeState);
-                    }    
-                    
+                        if(childObj != null) {
+                            addChildNodesToGraph(graph, node, relation, childObj, initialNodeState);
+                        }                        
+                    }                        
                     
                 } else {
                     //Construct child node and add to graph

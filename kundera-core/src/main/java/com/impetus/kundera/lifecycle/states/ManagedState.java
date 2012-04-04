@@ -155,9 +155,11 @@ public class ManagedState extends NodeState
         
         //Node to remain in Managed state  
         
-        //Generate an object graph of this found entity and put it into cache with Managed state
-        ObjectGraph graph = new ObjectGraphBuilder().getObjectGraph(nodeData, new ManagedState());
-        PersistenceCache.INSTANCE.getMainCache().addGraphToCache(graph);
+        //Generate an object graph of this found entity if not null, and put it into cache with Managed state
+        if(nodeData != null) {
+            ObjectGraph graph = new ObjectGraphBuilder().getObjectGraph(nodeData, new ManagedState());
+            PersistenceCache.INSTANCE.getMainCache().addGraphToCache(graph);
+        }       
        
     }
 
@@ -200,7 +202,8 @@ public class ManagedState extends NodeState
         // Managed ---> Detached
         NodeState nextState = new DetachedState();
         nodeStateContext.setCurrentNodeState(nextState);
-        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());
+        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());   
+        
     }
 
     @Override

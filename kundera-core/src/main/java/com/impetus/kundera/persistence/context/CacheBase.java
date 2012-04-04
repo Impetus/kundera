@@ -87,6 +87,19 @@ public class CacheBase
         }
     }   
     
+    public void removeNodeFromCache(Node node) {
+        if(getHeadNodes().contains(node)) {
+            getHeadNodes().remove(node);
+        }
+        
+        if(nodeMappings.get(node.getNodeId()) != null) {
+            nodeMappings.remove(node.getNodeId());            
+        }
+        
+        logCacheEvent("REMOVED FROM ", node.getNodeId());       
+        node = null;   //Eligible for GC       
+    }
+    
     public void addGraphToCache(ObjectGraph graph) {
         
         //Add head Node to list of head nodes

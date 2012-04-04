@@ -22,6 +22,7 @@ import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * @author amresh
@@ -93,7 +94,11 @@ public class RemovedState extends NodeState
         //Since node is flushed, mark it as NOT dirty
         nodeStateContext.setDirty(false);
         
-        logNodeEvent("DELETED", this, nodeStateContext.getNodeId());
+        //Remove this node from Persistence Cache
+        PersistenceCache.INSTANCE.getMainCache().removeNodeFromCache(node);
+        
+        logNodeEvent("DELETED", this, nodeStateContext.getNodeId());        
+        
     }
 
     @Override

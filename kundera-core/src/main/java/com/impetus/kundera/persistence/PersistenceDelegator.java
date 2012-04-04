@@ -253,7 +253,7 @@ public class PersistenceDelegator
      *            the e
      * @return the e
      */
-    public <E> E merge(E e)
+    public <E> E merge2(E e)
     {
 
         List<EnhancedEntity> reachableEntities = EntityResolver.resolve(e, CascadeType.MERGE);
@@ -293,7 +293,7 @@ public class PersistenceDelegator
      *            the e
      */
     @Deprecated
-    public void remove(Object e)
+    public void remove2(Object e)
     {
 
         EntityMetadata metadata = getMetadata(e.getClass());
@@ -499,7 +499,7 @@ public class PersistenceDelegator
      */
     // Old implementation, to be deleted
     @Deprecated
-    public void persist(Object e)
+    public void persist2(Object e)
     {
         // Invoke Pre Persist Events
         EntityMetadata metadata = getMetadata(e.getClass());
@@ -639,7 +639,7 @@ public class PersistenceDelegator
      * @return the e
      */
     @Deprecated    
-    public <E> E find(Class<E> entityClass, Object primaryKey)
+    public <E> E find2(Class<E> entityClass, Object primaryKey)
     {
 
         isRelationViaJoinTable = false;
@@ -1091,7 +1091,7 @@ public class PersistenceDelegator
      * Writes an entity into Persistence cache
      */
     
-    public void persist2(Object e)
+    public void persist(Object e)
     {
         // Invoke Pre Persist Events
         EntityMetadata metadata = getMetadata(e.getClass());
@@ -1120,7 +1120,7 @@ public class PersistenceDelegator
      * @param primaryKey
      * @return
      */
-    public <E> E find2(Class<E> entityClass, Object primaryKey)
+    public <E> E find(Class<E> entityClass, Object primaryKey)
     {
 
         EntityMetadata entityMetadata = getMetadata(entityClass);
@@ -1151,7 +1151,7 @@ public class PersistenceDelegator
     /**
      * Removes an entity object from persistence cache 
      */
-    public void remove2(Object e)
+    public void remove(Object e)
     {
 
         // Invoke Pre Remove Events
@@ -1231,7 +1231,6 @@ public class PersistenceDelegator
                     }
                 }
 
-                // TODO: remove node from persistence cache
             }
             
             //Flush Join Table data into database
@@ -1245,16 +1244,14 @@ public class PersistenceDelegator
                 } else if(OPERATION.DELETE.equals(jtData.getOperation())) {
                     for(Object pk : jtData.getJoinTableRecords().keySet()) {
                         client.deleteByColumn(jtData.getJoinTableName(), m.getIdColumn().getName(), pk);
-                    }                 
-                    
-                }
-                
+                    }                   
+                }                
             }
-            
+            joinTableDataMap.clear();   //All Join table operation performed, clear it.           
         }
     }
     
-    public <E> E merge2(E e)
+    public <E> E merge(E e)
     {     
 
         log.debug("Merging Entity : " + e);
@@ -1276,7 +1273,6 @@ public class PersistenceDelegator
 
         // TODO: not always, should be conditional
         flush();
-
 
         // fire PreUpdate events
         getEventDispatcher().fireEventListeners(m, e, PostUpdate.class);    
