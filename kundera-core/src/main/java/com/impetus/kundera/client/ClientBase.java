@@ -1,0 +1,99 @@
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
+package com.impetus.kundera.client;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.NodeLink;
+import com.impetus.kundera.graph.NodeLink.LinkProperty;
+import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+
+/**
+ * Base class for all Client implementations providing common utility methods to them all. 
+ * @author amresh
+ *
+ */
+public class ClientBase
+{
+    /**
+     * @param node
+     * @return
+     */
+    protected List<RelationHolder> getRelationHolders(Node node)
+    {
+        List<RelationHolder> relationsHolder = new ArrayList<RelationHolder>();
+        
+        //Add column value for all parent nodes linked to this node
+        Map<NodeLink, Node> parents = node.getParents();
+        Map<NodeLink, Node> children = node.getChildren(); 
+        
+        if(parents != null && ! parents.isEmpty()) {
+            
+            for(NodeLink parentNodeLink : parents.keySet()) {
+                String linkName = (String)parentNodeLink.getLinkProperty(LinkProperty.LINK_NAME);
+                String linkValue = (String)parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
+                boolean isSharedByPrimaryKey = (Boolean)parentNodeLink.getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
+                
+                if(linkName != null && linkValue != null && ! isSharedByPrimaryKey) {
+                    RelationHolder relationHolder = new RelationHolder(linkName, linkValue);
+                    relationsHolder.add(relationHolder);       
+                }               
+            }
+        }
+        
+        //Add column value for all child nodes linked to this node
+        if(children != null && ! children.isEmpty()) {
+            for(NodeLink childNodeLink : children.keySet()) {
+                String linkName = (String)childNodeLink.getLinkProperty(LinkProperty.LINK_NAME);
+                String linkValue = (String)childNodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
+                boolean isSharedByPrimaryKey = (Boolean)childNodeLink.getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
+                
+                if(linkName != null && linkValue != null && ! isSharedByPrimaryKey) {
+                    RelationHolder relationHolder = new RelationHolder(linkName, linkValue);
+                    relationsHolder.add(relationHolder);       
+                }              
+            }
+        }
+        return relationsHolder;
+    }
+    
+    /**
+     * @param node
+     * @param entityMetadata
+     */
+    protected void indexNode(Node node, EntityMetadata entityMetadata, IndexManager indexManager)
+    {
+        Map<NodeLink, Node> parents = node.getParents();
+        if (parents != null)
+        {
+            for(NodeLink parentNodeLink : parents.keySet()) {
+                indexManager.write(entityMetadata, node.getData(), (String)parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
+                        parents.get(parentNodeLink).getDataClass());
+            }
+            
+        }
+        else
+        {
+            indexManager.write(entityMetadata, node.getData());
+        }
+    }  
+
+}

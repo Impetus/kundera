@@ -442,9 +442,7 @@ public class Node implements NodeStateContext
     public void flush()
     {
         getCurrentNodeState().handleFlush(this);
-    }
-
-    
+    } 
     
     
     //Overridden methods from

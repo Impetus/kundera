@@ -102,14 +102,21 @@ public class CacheBase
     
     public void addGraphToCache(ObjectGraph graph) {
         
-        //Add head Node to list of head nodes
-        getHeadNodes().add(graph.getHeadNode());
+        
         
         //Add each node in the graph to cache
         for(String key : graph.getNodeMapping().keySet()) {            
             Node thisNode = graph.getNodeMapping().get(key);
-            addNodeToCache(thisNode);            
+            addNodeToCache(thisNode);
+            
+            //Remove all those head nodes in persistence cache, that are there in Graph as a non-head node
+            if(!thisNode.isHeadNode() && PersistenceCache.INSTANCE.getMainCache().getHeadNodes().contains(thisNode)) {
+                PersistenceCache.INSTANCE.getMainCache().getHeadNodes().remove(thisNode);
+            }
         }
+        
+        //Add head Node to list of head nodes        
+        addHeadNode(graph.getHeadNode());  
         
     }
     

@@ -253,7 +253,7 @@ public class PersistenceDelegator
      *            the e
      * @return the e
      */
-    public <E> E merge2(E e)
+    /*public <E> E merge2(E e)
     {
 
         List<EnhancedEntity> reachableEntities = EntityResolver.resolve(e, CascadeType.MERGE);
@@ -284,7 +284,7 @@ public class PersistenceDelegator
         // }
 
         return e;
-    }
+    }*/
 
     /**
      * Removes the.
@@ -292,7 +292,7 @@ public class PersistenceDelegator
      * @param e
      *            the e
      */
-    @Deprecated
+    /*@Deprecated
     public void remove2(Object e)
     {
 
@@ -311,7 +311,7 @@ public class PersistenceDelegator
         getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
         log.debug("Data removed successfully for entity : " + e.getClass());
 
-    }
+    }*/
 
     /**
      * Save graph.
@@ -498,7 +498,7 @@ public class PersistenceDelegator
      *            the e
      */
     // Old implementation, to be deleted
-    @Deprecated
+    /*@Deprecated
     public void persist2(Object e)
     {
         // Invoke Pre Persist Events
@@ -517,7 +517,7 @@ public class PersistenceDelegator
         getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
         log.debug("Data persisted successfully for entity : " + e.getClass());
 
-    }
+    }*/
 
     
 
@@ -638,7 +638,7 @@ public class PersistenceDelegator
      *            the primary key
      * @return the e
      */
-    @Deprecated    
+    /*@Deprecated    
     public <E> E find2(Class<E> entityClass, Object primaryKey)
     {
 
@@ -694,7 +694,7 @@ public class PersistenceDelegator
         return entity;
 
     }
-
+*/
     /**
      * Creates the query.
      * 
@@ -1102,7 +1102,10 @@ public class PersistenceDelegator
 
         // Call persist on each node in object graph
         Node headNode = graph.getHeadNode();
-        headNode.setHeadNode(true);
+        if(headNode.getParents() == null) {
+            headNode.setHeadNode(true);
+        }
+        
         headNode.persist();
 
         // TODO: not always, should be conditional
@@ -1142,7 +1145,19 @@ public class PersistenceDelegator
             node.find();
         }
         
-        Object nodeData = node.getData();          
+        Object nodeData = node.getData();  
+        
+        //If node for this nodeData is not already there in PC, 
+        //Generate an object graph of this found entity, and put it into cache with Managed state
+        if(nodeData != null) {
+            if(PersistenceCache.INSTANCE.getMainCache().getNodeFromCache(nodeId) == null) {
+                ObjectGraph graph = new ObjectGraphBuilder().getObjectGraph(nodeData, new ManagedState());
+                PersistenceCache.INSTANCE.getMainCache().addGraphToCache(graph);
+            }
+            
+        }     
+        
+        
         
         return (E) nodeData;
     }
@@ -1162,7 +1177,10 @@ public class PersistenceDelegator
         ObjectGraph graph = graphBuilder.getObjectGraph(e, new ManagedState());
 
         Node headNode = graph.getHeadNode();
-        headNode.setHeadNode(true);
+        
+        if(headNode.getParents() == null) {
+            headNode.setHeadNode(true);
+        }        
 
         headNode.remove();
 
@@ -1268,7 +1286,9 @@ public class PersistenceDelegator
 
         //Call merge on each node in object graph
         Node headNode = graph.getHeadNode();
-        headNode.setHeadNode(true);
+        if(headNode.getParents() == null) {
+            headNode.setHeadNode(true);
+        }        
         headNode.merge();
 
         // TODO: not always, should be conditional

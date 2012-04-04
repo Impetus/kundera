@@ -34,6 +34,8 @@ import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
@@ -52,7 +54,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author impetus
  */
-public class HBaseClient implements com.impetus.kundera.client.Client
+public class HBaseClient extends ClientBase implements Client
 {
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseClient.class);

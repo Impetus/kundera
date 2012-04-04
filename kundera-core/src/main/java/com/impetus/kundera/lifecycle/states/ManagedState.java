@@ -35,6 +35,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.PersistenceCache;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * @author amresh
@@ -153,13 +154,7 @@ public class ManagedState extends NodeState
         //This node is fresh and hence NOT dirty
         nodeStateContext.setDirty(false);      
         
-        //Node to remain in Managed state  
-        
-        //Generate an object graph of this found entity if not null, and put it into cache with Managed state
-        if(nodeData != null) {
-            ObjectGraph graph = new ObjectGraphBuilder().getObjectGraph(nodeData, new ManagedState());
-            PersistenceCache.INSTANCE.getMainCache().addGraphToCache(graph);
-        }       
+        //Node to remain in Managed state          
        
     }
 
