@@ -48,6 +48,7 @@ import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.lifecycle.states.ManagedState;
+import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -1221,31 +1222,35 @@ public class PersistenceDelegator
             while (!fs.isEmpty())
             {
                 Node node = fs.pop();
-
-                EntityMetadata metadata = getMetadata(node.getDataClass());
-                node.setClient(getClient(metadata));
-
-                node.flush();
-
-                // Update Link value for all nodes attached to this one
-                Map<NodeLink, Node> parents = node.getParents();
-                Map<NodeLink, Node> children = node.getChildren();
-
-                if (parents != null && !parents.isEmpty())
+                
+                //Only nodes in Managed and Removed state are flushed, rest are ignored
+                if (node.isInState(ManagedState.class) || node.isInState(RemovedState.class))
                 {
-                    for (NodeLink parentNodeLink : parents.keySet())
+                    EntityMetadata metadata = getMetadata(node.getDataClass());
+                    node.setClient(getClient(metadata));
+
+                    node.flush();
+
+                    // Update Link value for all nodes attached to this one
+                    Map<NodeLink, Node> parents = node.getParents();
+                    Map<NodeLink, Node> children = node.getChildren();
+
+                    if (parents != null && !parents.isEmpty())
                     {
-                        parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
-                                ObjectGraphBuilder.getEntityId(node.getNodeId()));
+                        for (NodeLink parentNodeLink : parents.keySet())
+                        {
+                            parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
+                                    ObjectGraphBuilder.getEntityId(node.getNodeId()));
+                        }
                     }
-                }
 
-                if (children != null && !children.isEmpty())
-                {
-                    for (NodeLink childNodeLink : children.keySet())
+                    if (children != null && !children.isEmpty())
                     {
-                        childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
-                                ObjectGraphBuilder.getEntityId(node.getNodeId()));
+                        for (NodeLink childNodeLink : children.keySet())
+                        {
+                            childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
+                                    ObjectGraphBuilder.getEntityId(node.getNodeId()));
+                        }
                     }
                 }
 

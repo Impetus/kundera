@@ -45,10 +45,11 @@ public class FlushManager
         
         Set<Node> headNodes = mainCache.getHeadNodes();
         
-        for(Node headNode : headNodes) {
-            addNodesToFlushStack(pc, headNode);
-        }
-        
+
+        for(Node headNode : headNodes) {            
+                addNodesToFlushStack(pc, headNode);     
+            
+        }        
     }
     
     /**
@@ -98,9 +99,9 @@ public class FlushManager
                 //Process child node Graph recursively first
                 Node childNode = mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
                     
-                if(!childNode.isTraversed() && childNode.isDirty()) {
+                if(!childNode.isTraversed()) {
                     addNodesToFlushStack(pc, childNode);
-                }                  
+                }                
                 
             }
             
@@ -137,14 +138,14 @@ public class FlushManager
                 
                 
                 //Process child node Graph recursively first
-                if(!childNode.isTraversed() && childNode.isDirty()) {
+                if(!childNode.isTraversed()) {
                     addNodesToFlushStack(pc, childNode);
                 }               
             }
             //Process One-To-One children
             for (NodeLink nodeLink : oneToOneChildren.keySet())
             {
-                if (!node.isTraversed()  && node.isDirty())
+                if (!node.isTraversed())
                 {
                     // Push this node to stack
                     node.setTraversed(true);
@@ -159,7 +160,7 @@ public class FlushManager
             //Process Many-To-One children
             for (NodeLink nodeLink : manyToOneChildren.keySet())
             {
-                if(!node.isTraversed()  && node.isDirty()) {
+                if(!node.isTraversed()) {
                     // Push this node to stack
                     node.setTraversed(true);
                     flushStack.push(node);
@@ -175,14 +176,14 @@ public class FlushManager
                     if(multiplicity.equals(Relation.ForeignKey.MANY_TO_ONE)) {
                         Node parentNode = parents.get(parentLink);
                         
-                        if(! parentNode.isTraversed()  && parentNode.isDirty()) {
+                        if(! parentNode.isTraversed()) {
                             addNodesToFlushStack(pc, parentNode);
                         }                        
                     }
                 }
                 
                 //Finally process this child node
-                if(!childNode.isTraversed()  && childNode.isDirty()) {
+                if(!childNode.isTraversed()) {
                     addNodesToFlushStack(pc, childNode);
                 }
             }
@@ -190,7 +191,7 @@ public class FlushManager
         
         //Finally, if this node itself is not traversed yet, (as may happen in 1-1 and M-1 
         //cases), push it to stack
-        if(!node.isTraversed()  && node.isDirty()) {
+        if(!node.isTraversed()) {
             node.setTraversed(true);
             flushStack.push(node);
         }

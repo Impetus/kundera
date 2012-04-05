@@ -25,6 +25,8 @@ import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 
 /**
  * Base class for all Client implementations providing common utility methods to them all. 
@@ -51,8 +53,10 @@ public class ClientBase
                 String linkName = (String)parentNodeLink.getLinkProperty(LinkProperty.LINK_NAME);
                 String linkValue = (String)parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
                 boolean isSharedByPrimaryKey = (Boolean)parentNodeLink.getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
+                Relation.ForeignKey multiplicity = parentNodeLink.getMultiplicity();
                 
-                if(linkName != null && linkValue != null && ! isSharedByPrimaryKey) {
+                if(linkName != null && linkValue != null && ! isSharedByPrimaryKey
+                        && multiplicity.equals(ForeignKey.ONE_TO_MANY)) {
                     RelationHolder relationHolder = new RelationHolder(linkName, linkValue);
                     relationsHolder.add(relationHolder);       
                 }               
@@ -65,8 +69,11 @@ public class ClientBase
                 String linkName = (String)childNodeLink.getLinkProperty(LinkProperty.LINK_NAME);
                 String linkValue = (String)childNodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
                 boolean isSharedByPrimaryKey = (Boolean)childNodeLink.getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
+                Relation.ForeignKey multiplicity = childNodeLink.getMultiplicity();
                 
-                if(linkName != null && linkValue != null && ! isSharedByPrimaryKey) {
+                if(linkName != null && linkValue != null && ! isSharedByPrimaryKey
+                && (multiplicity.equals(ForeignKey.ONE_TO_ONE) || multiplicity.equals(ForeignKey.MANY_TO_ONE))     
+                ) {
                     RelationHolder relationHolder = new RelationHolder(linkName, linkValue);
                     relationsHolder.add(relationHolder);       
                 }              

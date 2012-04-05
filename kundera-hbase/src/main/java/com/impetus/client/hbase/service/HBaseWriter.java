@@ -60,9 +60,12 @@ public class HBaseWriter implements Writer
             String qualifier = column.getName();
             try
             {
-
-                p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier),
-                        PropertyAccessorHelper.get(columnFamilyObj, column.getField()));
+                byte[] value = PropertyAccessorHelper.get(columnFamilyObj, column.getField());
+                
+                if(value != null) {
+                    p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), value);
+                }
+                
             }
             catch (PropertyAccessException e1)
             {
