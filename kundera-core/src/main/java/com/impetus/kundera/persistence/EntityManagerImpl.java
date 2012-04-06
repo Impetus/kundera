@@ -37,14 +37,13 @@ import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.context.FlushManager;
-import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * The Class EntityManagerImpl.
  * 
  * @author animesh.kumar
  */
-public class EntityManagerImpl implements EntityManager
+public class EntityManagerImpl implements EntityManager, EntityTransaction
 {
 
     /** The Constant log. */
@@ -220,6 +219,7 @@ public class EntityManagerImpl implements EntityManager
     @Override
     public final void flush()
     {
+        checkClosed();
         persistenceDelegator.flush();
     }
 
@@ -315,8 +315,8 @@ public class EntityManagerImpl implements EntityManager
      */
     @Override
     public final EntityTransaction getTransaction()
-    {
-        throw new NotImplementedException("TODO");
+    {        
+        return this;
     }
 
     /*
@@ -626,5 +626,53 @@ public class EntityManagerImpl implements EntityManager
     {
         return persistenceDelegator;
     }
+
+    
+    /////////////////////////////////////////////////////////////////////////
+    /** Methods from {@link EntityTransaction} interface */
+    /////////////////////////////////////////////////////////////////////////
+    
+    
+    
+    @Override
+    public void begin()
+    {
+        persistenceDelegator.begin();
+    }
+
+    @Override
+    public void commit()
+    {
+        checkClosed();
+        persistenceDelegator.commit();
+    }
+
+    @Override
+    public boolean getRollbackOnly()
+    {
+        if (!isActive()) {
+            throw new IllegalStateException("No active transaction found");
+        }
+        return persistenceDelegator.getRollbackOnly();            
+    }
+    
+    @Override
+    public void setRollbackOnly()
+    {
+        persistenceDelegator.setRollbackOnly();
+    } 
+
+    @Override
+    public boolean isActive()
+    {
+        return isOpen() && persistenceDelegator.isActive();
+    }
+
+    @Override
+    public void rollback()
+    {
+        checkClosed();
+        persistenceDelegator.rollback();
+    }   
 
 }

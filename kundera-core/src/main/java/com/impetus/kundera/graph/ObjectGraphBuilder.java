@@ -170,7 +170,7 @@ public class ObjectGraphBuilder
     }
     
     public static String getNodeId(Object pk, Class<?> objectClass) {
-        return objectClass.getName() + Constants.NODE_ID_SEPARATOR + (String)pk;
+        return objectClass.getName() + Constants.NODE_ID_SEPARATOR + pk.toString();
     }
     
     public static String getEntityId(String nodeId) {

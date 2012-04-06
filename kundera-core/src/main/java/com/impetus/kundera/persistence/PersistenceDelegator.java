@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.FlushModeType;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
@@ -54,8 +53,8 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
-import com.impetus.kundera.persistence.context.FlushStack;
 import com.impetus.kundera.persistence.context.FlushManager;
+import com.impetus.kundera.persistence.context.FlushStack;
 import com.impetus.kundera.persistence.context.MainCache;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.persistence.context.PersistenceCacheManager;
@@ -66,7 +65,6 @@ import com.impetus.kundera.persistence.handler.impl.EntityInterceptor;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.query.QueryResolver;
 
 /**
@@ -1303,6 +1301,32 @@ public class PersistenceDelegator
         getEventDispatcher().fireEventListeners(m, e, PostUpdate.class);    
 
         return e;
+    }
+    
+    /*******************************Transaction related methods ***********************************************/
+    
+    public void begin() {
+        
+    }   
+    
+    public void commit() {
+        flush();
+    }
+    
+    public void rollback() {
+        
+    }
+    
+    public boolean getRollbackOnly() {
+        return false;
+    }
+    
+    public void setRollbackOnly() {
+        
+    }
+    
+    public boolean isActive() {
+        return false;
     }
 
 }
