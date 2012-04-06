@@ -48,6 +48,7 @@ import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.lifecycle.states.ManagedState;
+import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -253,7 +254,7 @@ public class PersistenceDelegator
      *            the e
      * @return the e
      */
-    public <E> E merge(E e)
+    /*public <E> E merge2(E e)
     {
 
         List<EnhancedEntity> reachableEntities = EntityResolver.resolve(e, CascadeType.MERGE);
@@ -284,7 +285,7 @@ public class PersistenceDelegator
         // }
 
         return e;
-    }
+    }*/
 
     /**
      * Removes the.
@@ -292,8 +293,8 @@ public class PersistenceDelegator
      * @param e
      *            the e
      */
-    @Deprecated
-    public void remove(Object e)
+    /*@Deprecated
+    public void remove2(Object e)
     {
 
         EntityMetadata metadata = getMetadata(e.getClass());
@@ -311,7 +312,7 @@ public class PersistenceDelegator
         getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
         log.debug("Data removed successfully for entity : " + e.getClass());
 
-    }
+    }*/
 
     /**
      * Save graph.
@@ -498,8 +499,8 @@ public class PersistenceDelegator
      *            the e
      */
     // Old implementation, to be deleted
-    @Deprecated
-    public void persist(Object e)
+    /*@Deprecated
+    public void persist2(Object e)
     {
         // Invoke Pre Persist Events
         EntityMetadata metadata = getMetadata(e.getClass());
@@ -517,7 +518,7 @@ public class PersistenceDelegator
         getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
         log.debug("Data persisted successfully for entity : " + e.getClass());
 
-    }
+    }*/
 
     
 
@@ -638,8 +639,8 @@ public class PersistenceDelegator
      *            the primary key
      * @return the e
      */
-    @Deprecated    
-    public <E> E find(Class<E> entityClass, Object primaryKey)
+    /*@Deprecated    
+    public <E> E find2(Class<E> entityClass, Object primaryKey)
     {
 
         isRelationViaJoinTable = false;
@@ -694,7 +695,7 @@ public class PersistenceDelegator
         return entity;
 
     }
-
+*/
     /**
      * Creates the query.
      * 
@@ -1091,7 +1092,7 @@ public class PersistenceDelegator
      * Writes an entity into Persistence cache
      */
     
-    public void persist2(Object e)
+    public void persist(Object e)
     {
         // Invoke Pre Persist Events
         EntityMetadata metadata = getMetadata(e.getClass());
@@ -1102,7 +1103,10 @@ public class PersistenceDelegator
 
         // Call persist on each node in object graph
         Node headNode = graph.getHeadNode();
-        headNode.setHeadNode(true);
+        if(headNode.getParents() == null) {
+            headNode.setHeadNode(true);
+        }
+        
         headNode.persist();
 
         // TODO: not always, should be conditional
@@ -1120,7 +1124,7 @@ public class PersistenceDelegator
      * @param primaryKey
      * @return
      */
-    public <E> E find2(Class<E> entityClass, Object primaryKey)
+    public <E> E find(Class<E> entityClass, Object primaryKey)
     {
 
         EntityMetadata entityMetadata = getMetadata(entityClass);
@@ -1142,7 +1146,19 @@ public class PersistenceDelegator
             node.find();
         }
         
-        Object nodeData = node.getData();          
+        Object nodeData = node.getData();  
+        
+        //If node for this nodeData is not already there in PC, 
+        //Generate an object graph of this found entity, and put it into cache with Managed state
+        if(nodeData != null) {
+            if(PersistenceCache.INSTANCE.getMainCache().getNodeFromCache(nodeId) == null) {
+                ObjectGraph graph = new ObjectGraphBuilder().getObjectGraph(nodeData, new ManagedState());
+                PersistenceCache.INSTANCE.getMainCache().addGraphToCache(graph);
+            }
+            
+        }     
+        
+        
         
         return (E) nodeData;
     }
@@ -1151,7 +1167,7 @@ public class PersistenceDelegator
     /**
      * Removes an entity object from persistence cache 
      */
-    public void remove2(Object e)
+    public void remove(Object e)
     {
 
         // Invoke Pre Remove Events
@@ -1162,7 +1178,10 @@ public class PersistenceDelegator
         ObjectGraph graph = graphBuilder.getObjectGraph(e, new ManagedState());
 
         Node headNode = graph.getHeadNode();
-        headNode.setHeadNode(true);
+        
+        if(headNode.getParents() == null) {
+            headNode.setHeadNode(true);
+        }        
 
         headNode.remove();
 
@@ -1203,35 +1222,38 @@ public class PersistenceDelegator
             while (!fs.isEmpty())
             {
                 Node node = fs.pop();
-
-                EntityMetadata metadata = getMetadata(node.getDataClass());
-                node.setClient(getClient(metadata));
-
-                node.flush();
-
-                // Update Link value for all nodes attached to this one
-                Map<NodeLink, Node> parents = node.getParents();
-                Map<NodeLink, Node> children = node.getChildren();
-
-                if (parents != null && !parents.isEmpty())
+                
+                //Only nodes in Managed and Removed state are flushed, rest are ignored
+                if (node.isInState(ManagedState.class) || node.isInState(RemovedState.class))
                 {
-                    for (NodeLink parentNodeLink : parents.keySet())
+                    EntityMetadata metadata = getMetadata(node.getDataClass());
+                    node.setClient(getClient(metadata));
+
+                    node.flush();
+
+                    // Update Link value for all nodes attached to this one
+                    Map<NodeLink, Node> parents = node.getParents();
+                    Map<NodeLink, Node> children = node.getChildren();
+
+                    if (parents != null && !parents.isEmpty())
                     {
-                        parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
-                                ObjectGraphBuilder.getEntityId(node.getNodeId()));
+                        for (NodeLink parentNodeLink : parents.keySet())
+                        {
+                            parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
+                                    ObjectGraphBuilder.getEntityId(node.getNodeId()));
+                        }
+                    }
+
+                    if (children != null && !children.isEmpty())
+                    {
+                        for (NodeLink childNodeLink : children.keySet())
+                        {
+                            childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
+                                    ObjectGraphBuilder.getEntityId(node.getNodeId()));
+                        }
                     }
                 }
 
-                if (children != null && !children.isEmpty())
-                {
-                    for (NodeLink childNodeLink : children.keySet())
-                    {
-                        childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
-                                ObjectGraphBuilder.getEntityId(node.getNodeId()));
-                    }
-                }
-
-                // TODO: remove node from persistence cache
             }
             
             //Flush Join Table data into database
@@ -1245,16 +1267,14 @@ public class PersistenceDelegator
                 } else if(OPERATION.DELETE.equals(jtData.getOperation())) {
                     for(Object pk : jtData.getJoinTableRecords().keySet()) {
                         client.deleteByColumn(jtData.getJoinTableName(), m.getIdColumn().getName(), pk);
-                    }                 
-                    
-                }
-                
+                    }                   
+                }                
             }
-            
+            joinTableDataMap.clear();   //All Join table operation performed, clear it.           
         }
     }
     
-    public <E> E merge2(E e)
+    public <E> E merge(E e)
     {     
 
         log.debug("Merging Entity : " + e);
@@ -1271,12 +1291,13 @@ public class PersistenceDelegator
 
         //Call merge on each node in object graph
         Node headNode = graph.getHeadNode();
-        headNode.setHeadNode(true);
+        if(headNode.getParents() == null) {
+            headNode.setHeadNode(true);
+        }        
         headNode.merge();
 
         // TODO: not always, should be conditional
         flush();
-
 
         // fire PreUpdate events
         getEventDispatcher().fireEventListeners(m, e, PostUpdate.class);    

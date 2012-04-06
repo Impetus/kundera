@@ -54,7 +54,8 @@ public class PersistenceCacheManager
         for(Node node : PersistenceCache.INSTANCE.getTransactionalCache().getAllNodes()) {
             node.setTraversed(false);
         }
-    }
+    }  
+    
     
    
 

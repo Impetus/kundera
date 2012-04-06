@@ -91,10 +91,6 @@ public interface NodeStateContext
     void clear();
     void flush();
     
-    /*public boolean isInTransientState();
-    public boolean isInManagedState();
-    public boolean isInDetachedState();
-    public boolean isInRemovedState();*/ 
-    
+    public boolean isInState(Class<?> stateClass);   
 
 }

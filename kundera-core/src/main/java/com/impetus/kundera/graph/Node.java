@@ -349,6 +349,12 @@ public class Node implements NodeStateContext
         return "[" + nodeId +  "]";
     } 
     
+    @Override
+    public boolean equals(Object otherNode)
+    {
+        return super.equals(otherNode);
+    }
+    
     
     //////////////////////////////////////////
     /* CRUD related operations on this node */
@@ -441,9 +447,10 @@ public class Node implements NodeStateContext
     
     //Overridden methods from
     
-    
-    
-    
-    
+    @Override
+    public boolean isInState(Class<?> stateClass)
+    {
+        return getCurrentNodeState().getClass().equals(stateClass);
+    }  
 
 }

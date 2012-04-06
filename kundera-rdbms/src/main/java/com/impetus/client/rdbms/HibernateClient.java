@@ -37,6 +37,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Restrictions;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -57,7 +58,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author vivek.mishra
  */
-public class HibernateClient implements Client
+public class HibernateClient extends ClientBase implements Client
 {
 
     /** The persistence unit. */
@@ -337,6 +338,7 @@ public class HibernateClient implements Client
     @Override
     public void persist(Node node)
     {
+        
     }
 
 

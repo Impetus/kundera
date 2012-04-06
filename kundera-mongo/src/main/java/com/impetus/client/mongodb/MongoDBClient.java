@@ -28,8 +28,11 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.NodeLink;
+import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -49,7 +52,7 @@ import com.mongodb.DBObject;
  * 
  * @author impetusopensource
  */
-public class MongoDBClient implements Client
+public class MongoDBClient extends ClientBase implements Client
 {
 
     /** The is connected. */
@@ -144,13 +147,17 @@ public class MongoDBClient implements Client
         String documentName = entityMetadata.getTableName();
 
         log.debug("Persisting data into " + dbName + "." + documentName + " for ID:" + node.getNodeId());
-        DBCollection dbCollection = mongoDb.getCollection(documentName);
+        DBCollection dbCollection = mongoDb.getCollection(documentName);       
+        
+        List<RelationHolder> relationHolders = getRelationHolders(node);
 
         BasicDBObject document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(
-                entityMetadata, node.getData(), null);
+                entityMetadata, node.getData(), relationHolders);
         dbCollection.save(document);
-    }
-    
+        
+        //Index This node
+        indexNode(node, entityMetadata, getIndexManager());    
+    }   
    
 
     /*
@@ -235,7 +242,27 @@ public class MongoDBClient implements Client
 
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
-    {
+    {       
+        String joinTableName = joinTableData.getJoinTableName();
+        String joinColumnName = joinTableData.getJoinColumnName();
+        String invJoinColumnName = joinTableData.getInverseJoinColumnName();
+        Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
+        
+        DBCollection dbCollection = mongoDb.getCollection(joinTableName);
+        List<BasicDBObject> documents = new ArrayList<BasicDBObject>();
+        
+        for(Object key : joinTableRecords.keySet()) {
+            Set<Object> values =  joinTableRecords.get(key);            
+            String joinColumnValue = (String) key;            
+            
+            for(Object childId : values) {
+                BasicDBObject dbObj = new BasicDBObject();
+                dbObj.put(joinColumnName, joinColumnValue);
+                dbObj.put(invJoinColumnName, (String)childId);
+                documents.add(dbObj);
+            }                               
+        }    
+        dbCollection.insert(documents.toArray(new BasicDBObject[0]));
     }
 
     @Override
@@ -396,7 +423,7 @@ public class MongoDBClient implements Client
     @Override
     public Object find(Class entityClass, Object key)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
 
         List<String>relationNames = entityMetadata.getRelationNames();
         
