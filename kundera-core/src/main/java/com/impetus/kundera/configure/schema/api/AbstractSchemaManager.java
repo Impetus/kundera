@@ -13,7 +13,6 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.sun.xml.internal.ws.util.MetadataUtil;
 
 /**
  * @author impadmin
