@@ -27,8 +27,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.cassandra.query.CassandraEntityReader;
+import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
@@ -38,7 +40,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 
 /**
- * A factory for creating PelopsClient objects.
+ * A factory for creating PelopsCliobjects.
  */
 public class PelopsClientFactory extends GenericClientFactory
 {
@@ -51,6 +53,8 @@ public class PelopsClientFactory extends GenericClientFactory
 
     /** The reader. */
     private EntityReader reader;
+    
+    private SchemaManager schemaManager;
 
     /*
      * (non-Javadoc)
@@ -69,7 +73,9 @@ public class PelopsClientFactory extends GenericClientFactory
                 luceneDirPath));
 
         reader = new CassandraEntityReader();
-
+        
+        schemaManager = new CassandraSchemaManager();
+        schemaManager.exportSchema();
     }
 
     /*
@@ -133,6 +139,7 @@ public class PelopsClientFactory extends GenericClientFactory
     public void destroy()
     {
         indexManager.close();
+        schemaManager.dropSchema();
         // Pelops.shutdown();
     }
 

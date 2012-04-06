@@ -18,7 +18,10 @@ package com.impetus.kundera.metadata.processor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.CollectionTable;
@@ -36,6 +39,7 @@ import javax.persistence.Table;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.annotations.Index;
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
@@ -108,6 +112,15 @@ public class TableProcessor extends AbstractEntityFieldProcessor
          addNamedNativeQueryMetadata(clazz);
         // set schema name and persistence unit name (if provided)
         String schemaStr = table.schema();
+        Index idx = clazz.getAnnotation(Index.class);
+        List <String> colToBeIndexed = null;
+        if(idx != null)
+        {
+        	 if (idx.columns() != null && idx.columns().length != 0)
+             {
+        		 colToBeIndexed = Arrays.asList(idx.columns());
+             }
+        }
         if (schemaStr == null)
         {
             LOG.error("It is mandatory to specify Schema alongwith Table name:" + table.name()
@@ -185,7 +198,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                     // objects in JVM.
                     if (!isEmbeddable)
                     {
-                        metadata.addColumn(name, new com.impetus.kundera.metadata.model.Column(name, f));
+                        metadata.addColumn(name, new com.impetus.kundera.metadata.model.Column(name, f, colToBeIndexed != null ?colToBeIndexed.contains(name):false));
                     }
                     EmbeddedColumn embeddedColumn = new EmbeddedColumn(name, f);
                     metadata.addEmbeddedColumn(name, embeddedColumn);

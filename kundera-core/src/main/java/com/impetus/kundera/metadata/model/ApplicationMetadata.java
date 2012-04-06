@@ -26,6 +26,7 @@ import javax.persistence.metamodel.Metamodel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.configure.schema.SchemaMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
@@ -44,6 +45,8 @@ public class ApplicationMetadata
 
     /** The Constant log. */
     private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
+    
+    private SchemaMetadata schemaMetadata = new SchemaMetadata();
 
     /**
      * Collection instance to hold clazz's full name to persistence unit
@@ -331,4 +334,22 @@ public class ApplicationMetadata
             return entityClazz;
         }
     }
+
+
+	/**
+	 * @return the schemaMetadata
+	 */
+	public SchemaMetadata getSchemaMetadata() 
+	{
+//		if
+		return schemaMetadata;
+	}
+
+	/**
+	 * @param schemaMetadata the schemaMetadata to set
+	 */
+	public void setSchemaMetadata(SchemaMetadata schemaMetadata) {
+		this.schemaMetadata = schemaMetadata;
+	}
+
 }

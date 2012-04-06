@@ -24,8 +24,10 @@ import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.mongodb.schemamanager.MongoDBSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
@@ -54,6 +56,8 @@ public class MongoDBClientFactory extends GenericClientFactory
 
     /** The reader. */
     private EntityReader reader;
+    
+    private SchemaManager schemaManager;
 
     /*
      * (non-Javadoc)
@@ -67,6 +71,8 @@ public class MongoDBClientFactory extends GenericClientFactory
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
                 luceneDirPath));
         reader = new MongoEntityReader();
+        schemaManager = new MongoDBSchemaManager();
+        schemaManager.exportSchema();
     }
 
     /*
@@ -162,6 +168,7 @@ public class MongoDBClientFactory extends GenericClientFactory
     public void destroy()
     {
         indexManager.close();
+        schemaManager.dropSchema();
         if (mongoDB != null)
         {
             logger.info("Closing connection to mongodb.");
