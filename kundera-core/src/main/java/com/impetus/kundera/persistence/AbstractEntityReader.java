@@ -74,8 +74,7 @@ public class AbstractEntityReader
         for(Relation relation : m.getRelations()) {
             if (relation.isRelatedViaJoinTable())
             {
-                //computeJoinTableRelations(e, client, m, g, persistenceDelegeator, relation);
-
+                populateRelationFromJoinTable(e, childClient, m, pd, relation);
             }
             else
             {
@@ -757,6 +756,59 @@ public class AbstractEntityReader
         }
 
     }
+    
+    
+    private void populateRelationFromJoinTable(EnhanceEntity e, Client client, EntityMetadata entityMetadata, 
+            PersistenceDelegator delegator, Relation relation) {
+        Object entity = e.getEntity();
+        
+        JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
+        String joinTableName = jtMetadata.getJoinTableName();
+
+        Set<String> joinColumns = jtMetadata.getJoinColumns();
+        Set<String> inverseJoinColumns = jtMetadata.getInverseJoinColumns();
+
+        String joinColumnName = (String) joinColumns.toArray()[0];
+        String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
+
+        EntityMetadata relMetadata = delegator.getMetadata(relation.getTargetEntity());
+        
+        Client pClient = delegator.getClient(entityMetadata);
+        List<?> foreignKeys = pClient.getForeignKeysFromJoinTable(joinTableName, joinColumnName, inverseJoinColumnName,
+                relMetadata, e.getEntityId());
+
+        List childrenEntities = new ArrayList();
+        for (Object foreignKey : foreignKeys)
+        {            
+            EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
+            Client childClient = delegator.getClient(childMetadata);
+            // Object child = childClient.find(relation.getTargetEntity(),
+            // childMetadata, (String) foreignKey, null);
+            Object child = delegator.find(relation.getTargetEntity(), foreignKey);
+
+            //TODO: Handle bidirection
+            //onBiDirection(e, client, objectGraph, entityMetadata, child, childMetadata, childClient);
+
+            childrenEntities.add(child);            
+        }
+
+        Field childField = relation.getProperty();
+
+        try
+        {
+            PropertyAccessorHelper.set(
+                    entity,
+                    childField,
+                    PropertyAccessorHelper.isCollection(childField.getType()) ? getFieldInstance(childrenEntities,
+                            childField) : childrenEntities.get(0));
+        }
+        catch (PropertyAccessException ex)
+        {            
+            throw new EntityReaderException(ex);
+        }
+        
+        
+    }
 
     /**
      * Compute join table relations.
@@ -774,6 +826,7 @@ public class AbstractEntityReader
      * @param relation
      *            the relation
      */
+    @Deprecated
     private void computeJoinTableRelations(EnhanceEntity e, Client client, EntityMetadata entityMetadata,
             EntitySaveGraph objectGraph, PersistenceDelegator delegator, Relation relation)
     {
@@ -794,7 +847,7 @@ public class AbstractEntityReader
 
         Client pClient = delegator.getClient(entityMetadata);
         List<?> foreignKeys = pClient.getForeignKeysFromJoinTable(joinTableName, joinColumnName, inverseJoinColumnName,
-                relMetadata, objectGraph);
+                relMetadata, objectGraph.getParentId());
 
         List childrenEntities = new ArrayList();
         for (Object foreignKey : foreignKeys)

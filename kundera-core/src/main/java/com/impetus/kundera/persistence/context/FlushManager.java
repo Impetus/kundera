@@ -24,9 +24,12 @@ import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.lifecycle.states.ManagedState;
+import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
+import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 
 /**
  * Provides utility methods for managing Flush Stack.
@@ -42,10 +45,11 @@ public class FlushManager
         
         Set<Node> headNodes = mainCache.getHeadNodes();
         
-        for(Node headNode : headNodes) {
-            addNodesToFlushStack(pc, headNode);
-        }
-        
+
+        for(Node headNode : headNodes) {            
+                addNodesToFlushStack(pc, headNode);     
+            
+        }        
     }
     
     /**
@@ -97,7 +101,7 @@ public class FlushManager
                     
                 if(!childNode.isTraversed()) {
                     addNodesToFlushStack(pc, childNode);
-                }                  
+                }                
                 
             }
             
@@ -107,15 +111,31 @@ public class FlushManager
                 Node childNode = mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
                 
                 //Extract information required to be persisted into Join Table
-                JoinTableMetadata jtmd = (JoinTableMetadata)nodeLink.getLinkProperty(LinkProperty.JOIN_TABLE_METADATA); 
-                String joinColumnName = (String) jtmd.getJoinColumns().toArray()[0];
-                String inverseJoinColumnName = (String) jtmd.getInverseJoinColumns().toArray()[0];
-                Object entityId = ObjectGraphBuilder.getEntityId(node.getNodeId());
-                Object childId = ObjectGraphBuilder.getEntityId(childNode.getNodeId());
+                if(node.isDirty() && ! node.isTraversed()) {
+                    JoinTableMetadata jtmd = (JoinTableMetadata) nodeLink.getLinkProperty(LinkProperty.JOIN_TABLE_METADATA);
+                    String joinColumnName = (String) jtmd.getJoinColumns().toArray()[0];
+                    String inverseJoinColumnName = (String) jtmd.getInverseJoinColumns().toArray()[0];
+                    Object entityId = ObjectGraphBuilder.getEntityId(node.getNodeId());
+                    Object childId = ObjectGraphBuilder.getEntityId(childNode.getNodeId());
+
+                    Set<Object> childValues = new HashSet<Object>();
+                    childValues.add(childId);
+
+                    OPERATION operation = null;
+                    if (node.getCurrentNodeState().getClass().equals(ManagedState.class))
+                    {
+                        operation = OPERATION.INSERT;
+                    }
+                    else if (node.getCurrentNodeState().getClass().equals(RemovedState.class))
+                    {
+                        operation = OPERATION.DELETE;
+                    }
+
+                    pc.addJoinTableDataIntoMap(operation, jtmd.getJoinTableName(), joinColumnName, inverseJoinColumnName,
+                            node.getDataClass(), entityId, childValues);
+
+                }          
                 
-                Set<Object> childValues = new HashSet<Object>(); childValues.add(childId);
-                
-                pc.addJoinTableDataIntoMap(jtmd.getJoinTableName(), joinColumnName, inverseJoinColumnName, node.getDataClass(), entityId, childValues);
                 
                 //Process child node Graph recursively first
                 if(!childNode.isTraversed()) {

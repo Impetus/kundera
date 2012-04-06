@@ -35,6 +35,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.PersistenceCache;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * @author amresh
@@ -123,10 +124,10 @@ public class ManagedState extends NodeState
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass);
         String entityId = ObjectGraphBuilder.getEntityId(nodeStateContext.getNodeId());
         
-        List<String> linkNames = new ArrayList<String>();
+        /*List<String> linkNames = new ArrayList<String>();
         for(Relation relation : entityMetadata.getRelations()) {
             linkNames.add(relation.getJoinColumnName());
-        }         
+        }*/         
         
         Object nodeData = null;   //Node data
         
@@ -138,7 +139,7 @@ public class ManagedState extends NodeState
         {
             Object entity = enhanceEntity.getEntity();
             
-            if (linkNames.isEmpty() && !entityMetadata.isRelationViaJoinTable())
+            if ((entityMetadata.getRelationNames() == null || entityMetadata.getRelationNames().isEmpty()) && !entityMetadata.isRelationViaJoinTable())
             {
                 nodeData = entity;
             }
@@ -153,11 +154,7 @@ public class ManagedState extends NodeState
         //This node is fresh and hence NOT dirty
         nodeStateContext.setDirty(false);      
         
-        //Node to remain in Managed state  
-        
-        //Generate an object graph of this found entity and put it into cache with Managed state
-        ObjectGraph graph = new ObjectGraphBuilder().getObjectGraph(nodeData, new ManagedState());
-        PersistenceCache.INSTANCE.getMainCache().addGraphToCache(graph);
+        //Node to remain in Managed state          
        
     }
 
@@ -200,7 +197,8 @@ public class ManagedState extends NodeState
         // Managed ---> Detached
         NodeState nextState = new DetachedState();
         nodeStateContext.setCurrentNodeState(nextState);
-        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());
+        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());   
+        
     }
 
     @Override

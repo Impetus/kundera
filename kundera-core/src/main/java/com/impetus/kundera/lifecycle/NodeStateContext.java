@@ -90,5 +90,7 @@ public interface NodeStateContext
     // Cache Management
     void clear();
     void flush();
+    
+    public boolean isInState(Class<?> stateClass);   
 
 }
