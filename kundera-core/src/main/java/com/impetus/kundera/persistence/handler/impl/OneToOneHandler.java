@@ -24,6 +24,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 
 import org.hibernate.proxy.HibernateProxy;
 
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.PersistenceObjectGraphBuilderException;
@@ -148,7 +149,7 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
 
             try
             {
-                PropertyAccessorHelper.setId(associatedEntity, metadata, getId(entity, metadata));
+                PropertyAccessorHelper.setId(associatedEntity, KunderaMetadataManager.getEntityMetadata(clazz), getId(entity, metadata));
                 // PropertyAccessorHelper.set(associatedEntity, f, getId(entity,
                 // metadata));
             }
