@@ -273,13 +273,13 @@ public class HBaseClient extends ClientBase implements Client
     {
         Object entity = node.getData();
         String id = ObjectGraphBuilder.getEntityId(node.getNodeId());
-        
-        List<RelationHolder> relationHolders = getRelationHolders(node);   
-        
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass()); 
-        
+
+        List<RelationHolder> relationHolders = getRelationHolders(node);
+
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+
         onPersist(entityMetadata, entity, id, relationHolders);
-        indexNode(node, entityMetadata, getIndexManager());        
+        indexNode(node, entityMetadata, getIndexManager());
     }
 
     /*
@@ -403,8 +403,6 @@ public class HBaseClient extends ClientBase implements Client
         }
 
     }
-    
-    
 
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
@@ -412,18 +410,20 @@ public class HBaseClient extends ClientBase implements Client
         String joinTableName = joinTableData.getJoinTableName();
         String joinColumnName = joinTableData.getJoinColumnName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
-        Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();        
-                
-        for(Object key : joinTableRecords.keySet()) {
-            Set<Object> values =  joinTableRecords.get(key);            
-            String joinColumnValue = (String) key;      
-            
+        Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
+
+        for (Object key : joinTableRecords.keySet())
+        {
+            Set<Object> values = joinTableRecords.get(key);
+            String joinColumnValue = (String) key;
+
             Map<String, String> columns = new HashMap<String, String>();
-            for(Object childValue : values) {
-                String invJoinColumnValue = (String)childValue;
+            for (Object childValue : values)
+            {
+                String invJoinColumnValue = (String) childValue;
                 columns.put(invJoinColumnName + "_" + invJoinColumnValue, invJoinColumnValue);
             }
-            
+
             if (columns != null && !columns.isEmpty())
             {
                 try
@@ -435,10 +435,10 @@ public class HBaseClient extends ClientBase implements Client
                 {
                     throw new PersistenceException(e);
                 }
-            }          
-            
-        }    
-        
+            }
+
+        }
+
     }
 
     /*
@@ -453,7 +453,7 @@ public class HBaseClient extends ClientBase implements Client
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
             String inverseJoinColumnName, EntityMetadata relMetadata, String parentId)
-    {        
+    {
         return handler.getForeignKeysFromJoinTable(joinTableName, parentId, inverseJoinColumnName);
 
     }

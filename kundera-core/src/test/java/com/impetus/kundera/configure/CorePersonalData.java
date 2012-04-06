@@ -3,7 +3,6 @@ package com.impetus.kundera.configure;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-
 @Embeddable
 public class CorePersonalData
 {
@@ -26,18 +25,19 @@ public class CorePersonalData
         this.website = website;
         this.email = email;
         this.yahooId = yahooId;
-    }  
-    
+    }
 
-    public String getWebsite() {
-		return website;
-	}
+    public String getWebsite()
+    {
+        return website;
+    }
 
-	public void setWebsite(String website) {
-		this.website = website;
-	}
+    public void setWebsite(String website)
+    {
+        this.website = website;
+    }
 
-	/**
+    /**
      * @return the email
      */
     public String getEmail()
@@ -54,11 +54,13 @@ public class CorePersonalData
         this.email = email;
     }
 
-	public String getYahooId() {
-		return yahooId;
-	}
+    public String getYahooId()
+    {
+        return yahooId;
+    }
 
-	public void setYahooId(String yahooId) {
-		this.yahooId = yahooId;
-	}   
+    public void setYahooId(String yahooId)
+    {
+        this.yahooId = yahooId;
+    }
 }

@@ -38,9 +38,9 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.utils.InvalidConfigurationException;
 
 /**
- * The Class PersistenceUnitConfiguration: 1) Find and load/configure persistence unit
- * meta data.
- * Earlier it was PersistenceUnitLoader.
+ * The Class PersistenceUnitConfiguration: 1) Find and load/configure
+ * persistence unit meta data. Earlier it was PersistenceUnitLoader.
+ * 
  * @author vivek.mishra
  */
 
@@ -96,9 +96,10 @@ class PersistenceUnitConfiguration implements Configuration
             log.info("Finishing persistence unit metadata configuration ...");
             appMetadata.addPersistenceUnitMetadata(metadatas);
         }
-        catch (InvalidConfigurationException e)
+        catch (InvalidConfigurationException icex)
         {
-            throw new PersistenceLoaderException(e);
+            log.error("Error occurred during persistence unit configuration, Caused by:" + icex.getMessage());
+            throw new PersistenceLoaderException(icex);
         }
 
     }

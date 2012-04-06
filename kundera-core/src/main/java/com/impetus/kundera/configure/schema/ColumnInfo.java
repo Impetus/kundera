@@ -1,84 +1,128 @@
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
+
 package com.impetus.kundera.configure.schema;
 
-public class ColumnInfo {
-	private boolean isIndexable = false;
-	private String columnName;
-	private String type;
+/**
+ * The Class ColumnInfo holds column related information.
+ * 
+ * @author Kuldeep.Kumar
+ */
+public class ColumnInfo
+{
 
-	// public ColumnInfo(Column column, List<PropertyIndex> indexs) {
-	// setType(column.getField().getType().toString());
-	// for (PropertyIndex index : indexs) {
-	// if (column.getName().equals(index.getName())) {
-	// setIndexable(true);
-	// }
-	// }
-	// }
+    /** The is indexable variable for indexing the column. */
+    private boolean isIndexable = false;
 
-	public ColumnInfo() {
+    /** The column name variable . */
+    private String columnName;
 
-	}
+    /** The type variable. */
+    private String type;
 
-	@Override
-	public boolean equals(Object obj) {
-		boolean result = false;
-		if (obj == null) {
-			result = false;
-		}
-		if (getClass() != obj.getClass()) {
-			result = false;
-		}
-		ColumnInfo columnInfo = (ColumnInfo) obj;
+    /**
+     * Instantiates a new column info.
+     */
+    public ColumnInfo()
+    {
 
-		if (this.columnName != null
-				&& this.columnName.equals(columnInfo.columnName)) {
+    }
 
-			result = true;
-		}
-		return result;
-	}
+    /**
+     * Equals method compare two object of columnInfo on the basis of their name.
+     * 
+     * @param Object
+     *            instance.
+     * 
+     * @return boolean value.
+     */
+    @Override
+    public boolean equals(Object obj)
+    {
+       
+        /// if object's class and column name matches then return true;
+        
+        return obj != null && 
+                obj instanceof ColumnInfo &&
+                ((ColumnInfo) obj).columnName != null 
+                ?  this.columnName != null && this.columnName.equals(((ColumnInfo) obj).columnName)
+                : false; 
+                
+    }
 
-	/**
-	 * @return the columnName
-	 */
-	public String getColumnName() {
-		return columnName;
-	}
+    /**
+     * Gets the column name.
+     * 
+     * @return the columnName
+     */
+    public String getColumnName()
+    {
+        return columnName;
+    }
 
-	/**
-	 * @param columnName
-	 *            the columnName to set
-	 */
-	public void setColumnName(String columnName) {
-		this.columnName = columnName;
-	}
+    /**
+     * Sets the column name.
+     * 
+     * @param columnName
+     *            the columnName to set
+     */
+    public void setColumnName(String columnName)
+    {
+        this.columnName = columnName;
+    }
 
-	/**
-	 * @return the isIndexable
-	 */
-	public boolean isIndexable() {
-		return isIndexable;
-	}
+    /**
+     * Checks if is indexable.
+     * 
+     * @return the isIndexable
+     */
+    public boolean isIndexable()
+    {
+        return isIndexable;
+    }
 
-	/**
-	 * @param isIndexable the isIndexable to set
-	 */
-	public void setIndexable(boolean isIndexable) {
-		this.isIndexable = isIndexable;
-	}
+    /**
+     * Sets the indexable.
+     * 
+     * @param isIndexable
+     *            the isIndexable to set
+     */
+    public void setIndexable(boolean isIndexable)
+    {
+        this.isIndexable = isIndexable;
+    }
 
-	/**
-	 * @return the type
-	 */
-	public String getType() {
-		return type;
-	}
+    /**
+     * Gets the type.
+     * 
+     * @return the type
+     */
+    public String getType()
+    {
+        return type;
+    }
 
-	/**
-	 * @param type
-	 *            the type to set
-	 */
-	public void setType(String type) {
-		this.type = type;
-	}
-
+    /**
+     * Sets the type.
+     * 
+     * @param type
+     *            the type to set
+     */
+    public void setType(String type)
+    {
+        this.type = type;
+    }
 }

@@ -22,7 +22,7 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 
-import com.impetus.client.hbase.schemamanager.HbaseSchemaManager;
+import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
@@ -58,7 +58,9 @@ public class HBaseClientFactory extends GenericClientFactory
     /** The pool size. */
     private int poolSize;
 
+    /** Configure schema manager. */
     private SchemaManager schemaManager;
+
     /*
      * (non-Javadoc)
      * 
@@ -92,8 +94,8 @@ public class HBaseClientFactory extends GenericClientFactory
         hadoopConf.set("hbase.master", node + ":" + port);
         conf = new HBaseConfiguration(hadoopConf);
         reader = new HBaseEntityReader();
-        
-        schemaManager = new HbaseSchemaManager();
+
+        schemaManager = new HBaseSchemaManager();
         schemaManager.exportSchema();
     }
 

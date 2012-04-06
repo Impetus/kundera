@@ -7,39 +7,46 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "HbaseEntityAddressUni1To1PK", schema = "KunderaHbaseExamples@hbase")
-public class HbaseEntityAddressUni1To1PK {
-	@Id
-	@Column(name = "PERSON_ID")
-	private String personId;
+public class HbaseEntityAddressUni1To1PK
+{
+    @Id
+    @Column(name = "PERSON_ID")
+    private String personId;
 
-	@Column(name = "ADDRESS_ID")
-	private String addressId;
+    @Column(name = "ADDRESS_ID")
+    private String addressId;
 
-	@Column(name = "STREET")
-	private String street;
+    @Column(name = "STREET")
+    private String street;
 
-	public String getPersonId() {
-		return personId;
-	}
+    public String getPersonId()
+    {
+        return personId;
+    }
 
-	public void setPersonId(String personId) {
-		this.personId = personId;
-	}
+    public void setPersonId(String personId)
+    {
+        this.personId = personId;
+    }
 
-	public String getAddressId() {
-		return addressId;
-	}
+    public String getAddressId()
+    {
+        return addressId;
+    }
 
-	public void setAddressId(String addressId) {
-		this.addressId = addressId;
-	}
+    public void setAddressId(String addressId)
+    {
+        this.addressId = addressId;
+    }
 
-	public String getStreet() {
-		return street;
-	}
+    public String getStreet()
+    {
+        return street;
+    }
 
-	public void setStreet(String street) {
-		this.street = street;
-	}
+    public void setStreet(String street)
+    {
+        this.street = street;
+    }
 
 }

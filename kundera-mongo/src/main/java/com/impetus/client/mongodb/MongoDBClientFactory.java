@@ -56,14 +56,11 @@ public class MongoDBClientFactory extends GenericClientFactory
 
     /** The reader. */
     private EntityReader reader;
-    
+
+    /** Configure schema manager. */
     private SchemaManager schemaManager;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.loader.GenericClientFactory#initializeClient()
-     */
+    
     @Override
     public void initialize()
     {

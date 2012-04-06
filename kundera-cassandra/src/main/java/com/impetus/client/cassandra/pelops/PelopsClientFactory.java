@@ -53,7 +53,8 @@ public class PelopsClientFactory extends GenericClientFactory
 
     /** The reader. */
     private EntityReader reader;
-    
+
+    /** Configure schema manager. */
     private SchemaManager schemaManager;
 
     /*
@@ -73,7 +74,7 @@ public class PelopsClientFactory extends GenericClientFactory
                 luceneDirPath));
 
         reader = new CassandraEntityReader();
-        
+
         schemaManager = new CassandraSchemaManager();
         schemaManager.exportSchema();
     }
@@ -111,7 +112,6 @@ public class PelopsClientFactory extends GenericClientFactory
         // TODO return a thrift pool
         return null;
     }
-
 
     @Override
     protected Client instantiateClient(String persistenceUnit)

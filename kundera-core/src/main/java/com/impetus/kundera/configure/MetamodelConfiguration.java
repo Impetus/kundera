@@ -46,13 +46,12 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
- * The Metamodel configurer:
- *   a) Configure application meta data
- *   b) loads entity metadata and maps metadata.
+ * The Metamodel configurer: a) Configure application meta data b) loads entity
+ * metadata and maps metadata.
  * 
  * @author vivek.mishra
  */
-class MetamodelConfiguration  implements Configuration
+class MetamodelConfiguration implements Configuration
 {
 
     /** The log. */
@@ -64,14 +63,17 @@ class MetamodelConfiguration  implements Configuration
     /**
      * Constructor using persistence units as parameter.
      * 
-     * @param persistenceUnits  persistence units.
+     * @param persistenceUnits
+     *            persistence units.
      */
     MetamodelConfiguration(String... persistenceUnits)
     {
         this.persistenceUnits = persistenceUnits;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.configure.Configuration#configure()
      */
     @Override
@@ -104,7 +106,8 @@ class MetamodelConfiguration  implements Configuration
     {
         if (persistenceUnit == null)
         {
-            throw new IllegalArgumentException("Must have a persistenceUnitName in order to load entity metadata, you provided:" + persistenceUnit);
+            throw new IllegalArgumentException(
+                    "Must have a persistenceUnitName in order to load entity metadata, you provided:" + persistenceUnit);
         }
 
         KunderaMetadata kunderaMetadata = KunderaMetadata.INSTANCE;
@@ -114,13 +117,13 @@ class MetamodelConfiguration  implements Configuration
         /** Classes to scan */
         List<String> classesToScan;
         URL[] resources = null;
-        String client=null;
+        String client = null;
         if (persistentUnitMetadataMap == null || persistentUnitMetadataMap.isEmpty())
         {
             log.error("It is necessary to load Persistence Unit metadata  for persistence unit " + persistenceUnit
                     + " first before loading entity metadata.");
-            throw new MetamodelLoaderException("load Persistence Unit metadata  for persistence unit " + persistenceUnit
-                    + " first before loading entity metadata.");
+            throw new MetamodelLoaderException("load Persistence Unit metadata  for persistence unit "
+                    + persistenceUnit + " first before loading entity metadata.");
         }
         else
         {
@@ -128,9 +131,9 @@ class MetamodelConfiguration  implements Configuration
             classesToScan = puMetadata.getManagedClassNames();
             List<URL> managedURLs = puMetadata.getManagedURLs();
             client = puMetadata.getClient();
-            if(managedURLs != null)
+            if (managedURLs != null)
             {
-                resources = managedURLs.toArray(new URL[]{});
+                resources = managedURLs.toArray(new URL[] {});
             }
         }
 
@@ -146,7 +149,7 @@ class MetamodelConfiguration  implements Configuration
                     + ". Entities will be loaded from classpath/ context-path");
             // Entity metadata is not related to any PU, and hence will be
             // stored at common place
-//            persistenceUnit = Constants.COMMON_ENTITY_METADATAS;
+            // persistenceUnit = Constants.COMMON_ENTITY_METADATAS;
 
             // Check whether all common entity metadata have already been loaded
             if (appMetadata.getMetamodelMap().get(persistenceUnit) != null)
@@ -156,12 +159,12 @@ class MetamodelConfiguration  implements Configuration
             }
 
             reader = new ClasspathReader();
-//            resources = reader.findResourcesByClasspath();
+            // resources = reader.findResourcesByClasspath();
         }
         else
         {
             reader = new ClasspathReader(classesToScan);
-//            resources = reader.findResourcesByContextLoader();
+            // resources = reader.findResourcesByContextLoader();
         }
         // All entities to load should be annotated with @Entity
         reader.addValidAnnotations(Entity.class.getName());
@@ -214,15 +217,14 @@ class MetamodelConfiguration  implements Configuration
      *            the entity metadata map
      * @param entityNameToClassMap
      *            the entity name to class map
-     * @param  persistence unit
-     *            the persistence unit.           
+     * @param persistence
+     *            unit the persistence unit.
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
     private void scanClassAndPutMetadata(InputStream bits, Reader reader,
-            Map<Class<?>, EntityMetadata> entityMetadataMap, Map<String, Class<?>> entityNameToClassMap,String persistenceUnit, String client
-            ,Map<String, List<String>> clazzToPuMap)
-            throws IOException
+            Map<Class<?>, EntityMetadata> entityMetadataMap, Map<String, Class<?>> entityNameToClassMap,
+            String persistenceUnit, String client, Map<String, List<String>> clazzToPuMap) throws IOException
     {
         DataInputStream dstream = new DataInputStream(new BufferedInputStream(bits));
         ClassFile cf = null;
@@ -251,14 +253,15 @@ class MetamodelConfiguration  implements Configuration
                     if (entityNameToClassMap.containsKey(clazz.getSimpleName()))
                     {
                         throw new MetamodelLoaderException("Name conflict between classes "
-                                + entityNameToClassMap.get(clazz.getSimpleName()).getName() + " and " 
-                                + clazz.getName() + ". Make sure no two entity classes with the same name "
+                                + entityNameToClassMap.get(clazz.getSimpleName()).getName() + " and " + clazz.getName()
+                                + ". Make sure no two entity classes with the same name "
                                 + " are specified for persistence unit " + persistenceUnit);
                     }
-                    
-                    //This is required just to keep hibernate happy. 
-                   //As somehow it complains for lazily loading of entities while building session factory.
-                    
+
+                    // This is required just to keep hibernate happy.
+                    // As somehow it complains for lazily loading of entities
+                    // while building session factory.
+
                     entityNameToClassMap.put(clazz.getSimpleName(), clazz);
 
                     EntityMetadata metadata = entityMetadataMap.get(clazz);
@@ -270,14 +273,15 @@ class MetamodelConfiguration  implements Configuration
                         {
                             if (null == metadata)
                             {
-                                MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit,client);
+                                MetadataBuilder metadataBuilder = new MetadataBuilder(persistenceUnit, client);
                                 metadata = metadataBuilder.buildEntityMetadata(clazz);
-                                
-                                //in case entity's pu does not belong to parse persistence unit, it will be null.
-                                if(metadata != null)
+
+                                // in case entity's pu does not belong to parse
+                                // persistence unit, it will be null.
+                                if (metadata != null)
                                 {
-                                 entityMetadataMap.put(clazz, metadata);
-                                 mapClazztoPu(clazz, persistenceUnit, clazzToPuMap);
+                                    entityMetadataMap.put(clazz, metadata);
+                                    mapClazztoPu(clazz, persistenceUnit, clazzToPuMap);
                                 }
                             }
                         }
@@ -289,7 +293,7 @@ class MetamodelConfiguration  implements Configuration
         catch (ClassNotFoundException e)
         {
             log.error("Class " + className + " not found, it won't be loaded as entity");
-        } 
+        }
         finally
         {
             dstream.close();
@@ -297,15 +301,18 @@ class MetamodelConfiguration  implements Configuration
         }
     }
 
-
     /**
-     * Method to prepare class simple name to list of pu's mapping.
-     * 1 class can be mapped to multiple persistence units, in case of RDBMS, in other cases it will only be 1!
+     * Method to prepare class simple name to list of pu's mapping. 1 class can
+     * be mapped to multiple persistence units, in case of RDBMS, in other cases
+     * it will only be 1!
      * 
-     * @param clazz   entity class to be mapped.
-     * @param pu      current persistence unit name
-     * @param clazzToPuMap   collection holding mapping.
-     * @return   map holding mapping.
+     * @param clazz
+     *            entity class to be mapped.
+     * @param pu
+     *            current persistence unit name
+     * @param clazzToPuMap
+     *            collection holding mapping.
+     * @return map holding mapping.
      */
     private Map<String, List<String>> mapClazztoPu(Class<?> clazz, String pu, Map<String, List<String>> clazzToPuMap)
     {
@@ -321,8 +328,8 @@ class MetamodelConfiguration  implements Configuration
                 puCol = clazzToPuMap.get(clazz.getName());
             }
         }
-        
-        if(!puCol.contains(pu))
+
+        if (!puCol.contains(pu))
         {
             puCol.add(pu);
             clazzToPuMap.put(clazz.getName(), puCol);

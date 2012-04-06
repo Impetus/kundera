@@ -12,84 +12,95 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "HbaseEntityPersonUni1To1", schema = "KunderaHbaseExamples@hbase")
-public class HbaseEntityPersonUni1To1 {
+public class HbaseEntityPersonUni1To1
+{
 
-	@Id
-	@Column(name = "PERSON_ID")
-	private String personId;
+    @Id
+    @Column(name = "PERSON_ID")
+    private String personId;
 
-	@Column(name = "PERSON_NAME")
-	private String personName;
+    @Column(name = "PERSON_NAME")
+    private String personName;
 
-	@Column(name = "AGE")
-	private short age;
+    @Column(name = "AGE")
+    private short age;
 
-	@Embedded
-	private HbasePersonalData personalData;
+    @Embedded
+    private HbasePersonalData personalData;
 
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name = "ADDRESS_ID")
-	private HbaseEntityAddressUni1To1 address;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "ADDRESS_ID")
+    private HbaseEntityAddressUni1To1 address;
 
-	public String getPersonId() {
-		return personId;
-	}
+    public String getPersonId()
+    {
+        return personId;
+    }
 
-	public String getPersonName() {
-		return personName;
-	}
+    public String getPersonName()
+    {
+        return personName;
+    }
 
-	public void setPersonName(String personName) {
-		this.personName = personName;
-	}
+    public void setPersonName(String personName)
+    {
+        this.personName = personName;
+    }
 
-	public void setPersonId(String personId) {
-		this.personId = personId;
-	}
+    public void setPersonId(String personId)
+    {
+        this.personId = personId;
+    }
 
-	/**
-	 * @return the age
-	 */
-	public short getAge() {
-		return age;
-	}
+    /**
+     * @return the age
+     */
+    public short getAge()
+    {
+        return age;
+    }
 
-	/**
-	 * @param age
-	 *            the age to set
-	 */
-	public void setAge(short age) {
-		this.age = age;
-	}
+    /**
+     * @param age
+     *            the age to set
+     */
+    public void setAge(short age)
+    {
+        this.age = age;
+    }
 
-	/**
-	 * @return the personalData
-	 */
-	public HbasePersonalData getPersonalData() {
-		return personalData;
-	}
+    /**
+     * @return the personalData
+     */
+    public HbasePersonalData getPersonalData()
+    {
+        return personalData;
+    }
 
-	/**
-	 * @param personalData
-	 *            the personalData to set
-	 */
-	public void setPersonalData(HbasePersonalData personalData) {
-		this.personalData = personalData;
-	}
+    /**
+     * @param personalData
+     *            the personalData to set
+     */
+    public void setPersonalData(HbasePersonalData personalData)
+    {
+        this.personalData = personalData;
+    }
 
-	/**
-	 * @return the address
-	 */
-	public HbaseEntityAddressUni1To1 getAddress() {
-		return address;
-	}
+    /**
+     * @return the address
+     */
+    public HbaseEntityAddressUni1To1 getAddress()
+    {
+        return address;
+    }
 
-	/**
-	 * @param address
-	 *            the address to set
-	 */
-	public void setAddress(HbaseEntityAddressUni1To1 address) {
-		this.address = address;
-	}
+    /**
+     * @param address
+     *            the address to set
+     */
+    public void setAddress(HbaseEntityAddressUni1To1 address)
+    {
+        this.address = address;
+    }
 
 }

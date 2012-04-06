@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.kundera.configure.schema;
 
 import java.util.List;
@@ -5,160 +20,256 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TableInfo {
-	/** The log. */
-	private static Logger log = LoggerFactory.getLogger(TableInfo.class);
-	private String tableName;
-	private List<ColumnInfo> columnMetadatas;
-	private String tableIdType;
-	private String type;
-	private SchemaAction action;
-	private List<EmbeddedColumnInfo> embeddedColumnMetadatas;
-	private boolean isIndexable ;
+/**
+ * TableInfo class holds table creation related information.
+ * 
+ * @author Kuldeep.Kumar
+ * 
+ */
+public class TableInfo
+{
+    /** The log. */
+    private static Logger log = LoggerFactory.getLogger(TableInfo.class);
 
-	public TableInfo() {
-	}
+    /** The table name. */
+    private String tableName;
 
-	@Override
-	public boolean equals(Object obj) {
-		boolean result = false;
-		if (obj == null) {
-			result = false;
-		}
-		if (getClass() != obj.getClass()) {
-			result = false;
-		}
-		TableInfo tableInfo = (TableInfo) obj;
+    /** The column metadatas. */
+    private List<ColumnInfo> columnMetadatas;
 
-		if (this.tableName != null
-				&& this.tableName.equals(tableInfo.tableName)
-				&& this.type.equals(tableInfo.type)
-				&& this.tableIdType.equals(tableInfo.tableIdType)) {
+    /** The table id type. */
+    private String tableIdType;
 
-			result = true;
-		}
-		return result;
-	}
+    /** The type. */
+    private String type;
 
-	/**
-	 * @return the action
-	 */
-	public SchemaAction getAction() {
-		return action;
-	}
+    /** The action. */
+    private SchemaAction action;
 
-	/**
-	 * @param action
-	 *            the action to set
-	 */
-	public void setAction(SchemaAction action) {
-		this.action = action;
-	}
+    /** The embedded column metadatas. */
+    private List<EmbeddedColumnInfo> embeddedColumnMetadatas;
 
-	/**
-	 * @return the tableName
-	 */
-	public String getTableName() {
-		return tableName;
-	}
+    /** The is indexable. */
+    private boolean isIndexable;
 
-	/**
-	 * @param tableName
-	 *            the tableName to set
-	 */
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
+    /**
+     * Instantiates a new table info.
+     */
+    public TableInfo()
+    {
+    }
 
-	/**
-	 * @return the tableIdType
-	 */
-	public String getTableIdType() {
-		return tableIdType;
-	}
+    /**
+     * Equals method compare two object of TableInfo on the basis of their name,type and
+     * tableIdType .
+     * 
+     * @param Object
+     *            instance.
+     * 
+     * @return boolean value.
+     */
+    @Override
+    public boolean equals(Object obj)
+    {
+        boolean result = false;
+        if (obj == null)
+        {
+            result = false;
+        }
+        else if (getClass() != obj.getClass())
+        {
+            result = false;
+        }
+        else
+        {
+            TableInfo tableInfo = (TableInfo) obj;
 
-	/**
-	 * @param tableIdType
-	 *            the tableIdType to set
-	 */
-	public void setTableIdType(String tableIdType) {
-		this.tableIdType = tableIdType;
-	}
+            if (this.tableName != null && this.tableName.equals(tableInfo.tableName)
+                    && this.type.equals(tableInfo.type) && this.tableIdType.equals(tableInfo.tableIdType))
+            {
 
-	/**
-	 * @return the columnMetadatas
-	 */
-	public List<ColumnInfo> getColumnMetadatas() {
-		return columnMetadatas;
-	}
+                result = true;
+            }
+        }
+        return result;
+    }
 
-	/**
-	 * @param columnMetadatas
-	 *            the columnMetadatas to set
-	 */
-	public void setColumnMetadatas(List<ColumnInfo> columnMetadatas) {
-		this.columnMetadatas = columnMetadatas;
-	}
+    /**
+     * Gets the action.
+     * 
+     * @return the action
+     */
+    public SchemaAction getAction()
+    {
+        return action;
+    }
 
-	/**
-	 * @return the embeddedColumnMetadatas
-	 */
-	public List<EmbeddedColumnInfo> getEmbeddedColumnMetadatas() {
-		return embeddedColumnMetadatas;
-	}
+    /**
+     * Sets the action.
+     * 
+     * @param action
+     *            the action to set
+     */
+    public void setAction(SchemaAction action)
+    {
+        this.action = action;
+    }
 
-	/**
-	 * @param embeddedColumnMetadatas
-	 *            the embeddedColumnMetadatas to set
-	 */
-	public void setEmbeddedColumnMetadatas(
-			List<EmbeddedColumnInfo> embeddedColumnMetadatas) {
-		this.embeddedColumnMetadatas = embeddedColumnMetadatas;
-	}
+    /**
+     * Gets the table name.
+     * 
+     * @return the tableName
+     */
+    public String getTableName()
+    {
+        return tableName;
+    }
 
-	/**
-	 * @return the type
-	 */
-	public String getType() {
-		return type;
-	}
+    /**
+     * Sets the table name.
+     * 
+     * @param tableName
+     *            the tableName to set
+     */
+    public void setTableName(String tableName)
+    {
+        this.tableName = tableName;
+    }
 
-	/**
-	 * @return the isIndexable
-	 */
-	public boolean isIndexable() {
-		return isIndexable;
-	}
+    /**
+     * Gets the table id type.
+     * 
+     * @return the tableIdType
+     */
+    public String getTableIdType()
+    {
+        return tableIdType;
+    }
 
-	/**
-	 * @param isIndexable the isIndexable to set
-	 */
-	public void setIndexable(boolean isIndexable) {
-		this.isIndexable = isIndexable;
-	}
+    /**
+     * Sets the table id type.
+     * 
+     * @param tableIdType
+     *            the tableIdType to set
+     */
+    public void setTableIdType(String tableIdType)
+    {
+        this.tableIdType = tableIdType;
+    }
 
-	/**
-	 * @param type
-	 *            the type to set
-	 */
-	public void setType(String type) {
-		this.type = type;
-	}
+    /**
+     * Gets the column metadatas.
+     * 
+     * @return the columnMetadatas
+     */
+    public List<ColumnInfo> getColumnMetadatas()
+    {
+        return columnMetadatas;
+    }
 
-	public enum SchemaAction {
-		createdrop, create, update, validate;
+    /**
+     * Sets the column metadatas.
+     * 
+     * @param columnMetadatas
+     *            the columnMetadatas to set
+     */
+    public void setColumnMetadatas(List<ColumnInfo> columnMetadatas)
+    {
+        this.columnMetadatas = columnMetadatas;
+    }
 
-		/**
-		 * 
-		 * @param name
-		 * @return
-		 */
-		public static SchemaAction instanceOf(String name) {
-			if (name.equalsIgnoreCase("create-drop")) {
-				return SchemaAction.createdrop;
-			}
-			return SchemaAction.valueOf(SchemaAction.class, name);
-		}
-	}
+    /**
+     * Gets the embedded column metadatas.
+     * 
+     * @return the embeddedColumnMetadatas
+     */
+    public List<EmbeddedColumnInfo> getEmbeddedColumnMetadatas()
+    {
+        return embeddedColumnMetadatas;
+    }
 
+    /**
+     * Sets the embedded column metadatas.
+     * 
+     * @param embeddedColumnMetadatas
+     *            the embeddedColumnMetadatas to set
+     */
+    public void setEmbeddedColumnMetadatas(List<EmbeddedColumnInfo> embeddedColumnMetadatas)
+    {
+        this.embeddedColumnMetadatas = embeddedColumnMetadatas;
+    }
+
+    /**
+     * Gets the type.
+     * 
+     * @return the type
+     */
+    public String getType()
+    {
+        return type;
+    }
+
+    /**
+     * Checks if is indexable.
+     * 
+     * @return the isIndexable
+     */
+    public boolean isIndexable()
+    {
+        return isIndexable;
+    }
+
+    /**
+     * Sets the indexable.
+     * 
+     * @param isIndexable
+     *            the isIndexable to set
+     */
+    public void setIndexable(boolean isIndexable)
+    {
+        this.isIndexable = isIndexable;
+    }
+
+    /**
+     * Sets the type.
+     * 
+     * @param type
+     *            the type to set
+     */
+    public void setType(String type)
+    {
+        this.type = type;
+    }
+
+    /**
+     * The Enum SchemaAction.
+     */
+    public enum SchemaAction
+    {
+
+        /** The createdrop. */
+        createdrop,
+        /** The create. */
+        create,
+        /** The update. */
+        update,
+        /** The validate. */
+        validate;
+
+        /**
+         * Instance of.
+         * 
+         * @param name
+         *            the name
+         * @return the schema action
+         */
+        public static SchemaAction instanceOf(String name)
+        {
+            if (name.equalsIgnoreCase("create-drop"))
+            {
+                return SchemaAction.createdrop;
+            }
+            return SchemaAction.valueOf(SchemaAction.class, name);
+        }
+    }
 }

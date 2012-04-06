@@ -30,8 +30,9 @@ import com.impetus.kundera.configure.schema.SchemaMetadata;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
- * Application metadata refers to metdata specific to application(e.g. metamodel collection, persistence unit metdatas)
- * Any reference which is out of persistence unit metadata and entity specific metadata is held by this class.
+ * Application metadata refers to metdata specific to application(e.g. metamodel
+ * collection, persistence unit metdatas) Any reference which is out of
+ * persistence unit metadata and entity specific metadata is held by this class.
  * 
  * @author amresh.singh
  */
@@ -45,7 +46,7 @@ public class ApplicationMetadata
 
     /** The Constant log. */
     private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
-    
+
     private SchemaMetadata schemaMetadata = new SchemaMetadata();
 
     /**
@@ -172,7 +173,7 @@ public class ApplicationMetadata
      */
     public List<String> getMappedPersistenceUnit(Class<?> clazz)
     {
-        return this.clazzToPuMap != null? this.clazzToPuMap.get(clazz.getName()):null;
+        return this.clazzToPuMap != null ? this.clazzToPuMap.get(clazz.getName()) : null;
     }
 
     /**
@@ -229,7 +230,7 @@ public class ApplicationMetadata
      * @param query
      *            named/native query.
      * @param isNativeQuery
-     *            true, if it is a namednativequery.           
+     *            true, if it is a namednativequery.
      * 
      */
     public void addQueryToCollection(String queryName, String query, boolean isNativeQuery, Class clazz)
@@ -242,8 +243,8 @@ public class ApplicationMetadata
         {
             namedNativeQueries.put(queryName, new QueryWrapper(queryName, query, isNativeQuery, clazz));
         }
-        //No null check made as it will never hold null value 
-        else if(!getQuery(queryName).equals(query))
+        // No null check made as it will never hold null value
+        else if (!getQuery(queryName).equals(query))
         {
             logger.error("Duplicate named/native query with name:" + queryName
                     + "found! Already there is a query with same name:" + namedNativeQueries.get(queryName));
@@ -261,26 +262,29 @@ public class ApplicationMetadata
      */
     public String getQuery(String name)
     {
-        QueryWrapper wrapper= namedNativeQueries != null?namedNativeQueries.get(name):null;
-        return wrapper != null? wrapper.getQuery():null;
+        QueryWrapper wrapper = namedNativeQueries != null ? namedNativeQueries.get(name) : null;
+        return wrapper != null ? wrapper.getQuery() : null;
     }
 
     /**
      * Returns true, if query is named native or native, else false
-     * @param name mapped name.
+     * 
+     * @param name
+     *            mapped name.
      * @return boolean value
      */
     public boolean isNative(String name)
     {
-        QueryWrapper wrapper= namedNativeQueries != null? namedNativeQueries.get(name):null;
-        return wrapper != null? wrapper.isNativeQuery():false;
+        QueryWrapper wrapper = namedNativeQueries != null ? namedNativeQueries.get(name) : null;
+        return wrapper != null ? wrapper.isNativeQuery() : false;
     }
-    
+
     public Class getMappedClass(String name)
     {
-        QueryWrapper wrapper= namedNativeQueries !=null?namedNativeQueries.get(name):null;
-        return wrapper != null ? wrapper.getMappedClazz():null;
+        QueryWrapper wrapper = namedNativeQueries != null ? namedNativeQueries.get(name) : null;
+        return wrapper != null ? wrapper.getMappedClazz() : null;
     }
+
     /**
      * Handler error and log statements.
      * 
@@ -293,14 +297,17 @@ public class ApplicationMetadata
         throw new ApplicationLoaderException("Duplicate name:" + clazzName
                 + "Please provide entity with complete package name");
     }
-    
 
     private class QueryWrapper
     {
         String queryName;
+
         String query;
+
         boolean isNativeQuery;
+
         Class entityClazz;
+
         /**
          * @param queryName
          * @param query
@@ -313,7 +320,7 @@ public class ApplicationMetadata
             this.isNativeQuery = isNativeQuery;
             this.entityClazz = clazz;
         }
-       
+
         /**
          * @return the query
          */
@@ -321,6 +328,7 @@ public class ApplicationMetadata
         {
             return query;
         }
+
         /**
          * @return the isNativeQuery
          */
@@ -328,28 +336,19 @@ public class ApplicationMetadata
         {
             return isNativeQuery;
         }
-        
+
         Class getMappedClazz()
         {
             return entityClazz;
         }
     }
 
-
-	/**
-	 * @return the schemaMetadata
-	 */
-	public SchemaMetadata getSchemaMetadata() 
-	{
-//		if
-		return schemaMetadata;
-	}
-
-	/**
-	 * @param schemaMetadata the schemaMetadata to set
-	 */
-	public void setSchemaMetadata(SchemaMetadata schemaMetadata) {
-		this.schemaMetadata = schemaMetadata;
-	}
+    /**
+     * @return the schemaMetadata
+     */
+    public SchemaMetadata getSchemaMetadata()
+    {
+        return schemaMetadata;
+    }
 
 }

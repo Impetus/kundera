@@ -3,7 +3,6 @@ package com.impetus.client.hbase.schemaManager;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-
 @Embeddable
 public class HbasePersonalData
 {
@@ -26,18 +25,19 @@ public class HbasePersonalData
         this.website = website;
         this.email = email;
         this.yahooId = yahooId;
-    }  
-    
+    }
 
-    public String getWebsite() {
-		return website;
-	}
+    public String getWebsite()
+    {
+        return website;
+    }
 
-	public void setWebsite(String website) {
-		this.website = website;
-	}
+    public void setWebsite(String website)
+    {
+        this.website = website;
+    }
 
-	/**
+    /**
      * @return the email
      */
     public String getEmail()
@@ -54,11 +54,13 @@ public class HbasePersonalData
         this.email = email;
     }
 
-	public String getYahooId() {
-		return yahooId;
-	}
+    public String getYahooId()
+    {
+        return yahooId;
+    }
 
-	public void setYahooId(String yahooId) {
-		this.yahooId = yahooId;
-	}   
+    public void setYahooId(String yahooId)
+    {
+        this.yahooId = yahooId;
+    }
 }

@@ -59,7 +59,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * The Class HBaseDataHandler.
- *
+ * 
  * @author vivek.mishra
  */
 public class HBaseDataHandler implements DataHandler
@@ -84,9 +84,11 @@ public class HBaseDataHandler implements DataHandler
 
     /**
      * Instantiates a new h base data handler.
-     *
-     * @param conf the conf
-     * @param hTablePool the h table pool
+     * 
+     * @param conf
+     *            the conf
+     * @param hTablePool
+     *            the h table pool
      */
     public HBaseDataHandler(HBaseConfiguration conf, HTablePool hTablePool)
     {
@@ -103,8 +105,12 @@ public class HBaseDataHandler implements DataHandler
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.admin.DataHandler#createTableIfDoesNotExist(java.lang.String, java.lang.String[])
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.admin.DataHandler#createTableIfDoesNotExist(
+     * java.lang.String, java.lang.String[])
      */
     @Override
     public void createTableIfDoesNotExist(final String tableName, final String... colFamily)
@@ -125,10 +131,13 @@ public class HBaseDataHandler implements DataHandler
 
     /**
      * Adds the column family to table.
-     *
-     * @param tableName the table name
-     * @param columnFamilyName the column family name
-     * @throws IOException Signals that an I/O exception has occurred.
+     * 
+     * @param tableName
+     *            the table name
+     * @param columnFamilyName
+     *            the column family name
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
      */
     private void addColumnFamilyToTable(String tableName, String columnFamilyName) throws IOException
     {
@@ -164,8 +173,13 @@ public class HBaseDataHandler implements DataHandler
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.admin.DataHandler#readData(java.lang.String, java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String, java.util.List)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.admin.DataHandler#readData(java.lang.String,
+     * java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata,
+     * java.lang.String, java.util.List)
      */
     @Override
     public Object readData(final String tableName, Class clazz, EntityMetadata m, final String rowKey,
@@ -183,11 +197,12 @@ public class HBaseDataHandler implements DataHandler
             // Load raw data from HBase
             HBaseData data = hbaseReader.LoadData(hTable, rowKey);
 
-            // Populate raw data from HBase into entity            
-           
-           if(data.getColumns() != null) {
-               entity = clazz.newInstance(); // Entity Object
-               entity = populateEntityFromHbaseData(entity, data, m, rowKey, relationNames);
+            // Populate raw data from HBase into entity
+
+            if (data.getColumns() != null)
+            {
+                entity = clazz.newInstance(); // Entity Object
+                entity = populateEntityFromHbaseData(entity, data, m, rowKey, relationNames);
             }
         }
         catch (InstantiationException e1)
@@ -199,7 +214,9 @@ public class HBaseDataHandler implements DataHandler
         {
             log.error("Illegal Access while reading data from " + tableName + ";Details: " + e1.getMessage());
             // return enhancedEntity;
-        } catch(Exception e) {
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
         finally
@@ -208,13 +225,18 @@ public class HBaseDataHandler implements DataHandler
             {
                 puthTable(hTable);
             }
-            
-        }    
+
+        }
         return entity;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.admin.DataHandler#writeData(java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object, java.lang.String, java.util.List)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.admin.DataHandler#writeData(java.lang.String,
+     * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.Object,
+     * java.lang.String, java.util.List)
      */
     @Override
     public void writeData(String tableName, EntityMetadata m, Object entity, String rowId,
@@ -333,8 +355,12 @@ public class HBaseDataHandler implements DataHandler
         puthTable(hTable);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.admin.DataHandler#writeJoinTableData(java.lang.String, java.lang.String, java.util.Map)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.admin.DataHandler#writeJoinTableData(java.lang
+     * .String, java.lang.String, java.util.Map)
      */
     @Override
     public void writeJoinTableData(String tableName, String rowId, Map<String, String> columns) throws IOException
@@ -347,8 +373,12 @@ public class HBaseDataHandler implements DataHandler
 
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.admin.DataHandler#getForeignKeysFromJoinTable(java.lang.String, java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.admin.DataHandler#getForeignKeysFromJoinTable
+     * (java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
     public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String rowKey, String inverseJoinColumnName)
@@ -394,10 +424,12 @@ public class HBaseDataHandler implements DataHandler
 
     /**
      * Selects an HTable from the pool and returns.
-     *
-     * @param tableName Name of HBase table
+     * 
+     * @param tableName
+     *            Name of HBase table
      * @return the h table
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
      */
     private HTable gethTable(final String tableName) throws IOException
     {
@@ -407,15 +439,18 @@ public class HBaseDataHandler implements DataHandler
 
     /**
      * Puts HTable back into the HBase table pool.
-     *
-     * @param hTable HBase Table instance
+     * 
+     * @param hTable
+     *            HBase Table instance
      */
     private void puthTable(HTable hTable)
     {
         hTablePool.putTable(hTable);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.client.hbase.admin.DataHandler#shutdown()
      */
     @Override
@@ -439,12 +474,17 @@ public class HBaseDataHandler implements DataHandler
     // TODO: Scope of performance improvement in this method
     /**
      * Populate entity from hbase data.
-     *
-     * @param entity the entity
-     * @param hbaseData the hbase data
-     * @param m the m
-     * @param rowKey the row key
-     * @param relationNames the relation names
+     * 
+     * @param entity
+     *            the entity
+     * @param hbaseData
+     *            the hbase data
+     * @param m
+     *            the m
+     * @param rowKey
+     *            the row key
+     * @param relationNames
+     *            the relation names
      * @return the object
      */
     private Object populateEntityFromHbaseData(Object entity, HBaseData hbaseData, EntityMetadata m, String rowKey,
@@ -472,13 +512,13 @@ public class HBaseDataHandler implements DataHandler
                 for (KeyValue colData : hbaseValues)
                 {
                     String hbaseColumn = Bytes.toString(colData.getFamily());
-//                    String colName = getColumnName(hbaseColumn);
+                    // String colName = getColumnName(hbaseColumn);
                     String colName = hbaseColumn;
                     if (colName != null && colName.equalsIgnoreCase(columnName.toLowerCase()))
                     {
                         byte[] hbaseColumnValue = colData.getValue();
                         PropertyAccessorHelper.set(entity, columnField, hbaseColumnValue);
-                        
+
                     }
                     else if (relationNames != null && relationNames.contains(colName))
                     {
@@ -638,12 +678,17 @@ public class HBaseDataHandler implements DataHandler
 
     /**
      * Sets the h base data into object.
-     *
-     * @param colData the col data
-     * @param columnFamilyField the column family field
-     * @param columnNameToFieldMap the column name to field map
-     * @param columnFamilyObj the column family obj
-     * @throws PropertyAccessException the property access exception
+     * 
+     * @param colData
+     *            the col data
+     * @param columnFamilyField
+     *            the column family field
+     * @param columnNameToFieldMap
+     *            the column name to field map
+     * @param columnFamilyObj
+     *            the column family obj
+     * @throws PropertyAccessException
+     *             the property access exception
      */
     private void setHBaseDataIntoObject(KeyValue colData, Field columnFamilyField,
             Map<String, Field> columnNameToFieldMap, Object columnFamilyObj) throws PropertyAccessException
@@ -671,18 +716,24 @@ public class HBaseDataHandler implements DataHandler
 
     /**
      * Gets the column name.
-     *
-     * @param hbaseColumn the hbase column
+     * 
+     * @param hbaseColumn
+     *            the hbase column
      * @return the column name
      */
     private String getColumnName(String hbaseColumn)
     {
-//        return hbaseColumn != null ? hbaseColumn.substring(0,hbaseColumn.indexOf(":") ) : null;
-    	return hbaseColumn != null ? hbaseColumn.substring(0,hbaseColumn.length() ) : null;
+        // return hbaseColumn != null ?
+        // hbaseColumn.substring(0,hbaseColumn.indexOf(":") ) : null;
+        return hbaseColumn != null ? hbaseColumn.substring(0, hbaseColumn.length()) : null;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.admin.DataHandler#deleteRow(java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.admin.DataHandler#deleteRow(java.lang.String,
+     * java.lang.String)
      */
     public void deleteRow(String rowKey, String tableName) throws IOException
     {
