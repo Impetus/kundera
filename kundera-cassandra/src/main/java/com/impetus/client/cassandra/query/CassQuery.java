@@ -120,7 +120,7 @@ public class CassQuery extends QueryImpl implements Query
             }
         }
         return result;
-    }
+    }    
 
     /**
      * On executeUpdate.
@@ -206,21 +206,11 @@ public class CassQuery extends QueryImpl implements Query
         idxClauses.put(idPresent, clauses);
 
         return idxClauses;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera
-     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client,
-     * java.util.List, java.util.List, boolean)
-     */
+    }   
+    
     @Override
-    protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
-            List<String> relationNames, boolean isParent)
+    protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
-        log.debug("on handleAssociations cassandra query");
         List<EnhanceEntity> ls = null;
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         if (appMetadata.isNative(getJPAQuery()))
@@ -231,12 +221,15 @@ public class CassQuery extends QueryImpl implements Query
         {
             Map<Boolean, List<IndexClause>> ixClause = MetadataUtils.useSecondryIndex(m.getPersistenceUnit())?prepareIndexClause(m):null;
 
-            ((CassandraEntityReader) getReader()).setConditions(ixClause);
-
-            ls = reader.populateRelation(m, relationNames, isParent, client);
+            ((CassandraEntityReader) getReader()).setConditions(ixClause);           
+            
+            
+            ls = reader.populateRelation(m, m.getRelationNames(), m.isParent(), client);
         }
-        return handleGraph(ls, graphs, client, m);
-    }
+        return setRelationEntities(ls, client, m);
+
+    }   
+    
 
     /**
      * Gets the operator.

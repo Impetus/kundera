@@ -104,8 +104,12 @@ public final class EntityMetadata
 
     /** The is relation via join table. */
     private boolean isRelationViaJoinTable;
-
+    
     private List<String> relationNames;
+    
+    //Whether it contains One-To-Many relationship    
+    private boolean isParent;
+    
     /**
      * The Enum Type.
      */
@@ -636,6 +640,8 @@ public final class EntityMetadata
     {
         this.cacheable = cacheable;
     }
+    
+    
 
     /*
      * (non-Javadoc)
@@ -770,6 +776,23 @@ public final class EntityMetadata
     public boolean isRelationViaJoinTable()
     {
         return isRelationViaJoinTable;
+    }    
+    
+
+    /**
+     * @return the isParent
+     */
+    public boolean isParent()
+    {
+        return isParent;
+    }
+
+    /**
+     * @param isParent the isParent to set
+     */
+    public void setParent(boolean isParent)
+    {
+        this.isParent = isParent;
     }
 
     /**

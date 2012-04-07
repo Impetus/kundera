@@ -48,7 +48,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.KunderaQuery.UpdateClause;
@@ -76,8 +75,8 @@ public abstract class QueryImpl implements Query
     /**
      * Default maximum result to fetch.
      */
-    protected int maxResult=100;
-    
+    protected int maxResult = 100;
+
     /**
      * Instantiates a new query impl.
      * 
@@ -126,81 +125,38 @@ public abstract class QueryImpl implements Query
         this.kunderaQuery = kunderaQuery;
     }
 
-    /* @see javax.persistence.Query#executeUpdate() */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#executeUpdate()
-     */
     @Override
     public int executeUpdate()
     {
         return onExecuteUpdate();
     }
 
-    /* @see javax.persistence.Query#getResultList() */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.Query#getResultList()
-     */
     @Override
     public List<?> getResultList()
     {
         log.info("On getResultList() executing query: " + query);
         List results = null;
-        try
+
+        EntityMetadata m = getEntityMetadata();
+        Client client = persistenceDelegeator.getClient(m);
+
+        if (m.getRelationNames().isEmpty() && !m.isRelationViaJoinTable())
         {
-            EntityMetadata m = getEntityMetadata();
-            Client client = persistenceDelegeator.getClient(m);
-
-            // get Graph
-            List<EntitySaveGraph> graphs = persistenceDelegeator.getGraph(m.getEntityClazz().newInstance(), m);
-            // Get relations.
-            Map<Boolean, List<String>> relationHolder = persistenceDelegeator.getRelations(graphs, m.getEntityClazz());
-            List<String> relationNames = relationHolder.values().iterator().next();
-            boolean isParent = relationHolder.keySet().iterator().next();
-
-            if (relationNames.isEmpty() && !m.isRelationViaJoinTable())
-            {
-
-                // There is no association so simply return list of entities.
-                results = populateEntities(m, client);
-            }
-            else
-            {
-                results = handleAssociations(m, client, graphs, relationNames, isParent);
-            }
-
+            results = populateEntities(m, client);
         }
-        catch (InstantiationException e)
+        else
         {
-            log.error("error while returing query result:" + e.getMessage());
-            throw new QueryHandlerException(e.getMessage());
+            results = recursivelyPopulateEntities(m, client);
         }
-        catch (IllegalAccessException e)
-        {
-            log.error("error while returing query result:" + e.getMessage());
-            throw new QueryHandlerException(e.getMessage());
-        } // Query is parsed.
-          // get Graph
-          // If there is any relation and entity is not parent,
-          // get client from persistenceDelegator and find that object.
-          // set that object in graph
-          // Populate child entities according to graph.
-          // if entity is parent pass it as foreign key id for client
-          // if entity is not parent then pass retrieved relation key value to
-          // specific client for find by id.
 
         // If intended for delete/update.
-        if(kunderaQuery.isDeleteUpdate())
+        if (kunderaQuery.isDeleteUpdate())
         {
             onDeleteOrUpdate(results);
         }
         return results != null && !results.isEmpty() ? results : null;
 
     }
-    
 
     /**
      * Gets the persistence delegeator.
@@ -222,6 +178,392 @@ public abstract class QueryImpl implements Query
     {
         this.persistenceDelegeator = persistenceDelegeator;
     }
+
+    protected List<Object> setRelationEntities(List<EnhanceEntity> enhanceEntities, Client client, EntityMetadata m)
+    {
+        // Enhance entities can contain or may not contain relation.
+        // if it contain a relation means it is a child
+        // if it does not then it means it is a parent.
+        List<Object> result = null;
+        Map<Object, Object> relationalValues = new HashMap<Object, Object>();
+        if (enhanceEntities != null)
+        {
+            for (EnhanceEntity e : enhanceEntities)
+            {
+                if (result == null)
+                {
+                    result = new ArrayList<Object>(enhanceEntities.size());
+                }
+
+                result.add(getReader().recursivelyFindEntities(e, client, m, persistenceDelegeator));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Populate using lucene.
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param result
+     *            the result
+     * @return the list
+     */
+    protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result)
+    {
+        String luceneQ = getLuceneQueryFromJPAQuery();
+        Map<String, String> searchFilter = client.getIndexManager().search(luceneQ, Constants.INVALID,
+                Constants.INVALID);
+        if (kunderaQuery.isAliasOnly())
+        {
+            String[] primaryKeys = searchFilter.values().toArray(new String[] {});
+            Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
+
+            // result = (List<Object>) client.findAll(m.getEntityClazz(),
+            // uniquePKs.toArray());
+            result = (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), uniquePKs.toArray());
+
+        }
+        else
+        {
+            return (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), searchFilter);
+
+        }
+        return result;
+    }
+
+    /**
+     * Gets the field instance.
+     * 
+     * @param chids
+     *            the chids
+     * @param f
+     *            the f
+     * @return the field instance
+     */
+    private Object getFieldInstance(List chids, Field f)
+    {
+
+        if (Set.class.isAssignableFrom(f.getType()))
+        {
+            Set col = new HashSet(chids);
+            return col;
+        }
+        return chids;
+    }
+
+    /**
+     * Populate relations.
+     * 
+     * @param relations
+     *            the relations
+     * @param o
+     *            the o
+     * @return the map
+     */
+    protected Map<String, Object> populateRelations(List<String> relations, Object[] o)
+    {
+        Map<String, Object> relationVal = new HashMap<String, Object>(relations.size());
+        int counter = 1;
+        for (String r : relations)
+        {
+            relationVal.put(r, o[counter++]);
+        }
+        return relationVal;
+    }
+
+    /**
+     * Gets the lucene query from jpa query.
+     * 
+     * @return the lucene query from jpa query
+     */
+    protected String getLuceneQueryFromJPAQuery()
+    {
+        StringBuffer sb = new StringBuffer();
+
+        for (Object object : kunderaQuery.getFilterClauseQueue())
+        {
+            if (object instanceof FilterClause)
+            {
+                boolean appended = false;
+                FilterClause filter = (FilterClause) object;
+                sb.append("+");
+                // property
+                sb.append(filter.getProperty());
+
+                // joiner
+                String appender = "";
+                if (filter.getCondition().equals("="))
+                {
+                    sb.append(":");
+                }
+                else if (filter.getCondition().equalsIgnoreCase("like"))
+                {
+                    sb.append(":");
+                    appender = "*";
+                }
+                else if (filter.getCondition().equalsIgnoreCase(">"))
+                {
+                    sb.append(appendRange(filter.getValue(), false, true));
+                    appended = true;
+                }
+                else if (filter.getCondition().equalsIgnoreCase(">="))
+                {
+                    sb.append(appendRange(filter.getValue(), true, true));
+                    appended = true;
+                }
+                else if (filter.getCondition().equalsIgnoreCase("<"))
+                {
+                    sb.append(appendRange(filter.getValue(), false, false));
+                    appended = true;
+                }
+                else if (filter.getCondition().equalsIgnoreCase("<="))
+                {
+                    sb.append(appendRange(filter.getValue(), true, false));
+                    appended = true;
+                }
+
+                // value. if not already appended.
+                if (!appended)
+                {
+                    sb.append(filter.getValue());
+                    sb.append(appender);
+                }
+            }
+            else
+            {
+                sb.append(" " + object + " ");
+            }
+        }
+
+        // add Entity_CLASS field too.
+        if (sb.length() > 0)
+        {
+            sb.append(" AND ");
+        }
+        sb.append("+");
+        sb.append(DocumentIndexer.ENTITY_CLASS_FIELD);
+        sb.append(":");
+        // sb.append(getEntityClass().getName());
+        sb.append(kunderaQuery.getEntityClass().getCanonicalName().toLowerCase());
+
+        return sb.toString();
+    }
+
+    /**
+     * Returns lucene based query.
+     * 
+     * @param clazzFieldName
+     *            lucene field name for class
+     * @param clazzName
+     *            class name
+     * @param idFieldName
+     *            lucene id field name
+     * @param idFieldValue
+     *            lucene id field value
+     * @return query lucene query.
+     */
+    protected static String getQuery(String clazzFieldName, String clazzName, String idFieldName, String idFieldValue)
+    {
+        StringBuffer sb = new StringBuffer("+");
+        sb.append(clazzFieldName);
+        sb.append(":");
+        sb.append(clazzName);
+        sb.append(" AND ");
+        sb.append("+");
+        sb.append(idFieldName);
+        sb.append(":");
+        sb.append(idFieldValue);
+        return sb.toString();
+    }
+
+    /**
+     * Transform.
+     * 
+     * @param m
+     *            the m
+     * @param ls
+     *            the ls
+     * @param resultList
+     *            the result list
+     */
+    protected void transform(EntityMetadata m, List<EnhanceEntity> ls, List resultList)
+    {
+        for (Object r : resultList)
+        {
+            EnhanceEntity e = new EnhanceEntity(r, persistenceDelegeator.getId(r, m), null);
+            ls.add(e);
+        }
+    }
+
+    /**
+     * Fetch data from lucene.
+     * 
+     * @param client
+     *            the client
+     * @return the sets the
+     */
+    protected Set<String> fetchDataFromLucene(Client client)
+    {
+        String luceneQuery = getLuceneQueryFromJPAQuery();
+        // use lucene to query and get Pk's only.
+        // go to client and get relation with values.!
+        // populate EnhanceEntity
+        Map<String, String> results = client.getIndexManager().search(luceneQuery);
+        Set<String> rSet = new HashSet<String>(results.values());
+        return rSet;
+    }
+
+    /**
+     * On association using lucene.
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @param ls
+     *            the ls
+     */
+    protected void onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
+    {
+        Set<String> rSet = fetchDataFromLucene(client);
+
+        List resultList = client.findAll(m.getEntityClazz(), rSet.toArray(new String[] {}));
+        transform(m, ls, resultList);
+
+    }
+
+    /**
+     * Returns column name from the filter property which is in the form
+     * dbName.columnName
+     * 
+     * @param filterProperty
+     *            the filter property
+     * @return the column name
+     */
+    protected String getColumnName(String filterProperty)
+    {
+        StringTokenizer st = new StringTokenizer(filterProperty, ".");
+        String columnName = "";
+        while (st.hasMoreTokens())
+        {
+            columnName = st.nextToken();
+        }
+
+        return columnName;
+    }
+
+    /**
+     * Append range.
+     * 
+     * @param value
+     *            the value
+     * @param inclusive
+     *            the inclusive
+     * @param isGreaterThan
+     *            the is greater than
+     * @return the string
+     */
+    private String appendRange(String value, boolean inclusive, boolean isGreaterThan)
+    {
+        String appender = " ";
+        StringBuilder sb = new StringBuilder();
+        sb.append(":");
+        sb.append(inclusive ? "[" : "{");
+        sb.append(isGreaterThan ? value : "*");
+        sb.append(appender);
+        sb.append("TO");
+        sb.append(appender);
+        sb.append(isGreaterThan ? "null" : value);
+        sb.append(inclusive ? "]" : "}");
+        return sb.toString();
+    }
+
+    /**
+     * Populate entities, Method to populate data in case no relation exist!.
+     * 
+     * @param m
+     *            the m
+     * @param client
+     *            the client
+     * @return the list
+     */
+    protected abstract List<Object> populateEntities(EntityMetadata m, Client client);
+
+    protected abstract List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client);
+
+    /**
+     * Method returns entity reader.
+     * 
+     * @return entityReader entity reader.
+     */
+    protected abstract EntityReader getReader();
+
+    protected abstract int onExecuteUpdate();
+
+    /**
+     * Returns entity metadata, in case of native query mapped class is present
+     * within application metadata.
+     * 
+     * @return entityMetadata entity metadata.
+     */
+    protected EntityMetadata getEntityMetadata()
+    {
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        EntityMetadata m = null;
+        if (appMetadata.isNative(getJPAQuery()))
+        {
+            Class clazz = appMetadata.getMappedClass(getJPAQuery());
+            m = KunderaMetadataManager.getEntityMetadata(clazz);
+        }
+        else
+        {
+            m = kunderaQuery.getEntityMetadata();
+        }
+        return m;
+    }
+
+    /**
+     * Performs delete or update based on query.
+     * 
+     * @param results
+     *            list of objects to be merged/deleted.
+     */
+    private void onDeleteOrUpdate(List results)
+    {
+        if (!kunderaQuery.isUpdateClause())
+        {
+            // then case of delete
+            for (Object result : results)
+            {
+                persistenceDelegeator.remove(result);
+            }
+        }
+        else
+        {
+            EntityMetadata entityMetadata = getEntityMetadata();
+            for (Object result : results)
+            {
+                for (UpdateClause c : kunderaQuery.getUpdateClauseQueue())
+                {
+                    String columnName = c.getProperty();
+                    Column column = entityMetadata.getColumn(columnName);
+
+                    PropertyAccessorHelper.set(result, column.getField(), c.getValue());
+                    persistenceDelegeator.merge(result);
+                }
+
+            }
+        }
+
+    }
+    
+    
+    /************************* Methods from {@link Query} interface *******************************/
 
     /* @see javax.persistence.Query#getSingleResult() */
     /*
@@ -594,417 +936,5 @@ public abstract class QueryImpl implements Query
     {
         throw new NotImplementedException("TODO");
     }
-
-    /**
-     * Handle graph.
-     * 
-     * @param enhanceEntities
-     *            the enhance entities
-     * @param graphs
-     *            the graphs
-     * @param client
-     *            the client
-     * @param m
-     *            the m
-     * @return the list
-     */
-    protected List<Object> handleGraph(List<EnhanceEntity> enhanceEntities, List<EntitySaveGraph> graphs,
-            Client client, EntityMetadata m)
-    {
-        // Enhance entities can contain or may not contain relation.
-        // if it contain a relation means it is a child
-        // if it does not then it means it is a parent.
-        List<Object> result = null;
-        Map<Object, Object> relationalValues = new HashMap<Object, Object>();
-        if (enhanceEntities != null)
-        {
-            for (EnhanceEntity e : enhanceEntities)
-            {
-                if (result == null)
-                {
-                    result = new ArrayList<Object>(enhanceEntities.size());
-                }
-               
-                result.add(getReader().computeGraph(e, graphs, relationalValues, client, m, persistenceDelegeator));
-                
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Populate using lucene.
-     * 
-     * @param m
-     *            the m
-     * @param client
-     *            the client
-     * @param result
-     *            the result
-     * @return the list
-     */
-    protected List<Object> populateUsingLucene(EntityMetadata m, Client client, List<Object> result)
-    {
-        String luceneQ = getLuceneQueryFromJPAQuery();
-        Map<String, String> searchFilter = client.getIndexManager().search(luceneQ, Constants.INVALID,
-                Constants.INVALID);
-        if (kunderaQuery.isAliasOnly())
-        {
-            String[] primaryKeys = searchFilter.values().toArray(new String[] {});
-            Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
-
-            // result = (List<Object>) client.findAll(m.getEntityClazz(),
-            // uniquePKs.toArray());
-            result = (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), uniquePKs.toArray());
-
-        }
-        else
-        {
-            return (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), searchFilter);
-
-        }
-        return result;
-    }
-
-    /**
-     * Gets the field instance.
-     * 
-     * @param chids
-     *            the chids
-     * @param f
-     *            the f
-     * @return the field instance
-     */
-    private Object getFieldInstance(List chids, Field f)
-    {
-
-        if (Set.class.isAssignableFrom(f.getType()))
-        {
-            Set col = new HashSet(chids);
-            return col;
-        }
-        return chids;
-    }
-
-    /**
-     * Populate relations.
-     * 
-     * @param relations
-     *            the relations
-     * @param o
-     *            the o
-     * @return the map
-     */
-    protected Map<String, Object> populateRelations(List<String> relations, Object[] o)
-    {
-        Map<String, Object> relationVal = new HashMap<String, Object>(relations.size());
-        int counter = 1;
-        for (String r : relations)
-        {
-            relationVal.put(r, o[counter++]);
-        }
-        return relationVal;
-    }
-
-    /**
-     * Gets the lucene query from jpa query.
-     * 
-     * @return the lucene query from jpa query
-     */
-    protected String getLuceneQueryFromJPAQuery()
-    {
-        StringBuffer sb = new StringBuffer();
-
-        for (Object object : kunderaQuery.getFilterClauseQueue())
-        {
-            if (object instanceof FilterClause)
-            {
-                boolean appended = false;
-                FilterClause filter = (FilterClause) object;
-                sb.append("+");
-                // property
-                sb.append(filter.getProperty());
-
-                // joiner
-                String appender = "";
-                if (filter.getCondition().equals("="))
-                {
-                    sb.append(":");
-                }
-                else if (filter.getCondition().equalsIgnoreCase("like"))
-                {
-                    sb.append(":");
-                    appender = "*";
-                }
-                else if (filter.getCondition().equalsIgnoreCase(">"))
-                {
-                    sb.append(appendRange(filter.getValue(), false, true));
-                    appended = true;
-                }
-                else if (filter.getCondition().equalsIgnoreCase(">="))
-                {
-                    sb.append(appendRange(filter.getValue(), true, true));
-                    appended = true;
-                }
-                else if (filter.getCondition().equalsIgnoreCase("<"))
-                {
-                    sb.append(appendRange(filter.getValue(), false, false));
-                    appended = true;
-                }
-                else if (filter.getCondition().equalsIgnoreCase("<="))
-                {
-                    sb.append(appendRange(filter.getValue(), true, false));
-                    appended = true;
-                }
-
-                // value. if not already appended.
-                if (!appended)
-                {
-                    sb.append(filter.getValue());
-                    sb.append(appender);
-                }
-            }
-            else
-            {
-                sb.append(" " + object + " ");
-            }
-        }
-
-        // add Entity_CLASS field too.
-        if (sb.length() > 0)
-        {
-            sb.append(" AND ");
-        }
-        sb.append("+");
-        sb.append(DocumentIndexer.ENTITY_CLASS_FIELD);
-        sb.append(":");
-        // sb.append(getEntityClass().getName());
-        sb.append(kunderaQuery.getEntityClass().getCanonicalName().toLowerCase());
-
-        return sb.toString();
-    }
-
-    /**
-     * Returns lucene based query.
-     * 
-     * @param clazzFieldName
-     *            lucene field name for class
-     * @param clazzName
-     *            class name
-     * @param idFieldName
-     *            lucene id field name
-     * @param idFieldValue
-     *            lucene id field value
-     * @return query lucene query.
-     */
-    protected static String getQuery(String clazzFieldName, String clazzName, String idFieldName, String idFieldValue)
-    {
-        StringBuffer sb = new StringBuffer("+");
-        sb.append(clazzFieldName);
-        sb.append(":");
-        sb.append(clazzName);
-        sb.append(" AND ");
-        sb.append("+");
-        sb.append(idFieldName);
-        sb.append(":");
-        sb.append(idFieldValue);
-        return sb.toString();
-    }
-
-    /**
-     * Transform.
-     * 
-     * @param m
-     *            the m
-     * @param ls
-     *            the ls
-     * @param resultList
-     *            the result list
-     */
-    protected void transform(EntityMetadata m, List<EnhanceEntity> ls, List resultList)
-    {
-        for (Object r : resultList)
-        {
-            EnhanceEntity e = new EnhanceEntity(r, persistenceDelegeator.getId(r, m), null);
-            ls.add(e);
-        }
-    }
-
-    /**
-     * Fetch data from lucene.
-     * 
-     * @param client
-     *            the client
-     * @return the sets the
-     */
-    protected Set<String> fetchDataFromLucene(Client client)
-    {
-        String luceneQuery = getLuceneQueryFromJPAQuery();
-        // use lucene to query and get Pk's only.
-        // go to client and get relation with values.!
-        // populate EnhanceEntity
-        Map<String, String> results = client.getIndexManager().search(luceneQuery);
-        Set<String> rSet = new HashSet<String>(results.values());
-        return rSet;
-    }
-
-    /**
-     * On association using lucene.
-     * 
-     * @param m
-     *            the m
-     * @param client
-     *            the client
-     * @param ls
-     *            the ls
-     */
-    protected void onAssociationUsingLucene(EntityMetadata m, Client client, List<EnhanceEntity> ls)
-    {
-        Set<String> rSet = fetchDataFromLucene(client);
-
-        List resultList = client.findAll(m.getEntityClazz(), rSet.toArray(new String[] {}));
-        transform(m, ls, resultList);
-     
-    }
-
-    /**
-     * Returns column name from the filter property which is in the form
-     * dbName.columnName
-     * 
-     * @param filterProperty
-     *            the filter property
-     * @return the column name
-     */
-    protected String getColumnName(String filterProperty)
-    {
-        StringTokenizer st = new StringTokenizer(filterProperty, ".");
-        String columnName = "";
-        while (st.hasMoreTokens())
-        {
-            columnName = st.nextToken();
-        }
-
-        return columnName;
-    }
-
-    /**
-     * Append range.
-     * 
-     * @param value
-     *            the value
-     * @param inclusive
-     *            the inclusive
-     * @param isGreaterThan
-     *            the is greater than
-     * @return the string
-     */
-    private String appendRange(String value, boolean inclusive, boolean isGreaterThan)
-    {
-        String appender = " ";
-        StringBuilder sb = new StringBuilder();
-        sb.append(":");
-        sb.append(inclusive ? "[" : "{");
-        sb.append(isGreaterThan ? value : "*");
-        sb.append(appender);
-        sb.append("TO");
-        sb.append(appender);
-        sb.append(isGreaterThan ? "null" : value);
-        sb.append(inclusive ? "]" : "}");
-        return sb.toString();
-    }
-
-    /**
-     * Populate entities, Method to populate data in case no relation exist!.
-     * 
-     * @param m
-     *            the m
-     * @param client
-     *            the client
-     * @return the list
-     */
-    protected abstract List<Object> populateEntities(EntityMetadata m, Client client);
-
-    /**
-     * Method to handle population of associated entities based on relation map.
-     * 
-     * @param m
-     *            the m
-     * @param client
-     *            the client
-     * @param graphs
-     *            the graphs
-     * @param relationNames
-     *            the relation names
-     * @param isParent
-     *            the is parent
-     * @return the list
-     */
-    protected abstract List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
-            List<String> relationNames, boolean isParent);
-
-    /**
-     * Method returns entity reader.
-     * 
-     * @return entityReader entity reader.
-     */
-    protected abstract EntityReader getReader();
-    
-    protected abstract int onExecuteUpdate();
-
-    
-    /**
-     * Returns entity metadata, in case of native query mapped class is present within application metadata.
-     * @return entityMetadata entity metadata.
-     */
-    protected EntityMetadata getEntityMetadata()
-    {
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        EntityMetadata m=null; 
-        if (appMetadata.isNative(getJPAQuery()))
-        {
-            Class clazz = appMetadata.getMappedClass(getJPAQuery());
-            m = KunderaMetadataManager.getEntityMetadata(clazz);
-        }else
-        {
-            m = kunderaQuery.getEntityMetadata();
-        }
-        return m;
-    }
-
-    
-    /**
-     * Performs delete or update based on query.
-     * 
-     *  @param results list of objects to be merged/deleted.
-     */
-    private void onDeleteOrUpdate(List results)
-    {
-      if(!kunderaQuery.isUpdateClause())
-      {
-          //then case of delete
-          for(Object result : results)
-          {
-              persistenceDelegeator.remove(result);
-          }
-      } else
-      {
-          EntityMetadata entityMetadata = getEntityMetadata();
-          for(Object result : results)
-          {
-              for(UpdateClause c : kunderaQuery.getUpdateClauseQueue())
-              {
-                  String columnName = c.getProperty();
-                  Column column = entityMetadata.getColumn(columnName);
-                  
-                  PropertyAccessorHelper.set(result, column.getField(), c.getValue());
-                  persistenceDelegeator.merge(result);
-              }
-              
-          }
-      }
-          
-    }
-
 
 }

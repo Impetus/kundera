@@ -68,32 +68,16 @@ public class RDBMSQuery extends QueryImpl implements Query
         this.kunderaQuery = kunderaQuery;
     }
 
-    /**
-     * Handle associations.
-     * 
-     * @param m
-     *            the m
-     * @param client
-     *            the client
-     * @param graphs
-     *            the graphs
-     * @param relationNames
-     *            the relation names
-     * @param isParent
-     *            the is parent
-     * @return the list
-     */
-    protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
-            List<String> relationNames, boolean isParent)
+    @Override
+    protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
         // retrieve
         log.debug("On handleAssociation() retrieve associations ");
 
         initializeReader();
-        List<EnhanceEntity> ls = getReader().populateRelation(m, relationNames, isParent, client);
-        // pass graph and list of enhanced entities and graph for association
-        // population.
-        return handleGraph(ls, graphs, client, m);
+        List<EnhanceEntity> ls = getReader().populateRelation(m, m.getRelationNames(), m.isParent(), client);
+        
+        return setRelationEntities(ls, client, m);
     }
 
     /*

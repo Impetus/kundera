@@ -73,10 +73,7 @@ public interface EntityReader
     Object recursivelyFindEntities(EnhanceEntity e, Client client, EntityMetadata m, PersistenceDelegator pd);
     
     
-    @Deprecated
-    Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder,
-            Client client, EntityMetadata m, PersistenceDelegator persistenceDelegeator); 
-
+    
     /**
      * Find by id.
      * 
