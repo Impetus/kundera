@@ -96,6 +96,9 @@ public class PersistenceDelegator
     private ObjectGraphBuilder graphBuilder;
 
     private FlushManager flushManager;
+    
+    //Whether a transaction is in progress
+    private boolean isTransactionInProgress;
 
     /**
      * Instantiates a new persistence delegator.
@@ -618,25 +621,36 @@ public class PersistenceDelegator
     public void setFlushMode(FlushModeType flushMode)
     {
         this.flushMode = flushMode;
+    }  
+    
+
+    /**
+     * @return the isTransactionInProgress
+     */
+    public boolean isTransactionInProgress()
+    {
+        return isTransactionInProgress;
     }
 
-    
 
     /******************************* Transaction related methods ***********************************************/
 
+    
+    
     public void begin()
     {
-
+        isTransactionInProgress = true;
     }
 
     public void commit()
     {
         flush();
+        isTransactionInProgress = false;
     }
 
     public void rollback()
     {
-
+        isTransactionInProgress = false;
     }
 
     public boolean getRollbackOnly()
@@ -651,6 +665,6 @@ public class PersistenceDelegator
 
     public boolean isActive()
     {
-        return false;
+        return isTransactionInProgress;
     }    
 }

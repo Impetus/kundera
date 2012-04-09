@@ -22,7 +22,9 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
+import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
+import javax.persistence.TransactionRequiredException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -47,7 +49,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
 {
 
     /** The Constant log. */
-    private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
+    private static Log logger = LogFactory.getLog(EntityManagerImpl.class);
 
     /** The factory. */
     private EntityManagerFactory factory;
@@ -67,6 +69,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     /** Properties provided by user at the time of EntityManager Creation. */
     private PersistenceDelegator persistenceDelegator;
     
+    /** Persistence Context Type (Transaction/ Extended) */
+    private PersistenceContextType persistenceContextType;
     
     FlushManager flushStackManager;    
 
@@ -82,6 +86,9 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
         logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
         session = new EntityManagerSession((Cache) factory.getCache());               
         persistenceDelegator = new PersistenceDelegator(session);
+        
+        //For Application managed persistence context, type is always EXTENDED
+        persistenceContextType = PersistenceContextType.EXTENDED;
         logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
     }
 
@@ -122,6 +129,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     public final void remove(Object e)
     {
         checkClosed();
+        checkTransactionNeeded();
+        
         // TODO Check for validity also as per JPA
         if (e == null)
         {
@@ -140,6 +149,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     public final <E> E merge(E e)
     {
         checkClosed();
+        checkTransactionNeeded();
+        
         if (e == null)
         {
             throw new IllegalArgumentException("Entity to be merged must not be null.");
@@ -157,6 +168,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     public final void persist(Object e)
     {
         checkClosed();
+        checkTransactionNeeded();
+        
         if (e == null)
         {
             throw new IllegalArgumentException("Entity to be persisted must not be null.");
@@ -316,6 +329,9 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     @Override
     public final EntityTransaction getTransaction()
     {        
+        /*if (this.transactionType == PersistenceUnitTransactionType.JTA) {
+           throw new IllegalStateException("A JTA EntityManager cannot use getTransaction()");
+        }*/
         return this;
     }
 
@@ -350,6 +366,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     @Override
     public final void refresh(Object entity)
     {
+        checkTransactionNeeded();
         throw new NotImplementedException("TODO");
     }
 
@@ -585,6 +602,11 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     {
         return !closed;
     }
+    
+    private void validate() {
+        checkClosed();
+        checkTransactionNeeded();
+    }
 
     /**
      * Check closed.
@@ -595,6 +617,13 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
         {
             throw new IllegalStateException("EntityManager has already been closed.");
         }
+    }
+    
+    private void checkTransactionNeeded() {
+        if ((this.persistenceContextType != PersistenceContextType.TRANSACTION) || (persistenceDelegator.isTransactionInProgress()))
+        return;
+        
+        throw new TransactionRequiredException("no transaction is in progress for a TRANSACTION type persistence context");
     }
 
     /**
@@ -625,9 +654,19 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     private PersistenceDelegator getPersistenceDelegator()
     {
         return persistenceDelegator;
-    }
+    } 
 
     
+    /**
+     * @return the persistenceContextType
+     */
+    public PersistenceContextType getPersistenceContextType()
+    {
+        return persistenceContextType;
+    }
+    
+    
+
     /////////////////////////////////////////////////////////////////////////
     /** Methods from {@link EntityTransaction} interface */
     /////////////////////////////////////////////////////////////////////////
@@ -637,14 +676,14 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     @Override
     public void begin()
     {
-        persistenceDelegator.begin();
+        persistenceDelegator.begin();        
     }
 
     @Override
     public void commit()
     {
         checkClosed();
-        persistenceDelegator.commit();
+        persistenceDelegator.commit();        
     }
 
     @Override
