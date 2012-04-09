@@ -28,9 +28,6 @@ import org.slf4j.LoggerFactory;
  */
 public class TableInfo
 {
-    /** The log. */
-    private static Logger log = LoggerFactory.getLogger(TableInfo.class);
-
     /** The table name. */
     private String tableName;
 
@@ -42,9 +39,6 @@ public class TableInfo
 
     /** The type. */
     private String type;
-
-    /** The action. */
-    private SchemaAction action;
 
     /** The embedded column metadatas. */
     private List<EmbeddedColumnInfo> embeddedColumnMetadatas;
@@ -60,8 +54,8 @@ public class TableInfo
     }
 
     /**
-     * Equals method compare two object of TableInfo on the basis of their name,type and
-     * tableIdType .
+     * Equals method compare two object of TableInfo on the basis of their
+     * name,type and tableIdType .
      * 
      * @param Object
      *            instance.
@@ -92,27 +86,6 @@ public class TableInfo
             }
         }
         return result;
-    }
-
-    /**
-     * Gets the action.
-     * 
-     * @return the action
-     */
-    public SchemaAction getAction()
-    {
-        return action;
-    }
-
-    /**
-     * Sets the action.
-     * 
-     * @param action
-     *            the action to set
-     */
-    public void setAction(SchemaAction action)
-    {
-        this.action = action;
     }
 
     /**
@@ -239,37 +212,5 @@ public class TableInfo
     public void setType(String type)
     {
         this.type = type;
-    }
-
-    /**
-     * The Enum SchemaAction.
-     */
-    public enum SchemaAction
-    {
-
-        /** The createdrop. */
-        createdrop,
-        /** The create. */
-        create,
-        /** The update. */
-        update,
-        /** The validate. */
-        validate;
-
-        /**
-         * Instance of.
-         * 
-         * @param name
-         *            the name
-         * @return the schema action
-         */
-        public static SchemaAction instanceOf(String name)
-        {
-            if (name.equalsIgnoreCase("create-drop"))
-            {
-                return SchemaAction.createdrop;
-            }
-            return SchemaAction.valueOf(SchemaAction.class, name);
-        }
     }
 }

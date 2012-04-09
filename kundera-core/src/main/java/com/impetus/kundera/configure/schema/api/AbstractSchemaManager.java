@@ -27,10 +27,11 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
- * Abstract Schema Manager  has abstract method to handle {@code SchemaOperationType}.
+ * Abstract Schema Manager has abstract method to handle
+ * {@code SchemaOperationType}.
  * 
  * @author Kuldeep.Kumar
- *
+ * 
  */
 public abstract class AbstractSchemaManager
 {
@@ -73,7 +74,7 @@ public abstract class AbstractSchemaManager
         Set<String> pus = puToSchemaCol.keySet();
         for (String pu : pus)
         {
-            //Get persistence unit metadata
+            // Get persistence unit metadata
             puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(pu);
 
             kundera_client = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_CLIENT);
@@ -81,9 +82,9 @@ public abstract class AbstractSchemaManager
             host = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_NODES);
             databaseName = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
             useSecondryIndex = MetadataUtils.useSecondryIndex(pu);
-            //get type of schema of operation.
+            // get type of schema of operation.
             operation = puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE);
-            
+
             // invoke handle operation.
             if (operation != null && initiateClient())
             {
@@ -136,8 +137,7 @@ public abstract class AbstractSchemaManager
      * handleOperations method handles the all operation on the basis of
      * operationType
      */
- 
-    
+
     /**
      * enum class for operation type
      */
@@ -167,13 +167,12 @@ public abstract class AbstractSchemaManager
         {
             if (operation.equalsIgnoreCase("create-drop"))
             {
-                operation = "createdrop";
+                return ScheamOperationType.createdrop;
             }
-
-            return ScheamOperationType.valueOf(operation);
+            return ScheamOperationType.valueOf(ScheamOperationType.class, operation);
         }
     }
-    
+
     /**
      * Handle operations.
      * 
@@ -200,6 +199,4 @@ public abstract class AbstractSchemaManager
             break;
         }
     }
-
-   
 }

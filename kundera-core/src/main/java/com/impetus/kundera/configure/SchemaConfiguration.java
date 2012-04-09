@@ -28,7 +28,6 @@ import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.TableInfo;
-import com.impetus.kundera.configure.schema.TableInfo.SchemaAction;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.Column;
@@ -70,11 +69,12 @@ public class SchemaConfiguration implements Configuration
 
         puToSchemaCol = appMetadata.getSchemaMetadata().getPuToSchemaCol();
 
-        //TODO, FIXME: Refactoring is required.
+        // TODO, FIXME: Refactoring is required.
         for (String persistenceUnit : persistenceUnits)
         {
             if (getKunderaProperty(persistenceUnit) != null)
             {
+                log.info("creating schema generation map");
                 List<TableInfo> tableInfos = puToSchemaCol.get(persistenceUnit);
                 // if no TableInfos for given persistence unit.
                 if (tableInfos == null)
@@ -105,7 +105,7 @@ public class SchemaConfiguration implements Configuration
                         tableInfo.setType("Super");
                     }
                     tableInfo.setTableIdType(entityMetadata.getIdColumn().getField().getType().toString());
-                    tableInfo.setAction(SchemaAction.instanceOf(getKunderaProperty(persistenceUnit)));
+                    // tableInfo.setAction(SchemaAction.instanceOf(getKunderaProperty(persistenceUnit)));
 
                     // check for tableInfos not empty and contains the present
                     // tableInfo.
@@ -197,7 +197,7 @@ public class SchemaConfiguration implements Configuration
                                 }
                                 targetTableInfo.setTableIdType(targetEntityMetadata.getIdColumn().getField().getType()
                                         .toString());
-                                targetTableInfo.setAction(SchemaAction.instanceOf(getKunderaProperty(persistenceUnit)));
+                                // targetTableInfo.setAction(SchemaAction.instanceOf(getKunderaProperty(persistenceUnit)));
                                 if (!pu.equals(persistenceUnit))
                                 {
                                     List<TableInfo> targetTableInfos = puToSchemaCol.get(pu);
@@ -342,5 +342,4 @@ public class SchemaConfiguration implements Configuration
         return KUNDERA_DDL_AUTO_PREPARE;
     }
 
-  
 }

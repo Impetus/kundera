@@ -33,8 +33,8 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
 /**
- * The Class MongoDBSchemaManager manages auto schema operation {@code ScheamOperationType}
- * for mongoDb database.
+ * The Class MongoDBSchemaManager manages auto schema operation
+ * {@code ScheamOperationType} for mongoDb database.
  * 
  * @author Kuldeep.kumar
  * 
@@ -54,7 +54,6 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(MongoDBSchemaManager.class);
 
-   
     @Override
     /**
      * Export schema handles the handleOperation method.
@@ -72,7 +71,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     protected void update(List<TableInfo> tableInfos)
     {
-          // Do nothing as by default mongo handles it.
+        // Do nothing as by default mongo handles it.
     }
 
     /**
@@ -83,7 +82,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     protected void create(List<TableInfo> tableInfos)
     {
-     // Do nothing as by default mongo handles it.
+        // Do nothing as by default mongo handles it.
     }
 
     /**
@@ -124,15 +123,24 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             db = m.getDB(databaseName);
         }
 
-        for (TableInfo tableInfo : tableInfos)
-        {
-            if (!db.collectionExists(tableInfo.getTableName()))
+//        if (db == null)
+//        {
+//            logger.error("database " + databaseName + "does not exist");
+//            throw new SchemaGenerationException("mongoDb", databaseName);
+//        }
+//        else
+//        {
+
+            for (TableInfo tableInfo : tableInfos)
             {
-                logger.error("Collection " + tableInfo.getTableName() + "does not exist in db " + db.getName());
-                throw new SchemaGenerationException("mongoDb", databaseName, tableInfo.getTableName());
+                if (!db.collectionExists(tableInfo.getTableName()))
+                {
+                    logger.error("Collection " + tableInfo.getTableName() + "does not exist in db " + db.getName());
+                    throw new SchemaGenerationException("mongoDb", databaseName, tableInfo.getTableName());
+                }
             }
         }
-    }
+//    }
 
     /**
      * drop schema method drop the table
@@ -174,6 +182,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             }
             catch (MongoException e)
             {
+
                 throw new SchemaGenerationException(e);
             }
 
