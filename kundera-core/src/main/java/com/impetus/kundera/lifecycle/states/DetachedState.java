@@ -25,13 +25,15 @@ import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.NodeStateContext;
+import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * @author amresh
  *
  */
 public class DetachedState extends NodeState
-{
+{    
+    
     @Override
     public void initialize(NodeStateContext nodeStateContext)
     {

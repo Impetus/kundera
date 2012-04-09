@@ -41,7 +41,7 @@ public class FlushManager
         
         //Process Main cache
         MainCache mainCache = (MainCache)pc.getMainCache();        
-        PersistenceCacheManager.markAllNodesNotTraversed();
+        new PersistenceCacheManager(pc).markAllNodesNotTraversed();
         
         Set<Node> headNodes = mainCache.getHeadNodes();
         

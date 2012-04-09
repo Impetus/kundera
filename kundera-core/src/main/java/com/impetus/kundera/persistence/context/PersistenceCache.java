@@ -45,9 +45,7 @@ public class PersistenceCache
     
     FlushManager flushManager;
     
-    /** one instance of this class */
-    public static final PersistenceCache INSTANCE = new PersistenceCache();
-    
+   
     /**
      * Stack containing Nodes to be flushed
      * Entities are always flushed from the top, there way to bottom until stack is empty 

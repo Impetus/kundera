@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.configure.Configurator;
+import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * Test case for {@link ObjectGraphBuilder} 
@@ -64,7 +65,7 @@ public class ObjectGraphBuilderTest
         store.addCounter(new BillingCounter(2, "B"));
         store.addCounter(new BillingCounter(3, "C"));
         
-        ObjectGraph graph = graphBuilder.getObjectGraph(store, null);
+        ObjectGraph graph = graphBuilder.getObjectGraph(store, null, new PersistenceCache());
         
         Assert.assertNotNull(graph);
         Node headNode = graph.getHeadNode();

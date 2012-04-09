@@ -19,45 +19,56 @@ import com.impetus.kundera.graph.Node;
 
 /**
  * @author amresh
- *
+ * 
  */
 public class PersistenceCacheManager
 {
-    public static void clearPersistenceCache() {
-        PersistenceCache pc = PersistenceCache.INSTANCE;       
+    private PersistenceCache persistenceCache;
+
+    public PersistenceCacheManager(PersistenceCache pc)
+    {
+        this.persistenceCache = pc;
+    }
+
+    public static void clearPersistenceCache()
+    {
+        PersistenceCache pc = PersistenceCache.INSTANCE;
         pc.clean();
 
-        //cleanIndividualCache(pc.getMainCache());
-//        cleanIndividualCache(pc.getEmbeddedCache());
-//        cleanIndividualCache(pc.getElementCollectionCache());
-//        cleanIndividualCache(pc.getTransactionalCache());        
-    }
-    
-    private static void cleanIndividualCache(CacheBase cache) {
-        for(Node node : cache.getAllNodes()) {
+    } // cleanIndividualCache(pc.getMainCache());
+    // cleanIndividualCache(pc.getEmbeddedCache());
+    // cleanIndividualCache(pc.getElementCollectionCache());
+    // cleanIndividualCache(pc.getTransactionalCache());
+
+    private void cleanIndividualCache(CacheBase cache)
+    {
+        for (Node node : cache.getAllNodes())
+        {
             node.clear();
         }
     }
-    
-    public static void markAllNodesNotTraversed() {        
-        for(Node node : PersistenceCache.INSTANCE.getMainCache().getAllNodes()) {
+
+    public void markAllNodesNotTraversed()
+    {
+        for (Node node : persistenceCache.getMainCache().getAllNodes())
+        {
             node.setTraversed(false);
         }
-        
-        for(Node node : PersistenceCache.INSTANCE.getEmbeddedCache().getAllNodes()) {
+
+        for (Node node : persistenceCache.getEmbeddedCache().getAllNodes())
+        {
             node.setTraversed(false);
         }
-        
-        for(Node node : PersistenceCache.INSTANCE.getElementCollectionCache().getAllNodes()) {
+
+        for (Node node : persistenceCache.getElementCollectionCache().getAllNodes())
+        {
             node.setTraversed(false);
         }
-        
-        for(Node node : PersistenceCache.INSTANCE.getTransactionalCache().getAllNodes()) {
+
+        for (Node node : persistenceCache.getTransactionalCache().getAllNodes())
+        {
             node.setTraversed(false);
         }
-    }  
-    
-    
-   
+    }
 
 }

@@ -262,7 +262,7 @@ public class AbstractEntityReader
      *             the exception
      */
     
-    @Deprecated
+    //Delete after refactoring
     public Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder,
             Client client, EntityMetadata m, PersistenceDelegator persistenceDelegeator) 
     {
