@@ -153,5 +153,13 @@ public class CacheBase
     public Collection<Node> getAllNodes() {
         return nodeMappings.values();
     }
-    
+
+    /**
+     * 
+     */
+    public void clear()
+    {
+        this.nodeMappings.clear();
+        this.headNodes.clear();
+    }
 }

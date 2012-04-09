@@ -77,17 +77,42 @@ public class PersistenceCache
         flushManager = new FlushManager();
     }    
     
-    public void clean() {
-        mainCache = null;
-        embeddedCache = null;
-        elementCollectionCache = null;
-        transactionalCache = null;
+    /**
+     * Cleaned out the data.
+     * 
+     */
+    public void clean()
+    {
+        // Clear main cache. 
+        if(mainCache != null)
+        {
+            mainCache.clear();
+        }
         
-        flushStack.clear(); flushStack = null;
-        joinTableDataMap.clear(); joinTableDataMap = null;
-        flushManager = null;
+        if(embeddedCache != null)
+        {
+            embeddedCache.clear();
+        }
+        if(elementCollectionCache != null)
+        {
+            elementCollectionCache.clear();
+        }
+        if(transactionalCache != null)
+        {
+            transactionalCache.clear();
+        }
+
+        if (flushStack != null)
+        {
+            flushStack.clear();
+        }
+        if (joinTableDataMap != null)
+        {
+            joinTableDataMap.clear();
+        }
+        
     }
-    
+
     /**
      * @return the mainCache
      */

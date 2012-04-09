@@ -25,11 +25,12 @@ public class PersistenceCacheManager
 {
     public static void clearPersistenceCache() {
         PersistenceCache pc = PersistenceCache.INSTANCE;       
-        
-        cleanIndividualCache(pc.getMainCache());
-        cleanIndividualCache(pc.getEmbeddedCache());
-        cleanIndividualCache(pc.getElementCollectionCache());
-        cleanIndividualCache(pc.getTransactionalCache());        
+        pc.clean();
+
+        //cleanIndividualCache(pc.getMainCache());
+//        cleanIndividualCache(pc.getEmbeddedCache());
+//        cleanIndividualCache(pc.getElementCollectionCache());
+//        cleanIndividualCache(pc.getTransactionalCache());        
     }
     
     private static void cleanIndividualCache(CacheBase cache) {
