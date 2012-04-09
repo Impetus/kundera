@@ -132,7 +132,7 @@ public class HBaseClient extends ClientBase implements Client
     @Override
     public <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<E> entities = new ArrayList<E>();
         for (Object rowKey : rowIds)
         {
