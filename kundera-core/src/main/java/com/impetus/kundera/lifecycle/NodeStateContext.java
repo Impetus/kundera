@@ -23,6 +23,7 @@ import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * State context of a given entity
@@ -91,6 +92,10 @@ public interface NodeStateContext
     void clear();
     void flush();
     
-    public boolean isInState(Class<?> stateClass);   
+    public boolean isInState(Class<?> stateClass);  
+    
+    
+    public PersistenceCache getPersistenceCache();
+    public void setPersistenceCache(PersistenceCache persistenceCache);
 
 }

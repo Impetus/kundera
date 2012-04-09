@@ -88,9 +88,6 @@ public class PersistenceDelegator
     /** The is relation via join table. */
     boolean isRelationViaJoinTable;
 
-    /** The no session lookup. */
-    private boolean noSessionLookup;
-
     private FlushModeType flushMode = FlushModeType.AUTO;
 
     private ObjectGraphBuilder graphBuilder;
@@ -99,6 +96,8 @@ public class PersistenceDelegator
     
     //Whether a transaction is in progress
     private boolean isTransactionInProgress;
+    
+    private PersistenceCache persistenceCache;
 
     /**
      * Instantiates a new persistence delegator.
@@ -108,12 +107,13 @@ public class PersistenceDelegator
      * @param persistenceUnits
      *            the persistence units
      */
-    public PersistenceDelegator(EntityManagerSession session)
+    public PersistenceDelegator(EntityManagerSession session, PersistenceCache pc)
     {
         this.session = session;
         eventDispatcher = new EntityEventDispatcher();
         graphBuilder = new ObjectGraphBuilder();
         flushManager = new FlushManager();
+        this.persistenceCache = pc;
     }
     
     
@@ -133,7 +133,7 @@ public class PersistenceDelegator
         getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
 
         // Create an object graph of the entity object
-        ObjectGraph graph = graphBuilder.getObjectGraph(e, new TransientState());
+        ObjectGraph graph = graphBuilder.getObjectGraph(e, new TransientState(), getPersistenceCache());
 
         // Call persist on each node in object graph
         Node headNode = graph.getHeadNode();
@@ -168,14 +168,14 @@ public class PersistenceDelegator
 
         String nodeId = ObjectGraphBuilder.getNodeId(primaryKey, entityClass);
 
-        MainCache mainCache = (MainCache) PersistenceCache.INSTANCE.getMainCache();
+        MainCache mainCache = (MainCache) getPersistenceCache().getMainCache();
         Node node = mainCache.getNodeFromCache(nodeId);
 
         // if node is not in persistence cache or is dirty, fetch from database
         if (node == null || node.isDirty())
         {
 
-            node = new Node(nodeId, entityClass, new ManagedState());
+            node = new Node(nodeId, entityClass, new ManagedState(), getPersistenceCache());
             Client client = getClient(entityMetadata);
             node.setClient(client);
             node.setPersistenceDelegator(this);
@@ -190,10 +190,10 @@ public class PersistenceDelegator
         // with Managed state
         if (nodeData != null)
         {
-            if (PersistenceCache.INSTANCE.getMainCache().getNodeFromCache(nodeId) == null)
+            if (getPersistenceCache().getMainCache().getNodeFromCache(nodeId) == null)
             {
-                ObjectGraph graph = new ObjectGraphBuilder().getObjectGraph(nodeData, new ManagedState());
-                PersistenceCache.INSTANCE.getMainCache().addGraphToCache(graph);
+                ObjectGraph graph = new ObjectGraphBuilder().getObjectGraph(nodeData, new ManagedState(), getPersistenceCache());
+                getPersistenceCache().getMainCache().addGraphToCache(graph, getPersistenceCache());
             }
 
         }
@@ -223,7 +223,7 @@ public class PersistenceDelegator
         getEventDispatcher().fireEventListeners(metadata, e, PreRemove.class);
 
         // Create an object graph of the entity object
-        ObjectGraph graph = graphBuilder.getObjectGraph(e, new ManagedState());
+        ObjectGraph graph = graphBuilder.getObjectGraph(e, new ManagedState(), getPersistenceCache());
 
         Node headNode = graph.getHeadNode();
 
@@ -258,10 +258,10 @@ public class PersistenceDelegator
             // Build Flush Stack from the Persistence Cache
             // TODO: Cascade flush for only those related entities for whom
             // cascade=ALL or PERSIST
-            flushManager.buildFlushStack(PersistenceCache.INSTANCE);
+            flushManager.buildFlushStack(getPersistenceCache());
 
             // Get flush stack from Persistence Cache
-            FlushStack fs = PersistenceCache.INSTANCE.getFlushStack();
+            FlushStack fs = getPersistenceCache().getFlushStack();
 
             // Flush each node in flush stack from top to bottom unit it's empty
             log.debug("Flushing following flush stack to database(s) (showing stack objects from top to bottom):\n"
@@ -305,7 +305,7 @@ public class PersistenceDelegator
             }
 
             // Flush Join Table data into database
-            Map<String, JoinTableData> joinTableDataMap = PersistenceCache.INSTANCE.getJoinTableDataMap();
+            Map<String, JoinTableData> joinTableDataMap = getPersistenceCache().getJoinTableDataMap();
             for (JoinTableData jtData : joinTableDataMap.values())
             {
                 EntityMetadata m = KunderaMetadataManager.getEntityMetadata(jtData.getEntityClass());
@@ -341,7 +341,7 @@ public class PersistenceDelegator
         getEventDispatcher().fireEventListeners(m, e, PreUpdate.class);
 
         // Create an object graph of the entity object to be merged
-        ObjectGraph graph = graphBuilder.getObjectGraph(e, new ManagedState());
+        ObjectGraph graph = graphBuilder.getObjectGraph(e, new ManagedState(), getPersistenceCache());
 
         // Call merge on each node in object graph
         Node headNode = graph.getHeadNode();
@@ -530,7 +530,7 @@ public class PersistenceDelegator
     public final void clear()
     {
         // Move all nodes tied to this EM into detached state
-        PersistenceCacheManager.clearPersistenceCache();
+        new PersistenceCacheManager(getPersistenceCache()).clearPersistenceCache();
     }
 
     /**
@@ -630,6 +630,15 @@ public class PersistenceDelegator
     public boolean isTransactionInProgress()
     {
         return isTransactionInProgress;
+    } 
+
+
+    /**
+     * @return the persistenceCache
+     */
+    public PersistenceCache getPersistenceCache()
+    {
+        return persistenceCache;
     }
 
 

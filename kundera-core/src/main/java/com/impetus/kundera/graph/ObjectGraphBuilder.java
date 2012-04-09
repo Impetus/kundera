@@ -36,9 +36,11 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 public class ObjectGraphBuilder
 {
-    public ObjectGraph getObjectGraph(Object entity, NodeState initialNodeState) {        
+    PersistenceCache persistenceCache;
+    public ObjectGraph getObjectGraph(Object entity, NodeState initialNodeState, PersistenceCache persistenceCache) {        
         //Initialize object graph
         ObjectGraph objectGraph = new ObjectGraph();   
+        this.persistenceCache = persistenceCache;
         
         //Recursively build object graph and get head node.        
         Node headNode = getNode(entity, objectGraph, initialNodeState);         
@@ -70,9 +72,9 @@ public class ObjectGraphBuilder
         
         //Construct this Node first, if one not already there in Persistence Cache
         Node node = null;
-        Node nodeInPersistenceCache = PersistenceCache.INSTANCE.getMainCache().getNodeFromCache(nodeId);
+        Node nodeInPersistenceCache = persistenceCache.getMainCache().getNodeFromCache(nodeId);
         if(nodeInPersistenceCache == null) {
-            node = new Node(nodeId, entity, initialNodeState);
+            node = new Node(nodeId, entity, initialNodeState, persistenceCache);
         } else {
             node = nodeInPersistenceCache;
             

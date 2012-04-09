@@ -31,13 +31,15 @@ public class FlushStackTest
 {
 
     FlushStack fs;
+    PersistenceCache pc;
     /**
      * @throws java.lang.Exception
      */
     @Before
     public void setUp() throws Exception
     {
-        fs = new FlushStack();
+        pc = new PersistenceCache();
+        fs = pc.getFlushStack();
     }
 
     /**
@@ -50,10 +52,10 @@ public class FlushStackTest
     
     @Test
     public void testFlushStackPush() {
-        fs.push(new Node("A", new Object()));
-        fs.push(new Node("B", new Object()));
-        fs.push(new Node("C", new Object()));
-        fs.push(new Node("D", new Object()));
+        fs.push(new Node("A", new Object(), pc));
+        fs.push(new Node("B", new Object(), pc));
+        fs.push(new Node("C", new Object(), pc));
+        fs.push(new Node("D", new Object(), pc));
         
         System.out.println(fs);
         

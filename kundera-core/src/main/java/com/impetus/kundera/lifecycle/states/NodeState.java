@@ -25,6 +25,7 @@ import com.impetus.kundera.lifecycle.NodeStateContext;
  */
 public abstract class NodeState
 {   
+   
     public abstract void initialize(NodeStateContext nodeStateContext);
     
     //Life cycle Management
@@ -47,8 +48,9 @@ public abstract class NodeState
     
     //Cache Management
     public abstract void handleClear(NodeStateContext nodeStateContext);
-    public abstract void handleFlush(NodeStateContext nodeStateContext);
-    
+    public abstract void handleFlush(NodeStateContext nodeStateContext);   
+
+
     public void logStateChangeEvent(NodeState prevState, NodeState nextState, String nodeId) {
         System.out.println("Node: " + nodeId + ":: " + prevState.getClass().getSimpleName() + " >>> " + nextState.getClass().getSimpleName());
     }

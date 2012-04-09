@@ -39,6 +39,7 @@ import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.context.FlushManager;
+import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * The Class EntityManagerImpl.
@@ -72,6 +73,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     /** Persistence Context Type (Transaction/ Extended) */
     private PersistenceContextType persistenceContextType;
     
+    private PersistenceCache persistenceCache;
+    
     FlushManager flushStackManager;    
 
     /**
@@ -84,8 +87,10 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     {
         this.factory = factory;
         logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
-        session = new EntityManagerSession((Cache) factory.getCache());               
-        persistenceDelegator = new PersistenceDelegator(session);
+        session = new EntityManagerSession((Cache) factory.getCache());  
+        persistenceCache = new PersistenceCache();
+        
+        persistenceDelegator = new PersistenceDelegator(session, persistenceCache);
         
         //For Application managed persistence context, type is always EXTENDED
         persistenceContextType = PersistenceContextType.EXTENDED;

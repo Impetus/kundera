@@ -71,9 +71,9 @@ public class PersistenceCacheTest
         store.addCounter(new BillingCounter(2, "B"));
         store.addCounter(new BillingCounter(3, "C"));
         
-        ObjectGraph graph = graphBuilder.getObjectGraph(store, null);
+        ObjectGraph graph = graphBuilder.getObjectGraph(store, null, pc);
         
-        pc.getMainCache().addGraphToCache(graph);
+        pc.getMainCache().addGraphToCache(graph, pc);
         
         Assert.assertNotNull(pc.getMainCache());
         Assert.assertEquals(1, pc.getMainCache().getHeadNodes().size());

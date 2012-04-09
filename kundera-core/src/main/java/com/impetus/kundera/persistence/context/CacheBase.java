@@ -100,7 +100,7 @@ public class CacheBase
         node = null;   //Eligible for GC       
     }
     
-    public void addGraphToCache(ObjectGraph graph) {
+    public void addGraphToCache(ObjectGraph graph, PersistenceCache persistenceCache) {
         
         
         
@@ -110,8 +110,8 @@ public class CacheBase
             addNodeToCache(thisNode);
             
             //Remove all those head nodes in persistence cache, that are there in Graph as a non-head node
-            if(!thisNode.isHeadNode() && PersistenceCache.INSTANCE.getMainCache().getHeadNodes().contains(thisNode)) {
-                PersistenceCache.INSTANCE.getMainCache().getHeadNodes().remove(thisNode);
+            if(!thisNode.isHeadNode() && persistenceCache.getMainCache().getHeadNodes().contains(thisNode)) {
+                persistenceCache.getMainCache().getHeadNodes().remove(thisNode);
             }
         }
         

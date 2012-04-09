@@ -32,7 +32,6 @@ import com.impetus.kundera.persistence.context.PersistenceCache;
  */
 public class TransientState extends NodeState
 {    
-
     @Override
     public void initialize(NodeStateContext nodeStateContext)
     {
@@ -52,11 +51,11 @@ public class TransientState extends NodeState
         
         //If it's a head node, add this to the list of head nodes in PC
         if(nodeStateContext.isHeadNode()) {
-            PersistenceCache.INSTANCE.getMainCache().addHeadNode((Node)nodeStateContext);
+            nodeStateContext.getPersistenceCache().getMainCache().addHeadNode((Node)nodeStateContext);
         }
         
         //Add this node into persistence cache
-        PersistenceCache.INSTANCE.getMainCache().addNodeToCache((Node)nodeStateContext);
+        nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);
 
         //Recurse persist operation on all managed entities for whom cascade=ALL or PERSIST
         Map<NodeLink, Node> children = nodeStateContext.getChildren();
