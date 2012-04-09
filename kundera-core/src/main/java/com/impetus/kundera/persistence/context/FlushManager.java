@@ -191,7 +191,7 @@ public class FlushManager
         
         //Finally, if this node itself is not traversed yet, (as may happen in 1-1 and M-1 
         //cases), push it to stack
-        if(!node.isTraversed()) {
+        if(!node.isTraversed() && node.isDirty()) {
             node.setTraversed(true);
             flushStack.push(node);
         }
