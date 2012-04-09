@@ -16,9 +16,16 @@
 package com.impetus.kundera.lifecycle.states;
 
 
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.CascadeType;
+
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -109,6 +116,22 @@ public class RemovedState extends NodeState
     @Override
     public void handleDetach(NodeStateContext nodeStateContext)
     {
+        //Removed ---> Detached
+        NodeState nextState = new DetachedState();
+        nodeStateContext.setCurrentNodeState(nextState);
+        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());        
+        
+        //Cascade detach operation to all referenced entities for whom cascade=ALL or DETACH
+        Map<NodeLink, Node> children = nodeStateContext.getChildren();
+        if(children != null) {
+            for(NodeLink nodeLink : children.keySet()) {
+                List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
+                if(cascadeTypes.contains(CascadeType.DETACH) || cascadeTypes.contains(CascadeType.ALL)) {
+                    Node childNode = children.get(nodeLink);                
+                    childNode.detach();
+                }
+            }
+        }  
     }
 
     @Override
@@ -124,7 +147,7 @@ public class RemovedState extends NodeState
         nodeStateContext.setCurrentNodeState(new ManagedState());
         
         //If Persistence Context is TRANSACTIONAL
-        //context.setCurrentEntityState(new DetachedState());
+        //nodeStateContext.detach();
     }
 
     @Override

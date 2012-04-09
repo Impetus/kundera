@@ -101,13 +101,13 @@ public class TransientState extends NodeState
     @Override
     public void handleClose(NodeStateContext nodeStateContext)
     {
-        //Nothing to do, only entities in Managed state move to detached state
+      //Nothing to do, only entities in Managed/ Removed state move to detached state
     }
 
     @Override
     public void handleClear(NodeStateContext nodeStateContext)
     {
-      //Nothing to do, only entities in Managed state move to detached state
+      //Nothing to do, only entities in Managed/ Removed state move to detached state
     }
 
     @Override
@@ -123,6 +123,7 @@ public class TransientState extends NodeState
     @Override
     public void handleDetach(NodeStateContext nodeStateContext)
     {
+      //Nothing to do, only entities in Managed/ Removed state move to detached state
     }
 
     @Override
