@@ -140,7 +140,7 @@ public abstract class QueryImpl implements Query
         EntityMetadata m = getEntityMetadata();
         Client client = persistenceDelegeator.getClient(m);
 
-        if (m.getRelationNames().isEmpty() && !m.isRelationViaJoinTable())
+        if (m.getRelationNames() == null ||(m.getRelationNames().isEmpty() && !m.isRelationViaJoinTable()))
         {
             results = populateEntities(m, client);
         }
