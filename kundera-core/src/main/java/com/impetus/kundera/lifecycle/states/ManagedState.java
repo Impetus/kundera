@@ -42,10 +42,12 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  *
  */
 public class ManagedState extends NodeState
-{
+{   
+    
     @Override
     public void initialize(NodeStateContext nodeStateContext)
     {
+       
     }
 
     @Override
@@ -96,11 +98,11 @@ public class ManagedState extends NodeState
         
         //If it's a head node, add this to the list of head nodes in PC
         if(nodeStateContext.isHeadNode()) {
-            PersistenceCache.INSTANCE.getMainCache().addHeadNode((Node)nodeStateContext);
+            nodeStateContext.getPersistenceCache().getMainCache().addHeadNode((Node)nodeStateContext);
         }
         
         //Add this node into persistence cache
-        PersistenceCache.INSTANCE.getMainCache().addNodeToCache((Node)nodeStateContext);
+        nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);
         
         //Cascade merge operation for all related entities for whom cascade=ALL or MERGE
         Map<NodeLink, Node> children = nodeStateContext.getChildren();
@@ -167,7 +169,7 @@ public class ManagedState extends NodeState
     @Override
     public void handleClear(NodeStateContext nodeStateContext)
     {
-        handleDetach(nodeStateContext);
+        handleDetach(nodeStateContext);   
     }
 
     @Override
@@ -193,11 +195,23 @@ public class ManagedState extends NodeState
 
     @Override
     public void handleDetach(NodeStateContext nodeStateContext)
-    {
+    {        
         // Managed ---> Detached
         NodeState nextState = new DetachedState();
         nodeStateContext.setCurrentNodeState(nextState);
-        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());   
+        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());        
+        
+        //Cascade detach operation to all referenced entities for whom cascade=ALL or DETACH
+        Map<NodeLink, Node> children = nodeStateContext.getChildren();
+        if(children != null) {
+            for(NodeLink nodeLink : children.keySet()) {
+                List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
+                if(cascadeTypes.contains(CascadeType.DETACH) || cascadeTypes.contains(CascadeType.ALL)) {
+                    Node childNode = children.get(nodeLink);                
+                    childNode.detach();
+                }
+            }
+        }  
         
     }
 

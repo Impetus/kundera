@@ -25,13 +25,15 @@ import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.NodeStateContext;
+import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * @author amresh
  *
  */
 public class DetachedState extends NodeState
-{
+{    
+    
     @Override
     public void initialize(NodeStateContext nodeStateContext)
     {
@@ -89,13 +91,13 @@ public class DetachedState extends NodeState
     @Override
     public void handleClose(NodeStateContext nodeStateContext)
     {
-      //Nothing to do, only entities in Managed state move to detached state
+      //Nothing to do, already in Detached State
     }
 
     @Override
     public void handleClear(NodeStateContext nodeStateContext)
     {
-      //Nothing to do, only entities in Managed state move to detached state
+        //Nothing to do, already in Detached State
     }
 
     @Override
@@ -111,6 +113,7 @@ public class DetachedState extends NodeState
     @Override
     public void handleDetach(NodeStateContext nodeStateContext)
     {
+        //Nothing to do, already in Detached State
     }
 
     @Override

@@ -25,6 +25,7 @@ import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * Represents a node in object graph 
@@ -63,20 +64,23 @@ public class Node implements NodeStateContext
     /** Client for this node */
     Client client;
     
+    //Reference to Persistence cache where this node is stored
+    private PersistenceCache persistenceCache;;
+    
     PersistenceDelegator pd;
     
-    public Node() {        
-    }
     
-    public Node(String nodeId, Object data) {
+    public Node(String nodeId, Object data, PersistenceCache pc) {
         initializeNode(nodeId, data);    
+        setPersistenceCache(pc);
         
         //Initialize current node state to transient state
         this.currentNodeState = new TransientState();
     }
     
-    public Node(String nodeId, Object data, NodeState initialNodeState) {
+    public Node(String nodeId, Object data, NodeState initialNodeState, PersistenceCache pc) {
         initializeNode(nodeId, data);
+        setPersistenceCache(pc);
         
         //Initialize current node state
         if(initialNodeState == null) {
@@ -87,9 +91,10 @@ public class Node implements NodeStateContext
         
     }
     
-    public Node(String nodeId, Class<?> nodeDataClass, NodeState initialNodeState) {
+    public Node(String nodeId, Class<?> nodeDataClass, NodeState initialNodeState, PersistenceCache pc) {
         this.nodeId = nodeId;
         this.dataClass = nodeDataClass;
+        setPersistenceCache(pc);
         
         //Initialize current node state
         if(initialNodeState == null) {
@@ -441,7 +446,10 @@ public class Node implements NodeStateContext
     @Override
     public void flush()
     {
-        getCurrentNodeState().handleFlush(this);
+        if(isDirty())
+        {
+            getCurrentNodeState().handleFlush(this);
+        }
     } 
     
     
@@ -451,6 +459,18 @@ public class Node implements NodeStateContext
     public boolean isInState(Class<?> stateClass)
     {
         return getCurrentNodeState().getClass().equals(stateClass);
-    }  
+    }
+
+    @Override
+    public PersistenceCache getPersistenceCache()
+    {
+        return this.persistenceCache;
+    }
+
+    @Override
+    public void setPersistenceCache(PersistenceCache persistenceCache)
+    {
+        this.persistenceCache = persistenceCache;
+    }     
 
 }

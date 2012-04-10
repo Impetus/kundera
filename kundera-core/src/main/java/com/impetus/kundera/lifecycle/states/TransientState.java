@@ -32,7 +32,6 @@ import com.impetus.kundera.persistence.context.PersistenceCache;
  */
 public class TransientState extends NodeState
 {    
-
     @Override
     public void initialize(NodeStateContext nodeStateContext)
     {
@@ -52,11 +51,11 @@ public class TransientState extends NodeState
         
         //If it's a head node, add this to the list of head nodes in PC
         if(nodeStateContext.isHeadNode()) {
-            PersistenceCache.INSTANCE.getMainCache().addHeadNode((Node)nodeStateContext);
+            nodeStateContext.getPersistenceCache().getMainCache().addHeadNode((Node)nodeStateContext);
         }
         
         //Add this node into persistence cache
-        PersistenceCache.INSTANCE.getMainCache().addNodeToCache((Node)nodeStateContext);
+        nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);
 
         //Recurse persist operation on all managed entities for whom cascade=ALL or PERSIST
         Map<NodeLink, Node> children = nodeStateContext.getChildren();
@@ -101,13 +100,13 @@ public class TransientState extends NodeState
     @Override
     public void handleClose(NodeStateContext nodeStateContext)
     {
-        //Nothing to do, only entities in Managed state move to detached state
+      //Nothing to do, only entities in Managed/ Removed state move to detached state
     }
 
     @Override
     public void handleClear(NodeStateContext nodeStateContext)
     {
-      //Nothing to do, only entities in Managed state move to detached state
+      //Nothing to do, only entities in Managed/ Removed state move to detached state
     }
 
     @Override
@@ -123,6 +122,7 @@ public class TransientState extends NodeState
     @Override
     public void handleDetach(NodeStateContext nodeStateContext)
     {
+      //Nothing to do, only entities in Managed/ Removed state move to detached state
     }
 
     @Override

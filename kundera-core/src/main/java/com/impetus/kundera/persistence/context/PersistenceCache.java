@@ -45,9 +45,7 @@ public class PersistenceCache
     
     FlushManager flushManager;
     
-    /** one instance of this class */
-    public static final PersistenceCache INSTANCE = new PersistenceCache();
-    
+   
     /**
      * Stack containing Nodes to be flushed
      * Entities are always flushed from the top, there way to bottom until stack is empty 
@@ -77,17 +75,42 @@ public class PersistenceCache
         flushManager = new FlushManager();
     }    
     
-    public void clean() {
-        mainCache = null;
-        embeddedCache = null;
-        elementCollectionCache = null;
-        transactionalCache = null;
+    /**
+     * Cleaned out the data.
+     * 
+     */
+    public void clean()
+    {
+        // Clear main cache. 
+        if(mainCache != null)
+        {
+            mainCache.clear();
+        }
         
-        flushStack.clear(); flushStack = null;
-        joinTableDataMap.clear(); joinTableDataMap = null;
-        flushManager = null;
+        if(embeddedCache != null)
+        {
+            embeddedCache.clear();
+        }
+        if(elementCollectionCache != null)
+        {
+            elementCollectionCache.clear();
+        }
+        if(transactionalCache != null)
+        {
+            transactionalCache.clear();
+        }
+
+        if (flushStack != null)
+        {
+            flushStack.clear();
+        }
+        if (joinTableDataMap != null)
+        {
+            joinTableDataMap.clear();
+        }
+        
     }
-    
+
     /**
      * @return the mainCache
      */

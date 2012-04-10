@@ -259,6 +259,20 @@ public class PersistenceXMLLoader
                 {
                     metadata.setProvider(getElementContent(element));
                 }
+                
+                else if (tag.equals("transaction-type"))
+                {
+                    String transactionType = getElementContent(element);
+                    
+                    if(StringUtils.isEmpty(transactionType) || PersistenceUnitTransactionType.RESOURCE_LOCAL.name().equals(transactionType)) {
+                    
+                        metadata.setTransactionType(PersistenceUnitTransactionType.RESOURCE_LOCAL);
+                        
+                    } else if(PersistenceUnitTransactionType.JTA.name().equals(transactionType)) {
+                        metadata.setTransactionType(PersistenceUnitTransactionType.JTA);
+                    }                
+                    
+                }
                 else if (tag.equals("properties"))
                 {
                     NodeList props = element.getChildNodes();

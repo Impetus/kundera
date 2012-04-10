@@ -25,6 +25,7 @@ import javax.persistence.PersistenceUnitUtil;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
@@ -67,7 +68,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      * Array of persistence units. (Contains only one string usually except when
      * persisting in multiple data-stores)
      */
-    String[] persistenceUnits;
+    String[] persistenceUnits;    
+    
+    PersistenceUnitTransactionType transactionType;
 
     /**
      * This one is generally called via the PersistenceProvider.

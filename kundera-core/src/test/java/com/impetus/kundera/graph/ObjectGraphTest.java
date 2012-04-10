@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
+import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * Test case for {@link ObjectGraph}
@@ -30,6 +31,7 @@ import com.impetus.kundera.graph.NodeLink.LinkProperty;
 public class ObjectGraphTest
 {
     ObjectGraph objectGraph;
+    PersistenceCache pc;
 
     /**
      * @throws java.lang.Exception
@@ -38,6 +40,7 @@ public class ObjectGraphTest
     public void setUp() throws Exception
     {
         objectGraph = new ObjectGraph();
+        pc = new PersistenceCache();
     }
 
     /**
@@ -64,11 +67,11 @@ public class ObjectGraphTest
         String b2Id = ObjectGraphBuilder.getNodeId("A2", b2);
         String b3Id = ObjectGraphBuilder.getNodeId("A3", b3);
         
-        Node headNode = new Node(storeId, store);       
+        Node headNode = new Node(storeId, store, pc);       
         
-        Node child1 = new Node(b1Id, b1);
-        Node child2 = new Node(b2Id, b2);
-        Node child3 = new Node(b3Id, b3);
+        Node child1 = new Node(b1Id, b1, pc);
+        Node child2 = new Node(b2Id, b2, pc);
+        Node child3 = new Node(b3Id, b3, pc);
         
         NodeLink linkB1 = new NodeLink(storeId, b1Id);
         NodeLink linkB2 = new NodeLink(storeId, b2Id);

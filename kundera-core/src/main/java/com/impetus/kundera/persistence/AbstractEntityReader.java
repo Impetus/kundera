@@ -79,7 +79,7 @@ public class AbstractEntityReader
             else
             {
                 Relation.ForeignKey multiplicity = relation.getType();
-                if(multiplicity.equals(Relation.ForeignKey.ONE_TO_ONE) || relation.equals(Relation.ForeignKey.MANY_TO_ONE)) {
+                if(multiplicity.equals(Relation.ForeignKey.ONE_TO_ONE) || multiplicity.equals(Relation.ForeignKey.MANY_TO_ONE)) {
                     //Swapped relationship
                     String relationName = relation.getJoinColumnName();
                     Object relationValue = e.getRelations().get(relationName);
@@ -262,7 +262,7 @@ public class AbstractEntityReader
      *             the exception
      */
     
-    @Deprecated
+    //Delete after refactoring
     public Object computeGraph(EnhanceEntity e, List<EntitySaveGraph> graphs, Map<Object, Object> collectionHolder,
             Client client, EntityMetadata m, PersistenceDelegator persistenceDelegeator) 
     {
