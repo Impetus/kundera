@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
+
 package com.impetus.client.schemaManager;
 
 import java.io.IOException;
@@ -6,9 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 import junit.framework.Assert;
 
@@ -32,11 +45,23 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
-
+/**
+ * CassandraSchemaManagerTest class test the auto creation schema property in cassandra data store.  
+ * 
+ * @author Kuldeep.Kumar
+ *
+ */
 public class CassandraSchemaManagerTest
 {
+    
+    /** The configuration. */
     private SchemaConfiguration configuration;
 
+    /**
+     * Sets the up.
+     *
+     * @throws Exception the exception
+     */
     @Before
     public void setUp() throws Exception
     {
@@ -44,17 +69,31 @@ public class CassandraSchemaManagerTest
         configuration = new SchemaConfiguration("cassandra");
     }
 
+    /**
+     * Tear down.
+     *
+     * @throws Exception the exception
+     */
     @After
     public void tearDown() throws Exception
     {
     }
 
+    /**
+     * Test schema operation.
+     *
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws TException the t exception
+     * @throws InvalidRequestException the invalid request exception
+     * @throws UnavailableException the unavailable exception
+     * @throws TimedOutException the timed out exception
+     * @throws SchemaDisagreementException the schema disagreement exception
+     */
     @Test
     public void testSchemaOperation() throws IOException, TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
         getEntityManagerFactory();
-        // configuration.configure();
         Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraExamples"));
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCassandraExamples"));
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySuper", "KunderaCassandraExamples"));
@@ -76,6 +115,11 @@ public class CassandraSchemaManagerTest
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBiMTo1", "KunderaCassandraExamples"));
     }
 
+    /**
+     * Gets the entity manager factory.
+     *
+     * @return the entity manager factory
+     */
     private EntityManagerFactoryImpl getEntityManagerFactory()
     {
         Map<String, Object> props = new HashMap<String, Object>();
@@ -201,6 +245,7 @@ public class CassandraSchemaManagerTest
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 
+        configuration.configure();
         EntityManagerFactoryImpl impl = new EntityManagerFactoryImpl(puMetadata, props);
         return impl;
     }

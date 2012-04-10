@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
@@ -63,14 +64,16 @@ public abstract class AbstractSchemaManager
     // @Override
     /**
      * Export schema handles the handleOperation method.
+     * 
+     * @param hbase
      */
-    protected void exportSchema()
+    protected void exportSchema(ClientType client)
     {
 
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 
         // Actually, start 1 pu.
-        Map<String, List<TableInfo>> puToSchemaCol = appMetadata.getSchemaMetadata().getPuToSchemaCol();
+        Map<String, List<TableInfo>> puToSchemaCol = appMetadata.getSchemaMetadata().getPuToSchemaMetadata();
         Set<String> pus = puToSchemaCol.keySet();
         for (String pu : pus)
         {
@@ -78,18 +81,21 @@ public abstract class AbstractSchemaManager
             puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(pu);
 
             kundera_client = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_CLIENT);
-            port = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_PORT);
-            host = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_NODES);
-            databaseName = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
-            useSecondryIndex = MetadataUtils.useSecondryIndex(pu);
-            // get type of schema of operation.
-            operation = puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE);
-
-            // invoke handle operation.
-            if (operation != null && initiateClient())
+            if (kundera_client.equalsIgnoreCase(client.toString()))
             {
-                tableInfos = puToSchemaCol.get(pu);
-                handleOperations(tableInfos);
+                port = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_PORT);
+                host = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_NODES);
+                databaseName = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
+                useSecondryIndex = MetadataUtils.useSecondryIndex(pu);
+                // get type of schema of operation.
+                operation = puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE);
+
+                // invoke handle operation.
+                if (operation != null && initiateClient())
+                {
+                    tableInfos = puToSchemaCol.get(pu);
+                    handleOperations(tableInfos);
+                }
             }
         }
     }

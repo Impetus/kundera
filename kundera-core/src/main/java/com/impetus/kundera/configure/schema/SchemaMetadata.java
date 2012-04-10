@@ -30,21 +30,21 @@ public final class SchemaMetadata
 {
 
     /** The pu to schema col. */
-    private Map<String, List<TableInfo>> puToSchemaCol;
+    private Map<String, List<TableInfo>> puToSchemaMetadata;
 
     /**
      * Gets the pu to schema col.
      * 
-     * @return the puToSchemaCol
-     * TODO: Kuldeep: give it a valid name
+     * @return the puToSchemaCol TODO: Kuldeep: give it a valid name
      */
-    public Map<String, List<TableInfo>> getPuToSchemaCol()
+
+    public Map<String, List<TableInfo>> getPuToSchemaMetadata()
     {
-        if (puToSchemaCol == null)
+        if (puToSchemaMetadata == null)
         {
-            puToSchemaCol = new HashMap<String, List<TableInfo>>();
+            puToSchemaMetadata = new HashMap<String, List<TableInfo>>();
         }
-        return puToSchemaCol;
+        return puToSchemaMetadata;
     }
 
     /**
@@ -53,8 +53,8 @@ public final class SchemaMetadata
      * @param puToSchemaCol
      *            the puToSchemaCol to set
      */
-    public void setPuToSchemaCol(Map<String, List<TableInfo>> puToSchemaCol)
+    public void setPuToSchemaMetadata(Map<String, List<TableInfo>> puToSchemaCol)
     {
-        this.puToSchemaCol = puToSchemaCol;
+        this.puToSchemaMetadata = puToSchemaCol;
     }
 }

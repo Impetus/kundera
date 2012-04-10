@@ -47,7 +47,7 @@ import com.impetus.kundera.configure.schema.api.SchemaManager;
  * Manages auto schema operation defined in {@code ScheamOperationType}.
  * 
  * @author Kuldeep.kumar
- *
+ * 
  */
 public class CassandraSchemaManager extends AbstractSchemaManager implements SchemaManager
 {
@@ -67,14 +67,15 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     public void exportSchema()
     {
-        super.exportSchema();
+        super.exportSchema(ClientType.PELOPS);
 
     }
 
     /**
      * create_drop method creates schema and table for the list of tableInfos.
      * 
-     * @param tableInfos list of TableInfos.
+     * @param tableInfos
+     *            list of TableInfos.
      */
     protected void create_drop(List<TableInfo> tableInfos)
     {
@@ -85,7 +86,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     /**
      * Creates schema and table for the list of tableInfos.
      * 
-     * @param tableInfos list of TableInfos.
+     * @param tableInfos
+     *            list of TableInfos.
      */
     protected void create(List<TableInfo> tableInfos)
     {
@@ -118,7 +120,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     /**
      * update method update schema and table for the list of tableInfos
      * 
-     * @param tableInfos list of TableInfos.
+     * @param tableInfos
+     *            list of TableInfos.
      */
     protected void update(List<TableInfo> tableInfos)
     {
@@ -152,7 +155,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     /**
      * validate method validate schema and table for the list of tableInfos.
      * 
-     * @param tableInfos list of TableInfos.
+     * @param tableInfos
+     *            list of TableInfos.
      */
     protected void validate(List<TableInfo> tableInfos)
     {
@@ -181,7 +185,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     /**
      * check for Tables method check the existence of schema and table
      * 
-     * @param tableInfos list of TableInfos and ksDef object of KsDef
+     * @param tableInfos
+     *            list of TableInfos and ksDef object of KsDef
      */
     private void onValidateTables(List<TableInfo> tableInfos, KsDef ksDef)
     {
@@ -223,7 +228,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     /**
      * add tables to Keyspace method add the table to given keyspace.
      * 
-     * @param tableInfos list of TableInfos and ksDef object of KsDef.
+     * @param tableInfos
+     *            list of TableInfos and ksDef object of KsDef.
      */
     private void addTablesToKeyspace(List<TableInfo> tableInfos, KsDef ksDef) throws InvalidRequestException,
             TException, SchemaDisagreementException
@@ -254,7 +260,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * create keyspace and table method create keyspace and table for the list
      * of tableInfos
      * 
-     * @param tableInfos list of TableInfos.
+     * @param tableInfos
+     *            list of TableInfos.
      */
     private void createKeyspaceAndTables(List<TableInfo> tableInfos)
     {
@@ -290,7 +297,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     /**
      * create keyspace method create keyspace for given ksDef.
      * 
-     * @param ksDef a Object of KsDef.
+     * @param ksDef
+     *            a Object of KsDef.
      */
     private void createKeyspace(KsDef ksDef) throws InvalidRequestException, SchemaDisagreementException, TException
     {

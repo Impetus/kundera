@@ -117,17 +117,8 @@ public class MongoDBQuery extends QueryImpl
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.query.QueryImpl#handleAssociations(com.impetus.kundera
-     * .metadata.model.EntityMetadata, com.impetus.kundera.client.Client,
-     * java.util.List, java.util.List, boolean)
-     */
     @Override
-    protected List<Object> handleAssociations(EntityMetadata m, Client client, List<EntitySaveGraph> graphs,
-            List<String> relationNames, boolean isParent)
+    protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
         // TODO : required to modify client return relation.
         // if it is a parent..then find data related to it only
@@ -138,15 +129,14 @@ public class MongoDBQuery extends QueryImpl
         {
             BasicDBObject orderByClause = getOrderByClause();
             ls = ((MongoDBClient) client).loadData(m, createMongoQuery(m, getKunderaQuery().getFilterClauseQueue()),
-                    getKunderaQuery().getResult(), relationNames, orderByClause);
+                    getKunderaQuery().getResult(), m.getRelationNames(), orderByClause);
         }
         catch (Exception e)
         {
             throw new QueryHandlerException(e.getMessage());
         }
 
-        return handleGraph(ls, graphs, client, m);
-
+        return setRelationEntities(ls, client, m);
     }
 
     /*

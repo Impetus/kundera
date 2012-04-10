@@ -23,13 +23,13 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
-import org.apache.hadoop.hbase.TableExistsException;
 import org.apache.hadoop.hbase.TableNotFoundException;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
@@ -62,7 +62,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      */
     public void exportSchema()
     {
-        super.exportSchema();
+        super.exportSchema(ClientType.HBASE);
     }
 
     /**
@@ -122,8 +122,16 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             }
             catch (IOException e)
             {
-                logger.error("check for network connection caused by" + e.getMessage());
-                throw new SchemaGenerationException(e, "Hbase");
+                try
+                {
+                    admin.createTable(hTableDescriptor);
+                }
+                catch (IOException e1)
+                {
+                    logger.error("check for network connection caused by" + e.getMessage());
+                    throw new SchemaGenerationException(e, "Hbase");
+                }
+
             }
         }
     }
@@ -185,37 +193,23 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             }
             catch (TableNotFoundException e)
             {
-                logger.error("table doesn't exist caused by " + e.getMessage());
-                throw new SchemaGenerationException(e, "Hbase");
+                logger.info("creating table " + tableInfo.getTableName());
             }
-            catch (IOException e)
+            catch (IOException ioex)
             {
-                logger.error("either table isn't in enabled state or some network problem caused by " + e.getMessage());
-                throw new SchemaGenerationException(e, "Hbase");
+                logger.error("either table isn't in enabled state or some network problem caused by "
+                        + ioex.getMessage());
+                throw new SchemaGenerationException(ioex, "Hbase");
             }
             HTableDescriptor hTableDescriptor = getTableMetaData(tableInfo);
             try
             {
                 admin.createTable(hTableDescriptor);
             }
-            catch (IllegalArgumentException e)
+            catch (IOException ioex1)
             {
-                throw new SchemaGenerationException(
-                        "table name is reserved can't create table of this name please change your table name ", e,
-                        "Hbase");
-            }
-            catch (MasterNotRunningException e)
-            {
-                throw new SchemaGenerationException("master is not running please check your master state ", e, "Hbase");
-            }
-            catch (TableExistsException e)
-            {
-                throw new SchemaGenerationException("table already exists please change your table name ", e, "Hbase");
-            }
-            catch (IOException e)
-            {
-                logger.error("table isn't in enabled state caused by" + e.getMessage());
-                throw new SchemaGenerationException(e, "Hbase");
+                logger.error("table isn't in enabled state caused by" + ioex1.getMessage());
+                throw new SchemaGenerationException(ioex1, "Hbase");
             }
         }
     }
@@ -246,7 +240,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 }
             }
         }
-        admin=null;
+        admin = null;
     }
 
     /**
@@ -280,6 +274,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         }
         return false;
     }
+
     /**
      * get Table metadata method returns the HTableDescriptor of table for given
      * tableInfo
@@ -308,5 +303,4 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         return hTableDescriptor;
     }
 
-    
 }

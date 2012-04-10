@@ -67,30 +67,12 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.persistence.EntityReader#findById(java.lang.String,
-     * com.impetus.kundera.metadata.model.EntityMetadata, java.util.List,
-     * com.impetus.kundera.client.Client)
-     */
     @Override
     public EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client)
     {
         return super.findById(primaryKey, m, relationNames, client);
 
-/*        try
-        {
-            return (EnhanceEntity) client.find(m.getEntityClazz(), primaryKey.toString());
-        }
-        catch (Exception e)
-        {
-            log.error("Error while handling find by id");
-            throw new PersistenceException(e.getMessage());
-        }
-
-*/    }
+    }
 
     /**
      * Method responsible for reading bacl entity and relations using secondary
@@ -113,7 +95,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     {
         List<EnhanceEntity> ls = null;
 
-        boolean isRowKeyQuery = conditions!= null? conditions.keySet().iterator().next():false;
+        boolean isRowKeyQuery = conditions != null ? conditions.keySet().iterator().next() : false;
 
         // If Query is not for find by range.
         if (!isRowKeyQuery)

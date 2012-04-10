@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
+
 package com.impetus.kundera.configure;
 
 import java.util.ArrayList;
@@ -23,64 +39,80 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.TableProcessor;
-import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
+/**
+ * SchemaConfigurationTest class test the creation of map puToSchemaMetadata .
+ * 
+ * @author Kuldeep.Kumar
+ * 
+ */
 public class SchemaConfigurationTest
 {
+    
+    /** The configuration. */
     private SchemaConfiguration configuration;
 
-    private Map<String, List<TableInfo>> puToSchemaCol;
+    /** The pu to schema metadata. */
+    private Map<String, List<TableInfo>> puToSchemaMetadata;
 
+    /**
+     * Sets the up before class.
+     *
+     * @throws Exception the exception
+     */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
     }
 
+    /**
+     * Tear down after class.
+     *
+     * @throws Exception the exception
+     */
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
     }
 
+    /**
+     * Sets the up.
+     *
+     * @throws Exception the exception
+     */
     @Before
     public void setUp() throws Exception
     {
         configuration = new SchemaConfiguration("cassandra");
-        puToSchemaCol = new HashMap<String, List<TableInfo>>();
+        puToSchemaMetadata = new HashMap<String, List<TableInfo>>();
     }
 
+    /**
+     * Tear down.
+     *
+     * @throws Exception the exception
+     */
     @After
     public void tearDown() throws Exception
     {
     }
 
+    /**
+     * Test configure.
+     */
     @Test
     public void testConfigure()
     {
         intialize();
         configuration.configure();
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        puToSchemaCol = appMetadata.getSchemaMetadata().getPuToSchemaCol();
-        Assert.assertEquals(1, puToSchemaCol.size());
-////        Assert.assertNotNull(puToSchemaCol.containsKey("cassandra"));
-////        List<TableInfo> tableInfos = puToSchemaCol.get("cassandra");
-//        Assert.assertNotNull(tableInfos);
-//
-//        Assert.assertEquals(8, tableInfos.size());
-
-        // Assert.assertEquals("class java.lang.String", tableInfos.get(0)
-        // .getTableIdType());
-        // Assert.assertEquals("PERSONNEL", tableInfos.get(0).getTableName());
-        // Assert.assertEquals("Super", tableInfos.get(0).getType());
-        // List<EmbeddedColumnInfo> columnInfos = tableInfos.get(0)
-        // .getEmbeddedColumnMetadatas();
-        // Assert.assertEquals(2, columnInfos.size());
-
-        // Assert.assertEquals("class java.lang.String", columnInfos.get(0)
-        // .getType());
-        // Assert.assertEquals(false, columnInfos.get(0).isIndexable());
-
+        puToSchemaMetadata = appMetadata.getSchemaMetadata().getPuToSchemaMetadata();
+        Assert.assertEquals(1, puToSchemaMetadata.size());
     }
 
+    /**
+     * Intialize.
+     */
     private void intialize()
     {
         Map<String, Object> props = new HashMap<String, Object>();
@@ -155,7 +187,8 @@ public class SchemaConfigurationTest
         metaModel.addEntityMetadata(CoreEntityPersonUni1ToM.class, m7);
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
-//        EntityManagerFactoryImpl impl = new EntityManagerFactoryImpl(puMetadata, props);
+        // EntityManagerFactoryImpl impl = new
+        // EntityManagerFactoryImpl(puMetadata, props);
     }
 
 }

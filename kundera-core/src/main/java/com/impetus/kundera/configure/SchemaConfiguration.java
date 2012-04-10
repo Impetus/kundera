@@ -48,7 +48,7 @@ public class SchemaConfiguration implements Configuration
     /** Holding persistence unit instances. */
     private String[] persistenceUnits;
 
-    private Map<String, List<TableInfo>> puToSchemaCol;
+    private Map<String, List<TableInfo>> puToSchemaMetadata;
 
     /**
      * Constructor using persistence units as parameter.
@@ -67,15 +67,15 @@ public class SchemaConfiguration implements Configuration
 
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 
-        puToSchemaCol = appMetadata.getSchemaMetadata().getPuToSchemaCol();
+        puToSchemaMetadata = appMetadata.getSchemaMetadata().getPuToSchemaMetadata();
 
         // TODO, FIXME: Refactoring is required.
         for (String persistenceUnit : persistenceUnits)
         {
             if (getKunderaProperty(persistenceUnit) != null)
             {
-                log.info("creating schema generation map");
-                List<TableInfo> tableInfos = puToSchemaCol.get(persistenceUnit);
+                log.info("creating puToSchemaMetadata map for pu " + persistenceUnit);
+                List<TableInfo> tableInfos = puToSchemaMetadata.get(persistenceUnit);
                 // if no TableInfos for given persistence unit.
                 if (tableInfos == null)
                 {
@@ -200,7 +200,7 @@ public class SchemaConfiguration implements Configuration
                                 // targetTableInfo.setAction(SchemaAction.instanceOf(getKunderaProperty(persistenceUnit)));
                                 if (!pu.equals(persistenceUnit))
                                 {
-                                    List<TableInfo> targetTableInfos = puToSchemaCol.get(pu);
+                                    List<TableInfo> targetTableInfos = puToSchemaMetadata.get(pu);
                                     if (targetTableInfos == null)
                                     {
                                         targetTableInfos = new ArrayList<TableInfo>();
@@ -222,7 +222,7 @@ public class SchemaConfiguration implements Configuration
                                         targetTableInfo.setColumnMetadatas(columnInfos);
                                         targetTableInfos.add(targetTableInfo);
                                     }
-                                    puToSchemaCol.put(pu, targetTableInfos);
+                                    puToSchemaMetadata.put(pu, targetTableInfos);
                                 }
                                 else
                                 {
@@ -267,7 +267,7 @@ public class SchemaConfiguration implements Configuration
                         tableInfos.add(tableInfo);
                     }
                 }
-                puToSchemaCol.put(persistenceUnit, tableInfos);
+                puToSchemaMetadata.put(persistenceUnit, tableInfos);
             }
         }
     }
@@ -321,7 +321,7 @@ public class SchemaConfiguration implements Configuration
         ColumnInfo columnInfo = new ColumnInfo();
         columnInfo.setColumnName(joinColumnName);
         columnInfo.setIndexable(true);
-        columnInfo.setType(joinColumnName);
+        // columnInfo.setType();
         return columnInfo;
     }
 

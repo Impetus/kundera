@@ -32,6 +32,7 @@ import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -305,6 +306,15 @@ public class MetadataUtils
         }
 
         return null;
+    }
+    
+    public static boolean isParent(EntityMetadata m) {
+        for(Relation relation : m.getRelations()) {
+            if(Relation.ForeignKey.ONE_TO_MANY.equals(relation.getType())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

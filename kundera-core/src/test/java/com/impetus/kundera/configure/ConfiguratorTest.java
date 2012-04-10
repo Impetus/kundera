@@ -28,16 +28,17 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
- * junit test case for {@link Configurator}
- * 
+ * junit test case for {@link Configurator}.
+ *
  * @author vivek.mishra
- * 
  */
 public class ConfiguratorTest
 {
 
     /**
-     * @throws java.lang.Exception
+     * Sets the up.
+     *
+     * @throws Exception the exception
      */
     @Before
     public void setUp() throws Exception
@@ -45,6 +46,9 @@ public class ConfiguratorTest
 
     }
 
+    /**
+     * Test valid configure.
+     */
     @Test
     public void testValidConfigure()
     {
@@ -70,6 +74,9 @@ public class ConfiguratorTest
         Assert.assertNotNull(puMetadata.getPersistenceUnitRootUrl());
     }
 
+    /**
+     * Test invalid configure.
+     */
     @Test
     public void testInvalidConfigure()
     {
@@ -91,7 +98,9 @@ public class ConfiguratorTest
     }
 
     /**
-     * @throws java.lang.Exception
+     * Tear down.
+     *
+     * @throws Exception the exception
      */
     @After
     public void tearDown() throws Exception

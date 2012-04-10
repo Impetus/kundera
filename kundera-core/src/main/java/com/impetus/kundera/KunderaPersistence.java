@@ -42,9 +42,6 @@ public class KunderaPersistence implements PersistenceProvider
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(KunderaPersistence.class);
 
-    // /** The loaded. */
-    // private static Boolean loaded = false;
-
     /**
      * Instantiates a new kundera persistence.
      */
@@ -55,26 +52,12 @@ public class KunderaPersistence implements PersistenceProvider
         new CoreLoader().load();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
-     * (javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
-     */
     @Override
     public final EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map)
     {
         return createEntityManagerFactory(info.getPersistenceUnitName(), map);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * javax.persistence.spi.PersistenceProvider#createEntityManagerFactory(
-     * java.lang.String, java.util.Map)
-     */
     @Override
     public synchronized final EntityManagerFactory createEntityManagerFactory(String persistenceUnit, Map map)
     {

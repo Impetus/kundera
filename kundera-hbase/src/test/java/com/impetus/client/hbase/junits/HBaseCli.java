@@ -28,6 +28,7 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,27 +36,75 @@ import org.slf4j.LoggerFactory;
  * Embedded HBase client.
  * 
  * @author vivek.mishra
- *
+ * 
  */
 public class HBaseCli
 {
+    /** The utility. */
+    public static HBaseTestingUtility utility;
+
+    private static Boolean isStarted = false;
+
     private static final Logger logger = LoggerFactory.getLogger(HBaseCli.class);
+
     public static void main(String arg[])
     {
         HBaseCli cli = new HBaseCli();
         cli.init();
     }
-    
+
+    public static void startCluster()
+    {
+        if (!isStarted)
+        {
+            File workingDirectory = new File("./");
+            Configuration conf = new Configuration();
+            System.setProperty("test.build.data", workingDirectory.getAbsolutePath());
+            conf.set("test.build.data", new File(workingDirectory, "zookeeper").getAbsolutePath());
+            conf.set("fs.default.name", "file:///");
+            conf.set("zookeeper.session.timeout", "180000");
+            conf.set("hbase.zookeeper.peerport", "2888");
+            conf.set("hbase.zookeeper.property.clientPort", "2181");
+            try
+            {
+                conf.set(HConstants.HBASE_DIR, new File(workingDirectory, "hbase").toURI().toURL().toString());
+            }
+            catch (MalformedURLException e1)
+            {
+                logger.error(e1.getMessage());
+            }
+
+            Configuration hbaseConf = HBaseConfiguration.create(conf);
+            utility = new HBaseTestingUtility(hbaseConf);
+            try
+            {
+                MiniZooKeeperCluster zkCluster = new MiniZooKeeperCluster(conf);
+                zkCluster.setClientPort(2181);
+                zkCluster.setTickTime(18000);
+                zkCluster.startup(utility.setupClusterTestBuildDir());
+                utility.setZkCluster(zkCluster);
+                utility.startMiniCluster();
+                utility.getHbaseCluster().startMaster();
+            }
+            catch (Exception e)
+            {
+                logger.error(e.getMessage());
+                throw new RuntimeException(e);
+            }
+            isStarted = true;
+        }
+    }
+
     public void init()
     {
         File workingDirectory = new File("./");
         Configuration conf = new Configuration();
-        System.setProperty( "test.build.data", workingDirectory.getAbsolutePath() );
-        conf.set( "test.build.data", new File( workingDirectory, "zookeeper" ).getAbsolutePath() );
-        conf.set( "fs.default.name", "file:///" );
+        System.setProperty("test.build.data", workingDirectory.getAbsolutePath());
+        conf.set("test.build.data", new File(workingDirectory, "zookeeper").getAbsolutePath());
+        conf.set("fs.default.name", "file:///");
         try
         {
-            conf.set( HConstants.HBASE_DIR, new File( workingDirectory, "hbase" ).toURI().toURL().toString() );
+            conf.set(HConstants.HBASE_DIR, new File(workingDirectory, "hbase").toURI().toURL().toString());
         }
         catch (MalformedURLException e1)
         {
@@ -71,10 +120,10 @@ public class HBaseCli
             utility.getHBaseAdmin().disableTable("test");
             utility.getHBaseAdmin().addColumn("test", new HColumnDescriptor("testColFamily"));
             utility.getHBaseAdmin().enableTable("test");
-            logger.info("Server is running : " +utility.getHBaseAdmin().isMasterRunning());
-            
+            logger.info("Server is running : " + utility.getHBaseAdmin().isMasterRunning());
+
             Put p = new Put(Bytes.toBytes("1"));
-            p.add(Bytes.toBytes("testColFamily"), Bytes.toBytes("col1"),"col1".getBytes());
+            p.add(Bytes.toBytes("testColFamily"), Bytes.toBytes("col1"), "col1".getBytes());
             table.put(p);
             logger.info("Table exist:" + utility.getHBaseAdmin().tableExists("test"));
             Get g = new Get(Bytes.toBytes("1"));

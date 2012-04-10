@@ -88,7 +88,8 @@ public class OneToManyRelationMetadataProcessor extends AbstractEntityFieldProce
             relation.setJoinTableMetadata(jtMetadata);
         }
 
-        metadata.addRelation(relationField.getName(), relation);
+        metadata.addRelation(relationField.getName(), relation);   
+        metadata.setParent(true);
 
     }
 

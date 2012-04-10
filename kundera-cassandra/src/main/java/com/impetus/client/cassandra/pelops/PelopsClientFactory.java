@@ -76,7 +76,7 @@ public class PelopsClientFactory extends GenericClientFactory
         reader = new CassandraEntityReader();
 
         schemaManager = new CassandraSchemaManager();
-        schemaManager.exportSchema();
+//        schemaManager.exportSchema();
     }
 
     /*
@@ -139,7 +139,7 @@ public class PelopsClientFactory extends GenericClientFactory
     public void destroy()
     {
         indexManager.close();
-        schemaManager.dropSchema();
+//        schemaManager.dropSchema();
         // Pelops.shutdown();
     }
 

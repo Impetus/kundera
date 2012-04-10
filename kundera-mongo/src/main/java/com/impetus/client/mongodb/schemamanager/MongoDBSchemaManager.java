@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
@@ -60,7 +61,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     public void exportSchema()
     {
-        super.exportSchema();
+        super.exportSchema(ClientType.MONGODB);
     }
 
     /**
@@ -104,32 +105,33 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     protected void validate(List<TableInfo> tableInfos)
     {
-        List<String> dbNames = m.getDatabaseNames();
-        boolean found = false;
-        for (String dbName : dbNames)
+        // List<String> dbNames = m.getDatabaseNames();
+        // boolean found = false;
+        // for (String dbName : dbNames)
+        // {
+        // if (dbName.equalsIgnoreCase(databaseName))
+        // {
+        // found = true;
+        // }
+        // }
+        // if (!found)
+        // {
+        // logger.error("database " + databaseName + "does not exist");
+        // throw new SchemaGenerationException("mongoDb", databaseName);
+        // }
+        // else
+        // {
+        db = m.getDB(databaseName);
+        // }
+
+        if (db == null)
         {
-            if (dbName.equalsIgnoreCase(databaseName))
-            {
-                found = true;
-            }
-        }
-        if (!found)
-        {
+         
             logger.error("database " + databaseName + "does not exist");
             throw new SchemaGenerationException("mongoDb", databaseName);
         }
         else
         {
-            db = m.getDB(databaseName);
-        }
-
-//        if (db == null)
-//        {
-//            logger.error("database " + databaseName + "does not exist");
-//            throw new SchemaGenerationException("mongoDb", databaseName);
-//        }
-//        else
-//        {
 
             for (TableInfo tableInfo : tableInfos)
             {
@@ -140,7 +142,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
                 }
             }
         }
-//    }
+    }
 
     /**
      * drop schema method drop the table
@@ -172,8 +174,8 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             int localport = Integer.parseInt(port);
             try
             {
-                db = m.getDB(puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_KEYSPACE));
                 m = new Mongo(host, localport);
+                db = m.getDB(puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_KEYSPACE));
             }
             catch (UnknownHostException e)
             {

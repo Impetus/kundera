@@ -39,6 +39,7 @@ import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
@@ -61,16 +62,16 @@ import org.scale7.cassandra.pelops.pool.IThriftPool;
 import com.impetus.client.cassandra.pelops.PelopsDataHandler.ThriftRow;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
-import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
@@ -86,7 +87,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * @author animesh.kumar
  * @since 0.1
  */
-public class PelopsClient extends ClientBase implements Client
+public class PelopsClient implements Client
 {
 
     /** log for this class. */
@@ -383,7 +384,7 @@ public class PelopsClient extends ClientBase implements Client
                 addRelation(entityGraph, metadata, entityGraph.getRevFKeyName(), entityGraph.getRevFKeyValue(), tf);
             }
 
-            writeEntity(metadata, entity, tf);
+            onPersist(metadata, entity, tf);
 
             if (entityGraph.getRevParentClass() != null)
             {
@@ -442,11 +443,24 @@ public class PelopsClient extends ClientBase implements Client
                 }
             }
 
-            // Write this entity to database
-            writeEntity(metadata, entity, tf);
+            onPersist(metadata, entity, tf);
 
-            // Index This Node
-            indexNode(node, metadata, getIndexManager());
+            // Index Entity
+            if (parents != null)
+            {
+                for (NodeLink parentNodeLink : parents.keySet())
+                {
+                    getIndexManager().write(metadata, entity,
+                            (String) parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
+                            parents.get(parentNodeLink).getDataClass());
+                }
+
+            }
+            else
+            {
+                getIndexManager().write(metadata, entity);
+            }
+
         }
         catch (Exception e)
         {
@@ -511,7 +525,7 @@ public class PelopsClient extends ClientBase implements Client
                 addRelation(entitySaveGraph, metadata, rlName, rlValue, tf);
             }
 
-            writeEntity(metadata, childEntity, tf);
+            onPersist(metadata, childEntity, tf);
             onIndex(childEntity, entitySaveGraph, metadata, rlValue);
         }
         catch (Exception e)
@@ -1145,7 +1159,7 @@ public class PelopsClient extends ClientBase implements Client
      * @param tf
      *            the tf
      */
-    private void writeEntity(EntityMetadata metadata, Object entity, PelopsDataHandler.ThriftRow tf)
+    private void onPersist(EntityMetadata metadata, Object entity, PelopsDataHandler.ThriftRow tf)
     {
         Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
