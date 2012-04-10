@@ -30,10 +30,9 @@ public class PersistenceCacheManager
         this.persistenceCache = pc;
     }
 
-    public static void clearPersistenceCache()
+    public void clearPersistenceCache()
     {
-        PersistenceCache pc = PersistenceCache.INSTANCE;
-        pc.clean();
+        persistenceCache.clean();
 
     } // cleanIndividualCache(pc.getMainCache());
     // cleanIndividualCache(pc.getEmbeddedCache());
