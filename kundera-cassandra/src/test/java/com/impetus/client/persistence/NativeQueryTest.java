@@ -22,7 +22,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import junit.framework.Assert;
 
@@ -73,7 +75,8 @@ public class NativeQueryTest
     public void testCreateNativeQuery()
     {
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        EntityManager em = new EntityManagerImpl(emf);
+        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL, 
+                PersistenceContextType.EXTENDED);
         String nativeSql = "Select * from Cassandra c";
         QueryImpl q = (QueryImpl) em.createNativeQuery(nativeSql, CassandraEntitySample.class);
         Assert.assertEquals(nativeSql, q.getJPAQuery());
@@ -91,7 +94,8 @@ public class NativeQueryTest
                     + " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
             String useNativeSql = "USE test";
 
-            EntityManager em = new EntityManagerImpl(emf);
+            EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL, 
+                    PersistenceContextType.EXTENDED);
             Query q = em.createNativeQuery(nativeSql, CassandraEntitySample.class);
 //            q.getResultList();
             q.executeUpdate();
@@ -109,7 +113,8 @@ public class NativeQueryTest
     public void testCreateInsertColumnFamilyQuery()
     {
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        EntityManager em = new EntityManagerImpl(emf);
+        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL, 
+                PersistenceContextType.EXTENDED);
         
         // create column family
         String colFamilySql = "CREATE COLUMNFAMILY users (key varchar PRIMARY KEY,full_name varchar, birth_date int,state varchar)";

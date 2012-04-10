@@ -78,6 +78,7 @@ public class KunderaPersistence implements PersistenceProvider
     @Override
     public synchronized final EntityManagerFactory createEntityManagerFactory(String persistenceUnit, Map map)
     {
+        //TODO: This may be a comma separated PU list, synchronizing on this list may not be intended 
         synchronized (persistenceUnit)
         {
             // if (!loaded)

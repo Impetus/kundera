@@ -29,6 +29,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.metamodel.Metamodel;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
@@ -73,6 +74,9 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     /** Persistence Context Type (Transaction/ Extended) */
     private PersistenceContextType persistenceContextType;
     
+    /** Transaction Type (JTA/ RESOURCE_LOCAL) */
+    private PersistenceUnitTransactionType transactionType;
+    
     private PersistenceCache persistenceCache;
     
     FlushManager flushStackManager;    
@@ -83,17 +87,18 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
      * @param factory
      *            the factory
      */
-    public EntityManagerImpl(EntityManagerFactory factory)
+    public EntityManagerImpl(EntityManagerFactory factory, PersistenceUnitTransactionType transactionType, PersistenceContextType persistenceContextType)
     {
         this.factory = factory;
         logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
         session = new EntityManagerSession((Cache) factory.getCache());  
         persistenceCache = new PersistenceCache();
         
-        persistenceDelegator = new PersistenceDelegator(session, persistenceCache);
+        persistenceDelegator = new PersistenceDelegator(session, persistenceCache);        
         
-        //For Application managed persistence context, type is always EXTENDED
-        persistenceContextType = PersistenceContextType.EXTENDED;
+        this.persistenceContextType = persistenceContextType; 
+        this.transactionType = transactionType;
+        
         logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
     }
 
@@ -105,9 +110,9 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
      * @param properties
      *            the properties
      */
-    public EntityManagerImpl(EntityManagerFactory factory, Map properties)
+    public EntityManagerImpl(EntityManagerFactory factory, Map properties, PersistenceUnitTransactionType transactionType, PersistenceContextType persistenceContextType)
     {
-        this(factory);
+        this(factory, transactionType, persistenceContextType);
         this.properties = properties;
     }
 
@@ -334,9 +339,9 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     @Override
     public final EntityTransaction getTransaction()
     {        
-        /*if (this.transactionType == PersistenceUnitTransactionType.JTA) {
+        if (this.transactionType == PersistenceUnitTransactionType.JTA) {
            throw new IllegalStateException("A JTA EntityManager cannot use getTransaction()");
-        }*/
+        }
         return this;
     }
 
@@ -608,11 +613,6 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
         return !closed;
     }
     
-    private void validate() {
-        checkClosed();
-        checkTransactionNeeded();
-    }
-
     /**
      * Check closed.
      */
@@ -626,7 +626,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     
     private void checkTransactionNeeded() {
         if ((this.persistenceContextType != PersistenceContextType.TRANSACTION) || (persistenceDelegator.isTransactionInProgress()))
-        return;
+            return;
         
         throw new TransactionRequiredException("no transaction is in progress for a TRANSACTION type persistence context");
     }
