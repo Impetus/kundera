@@ -446,7 +446,10 @@ public class Node implements NodeStateContext
     @Override
     public void flush()
     {
-        getCurrentNodeState().handleFlush(this);
+        if(isDirty())
+        {
+            getCurrentNodeState().handleFlush(this);
+        }
     } 
     
     
