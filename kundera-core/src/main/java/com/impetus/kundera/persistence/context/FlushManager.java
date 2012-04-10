@@ -198,9 +198,11 @@ public class FlushManager
                 }
 
                 // Finally process this child node
-                if (!childNode.isTraversed())
+                if (!childNode.isTraversed() && childNode.isDirty())
                 {
-//                    addNodesToFlushStack(pc, childNode);
+                    addNodesToFlushStack(pc, childNode);
+                } else if(!childNode.isDirty())
+                {
                     childNode.setTraversed(true);
                     flushStack.push(childNode);
                 }
