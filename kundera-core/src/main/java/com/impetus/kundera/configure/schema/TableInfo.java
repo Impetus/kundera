@@ -65,27 +65,34 @@ public class TableInfo
     @Override
     public boolean equals(Object obj)
     {
-        boolean result = false;
-        if (obj == null)
-        {
-            result = false;
-        }
-        else if (getClass() != obj.getClass())
-        {
-            result = false;
-        }
-        else
-        {
-            TableInfo tableInfo = (TableInfo) obj;
 
-            if (this.tableName != null && this.tableName.equals(tableInfo.tableName)
-                    && this.type.equals(tableInfo.type) && this.tableIdType.equals(tableInfo.tableIdType))
-            {
+        return obj != null && obj instanceof TableInfo && ((TableInfo) obj).tableName != null ? this.tableName != null
+                && this.tableName.equals(((TableInfo) obj).tableName)
+                && this.tableIdType.equals(((TableInfo) obj).tableIdType) : false;
 
-                result = true;
-            }
-        }
-        return result;
+        // boolean result = false;
+        // if (obj == null)
+        // {
+        // result = false;
+        // }
+        // else if (getClass() != obj.getClass())
+        // {
+        // result = false;
+        // }
+        // else
+        // {
+        // TableInfo tableInfo = (TableInfo) obj;
+        //
+        // if (this.tableName != null &&
+        // this.tableName.equals(tableInfo.tableName)
+        // && this.type.equals(tableInfo.type) &&
+        // this.tableIdType.equals(tableInfo.tableIdType))
+        // {
+        //
+        // result = true;
+        // }
+        // }
+        // return result;
     }
 
     /**

@@ -56,13 +56,18 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      */
     private static final Logger logger = LoggerFactory.getLogger(HBaseSchemaManager.class);
 
+    public HBaseSchemaManager(ClientType client)
+    {
+        super(client);
+    }
+
     @Override
     /**
      * Export schema handles the handleOperation method.
      */
     public void exportSchema()
     {
-        super.exportSchema(ClientType.HBASE);
+        super.exportSchema();
     }
 
     /**

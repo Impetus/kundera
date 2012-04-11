@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.SchemaConfiguration;
@@ -45,15 +46,17 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+
 /**
- * HbaseSchemaManagerTest class test the auto creation schema property in hbase data store.  
+ * HbaseSchemaManagerTest class test the auto creation schema property in hbase
+ * data store.
  * 
  * @author Kuldeep.Kumar
- *
+ * 
  */
-public class HbaseSchemaManagerTest
+public class HBaseSchemaManagerTest
 {
-    
+
     /** The pu metadata. */
     private PersistenceUnitMetadata puMetadata;
 
@@ -70,43 +73,48 @@ public class HbaseSchemaManagerTest
     private static HBaseAdmin admin;
 
     /** The Constant logger. */
-    private static final Logger logger = LoggerFactory.getLogger(HbaseSchemaManagerTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(HBaseSchemaManagerTest.class);
 
     /**
      * Sets the up.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Before
     public void setUp() throws Exception
     {
-        // HBaseCli.startCluster();
+        HBaseCli.startCluster();
         configuration = new SchemaConfiguration("hbase");
         getEntityManagerFactory();
-        puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata("hbase");
-        port = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_PORT);
-        host = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_NODES);
-        Configuration hadoopConf = new Configuration();
-        hadoopConf.set("hbase.master", host + ":" + port);
-        HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
-        try
-        {
-            admin = new HBaseAdmin(conf);
-        }
-        catch (MasterNotRunningException e)
-        {
-            logger.equals("master not running exception" + e.getMessage());
-        }
-        catch (ZooKeeperConnectionException e)
-        {
-            logger.equals("zookeeper connection exception" + e.getMessage());
-        }
+        // puMetadata =
+        // KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata("hbase");
+        // port =
+        // puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_PORT);
+        // host =
+        // puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_NODES);
+        // Configuration hadoopConf = new Configuration();
+        // hadoopConf.set("hbase.master", host + ":" + port);
+        // HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
+        // try
+        // {
+        // admin = new HBaseAdmin(conf);
+        // }
+        // catch (MasterNotRunningException e)
+        // {
+        // logger.equals("master not running exception" + e.getMessage());
+        // }
+        // catch (ZooKeeperConnectionException e)
+        // {
+        // logger.equals("zookeeper connection exception" + e.getMessage());
+        // }
     }
 
     /**
      * Tear down.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @After
     public void tearDown() throws Exception
@@ -121,16 +129,16 @@ public class HbaseSchemaManagerTest
     {
         try
         {
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntitySimple"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntitySuper"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUni1To1"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUniMTo1"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUni1ToM"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityPersonUni1ToM"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityPersonUni1To1"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityPersonUniMto1"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUni1To1PK"));
-            Assert.assertTrue(admin.isTableAvailable("HbaseEntityPersonUni1To1PK"));
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntitySimple"));
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntitySuper"));
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityAddressUni1To1"));
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityAddressUniMTo1"));
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityAddressUni1ToM"));
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityPersonUni1ToM"));
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityPersonUni1To1"));
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityPersonUniMto1"));
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityAddressUni1To1PK"));
+            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityPersonUni1To1PK"));
         }
         catch (IOException e)
         {
@@ -140,7 +148,7 @@ public class HbaseSchemaManagerTest
 
     /**
      * Gets the entity manager factory.
-     *
+     * 
      * @return the entity manager factory
      */
     private EntityManagerFactoryImpl getEntityManagerFactory()

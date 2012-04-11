@@ -55,13 +55,18 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(MongoDBSchemaManager.class);
 
+    public MongoDBSchemaManager(ClientType client)
+    {
+        super(client);
+    }
+
     @Override
     /**
      * Export schema handles the handleOperation method.
      */
     public void exportSchema()
     {
-        super.exportSchema(ClientType.MONGODB);
+        super.exportSchema();
     }
 
     /**
@@ -126,7 +131,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
 
         if (db == null)
         {
-         
+
             logger.error("database " + databaseName + "does not exist");
             throw new SchemaGenerationException("mongoDb", databaseName);
         }

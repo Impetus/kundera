@@ -30,6 +30,7 @@ import com.impetus.client.cassandra.query.CassandraEntityReader;
 import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
@@ -75,8 +76,8 @@ public class PelopsClientFactory extends GenericClientFactory
 
         reader = new CassandraEntityReader();
 
-        schemaManager = new CassandraSchemaManager();
-//        schemaManager.exportSchema();
+        schemaManager = new CassandraSchemaManager(ClientType.PELOPS);
+        schemaManager.exportSchema();
     }
 
     /*
@@ -139,7 +140,7 @@ public class PelopsClientFactory extends GenericClientFactory
     public void destroy()
     {
         indexManager.close();
-//        schemaManager.dropSchema();
+        schemaManager.dropSchema();
         // Pelops.shutdown();
     }
 

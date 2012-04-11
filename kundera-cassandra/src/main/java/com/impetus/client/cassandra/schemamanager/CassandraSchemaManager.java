@@ -61,14 +61,23 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private static final Logger logger = LoggerFactory.getLogger(CassandraSchemaManager.class);
 
+    /**
+     * Instantiates a new cassandra schema manager.
+     *
+     * @param client the client
+     */
+    public CassandraSchemaManager(ClientType client)
+    {
+        super(client);
+    }
+
     @Override
     /**
      * Export schema handles the handleOperation method.
      */
     public void exportSchema()
     {
-        super.exportSchema(ClientType.PELOPS);
-
+        super.exportSchema();
     }
 
     /**

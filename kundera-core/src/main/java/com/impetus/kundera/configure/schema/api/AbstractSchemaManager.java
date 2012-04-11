@@ -61,13 +61,18 @@ public abstract class AbstractSchemaManager
     /** The use secondry index variable. */
     protected boolean useSecondryIndex = false;
 
+    public AbstractSchemaManager(ClientType client)
+    {
+        kundera_client = client.name();
+    }
+
     // @Override
     /**
      * Export schema handles the handleOperation method.
      * 
      * @param hbase
      */
-    protected void exportSchema(ClientType client)
+    protected void exportSchema()
     {
 
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
@@ -79,9 +84,9 @@ public abstract class AbstractSchemaManager
         {
             // Get persistence unit metadata
             puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(pu);
-
-            kundera_client = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_CLIENT);
-            if (kundera_client.equalsIgnoreCase(client.toString()))
+            if (kundera_client != null
+                    && kundera_client.equalsIgnoreCase(puMetadata.getProperties().getProperty(
+                            PersistenceProperties.KUNDERA_CLIENT)))
             {
                 port = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_PORT);
                 host = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_NODES);

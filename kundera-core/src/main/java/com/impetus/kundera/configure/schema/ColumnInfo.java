@@ -42,7 +42,8 @@ public class ColumnInfo
     }
 
     /**
-     * Equals method compare two object of columnInfo on the basis of their name.
+     * Equals method compare two object of columnInfo on the basis of their
+     * name.
      * 
      * @param Object
      *            instance.
@@ -52,15 +53,13 @@ public class ColumnInfo
     @Override
     public boolean equals(Object obj)
     {
-       
-        /// if object's class and column name matches then return true;
-        
-        return obj != null && 
-                obj instanceof ColumnInfo &&
-                ((ColumnInfo) obj).columnName != null 
-                ?  this.columnName != null && this.columnName.equals(((ColumnInfo) obj).columnName)
-                : false; 
-                
+
+        // / if object's class and column name matches then return true;
+
+        return obj != null && obj instanceof ColumnInfo && ((ColumnInfo) obj).columnName != null ? this.columnName != null
+                && this.columnName.equals(((ColumnInfo) obj).columnName) && this.type.equals(((ColumnInfo) obj).type)
+                : false;
+
     }
 
     /**
