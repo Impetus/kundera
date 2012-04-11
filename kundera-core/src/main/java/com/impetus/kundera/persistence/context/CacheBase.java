@@ -152,7 +152,7 @@ public class CacheBase
     
     public Collection<Node> getAllNodes() {
         return nodeMappings.values();
-    }
+    }     
 
     /**
      * 
