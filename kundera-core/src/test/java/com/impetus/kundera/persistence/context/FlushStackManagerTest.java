@@ -107,13 +107,13 @@ public class FlushStackManagerTest
         
         Assert.assertEquals(4, pc.getMainCache().size());
         
-        
+        markAllNodeAsDirty();        
         flushManager.buildFlushStack(pc);        
         
         FlushStack fs = pc.getFlushStack();
-        System.out.println(fs);
         Assert.assertEquals(4, fs.size());      
-    } 
+    }
+    
     
     @Test
     public void test_1_1_1_1() {
@@ -124,9 +124,11 @@ public class FlushStackManagerTest
         
         ObjectGraph graph = graphBuilder.getObjectGraph(a, null, pc);
         pc.getMainCache().addGraphToCache(graph, pc);
+        
+        markAllNodeAsDirty();
         flushManager.buildFlushStack(pc);  
+        
         FlushStack fs = pc.getFlushStack();
-        System.out.println(fs);
         Assert.assertEquals(3, fs.size());
     }
     
@@ -141,9 +143,10 @@ public class FlushStackManagerTest
         
         ObjectGraph graph = graphBuilder.getObjectGraph(a, null, pc);
         pc.getMainCache().addGraphToCache(graph, pc);
+        
+        markAllNodeAsDirty();
         flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
-        System.out.println(fs);
         Assert.assertEquals(5, fs.size());
     }
     
@@ -166,9 +169,9 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graphb2, pc);
         pc.getMainCache().addGraphToCache(graphb3, pc);
         
+        markAllNodeAsDirty();
         flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
-        System.out.println(fs);
         Assert.assertEquals(5, fs.size());
     }
     
@@ -189,9 +192,10 @@ public class FlushStackManagerTest
         
         ObjectGraph graph = graphBuilder.getObjectGraph(a, null, pc);
         pc.getMainCache().addGraphToCache(graph, pc);
+        
+        markAllNodeAsDirty();
         flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
-        System.out.println(fs);
         Assert.assertEquals(7, fs.size());
     }
     
@@ -212,9 +216,10 @@ public class FlushStackManagerTest
         
         ObjectGraph graph = graphBuilder.getObjectGraph(a, null, pc);
         pc.getMainCache().addGraphToCache(graph, pc);
+        
+        markAllNodeAsDirty();
         flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
-        System.out.println(fs);
         Assert.assertEquals(6, fs.size());
     }
     
@@ -241,9 +246,9 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graph2, pc);
         pc.getMainCache().addGraphToCache(graph3, pc);
         
+        markAllNodeAsDirty();
         flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
-        System.out.println(fs);
         Assert.assertEquals(7, fs.size());
     }
     
@@ -271,9 +276,9 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graph1, pc);
         pc.getMainCache().addGraphToCache(graph2, pc);        
         
+        markAllNodeAsDirty();
         flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
-        System.out.println(fs);
         Assert.assertEquals(8, fs.size());
     }
     
@@ -301,13 +306,25 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graph1, pc);
         pc.getMainCache().addGraphToCache(graph2, pc);        
         
+        markAllNodeAsDirty();
         flushManager.buildFlushStack(pc);  
         FlushStack fs = pc.getFlushStack();
-        System.out.println(fs);
         Assert.assertEquals(9, fs.size());
     }
     
-   
+    /**
+     * 
+     */
+    private void markAllNodeAsDirty()
+    {
+        for(Node hn : pc.getMainCache().getHeadNodes()) {
+            hn.setDirty(true);
+        }
+        
+        for(Node node : pc.getMainCache().getAllNodes()) {
+            node.setDirty(true);
+        }
+    } 
 
    
 }
