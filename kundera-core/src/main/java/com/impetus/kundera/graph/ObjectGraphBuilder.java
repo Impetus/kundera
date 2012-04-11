@@ -24,6 +24,7 @@ import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.context.PersistenceCache;
@@ -149,7 +150,9 @@ public class ObjectGraphBuilder
     private Map<LinkProperty, Object> getLinkProperties(Relation relation) {
         Map<LinkProperty, Object> linkProperties = new HashMap<NodeLink.LinkProperty, Object>();
         
-        linkProperties.put(LinkProperty.LINK_NAME, relation.getJoinColumnName());
+        
+        
+        linkProperties.put(LinkProperty.LINK_NAME,MetadataUtils.getMappedName(relation) );
         linkProperties.put(LinkProperty.IS_SHARED_BY_PRIMARY_KEY, relation.isJoinedByPrimaryKey());
         linkProperties.put(LinkProperty.IS_BIDIRECTIONAL, !relation.isUnary());
         linkProperties.put(LinkProperty.IS_RELATED_VIA_JOIN_TABLE, relation.isRelatedViaJoinTable());
@@ -164,8 +167,8 @@ public class ObjectGraphBuilder
         //TODO: Add more link properties as required
         
         return linkProperties;      
-    }    
-    
+    }
+
     
     public static String getNodeId(Object pk, Object nodeData) {
         return nodeData.getClass().getName() + Constants.NODE_ID_SEPARATOR + (String)pk;

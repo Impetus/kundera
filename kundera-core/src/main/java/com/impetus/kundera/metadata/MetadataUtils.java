@@ -317,4 +317,24 @@ public class MetadataUtils
         return false;
     }
 
+
+    
+    /**
+     * Returns mapped relational name, in case of bi directional mapping, it will return back pKey name of associated entity.
+     * 
+     * @param relation holding relation.
+     * @return   mapped/join column name.
+     */
+    public static String getMappedName(Relation relation)
+    {
+        String joinColumn = relation.getJoinColumnName();
+        if(joinColumn == null)
+        {
+            Class clazz = relation.getTargetEntity();
+            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+            joinColumn = metadata.getIdColumn().getName();
+        }
+        return joinColumn;
+    }    
+    
 }

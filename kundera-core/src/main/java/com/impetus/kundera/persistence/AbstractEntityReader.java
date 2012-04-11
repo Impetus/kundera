@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.JoinColumn;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
@@ -88,7 +89,7 @@ public class AbstractEntityReader
                         || multiplicity.equals(Relation.ForeignKey.MANY_TO_ONE))
                 {
                     // Swapped relationship
-                    String relationName = relation.getJoinColumnName();
+                    String relationName = MetadataUtils.getMappedName(relation);
                     Object relationValue = e.getRelations() != null? e.getRelations().get(relationName):null;
 
                     childClass = relation.getTargetEntity();
@@ -136,8 +137,10 @@ public class AbstractEntityReader
                     childClass = relation.getTargetEntity();
                     childMetadata = pd.getMetadata(childClass);
 
+                    Field biDirectionalField = getBiDirectionalField(e.getEntity().getClass(), childClass);
+
                     childClient = pd.getClient(childMetadata);
-                    String relationName = relation.getJoinColumnName();
+                    String relationName = MetadataUtils.getMappedName(relation);
                     String relationalValue = e.getEntityId();
 
                     Field f = relation.getProperty();
@@ -207,11 +210,11 @@ public class AbstractEntityReader
                         {
                             for (Object child : childs)
                             {
-                                Field biDirectionalField = getBiDirectionalField(e.getEntity().getClass(), childClass);
+//                                biDirectionalField = getBiDirectionalField(e.getEntity().getClass(), childClass);
 
                                 onBiDirection(e, client, relation.getProperty(), biDirectionalField,
                                         relation.getJoinColumnName(), m,
-                                        relationValuesMap.get(relationalValue + childClass.getName()), childMetadata,
+                                        child, childMetadata,
                                         childClient);
 
                             }
@@ -1149,4 +1152,25 @@ public class AbstractEntityReader
 
         return biDirectionalField;
     }
+
+
+    /**
+     * Gets the relation field name.
+     * 
+     * @param relation
+     *            the relation
+     * @return the relation field name
+     */
+    protected String getJoinColumnName(Field relation)
+    {
+        String columnName = null;
+        JoinColumn ann = relation.getAnnotation(JoinColumn.class);
+        if (ann != null)
+        {
+            columnName = ann.name();
+
+        }
+        return columnName != null ? columnName : relation.getName();
+    }
+
 }
