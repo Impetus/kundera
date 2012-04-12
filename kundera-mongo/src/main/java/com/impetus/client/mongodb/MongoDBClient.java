@@ -26,13 +26,12 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.NodeLink;
-import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -52,7 +51,7 @@ import com.mongodb.DBObject;
  * 
  * @author impetusopensource
  */
-public class MongoDBClient extends ClientBase implements Client
+public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 {
 
     /** The is connected. */
@@ -738,6 +737,16 @@ public class MongoDBClient extends ClientBase implements Client
         query.put(columnName, columnValue);
         dbCollection.remove(query);
 
+    }
+
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getQueryImplementor()
+     */
+    @Override
+    public Class<MongoDBQuery> getQueryImplementor()
+    {
+        return MongoDBQuery.class;
     }
 
     

@@ -36,6 +36,7 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.criterion.Restrictions;
 
+import com.impetus.client.rdbms.query.RDBMSQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.graph.Node;
@@ -58,7 +59,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author vivek.mishra
  */
-public class HibernateClient extends ClientBase implements Client
+public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 {
 
     /** The persistence unit. */
@@ -716,6 +717,15 @@ public class HibernateClient extends ClientBase implements Client
     public EntityReader getReader()
     {
         return reader;
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getQueryImplementor()
+     */
+    @Override
+    public Class<RDBMSQuery> getQueryImplementor()
+    {
+        return RDBMSQuery.class;
     }
 
     /**

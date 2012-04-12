@@ -50,13 +50,14 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.LuceneQuery;
 
 /**
  * HBase client.
  * 
  * @author impetus
  */
-public class HBaseClient extends ClientBase implements Client
+public class HBaseClient extends ClientBase implements Client<LuceneQuery>
 {
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseClient.class);
@@ -552,6 +553,15 @@ public class HBaseClient extends ClientBase implements Client
     public EntityReader getReader()
     {
         return reader;
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getQueryImplementor()
+     */
+    @Override
+    public Class<LuceneQuery> getQueryImplementor()
+    {
+        return LuceneQuery.class;
     }
 
 }

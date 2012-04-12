@@ -60,6 +60,7 @@ import org.scale7.cassandra.pelops.Selector;
 import org.scale7.cassandra.pelops.pool.IThriftPool;
 
 import com.impetus.client.cassandra.pelops.PelopsDataHandler.ThriftRow;
+import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -87,7 +88,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * @author animesh.kumar
  * @since 0.1
  */
-public class PelopsClient implements Client
+public class PelopsClient implements Client<CassQuery>
 {
 
     /** log for this class. */
@@ -1296,5 +1297,15 @@ public class PelopsClient implements Client
         }
 
         return returnedEntities;
+    }
+
+ 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getQueryImplementor()
+     */
+    @Override
+    public Class<CassQuery> getQueryImplementor()
+    {
+        return CassQuery.class;
     }
 }
