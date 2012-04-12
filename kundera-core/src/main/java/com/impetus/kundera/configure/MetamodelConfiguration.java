@@ -286,7 +286,6 @@ class MetamodelConfiguration implements Configuration
                             }
                         }
                     }
-
                 }
             }
         }

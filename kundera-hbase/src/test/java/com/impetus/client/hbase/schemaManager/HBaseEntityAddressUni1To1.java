@@ -13,6 +13,7 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
+
 package com.impetus.client.hbase.schemaManager;
 
 import javax.persistence.Column;
@@ -21,45 +22,21 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * The Class HbaseEntityAddressUni1To1PK.
+ * The Class HbaseEntityAddressUni1To1.
  */
 @Entity
-@Table(name = "HbaseEntityAddressUni1To1PK", schema = "KunderaHbaseExamples@hbase")
-public class HbaseEntityAddressUni1To1PK
+@Table(name = "HbaseEntityAddressUni1To1", schema = "KunderaHbaseExamples@hbase")
+public class HBaseEntityAddressUni1To1
 {
     
-    /** The person id. */
-    @Id
-    @Column(name = "PERSON_ID")
-    private String personId;
-
     /** The address id. */
+    @Id
     @Column(name = "ADDRESS_ID")
     private String addressId;
 
     /** The street. */
     @Column(name = "STREET")
     private String street;
-
-    /**
-     * Gets the person id.
-     *
-     * @return the person id
-     */
-    public String getPersonId()
-    {
-        return personId;
-    }
-
-    /**
-     * Sets the person id.
-     *
-     * @param personId the new person id
-     */
-    public void setPersonId(String personId)
-    {
-        this.personId = personId;
-    }
 
     /**
      * Gets the address id.

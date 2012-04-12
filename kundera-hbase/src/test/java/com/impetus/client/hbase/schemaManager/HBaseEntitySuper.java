@@ -15,24 +15,21 @@
  ******************************************************************************/
 package com.impetus.client.hbase.schemaManager;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
+
 /**
- * The Class HbaseEntityPersonUni1To1PK.
+ * The Class HbaseEntitySuper.
  */
 @Entity
-@Table(name = "HbaseEntityPersonUni1To1PK", schema = "KunderaHbaseExamples@hbase")
-public class HbaseEntityPersonUni1To1PK
+@Table(name = "HbaseEntitySuper", schema = "KunderaHbaseExamples@hbase")
+public class HBaseEntitySuper
 {
-    
+
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
@@ -42,14 +39,13 @@ public class HbaseEntityPersonUni1To1PK
     @Column(name = "PERSON_NAME")
     private String personName;
 
+    /** The age. */
+    @Column(name = "AGE")
+    private short age;
+
     /** The personal data. */
     @Embedded
-    HbasePersonalData personalData;
-
-    /** The address. */
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
-    @PrimaryKeyJoinColumn
-    private HbaseEntityAddressUni1To1PK address;
+    private HBasePersonalData personalData;
 
     /**
      * Gets the person id.
@@ -92,11 +88,31 @@ public class HbaseEntityPersonUni1To1PK
     }
 
     /**
+     * Gets the age.
+     *
+     * @return the age
+     */
+    public short getAge()
+    {
+        return age;
+    }
+
+    /**
+     * Sets the age.
+     *
+     * @param age the age to set
+     */
+    public void setAge(short age)
+    {
+        this.age = age;
+    }
+
+    /**
      * Gets the personal data.
      *
      * @return the personalData
      */
-    public HbasePersonalData getPersonalData()
+    public HBasePersonalData getPersonalData()
     {
         return personalData;
     }
@@ -106,28 +122,9 @@ public class HbaseEntityPersonUni1To1PK
      *
      * @param personalData the personalData to set
      */
-    public void setPersonalData(HbasePersonalData personalData)
+    public void setPersonalData(HBasePersonalData personalData)
     {
         this.personalData = personalData;
     }
 
-    /**
-     * Gets the address.
-     *
-     * @return the address
-     */
-    public HbaseEntityAddressUni1To1PK getAddress()
-    {
-        return address;
-    }
-
-    /**
-     * Sets the address.
-     *
-     * @param address the address to set
-     */
-    public void setAddress(HbaseEntityAddressUni1To1PK address)
-    {
-        this.address = address;
-    }
 }

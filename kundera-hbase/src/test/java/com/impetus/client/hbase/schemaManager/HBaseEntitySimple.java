@@ -13,25 +13,20 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
+
 package com.impetus.client.hbase.schemaManager;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-
 /**
- * The Class HbaseEntityPersonUni1To1.
+ * The Class HbaseEntitySimple.
  */
 @Entity
-@Table(name = "HbaseEntityPersonUni1To1", schema = "KunderaHbaseExamples@hbase")
-public class HbaseEntityPersonUni1To1
+@Table(name = "HbaseEntitySimple", schema = "KunderaHbaseExamples@hbase")
+public class HBaseEntitySimple
 {
 
     /** The person id. */
@@ -47,18 +42,9 @@ public class HbaseEntityPersonUni1To1
     @Column(name = "AGE")
     private short age;
 
-    /** The personal data. */
-    @Embedded
-    private HbasePersonalData personalData;
-
-    /** The address. */
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "ADDRESS_ID")
-    private HbaseEntityAddressUni1To1 address;
-
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -68,7 +54,7 @@ public class HbaseEntityPersonUni1To1
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -78,8 +64,9 @@ public class HbaseEntityPersonUni1To1
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -88,8 +75,9 @@ public class HbaseEntityPersonUni1To1
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -98,7 +86,7 @@ public class HbaseEntityPersonUni1To1
 
     /**
      * Gets the age.
-     *
+     * 
      * @return the age
      */
     public short getAge()
@@ -108,52 +96,13 @@ public class HbaseEntityPersonUni1To1
 
     /**
      * Sets the age.
-     *
-     * @param age the age to set
+     * 
+     * @param age
+     *            the age to set
      */
     public void setAge(short age)
     {
         this.age = age;
-    }
-
-    /**
-     * Gets the personal data.
-     *
-     * @return the personalData
-     */
-    public HbasePersonalData getPersonalData()
-    {
-        return personalData;
-    }
-
-    /**
-     * Sets the personal data.
-     *
-     * @param personalData the personalData to set
-     */
-    public void setPersonalData(HbasePersonalData personalData)
-    {
-        this.personalData = personalData;
-    }
-
-    /**
-     * Gets the address.
-     *
-     * @return the address
-     */
-    public HbaseEntityAddressUni1To1 getAddress()
-    {
-        return address;
-    }
-
-    /**
-     * Sets the address.
-     *
-     * @param address the address to set
-     */
-    public void setAddress(HbaseEntityAddressUni1To1 address)
-    {
-        this.address = address;
     }
 
 }

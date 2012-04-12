@@ -25,7 +25,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "HbaseEntityAddressUniMTo1", schema = "KunderaHbaseExamples@hbase")
-public class HbaseEntityAddressUniMTo1
+public class HBaseEntityAddressUniMTo1
 {
     
     /** The address id. */

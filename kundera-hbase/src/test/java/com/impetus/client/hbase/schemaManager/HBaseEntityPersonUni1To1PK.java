@@ -13,22 +13,26 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-
 package com.impetus.client.hbase.schemaManager;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 /**
- * The Class HbaseEntitySimple.
+ * The Class HbaseEntityPersonUni1To1PK.
  */
 @Entity
-@Table(name = "HbaseEntitySimple", schema = "KunderaHbaseExamples@hbase")
-public class HbaseEntitySimple
+@Table(name = "HbaseEntityPersonUni1To1PK", schema = "KunderaHbaseExamples@hbase")
+public class HBaseEntityPersonUni1To1PK
 {
-
+    
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
@@ -38,13 +42,18 @@ public class HbaseEntitySimple
     @Column(name = "PERSON_NAME")
     private String personName;
 
-    /** The age. */
-    @Column(name = "AGE")
-    private short age;
+    /** The personal data. */
+    @Embedded
+    HBasePersonalData personalData;
+
+    /** The address. */
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    @PrimaryKeyJoinColumn
+    private HBaseEntityAddressUni1To1PK address;
 
     /**
      * Gets the person id.
-     * 
+     *
      * @return the person id
      */
     public String getPersonId()
@@ -54,7 +63,7 @@ public class HbaseEntitySimple
 
     /**
      * Gets the person name.
-     * 
+     *
      * @return the person name
      */
     public String getPersonName()
@@ -64,9 +73,8 @@ public class HbaseEntitySimple
 
     /**
      * Sets the person name.
-     * 
-     * @param personName
-     *            the new person name
+     *
+     * @param personName the new person name
      */
     public void setPersonName(String personName)
     {
@@ -75,9 +83,8 @@ public class HbaseEntitySimple
 
     /**
      * Sets the person id.
-     * 
-     * @param personId
-     *            the new person id
+     *
+     * @param personId the new person id
      */
     public void setPersonId(String personId)
     {
@@ -85,24 +92,42 @@ public class HbaseEntitySimple
     }
 
     /**
-     * Gets the age.
-     * 
-     * @return the age
+     * Gets the personal data.
+     *
+     * @return the personalData
      */
-    public short getAge()
+    public HBasePersonalData getPersonalData()
     {
-        return age;
+        return personalData;
     }
 
     /**
-     * Sets the age.
-     * 
-     * @param age
-     *            the age to set
+     * Sets the personal data.
+     *
+     * @param personalData the personalData to set
      */
-    public void setAge(short age)
+    public void setPersonalData(HBasePersonalData personalData)
     {
-        this.age = age;
+        this.personalData = personalData;
     }
 
+    /**
+     * Gets the address.
+     *
+     * @return the address
+     */
+    public HBaseEntityAddressUni1To1PK getAddress()
+    {
+        return address;
+    }
+
+    /**
+     * Sets the address.
+     *
+     * @param address the address to set
+     */
+    public void setAddress(HBaseEntityAddressUni1To1PK address)
+    {
+        this.address = address;
+    }
 }

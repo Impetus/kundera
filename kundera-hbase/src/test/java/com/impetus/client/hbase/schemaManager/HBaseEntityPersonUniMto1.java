@@ -31,7 +31,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "HbaseEntityPersonUniMto1", schema = "KunderaHbaseExamples@hbase")
-public class HbaseEntityPersonUniMto1
+public class HBaseEntityPersonUniMto1
 {
 
     /** The person id. */
@@ -49,12 +49,12 @@ public class HbaseEntityPersonUniMto1
 
     /** The personal data. */
     @Embedded
-    private HbasePersonalData personalData;
+    private HBasePersonalData personalData;
 
     /** The address. */
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "ADDRESS_ID")
-    private HbaseEntityAddressUniMTo1 address;
+    private HBaseEntityAddressUniMTo1 address;
 
     /**
      * Gets the person id.
@@ -121,7 +121,7 @@ public class HbaseEntityPersonUniMto1
      *
      * @return the personalData
      */
-    public HbasePersonalData getPersonalData()
+    public HBasePersonalData getPersonalData()
     {
         return personalData;
     }
@@ -131,7 +131,7 @@ public class HbaseEntityPersonUniMto1
      *
      * @param personalData the personalData to set
      */
-    public void setPersonalData(HbasePersonalData personalData)
+    public void setPersonalData(HBasePersonalData personalData)
     {
         this.personalData = personalData;
     }
@@ -141,7 +141,7 @@ public class HbaseEntityPersonUniMto1
      *
      * @return the address
      */
-    public HbaseEntityAddressUniMTo1 getAddress()
+    public HBaseEntityAddressUniMTo1 getAddress()
     {
         return address;
     }
@@ -151,7 +151,7 @@ public class HbaseEntityPersonUniMto1
      *
      * @param address the address to set
      */
-    public void setAddress(HbaseEntityAddressUniMTo1 address)
+    public void setAddress(HBaseEntityAddressUniMTo1 address)
     {
         this.address = address;
     }

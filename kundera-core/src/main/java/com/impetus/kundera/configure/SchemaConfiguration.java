@@ -34,10 +34,12 @@ import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
+import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
+import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 
 public class SchemaConfiguration implements Configuration
 {
@@ -259,6 +261,23 @@ public class SchemaConfiguration implements Configuration
                                     getJoinColumn(relation.getJoinColumnName())))
                             {
                                 tableInfo.getColumnMetadatas().add(getJoinColumn(relation.getJoinColumnName()));
+                            }
+                        }
+                        else if (relationType.equals(ForeignKey.MANY_TO_MANY))
+                        {
+                            if (relation.isRelatedViaJoinTable())
+                            {
+                                JoinTableMetadata joinTableMetadata = relation.getJoinTableMetadata();
+                                TableInfo joinTableInfo = new TableInfo();
+                                joinTableInfo.setTableName(joinTableMetadata.getJoinTableName());
+                                joinTableInfo.setType("Standard");
+
+                                tableInfos.add(joinTableInfo);
+                            }
+                            else
+                            {
+                                throw new InvalidEntityDefinitionException(
+                                        "JoinTable annotation is mandatory for Many to Many Relationship");
                             }
                         }
                     }

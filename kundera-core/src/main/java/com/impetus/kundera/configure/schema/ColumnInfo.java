@@ -57,7 +57,8 @@ public class ColumnInfo
         // / if object's class and column name matches then return true;
 
         return obj != null && obj instanceof ColumnInfo && ((ColumnInfo) obj).columnName != null ? this.columnName != null
-                && this.columnName.equals(((ColumnInfo) obj).columnName) && this.type.equals(((ColumnInfo) obj).type)
+                && this.columnName.equals(((ColumnInfo) obj).columnName)
+                && this.isIndexable == ((ColumnInfo) obj).isIndexable
                 : false;
 
     }

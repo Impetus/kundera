@@ -23,7 +23,7 @@ import javax.persistence.Embeddable;
  * The Class HbasePersonalData.
  */
 @Embeddable
-public class HbasePersonalData
+public class HBasePersonalData
 {
 
     /** The website. */
@@ -41,7 +41,7 @@ public class HbasePersonalData
     /**
      * Instantiates a new hbase personal data.
      */
-    public HbasePersonalData()
+    public HBasePersonalData()
     {
 
     }
@@ -56,7 +56,7 @@ public class HbasePersonalData
      * @param yahooId
      *            the yahoo id
      */
-    public HbasePersonalData(String website, String email, String yahooId)
+    public HBasePersonalData(String website, String email, String yahooId)
     {
         this.website = website;
         this.email = email;

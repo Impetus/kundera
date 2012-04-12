@@ -341,7 +341,7 @@ public class HBaseClient extends ClientBase implements Client
 
         try
         {
-            handler.createTableIfDoesNotExist(tableName, columnFamilyNames.toArray(new String[0]));
+//            handler.createTableIfDoesNotExist(tableName, columnFamilyNames.toArray(new String[0]));
 
             // Write data to HBase
 

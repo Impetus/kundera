@@ -20,23 +20,46 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
- * The Class HbaseEntityAddressUni1ToM.
+ * The Class HbaseEntityAddressUni1To1PK.
  */
 @Entity
-@Table(name = "HbaseEntityAddressUni1ToM", schema = "KunderaHbaseExamples@hbase")
-public class HbaseEntityAddressUni1ToM
+@Table(name = "HbaseEntityAddressUni1To1PK", schema = "KunderaHbaseExamples@hbase")
+public class HBaseEntityAddressUni1To1PK
 {
+    
+    /** The person id. */
+    @Id
+    @Column(name = "PERSON_ID")
+    private String personId;
 
     /** The address id. */
-    @Id
     @Column(name = "ADDRESS_ID")
     private String addressId;
 
     /** The street. */
     @Column(name = "STREET")
     private String street;
+
+    /**
+     * Gets the person id.
+     *
+     * @return the person id
+     */
+    public String getPersonId()
+    {
+        return personId;
+    }
+
+    /**
+     * Sets the person id.
+     *
+     * @param personId the new person id
+     */
+    public void setPersonId(String personId)
+    {
+        this.personId = personId;
+    }
 
     /**
      * Gets the address id.

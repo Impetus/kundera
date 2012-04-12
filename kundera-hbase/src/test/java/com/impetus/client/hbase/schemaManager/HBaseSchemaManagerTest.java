@@ -24,10 +24,6 @@ import java.util.Properties;
 
 import junit.framework.Assert;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.MasterNotRunningException;
-import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.junit.After;
 import org.junit.Before;
@@ -36,9 +32,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.junits.HBaseCli;
+import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.configure.SchemaConfiguration;
+import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -56,6 +55,8 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
  */
 public class HBaseSchemaManagerTest
 {
+    /** Configure schema manager. */
+    private SchemaManager schemaManager;
 
     /** The pu metadata. */
     private PersistenceUnitMetadata puMetadata;
@@ -175,41 +176,41 @@ public class HBaseSchemaManagerTest
 
         List<String> pus = new ArrayList<String>();
         pus.add(persistenceUnit);
-        clazzToPu.put(HbaseEntitySimple.class.getName(), pus);
-        clazzToPu.put(HbaseEntitySuper.class.getName(), pus);
-        clazzToPu.put(HbaseEntityAddressUni1To1.class.getName(), pus);
-        clazzToPu.put(HbaseEntityAddressUni1ToM.class.getName(), pus);
-        clazzToPu.put(HbaseEntityAddressUniMTo1.class.getName(), pus);
-        clazzToPu.put(HbaseEntityPersonUniMto1.class.getName(), pus);
-        clazzToPu.put(HbaseEntityPersonUni1To1.class.getName(), pus);
-        clazzToPu.put(HbaseEntityPersonUni1ToM.class.getName(), pus);
-        clazzToPu.put(HbaseEntityAddressUni1To1PK.class.getName(), pus);
-        clazzToPu.put(HbaseEntityPersonUni1To1PK.class.getName(), pus);
+        clazzToPu.put(HBaseEntitySimple.class.getName(), pus);
+        clazzToPu.put(HBaseEntitySuper.class.getName(), pus);
+        clazzToPu.put(HBaseEntityAddressUni1To1.class.getName(), pus);
+        clazzToPu.put(HBaseEntityAddressUni1ToM.class.getName(), pus);
+        clazzToPu.put(HBaseEntityAddressUniMTo1.class.getName(), pus);
+        clazzToPu.put(HBaseEntityPersonUniMto1.class.getName(), pus);
+        clazzToPu.put(HBaseEntityPersonUni1To1.class.getName(), pus);
+        clazzToPu.put(HBaseEntityPersonUni1ToM.class.getName(), pus);
+        clazzToPu.put(HBaseEntityAddressUni1To1PK.class.getName(), pus);
+        clazzToPu.put(HBaseEntityPersonUni1To1PK.class.getName(), pus);
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(HbaseEntitySimple.class);
-        EntityMetadata m1 = new EntityMetadata(HbaseEntitySuper.class);
-        EntityMetadata m2 = new EntityMetadata(HbaseEntityAddressUni1To1.class);
-        EntityMetadata m3 = new EntityMetadata(HbaseEntityAddressUni1ToM.class);
-        EntityMetadata m4 = new EntityMetadata(HbaseEntityAddressUniMTo1.class);
-        EntityMetadata m5 = new EntityMetadata(HbaseEntityPersonUniMto1.class);
-        EntityMetadata m6 = new EntityMetadata(HbaseEntityPersonUni1To1.class);
-        EntityMetadata m7 = new EntityMetadata(HbaseEntityPersonUni1ToM.class);
-        EntityMetadata m8 = new EntityMetadata(HbaseEntityPersonUni1To1PK.class);
-        EntityMetadata m9 = new EntityMetadata(HbaseEntityAddressUni1To1PK.class);
+        EntityMetadata m = new EntityMetadata(HBaseEntitySimple.class);
+        EntityMetadata m1 = new EntityMetadata(HBaseEntitySuper.class);
+        EntityMetadata m2 = new EntityMetadata(HBaseEntityAddressUni1To1.class);
+        EntityMetadata m3 = new EntityMetadata(HBaseEntityAddressUni1ToM.class);
+        EntityMetadata m4 = new EntityMetadata(HBaseEntityAddressUniMTo1.class);
+        EntityMetadata m5 = new EntityMetadata(HBaseEntityPersonUniMto1.class);
+        EntityMetadata m6 = new EntityMetadata(HBaseEntityPersonUni1To1.class);
+        EntityMetadata m7 = new EntityMetadata(HBaseEntityPersonUni1ToM.class);
+        EntityMetadata m8 = new EntityMetadata(HBaseEntityPersonUni1To1PK.class);
+        EntityMetadata m9 = new EntityMetadata(HBaseEntityAddressUni1To1PK.class);
 
         TableProcessor processor = new TableProcessor();
-        processor.process(HbaseEntitySimple.class, m);
-        processor.process(HbaseEntitySuper.class, m1);
-        processor.process(HbaseEntityAddressUni1To1.class, m2);
-        processor.process(HbaseEntityAddressUni1ToM.class, m3);
-        processor.process(HbaseEntityAddressUniMTo1.class, m4);
-        processor.process(HbaseEntityPersonUniMto1.class, m5);
-        processor.process(HbaseEntityPersonUni1To1.class, m6);
-        processor.process(HbaseEntityPersonUni1ToM.class, m7);
-        processor.process(HbaseEntityPersonUni1To1PK.class, m8);
-        processor.process(HbaseEntityAddressUni1To1PK.class, m9);
+        processor.process(HBaseEntitySimple.class, m);
+        processor.process(HBaseEntitySuper.class, m1);
+        processor.process(HBaseEntityAddressUni1To1.class, m2);
+        processor.process(HBaseEntityAddressUni1ToM.class, m3);
+        processor.process(HBaseEntityAddressUniMTo1.class, m4);
+        processor.process(HBaseEntityPersonUniMto1.class, m5);
+        processor.process(HBaseEntityPersonUni1To1.class, m6);
+        processor.process(HBaseEntityPersonUni1ToM.class, m7);
+        processor.process(HBaseEntityPersonUni1To1PK.class, m8);
+        processor.process(HBaseEntityAddressUni1To1PK.class, m9);
 
         m.setPersistenceUnit(persistenceUnit);
         m1.setPersistenceUnit(persistenceUnit);
@@ -223,21 +224,24 @@ public class HBaseSchemaManagerTest
         m9.setPersistenceUnit(persistenceUnit);
 
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(HbaseEntitySimple.class, m);
-        metaModel.addEntityMetadata(HbaseEntitySuper.class, m1);
-        metaModel.addEntityMetadata(HbaseEntityAddressUni1To1.class, m2);
-        metaModel.addEntityMetadata(HbaseEntityAddressUni1ToM.class, m3);
-        metaModel.addEntityMetadata(HbaseEntityAddressUniMTo1.class, m4);
-        metaModel.addEntityMetadata(HbaseEntityPersonUniMto1.class, m5);
-        metaModel.addEntityMetadata(HbaseEntityPersonUni1To1.class, m6);
-        metaModel.addEntityMetadata(HbaseEntityPersonUni1ToM.class, m7);
-        metaModel.addEntityMetadata(HbaseEntityPersonUni1To1PK.class, m8);
-        metaModel.addEntityMetadata(HbaseEntityAddressUni1To1PK.class, m9);
+        metaModel.addEntityMetadata(HBaseEntitySimple.class, m);
+        metaModel.addEntityMetadata(HBaseEntitySuper.class, m1);
+        metaModel.addEntityMetadata(HBaseEntityAddressUni1To1.class, m2);
+        metaModel.addEntityMetadata(HBaseEntityAddressUni1ToM.class, m3);
+        metaModel.addEntityMetadata(HBaseEntityAddressUniMTo1.class, m4);
+        metaModel.addEntityMetadata(HBaseEntityPersonUniMto1.class, m5);
+        metaModel.addEntityMetadata(HBaseEntityPersonUni1To1.class, m6);
+        metaModel.addEntityMetadata(HBaseEntityPersonUni1ToM.class, m7);
+        metaModel.addEntityMetadata(HBaseEntityPersonUni1To1PK.class, m8);
+        metaModel.addEntityMetadata(HBaseEntityAddressUni1To1PK.class, m9);
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 
         configuration.configure();
-        EntityManagerFactoryImpl impl = new EntityManagerFactoryImpl(puMetadata, props);
-        return impl;
+        schemaManager = new HBaseSchemaManager(ClientType.HBASE);
+        schemaManager.exportSchema();
+        // EntityManagerFactoryImpl impl = new
+        // EntityManagerFactoryImpl(puMetadata, props);
+        return null;
     }
 }

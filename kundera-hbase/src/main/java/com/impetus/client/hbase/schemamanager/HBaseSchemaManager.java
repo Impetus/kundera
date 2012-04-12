@@ -88,39 +88,45 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 {
                     admin.disableTable(tableInfo.getTableName().getBytes());
                     HColumnDescriptor[] descriptors = descriptor.getColumnFamilies();
-                    for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
+                    if (tableInfo.getColumnMetadatas() != null)
                     {
-                        boolean found = false;
-                        HColumnDescriptor columnDescriptor = new HColumnDescriptor(columnInfo.getColumnName());
-                        for (HColumnDescriptor hColumnDescriptor : descriptors)
+                        for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
                         {
-                            if (hColumnDescriptor.equals(columnDescriptor))
+                            boolean found = false;
+                            HColumnDescriptor columnDescriptor = new HColumnDescriptor(columnInfo.getColumnName());
+                            for (HColumnDescriptor hColumnDescriptor : descriptors)
                             {
-                                found = true;
-                                break;
+                                if (hColumnDescriptor.equals(columnDescriptor))
+                                {
+                                    found = true;
+                                    break;
+                                }
                             }
-                        }
-                        if (!found)
-                        {
-                            admin.addColumn(tableInfo.getTableName(), columnDescriptor);
+                            if (!found)
+                            {
+                                admin.addColumn(tableInfo.getTableName(), columnDescriptor);
+                            }
                         }
                     }
-                    for (EmbeddedColumnInfo embeddedColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
+                    if (tableInfo.getEmbeddedColumnMetadatas() != null)
                     {
-                        boolean found = false;
-                        HColumnDescriptor columnDescriptor = new HColumnDescriptor(
-                                embeddedColumnInfo.getEmbeddedColumnName());
-                        for (HColumnDescriptor hColumnDescriptor : descriptors)
+                        for (EmbeddedColumnInfo embeddedColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
                         {
-                            if (hColumnDescriptor.equals(columnDescriptor))
+                            boolean found = false;
+                            HColumnDescriptor columnDescriptor = new HColumnDescriptor(
+                                    embeddedColumnInfo.getEmbeddedColumnName());
+                            for (HColumnDescriptor hColumnDescriptor : descriptors)
                             {
-                                found = true;
-                                break;
+                                if (hColumnDescriptor.equals(columnDescriptor))
+                                {
+                                    found = true;
+                                    break;
+                                }
                             }
-                        }
-                        if (!found)
-                        {
-                            admin.addColumn(tableInfo.getTableName(), columnDescriptor);
+                            if (!found)
+                            {
+                                admin.addColumn(tableInfo.getTableName(), columnDescriptor);
+                            }
                         }
                     }
                 }
@@ -151,13 +157,58 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     {
         for (TableInfo tableInfo : tableInfos)
         {
-            HTableDescriptor hTableDescriptor = getTableMetaData(tableInfo);
+            HTableDescriptor hTableDescriptor;
             try
             {
-                if (!hTableDescriptor.equals(admin.getTableDescriptor(tableInfo.getTableName().getBytes())))
+                hTableDescriptor = admin.getTableDescriptor(tableInfo.getTableName().getBytes());
+                if (tableInfo.getColumnMetadatas() != null)
                 {
-                    throw new SchemaGenerationException("Hbase", tableInfo.getTableName());
+                    for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
+                    {
+                        boolean isColumnFound = false;
+                        for (HColumnDescriptor columnDescriptor : hTableDescriptor.getColumnFamilies())
+                        {
+                            if (columnDescriptor.getNameAsString().equalsIgnoreCase(columnInfo.getColumnName()))
+                            {
+                                isColumnFound = true;
+                                break;
+                            }
+                        }
+                        if (!isColumnFound)
+                        {
+                            throw new SchemaGenerationException("column " + columnInfo.getColumnName()
+                                    + " does not exist in table " + tableInfo.getTableName() + "", "Hbase",
+                                    tableInfo.getTableName());
+                        }
+                    }
                 }
+                if (tableInfo.getEmbeddedColumnMetadatas() != null)
+                {
+                    for (EmbeddedColumnInfo embeddedColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
+                    {
+                        boolean isColumnFound = false;
+                        for (HColumnDescriptor columnDescriptor : hTableDescriptor.getColumnFamilies())
+                        {
+                            if (columnDescriptor.getNameAsString().equalsIgnoreCase(
+                                    embeddedColumnInfo.getEmbeddedColumnName()))
+                            {
+                                isColumnFound = true;
+                                break;
+                            }
+                        }
+                        if (!isColumnFound)
+                        {
+                            throw new SchemaGenerationException("column " + embeddedColumnInfo.getEmbeddedColumnName()
+                                    + " does not exist in table " + tableInfo.getTableName() + "", "Hbase",
+                                    tableInfo.getTableName());
+                        }
+                    }
+                }
+            }
+            catch (TableNotFoundException tnfex)
+            {
+                throw new SchemaGenerationException("table " + tableInfo.getTableName() + " does not exist ", tnfex,
+                        "Hbase");
             }
             catch (IOException e)
             {

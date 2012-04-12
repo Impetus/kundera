@@ -32,7 +32,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "HbaseEntityPersonUni1ToM", schema = "KunderaHbaseExamples@hbase")
-public class HbaseEntityPersonUni1ToM
+public class HBaseEntityPersonUni1ToM
 {
 
     /** The person id. */
@@ -50,12 +50,12 @@ public class HbaseEntityPersonUni1ToM
 
     /** The personal data. */
     @Embedded
-    private HbasePersonalData personalData;
+    private HBasePersonalData personalData;
 
     /** The addresses. */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "PERSON_ID")
-    private Set<HbaseEntityAddressUni1ToM> addresses;
+    private Set<HBaseEntityAddressUni1ToM> addresses;
 
     /**
      * Gets the person id.
@@ -125,7 +125,7 @@ public class HbaseEntityPersonUni1ToM
      * 
      * @return the personalData
      */
-    public HbasePersonalData getPersonalData()
+    public HBasePersonalData getPersonalData()
     {
         return personalData;
     }
@@ -136,7 +136,7 @@ public class HbaseEntityPersonUni1ToM
      * @param personalData
      *            the personalData to set
      */
-    public void setPersonalData(HbasePersonalData personalData)
+    public void setPersonalData(HBasePersonalData personalData)
     {
         this.personalData = personalData;
     }
@@ -146,7 +146,7 @@ public class HbaseEntityPersonUni1ToM
      * 
      * @return the addresses
      */
-    public Set<HbaseEntityAddressUni1ToM> getAddresses()
+    public Set<HBaseEntityAddressUni1ToM> getAddresses()
     {
         return addresses;
     }
@@ -157,7 +157,7 @@ public class HbaseEntityPersonUni1ToM
      * @param addresses
      *            the addresses to set
      */
-    public void setAddresses(Set<HbaseEntityAddressUni1ToM> addresses)
+    public void setAddresses(Set<HBaseEntityAddressUni1ToM> addresses)
     {
         this.addresses = addresses;
     }

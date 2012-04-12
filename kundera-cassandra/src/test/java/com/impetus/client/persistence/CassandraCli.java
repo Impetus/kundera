@@ -39,7 +39,7 @@ public final class CassandraCli {
 	private static EmbeddedCassandraService cassandra;
 
 	/** The client. */
-	protected static Cassandra.Client client;
+	private static Cassandra.Client client;
 
 	/** the log used by this class. */
 	private static Log log = LogFactory.getLog(CassandraCli.class);
@@ -212,5 +212,13 @@ public final class CassandraCli {
 		socket.open();
 
 	}
+
+    /**
+     * @return the client
+     */
+    public Cassandra.Client getClient()
+    {
+        return client;
+    }
 	
 }

@@ -18,8 +18,8 @@ package com.impetus.client.cassandra.schemamanager;
 import java.util.HashMap;
 
 /**
- * The Class CassandraValidationClassMapper holds the map of validation class(e.g. wrapper for default_validation_class property)
- * mapper.
+ * The Class CassandraValidationClassMapper holds the map of validation
+ * class(e.g. wrapper for default_validation_class property) mapper.
  * 
  * @author Kuldeep.kumar
  */

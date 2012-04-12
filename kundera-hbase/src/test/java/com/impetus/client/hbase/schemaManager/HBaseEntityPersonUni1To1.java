@@ -15,19 +15,23 @@
  ******************************************************************************/
 package com.impetus.client.hbase.schemaManager;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 
 /**
- * The Class HbaseEntitySuper.
+ * The Class HbaseEntityPersonUni1To1.
  */
 @Entity
-@Table(name = "HbaseEntitySuper", schema = "KunderaHbaseExamples@hbase")
-public class HbaseEntitySuper
+@Table(name = "HbaseEntityPersonUni1To1", schema = "KunderaHbaseExamples@hbase")
+public class HBaseEntityPersonUni1To1
 {
 
     /** The person id. */
@@ -45,7 +49,12 @@ public class HbaseEntitySuper
 
     /** The personal data. */
     @Embedded
-    private HbasePersonalData personalData;
+    private HBasePersonalData personalData;
+
+    /** The address. */
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "ADDRESS_ID")
+    private HBaseEntityAddressUni1To1 address;
 
     /**
      * Gets the person id.
@@ -112,7 +121,7 @@ public class HbaseEntitySuper
      *
      * @return the personalData
      */
-    public HbasePersonalData getPersonalData()
+    public HBasePersonalData getPersonalData()
     {
         return personalData;
     }
@@ -122,9 +131,29 @@ public class HbaseEntitySuper
      *
      * @param personalData the personalData to set
      */
-    public void setPersonalData(HbasePersonalData personalData)
+    public void setPersonalData(HBasePersonalData personalData)
     {
         this.personalData = personalData;
+    }
+
+    /**
+     * Gets the address.
+     *
+     * @return the address
+     */
+    public HBaseEntityAddressUni1To1 getAddress()
+    {
+        return address;
+    }
+
+    /**
+     * Sets the address.
+     *
+     * @param address the address to set
+     */
+    public void setAddress(HBaseEntityAddressUni1To1 address)
+    {
+        this.address = address;
     }
 
 }

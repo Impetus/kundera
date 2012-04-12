@@ -17,9 +17,6 @@ package com.impetus.kundera.configure.schema;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * TableInfo class holds table creation related information.
  * 
