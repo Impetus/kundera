@@ -16,20 +16,12 @@
 package com.impetus.kundera.lifecycle.states;
 
 
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.CascadeType;
+import javax.persistence.PersistenceContextType;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
-import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.NodeStateContext;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * @author amresh
@@ -45,22 +37,29 @@ public class RemovedState extends NodeState
     @Override
     public void handlePersist(NodeStateContext nodeStateContext)
     {
-        nodeStateContext.setCurrentNodeState(new ManagedState());
-        //TODO: Recurse persist operation on all related entities for whom cascade=ALL or PERSIST
+        //Removed ---> Managed State
+        moveNodeToNextState(nodeStateContext, new ManagedState());
+        
+        //Recurse persist operation on all related entities for whom cascade=ALL or PERSIST
+        recursivelyPerformOperation(nodeStateContext, OPERATION.PERSIST);
     }    
 
     @Override
     public void handleRemove(NodeStateContext nodeStateContext)
     {
         //Ignored, entity will remain in removed state
-        //TODO: Recurse remove operation for all related entities for whom cascade=ALL or REMOVE
+        
+        //Recurse remove operation for all related entities for whom cascade=ALL or REMOVE
+        recursivelyPerformOperation(nodeStateContext, OPERATION.REMOVE);
     }
 
     @Override
     public void handleRefresh(NodeStateContext nodeStateContext)
     {
-      //Ignored, entity will remain in removed state
-      //TODO: Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
+        // Ignored, entity will remain in removed state
+
+        // Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
+        recursivelyPerformOperation(nodeStateContext, OPERATION.REFRESH);
     }
 
     @Override
@@ -117,21 +116,10 @@ public class RemovedState extends NodeState
     public void handleDetach(NodeStateContext nodeStateContext)
     {
         //Removed ---> Detached
-        NodeState nextState = new DetachedState();
-        nodeStateContext.setCurrentNodeState(nextState);
-        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());        
+        moveNodeToNextState(nodeStateContext, new DetachedState());               
         
         //Cascade detach operation to all referenced entities for whom cascade=ALL or DETACH
-        Map<NodeLink, Node> children = nodeStateContext.getChildren();
-        if(children != null) {
-            for(NodeLink nodeLink : children.keySet()) {
-                List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
-                if(cascadeTypes.contains(CascadeType.DETACH) || cascadeTypes.contains(CascadeType.ALL)) {
-                    Node childNode = children.get(nodeLink);                
-                    childNode.detach();
-                }
-            }
-        }  
+        recursivelyPerformOperation(nodeStateContext, OPERATION.DETACH);  
     }
 
     @Override
@@ -143,11 +131,16 @@ public class RemovedState extends NodeState
     @Override
     public void handleRollback(NodeStateContext nodeStateContext)
     {
-        //If Persistence Context is EXTENDED
-        nodeStateContext.setCurrentNodeState(new ManagedState());
+        //If persistence context is EXTENDED, Next state should be Managed
+        //If persistence context is TRANSACTIONAL, Node should be detached
         
-        //If Persistence Context is TRANSACTIONAL
-        //nodeStateContext.detach();
+        if(PersistenceContextType.EXTENDED.equals(nodeStateContext.getPersistenceCache().getPersistenceContextType())) {
+            moveNodeToNextState(nodeStateContext, new ManagedState());            
+            
+        } else if(PersistenceContextType.TRANSACTION.equals(nodeStateContext.getPersistenceCache().getPersistenceContextType())) {
+            nodeStateContext.detach();
+        }       
+        
     }
 
     @Override

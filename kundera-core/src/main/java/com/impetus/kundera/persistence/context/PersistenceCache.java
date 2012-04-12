@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.PersistenceContextType;
+
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 
@@ -44,6 +46,8 @@ public class PersistenceCache
     private CacheBase transactionalCache;
     
     FlushManager flushManager;
+    
+    private PersistenceContextType persistenceContextType;
     
    
     /**
@@ -215,6 +219,22 @@ public class PersistenceCache
     public Map<String, JoinTableData> getJoinTableDataMap()
     {
         return joinTableDataMap;
+    }     
+
+    /**
+     * @return the persistenceContextType
+     */
+    public PersistenceContextType getPersistenceContextType()
+    {
+        return persistenceContextType;
+    }
+
+    /**
+     * @param persistenceContextType the persistenceContextType to set
+     */
+    public void setPersistenceContextType(PersistenceContextType persistenceContextType)
+    {
+        this.persistenceContextType = persistenceContextType;
     }
 
     /**
