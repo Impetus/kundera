@@ -53,7 +53,7 @@ public class ConfiguratorTest
     public void testValidConfigure()
     {
         final String puName = "kunderatest";
-        final String kundera_client = "rdbms";
+        final String kundera_client = "com.impetus.client.rdbms.RDBMSClientFactory";
 
         // invoke configure.
         Configurator configurator = new Configurator(puName);

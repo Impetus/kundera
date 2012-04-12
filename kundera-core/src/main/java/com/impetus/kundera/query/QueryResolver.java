@@ -23,8 +23,6 @@ import javax.persistence.Query;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -86,14 +84,12 @@ public class QueryResolver
         }
         
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
-        String kunderaClientName = (String) puMetadata.getProperties().get(PersistenceProperties.KUNDERA_CLIENT);
-        ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());
 
         Query query = null;
 
         try
         {
-            query = getQuery(clientType, jpaQuery, persistenceDelegator, m);
+            query = getQuery(jpaQuery, persistenceDelegator, m);
         }
         catch (SecurityException e)
         {
@@ -136,10 +132,8 @@ public class QueryResolver
     }
 
     /**
-     * Gets the query.
+     * Gets the query instance.
      * 
-     * @param clientType
-     *            the client type
      * @param jpaQuery
      *            the jpa query
      * @param persistenceDelegator
@@ -162,7 +156,7 @@ public class QueryResolver
      * @throws InvocationTargetException
      *             the invocation target exception
      */
-    public Query getQuery(ClientType clientType, String jpaQuery, PersistenceDelegator persistenceDelegator, EntityMetadata m)
+    public Query getQuery(String jpaQuery, PersistenceDelegator persistenceDelegator, EntityMetadata m)
             throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException,
             InstantiationException, IllegalAccessException, InvocationTargetException
     {

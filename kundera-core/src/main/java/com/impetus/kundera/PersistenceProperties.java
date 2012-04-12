@@ -35,9 +35,6 @@ public interface PersistenceProperties {
 	/** The Constant KUNDERA_DIALECT. */
 	public static final String KUNDERA_DIALECT = "kundera.dialect";
 
-	/** The Constant KUNDERA_CLIENT. */
-	public static final String KUNDERA_CLIENT = "kundera.client";
-
         /** The Constant Kundera Client factory */
         public static final String KUNDERA_CLIENT_FACTORY="kundera.client.lookup.class";
 

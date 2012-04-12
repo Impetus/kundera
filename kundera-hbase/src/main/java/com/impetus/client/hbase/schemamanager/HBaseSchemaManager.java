@@ -29,7 +29,6 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
@@ -56,9 +55,13 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      */
     private static final Logger logger = LoggerFactory.getLogger(HBaseSchemaManager.class);
 
-    public HBaseSchemaManager(ClientType client)
+    /**
+     * Initialises HBase schema manager
+     * @param clientFactory client factory.
+     */
+    public HBaseSchemaManager(String clientFactory)
     {
-        super(client);
+        super(clientFactory);
     }
 
     @Override
@@ -256,8 +259,6 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      */
     protected boolean initiateClient()
     {
-        if (kundera_client.equalsIgnoreCase("Hbase"))
-        {
             Configuration hadoopConf = new Configuration();
             hadoopConf.set("hbase.master", host + ":" + port);
             HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
@@ -276,8 +277,6 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 throw new SchemaGenerationException(e, "Hbase");
             }
             return true;
-        }
-        return false;
     }
 
     /**

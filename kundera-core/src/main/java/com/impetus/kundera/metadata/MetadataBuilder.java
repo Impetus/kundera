@@ -23,7 +23,7 @@ import javax.persistence.PersistenceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.client.ClientType;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.processor.CacheableAnnotationProcessor;
 import com.impetus.kundera.metadata.processor.EntityListenersProcessor;
@@ -130,11 +130,11 @@ public class MetadataBuilder
     {
         // if pu is null and client is not rdbms OR metadata pu does not match
         // with configured one. don't process for anything.
-        if ((metadata.getPersistenceUnit() == null && !ClientType.RDBMS.name().equals(client.toUpperCase()))
+        if ((metadata.getPersistenceUnit() == null && !Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client))
                 || metadata.getPersistenceUnit() != null && !metadata.getPersistenceUnit().equals(persistenceUnit))
         {
             metadata = null;
-        } else if(metadata.getPersistenceUnit() == null && ClientType.RDBMS.name().equals(client.toUpperCase()))
+        } else if(metadata.getPersistenceUnit() == null && Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client))
         {
             // no more "null" as persistence unit for RDBMS scenarios!
             metadata.setPersistenceUnit(persistenceUnit);

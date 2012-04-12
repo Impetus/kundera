@@ -139,7 +139,6 @@ public class HBaseSchemaManagerTest
         Map<String, Object> props = new HashMap<String, Object>();
         String persistenceUnit = "hbase";
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT, "Hbase");
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaHbaseExamples");

@@ -529,7 +529,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
          String client=null;
          if(this.properties != null)
          {
-             client = (String) this.properties.get(PersistenceProperties.KUNDERA_CLIENT);
+             client = (String) this.properties.get(PersistenceProperties.KUNDERA_CLIENT_FACTORY);
          }
          
          if(client == null)
