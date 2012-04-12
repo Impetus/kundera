@@ -88,27 +88,6 @@ public class HBaseSchemaManagerTest
         HBaseCli.startCluster();
         configuration = new SchemaConfiguration("hbase");
         getEntityManagerFactory();
-        // puMetadata =
-        // KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata("hbase");
-        // port =
-        // puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_PORT);
-        // host =
-        // puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_NODES);
-        // Configuration hadoopConf = new Configuration();
-        // hadoopConf.set("hbase.master", host + ":" + port);
-        // HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
-        // try
-        // {
-        // admin = new HBaseAdmin(conf);
-        // }
-        // catch (MasterNotRunningException e)
-        // {
-        // logger.equals("master not running exception" + e.getMessage());
-        // }
-        // catch (ZooKeeperConnectionException e)
-        // {
-        // logger.equals("zookeeper connection exception" + e.getMessage());
-        // }
     }
 
     /**
@@ -120,6 +99,7 @@ public class HBaseSchemaManagerTest
     @After
     public void tearDown() throws Exception
     {
+        HBaseCli.stopCluster();
     }
 
     /**
@@ -143,7 +123,10 @@ public class HBaseSchemaManagerTest
         }
         catch (IOException e)
         {
-
+            Assert.fail("Failed, Caused by:" + e.getMessage());
+        }catch (Exception e)
+        {
+            Assert.fail("Failed, Caused by:" + e.getMessage());
         }
     }
 
@@ -157,10 +140,10 @@ public class HBaseSchemaManagerTest
         Map<String, Object> props = new HashMap<String, Object>();
         String persistenceUnit = "hbase";
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT, "Hbase");
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaHbaseExamples");
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, "com.impetus.client.hbase.HBaseClientFactory");
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();

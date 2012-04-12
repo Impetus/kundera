@@ -23,10 +23,9 @@ import javax.persistence.Query;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -64,6 +63,7 @@ public class QueryResolver
         String mappedQuery = appMetadata.getQuery(jpaQuery);
         boolean isNative = appMetadata.isNative(jpaQuery);
         String pu = null;
+        EntityMetadata m =null;
         // In case of named native query
         if (!isNative)
         {
@@ -74,22 +74,22 @@ public class QueryResolver
 
             kunderaQuery.postParsingInit();
             pu = kunderaQuery.getPersistenceUnit();
+            m = kunderaQuery.getEntityMetadata();
         } else
         {
             Class mappedClass = appMetadata.getMappedClass(jpaQuery);
             
             pu = appMetadata.getMappedPersistenceUnit(mappedClass).get(0);
+            m= KunderaMetadataManager.getEntityMetadata(mappedClass);
         }
         
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
-        String kunderaClientName = (String) puMetadata.getProperties().get(PersistenceProperties.KUNDERA_CLIENT);
-        ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());
 
         Query query = null;
 
         try
         {
-            query = getQuery(clientType, jpaQuery, persistenceDelegator);
+            query = getQuery(jpaQuery, persistenceDelegator, m);
         }
         catch (SecurityException e)
         {
@@ -132,10 +132,8 @@ public class QueryResolver
     }
 
     /**
-     * Gets the query.
+     * Gets the query instance.
      * 
-     * @param clientType
-     *            the client type
      * @param jpaQuery
      *            the jpa query
      * @param persistenceDelegator
@@ -158,45 +156,17 @@ public class QueryResolver
      * @throws InvocationTargetException
      *             the invocation target exception
      */
-    public Query getQuery(ClientType clientType, String jpaQuery, PersistenceDelegator persistenceDelegator)
+    public Query getQuery(String jpaQuery, PersistenceDelegator persistenceDelegator, EntityMetadata m)
             throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException,
             InstantiationException, IllegalAccessException, InvocationTargetException
     {
         Query query;
-        Class clazz = null;
-        switch (clientType)
-        {
-        case HBASE:
-            clazz = Class.forName("com.impetus.kundera.query.LuceneQuery");
-
-            break;
-        case MONGODB:
-            clazz = Class.forName("com.impetus.client.mongodb.query.MongoDBQuery");
-            break;
-        case PELOPS:
-            clazz = Class.forName("com.impetus.client.cassandra.query.CassQuery");
-
-            break;
-        case THRIFT:
-            clazz = Class.forName("com.impetus.client.cassandra.query.CassQuery");
-
-            break;
-
-        case RDBMS:
-            clazz = Class.forName("com.impetus.client.rdbms.query.RDBMSQuery");
-
-            break;
-
-        default:
-            throw new ClassNotFoundException("Invalid Client type" + clientType);
-            // break;
-        }
+        Class clazz = persistenceDelegator.getClient(m).getQueryImplementor();
 
         @SuppressWarnings("rawtypes")
         Constructor constructor = clazz.getConstructor(String.class, KunderaQuery.class, PersistenceDelegator.class);
         query = (Query) constructor.newInstance(jpaQuery, kunderaQuery, persistenceDelegator);
 
         return query;
-
     }
 }

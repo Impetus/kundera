@@ -25,6 +25,7 @@
 			<property name="hibernate.connection.url" value="jdbc:mysql://localhost/test"/>
 			<property name="hibernate.connection.username" value="root"/>
 			<property name="kundera.client" value="rdbms"/>
+			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
 			<property name="hibernate.connection.password" value="impetus"/>
 			<property name="hibernate.current_session_context_class" value="org.hibernate.context.ThreadLocalSessionContext" />
 			<property name="hibernate.show_sql" value="true"/>

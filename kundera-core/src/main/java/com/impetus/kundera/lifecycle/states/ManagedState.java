@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
+import javax.persistence.PersistenceContextType;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -54,38 +55,34 @@ public class ManagedState extends NodeState
     public void handlePersist(NodeStateContext nodeStateContext)
     {
         //Ignored, entity remains in the same state
-        //TODO: Cascade persist operation for related entities for whom cascade=ALL or PERSIST
+        
+        
+        //Cascade persist operation for related entities for whom cascade=ALL or PERSIST 
+        recursivelyPerformOperation(nodeStateContext, OPERATION.PERSIST);
     }   
 
     @Override
     public void handleRemove(NodeStateContext nodeStateContext)
     {
         // Managed ---> Removed
-        NodeState nextState = new RemovedState();
-        nodeStateContext.setCurrentNodeState(nextState);
-        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());       
+        moveNodeToNextState(nodeStateContext, new RemovedState());       
         
         //Mark entity for removal in persistence context
         nodeStateContext.setDirty(true);        
         
         //Recurse remove operation for all related entities for whom cascade=ALL or REMOVE      
-        Map<NodeLink, Node> children = nodeStateContext.getChildren();
-        if(children != null) {       //Nothing to do for leaf nodes
-            for(NodeLink nodeLink : children.keySet()) {
-                List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
-                if(cascadeTypes.contains(CascadeType.REMOVE) || cascadeTypes.contains(CascadeType.ALL)) {
-                    Node childNode = children.get(nodeLink);                
-                    childNode.remove();
-                }
-            }
-        }
+        recursivelyPerformOperation(nodeStateContext, OPERATION.REMOVE);
     }
+
+    
 
     @Override
     public void handleRefresh(NodeStateContext nodeStateContext)
     {
         //TODO: Refresh entity state from the database
-        //TODO: Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
+        
+        //Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
+        recursivelyPerformOperation(nodeStateContext, OPERATION.REFRESH);
     }
 
     @Override
@@ -105,16 +102,7 @@ public class ManagedState extends NodeState
         nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);
         
         //Cascade merge operation for all related entities for whom cascade=ALL or MERGE
-        Map<NodeLink, Node> children = nodeStateContext.getChildren();
-        if(children != null) {
-            for(NodeLink nodeLink : children.keySet()) {
-                List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
-                if(cascadeTypes.contains(CascadeType.MERGE) || cascadeTypes.contains(CascadeType.ALL)) {
-                    Node childNode = children.get(nodeLink);                
-                    childNode.merge();
-                }
-            }
-        }
+        recursivelyPerformOperation(nodeStateContext, OPERATION.MERGE);
     }
     
     @Override
@@ -126,11 +114,7 @@ public class ManagedState extends NodeState
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass);
         String entityId = ObjectGraphBuilder.getEntityId(nodeStateContext.getNodeId());
         
-        /*List<String> linkNames = new ArrayList<String>();
-        for(Relation relation : entityMetadata.getRelations()) {
-            linkNames.add(relation.getJoinColumnName());
-        }*/         
-        
+  
         Object nodeData = null;   //Node data
         
         
@@ -197,22 +181,11 @@ public class ManagedState extends NodeState
     public void handleDetach(NodeStateContext nodeStateContext)
     {        
         // Managed ---> Detached
-        NodeState nextState = new DetachedState();
-        nodeStateContext.setCurrentNodeState(nextState);
-        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());        
+        moveNodeToNextState(nodeStateContext, new DetachedState());  
+                
         
         //Cascade detach operation to all referenced entities for whom cascade=ALL or DETACH
-        Map<NodeLink, Node> children = nodeStateContext.getChildren();
-        if(children != null) {
-            for(NodeLink nodeLink : children.keySet()) {
-                List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
-                if(cascadeTypes.contains(CascadeType.DETACH) || cascadeTypes.contains(CascadeType.ALL)) {
-                    Node childNode = children.get(nodeLink);                
-                    childNode.detach();
-                }
-            }
-        }  
-        
+        recursivelyPerformOperation(nodeStateContext, OPERATION.DETACH);        
     }
 
     @Override
@@ -224,11 +197,15 @@ public class ManagedState extends NodeState
     @Override
     public void handleRollback(NodeStateContext nodeStateContext)
     {
-        //If persistence context is EXTENDED
-        nodeStateContext.setCurrentNodeState(new TransientState());
+        //If persistence context is EXTENDED, Next state should be Transient
+        //If persistence context is TRANSACTIONAL, Next state should be detached
         
-        //If persistence context is TRANSACTIONAL
-        //context.setCurrentEntityState(new DetachedState());
+        if(PersistenceContextType.EXTENDED.equals(nodeStateContext.getPersistenceCache().getPersistenceContextType())) {
+            moveNodeToNextState(nodeStateContext, new TransientState());            
+            
+        } else if(PersistenceContextType.TRANSACTION.equals(nodeStateContext.getPersistenceCache().getPersistenceContextType())) {
+            moveNodeToNextState(nodeStateContext, new DetachedState());
+        }       
     }
 
     @Override

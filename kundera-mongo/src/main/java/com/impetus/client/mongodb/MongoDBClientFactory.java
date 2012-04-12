@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import com.impetus.client.mongodb.schemamanager.MongoDBSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
@@ -69,7 +68,7 @@ public class MongoDBClientFactory extends GenericClientFactory
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
                 luceneDirPath));
         reader = new MongoEntityReader();
-        schemaManager = new MongoDBSchemaManager(ClientType.MONGODB);
+        schemaManager = new MongoDBSchemaManager(MongoDBClientFactory.class.getName());
         schemaManager.exportSchema();
     }
 

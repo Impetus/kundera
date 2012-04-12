@@ -70,37 +70,16 @@ public final class ClientResolver
         logger.info("Initializing client factory for: " + persistenceUnit);
         PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
-        String kunderaClientName = (String) persistenceUnitMetadata.getProperties().get(
-                PersistenceProperties.KUNDERA_CLIENT);
-        ClientType clientType = ClientType.getValue(kunderaClientName.toUpperCase());
+        String kunderaClientFactory = persistenceUnitMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY);
 
+        if(kunderaClientFactory == null)
+        {
+            throw new ClientResolverException(
+                    "<kundera.client.lookup.class> is missing from persistence.xml, please provide specific client factory. e.g., <property name=\"kundera.client.lookup.class\" value=\"com.impetus.client.cassandra.pelops.PelopsClientFactory\" />");
+        }
         try
         {
-            if (clientType.equals(ClientType.HBASE))
-            {
-                clientFactory = (ClientFactory) Class.forName("com.impetus.client.hbase.HBaseClientFactory")
-                        .newInstance();
-            }
-            else if (clientType.equals(ClientType.PELOPS))
-            {
-                clientFactory = (ClientFactory) Class
-                        .forName("com.impetus.client.cassandra.pelops.PelopsClientFactory").newInstance();
-            }
-            else if (clientType.equals(ClientType.THRIFT))
-            {
-                clientFactory = (ClientFactory) Class
-                        .forName("com.impetus.client.cassandra.thrift.ThriftClientFactory").newInstance();
-            }
-            else if (clientType.equals(ClientType.MONGODB))
-            {
-                clientFactory = (ClientFactory) Class.forName("com.impetus.client.mongodb.MongoDBClientFactory")
-                        .newInstance();
-            }
-            else if (clientType.equals(ClientType.RDBMS))
-            {
-                clientFactory = (ClientFactory) Class.forName("com.impetus.client.rdbms.RDBMSClientFactory")
-                        .newInstance();
-            }
+            clientFactory = (ClientFactory) Class.forName(kunderaClientFactory).newInstance();
         }
         catch (InstantiationException e)
         {

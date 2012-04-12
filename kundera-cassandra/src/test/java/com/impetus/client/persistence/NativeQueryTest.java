@@ -180,7 +180,7 @@ public class NativeQueryTest
         Map<String, Object> props = new HashMap<String, Object>();
         String persistenceUnit = "cassandra";
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT, "pelops");
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, "com.impetus.client.cassandra.pelops.PelopsClientFactory");
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaExamples");

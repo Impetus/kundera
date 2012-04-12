@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
@@ -47,7 +46,7 @@ public abstract class AbstractSchemaManager
     protected String host;
 
     /** The kundera_client variable. */
-    protected String kundera_client;
+    protected String kundera_client_factory;
 
     /** The database name variable. */
     protected String databaseName;
@@ -61,9 +60,14 @@ public abstract class AbstractSchemaManager
     /** The use secondry index variable. */
     protected boolean useSecondryIndex = false;
 
-    public AbstractSchemaManager(ClientType client)
+    /**
+     * Initialise with configured client factory.
+     * 
+     * @param clientFactory  specific client factory.
+     */
+    protected AbstractSchemaManager(String clientFactory)
     {
-        kundera_client = client.name();
+        kundera_client_factory = clientFactory;
     }
 
     // @Override
@@ -84,9 +88,9 @@ public abstract class AbstractSchemaManager
         {
             // Get persistence unit metadata
             puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(pu);
-            if (kundera_client != null
-                    && kundera_client.equalsIgnoreCase(puMetadata.getProperties().getProperty(
-                            PersistenceProperties.KUNDERA_CLIENT)))
+            if (kundera_client_factory != null
+                    && kundera_client_factory.equalsIgnoreCase(puMetadata.getProperties().getProperty(
+                            PersistenceProperties.KUNDERA_CLIENT_FACTORY)))
             {
                 port = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_PORT);
                 host = puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_NODES);

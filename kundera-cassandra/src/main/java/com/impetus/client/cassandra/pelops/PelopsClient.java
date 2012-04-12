@@ -60,6 +60,7 @@ import org.scale7.cassandra.pelops.Selector;
 import org.scale7.cassandra.pelops.pool.IThriftPool;
 
 import com.impetus.client.cassandra.pelops.PelopsDataHandler.ThriftRow;
+import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -87,7 +88,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * @author animesh.kumar
  * @since 0.1
  */
-public class PelopsClient implements Client
+public class PelopsClient implements Client<CassQuery>
 {
 
     /** log for this class. */
@@ -625,31 +626,47 @@ public class PelopsClient implements Client
      */
     private void createIndexesOnColumns(String tableName, String poolName, List<Column> columns)
     {
-        String keysapce = Pelops.getDbConnPool(poolName).getKeyspace();
+        String keyspace = Pelops.getDbConnPool(poolName).getKeyspace();
         try
         {
             Cassandra.Client api = Pelops.getDbConnPool(poolName).getConnection().getAPI();
-            KsDef ksDef = api.describe_keyspace(keysapce);
+            KsDef ksDef = api.describe_keyspace(keyspace);
             List<CfDef> cfDefs = ksDef.getCf_defs();
 
             // Column family definition on which secondary index creation is
             // required
             CfDef columnFamilyDefToUpdate = null;
+//            boolean isNew=false;
             for (CfDef cfDef : cfDefs)
             {
                 if (cfDef.getName().equals(tableName))
                 {
                     columnFamilyDefToUpdate = cfDef;
+//                    isNew=false;
                     break;
                 }
             }
+            
+//            //create a column family, in case it is not already available.
+//            if(columnFamilyDefToUpdate == null)
+//            {
+//                isNew = true;
+//                columnFamilyDefToUpdate = new CfDef(keyspace, tableName); 
+//                ksDef.addToCf_defs(columnFamilyDefToUpdate);
+//            }
 
             // Get list of indexes already created
             List<ColumnDef> columnMetadataList = columnFamilyDefToUpdate.getColumn_metadata();
             List<String> indexList = new ArrayList<String>();
-            for (ColumnDef columnDef : columnMetadataList)
+            
+            if (columnMetadataList != null)
             {
-                indexList.add(columnDef.getIndex_name());
+                for (ColumnDef columnDef : columnMetadataList)
+                {
+                    indexList.add(columnDef.getIndex_name().trim());
+                }
+                //need to set them to null else it is giving problem on update column family and trying to add again existing indexes.
+                columnFamilyDefToUpdate.column_metadata = null;
             }
 
             // Iterate over all columns for creating secondary index on them
@@ -667,19 +684,26 @@ public class PelopsClient implements Client
                 // Add secondary index only if it's not already created
                 // (if already created, it would be there in column family
                 // definition)
-                if (!indexList.contains(indexName))
+                if (!indexList.contains(indexName.trim()))
                 {
+                    
                     columnFamilyDefToUpdate.addToColumn_metadata(columnDef);
                 }
             }
 
             // Finally, update column family with modified column family
             // definition
-            api.system_update_column_family(columnFamilyDefToUpdate);
+    
+             api.system_update_column_family(columnFamilyDefToUpdate);
+//            } else
+//            {
+//                api.system_add_column_family(columnFamilyDefToUpdate);
+//            }
 
         }
         catch (InvalidRequestException e)
         {
+ 
             log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
 
         }
@@ -1273,5 +1297,15 @@ public class PelopsClient implements Client
         }
 
         return returnedEntities;
+    }
+
+ 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#getQueryImplementor()
+     */
+    @Override
+    public Class<CassQuery> getQueryImplementor()
+    {
+        return CassQuery.class;
     }
 }

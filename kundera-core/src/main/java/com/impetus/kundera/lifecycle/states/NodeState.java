@@ -16,7 +16,19 @@
 package com.impetus.kundera.lifecycle.states;
 
 
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.CascadeType;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.NodeLink;
+import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.NodeStateContext;
+import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
  * State machine class for Node state
@@ -25,6 +37,15 @@ import com.impetus.kundera.lifecycle.NodeStateContext;
  */
 public abstract class NodeState
 {   
+    private static Log log = LogFactory.getLog(NodeState.class);
+    
+    public enum OPERATION {
+        PERSIST,
+        MERGE,
+        REMOVE,
+        REFRESH,
+        DETACH
+    }
    
     public abstract void initialize(NodeStateContext nodeStateContext);
     
@@ -50,13 +71,73 @@ public abstract class NodeState
     public abstract void handleClear(NodeStateContext nodeStateContext);
     public abstract void handleFlush(NodeStateContext nodeStateContext);   
 
+    /**
+     * @param nodeStateContext
+     */
+    protected void moveNodeToNextState(NodeStateContext nodeStateContext, NodeState nextState)
+    {        
+        nodeStateContext.setCurrentNodeState(nextState);
+        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());
+    }
+    
+    /**
+     * @param nodeStateContext
+     */
+    protected void recursivelyPerformOperation(NodeStateContext nodeStateContext, OPERATION operation)
+    {
+        Map<NodeLink, Node> children = nodeStateContext.getChildren();
+        if (children != null)
+        {
+            for (NodeLink nodeLink : children.keySet())
+            {
+                List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
 
+                switch (operation)
+                {
+                case PERSIST:
+                    if (cascadeTypes.contains(CascadeType.PERSIST) || cascadeTypes.contains(CascadeType.ALL))
+                    {
+                        Node childNode = children.get(nodeLink);
+                        childNode.persist();
+                    }
+                case MERGE:
+                    if (cascadeTypes.contains(CascadeType.MERGE) || cascadeTypes.contains(CascadeType.ALL))
+                    {
+                        Node childNode = children.get(nodeLink);
+                        childNode.merge();
+                    }
+
+                case REMOVE:
+                    if (cascadeTypes.contains(CascadeType.REMOVE) || cascadeTypes.contains(CascadeType.ALL))
+                    {
+                        Node childNode = children.get(nodeLink);
+                        childNode.remove();
+                    }
+
+                case REFRESH:
+                    if (cascadeTypes.contains(CascadeType.REFRESH) || cascadeTypes.contains(CascadeType.ALL))
+                    {
+                        Node childNode = children.get(nodeLink);
+                        childNode.refresh();
+                    }
+                case DETACH:
+                    if (cascadeTypes.contains(CascadeType.DETACH) || cascadeTypes.contains(CascadeType.ALL))
+                    {
+                        Node childNode = children.get(nodeLink);
+                        childNode.detach();
+                    }
+                }
+
+            }
+        }
+    }
+    
     public void logStateChangeEvent(NodeState prevState, NodeState nextState, String nodeId) {
-        System.out.println("Node: " + nodeId + ":: " + prevState.getClass().getSimpleName() + " >>> " + nextState.getClass().getSimpleName());
+        log.debug("Node: " + nodeId + ":: " + prevState.getClass().getSimpleName() + " >>> " + nextState.getClass().getSimpleName());
     }
     
     public void logNodeEvent(String eventType, NodeState currentState, String nodeId) {
-        System.out.println("Node: " + nodeId + ":: " + eventType + " in state " + currentState.getClass().getSimpleName());
+        log.debug("Node: " + nodeId + ":: " + eventType + " in state " + currentState.getClass().getSimpleName());
     }
     
 }

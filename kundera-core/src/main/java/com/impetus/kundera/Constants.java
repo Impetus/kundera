@@ -76,4 +76,5 @@ public final class Constants
     
     public final static String NODE_ID_SEPARATOR = "$";
 
+    public final static String RDBMS_CLIENT_FACTORY="com.impetus.client.rdbms.RDBMSClientFactory";
 }

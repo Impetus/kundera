@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
@@ -55,9 +54,9 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(MongoDBSchemaManager.class);
 
-    public MongoDBSchemaManager(ClientType client)
+    public MongoDBSchemaManager(String clientFactory)
     {
-        super(client);
+        super(clientFactory);
     }
 
     @Override
@@ -173,8 +172,6 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
      */
     protected boolean initiateClient()
     {
-        if (kundera_client.equalsIgnoreCase("MongoDB"))
-        {
 
             int localport = Integer.parseInt(port);
             try
@@ -194,7 +191,5 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
             }
 
             return true;
-        }
-        return false;
     }
 }

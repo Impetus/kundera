@@ -38,14 +38,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.configure.schema.ColumnInfo;
-import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
-import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.property.PropertyAccessException;
 
 /**
@@ -68,13 +65,18 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     /**
      * Instantiates a new cassandra schema manager.
+<<<<<<< HEAD
      * 
      * @param client
      *            the client
+=======
+     *
+     * @param clientFactory the configured client clientFactory
+>>>>>>> aae3a152a29bcd313f5a24f70fa99937787b0407
      */
-    public CassandraSchemaManager(ClientType client)
+    public CassandraSchemaManager(String clientFactory)
     {
-        super(client);
+        super(clientFactory);
     }
 
     @Override
@@ -473,7 +475,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     protected boolean initiateClient()
     {
-        if (kundera_client.equalsIgnoreCase(ClientType.PELOPS.name()) && cassandra_client == null)
+        if (cassandra_client == null)
         {
             TSocket socket = new TSocket(host, Integer.parseInt(port));
             TTransport transport = new TFramedTransport(socket);

@@ -42,9 +42,7 @@ public class TransientState extends NodeState
     {        
         
         //Transient ---> Managed
-        NodeState nextState = new ManagedState();
-        nodeStateContext.setCurrentNodeState(nextState); 
-        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());
+        moveNodeToNextState(nodeStateContext, new ManagedState());
         
         //Mark this entity for saving in database
         nodeStateContext.setDirty(true);
@@ -58,17 +56,7 @@ public class TransientState extends NodeState
         nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);
 
         //Recurse persist operation on all managed entities for whom cascade=ALL or PERSIST
-        Map<NodeLink, Node> children = nodeStateContext.getChildren();
-        if(children != null) {
-            for(NodeLink nodeLink : children.keySet()) {
-                List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
-                if(cascadeTypes.contains(CascadeType.PERSIST) || cascadeTypes.contains(CascadeType.ALL)) {
-                    Node childNode = children.get(nodeLink);                
-                    childNode.persist();
-                }
-            }
-        }
-        
+        recursivelyPerformOperation(nodeStateContext, OPERATION.PERSIST);        
     }                
                    
 
@@ -76,14 +64,21 @@ public class TransientState extends NodeState
     public void handleRemove(NodeStateContext nodeStateContext)
     {
         //Ignored, Entity will remain in the Transient state
-        //TODO: Recurse remove operation for all related entities for whom cascade=ALL or REMOVE
+        
+        //Recurse remove operation for all related entities for whom cascade=ALL or REMOVE
+        recursivelyPerformOperation(nodeStateContext, OPERATION.REMOVE);
     }
+
+    
 
     @Override
     public void handleRefresh(NodeStateContext nodeStateContext)
     {
         //Ignored, Entity will remain in the Transient state
-        //TODO: Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
+        
+        
+        //Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
+        recursivelyPerformOperation(nodeStateContext, OPERATION.REFRESH);
     }
 
     @Override

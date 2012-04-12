@@ -25,7 +25,6 @@ import org.apache.lucene.util.Version;
 import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
@@ -96,7 +95,7 @@ public class HBaseClientFactory extends GenericClientFactory
         conf = new HBaseConfiguration(hadoopConf);
         reader = new HBaseEntityReader();
 
-        schemaManager = new HBaseSchemaManager(ClientType.HBASE);
+        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName());
         schemaManager.exportSchema();
     }
 

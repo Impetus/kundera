@@ -16,16 +16,7 @@
 package com.impetus.kundera.lifecycle.states;
 
 
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.CascadeType;
-
-import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.NodeLink;
-import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.NodeStateContext;
-import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * @author amresh
@@ -49,7 +40,7 @@ public class DetachedState extends NodeState
     public void handleRemove(NodeStateContext nodeStateContext)
     {
         throw new IllegalArgumentException("Remove operation not allowed in Detached state." +
-        		" Possible reason: You may have closed entity manager before calling remove");
+        		" Possible reason: You may have closed entity manager before calling remove. A solution is to call merge before remove.");
     }
 
     @Override
@@ -62,25 +53,13 @@ public class DetachedState extends NodeState
     public void handleMerge(NodeStateContext nodeStateContext)
     {
         // Detached ---> Managed
-        NodeState nextState = new ManagedState();
-        nodeStateContext.setCurrentNodeState(nextState); 
-        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());       
+        moveNodeToNextState(nodeStateContext, new ManagedState());       
         
         //TODO: Copy detached entity's current state to existing managed instance of the 
         // same entity identity (if one exists), or create a new managed copy       
         
         //Cascade manage operation for all related entities for whom cascade=ALL or MERGE
-        //Cascade merge operation for all related entities for whom cascade=ALL or MERGE
-        Map<NodeLink, Node> children = nodeStateContext.getChildren();
-        if(children != null) {
-            for(NodeLink nodeLink : children.keySet()) {
-                List<CascadeType> cascadeTypes = (List<CascadeType>) nodeLink.getLinkProperty(LinkProperty.CASCADE);
-                if(cascadeTypes.contains(CascadeType.MERGE) || cascadeTypes.contains(CascadeType.ALL)) {
-                    Node childNode = children.get(nodeLink);                
-                    childNode.merge();
-                }
-            }
-        }
+        recursivelyPerformOperation(nodeStateContext, OPERATION.MERGE);
     }
     
     @Override
@@ -134,8 +113,6 @@ public class DetachedState extends NodeState
     @Override
     public void handleContains(NodeStateContext nodeStateContext)
     {
-    } 
-    
-    
+    }   
 
 }

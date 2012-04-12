@@ -16,6 +16,7 @@
 package com.impetus.client.hbase.junits;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 import org.apache.hadoop.conf.Configuration;
@@ -136,6 +137,25 @@ public class HBaseCli
             utility.shutdownMiniCluster();
         }
         catch (Exception e)
+        {
+            logger.error(e.getMessage());
+        }
+    }
+
+    /**
+     * Destroys cluster.
+     */
+    public static void stopCluster()
+    {
+        try
+        {
+            if (utility != null)
+            {
+                utility.shutdownMiniCluster();
+                utility = null;
+            }
+        }
+        catch (IOException e)
         {
             logger.error(e.getMessage());
         }

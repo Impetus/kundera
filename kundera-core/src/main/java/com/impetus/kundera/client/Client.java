@@ -18,6 +18,8 @@ package com.impetus.kundera.client;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Query;
+
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -32,7 +34,7 @@ import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
  * 
  * @author vivek.mishra
  */
-public interface Client
+public interface Client<Q extends Query> 
 {
 
     /**
@@ -223,4 +225,11 @@ public interface Client
      * @return reader entity reader.
      */
     EntityReader getReader();
+
+
+    /**
+     * Returns query implementor class, required for initializing client specific query interface. 
+     * @return class instance of configured query interface.
+     */
+    Class<Q> getQueryImplementor();
 }
