@@ -635,24 +635,24 @@ public class PelopsClient implements Client
             // Column family definition on which secondary index creation is
             // required
             CfDef columnFamilyDefToUpdate = null;
-            boolean isNew=false;
+//            boolean isNew=false;
             for (CfDef cfDef : cfDefs)
             {
                 if (cfDef.getName().equals(tableName))
                 {
                     columnFamilyDefToUpdate = cfDef;
-                    isNew=false;
+//                    isNew=false;
                     break;
                 }
             }
             
-            //create a column family, in case it is not already available.
-            if(columnFamilyDefToUpdate == null)
-            {
-                isNew = true;
-                columnFamilyDefToUpdate = new CfDef(keyspace, tableName); 
-                ksDef.addToCf_defs(columnFamilyDefToUpdate);
-            }
+//            //create a column family, in case it is not already available.
+//            if(columnFamilyDefToUpdate == null)
+//            {
+//                isNew = true;
+//                columnFamilyDefToUpdate = new CfDef(keyspace, tableName); 
+//                ksDef.addToCf_defs(columnFamilyDefToUpdate);
+//            }
 
             // Get list of indexes already created
             List<ColumnDef> columnMetadataList = columnFamilyDefToUpdate.getColumn_metadata();
@@ -692,18 +692,17 @@ public class PelopsClient implements Client
 
             // Finally, update column family with modified column family
             // definition
-            if(!isNew)
-            {
+    
              api.system_update_column_family(columnFamilyDefToUpdate);
-            } else
-            {
-                api.system_add_column_family(columnFamilyDefToUpdate);
-            }
+//            } else
+//            {
+//                api.system_add_column_family(columnFamilyDefToUpdate);
+//            }
 
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
+ 
             log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
 
         }
