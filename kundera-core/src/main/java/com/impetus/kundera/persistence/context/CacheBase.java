@@ -21,9 +21,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.ObjectGraph;
+import com.impetus.kundera.lifecycle.states.NodeState;
 
 /**
  * Base class for all cache required in persistence context 
@@ -31,6 +35,8 @@ import com.impetus.kundera.graph.ObjectGraph;
  */
 public class CacheBase
 {
+    private static Log log = LogFactory.getLog(CacheBase.class);
+    
     private Map<String, Node> nodeMappings;    
     private Set<Node> headNodes;
     
@@ -121,7 +127,7 @@ public class CacheBase
     }
     
     private void logCacheEvent(String eventType, String nodeId) {
-        System.out.println("Node: " + nodeId + ":: " + eventType + " PC");
+        log.debug("Node: " + nodeId + ":: " + eventType + " Persistence Context");
     }    
 
     /**

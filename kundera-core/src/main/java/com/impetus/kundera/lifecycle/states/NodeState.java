@@ -21,10 +21,14 @@ import java.util.Map;
 
 import javax.persistence.CascadeType;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.NodeStateContext;
+import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
  * State machine class for Node state
@@ -33,6 +37,7 @@ import com.impetus.kundera.lifecycle.NodeStateContext;
  */
 public abstract class NodeState
 {   
+    private static Log log = LogFactory.getLog(NodeState.class);
     
     public enum OPERATION {
         PERSIST,
@@ -128,11 +133,11 @@ public abstract class NodeState
     }
     
     public void logStateChangeEvent(NodeState prevState, NodeState nextState, String nodeId) {
-        System.out.println("Node: " + nodeId + ":: " + prevState.getClass().getSimpleName() + " >>> " + nextState.getClass().getSimpleName());
+        log.debug("Node: " + nodeId + ":: " + prevState.getClass().getSimpleName() + " >>> " + nextState.getClass().getSimpleName());
     }
     
     public void logNodeEvent(String eventType, NodeState currentState, String nodeId) {
-        System.out.println("Node: " + nodeId + ":: " + eventType + " in state " + currentState.getClass().getSimpleName());
+        log.debug("Node: " + nodeId + ":: " + eventType + " in state " + currentState.getClass().getSimpleName());
     }
     
 }
