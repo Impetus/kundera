@@ -626,8 +626,8 @@ public class PelopsClient implements Client<CassQuery>
      * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
-    public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
-            String inverseJoinColumnName, EntityMetadata relMetadata, String parentId)
+    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName,
+            String inverseJoinColumnName, String parentId)
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
         List<Column> columns = selector.getColumnsFromRow(joinTableName, new Bytes(parentId.getBytes()),
@@ -647,7 +647,7 @@ public class PelopsClient implements Client<CassQuery>
      * java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
-    public List<Object> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
+    public List<Object> findIdsByColumn(EntityMetadata parentMetadata, String joinTableName,
             String joinColumnName, String inverseJoinColumnName, Object childId)
     {
 

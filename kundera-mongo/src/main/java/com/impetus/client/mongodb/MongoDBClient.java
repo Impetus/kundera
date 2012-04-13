@@ -140,8 +140,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
     }
 
     @Override
-    public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
-            String inverseJoinColumnName, EntityMetadata relMetadata, String parentId)
+    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName,
+            String inverseJoinColumnName, String parentId)
     {        
         List<E> foreignKeys = new ArrayList<E>();
 
@@ -163,7 +163,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
     }
 
     @Override
-    public List<Object> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
+    public List<Object> findIdsByColumn(EntityMetadata parentMetadata, String joinTableName,
             String joinColumnName, String inverseJoinColumnName, Object childId)
     {
 

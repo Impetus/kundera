@@ -354,8 +354,8 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
      * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
-    public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
-            String inverseJoinColumnName, EntityMetadata relMetadata, String parentId)
+    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName,
+            String inverseJoinColumnName, String parentId)
     {
         return handler.getForeignKeysFromJoinTable(joinTableName, parentId, inverseJoinColumnName);
 
@@ -370,7 +370,7 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
      * java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
-    public <E> List<E> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
+    public <E> List<E> findIdsByColumn(EntityMetadata parentMetadata, String joinTableName,
             String joinColumnName, String inverseJoinColumnName, Object childId)
     {
         return handler.findParentEntityFromJoinTable(parentMetadata, joinTableName, joinColumnName,

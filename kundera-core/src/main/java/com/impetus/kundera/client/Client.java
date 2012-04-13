@@ -106,8 +106,6 @@ public interface Client<Q extends Query>
      */
     String getPersistenceUnit();
 
-    // TODO Do we really need it. This may not be required for few of the
-    // clients
     /**
      * Gets the index manager.
      * 
@@ -123,30 +121,28 @@ public interface Client<Q extends Query>
 
 
     /**
-     * Retrieves a list of foreign keys from a join table for a given primary
-     * key.
-     * 
-     * @param <E>
-     *            the element type
-     * @param joinTableName
-     *            Name of Join Table
-     * @param joinColumnName
-     *            Name of Join Column
-     * @param inverseJoinColumnName
-     *            Name of Inverse Join Column
-     * @param relMetadata
-     *            Entity metadata for the child entity (i.e. entity at the other
-     *            side of the relationship)
-     * @param objectGraph
-     *            Object graph of the persistence (Includes parent and child
-     *            data and other related info)
-     * @return the foreign keys from join table
+     * Returns List of column values for given primary key and column name.
+     *  
+     * @param <E>               Type cast
+     * @param tableName         Table/column family name.
+     * @param pKeyColumnName    Primary key column name.
+     * @param columnName        Name of column to be fetched.
+     * @param pKeyColumnValue   primary key value.
+     * @return                  list of values fetched for <columnName>  
      */
-    <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, String parentId);
+    <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, String pKeyColumnValue);
 
-    <E> List<E> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
-            String joinColumnName, String inverseJoinColumnName, Object childId);
+    /**
+     * Returns list of primary keys based fetched by parameterized column name and 
+     * @param <E>                    type case
+     * @param parentMetadata         
+     * @param tableName
+     * @param joinColumnName
+     * @param inverseJoinColumnName
+     * @param childId
+     * @return
+     */
+    <E> List<E> findIdsByColumn(EntityMetadata parentMetadata, String tableName, String joinColumnName, String inverseJoinColumnName, Object childId);
 
     /**
      * Delete rows from given table for given column name and corresponding value..

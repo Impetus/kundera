@@ -446,8 +446,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
-    public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
-            String inverseJoinColumnName, EntityMetadata relMetadata, String parentId)
+    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName,
+            String inverseJoinColumnName,  String parentId)
     {        
 
         StringBuffer sqlQuery = new StringBuffer();
@@ -472,7 +472,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * @see com.impetus.kundera.client.Client#findParentEntityFromJoinTable(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
      */
     @Override
-    public List<Object> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
+    public List<Object> findIdsByColumn(EntityMetadata parentMetadata, String joinTableName,
             String joinColumnName, String inverseJoinColumnName, Object childId)
     {
 
