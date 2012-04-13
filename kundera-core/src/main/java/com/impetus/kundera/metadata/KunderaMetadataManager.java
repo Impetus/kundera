@@ -63,7 +63,7 @@ public class KunderaMetadataManager
 
         MetamodelImpl metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata()
                 .getMetamodel(persistenceUnit);
-        
+
         return metamodel;
     }
 
@@ -90,11 +90,12 @@ public class KunderaMetadataManager
         }
 
         // FIXME: I need to verify this why we need common entity metadata now!
-//        if (metamodel == null)
-//        {
-//            metamodel = (MetamodelImpl) kunderaMetadata.getApplicationMetadata().getMetamodel(
-//                    Constants.COMMON_ENTITY_METADATAS);
-//        }
+        // if (metamodel == null)
+        // {
+        // metamodel = (MetamodelImpl)
+        // kunderaMetadata.getApplicationMetadata().getMetamodel(
+        // Constants.COMMON_ENTITY_METADATAS);
+        // }
         return metamodel;
     }
 
@@ -123,16 +124,21 @@ public class KunderaMetadataManager
      */
     public static EntityMetadata getEntityMetadata(Class entityClass)
     {
-        List<String> persistenceUnits = KunderaMetadata.INSTANCE.getApplicationMetadata().getMappedPersistenceUnit(entityClass);
-        
-        // persistence units will only have more than 1 persistence unit in case of RDBMS.
-        for (String pu : persistenceUnits)
+        List<String> persistenceUnits = KunderaMetadata.INSTANCE.getApplicationMetadata().getMappedPersistenceUnit(
+                entityClass);
+
+        // persistence units will only have more than 1 persistence unit in case
+        // of RDBMS.
+        if (persistenceUnits != null)
         {
-            MetamodelImpl metamodel = getMetamodel(pu);
-            EntityMetadata metadata = metamodel.getEntityMetadata(entityClass);
-            if (metadata != null )
+            for (String pu : persistenceUnits)
             {
-                return metadata;
+                MetamodelImpl metamodel = getMetamodel(pu);
+                EntityMetadata metadata = metamodel.getEntityMetadata(entityClass);
+                if (metadata != null)
+                {
+                    return metadata;
+                }
             }
         }
         log.warn("No Entity metadata found for the class " + entityClass

@@ -45,22 +45,25 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
+
 /**
- * CassandraSchemaManagerTest class test the auto creation schema property in cassandra data store.  
+ * CassandraSchemaManagerTest class test the auto creation schema property in
+ * cassandra data store.
  * 
  * @author Kuldeep.Kumar
- *
+ * 
  */
 public class CassandraSchemaManagerTest
 {
-    
+
     /** The configuration. */
     private SchemaConfiguration configuration;
 
     /**
      * Sets the up.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Before
     public void setUp() throws Exception
@@ -71,23 +74,32 @@ public class CassandraSchemaManagerTest
 
     /**
      * Tear down.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @After
     public void tearDown() throws Exception
     {
+        CassandraCli cli = new CassandraCli();
+        cli.getClient().system_drop_keyspace("KunderaCassandraExamples");
     }
 
     /**
      * Test schema operation.
-     *
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws TException the t exception
-     * @throws InvalidRequestException the invalid request exception
-     * @throws UnavailableException the unavailable exception
-     * @throws TimedOutException the timed out exception
-     * @throws SchemaDisagreementException the schema disagreement exception
+     * 
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     * @throws TException
+     *             the t exception
+     * @throws InvalidRequestException
+     *             the invalid request exception
+     * @throws UnavailableException
+     *             the unavailable exception
+     * @throws TimedOutException
+     *             the timed out exception
+     * @throws SchemaDisagreementException
+     *             the schema disagreement exception
      */
     @Test
     public void testSchemaOperation() throws IOException, TException, InvalidRequestException, UnavailableException,
@@ -117,7 +129,7 @@ public class CassandraSchemaManagerTest
 
     /**
      * Gets the entity manager factory.
-     *
+     * 
      * @return the entity manager factory
      */
     private EntityManagerFactoryImpl getEntityManagerFactory()
@@ -125,11 +137,13 @@ public class CassandraSchemaManagerTest
         Map<String, Object> props = new HashMap<String, Object>();
         String persistenceUnit = "cassandra";
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, "com.impetus.client.cassandra.pelops.PelopsClientFactory");
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,
+                "com.impetus.client.cassandra.pelops.PelopsClientFactory");
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCassandraExamples");
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
         puMetadata.setPersistenceUnitName(persistenceUnit);

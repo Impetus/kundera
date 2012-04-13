@@ -64,15 +64,14 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private static final Logger logger = LoggerFactory.getLogger(CassandraSchemaManager.class);
 
     /**
-     * Instantiates a new cassandra schema manager.
-<<<<<<< HEAD
+     * Instantiates a new cassandra schema manager. <<<<<<< HEAD
      * 
      * @param client
-     *            the client
-=======
-     *
-     * @param clientFactory the configured client clientFactory
->>>>>>> aae3a152a29bcd313f5a24f70fa99937787b0407
+     *            the client =======
+     * 
+     * @param clientFactory
+     *            the configured client clientFactory >>>>>>>
+     *            aae3a152a29bcd313f5a24f70fa99937787b0407
      */
     public CassandraSchemaManager(String clientFactory)
     {
@@ -111,7 +110,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         try
         {
             KsDef ksDef = cassandra_client.describe_keyspace(databaseName);
-            addOrUpdateTablesToKeyspace(tableInfos, ksDef);
+            addTablesToKeyspace(tableInfos, ksDef);
         }
         catch (NotFoundException nfex)
         {
@@ -134,6 +133,32 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
     }
 
+    private void addTablesToKeyspace(List<TableInfo> tableInfos, KsDef ksDef) throws InvalidRequestException,
+            SchemaDisagreementException, TException
+    {
+        cassandra_client.set_keyspace(databaseName);
+        for (TableInfo tableInfo : tableInfos)
+        {
+            boolean found = false;
+            for (CfDef cfDef : ksDef.getCf_defs())
+            {
+                if (cfDef.getName().equalsIgnoreCase(tableInfo.getTableName())
+                        && cfDef.getColumn_type().equalsIgnoreCase(tableInfo.getType()))
+                {
+                    cassandra_client.system_drop_column_family(tableInfo.getTableName());
+                    cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
+            }
+        }
+
+    }
+
     /**
      * update method update schema and table for the list of tableInfos
      * 
@@ -146,7 +171,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         try
         {
             KsDef ksDef = cassandra_client.describe_keyspace(databaseName);
-            addOrUpdateTablesToKeyspace(tableInfos, ksDef);
+            updateTables(tableInfos, ksDef);
         }
         catch (NotFoundException e)
         {
@@ -290,8 +315,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @param tableInfos
      *            list of TableInfos and ksDef object of KsDef.
      */
-    private void addOrUpdateTablesToKeyspace(List<TableInfo> tableInfos, KsDef ksDef) throws InvalidRequestException,
-            TException, SchemaDisagreementException
+    private void updateTables(List<TableInfo> tableInfos, KsDef ksDef) throws InvalidRequestException, TException,
+            SchemaDisagreementException
     {
 
         cassandra_client.set_keyspace(databaseName);
@@ -428,10 +453,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         return cfDef;
     }
 
-//    private enum ColumnFamilyType
-//    {
-//        Standard, Super;
-//    }
+    // private enum ColumnFamilyType
+    // {
+    // Standard, Super;
+    // }
 
     /**
      * drop schema method drop the table from keyspace.
