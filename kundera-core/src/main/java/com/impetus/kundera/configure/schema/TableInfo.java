@@ -15,10 +15,10 @@
  ******************************************************************************/
 package com.impetus.kundera.configure.schema;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
  * TableInfo class holds table creation related information.
@@ -49,9 +49,14 @@ public class TableInfo
     /**
      * Instantiates a new table info.
      */
-    public TableInfo()
+    public TableInfo(String tableName, boolean isIndexable, String tableSchemaType, String idClassType)
     {
+        this.tableName = tableName;
+        this.isIndexable = isIndexable;
+        this.type = tableSchemaType;
+        this.tableIdType = idClassType;
     }
+    
 
     /**
      * Equals method compare two object of TableInfo on the basis of their
@@ -70,31 +75,27 @@ public class TableInfo
                 && this.tableName.equals(((TableInfo) obj).tableName)
                 && this.tableIdType.equals(((TableInfo) obj).tableIdType) : false;
 
-        // boolean result = false;
-        // if (obj == null)
-        // {
-        // result = false;
-        // }
-        // else if (getClass() != obj.getClass())
-        // {
-        // result = false;
-        // }
-        // else
-        // {
-        // TableInfo tableInfo = (TableInfo) obj;
-        //
-        // if (this.tableName != null &&
-        // this.tableName.equals(tableInfo.tableName)
-        // && this.type.equals(tableInfo.type) &&
-        // this.tableIdType.equals(tableInfo.tableIdType))
-        // {
-        //
-        // result = true;
-        // }
-        // }
-        // return result;
     }
 
+    @Override 
+    public int hashCode()
+    {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+    
+    @Override
+    public String toString()
+    {
+        StringBuilder strBuilder = new StringBuilder("tableIdType:==> ");
+        strBuilder.append(tableIdType);
+        strBuilder.append(" | tableName: ==>");
+        strBuilder.append(tableName);
+        strBuilder.append(" | type: ==>");
+        strBuilder.append(type);
+        strBuilder.append("isIndexable: ==>");
+        strBuilder.append(isIndexable);
+        return strBuilder.toString();
+    }
     /**
      * Gets the table name.
      * 
@@ -144,20 +145,32 @@ public class TableInfo
      */
     public List<ColumnInfo> getColumnMetadatas()
     {
+
+        if(this.columnMetadatas == null)
+        {
+            this.columnMetadatas = new ArrayList<ColumnInfo>();
+        }
+        
         return columnMetadatas;
     }
 
-    /**
-     * Sets the column metadatas.
-     * 
-     * @param columnMetadatas
-     *            the columnMetadatas to set
-     */
-    public void setColumnMetadatas(List<ColumnInfo> columnMetadatas)
+    public void addColumnInfo(ColumnInfo columnInfo)
     {
-        this.columnMetadatas = columnMetadatas;
+        if(this.columnMetadatas == null)
+        {
+            this.columnMetadatas = new ArrayList<ColumnInfo>();
+        }
+        columnMetadatas.add(columnInfo);
     }
-
+    
+    public void addEmbeddedColumnInfo(EmbeddedColumnInfo embdColumnInfo)
+    {
+        if(this.embeddedColumnMetadatas == null)
+        {
+            this.embeddedColumnMetadatas = new ArrayList<EmbeddedColumnInfo>();
+        }
+        embeddedColumnMetadatas.add(embdColumnInfo);
+    }
     /**
      * Gets the embedded column metadatas.
      * 
@@ -168,16 +181,6 @@ public class TableInfo
         return embeddedColumnMetadatas;
     }
 
-    /**
-     * Sets the embedded column metadatas.
-     * 
-     * @param embeddedColumnMetadatas
-     *            the embeddedColumnMetadatas to set
-     */
-    public void setEmbeddedColumnMetadatas(List<EmbeddedColumnInfo> embeddedColumnMetadatas)
-    {
-        this.embeddedColumnMetadatas = embeddedColumnMetadatas;
-    }
 
     /**
      * Gets the type.

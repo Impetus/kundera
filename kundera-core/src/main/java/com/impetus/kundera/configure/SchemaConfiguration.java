@@ -39,6 +39,14 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 
+/**
+ * Schema configuration implementation to support ddl_schema_creation
+ * functionality. e.g. kundera_ddl_auto_prepare
+ * (create,create-drop,validate,update)
+ * 
+ * @author Kuldeep.Kumar
+ * 
+ */
 public class SchemaConfiguration implements Configuration
 {
 
@@ -72,40 +80,23 @@ public class SchemaConfiguration implements Configuration
         // TODO, FIXME: Refactoring is required.
         for (String persistenceUnit : persistenceUnits)
         {
-            if (getKunderaProperty(persistenceUnit) != null)
+            if (getSchemaProperty(persistenceUnit) != null)
             {
-                log.info("creating puToSchemaMetadata map for pu " + persistenceUnit);
-                List<TableInfo> tableInfos = puToSchemaMetadata.get(persistenceUnit);
-                // if no TableInfos for given persistence unit.
-                if (tableInfos == null)
-                {
-                    tableInfos = new ArrayList<TableInfo>();
-                }
+                log.info("Configuring schema export for: " + persistenceUnit);
+                List<TableInfo> tableInfos = getSchemaInfo(persistenceUnit);
 
-                Metamodel metaModel = appMetadata.getMetamodel(persistenceUnit);
-                Map<Class<?>, EntityMetadata> entityMetadataMap = ((MetamodelImpl) metaModel).getEntityMetadataMap();
+                Map<Class<?>, EntityMetadata> entityMetadataMap = getEntityMetadataCol(appMetadata, persistenceUnit);
 
+                // Iterate each entity metadata.
                 for (EntityMetadata entityMetadata : entityMetadataMap.values())
                 {
                     // get entity metadata(table info as well as columns)
                     // if table info exists, get it from map.
                     boolean found = false;
                     Type type = entityMetadata.getType();
-                    TableInfo tableInfo = new TableInfo();
-                    tableInfo.setTableName(entityMetadata.getTableName());
-                    tableInfo.setIndexable(entityMetadata.isIndexable());
-
-                    // check for standard and super column.
-                    if (type.isColumnFamilyMetadata())
-                    {
-                        tableInfo.setType("Standard");
-                    }
-                    else
-                    {
-                        tableInfo.setType("Super");
-                    }
-                    tableInfo.setTableIdType(entityMetadata.getIdColumn().getField().getType().toString());
-                    // tableInfo.setAction(SchemaAction.instanceOf(getKunderaProperty(persistenceUnit)));
+                    String idClassName = entityMetadata.getIdColumn().getField().getType().getName();
+                    TableInfo tableInfo = new TableInfo(entityMetadata.getTableName(), entityMetadata.isIndexable(),
+                            type.name(), idClassName);
 
                     // check for tableInfos not empty and contains the present
                     // tableInfo.
@@ -114,154 +105,16 @@ public class SchemaConfiguration implements Configuration
                         found = true;
                         int idx = tableInfos.indexOf(tableInfo);
                         tableInfo = tableInfos.get(idx);
-                        if (tableInfo.getType().equalsIgnoreCase("Standard"))
-                        {
-                            for (Column column : entityMetadata.getColumnsAsList())
-                            {
-                                if (!tableInfo.getColumnMetadatas().contains(getColumn(column)))
-                                {
-                                    tableInfo.getColumnMetadatas().add(getColumn(column));
-                                }
-                            }
-                        }
-                        else
-                        {
-                            List<EmbeddedColumnInfo> embeddedColumnInfos = new ArrayList<EmbeddedColumnInfo>();
-                            for (EmbeddedColumn embeddedColumn : entityMetadata.getEmbeddedColumnsAsList())
-                            {
-                                embeddedColumnInfos.add(getEmbeddedColumn(embeddedColumn));
-                                tableInfo.setEmbeddedColumnMetadatas(embeddedColumnInfos);
-                            }
-                        }
+                        addColumnToTableInfo(entityMetadata, type, tableInfo);
                     }
                     else
                     {
-                        if (tableInfo.getType().equalsIgnoreCase("Standard"))
-                        {
-                            List<ColumnInfo> columns = new ArrayList<ColumnInfo>();
-
-                            for (Column column : entityMetadata.getColumnsAsList())
-                            {
-                                columns.add(getColumn(column));
-                            }
-                            tableInfo.setColumnMetadatas(columns);
-                        }
-                        else
-                        {
-                            List<EmbeddedColumnInfo> embeddedColumnInfos = new ArrayList<EmbeddedColumnInfo>();
-                            for (EmbeddedColumn embeddedColumn : entityMetadata.getEmbeddedColumnsAsList())
-                            {
-                                embeddedColumnInfos.add(getEmbeddedColumn(embeddedColumn));
-                            }
-                            tableInfo.setEmbeddedColumnMetadatas(embeddedColumnInfos);
-                        }
+                        addColumnToTableInfo(entityMetadata, type, tableInfo);
                     }
+
                     List<Relation> relations = entityMetadata.getRelations();
-                    for (Relation relation : relations)
-                    {
-                        Class entityClass = relation.getTargetEntity();
-                        EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
-                        ForeignKey relationType = relation.getType();
-
-                        if ((relationType.equals(ForeignKey.ONE_TO_MANY) && relation.getJoinColumnName() != null)
-                                || relation.isJoinedByPrimaryKey())
-                        {
-                            if (targetEntityMetadata.equals(entityMetadata))
-                            {
-                                if (tableInfo.getColumnMetadatas() == null)
-                                {
-                                    List<ColumnInfo> columnMetadatas = new ArrayList<ColumnInfo>();
-                                    columnMetadatas.add(getJoinColumn(relation.getJoinColumnName()));
-                                    tableInfo.setColumnMetadatas(columnMetadatas);
-                                }
-                                else if (tableInfo.getColumnMetadatas().contains(
-                                        getJoinColumn(relation.getJoinColumnName())))
-                                {
-                                    tableInfo.getColumnMetadatas().add(getJoinColumn(relation.getJoinColumnName()));
-                                }
-                            }
-                            else
-                            {
-                                String pu = targetEntityMetadata.getPersistenceUnit();
-                                Type targetEntityType = targetEntityMetadata.getType();
-                                TableInfo targetTableInfo = new TableInfo();
-                                targetTableInfo.setTableName(targetEntityMetadata.getTableName());
-                                targetTableInfo.setIndexable(targetEntityMetadata.isIndexable());
-                                if (targetEntityType.isColumnFamilyMetadata())
-                                {
-                                    targetTableInfo.setType("Standard");
-                                }
-                                else
-                                {
-                                    targetTableInfo.setType("Super");
-                                }
-                                targetTableInfo.setTableIdType(targetEntityMetadata.getIdColumn().getField().getType()
-                                        .toString());
-                                // targetTableInfo.setAction(SchemaAction.instanceOf(getKunderaProperty(persistenceUnit)));
-                                if (!pu.equals(persistenceUnit))
-                                {
-                                    List<TableInfo> targetTableInfos = puToSchemaMetadata.get(pu);
-                                    if (targetTableInfos == null)
-                                    {
-                                        targetTableInfos = new ArrayList<TableInfo>();
-                                    }
-
-                                    if (!targetTableInfos.isEmpty() && targetTableInfos.contains(targetTableInfo))
-                                    {
-                                        int idx = targetTableInfos.indexOf(targetTableInfo);
-                                        targetTableInfo = targetTableInfos.get(idx);
-
-                                        Column column = entityMetadata.getIdColumn();
-                                        targetTableInfo.getColumnMetadatas().add(getColumn(column));
-                                        targetTableInfos.add(targetTableInfo);
-                                    }
-                                    else
-                                    {
-                                        List<ColumnInfo> columnInfos = new ArrayList<ColumnInfo>();
-                                        columnInfos.add(getColumn(entityMetadata.getIdColumn()));
-                                        targetTableInfo.setColumnMetadatas(columnInfos);
-                                        targetTableInfos.add(targetTableInfo);
-                                    }
-                                    puToSchemaMetadata.put(pu, targetTableInfos);
-                                }
-                                else
-                                {
-                                    if (!tableInfos.isEmpty() && tableInfos.contains(targetTableInfo))
-                                    {
-                                        int idx = tableInfos.indexOf(targetTableInfo);
-                                        targetTableInfo = tableInfos.get(idx);
-
-                                        Column column = entityMetadata.getIdColumn();
-                                        if (!targetTableInfo.getColumnMetadatas().contains(getColumn(column)))
-                                        {
-                                            targetTableInfo.getColumnMetadatas().add(getColumn(column));
-                                        }
-                                    }
-                                    else
-                                    {
-                                        List<ColumnInfo> columnInfos = new ArrayList<ColumnInfo>();
-                                        columnInfos.add(getColumn(entityMetadata.getIdColumn()));
-                                        targetTableInfo.setColumnMetadatas(columnInfos);
-                                        tableInfos.add(targetTableInfo);
-                                    }
-                                }
-                            }
-                        }
-                        else if (relation.isUnary() && relation.getJoinColumnName() != null)
-                        {
-                            if (tableInfo.getColumnMetadatas() == null)
-                            {
-                                List<ColumnInfo> columnMetadatas = new ArrayList<ColumnInfo>();
-                                columnMetadatas.add(getJoinColumn(relation.getJoinColumnName()));
-                                tableInfo.setColumnMetadatas(columnMetadatas);
-                            }
-                            else if (!tableInfo.getColumnMetadatas().contains(
-                                    getJoinColumn(relation.getJoinColumnName())))
-                            {
-                                tableInfo.getColumnMetadatas().add(getJoinColumn(relation.getJoinColumnName()));
-                            }
-                        }
-                    }
+                    parseRelations(persistenceUnit, tableInfos, entityMetadata, tableInfo, relations);
+                    
                     if (!found)
                     {
                         tableInfos.add(tableInfo);
@@ -272,8 +125,122 @@ public class SchemaConfiguration implements Configuration
         }
     }
 
+    private void parseRelations(String persistenceUnit, List<TableInfo> tableInfos, EntityMetadata entityMetadata,
+            TableInfo tableInfo, List<Relation> relations)
+    {
+        for (Relation relation : relations)
+        {
+            Class entityClass = relation.getTargetEntity();
+            EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+            ForeignKey relationType = relation.getType();
+
+            if ((relationType.equals(ForeignKey.ONE_TO_MANY) && relation.getJoinColumnName() != null)
+                    || relation.isJoinedByPrimaryKey())
+            {
+                if (targetEntityMetadata.equals(entityMetadata))
+                {
+                    tableInfo.addColumnInfo(getJoinColumn(relation.getJoinColumnName()));
+                }
+                else
+                {
+                    String pu = targetEntityMetadata.getPersistenceUnit();
+                    Type targetEntityType = targetEntityMetadata.getType();
+                    String idClass = targetEntityMetadata.getIdColumn().getField().getType().getName();
+                    TableInfo targetTableInfo = new TableInfo(targetEntityMetadata.getTableName(),
+                            targetEntityMetadata.isIndexable(), targetEntityType.name(), idClass);
+                    
+                    //In case of different persistence unit. case for poly glot persistence.
+                    if (!pu.equals(persistenceUnit))
+                    {
+                        List<TableInfo> targetTableInfos = getSchemaInfo(pu);
+
+                        addIdColumnToInfo(entityMetadata, targetTableInfo, targetTableInfos);
+                        
+                        //add for newly discovered persistence unit.
+                        puToSchemaMetadata.put(pu, targetTableInfos);
+                    }
+                    else
+                    {
+                        addIdColumnToInfo(entityMetadata, targetTableInfo, tableInfos);
+                        tableInfos.add(targetTableInfo);
+                    }
+                }
+            }
+            else if (relation.isUnary() && relation.getJoinColumnName() != null)
+            {
+                tableInfo.addColumnInfo(getJoinColumn(relation.getJoinColumnName()));
+            }
+        }
+    }
+
+    private void addIdColumnToInfo(EntityMetadata entityMetadata, TableInfo targetTableInfo,
+            List<TableInfo> targetTableInfos)
+    {
+        if (!targetTableInfos.isEmpty() && targetTableInfos.contains(targetTableInfo))
+        {
+            int idx = targetTableInfos.indexOf(targetTableInfo);
+            targetTableInfo = targetTableInfos.get(idx);
+        }
+        
+        targetTableInfo.addColumnInfo(getColumn(entityMetadata.getIdColumn()));
+        targetTableInfos.add(targetTableInfo);
+    }
+
+    private void addColumnToTableInfo(EntityMetadata entityMetadata, Type type, TableInfo tableInfo)
+    {
+        // Add columns to table info.
+        for (Column column : entityMetadata.getColumnsAsList())
+        {
+            if (!tableInfo.getColumnMetadatas().contains(getColumn(column)))
+            {
+                tableInfo.addColumnInfo(getColumn(column));
+            }
+        }
+
+        // Added embedded column infos to table info.
+        for (EmbeddedColumn embeddedColumn : entityMetadata.getEmbeddedColumnsAsList())
+        {
+            tableInfo.addEmbeddedColumnInfo(getEmbeddedColumn(embeddedColumn));
+        }
+    }
+
     /**
-     * getEmbeddedColumn method return EmbeddedColumnInfo for the given
+     * Returns list of configured table/column families.
+     * 
+     * @param persistenceUnit
+     *            persistence unit, for which schema needs to be fetched.
+     * 
+     * @return list of {@link TableInfo}
+     */
+    private List<TableInfo> getSchemaInfo(String persistenceUnit)
+    {
+        List<TableInfo> tableInfos = puToSchemaMetadata.get(persistenceUnit);
+        // if no TableInfos for given persistence unit.
+        if (tableInfos == null)
+        {
+            tableInfos = new ArrayList<TableInfo>();
+        }
+        return tableInfos;
+    }
+
+    /**
+     * Returns map of entity metdata {@link EntityMetadata}.
+     * 
+     * @param appMetadata
+     *            application metadata
+     * @param persistenceUnit
+     *            persistence unit
+     * @return map of entity metadata.
+     */
+    private Map<Class<?>, EntityMetadata> getEntityMetadataCol(ApplicationMetadata appMetadata, String persistenceUnit)
+    {
+        Metamodel metaModel = appMetadata.getMetamodel(persistenceUnit);
+        Map<Class<?>, EntityMetadata> entityMetadataMap = ((MetamodelImpl) metaModel).getEntityMetadataMap();
+        return entityMetadataMap;
+    }
+
+    /**
+     * getEmbeddedColumn method return EmbeddedCoumnInfo for the given
      * EmbeddedColumn.
      * 
      * @param object
@@ -321,7 +288,6 @@ public class SchemaConfiguration implements Configuration
         ColumnInfo columnInfo = new ColumnInfo();
         columnInfo.setColumnName(joinColumnName);
         columnInfo.setIndexable(true);
-        // columnInfo.setType();
         return columnInfo;
     }
 
@@ -333,7 +299,7 @@ public class SchemaConfiguration implements Configuration
      *            persistenceUnit.
      * @return value of kundera auto ddl in form of String.
      */
-    private String getKunderaProperty(String persistenceUnit)
+    private String getSchemaProperty(String persistenceUnit)
     {
         String KUNDERA_DDL_AUTO_PREPARE = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit)
