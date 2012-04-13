@@ -164,7 +164,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     @Override
     public void delete(Object entity, Object pKey)
     {
-        Session s = getSessionInstance();
+        Session s = getStatefulSession();
         Transaction tx = s.beginTransaction();
         s.delete(entity);
         tx.commit();
@@ -272,15 +272,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     public void persist(Node node)
     {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-        String id = ObjectGraphBuilder.getEntityId(node.getNodeId());
+        String id = ObjectGraphBuilder.getEntityId(node.getNodeId());        
         
-        Session s;
-        Transaction tx;
         try
         {
-            s = getSessionInstance();
-            tx = s.beginTransaction();
-            s.persist(node.getData());
+            s = getStatelessSession();
+            Transaction tx = s.beginTransaction();
+            s.insert(node.getData());
             tx.commit();
         }
         // TODO: Bad code, get rid of these exceptions, currently necessary for
@@ -301,12 +299,12 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             String linkValue = rh.getRelationValue();
             if(linkName != null && linkValue != null) {
                 
-                s = getSessionInstance();
-                tx = s.beginTransaction();
+                s = getStatelessSession();
+                Transaction tx = s.beginTransaction();
                 String updateSql = "Update " + metadata.getTableName() + " SET " + linkName + "= '"
                         + linkValue + "' WHERE " + metadata.getIdColumn().getName() + " = '"
                         + id + "'";
-                s.createSQLQuery(updateSql).executeUpdate();
+                s.createSQLQuery(updateSql).executeUpdate();    
                 tx.commit();
             }
         }       
@@ -404,7 +402,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         query.append("DELETE FROM ").append(tableName).append(" WHERE ").append(columnName).append("=")
                 .append("'").append(columnValue).append("'");
 
-        Session s = getSessionInstance();
+        Session s = getStatefulSession();
         Transaction tx = s.beginTransaction();
         s.createSQLQuery(query.toString()).executeUpdate();
         tx.commit();
@@ -431,7 +429,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             Object parentId, Set<Object> childrenIds)
     {       
 
-        Session s = getSessionInstance();
+        Session s = getStatefulSession();
         Transaction tx = s.beginTransaction();
         
         for(Object childId : childrenIds) {
@@ -477,7 +475,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * 
      * @return the session instance
      */
-    private Session getSessionInstance()
+    private Session getStatefulSession()
     {
         Session s = null;
         if (sf.isClosed())
@@ -495,11 +493,16 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return s;
     }
     
+    private StatelessSession getStatelessSession()
+    {
+        return sf.openStatelessSession();
+    }
+    
     /**
      * Find.
      * 
      * @param nativeQuery
-     *            the native query
+     *            the native fquery
      * @param relations
      *            the relations
      * @param m
@@ -550,7 +553,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         queryBuilder.append("'");
         queryBuilder.append(colValue);
         queryBuilder.append("'");
-        Session s = getSessionInstance();
+        Session s = getStatefulSession();
         s.beginTransaction();
         SQLQuery q = s.createSQLQuery(queryBuilder.toString()).addEntity(m.getEntityClazz());
         return q.list();
