@@ -61,8 +61,10 @@ import com.impetus.client.cassandra.pelops.PelopsDataHandler.ThriftRow;
 import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
+import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
@@ -82,7 +84,7 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
  * @author animesh.kumar
  * @since 0.1
  */
-public class PelopsClient implements Client<CassQuery>
+public class PelopsClient extends ClientBase implements Client<CassQuery>
 {
 
     /** log for this class. */
@@ -372,51 +374,18 @@ public class PelopsClient implements Client<CassQuery>
         Object entity = node.getData();
         String id = ObjectGraphBuilder.getEntityId(node.getNodeId());
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+        
+        List<RelationHolder> relationHolders = getRelationHolders(node);
 
         try
         {
             // Populate thrift row for this entity
-            PelopsDataHandler.ThriftRow tf = populateTfRow(entity, id, metadata);
+            PelopsDataHandler.ThriftRow tf = populateTfRow(entity, id, metadata);        
 
-            Map<NodeLink, Node> parents = node.getParents();
-            Map<NodeLink, Node> children = node.getChildren();
-
-            // Add column value for all parent nodes linked to this node
-            if (parents != null && !parents.isEmpty())
-            {
-                for (NodeLink parentNodeLink : parents.keySet())
-                {
-                    addNodeLinkToThriftRow(metadata, tf, parentNodeLink);
-                }
-            }
-
-            // Add column value for all child nodes linked to this node
-            if (children != null && !children.isEmpty())
-            {
-                for (NodeLink childNodeLink : children.keySet())
-                {
-                    addNodeLinkToThriftRow(metadata, tf, childNodeLink);
-                }
-            }
-
-            onPersist(metadata, entity, tf);
+            onPersist(metadata, entity, tf, relationHolders);
 
             // Index Entity
-            if (parents != null)
-            {
-                for (NodeLink parentNodeLink : parents.keySet())
-                {
-                    getIndexManager().write(metadata, entity,
-                            (String) parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
-                            parents.get(parentNodeLink).getDataClass());
-                }
-
-            }
-            else
-            {
-                getIndexManager().write(metadata, entity);
-            }
-
+            indexNode(node, metadata, getIndexManager());
         }
         catch (Exception e)
         {
@@ -425,39 +394,6 @@ public class PelopsClient implements Client<CassQuery>
 
     }
 
-    /**
-     * Adds the node link to thrift row.
-     * 
-     * @param metadata
-     *            the metadata
-     * @param tf
-     *            the tf
-     * @param nodeLink
-     *            the node link
-     */
-    private void addNodeLinkToThriftRow(EntityMetadata metadata, PelopsDataHandler.ThriftRow tf, NodeLink nodeLink)
-    {
-        String linkName = (String) nodeLink.getLinkProperty(LinkProperty.LINK_NAME);
-        String linkValue = (String) nodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
-        Boolean isSharedByPrimaryKey = (Boolean) nodeLink.getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
-
-        if (linkName != null && linkValue != null && !isSharedByPrimaryKey)
-        {
-            if (metadata.getEmbeddedColumnsAsList().isEmpty())
-            {
-                Column col = populateFkey(linkName, linkValue, timestamp);
-                tf.addColumn(col);
-            }
-            else
-            {
-                SuperColumn superColumn = new SuperColumn();
-                superColumn.setName(linkName.getBytes());
-                Column column = populateFkey(linkName, linkValue, timestamp);
-                superColumn.addToColumns(column);
-                tf.addSuperColumn(superColumn);
-            }
-        }
-    }
 
     /**
      * Persists records into Join Table
@@ -959,8 +895,10 @@ public class PelopsClient implements Client<CassQuery>
      * @param tf
      *            the tf
      */
-    private void onPersist(EntityMetadata metadata, Object entity, PelopsDataHandler.ThriftRow tf)
+    private void onPersist(EntityMetadata metadata, Object entity, PelopsDataHandler.ThriftRow tf, List<RelationHolder> relations)
     {
+        addRelationsToThriftRow(metadata, tf, relations);         
+        
         Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
         List<Column> thriftColumns = tf.getColumns();
@@ -985,6 +923,42 @@ public class PelopsClient implements Client<CassQuery>
 
         mutator.execute(ConsistencyLevel.ONE);
         tf = null;
+    }
+
+    /**
+     * Adds relation foreign key values as thrift column/ value to thrift row
+     * @param metadata
+     * @param tf
+     * @param relations
+     */
+    private void addRelationsToThriftRow(EntityMetadata metadata, PelopsDataHandler.ThriftRow tf,
+            List<RelationHolder> relations)
+    {
+        if (relations != null)
+        {
+            for (RelationHolder rh : relations)
+            {
+                String linkName = rh.getRelationName();
+                String linkValue = rh.getRelationValue();               
+
+                if (linkName != null && linkValue != null)
+                {
+                    if (metadata.getEmbeddedColumnsAsList().isEmpty())
+                    {
+                        Column col = populateFkey(linkName, linkValue, timestamp);
+                        tf.addColumn(col);
+                    }
+                    else
+                    {
+                        SuperColumn superColumn = new SuperColumn();
+                        superColumn.setName(linkName.getBytes());
+                        Column column = populateFkey(linkName, linkValue, timestamp);
+                        superColumn.addToColumns(column);
+                        tf.addSuperColumn(superColumn);
+                    }
+                }
+            }
+        }
     }
 
     /*

@@ -200,9 +200,12 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     {
         checkClosed();
         session.clear();
-        // TODO Do we need a client and persistenceDelegator close here?
         
-        persistenceDelegator.clear();
+        // TODO Do we need a client and persistenceDelegator close here?        
+        if(! PersistenceUnitTransactionType.JTA.equals(transactionType))
+        {
+            persistenceDelegator.clear();
+        }
         
     }
 
@@ -213,7 +216,12 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
         checkClosed();
         session.clear();
         session = null;
-        persistenceDelegator.close();       
+        persistenceDelegator.close(); 
+        
+        if(! PersistenceUnitTransactionType.JTA.equals(transactionType))
+        {
+            persistenceDelegator.clear();
+        }            
         closed = true;
     }
 
