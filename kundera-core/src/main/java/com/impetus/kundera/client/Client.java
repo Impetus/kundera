@@ -63,7 +63,6 @@ public interface Client<Q extends Query>
      * @throws Exception
      *             the exception
      */
-    //I will come to it LATER. 
     <E> List<E> findAll(Class<E> entityClass, Object... keys);
 
     /**
