@@ -272,7 +272,7 @@ public class SchemaConfiguration implements Configuration
         ColumnInfo columnInfo = new ColumnInfo();
         columnInfo.setColumnName(column.getName());
         columnInfo.setIndexable(column.isIndexable());
-        columnInfo.setType(column.getField().getType().toString());
+        columnInfo.setType(column.getField().getType().getName());
         return columnInfo;
     }
 
