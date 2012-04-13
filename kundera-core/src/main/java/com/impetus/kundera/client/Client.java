@@ -22,10 +22,8 @@ import javax.persistence.Query;
 
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 
 /**
  * Client API. Defines methods which are required for to be implemented by various clients(pelops, Mongo).
@@ -65,7 +63,6 @@ public interface Client<Q extends Query>
      * @throws Exception
      *             the exception
      */
-    //I will come to it LATER. 
     <E> List<E> findAll(Class<E> entityClass, Object... keys);
 
     /**
@@ -107,8 +104,6 @@ public interface Client<Q extends Query>
      */
     String getPersistenceUnit();
 
-    // TODO Do we really need it. This may not be required for few of the
-    // clients
     /**
      * Gets the index manager.
      * 
@@ -116,82 +111,36 @@ public interface Client<Q extends Query>
      */
     IndexManager getIndexManager();
 
-    /**
-     * On persistence.
-     * 
-     * @param entitySaveGraph
-     *            entity save graph
-     * @param metadata
-     *            entity meta data
-     * @return id id of persisted entity.
-     */
-    @Deprecated
-    String persist(EntitySaveGraph entitySaveGraph, EntityMetadata metadata);
 
-    /**
-     * On persistence.
-     * 
-     * @param childEntity
-     *            child entity
-     * @param entitySaveGraph
-     *            entity save graph
-     * @param metadata
-     *            entity meta data
-     * @return id id of persisted entity.
-     */
-    @Deprecated
-    void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata);
     
     void persist(Node node);
     
     void persistJoinTable(JoinTableData joinTableData);
 
-    /**
-     * Inserts records into Join Table.
-     * 
-     * @param joinTableName
-     *            Name of Join Table
-     * @param joinColumnName
-     *            Name of Join Column
-     * @param inverseJoinColumnName
-     *            Name of Inverse Join Column
-     * @param relMetadata
-     *            Entity metadata for the child entity (i.e. entity at the other
-     *            side of the relationship)
-     * @param primaryKey
-     *            TODO
-     * @param childEntity
-     *            TODO
-     */
-    @Deprecated
-    void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, Object primaryKey, Object childEntity);
 
     /**
-     * Retrieves a list of foreign keys from a join table for a given primary
-     * key.
-     * 
-     * @param <E>
-     *            the element type
-     * @param joinTableName
-     *            Name of Join Table
-     * @param joinColumnName
-     *            Name of Join Column
-     * @param inverseJoinColumnName
-     *            Name of Inverse Join Column
-     * @param relMetadata
-     *            Entity metadata for the child entity (i.e. entity at the other
-     *            side of the relationship)
-     * @param objectGraph
-     *            Object graph of the persistence (Includes parent and child
-     *            data and other related info)
-     * @return the foreign keys from join table
+     * Returns List of column values for given primary key and column name.
+     *  
+     * @param <E>               Type cast
+     * @param tableName         Table/column family name.
+     * @param pKeyColumnName    Primary key column name.
+     * @param columnName        Name of column to be fetched.
+     * @param pKeyColumnValue   primary key value.
+     * @return                  list of values fetched for <columnName>  
      */
-    <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, String parentId);
+    <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, String pKeyColumnValue);
 
-    <E> List<E> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
-            String joinColumnName, String inverseJoinColumnName, Object childId);
+    /**
+     * Returns array of primary key for given column name and it's value.
+     * @param tableName       table/column family name.
+     * @param pKeyName        primary key column name.
+     * @param columnName      column name to be used for search.
+     * @param columnValue     value for parameterised <columnName>.
+     * @param entity class    entity class
+     * @return                array containing fetched primary keys.
+     */
+    
+    Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue, Class entityClazz);
 
     /**
      * Delete rows from given table for given column name and corresponding value..

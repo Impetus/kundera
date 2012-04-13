@@ -790,8 +790,10 @@ public class AbstractEntityReader
                             String joinColumnName = (String) joinColumns.toArray()[0];
                             String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
 
-                            List<Object> parentEntities = client.findParentEntityFromJoinTable(origMetadata,
-                                    joinTableName, joinColumnName, inverseJoinColumnName, id);
+                            Object[] pKeys = client.findIdsByColumn(joinTableName, joinColumnName, inverseJoinColumnName, id, origMetadata.getEntityClazz());
+                            List<Object> parentEntities = pKeys != null? client.findAll(origMetadata.getEntityClazz(), pKeys):null;
+                                /*client.findIdsByColumn(origMetadata,
+                                    joinTableName, joinColumnName, inverseJoinColumnName, id);*/
 
                             if (results == null)
                             {
@@ -1008,8 +1010,7 @@ public class AbstractEntityReader
         EntityMetadata relMetadata = delegator.getMetadata(relation.getTargetEntity());
 
         Client pClient = delegator.getClient(entityMetadata);
-        List<?> foreignKeys = pClient.getForeignKeysFromJoinTable(joinTableName, joinColumnName, inverseJoinColumnName,
-                relMetadata, e.getEntityId());
+        List<?> foreignKeys = pClient.getColumnsById(joinTableName, joinColumnName, inverseJoinColumnName,e.getEntityId());
 
         List childrenEntities = new ArrayList();
         for (Object foreignKey : foreignKeys)

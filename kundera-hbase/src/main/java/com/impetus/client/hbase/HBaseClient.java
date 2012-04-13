@@ -47,8 +47,6 @@ import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
-import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.LuceneQuery;
 
@@ -237,36 +235,6 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
      * (non-Javadoc)
      * 
      * @see
-     * com.impetus.kundera.client.Client#persist(com.impetus.kundera.persistence
-     * .handler.impl.EntitySaveGraph,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
-    @Override
-    public String persist(EntitySaveGraph entityGraph, EntityMetadata entityMetadata)
-    {
-        Object entity = entityGraph.getParentEntity();
-        String id = entityGraph.getParentId();
-        onPersist(entityMetadata, entity, id,
-                RelationHolder.addRelation(entityGraph, entityGraph.getRevFKeyName(), entityGraph.getRevFKeyValue()));
-
-        if (entityGraph.getRevParentClass() != null)
-        {
-            getIndexManager().write(entityMetadata, entity, entityGraph.getRevFKeyValue(),
-                    entityGraph.getRevParentClass());
-        }
-        else
-        {
-            getIndexManager().write(entityMetadata, entityGraph.getParentEntity());
-        }
-
-        return null;
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
      * com.impetus.kundera.client.Client#persist(com.impetus.kundera.graph.Node)
      */
     @Override
@@ -283,22 +251,6 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
         indexNode(node, entityMetadata, getIndexManager());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
-     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
-    @Override
-    public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata entityMetadata)
-    {
-        String rlName = entitySaveGraph.getfKeyName();
-        String rlValue = entitySaveGraph.getParentId();
-        String id = entitySaveGraph.getChildId();
-        onPersist(entityMetadata, childEntity, id, RelationHolder.addRelation(entitySaveGraph, rlName, rlValue));
-        onIndex(childEntity, entitySaveGraph, entityMetadata, rlValue);
-    }
 
     /**
      * On persist.
@@ -354,56 +306,6 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String,
-     * java.lang.String, java.lang.String,
-     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
-     */
-    @Override
-    public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-
-    EntityMetadata relMetadata, Object primaryKey, Object childEntity)
-
-    {
-        String parentId = (String) primaryKey;
-        Map<String, String> columns = new HashMap<String, String>();
-        try
-        {
-            if (Collection.class.isAssignableFrom(childEntity.getClass()))
-            {
-                Collection children = (Collection) childEntity;
-
-                for (Object child : children)
-                {
-                    String childId = PropertyAccessorHelper.getId(child, relMetadata);
-                    columns.put(inverseJoinColumnName + "_" + childId, childId);
-                }
-
-            }
-            else
-            {
-                String childId = PropertyAccessorHelper.getId(childEntity, relMetadata);
-                columns.put(inverseJoinColumnName + "_" + childId, childId);
-            }
-
-            if (columns != null && !columns.isEmpty())
-            {
-                handler.createTableIfDoesNotExist(joinTableName, Constants.JOIN_COLUMNS_FAMILY_NAME);
-                handler.writeJoinTableData(joinTableName, parentId, columns);
-            }
-        }
-        catch (PropertyAccessException e)
-        {
-            e.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-    }
 
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
@@ -452,27 +354,10 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
      * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
-    public <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String joinColumnName,
-            String inverseJoinColumnName, EntityMetadata relMetadata, String parentId)
+    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName,
+            String inverseJoinColumnName, String parentId)
     {
         return handler.getForeignKeysFromJoinTable(joinTableName, parentId, inverseJoinColumnName);
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#findParentEntityFromJoinTable(com.impetus
-     * .kundera.metadata.model.EntityMetadata, java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.Object)
-     */
-    @Override
-    public <E> List<E> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
-            String joinColumnName, String inverseJoinColumnName, Object childId)
-    {
-        return handler.findParentEntityFromJoinTable(parentMetadata, joinTableName, joinColumnName,
-                inverseJoinColumnName, childId);
 
     }
 
@@ -495,29 +380,6 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
         }
     }
 
-    /**
-     * On index.
-     * 
-     * @param childEntity
-     *            the child entity
-     * @param entitySaveGraph
-     *            the entity save graph
-     * @param metadata
-     *            the metadata
-     * @param rlValue
-     *            the rl value
-     */
-    private void onIndex(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata, String rlValue)
-    {
-        if (!entitySaveGraph.isSharedPrimaryKey())
-        {
-            getIndexManager().write(metadata, childEntity, rlValue, entitySaveGraph.getParentEntity().getClass());
-        }
-        else
-        {
-            getIndexManager().write(metadata, childEntity);
-        }
-    }
 
     /*
      * (non-Javadoc)
@@ -562,6 +424,15 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
     public Class<LuceneQuery> getQueryImplementor()
     {
         return LuceneQuery.class;
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+     */
+    @Override
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue, Class entityClazz)
+    {
+        throw new UnsupportedOperationException("Method not supported.");
     }
 
 }

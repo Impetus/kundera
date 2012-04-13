@@ -142,7 +142,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
                 if (!db.collectionExists(tableInfo.getTableName()))
                 {
                     logger.error("Collection " + tableInfo.getTableName() + "does not exist in db " + db.getName());
-                    throw new SchemaGenerationException("mongoDb", databaseName, tableInfo.getTableName());
+                    throw new SchemaGenerationException("Collection " + tableInfo.getTableName() + "does not exist in db " + db.getName(),"mongoDb", databaseName, tableInfo.getTableName());
                 }
             }
         }

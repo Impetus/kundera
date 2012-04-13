@@ -57,7 +57,9 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
 
     /**
      * Initialises HBase schema manager
-     * @param clientFactory client factory.
+     * 
+     * @param clientFactory
+     *            client factory.
      */
     public HBaseSchemaManager(String clientFactory)
     {
@@ -181,7 +183,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                         {
                             throw new SchemaGenerationException("column " + columnInfo.getColumnName()
                                     + " does not exist in table " + tableInfo.getTableName() + "", "Hbase",
-                                    tableInfo.getTableName());
+                                    tableInfo.getTableName(), tableInfo.getTableName());
                         }
                     }
                 }
@@ -203,7 +205,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                         {
                             throw new SchemaGenerationException("column " + embeddedColumnInfo.getEmbeddedColumnName()
                                     + " does not exist in table " + tableInfo.getTableName() + "", "Hbase",
-                                    tableInfo.getTableName());
+                                    tableInfo.getTableName(), tableInfo.getTableName());
                         }
                     }
                 }
@@ -299,6 +301,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 }
             }
         }
+        operation = null;
         admin = null;
     }
 
@@ -310,24 +313,24 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      */
     protected boolean initiateClient()
     {
-            Configuration hadoopConf = new Configuration();
-            hadoopConf.set("hbase.master", host + ":" + port);
-            HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
-            try
-            {
-                admin = new HBaseAdmin(conf);
-            }
-            catch (MasterNotRunningException e)
-            {
-                logger.error("master not running exception caused by" + e.getMessage());
-                throw new SchemaGenerationException(e, "Hbase");
-            }
-            catch (ZooKeeperConnectionException e)
-            {
-                logger.equals("unable to connect to zookeeper caused by" + e.getMessage());
-                throw new SchemaGenerationException(e, "Hbase");
-            }
-            return true;
+        Configuration hadoopConf = new Configuration();
+        hadoopConf.set("hbase.master", host + ":" + port);
+        HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
+        try
+        {
+            admin = new HBaseAdmin(conf);
+        }
+        catch (MasterNotRunningException e)
+        {
+            logger.error("master not running exception caused by" + e.getMessage());
+            throw new SchemaGenerationException(e, "Hbase");
+        }
+        catch (ZooKeeperConnectionException e)
+        {
+            logger.equals("unable to connect to zookeeper caused by" + e.getMessage());
+            throw new SchemaGenerationException(e, "Hbase");
+        }
+        return true;
     }
 
     /**

@@ -100,12 +100,14 @@ public abstract class NodeState
                         Node childNode = children.get(nodeLink);
                         childNode.persist();
                     }
+                    break;
                 case MERGE:
                     if (cascadeTypes.contains(CascadeType.MERGE) || cascadeTypes.contains(CascadeType.ALL))
                     {
                         Node childNode = children.get(nodeLink);
                         childNode.merge();
                     }
+                    break;
 
                 case REMOVE:
                     if (cascadeTypes.contains(CascadeType.REMOVE) || cascadeTypes.contains(CascadeType.ALL))
@@ -113,6 +115,7 @@ public abstract class NodeState
                         Node childNode = children.get(nodeLink);
                         childNode.remove();
                     }
+                    break;
 
                 case REFRESH:
                     if (cascadeTypes.contains(CascadeType.REFRESH) || cascadeTypes.contains(CascadeType.ALL))
@@ -120,12 +123,14 @@ public abstract class NodeState
                         Node childNode = children.get(nodeLink);
                         childNode.refresh();
                     }
+                    break;
                 case DETACH:
                     if (cascadeTypes.contains(CascadeType.DETACH) || cascadeTypes.contains(CascadeType.ALL))
                     {
                         Node childNode = children.get(nodeLink);
                         childNode.detach();
                     }
+                    break;
                 }
 
             }

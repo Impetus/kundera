@@ -43,7 +43,11 @@ import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+<<<<<<< HEAD
 import com.impetus.kundera.property.PropertyAccessException;
+=======
+import com.impetus.kundera.metadata.model.EntityMetadata.Type;
+>>>>>>> 236e2ffb8bc57a81d05953e666fa0eb1344aa27a
 
 /**
  * Manages auto schema operation defined in {@code ScheamOperationType}.
@@ -424,9 +428,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         cfDef.setKeyspace(databaseName);
         cfDef.setName(tableInfo.getTableName());
         cfDef.setKey_validation_class(CassandraValidationClassMapper.getValidationClass(tableInfo.getTableIdType()));
+<<<<<<< HEAD
         if (tableInfo.getType() != null && tableInfo.getType().equals("Standard"))
+=======
+        if (tableInfo.getType().equals(Type.COLUMN_FAMILY))
+>>>>>>> 236e2ffb8bc57a81d05953e666fa0eb1344aa27a
         {
-            cfDef.setColumn_type(tableInfo.getType());
+            cfDef.setColumn_type("Standard");
             List<ColumnDef> columnDefs = new ArrayList<ColumnDef>();
             List<ColumnInfo> columnInfos = tableInfo.getColumnMetadatas();
             if (columnInfos != null)

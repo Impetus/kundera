@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.persistence.JoinColumn;
 import javax.persistence.PrimaryKeyJoinColumn;
 
+import com.impetus.kundera.annotations.Index;
 import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.persistence.event.CallbackMethod;
 
@@ -33,6 +34,7 @@ import com.impetus.kundera.persistence.event.CallbackMethod;
  * 
  * @author animesh.kumar
  */
+
 public final class EntityMetadata
 {
 

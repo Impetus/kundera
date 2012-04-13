@@ -32,6 +32,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Query;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -521,8 +522,7 @@ public class PersistenceDelegator
             clientMap = null;
         }
 
-        // TODO: Move all nodes tied to this EM into detached state
-        clear();
+        // TODO: Move all nodes tied to this EM into detached state   
 
         closed = true;
     }

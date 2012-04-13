@@ -38,7 +38,7 @@ public @interface Index
      * 
      * @return boolean
      */
-    boolean index() default true;
+    boolean index() default false;
 
     /**
      * Index name (if not provided, defualt is entity name).
