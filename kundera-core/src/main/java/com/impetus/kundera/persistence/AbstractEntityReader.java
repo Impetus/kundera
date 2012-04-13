@@ -790,8 +790,10 @@ public class AbstractEntityReader
                             String joinColumnName = (String) joinColumns.toArray()[0];
                             String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
 
-                            List<Object> parentEntities = client.findIdsByColumn(origMetadata,
-                                    joinTableName, joinColumnName, inverseJoinColumnName, id);
+                            Object[] pKeys = client.findIdsByColumn(joinTableName, joinColumnName, inverseJoinColumnName, id, origMetadata.getEntityClazz());
+                            List<Object> parentEntities = pKeys != null? client.findAll(origMetadata.getEntityClazz(), pKeys):null;
+                                /*client.findIdsByColumn(origMetadata,
+                                    joinTableName, joinColumnName, inverseJoinColumnName, id);*/
 
                             if (results == null)
                             {

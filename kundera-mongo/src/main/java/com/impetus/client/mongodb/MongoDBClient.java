@@ -162,19 +162,21 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         return foreignKeys;
     }
 
+    
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+     */
     @Override
-    public List<Object> findIdsByColumn(EntityMetadata parentMetadata, String joinTableName,
-            String joinColumnName, String inverseJoinColumnName, Object childId)
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,Class entityClazz)
     {
-
-        String childIdStr = (String) childId;
+        String childIdStr = (String) columnValue;
 
         List<Object> primaryKeys = new ArrayList<Object>();
 
-        DBCollection dbCollection = mongoDb.getCollection(joinTableName);
+        DBCollection dbCollection = mongoDb.getCollection(tableName);
         BasicDBObject query = new BasicDBObject();
 
-        query.put(inverseJoinColumnName, childIdStr);
+        query.put(columnName, childIdStr);
 
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
@@ -182,28 +184,19 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         while (cursor.hasNext())
         {
             fetchedDocument = cursor.next();
-            String primaryKey = (String) fetchedDocument.get(joinColumnName);
+            String primaryKey = (String) fetchedDocument.get(pKeyName);
             primaryKeys.add(primaryKey);
         }
 
-        List<Object> entities = null;
-        try
+        if (primaryKeys != null && !primaryKeys.isEmpty())
         {
-            if (!primaryKeys.isEmpty())
-            {
-                entities = new ArrayList<Object>();
-                entities.addAll(findAll(parentMetadata.getEntityClazz(), primaryKeys.toArray(new Object[0])));
-            }
+            return primaryKeys.toArray(new Object[0]);
         }
-        catch (Exception e)
-        {
-            throw new KunderaException(e);
-        }
-        return entities;
+        return null;
+
     }
 
     
-
     /*
      * (non-Javadoc)
      * 

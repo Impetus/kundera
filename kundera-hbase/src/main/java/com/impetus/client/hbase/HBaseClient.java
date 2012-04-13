@@ -364,23 +364,6 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * com.impetus.kundera.client.Client#findParentEntityFromJoinTable(com.impetus
-     * .kundera.metadata.model.EntityMetadata, java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.Object)
-     */
-    @Override
-    public <E> List<E> findIdsByColumn(EntityMetadata parentMetadata, String joinTableName,
-            String joinColumnName, String inverseJoinColumnName, Object childId)
-    {
-        return handler.findParentEntityFromJoinTable(parentMetadata, joinTableName, joinColumnName,
-                inverseJoinColumnName, childId);
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
      * java.lang.String, java.lang.Object)
      */
@@ -441,6 +424,15 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
     public Class<LuceneQuery> getQueryImplementor()
     {
         return LuceneQuery.class;
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+     */
+    @Override
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue, Class entityClazz)
+    {
+        throw new UnsupportedOperationException("Method not supported.");
     }
 
 }

@@ -22,7 +22,6 @@ import javax.persistence.Query;
 
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 
@@ -133,16 +132,16 @@ public interface Client<Q extends Query>
     <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, String pKeyColumnValue);
 
     /**
-     * Returns list of primary keys based fetched by parameterized column name and 
-     * @param <E>                    type case
-     * @param parentMetadata         
-     * @param tableName
-     * @param joinColumnName
-     * @param inverseJoinColumnName
-     * @param childId
-     * @return
+     * Returns array of primary key for given column name and it's value.
+     * @param tableName       table/column family name.
+     * @param pKeyName        primary key column name.
+     * @param columnName      column name to be used for search.
+     * @param columnValue     value for parameterised <columnName>.
+     * @param entity class    entity class
+     * @return                array containing fetched primary keys.
      */
-    <E> List<E> findIdsByColumn(EntityMetadata parentMetadata, String tableName, String joinColumnName, String inverseJoinColumnName, Object childId);
+    
+    Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue, Class entityClazz);
 
     /**
      * Delete rows from given table for given column name and corresponding value..

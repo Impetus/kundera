@@ -638,62 +638,49 @@ public class PelopsClient implements Client<CassQuery>
         return foreignKeys;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#findParentEntityFromJoinTable(com.impetus
-     * .kundera.metadata.model.EntityMetadata, java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.Object)
+
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
      */
     @Override
-    public List<Object> findIdsByColumn(EntityMetadata parentMetadata, String joinTableName,
-            String joinColumnName, String inverseJoinColumnName, Object childId)
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,Class entityClazz)
     {
-
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        String childIdStr = (String) columnValue;
 
-        String childIdStr = (String) childId;
-
-        List<Object> entities = null;
         IndexClause ix = Selector.newIndexClause(
                 Bytes.EMPTY,
                 10000,
-                Selector.newIndexExpression(inverseJoinColumnName + "_" + childIdStr, IndexOperator.EQ,
+                Selector.newIndexExpression(columnName + "_" + childIdStr, IndexOperator.EQ,
                         Bytes.fromByteArray(childIdStr.getBytes())));
 
-        Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(joinTableName, ix, slicePredicate,
+        Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(tableName, ix, slicePredicate,
                 ConsistencyLevel.ONE);
 
         List<Object> rowKeys = new ArrayList<Object>();
-        entities = new ArrayList<Object>(qResults.size());
 
-        try
-        {
             // iterate through complete map and
             Iterator<Bytes> rowIter = qResults.keySet().iterator();
             while (rowIter.hasNext())
             {
                 Bytes rowKey = rowIter.next();
 
-                PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(parentMetadata.getIdColumn()
+                PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn()
                         .getField());
-                Object value = accessor.fromBytes(parentMetadata.getIdColumn().getField().getClass(),
+                Object value = accessor.fromBytes(metadata.getIdColumn().getField().getClass(),
                         rowKey.toByteArray());
 
                 rowKeys.add(value);
             }
 
-            entities.addAll(findAll(parentMetadata.getEntityClazz(), rowKeys.toArray(new Object[0])));
-        }
-        catch (Exception e)
-        {
-            throw new KunderaException(e);
-        }
-
-        return entities;
-
+            if (rowKeys != null && !rowKeys.isEmpty())
+            {
+                return rowKeys.toArray(new Object[0]);
+            }
+            return null;
     }
 
     /*

@@ -468,19 +468,18 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return foreignKeys;
     }
 
+
     /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findParentEntityFromJoinTable(com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
      */
     @Override
-    public List<Object> findIdsByColumn(EntityMetadata parentMetadata, String joinTableName,
-            String joinColumnName, String inverseJoinColumnName, Object childId)
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,Class entityClazz)
     {
-
-        String childIdStr = (String) childId;
+        String childIdStr = (String) columnValue;
 
         StringBuffer sqlQuery = new StringBuffer();
-        sqlQuery.append("SELECT ").append(joinColumnName).append(" FROM ").append(joinTableName).append(" WHERE ")
-                .append(inverseJoinColumnName).append("='").append(childIdStr).append("'");
+        sqlQuery.append("SELECT ").append(pKeyName).append(" FROM ").append(tableName).append(" WHERE ")
+                .append(columnName).append("='").append(childIdStr).append("'");
 
         Session s = sf.openSession();
         Transaction tx = s.beginTransaction();
@@ -491,23 +490,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         primaryKeys = query.list();
 
+        
         s.close();
-
-        List<Object> entities = null;
-        try
+        if (primaryKeys != null && !primaryKeys.isEmpty())
         {
-            if (primaryKeys != null && !primaryKeys.isEmpty())
-            {
-                entities = new ArrayList<Object>();
-                entities.addAll(findAll(parentMetadata.getEntityClazz(), primaryKeys.toArray(new Object[0])));
-            }
+            return primaryKeys.toArray(new Object[0]);
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return entities;
+        return null;
     }
 
 
