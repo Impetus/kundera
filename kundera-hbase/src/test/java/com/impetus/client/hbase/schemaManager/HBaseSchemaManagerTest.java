@@ -31,14 +31,15 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.hbase.HBaseClientFactory;
 import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
+import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -55,6 +56,8 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
  */
 public class HBaseSchemaManagerTest
 {
+    private final boolean useLucene = true;
+
     /** Configure schema manager. */
     private SchemaManager schemaManager;
 
@@ -73,6 +76,8 @@ public class HBaseSchemaManagerTest
     /** The admin. */
     private static HBaseAdmin admin;
 
+    private ApplicationMetadata appMetadata;
+
     /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(HBaseSchemaManagerTest.class);
 
@@ -85,9 +90,14 @@ public class HBaseSchemaManagerTest
     @Before
     public void setUp() throws Exception
     {
+        logger.info("starting server");
         HBaseCli.startCluster();
+        if (admin == null)
+        {
+            admin = HBaseCli.utility.getHBaseAdmin();
+        }
         configuration = new SchemaConfiguration("hbase");
-        getEntityManagerFactory();
+
     }
 
     /**
@@ -100,6 +110,7 @@ public class HBaseSchemaManagerTest
     public void tearDown() throws Exception
     {
         HBaseCli.stopCluster();
+        appMetadata = null;
     }
 
     /**
@@ -110,21 +121,25 @@ public class HBaseSchemaManagerTest
     {
         try
         {
-            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntitySimple"));
-            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntitySuper"));
-            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityAddressUni1To1"));
-            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityAddressUniMTo1"));
-            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityAddressUni1ToM"));
-            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityPersonUni1ToM"));
-            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityPersonUni1To1"));
-            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityPersonUniMto1"));
-            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityAddressUni1To1PK"));
-            Assert.assertTrue(HBaseCli.utility.getHBaseAdmin().isTableAvailable("HbaseEntityPersonUni1To1PK"));
+            getEntityManagerFactory("create");
+            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName());
+            schemaManager.exportSchema();
+            Assert.assertTrue(admin.isTableAvailable("HbaseEntitySimple"));
+            Assert.assertTrue(admin.isTableAvailable("HbaseEntitySuper"));
+            Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUni1To1"));
+            Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUniMTo1"));
+            Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUni1ToM"));
+            Assert.assertTrue(admin.isTableAvailable("HbaseEntityPersonUni1ToM"));
+            Assert.assertTrue(admin.isTableAvailable("HbaseEntityPersonUni1To1"));
+            Assert.assertTrue(admin.isTableAvailable("HbaseEntityPersonUniMto1"));
+            Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUni1To1PK"));
+            Assert.assertTrue(admin.isTableAvailable("HbaseEntityPersonUni1To1PK"));
         }
         catch (IOException e)
         {
             Assert.fail("Failed, Caused by:" + e.getMessage());
-        }catch (Exception e)
+        }
+        catch (Exception e)
         {
             Assert.fail("Failed, Caused by:" + e.getMessage());
         }
@@ -135,8 +150,9 @@ public class HBaseSchemaManagerTest
      * 
      * @return the entity manager factory
      */
-    private EntityManagerFactoryImpl getEntityManagerFactory()
+    private EntityManagerFactoryImpl getEntityManagerFactory(String property)
     {
+        ClientMetadata clientMetadata = new ClientMetadata();
         Map<String, Object> props = new HashMap<String, Object>();
         String persistenceUnit = "hbase";
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
@@ -144,8 +160,22 @@ public class HBaseSchemaManagerTest
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaHbaseExamples");
         props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, "com.impetus.client.hbase.HBaseClientFactory");
-        props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
+
+        if (useLucene)
+        {
+            props.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "/home/impadmin/lucene");
+
+            clientMetadata.setLuceneIndexDir("/home/impadmin/lucene");
+        }
+        else
+        {
+
+            clientMetadata.setLuceneIndexDir(null);
+        }
+
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
         puMetadata.setPersistenceUnitName(persistenceUnit);
         Properties p = new Properties();
@@ -219,10 +249,9 @@ public class HBaseSchemaManagerTest
         metaModel.addEntityMetadata(HBaseEntityAddressUni1To1PK.class, m9);
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
+        KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 
         configuration.configure();
-        schemaManager = new HBaseSchemaManager(ClientType.HBASE);
-        schemaManager.exportSchema();
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
         return null;
