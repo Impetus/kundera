@@ -25,7 +25,6 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 
 /**
  * Client API. Defines methods which are required for to be implemented by various clients(pelops, Mongo).
@@ -116,56 +115,12 @@ public interface Client<Q extends Query>
      */
     IndexManager getIndexManager();
 
-    /**
-     * On persistence.
-     * 
-     * @param entitySaveGraph
-     *            entity save graph
-     * @param metadata
-     *            entity meta data
-     * @return id id of persisted entity.
-     */
-    @Deprecated
-    String persist(EntitySaveGraph entitySaveGraph, EntityMetadata metadata);
 
-    /**
-     * On persistence.
-     * 
-     * @param childEntity
-     *            child entity
-     * @param entitySaveGraph
-     *            entity save graph
-     * @param metadata
-     *            entity meta data
-     * @return id id of persisted entity.
-     */
-    @Deprecated
-    void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata);
     
     void persist(Node node);
     
     void persistJoinTable(JoinTableData joinTableData);
 
-    /**
-     * Inserts records into Join Table.
-     * 
-     * @param joinTableName
-     *            Name of Join Table
-     * @param joinColumnName
-     *            Name of Join Column
-     * @param inverseJoinColumnName
-     *            Name of Inverse Join Column
-     * @param relMetadata
-     *            Entity metadata for the child entity (i.e. entity at the other
-     *            side of the relationship)
-     * @param primaryKey
-     *            TODO
-     * @param childEntity
-     *            TODO
-     */
-    @Deprecated
-    void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, Object primaryKey, Object childEntity);
 
     /**
      * Retrieves a list of foreign keys from a join table for a given primary

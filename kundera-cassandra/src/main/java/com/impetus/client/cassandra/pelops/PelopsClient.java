@@ -18,7 +18,6 @@ package com.impetus.client.cassandra.pelops;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +38,6 @@ import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
@@ -67,21 +65,17 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
-import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
+import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 
-// TODO: Auto-generated Javadoc
 /**
  * Client implementation using Pelops. http://code.google.com/p/pelops/
  * 
@@ -369,45 +363,6 @@ public class PelopsClient implements Client<CassQuery>
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.Client#persist(java.lang.Object)
-     */
-    @Override
-    public String persist(EntitySaveGraph entityGraph, EntityMetadata metadata)
-    {
-        try
-        {
-            Object entity = entityGraph.getParentEntity();
-            String id = entityGraph.getParentId();
-            PelopsDataHandler.ThriftRow tf = populateTfRow(entity, id, metadata);
-
-            if (entityGraph.getRevFKeyName() != null)
-            {
-                addRelation(entityGraph, metadata, entityGraph.getRevFKeyName(), entityGraph.getRevFKeyValue(), tf);
-            }
-
-            onPersist(metadata, entity, tf);
-
-            if (entityGraph.getRevParentClass() != null)
-            {
-                getIndexManager().write(metadata, entity, entityGraph.getRevFKeyValue(),
-                        entityGraph.getRevParentClass());
-            }
-            else
-            {
-                getIndexManager().write(metadata, entity);
-            }
-
-        }
-        catch (Exception e)
-        {
-            throw new KunderaException(e);
-        }
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see
      * com.impetus.kundera.client.Client#persist(com.impetus.kundera.graph.Node)
      */
@@ -465,7 +420,7 @@ public class PelopsClient implements Client<CassQuery>
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            throw new KunderaException(e);
         }
 
     }
@@ -502,38 +457,6 @@ public class PelopsClient implements Client<CassQuery>
                 tf.addSuperColumn(superColumn);
             }
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
-     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
-    @Override
-    public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
-    {
-        // you got child entity and
-        String rlName = entitySaveGraph.getfKeyName();
-        String rlValue = entitySaveGraph.getParentId();
-        String id = entitySaveGraph.getChildId();
-        try
-        {
-            PelopsDataHandler.ThriftRow tf = populateTfRow(childEntity, id, metadata);
-            if (rlName != null)
-            {
-                addRelation(entitySaveGraph, metadata, rlName, rlValue, tf);
-            }
-
-            onPersist(metadata, childEntity, tf);
-            onIndex(childEntity, entitySaveGraph, metadata, rlValue);
-        }
-        catch (Exception e)
-        {
-            throw new KunderaException(e);
-        }
-
     }
 
     /**
@@ -577,43 +500,6 @@ public class PelopsClient implements Client<CassQuery>
 
     }
 
-    @Deprecated
-    @Override
-    public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, Object primaryKey, Object childEntity)
-    {
-
-        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit());
-
-        Mutator mutator = Pelops.createMutator(poolName);
-
-        String parentId = (String) primaryKey;
-        List<Column> columns = new ArrayList<Column>();
-
-        if (Collection.class.isAssignableFrom(childEntity.getClass()))
-        {
-            Collection children = (Collection) childEntity;
-
-            for (Object child : children)
-            {
-
-                addColumnsToJoinTable(inverseJoinColumnName, relMetadata, columns, child);
-            }
-
-        }
-        else
-        {
-            addColumnsToJoinTable(inverseJoinColumnName, relMetadata, columns, childEntity);
-        }
-
-        createIndexesOnColumns(joinTableName, poolName, columns);
-
-        // Pelops.createColumnFamilyManager(cluster, keyspace)
-        mutator.writeColumns(joinTableName, new Bytes(parentId.getBytes()),
-                Arrays.asList(columns.toArray(new Column[0])));
-        mutator.execute(ConsistencyLevel.ONE);
-    }
-
     /**
      * Creates secondary indexes on columns if not already created.
      * 
@@ -636,36 +522,37 @@ public class PelopsClient implements Client<CassQuery>
             // Column family definition on which secondary index creation is
             // required
             CfDef columnFamilyDefToUpdate = null;
-//            boolean isNew=false;
+            // boolean isNew=false;
             for (CfDef cfDef : cfDefs)
             {
                 if (cfDef.getName().equals(tableName))
                 {
                     columnFamilyDefToUpdate = cfDef;
-//                    isNew=false;
+                    // isNew=false;
                     break;
                 }
             }
-            
-//            //create a column family, in case it is not already available.
-//            if(columnFamilyDefToUpdate == null)
-//            {
-//                isNew = true;
-//                columnFamilyDefToUpdate = new CfDef(keyspace, tableName); 
-//                ksDef.addToCf_defs(columnFamilyDefToUpdate);
-//            }
+
+            // //create a column family, in case it is not already available.
+            // if(columnFamilyDefToUpdate == null)
+            // {
+            // isNew = true;
+            // columnFamilyDefToUpdate = new CfDef(keyspace, tableName);
+            // ksDef.addToCf_defs(columnFamilyDefToUpdate);
+            // }
 
             // Get list of indexes already created
             List<ColumnDef> columnMetadataList = columnFamilyDefToUpdate.getColumn_metadata();
             List<String> indexList = new ArrayList<String>();
-            
+
             if (columnMetadataList != null)
             {
                 for (ColumnDef columnDef : columnMetadataList)
                 {
                     indexList.add(columnDef.getIndex_name().trim());
                 }
-                //need to set them to null else it is giving problem on update column family and trying to add again existing indexes.
+                // need to set them to null else it is giving problem on update
+                // column family and trying to add again existing indexes.
                 columnFamilyDefToUpdate.column_metadata = null;
             }
 
@@ -686,24 +573,24 @@ public class PelopsClient implements Client<CassQuery>
                 // definition)
                 if (!indexList.contains(indexName.trim()))
                 {
-                    
+
                     columnFamilyDefToUpdate.addToColumn_metadata(columnDef);
                 }
             }
 
             // Finally, update column family with modified column family
             // definition
-    
-             api.system_update_column_family(columnFamilyDefToUpdate);
-//            } else
-//            {
-//                api.system_add_column_family(columnFamilyDefToUpdate);
-//            }
+
+            api.system_update_column_family(columnFamilyDefToUpdate);
+            // } else
+            // {
+            // api.system_add_column_family(columnFamilyDefToUpdate);
+            // }
 
         }
         catch (InvalidRequestException e)
         {
- 
+
             log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
 
         }
@@ -826,40 +713,6 @@ public class PelopsClient implements Client<CassQuery>
 
         RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
         rowDeletor.deleteRow(tableName, columnValue.toString(), ConsistencyLevel.ONE);
-    }
-
-    /**
-     * Adds the columns to join table.
-     * 
-     * @param inverseJoinColumnName
-     *            the inverse join column name
-     * @param relMetadata
-     *            the rel metadata
-     * @param columns
-     *            the columns
-     * @param child
-     *            the child
-     */
-    @Deprecated
-    private void addColumnsToJoinTable(String inverseJoinColumnName, EntityMetadata relMetadata, List<Column> columns,
-            Object child)
-    {
-        String childId = null;
-        try
-        {
-            childId = PropertyAccessorHelper.getId(child, relMetadata);
-            Column col = new Column();
-            col.setName(PropertyAccessorFactory.STRING.toBytes(inverseJoinColumnName + "_" + childId));
-            col.setValue(PropertyAccessorFactory.STRING.toBytes(childId));
-            col.setTimestamp(System.currentTimeMillis());
-
-            columns.add(col);
-        }
-        catch (PropertyAccessException e)
-        {
-            throw new KunderaException(e);
-        }
-
     }
 
     /**
@@ -1058,70 +911,6 @@ public class PelopsClient implements Client<CassQuery>
     }
 
     /**
-     * On index.
-     * 
-     * @param childEntity
-     *            the child entity
-     * @param entitySaveGraph
-     *            the entity save graph
-     * @param metadata
-     *            the metadata
-     * @param rlValue
-     *            the rl value
-     */
-    private void onIndex(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata, String rlValue)
-    {
-        if (!entitySaveGraph.isSharedPrimaryKey())
-        {
-            getIndexManager().write(metadata, childEntity, rlValue, entitySaveGraph.getParentEntity().getClass());
-        }
-        else
-        {
-            getIndexManager().write(metadata, childEntity);
-        }
-    }
-
-    /**
-     * Adds the relation.
-     * 
-     * @param entitySaveGraph
-     *            the entity save graph
-     * @param m
-     *            the m
-     * @param rlName
-     *            the rl name
-     * @param rlValue
-     *            the rl value
-     * @param tf
-     *            the tf
-     * @throws PropertyAccessException
-     *             the property access exception
-     */
-    @Deprecated
-    // Delete this method after node implementation completes
-    private void addRelation(EntitySaveGraph entitySaveGraph, EntityMetadata m, String rlName, String rlValue,
-            PelopsDataHandler.ThriftRow tf) throws PropertyAccessException
-    {
-        if (!entitySaveGraph.isSharedPrimaryKey())
-        {
-            if (m.getEmbeddedColumnsAsList().isEmpty())
-            {
-                Column col = populateFkey(rlName, rlValue, timestamp);
-                tf.addColumn(col);
-            }
-            else
-            {
-                SuperColumn superColumn = new SuperColumn();
-                superColumn.setName(rlName.getBytes());
-                Column column = populateFkey(rlName, rlValue, timestamp);
-                superColumn.addToColumns(column);
-                tf.addSuperColumn(superColumn);
-            }
-
-        }
-    }
-
-    /**
      * Populates foreign key as column.
      * 
      * @param rlName
@@ -1299,8 +1088,9 @@ public class PelopsClient implements Client<CassQuery>
         return returnedEntities;
     }
 
- 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.client.Client#getQueryImplementor()
      */
     @Override

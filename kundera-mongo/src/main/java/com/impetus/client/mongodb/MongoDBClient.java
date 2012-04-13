@@ -16,7 +16,6 @@
 package com.impetus.client.mongodb;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,9 +36,6 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
-import com.impetus.kundera.property.PropertyAccessException;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -95,49 +91,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         this.persistenceUnit = persistenceUnit;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#persist(com.impetus.kundera.persistence
-     * .handler.impl.EntitySaveGraph,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
-    @Override
-    public String persist(EntitySaveGraph entityGraph, EntityMetadata entityMetadata)
-    {
-        Object entity = entityGraph.getParentEntity();
-        String id = entityGraph.getParentId();
-
-        try
-        {
-            onPersist(entityMetadata, entity, id, RelationHolder.addRelation(entityGraph, entityGraph.getRevFKeyName(),
-                    entityGraph.getRevFKeyValue()));
-
-            if (entityGraph.getRevParentClass() != null)
-            {
-                getIndexManager().write(entityMetadata, entity, entityGraph.getRevFKeyValue(),
-                        entityGraph.getRevParentClass());
-            }
-            else
-            {
-                getIndexManager().write(entityMetadata, entity);
-            }
-        }
-        catch (PropertyAccessException e)
-        {
-            log.error(e.getMessage());
-            throw new KunderaException(e);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            log.error(e.getMessage());
-            throw new KunderaException(e);
-        }
-
-        return null;
-    }
     
     public void persist(Node node) {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
@@ -159,84 +112,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
     }   
    
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
-     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
-    @Override
-    public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
-    {
-        String rlName = entitySaveGraph.getfKeyName();
-        String rlValue = entitySaveGraph.getParentId();
-        String id = entitySaveGraph.getChildId();
-
-        try
-        {
-            onPersist(metadata, childEntity, id, RelationHolder.addRelation(entitySaveGraph, rlName, rlValue));
-            onIndex(childEntity, entitySaveGraph, metadata, rlValue);
-        }
-        catch (PropertyAccessException e)
-        {        
-            
-            log.error(e.getMessage());
-            throw new KunderaException(e);
-        }
-        catch (Exception e)
-        {
-            log.error(e.getMessage());
-            throw new KunderaException(e);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#persistJoinTable(java.lang.String,
-     * java.lang.String, java.lang.String,
-     * com.impetus.kundera.metadata.model.EntityMetadata,
-     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
-     */
-    @Override
-    public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, Object primaryKey, Object childEntity)
-    {
-        DBCollection dbCollection = mongoDb.getCollection(joinTableName);
-
-        List<BasicDBObject> documents = new ArrayList<BasicDBObject>();
-
-        String parentId = (String) primaryKey;
-        try
-        {
-            if (Collection.class.isAssignableFrom(childEntity.getClass()))
-            {
-                Collection children = (Collection) childEntity;
-
-                for (Object child : children)
-                {
-
-                    addColumnsToJoinTable(joinColumnName, inverseJoinColumnName, relMetadata, documents, parentId,
-                            child);
-                }
-
-            }
-            else
-
-            {
-                addColumnsToJoinTable(joinColumnName, inverseJoinColumnName, relMetadata, documents, parentId,
-                        childEntity);
-            }
-        }
-        catch (PropertyAccessException e)
-        {
-            throw new KunderaException(e);
-        }
-
-        dbCollection.insert(documents.toArray(new BasicDBObject[0]));
-    }
-    
     
 
     @Override
@@ -327,89 +202,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         return entities;
     }
 
-    /**
-     * Adds the columns to join table.
-     * 
-     * @param joinColumnName
-     *            the join column name
-     * @param inverseJoinColumnName
-     *            the inverse join column name
-     * @param relMetadata
-     *            the rel metadata
-     * @param documents
-     *            the documents
-     * @param parentId
-     *            the parent id
-     * @param child
-     *            the child
-     * @throws PropertyAccessException
-     *             the property access exception
-     */
-    private void addColumnsToJoinTable(String joinColumnName, String inverseJoinColumnName, EntityMetadata relMetadata,
-            List<BasicDBObject> documents, String parentId, Object child) throws PropertyAccessException
-    {
-        String childId = PropertyAccessorHelper.getId(child, relMetadata);
-        BasicDBObject dbObj = new BasicDBObject();
-        dbObj.put(joinColumnName, parentId);
-        dbObj.put(inverseJoinColumnName, childId);
-
-        documents.add(dbObj);
-    }
-
-    /**
-     * On index.
-     * 
-     * @param childEntity
-     *            the child entity
-     * @param entitySaveGraph
-     *            the entity save graph
-     * @param metadata
-     *            the metadata
-     * @param rlValue
-     *            the rl value
-     */
-    private void onIndex(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata, String rlValue)
-    {
-        if (!entitySaveGraph.isSharedPrimaryKey())
-        {
-            getIndexManager().write(metadata, childEntity, rlValue, entitySaveGraph.getParentEntity().getClass());
-        }
-        else
-        {
-            getIndexManager().write(metadata, childEntity);
-        }
-    }
-
-    /**
-     * On persist.
-     * 
-     * @param entityMetadata
-     *            the entity metadata
-     * @param entity
-     *            the entity
-     * @param id
-     *            the id
-     * @param relations
-     *            the relations
-     * @throws Exception
-     *             the exception
-     * @throws PropertyAccessException
-     *             the property access exception
-     */
-    private void onPersist(EntityMetadata entityMetadata, Object entity, String id, List<RelationHolder> relations)
-            throws Exception, PropertyAccessException
-    {
-        String dbName = entityMetadata.getSchema();
-        String documentName = entityMetadata.getTableName();
-
-        log.debug("Persisting data into " + dbName + "." + documentName + " for " + id);
-        DBCollection dbCollection = mongoDb.getCollection(documentName);
-
-        BasicDBObject document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(
-                entityMetadata, entity, relations);
-        dbCollection.save(document);
-
-    }    
     
 
     /*
@@ -645,40 +437,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         return indexManager;
     }
 
-//    /*
-//     * (non-Javadoc)
-//     * 
-//     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
-//     * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
-//     */
-//    @Override
-//    public Object find(Class<?> clazz, EntityMetadata entityMetadata, Object rowId, List<String> relationNames)
-//    {
-//
-//        log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + rowId);
-//
-//        DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
-//
-//        BasicDBObject query = new BasicDBObject();
-//        query.put(entityMetadata.getIdColumn().getName(), rowId.toString());
-//
-//        DBCursor cursor = dbCollection.find(query);
-//        DBObject fetchedDocument = null;
-//
-//        if (cursor.hasNext())
-//        {
-//            fetchedDocument = cursor.next();
-//        }
-//        else
-//        {
-//            return null;
-//        }
-//
-//        Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
-//                entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, relationNames);
-//
-//        return entity;
-//    }
 
     /**
      * Method to find entity for given association name and association value.

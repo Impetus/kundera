@@ -271,66 +271,66 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#persist(com.impetus.kundera.persistence
-     * .handler.impl.EntitySaveGraph,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
-    @Override
-    public String persist(EntitySaveGraph entityGraph, EntityMetadata metadata)
-    {
-
-        Session s;
-        Transaction tx;
-        try
-        {
-            s = getSessionInstance();
-            tx = s.beginTransaction();
-            s.persist(entityGraph.getParentEntity());
-            tx.commit();
-        }
-        // TODO: Bad code, get rid of these exceptions, currently necessary for
-        // handling many to one case
-        catch (org.hibernate.exception.ConstraintViolationException e)
-        {
-            log.info(e.getMessage());
-        }
-        catch (HibernateException e)
-        {
-            log.info(e.getMessage());
-        }
-
-        // If entity has a parent entity, update foreign key
-        if (entityGraph.getRevFKeyName() != null)
-        {
-            s = getSessionInstance();
-            tx = s.beginTransaction();
-            String updateSql = "Update " + metadata.getTableName() + " SET " + entityGraph.getRevFKeyName() + "= '"
-                    + entityGraph.getRevFKeyValue() + "' WHERE " + metadata.getIdColumn().getName() + " = '"
-                    + entityGraph.getParentId() + "'";
-            s.createSQLQuery(updateSql).executeUpdate();
-            tx.commit();
-        }
-
-        if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
-        {
-            if (entityGraph.getRevParentClass() != null)
-            {
-                getIndexManager().write(metadata, entityGraph.getParentEntity(), entityGraph.getRevFKeyValue(),
-                        entityGraph.getRevParentClass());
-            }
-            else
-            {
-                getIndexManager().write(metadata, entityGraph.getParentEntity());
-            }
-        }
-
-        return null;
-
-    }   
+//    /*
+//     * (non-Javadoc)
+//     * 
+//     * @see
+//     * com.impetus.kundera.client.Client#persist(com.impetus.kundera.persistence
+//     * .handler.impl.EntitySaveGraph,
+//     * com.impetus.kundera.metadata.model.EntityMetadata)
+//     */
+//    @Override
+//    public String persist(EntitySaveGraph entityGraph, EntityMetadata metadata)
+//    {
+//
+//        Session s;
+//        Transaction tx;
+//        try
+//        {
+//            s = getSessionInstance();
+//            tx = s.beginTransaction();
+//            s.persist(entityGraph.getParentEntity());
+//            tx.commit();
+//        }
+//        // TODO: Bad code, get rid of these exceptions, currently necessary for
+//        // handling many to one case
+//        catch (org.hibernate.exception.ConstraintViolationException e)
+//        {
+//            log.info(e.getMessage());
+//        }
+//        catch (HibernateException e)
+//        {
+//            log.info(e.getMessage());
+//        }
+//
+//        // If entity has a parent entity, update foreign key
+//        if (entityGraph.getRevFKeyName() != null)
+//        {
+//            s = getSessionInstance();
+//            tx = s.beginTransaction();
+//            String updateSql = "Update " + metadata.getTableName() + " SET " + entityGraph.getRevFKeyName() + "= '"
+//                    + entityGraph.getRevFKeyValue() + "' WHERE " + metadata.getIdColumn().getName() + " = '"
+//                    + entityGraph.getParentId() + "'";
+//            s.createSQLQuery(updateSql).executeUpdate();
+//            tx.commit();
+//        }
+//
+//        if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
+//        {
+//            if (entityGraph.getRevParentClass() != null)
+//            {
+//                getIndexManager().write(metadata, entityGraph.getParentEntity(), entityGraph.getRevFKeyValue(),
+//                        entityGraph.getRevParentClass());
+//            }
+//            else
+//            {
+//                getIndexManager().write(metadata, entityGraph.getParentEntity());
+//            }
+//        }
+//
+//        return null;
+//
+//    }   
     
 
     /* (non-Javadoc)
@@ -343,90 +343,90 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     }
 
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
-     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph,
-     * com.impetus.kundera.metadata.model.EntityMetadata)
-     */
-    @Override
-    public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
-    {
-        // String rlName = entitySaveGraph.getfKeyName();
-        String rlValue = entitySaveGraph.getParentId();
-        ;
-        Session s;
-        Transaction tx;
-        try
-        {
-            s = getSessionInstance();
-            tx = s.beginTransaction();
-            s.persist(childEntity);
-            tx.commit();
-            // TODO: Bad code, get rid of these exceptions, currently necessary
-            // for handling many to one case
-        }
-        catch (HibernateException e)
-        {
-            log.info(e.getMessage());
-        }
+//    /*
+//     * (non-Javadoc)
+//     * 
+//     * @see com.impetus.kundera.client.Client#persist(java.lang.Object,
+//     * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph,
+//     * com.impetus.kundera.metadata.model.EntityMetadata)
+//     */
+//    @Override
+//    public void persist(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata)
+//    {
+//        // String rlName = entitySaveGraph.getfKeyName();
+//        String rlValue = entitySaveGraph.getParentId();
+//        ;
+//        Session s;
+//        Transaction tx;
+//        try
+//        {
+//            s = getSessionInstance();
+//            tx = s.beginTransaction();
+//            s.persist(childEntity);
+//            tx.commit();
+//            // TODO: Bad code, get rid of these exceptions, currently necessary
+//            // for handling many to one case
+//        }
+//        catch (HibernateException e)
+//        {
+//            log.info(e.getMessage());
+//        }
+//
+//        // Update foreign key value
+//        if (entitySaveGraph.getfKeyName() != null)
+//        {
+//            s = getSessionInstance();
+//            tx = s.beginTransaction();
+//            String updateSql = "Update " + metadata.getTableName() + " SET " + entitySaveGraph.getfKeyName() + "= '"
+//                    + entitySaveGraph.getParentId() + "' WHERE " + metadata.getIdColumn().getName() + " = '"
+//                    + entitySaveGraph.getChildId() + "'";
+//            s.createSQLQuery(updateSql).executeUpdate();
+//            tx.commit();
+//        }
+//
+//        onIndex(childEntity, entitySaveGraph, metadata, rlValue);
+//    }
 
-        // Update foreign key value
-        if (entitySaveGraph.getfKeyName() != null)
-        {
-            s = getSessionInstance();
-            tx = s.beginTransaction();
-            String updateSql = "Update " + metadata.getTableName() + " SET " + entitySaveGraph.getfKeyName() + "= '"
-                    + entitySaveGraph.getParentId() + "' WHERE " + metadata.getIdColumn().getName() + " = '"
-                    + entitySaveGraph.getChildId() + "'";
-            s.createSQLQuery(updateSql).executeUpdate();
-            tx.commit();
-        }
-
-        onIndex(childEntity, entitySaveGraph, metadata, rlValue);
-    }
-
-    /**
-     * Inserts records into JoinTable for the given relationship.
-     * 
-     * @param joinTableName
-     *            the join table name
-     * @param joinColumnName
-     *            the join column name
-     * @param inverseJoinColumnName
-     *            the inverse join column name
-     * @param relMetadata
-     *            the rel metadata
-     * @param primaryKey
-     *            the primary key
-     * @param childEntity
-     *            the child entity
-     */
-    @Override
-    public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            EntityMetadata relMetadata, Object primaryKey, Object childEntity)
-    {
-
-        String parentId = (String) primaryKey;
-        if (Collection.class.isAssignableFrom(childEntity.getClass()))
-        {
-            Collection children = (Collection) childEntity;
-
-            for (Object child : children)
-            {
-                insertRecordInJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, parentId,
-                        child);
-            }
-
-        }
-        else
-        {
-            insertRecordInJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, parentId,
-                    childEntity);
-        }
-
-    }
+//    /**
+//     * Inserts records into JoinTable for the given relationship.
+//     * 
+//     * @param joinTableName
+//     *            the join table name
+//     * @param joinColumnName
+//     *            the join column name
+//     * @param inverseJoinColumnName
+//     *            the inverse join column name
+//     * @param relMetadata
+//     *            the rel metadata
+//     * @param primaryKey
+//     *            the primary key
+//     * @param childEntity
+//     *            the child entity
+//     */
+//    @Override
+//    public void persistJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+//            EntityMetadata relMetadata, Object primaryKey, Object childEntity)
+//    {
+//
+//        String parentId = (String) primaryKey;
+//        if (Collection.class.isAssignableFrom(childEntity.getClass()))
+//        {
+//            Collection children = (Collection) childEntity;
+//
+//            for (Object child : children)
+//            {
+//                insertRecordInJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, parentId,
+//                        child);
+//            }
+//
+//        }
+//        else
+//        {
+//            insertRecordInJoinTable(joinTableName, joinColumnName, inverseJoinColumnName, relMetadata, parentId,
+//                    childEntity);
+//        }
+//
+//    }
 
     
     
