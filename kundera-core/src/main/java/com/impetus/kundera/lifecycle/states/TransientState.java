@@ -15,16 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.CascadeType;
-
 import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.NodeLink;
-import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.NodeStateContext;
-import com.impetus.kundera.persistence.context.PersistenceCache;
+import com.impetus.kundera.utils.ObjectUtils;
 
 /**
  * @author amresh
@@ -47,10 +40,7 @@ public class TransientState extends NodeState
         //Mark this entity for saving in database
         nodeStateContext.setDirty(true);
         
-        //If it's a head node, add this to the list of head nodes in PC
-        if(nodeStateContext.isHeadNode()) {
-            nodeStateContext.getPersistenceCache().getMainCache().addHeadNode((Node)nodeStateContext);
-        }
+        
         
         //Add this node into persistence cache
         nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);
@@ -84,12 +74,15 @@ public class TransientState extends NodeState
     @Override
     public void handleMerge(NodeStateContext nodeStateContext)
     {
-        //TODO: create a new managed entity and copy state of original entity into this one.
+        //create a new managed entity and copy state of original entity into this one.
+        Object copiedNodeData = ObjectUtils.deepCopy(nodeStateContext.getData());
+        nodeStateContext.setData(copiedNodeData);
     }
     
     @Override
     public void handleFind(NodeStateContext nodeStateContext)
     {
+        //Nothing to do, Entity once found, jusmps directly to managed state
     }
 
     @Override
@@ -107,6 +100,7 @@ public class TransientState extends NodeState
     @Override
     public void handleFlush(NodeStateContext nodeStateContext)
     {
+        //Nothing to do, Entities are flushed from Managed/ Removed state only
     }
 
     @Override

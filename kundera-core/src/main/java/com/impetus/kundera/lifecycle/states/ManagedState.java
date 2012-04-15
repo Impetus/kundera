@@ -91,12 +91,7 @@ public class ManagedState extends NodeState
         //Ignored, entity remains in the same state
         
         //Mark this entity for saving in database
-        nodeStateContext.setDirty(true);
-        
-        //If it's a head node, add this to the list of head nodes in PC
-        if(nodeStateContext.isHeadNode()) {
-            nodeStateContext.getPersistenceCache().getMainCache().addHeadNode((Node)nodeStateContext);
-        }
+        nodeStateContext.setDirty(true);      
         
         //Add this node into persistence cache
         nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);
@@ -134,6 +129,8 @@ public class ManagedState extends NodeState
                 nodeData = reader.recursivelyFindEntities(enhanceEntity, client, entityMetadata, nodeStateContext.getPersistenceDelegator());                
             }            
         }    
+        
+        
         
         nodeStateContext.setData(nodeData);
         

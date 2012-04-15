@@ -29,6 +29,8 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.utils.DeepEquals;
+import com.impetus.kundera.utils.ObjectUtils;
 
 
 /**
@@ -74,17 +76,28 @@ public class ObjectGraphBuilder
         //Construct this Node first, if one not already there in Persistence Cache
         Node node = null;
         Node nodeInPersistenceCache = persistenceCache.getMainCache().getNodeFromCache(nodeId);
+        
+        //Make a deep copy of entity data        
+        Object nodeDataCopy = ObjectUtils.deepCopy(entity);
+        
         if(nodeInPersistenceCache == null) {
-            node = new Node(nodeId, entity, initialNodeState, persistenceCache);
+            node = new Node(nodeId, nodeDataCopy, initialNodeState, persistenceCache);
         } else {
             node = nodeInPersistenceCache;
             
+            //Determine whether this node is dirty based on comparison between Node data and entity data
+            //If dirty, set the entity data into node and mark it as dirty
+            if(! DeepEquals.deepEquals(node.getData(), entity)) {
+                node.setData(nodeDataCopy);
+                node.setDirty(true);
+            }
+            
             //If node is NOT in managed state, its data needs to be 
             //replaced with the one provided in entity object
-            if(! node.getCurrentNodeState().getClass().equals(ManagedState.class)) {
-                node.setData(entity);
+            /*if(! node.getCurrentNodeState().getClass().equals(ManagedState.class)) {
+                node.setData(nodeDataCopy);
                 node.setDirty(true);
-            }            
+            }*/            
         }   
         
         //Put this node into object graph
