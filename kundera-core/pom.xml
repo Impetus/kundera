@@ -43,6 +43,13 @@
 			<artifactId>cglib</artifactId>
 			<version>2.2</version>
 		</dependency>
+
+	<dependency>
+		<groupId>com.thoughtworks.xstream</groupId>
+		<artifactId>xstream</artifactId>
+		<version>1.4.2</version>
+	</dependency>
+
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>

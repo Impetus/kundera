@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import com.thoughtworks.xstream.XStream;
+
 /**
  * Provides utility methods for operation on objects
  * 
@@ -28,12 +30,14 @@ import java.io.ObjectOutputStream;
  */
 public class ObjectUtils
 {
+    private static  XStream xstream = new XStream();
+    
     /**
      * Provides a deep clone serializing/de-serializng <code>objectToCopy</code>
      * @param objectToCopy The object to be cloned
      * @return The cloned object
      */
-    public static final Object deepCopy(Object objectToCopy)
+    public static final Object deepCopyUsingSerialization(Object objectToCopy)
     {
         
             try
@@ -49,7 +53,8 @@ public class ObjectUtils
                 ObjectInputStream ois = new ObjectInputStream(bis);
                 Object copy = ois.readObject();
                 ois.close();
-                return copy;
+                return copy;                
+                
             }
             catch (IOException e)
             {
@@ -61,6 +66,10 @@ public class ObjectUtils
             }
             return null;
         
+    }
+    
+    public static final Object deepCopy(Object objectToCopy)    {
+        return xstream.fromXML(xstream.toXML(objectToCopy));                
     }
 
 }
