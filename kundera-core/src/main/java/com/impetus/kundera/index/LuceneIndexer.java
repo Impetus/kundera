@@ -216,7 +216,7 @@ public class LuceneIndexer extends DocumentIndexer
         try
         {
             /* String indexName, Query query, boolean autoCommit */
-            getIndexWriter().deleteDocuments(new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));
+            getIndexWriter().deleteDocuments(new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));            
         }
         catch (CorruptIndexException e)
         {
@@ -402,6 +402,28 @@ public class LuceneIndexer extends DocumentIndexer
 
         indexDocument(metadata, object, parentId, clazz);
         onCommit();
+    }
+    
+    
+
+    @Override
+    public boolean entityExistsInIndex(Class<?> entityClass)
+    {
+        String luceneQuery = "+" + ENTITY_CLASS_FIELD + ":" + entityClass.getCanonicalName().toLowerCase();
+        Map<String, String> results;
+        try
+        {
+            results = search(luceneQuery, 0, 10, false);
+        }
+        catch (LuceneIndexingException e)
+        {
+            return false;
+        }
+        if(results == null || results.isEmpty()) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**

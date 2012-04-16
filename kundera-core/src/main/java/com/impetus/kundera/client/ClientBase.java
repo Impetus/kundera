@@ -92,14 +92,14 @@ public class ClientBase
         if (parents != null)
         {
             for(NodeLink parentNodeLink : parents.keySet()) {
-                indexManager.write(entityMetadata, node.getData(), (String)parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
+                indexManager.update(entityMetadata, node.getData(), (String)parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
                         parents.get(parentNodeLink).getDataClass());
             }
             
         }
         else
         {
-            indexManager.write(entityMetadata, node.getData());
+            indexManager.update(entityMetadata, node.getData(), null, null);
         }
     }  
 

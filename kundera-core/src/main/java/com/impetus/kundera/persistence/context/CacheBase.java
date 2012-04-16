@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.ObjectGraph;
-import com.impetus.kundera.lifecycle.states.NodeState;
+import com.impetus.kundera.utils.ObjectUtils;
 
 /**
  * Base class for all cache required in persistence context 
@@ -56,7 +56,12 @@ public class CacheBase
     }
     
     public void addNodeToCache(Node node) {
-       /* check if this node already exists in cache node mappings
+        //Make a deep copy of Node data and and set into node
+        //Original data object is now detached from Node and is possibly referred by user code 
+        Object nodeDataCopy = ObjectUtils.deepCopy(node.getData());
+        node.setData(nodeDataCopy);        
+        
+        /* check if this node already exists in cache node mappings
         * If yes, update parents and children links
         * Otherwise, just simply add the node to cache node mappings
        */
@@ -83,13 +88,20 @@ public class CacheBase
                 node.getChildren().putAll(existingNode.getChildren());
             }
             
-            logCacheEvent("ADDED TO ", node.getNodeId());
+            
             nodeMappings.put(node.getNodeId(), node);
+            logCacheEvent("ADDED TO ", node.getNodeId());
+            
         }
         else
         {
             logCacheEvent("ADDED TO ", node.getNodeId());
             nodeMappings.put(node.getNodeId(), node);
+        }
+        
+        //If it's a head node, add this to the list of head nodes in Persistence Cache
+        if(node.isHeadNode()) {
+            node.getPersistenceCache().getMainCache().addHeadNode(node);
         }
     }   
     
@@ -106,9 +118,7 @@ public class CacheBase
         node = null;   //Eligible for GC       
     }
     
-    public void addGraphToCache(ObjectGraph graph, PersistenceCache persistenceCache) {
-        
-        
+    public void addGraphToCache(ObjectGraph graph, PersistenceCache persistenceCache) {    
         
         //Add each node in the graph to cache
         for(String key : graph.getNodeMapping().keySet()) {            

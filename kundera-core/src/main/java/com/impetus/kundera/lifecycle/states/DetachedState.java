@@ -55,7 +55,7 @@ public class DetachedState extends NodeState
         // Detached ---> Managed
         moveNodeToNextState(nodeStateContext, new ManagedState());       
         
-        //TODO: Copy detached entity's current state to existing managed instance of the 
+        //Copy detached entity's current state to existing managed instance of the 
         // same entity identity (if one exists), or create a new managed copy       
         
         //Cascade manage operation for all related entities for whom cascade=ALL or MERGE
@@ -82,6 +82,7 @@ public class DetachedState extends NodeState
     @Override
     public void handleFlush(NodeStateContext nodeStateContext)
     {
+      //Nothing to do, Entities are flushed from Managed/ Removed state only
     }
 
     @Override
