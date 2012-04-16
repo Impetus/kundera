@@ -78,7 +78,7 @@ public interface Indexer
 
     Map<String, String> search(String luceneQuery, int start, int count, boolean fetchRelation);
     
-    boolean entityExistsInIndex(Class<?> entityClass);        
+    boolean documentExistsForEntity(Class<?> entityClass);        
     
 
     /**

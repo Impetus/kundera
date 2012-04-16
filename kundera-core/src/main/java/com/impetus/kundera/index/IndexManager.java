@@ -83,8 +83,8 @@ public class IndexManager
             {                
                 String id = PropertyAccessorHelper.getId(entity, metadata);                
                 
-                boolean entityExists = indexer.entityExistsInIndex(entity.getClass());
-                if(entityExists) {
+                boolean documentExists = indexer.documentExistsForEntity(entity.getClass());
+                if(documentExists) {
                     indexer.unindex(metadata, id);
                     
                 }   
