@@ -16,6 +16,8 @@
 
 package com.impetus.kundera.configure.schema;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 /**
  * The Class ColumnInfo holds column related information.
  * 
@@ -31,7 +33,7 @@ public class ColumnInfo
     private String columnName;
 
     /** The type variable. */
-    private String type;
+    private Class type;
 
     /**
      * Instantiates a new column info.
@@ -58,9 +60,34 @@ public class ColumnInfo
 
         return obj != null && obj instanceof ColumnInfo && ((ColumnInfo) obj).columnName != null ? this.columnName != null
                 && this.columnName.equals(((ColumnInfo) obj).columnName)
-                && this.isIndexable == ((ColumnInfo) obj).isIndexable
                 : false;
 
+    }
+
+    @Override
+    /**
+     * returns the hash code for object. 
+     * 
+     */
+    public int hashCode()
+    {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    /**
+     * returns the string representation of object .
+     * 
+     */
+    public String toString()
+    {
+        StringBuilder strBuilder = new StringBuilder("type:==> ");
+        strBuilder.append(type);
+        strBuilder.append(" | columnName: ==>");
+        strBuilder.append(columnName);
+        strBuilder.append(" | isIndexable: ==>");
+        strBuilder.append(isIndexable);
+        return strBuilder.toString();
     }
 
     /**
@@ -106,22 +133,18 @@ public class ColumnInfo
     }
 
     /**
-     * Gets the type.
-     * 
      * @return the type
      */
-    public String getType()
+    public Class getType()
     {
         return type;
     }
 
     /**
-     * Sets the type.
-     * 
      * @param type
      *            the type to set
      */
-    public void setType(String type)
+    public void setType(Class type)
     {
         this.type = type;
     }

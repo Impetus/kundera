@@ -18,6 +18,8 @@ package com.impetus.kundera.configure.schema;
 
 import java.util.List;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 /**
  * The Class ColumnInfo holds the information of Embedded Columns.
  * 
@@ -78,27 +80,30 @@ public class EmbeddedColumnInfo
     @Override
     public boolean equals(Object obj)
     {
-        boolean result = false;
-        if (obj == null)
-        {
-            result = false;
-        }
-        else if (getClass() != obj.getClass())
-        {
-            result = false;
-        }
-        else
-        {
-            EmbeddedColumnInfo embeddedColumnInfo = (EmbeddedColumnInfo) obj;
-
-            if (this.embeddedColumnName != null
-                    && this.embeddedColumnName.equals(embeddedColumnInfo.embeddedColumnName))
-            {
-
-                result = true;
-            }
-        }
-        return result;
+        return obj != null && obj instanceof EmbeddedColumnInfo
+                && ((EmbeddedColumnInfo) obj).embeddedColumnName != null ? this.embeddedColumnName != null
+                && this.embeddedColumnName.equals(((EmbeddedColumnInfo) obj).embeddedColumnName) : false;
     }
 
+    @Override
+    /**
+     * returns the hash code for object.
+     * 
+     */
+    public int hashCode()
+    {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    /**
+     * returns the string representation of object .
+     * 
+     */
+    public String toString()
+    {
+        StringBuilder strBuilder = new StringBuilder("embeddedColumnName:==> ");
+        strBuilder.append(embeddedColumnName);
+        return strBuilder.toString();
+    }
 }

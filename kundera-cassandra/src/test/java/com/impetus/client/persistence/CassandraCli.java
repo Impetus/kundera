@@ -218,6 +218,7 @@ public final class CassandraCli
 
     }
 
+    
     /**
      * Inits the client.
      * 

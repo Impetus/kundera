@@ -29,13 +29,16 @@ import java.util.Map;
 public final class SchemaMetadata
 {
 
-    /** The pu to schema col. */
+    /**
+     * The pu to schema metadata holds the map of pu to list of tableInfo.
+     * 
+     */
     private Map<String, List<TableInfo>> puToSchemaMetadata;
 
     /**
-     * Gets the pu to schema col.
+     * Gets the pu to schema metadata.
      * 
-     * @return the puToSchemaCol TODO: Kuldeep: give it a valid name
+     * @return the puToSchemaMetadata 
      */
 
     public Map<String, List<TableInfo>> getPuToSchemaMetadata()

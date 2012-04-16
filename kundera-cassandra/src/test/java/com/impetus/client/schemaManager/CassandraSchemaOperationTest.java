@@ -89,11 +89,11 @@ public class CassandraSchemaOperationTest
     {
         try
         {
-            client.system_drop_keyspace("KunderaCassandraTests");
+            client.system_drop_keyspace("KunderaCoreExmples");
         }
         catch (InvalidRequestException irex)
         {
-            Assert.assertTrue(!CassandraCli.keyspaceExist("KunderaCassandraTests"));
+            Assert.assertTrue(!CassandraCli.keyspaceExist("KunderaCoreExmples"));
         }
     }
 
@@ -105,10 +105,10 @@ public class CassandraSchemaOperationTest
         schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
         schemaManager.exportSchema();
 
-        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraTests"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCassandraTests"));
+        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
         org.apache.cassandra.thrift.KsDef ksDef = new KsDef();
-        ksDef = client.describe_keyspace("KunderaCassandraTests");
+        ksDef = client.describe_keyspace("KunderaCoreExmples");
         Assert.assertEquals(1, ksDef.getCf_defs().size());
         for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
         {
@@ -136,10 +136,10 @@ public class CassandraSchemaOperationTest
         schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
         schemaManager.exportSchema();
 
-        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraTests"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCassandraTests"));
+        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
         org.apache.cassandra.thrift.KsDef ksDef = new KsDef();
-        ksDef = client.describe_keyspace("KunderaCassandraTests");
+        ksDef = client.describe_keyspace("KunderaCoreExmples");
         for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
         {
             Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
@@ -159,25 +159,25 @@ public class CassandraSchemaOperationTest
             }
         }
         schemaManager.dropSchema();
-        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraTests"));
-        Assert.assertFalse(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCassandraTests"));
+        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
+        Assert.assertFalse(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
     }
 
     @Test
     public void testUpdate() throws NotFoundException, InvalidRequestException, TException,
             SchemaDisagreementException, UnsupportedEncodingException
     {
-        CassandraCli.createKeySpace("KunderaCassandraTests");
-        client.set_keyspace("KunderaCassandraTests");
-        org.apache.cassandra.thrift.CfDef cf_def = new org.apache.cassandra.thrift.CfDef("KunderaCassandraTests",
+        CassandraCli.createKeySpace("KunderaCoreExmples");
+        client.set_keyspace("KunderaCoreExmples");
+        org.apache.cassandra.thrift.CfDef cf_def = new org.apache.cassandra.thrift.CfDef("KunderaCoreExmples",
                 "CassandraEntitySimple");
         cf_def.column_type = "Standard";
         client.system_add_column_family(cf_def);
 
-        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraTests"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCassandraTests"));
+        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
         org.apache.cassandra.thrift.KsDef ksDef = new KsDef();
-        ksDef = client.describe_keyspace("KunderaCassandraTests");
+        ksDef = client.describe_keyspace("KunderaCoreExmples");
         // Assert.assertEquals(1, ksDef.getCf_defs().size());
         Assert.assertEquals(0, ksDef.getCf_defs().get(0).getColumn_metadata().size());
 
@@ -185,9 +185,9 @@ public class CassandraSchemaOperationTest
         schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
         schemaManager.exportSchema();
 
-        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraTests"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCassandraTests"));
-        ksDef = client.describe_keyspace("KunderaCassandraTests");
+        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
+        ksDef = client.describe_keyspace("KunderaCoreExmples");
         for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
         {
             Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
@@ -211,9 +211,9 @@ public class CassandraSchemaOperationTest
     public void testUpdateInValid() throws NotFoundException, InvalidRequestException, TException,
             SchemaDisagreementException, UnsupportedEncodingException
     {
-        CassandraCli.createKeySpace("KunderaCassandraTests");
-        client.set_keyspace("KunderaCassandraTests");
-        org.apache.cassandra.thrift.CfDef cf_def = new org.apache.cassandra.thrift.CfDef("KunderaCassandraTests",
+        CassandraCli.createKeySpace("KunderaCoreExmples");
+        client.set_keyspace("KunderaCoreExmples");
+        org.apache.cassandra.thrift.CfDef cf_def = new org.apache.cassandra.thrift.CfDef("KunderaCoreExmples",
                 "CassandraEntitySimple");
         cf_def.column_type = "Standard";
         List<ColumnDef> column_metadata = new ArrayList<ColumnDef>();
@@ -233,9 +233,9 @@ public class CassandraSchemaOperationTest
         cf_def.setColumn_metadata(column_metadata);
         client.system_add_column_family(cf_def);
 
-        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraTests"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCassandraTests"));
-        org.apache.cassandra.thrift.KsDef ksDef = client.describe_keyspace("KunderaCassandraTests");
+        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
+        org.apache.cassandra.thrift.KsDef ksDef = client.describe_keyspace("KunderaCoreExmples");
         Assert.assertEquals(1, ksDef.getCf_defs().size());
         Assert.assertEquals(2, ksDef.getCf_defs().get(0).getColumn_metadata().size());
 
@@ -243,9 +243,9 @@ public class CassandraSchemaOperationTest
         schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
         schemaManager.exportSchema();
 
-        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraTests"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCassandraTests"));
-        ksDef = client.describe_keyspace("KunderaCassandraTests");
+        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
+        ksDef = client.describe_keyspace("KunderaCoreExmples");
         for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
         {
             Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
@@ -258,9 +258,9 @@ public class CassandraSchemaOperationTest
 
             for (ColumnDef columnDef : cfDef.getColumn_metadata())
             {
-                Assert.assertFalse(columnDef.isSetIndex_type());
+                Assert.assertTrue(columnDef.isSetIndex_type());
                 Assert.assertTrue(columns.contains(new String(columnDef.getName(), Constants.ENCODING)));
-                Assert.assertNull(columnDef.index_name);
+                Assert.assertNotNull(columnDef.index_name);
             }
         }
     }
@@ -270,11 +270,11 @@ public class CassandraSchemaOperationTest
     {
         try
         {
-            CassandraCli.createKeySpace("KunderaCassandraTests");
+            CassandraCli.createKeySpace("KunderaCoreExmples");
 
-            client.set_keyspace("KunderaCassandraTests");
+            client.set_keyspace("KunderaCoreExmples");
 
-            org.apache.cassandra.thrift.CfDef cf_def = new org.apache.cassandra.thrift.CfDef("KunderaCassandraTests",
+            org.apache.cassandra.thrift.CfDef cf_def = new org.apache.cassandra.thrift.CfDef("KunderaCoreExmples",
                     "CassandraEntitySimple");
             cf_def.column_type = "Standard";
             client.system_add_column_family(cf_def);
@@ -283,9 +283,9 @@ public class CassandraSchemaOperationTest
             schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
             schemaManager.exportSchema();
 
-            Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraTests"));
-            Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCassandraTests"));
-            org.apache.cassandra.thrift.KsDef ksDef = client.describe_keyspace("KunderaCassandraTests");
+            Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
+            Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
+            org.apache.cassandra.thrift.KsDef ksDef = client.describe_keyspace("KunderaCoreExmples");
             for (org.apache.cassandra.thrift.CfDef cfDef : ksDef.getCf_defs())
             {
                 Assert.assertEquals("CassandraEntitySimple", cfDef.getName());
@@ -342,9 +342,9 @@ public class CassandraSchemaOperationTest
     {
         try
         {
-            CassandraCli.createKeySpace("KunderaCassandraTests");
-            client.set_keyspace("KunderaCassandraTests");
-            org.apache.cassandra.thrift.CfDef cf_def = new org.apache.cassandra.thrift.CfDef("KunderaCassandraTests",
+            CassandraCli.createKeySpace("KunderaCoreExmples");
+            client.set_keyspace("KunderaCoreExmples");
+            org.apache.cassandra.thrift.CfDef cf_def = new org.apache.cassandra.thrift.CfDef("KunderaCoreExmples",
                     "CassandraEntitySimple");
             cf_def.column_type = "Standard";
             List<ColumnDef> column_metadata = new ArrayList<ColumnDef>();
@@ -364,9 +364,9 @@ public class CassandraSchemaOperationTest
             cf_def.setColumn_metadata(column_metadata);
             client.system_add_column_family(cf_def);
 
-            Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraTests"));
-            Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCassandraTests"));
-            org.apache.cassandra.thrift.KsDef ksDef = client.describe_keyspace("KunderaCassandraTests");
+            Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
+            Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
+            org.apache.cassandra.thrift.KsDef ksDef = client.describe_keyspace("KunderaCoreExmples");
             Assert.assertEquals(1, ksDef.getCf_defs().size());
             Assert.assertEquals(2, ksDef.getCf_defs().get(0).getColumn_metadata().size());
 
@@ -405,7 +405,7 @@ public class CassandraSchemaOperationTest
             errors.add("column " + "AGE" + " does not exist in column family " + "CassandraEntitySimple" + "");
             errors.add("column " + "PERSON_NAME" + " does not exist in column family " + "CassandraEntitySimple" + "");
             errors.add("column family " + "CassandraEntitySimple " + " does not exist in keyspace "
-                    + "KunderaCassandraTests" + "");
+                    + "KunderaCoreExmples" + "");
             Assert.assertTrue(errors.contains(sgex.getMessage()));
         }
     }
@@ -427,7 +427,7 @@ public class CassandraSchemaOperationTest
         props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, PelopsClientFactory.class.getName());
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCassandraTests");
+        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCoreExmples");
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
         if (useLucene)
         {

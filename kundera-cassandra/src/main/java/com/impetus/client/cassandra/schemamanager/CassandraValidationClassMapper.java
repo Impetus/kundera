@@ -27,35 +27,35 @@ final class CassandraValidationClassMapper
 {
 
     /** The Constant validationClassMapper. */
-    final static HashMap<String, String> validationClassMapper = new HashMap<String, String>();
+    final static HashMap<Class, String> validationClassMapper = new HashMap<Class, String>();
 
     static
     {
 
-        validationClassMapper.put("java.lang.String", "UTF8Type");
-        validationClassMapper.put("char", "UTF8Type");
+        validationClassMapper.put(java.lang.String.class, "UTF8Type");
+        validationClassMapper.put(char.class, "UTF8Type");
 
-        validationClassMapper.put("java.sql.Time", "IntegerType");
-        validationClassMapper.put("java.lang.Integer", "IntegerType");
-        validationClassMapper.put("int", "IntegerType");
-        validationClassMapper.put("java.sql.Timestamp", "IntegerType");
-        validationClassMapper.put("short", "IntegerType");
-        validationClassMapper.put("java.math.BigDecimal", "IntegerType");
-        validationClassMapper.put("java.sql.Date", "IntegerType");
-        validationClassMapper.put("java.util.Date", "IntegerType");
-        validationClassMapper.put("java.math.BigInteger", "IntegerType");
+        validationClassMapper.put(java.sql.Time.class, "IntegerType");
+        validationClassMapper.put(java.lang.Integer.class, "IntegerType");
+        validationClassMapper.put(int.class, "IntegerType");
+        validationClassMapper.put(java.sql.Timestamp.class, "IntegerType");
+        validationClassMapper.put(short.class, "IntegerType");
+        validationClassMapper.put(java.math.BigDecimal.class, "IntegerType");
+        validationClassMapper.put(java.sql.Date.class, "IntegerType");
+        validationClassMapper.put(java.util.Date.class, "IntegerType");
+        validationClassMapper.put(java.math.BigInteger.class, "IntegerType");
 
-        validationClassMapper.put("java.lang.Double", "DoubleType");
-        validationClassMapper.put("double", "DoubleType");
+        validationClassMapper.put(java.lang.Double.class, "DoubleType");
+        validationClassMapper.put(double.class, "DoubleType");
 
-        validationClassMapper.put("boolean", "BooleanType");
+        validationClassMapper.put(boolean.class, "BooleanType");
 
-        validationClassMapper.put("java.lang.Long", "LongType");
-        validationClassMapper.put("long", "LongType");
+        validationClassMapper.put(java.lang.Long.class, "LongType");
+        validationClassMapper.put(long.class, "LongType");
 
-        validationClassMapper.put("byte", "BytesType");
+        validationClassMapper.put(byte.class, "BytesType");
 
-        validationClassMapper.put("float", "FloatType");
+        validationClassMapper.put(float.class, "FloatType");
     }
 
     /**
@@ -65,7 +65,7 @@ final class CassandraValidationClassMapper
      *            the data type
      * @return the validation class
      */
-    static String getValidationClass(String dataType)
+    static String getValidationClass(Class dataType)
     {
         String validation_class;
         validation_class = validationClassMapper.get(dataType);

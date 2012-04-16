@@ -132,7 +132,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         {
 
             logger.error("database " + databaseName + "does not exist");
-            throw new SchemaGenerationException("mongoDb", databaseName);
+            throw new SchemaGenerationException("database " + databaseName + "does not exist", "mongoDb", databaseName);
         }
         else
         {
@@ -142,7 +142,8 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
                 if (!db.collectionExists(tableInfo.getTableName()))
                 {
                     logger.error("Collection " + tableInfo.getTableName() + "does not exist in db " + db.getName());
-                    throw new SchemaGenerationException("Collection " + tableInfo.getTableName() + "does not exist in db " + db.getName(),"mongoDb", databaseName, tableInfo.getTableName());
+                    throw new SchemaGenerationException("Collection " + tableInfo.getTableName()
+                            + "does not exist in db " + db.getName(), "mongoDb", databaseName, tableInfo.getTableName());
                 }
             }
         }
@@ -173,23 +174,23 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
     protected boolean initiateClient()
     {
 
-            int localport = Integer.parseInt(port);
-            try
-            {
-                m = new Mongo(host, localport);
-                db = m.getDB(puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_KEYSPACE));
-            }
-            catch (UnknownHostException e)
-            {
-                logger.error("database host cannot be resolved caused by" + e.getMessage());
-                throw new SchemaGenerationException(e, "mongoDb");
-            }
-            catch (MongoException e)
-            {
+        int localport = Integer.parseInt(port);
+        try
+        {
+            m = new Mongo(host, localport);
+            db = m.getDB(puMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_KEYSPACE));
+        }
+        catch (UnknownHostException e)
+        {
+            logger.error("database host cannot be resolved caused by" + e.getMessage());
+            throw new SchemaGenerationException(e, "mongoDb");
+        }
+        catch (MongoException e)
+        {
 
-                throw new SchemaGenerationException(e);
-            }
+            throw new SchemaGenerationException(e);
+        }
 
-            return true;
+        return true;
     }
 }

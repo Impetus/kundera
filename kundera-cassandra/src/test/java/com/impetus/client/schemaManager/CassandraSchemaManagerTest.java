@@ -82,7 +82,7 @@ public class CassandraSchemaManagerTest
     public void tearDown() throws Exception
     {
         CassandraCli cli = new CassandraCli();
-        cli.getClient().system_drop_keyspace("KunderaCassandraExamples");
+        cli.getClient().system_drop_keyspace("KunderaCoreExmples");
     }
 
     /**
@@ -106,25 +106,25 @@ public class CassandraSchemaManagerTest
             TimedOutException, SchemaDisagreementException
     {
         getEntityManagerFactory();
-        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySuper", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUni1To1", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUniMTo1", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUni1ToM", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUniMto1", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUni1ToM", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUni1To1", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUni1To1PK", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUni1To1PK", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBi1To1FK", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBi1To1PK", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBi1ToM", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBiMTo1", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1To1FK", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1To1PK", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1ToM", "KunderaCassandraExamples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBiMTo1", "KunderaCassandraExamples"));
+        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySuper", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUni1To1", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUniMTo1", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUni1ToM", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUniMto1", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUni1ToM", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUni1To1", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUni1To1PK", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUni1To1PK", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBi1To1FK", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBi1To1PK", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBi1ToM", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBiMTo1", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1To1FK", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1To1PK", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1ToM", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBiMTo1", "KunderaCoreExmples"));
     }
 
     /**
@@ -141,7 +141,7 @@ public class CassandraSchemaManagerTest
                 "com.impetus.client.cassandra.pelops.PelopsClientFactory");
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCassandraExamples");
+        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCoreExmples");
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();

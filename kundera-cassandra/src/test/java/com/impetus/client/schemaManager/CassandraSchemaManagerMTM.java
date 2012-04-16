@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.schemaManager;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,11 +29,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.pelops.PelopsClientFactory;
 import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.client.ClientType;
 import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
@@ -98,7 +96,7 @@ public class CassandraSchemaManagerMTM
         {
             getEntityManagerFactory("create");
 
-            schemaManager = new CassandraSchemaManager(ClientType.PELOPS);
+            schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
             schemaManager.exportSchema();
             Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraExamples"));
             Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonnelUniMToM",
@@ -127,7 +125,7 @@ public class CassandraSchemaManagerMTM
         Map<String, Object> props = new HashMap<String, Object>();
         String persistenceUnit = "cassandra";
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT, "PELOPS");
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,"com.impetus.client.cassandra.pelops.PelopsClientFactory");
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCassandraExamples");

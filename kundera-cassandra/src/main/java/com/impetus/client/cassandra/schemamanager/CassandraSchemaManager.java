@@ -43,11 +43,8 @@ import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
-<<<<<<< HEAD
-import com.impetus.kundera.property.PropertyAccessException;
-=======
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
->>>>>>> 236e2ffb8bc57a81d05953e666fa0eb1344aa27a
+import com.impetus.kundera.property.PropertyAccessException;
 
 /**
  * Manages auto schema operation defined in {@code ScheamOperationType}.
@@ -68,14 +65,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private static final Logger logger = LoggerFactory.getLogger(CassandraSchemaManager.class);
 
     /**
-     * Instantiates a new cassandra schema manager. <<<<<<< HEAD
+     * Instantiates a new cassandra schema manager.
      * 
      * @param client
-     *            the client =======
+     *            the client
      * 
      * @param clientFactory
-     *            the configured client clientFactory >>>>>>>
-     *            aae3a152a29bcd313f5a24f70fa99937787b0407
+     *            the configured client clientFactory
      */
     public CassandraSchemaManager(String clientFactory)
     {
@@ -100,7 +96,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     protected void create_drop(List<TableInfo> tableInfos)
     {
         create(tableInfos);
-
     }
 
     /**
@@ -114,6 +109,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         try
         {
             KsDef ksDef = cassandra_client.describe_keyspace(databaseName);
+
             addTablesToKeyspace(tableInfos, ksDef);
         }
         catch (NotFoundException nfex)
@@ -122,21 +118,33 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException irex)
         {
-            logger.error("keyspace " + databaseName + " does not exist :" + irex.getMessage());
-            throw new SchemaGenerationException(irex, "Cassandra", databaseName);
+            logger.error("keyspace " + databaseName + " does not exist caused by :" + irex.getMessage());
+            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", irex, "Cassandra",
+                    databaseName);
         }
         catch (TException tex)
         {
-            logger.error("keyspace " + databaseName + " does not exist :" + tex.getMessage());
-            throw new SchemaGenerationException(tex, "Cassandra", databaseName);
+            logger.error("keyspace " + databaseName + " does not exist caused by :" + tex.getMessage());
+            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", tex, "Cassandra",
+                    databaseName);
         }
         catch (SchemaDisagreementException sdex)
         {
-            logger.error("keyspace " + databaseName + " does not exist :" + sdex.getMessage());
-            throw new SchemaGenerationException(sdex, "Cassandra", databaseName);
+            logger.error("keyspace " + databaseName + " does not exist caused by :" + sdex.getMessage());
+            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", sdex, "Cassandra",
+                    databaseName);
         }
     }
 
+    /**
+     * add tables to given keyspace {@code ksDef}.
+     * 
+     * @param tableInfos
+     * @param ksDef
+     * @throws InvalidRequestException
+     * @throws SchemaDisagreementException
+     * @throws TException
+     */
     private void addTablesToKeyspace(List<TableInfo> tableInfos, KsDef ksDef) throws InvalidRequestException,
             SchemaDisagreementException, TException
     {
@@ -147,7 +155,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             for (CfDef cfDef : ksDef.getCf_defs())
             {
                 if (cfDef.getName().equalsIgnoreCase(tableInfo.getTableName())
-                        && cfDef.getColumn_type().equalsIgnoreCase(tableInfo.getType()))
+                        && cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))
                 {
                     cassandra_client.system_drop_column_family(tableInfo.getTableName());
                     cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
@@ -160,7 +168,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
             }
         }
-
     }
 
     /**
@@ -171,7 +178,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     protected void update(List<TableInfo> tableInfos)
     {
-
         try
         {
             KsDef ksDef = cassandra_client.describe_keyspace(databaseName);
@@ -184,17 +190,20 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         catch (InvalidRequestException e)
         {
             logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException(e, "Cassandra", databaseName);
+            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+                    databaseName);
         }
         catch (TException e)
         {
             logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException(e, "Cassandra", databaseName);
+            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+                    databaseName);
         }
         catch (SchemaDisagreementException e)
         {
             logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException(e, "Cassandra", databaseName);
+            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+                    databaseName);
         }
     }
 
@@ -213,18 +222,21 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (NotFoundException e)
         {
-            logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException(e, "Cassandra", databaseName);
+            logger.error("keyspace " + databaseName + " does not exist :");
+            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+                    databaseName);
         }
         catch (InvalidRequestException e)
         {
             logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException(e, "Cassandra", databaseName);
+            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+                    databaseName);
         }
         catch (TException e)
         {
             logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException(e, "Cassandra", databaseName);
+            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+                    databaseName);
         }
     }
 
@@ -243,12 +255,14 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         catch (InvalidRequestException e)
         {
             logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException(e, "Cassandra", databaseName);
+            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+                    databaseName);
         }
         catch (TException e)
         {
             logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException(e, "Cassandra", databaseName);
+            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+                    databaseName);
         }
         for (TableInfo tableInfo : tableInfos)
         {
@@ -256,9 +270,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             for (CfDef cfDef : ksDef.getCf_defs())
             {
                 if (cfDef.getName().equalsIgnoreCase(tableInfo.getTableName())
-                        && (cfDef.getColumn_type().equals(tableInfo.getType())))
+                        && (cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name())))
                 {
-                    if (cfDef.getColumn_type().equalsIgnoreCase("Standard"))
+                    if (cfDef.getColumn_type().equals(ColumnFamilyType.Standard.name()))
                     {
                         for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
                         {
@@ -290,6 +304,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                             }
                         }
                         tablefound = true;
+                        break;
+                    }
+                    else if (cfDef.getColumn_type().equals(ColumnFamilyType.Super.name()))
+                    {
+                        tablefound = true;
                     }
                 }
             }
@@ -305,12 +324,22 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
     }
 
+    /**
+     * is metadata same method returns true if ColumnDef and columnInfo have same metadata. 
+     * 
+     * @param columnDef
+     * @param columnInfo
+     * @return
+     * @throws UnsupportedEncodingException
+     */
     private boolean isMetadataSame(ColumnDef columnDef, ColumnInfo columnInfo) throws UnsupportedEncodingException
     {
-        return (new String(columnDef.getName(), Constants.ENCODING)).equals(columnInfo.getColumnName())
+        // .equalsIgnoreCase(CassandraValidationClassMapper.getValidationClass(columnInfo
+        // .getType())
+        return (new String(columnDef.getName(), Constants.ENCODING).equals(columnInfo.getColumnName()))
                 && (columnDef.isSetIndex_type() == columnInfo.isIndexable() || (columnDef.isSetIndex_type())) ? (columnDef
-                .getValidation_class().equalsIgnoreCase(CassandraValidationClassMapper.getValidationClass(columnInfo
-                .getType()))) : false;
+                .getValidation_class()
+                .endsWith(CassandraValidationClassMapper.getValidationClass(columnInfo.getType()))) : false;
     }
 
     /**
@@ -330,13 +359,17 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             for (CfDef cfDef : ksDef.getCf_defs())
             {
                 if (cfDef.getName().equalsIgnoreCase(tableInfo.getTableName())
-                        && cfDef.getColumn_type().equalsIgnoreCase(tableInfo.getType()))
+                        && cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))
                 {
                     if (cfDef.getColumn_type().equalsIgnoreCase("Standard"))
                     {
+
                         for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
                         {
-                            cfDef.addToColumn_metadata(getColumnMetadata(columnInfo));
+                            if (!isIndexesPresent(columnInfo, cfDef))
+                            {
+                                cfDef.addToColumn_metadata(getColumnMetadata(columnInfo));
+                            }
                         }
                     }
                     cassandra_client.system_update_column_family(cfDef);
@@ -353,12 +386,49 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
     }
 
+    /**
+     * isInedexesPresent method return whether indexes present or not on
+     * particular column.
+     * 
+     * @param columnInfo
+     * @param cfDef
+     * @return
+     */
+    private boolean isIndexesPresent(ColumnInfo columnInfo, CfDef cfDef)
+    {
+        for (ColumnDef columnDef : cfDef.getColumn_metadata())
+        {
+            try
+            {
+                if (new String(columnDef.getName(), Constants.ENCODING).equals(columnInfo.getColumnName()))
+                {
+                    if (columnDef.getIndex_type() != null)
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (UnsupportedEncodingException ueex)
+            {
+                throw new PropertyAccessException(ueex);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * getColumnMetadata use for getting column metadata for specific
+     * columnInfo.
+     * 
+     * @param columnInfo
+     * @return
+     */
     private ColumnDef getColumnMetadata(ColumnInfo columnInfo)
     {
         ColumnDef columnDef = new ColumnDef();
         columnDef.setName(columnInfo.getColumnName().getBytes());
         columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(columnInfo.getType()));
-        if (useSecondryIndex && columnInfo.isIndexable())
+        if (columnInfo.isIndexable())
         {
             columnDef.setIndex_type(IndexType.KEYS);
         }
@@ -428,11 +498,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         cfDef.setKeyspace(databaseName);
         cfDef.setName(tableInfo.getTableName());
         cfDef.setKey_validation_class(CassandraValidationClassMapper.getValidationClass(tableInfo.getTableIdType()));
-<<<<<<< HEAD
-        if (tableInfo.getType() != null && tableInfo.getType().equals("Standard"))
-=======
-        if (tableInfo.getType().equals(Type.COLUMN_FAMILY))
->>>>>>> 236e2ffb8bc57a81d05953e666fa0eb1344aa27a
+
+        if (tableInfo.getType() != null && tableInfo.getType().equals(Type.COLUMN_FAMILY.name()))
+
         {
             cfDef.setColumn_type("Standard");
             List<ColumnDef> columnDefs = new ArrayList<ColumnDef>();
@@ -442,9 +510,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 for (ColumnInfo columnInfo : columnInfos)
                 {
                     ColumnDef columnDef = new ColumnDef();
-                    if (useSecondryIndex && columnInfo.isIndexable())
+                    if (columnInfo.isIndexable())
                     {
                         columnDef.setIndex_type(IndexType.KEYS);
+                        // columnDef.setIndex_typeIsSet(columnInfo.isIndexable());
                     }
                     columnDef.setName(columnInfo.getColumnName().getBytes());
                     columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(columnInfo
@@ -461,13 +530,31 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         return cfDef;
     }
 
-    // private enum ColumnFamilyType
-    // {
-    // Standard, Super;
-    // }
+    /**
+     * Enum ColumnFamilyType for type of column family in cassandra ie Super or
+     * Standard.
+     * 
+     */
+    private enum ColumnFamilyType
+    {
+        Standard, Super;
+        private static ColumnFamilyType getInstanceOf(String type)
+        {
+            if (type.equals(Type.COLUMN_FAMILY.name()))
+            {
+                return ColumnFamilyType.Standard;
+            }
+            else
+            {
+
+                return ColumnFamilyType.Super;
+            }
+        }
+    }
 
     /**
      * drop schema method drop the table from keyspace.
+     * 
      */
     public void dropSchema()
     {
