@@ -407,7 +407,7 @@ public class LuceneIndexer extends DocumentIndexer
     
 
     @Override
-    public boolean documentExistsForEntity(Class<?> entityClass)
+    public boolean entityExistsInIndex(Class<?> entityClass)
     {
         String luceneQuery = "+" + ENTITY_CLASS_FIELD + ":" + entityClass.getCanonicalName().toLowerCase();
         Map<String, String> results;
