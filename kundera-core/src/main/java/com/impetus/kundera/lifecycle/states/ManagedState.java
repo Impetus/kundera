@@ -16,27 +16,16 @@
 package com.impetus.kundera.lifecycle.states;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.CascadeType;
 import javax.persistence.PersistenceContextType;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.NodeLink;
-import com.impetus.kundera.graph.ObjectGraph;
-import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.EntityReader;
-import com.impetus.kundera.persistence.context.PersistenceCache;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * @author amresh
@@ -90,8 +79,9 @@ public class ManagedState extends NodeState
     {
         //Ignored, entity remains in the same state
         
-        //Mark this entity for saving in database
-        nodeStateContext.setDirty(true);      
+        //Mark this entity for saving in database depending upon whether it's deep equals to the 
+        //one in persistence cache
+        // nodeStateContext.setDirty(true);      
         
         //Add this node into persistence cache
         nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);

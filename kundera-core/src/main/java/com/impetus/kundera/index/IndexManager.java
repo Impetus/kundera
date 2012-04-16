@@ -74,17 +74,21 @@ public class IndexManager
      * @param entity
      *            the entity
      */
-    public final void update(EntityMetadata metadata, Object entity) 
+    public final void update(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz) 
     {
         
         try
         {
             if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
-            {
-
-                String id = PropertyAccessorHelper.getId(entity, metadata);
-                indexer.unindex(metadata, id);
-                indexer.index(metadata, entity);
+            {                
+                String id = PropertyAccessorHelper.getId(entity, metadata);                
+                
+                boolean entityExists = indexer.entityExistsInIndex(entity.getClass());
+                if(entityExists) {
+                    indexer.unindex(metadata, id);
+                    
+                }   
+                indexer.index(metadata, entity, parentId, clazz);
             }
         }       
         catch (PropertyAccessException e)

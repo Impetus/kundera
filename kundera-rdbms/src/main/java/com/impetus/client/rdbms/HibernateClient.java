@@ -441,34 +441,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             s.createSQLQuery(query.toString()).executeUpdate();
         }
         tx.commit();
-    }
-
-    /**
-     * On index.
-     * 
-     * @param childEntity
-     *            the child entity
-     * @param entitySaveGraph
-     *            the entity save graph
-     * @param metadata
-     *            the metadata
-     * @param rlValue
-     *            the rl value
-     */
-    private void onIndex(Object childEntity, EntitySaveGraph entitySaveGraph, EntityMetadata metadata, String rlValue)
-    {
-        if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
-        {
-            if (!entitySaveGraph.isSharedPrimaryKey())
-            {
-                getIndexManager().write(metadata, childEntity, rlValue, entitySaveGraph.getParentClass());
-            }
-            else
-            {
-                getIndexManager().write(metadata, childEntity);
-            }
-        }
-    }
+    }    
 
     /**
      * Gets the session instance.

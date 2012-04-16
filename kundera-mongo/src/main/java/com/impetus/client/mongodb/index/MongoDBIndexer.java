@@ -97,6 +97,12 @@ public class MongoDBIndexer implements Indexer
 
         client.createIndex(metadata.getTableName(), columnList, 1); // 1=Ascending
 
+    }    
+    
+    @Override
+    public boolean entityExistsInIndex(Class<?> entityClass)
+    {
+        return false;
     }
 
     /*

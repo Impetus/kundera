@@ -89,6 +89,8 @@ public class ObjectGraphBuilder
             if(! DeepEquals.deepEquals(node.getData(), entity)) {
                 node.setData(nodeDataCopy);
                 node.setDirty(true);
+            } else {
+                node.setDirty(false);
             }
             
             //If node is NOT in managed state, its data needs to be 
