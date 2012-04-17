@@ -86,7 +86,7 @@ public class IndexManager
                 boolean documentExists = indexer.entityExistsInIndex(entity.getClass());
                 if(documentExists) {
                     indexer.unindex(metadata, id);
-                    
+                    indexer.flush();
                 }   
                 indexer.index(metadata, entity, parentId, clazz);
             }

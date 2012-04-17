@@ -64,6 +64,7 @@ import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.QueryResolver;
+import com.impetus.kundera.utils.ObjectUtils;
 
 /**
  * The Class PersistenceDelegator.
@@ -198,8 +199,9 @@ public class PersistenceDelegator
             }
 
         }
-
-        return (E) nodeData;
+        
+        //Return a deep copy of the node data
+        return (E) ObjectUtils.deepCopy(nodeData);
     }
     
     public <E> List<E> find(Class<E> entityClass, Object... primaryKeys)
@@ -358,7 +360,7 @@ public class PersistenceDelegator
         // fire PreUpdate events
         getEventDispatcher().fireEventListeners(m, e, PostUpdate.class);
 
-        return e;
+        return (E)headNode.getData();
     }
 
     // TODO : This method needs serious attention!
