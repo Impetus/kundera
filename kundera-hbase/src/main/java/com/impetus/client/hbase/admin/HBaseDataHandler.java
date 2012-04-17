@@ -154,6 +154,8 @@ public class HBaseDataHandler implements DataHandler
                 {
                     admin.disableTable(tableName);
                 }
+                
+                
                 admin.addColumn(tableName, cfDesciptor);
 
                 // Enable table once done
@@ -312,7 +314,10 @@ public class HBaseDataHandler implements DataHandler
                         { // Fresh row
                             dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
                                     + (++lastEmbeddedObjectCount);
+                            
                         }
+                        addColumnFamilyToTable(tableName, dynamicCFName);
+                        hbaseWriter.writeColumns(hTable, dynamicCFName, rowId, columns, obj);
                     }
 
                     // Clear embedded collection cache for GC

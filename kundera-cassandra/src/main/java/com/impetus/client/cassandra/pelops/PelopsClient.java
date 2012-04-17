@@ -190,7 +190,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         List<E> results = new ArrayList<E>();
         for (Object rowKey : rowIds)
         {
-            E r = (E) find(entityClass, entityMetadata, rowKey.toString(), null);
+            E r = (E) find(entityClass, entityMetadata, rowKey.toString(), entityMetadata.getRelationNames());
             if (r != null)
             {
                 results.add(r);

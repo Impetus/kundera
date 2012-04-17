@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.utils.DeepEquals;
 
 /**
  * Cache for holding element collection column names and corresponding objects
@@ -141,6 +142,15 @@ public class ElementCollectionCacheManager
         {
             Map<Object, String> elementCollectionObjectMap = getElementCollectionCache().get(rowKey);
             String elementCollectionObjectName = elementCollectionObjectMap.get(elementCollectionObject);
+            if(elementCollectionObjectName == null) {
+                for(Object obj : elementCollectionObjectMap.keySet()) {
+                    if(DeepEquals.deepEquals(elementCollectionObject, obj)) {
+                        elementCollectionObjectName = elementCollectionObjectMap.get(obj);
+                        break;
+                    }
+                }
+            }           
+            
             if (elementCollectionObjectName == null)
             {
                 log.debug("No element collection object name found in cache for object:" + elementCollectionObject);
