@@ -154,8 +154,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             boolean found = false;
             for (CfDef cfDef : ksDef.getCf_defs())
             {
-                if (cfDef.getName().equalsIgnoreCase(tableInfo.getTableName())
-                        && cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))
+                if (cfDef.getName().equalsIgnoreCase(tableInfo.getTableName()))
+//                        && cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))
                 {
                     cassandra_client.system_drop_column_family(tableInfo.getTableName());
                     cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
