@@ -31,6 +31,7 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -97,13 +98,29 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         
         String dbName = entityMetadata.getSchema();
         String documentName = entityMetadata.getTableName();
+        Object key = ObjectGraphBuilder.getEntityId(node.getNodeId());
 
         log.debug("Persisting data into " + dbName + "." + documentName + " for ID:" + node.getNodeId());
         DBCollection dbCollection = mongoDb.getCollection(documentName);       
         
         List<RelationHolder> relationHolders = getRelationHolders(node);
 
-        BasicDBObject document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(
+        BasicDBObject query = new BasicDBObject();
+        query.put(entityMetadata.getIdColumn().getName(), key.toString());
+
+        DBCursor cursor = dbCollection.find(query);
+        DBObject document = null;
+
+        if (cursor.hasNext())
+        {
+            document = cursor.next();
+        }
+        else
+        {
+            document = new BasicDBObject();
+        }        
+        
+        document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(document, 
                 entityMetadata, node.getData(), relationHolders);
         dbCollection.save(document);
         
@@ -262,7 +279,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         {
             DBObject fetchedDocument = cursor.next();
             Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
-                    entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, null);
+                    entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, entityMetadata.getRelationNames());
             entities.add(entity);
         }
         return entities;

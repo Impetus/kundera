@@ -251,11 +251,11 @@ public class MongoDBDataHandler
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public BasicDBObject getDocumentFromEntity(EntityMetadata m, Object entity, List<RelationHolder> relations)
+    public DBObject getDocumentFromEntity(DBObject dbObj, EntityMetadata m, Object entity, List<RelationHolder> relations)
             throws PropertyAccessException
     {
         List<Column> columns = m.getColumnsAsList();
-        BasicDBObject dbObj = new BasicDBObject();
+        
 
         // Populate Row Key
         dbObj.put("_id", PropertyAccessorHelper.getId(entity, m));
@@ -334,7 +334,7 @@ public class MongoDBDataHandler
      * @throws PropertyAccessException
      *             the property access exception
      */
-    private void extractEntityField(Object entity, BasicDBObject dbObj, Column column) throws PropertyAccessException
+    private void extractEntityField(Object entity, DBObject dbObj, Column column) throws PropertyAccessException
     {
         // A column field may be a collection(not defined as 1-to-M
         // relationship)
