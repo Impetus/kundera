@@ -175,8 +175,11 @@ public class MongoDBDataHandler
                     relationValue.put(r, colValue);
                 }
 
-                e = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationValue);
-                return e;
+                if(!relationValue.isEmpty())
+                {
+                    e = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationValue);
+                    return e;
+                }
             }
             return entity;
 

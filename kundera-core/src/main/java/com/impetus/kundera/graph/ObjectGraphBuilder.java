@@ -80,7 +80,9 @@ public class ObjectGraphBuilder
         Object nodeDataCopy = ObjectUtils.deepCopy(entity);
         
         if(nodeInPersistenceCache == null) {
-            node = new Node(nodeId, nodeDataCopy, initialNodeState, persistenceCache);
+            node = new Node(nodeId, nodeDataCopy, initialNodeState, persistenceCache);           
+            
+            
         } else {
             node = nodeInPersistenceCache;
             
@@ -151,7 +153,9 @@ public class ObjectGraphBuilder
           //Construct Node Link for this relationship
             NodeLink nodeLink = new NodeLink(node.getNodeId(), childNode.getNodeId());
             nodeLink.setMultiplicity(relation.getType());
-            nodeLink.setLinkProperties(getLinkProperties(relation));
+            
+            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+            nodeLink.setLinkProperties(getLinkProperties(metadata, relation));
             
             //Add Parent node to this child
             childNode.addParentNode(nodeLink, node);
@@ -161,12 +165,18 @@ public class ObjectGraphBuilder
         }        
     }
     
-    private Map<LinkProperty, Object> getLinkProperties(Relation relation) {
+    /**
+     * 
+     * @param metadata Entity metadata of the parent node
+     * @param relation 
+     * @return
+     */
+    private Map<LinkProperty, Object> getLinkProperties(EntityMetadata metadata, Relation relation) {
         Map<LinkProperty, Object> linkProperties = new HashMap<NodeLink.LinkProperty, Object>();
         
         
         
-        linkProperties.put(LinkProperty.LINK_NAME,MetadataUtils.getMappedName(relation) );
+        linkProperties.put(LinkProperty.LINK_NAME,MetadataUtils.getMappedName(metadata, relation));
         linkProperties.put(LinkProperty.IS_SHARED_BY_PRIMARY_KEY, relation.isJoinedByPrimaryKey());
         linkProperties.put(LinkProperty.IS_BIDIRECTIONAL, !relation.isUnary());
         linkProperties.put(LinkProperty.IS_RELATED_VIA_JOIN_TABLE, relation.isRelatedViaJoinTable());

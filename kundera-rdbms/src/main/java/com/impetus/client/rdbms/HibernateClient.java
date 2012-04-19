@@ -164,11 +164,10 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     @Override
     public void delete(Object entity, Object pKey)
     {
-        Session s = getStatefulSession();
+        s = getStatelessSession();
         Transaction tx = s.beginTransaction();
         s.delete(entity);
-        tx.commit();
-        s.close();
+        tx.commit();        
 
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
         if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
@@ -274,10 +273,11 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
         String id = ObjectGraphBuilder.getEntityId(node.getNodeId());        
         
+        Transaction tx = null;
         try
         {
             s = getStatelessSession();
-            Transaction tx = s.beginTransaction();
+            tx = s.beginTransaction();
             s.insert(node.getData());
             tx.commit();
         }
@@ -285,7 +285,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         // handling many to one case
         catch (org.hibernate.exception.ConstraintViolationException e)
         {
-            log.info(e.getMessage());
+            log.info(e.getMessage());            
+            s.update(node.getData());
+            tx.commit();
         }
         catch (HibernateException e)
         {
@@ -300,7 +302,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             if(linkName != null && linkValue != null) {
                 
                 s = getStatelessSession();
-                Transaction tx = s.beginTransaction();
+                tx = s.beginTransaction();
                 String updateSql = "Update " + metadata.getTableName() + " SET " + linkName + "= '"
                         + linkValue + "' WHERE " + metadata.getIdColumn().getName() + " = '"
                         + id + "'";

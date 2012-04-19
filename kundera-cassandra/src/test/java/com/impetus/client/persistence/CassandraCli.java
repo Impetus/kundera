@@ -225,7 +225,7 @@ public final class CassandraCli
      * @throws TTransportException
      *             the t transport exception
      */
-    private static void initClient() throws TTransportException
+    public static void initClient() throws TTransportException
     {
         TSocket socket = new TSocket("127.0.0.1", 9160);
         TTransport transport = new TFramedTransport(socket);

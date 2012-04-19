@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
+import java.beans.Encoder;
+import java.beans.Expression;
+import java.beans.PersistenceDelegate;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -89,47 +92,49 @@ public class AbstractEntityReader
                         || multiplicity.equals(Relation.ForeignKey.MANY_TO_ONE))
                 {
                     // Swapped relationship
-                    String relationName = MetadataUtils.getMappedName(relation);
-                    Object relationValue = e.getRelations() != null? e.getRelations().get(relationName):null;
+                    String relationName = MetadataUtils.getMappedName(m, relation);
+                    Object relationValue = e.getRelations() != null ? e.getRelations().get(relationName) : null;
 
                     childClass = relation.getTargetEntity();
                     childMetadata = KunderaMetadataManager.getEntityMetadata(childClass);
                     Field relationField = relation.getProperty();
-                    if(relationValue != null)
+                    if (relationValue != null)
                     {
-                    if (!relationValuesMap.containsKey(relationValue + childClass.getName()) && relationValue != null)
-                    {
-                        childClient = pd.getClient(childMetadata);
-
-                        Object child = null;
-
-                        if (relationValue != null)
+                        if (!relationValuesMap.containsKey(relationValue + childClass.getName())
+                                && relationValue != null)
                         {
-                            if (childClass.equals(e.getEntity().getClass()))
+                            childClient = pd.getClient(childMetadata);
+
+                            Object child = null;
+
+                            if (relationValue != null)
                             {
-                                child = childClient.find(childClass, relationValue.toString());
+                                if (childClass.equals(e.getEntity().getClass()))
+                                {
+                                    child = childClient.find(childClass, relationValue.toString());
+                                }
+                                else
+                                {
+                                    child = pd.find(childClass, relationValue.toString());
+                                }
                             }
-                            else
-                            {
-                                child = pd.find(childClass, relationValue.toString());
-                            }
+
+                            relationValuesMap.put(relationValue + childClass.getName(), child);
+
                         }
+                        Field biDirectionalField = getBiDirectionalField(e.getEntity().getClass(), childClass);
+                        onBiDirection(pd, e, client, relation, biDirectionalField,
+                                relation.getJoinColumnName(), m,
+                                relationValuesMap.get(relationValue + childClass.getName()), childMetadata, childClient);
+                        // onBiDirection(e, client, g, m,
+                        // collectionHolder.get(relationalValue+childClazz.getName()),
+                        // childMetadata, childClient);
 
-                        relationValuesMap.put(relationValue + childClass.getName(), child);
-
-                    }
-                    Field biDirectionalField = getBiDirectionalField(e.getEntity().getClass(), childClass);
-                    onBiDirection(e, client, relation.getProperty(), biDirectionalField, relation.getJoinColumnName(),
-                            m, relationValuesMap.get(relationValue + childClass.getName()), childMetadata, childClient);
-                    // onBiDirection(e, client, g, m,
-                    // collectionHolder.get(relationalValue+childClazz.getName()),
-                    // childMetadata, childClient);
-
-                    List<Object> collection = new ArrayList<Object>(1);
-                    collection.add(relationValuesMap.get(relationValue + childClass.getName()));
-                    PropertyAccessorHelper.set(e.getEntity(), relationField, PropertyAccessorHelper
-                            .isCollection(relationField.getType()) ? getFieldInstance(collection, relationField)
-                            : collection.get(0));
+                        List<Object> collection = new ArrayList<Object>(1);
+                        collection.add(relationValuesMap.get(relationValue + childClass.getName()));
+                        PropertyAccessorHelper.set(e.getEntity(), relationField, PropertyAccessorHelper
+                                .isCollection(relationField.getType()) ? getFieldInstance(collection, relationField)
+                                : collection.get(0));
                     }
                 }
                 else if (multiplicity.equals(Relation.ForeignKey.ONE_TO_MANY))
@@ -140,86 +145,88 @@ public class AbstractEntityReader
                     Field biDirectionalField = getBiDirectionalField(e.getEntity().getClass(), childClass);
 
                     childClient = pd.getClient(childMetadata);
-                    String relationName = MetadataUtils.getMappedName(relation);
+                    String relationName = biDirectionalField != null ? m.getIdColumn().getName():MetadataUtils.getMappedName(m, relation);
                     String relationalValue = e.getEntityId();
 
                     Field f = relation.getProperty();
-                    if(relationalValue != null)
+                    if (relationName != null && relationalValue != null)
                     {
-                    if (!relationValuesMap.containsKey(relationalValue + childClass.getName()))
-                    {
-                        // create a finder and pass metadata, relationName,
-                        // relationalValue.
-                        List<Object> childs = null;
-                        if (MetadataUtils.useSecondryIndex(childClient.getPersistenceUnit()))
+                        if (!relationValuesMap.containsKey(relationalValue + childClass.getName()))
                         {
-                            childs = childClient.findByRelation(relationName, relationalValue, childClass);
-
-                            // pass this entity id as a value to be searched
-                            // for
-                            // for
-                        }
-                        else
-                        {
-                            if (relation.isJoinedByPrimaryKey())
+                            // create a finder and pass metadata, relationName,
+                            // relationalValue.
+                            List<Object> childs = null;
+                            if (MetadataUtils.useSecondryIndex(childClient.getPersistenceUnit()))
                             {
-                                childs = new ArrayList();
-                                // childs.add(childClient.find(childClazz,
-                                // childMetadata, e.getEntityId(), null));
-                                childs.add(childClass.equals(e.getEntity().getClass()) ? childs.add(childClient.find(
-                                        childClass, e.getEntityId())) : pd.find(childClass, relationalValue.toString()));
+                                childs = childClient.findByRelation(relationName, relationalValue, childClass);
+
+                                // pass this entity id as a value to be searched
+                                // for
+                                // for
                             }
                             else
                             {
-                                // lucene query, where entity class is child
-                                // class, parent class is entity's class and
-                                // parentid is entity ID!
-                                // that's it!
-                                String query = getQuery(DocumentIndexer.PARENT_ID_CLASS, e.getEntity().getClass()
-                                        .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD,
-                                        e.getEntityId(), childClass.getCanonicalName().toLowerCase());
-                                // System.out.println(query);
-                                Map<String, String> results = childClient.getIndexManager().search(query);
-                                Set<String> rsSet = new HashSet<String>(results.values());
-                                // childs = (List<Object>)
-                                // childClient.find(childClazz,
-                                // rsSet.toArray(new String[] {}));
-
-                                if (childClass.equals(e.getEntity().getClass()))
+                                if (relation.isJoinedByPrimaryKey())
                                 {
-                                    childs = (List<Object>) childClient.findAll(childClass,
-                                            rsSet.toArray(new String[] {}));
+                                    childs = new ArrayList();
+                                    // childs.add(childClient.find(childClazz,
+                                    // childMetadata, e.getEntityId(), null));
+                                    childs.add(childClass.equals(e.getEntity().getClass()) ? childs.add(childClient
+                                            .find(childClass, e.getEntityId())) : pd.find(childClass,
+                                            relationalValue.toString()));
                                 }
                                 else
                                 {
+                                    // lucene query, where entity class is child
+                                    // class, parent class is entity's class and
+                                    // parentid is entity ID!
+                                    // that's it!
+                                    String query = getQuery(DocumentIndexer.PARENT_ID_CLASS, e.getEntity().getClass()
+                                            .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD,
+                                            e.getEntityId(), childClass.getCanonicalName().toLowerCase());
+                                    // System.out.println(query);
+                                    Map<String, String> results = childClient.getIndexManager().search(query);
+                                    Set<String> rsSet = new HashSet<String>(results.values());
                                     // childs = (List<Object>)
-                                    // pd.find(childClass, g, rsSet.toArray(new
-                                    // String[] {}));
-                                    childs = (List<Object>) childClient.findAll(childClass,
-                                            rsSet.toArray(new String[] {}));
+                                    // childClient.find(childClazz,
+                                    // rsSet.toArray(new String[] {}));
+
+                                    if (childClass.equals(e.getEntity().getClass()))
+                                    {
+                                        childs = (List<Object>) childClient.findAll(childClass,
+                                                rsSet.toArray(new String[] {}));
+                                    }
+                                    else
+                                    {
+                                        // childs = (List<Object>)
+                                        // pd.find(childClass, g,
+                                        // rsSet.toArray(new
+                                        // String[] {}));
+                                        childs = (List<Object>) childClient.findAll(childClass,
+                                                rsSet.toArray(new String[] {}));
+                                    }
+
                                 }
-
                             }
-                        }
-                        // secondary indexes.
-                        // create sql query for hibernate client.
-                        // f = g.getProperty();
-                        relationValuesMap.put(relationalValue + childClass.getName(), childs);
+                            // secondary indexes.
+                            // create sql query for hibernate client.
+                            // f = g.getProperty();
+                            relationValuesMap.put(relationalValue + childClass.getName(), childs);
 
-                        if (childs != null)
-                        {
-                            for (Object child : childs)
+                            if (childs != null)
                             {
-//                                biDirectionalField = getBiDirectionalField(e.getEntity().getClass(), childClass);
+                                for (Object child : childs)
+                                {
+                                    // biDirectionalField =
+                                    // getBiDirectionalField(e.getEntity().getClass(),
+                                    // childClass);
 
-                                onBiDirection(e, client, relation.getProperty(), biDirectionalField,
-                                        relation.getJoinColumnName(), m,
-                                        child, childMetadata,
-                                        childClient);
+                                    onBiDirection(pd, e, client, relation, biDirectionalField,
+                                            relation.getJoinColumnName(), m, child, childMetadata, childClient);
 
+                                }
                             }
                         }
-                    }
                     }
                     // handle bi direction here.
 
@@ -750,7 +757,7 @@ public class AbstractEntityReader
      * @throws Exception
      *             the exception
      */
-    private void onBiDirection(EnhanceEntity e, Client client, Field relationalField, Field bidirectionalField,
+    private void onBiDirection(PersistenceDelegator pd, EnhanceEntity e, Client client, Relation originalRelation, Field bidirectionalField,
             String relationName, EntityMetadata origMetadata, Object child, EntityMetadata childMetadata,
             Client childClient)
     {
@@ -780,7 +787,7 @@ public class AbstractEntityReader
                     {
                         if (origMetadata.isRelationViaJoinTable())
                         {
-                            Relation joinTableRelation = origMetadata.getRelation(relationalField.getName());
+                            Relation joinTableRelation = origMetadata.getRelation(originalRelation.getProperty().getName());
                             JoinTableMetadata jtMetadata = joinTableRelation.getJoinTableMetadata();
                             String joinTableName = jtMetadata.getJoinTableName();
 
@@ -790,20 +797,45 @@ public class AbstractEntityReader
                             String joinColumnName = (String) joinColumns.toArray()[0];
                             String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
 
-                            Object[] pKeys = client.findIdsByColumn(joinTableName, joinColumnName, inverseJoinColumnName, id, origMetadata.getEntityClazz());
-                            List<Object> parentEntities = pKeys != null? client.findAll(origMetadata.getEntityClazz(), pKeys):null;
-                                /*client.findIdsByColumn(origMetadata,
-                                    joinTableName, joinColumnName, inverseJoinColumnName, id);*/
+                            Object[] pKeys = client.findIdsByColumn(joinTableName, joinColumnName,
+                                    inverseJoinColumnName, id, origMetadata.getEntityClazz());       
+                            
+//                          List<Object> parentEntities = pKeys != null ? client.findAll(origMetadata.getEntityClazz(), pKeys) : null;
+                          
 
-                            if (results == null)
+                            for (Object key : pKeys)
                             {
-                                results = new ArrayList<Object>();
-                            }
+                                String rlName = MetadataUtils.getMappedName(origMetadata, originalRelation);
 
-                            if (parentEntities != null)
-                            {
-                                results.addAll(parentEntities);
+                                List keys = client.getColumnsById(joinTableName, joinColumnName, inverseJoinColumnName,
+                                        key.toString());
+                                Object pEntity = client.find(origMetadata.getEntityClazz(), key);
+                                List recursiveChilds = childClient.findAll(childMetadata.getEntityClazz(), keys.toArray());
+                                if (pEntity != null && recursiveChilds != null && !recursiveChilds.isEmpty())
+                                {
+                                    PropertyAccessorHelper.set(pEntity, originalRelation.getProperty(), getFieldInstance(recursiveChilds, originalRelation.getProperty()));
+                                    if (results == null)
+                                    {
+                                        results = new ArrayList<Object>();
+                                    }
+                                    results.add(pEntity);
+                                }
                             }
+                            
+                            /*List<Object> parentEntities = null;
+                            if(pKeys != null) {
+                                parentEntities = (List<Object>) pd.find(origMetadata.getEntityClazz(), pKeys);
+                            }   */                         
+
+//                            if (results == null)
+//                            {
+//                                results = new ArrayList<Object>();
+//                            }
+
+//                            if (parentEntities != null)
+//                            {
+//                                results.addAll(parentEntities);
+//                            }
 
                         }
                         else
@@ -860,9 +892,9 @@ public class AbstractEntityReader
                 // bidirectional.
                 for (Object o : obj)
                 {
-                    if (o != null)
+                    if (o != null && !relation.getType().equals(ForeignKey.MANY_TO_MANY))
                     {
-                        Field f = relationalField;
+                        Field f = originalRelation.getProperty();
 
                         try
                         {
@@ -925,7 +957,8 @@ public class AbstractEntityReader
     {
         Set<String> rSet = fetchDataFromLucene(client);
         List resultList = client.findAll(m.getEntityClazz(), rSet.toArray(new String[] {}));
-        return m.getRelationNames() != null && !m.getRelationNames().isEmpty() ? resultList : transform(m, ls, resultList);
+        return m.getRelationNames() != null && !m.getRelationNames().isEmpty() ? resultList : transform(m, ls,
+                resultList);
     }
 
     /**
@@ -1010,20 +1043,20 @@ public class AbstractEntityReader
         EntityMetadata relMetadata = delegator.getMetadata(relation.getTargetEntity());
 
         Client pClient = delegator.getClient(entityMetadata);
-        List<?> foreignKeys = pClient.getColumnsById(joinTableName, joinColumnName, inverseJoinColumnName,e.getEntityId());
+        List<?> foreignKeys = pClient.getColumnsById(joinTableName, joinColumnName, inverseJoinColumnName,
+                e.getEntityId());
 
         List childrenEntities = new ArrayList();
         for (Object foreignKey : foreignKeys)
         {
             EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
             Client childClient = delegator.getClient(childMetadata);
-            // Object child = childClient.find(relation.getTargetEntity(),
-            // childMetadata, (String) foreignKey, null);
+            
             Object child = delegator.find(relation.getTargetEntity(), foreignKey);
-
-            // TODO: Handle bidirection
-            // onBiDirection(e, client, objectGraph, entityMetadata, child,
-            // childMetadata, childClient);
+         
+            //Handle bidirection
+            //onBiDirection(e, client, objectGraph, entityMetadata, child, childMetadata, childClient);
+            onBiDirection(delegator, e, pClient, relation, getBiDirectionalField(entity.getClass(), relation.getTargetEntity()), joinColumnName, entityMetadata, child, childMetadata, childClient);
 
             childrenEntities.add(child);
         }
@@ -1153,7 +1186,6 @@ public class AbstractEntityReader
 
         return biDirectionalField;
     }
-
 
     /**
      * Gets the relation field name.

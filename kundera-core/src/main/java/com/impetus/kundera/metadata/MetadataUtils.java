@@ -33,6 +33,7 @@ import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -325,14 +326,15 @@ public class MetadataUtils
      * @param relation holding relation.
      * @return   mapped/join column name.
      */
-    public static String getMappedName(Relation relation)
+    public static String getMappedName(EntityMetadata parentMetadata, Relation relation)
     {
         String joinColumn = relation.getJoinColumnName();
         if(joinColumn == null)
-        {
+        {         
+            
             Class clazz = relation.getTargetEntity();
             EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
-            joinColumn = metadata.getIdColumn().getName();
+            joinColumn = relation.getType().equals(ForeignKey.ONE_TO_MANY)? parentMetadata.getIdColumn().getName():metadata.getIdColumn().getName();
         }
         return joinColumn;
     }    

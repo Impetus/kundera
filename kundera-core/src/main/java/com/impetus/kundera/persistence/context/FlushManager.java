@@ -49,8 +49,8 @@ public class FlushManager
 
         for (Node headNode : headNodes)
         {
-            if(headNode.isDirty())
-            addNodesToFlushStack(pc, headNode);
+            if (headNode.isDirty())
+                addNodesToFlushStack(pc, headNode);
 
         }
     }
@@ -118,39 +118,45 @@ public class FlushManager
             {
                 Node childNode = mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
 
-                // Extract information required to be persisted into Join Table
-                if (node.isDirty() && !node.isTraversed())
+                if (childNode != null)
                 {
-                    JoinTableMetadata jtmd = (JoinTableMetadata) nodeLink
-                            .getLinkProperty(LinkProperty.JOIN_TABLE_METADATA);
-                    String joinColumnName = (String) jtmd.getJoinColumns().toArray()[0];
-                    String inverseJoinColumnName = (String) jtmd.getInverseJoinColumns().toArray()[0];
-                    Object entityId = ObjectGraphBuilder.getEntityId(node.getNodeId());
-                    Object childId = ObjectGraphBuilder.getEntityId(childNode.getNodeId());
-
-                    Set<Object> childValues = new HashSet<Object>();
-                    childValues.add(childId);
-
-                    OPERATION operation = null;
-                    if (node.getCurrentNodeState().getClass().equals(ManagedState.class))
+                    // Extract information required to be persisted into Join
+                    // Table
+                    if (node.isDirty() && !node.isTraversed())
                     {
-                        operation = OPERATION.INSERT;
-                    }
-                    else if (node.getCurrentNodeState().getClass().equals(RemovedState.class))
-                    {
-                        operation = OPERATION.DELETE;
+                        JoinTableMetadata jtmd = (JoinTableMetadata) nodeLink
+                                .getLinkProperty(LinkProperty.JOIN_TABLE_METADATA);
+                        String joinColumnName = (String) jtmd.getJoinColumns().toArray()[0];
+                        String inverseJoinColumnName = (String) jtmd.getInverseJoinColumns().toArray()[0];
+                        Object entityId = ObjectGraphBuilder.getEntityId(node.getNodeId());
+                        Object childId = ObjectGraphBuilder.getEntityId(childNode.getNodeId());
+
+                        Set<Object> childValues = new HashSet<Object>();
+                        childValues.add(childId);
+
+                        OPERATION operation = null;
+                        if (node.getCurrentNodeState().getClass().equals(ManagedState.class))
+                        {
+                            operation = OPERATION.INSERT;
+                        }
+                        else if (node.getCurrentNodeState().getClass().equals(RemovedState.class))
+                        {
+                            operation = OPERATION.DELETE;
+                        }
+
+                        pc.addJoinTableDataIntoMap(operation, jtmd.getJoinTableName(), joinColumnName,
+                                inverseJoinColumnName, node.getDataClass(), entityId, childValues);
+
                     }
 
-                    pc.addJoinTableDataIntoMap(operation, jtmd.getJoinTableName(), joinColumnName,
-                            inverseJoinColumnName, node.getDataClass(), entityId, childValues);
+                    // Process child node Graph recursively first
+                    if (!childNode.isTraversed())
+                    {
+                        addNodesToFlushStack(pc, childNode);
+                    }
 
                 }
 
-                // Process child node Graph recursively first
-                if (!childNode.isTraversed())
-                {
-                    addNodesToFlushStack(pc, childNode);
-                }
             }
             // Process One-To-One children
             for (NodeLink nodeLink : oneToOneChildren.keySet())
@@ -201,7 +207,8 @@ public class FlushManager
                 if (!childNode.isTraversed() && childNode.isDirty())
                 {
                     addNodesToFlushStack(pc, childNode);
-                } else if(!childNode.isDirty())
+                }
+                else if (!childNode.isDirty())
                 {
                     childNode.setTraversed(true);
                     flushStack.push(childNode);

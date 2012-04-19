@@ -139,7 +139,7 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
             try
             {
                 e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
-                        entityMetadata, rowKey.toString(), null);
+                        entityMetadata, rowKey.toString(), entityMetadata.getRelationNames());
             }
             catch (IOException e1)
             {

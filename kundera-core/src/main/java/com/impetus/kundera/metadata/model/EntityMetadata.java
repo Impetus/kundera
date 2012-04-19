@@ -26,6 +26,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.PrimaryKeyJoinColumn;
 
 import com.impetus.kundera.client.DBType;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.persistence.event.CallbackMethod;
 
 /**
