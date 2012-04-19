@@ -328,6 +328,8 @@ public class MetadataUtils
      */
     public static String getMappedName(EntityMetadata parentMetadata, Relation relation)
     {
+        if(relation != null)
+        {
         String joinColumn = relation.getJoinColumnName();
         if(joinColumn == null)
         {         
@@ -337,6 +339,8 @@ public class MetadataUtils
             joinColumn = relation.getType().equals(ForeignKey.ONE_TO_MANY)? parentMetadata.getIdColumn().getName():metadata.getIdColumn().getName();
         }
         return joinColumn;
+        }
+        return null;
     }    
     
 }

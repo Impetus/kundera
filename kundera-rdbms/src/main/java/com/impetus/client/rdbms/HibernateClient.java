@@ -18,6 +18,7 @@ package com.impetus.client.rdbms;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -357,7 +358,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         foreignKeys = query.list();
 
-        s.close();
+//        s.close();
 
         return foreignKeys;
     }
@@ -385,7 +386,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         primaryKeys = query.list();
 
         
-        s.close();
+//        s.close();
         if (primaryKeys != null && !primaryKeys.isEmpty())
         {
             return primaryKeys.toArray(new Object[0]);
@@ -401,10 +402,11 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     {
 
         StringBuffer query = new StringBuffer();
+        
         query.append("DELETE FROM ").append(tableName).append(" WHERE ").append(columnName).append("=")
                 .append("'").append(columnValue).append("'");
 
-        Session s = getStatefulSession();
+        s = getStatelessSession();
         Transaction tx = s.beginTransaction();
         s.createSQLQuery(query.toString()).executeUpdate();
         tx.commit();
@@ -431,16 +433,35 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             Object parentId, Set<Object> childrenIds)
     {       
 
-        Session s = getStatefulSession();
-        Transaction tx = s.beginTransaction();
         
+        s = getStatelessSession();
+        Transaction tx = s.beginTransaction();
         for(Object childId : childrenIds) {
             StringBuffer query = new StringBuffer();
-            query.append("INSERT INTO ").append(joinTableName).append("(").append(joinColumnName).append(",")
-                    .append(inverseJoinColumnName).append(")").append(" VALUES('").append(parentId).append("','")
-                    .append(childId).append("')");
             
-            s.createSQLQuery(query.toString()).executeUpdate();
+            //write an update query
+            Object[] existingRowIds = findIdsByColumn(joinTableName, joinColumnName, inverseJoinColumnName, (String)childId, null);
+            
+            boolean joinTableRecordsExists = false;
+            if(existingRowIds != null && existingRowIds.length > 0) {
+                for(Object o : existingRowIds) {
+                    if(o.toString().equals(parentId.toString())) {
+                        joinTableRecordsExists = true;
+                        break;
+                    }
+                }        
+                
+            }
+            
+            if(! joinTableRecordsExists) {
+                
+                query.append("INSERT INTO ").append(joinTableName).append("(").append(joinColumnName).append(",")
+                .append(inverseJoinColumnName).append(")").append(" VALUES('").append(parentId).append("','")
+                .append(childId).append("')");
+        
+                s.createSQLQuery(query.toString()).executeUpdate();                
+            }         
+            
         }
         tx.commit();
     }    
@@ -450,7 +471,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * 
      * @return the session instance
      */
-    private Session getStatefulSession()
+    /*private Session getStatefulSession()
     {
         Session s = null;
         if (sf.isClosed())
@@ -466,11 +487,11 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             }
         }
         return s;
-    }
+    }*/
     
     private StatelessSession getStatelessSession()
     {
-        return sf.openStatelessSession();
+        return s != null ? s : sf.openStatelessSession();
     }
     
     /**
@@ -489,18 +510,21 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         // Session s = getSessionInstance();
         List<Object[]> result = new ArrayList<Object[]>();
 
-        s = sf.openStatelessSession();
+        s = getStatelessSession();
 
         s.beginTransaction();
         SQLQuery q = s.createSQLQuery(nativeQuery).addEntity(m.getEntityClazz());
-        for (String r : relations)
+        if (relations != null)
         {
-            if (!m.getIdColumn().getName().equalsIgnoreCase(r))
+            for (String r : relations)
             {
-                q.addScalar(r);
+                String name = MetadataUtils.getMappedName(m, m.getRelation(r));
+                if (!m.getIdColumn().getName().equalsIgnoreCase(name != null?name:r))
+                {
+                    q.addScalar(name != null?name:r);
+                }
             }
         }
-
         return q.list();
     }
 
@@ -528,7 +552,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         queryBuilder.append("'");
         queryBuilder.append(colValue);
         queryBuilder.append("'");
-        Session s = getStatefulSession();
+        s = getStatelessSession();
         s.beginTransaction();
         SQLQuery q = s.createSQLQuery(queryBuilder.toString()).addEntity(m.getEntityClazz());
         return q.list();

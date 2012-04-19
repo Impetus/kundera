@@ -819,12 +819,17 @@ public final class EntityMetadata
      */
     private void addRelationName(Relation rField)
     {
-        String relationName=getJoinColumnName(rField.getProperty());
-        if(rField.getProperty().isAnnotationPresent(PrimaryKeyJoinColumn.class))
+        if (!rField.isRelatedViaJoinTable())
         {
-            relationName = this.getIdColumn().getName();
+            String relationName = getJoinColumnName(rField.getProperty());
+            if (rField.getProperty().isAnnotationPresent(PrimaryKeyJoinColumn.class))
+            {
+                relationName = this.getIdColumn().getName();
+            }
+            
+            
+            addToRelationNameCollection(relationName);
         }
-        addToRelationNameCollection(relationName);
     }
 
     /**

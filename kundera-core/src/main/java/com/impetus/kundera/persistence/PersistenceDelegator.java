@@ -199,6 +199,10 @@ public class PersistenceDelegator
             }
 
         }
+        else
+        {
+            return null;
+        }
         
         //Return a deep copy of the node data
         return (E) ObjectUtils.deepCopy(nodeData);

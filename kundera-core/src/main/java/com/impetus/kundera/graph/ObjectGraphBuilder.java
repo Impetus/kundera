@@ -48,8 +48,10 @@ public class ObjectGraphBuilder
         Node headNode = getNode(entity, objectGraph, initialNodeState);         
         
         //Set head node into object graph
-        objectGraph.setHeadNode(headNode);
-        
+        if(headNode != null)
+        {
+           objectGraph.setHeadNode(headNode);
+        }
         return objectGraph;
     }
 
@@ -64,16 +66,20 @@ public class ObjectGraphBuilder
     private Node getNode(Object entity, ObjectGraph graph, NodeState initialNodeState)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        if(entityMetadata == null)
+        {
+            return null;
+        }
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);        
         String nodeId = getNodeId(id, entity);
         
         //If this node is already there in graph (may happen for bidirectional relationship, do nothing and return null)
-        if(graph.getNode(nodeId) != null) {
-            return null;
+        Node node = graph.getNode(nodeId);
+        if(node != null) {
+            return node;
         }
         
-        //Construct this Node first, if one not already there in Persistence Cache
-        Node node = null;
+        //Construct this Node first, if one not already there in Persistence Cache        
         Node nodeInPersistenceCache = persistenceCache.getMainCache().getNodeFromCache(nodeId);
         
         //Make a deep copy of entity data        

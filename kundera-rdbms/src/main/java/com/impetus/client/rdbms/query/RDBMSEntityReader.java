@@ -258,17 +258,20 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             }
         }
 
-        for (String relation : relations)
+        if (relations != null)
         {
-            if (!entityMetadata.getIdColumn().getName().equalsIgnoreCase(relation))
+            for (String relation : relations)
             {
-                queryBuilder.append(", ");
-                queryBuilder.append(aliasName);
-                queryBuilder.append(".");
-                queryBuilder.append(relation);
+                String r = MetadataUtils.getMappedName(entityMetadata, entityMetadata.getRelation(relation));
+                if (!entityMetadata.getIdColumn().getName().equalsIgnoreCase(r != null?r:relation))
+                {
+                    queryBuilder.append(", ");
+                    queryBuilder.append(aliasName);
+                    queryBuilder.append(".");
+                    queryBuilder.append(r != null?r:relation);
+                }
             }
         }
-
         for (Relation r : entityMetadata.getRelations())
         {
             if (r.getJoinColumnName() != null)
