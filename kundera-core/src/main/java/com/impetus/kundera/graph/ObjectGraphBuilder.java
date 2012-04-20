@@ -74,12 +74,17 @@ public class ObjectGraphBuilder
         String nodeId = getNodeId(id, entity);
         
         //If this node is already there in graph (may happen for bidirectional relationship, do nothing and return null)
-        Node node = graph.getNode(nodeId);
+        if(graph.getNode(nodeId) != null) {
+              
+          return null;
+        }
+        /*Node node = graph.getNode(nodeId);
         if(node != null) {
             return node;
-        }
+        }*/
         
-        //Construct this Node first, if one not already there in Persistence Cache        
+        //Construct this Node first, if one not already there in Persistence Cache  
+        Node node = null;
         Node nodeInPersistenceCache = persistenceCache.getMainCache().getNodeFromCache(nodeId);
         
         //Make a deep copy of entity data        
