@@ -2,6 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+<parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+
   <groupId>com.impetus</groupId>
   <artifactId>kundera</artifactId>
   <version>2.0.6-SNAPSHOT</version>
@@ -10,10 +16,18 @@
   <name>kundera</name>
   <url>http://kundera.googlecode.com</url>
 
+ <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
    <scm>
-    <connection>scm:svn:http://kundera.googlecode.com/svn/trunk</connection>
-    <developerConnection>scm:svn:https://kundera.googlecode.com/svn/trunk</developerConnection>
-    <url>http://kundera.googlecode.com/svn/trunk</url>
+     <connection>scm:git:git@github.com:impetus-opensource/Kundera.git</connection>
+     <developerConnection>scm:git:git@github.com:impetus-opensource/Kundera.git</developerConnection>
+     <url>git@github.com:impetus-opensource/Kundera.git</url>
   </scm>
 
    <developers>
@@ -22,8 +36,19 @@
       <name>Vivek Mishra</name>
       <email>vivek.mishra@yahoo.com</email>
     </developer>
+    <developer>
+      <id>amresh.singh</id>
+      <name>Amresh Kumar Singh</name>
+      <email>amresh1002@gmail.com</email>
+    </developer>
+    <developer>
+      <id>Kuldeep.mishra</id>
+      <name>Kuldeep Kumar Mishra</name>
+      <email>kuld.cs.mishra@gmail.com</email>
+    </developer>
   </developers>
 
+<!--
   <issueManagement>
     <system>Google Code</system>
     <url>http://code.google.com/p/kundera/issues/list</url>
@@ -44,11 +69,12 @@
       <uniqueVersion>false</uniqueVersion>
     </snapshotRepository>
   </distributionManagement>
-
+-->
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+<!--
   <repositories>
     <repository>
       <id>kundera-missing</id>
@@ -76,6 +102,25 @@
     </repository>
   </repositories>
 
+  <repositories>
+ <repository>
+      <id>atlassian</id>
+      <name>Clover maven repo</name>
+      <url>http://repository.atlassian.com/maven2/</url>
+    </repository>
+  <repository>
+      <id>kundera-missing</id>
+      <name>Kundera Public Missing Resources Repository</name>
+      <url>http://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+-->
   <!-- Build profiles -->
   <profiles>
 
@@ -138,6 +183,13 @@
   </profiles>
 
   <build>
+      <extensions>
+              <extension>
+                      <groupId>org.apache.maven.wagon</groupId>
+                      <artifactId>wagon-webdav</artifactId>
+                      <version>1.0-beta-2</version>
+              </extension>
+      </extensions>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -196,6 +248,51 @@
           </filesets>
         </configuration>
       </plugin>
+      <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-source-plugin</artifactId>
+       <executions>
+         <execution>
+         <id>attach-sources</id>
+         <goals>
+          <goal>jar</goal>
+         </goals>
+       </execution>
+      </executions>
+    </plugin>
+    <plugin>
+     <groupId>org.apache.maven.plugins</groupId>
+     <artifactId>maven-javadoc-plugin</artifactId>
+     <executions>
+       <execution>
+         <id>attach-javadocs</id>
+         <goals>
+           <goal>jar</goal>
+         </goals>
+       </execution>
+     </executions>
+    </plugin>
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+     <!--<plugin>
+            <groupId>com.atlassian.maven.plugins</groupId>
+            <artifactId>maven-clover2-plugin</artifactId>
+            <version>3.0.0</version>
+            <configuration>
+                <licenseLocation>/home/impadmin/Downloads/clover.license</licenseLocation>
+            </configuration>
+        </plugin> -->
     </plugins>
   </build>
 
