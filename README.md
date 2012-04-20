@@ -31,6 +31,17 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
+
+#### 20-Apr-2012 - Kundera 2.0.6 released
+This release includes bug fixes and the following new features compared to version 2.0.5:
+
+* HBase 0.90.x migration.
+* Enhanced Persistence Context.
+* Named and Native queries support (including CQL support for cassandra)
+* UPDATE and DELETE queries support.
+* DDL auto-schema creation.
+* Performance improvements.
+
 #### 06-Feb-2012 - Kundera 2.0.5 released
 This release includes bug fixes and the following new features compared to version 2.0.4:
 
