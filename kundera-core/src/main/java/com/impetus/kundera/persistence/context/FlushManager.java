@@ -126,6 +126,8 @@ public class FlushManager
                     {
                         JoinTableMetadata jtmd = (JoinTableMetadata) nodeLink
                                 .getLinkProperty(LinkProperty.JOIN_TABLE_METADATA);
+                        if(jtmd != null)
+                        {
                         String joinColumnName = (String) jtmd.getJoinColumns().toArray()[0];
                         String inverseJoinColumnName = (String) jtmd.getInverseJoinColumns().toArray()[0];
                         Object entityId = ObjectGraphBuilder.getEntityId(node.getNodeId());
@@ -146,7 +148,7 @@ public class FlushManager
 
                         pc.addJoinTableDataIntoMap(operation, jtmd.getJoinTableName(), joinColumnName,
                                 inverseJoinColumnName, node.getDataClass(), entityId, childValues);
-
+                        }
                     }
 
                     // Process child node Graph recursively first

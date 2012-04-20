@@ -98,7 +98,7 @@ public abstract class NodeState
                     if (cascadeTypes.contains(CascadeType.PERSIST) || cascadeTypes.contains(CascadeType.ALL))
                     {
                         Node childNode = children.get(nodeLink);
-                        childNode.persist();
+                            childNode.persist();
                     }
                     break;
                 case MERGE:

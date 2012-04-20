@@ -117,6 +117,7 @@ public class AbstractEntityReader
                                 {
                                     child = pd.find(childClass, relationValue.toString());
                                 }
+                                child = child != null && child instanceof EnhanceEntity ? ((EnhanceEntity)child).getEntity():child;
                             }
 
                             relationValuesMap.put(relationValue + childClass.getName(), child);
@@ -155,80 +156,95 @@ public class AbstractEntityReader
                         {
                             // create a finder and pass metadata, relationName,
                             // relationalValue.
-//                            if(childClass.equals(e.getEntity().getClass())
-//                            {
-//                                child = pd.find(childClass, relationalValue.toString());
-//                            }
                             List<Object> childs = null;
-                            if (MetadataUtils.useSecondryIndex(childClient.getPersistenceUnit()))
+                            if (childClass.equals(e.getEntity().getClass()))
                             {
-                                childs = childClient.findByRelation(relationName, relationalValue, childClass);
-                               
-                                // pass this entity id as a value to be searched
-                                // for
-                                // for
-                            }
-                            else
+                                childs = childClient.findAll(childClass, relationalValue.toString());
+                            } else
                             {
-                                if (relation.isJoinedByPrimaryKey())
+                                if (MetadataUtils.useSecondryIndex(childClient.getPersistenceUnit()))
                                 {
-                                    childs = new ArrayList();
-                                    // childs.add(childClient.find(childClazz,
-                                    // childMetadata, e.getEntityId(), null));
-                                    childs.add(childClass.equals(e.getEntity().getClass()) ? childs.add(childClient
-                                            .find(childClass, e.getEntityId())) : pd.find(childClass,
-                                            relationalValue.toString()));
+                                    childs = childClient.findByRelation(relationName, relationalValue, childClass);
+
+                                    // pass this entity id as a value to be
+                                    // searched
+                                    // for
+                                    // for
                                 }
                                 else
                                 {
-                                    // lucene query, where entity class is child
-                                    // class, parent class is entity's class and
-                                    // parentid is entity ID!
-                                    // that's it!
-                                    String query = getQuery(DocumentIndexer.PARENT_ID_CLASS, e.getEntity().getClass()
-                                            .getCanonicalName().toLowerCase(), DocumentIndexer.PARENT_ID_FIELD,
-                                            e.getEntityId(), childClass.getCanonicalName().toLowerCase());
-                                    // System.out.println(query);
-                                    Map<String, String> results = childClient.getIndexManager().search(query);
-                                    Set<String> rsSet = new HashSet<String>(results.values());
-                                    // childs = (List<Object>)
-                                    // childClient.find(childClazz,
-                                    // rsSet.toArray(new String[] {}));
-
-                                    if (childClass.equals(e.getEntity().getClass()))
+                                    if (relation.isJoinedByPrimaryKey())
                                     {
-                                        childs = (List<Object>) childClient.findAll(childClass,
-                                                rsSet.toArray(new String[] {}));
+                                        childs = new ArrayList();
+                                        // childs.add(childClient.find(childClazz,
+                                        // childMetadata, e.getEntityId(),
+                                        // null));
+                                        childs.add(childClass.equals(e.getEntity().getClass()) ? childs.add(childClient
+                                                .find(childClass, e.getEntityId())) : pd.find(childClass,
+                                                relationalValue.toString()));
                                     }
                                     else
                                     {
+                                        // lucene query, where entity class is
+                                        // child
+                                        // class, parent class is entity's class
+                                        // and
+                                        // parentid is entity ID!
+                                        // that's it!
+                                        String query = getQuery(DocumentIndexer.PARENT_ID_CLASS, e.getEntity()
+                                                .getClass().getCanonicalName().toLowerCase(),
+                                                DocumentIndexer.PARENT_ID_FIELD, e.getEntityId(), childClass
+                                                        .getCanonicalName().toLowerCase());
+                                        // System.out.println(query);
+                                        Map<String, String> results = childClient.getIndexManager().search(query);
+                                        Set<String> rsSet = new HashSet<String>(results.values());
                                         // childs = (List<Object>)
-                                        // pd.find(childClass, g,
-                                        // rsSet.toArray(new
-                                        // String[] {}));
-                                        childs = (List<Object>) childClient.findAll(childClass,
-                                                rsSet.toArray(new String[] {}));
-                                    }
+                                        // childClient.find(childClazz,
+                                        // rsSet.toArray(new String[] {}));
 
+                                        if (childClass.equals(e.getEntity().getClass()))
+                                        {
+                                            childs = (List<Object>) childClient.findAll(childClass,
+                                                    rsSet.toArray(new String[] {}));
+                                        }
+                                        else
+                                        {
+                                            // childs = (List<Object>)
+                                            // pd.find(childClass, g,
+                                            // rsSet.toArray(new
+                                            // String[] {}));
+                                            childs = (List<Object>) childClient.findAll(childClass,
+                                                    rsSet.toArray(new String[] {}));
+                                        }
+
+                                    }
                                 }
                             }
                             // secondary indexes.
                             // create sql query for hibernate client.
                             // f = g.getProperty();
-                            relationValuesMap.put(relationalValue + childClass.getName(), childs);
-
-                            if (childs != null)
+//                            relationValuesMap.put(relationalValue + childClass.getName(), childs);
+                            if (childs != null && !childs.isEmpty())
                             {
+                                List childCol = new ArrayList(childs.size());
                                 for (Object child : childs)
                                 {
+                                    Object o = child instanceof EnhanceEntity ? ((EnhanceEntity) child).getEntity():child;
                                     // biDirectionalField =
                                     // getBiDirectionalField(e.getEntity().getClass(),
                                     // childClass);
-                                    recursivelyFindEntities(new EnhanceEntity(child, PropertyAccessorHelper.getId(child, childMetadata), null), childClient, childMetadata, pd);
+                                    if(!o.getClass().equals(e.getEntity().getClass()))
+                                    {
+                                        recursivelyFindEntities(
+                                                new EnhanceEntity(o, PropertyAccessorHelper.getId(o, childMetadata),
+                                                        null), childClient, childMetadata, pd);
+                                    }
                                     onBiDirection(pd, e, client, relation, biDirectionalField,
-                                            relation.getJoinColumnName(), m, child, childMetadata, childClient);
+                                            relation.getJoinColumnName(), m, o, childMetadata, childClient);
+                                    childCol.add(o);
 
                                 }
+                                relationValuesMap.put(relationalValue + childClass.getName(), childCol);
                             }
                         }
                     }
@@ -874,7 +890,7 @@ public class AbstractEntityReader
                             Object result = client.find(e.getEntity().getClass(), rowKey);
                             if (result != null)
                             {
-                                results.add(result);
+                                results.add(result instanceof EnhanceEntity ? ((EnhanceEntity) result).getEntity():result);
                             }
 
                         }
@@ -899,6 +915,7 @@ public class AbstractEntityReader
                 {
                     if (o != null && !relation.getType().equals(ForeignKey.MANY_TO_MANY))
                     {
+                        o = o instanceof EnhanceEntity ? ((EnhanceEntity)o).getEntity():o;
                         Field f = originalRelation.getProperty();
 
                         try

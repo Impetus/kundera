@@ -458,6 +458,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             // Column family definition on which secondary index creation is
             // required
             CfDef columnFamilyDefToUpdate = null;
+            boolean isUpdatable=false;
             // boolean isNew=false;
             for (CfDef cfDef : cfDefs)
             {
@@ -485,11 +486,11 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             {
                 for (ColumnDef columnDef : columnMetadataList)
                 {
-                    indexList.add(columnDef.getIndex_name().trim());
+                    indexList.add(Bytes.toUTF8(columnDef.getName()));
                 }
                 // need to set them to null else it is giving problem on update
                 // column family and trying to add again existing indexes.
-                columnFamilyDefToUpdate.column_metadata = null;
+//                columnFamilyDefToUpdate.column_metadata = null;
             }
 
             // Iterate over all columns for creating secondary index on them
@@ -502,23 +503,24 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                 columnDef.setValidation_class("UTF8Type");
                 columnDef.setIndex_type(IndexType.KEYS);
 
-                String indexName = PelopsUtils.getSecondaryIndexName(tableName, column);
+//                String indexName = PelopsUtils.getSecondaryIndexName(tableName, column);
 
                 // Add secondary index only if it's not already created
                 // (if already created, it would be there in column family
                 // definition)
-                if (!indexList.contains(indexName.trim()))
+                if (!indexList.contains(Bytes.toUTF8(column.getName())))
                 {
-
+                    isUpdatable=true;
                     columnFamilyDefToUpdate.addToColumn_metadata(columnDef);
                 }
             }
 
             // Finally, update column family with modified column family
             // definition
-
-            api.system_update_column_family(columnFamilyDefToUpdate);
-            // } else
+            if(isUpdatable)
+            {
+                api.system_update_column_family(columnFamilyDefToUpdate);
+            }// } else
             // {
             // api.system_add_column_family(columnFamilyDefToUpdate);
             // }
@@ -526,7 +528,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         }
         catch (InvalidRequestException e)
         {
-
+            e.printStackTrace();
             log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
 
         }

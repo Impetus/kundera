@@ -18,6 +18,9 @@ package com.impetus.kundera.graph;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.impetus.kundera.metadata.model.Relation;
 
 /**
@@ -150,7 +153,10 @@ public class NodeLink
     @Override
     public int hashCode()
     {
-        return getSourceNodeId().hashCode() * getTargetNodeId().hashCode();
+        int n = getSourceNodeId().hashCode()* getTargetNodeId().hashCode();
+        return n;
+        
+//        return new HashCodeBuilder().append(getSourceNodeId()).append(getTargetNodeId()).hashCode();
     }
 
     @Override
@@ -165,8 +171,11 @@ public class NodeLink
         }
         
         NodeLink targetNodeLink = (NodeLink) obj;
-        return getSourceNodeId().equals(targetNodeLink.getSourceNodeId())
-            && getTargetNodeId().equals(targetNodeLink.getTargetNodeId());
+        
+        return new EqualsBuilder().append(getSourceNodeId(), targetNodeLink.getSourceNodeId()).append(
+                getTargetNodeId(), targetNodeLink.getTargetNodeId()).isEquals();
+        //        return getSourceNodeId().equals(targetNodeLink.getSourceNodeId())
+//            && getTargetNodeId().equals(targetNodeLink.getTargetNodeId());
     }
     
     @Override

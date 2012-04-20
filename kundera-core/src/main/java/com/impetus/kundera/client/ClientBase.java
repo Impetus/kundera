@@ -91,16 +91,38 @@ public class ClientBase
         Map<NodeLink, Node> parents = node.getParents();
         if (parents != null)
         {
-            for(NodeLink parentNodeLink : parents.keySet()) {
-                indexManager.update(entityMetadata, node.getData(), (String)parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
-                        parents.get(parentNodeLink).getDataClass());
+            for (NodeLink parentNodeLink : parents.keySet())
+            {
+                indexManager.update(entityMetadata, node.getData(), (String) parentNodeLink
+                        .getLinkProperty(LinkProperty.LINK_VALUE), parents.get(parentNodeLink).getDataClass());
             }
-            
+
+        }
+        else if (node.getChildren() != null)
+        {
+
+            Map<NodeLink, Node> children = node.getChildren();
+            for (NodeLink childNodeLink : children.keySet())
+            {
+                if (childNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_ONE))
+                {
+                    indexManager.update(entityMetadata, node.getData(), (String) childNodeLink
+                            .getLinkProperty(LinkProperty.LINK_VALUE), children.get(childNodeLink).getDataClass());
+                }
+                else
+                {
+                    indexManager.update(entityMetadata, node.getData(), null, null);
+                }
+            }
         }
         else
         {
             indexManager.update(entityMetadata, node.getData(), null, null);
         }
+
+        // for(rel)
+
+        // indexManager.update(entityMetadata, node.getData(), null, null);
     }  
 
 }

@@ -402,9 +402,10 @@ public class HBaseDataHandler implements DataHandler
 
             for (KeyValue colData : hbaseValues)
             {
-                String hbaseColumn = Bytes.toString(colData.getFamily());
+                String hbaseColumn = Bytes.toString(colData.getQualifier());
+                String hbaseColumnFamily = Bytes.toString(colData.getFamily());
 
-                if (hbaseColumn.startsWith(Constants.JOIN_COLUMNS_FAMILY_NAME + ":" + inverseJoinColumnName))
+                if (hbaseColumnFamily.equals(Constants.JOIN_COLUMNS_FAMILY_NAME) && hbaseColumn.startsWith(inverseJoinColumnName))
                 {
                     byte[] val = colData.getValue();
                     String hbaseColumnValue = Bytes.toString(val);

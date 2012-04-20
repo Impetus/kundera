@@ -142,6 +142,7 @@ public class PersistenceDelegator
         if (headNode.getParents() == null)
         {
             headNode.setHeadNode(true);
+            getPersistenceCache().getMainCache().addHeadNode(headNode);
         }
 
         headNode.persist();
@@ -206,6 +207,7 @@ public class PersistenceDelegator
         
         //Return a deep copy of the node data
         return (E) ObjectUtils.deepCopy(nodeData);
+       
     }
     
     public <E> List<E> find(Class<E> entityClass, Object... primaryKeys)

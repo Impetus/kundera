@@ -26,6 +26,7 @@ import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.utils.ReflectUtils;
@@ -96,6 +97,11 @@ public class PropertyAccessorHelper
     public static void set(Object target, Field field, Object value)
     {
 
+        if(target instanceof EnhanceEntity || value instanceof EnhanceEntity)
+        {
+            System.out.println("TestB");
+        }
+        
         if (!field.isAccessible())
         {
             field.setAccessible(true);

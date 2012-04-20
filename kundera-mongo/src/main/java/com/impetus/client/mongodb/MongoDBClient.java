@@ -262,7 +262,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
     @Override
     public <E> List<E> findAll(Class<E> entityClass, Object... keys)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
 
         log.debug("Fetching data from " + entityMetadata.getTableName() + " for Keys " + keys);
 

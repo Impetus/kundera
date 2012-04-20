@@ -35,6 +35,10 @@ public class EnhanceEntity
     /** The relations. */
     private Map<String, Object> relations;
 
+    public EnhanceEntity()
+    {
+        
+    }
     /**
      * Instantiates a new enhance entity.
      * 

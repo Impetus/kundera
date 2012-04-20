@@ -373,12 +373,16 @@ public class KunderaQuery
             columnName = idColumn.getName();
         } 
         else
-        {
-            Column column = metadata.getColumn(property);
-            if(column != null)
+        {            
+            for(Column column : metadata.getColumnsAsList())
             {
-                columnName = column.getName();
-            }
+                if(column.getField().getName().equals(property))
+                {
+                    columnName = column.getName();
+                    break;
+                }
+            } 
+            
         }
         
         if(columnName == null)
