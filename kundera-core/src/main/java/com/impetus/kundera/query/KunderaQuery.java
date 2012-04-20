@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -326,7 +327,11 @@ public class KunderaQuery
                 // strip alias from property name
                 String property = tokens.get(0);
                 property = property.substring((entityAlias + ".").length());
-                property = indexName + "." + property;
+                
+                String columnName = getColumnNameFromFieldName(metadata, property);
+                
+                
+                columnName = indexName + "." + columnName;
                 // verify condition
                 String condition = tokens.get(1);
                 if (!Arrays.asList(INTRA_CLAUSE_OPERATORS).contains(condition.toUpperCase()))
@@ -334,7 +339,7 @@ public class KunderaQuery
                     throw new JPQLParseException("Bad JPA query: " + clause );
                 }
 
-                filtersQueue.add(new FilterClause(property, condition, tokens.get(2)));
+                filtersQueue.add(new FilterClause(columnName, condition, tokens.get(2)));
                 newClause = false;
             }
 
@@ -351,6 +356,36 @@ public class KunderaQuery
                 }
             }
         }
+    }
+
+    /**
+     * @param metadata
+     * @param property
+     * @return
+     */
+    private String getColumnNameFromFieldName(EntityMetadata metadata, String property)
+    {
+        String columnName = null;
+        Column idColumn = metadata.getIdColumn();
+        
+        if(idColumn.getField().getName().equals(property))
+        {
+            columnName = idColumn.getName();
+        } 
+        else
+        {
+            Column column = metadata.getColumn(property);
+            if(column != null)
+            {
+                columnName = column.getName();
+            }
+        }
+        
+        if(columnName == null)
+        {
+            columnName = property;
+        }
+        return columnName;
     }
 
     /**
@@ -824,6 +859,4 @@ public class KunderaQuery
 
         return tokens;
     }
-
-
 }
