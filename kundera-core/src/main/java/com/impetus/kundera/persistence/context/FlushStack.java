@@ -20,27 +20,29 @@ import java.util.Stack;
 import com.impetus.kundera.graph.Node;
 
 /**
- * Stack containing all Nodes to be flushed to persistence store 
+ * Stack containing all Nodes to be flushed to persistence store
+ * 
  * @author amresh.singh
  */
 public class FlushStack extends Stack<Node>
 {
-    public FlushStack() {
+    public FlushStack()
+    {
         super();
-    }  
-    
+    }
+
     @Override
-    public String toString() {
+    public String toString()
+    {
         StringBuffer sb = new StringBuffer();
         sb.append("Flush Stack(From top to bottom):\n");
         sb.append("--------------------------------------------\n");
-        for(int i = elementCount - 1; i >= 0; i--) {
+        for (int i = elementCount - 1; i >= 0; i--)
+        {
             sb.append("|").append(get(i)).append("\t|\n");
         }
         sb.append("--------------------------------------------");
         return sb.toString();
-    } 
-    
-    
-    
+    }
+
 }

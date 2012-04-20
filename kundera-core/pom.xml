@@ -44,12 +44,6 @@
 			<version>2.2</version>
 		</dependency>
 
-	<dependency>
-		<groupId>com.thoughtworks.xstream</groupId>
-		<artifactId>xstream</artifactId>
-		<version>1.4.2</version>
-	</dependency>
-
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
@@ -79,6 +73,12 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
 			<version>3.6.8.Final</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.cloner</groupId>
+			<artifactId>Cloner</artifactId>
+			<version>1.0.0.B1</version>
 		</dependency>
 
 		<!-- Test dependencies -->

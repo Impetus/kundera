@@ -20,8 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
-import com.thoughtworks.xstream.XStream;
+import org.cloner.Cloner;
 
 /**
  * Provides utility methods for operation on objects
@@ -30,46 +29,12 @@ import com.thoughtworks.xstream.XStream;
  */
 public class ObjectUtils
 {
-    private static  XStream xstream = new XStream();
-    
-    /**
-     * Provides a deep clone serializing/de-serializng <code>objectToCopy</code>
-     * @param objectToCopy The object to be cloned
-     * @return The cloned object
-     */
-    public static final Object deepCopyUsingSerialization(Object objectToCopy)
+
+    public static final Object deepCopy(Object objectToCopy)
     {
-        
-            try
-            {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream(100);
-                ObjectOutputStream oos = new ObjectOutputStream(bos);
-                oos.writeObject(objectToCopy);                
-                byte bytes[] = bos.toByteArray();
-                oos.close();
-                
-                
-                ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-                ObjectInputStream ois = new ObjectInputStream(bis);
-                Object copy = ois.readObject();
-                ois.close();
-                return copy;                
-                
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-            catch (ClassNotFoundException e)
-            {
-                e.printStackTrace();
-            }
-            return null;
-        
-    }
-    
-    public static final Object deepCopy(Object objectToCopy)    {
-        return xstream.fromXML(xstream.toXML(objectToCopy));                
+        Object destObject = Cloner.deepClone(objectToCopy, objectToCopy.getClass());
+        return destObject;
+
     }
 
 }

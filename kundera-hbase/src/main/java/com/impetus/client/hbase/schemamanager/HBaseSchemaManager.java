@@ -89,7 +89,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             try
             {
                 HTableDescriptor descriptor = admin.getTableDescriptor(tableInfo.getTableName().getBytes());
-                if (!hTableDescriptor.equals(descriptor))
+                if (!descriptor.getNameAsString().equalsIgnoreCase(tableInfo.getTableName()))
                 {
                     admin.disableTable(tableInfo.getTableName().getBytes());
                     HColumnDescriptor[] descriptors = descriptor.getColumnFamilies();
@@ -101,7 +101,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                             HColumnDescriptor columnDescriptor = new HColumnDescriptor(columnInfo.getColumnName());
                             for (HColumnDescriptor hColumnDescriptor : descriptors)
                             {
-                                if (hColumnDescriptor.equals(columnDescriptor))
+                                if (hColumnDescriptor.getNameAsString().equalsIgnoreCase(columnInfo.getColumnName()))
                                 {
                                     found = true;
                                     break;
@@ -122,7 +122,8 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                                     embeddedColumnInfo.getEmbeddedColumnName());
                             for (HColumnDescriptor hColumnDescriptor : descriptors)
                             {
-                                if (hColumnDescriptor.equals(columnDescriptor))
+                                if (hColumnDescriptor.getNameAsString().equalsIgnoreCase(
+                                        embeddedColumnInfo.getEmbeddedColumnName()))
                                 {
                                     found = true;
                                     break;
