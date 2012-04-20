@@ -89,7 +89,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             try
             {
                 HTableDescriptor descriptor = admin.getTableDescriptor(tableInfo.getTableName().getBytes());
-                if (!descriptor.getNameAsString().equalsIgnoreCase(tableInfo.getTableName()))
+                if (descriptor.getNameAsString().equalsIgnoreCase(tableInfo.getTableName()))
                 {
                     admin.disableTable(tableInfo.getTableName().getBytes());
                     HColumnDescriptor[] descriptors = descriptor.getColumnFamilies();
