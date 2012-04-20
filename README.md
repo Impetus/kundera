@@ -3,7 +3,7 @@ Overview
 The idea behind Kundera is to make working with NoSQL Databases drop-dead simple and fun. Kundera is being developed with following objectives:
 
 * To make working with NoSQL as simple as working with SQL
-*	To serve as JPA Compliant mapping solution for NoSQL Datastores.
+*  To serve as JPA Compliant mapping solution for NoSQL Datastores.
 *	To help developers, forget the complexity of NoSQL stores and focus on Domain Model.
 *	To make switching across data-stores as easy as changing a configuration.
 
@@ -31,6 +31,17 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
+
+#### 20-Apr-2012 - Kundera 2.0.6 released
+This release includes bug fixes and the following new features compared to version 2.0.5:
+
+* HBase 0.90.x migration.
+* Enhanced Persistence Context.
+* Named and Native queries support (including CQL support for cassandra)
+* UPDATE and DELETE queries support.
+* DDL auto-schema creation.
+* Performance improvements.
+
 #### 06-Feb-2012 - Kundera 2.0.5 released
 This release includes bug fixes and the following new features compared to version 2.0.4:
 
