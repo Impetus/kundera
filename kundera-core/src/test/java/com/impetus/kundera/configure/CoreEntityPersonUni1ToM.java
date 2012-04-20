@@ -60,7 +60,7 @@ public class CoreEntityPersonUni1ToM
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -70,7 +70,7 @@ public class CoreEntityPersonUni1ToM
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -80,8 +80,9 @@ public class CoreEntityPersonUni1ToM
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -90,8 +91,9 @@ public class CoreEntityPersonUni1ToM
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -100,7 +102,7 @@ public class CoreEntityPersonUni1ToM
 
     /**
      * Gets the age.
-     *
+     * 
      * @return the age
      */
     public short getAge()
@@ -110,8 +112,9 @@ public class CoreEntityPersonUni1ToM
 
     /**
      * Sets the age.
-     *
-     * @param age the age to set
+     * 
+     * @param age
+     *            the age to set
      */
     public void setAge(short age)
     {
@@ -120,7 +123,7 @@ public class CoreEntityPersonUni1ToM
 
     /**
      * Gets the personal data.
-     *
+     * 
      * @return the personalData
      */
     public CorePersonalData getPersonalData()
@@ -130,8 +133,9 @@ public class CoreEntityPersonUni1ToM
 
     /**
      * Sets the personal data.
-     *
-     * @param personalData the personalData to set
+     * 
+     * @param personalData
+     *            the personalData to set
      */
     public void setPersonalData(CorePersonalData personalData)
     {
@@ -140,7 +144,7 @@ public class CoreEntityPersonUni1ToM
 
     /**
      * Gets the addresses.
-     *
+     * 
      * @return the addresses
      */
     public Set<CoreEntityAddressUni1ToM> getAddresses()
@@ -150,8 +154,9 @@ public class CoreEntityPersonUni1ToM
 
     /**
      * Sets the addresses.
-     *
-     * @param addresses the addresses to set
+     * 
+     * @param addresses
+     *            the addresses to set
      */
     public void setAddresses(Set<CoreEntityAddressUni1ToM> addresses)
     {

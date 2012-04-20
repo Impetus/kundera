@@ -172,7 +172,7 @@ public abstract class DocumentIndexer implements Indexer
     protected void indexSuperColumn(EntityMetadata metadata, Object object, Document currentDoc, Object embeddedObject,
             EmbeddedColumn superColumn)
     {
-        
+
         // Add all super column fields into document
         for (Column col : superColumn.getColumns())
         {
@@ -186,7 +186,7 @@ public abstract class DocumentIndexer implements Indexer
 
         // Store document into Index
         indexDocument(metadata, currentDoc);
-       
+
     }
 
     /**
@@ -213,17 +213,17 @@ public abstract class DocumentIndexer implements Indexer
      * @param document
      *            the document
      */
-    protected void addEntityFieldsToDocument(EntityMetadata metadata, Object object, Document document) 
+    protected void addEntityFieldsToDocument(EntityMetadata metadata, Object object, Document document)
     {
         String indexName = metadata.getIndexName();
-        
+
         for (PropertyIndex index : metadata.getIndexProperties())
         {
             java.lang.reflect.Field property = index.getProperty();
             String propertyName = index.getName();
             addFieldToDocument(object, document, property, propertyName, indexName);
         }
-        
+
     }
 
     /**

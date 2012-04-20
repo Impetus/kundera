@@ -1,4 +1,3 @@
-
 /*******************************************************************************
  * * Copyright 2011 Impetus Infotech.
  *  *
@@ -25,7 +24,7 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class CorePersonalData
 {
-    
+
     /** The website. */
     @Column(name = "p_website")
     private String website;
@@ -48,10 +47,13 @@ public class CorePersonalData
 
     /**
      * Instantiates a new core personal data.
-     *
-     * @param website the website
-     * @param email the email
-     * @param yahooId the yahoo id
+     * 
+     * @param website
+     *            the website
+     * @param email
+     *            the email
+     * @param yahooId
+     *            the yahoo id
      */
     public CorePersonalData(String website, String email, String yahooId)
     {
@@ -62,7 +64,7 @@ public class CorePersonalData
 
     /**
      * Gets the website.
-     *
+     * 
      * @return the website
      */
     public String getWebsite()
@@ -72,8 +74,9 @@ public class CorePersonalData
 
     /**
      * Sets the website.
-     *
-     * @param website the new website
+     * 
+     * @param website
+     *            the new website
      */
     public void setWebsite(String website)
     {
@@ -82,7 +85,7 @@ public class CorePersonalData
 
     /**
      * Gets the email.
-     *
+     * 
      * @return the email
      */
     public String getEmail()
@@ -92,8 +95,9 @@ public class CorePersonalData
 
     /**
      * Sets the email.
-     *
-     * @param email the email to set
+     * 
+     * @param email
+     *            the email to set
      */
     public void setEmail(String email)
     {
@@ -102,7 +106,7 @@ public class CorePersonalData
 
     /**
      * Gets the yahoo id.
-     *
+     * 
      * @return the yahoo id
      */
     public String getYahooId()
@@ -112,8 +116,9 @@ public class CorePersonalData
 
     /**
      * Sets the yahoo id.
-     *
-     * @param yahooId the new yahoo id
+     * 
+     * @param yahooId
+     *            the new yahoo id
      */
     public void setYahooId(String yahooId)
     {

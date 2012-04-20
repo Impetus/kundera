@@ -29,7 +29,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
  * junit test case for {@link Configurator}.
- *
+ * 
  * @author vivek.mishra
  */
 public class ConfiguratorTest
@@ -37,8 +37,9 @@ public class ConfiguratorTest
 
     /**
      * Sets the up.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Before
     public void setUp() throws Exception
@@ -99,8 +100,9 @@ public class ConfiguratorTest
 
     /**
      * Tear down.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @After
     public void tearDown() throws Exception

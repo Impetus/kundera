@@ -15,10 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.processor;
 
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -80,7 +78,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
      * com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
-    public void process(Class<?> clazz, EntityMetadata metadata) 
+    public void process(Class<?> clazz, EntityMetadata metadata)
     {
         if (!clazz.isAnnotationPresent(Table.class))
         {
@@ -89,9 +87,9 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         }
 
         LOG.debug("Processing @Entity(" + clazz.getName() + ") for Persistence Object.");
-        
+
         populateMetadata(metadata, clazz);
-        
+
     }
 
     /**
@@ -102,31 +100,31 @@ public class TableProcessor extends AbstractEntityFieldProcessor
      * @param clazz
      *            the clazz
      */
-    private void populateMetadata(EntityMetadata metadata, Class<?> clazz) 
+    private void populateMetadata(EntityMetadata metadata, Class<?> clazz)
     {
         Table table = clazz.getAnnotation(Table.class);
         boolean isEmbeddable = false;
         // Set Name of persistence object
         metadata.setTableName(table.name());
-        //Add named/native query related application metadata.
-         addNamedNativeQueryMetadata(clazz);
+        // Add named/native query related application metadata.
+        addNamedNativeQueryMetadata(clazz);
         // set schema name and persistence unit name (if provided)
         String schemaStr = table.schema();
         Index idx = clazz.getAnnotation(Index.class);
-        List <String> colToBeIndexed = null;
-        if(idx != null)
+        List<String> colToBeIndexed = null;
+        if (idx != null)
         {
-        	 if (idx.columns() != null && idx.columns().length != 0)
-             {
-        		 colToBeIndexed = Arrays.asList(idx.columns());
-             }
+            if (idx.columns() != null && idx.columns().length != 0)
+            {
+                colToBeIndexed = Arrays.asList(idx.columns());
+            }
         }
         if (schemaStr == null)
         {
             LOG.error("It is mandatory to specify Schema alongwith Table name:" + table.name()
                     + ". This entity won't be persisted");
-            throw new InvalidEntityDefinitionException("It is mandatory to specify Schema alongwith Table name:" + table.name()
-                    + ". This entity won't be persisted");
+            throw new InvalidEntityDefinitionException("It is mandatory to specify Schema alongwith Table name:"
+                    + table.name() + ". This entity won't be persisted");
         }
         MetadataUtils.setSchemaAndPersistenceUnit(metadata, schemaStr);
 
@@ -198,7 +196,8 @@ public class TableProcessor extends AbstractEntityFieldProcessor
                     // objects in JVM.
                     if (!isEmbeddable)
                     {
-                        metadata.addColumn(name, new com.impetus.kundera.metadata.model.Column(name, f, colToBeIndexed != null ?colToBeIndexed.contains(name):false));
+                        metadata.addColumn(name, new com.impetus.kundera.metadata.model.Column(name, f,
+                                colToBeIndexed != null ? colToBeIndexed.contains(name) : false));
                     }
                     EmbeddedColumn embeddedColumn = new EmbeddedColumn(name, f);
                     metadata.addEmbeddedColumn(name, embeddedColumn);
@@ -374,43 +373,44 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     /**
      * Add named/native query annotated fields to application meta data.
      * 
-     * @param clazz entity class.
+     * @param clazz
+     *            entity class.
      */
     private void addNamedNativeQueryMetadata(Class clazz)
     {
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        String name,query=null;
-        if(clazz.isAnnotationPresent(NamedQuery.class))
+        String name, query = null;
+        if (clazz.isAnnotationPresent(NamedQuery.class))
         {
             NamedQuery ann = (NamedQuery) clazz.getAnnotation(NamedQuery.class);
-            appMetadata.addQueryToCollection(ann.name(),ann.query(), false, clazz);
+            appMetadata.addQueryToCollection(ann.name(), ann.query(), false, clazz);
         }
-        
-        if(clazz.isAnnotationPresent(NamedQueries.class))
+
+        if (clazz.isAnnotationPresent(NamedQueries.class))
         {
             NamedQueries ann = (NamedQueries) clazz.getAnnotation(NamedQueries.class);
-            
+
             NamedQuery[] anns = ann.value();
-            for(NamedQuery a : anns)
+            for (NamedQuery a : anns)
             {
-                appMetadata.addQueryToCollection(a.name(),a.query(), false,clazz);
+                appMetadata.addQueryToCollection(a.name(), a.query(), false, clazz);
             }
         }
-        
-        if(clazz.isAnnotationPresent(NamedNativeQuery.class))
+
+        if (clazz.isAnnotationPresent(NamedNativeQuery.class))
         {
             NamedNativeQuery ann = (NamedNativeQuery) clazz.getAnnotation(NamedNativeQuery.class);
-            appMetadata.addQueryToCollection(ann.name(),ann.query(), true,clazz);
+            appMetadata.addQueryToCollection(ann.name(), ann.query(), true, clazz);
         }
-        
-        if(clazz.isAnnotationPresent(NamedNativeQueries.class))
+
+        if (clazz.isAnnotationPresent(NamedNativeQueries.class))
         {
             NamedNativeQueries ann = (NamedNativeQueries) clazz.getAnnotation(NamedNativeQueries.class);
-            
+
             NamedNativeQuery[] anns = ann.value();
-            for(NamedNativeQuery a : anns)
+            for (NamedNativeQuery a : anns)
             {
-                appMetadata.addQueryToCollection(a.name(), a.query(), true,clazz);
+                appMetadata.addQueryToCollection(a.name(), a.query(), true, clazz);
             }
         }
     }

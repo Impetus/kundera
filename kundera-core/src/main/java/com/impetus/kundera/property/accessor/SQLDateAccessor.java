@@ -36,7 +36,7 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Date fromBytes(Class targetClass, byte[] b) 
+    public Date fromBytes(Class targetClass, byte[] b)
     {
         String s;
         try
@@ -84,7 +84,7 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
      * )
      */
     @Override
-    public Date fromString(Class targetClass, String s) 
+    public Date fromString(Class targetClass, String s)
     {
         Date d = Date.valueOf(s);
         return d;

@@ -19,7 +19,7 @@ import com.impetus.kundera.KunderaException;
 
 /**
  * @author amresh
- *
+ * 
  */
 public class PersistenceObjectGraphBuilderException extends KunderaException
 {

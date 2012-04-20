@@ -32,8 +32,6 @@ package com.impetus.kundera.proxy.cglib;
 
 import java.lang.reflect.Method;
 
-import javax.persistence.PersistenceException;
-
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.proxy.KunderaProxy;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
@@ -62,7 +60,7 @@ public class CglibLazyInitializerFactory implements LazyInitializerFactory
      */
     @Override
     public KunderaProxy getProxy(String entityName, Class<?> persistentClass, Method getIdentifierMethod,
-            Method setIdentifierMethod, String id, PersistenceDelegator persistenceDelegator)            
+            Method setIdentifierMethod, String id, PersistenceDelegator persistenceDelegator)
     {
 
         return (KunderaProxy) CglibLazyInitializer.getProxy(entityName, persistentClass,

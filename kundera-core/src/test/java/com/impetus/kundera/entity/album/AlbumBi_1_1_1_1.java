@@ -49,8 +49,8 @@ public class AlbumBi_1_1_1_1
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "PHOTO_ID")
     private PhotoBi_1_1_1_1 photo;
-    
-    @OneToOne(mappedBy="album")
+
+    @OneToOne(mappedBy = "album")
     private PhotographerBi_1_1_1_1 photographer;
 
     public AlbumBi_1_1_1_1()
@@ -142,11 +142,12 @@ public class AlbumBi_1_1_1_1
     }
 
     /**
-     * @param photographer the photographer to set
+     * @param photographer
+     *            the photographer to set
      */
     public void setPhotographer(PhotographerBi_1_1_1_1 photographer)
     {
         this.photographer = photographer;
-    }  
-    
+    }
+
 }

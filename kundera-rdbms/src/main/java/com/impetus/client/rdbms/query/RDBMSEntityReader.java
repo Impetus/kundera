@@ -101,7 +101,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             Client client)
     {
         List<EnhanceEntity> ls = null;
-        
+
         if (!isParent)
         {
             // if it is not a parent.
@@ -224,11 +224,11 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
     public String getSqlQueryFromJPA(EntityMetadata entityMetadata, List<String> relations, Set<String> primaryKeys)
     {
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        if(appMetadata.isNative(jpaQuery))
+        if (appMetadata.isNative(jpaQuery))
         {
             return jpaQuery;
         }
-        
+
         String aliasName = "_" + entityMetadata.getTableName();
 
         StringBuilder queryBuilder = new StringBuilder("Select ");
@@ -263,12 +263,12 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             for (String relation : relations)
             {
                 String r = MetadataUtils.getMappedName(entityMetadata, entityMetadata.getRelation(relation));
-                if (!entityMetadata.getIdColumn().getName().equalsIgnoreCase(r != null?r:relation))
+                if (!entityMetadata.getIdColumn().getName().equalsIgnoreCase(r != null ? r : relation))
                 {
                     queryBuilder.append(", ");
                     queryBuilder.append(aliasName);
                     queryBuilder.append(".");
-                    queryBuilder.append(r != null?r:relation);
+                    queryBuilder.append(r != null ? r : relation);
                 }
             }
         }

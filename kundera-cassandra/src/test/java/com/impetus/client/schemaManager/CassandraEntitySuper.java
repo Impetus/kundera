@@ -21,7 +21,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * The Class CassandraEntitySuper.
  */
@@ -49,7 +48,7 @@ public class CassandraEntitySuper
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -59,7 +58,7 @@ public class CassandraEntitySuper
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -69,8 +68,9 @@ public class CassandraEntitySuper
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -79,8 +79,9 @@ public class CassandraEntitySuper
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -89,7 +90,7 @@ public class CassandraEntitySuper
 
     /**
      * Gets the age.
-     *
+     * 
      * @return the age
      */
     public short getAge()
@@ -99,8 +100,9 @@ public class CassandraEntitySuper
 
     /**
      * Sets the age.
-     *
-     * @param age the age to set
+     * 
+     * @param age
+     *            the age to set
      */
     public void setAge(short age)
     {
@@ -109,7 +111,7 @@ public class CassandraEntitySuper
 
     /**
      * Gets the personal data.
-     *
+     * 
      * @return the personalData
      */
     public CassandraPersonalData getPersonalData()
@@ -119,8 +121,9 @@ public class CassandraEntitySuper
 
     /**
      * Sets the personal data.
-     *
-     * @param personalData the personalData to set
+     * 
+     * @param personalData
+     *            the personalData to set
      */
     public void setPersonalData(CassandraPersonalData personalData)
     {

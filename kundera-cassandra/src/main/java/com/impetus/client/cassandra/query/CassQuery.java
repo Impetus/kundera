@@ -42,10 +42,9 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.query.KunderaQuery;
-import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
 
 /**
@@ -92,11 +91,12 @@ public class CassQuery extends QueryImpl implements Query
     {
         log.debug("on populateEntities cassandra query");
         List<Object> result = null;
-        ApplicationMetadata appMetadata =KunderaMetadata.INSTANCE.getApplicationMetadata();
-        if(appMetadata.isNative(getJPAQuery()))
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        if (appMetadata.isNative(getJPAQuery()))
         {
             result = ((PelopsClient) client).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
-        } else
+        }
+        else
         {
             if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
             {
@@ -120,29 +120,33 @@ public class CassQuery extends QueryImpl implements Query
             }
         }
         return result;
-    }    
+    }
 
     /**
      * On executeUpdate.
+     * 
      * @return zero
      */
     @Override
     protected int onExecuteUpdate()
     {
-        
-      EntityMetadata m = getEntityMetadata();
-      if(KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(getJPAQuery()))
-      {
-          ((PelopsClient) persistenceDelegeator.getClient(m)).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
-      } else if(kunderaQuery.isDeleteUpdate())
-      {
-             List result = getResultList();
-             return result != null? result.size():0;
-//          throw new QueryHandlerException("executeUpdate() is currently supported for native queries only");
-      }
-      
-      return 0;
+
+        EntityMetadata m = getEntityMetadata();
+        if (KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(getJPAQuery()))
+        {
+            ((PelopsClient) persistenceDelegeator.getClient(m)).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
+        }
+        else if (kunderaQuery.isDeleteUpdate())
+        {
+            List result = getResultList();
+            return result != null ? result.size() : 0;
+            // throw new
+            // QueryHandlerException("executeUpdate() is currently supported for native queries only");
+        }
+
+        return 0;
     }
+
     /**
      * Prepare index clause.
      * 
@@ -206,8 +210,8 @@ public class CassQuery extends QueryImpl implements Query
         idxClauses.put(idPresent, clauses);
 
         return idxClauses;
-    }   
-    
+    }
+
     @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
@@ -219,17 +223,16 @@ public class CassQuery extends QueryImpl implements Query
         }
         else
         {
-            Map<Boolean, List<IndexClause>> ixClause = MetadataUtils.useSecondryIndex(m.getPersistenceUnit())?prepareIndexClause(m):null;
+            Map<Boolean, List<IndexClause>> ixClause = MetadataUtils.useSecondryIndex(m.getPersistenceUnit()) ? prepareIndexClause(m)
+                    : null;
 
-            ((CassandraEntityReader) getReader()).setConditions(ixClause);           
-            
-            
+            ((CassandraEntityReader) getReader()).setConditions(ixClause);
+
             ls = reader.populateRelation(m, m.getRelationNames(), m.isParent(), client);
         }
         return setRelationEntities(ls, client, m);
 
-    }   
-    
+    }
 
     /**
      * Gets the operator.

@@ -21,26 +21,29 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * Dummy BillingCounter enity class 
+ * Dummy BillingCounter enity class
+ * 
  * @author amresh.singh
  */
 
 @Entity
-@Table(name="BILLING_COUNTER", schema="KunderaTest")
+@Table(name = "BILLING_COUNTER", schema = "KunderaTest")
 public class BillingCounter
 {
     @Id
-    @Column(name="COUNTER_ID")
+    @Column(name = "COUNTER_ID")
     private int counterId;
-    
-    @Column(name="COUNTER_CODE")
+
+    @Column(name = "COUNTER_CODE")
     private String counterCode;
-    
-    public BillingCounter() {
-        
+
+    public BillingCounter()
+    {
+
     }
-    
-    public BillingCounter(int id, String code) {
+
+    public BillingCounter(int id, String code)
+    {
         this.counterId = id;
         this.counterCode = code;
     }
@@ -54,7 +57,8 @@ public class BillingCounter
     }
 
     /**
-     * @param counterId the counterId to set
+     * @param counterId
+     *            the counterId to set
      */
     public void setCounterId(int counterId)
     {
@@ -70,11 +74,12 @@ public class BillingCounter
     }
 
     /**
-     * @param counterCode the counterCode to set
+     * @param counterCode
+     *            the counterCode to set
      */
     public void setCounterCode(String counterCode)
     {
         this.counterCode = counterCode;
-    }  
-    
+    }
+
 }

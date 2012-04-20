@@ -19,7 +19,7 @@ import com.impetus.kundera.KunderaException;
 
 /**
  * @author amresh
- *
+ * 
  */
 public class EventListenerException extends KunderaException
 {
@@ -29,7 +29,7 @@ public class EventListenerException extends KunderaException
      */
     public EventListenerException()
     {
-        
+
     }
 
     /**
@@ -37,7 +37,7 @@ public class EventListenerException extends KunderaException
      */
     public EventListenerException(String arg0)
     {
-        super(arg0);       
+        super(arg0);
     }
 
     /**
@@ -45,7 +45,7 @@ public class EventListenerException extends KunderaException
      */
     public EventListenerException(Throwable arg0)
     {
-        super(arg0);       
+        super(arg0);
     }
 
     /**
@@ -54,7 +54,7 @@ public class EventListenerException extends KunderaException
      */
     public EventListenerException(String arg0, Throwable arg1)
     {
-        super(arg0, arg1);        
+        super(arg0, arg1);
     }
 
 }

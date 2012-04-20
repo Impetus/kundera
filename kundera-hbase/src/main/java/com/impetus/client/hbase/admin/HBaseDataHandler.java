@@ -154,8 +154,7 @@ public class HBaseDataHandler implements DataHandler
                 {
                     admin.disableTable(tableName);
                 }
-                
-                
+
                 admin.addColumn(tableName, cfDesciptor);
 
                 // Enable table once done
@@ -314,7 +313,7 @@ public class HBaseDataHandler implements DataHandler
                         { // Fresh row
                             dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
                                     + (++lastEmbeddedObjectCount);
-                            
+
                         }
                         addColumnFamilyToTable(tableName, dynamicCFName);
                         hbaseWriter.writeColumns(hTable, dynamicCFName, rowId, columns, obj);
@@ -405,7 +404,8 @@ public class HBaseDataHandler implements DataHandler
                 String hbaseColumn = Bytes.toString(colData.getQualifier());
                 String hbaseColumnFamily = Bytes.toString(colData.getFamily());
 
-                if (hbaseColumnFamily.equals(Constants.JOIN_COLUMNS_FAMILY_NAME) && hbaseColumn.startsWith(inverseJoinColumnName))
+                if (hbaseColumnFamily.equals(Constants.JOIN_COLUMNS_FAMILY_NAME)
+                        && hbaseColumn.startsWith(inverseJoinColumnName))
                 {
                     byte[] val = colData.getValue();
                     String hbaseColumnValue = Bytes.toString(val);

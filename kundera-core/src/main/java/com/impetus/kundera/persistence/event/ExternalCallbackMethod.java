@@ -46,7 +46,6 @@ public final class ExternalCallbackMethod implements CallbackMethod
         this.method = method;
     }
 
-
     public void invoke(Object entity) throws EventListenerException
     {
         if (!method.isAccessible())
@@ -72,7 +71,6 @@ public final class ExternalCallbackMethod implements CallbackMethod
             throw new EventListenerException(e);
         }
     }
-
 
     @Override
     public String toString()

@@ -42,7 +42,7 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Calendar fromBytes(Class targetClass, byte[] b) 
+    public Calendar fromBytes(Class targetClass, byte[] b)
     {
         String s;
         try
@@ -66,7 +66,7 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public byte[] toBytes(Object object) 
+    public byte[] toBytes(Object object)
     {
         Calendar cal = (Calendar) object;
         return DateAccessor.getFormattedObect(cal.getTime().toString()).getBytes();

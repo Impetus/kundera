@@ -30,7 +30,7 @@ import javax.persistence.Table;
 public class PhotoUni_1_M_M_M
 {
     @Id
-    @Column(name="PHOTO_ID")
+    @Column(name = "PHOTO_ID")
     private String photoId;
 
     @Column(name = "PHOTO_CAPTION")
@@ -38,12 +38,14 @@ public class PhotoUni_1_M_M_M
 
     @Column(name = "PHOTO_DESC")
     private String photoDescription;
-    
-    public PhotoUni_1_M_M_M() {
-        
+
+    public PhotoUni_1_M_M_M()
+    {
+
     }
-    
-    public PhotoUni_1_M_M_M(String photoId, String caption, String description) {
+
+    public PhotoUni_1_M_M_M(String photoId, String caption, String description)
+    {
         this.photoId = photoId;
         this.photoCaption = caption;
         this.photoDescription = description;

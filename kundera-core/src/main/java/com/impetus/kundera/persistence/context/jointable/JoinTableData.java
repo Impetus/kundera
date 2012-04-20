@@ -21,45 +21,47 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Holds data required prior to persisting records in Join Table 
+ * Holds data required prior to persisting records in Join Table
+ * 
  * @author amresh.singh
  */
 public class JoinTableData
 {
     private String joinTableName;
-    
+
     private Class<?> entityClass;
-    
+
     private String joinColumnName;
-    
+
     private String inverseJoinColumnName;
-    
+
     public static enum OPERATION
-    {        
-        INSERT,        
-        UPDATE,        
-        DELETE       
+    {
+        INSERT, UPDATE, DELETE
     }
 
     /**
      * Operation to be performed on this Join Table data
+     * 
      * @See {@link OPERATION}
      */
     private OPERATION operation;
-    
+
     /**
-     * Key -> Primary key of entity at the Join column side
-     * Value -> Set of primary keys of entities at the inverse join column side
+     * Key -> Primary key of entity at the Join column side Value -> Set of
+     * primary keys of entities at the inverse join column side
      */
     Map<Object, Set<Object>> joinTableRecords;
-    
-    public JoinTableData(OPERATION operation, String joinTableName, String joinColumnName, String inverseJoinColumnName, Class<?> entityClass) {
+
+    public JoinTableData(OPERATION operation, String joinTableName, String joinColumnName,
+            String inverseJoinColumnName, Class<?> entityClass)
+    {
         this.operation = operation;
         this.joinTableName = joinTableName;
         this.joinColumnName = joinColumnName;
         this.inverseJoinColumnName = inverseJoinColumnName;
-        this.entityClass = entityClass;       
-        
+        this.entityClass = entityClass;
+
         joinTableRecords = new HashMap<Object, Set<Object>>();
     }
 
@@ -72,7 +74,8 @@ public class JoinTableData
     }
 
     /**
-     * @param joinTableName the joinTableName to set
+     * @param joinTableName
+     *            the joinTableName to set
      */
     public void setJoinTableName(String joinTableName)
     {
@@ -88,7 +91,8 @@ public class JoinTableData
     }
 
     /**
-     * @param joinColumnName the joinColumnName to set
+     * @param joinColumnName
+     *            the joinColumnName to set
      */
     public void setJoinColumnName(String joinColumnName)
     {
@@ -104,7 +108,8 @@ public class JoinTableData
     }
 
     /**
-     * @param inverseJoinColumnName the inverseJoinColumnName to set
+     * @param inverseJoinColumnName
+     *            the inverseJoinColumnName to set
      */
     public void setInverseJoinColumnName(String inverseJoinColumnName)
     {
@@ -118,8 +123,6 @@ public class JoinTableData
     {
         return joinTableRecords;
     }
-    
-    
 
     /**
      * @return the entityClass
@@ -130,13 +133,13 @@ public class JoinTableData
     }
 
     /**
-     * @param entityClass the entityClass to set
+     * @param entityClass
+     *            the entityClass to set
      */
     public void setEntityClass(Class<?> entityClass)
     {
         this.entityClass = entityClass;
-    }   
-    
+    }
 
     /**
      * @return the operation
@@ -147,7 +150,8 @@ public class JoinTableData
     }
 
     /**
-     * @param operation the operation to set
+     * @param operation
+     *            the operation to set
      */
     public void setOperation(OPERATION operation)
     {
@@ -155,19 +159,22 @@ public class JoinTableData
     }
 
     /**
-     * @param joinTableRecords the joinTableRecords to set
+     * @param joinTableRecords
+     *            the joinTableRecords to set
      */
     public void addJoinTableRecord(Object key, Set<Object> values)
     {
         Set<Object> existingValues = joinTableRecords.get(key);
-        if(existingValues == null) {
-            existingValues = new HashSet<Object>();    
+        if (existingValues == null)
+        {
+            existingValues = new HashSet<Object>();
             existingValues.addAll(values);
             joinTableRecords.put(key, existingValues);
-        } else {
+        }
+        else
+        {
             existingValues.addAll(values);
-        }       
+        }
     }
-    
-    
+
 }

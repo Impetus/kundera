@@ -20,7 +20,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * The Class CassandraEntityAddressUni1To1PK.
  */
@@ -28,7 +27,7 @@ import javax.persistence.Table;
 @Table(name = "CassandraEntityAddressUni1To1PK", schema = "KunderaCoreExmples@cassandra")
 public class CassandraEntityAddressUni1To1PK
 {
-    
+
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
@@ -44,7 +43,7 @@ public class CassandraEntityAddressUni1To1PK
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -54,8 +53,9 @@ public class CassandraEntityAddressUni1To1PK
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -64,7 +64,7 @@ public class CassandraEntityAddressUni1To1PK
 
     /**
      * Gets the address id.
-     *
+     * 
      * @return the address id
      */
     public String getAddressId()
@@ -74,8 +74,9 @@ public class CassandraEntityAddressUni1To1PK
 
     /**
      * Sets the address id.
-     *
-     * @param addressId the new address id
+     * 
+     * @param addressId
+     *            the new address id
      */
     public void setAddressId(String addressId)
     {
@@ -84,7 +85,7 @@ public class CassandraEntityAddressUni1To1PK
 
     /**
      * Gets the street.
-     *
+     * 
      * @return the street
      */
     public String getStreet()
@@ -94,8 +95,9 @@ public class CassandraEntityAddressUni1To1PK
 
     /**
      * Sets the street.
-     *
-     * @param street the new street
+     * 
+     * @param street
+     *            the new street
      */
     public void setStreet(String street)
     {

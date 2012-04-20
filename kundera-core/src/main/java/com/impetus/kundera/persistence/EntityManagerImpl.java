@@ -58,8 +58,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
 
     /** The closed. */
     private boolean closed = false;
-    
-    /** Flush mode for this EM, default is AUTO.  */
+
+    /** Flush mode for this EM, default is AUTO. */
     FlushModeType flushMode = FlushModeType.AUTO;
 
     /** The session. */
@@ -70,16 +70,16 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
 
     /** Properties provided by user at the time of EntityManager Creation. */
     private PersistenceDelegator persistenceDelegator;
-    
+
     /** Persistence Context Type (Transaction/ Extended) */
     private PersistenceContextType persistenceContextType;
-    
+
     /** Transaction Type (JTA/ RESOURCE_LOCAL) */
     private PersistenceUnitTransactionType transactionType;
-    
+
     private PersistenceCache persistenceCache;
-    
-    FlushManager flushStackManager;    
+
+    FlushManager flushStackManager;
 
     /**
      * Instantiates a new entity manager impl.
@@ -87,19 +87,20 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
      * @param factory
      *            the factory
      */
-    public EntityManagerImpl(EntityManagerFactory factory, PersistenceUnitTransactionType transactionType, PersistenceContextType persistenceContextType)
+    public EntityManagerImpl(EntityManagerFactory factory, PersistenceUnitTransactionType transactionType,
+            PersistenceContextType persistenceContextType)
     {
         this.factory = factory;
         logger.debug("Creating EntityManager for persistence unit : " + getPersistenceUnit());
-        session = new EntityManagerSession((Cache) factory.getCache());  
+        session = new EntityManagerSession((Cache) factory.getCache());
         persistenceCache = new PersistenceCache();
         persistenceCache.setPersistenceContextType(persistenceContextType);
-        
-        persistenceDelegator = new PersistenceDelegator(session, persistenceCache);        
-        
-        this.persistenceContextType = persistenceContextType; 
+
+        persistenceDelegator = new PersistenceDelegator(session, persistenceCache);
+
+        this.persistenceContextType = persistenceContextType;
         this.transactionType = transactionType;
-        
+
         logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
     }
 
@@ -111,7 +112,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
      * @param properties
      *            the properties
      */
-    public EntityManagerImpl(EntityManagerFactory factory, Map properties, PersistenceUnitTransactionType transactionType, PersistenceContextType persistenceContextType)
+    public EntityManagerImpl(EntityManagerFactory factory, Map properties,
+            PersistenceUnitTransactionType transactionType, PersistenceContextType persistenceContextType)
     {
         this(factory, transactionType, persistenceContextType);
         this.properties = properties;
@@ -141,7 +143,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     {
         checkClosed();
         checkTransactionNeeded();
-        
+
         // TODO Check for validity also as per JPA
         if (e == null)
         {
@@ -161,7 +163,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     {
         checkClosed();
         checkTransactionNeeded();
-        
+
         if (e == null)
         {
             throw new IllegalArgumentException("Entity to be merged must not be null.");
@@ -180,35 +182,34 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     {
         checkClosed();
         checkTransactionNeeded();
-        
+
         if (e == null)
         {
             throw new IllegalArgumentException("Entity to be persisted must not be null.");
         }
 
-        getPersistenceDelegator().persist(e);  
-        
+        getPersistenceDelegator().persist(e);
+
     }
 
     /*
      * (non-Javadoc)
      * 
      * @see javax.persistence.EntityManager#clear()
-     */  
+     */
     @Override
     public final void clear()
     {
         checkClosed();
         session.clear();
-        
-        // TODO Do we need a client and persistenceDelegator close here?        
-        if(! PersistenceUnitTransactionType.JTA.equals(transactionType))
+
+        // TODO Do we need a client and persistenceDelegator close here?
+        if (!PersistenceUnitTransactionType.JTA.equals(transactionType))
         {
             persistenceDelegator.clear();
         }
-        
-    }
 
+    }
 
     @Override
     public final void close()
@@ -216,12 +217,12 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
         checkClosed();
         session.clear();
         session = null;
-        persistenceDelegator.close(); 
-        
-        if(! PersistenceUnitTransactionType.JTA.equals(transactionType))
+        persistenceDelegator.close();
+
+        if (!PersistenceUnitTransactionType.JTA.equals(transactionType))
         {
             persistenceDelegator.clear();
-        }            
+        }
         closed = true;
     }
 
@@ -246,7 +247,6 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     {
         return persistenceDelegator.createQuery(query);
     }
-
 
     @Override
     public final void flush()
@@ -299,14 +299,14 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     {
         // Add to meta data first.
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        
-        if(appMetadata.getQuery(sqlString) == null)
+
+        if (appMetadata.getQuery(sqlString) == null)
         {
             appMetadata.addQueryToCollection(sqlString, sqlString, true, resultClass);
         }
-        
+
         return persistenceDelegator.createQuery(sqlString);
-        
+
     }
 
     /*
@@ -333,7 +333,6 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
         throw new NotImplementedException("TODO");
     }
 
-
     @Override
     public final FlushModeType getFlushMode()
     {
@@ -347,9 +346,10 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
      */
     @Override
     public final EntityTransaction getTransaction()
-    {        
-        if (this.transactionType == PersistenceUnitTransactionType.JTA) {
-           throw new IllegalStateException("A JTA EntityManager cannot use getTransaction()");
+    {
+        if (this.transactionType == PersistenceUnitTransactionType.JTA)
+        {
+            throw new IllegalStateException("A JTA EntityManager cannot use getTransaction()");
         }
         return this;
     }
@@ -621,7 +621,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     {
         return !closed;
     }
-    
+
     /**
      * Check closed.
      */
@@ -632,12 +632,15 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
             throw new IllegalStateException("EntityManager has already been closed.");
         }
     }
-    
-    private void checkTransactionNeeded() {
-        if ((this.persistenceContextType != PersistenceContextType.TRANSACTION) || (persistenceDelegator.isTransactionInProgress()))
+
+    private void checkTransactionNeeded()
+    {
+        if ((this.persistenceContextType != PersistenceContextType.TRANSACTION)
+                || (persistenceDelegator.isTransactionInProgress()))
             return;
-        
-        throw new TransactionRequiredException("no transaction is in progress for a TRANSACTION type persistence context");
+
+        throw new TransactionRequiredException(
+                "no transaction is in progress for a TRANSACTION type persistence context");
     }
 
     /**
@@ -668,9 +671,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     private PersistenceDelegator getPersistenceDelegator()
     {
         return persistenceDelegator;
-    } 
+    }
 
-    
     /**
      * @return the persistenceContextType
      */
@@ -678,42 +680,39 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     {
         return persistenceContextType;
     }
-    
-    
 
-    /////////////////////////////////////////////////////////////////////////
+    // ///////////////////////////////////////////////////////////////////////
     /** Methods from {@link EntityTransaction} interface */
-    /////////////////////////////////////////////////////////////////////////
-    
-    
-    
+    // ///////////////////////////////////////////////////////////////////////
+
     @Override
     public void begin()
     {
-        persistenceDelegator.begin();        
+        persistenceDelegator.begin();
     }
 
     @Override
     public void commit()
     {
         checkClosed();
-        persistenceDelegator.commit();        
+        persistenceDelegator.commit();
     }
 
     @Override
     public boolean getRollbackOnly()
     {
-        if (!isActive()) {
+        if (!isActive())
+        {
             throw new IllegalStateException("No active transaction found");
         }
-        return persistenceDelegator.getRollbackOnly();            
+        return persistenceDelegator.getRollbackOnly();
     }
-    
+
     @Override
     public void setRollbackOnly()
     {
         persistenceDelegator.setRollbackOnly();
-    } 
+    }
 
     @Override
     public boolean isActive()
@@ -726,6 +725,6 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     {
         checkClosed();
         persistenceDelegator.rollback();
-    }   
+    }
 
 }

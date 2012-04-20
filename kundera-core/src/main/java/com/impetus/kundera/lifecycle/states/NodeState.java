@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
-
 import java.util.List;
 import java.util.Map;
 
@@ -28,58 +27,64 @@ import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.lifecycle.NodeStateContext;
-import com.impetus.kundera.persistence.EntityManagerImpl;
 
 /**
  * State machine class for Node state
+ * 
  * @author amresh
- *
+ * 
  */
 public abstract class NodeState
-{   
+{
     private static Log log = LogFactory.getLog(NodeState.class);
-    
-    public enum OPERATION {
-        PERSIST,
-        MERGE,
-        REMOVE,
-        REFRESH,
-        DETACH
+
+    public enum OPERATION
+    {
+        PERSIST, MERGE, REMOVE, REFRESH, DETACH
     }
-   
+
     public abstract void initialize(NodeStateContext nodeStateContext);
-    
-    //Life cycle Management
-    public abstract void handlePersist(NodeStateContext nodeStateContext);    
+
+    // Life cycle Management
+    public abstract void handlePersist(NodeStateContext nodeStateContext);
+
     public abstract void handleRemove(NodeStateContext nodeStateContext);
-    public abstract void handleRefresh(NodeStateContext nodeStateContext);    
-    public abstract void handleMerge(NodeStateContext nodeStateContext);    
+
+    public abstract void handleRefresh(NodeStateContext nodeStateContext);
+
+    public abstract void handleMerge(NodeStateContext nodeStateContext);
+
     public abstract void handleDetach(NodeStateContext nodeStateContext);
-    
-    public abstract void handleClose(NodeStateContext nodeStateContext);    
-    public abstract void handleLock(NodeStateContext nodeStateContext);    
-    
+
+    public abstract void handleClose(NodeStateContext nodeStateContext);
+
+    public abstract void handleLock(NodeStateContext nodeStateContext);
+
     public abstract void handleCommit(NodeStateContext nodeStateContext);
+
     public abstract void handleRollback(NodeStateContext nodeStateContext);
-    
-    //Identity Management
+
+    // Identity Management
     public abstract void handleFind(NodeStateContext nodeStateContext);
+
     public abstract void handleGetReference(NodeStateContext nodeStateContext);
+
     public abstract void handleContains(NodeStateContext nodeStateContext);
-    
-    //Cache Management
+
+    // Cache Management
     public abstract void handleClear(NodeStateContext nodeStateContext);
-    public abstract void handleFlush(NodeStateContext nodeStateContext);   
+
+    public abstract void handleFlush(NodeStateContext nodeStateContext);
 
     /**
      * @param nodeStateContext
      */
     protected void moveNodeToNextState(NodeStateContext nodeStateContext, NodeState nextState)
-    {        
+    {
         nodeStateContext.setCurrentNodeState(nextState);
-//        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());
+        // logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());
     }
-    
+
     /**
      * @param nodeStateContext
      */
@@ -98,7 +103,7 @@ public abstract class NodeState
                     if (cascadeTypes.contains(CascadeType.PERSIST) || cascadeTypes.contains(CascadeType.ALL))
                     {
                         Node childNode = children.get(nodeLink);
-                            childNode.persist();
+                        childNode.persist();
                     }
                     break;
                 case MERGE:
@@ -136,13 +141,16 @@ public abstract class NodeState
             }
         }
     }
-    
-    public void logStateChangeEvent(NodeState prevState, NodeState nextState, String nodeId) {
-        log.debug("Node: " + nodeId + ":: " + prevState.getClass().getSimpleName() + " >>> " + nextState.getClass().getSimpleName());
+
+    public void logStateChangeEvent(NodeState prevState, NodeState nextState, String nodeId)
+    {
+        log.debug("Node: " + nodeId + ":: " + prevState.getClass().getSimpleName() + " >>> "
+                + nextState.getClass().getSimpleName());
     }
-    
-    public void logNodeEvent(String eventType, NodeState currentState, String nodeId) {
+
+    public void logNodeEvent(String eventType, NodeState currentState, String nodeId)
+    {
         log.debug("Node: " + nodeId + ":: " + eventType + " in state " + currentState.getClass().getSimpleName());
     }
-    
+
 }

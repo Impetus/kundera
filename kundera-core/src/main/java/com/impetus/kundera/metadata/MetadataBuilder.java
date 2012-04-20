@@ -122,9 +122,12 @@ public class MetadataBuilder
     }
 
     /**
-     * If parameterised metadata is not for intended persistence unit, assign it to null.
-     * @param metadata entity metadata
-     * @return  metadata.
+     * If parameterised metadata is not for intended persistence unit, assign it
+     * to null.
+     * 
+     * @param metadata
+     *            entity metadata
+     * @return metadata.
      */
     private EntityMetadata belongsToPersistenceUnit(EntityMetadata metadata)
     {
@@ -134,7 +137,8 @@ public class MetadataBuilder
                 || metadata.getPersistenceUnit() != null && !metadata.getPersistenceUnit().equals(persistenceUnit))
         {
             metadata = null;
-        } else if(metadata.getPersistenceUnit() == null && Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client))
+        }
+        else if (metadata.getPersistenceUnit() == null && Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client))
         {
             // no more "null" as persistence unit for RDBMS scenarios!
             metadata.setPersistenceUnit(persistenceUnit);

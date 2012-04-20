@@ -38,7 +38,7 @@ public final class SchemaMetadata
     /**
      * Gets the pu to schema metadata.
      * 
-     * @return the puToSchemaMetadata 
+     * @return the puToSchemaMetadata
      */
 
     public Map<String, List<TableInfo>> getPuToSchemaMetadata()

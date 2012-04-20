@@ -18,39 +18,44 @@ package com.impetus.kundera.graph;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
- * Holds graph of an object 
+ * Holds graph of an object
+ * 
  * @author amresh.singh
  */
 public class ObjectGraph
 {
-    //Head node in this object graph
+    // Head node in this object graph
     private Node headNode;
-    
-    //Mapping between Node ID and Node itself
-    //Each node contains link to parent/ child nodes it is related to
+
+    // Mapping between Node ID and Node itself
+    // Each node contains link to parent/ child nodes it is related to
     private Map<String, Node> nodeMapping;
-    
-    public ObjectGraph() {        
+
+    public ObjectGraph()
+    {
         nodeMapping = new HashMap<String, Node>();
     }
-    
+
     /**
      * Adds a {@link Node} with a give nodeId to object graph.
+     * 
      * @param nodeId
      * @param node
      */
-    public void addNode(String nodeId, Node node) {        
-        nodeMapping.put(nodeId, node);        
+    public void addNode(String nodeId, Node node)
+    {
+        nodeMapping.put(nodeId, node);
     }
-    
+
     /**
      * Returns Node for a given node ID
+     * 
      * @param nodeId
      * @return
      */
-    public Node getNode(String nodeId) {
+    public Node getNode(String nodeId)
+    {
         return nodeMapping.get(nodeId);
     }
 
@@ -63,7 +68,8 @@ public class ObjectGraph
     }
 
     /**
-     * @param headNode the headNode to set
+     * @param headNode
+     *            the headNode to set
      */
     public void setHeadNode(Node headNode)
     {
@@ -76,8 +82,6 @@ public class ObjectGraph
     public Map<String, Node> getNodeMapping()
     {
         return nodeMapping;
-    } 
-    
-    
-    
+    }
+
 }

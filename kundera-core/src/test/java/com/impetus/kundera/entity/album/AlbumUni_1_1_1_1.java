@@ -28,14 +28,14 @@ import com.impetus.kundera.entity.photo.PhotoUni_1_1_1_1;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 @Entity
 @Table(name = "ALBUM", schema = "Pickr")
 public class AlbumUni_1_1_1_1
 {
     @Id
-    @Column(name="ALBUM_ID")
+    @Column(name = "ALBUM_ID")
     private String albumId;
 
     @Column(name = "ALBUM_NAME")
@@ -46,14 +46,14 @@ public class AlbumUni_1_1_1_1
 
     // One to many, will be persisted separately
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name="PHOTO_ID")
+    @JoinColumn(name = "PHOTO_ID")
     private PhotoUni_1_1_1_1 photo;
 
     public AlbumUni_1_1_1_1()
     {
-     
+
     }
-    
+
     public AlbumUni_1_1_1_1(String albumId, String name, String description)
     {
         this.albumId = albumId;
@@ -61,23 +61,24 @@ public class AlbumUni_1_1_1_1
         this.albumDescription = description;
     }
 
-    
+    /**
+     * @return the albumId
+     */
+    public String getAlbumId()
+    {
+        return albumId;
+    }
 
     /**
-	 * @return the albumId
-	 */
-	public String getAlbumId() {
-		return albumId;
-	}
+     * @param albumId
+     *            the albumId to set
+     */
+    public void setAlbumId(String albumId)
+    {
+        this.albumId = albumId;
+    }
 
-	/**
-	 * @param albumId the albumId to set
-	 */
-	public void setAlbumId(String albumId) {
-		this.albumId = albumId;
-	}
-
-	/**
+    /**
      * @return the albumName
      */
     public String getAlbumName()
@@ -86,7 +87,8 @@ public class AlbumUni_1_1_1_1
     }
 
     /**
-     * @param albumName the albumName to set
+     * @param albumName
+     *            the albumName to set
      */
     public void setAlbumName(String albumName)
     {
@@ -102,26 +104,29 @@ public class AlbumUni_1_1_1_1
     }
 
     /**
-     * @param albumDescription the albumDescription to set
+     * @param albumDescription
+     *            the albumDescription to set
      */
     public void setAlbumDescription(String albumDescription)
     {
         this.albumDescription = albumDescription;
     }
 
-	/**
-	 * @return the photo
-	 */
-	public PhotoUni_1_1_1_1 getPhoto() {
-		return photo;
-	}
+    /**
+     * @return the photo
+     */
+    public PhotoUni_1_1_1_1 getPhoto()
+    {
+        return photo;
+    }
 
-	/**
-	 * @param photo the photo to set
-	 */
-	public void setPhoto(PhotoUni_1_1_1_1 photo) {
-		this.photo = photo;
-	}
+    /**
+     * @param photo
+     *            the photo to set
+     */
+    public void setPhoto(PhotoUni_1_1_1_1 photo)
+    {
+        this.photo = photo;
+    }
 
-    
 }

@@ -166,7 +166,7 @@ public class DateAccessor implements PropertyAccessor<Date>
      * @throws PropertyAccessException
      *             throws only if invalid format is supplied.
      */
-    public static Date getDateByPattern(String date) 
+    public static Date getDateByPattern(String date)
     {
         for (String p : patterns)
         {
@@ -202,7 +202,7 @@ public class DateAccessor implements PropertyAccessor<Date>
      * @throws PropertyAccessException
      *             throws only if invalid format is supplied.
      */
-    public static String getFormattedObect(String date) 
+    public static String getFormattedObect(String date)
     {
         return getDateByPattern(date).toString();
     }

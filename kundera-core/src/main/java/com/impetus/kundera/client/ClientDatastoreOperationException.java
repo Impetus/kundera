@@ -18,10 +18,11 @@ package com.impetus.kundera.client;
 import com.impetus.kundera.KunderaException;
 
 /**
- * Generic exception class for exceptions thrown by all clients when a datastore 
+ * Generic exception class for exceptions thrown by all clients when a datastore
  * operation fails.
+ * 
  * @author amresh.singh
- *
+ * 
  */
 public class ClientDatastoreOperationException extends KunderaException
 {

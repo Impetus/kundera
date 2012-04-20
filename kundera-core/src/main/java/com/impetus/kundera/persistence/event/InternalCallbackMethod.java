@@ -80,7 +80,6 @@ public final class InternalCallbackMethod implements CallbackMethod
         }
     }
 
-
     @Override
     public String toString()
     {

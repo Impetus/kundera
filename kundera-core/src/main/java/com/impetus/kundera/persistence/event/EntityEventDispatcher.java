@@ -46,7 +46,7 @@ public class EntityEventDispatcher
      * @throws PersistenceException
      *             the persistence exception
      */
-    public void fireEventListeners(EntityMetadata metadata, Object entity, Class<?> event) 
+    public void fireEventListeners(EntityMetadata metadata, Object entity, Class<?> event)
     {
 
         // handle external listeners first
@@ -60,7 +60,7 @@ public class EntityEventDispatcher
                 log.debug("Firing >> " + callback);
 
                 callback.invoke(entity);
-               
+
             }
         }
     }

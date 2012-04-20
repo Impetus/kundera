@@ -19,8 +19,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import javax.persistence.PersistenceException;
-
 import com.impetus.kundera.KunderaException;
 
 /**

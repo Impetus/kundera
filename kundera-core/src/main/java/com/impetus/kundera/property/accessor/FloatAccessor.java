@@ -47,7 +47,7 @@ public class FloatAccessor implements PropertyAccessor<Float>
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public byte[] toBytes(Object object) 
+    public byte[] toBytes(Object object)
     {
         return fromInt(Float.floatToRawIntBits((Float) object));
     }

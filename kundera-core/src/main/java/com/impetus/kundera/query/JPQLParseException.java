@@ -17,7 +17,7 @@ package com.impetus.kundera.query;
 
 /**
  * @author amresh
- *
+ * 
  */
 public class JPQLParseException extends QueryHandlerException
 {

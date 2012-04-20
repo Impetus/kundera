@@ -104,9 +104,8 @@ public class EntityResolver
             Map<String, EnhancedEntity> entities) throws PropertyAccessException
     {
 
-        EntityMetadata entityMetaData = null;        
+        EntityMetadata entityMetaData = null;
         entityMetaData = KunderaMetadataManager.getEntityMetadata(object.getClass());
-        
 
         if (entityMetaData == null)
         {
@@ -118,8 +117,8 @@ public class EntityResolver
         // Ensure that @Id is set
         if (null == id || id.trim().isEmpty())
         {
-            throw new ReaderResolverException("Missing primary key >> " + entityMetaData.getEntityClazz().getName() + "#"
-                    + entityMetaData.getIdColumn().getField().getName());
+            throw new ReaderResolverException("Missing primary key >> " + entityMetaData.getEntityClazz().getName()
+                    + "#" + entityMetaData.getIdColumn().getField().getName());
         }
 
         // Dummy name to check if the object is already processed

@@ -73,7 +73,7 @@ public class CharAccessor implements PropertyAccessor<Character>
      * )
      */
     @Override
-    public Character fromString(Class targetClass, String s) 
+    public Character fromString(Class targetClass, String s)
     {
         try
         {

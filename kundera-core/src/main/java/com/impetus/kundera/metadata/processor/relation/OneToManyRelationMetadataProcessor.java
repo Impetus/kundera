@@ -53,7 +53,6 @@ public class OneToManyRelationMetadataProcessor extends AbstractEntityFieldProce
         throw new MetamodelLoaderException("Method call not applicable for Relation processors");
     }
 
-
     @Override
     public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata)
     {
@@ -88,7 +87,7 @@ public class OneToManyRelationMetadataProcessor extends AbstractEntityFieldProce
             relation.setJoinTableMetadata(jtMetadata);
         }
 
-        metadata.addRelation(relationField.getName(), relation);   
+        metadata.addRelation(relationField.getName(), relation);
         metadata.setParent(true);
 
     }

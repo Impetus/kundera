@@ -26,20 +26,21 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 
 /**
- * Client API. Defines methods which are required for to be implemented by various clients(pelops, Mongo).
- * Any new addition of new client must implement this API to integrate new client with existing Kundera API. 
- * It's an extension API to support extension of new client.
+ * Client API. Defines methods which are required for to be implemented by
+ * various clients(pelops, Mongo). Any new addition of new client must implement
+ * this API to integrate new client with existing Kundera API. It's an extension
+ * API to support extension of new client.
  * 
  * @author vivek.mishra
  */
-public interface Client<Q extends Query> 
+public interface Client<Q extends Query>
 {
 
     /**
      * Retrieve columns from a column-family row.
      * 
-     * @param 
-     *            the element type
+     * @param the
+     *            element type
      * @param entityClass
      *            the entity class
      * @param key
@@ -111,49 +112,58 @@ public interface Client<Q extends Query>
      */
     IndexManager getIndexManager();
 
-
-    
     void persist(Node node);
-    
-    void persistJoinTable(JoinTableData joinTableData);
 
+    void persistJoinTable(JoinTableData joinTableData);
 
     /**
      * Returns List of column values for given primary key and column name.
-     *  
-     * @param <E>               Type cast
-     * @param tableName         Table/column family name.
-     * @param pKeyColumnName    Primary key column name.
-     * @param columnName        Name of column to be fetched.
-     * @param pKeyColumnValue   primary key value.
-     * @return                  list of values fetched for <columnName>  
+     * 
+     * @param <E>
+     *            Type cast
+     * @param tableName
+     *            Table/column family name.
+     * @param pKeyColumnName
+     *            Primary key column name.
+     * @param columnName
+     *            Name of column to be fetched.
+     * @param pKeyColumnValue
+     *            primary key value.
+     * @return list of values fetched for <columnName>
      */
     <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, String pKeyColumnValue);
 
     /**
      * Returns array of primary key for given column name and it's value.
-     * @param tableName       table/column family name.
-     * @param pKeyName        primary key column name.
-     * @param columnName      column name to be used for search.
-     * @param columnValue     value for parameterised <columnName>.
-     * @param entity class    entity class
-     * @return                array containing fetched primary keys.
+     * 
+     * @param tableName
+     *            table/column family name.
+     * @param pKeyName
+     *            primary key column name.
+     * @param columnName
+     *            column name to be used for search.
+     * @param columnValue
+     *            value for parameterised <columnName>.
+     * @param entity
+     *            class entity class
+     * @return array containing fetched primary keys.
      */
-    
+
     Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue, Class entityClazz);
 
     /**
-     * Delete rows from given table for given column name and corresponding value..
+     * Delete rows from given table for given column name and corresponding
+     * value..
+     * 
      * @param tableName
-     *               Name of the table
+     *            Name of the table
      * @param columnName
-     *               Name of the column
+     *            Name of the column
      * @param columnValue
-     *               Name of column value                         
+     *            Name of column value
      */
-    void deleteByColumn(String tableName, String columnName, Object columnValue);   
-    
-    
+    void deleteByColumn(String tableName, String columnName, Object columnValue);
+
     /**
      * Find list of entities for given column name and column value, if index
      * support is provided..
@@ -163,7 +173,7 @@ public interface Client<Q extends Query>
      * @param colValue
      *            the column value
      * @param entityClass
-     *            the entity class           
+     *            the entity class
      * @return the list list of entities.
      */
     List<Object> findByRelation(String colName, String colValue, Class entityClazz);
@@ -175,9 +185,10 @@ public interface Client<Q extends Query>
      */
     EntityReader getReader();
 
-
     /**
-     * Returns query implementor class, required for initializing client specific query interface. 
+     * Returns query implementor class, required for initializing client
+     * specific query interface.
+     * 
      * @return class instance of configured query interface.
      */
     Class<Q> getQueryImplementor();

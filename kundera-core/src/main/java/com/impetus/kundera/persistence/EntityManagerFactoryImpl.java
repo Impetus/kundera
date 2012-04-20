@@ -71,9 +71,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      * Array of persistence units. (Contains only one string usually except when
      * persisting in multiple data-stores)
      */
-    String[] persistenceUnits;    
-    
-    //Transaction type
+    String[] persistenceUnits;
+
+    // Transaction type
     PersistenceUnitTransactionType transactionType;
 
     /**
@@ -117,18 +117,23 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         logger.info("Loading Client(s) For Persistence Unit(s) " + persistenceUnit);
 
         Set<PersistenceUnitTransactionType> txTypes = new HashSet<PersistenceUnitTransactionType>();
-        
+
         for (String pu : persistenceUnits)
         {
-            PersistenceUnitTransactionType txType = KunderaMetadataManager.getPersistenceUnitMetadata(pu).getTransactionType();
+            PersistenceUnitTransactionType txType = KunderaMetadataManager.getPersistenceUnitMetadata(pu)
+                    .getTransactionType();
             txTypes.add(txType);
-            
+
             ClientResolver.getClientFactory(pu).load(pu);
         }
-        
-        if(txTypes.size() != 1) {
-            throw new IllegalArgumentException("For polyglot persistence, it is mandatory for all persistence units to have same Transction type.");
-        } else {
+
+        if (txTypes.size() != 1)
+        {
+            throw new IllegalArgumentException(
+                    "For polyglot persistence, it is mandatory for all persistence units to have same Transction type.");
+        }
+        else
+        {
             this.transactionType = txTypes.iterator().next();
         }
 
@@ -157,19 +162,17 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         }
     }
 
-
     @Override
     public final EntityManager createEntityManager()
     {
-        //For Application managed persistence context, type is always EXTENDED
+        // For Application managed persistence context, type is always EXTENDED
         return new EntityManagerImpl(this, transactionType, PersistenceContextType.EXTENDED);
     }
-
 
     @Override
     public final EntityManager createEntityManager(Map map)
     {
-        //For Application managed persistence context, type is always EXTENDED
+        // For Application managed persistence context, type is always EXTENDED
         return new EntityManagerImpl(this, map, transactionType, PersistenceContextType.EXTENDED);
     }
 
@@ -238,7 +241,6 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     {
         throw new NotImplementedException("TODO");
     }
-    
 
     /**
      * @return the transactionType
@@ -249,7 +251,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     }
 
     /**
-     * @param transactionType the transactionType to set
+     * @param transactionType
+     *            the transactionType to set
      */
     public void setTransactionType(PersistenceUnitTransactionType transactionType)
     {

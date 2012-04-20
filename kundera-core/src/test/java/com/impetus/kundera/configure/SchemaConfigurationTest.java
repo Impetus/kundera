@@ -48,7 +48,7 @@ import com.impetus.kundera.metadata.processor.TableProcessor;
  */
 public class SchemaConfigurationTest
 {
-    
+
     /** The configuration. */
     private SchemaConfiguration configuration;
 
@@ -57,8 +57,9 @@ public class SchemaConfigurationTest
 
     /**
      * Sets the up before class.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
@@ -67,8 +68,9 @@ public class SchemaConfigurationTest
 
     /**
      * Tear down after class.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception
@@ -77,8 +79,9 @@ public class SchemaConfigurationTest
 
     /**
      * Sets the up.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Before
     public void setUp() throws Exception
@@ -89,8 +92,9 @@ public class SchemaConfigurationTest
 
     /**
      * Tear down.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @After
     public void tearDown() throws Exception

@@ -33,7 +33,7 @@ public class ReaderResolverException extends KunderaException
      */
     public ReaderResolverException()
     {
-        super();        
+        super();
     }
 
     /**
@@ -42,7 +42,7 @@ public class ReaderResolverException extends KunderaException
      */
     public ReaderResolverException(String arg0, Throwable arg1)
     {
-        super(arg0, arg1);       
+        super(arg0, arg1);
     }
 
     /**
@@ -50,7 +50,7 @@ public class ReaderResolverException extends KunderaException
      */
     public ReaderResolverException(String arg0)
     {
-        super(arg0);        
+        super(arg0);
     }
 
     /**
@@ -58,8 +58,7 @@ public class ReaderResolverException extends KunderaException
      */
     public ReaderResolverException(Throwable arg0)
     {
-        super(arg0);       
+        super(arg0);
     }
 
-    
 }

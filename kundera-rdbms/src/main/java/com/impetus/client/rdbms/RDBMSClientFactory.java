@@ -68,14 +68,17 @@ public class RDBMSClientFactory extends GenericClientFactory
     @Override
     protected Object createPoolOrConnection()
     {
-        
-        //Do nothing.
+
+        // Do nothing.
         return null;
     }
 
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.loader.GenericClientFactory#instantiateClient(java
+     * .lang.String)
      */
     @Override
     protected Client instantiateClient(String persistenceUnit)

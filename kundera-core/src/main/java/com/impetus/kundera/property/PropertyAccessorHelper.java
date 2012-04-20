@@ -24,8 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.PersistenceException;
-
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
@@ -73,7 +71,7 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static void set(Object target, Field field, String fieldVal) 
+    public static void set(Object target, Field field, String fieldVal)
     {
 
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
@@ -95,13 +93,8 @@ public class PropertyAccessorHelper
      *             the property access exception
      */
     public static void set(Object target, Field field, Object value)
-    {
+    {       
 
-        if(target instanceof EnhanceEntity || value instanceof EnhanceEntity)
-        {
-            System.out.println("TestB");
-        }
-        
         if (!field.isAccessible())
         {
             field.setAccessible(true);
@@ -133,7 +126,7 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static Object getObject(Object from, Field field) 
+    public static Object getObject(Object from, Field field)
     {
 
         if (!field.isAccessible())
@@ -168,7 +161,7 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static String getString(Object from, Field field) 
+    public static String getString(Object from, Field field)
     {
 
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
@@ -190,7 +183,7 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static byte[] get(Object from, Field field) 
+    public static byte[] get(Object from, Field field)
     {
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(field);
         return accessor.toBytes(getObject(from, field));
@@ -238,11 +231,11 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static void setId(Object entity, EntityMetadata metadata, String rowKey) 
+    public static void setId(Object entity, EntityMetadata metadata, String rowKey)
     {
         try
         {
-        	Field idField = metadata.getIdColumn().getField();
+            Field idField = metadata.getIdColumn().getField();
             PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(idField);
             Object obj = accessor.fromString(idField.getClass(), rowKey);
 
@@ -275,7 +268,7 @@ public class PropertyAccessorHelper
      */
     @SuppressWarnings("null")
     // TODO: Too much code, improve this, possibly by breaking it
-    public static final Object getObject(Object obj, String fieldName) 
+    public static final Object getObject(Object obj, String fieldName)
     {
         Field embeddedField;
         try

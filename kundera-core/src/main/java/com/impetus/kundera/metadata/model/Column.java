@@ -48,7 +48,6 @@ public final class Column
         this.field = field;
     }
 
-
     public Column(String name, Field field, boolean isIndexable)
     {
         this.name = name;

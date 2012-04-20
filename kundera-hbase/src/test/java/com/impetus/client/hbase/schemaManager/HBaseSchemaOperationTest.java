@@ -112,7 +112,7 @@ public class HBaseSchemaOperationTest
         // admin= null;
     }
 
-//    @Test
+    // @Test
     public void testCreate() throws IOException
     {
         getEntityManagerFactory("create");
@@ -139,7 +139,7 @@ public class HBaseSchemaOperationTest
         Assert.assertFalse(admin.isTableAvailable("HbaseEntitySimple"));
     }
 
-//    @Test
+    // @Test
     public void testCreatedrop() throws IOException
     {
         getEntityManagerFactory("create-drop");
@@ -165,7 +165,7 @@ public class HBaseSchemaOperationTest
         Assert.assertFalse(admin.isTableAvailable("HbaseEntitySimple"));
     }
 
-//    @Test
+    // @Test
     public void testUpdate() throws IOException
     {
         HTableDescriptor descriptor1 = new HTableDescriptor("HbaseEntitySimple");

@@ -79,94 +79,113 @@ public class PersistenceXMLLoader
     private static Document getDocument(URL configURL) throws InvalidConfigurationException
     {
         InputStream is = null;
-		Document doc;
-		try {
-			is = null;
-			if (configURL != null)
-			{
-			    URLConnection conn = configURL.openConnection();
-			    conn.setUseCaches(false); // avoid JAR locking on Windows and Tomcat
-			    is = conn.getInputStream();
-			}
-			if (is == null)
-			{
-			    throw new IOException("Failed to obtain InputStream from url: " + configURL);
-			}
+        Document doc;
+        try
+        {
+            is = null;
+            if (configURL != null)
+            {
+                URLConnection conn = configURL.openConnection();
+                conn.setUseCaches(false); // avoid JAR locking on Windows and
+                                          // Tomcat
+                is = conn.getInputStream();
+            }
+            if (is == null)
+            {
+                throw new IOException("Failed to obtain InputStream from url: " + configURL);
+            }
 
-			DocumentBuilderFactory docBuilderFactory = null;
-			docBuilderFactory = DocumentBuilderFactory.newInstance();
-			docBuilderFactory.setNamespaceAware(true);
+            DocumentBuilderFactory docBuilderFactory = null;
+            docBuilderFactory = DocumentBuilderFactory.newInstance();
+            docBuilderFactory.setNamespaceAware(true);
 
-			final Schema v2Schema = SchemaFactory.newInstance( javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI )
-				.newSchema( new StreamSource( getStreamFromClasspath( "persistence_2_0.xsd" ) ) );
-			final Validator v2Validator = v2Schema.newValidator();
-			final Schema v1Schema = SchemaFactory.newInstance( javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI )
-				.newSchema( new StreamSource( getStreamFromClasspath( "persistence_1_0.xsd" ) ) );
-			final Validator v1Validator = v1Schema.newValidator();
+            final Schema v2Schema = SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(
+                    new StreamSource(getStreamFromClasspath("persistence_2_0.xsd")));
+            final Validator v2Validator = v2Schema.newValidator();
+            final Schema v1Schema = SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(
+                    new StreamSource(getStreamFromClasspath("persistence_1_0.xsd")));
+            final Validator v1Validator = v1Schema.newValidator();
 
-			InputSource source = new InputSource(is);
-			DocumentBuilder docBuilder = null;
-			try {
-				docBuilder = docBuilderFactory.newDocumentBuilder();
-			} catch (ParserConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+            InputSource source = new InputSource(is);
+            DocumentBuilder docBuilder = null;
+            try
+            {
+                docBuilder = docBuilderFactory.newDocumentBuilder();
+            }
+            catch (ParserConfigurationException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
-			List errors = new ArrayList();
-			docBuilder.setErrorHandler(new ErrorLogger("XML InputStream", errors));
-			doc = docBuilder.parse(source);
+            List errors = new ArrayList();
+            docBuilder.setErrorHandler(new ErrorLogger("XML InputStream", errors));
+            doc = docBuilder.parse(source);
 
-			if (errors.size() == 0) {
-				v2Validator.setErrorHandler( new ErrorLogger("XML InputStream", errors ) );
-				v2Validator.validate( new DOMSource( doc ) );
-				boolean isV1Schema = false;
-				if ( errors.size() != 0 ) {
-					//v2 fails, it could be because the file is v1.
-					Exception exception = (Exception) errors.get( 0 );
-					final String errorMessage = exception.getMessage();
-					//is it a validation error due to a v1 schema validated by a v2
-					isV1Schema = errorMessage.contains("1.0")
-						&& errorMessage.contains("2.0")
-						&& errorMessage.contains("version");
-				}
-				if (isV1Schema) {
-					errors.clear();
-					v1Validator.setErrorHandler( new ErrorLogger("XML InputStream", errors ) );
-					v1Validator.validate( new DOMSource( doc ) );
-				}
-			} else {
-			    throw new InvalidConfigurationException("invalid persistence.xml", (Throwable) errors.get(0));
-			}
-		} catch (IOException e) {
-			throw new InvalidConfigurationException(e);
-		} catch (SAXException e) {
-			throw new InvalidConfigurationException(e);
-		} finally {
-			try {
-				is.close(); 
-			} catch (IOException e) {
-				throw new InvalidConfigurationException(e);
-			}
-		}
-        
-        
+            if (errors.size() == 0)
+            {
+                v2Validator.setErrorHandler(new ErrorLogger("XML InputStream", errors));
+                v2Validator.validate(new DOMSource(doc));
+                boolean isV1Schema = false;
+                if (errors.size() != 0)
+                {
+                    // v2 fails, it could be because the file is v1.
+                    Exception exception = (Exception) errors.get(0);
+                    final String errorMessage = exception.getMessage();
+                    // is it a validation error due to a v1 schema validated by
+                    // a v2
+                    isV1Schema = errorMessage.contains("1.0") && errorMessage.contains("2.0")
+                            && errorMessage.contains("version");
+                }
+                if (isV1Schema)
+                {
+                    errors.clear();
+                    v1Validator.setErrorHandler(new ErrorLogger("XML InputStream", errors));
+                    v1Validator.validate(new DOMSource(doc));
+                }
+            }
+            else
+            {
+                throw new InvalidConfigurationException("invalid persistence.xml", (Throwable) errors.get(0));
+            }
+        }
+        catch (IOException e)
+        {
+            throw new InvalidConfigurationException(e);
+        }
+        catch (SAXException e)
+        {
+            throw new InvalidConfigurationException(e);
+        }
+        finally
+        {
+            try
+            {
+                is.close();
+            }
+            catch (IOException e)
+            {
+                throw new InvalidConfigurationException(e);
+            }
+        }
+
         return doc;
     }
 
     /**
      * Get stream from classpath.
-     *
-     * @param fileName 
-     * 		the file name
+     * 
+     * @param fileName
+     *            the file name
      * @return the stream
      * @throws Exception
      *             the exception
      */
-    private static InputStream getStreamFromClasspath(String fileName) {
-	String path = fileName;
-	InputStream dtdStream = PersistenceXMLLoader.class.getClassLoader().getResourceAsStream( path );
-	return dtdStream;
+    private static InputStream getStreamFromClasspath(String fileName)
+    {
+        String path = fileName;
+        InputStream dtdStream = PersistenceXMLLoader.class.getClassLoader().getResourceAsStream(path);
+        return dtdStream;
     }
 
     /**
@@ -195,15 +214,18 @@ public class PersistenceXMLLoader
      *             the exception
      */
     public static List<PersistenceUnitMetadata> findPersistenceUnits(URL url,
-            PersistenceUnitTransactionType defaultTransactionType) throws InvalidConfigurationException 
+            PersistenceUnitTransactionType defaultTransactionType) throws InvalidConfigurationException
     {
 
         Document doc;
-		try {
-			doc = getDocument(url);
-		} catch (InvalidConfigurationException e) {
-			throw e;
-		}
+        try
+        {
+            doc = getDocument(url);
+        }
+        catch (InvalidConfigurationException e)
+        {
+            throw e;
+        }
         Element top = doc.getDocumentElement();
         NodeList children = top.getChildNodes();
         ArrayList<PersistenceUnitMetadata> units = new ArrayList<PersistenceUnitMetadata>();
@@ -259,19 +281,23 @@ public class PersistenceXMLLoader
                 {
                     metadata.setProvider(getElementContent(element));
                 }
-                
+
                 else if (tag.equals("transaction-type"))
                 {
                     String transactionType = getElementContent(element);
-                    
-                    if(StringUtils.isEmpty(transactionType) || PersistenceUnitTransactionType.RESOURCE_LOCAL.name().equals(transactionType)) {
-                    
+
+                    if (StringUtils.isEmpty(transactionType)
+                            || PersistenceUnitTransactionType.RESOURCE_LOCAL.name().equals(transactionType))
+                    {
+
                         metadata.setTransactionType(PersistenceUnitTransactionType.RESOURCE_LOCAL);
-                        
-                    } else if(PersistenceUnitTransactionType.JTA.name().equals(transactionType)) {
+
+                    }
+                    else if (PersistenceUnitTransactionType.JTA.name().equals(transactionType))
+                    {
                         metadata.setTransactionType(PersistenceUnitTransactionType.JTA);
-                    }                
-                    
+                    }
+
                 }
                 else if (tag.equals("properties"))
                 {
@@ -438,7 +464,7 @@ public class PersistenceXMLLoader
      * @throws Exception
      *             the exception
      */
-    public static String getElementContent(final Element element) 
+    public static String getElementContent(final Element element)
     {
         return getElementContent(element, null);
     }
@@ -454,7 +480,7 @@ public class PersistenceXMLLoader
      * @throws Exception
      *             the exception
      */
-    private static String getElementContent(Element element, String defaultStr) 
+    private static String getElementContent(Element element, String defaultStr)
     {
         if (element == null)
         {
@@ -477,8 +503,9 @@ public class PersistenceXMLLoader
     /**
      * Returns persistence unit root url
      * 
-     * @param url   raw url
-     * @return rootUrl   rootUrl 
+     * @param url
+     *            raw url
+     * @return rootUrl rootUrl
      */
     private static URL getPersistenceRootUrl(URL url)
     {
@@ -500,10 +527,11 @@ public class PersistenceXMLLoader
             }
             else if (AllowedProtocol.isValidProtocol(url.getProtocol()))
             {
-                if(StringUtils.contains(f, " "))
+                if (StringUtils.contains(f, " "))
                 {
                     jarUrl = new File(f).toURI().toURL();
-                } else
+                }
+                else
                 {
                     jarUrl = new File(f).toURL();
                 }
@@ -514,14 +542,16 @@ public class PersistenceXMLLoader
             log.error(mex.getMessage());
             throw new IllegalArgumentException("invalid jar URL[] provided!" + url);
         }
-        
+
         return jarUrl;
     }
 
     /**
      * Parse and exclude path till META-INF
-     * @param file raw file path.
-     * @return  extracted/parsed file path.
+     * 
+     * @param file
+     *            raw file path.
+     * @return extracted/parsed file path.
      */
     private static String parseFilePath(String file)
     {
@@ -534,7 +564,6 @@ public class PersistenceXMLLoader
         return file;
     }
 
-    
     /**
      * Allowed protocols
      */
@@ -542,7 +571,6 @@ public class PersistenceXMLLoader
     {
         WSJAR, JAR, ZIP, FILE, VFSZIP;
 
-        
         /**
          * In case it is jar protocol
          * 
@@ -551,13 +579,15 @@ public class PersistenceXMLLoader
          */
         public static boolean isJarProtocol(String protocol)
         {
-            return protocol != null && (protocol.toUpperCase().equals(JAR.name()) || protocol.toUpperCase().equals(WSJAR.name()));
+            return protocol != null
+                    && (protocol.toUpperCase().equals(JAR.name()) || protocol.toUpperCase().equals(WSJAR.name()));
         }
 
         /**
          * If provided protocol is within allowed protocol.
          * 
-         * @param protocol protocol
+         * @param protocol
+         *            protocol
          * @return true, if it is in allowed protocol.
          */
         public static boolean isValidProtocol(String protocol)
@@ -566,7 +596,8 @@ public class PersistenceXMLLoader
             {
                 AllowedProtocol.valueOf(protocol.toUpperCase());
                 return true;
-            } catch(IllegalArgumentException iex)
+            }
+            catch (IllegalArgumentException iex)
             {
                 return false;
             }

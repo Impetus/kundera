@@ -19,36 +19,40 @@ import com.impetus.kundera.KunderaException;
 
 /**
  * @author amresh
- *
+ * 
  */
-public class InvalidConfigurationException extends KunderaException {
+public class InvalidConfigurationException extends KunderaException
+{
 
-	/**
+    /**
 	 * 
 	 */
-	public InvalidConfigurationException() {		
-	}
+    public InvalidConfigurationException()
+    {
+    }
 
-	/**
-	 * @param paramString
-	 */
-	public InvalidConfigurationException(String paramString) {
-		super(paramString);		
-	}
+    /**
+     * @param paramString
+     */
+    public InvalidConfigurationException(String paramString)
+    {
+        super(paramString);
+    }
 
-	/**
-	 * @param paramThrowable
-	 */
-	public InvalidConfigurationException(Throwable paramThrowable) {
-		super(paramThrowable);		
-	}
+    /**
+     * @param paramThrowable
+     */
+    public InvalidConfigurationException(Throwable paramThrowable)
+    {
+        super(paramThrowable);
+    }
 
-	/**
-	 * @param paramString
-	 * @param paramThrowable
-	 */
-	public InvalidConfigurationException(String paramString,
-			Throwable paramThrowable) {
-	}
+    /**
+     * @param paramString
+     * @param paramThrowable
+     */
+    public InvalidConfigurationException(String paramString, Throwable paramThrowable)
+    {
+    }
 
 }

@@ -36,7 +36,7 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Timestamp fromBytes(Class targetClass, byte[] b) 
+    public Timestamp fromBytes(Class targetClass, byte[] b)
     {
 
         String s;
@@ -58,7 +58,7 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public byte[] toBytes(Object object) 
+    public byte[] toBytes(Object object)
     {
         Timestamp t = (Timestamp) object;
         return t.toString().getBytes();
@@ -84,7 +84,7 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
      * )
      */
     @Override
-    public Timestamp fromString(Class targetClass, String s) 
+    public Timestamp fromString(Class targetClass, String s)
     {
         Timestamp t = Timestamp.valueOf(s);
         return t;

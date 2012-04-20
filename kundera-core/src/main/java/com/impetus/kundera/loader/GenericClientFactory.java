@@ -43,8 +43,8 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
 
     /** The connection pool or connection. */
     private Object connectionPoolOrConnection;
-    
-//    private SchemaExpo
+
+    // private SchemaExpo
 
     /**
      * Load.

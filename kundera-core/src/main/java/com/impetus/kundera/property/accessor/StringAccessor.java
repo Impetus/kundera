@@ -91,7 +91,7 @@ public class StringAccessor implements PropertyAccessor<String>
      * )
      */
     @Override
-    public String fromString(Class targetClass, String s) 
+    public String fromString(Class targetClass, String s)
     {
         return s;
     }

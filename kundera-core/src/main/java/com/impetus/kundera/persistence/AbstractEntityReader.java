@@ -15,9 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
-import java.beans.Encoder;
-import java.beans.Expression;
-import java.beans.PersistenceDelegate;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -43,7 +40,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -117,15 +113,15 @@ public class AbstractEntityReader
                                 {
                                     child = pd.find(childClass, relationValue.toString());
                                 }
-                                child = child != null && child instanceof EnhanceEntity ? ((EnhanceEntity)child).getEntity():child;
+                                child = child != null && child instanceof EnhanceEntity ? ((EnhanceEntity) child)
+                                        .getEntity() : child;
                             }
 
                             relationValuesMap.put(relationValue + childClass.getName(), child);
 
                         }
                         Field biDirectionalField = getBiDirectionalField(e.getEntity().getClass(), childClass);
-                        onBiDirection(pd, e, client, relation, biDirectionalField,
-                                relation.getJoinColumnName(), m,
+                        onBiDirection(pd, e, client, relation, biDirectionalField, relation.getJoinColumnName(), m,
                                 relationValuesMap.get(relationValue + childClass.getName()), childMetadata, childClient);
                         // onBiDirection(e, client, g, m,
                         // collectionHolder.get(relationalValue+childClazz.getName()),
@@ -146,7 +142,8 @@ public class AbstractEntityReader
                     Field biDirectionalField = getBiDirectionalField(e.getEntity().getClass(), childClass);
 
                     childClient = pd.getClient(childMetadata);
-                    String relationName = biDirectionalField != null ? m.getIdColumn().getName():MetadataUtils.getMappedName(m, relation);
+                    String relationName = biDirectionalField != null ? m.getIdColumn().getName() : MetadataUtils
+                            .getMappedName(m, relation);
                     String relationalValue = e.getEntityId();
 
                     Field f = relation.getProperty();
@@ -160,7 +157,8 @@ public class AbstractEntityReader
                             if (childClass.equals(e.getEntity().getClass()))
                             {
                                 childs = childClient.findAll(childClass, relationalValue.toString());
-                            } else
+                            }
+                            else
                             {
                                 if (MetadataUtils.useSecondryIndex(childClient.getPersistenceUnit()))
                                 {
@@ -195,7 +193,7 @@ public class AbstractEntityReader
                                                 .getClass().getCanonicalName().toLowerCase(),
                                                 DocumentIndexer.PARENT_ID_FIELD, e.getEntityId(), childClass
                                                         .getCanonicalName().toLowerCase());
-                                        // System.out.println(query);
+                                        
                                         Map<String, String> results = childClient.getIndexManager().search(query);
                                         Set<String> rsSet = new HashSet<String>(results.values());
                                         // childs = (List<Object>)
@@ -223,17 +221,19 @@ public class AbstractEntityReader
                             // secondary indexes.
                             // create sql query for hibernate client.
                             // f = g.getProperty();
-//                            relationValuesMap.put(relationalValue + childClass.getName(), childs);
+                            // relationValuesMap.put(relationalValue +
+                            // childClass.getName(), childs);
                             if (childs != null && !childs.isEmpty())
                             {
                                 List childCol = new ArrayList(childs.size());
                                 for (Object child : childs)
                                 {
-                                    Object o = child instanceof EnhanceEntity ? ((EnhanceEntity) child).getEntity():child;
+                                    Object o = child instanceof EnhanceEntity ? ((EnhanceEntity) child).getEntity()
+                                            : child;
                                     // biDirectionalField =
                                     // getBiDirectionalField(e.getEntity().getClass(),
                                     // childClass);
-                                    if(!o.getClass().equals(e.getEntity().getClass()))
+                                    if (!o.getClass().equals(e.getEntity().getClass()))
                                     {
                                         recursivelyFindEntities(
                                                 new EnhanceEntity(o, PropertyAccessorHelper.getId(o, childMetadata),
@@ -777,9 +777,9 @@ public class AbstractEntityReader
      * @throws Exception
      *             the exception
      */
-    private void onBiDirection(PersistenceDelegator pd, EnhanceEntity e, Client client, Relation originalRelation, Field bidirectionalField,
-            String relationName, EntityMetadata origMetadata, Object child, EntityMetadata childMetadata,
-            Client childClient)
+    private void onBiDirection(PersistenceDelegator pd, EnhanceEntity e, Client client, Relation originalRelation,
+            Field bidirectionalField, String relationName, EntityMetadata origMetadata, Object child,
+            EntityMetadata childMetadata, Client childClient)
     {
         // Process bidirectional processing only if it's a bidirectional graph
         // and child exists (there is a possibility that this
@@ -807,7 +807,8 @@ public class AbstractEntityReader
                     {
                         if (origMetadata.isRelationViaJoinTable())
                         {
-                            Relation joinTableRelation = origMetadata.getRelation(originalRelation.getProperty().getName());
+                            Relation joinTableRelation = origMetadata.getRelation(originalRelation.getProperty()
+                                    .getName());
                             JoinTableMetadata jtMetadata = joinTableRelation.getJoinTableMetadata();
                             String joinTableName = jtMetadata.getJoinTableName();
 
@@ -818,10 +819,11 @@ public class AbstractEntityReader
                             String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
 
                             Object[] pKeys = client.findIdsByColumn(joinTableName, joinColumnName,
-                                    inverseJoinColumnName, id, origMetadata.getEntityClazz());       
-                            
-//                          List<Object> parentEntities = pKeys != null ? client.findAll(origMetadata.getEntityClazz(), pKeys) : null;
-                          
+                                    inverseJoinColumnName, id, origMetadata.getEntityClazz());
+
+                            // List<Object> parentEntities = pKeys != null ?
+                            // client.findAll(origMetadata.getEntityClazz(),
+                            // pKeys) : null;
 
                             for (Object key : pKeys)
                             {
@@ -830,11 +832,14 @@ public class AbstractEntityReader
                                 List keys = client.getColumnsById(joinTableName, joinColumnName, inverseJoinColumnName,
                                         key.toString());
                                 Object pEntity = client.find(origMetadata.getEntityClazz(), key);
-                                pEntity = pEntity != null && pEntity instanceof EnhanceEntity ? ((EnhanceEntity) pEntity).getEntity():pEntity;
-                                List recursiveChilds = childClient.findAll(childMetadata.getEntityClazz(), keys.toArray());
+                                pEntity = pEntity != null && pEntity instanceof EnhanceEntity ? ((EnhanceEntity) pEntity)
+                                        .getEntity() : pEntity;
+                                List recursiveChilds = childClient.findAll(childMetadata.getEntityClazz(),
+                                        keys.toArray());
                                 if (pEntity != null && recursiveChilds != null && !recursiveChilds.isEmpty())
                                 {
-                                    PropertyAccessorHelper.set(pEntity, originalRelation.getProperty(), getFieldInstance(recursiveChilds, originalRelation.getProperty()));
+                                    PropertyAccessorHelper.set(pEntity, originalRelation.getProperty(),
+                                            getFieldInstance(recursiveChilds, originalRelation.getProperty()));
                                     if (results == null)
                                     {
                                         results = new ArrayList<Object>();
@@ -842,21 +847,22 @@ public class AbstractEntityReader
                                     results.add(pEntity);
                                 }
                             }
-                            
-                            /*List<Object> parentEntities = null;
-                            if(pKeys != null) {
-                                parentEntities = (List<Object>) pd.find(origMetadata.getEntityClazz(), pKeys);
-                            }   */                         
 
-//                            if (results == null)
-//                            {
-//                                results = new ArrayList<Object>();
-//                            }
+                            /*
+                             * List<Object> parentEntities = null; if(pKeys !=
+                             * null) { parentEntities = (List<Object>)
+                             * pd.find(origMetadata.getEntityClazz(), pKeys); }
+                             */
 
-//                            if (parentEntities != null)
-//                            {
-//                                results.addAll(parentEntities);
-//                            }
+                            // if (results == null)
+                            // {
+                            // results = new ArrayList<Object>();
+                            // }
+
+                            // if (parentEntities != null)
+                            // {
+                            // results.addAll(parentEntities);
+                            // }
 
                         }
                         else
@@ -890,7 +896,8 @@ public class AbstractEntityReader
                             Object result = client.find(e.getEntity().getClass(), rowKey);
                             if (result != null)
                             {
-                                results.add(result instanceof EnhanceEntity ? ((EnhanceEntity) result).getEntity():result);
+                                results.add(result instanceof EnhanceEntity ? ((EnhanceEntity) result).getEntity()
+                                        : result);
                             }
 
                         }
@@ -915,7 +922,7 @@ public class AbstractEntityReader
                 {
                     if (o != null && !relation.getType().equals(ForeignKey.MANY_TO_MANY))
                     {
-                        o = o instanceof EnhanceEntity ? ((EnhanceEntity)o).getEntity():o;
+                        o = o instanceof EnhanceEntity ? ((EnhanceEntity) o).getEntity() : o;
                         Field f = originalRelation.getProperty();
 
                         try
@@ -1073,13 +1080,16 @@ public class AbstractEntityReader
         {
             EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
             Client childClient = delegator.getClient(childMetadata);
-            
+
             Object child = delegator.find(relation.getTargetEntity(), foreignKey);
-           
-            Object obj = child instanceof EnhanceEntity && child !=null? ((EnhanceEntity) child).getEntity():child;
-            //Handle bidirection
-            //onBiDirection(e, client, objectGraph, entityMetadata, child, childMetadata, childClient);
-            onBiDirection(delegator, e, pClient, relation, getBiDirectionalField(entity.getClass(), relation.getTargetEntity()), joinColumnName, entityMetadata, obj, childMetadata, childClient);
+
+            Object obj = child instanceof EnhanceEntity && child != null ? ((EnhanceEntity) child).getEntity() : child;
+            // Handle bidirection
+            // onBiDirection(e, client, objectGraph, entityMetadata, child,
+            // childMetadata, childClient);
+            onBiDirection(delegator, e, pClient, relation,
+                    getBiDirectionalField(entity.getClass(), relation.getTargetEntity()), joinColumnName,
+                    entityMetadata, obj, childMetadata, childClient);
 
             childrenEntities.add(obj);
         }

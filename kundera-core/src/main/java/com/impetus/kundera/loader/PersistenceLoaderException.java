@@ -19,7 +19,7 @@ import com.impetus.kundera.KunderaException;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class PersistenceLoaderException extends KunderaException
 {

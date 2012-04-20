@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.mongodb.query.MongoDBQuery;
-import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
@@ -92,17 +91,17 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         this.persistenceUnit = persistenceUnit;
     }
 
-    
-    public void persist(Node node) {
+    public void persist(Node node)
+    {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-        
+
         String dbName = entityMetadata.getSchema();
         String documentName = entityMetadata.getTableName();
         Object key = ObjectGraphBuilder.getEntityId(node.getNodeId());
 
         log.debug("Persisting data into " + dbName + "." + documentName + " for ID:" + node.getNodeId());
-        DBCollection dbCollection = mongoDb.getCollection(documentName);       
-        
+        DBCollection dbCollection = mongoDb.getCollection(documentName);
+
         List<RelationHolder> relationHolders = getRelationHolders(node);
 
         BasicDBObject query = new BasicDBObject();
@@ -118,48 +117,47 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         else
         {
             document = new BasicDBObject();
-        }        
-        
-        document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(document, 
-                entityMetadata, node.getData(), relationHolders);
-        dbCollection.save(document);
-        
-        //Index This node
-        indexNode(node, entityMetadata, getIndexManager());    
-    }   
-   
+        }
 
-    
+        document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(document, entityMetadata,
+                node.getData(), relationHolders);
+        dbCollection.save(document);
+
+        // Index This node
+        indexNode(node, entityMetadata, getIndexManager());
+    }
 
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
-    {       
+    {
         String joinTableName = joinTableData.getJoinTableName();
         String joinColumnName = joinTableData.getJoinColumnName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
-        
+
         DBCollection dbCollection = mongoDb.getCollection(joinTableName);
         List<BasicDBObject> documents = new ArrayList<BasicDBObject>();
-        
-        for(Object key : joinTableRecords.keySet()) {
-            Set<Object> values =  joinTableRecords.get(key);            
-            String joinColumnValue = (String) key;            
-            
-            for(Object childId : values) {
+
+        for (Object key : joinTableRecords.keySet())
+        {
+            Set<Object> values = joinTableRecords.get(key);
+            String joinColumnValue = (String) key;
+
+            for (Object childId : values)
+            {
                 BasicDBObject dbObj = new BasicDBObject();
                 dbObj.put(joinColumnName, joinColumnValue);
-                dbObj.put(invJoinColumnName, (String)childId);
+                dbObj.put(invJoinColumnName, (String) childId);
                 documents.add(dbObj);
-            }                               
-        }    
+            }
+        }
         dbCollection.insert(documents.toArray(new BasicDBObject[0]));
     }
 
     @Override
-    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName,
-            String inverseJoinColumnName, String parentId)
-    {        
+    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+            String parentId)
+    {
         List<E> foreignKeys = new ArrayList<E>();
 
         DBCollection dbCollection = mongoDb.getCollection(joinTableName);
@@ -179,12 +177,15 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         return foreignKeys;
     }
 
-    
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
      */
     @Override
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,Class entityClazz)
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
+            Class entityClazz)
     {
         String childIdStr = (String) columnValue;
 
@@ -213,7 +214,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 
     }
 
-    
     /*
      * (non-Javadoc)
      * 
@@ -226,8 +226,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
 
-        List<String>relationNames = entityMetadata.getRelationNames();
-        
+        List<String> relationNames = entityMetadata.getRelationNames();
+
         log.debug("Fetching data from " + entityMetadata.getTableName() + " for PK " + key);
 
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
@@ -278,8 +278,9 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         while (cursor.hasNext())
         {
             DBObject fetchedDocument = cursor.next();
-            Object entity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
-                    entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, entityMetadata.getRelationNames());
+            Object entity = new MongoDBDataHandler(this, getPersistenceUnit())
+                    .getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument,
+                            entityMetadata.getRelationNames());
             entities.add(entity);
         }
         return entities;
@@ -344,9 +345,11 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         return entities;
     }
 
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#delete(java.lang.Object, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
+     * java.lang.Object)
      */
     @Override
     public void delete(Object entity, Object pKey)
@@ -357,7 +360,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 
         // Find the DBObject to remove first
         BasicDBObject query = new BasicDBObject();
-        query.put(entityMetadata.getIdColumn().getName(), pKey.toString());        
+        query.put(entityMetadata.getIdColumn().getName(), pKey.toString());
 
         dbCollection.remove(query);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
@@ -447,7 +450,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         return indexManager;
     }
 
-
     /**
      * Method to find entity for given association name and association value.
      * 
@@ -494,9 +496,11 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         return reader;
     }
 
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.Object)
      */
     public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
@@ -507,8 +511,9 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 
     }
 
-
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.client.Client#getQueryImplementor()
      */
     @Override
@@ -517,7 +522,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         return MongoDBQuery.class;
     }
 
-    
     /**
      * Gets the string.
      * 

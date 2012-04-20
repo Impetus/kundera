@@ -37,8 +37,9 @@ public class EnhanceEntity
 
     public EnhanceEntity()
     {
-        
+
     }
+
     /**
      * Instantiates a new enhance entity.
      * 

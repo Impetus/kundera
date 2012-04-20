@@ -21,53 +21,54 @@ package com.impetus.kundera;
  * @author amresh.singh
  * 
  */
-public interface PersistenceProperties {
+public interface PersistenceProperties
+{
 
-	/** The Constant KUNDERA_NODES. */
-	public static final String KUNDERA_NODES = "kundera.nodes";
+    /** The Constant KUNDERA_NODES. */
+    public static final String KUNDERA_NODES = "kundera.nodes";
 
-	/** The Constant KUNDERA_PORT. */
-	public static final String KUNDERA_PORT = "kundera.port";
+    /** The Constant KUNDERA_PORT. */
+    public static final String KUNDERA_PORT = "kundera.port";
 
-	/** The Constant KUNDERA_KEYSPACE. */
-	public static final String KUNDERA_KEYSPACE = "kundera.keyspace";
+    /** The Constant KUNDERA_KEYSPACE. */
+    public static final String KUNDERA_KEYSPACE = "kundera.keyspace";
 
-	/** The Constant KUNDERA_DIALECT. */
-	public static final String KUNDERA_DIALECT = "kundera.dialect";
+    /** The Constant KUNDERA_DIALECT. */
+    public static final String KUNDERA_DIALECT = "kundera.dialect";
 
-        /** The Constant Kundera Client factory */
-        public static final String KUNDERA_CLIENT_FACTORY="kundera.client.lookup.class";
+    /** The Constant Kundera Client factory */
+    public static final String KUNDERA_CLIENT_FACTORY = "kundera.client.lookup.class";
 
-	/** The Constant KUNDERA_CACHE_PROVIDER_CLASS. */
-	public static final String KUNDERA_CACHE_PROVIDER_CLASS = "kundera.cache.provider.class";
+    /** The Constant KUNDERA_CACHE_PROVIDER_CLASS. */
+    public static final String KUNDERA_CACHE_PROVIDER_CLASS = "kundera.cache.provider.class";
 
-	/** The Constant KUNDERA_CACHE_CONFIG_RESOURCE. */
-	public static final String KUNDERA_CACHE_CONFIG_RESOURCE = "kundera.cache.config.resource";
+    /** The Constant KUNDERA_CACHE_CONFIG_RESOURCE. */
+    public static final String KUNDERA_CACHE_CONFIG_RESOURCE = "kundera.cache.config.resource";
 
-	/** The Constant KUNDERA_FETCH_MAX_DEPTH. */
-	public static final String KUNDERA_FETCH_MAX_DEPTH = "kundera.fetch.max.depth";
+    /** The Constant KUNDERA_FETCH_MAX_DEPTH. */
+    public static final String KUNDERA_FETCH_MAX_DEPTH = "kundera.fetch.max.depth";
 
-	/** Connection Pooling related constants. */
+    /** Connection Pooling related constants. */
 
-	// Cap on the number of object instances managed by the pool per node.
-	public static final String KUNDERA_POOL_SIZE_MAX_ACTIVE = "kundera.pool.size.max.active";
+    // Cap on the number of object instances managed by the pool per node.
+    public static final String KUNDERA_POOL_SIZE_MAX_ACTIVE = "kundera.pool.size.max.active";
 
-	// Cap on the number of "idle" instances in the pool.
-	/** The Constant KUNDERA_POOL_SIZE_MAX_IDLE. */
-	public static final String KUNDERA_POOL_SIZE_MAX_IDLE = "kundera.pool.size.max.idle";
+    // Cap on the number of "idle" instances in the pool.
+    /** The Constant KUNDERA_POOL_SIZE_MAX_IDLE. */
+    public static final String KUNDERA_POOL_SIZE_MAX_IDLE = "kundera.pool.size.max.idle";
 
-	// Minimum number of idle objects to maintain in each of the nodes.
-	/** The Constant KUNDERA_POOL_SIZE_MIN_IDLE. */
-	public static final String KUNDERA_POOL_SIZE_MIN_IDLE = "kundera.pool.size.min.idle";
+    // Minimum number of idle objects to maintain in each of the nodes.
+    /** The Constant KUNDERA_POOL_SIZE_MIN_IDLE. */
+    public static final String KUNDERA_POOL_SIZE_MIN_IDLE = "kundera.pool.size.min.idle";
 
-	// Cap on the total number of instances from all nodes combined.
-	/** The Constant KUNDERA_POOL_SIZE_MAX_TOTAL. */
-	public static final String KUNDERA_POOL_SIZE_MAX_TOTAL = "kundera.pool.size.max.total";
+    // Cap on the total number of instances from all nodes combined.
+    /** The Constant KUNDERA_POOL_SIZE_MAX_TOTAL. */
+    public static final String KUNDERA_POOL_SIZE_MAX_TOTAL = "kundera.pool.size.max.total";
 
-	/**
-	 * Home directory for alternative secondary indexing, Lucene to be specific.
-	 */
-	public static final String KUNDERA_INDEX_HOME_DIR = "index_home_dir";
+    /**
+     * Home directory for alternative secondary indexing, Lucene to be specific.
+     */
+    public static final String KUNDERA_INDEX_HOME_DIR = "index_home_dir";
 
-	public static final String KUNDERA_DDL_AUTO_PREPARE = "kundera_ddl_auto_prepare";
+    public static final String KUNDERA_DDL_AUTO_PREPARE = "kundera_ddl_auto_prepare";
 }

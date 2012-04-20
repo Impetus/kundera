@@ -25,7 +25,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-
 /**
  * The Class CassandraEntityPersonBi1To1FK.
  */
@@ -33,7 +32,7 @@ import javax.persistence.Table;
 @Table(name = "CassandraEntityPersonBi1To1FK", schema = "KunderaCoreExmples@cassandra")
 public class CassandraEntityPersonBi1To1FK
 {
-    
+
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
@@ -54,7 +53,7 @@ public class CassandraEntityPersonBi1To1FK
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -64,7 +63,7 @@ public class CassandraEntityPersonBi1To1FK
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -74,8 +73,9 @@ public class CassandraEntityPersonBi1To1FK
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -84,8 +84,9 @@ public class CassandraEntityPersonBi1To1FK
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -94,7 +95,7 @@ public class CassandraEntityPersonBi1To1FK
 
     /**
      * Gets the personal data.
-     *
+     * 
      * @return the personalData
      */
     public CassandraPersonalData getPersonalData()
@@ -104,8 +105,9 @@ public class CassandraEntityPersonBi1To1FK
 
     /**
      * Sets the personal data.
-     *
-     * @param personalData the personalData to set
+     * 
+     * @param personalData
+     *            the personalData to set
      */
     public void setPersonalData(CassandraPersonalData personalData)
     {
@@ -114,7 +116,7 @@ public class CassandraEntityPersonBi1To1FK
 
     /**
      * Gets the address.
-     *
+     * 
      * @return the address
      */
     public CassandraEntityAddressBi1To1FK getAddress()
@@ -124,8 +126,9 @@ public class CassandraEntityPersonBi1To1FK
 
     /**
      * Sets the address.
-     *
-     * @param address the new address
+     * 
+     * @param address
+     *            the new address
      */
     public void setAddress(CassandraEntityAddressBi1To1FK address)
     {

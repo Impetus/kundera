@@ -51,7 +51,6 @@ public interface LazyInitializerFactory
      *             the persistence exception
      */
     KunderaProxy getProxy(final String entityName, final Class<?> persistentClass, final Method getIdentifierMethod,
-            final Method setIdentifierMethod, final String id, final PersistenceDelegator persistenceDelegator)
-            ;
+            final Method setIdentifierMethod, final String id, final PersistenceDelegator persistenceDelegator);
 
 }

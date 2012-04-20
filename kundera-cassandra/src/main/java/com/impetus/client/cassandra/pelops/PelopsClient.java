@@ -66,8 +66,6 @@ import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.NodeLink;
-import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -374,13 +372,13 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         Object entity = node.getData();
         String id = ObjectGraphBuilder.getEntityId(node.getNodeId());
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-        
+
         List<RelationHolder> relationHolders = getRelationHolders(node);
 
         try
         {
             // Populate thrift row for this entity
-            PelopsDataHandler.ThriftRow tf = populateTfRow(entity, id, metadata);        
+            PelopsDataHandler.ThriftRow tf = populateTfRow(entity, id, metadata);
 
             onPersist(metadata, entity, tf, relationHolders);
 
@@ -393,7 +391,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         }
 
     }
-
 
     /**
      * Persists records into Join Table
@@ -458,7 +455,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             // Column family definition on which secondary index creation is
             // required
             CfDef columnFamilyDefToUpdate = null;
-            boolean isUpdatable=false;
+            boolean isUpdatable = false;
             // boolean isNew=false;
             for (CfDef cfDef : cfDefs)
             {
@@ -490,7 +487,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                 }
                 // need to set them to null else it is giving problem on update
                 // column family and trying to add again existing indexes.
-//                columnFamilyDefToUpdate.column_metadata = null;
+                // columnFamilyDefToUpdate.column_metadata = null;
             }
 
             // Iterate over all columns for creating secondary index on them
@@ -503,27 +500,28 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                 columnDef.setValidation_class("UTF8Type");
                 columnDef.setIndex_type(IndexType.KEYS);
 
-//                String indexName = PelopsUtils.getSecondaryIndexName(tableName, column);
+                // String indexName =
+                // PelopsUtils.getSecondaryIndexName(tableName, column);
 
                 // Add secondary index only if it's not already created
                 // (if already created, it would be there in column family
                 // definition)
                 if (!indexList.contains(Bytes.toUTF8(column.getName())))
                 {
-                    isUpdatable=true;
+                    isUpdatable = true;
                     columnFamilyDefToUpdate.addToColumn_metadata(columnDef);
                 }
             }
 
             // Finally, update column family with modified column family
             // definition
-            if(isUpdatable)
+            if (isUpdatable)
             {
                 api.system_update_column_family(columnFamilyDefToUpdate);
             }// } else
-            // {
-            // api.system_add_column_family(columnFamilyDefToUpdate);
-            // }
+             // {
+             // api.system_add_column_family(columnFamilyDefToUpdate);
+             // }
 
         }
         catch (InvalidRequestException e)
@@ -564,8 +562,8 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
      * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
-    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName,
-            String inverseJoinColumnName, String parentId)
+    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+            String parentId)
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
         List<Column> columns = selector.getColumnsFromRow(joinTableName, new Bytes(parentId.getBytes()),
@@ -576,13 +574,15 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         return foreignKeys;
     }
 
-
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
      */
     @Override
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,Class entityClazz)
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
+            Class entityClazz)
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
@@ -600,25 +600,24 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
 
         List<Object> rowKeys = new ArrayList<Object>();
 
-            // iterate through complete map and
-            Iterator<Bytes> rowIter = qResults.keySet().iterator();
-            while (rowIter.hasNext())
-            {
-                Bytes rowKey = rowIter.next();
+        // iterate through complete map and
+        Iterator<Bytes> rowIter = qResults.keySet().iterator();
+        while (rowIter.hasNext())
+        {
+            Bytes rowKey = rowIter.next();
 
-                PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn()
-                        .getField());
-                Object value = accessor.fromBytes(metadata.getIdColumn().getField().getClass(),
-                        rowKey.toByteArray());
+            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn()
+                    .getField());
+            Object value = accessor.fromBytes(metadata.getIdColumn().getField().getClass(), rowKey.toByteArray());
 
-                rowKeys.add(value);
-            }
+            rowKeys.add(value);
+        }
 
-            if (rowKeys != null && !rowKeys.isEmpty())
-            {
-                return rowKeys.toArray(new Object[0]);
-            }
-            return null;
+        if (rowKeys != null && !rowKeys.isEmpty())
+        {
+            return rowKeys.toArray(new Object[0]);
+        }
+        return null;
     }
 
     /*
@@ -881,7 +880,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        PelopsDataHandler handler = dataHandler != null? dataHandler: new PelopsDataHandler(this);
+        PelopsDataHandler handler = dataHandler != null ? dataHandler : new PelopsDataHandler(this);
         PelopsDataHandler.ThriftRow tf = handler.toThriftRow(this, entity, id, metadata, columnFamily);
         timestamp = handler.getTimestamp();
         return tf;
@@ -897,10 +896,11 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
      * @param tf
      *            the tf
      */
-    private void onPersist(EntityMetadata metadata, Object entity, PelopsDataHandler.ThriftRow tf, List<RelationHolder> relations)
+    private void onPersist(EntityMetadata metadata, Object entity, PelopsDataHandler.ThriftRow tf,
+            List<RelationHolder> relations)
     {
-        addRelationsToThriftRow(metadata, tf, relations);         
-        
+        addRelationsToThriftRow(metadata, tf, relations);
+
         Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
         List<Column> thriftColumns = tf.getColumns();
@@ -929,6 +929,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
 
     /**
      * Adds relation foreign key values as thrift column/ value to thrift row
+     * 
      * @param metadata
      * @param tf
      * @param relations
@@ -941,7 +942,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             for (RelationHolder rh : relations)
             {
                 String linkName = rh.getRelationName();
-                String linkValue = rh.getRelationValue();               
+                String linkValue = rh.getRelationValue();
 
                 if (linkName != null && linkValue != null)
                 {

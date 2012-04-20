@@ -18,7 +18,8 @@ package com.impetus.kundera.index;
 import com.impetus.kundera.KunderaException;
 
 /**
- * Captures any indexing related exceptions. 
+ * Captures any indexing related exceptions.
+ * 
  * @author animesh.kumar
  */
 public class IndexingException extends KunderaException
@@ -33,7 +34,7 @@ public class IndexingException extends KunderaException
     public IndexingException()
     {
         super();
-        
+
     }
 
     /**
@@ -43,7 +44,7 @@ public class IndexingException extends KunderaException
     public IndexingException(String arg0, Throwable arg1)
     {
         super(arg0, arg1);
-        
+
     }
 
     /**
@@ -52,7 +53,7 @@ public class IndexingException extends KunderaException
     public IndexingException(String arg0)
     {
         super(arg0);
-        
+
     }
 
     /**
@@ -61,6 +62,6 @@ public class IndexingException extends KunderaException
     public IndexingException(Throwable arg0)
     {
         super(arg0);
-        
-    }    
+
+    }
 }

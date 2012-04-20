@@ -146,7 +146,7 @@ public class KunderaQueryParser
 
         /**
          * Compile update.
-         *
+         * 
          * @return true, if successful
          */
         private boolean compileUpdate()
@@ -181,7 +181,7 @@ public class KunderaQueryParser
 
                 }
             }
-            
+
             compileResult();
             if (tokenizer.parseKeywordIgnoreCase("FROM"))
             {
@@ -255,47 +255,49 @@ public class KunderaQueryParser
             {
                 String[] colArr = tokenizeColumn(content);
                 addUpdateClause(colArr);
-//                query.setUpdateClause(content);
+                // query.setUpdateClause(content);
             }
         }
 
         /**
          * Tokenize column along with it's value using "," as tokenizer
-         * @param content      content
-         * @return  array of tokenized tuple.
+         * 
+         * @param content
+         *            content
+         * @return array of tokenized tuple.
          */
         private String[] tokenizeColumn(String content)
         {
-            StringTokenizer tokenizer = new StringTokenizer(content,",");
-            String[] columnArr = tokenizer.countTokens() > 0?new String[tokenizer.countTokens()]:null;
-            int count=0;
-            while(tokenizer.hasMoreTokens())
+            StringTokenizer tokenizer = new StringTokenizer(content, ",");
+            String[] columnArr = tokenizer.countTokens() > 0 ? new String[tokenizer.countTokens()] : null;
+            int count = 0;
+            while (tokenizer.hasMoreTokens())
             {
                 columnArr[count++] = tokenizer.nextToken();
             }
-            
+
             return columnArr;
         }
-        
+
         private void addUpdateClause(final String[] clauseArr)
         {
-            for(String columnTuple: clauseArr)
+            for (String columnTuple : clauseArr)
             {
                 StringTokenizer tokenizer = new StringTokenizer(columnTuple, ".");
                 String value = getTokenizedValue(tokenizer);
-                StringTokenizer token = new StringTokenizer(value,"=");
-                while(token.hasMoreTokens())
-                  {
+                StringTokenizer token = new StringTokenizer(value, "=");
+                while (token.hasMoreTokens())
+                {
                     query.addUpdateClause(token.nextToken(), token.nextToken());
-                  }
+                }
             }
         }
-        
+
         private String getTokenizedValue(StringTokenizer tokenizer)
         {
-            String value =null;
-            
-            while(tokenizer.hasMoreTokens())
+            String value = null;
+
+            while (tokenizer.hasMoreTokens())
             {
                 value = tokenizer.nextToken();
             }

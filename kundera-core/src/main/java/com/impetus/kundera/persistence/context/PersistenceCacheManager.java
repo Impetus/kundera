@@ -35,9 +35,9 @@ public class PersistenceCacheManager
         persistenceCache.clean();
 
     } // cleanIndividualCache(pc.getMainCache());
-    // cleanIndividualCache(pc.getEmbeddedCache());
-    // cleanIndividualCache(pc.getElementCollectionCache());
-    // cleanIndividualCache(pc.getTransactionalCache());
+      // cleanIndividualCache(pc.getEmbeddedCache());
+      // cleanIndividualCache(pc.getElementCollectionCache());
+      // cleanIndividualCache(pc.getTransactionalCache());
 
     private void cleanIndividualCache(CacheBase cache)
     {

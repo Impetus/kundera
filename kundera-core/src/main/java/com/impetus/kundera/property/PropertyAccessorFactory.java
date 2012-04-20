@@ -136,8 +136,8 @@ public class PropertyAccessorFactory
             else
             {
                 accessor = map.get(Object.class);
-            }	
-            
+            }
+
         }
         return accessor;
     }

@@ -44,7 +44,7 @@ public class CoreEntitySimple
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -54,7 +54,7 @@ public class CoreEntitySimple
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -64,8 +64,9 @@ public class CoreEntitySimple
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -74,8 +75,9 @@ public class CoreEntitySimple
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -84,7 +86,7 @@ public class CoreEntitySimple
 
     /**
      * Gets the age.
-     *
+     * 
      * @return the age
      */
     public short getAge()
@@ -94,8 +96,9 @@ public class CoreEntitySimple
 
     /**
      * Sets the age.
-     *
-     * @param age the age to set
+     * 
+     * @param age
+     *            the age to set
      */
     public void setAge(short age)
     {

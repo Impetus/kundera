@@ -42,7 +42,6 @@ public class IndexProcessor implements MetadataProcessor
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(IndexProcessor.class);
 
-
     public final void process(final Class<?> clazz, EntityMetadata metadata)
     {
         metadata.setIndexName(clazz.getSimpleName());

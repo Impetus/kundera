@@ -26,7 +26,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.PrimaryKeyJoinColumn;
 
 import com.impetus.kundera.client.DBType;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.persistence.event.CallbackMethod;
 
 /**
@@ -106,12 +105,12 @@ public final class EntityMetadata
 
     /** The is relation via join table. */
     private boolean isRelationViaJoinTable;
-    
+
     private List<String> relationNames;
-    
-    //Whether it contains One-To-Many relationship    
+
+    // Whether it contains One-To-Many relationship
     private boolean isParent;
-    
+
     /**
      * The Enum Type.
      */
@@ -642,8 +641,6 @@ public final class EntityMetadata
     {
         this.cacheable = cacheable;
     }
-    
-    
 
     /*
      * (non-Javadoc)
@@ -778,8 +775,7 @@ public final class EntityMetadata
     public boolean isRelationViaJoinTable()
     {
         return isRelationViaJoinTable;
-    }    
-    
+    }
 
     /**
      * @return the isParent
@@ -790,7 +786,8 @@ public final class EntityMetadata
     }
 
     /**
-     * @param isParent the isParent to set
+     * @param isParent
+     *            the isParent to set
      */
     public void setParent(boolean isParent)
     {
@@ -812,10 +809,12 @@ public final class EntityMetadata
     {
         return relationNames;
     }
+
     /**
      * Method to add specific relation name for given relational field.
      * 
-     * @param rField relation object.
+     * @param rField
+     *            relation object.
      */
     private void addRelationName(Relation rField)
     {
@@ -826,8 +825,7 @@ public final class EntityMetadata
             {
                 relationName = this.getIdColumn().getName();
             }
-            
-            
+
             addToRelationNameCollection(relationName);
         }
     }
@@ -835,21 +833,21 @@ public final class EntityMetadata
     /**
      * Adds relation name to relation name collection.
      * 
-     * @param relationName relational name
+     * @param relationName
+     *            relational name
      */
     private void addToRelationNameCollection(String relationName)
     {
-        if(relationNames == null)
+        if (relationNames == null)
         {
             relationNames = new ArrayList<String>();
         }
-        if(relationName != null)
+        if (relationName != null)
         {
-        relationNames.add(relationName);
+            relationNames.add(relationName);
         }
     }
-    
-    
+
     /**
      * Gets the relation field name.
      * 

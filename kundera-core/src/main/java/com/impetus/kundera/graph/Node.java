@@ -18,93 +18,101 @@ package com.impetus.kundera.graph;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.lifecycle.NodeStateContext;
-import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
- * Represents a node in object graph 
+ * Represents a node in object graph
+ * 
  * @author amresh.singh
  */
 public class Node implements NodeStateContext
-{  
-    
-    //ID of a node into object graph
+{
+
+    // ID of a node into object graph
     private String nodeId;
-    
-    //Actual node data
+
+    // Actual node data
     private Object data;
-    
-    //Current node state as defined in state machine
+
+    // Current node state as defined in state machine
     private NodeState currentNodeState;
-    
-    //Class of actual node data
-    private Class<?> dataClass;    
-    
-    //All parents of this node, Key is Node Link info and value is node itself
+
+    // Class of actual node data
+    private Class<?> dataClass;
+
+    // All parents of this node, Key is Node Link info and value is node itself
     private Map<NodeLink, Node> parents;
-    
-    //All children of this node, Key is Node Link info and value is node itself
+
+    // All children of this node, Key is Node Link info and value is node itself
     private Map<NodeLink, Node> children;
-    
-    //Whether this node has been traversed
+
+    // Whether this node has been traversed
     private boolean traversed;
-    
-    //Whether this node is dirty
+
+    // Whether this node is dirty
     private boolean dirty;
-    
-    //Whether this is a head node
+
+    // Whether this is a head node
     private boolean isHeadNode;
-    
+
     /** Client for this node */
     Client client;
-    
-    //Reference to Persistence cache where this node is stored
+
+    // Reference to Persistence cache where this node is stored
     private PersistenceCache persistenceCache;;
-    
+
     PersistenceDelegator pd;
-    
-    
-    public Node(String nodeId, Object data, PersistenceCache pc) {
-        initializeNode(nodeId, data);    
-        setPersistenceCache(pc);
-        
-        //Initialize current node state to transient state
-        this.currentNodeState = new TransientState();
-    }
-    
-    public Node(String nodeId, Object data, NodeState initialNodeState, PersistenceCache pc) {
+
+    public Node(String nodeId, Object data, PersistenceCache pc)
+    {
         initializeNode(nodeId, data);
         setPersistenceCache(pc);
-        
-        //Initialize current node state
-        if(initialNodeState == null) {
+
+        // Initialize current node state to transient state
+        this.currentNodeState = new TransientState();
+    }
+
+    public Node(String nodeId, Object data, NodeState initialNodeState, PersistenceCache pc)
+    {
+        initializeNode(nodeId, data);
+        setPersistenceCache(pc);
+
+        // Initialize current node state
+        if (initialNodeState == null)
+        {
             this.currentNodeState = new TransientState();
-        } else {
+        }
+        else
+        {
             this.currentNodeState = initialNodeState;
         }
-        
+
     }
-    
-    public Node(String nodeId, Class<?> nodeDataClass, NodeState initialNodeState, PersistenceCache pc) {
+
+    public Node(String nodeId, Class<?> nodeDataClass, NodeState initialNodeState, PersistenceCache pc)
+    {
         this.nodeId = nodeId;
         this.dataClass = nodeDataClass;
         setPersistenceCache(pc);
-        
-        //Initialize current node state
-        if(initialNodeState == null) {
+
+        // Initialize current node state
+        if (initialNodeState == null)
+        {
             this.currentNodeState = new TransientState();
-        } else {
+        }
+        else
+        {
             this.currentNodeState = initialNodeState;
         }
     }
-    
-    private void initializeNode(String nodeId, Object data) {
+
+    private void initializeNode(String nodeId, Object data)
+    {
         this.nodeId = nodeId;
         this.data = data;
         this.dataClass = data.getClass();
@@ -120,7 +128,8 @@ public class Node implements NodeStateContext
     }
 
     /**
-     * @param nodeId the nodeId to set
+     * @param nodeId
+     *            the nodeId to set
      */
     @Override
     public void setNodeId(String nodeId)
@@ -138,7 +147,8 @@ public class Node implements NodeStateContext
     }
 
     /**
-     * @param data the data to set
+     * @param data
+     *            the data to set
      */
     @Override
     public void setData(Object data)
@@ -153,10 +163,11 @@ public class Node implements NodeStateContext
     public Class getDataClass()
     {
         return dataClass;
-    }    
-    
+    }
+
     /**
-     * @param dataClass the dataClass to set
+     * @param dataClass
+     *            the dataClass to set
      */
     @Override
     public void setDataClass(Class dataClass)
@@ -174,13 +185,14 @@ public class Node implements NodeStateContext
     }
 
     /**
-     * @param currentNodeState the currentNodeState to set
+     * @param currentNodeState
+     *            the currentNodeState to set
      */
     @Override
     public void setCurrentNodeState(NodeState currentNodeState)
     {
         this.currentNodeState = currentNodeState;
-    }    
+    }
 
     /**
      * @return the parents
@@ -192,7 +204,8 @@ public class Node implements NodeStateContext
     }
 
     /**
-     * @param parents the parents to set
+     * @param parents
+     *            the parents to set
      */
     @Override
     public void setParents(Map<NodeLink, Node> parents)
@@ -210,15 +223,15 @@ public class Node implements NodeStateContext
     }
 
     /**
-     * @param children the children to set
+     * @param children
+     *            the children to set
      */
     @Override
     public void setChildren(Map<NodeLink, Node> children)
     {
         this.children = children;
-    }  
-    
-    
+    }
+
     /**
      * @return the isHeadNode
      */
@@ -228,7 +241,8 @@ public class Node implements NodeStateContext
     }
 
     /**
-     * @param isHeadNode the isHeadNode to set
+     * @param isHeadNode
+     *            the isHeadNode to set
      */
     public void setHeadNode(boolean isHeadNode)
     {
@@ -239,47 +253,59 @@ public class Node implements NodeStateContext
      * Retrieves parent node of this node for a given parent node ID
      */
     @Override
-    public Node getParentNode(String parentNodeId) {
+    public Node getParentNode(String parentNodeId)
+    {
         NodeLink link = new NodeLink(parentNodeId, getNodeId());
-        
-        if(this.parents == null) {
+
+        if (this.parents == null)
+        {
             return null;
-        } else {
+        }
+        else
+        {
             return this.parents.get(link);
         }
     }
-    
+
     /**
      * Retrieves child node of this node for a given child node ID
      */
-    
+
     @Override
-    public Node getChildNode(String childNodeId) {
+    public Node getChildNode(String childNodeId)
+    {
         NodeLink link = new NodeLink(getNodeId(), childNodeId);
-        
-        if(this.children == null) {
+
+        if (this.children == null)
+        {
             return null;
-        } else {
+        }
+        else
+        {
             return this.children.get(link);
         }
     }
-    
+
     @Override
-    public void addParentNode(NodeLink nodeLink, Node node) {
-        if(parents == null || parents.isEmpty()) {
+    public void addParentNode(NodeLink nodeLink, Node node)
+    {
+        if (parents == null || parents.isEmpty())
+        {
             parents = new HashMap<NodeLink, Node>();
         }
         parents.put(nodeLink, node);
     }
-    
+
     @Override
-    public void addChildNode(NodeLink nodeLink, Node node) {
-        if(children == null || children.isEmpty()) {
+    public void addChildNode(NodeLink nodeLink, Node node)
+    {
+        if (children == null || children.isEmpty())
+        {
             children = new HashMap<NodeLink, Node>();
         }
         children.put(nodeLink, node);
-    }   
-    
+    }
+
     /**
      * @return the traversed
      */
@@ -290,13 +316,14 @@ public class Node implements NodeStateContext
     }
 
     /**
-     * @param traversed the traversed to set
+     * @param traversed
+     *            the traversed to set
      */
     @Override
     public void setTraversed(boolean traversed)
     {
         this.traversed = traversed;
-    }   
+    }
 
     /**
      * @return the dirty
@@ -308,14 +335,14 @@ public class Node implements NodeStateContext
     }
 
     /**
-     * @param dirty the dirty to set
+     * @param dirty
+     *            the dirty to set
      */
     @Override
     public void setDirty(boolean dirty)
     {
         this.dirty = dirty;
-    }  
-    
+    }
 
     /**
      * @return the client
@@ -327,15 +354,15 @@ public class Node implements NodeStateContext
     }
 
     /**
-     * @param client the client to set
+     * @param client
+     *            the client to set
      */
-    
+
     @Override
     public void setClient(Client client)
     {
         this.client = client;
     }
-    
 
     @Override
     public PersistenceDelegator getPersistenceDelegator()
@@ -350,21 +377,21 @@ public class Node implements NodeStateContext
     }
 
     @Override
-    public String toString() {
-        return "[" + nodeId +  "]";
-    } 
-    
+    public String toString()
+    {
+        return "[" + nodeId + "]";
+    }
+
     @Override
     public boolean equals(Object otherNode)
     {
         return super.equals(otherNode);
     }
-    
-    
-    //////////////////////////////////////////
+
+    // ////////////////////////////////////////
     /* CRUD related operations on this node */
-    //////////////////////////////////////////
-    
+    // ////////////////////////////////////////
+
     @Override
     public void persist()
     {
@@ -446,15 +473,14 @@ public class Node implements NodeStateContext
     @Override
     public void flush()
     {
-        if(isDirty())
+        if (isDirty())
         {
             getCurrentNodeState().handleFlush(this);
         }
-    } 
-    
-    
-    //Overridden methods from
-    
+    }
+
+    // Overridden methods from
+
     @Override
     public boolean isInState(Class<?> stateClass)
     {
@@ -471,6 +497,6 @@ public class Node implements NodeStateContext
     public void setPersistenceCache(PersistenceCache persistenceCache)
     {
         this.persistenceCache = persistenceCache;
-    }     
+    }
 
 }

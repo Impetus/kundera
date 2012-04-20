@@ -93,7 +93,8 @@ public class ManyToManyHandler extends AssociationHandler implements MappingHand
         }
         catch (PropertyAccessException e)
         {
-            throw new PersistenceObjectGraphBuilderException("Error while getting relational graph for object " + entity, e);
+            throw new PersistenceObjectGraphBuilderException("Error while getting relational graph for object "
+                    + entity, e);
         }
 
         return objectGraph;

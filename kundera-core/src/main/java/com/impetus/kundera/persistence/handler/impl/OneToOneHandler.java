@@ -149,7 +149,8 @@ class OneToOneHandler extends AssociationHandler implements MappingHandler
 
             try
             {
-                PropertyAccessorHelper.setId(associatedEntity, KunderaMetadataManager.getEntityMetadata(clazz), getId(entity, metadata));
+                PropertyAccessorHelper.setId(associatedEntity, KunderaMetadataManager.getEntityMetadata(clazz),
+                        getId(entity, metadata));
                 // PropertyAccessorHelper.set(associatedEntity, f, getId(entity,
                 // metadata));
             }

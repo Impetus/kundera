@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.processor;
 
-
 import junit.framework.Assert;
 
 import org.junit.After;
@@ -30,28 +29,30 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
  * Junit Test case for @See TableProcessor.
  * 
  * @author vivek.mishra
- *
+ * 
  */
 public class TableProcessorTest
 {
 
     /**
      * Sets the up.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Before
     public void setUp() throws Exception
     {
-        //Do nothing.
+        // Do nothing.
     }
 
-    
     /**
      * Test process query metadata.
-     *
-     * @throws InstantiationException the instantiation exception
-     * @throws IllegalAccessException the illegal access exception
+     * 
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
      */
     @Test
     public void testProcessQueryMetadata() throws InstantiationException, IllegalAccessException
@@ -62,41 +63,42 @@ public class TableProcessorTest
         final String native_query = "Select native from TestEntity native where native.field = :field";
         final String native_query1 = "Select native1 from TestEntity native1 where native1.field = :field";
         final String native_query2 = "Select native2 from TestEntity native2 where native2.field = :field";
-        
+
         EntityMetadata metadata = new EntityMetadata(EntitySample.class);
         TableProcessor tableProcessor = new TableProcessor();
         tableProcessor.process(EntitySample.class, metadata);
-        
-        //Get application metadata
+
+        // Get application metadata
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        
+
         // Named query asserts.
         Assert.assertNotNull(appMetadata.getQuery("test.named.query"));
-        Assert.assertEquals(appMetadata.getQuery("test.named.query"),named_query);
+        Assert.assertEquals(appMetadata.getQuery("test.named.query"), named_query);
         Assert.assertNotNull(appMetadata.getQuery("test.named.queries1"));
-        Assert.assertEquals(appMetadata.getQuery("test.named.queries1"),named_query1);
+        Assert.assertEquals(appMetadata.getQuery("test.named.queries1"), named_query1);
         Assert.assertNotNull(appMetadata.getQuery("test.named.queries2"));
-        Assert.assertEquals(appMetadata.getQuery("test.named.queries2"),named_query2);
+        Assert.assertEquals(appMetadata.getQuery("test.named.queries2"), named_query2);
         Assert.assertNotNull(appMetadata.getQuery("test.named.queries2"));
 
-        //Native query asserts
+        // Native query asserts
         Assert.assertNotNull(appMetadata.getQuery("test.native.query"));
-        Assert.assertEquals(appMetadata.getQuery("test.native.query"),native_query);
+        Assert.assertEquals(appMetadata.getQuery("test.native.query"), native_query);
         Assert.assertNotNull(appMetadata.getQuery("test.native.query1"));
-        Assert.assertEquals(appMetadata.getQuery("test.native.query1"),native_query1);
+        Assert.assertEquals(appMetadata.getQuery("test.native.query1"), native_query1);
         Assert.assertNotNull(appMetadata.getQuery("test.native.query2"));
-        Assert.assertEquals(appMetadata.getQuery("test.native.query2"),native_query2);
+        Assert.assertEquals(appMetadata.getQuery("test.native.query2"), native_query2);
     }
-    
+
     /**
      * Tear down.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @After
     public void tearDown() throws Exception
     {
-        //Do nothing.
+        // Do nothing.
     }
 
 }

@@ -63,7 +63,8 @@ public abstract class AbstractSchemaManager
     /**
      * Initialise with configured client factory.
      * 
-     * @param clientFactory  specific client factory.
+     * @param clientFactory
+     *            specific client factory.
      */
     protected AbstractSchemaManager(String clientFactory)
     {

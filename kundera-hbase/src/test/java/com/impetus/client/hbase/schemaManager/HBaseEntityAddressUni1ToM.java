@@ -20,7 +20,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * The Class HbaseEntityAddressUni1ToM.
  */
@@ -40,7 +39,7 @@ public class HBaseEntityAddressUni1ToM
 
     /**
      * Gets the address id.
-     *
+     * 
      * @return the address id
      */
     public String getAddressId()
@@ -50,8 +49,9 @@ public class HBaseEntityAddressUni1ToM
 
     /**
      * Sets the address id.
-     *
-     * @param addressId the new address id
+     * 
+     * @param addressId
+     *            the new address id
      */
     public void setAddressId(String addressId)
     {
@@ -60,7 +60,7 @@ public class HBaseEntityAddressUni1ToM
 
     /**
      * Gets the street.
-     *
+     * 
      * @return the street
      */
     public String getStreet()
@@ -70,8 +70,9 @@ public class HBaseEntityAddressUni1ToM
 
     /**
      * Sets the street.
-     *
-     * @param street the new street
+     * 
+     * @param street
+     *            the new street
      */
     public void setStreet(String street)
     {

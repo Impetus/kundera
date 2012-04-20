@@ -440,7 +440,7 @@ public class CassandraSchemaOperationTest
 
             clientMetadata.setLuceneIndexDir(null);
         }
-        
+
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();

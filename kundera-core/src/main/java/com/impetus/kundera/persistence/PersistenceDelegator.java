@@ -32,7 +32,6 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Query;
-import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -95,10 +94,10 @@ public class PersistenceDelegator
     private ObjectGraphBuilder graphBuilder;
 
     private FlushManager flushManager;
-    
-    //Whether a transaction is in progress
+
+    // Whether a transaction is in progress
     private boolean isTransactionInProgress;
-    
+
     private PersistenceCache persistenceCache;
 
     /**
@@ -117,12 +116,10 @@ public class PersistenceDelegator
         flushManager = new FlushManager();
         this.persistenceCache = pc;
     }
-    
-    
+
     /***********************************************************************/
     /***************** CRUD Methods ****************************************/
     /***********************************************************************/
-    
 
     /**
      * Writes an entity into Persistence cache
@@ -151,8 +148,8 @@ public class PersistenceDelegator
         flush();
 
         graph.getNodeMapping().clear();
-        graph=null;
-        
+        graph = null;
+
         // Invoke Post Persist Events
         getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
         log.debug("Data persisted successfully for entity : " + e.getClass());
@@ -198,7 +195,8 @@ public class PersistenceDelegator
         {
             if (getPersistenceCache().getMainCache().getNodeFromCache(nodeId) == null)
             {
-                ObjectGraph graph = new ObjectGraphBuilder().getObjectGraph(nodeData, new ManagedState(), getPersistenceCache());
+                ObjectGraph graph = new ObjectGraphBuilder().getObjectGraph(nodeData, new ManagedState(),
+                        getPersistenceCache());
                 getPersistenceCache().getMainCache().addGraphToCache(graph, getPersistenceCache());
             }
 
@@ -207,12 +205,12 @@ public class PersistenceDelegator
         {
             return null;
         }
-        
-        //Return a deep copy of the node data
+
+        // Return a deep copy of the node data
         return (E) ObjectUtils.deepCopy(nodeData);
-       
+
     }
-    
+
     public <E> List<E> find(Class<E> entityClass, Object... primaryKeys)
     {
         List<E> entities = new ArrayList<E>();
@@ -369,7 +367,7 @@ public class PersistenceDelegator
         // fire PreUpdate events
         getEventDispatcher().fireEventListeners(m, e, PostUpdate.class);
 
-        return (E)headNode.getData();
+        return (E) headNode.getData();
     }
 
     // TODO : This method needs serious attention!
@@ -431,8 +429,6 @@ public class PersistenceDelegator
     {
         return eventDispatcher;
     }
-
-    
 
     /**
      * Find.
@@ -533,7 +529,7 @@ public class PersistenceDelegator
             clientMap = null;
         }
 
-        // TODO: Move all nodes tied to this EM into detached state   
+        // TODO: Move all nodes tied to this EM into detached state
 
         closed = true;
     }
@@ -632,8 +628,7 @@ public class PersistenceDelegator
     public void setFlushMode(FlushModeType flushMode)
     {
         this.flushMode = flushMode;
-    }  
-    
+    }
 
     /**
      * @return the isTransactionInProgress
@@ -641,8 +636,7 @@ public class PersistenceDelegator
     public boolean isTransactionInProgress()
     {
         return isTransactionInProgress;
-    } 
-
+    }
 
     /**
      * @return the persistenceCache
@@ -652,11 +646,8 @@ public class PersistenceDelegator
         return persistenceCache;
     }
 
-
     /******************************* Transaction related methods ***********************************************/
 
-    
-    
     public void begin()
     {
         isTransactionInProgress = true;
@@ -686,5 +677,5 @@ public class PersistenceDelegator
     public boolean isActive()
     {
         return isTransactionInProgress;
-    }    
+    }
 }

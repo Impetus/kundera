@@ -18,7 +18,6 @@ package com.impetus.kundera.metadata.processor.relation;
 import java.lang.reflect.Field;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 
 /**
  * The Interface RelationMetadataProcessor.

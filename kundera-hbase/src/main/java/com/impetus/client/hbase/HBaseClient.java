@@ -251,7 +251,6 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
         indexNode(node, entityMetadata, getIndexManager());
     }
 
-
     /**
      * On persist.
      * 
@@ -294,7 +293,8 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
 
         try
         {
-//            handler.createTableIfDoesNotExist(tableName, columnFamilyNames.toArray(new String[0]));
+            // handler.createTableIfDoesNotExist(tableName,
+            // columnFamilyNames.toArray(new String[0]));
 
             // Write data to HBase
 
@@ -305,7 +305,6 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
             throw new PersistenceException(e.getMessage());
         }
     }
-
 
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
@@ -354,8 +353,8 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
      * com.impetus.kundera.persistence.handler.impl.EntitySaveGraph)
      */
     @Override
-    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName,
-            String inverseJoinColumnName, String parentId)
+    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+            String parentId)
     {
         return handler.getForeignKeysFromJoinTable(joinTableName, parentId, inverseJoinColumnName);
 
@@ -379,7 +378,6 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
             throw new PersistenceException(e);
         }
     }
-
 
     /*
      * (non-Javadoc)
@@ -417,7 +415,9 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
         return reader;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.client.Client#getQueryImplementor()
      */
     @Override
@@ -426,11 +426,15 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
         return LuceneQuery.class;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
      */
     @Override
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue, Class entityClazz)
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
+            Class entityClazz)
     {
         throw new UnsupportedOperationException("Method not supported.");
     }

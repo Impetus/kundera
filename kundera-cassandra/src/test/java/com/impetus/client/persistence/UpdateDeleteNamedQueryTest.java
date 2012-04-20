@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.persistence;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +44,7 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
  * Test case for update/delete via JPQL.
  * 
  * @author vivek.mishra
- *
+ * 
  */
 public class UpdateDeleteNamedQueryTest
 {
@@ -83,29 +82,32 @@ public class UpdateDeleteNamedQueryTest
         entity.setKey("k");
         entity.setState("UP");
         em.persist(entity);
-        
+
         String updateQuery = "Update CassandraEntitySample c SET c.state=DELHI where c.state=UP";
         Query q = em.createQuery(updateQuery);
         q.executeUpdate();
-        
+
         CassandraEntitySample result = em.find(CassandraEntitySample.class, "k");
         Assert.assertNotNull(result);
-//        Assert.assertEquals("DELHI", result.getState()); // This should be uncommented later. as merge got some issue.
+        // Assert.assertEquals("DELHI", result.getState()); // This should be
+        // uncommented later. as merge got some issue.
         String deleteQuery = "Delete From CassandraEntitySample c where c.state=UP";
 
         q = em.createQuery(deleteQuery);
-//        q = em.createNamedQuery("delete.query");
+        // q = em.createNamedQuery("delete.query");
         q.executeUpdate();
         result = em.find(CassandraEntitySample.class, "k");
-//        Assert.assertNull(result); // This should be uncommented later. as merge got some issue.
+        // Assert.assertNull(result); // This should be uncommented later. as
+        // merge got some issue.
 
     }
-    
+
     @Test
     public void testDelete()
     {
-        
+
     }
+
     /**
      * @throws java.lang.Exception
      */
@@ -115,11 +117,9 @@ public class UpdateDeleteNamedQueryTest
         CassandraCli.dropKeySpace("KunderaExamples");
     }
 
-
-
     /**
      * Gets the entity manager factory.
-     *
+     * 
      * @return the entity manager factory
      */
     private EntityManagerFactoryImpl getEntityManagerFactory()
@@ -127,7 +127,8 @@ public class UpdateDeleteNamedQueryTest
         Map<String, Object> props = new HashMap<String, Object>();
         String persistenceUnit = "cassandra";
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, "com.impetus.client.cassandra.pelops.PelopsClientFactory");
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,
+                "com.impetus.client.cassandra.pelops.PelopsClientFactory");
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaExamples");
@@ -155,7 +156,7 @@ public class UpdateDeleteNamedQueryTest
         m.setPersistenceUnit(persistenceUnit);
         MetamodelImpl metaModel = new MetamodelImpl();
         metaModel.addEntityMetadata(CassandraEntitySample.class, m);
-        metaModel.addEntityNameToClassMapping("CassandraEntitySample",CassandraEntitySample.class);
+        metaModel.addEntityNameToClassMapping("CassandraEntitySample", CassandraEntitySample.class);
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
         EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
         return emf;

@@ -49,7 +49,7 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
     }
 
     @Override
-    public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata) 
+    public void addRelationIntoMetadata(Field relationField, EntityMetadata metadata)
     {
         ManyToMany ann = relationField.getAnnotation(ManyToMany.class);
 
@@ -96,7 +96,6 @@ public class ManyToManyRelationMetadataProcessor extends AbstractEntityFieldProc
         }
 
     }
-
 
     @Override
     public void process(Class<?> clazz, EntityMetadata metadata)

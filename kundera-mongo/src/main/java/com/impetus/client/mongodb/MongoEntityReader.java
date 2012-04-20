@@ -17,8 +17,6 @@ package com.impetus.client.mongodb;
 
 import java.util.List;
 
-import javax.persistence.PersistenceException;
-
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;

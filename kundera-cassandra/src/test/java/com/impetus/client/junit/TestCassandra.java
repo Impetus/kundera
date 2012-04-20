@@ -43,7 +43,6 @@ public class TestCassandra
     /** The logger. */
     private static Logger logger = Logger.getLogger(TestCassandra.class);
 
-
     /**
      * Sets the up.
      * 
@@ -89,6 +88,5 @@ public class TestCassandra
         logger.info("destroying");
         CassandraCli.dropKeySpace("UUIDSample");
     }
-
 
 }

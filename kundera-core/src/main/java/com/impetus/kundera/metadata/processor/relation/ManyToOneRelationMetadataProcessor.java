@@ -89,7 +89,6 @@ public class ManyToOneRelationMetadataProcessor extends AbstractEntityFieldProce
 
     }
 
-
     @Override
     public void process(Class<?> clazz, EntityMetadata metadata)
     {

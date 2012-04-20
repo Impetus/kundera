@@ -15,7 +15,9 @@
  */
 package com.impetus.kundera.graph;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,11 +28,13 @@ import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * Test case for {@link ObjectGraph}
+ * 
  * @author amresh.singh
  */
 public class ObjectGraphTest
 {
     ObjectGraph objectGraph;
+
     PersistenceCache pc;
 
     /**
@@ -61,43 +65,43 @@ public class ObjectGraphTest
         BillingCounter b1 = new BillingCounter();
         BillingCounter b2 = new BillingCounter();
         BillingCounter b3 = new BillingCounter();
-        
+
         String storeId = ObjectGraphBuilder.getNodeId("1", store);
         String b1Id = ObjectGraphBuilder.getNodeId("A1", b1);
         String b2Id = ObjectGraphBuilder.getNodeId("A2", b2);
         String b3Id = ObjectGraphBuilder.getNodeId("A3", b3);
-        
-        Node headNode = new Node(storeId, store, pc);       
-        
+
+        Node headNode = new Node(storeId, store, pc);
+
         Node child1 = new Node(b1Id, b1, pc);
         Node child2 = new Node(b2Id, b2, pc);
         Node child3 = new Node(b3Id, b3, pc);
-        
+
         NodeLink linkB1 = new NodeLink(storeId, b1Id);
         NodeLink linkB2 = new NodeLink(storeId, b2Id);
         NodeLink linkB3 = new NodeLink(storeId, b3Id);
-        
+
         linkB1.addLinkProperty(LinkProperty.LINK_NAME, "STORE_ID");
         linkB2.addLinkProperty(LinkProperty.LINK_NAME, "STORE_ID");
         linkB3.addLinkProperty(LinkProperty.LINK_NAME, "STORE_ID");
-        
+
         headNode.addChildNode(linkB1, child1);
         headNode.addChildNode(linkB2, child2);
         headNode.addChildNode(linkB3, child3);
-        
+
         child1.addParentNode(linkB1, headNode);
         child2.addParentNode(linkB2, headNode);
         child3.addParentNode(linkB3, headNode);
-        
+
         assertEquals(storeId, headNode.getNodeId());
         assertNull(headNode.getParents());
         assertEquals(3, headNode.getChildren().size());
-        
+
         assertEquals(b1Id, child1.getNodeId());
         assertNull(child1.getChildren());
         assertNotNull(child1.getParents());
         assertEquals(1, child1.getParents().size());
-        
+
     }
 
 }

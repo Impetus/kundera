@@ -38,14 +38,14 @@ public class PhotographerUni_1_1_1_M
     @Id
     @Column(name = "PHOTOGRAPHER_ID")
     private int photographerId;
-    
+
     @Column(name = "PHOTOGRAPHER_NAME")
     private String photographerName;
 
     // One to many, will be persisted separately
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name="ALBUM_ID")
-    private AlbumUni_1_1_1_M album;     
+    @JoinColumn(name = "ALBUM_ID")
+    private AlbumUni_1_1_1_M album;
 
     /**
      * @return the photographerName
@@ -56,7 +56,8 @@ public class PhotographerUni_1_1_1_M
     }
 
     /**
-     * @param photographerName the photographerName to set
+     * @param photographerName
+     *            the photographerName to set
      */
     public void setPhotographerName(String photographerName)
     {
@@ -72,7 +73,8 @@ public class PhotographerUni_1_1_1_M
     }
 
     /**
-     * @param photographerId the photographerId to set
+     * @param photographerId
+     *            the photographerId to set
      */
     public void setPhotographerId(int photographerId)
     {
@@ -87,6 +89,6 @@ public class PhotographerUni_1_1_1_M
     public void setAlbum(AlbumUni_1_1_1_M album)
     {
         this.album = album;
-    }   
+    }
 
 }

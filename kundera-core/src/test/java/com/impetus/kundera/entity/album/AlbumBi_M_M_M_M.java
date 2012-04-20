@@ -40,7 +40,7 @@ import com.impetus.kundera.entity.photographer.PhotographerBi_M_M_M_M;
 public class AlbumBi_M_M_M_M
 {
     @Id
-    @Column(name="ALBUM_ID")
+    @Column(name = "ALBUM_ID")
     private String albumId;
 
     @Column(name = "ALBUM_NAME")
@@ -50,16 +50,9 @@ public class AlbumBi_M_M_M_M
     private String albumDescription;
 
     @ManyToMany
-    @JoinTable(name = "ALBUM_PHOTO", 
-      joinColumns = {
-        @JoinColumn(name="ALBUM_ID")           
-      },
-      inverseJoinColumns = {
-        @JoinColumn(name="PHOTO_ID")
-      }
-    )
+    @JoinTable(name = "ALBUM_PHOTO", joinColumns = { @JoinColumn(name = "ALBUM_ID") }, inverseJoinColumns = { @JoinColumn(name = "PHOTO_ID") })
     private List<PhotoBi_M_M_M_M> photos;
-    
+
     @ManyToMany(mappedBy = "albums", fetch = FetchType.LAZY)
     private List<PhotographerBi_M_M_M_M> photographers;
 
@@ -117,28 +110,31 @@ public class AlbumBi_M_M_M_M
     public void setAlbumDescription(String albumDescription)
     {
         this.albumDescription = albumDescription;
-    }    
-    
+    }
+
     /**
      * @return the photos
      */
     public List<PhotoBi_M_M_M_M> getPhotos()
     {
-        if(this.photos == null || this.photos.isEmpty()) {
+        if (this.photos == null || this.photos.isEmpty())
+        {
             this.photos = new ArrayList<PhotoBi_M_M_M_M>();
         }
         return photos;
     }
 
     /**
-     * @param photos the photos to set
+     * @param photos
+     *            the photos to set
      */
     public void setPhotos(List<PhotoBi_M_M_M_M> photos)
     {
         this.photos = photos;
     }
 
-    public void addPhoto(PhotoBi_M_M_M_M photo) {
+    public void addPhoto(PhotoBi_M_M_M_M photo)
+    {
         getPhotos().add(photo);
     }
 
@@ -151,11 +147,12 @@ public class AlbumBi_M_M_M_M
     }
 
     /**
-     * @param photographers the photographers to set
+     * @param photographers
+     *            the photographers to set
      */
     public void setPhotographers(List<PhotographerBi_M_M_M_M> photographers)
     {
         this.photographers = photographers;
-    } 
+    }
 
 }

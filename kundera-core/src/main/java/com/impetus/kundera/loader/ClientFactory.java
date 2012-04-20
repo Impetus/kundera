@@ -21,7 +21,7 @@ import com.impetus.kundera.client.Client;
  * Interface for client factory.
  * 
  * @author vivek.mishra
- *
+ * 
  */
 public interface ClientFactory
 {
@@ -36,8 +36,9 @@ public interface ClientFactory
 
     /**
      * Instantiate and returns client instance
-     * @return  client instance.
+     * 
+     * @return client instance.
      */
     Client getClientInstance();
- 
+
 }

@@ -41,7 +41,7 @@ import com.impetus.kundera.entity.photographer.PhotographerBi_1_M_1_M;
 public class AlbumBi_1_M_1_M
 {
     @Id
-    @Column(name="ALBUM_ID")
+    @Column(name = "ALBUM_ID")
     private String albumId;
 
     @Column(name = "ALBUM_NAME")
@@ -51,11 +51,11 @@ public class AlbumBi_1_M_1_M
     private String albumDescription;
 
     // One to many, will be persisted separately
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy="album")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "album")
     private List<PhotoBi_1_M_1_M> photos;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="PHOTOGRAPHER_ID")
+    @JoinColumn(name = "PHOTOGRAPHER_ID")
     private PhotographerBi_1_M_1_M photographer;
 
     public AlbumBi_1_M_1_M()
@@ -119,7 +119,8 @@ public class AlbumBi_1_M_1_M
      */
     public List<PhotoBi_1_M_1_M> getPhotos()
     {
-        if(photos == null) {
+        if (photos == null)
+        {
             photos = new ArrayList<PhotoBi_1_M_1_M>();
         }
         return photos;
@@ -133,8 +134,9 @@ public class AlbumBi_1_M_1_M
     {
         this.photos = photos;
     }
-    
-    public void addPhoto(PhotoBi_1_M_1_M photo) {
+
+    public void addPhoto(PhotoBi_1_M_1_M photo)
+    {
         getPhotos().add(photo);
     }
 
@@ -147,12 +149,12 @@ public class AlbumBi_1_M_1_M
     }
 
     /**
-     * @param photographer the photographer to set
+     * @param photographer
+     *            the photographer to set
      */
     public void setPhotographer(PhotographerBi_1_M_1_M photographer)
     {
         this.photographer = photographer;
-    }  
-    
+    }
 
 }

@@ -16,20 +16,18 @@
 package com.impetus.kundera.persistence;
 
 import java.util.List;
-import java.util.Map;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 
 /**
  * The Interface EntityReader.
  * 
- * @author vivek.mishra 
+ * @author vivek.mishra
  * 
- * Interface to provide declarations for methods
- *         responsible for entity read operations.(Except queries).
+ *         Interface to provide declarations for methods responsible for entity
+ *         read operations.(Except queries).
  */
 public interface EntityReader
 {
@@ -69,11 +67,9 @@ public interface EntityReader
      * @throws Exception
      *             the exception
      */
-    
+
     Object recursivelyFindEntities(EnhanceEntity e, Client client, EntityMetadata m, PersistenceDelegator pd);
-    
-    
-    
+
     /**
      * Find by id.
      * 
@@ -89,5 +85,4 @@ public interface EntityReader
      */
     EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client);
 
-    
 }

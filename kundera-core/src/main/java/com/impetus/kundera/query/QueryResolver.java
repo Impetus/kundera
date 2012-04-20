@@ -63,7 +63,7 @@ public class QueryResolver
         String mappedQuery = appMetadata.getQuery(jpaQuery);
         boolean isNative = appMetadata.isNative(jpaQuery);
         String pu = null;
-        EntityMetadata m =null;
+        EntityMetadata m = null;
         // In case of named native query
         if (!isNative)
         {
@@ -75,14 +75,15 @@ public class QueryResolver
             kunderaQuery.postParsingInit();
             pu = kunderaQuery.getPersistenceUnit();
             m = kunderaQuery.getEntityMetadata();
-        } else
+        }
+        else
         {
             Class mappedClass = appMetadata.getMappedClass(jpaQuery);
-            
+
             pu = appMetadata.getMappedPersistenceUnit(mappedClass).get(0);
-            m= KunderaMetadataManager.getEntityMetadata(mappedClass);
+            m = KunderaMetadataManager.getEntityMetadata(mappedClass);
         }
-        
+
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
 
         Query query = null;

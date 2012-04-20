@@ -18,7 +18,6 @@ package com.impetus.client.rdbms;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -52,11 +51,9 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * The Class HibernateClient.
@@ -102,7 +99,8 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         conf = new Configuration().addProperties(HibernateUtils.getProperties(persistenceUnit));
         Collection<Class<?>> classes = ((MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 persistenceUnit)).getEntityNameToClassMap().values();
-        // to keep hibernate happy! As in our case all scanned classes are not meant for rdbms, so initally i have set depth to zero!
+        // to keep hibernate happy! As in our case all scanned classes are not
+        // meant for rdbms, so initally i have set depth to zero!
         conf.setProperty("hibernate.max_fetch_depth", "0");
         for (Class<?> c : classes)
         {
@@ -116,7 +114,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         this.indexManager = indexManager;
         this.reader = reader;
     }
-
 
     /*
      * (non-Javadoc)
@@ -142,7 +139,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return persistenceUnit;
     }
 
-
     /*
      * (non-Javadoc)
      * 
@@ -158,9 +154,11 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
     }
 
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#delete(java.lang.Object, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#delete(java.lang.Object,
+     * java.lang.Object)
      */
     @Override
     public void delete(Object entity, Object pKey)
@@ -168,7 +166,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         s = getStatelessSession();
         Transaction tx = s.beginTransaction();
         s.delete(entity);
-        tx.commit();        
+        tx.commit();
 
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
         if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
@@ -261,19 +259,18 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return pKeys;
     }
 
-    @Override    
+    @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
         return null;
     }
 
-     
     @Override
     public void persist(Node node)
     {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-        String id = ObjectGraphBuilder.getEntityId(node.getNodeId());        
-        
+        String id = ObjectGraphBuilder.getEntityId(node.getNodeId());
+
         Transaction tx = null;
         try
         {
@@ -286,7 +283,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         // handling many to one case
         catch (org.hibernate.exception.ConstraintViolationException e)
         {
-            log.info(e.getMessage());            
+            log.info(e.getMessage());
             s.update(node.getData());
             tx.commit();
         }
@@ -294,32 +291,32 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         {
             log.info(e.getMessage());
         }
-        
-        //Update foreign Keys
+
+        // Update foreign Keys
         List<RelationHolder> relationHolders = getRelationHolders(node);
-        for(RelationHolder rh : relationHolders) {
+        for (RelationHolder rh : relationHolders)
+        {
             String linkName = rh.getRelationName();
             String linkValue = rh.getRelationValue();
-            if(linkName != null && linkValue != null) {
-                
+            if (linkName != null && linkValue != null)
+            {
+
                 s = getStatelessSession();
                 tx = s.beginTransaction();
-                String updateSql = "Update " + metadata.getTableName() + " SET " + linkName + "= '"
-                        + linkValue + "' WHERE " + metadata.getIdColumn().getName() + " = '"
-                        + id + "'";
-                s.createSQLQuery(updateSql).executeUpdate();    
+                String updateSql = "Update " + metadata.getTableName() + " SET " + linkName + "= '" + linkValue
+                        + "' WHERE " + metadata.getIdColumn().getName() + " = '" + id + "'";
+                s.createSQLQuery(updateSql).executeUpdate();
                 tx.commit();
             }
-        }       
+        }
 
-        //Index Entity
+        // Index Entity
         if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
         {
-            indexNode(node, metadata, getIndexManager());          
+            indexNode(node, metadata, getIndexManager());
         }
     }
-   
-  
+
     /**
      * Inserts records into JoinTable
      */
@@ -329,21 +326,20 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         String joinTableName = joinTableData.getJoinTableName();
         String joinColumnName = joinTableData.getJoinColumnName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
-        
+
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
 
         for (Object key : joinTableRecords.keySet())
         {
-            Set<Object> values = joinTableRecords.get(key);           
+            Set<Object> values = joinTableRecords.get(key);
             insertRecordInJoinTable(joinTableName, joinColumnName, invJoinColumnName, key, values);
         }
     }
 
-
     @Override
-    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName,
-            String inverseJoinColumnName,  String parentId)
-    {        
+    public <E> List<E> getColumnsById(String joinTableName, String joinColumnName, String inverseJoinColumnName,
+            String parentId)
+    {
 
         StringBuffer sqlQuery = new StringBuffer();
         sqlQuery.append("SELECT ").append(inverseJoinColumnName).append(" FROM ").append(joinTableName)
@@ -358,17 +354,20 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         foreignKeys = query.list();
 
-//        s.close();
+        // s.close();
 
         return foreignKeys;
     }
 
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String, java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findIdsByColumn(java.lang.String,
+     * java.lang.String, java.lang.String, java.lang.Object, java.lang.Class)
      */
     @Override
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,Class entityClazz)
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
+            Class entityClazz)
     {
         String childIdStr = (String) columnValue;
 
@@ -385,8 +384,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         primaryKeys = query.list();
 
-        
-//        s.close();
+        // s.close();
         if (primaryKeys != null && !primaryKeys.isEmpty())
         {
             return primaryKeys.toArray(new Object[0]);
@@ -394,25 +392,27 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return null;
     }
 
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String, java.lang.String, java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
+     * java.lang.String, java.lang.Object)
      */
     public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
 
         StringBuffer query = new StringBuffer();
-        
-        query.append("DELETE FROM ").append(tableName).append(" WHERE ").append(columnName).append("=")
-                .append("'").append(columnValue).append("'");
+
+        query.append("DELETE FROM ").append(tableName).append(" WHERE ").append(columnName).append("=").append("'")
+                .append(columnValue).append("'");
 
         s = getStatelessSession();
         Transaction tx = s.beginTransaction();
         s.createSQLQuery(query.toString()).executeUpdate();
         tx.commit();
-        
+
     }
-    
+
     /**
      * Insert record in join table.
      * 
@@ -431,69 +431,63 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      */
     private void insertRecordInJoinTable(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             Object parentId, Set<Object> childrenIds)
-    {       
+    {
 
-        
         s = getStatelessSession();
         Transaction tx = s.beginTransaction();
-        for(Object childId : childrenIds) {
+        for (Object childId : childrenIds)
+        {
             StringBuffer query = new StringBuffer();
-            
-            //write an update query
-            Object[] existingRowIds = findIdsByColumn(joinTableName, joinColumnName, inverseJoinColumnName, (String)childId, null);
-            
+
+            // write an update query
+            Object[] existingRowIds = findIdsByColumn(joinTableName, joinColumnName, inverseJoinColumnName,
+                    (String) childId, null);
+
             boolean joinTableRecordsExists = false;
-            if(existingRowIds != null && existingRowIds.length > 0) {
-                for(Object o : existingRowIds) {
-                    if(o.toString().equals(parentId.toString())) {
+            if (existingRowIds != null && existingRowIds.length > 0)
+            {
+                for (Object o : existingRowIds)
+                {
+                    if (o.toString().equals(parentId.toString()))
+                    {
                         joinTableRecordsExists = true;
                         break;
                     }
-                }        
-                
+                }
+
             }
-            
-            if(! joinTableRecordsExists) {
-                
+
+            if (!joinTableRecordsExists)
+            {
+
                 query.append("INSERT INTO ").append(joinTableName).append("(").append(joinColumnName).append(",")
-                .append(inverseJoinColumnName).append(")").append(" VALUES('").append(parentId).append("','")
-                .append(childId).append("')");
-        
-                s.createSQLQuery(query.toString()).executeUpdate();                
-            }         
-            
+                        .append(inverseJoinColumnName).append(")").append(" VALUES('").append(parentId).append("','")
+                        .append(childId).append("')");
+
+                s.createSQLQuery(query.toString()).executeUpdate();
+            }
+
         }
         tx.commit();
-    }    
+    }
 
     /**
      * Gets the session instance.
      * 
      * @return the session instance
      */
-    /*private Session getStatefulSession()
-    {
-        Session s = null;
-        if (sf.isClosed())
-        {
-            s = sf.openSession();
-        }
-        else
-        {
-            s = sf.getCurrentSession();
-            if (s.isOpen())
-            {
-                s = sf.openSession();
-            }
-        }
-        return s;
-    }*/
-    
+    /*
+     * private Session getStatefulSession() { Session s = null; if
+     * (sf.isClosed()) { s = sf.openSession(); } else { s =
+     * sf.getCurrentSession(); if (s.isOpen()) { s = sf.openSession(); } }
+     * return s; }
+     */
+
     private StatelessSession getStatelessSession()
     {
         return s != null ? s : sf.openStatelessSession();
     }
-    
+
     /**
      * Find.
      * 
@@ -519,9 +513,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             for (String r : relations)
             {
                 String name = MetadataUtils.getMappedName(m, m.getRelation(r));
-                if (!m.getIdColumn().getName().equalsIgnoreCase(name != null?name:r))
+                if (!m.getIdColumn().getName().equalsIgnoreCase(name != null ? name : r))
                 {
-                    q.addScalar(name != null?name:r);
+                    q.addScalar(name != null ? name : r);
                 }
             }
         }
@@ -568,7 +562,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return reader;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.client.Client#getQueryImplementor()
      */
     @Override

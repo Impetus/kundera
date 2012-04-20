@@ -88,33 +88,33 @@ public class KunderaQueryParserTest
 
         parser = new KunderaQueryParser(kunderQuery, validQueryWithDefaultClause);
         parser.parse();
-       
+
     }
 
     @Test
     public void onUpdateDeleteQueryParse()
     {
         KunderaQuery kunderaQuery = new KunderaQuery();
-        
-        //update with single set value in SET clause.
+
+        // update with single set value in SET clause.
         String updateQuery = "UPDATE Country SET population = 10 where currency = INR";
 
         KunderaQueryParser parser = new KunderaQueryParser(kunderaQuery, updateQuery);
         parser.parse();
-        
+
         Assert.assertEquals("Country", kunderaQuery.getFrom());
         Assert.assertEquals("currency = INR", kunderaQuery.getFilter());
         Assert.assertNull(kunderaQuery.getResult());
         Assert.assertTrue(kunderaQuery.isUpdateClause());
         Assert.assertEquals(true, kunderaQuery.isDeleteUpdate());
-        for(UpdateClause q : kunderaQuery.getUpdateClauseQueue())
+        for (UpdateClause q : kunderaQuery.getUpdateClauseQueue())
         {
             Assert.assertEquals("population", q.getProperty());
             Assert.assertEquals("10", q.getValue());
         }
 
         kunderaQuery = new KunderaQuery();
-        //Update with multi valued SET clause.
+        // Update with multi valued SET clause.
         String multiValueUpdaeQuery = "UPDATE Country SET population = 10,name=vivek where currency = INR";
 
         parser = new KunderaQueryParser(kunderaQuery, multiValueUpdaeQuery);
@@ -127,18 +127,18 @@ public class KunderaQueryParserTest
         Assert.assertEquals(true, kunderaQuery.isDeleteUpdate());
         Assert.assertEquals(2, kunderaQuery.getUpdateClauseQueue().size());
 
-        UpdateClause[] result = kunderaQuery.getUpdateClauseQueue().toArray(new UpdateClause[]{});
+        UpdateClause[] result = kunderaQuery.getUpdateClauseQueue().toArray(new UpdateClause[] {});
         Assert.assertEquals("population", result[0].getProperty());
         Assert.assertEquals("10", result[0].getValue());
 
         Assert.assertEquals("name", result[1].getProperty());
         Assert.assertEquals("vivek", result[1].getValue());
-        
+
         kunderaQuery = new KunderaQuery();
-        
-        //Delete query.
+
+        // Delete query.
         String deleteQuery = "Delete from Country where currency = INR";
-        
+
         parser = new KunderaQueryParser(kunderaQuery, deleteQuery);
         parser.parse();
 
@@ -148,6 +148,7 @@ public class KunderaQueryParserTest
         Assert.assertFalse(kunderaQuery.isUpdateClause());
         Assert.assertEquals(true, kunderaQuery.isDeleteUpdate());
     }
+
     /**
      * Tear down.
      * 

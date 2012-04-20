@@ -40,7 +40,7 @@ public final class Relation
     FetchType fetchType;
 
     /** The cascades. */
-    private List<CascadeType> cascades; 
+    private List<CascadeType> cascades;
 
     /** The optional. */
     private boolean optional;

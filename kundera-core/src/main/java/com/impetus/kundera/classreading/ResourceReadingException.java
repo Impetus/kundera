@@ -19,12 +19,12 @@ import com.impetus.kundera.KunderaException;
 
 /**
  * Exception class for all exception scenarios involving resource reading.
+ * 
  * @author amresh.singh
- *
+ * 
  */
 public class ResourceReadingException extends KunderaException
 {
-    
 
     private static final long serialVersionUID = 2586557929464852258L;
 

@@ -19,17 +19,19 @@ package com.impetus.kundera.configure.schema.api;
  * Interface to define methods to be implemented by different schema managers.
  * 
  * @author kuldeep.kumar
- *
+ * 
  */
 public interface SchemaManager
 {
     /**
-     * Exports schema according to configured schema operation e.g. {create,create-drop,update,validate}
+     * Exports schema according to configured schema operation e.g.
+     * {create,create-drop,update,validate}
      */
     void exportSchema();
 
     /**
-     * Method required to drop auto create schema,in case of schema operation as {create-drop}, 
+     * Method required to drop auto create schema,in case of schema operation as
+     * {create-drop},
      */
     void dropSchema();
 

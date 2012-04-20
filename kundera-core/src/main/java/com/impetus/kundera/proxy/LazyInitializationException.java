@@ -62,6 +62,5 @@ public class LazyInitializationException extends KunderaException
         super(arg0);
         // TODO Auto-generated constructor stub
     }
-    
-    
+
 }

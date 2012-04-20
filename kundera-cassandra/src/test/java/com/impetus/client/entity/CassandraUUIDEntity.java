@@ -24,7 +24,7 @@ import javax.persistence.Table;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 @Entity
 @Table(name = "uuidsample", schema = "UUIDCassandra@cass_pu")
@@ -32,13 +32,13 @@ public class CassandraUUIDEntity
 {
 
     @Id
-    @Column(name="uuidKey")
+    @Column(name = "uuidKey")
     private UUID uuidKey;
-    
-    @Column(name="name")
+
+    @Column(name = "name")
     private String name;
-    
-    @Column(name="age")
+
+    @Column(name = "age")
     private Integer age;
 
     /**
@@ -46,8 +46,9 @@ public class CassandraUUIDEntity
      */
     public CassandraUUIDEntity()
     {
-        
+
     }
+
     /**
      * @return the uuidKey
      */
@@ -57,7 +58,8 @@ public class CassandraUUIDEntity
     }
 
     /**
-     * @param uuidKey the uuidKey to set
+     * @param uuidKey
+     *            the uuidKey to set
      */
     public void setUuidKey(UUID uuidKey)
     {
@@ -73,7 +75,8 @@ public class CassandraUUIDEntity
     }
 
     /**
-     * @param name the name to set
+     * @param name
+     *            the name to set
      */
     public void setName(String name)
     {
@@ -89,12 +92,12 @@ public class CassandraUUIDEntity
     }
 
     /**
-     * @param age the age to set
+     * @param age
+     *            the age to set
      */
     public void setAge(Integer age)
     {
         this.age = age;
     }
-    
-    
+
 }

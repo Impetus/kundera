@@ -34,12 +34,11 @@ import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.query.KunderaQuery;
-import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.KunderaQuery.SortOrder;
 import com.impetus.kundera.query.KunderaQuery.SortOrdering;
+import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
 import com.mongodb.BasicDBObject;
 
@@ -303,18 +302,20 @@ public class MongoDBQuery extends QueryImpl
         return enclosingDocumentName;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.QueryImpl#onExecuteUpdate()
      */
     @Override
     protected int onExecuteUpdate()
     {
-        if(kunderaQuery.isDeleteUpdate())
+        if (kunderaQuery.isDeleteUpdate())
         {
             List result = getResultList();
-            return result != null? result.size():0;
+            return result != null ? result.size() : 0;
         }
-        
+
         return 0;
     }
 }

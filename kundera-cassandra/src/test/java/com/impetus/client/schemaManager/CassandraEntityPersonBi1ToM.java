@@ -26,7 +26,6 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-
 /**
  * The Class CassandraEntityPersonBi1ToM.
  */
@@ -34,7 +33,7 @@ import javax.persistence.Table;
 @Table(name = "CassandraEntityPersonBi1ToM", schema = "KunderaCoreExmples@cassandra")
 public class CassandraEntityPersonBi1ToM
 {
-    
+
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
@@ -54,7 +53,7 @@ public class CassandraEntityPersonBi1ToM
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -64,7 +63,7 @@ public class CassandraEntityPersonBi1ToM
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -74,8 +73,9 @@ public class CassandraEntityPersonBi1ToM
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -84,8 +84,9 @@ public class CassandraEntityPersonBi1ToM
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -94,8 +95,9 @@ public class CassandraEntityPersonBi1ToM
 
     /**
      * Sets the personal data.
-     *
-     * @param personalData the personalData to set
+     * 
+     * @param personalData
+     *            the personalData to set
      */
     public void setPersonalData(CassandraPersonalData personalData)
     {
@@ -104,7 +106,7 @@ public class CassandraEntityPersonBi1ToM
 
     /**
      * Gets the personal data.
-     *
+     * 
      * @return the personalData
      */
     public CassandraPersonalData getPersonalData()
@@ -114,7 +116,7 @@ public class CassandraEntityPersonBi1ToM
 
     /**
      * Gets the addresses.
-     *
+     * 
      * @return the addresses
      */
     public Set<CassandraEntityAddressBi1ToM> getAddresses()
@@ -124,8 +126,9 @@ public class CassandraEntityPersonBi1ToM
 
     /**
      * Sets the addresses.
-     *
-     * @param addresses the new addresses
+     * 
+     * @param addresses
+     *            the new addresses
      */
     public void setAddresses(Set<CassandraEntityAddressBi1ToM> addresses)
     {

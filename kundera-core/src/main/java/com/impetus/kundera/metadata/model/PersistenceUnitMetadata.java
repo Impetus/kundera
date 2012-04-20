@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model;
 
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -45,7 +44,7 @@ import com.impetus.kundera.loader.PersistenceLoaderException;
  */
 public class PersistenceUnitMetadata implements PersistenceUnitInfo
 {
-    /** logger instance. */ 
+    /** logger instance. */
     private static Logger log = LoggerFactory.getLogger(PersistenceUnitMetadata.class);
 
     /** Persistence Unit name. */
@@ -65,7 +64,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
 
     /** The jar files. */
     private Set<String> jarFiles;
-    
+
     private Set<URL> jarUrls;
 
     /** The properties. */
@@ -76,7 +75,6 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
 
     private URL rootUrl;
 
-    
     /*
      * (non-Javadoc)
      * 
@@ -195,15 +193,14 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
      */
     public void addJarFile(String jarFile)
     {
-        if(jarFiles == null)
+        if (jarFiles == null)
         {
             jarFiles = new HashSet<String>();
         }
         this.jarFiles.add(jarFile);
         addJarFileUrl(jarFile);
-        
-    }
 
+    }
 
     /**
      * Gets the exclude unlisted classes.
@@ -321,7 +318,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     @Override
     public List<URL> getJarFileUrls()
     {
-        return jarUrls != null ?new ArrayList<URL>(jarUrls): null;
+        return jarUrls != null ? new ArrayList<URL>(jarUrls) : null;
     }
 
     /*
@@ -468,76 +465,80 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
 
     /**
      * Returns list of managed urls.
+     * 
      * @return
      */
     public List<URL> getManagedURLs()
     {
         // should we cache it?
         List<URL> managedURL = getJarFileUrls();
-        if(managedURL == null)
+        if (managedURL == null)
         {
             managedURL = new ArrayList<URL>(1);
         }
-        
-        if(!getExcludeUnlistedClasses())
+
+        if (!getExcludeUnlistedClasses())
         {
             managedURL.add(getPersistenceUnitRootUrl());
         }
         return managedURL;
     }
+
     /**
-     * Setter for persistence unit root url 
+     * Setter for persistence unit root url
      * 
-     * @param url   persistence unit root url.
+     * @param url
+     *            persistence unit root url.
      */
-     public void setPersistenceUnitRootUrl(URL url)
+    public void setPersistenceUnitRootUrl(URL url)
     {
         this.rootUrl = url;
     }
 
-     /**
-      * Adds jar file URL.
-      * 
-      * @param jarFile jar file path
-      */
-     private void addJarFileUrl(String jarFile)
-     {
-         if (jarUrls == null)
-         {
-             jarUrls = new HashSet<URL>();
-         }
-         try
-         {
-             jarUrls.add(new File(jarFile).toURI().toURL());
-         }
-         catch (MalformedURLException e)
-         {
-             log.error("Error while mapping jar-file url" + jarFile + "caused by:" + e.getMessage());
-             throw new IllegalArgumentException("Invalid jar-file URL:" + jarFile + "caused by: " + e.getMessage());
-         }
-     }
+    /**
+     * Adds jar file URL.
+     * 
+     * @param jarFile
+     *            jar file path
+     */
+    private void addJarFileUrl(String jarFile)
+    {
+        if (jarUrls == null)
+        {
+            jarUrls = new HashSet<URL>();
+        }
+        try
+        {
+            jarUrls.add(new File(jarFile).toURI().toURL());
+        }
+        catch (MalformedURLException e)
+        {
+            log.error("Error while mapping jar-file url" + jarFile + "caused by:" + e.getMessage());
+            throw new IllegalArgumentException("Invalid jar-file URL:" + jarFile + "caused by: " + e.getMessage());
+        }
+    }
 
-     
-     /**
-      * Gets the client.
-      * In case client is not configure, it throws IllegalArgumentException.
-      *
-      * @return the client
-      */
-     public String getClient()
-     {
-         String client=null;
-         if(this.properties != null)
-         {
-             client = (String) this.properties.get(PersistenceProperties.KUNDERA_CLIENT_FACTORY);
-         }
-         
-         if(client == null)
-         {
-             log.error("kundera.client property is missing for persistence unit:"+ persistenceUnitName);
-             throw new IllegalArgumentException("kundera.client property is missing for persistence unit:"+ persistenceUnitName);
-         }
-         
-         return client;
-     }
+    /**
+     * Gets the client. In case client is not configure, it throws
+     * IllegalArgumentException.
+     * 
+     * @return the client
+     */
+    public String getClient()
+    {
+        String client = null;
+        if (this.properties != null)
+        {
+            client = (String) this.properties.get(PersistenceProperties.KUNDERA_CLIENT_FACTORY);
+        }
+
+        if (client == null)
+        {
+            log.error("kundera.client property is missing for persistence unit:" + persistenceUnitName);
+            throw new IllegalArgumentException("kundera.client property is missing for persistence unit:"
+                    + persistenceUnitName);
+        }
+
+        return client;
+    }
 }

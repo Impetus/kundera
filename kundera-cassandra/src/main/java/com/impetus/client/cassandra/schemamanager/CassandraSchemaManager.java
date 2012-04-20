@@ -155,7 +155,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             for (CfDef cfDef : ksDef.getCf_defs())
             {
                 if (cfDef.getName().equalsIgnoreCase(tableInfo.getTableName()))
-//                        && cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))
+                // &&
+                // cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))
                 {
                     cassandra_client.system_drop_column_family(tableInfo.getTableName());
                     cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
@@ -325,7 +326,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
-     * is metadata same method returns true if ColumnDef and columnInfo have same metadata. 
+     * is metadata same method returns true if ColumnDef and columnInfo have
+     * same metadata.
      * 
      * @param columnDef
      * @param columnInfo

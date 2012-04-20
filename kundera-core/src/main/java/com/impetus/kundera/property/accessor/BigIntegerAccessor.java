@@ -17,7 +17,6 @@ package com.impetus.kundera.property.accessor;
 
 import java.math.BigInteger;
 
-import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
 /**
@@ -34,7 +33,7 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public BigInteger fromBytes(Class targetClass, byte[] b) 
+    public BigInteger fromBytes(Class targetClass, byte[] b)
     {
         return new BigInteger(b);
     }
@@ -46,7 +45,7 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public byte[] toBytes(Object object) 
+    public byte[] toBytes(Object object)
     {
         BigInteger b = (BigInteger) object;
         return b.toByteArray();
@@ -73,7 +72,7 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
      * )
      */
     @Override
-    public BigInteger fromString(Class targetClass, String s) 
+    public BigInteger fromString(Class targetClass, String s)
     {
         return new BigInteger(s);
     }

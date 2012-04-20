@@ -94,7 +94,6 @@ public class OneToOneRelationMetadataProcessor extends AbstractEntityFieldProces
         metadata.addRelation(relationField.getName(), relation);
     }
 
-
     @Override
     public void process(Class<?> clazz, EntityMetadata metadata)
     {

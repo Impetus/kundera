@@ -37,6 +37,7 @@ public interface Indexer
      */
 
     void unindex(EntityMetadata metadata, String id);
+
     /**
      * Indexes and object.
      * 
@@ -77,9 +78,8 @@ public interface Indexer
      */
 
     Map<String, String> search(String luceneQuery, int start, int count, boolean fetchRelation);
-    
-    boolean entityExistsInIndex(Class<?> entityClass);        
-    
+
+    boolean entityExistsInIndex(Class<?> entityClass);
 
     /**
      * Close on index writer/reader.

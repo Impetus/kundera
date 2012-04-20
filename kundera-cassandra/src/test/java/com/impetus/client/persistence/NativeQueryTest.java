@@ -52,14 +52,15 @@ import com.impetus.kundera.query.QueryImpl;
  */
 public class NativeQueryTest
 {
-    
+
     /** The schema. */
-    private final String schema="test";
-    
+    private final String schema = "test";
+
     /**
      * Sets the up.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Before
     public void setUp() throws Exception
@@ -75,7 +76,7 @@ public class NativeQueryTest
     public void testCreateNativeQuery()
     {
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL, 
+        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
         String nativeSql = "Select * from Cassandra c";
         QueryImpl q = (QueryImpl) em.createNativeQuery(nativeSql, CassandraEntitySample.class);
@@ -89,21 +90,21 @@ public class NativeQueryTest
     @Test
     public void testExecutNativeQuery()
     {
-            EntityManagerFactoryImpl emf = getEntityManagerFactory();
-            String nativeSql = "CREATE KEYSPACE " + schema
-                    + " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
-            String useNativeSql = "USE test";
+        EntityManagerFactoryImpl emf = getEntityManagerFactory();
+        String nativeSql = "CREATE KEYSPACE " + schema
+                + " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
+        String useNativeSql = "USE test";
 
-            EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL, 
-                    PersistenceContextType.EXTENDED);
-            Query q = em.createNativeQuery(nativeSql, CassandraEntitySample.class);
-//            q.getResultList();
-            q.executeUpdate();
-            q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
-//            q.getResultList();
-            q.executeUpdate();
-            Assert.assertTrue(CassandraCli.keyspaceExist(schema));
-            Assert.assertFalse(CassandraCli.keyspaceExist("invalidSchema"));
+        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
+                PersistenceContextType.EXTENDED);
+        Query q = em.createNativeQuery(nativeSql, CassandraEntitySample.class);
+        // q.getResultList();
+        q.executeUpdate();
+        q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
+        // q.getResultList();
+        q.executeUpdate();
+        Assert.assertTrue(CassandraCli.keyspaceExist(schema));
+        Assert.assertFalse(CassandraCli.keyspaceExist("invalidSchema"));
     }
 
     /**
@@ -113,39 +114,39 @@ public class NativeQueryTest
     public void testCreateInsertColumnFamilyQuery()
     {
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL, 
+        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
-        
+
         // create column family
         String colFamilySql = "CREATE COLUMNFAMILY users (key varchar PRIMARY KEY,full_name varchar, birth_date int,state varchar)";
         Query q = em.createNativeQuery(colFamilySql, CassandraEntitySample.class);
-//        q.getResultList();
+        // q.getResultList();
         q.executeUpdate();
         Assert.assertTrue(CassandraCli.columnFamilyExist("users", "KunderaExamples"));
-        
-        //Add indexes
+
+        // Add indexes
         String idxSql = "CREATE INDEX ON users (birth_date)";
         q = em.createNativeQuery(idxSql, CassandraEntitySample.class);
-//        q.getResultList();
+        // q.getResultList();
         q.executeUpdate();
         idxSql = "CREATE INDEX ON users (state)";
         q = em.createNativeQuery(idxSql, CassandraEntitySample.class);
-//        q.getResultList();
+        // q.getResultList();
         q.executeUpdate();
         // insert users.
         String insertSql = "INSERT INTO users (key, full_name, birth_date, state) VALUES ('bsanderson', 'Brandon Sanderson', 1975, 'UT')";
         q = em.createNativeQuery(insertSql, CassandraEntitySample.class);
-//        q.getResultList();
+        // q.getResultList();
         q.executeUpdate();
-        //select key and state 
+        // select key and state
         String selectSql = "SELECT key, state FROM users";
 
         q = em.createNativeQuery(selectSql, CassandraEntitySample.class);
         List<CassandraEntitySample> results = q.getResultList();
         Assert.assertNotNull(results);
-        Assert.assertEquals(1,results.size());
-        Assert.assertEquals("bsanderson",results.get(0).getKey());
-        Assert.assertEquals("UT",results.get(0).getState());
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("bsanderson", results.get(0).getKey());
+        Assert.assertEquals("UT", results.get(0).getState());
         Assert.assertNull(results.get(0).getFull_name());
 
         // insert users.
@@ -162,17 +163,17 @@ public class NativeQueryTest
         q = em.createNativeQuery(selectAll, CassandraEntitySample.class);
         results = q.getResultList();
         Assert.assertNotNull(results);
-        Assert.assertEquals(1,results.size());
-        Assert.assertEquals("bsanderson",results.get(0).getKey());
-        Assert.assertEquals("UT",results.get(0).getState());
-        Assert.assertEquals("Brandon Sanderson",results.get(0).getFull_name());
-        Assert.assertEquals(new Integer(1975),results.get(0).getBirth_date());
-        
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals("bsanderson", results.get(0).getKey());
+        Assert.assertEquals("UT", results.get(0).getState());
+        Assert.assertEquals("Brandon Sanderson", results.get(0).getFull_name());
+        Assert.assertEquals(new Integer(1975), results.get(0).getBirth_date());
+
     }
-    
+
     /**
      * Gets the entity manager factory.
-     *
+     * 
      * @return the entity manager factory
      */
     private EntityManagerFactoryImpl getEntityManagerFactory()
@@ -180,7 +181,8 @@ public class NativeQueryTest
         Map<String, Object> props = new HashMap<String, Object>();
         String persistenceUnit = "cassandra";
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
-        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, "com.impetus.client.cassandra.pelops.PelopsClientFactory");
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,
+                "com.impetus.client.cassandra.pelops.PelopsClientFactory");
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaExamples");
@@ -215,8 +217,9 @@ public class NativeQueryTest
 
     /**
      * Tear down.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @After
     public void tearDown() throws Exception

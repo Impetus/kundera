@@ -15,16 +15,15 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
-
 import com.impetus.kundera.lifecycle.NodeStateContext;
 
 /**
  * @author amresh
- *
+ * 
  */
 public class DetachedState extends NodeState
-{    
-    
+{
+
     @Override
     public void initialize(NodeStateContext nodeStateContext)
     {
@@ -34,13 +33,14 @@ public class DetachedState extends NodeState
     public void handlePersist(NodeStateContext nodeStateContext)
     {
         throw new IllegalArgumentException("Persist operation not allowed in Detached state");
-    }   
+    }
 
     @Override
     public void handleRemove(NodeStateContext nodeStateContext)
     {
-        throw new IllegalArgumentException("Remove operation not allowed in Detached state." +
-        		" Possible reason: You may have closed entity manager before calling remove. A solution is to call merge before remove.");
+        throw new IllegalArgumentException(
+                "Remove operation not allowed in Detached state."
+                        + " Possible reason: You may have closed entity manager before calling remove. A solution is to call merge before remove.");
     }
 
     @Override
@@ -53,15 +53,17 @@ public class DetachedState extends NodeState
     public void handleMerge(NodeStateContext nodeStateContext)
     {
         // Detached ---> Managed
-        moveNodeToNextState(nodeStateContext, new ManagedState());       
-        
-        //Copy detached entity's current state to existing managed instance of the 
-        // same entity identity (if one exists), or create a new managed copy       
-        
-        //Cascade manage operation for all related entities for whom cascade=ALL or MERGE
+        moveNodeToNextState(nodeStateContext, new ManagedState());
+
+        // Copy detached entity's current state to existing managed instance of
+        // the
+        // same entity identity (if one exists), or create a new managed copy
+
+        // Cascade manage operation for all related entities for whom
+        // cascade=ALL or MERGE
         recursivelyPerformOperation(nodeStateContext, OPERATION.MERGE);
     }
-    
+
     @Override
     public void handleFind(NodeStateContext nodeStateContext)
     {
@@ -70,19 +72,19 @@ public class DetachedState extends NodeState
     @Override
     public void handleClose(NodeStateContext nodeStateContext)
     {
-      //Nothing to do, already in Detached State
+        // Nothing to do, already in Detached State
     }
 
     @Override
     public void handleClear(NodeStateContext nodeStateContext)
     {
-        //Nothing to do, already in Detached State
+        // Nothing to do, already in Detached State
     }
 
     @Override
     public void handleFlush(NodeStateContext nodeStateContext)
     {
-      //Nothing to do, Entities are flushed from Managed/ Removed state only
+        // Nothing to do, Entities are flushed from Managed/ Removed state only
     }
 
     @Override
@@ -93,7 +95,7 @@ public class DetachedState extends NodeState
     @Override
     public void handleDetach(NodeStateContext nodeStateContext)
     {
-        //Nothing to do, already in Detached State
+        // Nothing to do, already in Detached State
     }
 
     @Override
@@ -114,6 +116,6 @@ public class DetachedState extends NodeState
     @Override
     public void handleContains(NodeStateContext nodeStateContext)
     {
-    }   
+    }
 
 }

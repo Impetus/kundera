@@ -32,7 +32,7 @@ import javax.persistence.Table;
 @Table(name = "HbaseEntityPersonUni1To1PK", schema = "KunderaHbaseExamples@hbase")
 public class HBaseEntityPersonUni1To1PK
 {
-    
+
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
@@ -53,7 +53,7 @@ public class HBaseEntityPersonUni1To1PK
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -63,7 +63,7 @@ public class HBaseEntityPersonUni1To1PK
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -73,8 +73,9 @@ public class HBaseEntityPersonUni1To1PK
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -83,8 +84,9 @@ public class HBaseEntityPersonUni1To1PK
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -93,7 +95,7 @@ public class HBaseEntityPersonUni1To1PK
 
     /**
      * Gets the personal data.
-     *
+     * 
      * @return the personalData
      */
     public HBasePersonalData getPersonalData()
@@ -103,8 +105,9 @@ public class HBaseEntityPersonUni1To1PK
 
     /**
      * Sets the personal data.
-     *
-     * @param personalData the personalData to set
+     * 
+     * @param personalData
+     *            the personalData to set
      */
     public void setPersonalData(HBasePersonalData personalData)
     {
@@ -113,7 +116,7 @@ public class HBaseEntityPersonUni1To1PK
 
     /**
      * Gets the address.
-     *
+     * 
      * @return the address
      */
     public HBaseEntityAddressUni1To1PK getAddress()
@@ -123,8 +126,9 @@ public class HBaseEntityPersonUni1To1PK
 
     /**
      * Sets the address.
-     *
-     * @param address the address to set
+     * 
+     * @param address
+     *            the address to set
      */
     public void setAddress(HBaseEntityAddressUni1To1PK address)
     {

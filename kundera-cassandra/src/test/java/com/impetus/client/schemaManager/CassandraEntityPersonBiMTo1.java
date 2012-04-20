@@ -28,7 +28,6 @@ import javax.persistence.Table;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
-
 /**
  * The Class CassandraEntityPersonBiMTo1.
  */
@@ -36,7 +35,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 @Table(name = "CassandraEntityPersonBiMTo1", schema = "KunderaCoreExmples@cassandra")
 public class CassandraEntityPersonBiMTo1
 {
-    
+
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
@@ -58,7 +57,7 @@ public class CassandraEntityPersonBiMTo1
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -68,7 +67,7 @@ public class CassandraEntityPersonBiMTo1
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -78,8 +77,9 @@ public class CassandraEntityPersonBiMTo1
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -88,8 +88,9 @@ public class CassandraEntityPersonBiMTo1
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -98,7 +99,7 @@ public class CassandraEntityPersonBiMTo1
 
     /**
      * Gets the personal data.
-     *
+     * 
      * @return the personalData
      */
     public CassandraPersonalData getPersonalData()
@@ -108,8 +109,9 @@ public class CassandraEntityPersonBiMTo1
 
     /**
      * Sets the personal data.
-     *
-     * @param personalData the personalData to set
+     * 
+     * @param personalData
+     *            the personalData to set
      */
     public void setPersonalData(CassandraPersonalData personalData)
     {
@@ -118,7 +120,7 @@ public class CassandraEntityPersonBiMTo1
 
     /**
      * Gets the address.
-     *
+     * 
      * @return the address
      */
     public CassandraEntityAddressBiMTo1 getAddress()
@@ -128,8 +130,9 @@ public class CassandraEntityPersonBiMTo1
 
     /**
      * Sets the address.
-     *
-     * @param address the new address
+     * 
+     * @param address
+     *            the new address
      */
     public void setAddress(CassandraEntityAddressBiMTo1 address)
     {

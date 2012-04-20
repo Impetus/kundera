@@ -32,7 +32,7 @@ public class EnumAccessor implements PropertyAccessor<Enum>
     @Override
     public Enum fromBytes(Class targetClass, byte[] b)
     {
-    	String s = null;
+        String s = null;
         try
         {
             s = new String(b, Constants.ENCODING);
@@ -41,11 +41,11 @@ public class EnumAccessor implements PropertyAccessor<Enum>
         {
             throw new PropertyAccessException(e);
         }
-    	return fromString(targetClass, s);
+        return fromString(targetClass, s);
     }
 
     @Override
-    public byte[] toBytes(Object object) 
+    public byte[] toBytes(Object object)
     {
         String s = toString(object);
         try
@@ -66,8 +66,8 @@ public class EnumAccessor implements PropertyAccessor<Enum>
     }
 
     @Override
-    public Enum fromString(Class targetClass, String string) 
-    {        
+    public Enum fromString(Class targetClass, String string)
+    {
         if (targetClass != null && string != null)
         {
             try
@@ -79,7 +79,7 @@ public class EnumAccessor implements PropertyAccessor<Enum>
                 throw new PropertyAccessException(ex);
             }
         }
-         
+
         return null;
     }
 

@@ -6,7 +6,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-
 @Table(name = "CassandraEntityHabitatUniMToM", schema = "KunderaCassandraExamples@cassandra")
 public class CassandraEntityHabitatUniMToM
 {

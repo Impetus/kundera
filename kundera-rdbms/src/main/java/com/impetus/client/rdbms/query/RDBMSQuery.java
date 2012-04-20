@@ -32,7 +32,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
@@ -76,7 +75,7 @@ public class RDBMSQuery extends QueryImpl implements Query
 
         initializeReader();
         List<EnhanceEntity> ls = getReader().populateRelation(m, m.getRelationNames(), m.isParent(), client);
-        
+
         return setRelationEntities(ls, client, m);
     }
 
@@ -100,7 +99,8 @@ public class RDBMSQuery extends QueryImpl implements Query
             if (MetadataUtils.useSecondryIndex(client.getPersistenceUnit()))
             {
                 List<String> relations = new ArrayList<String>();
-                List r = ((HibernateClient) client).find(((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, relations, null), relations, m);
+                List r = ((HibernateClient) client).find(
+                        ((RDBMSEntityReader) getReader()).getSqlQueryFromJPA(m, relations, null), relations, m);
                 result = new ArrayList<Object>(r.size());
 
                 for (Object o : r)
@@ -132,7 +132,6 @@ public class RDBMSQuery extends QueryImpl implements Query
         return result;
     }
 
-
     /*
      * (non-Javadoc)
      * 
@@ -148,23 +147,26 @@ public class RDBMSQuery extends QueryImpl implements Query
         return reader;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.QueryImpl#onExecuteUpdate()
      */
     @Override
     protected int onExecuteUpdate()
     {
-        if(kunderaQuery.isDeleteUpdate())
+        if (kunderaQuery.isDeleteUpdate())
         {
             List result = getResultList();
-            return result != null? result.size():0;
+            return result != null ? result.size() : 0;
         }
-        
+
         return 0;
     }
 
     /**
-     * Initializes reader with conditions and filter in case for JPA/Named query only!
+     * Initializes reader with conditions and filter in case for JPA/Named query
+     * only!
      * 
      */
     private void initializeReader()

@@ -101,8 +101,8 @@ public class CassandraSchemaManagerMTMTest
             Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraMTMTest"));
             Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonnelUniMToM",
                     "KunderaCassandraMTMTest"));
-            Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityHabitatUniMToM",
-                    "KunderaCassandraMTMTest"));
+            Assert.assertTrue(CassandraCli
+                    .columnFamilyExist("CassandraEntityHabitatUniMToM", "KunderaCassandraMTMTest"));
             Assert.assertTrue(CassandraCli.columnFamilyExist("PERSONNEL_ADDRESS", "KunderaCassandraMTMTest"));
         }
         catch (InvalidEntityDefinitionException iedex)

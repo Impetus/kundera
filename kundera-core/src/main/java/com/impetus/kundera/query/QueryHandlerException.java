@@ -65,5 +65,4 @@ public class QueryHandlerException extends RuntimeException
         // TODO Auto-generated constructor stub
     }
 
-    
 }

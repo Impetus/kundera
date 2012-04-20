@@ -142,15 +142,18 @@ public class ElementCollectionCacheManager
         {
             Map<Object, String> elementCollectionObjectMap = getElementCollectionCache().get(rowKey);
             String elementCollectionObjectName = elementCollectionObjectMap.get(elementCollectionObject);
-            if(elementCollectionObjectName == null) {
-                for(Object obj : elementCollectionObjectMap.keySet()) {
-                    if(DeepEquals.deepEquals(elementCollectionObject, obj)) {
+            if (elementCollectionObjectName == null)
+            {
+                for (Object obj : elementCollectionObjectMap.keySet())
+                {
+                    if (DeepEquals.deepEquals(elementCollectionObject, obj))
+                    {
                         elementCollectionObjectName = elementCollectionObjectMap.get(obj);
                         break;
                     }
                 }
-            }           
-            
+            }
+
             if (elementCollectionObjectName == null)
             {
                 log.debug("No element collection object name found in cache for object:" + elementCollectionObject);
@@ -220,22 +223,5 @@ public class ElementCollectionCacheManager
             log.warn("Unable to reclaim memory while clearing ElementCollection cache. Nothing to worry, will be taken care of by GC");
         }
     }
-    /*
-     * public static void main(String args[]) { EmbeddedCollectionCacheHandler h
-     * = new EmbeddedCollectionCacheHandler(); Tweet t1 = new Tweet("1",
-     * "Tweet 1111", "web"); Tweet t2 = new Tweet("2", "Tweet 2222", "mobile");
-     * Tweet t3 = new Tweet("3", "Tweet 3333", "iPhone");
-     * 
-     * h.addEmbeddedCollectionCacheMapping("IIIPL-0001", t1, "tweet#1");
-     * h.addEmbeddedCollectionCacheMapping("IIIPL-0001", t2, "tweet#2");
-     * h.addEmbeddedCollectionCacheMapping("IIIPL-0002", t3, "tweet#a");
-     * System.out.println(h.getEmbeddedCollectionCache());
-     * 
-     * System.out.println(h.getEmbeddedObjectName("IIIPL-0001", t3));
-     * System.out.println(h.getLastEmbeddedObjectCount("IIIPL-0001"));
-     * 
-     * 
-     * }
-     */
 
 }

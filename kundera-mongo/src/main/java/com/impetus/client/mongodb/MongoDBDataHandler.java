@@ -175,7 +175,7 @@ public class MongoDBDataHandler
                     relationValue.put(r, colValue);
                 }
 
-                if(!relationValue.isEmpty())
+                if (!relationValue.isEmpty())
                 {
                     e = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationValue);
                     return e;
@@ -203,18 +203,23 @@ public class MongoDBDataHandler
     }
 
     /**
-     * Setter for column value, by default converted from string value, in case of map it is automatically converted into map using BasicDBObject.
+     * Setter for column value, by default converted from string value, in case
+     * of map it is automatically converted into map using BasicDBObject.
      * 
-     * @param document mongo document
-     * @param entity   searched entity.
-     * @param column   column field.
+     * @param document
+     *            mongo document
+     * @param entity
+     *            searched entity.
+     * @param column
+     *            column field.
      */
     private void setColumnValue(DBObject document, Object entity, Column column)
     {
-        if(column.getField().getType().isAssignableFrom(Map.class))
+        if (column.getField().getType().isAssignableFrom(Map.class))
         {
-            PropertyAccessorHelper.set(entity, column.getField(), ((BasicDBObject)document.get(column.getName())).toMap());
-        } 
+            PropertyAccessorHelper.set(entity, column.getField(),
+                    ((BasicDBObject) document.get(column.getName())).toMap());
+        }
         else
         {
             PropertyAccessorHelper.set(entity, column.getField(), document.get(column.getName()).toString());
@@ -254,11 +259,10 @@ public class MongoDBDataHandler
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public DBObject getDocumentFromEntity(DBObject dbObj, EntityMetadata m, Object entity, List<RelationHolder> relations)
-            throws PropertyAccessException
+    public DBObject getDocumentFromEntity(DBObject dbObj, EntityMetadata m, Object entity,
+            List<RelationHolder> relations) throws PropertyAccessException
     {
         List<Column> columns = m.getColumnsAsList();
-        
 
         // Populate Row Key
         dbObj.put("_id", PropertyAccessorHelper.getId(entity, m));
@@ -341,7 +345,8 @@ public class MongoDBDataHandler
     {
         // A column field may be a collection(not defined as 1-to-M
         // relationship)
-        if (column.getField().getType().isAssignableFrom(List.class) || column.getField().getType().isAssignableFrom(Set.class))
+        if (column.getField().getType().isAssignableFrom(List.class)
+                || column.getField().getType().isAssignableFrom(Set.class))
         {
             Collection collection = (Collection) PropertyAccessorHelper.getObject(entity, column.getField());
             BasicDBList basicDBList = new BasicDBList();
@@ -350,7 +355,8 @@ public class MongoDBDataHandler
                 basicDBList.add(o);
             }
             dbObj.put(column.getName(), basicDBList);
-        } else if(column.getField().getType().isAssignableFrom(Map.class))
+        }
+        else if (column.getField().getType().isAssignableFrom(Map.class))
         {
             Map mapObj = (Map) PropertyAccessorHelper.getObject(entity, column.getField());
             BasicDBObjectBuilder builder = BasicDBObjectBuilder.start(mapObj);

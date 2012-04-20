@@ -15,25 +15,24 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
-
 /**
  * Interface to define for client life cycle manager.
- *  
+ * 
  * @author vivek.mishra
- *
+ * 
  */
 public interface ClientLifeCycleManager
 {
-    
+
     /**
      * Initialize configured client.
      */
     void initialize();
-    
+
     /**
      * Returns true if client is thread safe, else false.
      * 
-     * @return  true if client is thread safe.
+     * @return true if client is thread safe.
      */
     boolean isThreadSafe();
 

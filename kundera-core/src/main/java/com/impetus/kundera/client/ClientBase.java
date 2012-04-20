@@ -29,9 +29,11 @@ import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 
 /**
- * Base class for all Client implementations providing common utility methods to them all. 
+ * Base class for all Client implementations providing common utility methods to
+ * them all.
+ * 
  * @author amresh
- *
+ * 
  */
 public class ClientBase
 {
@@ -42,46 +44,53 @@ public class ClientBase
     protected List<RelationHolder> getRelationHolders(Node node)
     {
         List<RelationHolder> relationsHolder = new ArrayList<RelationHolder>();
-        
-        //Add column value for all parent nodes linked to this node
+
+        // Add column value for all parent nodes linked to this node
         Map<NodeLink, Node> parents = node.getParents();
-        Map<NodeLink, Node> children = node.getChildren(); 
-        
-        if(parents != null && ! parents.isEmpty()) {
-            
-            for(NodeLink parentNodeLink : parents.keySet()) {
-                String linkName = (String)parentNodeLink.getLinkProperty(LinkProperty.LINK_NAME);
-                String linkValue = (String)parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
-                boolean isSharedByPrimaryKey = (Boolean)parentNodeLink.getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
+        Map<NodeLink, Node> children = node.getChildren();
+
+        if (parents != null && !parents.isEmpty())
+        {
+
+            for (NodeLink parentNodeLink : parents.keySet())
+            {
+                String linkName = (String) parentNodeLink.getLinkProperty(LinkProperty.LINK_NAME);
+                String linkValue = (String) parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
+                boolean isSharedByPrimaryKey = (Boolean) parentNodeLink
+                        .getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
                 Relation.ForeignKey multiplicity = parentNodeLink.getMultiplicity();
-                
-                if(linkName != null && linkValue != null && ! isSharedByPrimaryKey
-                        && multiplicity.equals(ForeignKey.ONE_TO_MANY)) {
+
+                if (linkName != null && linkValue != null && !isSharedByPrimaryKey
+                        && multiplicity.equals(ForeignKey.ONE_TO_MANY))
+                {
                     RelationHolder relationHolder = new RelationHolder(linkName, linkValue);
-                    relationsHolder.add(relationHolder);       
-                }               
+                    relationsHolder.add(relationHolder);
+                }
             }
         }
-        
-        //Add column value for all child nodes linked to this node
-        if(children != null && ! children.isEmpty()) {
-            for(NodeLink childNodeLink : children.keySet()) {
-                String linkName = (String)childNodeLink.getLinkProperty(LinkProperty.LINK_NAME);
-                String linkValue = (String)childNodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
-                boolean isSharedByPrimaryKey = (Boolean)childNodeLink.getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
+
+        // Add column value for all child nodes linked to this node
+        if (children != null && !children.isEmpty())
+        {
+            for (NodeLink childNodeLink : children.keySet())
+            {
+                String linkName = (String) childNodeLink.getLinkProperty(LinkProperty.LINK_NAME);
+                String linkValue = (String) childNodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
+                boolean isSharedByPrimaryKey = (Boolean) childNodeLink
+                        .getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
                 Relation.ForeignKey multiplicity = childNodeLink.getMultiplicity();
-                
-                if(linkName != null && linkValue != null && ! isSharedByPrimaryKey
-                && (multiplicity.equals(ForeignKey.ONE_TO_ONE) || multiplicity.equals(ForeignKey.MANY_TO_ONE))     
-                ) {
+
+                if (linkName != null && linkValue != null && !isSharedByPrimaryKey
+                        && (multiplicity.equals(ForeignKey.ONE_TO_ONE) || multiplicity.equals(ForeignKey.MANY_TO_ONE)))
+                {
                     RelationHolder relationHolder = new RelationHolder(linkName, linkValue);
-                    relationsHolder.add(relationHolder);       
-                }              
+                    relationsHolder.add(relationHolder);
+                }
             }
         }
         return relationsHolder;
     }
-    
+
     /**
      * @param node
      * @param entityMetadata
@@ -123,6 +132,6 @@ public class ClientBase
         // for(rel)
 
         // indexManager.update(entityMetadata, node.getData(), null, null);
-    }  
+    }
 
 }

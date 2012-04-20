@@ -39,7 +39,7 @@ import com.impetus.kundera.entity.photo.PhotoUni_1_1_1_M;
 public class AlbumUni_1_1_1_M
 {
     @Id
-    @Column(name="ALBUM_ID")
+    @Column(name = "ALBUM_ID")
     private String albumId;
 
     @Column(name = "ALBUM_NAME")
@@ -50,7 +50,7 @@ public class AlbumUni_1_1_1_M
 
     // One to many, will be persisted separately
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name="ALBUM_ID")
+    @JoinColumn(name = "ALBUM_ID")
     private List<PhotoUni_1_1_1_M> photos;
 
     public AlbumUni_1_1_1_M()
@@ -114,21 +114,24 @@ public class AlbumUni_1_1_1_M
      */
     public List<PhotoUni_1_1_1_M> getPhotos()
     {
-        if(photos == null) {
+        if (photos == null)
+        {
             photos = new ArrayList<PhotoUni_1_1_1_M>();
         }
         return photos;
     }
 
     /**
-     * @param photos the photos to set
+     * @param photos
+     *            the photos to set
      */
     public void setPhotos(List<PhotoUni_1_1_1_M> photos)
     {
         this.photos = photos;
-    }   
-    
-    public void addPhoto(PhotoUni_1_1_1_M photo) {
+    }
+
+    public void addPhoto(PhotoUni_1_1_1_M photo)
+    {
         getPhotos().add(photo);
     }
 

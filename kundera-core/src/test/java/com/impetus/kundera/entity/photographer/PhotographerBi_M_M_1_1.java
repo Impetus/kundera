@@ -45,14 +45,7 @@ public class PhotographerBi_M_M_1_1
     private String photographerName;
 
     @ManyToMany
-    @JoinTable(name = "PHOTOGRAPHER_ALBUM", 
-      joinColumns = {
-        @JoinColumn(name="PHOTOGRAPHER_ID")           
-      },
-      inverseJoinColumns = {
-        @JoinColumn(name="ALBUM_ID")
-      }
-    )
+    @JoinTable(name = "PHOTOGRAPHER_ALBUM", joinColumns = { @JoinColumn(name = "PHOTOGRAPHER_ID") }, inverseJoinColumns = { @JoinColumn(name = "ALBUM_ID") })
     private List<AlbumBi_M_M_1_1> albums;
 
     /**

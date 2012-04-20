@@ -16,11 +16,11 @@
 package com.impetus.kundera.persistence.context;
 
 /**
- * Main cache for the persistence context 
+ * Main cache for the persistence context
+ * 
  * @author amresh.singh
  */
 public class MainCache extends CacheBase
 {
-    
 
 }

@@ -41,7 +41,7 @@ import com.impetus.kundera.entity.photographer.PhotographerBi_1_M_M_M;
 public class AlbumBi_1_M_M_M
 {
     @Id
-    @Column(name="ALBUM_ID")
+    @Column(name = "ALBUM_ID")
     private String albumId;
 
     @Column(name = "ALBUM_NAME")
@@ -51,18 +51,11 @@ public class AlbumBi_1_M_M_M
     private String albumDescription;
 
     @ManyToMany
-    @JoinTable(name = "ALBUM_PHOTO", 
-      joinColumns = {
-        @JoinColumn(name="ALBUM_ID")           
-      },
-      inverseJoinColumns = {
-        @JoinColumn(name="PHOTO_ID")
-      }
-    )
+    @JoinTable(name = "ALBUM_PHOTO", joinColumns = { @JoinColumn(name = "ALBUM_ID") }, inverseJoinColumns = { @JoinColumn(name = "PHOTO_ID") })
     private List<PhotoBi_1_M_M_M> photos;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="PHOTOGRAPHER_ID")
+    @JoinColumn(name = "PHOTOGRAPHER_ID")
     private PhotographerBi_1_M_M_M photographer;
 
     public AlbumBi_1_M_M_M()
@@ -119,28 +112,31 @@ public class AlbumBi_1_M_M_M
     public void setAlbumDescription(String albumDescription)
     {
         this.albumDescription = albumDescription;
-    }    
-    
+    }
+
     /**
      * @return the photos
      */
     public List<PhotoBi_1_M_M_M> getPhotos()
     {
-        if(this.photos == null || this.photos.isEmpty()) {
+        if (this.photos == null || this.photos.isEmpty())
+        {
             this.photos = new ArrayList<PhotoBi_1_M_M_M>();
         }
         return photos;
     }
 
     /**
-     * @param photos the photos to set
+     * @param photos
+     *            the photos to set
      */
     public void setPhotos(List<PhotoBi_1_M_M_M> photos)
     {
         this.photos = photos;
     }
 
-    public void addPhoto(PhotoBi_1_M_M_M photo) {
+    public void addPhoto(PhotoBi_1_M_M_M photo)
+    {
         getPhotos().add(photo);
     }
 
@@ -153,12 +149,12 @@ public class AlbumBi_1_M_M_M
     }
 
     /**
-     * @param photographer the photographer to set
+     * @param photographer
+     *            the photographer to set
      */
     public void setPhotographer(PhotographerBi_1_M_M_M photographer)
     {
         this.photographer = photographer;
-    }  
-    
+    }
 
 }

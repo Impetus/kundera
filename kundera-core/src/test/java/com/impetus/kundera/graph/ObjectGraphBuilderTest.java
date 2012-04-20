@@ -26,14 +26,15 @@ import com.impetus.kundera.configure.Configurator;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
- * Test case for {@link ObjectGraphBuilder} 
+ * Test case for {@link ObjectGraphBuilder}
+ * 
  * @author amresh.singh
  */
 public class ObjectGraphBuilderTest
 {
     ObjectGraphBuilder graphBuilder;
+
     Configurator configurator = new Configurator("kunderatest");
-    
 
     /**
      * @throws java.lang.Exception
@@ -51,11 +52,13 @@ public class ObjectGraphBuilderTest
     @After
     public void tearDown() throws Exception
     {
-        
+
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.graph.ObjectGraphBuilder#getObjectGraph(java.lang.Object)}.
+     * Test method for
+     * {@link com.impetus.kundera.graph.ObjectGraphBuilder#getObjectGraph(java.lang.Object)}
+     * .
      */
     @Test
     public void testGetObjectGraph()
@@ -64,28 +67,30 @@ public class ObjectGraphBuilderTest
         store.addCounter(new BillingCounter(1, "A"));
         store.addCounter(new BillingCounter(2, "B"));
         store.addCounter(new BillingCounter(3, "C"));
-        
+
         ObjectGraph graph = graphBuilder.getObjectGraph(store, null, new PersistenceCache());
-        
+
         Assert.assertNotNull(graph);
         Node headNode = graph.getHeadNode();
         Map<String, Node> nodeMappings = graph.getNodeMapping();
-        
+
         Assert.assertNotNull(headNode);
         Assert.assertNotNull(nodeMappings);
         Assert.assertFalse(nodeMappings.isEmpty());
         Assert.assertEquals(4, nodeMappings.size());
-        
+
         Assert.assertTrue(headNode.getParents() == null);
         Assert.assertEquals(3, headNode.getChildren().size());
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.graph.ObjectGraphBuilder#getNodeId(java.lang.Object, java.lang.Object)}.
+     * Test method for
+     * {@link com.impetus.kundera.graph.ObjectGraphBuilder#getNodeId(java.lang.Object, java.lang.Object)}
+     * .
      */
     @Test
     public void testGetNodeId()
-    {        
+    {
     }
 
 }

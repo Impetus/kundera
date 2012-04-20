@@ -76,7 +76,7 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
      * )
      */
     @Override
-    public Integer fromString(Class targetClass, String s) 
+    public Integer fromString(Class targetClass, String s)
     {
         try
         {

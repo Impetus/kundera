@@ -75,7 +75,6 @@ public class PelopsClientFactory extends GenericClientFactory
 
         reader = new CassandraEntityReader();
 
-
         schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
         schemaManager.exportSchema();
     }

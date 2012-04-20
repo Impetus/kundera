@@ -47,8 +47,8 @@ public class ClassFileIterator implements ResourceIterator
     public ClassFileIterator(File file, Filter filter)
     {
         files = new ArrayList<File>();
-        
-        init(files, file, filter);        
+
+        init(files, file, filter);
     }
 
     /**
@@ -76,7 +76,7 @@ public class ClassFileIterator implements ResourceIterator
      * @throws Exception
      *             the exception
      */
-    private static void init(List<File> list, File dir, Filter filter) 
+    private static void init(List<File> list, File dir, Filter filter)
     {
         File[] files = dir.listFiles();
         for (int i = 0; i < files.length; i++)
@@ -105,11 +105,10 @@ public class ClassFileIterator implements ResourceIterator
             return new FileInputStream(fp);
         }
         catch (FileNotFoundException e)
-        {            
+        {
             throw new ResourceReadingException("Couldn't read file " + fp, e);
         }
     }
-
 
     public void close()
     {

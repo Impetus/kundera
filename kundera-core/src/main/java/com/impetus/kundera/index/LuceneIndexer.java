@@ -91,7 +91,7 @@ public class LuceneIndexer extends DocumentIndexer
      * @param lucDirPath
      *            the luc dir path
      */
-    private LuceneIndexer(Analyzer analyzer, String lucDirPath) 
+    private LuceneIndexer(Analyzer analyzer, String lucDirPath)
     {
         super(analyzer);
         try
@@ -131,7 +131,7 @@ public class LuceneIndexer extends DocumentIndexer
      *            the luc dir path
      * @return single instance of LuceneIndexer
      */
-    public static synchronized LuceneIndexer getInstance(Analyzer analyzer, String lucDirPath) 
+    public static synchronized LuceneIndexer getInstance(Analyzer analyzer, String lucDirPath)
     {
         // super(analyzer);
         if (indexer == null && lucDirPath != null)
@@ -157,7 +157,7 @@ public class LuceneIndexer extends DocumentIndexer
      * 
      * @return index reader.
      */
-    private IndexReader getIndexReader() 
+    private IndexReader getIndexReader()
     {
         flushInternal();
 
@@ -192,8 +192,8 @@ public class LuceneIndexer extends DocumentIndexer
      */
     private File getIndexDirectory()
     {
-        File file = new File(luceneDirPath);       
-        
+        File file = new File(luceneDirPath);
+
         if (!file.isDirectory())
         {
             file.mkdir();
@@ -201,9 +201,8 @@ public class LuceneIndexer extends DocumentIndexer
         return file;
     }
 
-
     @Override
-    public final void index(EntityMetadata metadata, Object object) 
+    public final void index(EntityMetadata metadata, Object object)
     {
         indexDocument(metadata, object, null, null);
         onCommit();
@@ -216,7 +215,7 @@ public class LuceneIndexer extends DocumentIndexer
         try
         {
             /* String indexName, Query query, boolean autoCommit */
-            getIndexWriter().deleteDocuments(new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));            
+            getIndexWriter().deleteDocuments(new Term(KUNDERA_ID_FIELD, getKunderaId(metadata, id)));
         }
         catch (CorruptIndexException e)
         {
@@ -230,7 +229,7 @@ public class LuceneIndexer extends DocumentIndexer
 
     @SuppressWarnings("deprecation")
     @Override
-    public final Map<String, String> search(String luceneQuery, int start, int count, boolean fetchRelation) 
+    public final Map<String, String> search(String luceneQuery, int start, int count, boolean fetchRelation)
     {
 
         reader = getIndexReader();
@@ -248,7 +247,7 @@ public class LuceneIndexer extends DocumentIndexer
         {
             throw new LuceneIndexingException("Index reader is not initialized!");
         }
-        
+
         IndexSearcher searcher = new IndexSearcher(reader);
         QueryParser qp = new QueryParser(Version.LUCENE_34, DEFAULT_SEARCHABLE_FIELD, new StandardAnalyzer(
                 Version.LUCENE_34));
@@ -286,23 +285,24 @@ public class LuceneIndexer extends DocumentIndexer
         {
             throw new LuceneIndexingException(e);
         }
-        
+
         reader = null;
         return indexCol;
     }
 
     /**
      * Indexes document in file system using lucene.
+     * 
      * @param metadata
      *            the metadata
      * @param document
      *            the document
      */
-    public void indexDocument(EntityMetadata metadata, Document document) 
+    public void indexDocument(EntityMetadata metadata, Document document)
     {
 
         log.debug("Indexing document: " + document + " for " + metadata.getDBType() + " in file system using Lucene");
-        
+
         IndexWriter w = getIndexWriter();
         try
         {
@@ -324,11 +324,10 @@ public class LuceneIndexer extends DocumentIndexer
         }
     }
 
-
     /**
      * Flush internal.
      */
-    private void flushInternal() 
+    private void flushInternal()
     {
         try
         {
@@ -355,7 +354,7 @@ public class LuceneIndexer extends DocumentIndexer
     /**
      * Close of transaction.
      */
-    public void close() 
+    public void close()
     {
         try
         {
@@ -385,7 +384,7 @@ public class LuceneIndexer extends DocumentIndexer
      */
     @Override
     public void flush()
-    {       
+    {
         if (w != null)
         {
 
@@ -397,14 +396,12 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public void index(EntityMetadata metadata, Object object, String parentId, Class<?> clazz) 
+    public void index(EntityMetadata metadata, Object object, String parentId, Class<?> clazz)
     {
 
         indexDocument(metadata, object, parentId, clazz);
         onCommit();
     }
-    
-    
 
     @Override
     public boolean entityExistsInIndex(Class<?> entityClass)
@@ -419,9 +416,12 @@ public class LuceneIndexer extends DocumentIndexer
         {
             return false;
         }
-        if(results == null || results.isEmpty()) {
+        if (results == null || results.isEmpty())
+        {
             return false;
-        } else {
+        }
+        else
+        {
             return true;
         }
     }
@@ -439,7 +439,7 @@ public class LuceneIndexer extends DocumentIndexer
      *            the clazz
      * @return the document
      */
-    private Document indexDocument(EntityMetadata metadata, Object object, String parentId, Class<?> clazz) 
+    private Document indexDocument(EntityMetadata metadata, Object object, String parentId, Class<?> clazz)
     {
         if (!metadata.isIndexable())
         {
@@ -557,7 +557,6 @@ public class LuceneIndexer extends DocumentIndexer
             // Store document into index
             indexDocument(metadata, currentDoc);
         }
-        
 
         return currentDoc;
     }

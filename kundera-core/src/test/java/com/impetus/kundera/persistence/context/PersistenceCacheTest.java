@@ -15,7 +15,6 @@
  */
 package com.impetus.kundera.persistence.context;
 
-
 import junit.framework.Assert;
 
 import org.junit.After;
@@ -31,17 +30,20 @@ import com.impetus.kundera.graph.Store;
 
 /**
  * Test case for {@link PersistenceCache}
+ * 
  * @author amresh.singh
  */
 public class PersistenceCacheTest
 {
 
     PersistenceCache pc;
-    FlushManager flushManager;    
-    ObjectGraphBuilder graphBuilder;    
-    
+
+    FlushManager flushManager;
+
+    ObjectGraphBuilder graphBuilder;
+
     Configurator configurator = new Configurator("kunderatest");
-    
+
     /**
      * @throws java.lang.Exception
      */
@@ -51,9 +53,9 @@ public class PersistenceCacheTest
         pc = new PersistenceCache();
         flushManager = new FlushManager();
         graphBuilder = new ObjectGraphBuilder();
-        
-        configurator.configure();     
-        
+
+        configurator.configure();
+
     }
 
     /**
@@ -63,35 +65,29 @@ public class PersistenceCacheTest
     public void tearDown() throws Exception
     {
     }
-    
+
     @Test
-    public void testPersistenceCache() {
+    public void testPersistenceCache()
+    {
         Store store = new Store(1, "Food Bazaar, Noida");
         store.addCounter(new BillingCounter(1, "A"));
         store.addCounter(new BillingCounter(2, "B"));
         store.addCounter(new BillingCounter(3, "C"));
-        
+
         ObjectGraph graph = graphBuilder.getObjectGraph(store, null, pc);
-        
+
         pc.getMainCache().addGraphToCache(graph, pc);
-        
+
         Assert.assertNotNull(pc.getMainCache());
         Assert.assertEquals(1, pc.getMainCache().getHeadNodes().size());
-        
+
         Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphBuilder.getNodeId("1", Store.class));
-        
+
         Assert.assertNull(headNode.getParents());
         Assert.assertEquals(3, headNode.getChildren().size());
-        
-        Assert.assertEquals(4, pc.getMainCache().size());
-        
-        
-        /*flushStackManager.buildFlushStack(pc);        
-        
-        FlushStack fs = pc.getFlushStack();
-        System.out.println(fs);
-        Assert.assertEquals(4, fs.size());*/        
-        
-    }   
+
+        Assert.assertEquals(4, pc.getMainCache().size());     
+
+    }
 
 }

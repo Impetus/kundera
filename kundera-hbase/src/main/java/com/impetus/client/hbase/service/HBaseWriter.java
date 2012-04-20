@@ -61,11 +61,12 @@ public class HBaseWriter implements Writer
             try
             {
                 byte[] value = PropertyAccessorHelper.get(columnFamilyObj, column.getField());
-                
-                if(value != null) {
+
+                if (value != null)
+                {
                     p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), value);
                 }
-                
+
             }
             catch (PropertyAccessException e1)
             {
@@ -97,10 +98,10 @@ public class HBaseWriter implements Writer
             try
             {
 
-            	p.add(Bytes.toBytes(qualifier), Bytes.toBytes(qualifier), System.currentTimeMillis(), PropertyAccessorHelper.get(entity, column.getField()));
-//                p.add(Bytes.toBytes(qualifier), System.currentTimeMillis(),
-//                        PropertyAccessorHelper.get(entity, column.getField()));
-            
+                p.add(Bytes.toBytes(qualifier), Bytes.toBytes(qualifier), System.currentTimeMillis(),
+                        PropertyAccessorHelper.get(entity, column.getField()));
+                // p.add(Bytes.toBytes(qualifier), System.currentTimeMillis(),
+                // PropertyAccessorHelper.get(entity, column.getField()));
 
             }
             catch (PropertyAccessException e1)
@@ -142,9 +143,11 @@ public class HBaseWriter implements Writer
                 }
                 else
                 {
-                	p.add(Bytes.toBytes(r.getRelationName()), Bytes.toBytes(r.getRelationName()), System.currentTimeMillis(), Bytes.toBytes(r.getRelationValue()));
-//                    p.add(Bytes.toBytes(r.getRelationName()), System.currentTimeMillis(),
-//                            Bytes.toBytes(r.getRelationValue()));
+                    p.add(Bytes.toBytes(r.getRelationName()), Bytes.toBytes(r.getRelationName()),
+                            System.currentTimeMillis(), Bytes.toBytes(r.getRelationValue()));
+                    // p.add(Bytes.toBytes(r.getRelationName()),
+                    // System.currentTimeMillis(),
+                    // Bytes.toBytes(r.getRelationValue()));
                 }
 
             }
@@ -195,16 +198,20 @@ public class HBaseWriter implements Writer
     /**
      * Support for delete over HBase.
      */
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Writer#delete(org.apache.hadoop.hbase.client.HTable, java.lang.String, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Writer#delete(org.apache.hadoop.hbase.client
+     * .HTable, java.lang.String, java.lang.String)
      */
     public void delete(HTable hTable, String rowKey, String columnFamily)
-    {   	
+    {
         try
         {
-        	byte[] rowBytes = Bytes.toBytes(rowKey);
-        	Delete delete = new Delete(rowBytes);
-        	
+            byte[] rowBytes = Bytes.toBytes(rowKey);
+            Delete delete = new Delete(rowBytes);
+
             hTable.delete(delete);
         }
         catch (IOException e)

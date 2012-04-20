@@ -17,10 +17,9 @@ package com.impetus.kundera.metadata.validator;
 
 import com.impetus.kundera.KunderaException;
 
-
 /**
  * @author amresh
- *
+ * 
  */
 public class InvalidEntityDefinitionException extends KunderaException
 {

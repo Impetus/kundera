@@ -20,7 +20,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * The Class CassandraEntitySimple.
  */
@@ -44,7 +43,7 @@ public class CassandraEntitySimple
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -54,7 +53,7 @@ public class CassandraEntitySimple
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -64,8 +63,9 @@ public class CassandraEntitySimple
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -74,8 +74,9 @@ public class CassandraEntitySimple
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -84,7 +85,7 @@ public class CassandraEntitySimple
 
     /**
      * Gets the age.
-     *
+     * 
      * @return the age
      */
     public short getAge()
@@ -94,8 +95,9 @@ public class CassandraEntitySimple
 
     /**
      * Sets the age.
-     *
-     * @param age the age to set
+     * 
+     * @param age
+     *            the age to set
      */
     public void setAge(short age)
     {

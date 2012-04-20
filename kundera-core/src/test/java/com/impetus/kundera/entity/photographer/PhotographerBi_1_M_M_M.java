@@ -45,7 +45,7 @@ public class PhotographerBi_1_M_M_M
     private String photographerName;
 
     // One to many, will be persisted separately
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy="photographer")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "photographer")
     private List<AlbumBi_1_M_M_M> albums;
 
     /**
@@ -91,13 +91,14 @@ public class PhotographerBi_1_M_M_M
     }
 
     /**
-     * @param albums the albums to set
+     * @param albums
+     *            the albums to set
      */
     public void setAlbums(List<AlbumBi_1_M_M_M> albums)
     {
         this.albums = albums;
     }
-    
+
     /**
      * @param albums
      *            the albums to set

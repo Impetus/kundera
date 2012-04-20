@@ -27,7 +27,8 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
- * Resolver class for client. It instantiates client factory and discover specific client.
+ * Resolver class for client. It instantiates client factory and discover
+ * specific client.
  * 
  * @author vivek.mishra
  */
@@ -70,9 +71,10 @@ public final class ClientResolver
         logger.info("Initializing client factory for: " + persistenceUnit);
         PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(persistenceUnit);
-        String kunderaClientFactory = persistenceUnitMetadata.getProperties().getProperty(PersistenceProperties.KUNDERA_CLIENT_FACTORY);
+        String kunderaClientFactory = persistenceUnitMetadata.getProperties().getProperty(
+                PersistenceProperties.KUNDERA_CLIENT_FACTORY);
 
-        if(kunderaClientFactory == null)
+        if (kunderaClientFactory == null)
         {
             throw new ClientResolverException(
                     "<kundera.client.lookup.class> is missing from persistence.xml, please provide specific client factory. e.g., <property name=\"kundera.client.lookup.class\" value=\"com.impetus.client.cassandra.pelops.PelopsClientFactory\" />");

@@ -110,7 +110,6 @@ public class LuceneQuery extends QueryImpl implements Query
             return persistenceDelegeator.find(m.getEntityClazz(), searchFilter);
 
         }
-       
 
     }
 
@@ -139,14 +138,12 @@ public class LuceneQuery extends QueryImpl implements Query
     {
         throw new UnsupportedOperationException("Method not supported for default indexing");
     }
-    
 
     @Override
     protected EntityReader getReader()
     {
         throw new UnsupportedOperationException("Method not supported for default indexing");
-    }  
-    
+    }
 
     @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
@@ -154,18 +151,20 @@ public class LuceneQuery extends QueryImpl implements Query
         throw new UnsupportedOperationException("Method not supported for Lucene indexing");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.kundera.query.QueryImpl#onExecuteUpdate()
      */
     @Override
     protected int onExecuteUpdate()
     {
-        if(kunderaQuery.isDeleteUpdate())
+        if (kunderaQuery.isDeleteUpdate())
         {
             List result = getResultList();
-            return result != null? result.size():0;
+            return result != null ? result.size() : 0;
         }
-        
+
         return 0;
     }
 }

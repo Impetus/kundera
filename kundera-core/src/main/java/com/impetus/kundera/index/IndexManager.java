@@ -57,13 +57,13 @@ public class IndexManager
      * @param key
      *            the key
      */
-    public final void remove(EntityMetadata metadata, Object entity, String key) 
+    public final void remove(EntityMetadata metadata, Object entity, String key)
     {
         if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
         {
             indexer.unindex(metadata, key);
         }
-        
+
     }
 
     /**
@@ -74,27 +74,28 @@ public class IndexManager
      * @param entity
      *            the entity
      */
-    public final void update(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz) 
+    public final void update(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz)
     {
-        
+
         try
         {
             if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
-            {                
-                String id = PropertyAccessorHelper.getId(entity, metadata);                
-                
+            {
+                String id = PropertyAccessorHelper.getId(entity, metadata);
+
                 boolean documentExists = indexer.entityExistsInIndex(entity.getClass());
-                if(documentExists) {
+                if (documentExists)
+                {
                     indexer.unindex(metadata, id);
                     indexer.flush();
-                }   
+                }
                 indexer.index(metadata, entity, parentId, clazz);
             }
-        }       
+        }
         catch (PropertyAccessException e)
         {
             throw new IndexingException("Can't access ID from entity class " + metadata.getEntityClazz(), e);
-        }        
+        }
     }
 
     /**
@@ -105,12 +106,12 @@ public class IndexManager
      * @param entity
      *            the entity
      */
-    public final void write(EntityMetadata metadata, Object entity) 
-    {        
+    public final void write(EntityMetadata metadata, Object entity)
+    {
         if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
         {
             indexer.index(metadata, entity);
-        }      
+        }
     }
 
     /**
@@ -125,12 +126,12 @@ public class IndexManager
      * @param clazz
      *            class name
      */
-    public final void write(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz) 
-    {        
+    public final void write(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz)
+    {
         if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
         {
             indexer.index(metadata, entity, parentId, clazz);
-        }       
+        }
     }
 
     /**
@@ -141,23 +142,23 @@ public class IndexManager
      *            the query
      * @return the list
      */
-    public final Map<String, String> search(String query) 
-    {        
-        return search(query, Constants.INVALID, Constants.INVALID, false);      
-    }
-
-    /**
-     * Searches on the index. Note: Query must be in Indexer's understandable
-     * format
-     * 
-     * @param query
-     *            the query
-     * @return the list
-     */
-    public final Map<String, String> fetchRelation(String query) 
+    public final Map<String, String> search(String query)
     {
-        // TODO: need to return list.       
-        return search(query, Constants.INVALID, Constants.INVALID, true);       
+        return search(query, Constants.INVALID, Constants.INVALID, false);
+    }
+
+    /**
+     * Searches on the index. Note: Query must be in Indexer's understandable
+     * format
+     * 
+     * @param query
+     *            the query
+     * @return the list
+     */
+    public final Map<String, String> fetchRelation(String query)
+    {
+        // TODO: need to return list.
+        return search(query, Constants.INVALID, Constants.INVALID, true);
     }
 
     /**
@@ -169,9 +170,9 @@ public class IndexManager
      *            the count
      * @return the list
      */
-    public final Map<String, String> search(String query, int count) 
-    {        
-        return search(query, Constants.INVALID, count, false);       
+    public final Map<String, String> search(String query, int count)
+    {
+        return search(query, Constants.INVALID, count, false);
     }
 
     /**
@@ -185,9 +186,9 @@ public class IndexManager
      *            the count
      * @return the list
      */
-    public final Map<String, String> search(String query, int start, int count) 
-    {       
-        return indexer.search(query, start, count, false);       
+    public final Map<String, String> search(String query, int start, int count)
+    {
+        return indexer.search(query, start, count, false);
     }
 
     /**
@@ -203,9 +204,9 @@ public class IndexManager
      *            the fetch relation
      * @return the list
      */
-    public final Map<String, String> search(String query, int start, int count, boolean fetchRelation) 
-    {      
-        return indexer.search(query, start, count, fetchRelation);      
+    public final Map<String, String> search(String query, int start, int count, boolean fetchRelation)
+    {
+        return indexer.search(query, start, count, fetchRelation);
     }
 
     /**
@@ -216,17 +217,17 @@ public class IndexManager
         if (indexer != null)
         {
             indexer.flush();
-        } 
+        }
     }
 
     /**
      * Closes the transaction alongwith RAM directory.
      */
     public void close() throws IndexingException
-    {       
+    {
         if (indexer != null)
         {
             indexer.close();
-        } 
+        }
     }
 }

@@ -60,7 +60,6 @@ public class MongoDBClientFactory extends GenericClientFactory
     /** Configure schema manager. */
     private SchemaManager schemaManager;
 
-    
     @Override
     public void initialize()
     {

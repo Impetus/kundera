@@ -17,6 +17,7 @@ package com.impetus.kundera;
 
 /**
  * Base Exception class for all type of exceptions thrown by Kundera.
+ * 
  * @author amresh.singh
  */
 public class KunderaException extends RuntimeException

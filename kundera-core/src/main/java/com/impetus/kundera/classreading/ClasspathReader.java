@@ -65,7 +65,6 @@ public class ClasspathReader extends Reader
         this.classesToScan = classesToScan;
     }
 
-
     @Override
     public final void read()
     {
@@ -99,7 +98,7 @@ public class ClasspathReader extends Reader
      */
     @SuppressWarnings("deprecation")
     @Override
-    public final URL[] findResourcesByClasspath() 
+    public final URL[] findResourcesByClasspath()
     {
         List<URL> list = new ArrayList<URL>();
         String classpath = System.getProperty("java.class.path");
@@ -131,7 +130,7 @@ public class ClasspathReader extends Reader
      */
 
     @Override
-    public final URL[] findResourcesByContextLoader() 
+    public final URL[] findResourcesByContextLoader()
     {
         List<URL> list = new ArrayList<URL>();
 
@@ -175,7 +174,7 @@ public class ClasspathReader extends Reader
      * @see com.impetus.kundera.classreading.Reader#findResources()
      */
     @Override
-    public URL[] findResources() 
+    public URL[] findResources()
     {
         URL[] result = null;
 

@@ -16,7 +16,8 @@
 package com.impetus.kundera.persistence.context;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * <Prove description of functionality provided by this Type>
+ * 
  * @author amresh.singh
  */
 public class EmbeddedCache extends CacheBase

@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
-
 import javax.persistence.PersistenceContextType;
 
 import com.impetus.kundera.client.Client;
@@ -25,7 +24,7 @@ import com.impetus.kundera.lifecycle.NodeStateContext;
 
 /**
  * @author amresh
- *
+ * 
  */
 public class RemovedState extends NodeState
 {
@@ -37,19 +36,21 @@ public class RemovedState extends NodeState
     @Override
     public void handlePersist(NodeStateContext nodeStateContext)
     {
-        //Removed ---> Managed State
+        // Removed ---> Managed State
         moveNodeToNextState(nodeStateContext, new ManagedState());
-        
-        //Recurse persist operation on all related entities for whom cascade=ALL or PERSIST
+
+        // Recurse persist operation on all related entities for whom
+        // cascade=ALL or PERSIST
         recursivelyPerformOperation(nodeStateContext, OPERATION.PERSIST);
-    }    
+    }
 
     @Override
     public void handleRemove(NodeStateContext nodeStateContext)
     {
-        //Ignored, entity will remain in removed state
-        
-        //Recurse remove operation for all related entities for whom cascade=ALL or REMOVE
+        // Ignored, entity will remain in removed state
+
+        // Recurse remove operation for all related entities for whom
+        // cascade=ALL or REMOVE
         recursivelyPerformOperation(nodeStateContext, OPERATION.REMOVE);
     }
 
@@ -58,7 +59,8 @@ public class RemovedState extends NodeState
     {
         // Ignored, entity will remain in removed state
 
-        // Cascade refresh operation for all related entities for whom cascade=ALL or REFRESH
+        // Cascade refresh operation for all related entities for whom
+        // cascade=ALL or REFRESH
         recursivelyPerformOperation(nodeStateContext, OPERATION.REFRESH);
     }
 
@@ -67,7 +69,7 @@ public class RemovedState extends NodeState
     {
         throw new IllegalArgumentException("Merge operation not allowed in Removed state");
     }
-    
+
     @Override
     public void handleFind(NodeStateContext nodeStateContext)
     {
@@ -76,35 +78,35 @@ public class RemovedState extends NodeState
     @Override
     public void handleClose(NodeStateContext nodeStateContext)
     {
-      //Nothing to do, only entities in Managed state move to detached state
+        // Nothing to do, only entities in Managed state move to detached state
     }
 
     @Override
     public void handleClear(NodeStateContext nodeStateContext)
     {
-      //Nothing to do, only entities in Managed state move to detached state
+        // Nothing to do, only entities in Managed state move to detached state
     }
 
     @Override
     public void handleFlush(NodeStateContext nodeStateContext)
     {
-        //Entity state to remain as Removed     
-        
-        //Flush this node to database       
+        // Entity state to remain as Removed
+
+        // Flush this node to database
         Client client = nodeStateContext.getClient();
-        
-        Node node = (Node)nodeStateContext;
+
+        Node node = (Node) nodeStateContext;
         String entityId = ObjectGraphBuilder.getEntityId(node.getNodeId());
         client.delete(node.getData(), entityId);
-        
-        //Since node is flushed, mark it as NOT dirty
+
+        // Since node is flushed, mark it as NOT dirty
         nodeStateContext.setDirty(false);
-        
-        //Remove this node from Persistence Cache
+
+        // Remove this node from Persistence Cache
         nodeStateContext.getPersistenceCache().getMainCache().removeNodeFromCache(node);
-        
-//        logNodeEvent("DELETED", this, nodeStateContext.getNodeId());        
-        
+
+        // logNodeEvent("DELETED", this, nodeStateContext.getNodeId());
+
     }
 
     @Override
@@ -115,11 +117,12 @@ public class RemovedState extends NodeState
     @Override
     public void handleDetach(NodeStateContext nodeStateContext)
     {
-        //Removed ---> Detached
-        moveNodeToNextState(nodeStateContext, new DetachedState());               
-        
-        //Cascade detach operation to all referenced entities for whom cascade=ALL or DETACH
-        recursivelyPerformOperation(nodeStateContext, OPERATION.DETACH);  
+        // Removed ---> Detached
+        moveNodeToNextState(nodeStateContext, new DetachedState());
+
+        // Cascade detach operation to all referenced entities for whom
+        // cascade=ALL or DETACH
+        recursivelyPerformOperation(nodeStateContext, OPERATION.DETACH);
     }
 
     @Override
@@ -131,16 +134,20 @@ public class RemovedState extends NodeState
     @Override
     public void handleRollback(NodeStateContext nodeStateContext)
     {
-        //If persistence context is EXTENDED, Next state should be Managed
-        //If persistence context is TRANSACTIONAL, Node should be detached
-        
-        if(PersistenceContextType.EXTENDED.equals(nodeStateContext.getPersistenceCache().getPersistenceContextType())) {
-            moveNodeToNextState(nodeStateContext, new ManagedState());            
-            
-        } else if(PersistenceContextType.TRANSACTION.equals(nodeStateContext.getPersistenceCache().getPersistenceContextType())) {
+        // If persistence context is EXTENDED, Next state should be Managed
+        // If persistence context is TRANSACTIONAL, Node should be detached
+
+        if (PersistenceContextType.EXTENDED.equals(nodeStateContext.getPersistenceCache().getPersistenceContextType()))
+        {
+            moveNodeToNextState(nodeStateContext, new ManagedState());
+
+        }
+        else if (PersistenceContextType.TRANSACTION.equals(nodeStateContext.getPersistenceCache()
+                .getPersistenceContextType()))
+        {
             nodeStateContext.detach();
-        }       
-        
+        }
+
     }
 
     @Override
@@ -151,7 +158,6 @@ public class RemovedState extends NodeState
     @Override
     public void handleContains(NodeStateContext nodeStateContext)
     {
-    }   
-    
-    
+    }
+
 }

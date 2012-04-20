@@ -36,7 +36,7 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Time fromBytes(Class targetClass, byte[] b) 
+    public Time fromBytes(Class targetClass, byte[] b)
     {
         String s;
         try
@@ -57,7 +57,7 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public byte[] toBytes(Object object) 
+    public byte[] toBytes(Object object)
     {
         Time t = (Time) object;
         return t.toString().getBytes();
@@ -83,7 +83,7 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
      * )
      */
     @Override
-    public Time fromString(Class targetClass, String s) 
+    public Time fromString(Class targetClass, String s)
     {
         Time t = Time.valueOf(s);
         return t;

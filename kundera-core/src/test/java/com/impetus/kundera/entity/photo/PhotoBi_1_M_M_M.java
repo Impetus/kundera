@@ -36,7 +36,7 @@ import com.impetus.kundera.entity.album.AlbumBi_1_M_M_M;
 public class PhotoBi_1_M_M_M
 {
     @Id
-    @Column(name="PHOTO_ID")
+    @Column(name = "PHOTO_ID")
     private String photoId;
 
     @Column(name = "PHOTO_CAPTION")
@@ -44,15 +44,17 @@ public class PhotoBi_1_M_M_M
 
     @Column(name = "PHOTO_DESC")
     private String photoDescription;
-    
+
     @ManyToMany(mappedBy = "photos", fetch = FetchType.LAZY)
     private Set<AlbumBi_1_M_M_M> albums;
-    
-    public PhotoBi_1_M_M_M() {
-        
+
+    public PhotoBi_1_M_M_M()
+    {
+
     }
-    
-    public PhotoBi_1_M_M_M(String photoId, String caption, String description) {
+
+    public PhotoBi_1_M_M_M(String photoId, String caption, String description)
+    {
         this.photoId = photoId;
         this.photoCaption = caption;
         this.photoDescription = description;
@@ -118,11 +120,12 @@ public class PhotoBi_1_M_M_M
     }
 
     /**
-     * @param albums the albums to set
+     * @param albums
+     *            the albums to set
      */
     public void setAlbums(Set<AlbumBi_1_M_M_M> albums)
     {
         this.albums = albums;
-    }  
+    }
 
 }

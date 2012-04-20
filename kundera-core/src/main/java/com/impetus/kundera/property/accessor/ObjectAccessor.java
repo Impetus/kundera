@@ -39,26 +39,26 @@ public class ObjectAccessor implements PropertyAccessor<Object>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public final Object fromBytes(Class targetClass, byte[] bytes) 
+    public final Object fromBytes(Class targetClass, byte[] bytes)
     {
-       
-            try
-            {
-                ObjectInputStream ois;
-                ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
-                Object o = ois.readObject();
-                ois.close();
-                return o;
-            }
-            catch (IOException e)
-            {
-                throw new PropertyAccessException(e);
-            }
-            catch (ClassNotFoundException e)
-            {
-                throw new PropertyAccessException(e);
-            }
-        
+
+        try
+        {
+            ObjectInputStream ois;
+            ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+            Object o = ois.readObject();
+            ois.close();
+            return o;
+        }
+        catch (IOException e)
+        {
+            throw new PropertyAccessException(e);
+        }
+        catch (ClassNotFoundException e)
+        {
+            throw new PropertyAccessException(e);
+        }
+
     }
 
     /*
@@ -72,7 +72,7 @@ public class ObjectAccessor implements PropertyAccessor<Object>
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public final byte[] toBytes(Object o) 
+    public final byte[] toBytes(Object o)
     {
 
         try
@@ -87,7 +87,7 @@ public class ObjectAccessor implements PropertyAccessor<Object>
         {
             throw new PropertyAccessException(e);
         }
-        
+
     }
 
     /*

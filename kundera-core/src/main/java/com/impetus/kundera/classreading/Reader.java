@@ -130,7 +130,7 @@ public abstract class Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    public ResourceIterator getResourceIterator(URL url, Filter filter) 
+    public ResourceIterator getResourceIterator(URL url, Filter filter)
     {
         String urlString = url.toString();
         try

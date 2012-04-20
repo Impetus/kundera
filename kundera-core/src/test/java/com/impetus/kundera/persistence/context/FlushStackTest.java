@@ -15,7 +15,6 @@
  */
 package com.impetus.kundera.persistence.context;
 
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,13 +24,16 @@ import com.impetus.kundera.graph.Node;
 
 /**
  * Test case for {@link FlushStack}
+ * 
  * @author amresh.singh
  */
 public class FlushStackTest
 {
 
     FlushStack fs;
+
     PersistenceCache pc;
+
     /**
      * @throws java.lang.Exception
      */
@@ -49,19 +51,16 @@ public class FlushStackTest
     public void tearDown() throws Exception
     {
     }
-    
+
     @Test
-    public void testFlushStackPush() {
+    public void testFlushStackPush()
+    {
         fs.push(new Node("A", new Object(), pc));
         fs.push(new Node("B", new Object(), pc));
         fs.push(new Node("C", new Object(), pc));
         fs.push(new Node("D", new Object(), pc));
-        
-        System.out.println(fs);
-        
+
         Assert.assertEquals(4, fs.size());
     }
-    
-   
 
 }

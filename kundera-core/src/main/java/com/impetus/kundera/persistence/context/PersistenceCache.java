@@ -24,82 +24,82 @@ import javax.persistence.PersistenceContextType;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 
-
-
 /**
- * Implementation of Persistence Context as defined in JPA.
- * Acts as a cache of entities. 
+ * Implementation of Persistence Context as defined in JPA. Acts as a cache of
+ * entities.
+ * 
  * @author amresh.singh
  */
 public class PersistenceCache
 {
     /* Main Cache of entity objects */
     private CacheBase mainCache;
-    
+
     /* Cache of embedded objects */
     private CacheBase embeddedCache;
-    
+
     /* Cache of objects within element collection */
     private CacheBase elementCollectionCache;
-    
+
     /* Cache of transactional objects */
     private CacheBase transactionalCache;
-    
+
     FlushManager flushManager;
-    
+
     private PersistenceContextType persistenceContextType;
-    
-   
+
     /**
-     * Stack containing Nodes to be flushed
-     * Entities are always flushed from the top, there way to bottom until stack is empty 
+     * Stack containing Nodes to be flushed Entities are always flushed from the
+     * top, there way to bottom until stack is empty
      */
-    private FlushStack flushStack;  
-    
+    private FlushStack flushStack;
+
     /**
      * Map containing data required for inserting records for each join table.
-     * Key -> Name of Join Table
-     * Value -> records to be persisted in the join table
+     * Key -> Name of Join Table Value -> records to be persisted in the join
+     * table
      */
     private Map<String, JoinTableData> joinTableDataMap;
-    
-    public PersistenceCache() {
+
+    public PersistenceCache()
+    {
         initialize();
     }
-    
-    private void initialize() {
+
+    private void initialize()
+    {
         mainCache = new MainCache();
         embeddedCache = new EmbeddedCache();
         elementCollectionCache = new ElementCollectionCache();
         transactionalCache = new TransactionalCache();
-        
+
         flushStack = new FlushStack();
         joinTableDataMap = new HashMap<String, JoinTableData>();
-        
+
         flushManager = new FlushManager();
-    }    
-    
+    }
+
     /**
      * Cleaned out the data.
      * 
      */
     public void clean()
     {
-        // Clear main cache. 
-        if(mainCache != null)
+        // Clear main cache.
+        if (mainCache != null)
         {
             mainCache.clear();
         }
-        
-        if(embeddedCache != null)
+
+        if (embeddedCache != null)
         {
             embeddedCache.clear();
         }
-        if(elementCollectionCache != null)
+        if (elementCollectionCache != null)
         {
             elementCollectionCache.clear();
         }
-        if(transactionalCache != null)
+        if (transactionalCache != null)
         {
             transactionalCache.clear();
         }
@@ -112,7 +112,7 @@ public class PersistenceCache
         {
             joinTableDataMap.clear();
         }
-        
+
     }
 
     /**
@@ -121,19 +121,16 @@ public class PersistenceCache
     public CacheBase getMainCache()
     {
         return mainCache;
-    } 
-
-
+    }
 
     /**
-     * @param mainCache the mainCache to set
+     * @param mainCache
+     *            the mainCache to set
      */
     public void setMainCache(CacheBase mainCache)
     {
         this.mainCache = mainCache;
     }
-
-
 
     /**
      * @return the embeddedCache
@@ -143,17 +140,14 @@ public class PersistenceCache
         return embeddedCache;
     }
 
-
-
     /**
-     * @param embeddedCache the embeddedCache to set
+     * @param embeddedCache
+     *            the embeddedCache to set
      */
     public void setEmbeddedCache(CacheBase embeddedCache)
     {
         this.embeddedCache = embeddedCache;
     }
-
-
 
     /**
      * @return the elementCollectionCache
@@ -163,17 +157,14 @@ public class PersistenceCache
         return elementCollectionCache;
     }
 
-
-
     /**
-     * @param elementCollectionCache the elementCollectionCache to set
+     * @param elementCollectionCache
+     *            the elementCollectionCache to set
      */
     public void setElementCollectionCache(CacheBase elementCollectionCache)
     {
         this.elementCollectionCache = elementCollectionCache;
     }
-
-
 
     /**
      * @return the transactionalCache
@@ -183,17 +174,14 @@ public class PersistenceCache
         return transactionalCache;
     }
 
-
-
     /**
-     * @param transactionalCache the transactionalCache to set
+     * @param transactionalCache
+     *            the transactionalCache to set
      */
     public void setTransactionalCache(CacheBase transactionalCache)
     {
         this.transactionalCache = transactionalCache;
     }
-
-
 
     /**
      * @return the flushStack
@@ -203,10 +191,9 @@ public class PersistenceCache
         return flushStack;
     }
 
-
-
     /**
-     * @param flushStack the flushStack to set
+     * @param flushStack
+     *            the flushStack to set
      */
     public void setFlushStack(FlushStack flushStack)
     {
@@ -219,7 +206,7 @@ public class PersistenceCache
     public Map<String, JoinTableData> getJoinTableDataMap()
     {
         return joinTableDataMap;
-    }     
+    }
 
     /**
      * @return the persistenceContextType
@@ -230,7 +217,8 @@ public class PersistenceCache
     }
 
     /**
-     * @param persistenceContextType the persistenceContextType to set
+     * @param persistenceContextType
+     *            the persistenceContextType to set
      */
     public void setPersistenceContextType(PersistenceContextType persistenceContextType)
     {
@@ -238,21 +226,24 @@ public class PersistenceCache
     }
 
     /**
-     * @param joinTableDataMap the joinTableDataMap to set
+     * @param joinTableDataMap
+     *            the joinTableDataMap to set
      */
-    public void addJoinTableDataIntoMap(OPERATION operation, String joinTableName, String joinColumnName, 
+    public void addJoinTableDataIntoMap(OPERATION operation, String joinTableName, String joinColumnName,
             String invJoinColumnName, Class<?> entityClass, Object joinColumnValue, Set<Object> invJoinColumnValues)
     {
         JoinTableData joinTableData = joinTableDataMap.get(joinTableName);
-        if(joinTableData == null) {
+        if (joinTableData == null)
+        {
             joinTableData = new JoinTableData(operation, joinTableName, joinColumnName, invJoinColumnName, entityClass);
             joinTableData.addJoinTableRecord(joinColumnValue, invJoinColumnValues);
             joinTableDataMap.put(joinTableName, joinTableData);
-        } else {
+        }
+        else
+        {
             joinTableData.addJoinTableRecord(joinColumnValue, invJoinColumnValues);
         }
-        
-    } 
-    
+
+    }
 
 }

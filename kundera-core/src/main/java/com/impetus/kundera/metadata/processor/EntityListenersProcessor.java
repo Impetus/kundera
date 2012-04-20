@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityListeners;
-import javax.persistence.PersistenceException;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
@@ -38,7 +37,6 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.MetadataProcessor;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.persistence.event.CallbackMethod;
 import com.impetus.kundera.persistence.event.ExternalCallbackMethod;
 import com.impetus.kundera.persistence.event.InternalCallbackMethod;
@@ -68,7 +66,6 @@ public class EntityListenersProcessor implements MetadataProcessor
     @SuppressWarnings("unchecked")
     private static final List<Class<? extends Annotation>> JPAListenersAnnotations = Arrays.asList(PrePersist.class,
             PostPersist.class, PreUpdate.class, PostUpdate.class, PreRemove.class, PostRemove.class, PostLoad.class);
-
 
     @Override
     public final void process(final Class<?> entityClass, EntityMetadata metadata)

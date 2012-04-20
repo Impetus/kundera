@@ -35,7 +35,6 @@ import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
-import com.impetus.kundera.query.KunderaQuery.UpdateClause;
 
 /**
  * The Class KunderaQuery.
@@ -44,8 +43,8 @@ public class KunderaQuery
 {
 
     /** The Constant SINGLE_STRING_KEYWORDS. */
-    public static final String[] SINGLE_STRING_KEYWORDS = { "SELECT", "UPDATE", "SET", "DELETE", "UNIQUE", "FROM", "WHERE",
-            "GROUP BY", "HAVING", "ORDER BY" };
+    public static final String[] SINGLE_STRING_KEYWORDS = { "SELECT", "UPDATE", "SET", "DELETE", "UNIQUE", "FROM",
+            "WHERE", "GROUP BY", "HAVING", "ORDER BY" };
 
     /** The Constant INTER_CLAUSE_OPERATORS. */
     public static final String[] INTER_CLAUSE_OPERATORS = { "AND", "OR", "BETWEEN" };
@@ -89,8 +88,8 @@ public class KunderaQuery
     private List<SortOrdering> sortOrders;
 
     /** Persistence Unit(s). */
-//    String[] persistenceUnits;
-    
+    // String[] persistenceUnits;
+
     String persistenceUnit;
 
     // contains a Queue of alternate FilterClause object and Logical Strings
@@ -98,19 +97,19 @@ public class KunderaQuery
     /** The filters queue. */
     private Queue filtersQueue = new LinkedList();
 
-
     private boolean isDeleteUpdate;
-    
-    private Queue<UpdateClause> updateClauseQueue = new LinkedList<UpdateClause>(); 
+
+    private Queue<UpdateClause> updateClauseQueue = new LinkedList<UpdateClause>();
+
     /**
      * Instantiates a new kundera query.
      * 
      * @param persistenceUnits
      *            the persistence units
      */
-    public KunderaQuery(/*String... persistenceUnits*/)
+    public KunderaQuery(/* String... persistenceUnits */)
     {
-//        this.persistenceUnits = persistenceUnits;
+        // this.persistenceUnits = persistenceUnits;
     }
 
     /**
@@ -245,7 +244,7 @@ public class KunderaQuery
             throw new PersistenceException("Bad query format: " + from);
         }
 
-        if(!this.isDeleteUpdate)
+        if (!this.isDeleteUpdate)
         {
             StringTokenizer tokenizer = new StringTokenizer(getResult(), ",");
             while (tokenizer.hasMoreTokens())
@@ -266,26 +265,25 @@ public class KunderaQuery
 
         persistenceUnit = KunderaMetadata.INSTANCE.getApplicationMetadata().getMappedPersistenceUnit(entityName);
 
-        //Get specific metamodel.
-        MetamodelImpl  model = getMetamodel(persistenceUnit);
-        
-        if(model != null)
+        // Get specific metamodel.
+        MetamodelImpl model = getMetamodel(persistenceUnit);
+
+        if (model != null)
         {
             entityClass = model.getEntityClass(entityName);
         }
-        
+
         if (null == entityClass)
         {
             throw new QueryHandlerException("No entity found by the name: " + entityName);
         }
-        
-        
+
         EntityMetadata metadata = model.getEntityMetadata(entityClass);
-        
+
         if (!metadata.isIndexable())
         {
-            throw new QueryHandlerException(entityClass + " is not indexed. Not possible to run a query on it." +
-            		" Check whether it was properly annotated for indexing.");
+            throw new QueryHandlerException(entityClass + " is not indexed. Not possible to run a query on it."
+                    + " Check whether it was properly annotated for indexing.");
         }
     }
 
@@ -327,16 +325,15 @@ public class KunderaQuery
                 // strip alias from property name
                 String property = tokens.get(0);
                 property = property.substring((entityAlias + ".").length());
-                
+
                 String columnName = getColumnNameFromFieldName(metadata, property);
-                
-                
+
                 columnName = indexName + "." + columnName;
                 // verify condition
                 String condition = tokens.get(1);
                 if (!Arrays.asList(INTRA_CLAUSE_OPERATORS).contains(condition.toUpperCase()))
                 {
-                    throw new JPQLParseException("Bad JPA query: " + clause );
+                    throw new JPQLParseException("Bad JPA query: " + clause);
                 }
 
                 filtersQueue.add(new FilterClause(columnName, condition, tokens.get(2)));
@@ -367,25 +364,25 @@ public class KunderaQuery
     {
         String columnName = null;
         Column idColumn = metadata.getIdColumn();
-        
-        if(idColumn.getField().getName().equals(property))
+
+        if (idColumn.getField().getName().equals(property))
         {
             columnName = idColumn.getName();
-        } 
+        }
         else
-        {            
-            for(Column column : metadata.getColumnsAsList())
+        {
+            for (Column column : metadata.getColumnsAsList())
             {
-                if(column.getField().getName().equals(property))
+                if (column.getField().getName().equals(property))
                 {
                     columnName = column.getName();
                     break;
                 }
-            } 
-            
+            }
+
         }
-        
-        if(columnName == null)
+
+        if (columnName == null)
         {
             columnName = property;
         }
@@ -453,8 +450,6 @@ public class KunderaQuery
         return filtersQueue;
     }
 
-    
-    
     // class to keep hold of a where clause predicate
     /**
      * The Class FilterClause.
@@ -550,18 +545,19 @@ public class KunderaQuery
             return builder.toString();
         }
     }
-    
+
     public final class UpdateClause
     {
         private String property;
+
         private String value;
-        
+
         public UpdateClause(final String property, final String value)
         {
             this.property = property;
             this.value = value;
         }
-        
+
         /**
          * @return the property
          */
@@ -569,13 +565,16 @@ public class KunderaQuery
         {
             return property;
         }
+
         /**
-         * @param property the property to set
+         * @param property
+         *            the property to set
          */
         public void setProperty(String property)
         {
             this.property = property;
         }
+
         /**
          * @return the value
          */
@@ -583,15 +582,16 @@ public class KunderaQuery
         {
             return value;
         }
+
         /**
-         * @param value the value to set
+         * @param value
+         *            the value to set
          */
         public void setValue(String value)
         {
             this.value = value;
         }
-        
-        
+
     }
 
     /* @see java.lang.Object#clone() */
@@ -676,17 +676,18 @@ public class KunderaQuery
     {
         return persistenceUnit;
     }
-//
-//    /**
-//     * Sets the persistence units.
-//     * 
-//     * @param persistenceUnits
-//     *            the persistenceUnits to set
-//     */
-//    public void setPersistenceUnits(String[] persistenceUnits)
-//    {
-//        this.persistenceUnits = persistenceUnits;
-//    }
+
+    //
+    // /**
+    // * Sets the persistence units.
+    // *
+    // * @param persistenceUnits
+    // * the persistenceUnits to set
+    // */
+    // public void setPersistenceUnits(String[] persistenceUnits)
+    // {
+    // this.persistenceUnits = persistenceUnits;
+    // }
 
     /**
      * Parses the ordering @See Order By Clause.
@@ -793,8 +794,6 @@ public class KunderaQuery
         DESC;
     }
 
-    
-
     /**
      * @return the updateClauseQueue
      */
@@ -807,19 +806,20 @@ public class KunderaQuery
     {
         return !updateClauseQueue.isEmpty();
     }
-    
+
     public void addUpdateClause(final String property, final String value)
     {
         updateClauseQueue.add(new UpdateClause(property.trim(), value.trim()));
     }
+
     /**
      * @param b
      */
     public void setIsDeleteUpdate(boolean b)
     {
-       this.isDeleteUpdate = b;   
+        this.isDeleteUpdate = b;
     }
-    
+
     public boolean isDeleteUpdate()
     {
         return isDeleteUpdate;

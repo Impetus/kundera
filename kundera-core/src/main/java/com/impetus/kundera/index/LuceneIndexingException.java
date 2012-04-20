@@ -17,7 +17,7 @@ package com.impetus.kundera.index;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class LuceneIndexingException extends IndexingException
 {

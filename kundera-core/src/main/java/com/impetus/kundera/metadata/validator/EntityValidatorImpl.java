@@ -21,12 +21,10 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.PersistenceException;
 import javax.persistence.Table;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 
 /**
  * Validates entity for JPA rules.
@@ -75,7 +73,8 @@ public class EntityValidatorImpl implements EntityValidator
         }
         catch (NoSuchMethodException nsme)
         {
-            throw new InvalidEntityDefinitionException(clazz.getName() + " must have a default no-argument constructor.");
+            throw new InvalidEntityDefinitionException(clazz.getName()
+                    + " must have a default no-argument constructor.");
         }
 
         // Must be annotated with @Table

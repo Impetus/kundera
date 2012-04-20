@@ -175,15 +175,18 @@ class AssociationHandler
         }
         catch (PropertyAccessException e)
         {
-            throw new PersistenceObjectGraphBuilderException("Error while detaching associated entity from parent entity", e);
+            throw new PersistenceObjectGraphBuilderException(
+                    "Error while detaching associated entity from parent entity", e);
         }
         catch (InstantiationException e)
         {
-            throw new PersistenceObjectGraphBuilderException("Error while detaching associated entity from parent entity", e);
+            throw new PersistenceObjectGraphBuilderException(
+                    "Error while detaching associated entity from parent entity", e);
         }
         catch (IllegalAccessException e)
         {
-            throw new PersistenceObjectGraphBuilderException("Error while detaching associated entity from parent entity", e);
+            throw new PersistenceObjectGraphBuilderException(
+                    "Error while detaching associated entity from parent entity", e);
         }
     }
 

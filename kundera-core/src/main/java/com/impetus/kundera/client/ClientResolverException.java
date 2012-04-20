@@ -18,8 +18,8 @@ package com.impetus.kundera.client;
 import com.impetus.kundera.KunderaException;
 
 /**
- * Exception class for error scenarios involving resolution of clients.
- * The Class ClientResolverException.
+ * Exception class for error scenarios involving resolution of clients. The
+ * Class ClientResolverException.
  * 
  * @author impetus
  */
@@ -34,7 +34,7 @@ public class ClientResolverException extends KunderaException
      */
     public ClientResolverException()
     {
-        super();        
+        super();
     }
 
     /**
@@ -44,7 +44,7 @@ public class ClientResolverException extends KunderaException
     public ClientResolverException(String arg0, Throwable arg1)
     {
         super(arg0, arg1);
-        
+
     }
 
     /**
@@ -53,7 +53,7 @@ public class ClientResolverException extends KunderaException
     public ClientResolverException(String arg0)
     {
         super(arg0);
-        
+
     }
 
     /**
@@ -62,6 +62,6 @@ public class ClientResolverException extends KunderaException
     public ClientResolverException(Throwable arg0)
     {
         super(arg0);
-        
-    }    
+
+    }
 }

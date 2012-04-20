@@ -47,29 +47,30 @@ public class SchemaGenerationException extends KunderaException
      * @param schema
      *            the schema
      */
-    public SchemaGenerationException(String arg0 ,String dataStore, String schema)
+    public SchemaGenerationException(String arg0, String dataStore, String schema)
     {
         super(arg0);
         this.dataStoreName = dataStore;
         this.schemaName = schema;
     }
 
-//    /**
-//     * Instantiates a new schemaGeneration exception.
-//     * 
-//     * @param dataStore
-//     *            the data store
-//     * @param schema
-//     *            the schema
-//     * @param table
-//     *            the table
-//     */
-//    public SchemaGenerationException(String arg0 ,String dataStore, String schema, String table)
-//    {
-//        this.dataStoreName = dataStore;
-//        this.schemaName = schema;
-//        this.tableName = table;
-//    }
+    // /**
+    // * Instantiates a new schemaGeneration exception.
+    // *
+    // * @param dataStore
+    // * the data store
+    // * @param schema
+    // * the schema
+    // * @param table
+    // * the table
+    // */
+    // public SchemaGenerationException(String arg0 ,String dataStore, String
+    // schema, String table)
+    // {
+    // this.dataStoreName = dataStore;
+    // this.schemaName = schema;
+    // this.tableName = table;
+    // }
 
     /**
      * Instantiates a new schemaGeneration exception.

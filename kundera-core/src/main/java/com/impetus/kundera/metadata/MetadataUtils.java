@@ -308,39 +308,43 @@ public class MetadataUtils
 
         return null;
     }
-    
-    public static boolean isParent(EntityMetadata m) {
-        for(Relation relation : m.getRelations()) {
-            if(Relation.ForeignKey.ONE_TO_MANY.equals(relation.getType())) {
+
+    public static boolean isParent(EntityMetadata m)
+    {
+        for (Relation relation : m.getRelations())
+        {
+            if (Relation.ForeignKey.ONE_TO_MANY.equals(relation.getType()))
+            {
                 return true;
             }
         }
         return false;
     }
 
-
-    
     /**
-     * Returns mapped relational name, in case of bi directional mapping, it will return back pKey name of associated entity.
+     * Returns mapped relational name, in case of bi directional mapping, it
+     * will return back pKey name of associated entity.
      * 
-     * @param relation holding relation.
-     * @return   mapped/join column name.
+     * @param relation
+     *            holding relation.
+     * @return mapped/join column name.
      */
     public static String getMappedName(EntityMetadata parentMetadata, Relation relation)
     {
-        if(relation != null)
+        if (relation != null)
         {
-        String joinColumn = relation.getJoinColumnName();
-        if(joinColumn == null)
-        {         
-            
-            Class clazz = relation.getTargetEntity();
-            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
-            joinColumn = relation.getType().equals(ForeignKey.ONE_TO_MANY)? parentMetadata.getIdColumn().getName():metadata.getIdColumn().getName();
-        }
-        return joinColumn;
+            String joinColumn = relation.getJoinColumnName();
+            if (joinColumn == null)
+            {
+
+                Class clazz = relation.getTargetEntity();
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+                joinColumn = relation.getType().equals(ForeignKey.ONE_TO_MANY) ? parentMetadata.getIdColumn().getName()
+                        : metadata.getIdColumn().getName();
+            }
+            return joinColumn;
         }
         return null;
-    }    
-    
+    }
+
 }

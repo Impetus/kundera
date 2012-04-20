@@ -26,8 +26,12 @@ import com.impetus.kundera.property.PropertyAccessor;
 public class UUIDAccessor implements PropertyAccessor<UUID>
 {
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(java.lang.Class, byte[])
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#fromBytes(java.lang.Class,
+     * byte[])
      */
     @Override
     public UUID fromBytes(Class targetClass, byte[] bytes) throws PropertyAccessException
@@ -42,8 +46,11 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
@@ -59,8 +66,11 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
      */
     @Override
     public String toString(Object object)
@@ -68,8 +78,12 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
         return ((UUID) object).toString();
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.Class, java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.property.PropertyAccessor#fromString(java.lang.Class,
+     * java.lang.String)
      */
     @Override
     public UUID fromString(Class targetClass, String s) throws PropertyAccessException
@@ -86,8 +100,9 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
 
     /**
      * Returns as byte array.
-     *
-     * @param uuid UUID
+     * 
+     * @param uuid
+     *            UUID
      * @return byte[] array.
      */
     private static byte[] asByteArray(UUID uuid)

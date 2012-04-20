@@ -23,7 +23,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
 /**
  * The Class CassandraEntityAddressBi1ToM.
  */
@@ -31,7 +30,7 @@ import javax.persistence.Table;
 @Table(name = "CassandraEntityAddressBi1ToM", schema = "KunderaCoreExmples@cassandra")
 public class CassandraEntityAddressBi1ToM
 {
-    
+
     /** The address id. */
     @Id
     @Column(name = "ADDRESS_ID")
@@ -48,7 +47,7 @@ public class CassandraEntityAddressBi1ToM
 
     /**
      * Gets the address id.
-     *
+     * 
      * @return the address id
      */
     public String getAddressId()
@@ -58,8 +57,9 @@ public class CassandraEntityAddressBi1ToM
 
     /**
      * Sets the address id.
-     *
-     * @param addressId the new address id
+     * 
+     * @param addressId
+     *            the new address id
      */
     public void setAddressId(String addressId)
     {
@@ -68,7 +68,7 @@ public class CassandraEntityAddressBi1ToM
 
     /**
      * Gets the street.
-     *
+     * 
      * @return the street
      */
     public String getStreet()
@@ -78,8 +78,9 @@ public class CassandraEntityAddressBi1ToM
 
     /**
      * Sets the street.
-     *
-     * @param street the new street
+     * 
+     * @param street
+     *            the new street
      */
     public void setStreet(String street)
     {
@@ -88,7 +89,7 @@ public class CassandraEntityAddressBi1ToM
 
     /**
      * Gets the person.
-     *
+     * 
      * @return the person
      */
     public CassandraEntityPersonBi1ToM getPerson()
@@ -98,8 +99,9 @@ public class CassandraEntityAddressBi1ToM
 
     /**
      * Sets the person.
-     *
-     * @param person the new person
+     * 
+     * @param person
+     *            the new person
      */
     public void setPerson(CassandraEntityPersonBi1ToM person)
     {

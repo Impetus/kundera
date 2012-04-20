@@ -54,10 +54,10 @@ public final class JarFileIterator implements ResourceIterator
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    /*public JarFileIterator(File file, Filter filter) throws FileNotFoundException
-    {        
-        this(new FileInputStream(file), filter);
-    }*/
+    /*
+     * public JarFileIterator(File file, Filter filter) throws
+     * FileNotFoundException { this(new FileInputStream(file), filter); }
+     */
 
     /**
      * Instantiates a new jar file iterator.
@@ -70,7 +70,7 @@ public final class JarFileIterator implements ResourceIterator
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    public JarFileIterator(InputStream is, Filter filter) 
+    public JarFileIterator(InputStream is, Filter filter)
     {
         this.filter = filter;
         try
@@ -114,18 +114,17 @@ public final class JarFileIterator implements ResourceIterator
         }
     }
 
-    public InputStream next() 
+    public InputStream next()
     {
         if (closed || (next == null && !initial))
             return null;
-        
+
         setNext();
-       
+
         if (next == null)
             return null;
         return new InputStreamWrapper(jar);
     }
-
 
     public void close()
     {
@@ -136,7 +135,7 @@ public final class JarFileIterator implements ResourceIterator
         }
         catch (IOException ignored)
         {
-            
+
         }
 
     }

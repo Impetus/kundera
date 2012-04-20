@@ -28,7 +28,6 @@ import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
-import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 
 /**
@@ -126,28 +125,28 @@ public class FlushManager
                     {
                         JoinTableMetadata jtmd = (JoinTableMetadata) nodeLink
                                 .getLinkProperty(LinkProperty.JOIN_TABLE_METADATA);
-                        if(jtmd != null)
+                        if (jtmd != null)
                         {
-                        String joinColumnName = (String) jtmd.getJoinColumns().toArray()[0];
-                        String inverseJoinColumnName = (String) jtmd.getInverseJoinColumns().toArray()[0];
-                        Object entityId = ObjectGraphBuilder.getEntityId(node.getNodeId());
-                        Object childId = ObjectGraphBuilder.getEntityId(childNode.getNodeId());
+                            String joinColumnName = (String) jtmd.getJoinColumns().toArray()[0];
+                            String inverseJoinColumnName = (String) jtmd.getInverseJoinColumns().toArray()[0];
+                            Object entityId = ObjectGraphBuilder.getEntityId(node.getNodeId());
+                            Object childId = ObjectGraphBuilder.getEntityId(childNode.getNodeId());
 
-                        Set<Object> childValues = new HashSet<Object>();
-                        childValues.add(childId);
+                            Set<Object> childValues = new HashSet<Object>();
+                            childValues.add(childId);
 
-                        OPERATION operation = null;
-                        if (node.getCurrentNodeState().getClass().equals(ManagedState.class))
-                        {
-                            operation = OPERATION.INSERT;
-                        }
-                        else if (node.getCurrentNodeState().getClass().equals(RemovedState.class))
-                        {
-                            operation = OPERATION.DELETE;
-                        }
+                            OPERATION operation = null;
+                            if (node.getCurrentNodeState().getClass().equals(ManagedState.class))
+                            {
+                                operation = OPERATION.INSERT;
+                            }
+                            else if (node.getCurrentNodeState().getClass().equals(RemovedState.class))
+                            {
+                                operation = OPERATION.DELETE;
+                            }
 
-                        pc.addJoinTableDataIntoMap(operation, jtmd.getJoinTableName(), joinColumnName,
-                                inverseJoinColumnName, node.getDataClass(), entityId, childValues);
+                            pc.addJoinTableDataIntoMap(operation, jtmd.getJoinTableName(), joinColumnName,
+                                    inverseJoinColumnName, node.getDataClass(), entityId, childValues);
                         }
                     }
 

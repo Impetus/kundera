@@ -93,13 +93,14 @@ public class PhotographerUni_1_M_M_M
     }
 
     /**
-     * @param albums the albums to set
+     * @param albums
+     *            the albums to set
      */
     public void setAlbums(List<AlbumUni_1_M_M_M> albums)
     {
         this.albums = albums;
     }
-    
+
     /**
      * @param albums
      *            the albums to set

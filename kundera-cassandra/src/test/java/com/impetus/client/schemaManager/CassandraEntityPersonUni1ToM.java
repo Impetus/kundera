@@ -27,7 +27,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-
 /**
  * The Class CassandraEntityPersonUni1ToM.
  */
@@ -60,7 +59,7 @@ public class CassandraEntityPersonUni1ToM
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -70,7 +69,7 @@ public class CassandraEntityPersonUni1ToM
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -80,8 +79,9 @@ public class CassandraEntityPersonUni1ToM
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -90,8 +90,9 @@ public class CassandraEntityPersonUni1ToM
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -100,7 +101,7 @@ public class CassandraEntityPersonUni1ToM
 
     /**
      * Gets the age.
-     *
+     * 
      * @return the age
      */
     public short getAge()
@@ -110,8 +111,9 @@ public class CassandraEntityPersonUni1ToM
 
     /**
      * Sets the age.
-     *
-     * @param age the age to set
+     * 
+     * @param age
+     *            the age to set
      */
     public void setAge(short age)
     {
@@ -120,7 +122,7 @@ public class CassandraEntityPersonUni1ToM
 
     /**
      * Gets the personal data.
-     *
+     * 
      * @return the personalData
      */
     public CassandraPersonalData getPersonalData()
@@ -130,8 +132,9 @@ public class CassandraEntityPersonUni1ToM
 
     /**
      * Sets the personal data.
-     *
-     * @param personalData the personalData to set
+     * 
+     * @param personalData
+     *            the personalData to set
      */
     public void setPersonalData(CassandraPersonalData personalData)
     {
@@ -140,7 +143,7 @@ public class CassandraEntityPersonUni1ToM
 
     /**
      * Gets the addresses.
-     *
+     * 
      * @return the addresses
      */
     public Set<CassandraEntityAddressUni1ToM> getAddresses()
@@ -150,8 +153,9 @@ public class CassandraEntityPersonUni1ToM
 
     /**
      * Sets the addresses.
-     *
-     * @param addresses the addresses to set
+     * 
+     * @param addresses
+     *            the addresses to set
      */
     public void setAddresses(Set<CassandraEntityAddressUni1ToM> addresses)
     {

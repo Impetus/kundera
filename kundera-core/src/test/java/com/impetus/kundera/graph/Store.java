@@ -28,29 +28,33 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
- * Dummy Store entity class 
+ * Dummy Store entity class
+ * 
  * @author amresh.singh
  */
 
 @Entity
-@Table(name="STORE", schema="KunderaTest")
+@Table(name = "STORE", schema = "KunderaTest")
 public class Store
 {
     @Id
-    @Column(name="STORE_ID")
+    @Column(name = "STORE_ID")
     private int storeId;
-    
-    @Column(name="STORE_NAME")
+
+    @Column(name = "STORE_NAME")
     private String storeName;
-    
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "STORE_ID")
     private List<BillingCounter> counters;
-    
-    public Store() {
-        
+
+    public Store()
+    {
+
     }
-    public Store(int id, String name) {
+
+    public Store(int id, String name)
+    {
         this.storeId = id;
         this.storeName = name;
     }
@@ -64,7 +68,8 @@ public class Store
     }
 
     /**
-     * @param storeId the storeId to set
+     * @param storeId
+     *            the storeId to set
      */
     public void setStoreId(int storeId)
     {
@@ -80,7 +85,8 @@ public class Store
     }
 
     /**
-     * @param storeName the storeName to set
+     * @param storeName
+     *            the storeName to set
      */
     public void setStoreName(String storeName)
     {
@@ -96,15 +102,16 @@ public class Store
     }
 
     /**
-     * @param counters the counters to set
+     * @param counters
+     *            the counters to set
      */
     public void addCounter(BillingCounter counter)
     {
-        if(counters == null) {
-            counters = new ArrayList<BillingCounter>();            
+        if (counters == null)
+        {
+            counters = new ArrayList<BillingCounter>();
         }
         counters.add(counter);
-    }  
-    
+    }
 
 }

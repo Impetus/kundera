@@ -18,10 +18,6 @@ package com.impetus.client.persistence;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.NamedNativeQueries;
-import javax.persistence.NamedNativeQuery;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 /**
@@ -33,14 +29,14 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "users", schema = "twissandra@KunderaExamples")
-//@NamedQuery(name="delete.query",query="Delete From CassandraEntitySample c where c.state=UP")
+// @NamedQuery(name="delete.query",query="Delete From CassandraEntitySample c where c.state=UP")
 public class CassandraEntitySample
 {
 
     @Id
-    @Column(name="key")
+    @Column(name = "key")
     private String key;
-    
+
     @Column(name = "full_name")
     private String full_name;
 
@@ -49,6 +45,7 @@ public class CassandraEntitySample
 
     @Column(name = "state")
     private String state;
+
     /**
      * @return the key
      */
@@ -66,7 +63,6 @@ public class CassandraEntitySample
         this.key = key;
     }
 
-
     /**
      * @return the full_name
      */
@@ -76,7 +72,8 @@ public class CassandraEntitySample
     }
 
     /**
-     * @param full_name the full_name to set
+     * @param full_name
+     *            the full_name to set
      */
     public void setFull_name(String full_name)
     {
@@ -92,7 +89,8 @@ public class CassandraEntitySample
     }
 
     /**
-     * @param birth_date the birth_date to set
+     * @param birth_date
+     *            the birth_date to set
      */
     public void setBirth_date(int birth_date)
     {
@@ -108,12 +106,12 @@ public class CassandraEntitySample
     }
 
     /**
-     * @param state the state to set
+     * @param state
+     *            the state to set
      */
     public void setState(String state)
     {
         this.state = state;
     }
 
-    
 }

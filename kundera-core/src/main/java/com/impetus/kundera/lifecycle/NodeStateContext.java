@@ -17,7 +17,6 @@ package com.impetus.kundera.lifecycle;
 
 import java.util.Map;
 
-
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
@@ -27,75 +26,100 @@ import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
  * State context of a given entity
+ * 
  * @author amresh
  * 
  */
 public interface NodeStateContext
-{    
-    //State methods    
+{
+    // State methods
     NodeState getCurrentNodeState();
-    void setCurrentNodeState(NodeState nodeState); 
-    
+
+    void setCurrentNodeState(NodeState nodeState);
+
     String getNodeId();
-    void setNodeId(String nodeId);   
-    
+
+    void setNodeId(String nodeId);
+
     Object getData();
-    void setData(Object data); 
-    
+
+    void setData(Object data);
+
     Class getDataClass();
+
     void setDataClass(Class dataClass);
-    
+
     Map<NodeLink, Node> getParents();
+
     void setParents(Map<NodeLink, Node> parents);
-    
+
     Map<NodeLink, Node> getChildren();
+
     void setChildren(Map<NodeLink, Node> children);
-    
+
     Node getParentNode(String parentNodeId);
+
     Node getChildNode(String childNodeId);
-    
+
     void addParentNode(NodeLink nodeLink, Node node);
+
     void addChildNode(NodeLink nodeLink, Node node);
-    
+
     boolean isTraversed();
+
     void setTraversed(boolean traversed);
-    
+
     boolean isDirty();
+
     void setDirty(boolean dirty);
-    
+
     boolean isHeadNode();
-    void setHeadNode(boolean isHeadNode);    
-    
+
+    void setHeadNode(boolean isHeadNode);
+
     Client getClient();
+
     void setClient(Client client);
-    
+
     PersistenceDelegator getPersistenceDelegator();
+
     void setPersistenceDelegator(PersistenceDelegator pd);
-    
+
     // Life cycle Management
     void persist();
+
     void remove();
+
     void refresh();
+
     void merge();
+
     void detach();
+
     void close();
+
     void lock();
+
     void commit();
+
     void rollback();
 
     // Identity Management
     void find();
+
     void getReference();
+
     void contains();
 
     // Cache Management
     void clear();
+
     void flush();
-    
-    public boolean isInState(Class<?> stateClass);  
-    
-    
+
+    public boolean isInState(Class<?> stateClass);
+
     public PersistenceCache getPersistenceCache();
+
     public void setPersistenceCache(PersistenceCache persistenceCache);
 
 }

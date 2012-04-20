@@ -44,7 +44,7 @@ public class PhotographerBi_1_M_1_M
     @Column(name = "PHOTOGRAPHER_NAME")
     private String photographerName;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy="photographer")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "photographer")
     private List<AlbumBi_1_M_1_M> albums;
 
     /**

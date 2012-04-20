@@ -24,7 +24,7 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class CassandraPersonalData
 {
-    
+
     /** The website. */
     @Column(name = "p_website")
     private String website;
@@ -47,10 +47,13 @@ public class CassandraPersonalData
 
     /**
      * Instantiates a new cassandra personal data.
-     *
-     * @param website the website
-     * @param email the email
-     * @param yahooId the yahoo id
+     * 
+     * @param website
+     *            the website
+     * @param email
+     *            the email
+     * @param yahooId
+     *            the yahoo id
      */
     public CassandraPersonalData(String website, String email, String yahooId)
     {
@@ -61,7 +64,7 @@ public class CassandraPersonalData
 
     /**
      * Gets the website.
-     *
+     * 
      * @return the website
      */
     public String getWebsite()
@@ -71,8 +74,9 @@ public class CassandraPersonalData
 
     /**
      * Sets the website.
-     *
-     * @param website the new website
+     * 
+     * @param website
+     *            the new website
      */
     public void setWebsite(String website)
     {
@@ -81,7 +85,7 @@ public class CassandraPersonalData
 
     /**
      * Gets the email.
-     *
+     * 
      * @return the email
      */
     public String getEmail()
@@ -91,8 +95,9 @@ public class CassandraPersonalData
 
     /**
      * Sets the email.
-     *
-     * @param email the email to set
+     * 
+     * @param email
+     *            the email to set
      */
     public void setEmail(String email)
     {
@@ -101,7 +106,7 @@ public class CassandraPersonalData
 
     /**
      * Gets the yahoo id.
-     *
+     * 
      * @return the yahoo id
      */
     public String getYahooId()
@@ -111,8 +116,9 @@ public class CassandraPersonalData
 
     /**
      * Sets the yahoo id.
-     *
-     * @param yahooId the new yahoo id
+     * 
+     * @param yahooId
+     *            the new yahoo id
      */
     public void setYahooId(String yahooId)
     {

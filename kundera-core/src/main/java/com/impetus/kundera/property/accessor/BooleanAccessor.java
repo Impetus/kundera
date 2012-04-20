@@ -32,7 +32,7 @@ public class BooleanAccessor implements PropertyAccessor<Boolean>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public Boolean fromBytes(Class targetClass, byte[] data) 
+    public Boolean fromBytes(Class targetClass, byte[] data)
     {
         return (data == null || data.length == 0) ? false : data[0] != 0x00;
     }
@@ -44,7 +44,7 @@ public class BooleanAccessor implements PropertyAccessor<Boolean>
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public byte[] toBytes(Object object) 
+    public byte[] toBytes(Object object)
     {
         if (object != null)
         {
@@ -76,7 +76,7 @@ public class BooleanAccessor implements PropertyAccessor<Boolean>
      * )
      */
     @Override
-    public Boolean fromString(Class targetClass, String s) 
+    public Boolean fromString(Class targetClass, String s)
     {
         try
         {
