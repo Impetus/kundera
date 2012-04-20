@@ -92,6 +92,7 @@ public class HBaseClientFactory extends GenericClientFactory
 
         Configuration hadoopConf = new Configuration();
         hadoopConf.set("hbase.master", node + ":" + port);
+        hadoopConf.set("hbase.zookeeper.quorum",node);
         conf = new HBaseConfiguration(hadoopConf);
         reader = new HBaseEntityReader();
 

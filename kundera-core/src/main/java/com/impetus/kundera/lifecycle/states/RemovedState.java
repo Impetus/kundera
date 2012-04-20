@@ -103,7 +103,7 @@ public class RemovedState extends NodeState
         //Remove this node from Persistence Cache
         nodeStateContext.getPersistenceCache().getMainCache().removeNodeFromCache(node);
         
-        logNodeEvent("DELETED", this, nodeStateContext.getNodeId());        
+//        logNodeEvent("DELETED", this, nodeStateContext.getNodeId());        
         
     }
 

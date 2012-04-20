@@ -206,15 +206,24 @@ public class ObjectGraphBuilder
 
     
     public static String getNodeId(Object pk, Object nodeData) {
-        return nodeData.getClass().getName() + Constants.NODE_ID_SEPARATOR + (String)pk;
+        StringBuffer strBuffer = new StringBuffer(nodeData.getClass().getName());
+        strBuffer.append(Constants.NODE_ID_SEPARATOR);
+        strBuffer.append(pk);
+        return strBuffer.toString();
     }
     
     public static String getNodeId(Object pk, Class<?> objectClass) {
-        return objectClass.getName() + Constants.NODE_ID_SEPARATOR + pk.toString();
+
+        StringBuffer strBuffer = new StringBuffer(objectClass.getName());
+        strBuffer.append(Constants.NODE_ID_SEPARATOR);
+        strBuffer.append(pk);
+        return strBuffer.toString();
+
+//        return objectClass.getName() + Constants.NODE_ID_SEPARATOR + pk.toString();
     }
     
     public static String getEntityId(String nodeId) {
-        
+
         return nodeId.substring(nodeId.indexOf(Constants.NODE_ID_SEPARATOR) + 1, nodeId.length());
     }
     

@@ -150,6 +150,9 @@ public class PersistenceDelegator
         // TODO: not always, should be conditional
         flush();
 
+        graph.getNodeMapping().clear();
+        graph=null;
+        
         // Invoke Post Persist Events
         getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
         log.debug("Data persisted successfully for entity : " + e.getClass());

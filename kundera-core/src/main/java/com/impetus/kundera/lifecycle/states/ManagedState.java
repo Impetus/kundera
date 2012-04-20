@@ -152,7 +152,7 @@ public class ManagedState extends NodeState
         Client client = nodeStateContext.getClient();
         client.persist((Node)nodeStateContext);        
         
-        logNodeEvent("FLUSHED", this, nodeStateContext.getNodeId());
+//        logNodeEvent("FLUSHED", this, nodeStateContext.getNodeId());
         
         //Since node is flushed, mark it as NOT dirty
         nodeStateContext.setDirty(false);
