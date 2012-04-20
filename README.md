@@ -31,6 +31,8 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
+Please Note: Kundera-2.0.6 is current development branch. 2.0.6 is released tag.
+
 
 #### 20-Apr-2012 - Kundera 2.0.6 released
 This release includes bug fixes and the following new features compared to version 2.0.5:
