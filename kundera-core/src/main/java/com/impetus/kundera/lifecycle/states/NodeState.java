@@ -77,7 +77,7 @@ public abstract class NodeState
     protected void moveNodeToNextState(NodeStateContext nodeStateContext, NodeState nextState)
     {        
         nodeStateContext.setCurrentNodeState(nextState);
-        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());
+//        logStateChangeEvent(this, nextState, nodeStateContext.getNodeId());
     }
     
     /**

@@ -879,7 +879,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        PelopsDataHandler handler = new PelopsDataHandler(this);
+        PelopsDataHandler handler = dataHandler != null? dataHandler: new PelopsDataHandler(this);
         PelopsDataHandler.ThriftRow tf = handler.toThriftRow(this, entity, id, metadata, columnFamily);
         timestamp = handler.getTimestamp();
         return tf;
