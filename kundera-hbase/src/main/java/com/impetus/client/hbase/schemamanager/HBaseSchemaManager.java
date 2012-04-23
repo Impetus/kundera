@@ -316,6 +316,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     {
         Configuration hadoopConf = new Configuration();
         hadoopConf.set("hbase.master", host + ":" + port);
+        hadoopConf.set("hbase.zookeeper.quorum", host);
         HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
         try
         {

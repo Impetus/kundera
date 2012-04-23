@@ -302,7 +302,8 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
         }
         catch (IOException e)
         {
-            throw new PersistenceException(e.getMessage());
+//            e.printStackTrace();
+            throw new PersistenceException(e);
         }
     }
 
