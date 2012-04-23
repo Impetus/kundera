@@ -13,8 +13,8 @@
   <version>2.0.7-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>kundera</name>
-  <url>http://kundera.googlecode.com</url>
+  <name>kundera-trunk</name>
+  <url>https://github.com/impetus-opensource/Kundera</url>
 
  <licenses>
     <license>
