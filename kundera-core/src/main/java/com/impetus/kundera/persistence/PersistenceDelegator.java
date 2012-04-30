@@ -59,7 +59,6 @@ import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.QueryResolver;
@@ -449,43 +448,6 @@ public class PersistenceDelegator
         entities = getClient(entityMetadata).find(entityClass, embeddedColumnMap);
 
         return entities;
-    }
-
-    /**
-     * Delete from join table.
-     * 
-     * @param objectGraph
-     *            the object graph
-     * @param metadata
-     *            the metadata
-     */
-    private void deleteFromJoinTable(EntitySaveGraph objectGraph, EntityMetadata metadata)
-    {
-        // Delete data from Join Table if any
-        if (metadata.isRelationViaJoinTable())
-        {
-            for (Relation relation : metadata.getRelations())
-            {
-                if (relation.isRelatedViaJoinTable())
-                {
-
-                    JoinTableMetadata jtMetadata = relation.getJoinTableMetadata();
-                    String joinTableName = jtMetadata.getJoinTableName();
-
-                    Set<String> joinColumns = jtMetadata.getJoinColumns();
-                    Set<String> inverseJoinColumns = jtMetadata.getInverseJoinColumns();
-
-                    String joinColumnName = (String) joinColumns.toArray()[0];
-                    String inverseJoinColumnName = (String) inverseJoinColumns.toArray()[0];
-
-                    EntityMetadata relMetadata = getMetadata(objectGraph.getChildClass());
-
-                    Client pClient = getClient(metadata);
-                    pClient.deleteByColumn(joinTableName, joinColumnName, objectGraph.getParentId());
-
-                }
-            }
-        }
     }
 
     /**

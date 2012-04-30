@@ -15,10 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.db;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.impetus.kundera.persistence.handler.impl.EntitySaveGraph;
 
 /**
  * The Class RelationHolder.
@@ -66,30 +62,6 @@ public class RelationHolder
     public String getRelationValue()
     {
         return relationValue;
-    }
-
-    /**
-     * Adds the relation.
-     * 
-     * @param entitySaveGraph
-     *            the entity save graph
-     * @param rlName
-     *            the rl name
-     * @param rlValue
-     *            the rl value
-     * @return the list
-     */
-    public static List<RelationHolder> addRelation(EntitySaveGraph entitySaveGraph, String rlName, String rlValue)
-    {
-        if (rlName != null && !entitySaveGraph.isSharedPrimaryKey())
-        {
-            List<RelationHolder> relations = new ArrayList<RelationHolder>();
-            RelationHolder relation = new RelationHolder(rlName, rlValue);
-            relations.add(relation);
-
-            return relations;
-        }
-        return null;
     }
 
 }
