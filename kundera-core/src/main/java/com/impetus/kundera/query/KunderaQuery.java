@@ -17,8 +17,10 @@ package com.impetus.kundera.query;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -101,6 +103,7 @@ public class KunderaQuery
 
     private Queue<UpdateClause> updateClauseQueue = new LinkedList<UpdateClause>();
 
+    private TypedParameter typedParameter;
     /**
      * Instantiates a new kundera query.
      * 
@@ -303,6 +306,7 @@ public class KunderaQuery
         }
 
         List<String> clauses = tokenize(filter, INTER_CLAUSE_PATTERN);
+        
 
         // parse and structure for "between" clause , if present, else it will
         // return original clause
@@ -336,7 +340,10 @@ public class KunderaQuery
                     throw new JPQLParseException("Bad JPA query: " + clause);
                 }
 
-                filtersQueue.add(new FilterClause(columnName, condition, tokens.get(2)));
+                FilterClause filterClause = new FilterClause(columnName, condition, tokens.get(2));
+                filtersQueue.add(filterClause);
+
+                onTypedParameter(tokens, filterClause);
                 newClause = false;
             }
 
@@ -355,6 +362,48 @@ public class KunderaQuery
         }
     }
 
+    
+    /**
+     * Depending upon filter value, if it starts with ":" then it is NAMED parameter, else if 
+     * starts with "?", it will be INDEXED parameter.
+     * 
+     * @param tokens        tokens
+     * @param filterClause  filter clauses.
+     */
+    private void onTypedParameter(List<String> tokens, FilterClause filterClause)
+    {
+        if (tokens.get(2) != null && tokens.get(2).startsWith(":"))
+        {
+            addTypedParameter(Type.NAMED, tokens.get(2), filterClause);
+        }
+        else if (tokens.get(2) != null && tokens.get(2).startsWith("?"))
+        {
+            addTypedParameter(Type.INDEXED, tokens.get(2), filterClause);
+        }
+    }
+
+    /**
+     * Adds typed parameter to {@link TypedParameter}
+     * 
+     * @param type         type of parameter(e.g. NAMED/INDEXED)
+     * @param parameter    parameter name.
+     * @param clause       filter clause.
+     */
+    private void addTypedParameter(Type type, String parameter, FilterClause clause)
+    {
+        if(typedParameter == null)
+        {
+            typedParameter = new TypedParameter(type);
+        } 
+        
+        if(typedParameter.getType().equals(type))
+        {
+            typedParameter.addParameters(parameter, clause);
+        } else
+        {
+            logger.warn("Invalid type provided, it can either be name or indexes!");
+        }
+    }
     /**
      * @param metadata
      * @param property
@@ -399,7 +448,8 @@ public class KunderaQuery
      */
     public final void setParameter(String name, String value)
     {
-        boolean found = false;
+        setParameterValue(":"+name, value);
+/*        boolean found = false;
         for (Object object : getFilterClauseQueue())
         {
             if (object instanceof FilterClause)
@@ -417,6 +467,38 @@ public class KunderaQuery
         if (!found)
         {
             throw new QueryHandlerException("invalid parameter: " + name);
+        }
+*/    }
+
+    public final void setParameter(int position, String value)
+    {
+        setParameterValue("?"+position, value);
+    }
+   
+    
+    /**
+     * Sets parameter value into filterClause, depending upon {@link Type}
+     * 
+     * @param name  parameter name.
+     * @param value parameter value.
+     */
+    private void setParameterValue(String name, String value)
+    {
+        if(typedParameter != null)
+        {
+            FilterClause clause = typedParameter.getParameters().get(name);
+            if(clause != null)
+            {
+             clause.setValue(value);
+            } else 
+            {
+                logger.error("Error while setting parameter by clause:");
+                throw new QueryHandlerException("named parameter:" + name + " not found!");
+            }
+        } else 
+        {
+            throw new QueryHandlerException("No named parameter present for query");
+            
         }
     }
 
@@ -862,5 +944,52 @@ public class KunderaQuery
         }
 
         return tokens;
+    }
+
+    
+    private class TypedParameter
+    {
+        private Type type;
+        private Map<String, FilterClause> parameters;
+       
+        /**
+         * 
+         */
+        public TypedParameter(Type type)
+        {
+          this.type = type;
+        }
+        /**
+         * @return the type
+         */
+        private Type getType()
+        {
+            return type;
+        }
+      
+        /**
+         * @return the parameters
+         */
+        Map<String, FilterClause> getParameters()
+        {
+            return parameters;
+        }
+        
+        void addParameters(String key, FilterClause clause)
+        {
+           if(parameters == null)
+           {
+               parameters = new HashMap<String, FilterClause>();
+           }
+           
+           parameters.put(key, clause);
+        }
+        
+    }
+    
+    enum Type
+    {
+        INDEXED,
+        NAMED
     }
 }

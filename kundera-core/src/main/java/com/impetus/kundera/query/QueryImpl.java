@@ -72,11 +72,14 @@ public abstract class QueryImpl implements Query
     /** The log. */
     private static Log log = LogFactory.getLog(QueryImpl.class);
 
+    private Set<Parameter<?>> parameters  = new HashSet<Parameter<?>>();
     /**
      * Default maximum result to fetch.
      */
     protected int maxResult = 100;
 
+   
+    
     /**
      * Instantiates a new query impl.
      * 
@@ -503,6 +506,10 @@ public abstract class QueryImpl implements Query
      */
     protected abstract EntityReader getReader();
 
+    /**
+     * Method to be invoked on query.executeUpdate().
+     * @return
+     */
     protected abstract int onExecuteUpdate();
 
     /**
@@ -643,6 +650,7 @@ public abstract class QueryImpl implements Query
     public Query setParameter(String name, Object value)
     {
         kunderaQuery.setParameter(name, value.toString());
+        parameters.add(new JPAParameter(name, null, value.getClass()));
         return this;
     }
 
@@ -655,7 +663,9 @@ public abstract class QueryImpl implements Query
     @Override
     public Query setParameter(int position, Object value)
     {
-        throw new NotImplementedException("TODO");
+        kunderaQuery.setParameter(position, value.toString());
+        parameters.add(new JPAParameter(null, position, value.getClass()));
+        return this;
     }
 
     /*
@@ -730,7 +740,7 @@ public abstract class QueryImpl implements Query
     @Override
     public int getMaxResults()
     {
-        throw new NotImplementedException("TODO");
+        return maxResult;
     }
 
     /*
@@ -799,7 +809,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Set<Parameter<?>> getParameters()
     {
-        throw new NotImplementedException("TODO");
+        return parameters;
     }
 
     /*
@@ -810,7 +820,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Parameter<?> getParameter(String paramString)
     {
-        throw new NotImplementedException("TODO");
+        return getParameterByName(paramString);
     }
 
     /*
@@ -833,7 +843,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Parameter<?> getParameter(int paramInt)
     {
-        throw new NotImplementedException("TODO");
+        return getParameterByOrdinal(paramInt);
     }
 
     /*
@@ -936,4 +946,88 @@ public abstract class QueryImpl implements Query
         throw new NotImplementedException("TODO");
     }
 
+
+    /**
+     * Returns specific parameter instance for given name
+     * 
+     * @param name  parameter name.
+     * 
+     * @return parameter
+     */
+    private Parameter getParameterByName(String name)
+    {
+        for(Parameter p : parameters)
+        {
+            if(name.equals(p.getName()))
+            {
+                return p;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Returns parameter by ordinal
+     * 
+     * @param position   position
+     * @return      parameter instance.
+     */
+    private Parameter getParameterByOrdinal(Integer position)
+    {
+        for(Parameter p : parameters)
+        {
+            if(position.equals(p.getPosition()))
+            {
+                return p;
+            }
+        }
+        
+        return null;
+    }
+    
+    private class JPAParameter<T> implements Parameter<T>
+    {
+        private String name;
+        private Integer position;
+        private Class<T> type;
+
+        /**
+         * 
+         */
+        JPAParameter(String name, Integer position,Class<T> type)
+        {
+            this.name = name;
+            this.position = position;
+            this.type = type;
+        }
+        
+        /* (non-Javadoc)
+         * @see javax.persistence.Parameter#getName()
+         */
+        @Override
+        public String getName()
+        {
+            return name;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.persistence.Parameter#getPosition()
+         */
+        @Override
+        public Integer getPosition()
+        {
+            return position;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.persistence.Parameter#getParameterType()
+         */
+        @Override
+        public Class<T> getParameterType()
+        {
+            return type;
+        }
+        
+    }
 }
