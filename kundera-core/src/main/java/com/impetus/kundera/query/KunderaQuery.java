@@ -18,22 +18,25 @@ package com.impetus.kundera.query;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.Parameter;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -110,9 +113,8 @@ public class KunderaQuery
      * @param persistenceUnits
      *            the persistence units
      */
-    public KunderaQuery(/* String... persistenceUnits */)
+    public KunderaQuery()
     {
-        // this.persistenceUnits = persistenceUnits;
     }
 
     /**
@@ -222,6 +224,15 @@ public class KunderaQuery
         return result != null && (result.indexOf(".") == -1);
     }
 
+    /**
+     * Returns set of parameters.
+     * 
+     * @return jpaParameters
+     */
+    public Set<Parameter<?>> getParameters()
+    {
+        return typedParameter.jpaParameters;
+    }
     // must be executed after parse(). it verifies and populated the query
     // predicates.
     /**
@@ -330,9 +341,9 @@ public class KunderaQuery
                 String property = tokens.get(0);
                 property = property.substring((entityAlias + ".").length());
 
-                String columnName = getColumnNameFromFieldName(metadata, property);
-
-                columnName = indexName + "." + columnName;
+//                String columnName = getColumnNameFromFieldName(metadata, property);
+                String columnName = metadata.getColumnName(property);
+//                columnName = indexName + "." + columnName;
                 // verify condition
                 String condition = tokens.get(1);
                 if (!Arrays.asList(INTRA_CLAUSE_OPERATORS).contains(condition.toUpperCase()))
@@ -343,7 +354,7 @@ public class KunderaQuery
                 FilterClause filterClause = new FilterClause(columnName, condition, tokens.get(2));
                 filtersQueue.add(filterClause);
 
-                onTypedParameter(tokens, filterClause);
+                onTypedParameter(tokens, filterClause, property);
                 newClause = false;
             }
 
@@ -370,15 +381,17 @@ public class KunderaQuery
      * @param tokens        tokens
      * @param filterClause  filter clauses.
      */
-    private void onTypedParameter(List<String> tokens, FilterClause filterClause)
+    private void onTypedParameter(List<String> tokens, FilterClause filterClause, String fieldName)
     {
         if (tokens.get(2) != null && tokens.get(2).startsWith(":"))
         {
             addTypedParameter(Type.NAMED, tokens.get(2), filterClause);
+            filterJPAParameterInfo(Type.NAMED, tokens.get(2).substring(1), fieldName);
         }
         else if (tokens.get(2) != null && tokens.get(2).startsWith("?"))
         {
             addTypedParameter(Type.INDEXED, tokens.get(2), filterClause);
+            filterJPAParameterInfo(Type.INDEXED, tokens.get(2).substring(1), fieldName);
         }
     }
 
@@ -404,39 +417,21 @@ public class KunderaQuery
             logger.warn("Invalid type provided, it can either be name or indexes!");
         }
     }
-    /**
-     * @param metadata
-     * @param property
-     * @return
-     */
-    private String getColumnNameFromFieldName(EntityMetadata metadata, String property)
+    
+    private void filterJPAParameterInfo(Type type, String name, String fieldName)
     {
-        String columnName = null;
-        Column idColumn = metadata.getIdColumn();
-
-        if (idColumn.getField().getName().equals(property))
+        Class fieldType = KunderaMetadataManager.getEntityMetadata(entityClass).getFieldType(fieldName); 
+        if(type.equals(Type.INDEXED))
         {
-            columnName = idColumn.getName();
-        }
-        else
+            typedParameter.addJPAParameter(new JPAParameter(null, Integer.valueOf(name), fieldType));
+        } else
         {
-            for (Column column : metadata.getColumnsAsList())
-            {
-                if (column.getField().getName().equals(property))
-                {
-                    columnName = column.getName();
-                    break;
-                }
-            }
-
+            typedParameter.addJPAParameter(new JPAParameter(name, null, fieldType));
         }
-
-        if (columnName == null)
-        {
-            columnName = property;
-        }
-        return columnName;
     }
+    
+    
+    
 
     /**
      * Sets the parameter.
@@ -449,26 +444,7 @@ public class KunderaQuery
     public final void setParameter(String name, String value)
     {
         setParameterValue(":"+name, value);
-/*        boolean found = false;
-        for (Object object : getFilterClauseQueue())
-        {
-            if (object instanceof FilterClause)
-            {
-                FilterClause filter = (FilterClause) object;
-                // key
-                if (filter.getValue().equals(":" + name))
-                {
-                    filter.setValue(value);
-                    found = true;
-                    return;
-                }
-            }
-        }
-        if (!found)
-        {
-            throw new QueryHandlerException("invalid parameter: " + name);
-        }
-*/    }
+    }
 
     public final void setParameter(int position, String value)
     {
@@ -759,17 +735,6 @@ public class KunderaQuery
         return persistenceUnit;
     }
 
-    //
-    // /**
-    // * Sets the persistence units.
-    // *
-    // * @param persistenceUnits
-    // * the persistenceUnits to set
-    // */
-    // public void setPersistenceUnits(String[] persistenceUnits)
-    // {
-    // this.persistenceUnits = persistenceUnits;
-    // }
 
     /**
      * Parses the ordering @See Order By Clause.
@@ -950,6 +915,9 @@ public class KunderaQuery
     private class TypedParameter
     {
         private Type type;
+
+        private Set<Parameter<?>> jpaParameters = new HashSet<Parameter<?>>();
+        
         private Map<String, FilterClause> parameters;
        
         /**
@@ -985,11 +953,107 @@ public class KunderaQuery
            parameters.put(key, clause);
         }
         
+        void addJPAParameter(Parameter param)
+        {
+            jpaParameters.add(param);
+        }
     }
     
-    enum Type
+    private enum Type
     {
         INDEXED,
         NAMED
+    }
+
+    /*
+     * JPA Parameter type
+     */
+    private class JPAParameter<T> implements Parameter<T>
+    {
+        private String name;
+        private Integer position;
+        private Class<T> type;
+
+        /**
+         * 
+         */
+        JPAParameter(String name, Integer position,Class<T> type)
+        {
+            this.name = name;
+            this.position = position;
+            this.type = type;
+        }
+        
+        /* (non-Javadoc)
+         * @see javax.persistence.Parameter#getName()
+         */
+        @Override
+        public String getName()
+        {
+            return name;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.persistence.Parameter#getPosition()
+         */
+        @Override
+        public Integer getPosition()
+        {
+            return position;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.persistence.Parameter#getParameterType()
+         */
+        @Override
+        public Class<T> getParameterType()
+        {
+            return type;
+        }
+        
+        @Override
+        public int hashCode()
+        {
+            return HashCodeBuilder.reflectionHashCode(this);
+        }
+        
+        @Override
+        public boolean equals(Object obj)
+        {
+            if(obj == null)
+            {
+                return false;
+            }
+            if(!obj.getClass().equals(this.getClass()))
+            {
+                return false;
+            }
+            
+            Parameter<?> typed = (Parameter<?>) obj;
+            
+            if(typed.getParameterType().equals(this.getParameterType()))
+            {
+                if (this.getName() == null && typed.getName() == null)
+                {
+                    return this.getPosition() != null && this.getPosition().equals(typed.getPosition());
+                } else
+                {
+                    return this.getName() != null && this.getName().equals(typed.getName());
+                }
+                 
+            }
+            
+            return false;
+        }
+    
+        @Override
+        public String toString()
+        {
+            StringBuilder strBuilder = new StringBuilder();
+            strBuilder.append("[ name = " + this.getName() + "]");
+            strBuilder.append("[ position = " + this.getPosition() + "]" );
+            strBuilder.append("[ type = " + this.getParameterType() + "]");
+            return strBuilder.toString();
+        }
     }
 }

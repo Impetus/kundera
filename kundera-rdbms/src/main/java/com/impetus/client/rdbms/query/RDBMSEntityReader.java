@@ -302,7 +302,8 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                 if (o instanceof FilterClause)
                 {
                     FilterClause clause = ((FilterClause) o);
-                    String fieldName = getColumnName(clause.getProperty());
+//                    String fieldName = getColumnName(clause.getProperty());
+                    String fieldName = clause.getProperty();
                     boolean isString = isStringProperty(entityMetadata, fieldName);
 
                     queryBuilder.append(StringUtils.replace(clause.getProperty(),
@@ -450,25 +451,25 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
     }
 
-    /**
-     * Returns column name from the filter property which is in the form
-     * dbName.columnName
-     * 
-     * @param filterProperty
-     *            the filter property
-     * @return the column name
-     */
-    private String getColumnName(String filterProperty)
-    {
-        StringTokenizer st = new StringTokenizer(filterProperty, ".");
-        String columnName = "";
-        while (st.hasMoreTokens())
-        {
-            columnName = st.nextToken();
-        }
-
-        return columnName;
-    }
+//    /**
+//     * Returns column name from the filter property which is in the form
+//     * dbName.columnName
+//     * 
+//     * @param filterProperty
+//     *            the filter property
+//     * @return the column name
+//     */
+//    private String getColumnName(String filterProperty)
+//    {
+//        StringTokenizer st = new StringTokenizer(filterProperty, ".");
+//        String columnName = "";
+//        while (st.hasMoreTokens())
+//        {
+//            columnName = st.nextToken();
+//        }
+//
+//        return columnName;
+//    }
 
     /**
      * Checks if is string property.

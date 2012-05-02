@@ -166,7 +166,8 @@ public class MongoDBQuery extends QueryImpl
             if (object instanceof FilterClause)
             {
                 FilterClause filter = (FilterClause) object;
-                String property = getColumnName(filter.getProperty());
+//                String property = getColumnName(filter.getProperty());
+                String property = filter.getProperty();
                 String condition = filter.getCondition();
                 String value = filter.getValue();
 

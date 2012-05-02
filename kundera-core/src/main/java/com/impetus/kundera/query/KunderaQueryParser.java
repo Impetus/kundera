@@ -17,7 +17,6 @@ package com.impetus.kundera.query;
 
 import java.util.StringTokenizer;
 
-// TODO: Auto-generated Javadoc
 /**
  * Parser for handling JPQL Single-String queries. Takes a JPQLQuery and the
  * query string and parses it into its constituent parts, updating the JPQLQuery

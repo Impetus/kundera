@@ -168,8 +168,8 @@ public class CassQuery extends QueryImpl implements Query
             if (o instanceof FilterClause)
             {
                 FilterClause clause = ((FilterClause) o);
-                String fieldName = getColumnName(clause.getProperty());
-
+//                String fieldName = getColumnName(clause.getProperty());
+                String fieldName = clause.getProperty();
                 // in case id column matches with field name, set it for first
                 // time.
                 if (!idPresent && idColumn.equalsIgnoreCase(fieldName))

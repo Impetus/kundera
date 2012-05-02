@@ -72,7 +72,7 @@ public abstract class QueryImpl implements Query
     /** The log. */
     private static Log log = LogFactory.getLog(QueryImpl.class);
 
-    private Set<Parameter<?>> parameters  = new HashSet<Parameter<?>>();
+    private Set<Parameter<?>> parameters;
     /**
      * Default maximum result to fetch.
      */
@@ -440,25 +440,25 @@ public abstract class QueryImpl implements Query
 
     }
 
-    /**
-     * Returns column name from the filter property which is in the form
-     * dbName.columnName
-     * 
-     * @param filterProperty
-     *            the filter property
-     * @return the column name
-     */
-    protected String getColumnName(String filterProperty)
-    {
-        StringTokenizer st = new StringTokenizer(filterProperty, ".");
-        String columnName = "";
-        while (st.hasMoreTokens())
-        {
-            columnName = st.nextToken();
-        }
-
-        return columnName;
-    }
+//    /**
+//     * Returns column name from the filter property which is in the form
+//     * dbName.columnName
+//     * 
+//     * @param filterProperty
+//     *            the filter property
+//     * @return the column name
+//     */
+//    protected String getColumnName(String filterProperty)
+//    {
+//        StringTokenizer st = new StringTokenizer(filterProperty, ".");
+//        String columnName = "";
+//        while (st.hasMoreTokens())
+//        {
+//            columnName = st.nextToken();
+//        }
+//
+//        return columnName;
+//    }
 
     /**
      * Append range.
@@ -650,7 +650,6 @@ public abstract class QueryImpl implements Query
     public Query setParameter(String name, Object value)
     {
         kunderaQuery.setParameter(name, value.toString());
-        parameters.add(new JPAParameter(name, null, value.getClass()));
         return this;
     }
 
@@ -664,7 +663,6 @@ public abstract class QueryImpl implements Query
     public Query setParameter(int position, Object value)
     {
         kunderaQuery.setParameter(position, value.toString());
-        parameters.add(new JPAParameter(null, position, value.getClass()));
         return this;
     }
 
@@ -809,6 +807,11 @@ public abstract class QueryImpl implements Query
     @Override
     public Set<Parameter<?>> getParameters()
     {
+        if(parameters == null)
+        {
+            parameters = kunderaQuery.getParameters();
+        }
+        
         return parameters;
     }
 
@@ -820,6 +823,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Parameter<?> getParameter(String paramString)
     {
+        getParameters();
         return getParameterByName(paramString);
     }
 
@@ -843,6 +847,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Parameter<?> getParameter(int paramInt)
     {
+        getParameters();
         return getParameterByOrdinal(paramInt);
     }
 
@@ -986,48 +991,5 @@ public abstract class QueryImpl implements Query
         return null;
     }
     
-    private class JPAParameter<T> implements Parameter<T>
-    {
-        private String name;
-        private Integer position;
-        private Class<T> type;
-
-        /**
-         * 
-         */
-        JPAParameter(String name, Integer position,Class<T> type)
-        {
-            this.name = name;
-            this.position = position;
-            this.type = type;
-        }
-        
-        /* (non-Javadoc)
-         * @see javax.persistence.Parameter#getName()
-         */
-        @Override
-        public String getName()
-        {
-            return name;
-        }
-
-        /* (non-Javadoc)
-         * @see javax.persistence.Parameter#getPosition()
-         */
-        @Override
-        public Integer getPosition()
-        {
-            return position;
-        }
-
-        /* (non-Javadoc)
-         * @see javax.persistence.Parameter#getParameterType()
-         */
-        @Override
-        public Class<T> getParameterType()
-        {
-            return type;
-        }
-        
-    }
+   
 }
