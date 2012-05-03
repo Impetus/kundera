@@ -240,26 +240,6 @@ public abstract class QueryImpl implements Query
     }
 
     /**
-     * Gets the field instance.
-     * 
-     * @param chids
-     *            the chids
-     * @param f
-     *            the f
-     * @return the field instance
-     */
-    private Object getFieldInstance(List chids, Field f)
-    {
-
-        if (Set.class.isAssignableFrom(f.getType()))
-        {
-            Set col = new HashSet(chids);
-            return col;
-        }
-        return chids;
-    }
-
-    /**
      * Populate relations.
      * 
      * @param relations
