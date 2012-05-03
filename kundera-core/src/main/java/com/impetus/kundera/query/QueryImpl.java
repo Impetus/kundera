@@ -25,11 +25,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.Parameter;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 
@@ -679,6 +679,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Query setParameter(String name, Date value, TemporalType temporalType)
     {
+        // Purpose of temporal type is to set value based on temporal type.
         throw new NotImplementedException("TODO");
     }
 
@@ -772,7 +773,20 @@ public abstract class QueryImpl implements Query
     @Override
     public <T> Query setParameter(Parameter<T> paramParameter, T paramT)
     {
-        throw new NotImplementedException("TODO");
+        if(!getParameters().contains(paramParameter))
+        {
+            throw new IllegalArgumentException("parameter does not correspond to a parameter of the query");
+        }
+        
+        if(paramParameter.getName() != null)
+        {
+            kunderaQuery.setParameter(paramParameter.getName(), paramT.toString());
+        } else
+        {
+            kunderaQuery.setParameter(paramParameter.getPosition(), paramT.toString());
+        }
+        
+        return this;
     }
 
     /*
@@ -823,6 +837,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Parameter<?> getParameter(String paramString)
     {
+        onNativeCondition();
         getParameters();
         return getParameterByName(paramString);
     }
@@ -836,8 +851,11 @@ public abstract class QueryImpl implements Query
     @Override
     public <T> Parameter<T> getParameter(String paramString, Class<T> paramClass)
     {
-        throw new NotImplementedException("TODO");
+        onNativeCondition();
+        Parameter parameter = getParameterByName(paramString);
+        return onTypeCheck(paramClass, parameter);
     }
+
 
     /*
      * (non-Javadoc)
@@ -847,6 +865,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Parameter<?> getParameter(int paramInt)
     {
+        onNativeCondition();
         getParameters();
         return getParameterByOrdinal(paramInt);
     }
@@ -859,7 +878,10 @@ public abstract class QueryImpl implements Query
     @Override
     public <T> Parameter<T> getParameter(int paramInt, Class<T> paramClass)
     {
-        throw new NotImplementedException("TODO");
+        onNativeCondition();
+        getParameters();
+        Parameter parameter = getParameterByOrdinal(paramInt);
+        return onTypeCheck(paramClass, parameter);
     }
 
     /*
@@ -870,7 +892,8 @@ public abstract class QueryImpl implements Query
     @Override
     public boolean isBound(Parameter<?> paramParameter)
     {
-        throw new NotImplementedException("TODO");
+        return kunderaQuery.isBound(paramParameter);
+        
     }
 
     /*
@@ -882,7 +905,12 @@ public abstract class QueryImpl implements Query
     @Override
     public <T> T getParameterValue(Parameter<T> paramParameter)
     {
-        throw new NotImplementedException("TODO");
+        Object value = kunderaQuery.getClauseValue(paramParameter);
+        if(value == null)
+        {
+            throw new IllegalStateException("parameter has not been bound" + paramParameter);
+        }
+        return (T) value;
     }
 
     /*
@@ -893,7 +921,8 @@ public abstract class QueryImpl implements Query
     @Override
     public Object getParameterValue(String paramString)
     {
-        throw new NotImplementedException("TODO");
+        
+        return onParameterValue(":"+paramString);
     }
 
     /*
@@ -904,7 +933,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Object getParameterValue(int paramInt)
     {
-        throw new NotImplementedException("TODO");
+        return onParameterValue("?"+paramInt);
     }
 
     /*
@@ -948,7 +977,14 @@ public abstract class QueryImpl implements Query
     @Override
     public <T> T unwrap(Class<T> paramClass)
     {
-        throw new NotImplementedException("TODO");
+        try
+        {
+            return (T) this;
+        }
+        catch (ClassCastException ccex)
+        {
+            throw new PersistenceException("Provider does not support the call for class type:[" + paramClass + "]");
+        }
     }
 
 
@@ -991,5 +1027,49 @@ public abstract class QueryImpl implements Query
         return null;
     }
     
-   
+    /**
+     * Method to handle get/set Parameter supplied for native query.
+     */
+    private void onNativeCondition()
+    {
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        if(appMetadata.isNative(query))
+        {
+            throw new IllegalStateException("invoked on a native query when the implementation does not support this use");
+        }
+    }
+    
+    /**
+     * Validated parameter's class with input paramClass. Returns back parameter if it matches, else throws an {@link IllegalArgumentException}.
+     * @param <T>               type of class.
+     * @param paramClass        expected class type.
+     * @param parameter         parameter
+     * @return                  parameter if it matches, else throws an {@link IllegalArgumentException}.
+     */
+    private <T> Parameter<T> onTypeCheck(Class<T> paramClass, Parameter<T> parameter)
+    {
+        if(parameter.getParameterType() != null && parameter.getParameterType().equals(paramClass))
+        {
+            return parameter;
+        }
+        throw new IllegalArgumentException("The parameter of the specified name does not exist or is not assignable to the type");
+    }
+
+    /**
+     * Returns parameter value.
+     * 
+     * @param paramString parameter as string.
+     * 
+     * @return value of parameter.
+     */
+    private Object onParameterValue(String paramString)
+    {
+        Object value = kunderaQuery.getClauseValue(paramString);
+        if(value == null)
+        {
+            throw new IllegalStateException("parameter has not been bound" + paramString);
+        }
+        return value;
+    }
+
 }

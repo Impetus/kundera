@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import javax.persistence.PersistenceException;
 
@@ -451,25 +450,6 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
     }
 
-//    /**
-//     * Returns column name from the filter property which is in the form
-//     * dbName.columnName
-//     * 
-//     * @param filterProperty
-//     *            the filter property
-//     * @return the column name
-//     */
-//    private String getColumnName(String filterProperty)
-//    {
-//        StringTokenizer st = new StringTokenizer(filterProperty, ".");
-//        String columnName = "";
-//        while (st.hasMoreTokens())
-//        {
-//            columnName = st.nextToken();
-//        }
-//
-//        return columnName;
-//    }
 
     /**
      * Checks if is string property.

@@ -233,6 +233,87 @@ public class KunderaQuery
     {
         return typedParameter.jpaParameters;
     }
+    
+    /**
+     * Parameter is bound if it holds any value, else will return false
+     * 
+     * @param param
+     * @return
+     */
+    public boolean isBound(Parameter param)
+    {
+        return getClauseValue(param) != null;
+    }
+
+    /**
+     * Returns clause value for supplied parameter.
+     * @param paramString
+     * @return
+     */
+    public Object getClauseValue(String paramString)
+    {
+        if (typedParameter != null && typedParameter.getParameters() != null)
+        {
+            FilterClause clause = typedParameter.getParameters().get(paramString);
+            if (clause != null)
+            {
+                return clause.getValue();
+            }
+            else
+            {
+                throw new IllegalArgumentException("parameter is not a parameter of the query");
+            }
+        }
+
+        throw new IllegalArgumentException("parameter is not a parameter of the query");
+    }
+    
+    /**
+     * Returns specific clause value.
+     * 
+     * @param param parameter
+     * 
+     * @return clause value.
+     */
+    public Object getClauseValue(Parameter param)
+    {
+        Parameter match=null;
+        if(typedParameter != null && typedParameter.jpaParameters!= null)
+        {
+            for(Parameter p : typedParameter.jpaParameters)
+            {
+                if(p.equals(param))
+                {
+                    match = p;
+                    if(typedParameter.getType().equals(Type.NAMED))
+                    {
+                       FilterClause clause = typedParameter.getParameters().get(":"+p.getName());
+                       if(clause != null)
+                       {
+                           return clause.getValue();
+                       }
+                    } else
+                    {
+                        FilterClause clause = typedParameter.getParameters().get("?"+p.getName());
+                        if(clause != null)
+                        {
+                            return clause.getValue();
+                        }
+                        
+                    }
+                    break;
+                }
+            }
+            
+            if(match == null)
+            {
+                throw new IllegalArgumentException("parameter is not a parameter of the query");
+
+            }
+        }
+        
+        throw new IllegalArgumentException("parameter is not a parameter of the query");
+    }
     // must be executed after parse(). it verifies and populated the query
     // predicates.
     /**
