@@ -24,7 +24,9 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HConstants;
+import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
@@ -80,12 +82,12 @@ public class HBaseCli
             try
             {
                 MiniZooKeeperCluster zkCluster = new MiniZooKeeperCluster(conf);
-                zkCluster.setClientPort(2181);
+                zkCluster.setDefaultClientPort(2181);
                 zkCluster.setTickTime(18000);
-                zkCluster.startup(utility.setupClusterTestBuildDir());
+                zkCluster.startup(new File(utility.getClusterTestDir().toString()));
                 utility.setZkCluster(zkCluster);
                 utility.startMiniCluster();
-                utility.getHbaseCluster().startMaster();
+                utility.getHBaseCluster().startMaster();
             }
             catch (Exception e)
             {
@@ -142,6 +144,12 @@ public class HBaseCli
         }
     }
 
+    private void addIndex(String tablemName) throws IOException
+    {
+        HBaseAdmin admin = utility.getHBaseAdmin();
+        HTableDescriptor tblDescriptor = admin.getTableDescriptor(tablemName.getBytes());
+        tblDescriptor.addCoprocessor("mycoProcessor");
+    }
     /**
      * Destroys cluster.
      */
@@ -156,6 +164,10 @@ public class HBaseCli
             }
         }
         catch (IOException e)
+        {
+            logger.error(e.getMessage());
+        }
+        catch(Exception e)
         {
             logger.error(e.getMessage());
         }

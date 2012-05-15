@@ -67,6 +67,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 
     /** The reader. */
     private EntityReader reader;
+    
+    private MongoDBDataHandler handler; 
 
     /** The log. */
     private static Log log = LogFactory.getLog(MongoDBClient.class);
@@ -89,6 +91,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         this.indexManager = mgr;
         this.reader = reader;
         this.persistenceUnit = persistenceUnit;
+        handler = new MongoDBDataHandler();
     }
 
     public void persist(Node node)
@@ -119,7 +122,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
             document = new BasicDBObject();
         }
 
-        document = new MongoDBDataHandler(this, getPersistenceUnit()).getDocumentFromEntity(document, entityMetadata,
+        document = handler.getDocumentFromEntity(document, entityMetadata,
                 node.getData(), relationHolders);
         dbCollection.save(document);
 
@@ -247,7 +250,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
             return null;
         }
 
-        Object enhancedEntity = new MongoDBDataHandler(this, getPersistenceUnit()).getEntityFromDocument(
+        Object enhancedEntity = handler.getEntityFromDocument(
                 entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, relationNames);
 
         return enhancedEntity;
@@ -278,8 +281,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         while (cursor.hasNext())
         {
             DBObject fetchedDocument = cursor.next();
-            Object entity = new MongoDBDataHandler(this, getPersistenceUnit())
-                    .getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument,
+            Object entity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument,
                             entityMetadata.getRelationNames());
             entities.add(entity);
         }
@@ -323,7 +325,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         if (result.indexOf(".") >= 0)
         {
             // TODO i need to discuss with Amresh before modifying it.
-            entities.addAll(new MongoDBDataHandler(this, getPersistenceUnit()).getEmbeddedObjectList(dbCollection,
+            entities.addAll(handler.getEmbeddedObjectList(dbCollection,
                     entityMetadata, documentName, mongoQuery, result, orderBy));
 
         }
@@ -333,7 +335,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 
             DBCursor cursor = orderBy != null ? dbCollection.find(mongoQuery).sort(orderBy) : dbCollection
                     .find(mongoQuery);
-            MongoDBDataHandler handler = new MongoDBDataHandler(this, getPersistenceUnit());
             while (cursor.hasNext())
             {
                 DBObject fetchedDocument = cursor.next();
@@ -473,7 +474,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
-        MongoDBDataHandler handler = new MongoDBDataHandler(this, getPersistenceUnit());
         List<Object> results = new ArrayList<Object>();
         while (cursor.hasNext())
         {

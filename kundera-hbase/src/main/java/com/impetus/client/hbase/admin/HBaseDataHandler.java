@@ -420,9 +420,17 @@ public class HBaseDataHandler implements DataHandler
         }
         finally
         {
-            if (hTable != null)
+            try
             {
-                puthTable(hTable);
+                if (hTable != null)
+                {
+                    puthTable(hTable);
+                }
+            }
+            catch (IOException e)
+            {
+
+              // Do nothing.
             }
         }
         return foreignKeys;
@@ -449,7 +457,7 @@ public class HBaseDataHandler implements DataHandler
      * @param hTable
      *            HBase Table instance
      */
-    private void puthTable(HTable hTable)
+    private void puthTable(HTable hTable) throws IOException
     {
         hTablePool.putTable(hTable);
     }

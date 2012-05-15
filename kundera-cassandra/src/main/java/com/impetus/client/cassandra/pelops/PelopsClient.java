@@ -92,7 +92,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     private boolean closed = false;
 
     /** The data handler. */
-    private PelopsDataHandler dataHandler;
+    private PelopsDataHandler handler;
 
     /** The index manager. */
     private IndexManager indexManager;
@@ -120,7 +120,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     {
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
-        this.dataHandler = new PelopsDataHandler(this);
+        this.handler = new PelopsDataHandler();
         this.reader = reader;
     }
 
@@ -186,15 +186,8 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<E> results = new ArrayList<E>();
-        for (Object rowKey : rowIds)
-        {
-            E r = (E) find(entityClass, entityMetadata, rowKey.toString(), entityMetadata.getRelationNames());
-            if (r != null)
-            {
-                results.add(r);
-            }
-        }
-
+        results = find(entityClass, entityMetadata.getRelationNames(), entityMetadata.getRelationNames() != null
+                && !entityMetadata.getRelationNames().isEmpty(), entityMetadata, rowIds);
         return results.isEmpty() ? null : results;
     }
 
@@ -214,7 +207,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
      * @return list of wrapped entities.
      */
     public final List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
-            String... rowIds)
+            Object... rowIds)
     {
         if (!isOpen())
         {
@@ -224,7 +217,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
         // selector.
 
-        PelopsDataHandler handler = new PelopsDataHandler(this);
+//        PelopsDataHandler handler = new PelopsDataHandler(this);
 
         List entities = null;
         try
@@ -259,7 +252,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                 List<SuperColumn> superColumnList = loadSuperColumns(entityMetadata.getSchema(),
                         entityMetadata.getTableName(), entityId,
                         new String[] { superColumnName.substring(0, superColumnName.indexOf("|")) });
-                E e = (E) dataHandler.fromThriftRow(entityMetadata.getEntityClazz(), entityMetadata,
+                E e = (E) handler.fromThriftRow(entityMetadata.getEntityClazz(), entityMetadata,
                         new DataRow<SuperColumn>(entityId, entityMetadata.getTableName(), superColumnList));
                 entities.add(e);
             }
@@ -355,7 +348,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     public final void close()
     {
         this.indexManager.flush();
-        this.dataHandler = null;
+        this.handler = null;
         closed = true;
 
     }
@@ -569,7 +562,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         List<Column> columns = selector.getColumnsFromRow(joinTableName, new Bytes(parentId.getBytes()),
                 Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
 
-        PelopsDataHandler handler = new PelopsDataHandler(this);
+//        PelopsDataHandler handler = new PelopsDataHandler(this);
         List<E> foreignKeys = handler.getForeignKeysFromJoinTable(inverseJoinColumnName, columns);
         return foreignKeys;
     }
@@ -729,7 +722,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                         superColumns.add(supCol.getSuper_column());
                     }
 
-                    Object r = dataHandler.fromSuperColumnThriftRow(m.getEntityClazz(), m, dataHandler.new ThriftRow(
+                    Object r = handler.fromSuperColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(
                             new String(rowKey), m.getTableName(), null, superColumns), relations, isWrapReq);
                     results.add(r);
                     // List<SuperColumn> superCol = columns.
@@ -742,7 +735,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                         cols.add(supCol.getColumn());
                     }
 
-                    Object r = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m, dataHandler.new ThriftRow(
+                    Object r = handler.fromColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(
                             new String(rowKey), m.getTableName(), cols, null), relations, isWrapReq);
                     results.add(r);
                 }
@@ -776,8 +769,8 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             List<Column> columns = qResults.get(rowKey);
             try
             {
-                Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m,
-                        dataHandler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null),
+                Object e = handler.fromColumnThriftRow(m.getEntityClazz(), m,
+                        handler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null),
                         relationNames, isRelational);
                 entities.add(e);
             }
@@ -880,8 +873,8 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        PelopsDataHandler handler = dataHandler != null ? dataHandler : new PelopsDataHandler(this);
-        PelopsDataHandler.ThriftRow tf = handler.toThriftRow(this, entity, id, metadata, columnFamily);
+//        PelopsDataHandler handler = dataHandler != null ? dataHandler : new PelopsDataHandler(;
+        PelopsDataHandler.ThriftRow tf = handler.toThriftRow(entity, id, metadata, columnFamily);
         timestamp = handler.getTimestamp();
         return tf;
     }
@@ -1009,10 +1002,10 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                     CqlRow row = iter.next();
                     String rowKey = Bytes.toUTF8(row.getKey());
 
-                    ThriftRow thriftRow = dataHandler.new ThriftRow(rowKey, entityMetadata.getTableName(),
+                    ThriftRow thriftRow = handler.new ThriftRow(rowKey, entityMetadata.getTableName(),
                             row.getColumns(), null);
 
-                    Object entity = dataHandler.fromColumnThriftRow(clazz, entityMetadata, thriftRow, relationalField,
+                    Object entity = handler.fromColumnThriftRow(clazz, entityMetadata, thriftRow, relationalField,
                             relationalField != null && !relationalField.isEmpty());
                     returnedEntities.add(entity);
                 }

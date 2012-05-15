@@ -40,8 +40,6 @@ import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
-import com.impetus.kundera.client.Client;
-import com.impetus.kundera.client.DataHandler;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -57,26 +55,12 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author amresh.singh
  */
-public class PelopsDataHandler extends DataHandler
+final class PelopsDataHandler
 {
-
-    /** The client. */
-    private Client client;
 
     /** The timestamp. */
     private long timestamp = System.currentTimeMillis();
 
-    /**
-     * Instantiates a new pelops data handler.
-     * 
-     * @param client
-     *            the client
-     */
-    public PelopsDataHandler(Client client)
-    {
-        super();
-        this.client = client;
-    }
 
     /** The log. */
     private static Log log = LogFactory.getLog(PelopsDataHandler.class);
@@ -100,7 +84,7 @@ public class PelopsDataHandler extends DataHandler
      * @throws Exception
      *             the exception
      */
-    public Object fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String rowKey,
+    Object fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String rowKey,
             List<String> relationNames, boolean isWrapReq) throws Exception
     {
         List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
@@ -166,14 +150,17 @@ public class PelopsDataHandler extends DataHandler
      * @throws Exception
      *             the exception
      */
-    public List<Object> fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, List<String> relationNames,
-            boolean isWrapReq, String... rowIds) throws Exception
+    List<Object> fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, List<String> relationNames,
+            boolean isWrapReq, Object... rowIds) throws Exception
     {
         List<Object> entities = new ArrayList<Object>(rowIds.length);
-        for (String rowKey : rowIds)
+        if (rowIds != null)
         {
-            Object e = fromThriftRow(selector, clazz, m, rowKey, relationNames, isWrapReq);
-            entities.add(e);
+            for (Object rowKey : rowIds)
+            {
+                Object e = fromThriftRow(selector, clazz, m, rowKey.toString(), relationNames, isWrapReq);
+                entities.add(e);
+            }
         }
         return entities;
     }
@@ -194,7 +181,7 @@ public class PelopsDataHandler extends DataHandler
      *             the exception
      */
     // TODO: this is a duplicate code snippet and we need to refactor this.
-    public <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception
+    <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception
     {
 
         // Instantiate a new instance
@@ -289,7 +276,7 @@ public class PelopsDataHandler extends DataHandler
      * @throws Exception
      *             the exception
      */
-    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
+    Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
             List<String> relationNames, boolean isWrapperReq) throws Exception
     {
 
@@ -368,7 +355,7 @@ public class PelopsDataHandler extends DataHandler
      * @throws Exception
      *             the exception
      */
-    public Object fromSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr, List<String> relationNames,
+    Object fromSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr, List<String> relationNames,
             boolean isWrapReq) throws Exception
     {
 
@@ -515,7 +502,7 @@ public class PelopsDataHandler extends DataHandler
      * @throws Exception
      *             the exception
      */
-    public Object populateEmbeddedObject(SuperColumn sc, EntityMetadata m) throws Exception
+    Object populateEmbeddedObject(SuperColumn sc, EntityMetadata m) throws Exception
     {
         Field embeddedCollectionField = null;
         Object embeddedObject = null;
@@ -591,8 +578,6 @@ public class PelopsDataHandler extends DataHandler
     /**
      * Helper method to convert @Entity to ThriftRow.
      * 
-     * @param client
-     *            the client
      * @param e
      *            the e
      * @param id
@@ -605,7 +590,7 @@ public class PelopsDataHandler extends DataHandler
      * @throws Exception
      *             the exception
      */
-    public ThriftRow toThriftRow(PelopsClient client, Object e, String id, EntityMetadata m, String columnFamily)
+    ThriftRow toThriftRow(Object e, String id, EntityMetadata m, String columnFamily)
             throws Exception
     {
         // timestamp to use in thrift column objects
@@ -617,7 +602,7 @@ public class PelopsDataHandler extends DataHandler
         tr.setId(id); // Id
 
         // Add super columns to thrift row
-        addSuperColumnsToThriftRow(timestamp, client, tr, m, e, id);
+        addSuperColumnsToThriftRow(timestamp, tr, m, e, id);
 
         // Add columns to thrift row, only if there is no super column
         if (m.getEmbeddedColumnsAsList().isEmpty())
@@ -697,7 +682,7 @@ public class PelopsDataHandler extends DataHandler
      * @throws Exception
      *             the exception
      */
-    private void addSuperColumnsToThriftRow(long timestamp, PelopsClient client, ThriftRow tr, EntityMetadata m,
+    private void addSuperColumnsToThriftRow(long timestamp, ThriftRow tr, EntityMetadata m,
             Object e, String id) throws Exception
     {
         // Iterate through Super columns
@@ -836,7 +821,7 @@ public class PelopsDataHandler extends DataHandler
      *            the columns
      * @return the foreign keys from join table
      */
-    public <E> List<E> getForeignKeysFromJoinTable(String inverseJoinColumnName, List<Column> columns)
+    <E> List<E> getForeignKeysFromJoinTable(String inverseJoinColumnName, List<Column> columns)
     {
         List<E> foreignKeys = new ArrayList<E>();
 
@@ -879,7 +864,7 @@ public class PelopsDataHandler extends DataHandler
      * 
      * @author animesh.kumar
      */
-    public class ThriftRow
+    class ThriftRow
     {
 
         /** Id of the row. */
@@ -897,7 +882,7 @@ public class PelopsDataHandler extends DataHandler
         /**
          * default constructor.
          */
-        public ThriftRow()
+        ThriftRow()
         {
             columns = new ArrayList<Column>();
             superColumns = new ArrayList<SuperColumn>();
@@ -915,7 +900,7 @@ public class PelopsDataHandler extends DataHandler
          * @param superColumns
          *            the super columns
          */
-        public ThriftRow(String id, String columnFamilyName, List<Column> columns, List<SuperColumn> superColumns)
+        ThriftRow(String id, String columnFamilyName, List<Column> columns, List<SuperColumn> superColumns)
         {
             this.id = id;
             this.columnFamilyName = columnFamilyName;
@@ -936,7 +921,7 @@ public class PelopsDataHandler extends DataHandler
          * 
          * @return the id
          */
-        public String getId()
+        String getId()
         {
             return id;
         }
@@ -947,7 +932,7 @@ public class PelopsDataHandler extends DataHandler
          * @param id
          *            the key to set
          */
-        public void setId(String id)
+        void setId(String id)
         {
             this.id = id;
         }
@@ -957,7 +942,7 @@ public class PelopsDataHandler extends DataHandler
          * 
          * @return the columnFamilyName
          */
-        public String getColumnFamilyName()
+        String getColumnFamilyName()
         {
             return columnFamilyName;
         }
@@ -968,7 +953,7 @@ public class PelopsDataHandler extends DataHandler
          * @param columnFamilyName
          *            the columnFamilyName to set
          */
-        public void setColumnFamilyName(String columnFamilyName)
+        void setColumnFamilyName(String columnFamilyName)
         {
             this.columnFamilyName = columnFamilyName;
         }
@@ -978,7 +963,7 @@ public class PelopsDataHandler extends DataHandler
          * 
          * @return the columns
          */
-        public List<Column> getColumns()
+        List<Column> getColumns()
         {
             return columns;
         }
@@ -989,7 +974,7 @@ public class PelopsDataHandler extends DataHandler
          * @param columns
          *            the columns to set
          */
-        public void setColumns(List<Column> columns)
+        void setColumns(List<Column> columns)
         {
             this.columns = columns;
         }
@@ -1000,7 +985,7 @@ public class PelopsDataHandler extends DataHandler
          * @param column
          *            the column
          */
-        public void addColumn(Column column)
+        void addColumn(Column column)
         {
             columns.add(column);
         }
@@ -1010,7 +995,7 @@ public class PelopsDataHandler extends DataHandler
          * 
          * @return the superColumns
          */
-        public List<SuperColumn> getSuperColumns()
+        List<SuperColumn> getSuperColumns()
         {
             return superColumns;
         }
@@ -1021,7 +1006,7 @@ public class PelopsDataHandler extends DataHandler
          * @param superColumns
          *            the superColumns to set
          */
-        public void setSuperColumns(List<SuperColumn> superColumns)
+        void setSuperColumns(List<SuperColumn> superColumns)
         {
             this.superColumns = superColumns;
         }
@@ -1032,7 +1017,7 @@ public class PelopsDataHandler extends DataHandler
          * @param superColumn
          *            the super column
          */
-        public void addSuperColumn(SuperColumn superColumn)
+        void addSuperColumn(SuperColumn superColumn)
         {
             this.superColumns.add(superColumn);
         }
@@ -1044,7 +1029,7 @@ public class PelopsDataHandler extends DataHandler
      * 
      * @return the timestamp
      */
-    public long getTimestamp()
+    long getTimestamp()
     {
         return timestamp;
     }

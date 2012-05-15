@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -419,26 +418,6 @@ public abstract class QueryImpl implements Query
         transform(m, ls, resultList);
 
     }
-
-//    /**
-//     * Returns column name from the filter property which is in the form
-//     * dbName.columnName
-//     * 
-//     * @param filterProperty
-//     *            the filter property
-//     * @return the column name
-//     */
-//    protected String getColumnName(String filterProperty)
-//    {
-//        StringTokenizer st = new StringTokenizer(filterProperty, ".");
-//        String columnName = "";
-//        while (st.hasMoreTokens())
-//        {
-//            columnName = st.nextToken();
-//        }
-//
-//        return columnName;
-//    }
 
     /**
      * Append range.

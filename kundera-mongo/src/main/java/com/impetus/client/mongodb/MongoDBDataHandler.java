@@ -51,29 +51,8 @@ import com.mongodb.DBObject;
  * 
  * @author amresh.singh
  */
-public class MongoDBDataHandler
+final class MongoDBDataHandler
 {
-
-    /** The client. */
-    private Client client;
-
-    /** The persistence unit. */
-    private String persistenceUnit;
-
-    /**
-     * Instantiates a new mongo db data handler.
-     * 
-     * @param client
-     *            the client
-     * @param persistenceUnit
-     *            the persistence unit
-     */
-    public MongoDBDataHandler(Client client, String persistenceUnit)
-    {
-        super();
-        this.client = client;
-        this.persistenceUnit = persistenceUnit;
-    }
 
     /** The log. */
     private static Log log = LogFactory.getLog(MongoDBDataHandler.class);
@@ -91,7 +70,7 @@ public class MongoDBDataHandler
      *            the relations
      * @return the entity from document
      */
-    public Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document,
+    Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document,
             List<String> relations)
     {
         // Entity object
@@ -226,25 +205,6 @@ public class MongoDBDataHandler
         }
     }
 
-    /**
-     * Gets the client.
-     * 
-     * @return the client
-     */
-    private Client getClient()
-    {
-        return client;
-    }
-
-    /**
-     * Gets the persistence unit.
-     * 
-     * @return the persistence unit
-     */
-    private String getPersistenceUnit()
-    {
-        return persistenceUnit;
-    }
 
     /**
      * Gets the document from entity.
@@ -259,7 +219,7 @@ public class MongoDBDataHandler
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public DBObject getDocumentFromEntity(DBObject dbObj, EntityMetadata m, Object entity,
+    DBObject getDocumentFromEntity(DBObject dbObj, EntityMetadata m, Object entity,
             List<RelationHolder> relations) throws PropertyAccessException
     {
         List<Column> columns = m.getColumnsAsList();
@@ -379,7 +339,7 @@ public class MongoDBDataHandler
      *            the filter property
      * @return the column name
      */
-    public String getColumnName(String filterProperty)
+    String getColumnName(String filterProperty)
     {
         StringTokenizer st = new StringTokenizer(filterProperty, ".");
         String columnName = "";
@@ -400,7 +360,7 @@ public class MongoDBDataHandler
      *            the column name
      * @return the enclosing document name
      */
-    public String getEnclosingDocumentName(EntityMetadata m, String columnName)
+    String getEnclosingDocumentName(EntityMetadata m, String columnName)
     {
         String enclosingDocumentName = null;
         if (!m.getColumnFieldNames().contains(columnName))
@@ -447,7 +407,7 @@ public class MongoDBDataHandler
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
+    List getEmbeddedObjectList(DBCollection dbCollection, EntityMetadata m, String documentName,
             BasicDBObject mongoQuery, String result, BasicDBObject orderBy) throws PropertyAccessException
     {
         List list = new ArrayList();// List of embedded object to be returned

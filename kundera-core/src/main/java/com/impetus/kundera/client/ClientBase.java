@@ -129,9 +129,6 @@ public class ClientBase
             indexManager.update(entityMetadata, node.getData(), null, null);
         }
 
-        // for(rel)
-
-        // indexManager.update(entityMetadata, node.getData(), null, null);
     }
 
 }

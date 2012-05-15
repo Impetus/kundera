@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase</artifactId>
-			<version>0.90.4</version>
+			<version>0.92.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -44,7 +44,7 @@
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase</artifactId>
-			<version>0.90.4</version>
+			<version>0.92.1</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
