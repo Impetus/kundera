@@ -22,8 +22,11 @@ import java.util.Map;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
+import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
@@ -35,14 +38,57 @@ import com.impetus.kundera.metadata.model.Relation.ForeignKey;
  * @author amresh
  * 
  */
-public class ClientBase
+public abstract class ClientBase
 {
+
+    /** The index manager. */
+    protected IndexManager indexManager;
+
+    /** persistence unit */
+    protected String persistenceUnit;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getIndexManager()
+     */
+    public final IndexManager getIndexManager()
+    {
+        return indexManager;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getPersistenceUnit()
+     */
+    public String getPersistenceUnit()
+    {
+        return persistenceUnit;
+    }
+    
+    /**
+     * Method to handle 
+     * @param node
+     */
+    public void persist(Node node)
+    {
+        Object entity = node.getData();
+        String id = ObjectGraphBuilder.getEntityId(node.getNodeId());
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+
+        List<RelationHolder> relationHolders = getRelationHolders(node);
+        onPersist(metadata, entity, id, relationHolders);
+        indexNode(node, metadata);
+    }
+    
     /**
      * @param node
      * @return
      */
     protected List<RelationHolder> getRelationHolders(Node node)
     {
+
         List<RelationHolder> relationsHolder = new ArrayList<RelationHolder>();
 
         // Add column value for all parent nodes linked to this node
@@ -95,40 +141,53 @@ public class ClientBase
      * @param node
      * @param entityMetadata
      */
-    protected void indexNode(Node node, EntityMetadata entityMetadata, IndexManager indexManager)
+    protected void indexNode(Node node, EntityMetadata entityMetadata)
     {
-        Map<NodeLink, Node> parents = node.getParents();
-        if (parents != null)
+        if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
         {
-            for (NodeLink parentNodeLink : parents.keySet())
+            Map<NodeLink, Node> parents = node.getParents();
+            if (parents != null)
             {
-                indexManager.update(entityMetadata, node.getData(), (String) parentNodeLink
-                        .getLinkProperty(LinkProperty.LINK_VALUE), parents.get(parentNodeLink).getDataClass());
+                for (NodeLink parentNodeLink : parents.keySet())
+                {
+                    indexManager.update(entityMetadata, node.getData(),
+                            (String) parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
+                            parents.get(parentNodeLink).getDataClass());
+                }
+
             }
-
-        }
-        else if (node.getChildren() != null)
-        {
-
-            Map<NodeLink, Node> children = node.getChildren();
-            for (NodeLink childNodeLink : children.keySet())
+            else if (node.getChildren() != null)
             {
-                if (childNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_ONE))
+
+                Map<NodeLink, Node> children = node.getChildren();
+                for (NodeLink childNodeLink : children.keySet())
                 {
-                    indexManager.update(entityMetadata, node.getData(), (String) childNodeLink
-                            .getLinkProperty(LinkProperty.LINK_VALUE), children.get(childNodeLink).getDataClass());
-                }
-                else
-                {
-                    indexManager.update(entityMetadata, node.getData(), null, null);
+                    if (childNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_ONE))
+                    {
+                        indexManager.update(entityMetadata, node.getData(),
+                                (String) childNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
+                                children.get(childNodeLink).getDataClass());
+                    }
+                    else
+                    {
+                        indexManager.update(entityMetadata, node.getData(), null, null);
+                    }
                 }
             }
+            else
+            {
+                indexManager.update(entityMetadata, node.getData(), null, null);
+            }
         }
-        else
-        {
-            indexManager.update(entityMetadata, node.getData(), null, null);
-        }
-
     }
+    
+    /**
+     * Method to be implemented by inherited classes. On receiving persist event specific client need to implement this method.  
 
+     * @param entityMetadata   entity metadata.
+     * @param entity           entity object.
+     * @param id               entity id.
+     * @param rlHolders        relation holders. This field is only required in case Entity is holding up any associations with other entities.
+     */
+    protected abstract void onPersist(EntityMetadata entityMetadata,Object entity, Object id, List<RelationHolder> rlHolders);
 }

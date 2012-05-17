@@ -63,17 +63,11 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 {
 
-    /** The persistence unit. */
-    private String persistenceUnit;
-
     /** The conf. */
     private Configuration conf;
 
     /** The sf. */
     private SessionFactory sf;
-
-    /** The index manager. */
-    private IndexManager indexManager;
 
     /** The s. */
     private StatelessSession s;
@@ -115,29 +109,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         this.reader = reader;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getIndexManager()
-     */
-    @Override
-    public IndexManager getIndexManager()
-    {
-
-        return indexManager;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getPersistenceUnit()
-     */
-    @Override
-    public String getPersistenceUnit()
-    {
-
-        return persistenceUnit;
-    }
 
     /*
      * (non-Javadoc)
@@ -233,32 +204,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return c.list();
     }
 
-    /**
-     * Gets the data type.
-     * 
-     * @param entityMetadata
-     *            the entity metadata
-     * @param arg1
-     *            the arg1
-     * @return the data type
-     * @throws PropertyAccessException
-     *             the property access exception
-     */
-    private Object[] getDataType(EntityMetadata entityMetadata, Object... arg1) throws PropertyAccessException
-    {
-        Field idField = entityMetadata.getIdColumn().getField();
-        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(idField);
-
-        Object[] pKeys = new Object[arg1.length];
-        int cnt = 0;
-        for (Object r : arg1)
-        {
-            pKeys[cnt++] = accessor.fromString(idField.getClass(), r.toString());
-        }
-
-        return pKeys;
-    }
-
+   
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
@@ -266,26 +212,22 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     }
 
     @Override
-    public void persist(Node node)
+    protected void onPersist(EntityMetadata metadata, Object entity, Object id, List<RelationHolder> relationHolders)
     {
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-        String id = ObjectGraphBuilder.getEntityId(node.getNodeId());
 
         Transaction tx = null;
         try
         {
             s = getStatelessSession();
             tx = s.beginTransaction();
-            s.insert(node.getData());
-            tx.commit();
+            s.insert(entity);
         }
         // TODO: Bad code, get rid of these exceptions, currently necessary for
         // handling many to one case
         catch (org.hibernate.exception.ConstraintViolationException e)
         {
             log.info(e.getMessage());
-            s.update(node.getData());
-            tx.commit();
+            s.update(entity);
         }
         catch (HibernateException e)
         {
@@ -293,7 +235,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         }
 
         // Update foreign Keys
-        List<RelationHolder> relationHolders = getRelationHolders(node);
         for (RelationHolder rh : relationHolders)
         {
             String linkName = rh.getRelationName();
@@ -301,20 +242,13 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             if (linkName != null && linkValue != null)
             {
 
-                s = getStatelessSession();
-                tx = s.beginTransaction();
                 String updateSql = "Update " + metadata.getTableName() + " SET " + linkName + "= '" + linkValue
                         + "' WHERE " + metadata.getIdColumn().getName() + " = '" + id + "'";
                 s.createSQLQuery(updateSql).executeUpdate();
-                tx.commit();
             }
         }
 
-        // Index Entity
-        if (!MetadataUtils.useSecondryIndex(getPersistenceUnit()))
-        {
-            indexNode(node, metadata, getIndexManager());
-        }
+        tx.commit();
     }
 
     /**
@@ -618,4 +552,32 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         return null;
     }
+
+
+    /**
+     * Gets the data type.
+     * 
+     * @param entityMetadata
+     *            the entity metadata
+     * @param arg1
+     *            the arg1
+     * @return the data type
+     * @throws PropertyAccessException
+     *             the property access exception
+     */
+    private Object[] getDataType(EntityMetadata entityMetadata, Object... arg1) throws PropertyAccessException
+    {
+        Field idField = entityMetadata.getIdColumn().getField();
+        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(idField);
+
+        Object[] pKeys = new Object[arg1.length];
+        int cnt = 0;
+        for (Object r : arg1)
+        {
+            pKeys[cnt++] = accessor.fromString(idField.getClass(), r.toString());
+        }
+
+        return pKeys;
+    }
+
 }

@@ -29,8 +29,6 @@ import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -59,11 +57,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
     /** The data handler. */
     // private MongoDBDataHandler dataHandler;
 
-    /** The index manager. */
-    private IndexManager indexManager;
-
-    /** The persistence unit. */
-    private String persistenceUnit;
 
     /** The reader. */
     private EntityReader reader;
@@ -94,41 +87,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         handler = new MongoDBDataHandler();
     }
 
-    public void persist(Node node)
-    {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-
-        String dbName = entityMetadata.getSchema();
-        String documentName = entityMetadata.getTableName();
-        Object key = ObjectGraphBuilder.getEntityId(node.getNodeId());
-
-        log.debug("Persisting data into " + dbName + "." + documentName + " for ID:" + node.getNodeId());
-        DBCollection dbCollection = mongoDb.getCollection(documentName);
-
-        List<RelationHolder> relationHolders = getRelationHolders(node);
-
-        BasicDBObject query = new BasicDBObject();
-        query.put(entityMetadata.getIdColumn().getName(), key.toString());
-
-        DBCursor cursor = dbCollection.find(query);
-        DBObject document = null;
-
-        if (cursor.hasNext())
-        {
-            document = cursor.next();
-        }
-        else
-        {
-            document = new BasicDBObject();
-        }
-
-        document = handler.getDocumentFromEntity(document, entityMetadata,
-                node.getData(), relationHolders);
-        dbCollection.save(document);
-
-        // Index This node
-        indexNode(node, entityMetadata, getIndexManager());
-    }
 
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
@@ -429,27 +387,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         throw new NotImplementedException("Not yet implemented");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getPersistenceUnit()
-     */
-    @Override
-    public String getPersistenceUnit()
-    {
-        return persistenceUnit;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getIndexManager()
-     */
-    @Override
-    public IndexManager getIndexManager()
-    {
-        return indexManager;
-    }
 
     /**
      * Method to find entity for given association name and association value.
@@ -520,6 +457,31 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
     public Class<MongoDBQuery> getQueryImplementor()
     {
         return MongoDBQuery.class;
+    }
+
+    @Override
+    protected void onPersist(EntityMetadata entityMetadata,Object entity, Object id, List<RelationHolder> rlHolders)
+    {
+        String documentName = entityMetadata.getTableName();
+        DBCollection dbCollection = mongoDb.getCollection(documentName);
+        BasicDBObject query = new BasicDBObject();
+        query.put(entityMetadata.getIdColumn().getName(), id.toString());
+
+        DBCursor cursor = dbCollection.find(query);
+        DBObject document = null;
+
+        if (cursor.hasNext())
+        {
+            document = cursor.next();
+        }
+        else
+        {
+            document = new BasicDBObject();
+        }
+
+        document = handler.getDocumentFromEntity(document, entityMetadata,entity, rlHolders);
+        dbCollection.save(document);
+        
     }
 
     /**

@@ -181,7 +181,7 @@ public abstract class QueryImpl implements Query
         this.persistenceDelegeator = persistenceDelegeator;
     }
 
-    protected List<Object> setRelationEntities(List<EnhanceEntity> enhanceEntities, Client client, EntityMetadata m)
+    protected List<Object> setRelationEntities(List enhanceEntities, Client client, EntityMetadata m)
     {
         // Enhance entities can contain or may not contain relation.
         // if it contain a relation means it is a child
@@ -190,14 +190,20 @@ public abstract class QueryImpl implements Query
         Map<Object, Object> relationalValues = new HashMap<Object, Object>();
         if (enhanceEntities != null)
         {
-            for (EnhanceEntity e : enhanceEntities)
+            for (Object e : enhanceEntities)
             {
                 if (result == null)
                 {
                     result = new ArrayList<Object>(enhanceEntities.size());
                 }
 
-                result.add(getReader().recursivelyFindEntities(e, client, m, persistenceDelegeator));
+                if(!(e instanceof EnhanceEntity))
+                {
+                    e = new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m), null);
+                }  
+                
+                result.add(getReader().recursivelyFindEntities((EnhanceEntity)e, client, m, persistenceDelegeator));
+                
             }
         }
 

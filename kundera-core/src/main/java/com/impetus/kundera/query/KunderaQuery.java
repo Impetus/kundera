@@ -432,7 +432,7 @@ public class KunderaQuery
                     throw new JPQLParseException("Bad JPA query: " + clause);
                 }
 
-                FilterClause filterClause = new FilterClause(columnName, condition, tokens.get(2));
+                FilterClause filterClause = new FilterClause(indexName != null ?indexName + "."+columnName : columnName, condition, tokens.get(2));
                 filtersQueue.add(filterClause);
 
                 onTypedParameter(tokens, filterClause, property);

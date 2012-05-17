@@ -65,8 +65,6 @@ import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -94,14 +92,8 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     /** The data handler. */
     private PelopsDataHandler handler;
 
-    /** The index manager. */
-    private IndexManager indexManager;
-
     /** The reader. */
     private EntityReader reader;
-
-    /** The persistence unit. */
-    private String persistenceUnit;
 
     /** The timestamp. */
     private long timestamp;
@@ -138,42 +130,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         return find(entityClass, entityMetadata, rowId != null ? rowId.toString() : null, relationNames);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
-     * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String)
-     */
-    /**
-     * Find.
-     * 
-     * @param clazz
-     *            the clazz
-     * @param metadata
-     *            the metadata
-     * @param rowId
-     *            the row id
-     * @param relationNames
-     *            the relation names
-     * @return the object
-     */
-    private final Object find(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relationNames)
-    {
-
-        List<Object> result = null;
-        try
-        {
-            result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata,
-                    rowId != null ? rowId.toString() : null);
-        }
-        catch (Exception e)
-        {
-            log.error("Error on retrieval" + e.getMessage());
-            throw new PersistenceException(e.getMessage());
-        }
-
-        return result != null & !result.isEmpty() ? result.get(0) : null;
-    }
 
     /*
      * (non-Javadoc)
@@ -217,7 +173,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
         // selector.
 
-//        PelopsDataHandler handler = new PelopsDataHandler(this);
+        // PelopsDataHandler handler = new PelopsDataHandler(this);
 
         List entities = null;
         try
@@ -264,28 +220,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         return entities;
     }
 
-    /**
-     * Load super columns.
-     * 
-     * @param keyspace
-     *            the keyspace
-     * @param columnFamily
-     *            the column family
-     * @param rowId
-     *            the row id
-     * @param superColumnNames
-     *            the super column names
-     * @return the list
-     */
-    private final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
-            String... superColumnNames)
-    {
-        if (!isOpen())
-            throw new PersistenceException("PelopsClient is closed.");
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        return selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames),
-                ConsistencyLevel.ONE);
-    }
 
     /*
      * (non-Javadoc)
@@ -310,38 +244,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     /*
      * (non-Javadoc)
      * 
-     * @see com.impetus.kundera.client.Client#getIndexManager()
-     */
-    @Override
-    public final IndexManager getIndexManager()
-    {
-        return indexManager;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getPersistenceUnit()
-     */
-    @Override
-    public String getPersistenceUnit()
-    {
-        return persistenceUnit;
-    }
-
-    /**
-     * Checks if is open.
-     * 
-     * @return true, if is open
-     */
-    private final boolean isOpen()
-    {
-        return !closed;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.impetus.kundera.client.Client#close()
      */
     @Override
@@ -350,38 +252,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         this.indexManager.flush();
         this.handler = null;
         closed = true;
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#persist(com.impetus.kundera.graph.Node)
-     */
-    @Override
-    public void persist(Node node)
-    {
-        Object entity = node.getData();
-        String id = ObjectGraphBuilder.getEntityId(node.getNodeId());
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-
-        List<RelationHolder> relationHolders = getRelationHolders(node);
-
-        try
-        {
-            // Populate thrift row for this entity
-            PelopsDataHandler.ThriftRow tf = populateTfRow(entity, id, metadata);
-
-            onPersist(metadata, entity, tf, relationHolders);
-
-            // Index Entity
-            indexNode(node, metadata, getIndexManager());
-        }
-        catch (Exception e)
-        {
-            throw new KunderaException(e);
-        }
 
     }
 
@@ -395,15 +265,12 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         Mutator mutator = Pelops.createMutator(poolName);
 
         String joinTableName = joinTableData.getJoinTableName();
-        String joinColumnName = joinTableData.getJoinColumnName();
         String invJoinColumnName = joinTableData.getInverseJoinColumnName();
         Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
 
         for (Object key : joinTableRecords.keySet())
         {
             Set<Object> values = joinTableRecords.get(key);
-
-            String joinColumnValue = (String) key;
 
             List<Column> columns = new ArrayList<Column>();
 
@@ -426,124 +293,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
 
     }
 
-    /**
-     * Creates secondary indexes on columns if not already created.
-     * 
-     * @param tableName
-     *            Column family name
-     * @param poolName
-     *            Pool Name
-     * @param columns
-     *            List of columns
-     */
-    private void createIndexesOnColumns(String tableName, String poolName, List<Column> columns)
-    {
-        String keyspace = Pelops.getDbConnPool(poolName).getKeyspace();
-        try
-        {
-            Cassandra.Client api = Pelops.getDbConnPool(poolName).getConnection().getAPI();
-            KsDef ksDef = api.describe_keyspace(keyspace);
-            List<CfDef> cfDefs = ksDef.getCf_defs();
-
-            // Column family definition on which secondary index creation is
-            // required
-            CfDef columnFamilyDefToUpdate = null;
-            boolean isUpdatable = false;
-            // boolean isNew=false;
-            for (CfDef cfDef : cfDefs)
-            {
-                if (cfDef.getName().equals(tableName))
-                {
-                    columnFamilyDefToUpdate = cfDef;
-                    // isNew=false;
-                    break;
-                }
-            }
-
-            // //create a column family, in case it is not already available.
-            // if(columnFamilyDefToUpdate == null)
-            // {
-            // isNew = true;
-            // columnFamilyDefToUpdate = new CfDef(keyspace, tableName);
-            // ksDef.addToCf_defs(columnFamilyDefToUpdate);
-            // }
-
-            // Get list of indexes already created
-            List<ColumnDef> columnMetadataList = columnFamilyDefToUpdate.getColumn_metadata();
-            List<String> indexList = new ArrayList<String>();
-
-            if (columnMetadataList != null)
-            {
-                for (ColumnDef columnDef : columnMetadataList)
-                {
-                    indexList.add(Bytes.toUTF8(columnDef.getName()));
-                }
-                // need to set them to null else it is giving problem on update
-                // column family and trying to add again existing indexes.
-                // columnFamilyDefToUpdate.column_metadata = null;
-            }
-
-            // Iterate over all columns for creating secondary index on them
-            for (Column column : columns)
-            {
-
-                ColumnDef columnDef = new ColumnDef();
-
-                columnDef.setName(column.getName());
-                columnDef.setValidation_class("UTF8Type");
-                columnDef.setIndex_type(IndexType.KEYS);
-
-                // String indexName =
-                // PelopsUtils.getSecondaryIndexName(tableName, column);
-
-                // Add secondary index only if it's not already created
-                // (if already created, it would be there in column family
-                // definition)
-                if (!indexList.contains(Bytes.toUTF8(column.getName())))
-                {
-                    isUpdatable = true;
-                    columnFamilyDefToUpdate.addToColumn_metadata(columnDef);
-                }
-            }
-
-            // Finally, update column family with modified column family
-            // definition
-            if (isUpdatable)
-            {
-                api.system_update_column_family(columnFamilyDefToUpdate);
-            }// } else
-             // {
-             // api.system_add_column_family(columnFamilyDefToUpdate);
-             // }
-
-        }
-        catch (InvalidRequestException e)
-        {
-            e.printStackTrace();
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
-
-        }
-        catch (SchemaDisagreementException e)
-        {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
-
-        }
-        catch (TException e)
-        {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
-
-        }
-        catch (NotFoundException e)
-        {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
-
-        }
-        catch (PropertyAccessException e)
-        {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
-
-        }
-    }
 
     /*
      * (non-Javadoc)
@@ -562,7 +311,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         List<Column> columns = selector.getColumnsFromRow(joinTableName, new Bytes(parentId.getBytes()),
                 Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
 
-//        PelopsDataHandler handler = new PelopsDataHandler(this);
+        // PelopsDataHandler handler = new PelopsDataHandler(this);
         List<E> foreignKeys = handler.getForeignKeysFromJoinTable(inverseJoinColumnName, columns);
         return foreignKeys;
     }
@@ -735,54 +484,14 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                         cols.add(supCol.getColumn());
                     }
 
-                    Object r = handler.fromColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(
-                            new String(rowKey), m.getTableName(), cols, null), relations, isWrapReq);
+                    Object r = handler.fromColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(new String(
+                            rowKey), m.getTableName(), cols, null), relations, isWrapReq);
                     results.add(r);
                 }
             }
         }
 
         return results;
-    }
-
-    /**
-     * Populate data.
-     * 
-     * @param m
-     *            the m
-     * @param qResults
-     *            the q results
-     * @param entities
-     *            the entities
-     * @param isRelational
-     *            the is relational
-     * @param relationNames
-     *            the relation names
-     */
-    private void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities,
-            boolean isRelational, List<String> relationNames)
-    {
-        Iterator<Bytes> rowIter = qResults.keySet().iterator();
-        while (rowIter.hasNext())
-        {
-            Bytes rowKey = rowIter.next();
-            List<Column> columns = qResults.get(rowKey);
-            try
-            {
-                Object e = handler.fromColumnThriftRow(m.getEntityClazz(), m,
-                        handler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null),
-                        relationNames, isRelational);
-                entities.add(e);
-            }
-            catch (IllegalStateException e)
-            {
-                throw new KunderaException(e);
-            }
-            catch (Exception e)
-            {
-                throw new KunderaException(e);
-            }
-        }
     }
 
     /*
@@ -847,114 +556,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         col.setValue(rlValue.getBytes());
         col.setTimestamp(timestamp);
         return col;
-    }
-
-    /**
-     * Populate tf row.
-     * 
-     * @param entity
-     *            the entity
-     * @param id
-     *            the id
-     * @param metadata
-     *            the metadata
-     * @return the pelops data handler n. thrift row
-     * @throws Exception
-     *             the exception
-     */
-    private PelopsDataHandler.ThriftRow populateTfRow(Object entity, String id, EntityMetadata metadata)
-            throws Exception
-    {
-
-        String columnFamily = metadata.getTableName();
-
-        if (!isOpen())
-        {
-            throw new PersistenceException("PelopsClient is closed.");
-        }
-
-//        PelopsDataHandler handler = dataHandler != null ? dataHandler : new PelopsDataHandler(;
-        PelopsDataHandler.ThriftRow tf = handler.toThriftRow(entity, id, metadata, columnFamily);
-        timestamp = handler.getTimestamp();
-        return tf;
-    }
-
-    /**
-     * On persist.
-     * 
-     * @param metadata
-     *            the metadata
-     * @param entity
-     *            the entity
-     * @param tf
-     *            the tf
-     */
-    private void onPersist(EntityMetadata metadata, Object entity, PelopsDataHandler.ThriftRow tf,
-            List<RelationHolder> relations)
-    {
-        addRelationsToThriftRow(metadata, tf, relations);
-
-        Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
-
-        List<Column> thriftColumns = tf.getColumns();
-        List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
-        if (thriftColumns != null && !thriftColumns.isEmpty())
-        {
-            // Bytes.fromL
-            mutator.writeColumns(metadata.getTableName(), new Bytes(tf.getId().getBytes()),
-                    Arrays.asList(tf.getColumns().toArray(new Column[0])));
-        }
-
-        if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
-        {
-            for (SuperColumn sc : thriftSuperColumns)
-            {
-                mutator.writeSubColumns(metadata.getTableName(), tf.getId(), Bytes.toUTF8(sc.getName()),
-                        sc.getColumns());
-
-            }
-
-        }
-
-        mutator.execute(ConsistencyLevel.ONE);
-        tf = null;
-    }
-
-    /**
-     * Adds relation foreign key values as thrift column/ value to thrift row
-     * 
-     * @param metadata
-     * @param tf
-     * @param relations
-     */
-    private void addRelationsToThriftRow(EntityMetadata metadata, PelopsDataHandler.ThriftRow tf,
-            List<RelationHolder> relations)
-    {
-        if (relations != null)
-        {
-            for (RelationHolder rh : relations)
-            {
-                String linkName = rh.getRelationName();
-                String linkValue = rh.getRelationValue();
-
-                if (linkName != null && linkValue != null)
-                {
-                    if (metadata.getEmbeddedColumnsAsList().isEmpty())
-                    {
-                        Column col = populateFkey(linkName, linkValue, timestamp);
-                        tf.addColumn(col);
-                    }
-                    else
-                    {
-                        SuperColumn superColumn = new SuperColumn();
-                        superColumn.setName(linkName.getBytes());
-                        Column column = populateFkey(linkName, linkValue, timestamp);
-                        superColumn.addToColumns(column);
-                        tf.addSuperColumn(superColumn);
-                    }
-                }
-            }
-        }
     }
 
     /*
@@ -1055,4 +656,340 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     {
         return CassQuery.class;
     }
+
+    @Override
+    protected void onPersist(EntityMetadata metadata, Object entity, Object id, List<RelationHolder> rlHolders)
+    {
+
+        PelopsDataHandler.ThriftRow tf = null;
+        try
+        {
+            tf = populateTfRow(entity, id.toString(), metadata);
+        }
+        catch (Exception e)
+        {
+            log.error("Error during persist, Caused by:" + e.getMessage());
+            throw new KunderaException(e);
+        }
+
+        addRelationsToThriftRow(metadata, tf, rlHolders);
+
+        Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
+
+        List<Column> thriftColumns = tf.getColumns();
+        List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
+        if (thriftColumns != null && !thriftColumns.isEmpty())
+        {
+            // Bytes.fromL
+            mutator.writeColumns(metadata.getTableName(), new Bytes(tf.getId().getBytes()),
+                    Arrays.asList(tf.getColumns().toArray(new Column[0])));
+        }
+
+        if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
+        {
+            for (SuperColumn sc : thriftSuperColumns)
+            {
+                mutator.writeSubColumns(metadata.getTableName(), tf.getId(), Bytes.toUTF8(sc.getName()),
+                        sc.getColumns());
+
+            }
+
+        }
+
+        mutator.execute(ConsistencyLevel.ONE);
+        tf = null;
+    }
+
+    /**
+     * Populate tf row.
+     * 
+     * @param entity
+     *            the entity
+     * @param id
+     *            the id
+     * @param metadata
+     *            the metadata
+     * @return the pelops data handler n. thrift row
+     * @throws Exception
+     *             the exception
+     */
+    private PelopsDataHandler.ThriftRow populateTfRow(Object entity, String id, EntityMetadata metadata)
+            throws Exception
+    {
+
+        String columnFamily = metadata.getTableName();
+
+        if (!isOpen())
+        {
+            throw new PersistenceException("PelopsClient is closed.");
+        }
+
+        // PelopsDataHandler handler = dataHandler != null ? dataHandler : new
+        // PelopsDataHandler(;
+        PelopsDataHandler.ThriftRow tf = handler.toThriftRow(entity, id, metadata, columnFamily);
+        timestamp = handler.getTimestamp();
+        return tf;
+    }
+
+    /**
+     * Adds relation foreign key values as thrift column/ value to thrift row
+     * 
+     * @param metadata
+     * @param tf
+     * @param relations
+     */
+    private void addRelationsToThriftRow(EntityMetadata metadata, PelopsDataHandler.ThriftRow tf,
+            List<RelationHolder> relations)
+    {
+        if (relations != null)
+        {
+            for (RelationHolder rh : relations)
+            {
+                String linkName = rh.getRelationName();
+                String linkValue = rh.getRelationValue();
+
+                if (linkName != null && linkValue != null)
+                {
+                    if (metadata.getEmbeddedColumnsAsList().isEmpty())
+                    {
+                        Column col = populateFkey(linkName, linkValue, timestamp);
+                        tf.addColumn(col);
+                    }
+                    else
+                    {
+                        SuperColumn superColumn = new SuperColumn();
+                        superColumn.setName(linkName.getBytes());
+                        Column column = populateFkey(linkName, linkValue, timestamp);
+                        superColumn.addToColumns(column);
+                        tf.addSuperColumn(superColumn);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Find.
+     * 
+     * @param clazz
+     *            the clazz
+     * @param metadata
+     *            the metadata
+     * @param rowId
+     *            the row id
+     * @param relationNames
+     *            the relation names
+     * @return the object
+     */
+    private final Object find(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relationNames)
+    {
+
+        List<Object> result = null;
+        try
+        {
+            result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata,
+                    rowId != null ? rowId.toString() : null);
+        }
+        catch (Exception e)
+        {
+            log.error("Error on retrieval" + e.getMessage());
+            throw new PersistenceException(e.getMessage());
+        }
+
+        return result != null & !result.isEmpty() ? result.get(0) : null;
+    }
+
+    /**
+     * Populate data.
+     * 
+     * @param m
+     *            the m
+     * @param qResults
+     *            the q results
+     * @param entities
+     *            the entities
+     * @param isRelational
+     *            the is relational
+     * @param relationNames
+     *            the relation names
+     */
+    private void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities,
+            boolean isRelational, List<String> relationNames)
+    {
+        Iterator<Bytes> rowIter = qResults.keySet().iterator();
+        while (rowIter.hasNext())
+        {
+            Bytes rowKey = rowIter.next();
+            List<Column> columns = qResults.get(rowKey);
+            try
+            {
+                Object e = handler.fromColumnThriftRow(m.getEntityClazz(), m,
+                        handler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null),
+                        relationNames, isRelational);
+                entities.add(e);
+            }
+            catch (IllegalStateException e)
+            {
+                throw new KunderaException(e);
+            }
+            catch (Exception e)
+            {
+                throw new KunderaException(e);
+            }
+        }
+    }
+
+    /**
+     * Creates secondary indexes on columns if not already created.
+     * 
+     * @param tableName
+     *            Column family name
+     * @param poolName
+     *            Pool Name
+     * @param columns
+     *            List of columns
+     */
+    private void createIndexesOnColumns(String tableName, String poolName, List<Column> columns)
+    {
+        String keyspace = Pelops.getDbConnPool(poolName).getKeyspace();
+        try
+        {
+            Cassandra.Client api = Pelops.getDbConnPool(poolName).getConnection().getAPI();
+            KsDef ksDef = api.describe_keyspace(keyspace);
+            List<CfDef> cfDefs = ksDef.getCf_defs();
+
+            // Column family definition on which secondary index creation is
+            // required
+            CfDef columnFamilyDefToUpdate = null;
+            boolean isUpdatable = false;
+            // boolean isNew=false;
+            for (CfDef cfDef : cfDefs)
+            {
+                if (cfDef.getName().equals(tableName))
+                {
+                    columnFamilyDefToUpdate = cfDef;
+                    // isNew=false;
+                    break;
+                }
+            }
+
+            // //create a column family, in case it is not already available.
+            // if(columnFamilyDefToUpdate == null)
+            // {
+            // isNew = true;
+            // columnFamilyDefToUpdate = new CfDef(keyspace, tableName);
+            // ksDef.addToCf_defs(columnFamilyDefToUpdate);
+            // }
+
+            // Get list of indexes already created
+            List<ColumnDef> columnMetadataList = columnFamilyDefToUpdate.getColumn_metadata();
+            List<String> indexList = new ArrayList<String>();
+
+            if (columnMetadataList != null)
+            {
+                for (ColumnDef columnDef : columnMetadataList)
+                {
+                    indexList.add(Bytes.toUTF8(columnDef.getName()));
+                }
+                // need to set them to null else it is giving problem on update
+                // column family and trying to add again existing indexes.
+                // columnFamilyDefToUpdate.column_metadata = null;
+            }
+
+            // Iterate over all columns for creating secondary index on them
+            for (Column column : columns)
+            {
+
+                ColumnDef columnDef = new ColumnDef();
+
+                columnDef.setName(column.getName());
+                columnDef.setValidation_class("UTF8Type");
+                columnDef.setIndex_type(IndexType.KEYS);
+
+                // String indexName =
+                // PelopsUtils.getSecondaryIndexName(tableName, column);
+
+                // Add secondary index only if it's not already created
+                // (if already created, it would be there in column family
+                // definition)
+                if (!indexList.contains(Bytes.toUTF8(column.getName())))
+                {
+                    isUpdatable = true;
+                    columnFamilyDefToUpdate.addToColumn_metadata(columnDef);
+                }
+            }
+
+            // Finally, update column family with modified column family
+            // definition
+            if (isUpdatable)
+            {
+                api.system_update_column_family(columnFamilyDefToUpdate);
+            }// } else
+             // {
+             // api.system_add_column_family(columnFamilyDefToUpdate);
+             // }
+
+        }
+        catch (InvalidRequestException e)
+        {
+            e.printStackTrace();
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+
+        }
+        catch (SchemaDisagreementException e)
+        {
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+
+        }
+        catch (TException e)
+        {
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+
+        }
+        catch (NotFoundException e)
+        {
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+
+        }
+        catch (PropertyAccessException e)
+        {
+            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
+
+        }
+    }
+
+    /**
+     * Load super columns.
+     * 
+     * @param keyspace
+     *            the keyspace
+     * @param columnFamily
+     *            the column family
+     * @param rowId
+     *            the row id
+     * @param superColumnNames
+     *            the super column names
+     * @return the list
+     */
+    private final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
+            String... superColumnNames)
+    {
+        if (!isOpen())
+            throw new PersistenceException("PelopsClient is closed.");
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        return selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames),
+                ConsistencyLevel.ONE);
+    }
+
+    /**
+     * Checks if is open.
+     * 
+     * @return true, if is open
+     */
+    private final boolean isOpen()
+    {
+        return !closed;
+    }
+
+
 }

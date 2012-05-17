@@ -63,12 +63,6 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
     /** The handler. */
     private DataHandler handler;
 
-    /** The index manager. */
-    private IndexManager indexManager;
-
-    /** The persistence unit. */
-    private String persistenceUnit;
-
     /** The reader. */
     private EntityReader reader;
 
@@ -204,34 +198,6 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
     }
 
     /*
-     * @Override public void delete(EnhancedEntity enhancedEntity) throws
-     * Exception { throw new RuntimeException("TODO:not yet supported");
-     * 
-     * }
-     */
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getIndexManager()
-     */
-    @Override
-    public final IndexManager getIndexManager()
-    {
-        return indexManager;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getPersistenceUnit()
-     */
-    @Override
-    public String getPersistenceUnit()
-    {
-        return persistenceUnit;
-    }
-
-    /*
      * (non-Javadoc)
      * 
      * @see
@@ -248,7 +214,7 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
 
         onPersist(entityMetadata, entity, id, relationHolders);
-        indexNode(node, entityMetadata, getIndexManager());
+        indexNode(node, entityMetadata);
     }
 
     /**
@@ -263,10 +229,9 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
      * @param relations
      *            the relations
      */
-    private void onPersist(EntityMetadata entityMetadata, Object entity, String id, List<RelationHolder> relations)
+    @Override
+    protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> relations)
     {
-        String dbName = entityMetadata.getSchema(); // Has no meaning for HBase,
-                                                    // not used
         String tableName = entityMetadata.getTableName();
 
         List<String> columnFamilyNames = new ArrayList<String>();
@@ -298,7 +263,7 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
 
             // Write data to HBase
 
-            handler.writeData(tableName, entityMetadata, entity, id, relations);
+            handler.writeData(tableName, entityMetadata, entity, id.toString(), relations);
         }
         catch (IOException e)
         {
