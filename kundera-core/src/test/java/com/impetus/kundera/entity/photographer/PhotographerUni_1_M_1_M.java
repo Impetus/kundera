@@ -18,7 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -26,6 +29,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.impetus.kundera.entity.PersonalDetail;
+import com.impetus.kundera.entity.Tweet;
 import com.impetus.kundera.entity.album.AlbumUni_1_M_1_M;
 
 /**
@@ -35,7 +40,7 @@ import com.impetus.kundera.entity.album.AlbumUni_1_M_1_M;
  */
 
 @Entity
-@Table(name = "PHOTOGRAPHER", schema = "Pickr")
+@Table(name = "PHOTOGRAPHER", schema = "kunderatest")
 public class PhotographerUni_1_M_1_M
 {
     @Id
@@ -44,6 +49,15 @@ public class PhotographerUni_1_M_1_M
 
     @Column(name = "PHOTOGRAPHER_NAME")
     private String photographerName;
+    
+    // Embedded object, will persist co-located
+    @Embedded
+    private PersonalDetail personalDetail;
+
+    // Element collection, will persist co-located
+    @ElementCollection
+    @CollectionTable(name = "tweeted")
+    private List<Tweet> tweets;
 
     // One to many, will be persisted separately
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -104,5 +118,42 @@ public class PhotographerUni_1_M_1_M
         }
         this.albums.add(album);
     }
+
+    /**
+     * @return the personalDetail
+     */
+    public PersonalDetail getPersonalDetail()
+    {
+        return personalDetail;
+    }
+
+    /**
+     * @param personalDetail the personalDetail to set
+     */
+    public void setPersonalDetail(PersonalDetail personalDetail)
+    {
+        this.personalDetail = personalDetail;
+    }
+
+    /**
+     * @return the tweets
+     */
+    public List<Tweet> getTweets()
+    {
+        return tweets;
+    }
+
+    /**
+     * @param tweets the tweets to set
+     */
+    public void addTweet(Tweet tweet)
+    {
+        if(tweets == null) {
+            tweets = new ArrayList<Tweet>();            
+        }
+        tweets.add(tweet);
+    }
+    
+    
 
 }
