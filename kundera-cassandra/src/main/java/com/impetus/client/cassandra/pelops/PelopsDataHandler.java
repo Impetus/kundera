@@ -599,6 +599,7 @@ final class PelopsDataHandler
         tr.setColumnFamilyName(columnFamily); // column-family name
         tr.setId(id); // Id
 
+        timestamp = getTimestamp();
         // Add super columns to thrift row
         addSuperColumnsToThriftRow(timestamp, tr, m, e, id);
 
@@ -646,6 +647,7 @@ final class PelopsDataHandler
                 try
                 {
                     byte[] value = PropertyAccessorHelper.get(e, field);
+                    
                     if (value != null)
                     {
                         Column col = new Column();
@@ -1036,7 +1038,7 @@ final class PelopsDataHandler
      */
     long getTimestamp()
     {
-        return timestamp;
+        return System.currentTimeMillis();
     }
 
 }
