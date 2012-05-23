@@ -28,7 +28,7 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "users", schema = "twissandra@KunderaExamples")
+@Table(name = "users", schema = "cassandra@KunderaExamples")
 // @NamedQuery(name="delete.query",query="Delete From CassandraEntitySample c where c.state=UP")
 public class CassandraEntitySample
 {

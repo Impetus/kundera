@@ -61,7 +61,6 @@ final class PelopsDataHandler
     /** The timestamp. */
     private long timestamp = System.currentTimeMillis();
 
-
     /** The log. */
     private static Log log = LogFactory.getLog(PelopsDataHandler.class);
 
@@ -276,8 +275,8 @@ final class PelopsDataHandler
      * @throws Exception
      *             the exception
      */
-    Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
-            List<String> relationNames, boolean isWrapperReq) throws Exception
+    Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow, List<String> relationNames,
+            boolean isWrapperReq) throws Exception
     {
 
         // Instantiate a new instance
@@ -590,8 +589,7 @@ final class PelopsDataHandler
      * @throws Exception
      *             the exception
      */
-    ThriftRow toThriftRow(Object e, String id, EntityMetadata m, String columnFamily)
-            throws Exception
+    ThriftRow toThriftRow(Object e, String id, EntityMetadata m, String columnFamily) throws Exception
     {
         // timestamp to use in thrift column objects
         // long timestamp = System.currentTimeMillis();
@@ -648,11 +646,18 @@ final class PelopsDataHandler
                 try
                 {
                     byte[] value = PropertyAccessorHelper.get(e, field);
-                    Column col = new Column();
-                    col.setName(PropertyAccessorFactory.STRING.toBytes(name));
-                    col.setValue(value);
-                    col.setTimestamp(timestamp);
-                    columns.add(col);
+                    if (value != null)
+                    {
+                        Column col = new Column();
+                        col.setName(PropertyAccessorFactory.STRING.toBytes(name));
+                        col.setValue(value);
+                        col.setTimestamp(timestamp);
+                        columns.add(col);
+                    }
+                    else
+                    {
+                        log.debug("skipping column :" + name + " as value is not provided!");
+                    }
                 }
                 catch (PropertyAccessException exp)
                 {
@@ -682,8 +687,8 @@ final class PelopsDataHandler
      * @throws Exception
      *             the exception
      */
-    private void addSuperColumnsToThriftRow(long timestamp, ThriftRow tr, EntityMetadata m,
-            Object e, String id) throws Exception
+    private void addSuperColumnsToThriftRow(long timestamp, ThriftRow tr, EntityMetadata m, Object e, String id)
+            throws Exception
     {
         // Iterate through Super columns
         for (EmbeddedColumn superColumn : m.getEmbeddedColumnsAsList())
