@@ -147,6 +147,12 @@ public class CassQuery extends QueryImpl implements Query
         return 0;
     }
 
+    private String getColumnName(String propName) {
+        int loc = propName.indexOf(".");
+        if (loc < 0) return propName;
+        return propName.substring(loc + 1);
+    }
+
     /**
      * Prepare index clause.
      * 
@@ -168,16 +174,16 @@ public class CassQuery extends QueryImpl implements Query
             if (o instanceof FilterClause)
             {
                 FilterClause clause = ((FilterClause) o);
-//                String fieldName = getColumnName(clause.getProperty());
+                String fieldNameShort = getColumnName(clause.getProperty());
                 String fieldName = clause.getProperty();
                 // in case id column matches with field name, set it for first
                 // time.
-                if (!idPresent && idColumn.equalsIgnoreCase(fieldName))
+                if (!idPresent && idColumn.equalsIgnoreCase(fieldNameShort))
                 {
                     idPresent = true;
                 }
 
-                if (idPresent & !idColumn.equalsIgnoreCase(fieldName))
+                if (idPresent & !idColumn.equalsIgnoreCase(fieldNameShort))
                 {
                     log.error("Support for search on rowKey and indexed column is not enabled with in cassandra");
                     throw new QueryHandlerException("unsupported query operation clause for cassandra");
@@ -186,8 +192,8 @@ public class CassQuery extends QueryImpl implements Query
                 String condition = clause.getCondition();
                 String value = clause.getValue();
                 // value.e
-                expr.add(Selector.newIndexExpression(fieldName, getOperator(condition, idPresent),
-                        getBytesValue(fieldName, m, value)));
+                expr.add(Selector.newIndexExpression(fieldNameShort, getOperator(condition, idPresent),
+                        getBytesValue(fieldNameShort, m, value)));
             }
             else
             {
