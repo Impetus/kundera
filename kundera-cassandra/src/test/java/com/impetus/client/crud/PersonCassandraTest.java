@@ -59,7 +59,7 @@ public class PersonCassandraTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory("secIdxCassandra");
+        emf = Persistence.createEntityManagerFactory("secIdxCassandraTest");
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
     }

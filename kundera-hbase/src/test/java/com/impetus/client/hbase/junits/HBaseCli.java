@@ -25,6 +25,11 @@ import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.InvalidFamilyOperationException;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,31 +40,21 @@ import org.slf4j.LoggerFactory;
  * @author vivek.mishra
  * 
  */
-public final class HBaseCli
+public class HBaseCli
 {
-
-    /** The Constant logger. */
-    private static final Logger logger = LoggerFactory.getLogger(HBaseCli.class);
-
     /** The utility. */
     public static HBaseTestingUtility utility;
 
     private static Boolean isStarted = false;
 
-    /**
-     * The main method.
-     * 
-     * @param arg
-     *            the arguments
-     */
+    private static final Logger logger = LoggerFactory.getLogger(HBaseCli.class);
+
     public static void main(String arg[])
     {
-        startCluster();
+        HBaseCli cli = new HBaseCli();
+        cli.init();
     }
 
-    /**
-     * Starts a new cluster.
-     */
     public static void startCluster()
     {
         if (!isStarted)
@@ -99,6 +94,52 @@ public final class HBaseCli
                 throw new RuntimeException(e);
             }
             isStarted = true;
+        }
+    }
+
+    public void init()
+    {
+        File workingDirectory = new File("./");
+        Configuration conf = new Configuration();
+        System.setProperty("test.build.data", workingDirectory.getAbsolutePath());
+        conf.set("test.build.data", new File(workingDirectory, "zookeeper").getAbsolutePath());
+        conf.set("fs.default.name", "file:///");
+        try
+        {
+            conf.set(HConstants.HBASE_DIR, new File(workingDirectory, "hbase").toURI().toURL().toString());
+        }
+        catch (MalformedURLException e1)
+        {
+            logger.error(e1.getMessage());
+        }
+
+        Configuration hbaseConf = HBaseConfiguration.create(conf);
+        HBaseTestingUtility utility = new HBaseTestingUtility(hbaseConf);
+        try
+        {
+            utility.startMiniCluster();
+            HTable table = utility.createTable("test".getBytes(), "testcol".getBytes());
+            utility.getHBaseAdmin().disableTable("test");
+            utility.getHBaseAdmin().addColumn("test", new HColumnDescriptor("testColFamily"));
+            utility.getHBaseAdmin().enableTable("test");
+            logger.info("Server is running : " + utility.getHBaseAdmin().isMasterRunning());
+
+            Put p = new Put(Bytes.toBytes("1"));
+            p.add(Bytes.toBytes("testColFamily"), Bytes.toBytes("col1"), "col1".getBytes());
+            table.put(p);
+            logger.info("Table exist:" + utility.getHBaseAdmin().tableExists("test"));
+            Get g = new Get(Bytes.toBytes("1"));
+            Result r = table.get(g);
+            logger.info("Row count:" + r.list().size());
+            utility.getHBaseAdmin().disableTable("test");
+            logger.info("Deleting table...");
+            utility.getHBaseAdmin().deleteTable("test");
+            logger.info("Shutting down now...");
+            utility.shutdownMiniCluster();
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage());
         }
     }
 
@@ -153,16 +194,18 @@ public final class HBaseCli
         }
     }
 
+    
+    
     /**
-     * Destroyes cluster.
+     * Destroys cluster.
      */
     public static void stopCluster()
     {
         try
         {
             if (utility != null)
-            {              
-                utility.shutdownMiniCluster();          
+            {
+                utility.shutdownMiniCluster();
                 utility = null;
             }
         }
@@ -170,32 +213,6 @@ public final class HBaseCli
         {
             logger.error(e.getMessage());
         }
-        /*
-         * DO NOT DELETE IT! HTable table =
-         * utility.createTable("test".getBytes(), "testcol".getBytes());
-         * utility.getHBaseAdmin().disableTable("test");
-         * utility.getHBaseAdmin().addColumn("test", new
-         * HColumnDescriptor("testColFamily"));
-         * utility.getHBaseAdmin().enableTable("test");
-         * logger.info("Server is running : "
-         * +utility.getHBaseAdmin().isMasterRunning());
-         * 
-         * Put p = new Put(Bytes.toBytes("1"));
-         * p.add(Bytes.toBytes("testColFamily"),
-         * Bytes.toBytes("col1"),"col1".getBytes()); table.put(p);
-         * logger.info("Table exist:" +
-         * utility.getHBaseAdmin().tableExists("test")); Get g = new
-         * Get(Bytes.toBytes("1")); Result r = table.get(g);
-         * logger.info("Row count:" + r.list().size());
-         * utility.getHBaseAdmin().disableTable("test");
-         * logger.info("Deleting table...");
-         * utility.getHBaseAdmin().deleteTable("test");
-         * logger.info("Shutting down now..."); utility.shutdownMiniCluster();
-         */
     }
 
-    public static boolean isStarted()
-    {
-        return isStarted;
-    }
 }

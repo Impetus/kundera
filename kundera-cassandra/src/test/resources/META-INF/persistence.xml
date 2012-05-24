@@ -20,7 +20,7 @@
 		</properties>
 	</persistence-unit>
 	
-		<persistence-unit name="secIdxCassandra">
+		<persistence-unit name="secIdxCassandraTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>		
 		<properties>			
 			<property name="kundera.nodes" value="localhost"/>

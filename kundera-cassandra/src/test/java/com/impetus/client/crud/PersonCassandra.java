@@ -12,7 +12,7 @@ import com.impetus.kundera.annotations.Index;
  * The Class Person.
  */
 @Entity
-@Table(name = "PERSON", schema = "KunderaExamples@secIdxCassandra")
+@Table(name = "PERSON", schema = "KunderaExamples@secIdxCassandraTest")
 @Index(index = true, columns = { "PERSON_NAME", "AGE" })
 public class PersonCassandra
 {
