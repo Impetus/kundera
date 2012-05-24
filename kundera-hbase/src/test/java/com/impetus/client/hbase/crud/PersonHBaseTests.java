@@ -96,6 +96,6 @@ public class PersonHBaseTests extends BaseTest
         {
             em.remove(val);
         }
-        HBaseCli.stopCluster();
+      //  HBaseCli.stopCluster();
     }
 }
