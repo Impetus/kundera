@@ -68,9 +68,9 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     }
 
     @Override
-    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client)
+    public EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
     {
-        return super.findById(primaryKey, m, relationNames, client);
+        return super.findById(primaryKey, m, client);
 
     }
 

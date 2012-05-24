@@ -103,8 +103,7 @@ public class ManagedState extends NodeState
         Object nodeData = null; // Node data
 
         EntityReader reader = client.getReader();
-        EnhanceEntity enhanceEntity = reader.findById(entityId, entityMetadata, entityMetadata.getRelationNames(),
-                client);
+        EnhanceEntity enhanceEntity = reader.findById(entityId, entityMetadata, client);
 
         if (enhanceEntity != null && enhanceEntity.getEntity() != null)
         {

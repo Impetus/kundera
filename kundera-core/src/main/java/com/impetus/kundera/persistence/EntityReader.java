@@ -83,6 +83,6 @@ public interface EntityReader
      *            the client
      * @return the enhance entity
      */
-    EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client);
+    EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client);
 
 }

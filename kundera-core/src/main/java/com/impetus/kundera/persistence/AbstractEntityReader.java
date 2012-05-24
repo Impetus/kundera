@@ -269,7 +269,7 @@ public class AbstractEntityReader
      * com.impetus.kundera.client.Client)
      */
 
-    protected EnhanceEntity findById(Object primaryKey, EntityMetadata m, List<String> relationNames, Client client)
+    protected EnhanceEntity findById(Object primaryKey, EntityMetadata m, Client client)
     {
         try
         {
