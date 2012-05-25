@@ -172,7 +172,7 @@ public class DateAccessor implements PropertyAccessor<Date>
         {
             try
             {
-                DateFormat formatter = new SimpleDateFormat(p);
+                DateFormat formatter = new SimpleDateFormat(p, Locale.ENGLISH);
                 Date dt = formatter.parse(date);
                 return dt;
             }
