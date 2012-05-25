@@ -56,6 +56,7 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 import org.scale7.cassandra.pelops.pool.IThriftPool;
+import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.pelops.PelopsDataHandler.ThriftRow;
 import com.impetus.client.cassandra.query.CassQuery;
@@ -585,65 +586,75 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     {
         IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit()));
         // thrift.get
-        org.apache.cassandra.thrift.Cassandra.Client thriftClient = thrift.getConnection().getAPI();
-
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
-        CqlResult result = null;
-        List returnedEntities = null;
-        try
-        {
-            result = thriftClient.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
-                    org.apache.cassandra.thrift.Compression.NONE);
-            if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
-            {
-                returnedEntities = new ArrayList<Object>(result.getRowsSize());
-                Iterator<CqlRow> iter = result.getRowsIterator();
-                while (iter.hasNext())
-                {
-                    CqlRow row = iter.next();
-                    String rowKey = Bytes.toUTF8(row.getKey());
-
-                    ThriftRow thriftRow = handler.new ThriftRow(rowKey, entityMetadata.getTableName(),
-                            row.getColumns(), null);
-
-                    Object entity = handler.fromColumnThriftRow(clazz, entityMetadata, thriftRow, relationalField,
-                            relationalField != null && !relationalField.isEmpty());
-                    returnedEntities.add(entity);
-                }
-            }
-        }
-        catch (InvalidRequestException e)
-        {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-            throw new PersistenceException(e);
-        }
-        catch (UnavailableException e)
-        {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-            throw new PersistenceException(e);
-        }
-        catch (TimedOutException e)
-        {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-            throw new PersistenceException(e);
-        }
-        catch (SchemaDisagreementException e)
-        {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-            throw new PersistenceException(e);
-        }
-        catch (TException e)
-        {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-            throw new PersistenceException(e);
-        }
-        catch (Exception e)
-        {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-            throw new PersistenceException(e);
-        }
-
-        return returnedEntities;
+        IPooledConnection connection = thrift.getConnection();
+		try {
+			org.apache.cassandra.thrift.Cassandra.Client thriftClient = connection.getAPI();
+	
+	        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
+	        CqlResult result = null;
+	        List returnedEntities = null;
+	        try
+	        {
+	            result = thriftClient.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
+	                    org.apache.cassandra.thrift.Compression.NONE);
+	            if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
+	            {
+	                returnedEntities = new ArrayList<Object>(result.getRowsSize());
+	                Iterator<CqlRow> iter = result.getRowsIterator();
+	                while (iter.hasNext())
+	                {
+	                    CqlRow row = iter.next();
+	                    String rowKey = Bytes.toUTF8(row.getKey());
+	
+	                    ThriftRow thriftRow = handler.new ThriftRow(rowKey, entityMetadata.getTableName(),
+	                            row.getColumns(), null);
+	
+	                    Object entity = handler.fromColumnThriftRow(clazz, entityMetadata, thriftRow, relationalField,
+	                            relationalField != null && !relationalField.isEmpty());
+	                    returnedEntities.add(entity);
+	                }
+	            }
+	        }
+	        catch (InvalidRequestException e)
+	        {
+	            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+	            throw new PersistenceException(e);
+	        }
+	        catch (UnavailableException e)
+	        {
+	            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+	            throw new PersistenceException(e);
+	        }
+	        catch (TimedOutException e)
+	        {
+	            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+	            throw new PersistenceException(e);
+	        }
+	        catch (SchemaDisagreementException e)
+	        {
+	            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+	            throw new PersistenceException(e);
+	        }
+	        catch (TException e)
+	        {
+	            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+	            throw new PersistenceException(e);
+	        }
+	        catch (Exception e)
+	        {
+	            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+	            throw new PersistenceException(e);
+	        }
+	        return returnedEntities;
+		} finally {
+			try {
+				if (connection != null) {
+					connection.release();
+				}
+			} catch (Exception e) {
+				log.warn("Releasing connection for native CQL query failed", e);
+			}
+		}
     }
 
     /*
