@@ -107,6 +107,33 @@ public class NativeQueryTest
         Assert.assertFalse(CassandraCli.keyspaceExist("invalidSchema"));
     }
 
+	/**
+	 * Native queries should not leak connections. Pelops pool fails providing a
+	 * connection if we don't call {@link IPooledConnection#release()}
+	 */
+	@Test
+	public void testReleasesNativeQueryConnection() {
+		EntityManagerFactoryImpl emf = getEntityManagerFactory();
+		String nativeSql = "CREATE KEYSPACE "
+				+ schema
+				+ " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
+		String useNativeSql = "USE test";
+
+		EntityManager em = new EntityManagerImpl(emf,
+				PersistenceUnitTransactionType.RESOURCE_LOCAL,
+				PersistenceContextType.EXTENDED);
+		Query q = em.createNativeQuery(nativeSql, CassandraEntitySample.class);
+		// q.getResultList();
+		q.executeUpdate();
+
+		// won't be able to loop if connections are leaked
+		for (int i = 0; i < 30; i++) {
+			q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
+			// q.getResultList();
+			q.executeUpdate();
+		}
+	}
+	
     /**
      * Test create insert column family query.
      */
