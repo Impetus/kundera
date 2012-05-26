@@ -140,16 +140,24 @@ public class NativeQueryTest
     @Test
     public void testCreateInsertColumnFamilyQuery()
     {
+        String nativeSql = "CREATE KEYSPACE " + schema
+        + " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
+        String useNativeSql = "USE test";
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
-
-        // create column family
-        String colFamilySql = "CREATE COLUMNFAMILY users (key varchar PRIMARY KEY,full_name varchar, birth_date int,state varchar)";
-        Query q = em.createNativeQuery(colFamilySql, CassandraEntitySample.class);
+        Query q = em.createNativeQuery(nativeSql, CassandraEntitySample.class);
         // q.getResultList();
         q.executeUpdate();
-        Assert.assertTrue(CassandraCli.columnFamilyExist("users", "KunderaExamples"));
+        q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
+        // q.getResultList();
+        q.executeUpdate();
+        // create column family
+        String colFamilySql = "CREATE COLUMNFAMILY users (key varchar PRIMARY KEY,full_name varchar, birth_date int,state varchar)";
+        q = em.createNativeQuery(colFamilySql, CassandraEntitySample.class);
+        // q.getResultList();
+        q.executeUpdate();
+        Assert.assertTrue(CassandraCli.columnFamilyExist("users", "test"));
 
         // Add indexes
         String idxSql = "CREATE INDEX ON users (birth_date)";

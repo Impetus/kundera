@@ -288,7 +288,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             createIndexesOnColumns(joinTableName, poolName, columns);
             String pk = (String) key;
 
-            mutator.writeColumns(joinTableName, new Bytes(pk.getBytes()), Arrays.asList(columns.toArray(new Column[0])));
+            mutator.writeColumns(joinTableName, Bytes.fromUTF8(pk), Arrays.asList(columns.toArray(new Column[0])));
             mutator.execute(ConsistencyLevel.ONE);
         }
 
@@ -309,7 +309,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             String parentId)
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        List<Column> columns = selector.getColumnsFromRow(joinTableName, new Bytes(parentId.getBytes()),
+        List<Column> columns = selector.getColumnsFromRow(joinTableName, Bytes.fromUTF8(parentId),
                 Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
 
         // PelopsDataHandler handler = new PelopsDataHandler(this);
@@ -692,7 +692,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         if (thriftColumns != null && !thriftColumns.isEmpty())
         {
             // Bytes.fromL
-            mutator.writeColumns(metadata.getTableName(), new Bytes(tf.getId().getBytes()),
+            mutator.writeColumns(metadata.getTableName(), Bytes.fromUTF8(tf.getId()),
                     Arrays.asList(tf.getColumns().toArray(new Column[0])));
         }
 
