@@ -105,17 +105,6 @@
       <name>Clover maven repo</name>
       <url>http://repository.atlassian.com/maven2/</url>
     </repository>
-  <repository>
-      <id>kundera-missing</id>
-      <name>Kundera Public Missing Resources Repository</name>
-      <url>http://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
   </repositories>
   <!-- Build profiles -->
   <profiles>

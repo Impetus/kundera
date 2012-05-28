@@ -41,7 +41,7 @@ public class StringAccessor implements PropertyAccessor<String>
 
         try
         {
-            return new String(bytes, Constants.ENCODING);
+            return bytes != null? new String(bytes, Constants.ENCODING): null;
         }
         catch (UnsupportedEncodingException e)
         {
@@ -62,7 +62,7 @@ public class StringAccessor implements PropertyAccessor<String>
 
         try
         {
-            return ((String) s).getBytes(Constants.ENCODING);
+            return s != null ? ((String) s).getBytes(Constants.ENCODING):null;
         }
         catch (UnsupportedEncodingException e)
         {
@@ -80,7 +80,11 @@ public class StringAccessor implements PropertyAccessor<String>
     @Override
     public final String toString(Object object)
     {
-        return (String) object;
+        if (object != null && object.getClass().isAssignableFrom(String.class))
+        {
+            return (String) object;
+        }
+        return null;
     }
 
     /*
