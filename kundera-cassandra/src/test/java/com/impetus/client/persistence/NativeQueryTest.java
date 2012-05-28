@@ -53,8 +53,8 @@ import com.impetus.kundera.query.QueryImpl;
 public class NativeQueryTest
 {
 
-    /** The schema. */
-    private final String schema = "test";
+//    /** The schema. */
+    private final String schema = "KunderaExamples";
 
     /**
      * Sets the up.
@@ -66,7 +66,7 @@ public class NativeQueryTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        CassandraCli.createKeySpace("KunderaExamples");
+        CassandraCli.createKeySpace(schema);
     }
 
     /**
@@ -91,16 +91,16 @@ public class NativeQueryTest
     public void testExecutNativeQuery()
     {
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        String nativeSql = "CREATE KEYSPACE " + schema
-                + " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
-        String useNativeSql = "USE test";
+//        String nativeSql = "CREATE KEYSPACE " + schema
+//                + " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
+        String useNativeSql = "USE " + schema;
 
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
-        Query q = em.createNativeQuery(nativeSql, CassandraEntitySample.class);
-        // q.getResultList();
-        q.executeUpdate();
-        q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
+//        Query q = em.createNativeQuery(nativeSql, CassandraEntitySample.class);
+//        // q.getResultList();
+//        q.executeUpdate();
+        Query q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
         // q.getResultList();
         q.executeUpdate();
         Assert.assertTrue(CassandraCli.keyspaceExist(schema));
@@ -114,21 +114,22 @@ public class NativeQueryTest
 	@Test
 	public void testReleasesNativeQueryConnection() {
 		EntityManagerFactoryImpl emf = getEntityManagerFactory();
-		String nativeSql = "CREATE KEYSPACE "
-				+ schema
-				+ " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
-		String useNativeSql = "USE test";
+//		String nativeSql = "CREATE KEYSPACE "
+//				+ schema
+//				+ " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
+//		String useNativeSql = "USE test";
+                String useNativeSql = "USE " + schema;
 
 		EntityManager em = new EntityManagerImpl(emf,
 				PersistenceUnitTransactionType.RESOURCE_LOCAL,
 				PersistenceContextType.EXTENDED);
-		Query q = em.createNativeQuery(nativeSql, CassandraEntitySample.class);
-		// q.getResultList();
-		q.executeUpdate();
+//		Query q = em.createNativeQuery(nativeSql, CassandraEntitySample.class);
+//		// q.getResultList();
+//		q.executeUpdate();
 
 		// won't be able to loop if connections are leaked
 		for (int i = 0; i < 30; i++) {
-			q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
+			Query q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
 			// q.getResultList();
 			q.executeUpdate();
 		}
@@ -140,16 +141,17 @@ public class NativeQueryTest
     @Test
     public void testCreateInsertColumnFamilyQuery()
     {
-        String nativeSql = "CREATE KEYSPACE " + schema
-        + " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
-        String useNativeSql = "USE test";
+//        String nativeSql = "CREATE KEYSPACE " + schema
+//        + " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
+//        String useNativeSql = "USE test";
+        String useNativeSql = "USE " + schema;
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
-        Query q = em.createNativeQuery(nativeSql, CassandraEntitySample.class);
-        // q.getResultList();
-        q.executeUpdate();
-        q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
+//        Query q = em.createNativeQuery(nativeSql, CassandraEntitySample.class);
+//        // q.getResultList();
+//        q.executeUpdate();
+        Query q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
         // q.getResultList();
         q.executeUpdate();
         // create column family
@@ -259,7 +261,7 @@ public class NativeQueryTest
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli.dropKeySpace("KunderaExamples");
+//        CassandraCli.dropKeySpace("KunderaExamples");
         CassandraCli.dropKeySpace(schema);
     }
 
