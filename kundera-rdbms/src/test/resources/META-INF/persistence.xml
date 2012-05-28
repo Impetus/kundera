@@ -1,51 +1,54 @@
-<persistence xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
 	https://raw.github.com/impetus-opensource/Kundera/Kundera-2.0.4/kundera-core/src/test/resources/META-INF/persistence_2_0.xsd"
 	version="2.0">
 
 	<persistence-unit name="testHibernate">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-			<class>com.impetus.client.Player</class>			
-			<class>com.impetus.client.onetoone.OTONPerson</class>			
-			<class>com.impetus.client.onetoone.OTONSPerson</class>			
-			<class>com.impetus.client.onetomany.OTMNPerson</class>			
-			<class>com.impetus.client.onetomany.bi.OTMBNPerson</class>			
-			<class>com.impetus.client.manytoone.MTONPerson</class>			
-			<class>com.impetus.client.manytomany.MTMNPerson</class>			
-			<class>com.impetus.client.onetoone.OTOAddress</class>			
-			<class>com.impetus.client.onetoone.OTOSAddress</class>			
-			<class>com.impetus.client.onetomany.OTMAddress</class>			
-			<class>com.impetus.client.onetomany.bi.OTMBAddress</class>			
-			<class>com.impetus.client.manytoone.MTOAddress</class>			
-			<class>com.impetus.client.manytomany.MTMAddress</class>			
-		<properties>			
-<!--             <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
- -->			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>
-			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
-			<property name="hibernate.connection.url" value="jdbc:mysql://localhost/test"/>
-			<property name="hibernate.connection.username" value="root"/>
-			<property name="kundera.client" value="rdbms"/>
+		<class>com.impetus.client.Player</class>
+		<class>com.impetus.client.onetoone.OTONPerson</class>
+		<class>com.impetus.client.onetoone.OTONSPerson</class>
+		<class>com.impetus.client.onetomany.OTMNPerson</class>
+		<class>com.impetus.client.onetomany.bi.OTMBNPerson</class>
+		<class>com.impetus.client.manytoone.MTONPerson</class>
+		<class>com.impetus.client.manytomany.MTMNPerson</class>
+		<class>com.impetus.client.onetoone.OTOAddress</class>
+		<class>com.impetus.client.onetoone.OTOSAddress</class>
+		<class>com.impetus.client.onetomany.OTMAddress</class>
+		<class>com.impetus.client.onetomany.bi.OTMBAddress</class>
+		<class>com.impetus.client.manytoone.MTOAddress</class>
+		<class>com.impetus.client.manytomany.MTMAddress</class>
+		<properties>
+			<property name="hibernate.hbm2ddl.auto" value="create" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
+			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" />
+			<property name="hibernate.connection.url" value="jdbc:mysql://localhost/test" />
+			<property name="hibernate.connection.username" value="root" />
+			<property name="kundera.client" value="rdbms" />
 			<property name="kundera.client.lookup.class" value="com.impetus.client.rdbms.RDBMSClientFactory" />
-			<property name="hibernate.connection.password" value="impetus"/>
-			<property name="hibernate.current_session_context_class" value="org.hibernate.context.ThreadLocalSessionContext" />
-			<property name="hibernate.show_sql" value="true"/>
-			<property name="hibernate.format_sql" value="true"/>
-			
+			<property name="hibernate.connection.password" value="impetus" />
+			<property name="hibernate.current_session_context_class"
+				value="org.hibernate.context.ThreadLocalSessionContext" />
+			<property name="hibernate.show_sql" value="true" />
+			<property name="hibernate.format_sql" value="true" />
+
 		</properties>
-		
+
 	</persistence-unit>
-	
-		<persistence-unit name="kcassandra">
+
+	<persistence-unit name="kcassandra">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<properties>			
-			<property name="kundera.nodes" value="localhost"/>
-			<property name="kundera.port" value="9160"/>
-			<property name="kundera.keyspace" value="KunderaKeyspace"/>
-			<property name="kundera.dialect" value="cassandra"/>
-			<property name="kundera.client" value="Pelops"/>
-			<property name="kundera.cache.provider.class" value="com.impetus.kundera.cache.ehcache.EhCacheProvider"/>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaKeyspace" />
+			<property name="kundera.dialect" value="cassandra" />
+			<property name="kundera.client" value="Pelops" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 		</properties>
-		
+
 	</persistence-unit>
-	
+
 </persistence>

@@ -67,17 +67,19 @@ public class HBaseSchemaOperationTest
 
     private static HBaseAdmin admin;
 
+    private static HBaseCli cli;
+
     /**
      * @throws java.lang.Exception
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception
     {
-
-        HBaseCli.startCluster();
+        cli = new HBaseCli();
+        cli.startCluster();
         if (admin == null)
         {
-            admin = HBaseCli.utility.getHBaseAdmin();
+            admin = cli.utility.getHBaseAdmin();
         }
     }
 
@@ -97,7 +99,8 @@ public class HBaseSchemaOperationTest
     @AfterClass
     public static void tearDownAfterClass() throws Exception
     {
-        // HBaseCli.stopCluster();
+        cli.stopCluster();
+
         // admin = null;
     }
 
@@ -107,12 +110,12 @@ public class HBaseSchemaOperationTest
     @After
     public void tearDown() throws Exception
     {
-        schemaManager.dropSchema();
+        // schemaManager.dropSchema();
         // HBaseCli.stopCluster();
         // admin= null;
     }
 
-    // @Test
+    @Test
     public void testCreate() throws IOException
     {
         getEntityManagerFactory("create");
@@ -139,7 +142,7 @@ public class HBaseSchemaOperationTest
         Assert.assertFalse(admin.isTableAvailable("HbaseEntitySimple"));
     }
 
-    // @Test
+    @Test
     public void testCreatedrop() throws IOException
     {
         getEntityManagerFactory("create-drop");
@@ -161,17 +164,26 @@ public class HBaseSchemaOperationTest
             Assert.assertTrue(columns.contains(columnDescriptor.getNameAsString()));
         }
 
+        // if (admin.isTableAvailable("HbaseEntitySimple"))
+        // {
+        // admin.disableTable("HbaseEntitySimple");
+        // admin.deleteTable("HbaseEntitySimple");
+        // }
         schemaManager.dropSchema();
         Assert.assertFalse(admin.isTableAvailable("HbaseEntitySimple"));
     }
 
-    // @Test
+    @Test
     public void testUpdate() throws IOException
     {
         HTableDescriptor descriptor1 = new HTableDescriptor("HbaseEntitySimple");
         HColumnDescriptor columnDescriptor1 = new HColumnDescriptor("PERSON_NAME");
         descriptor1.addFamily(columnDescriptor1);
-
+        if (admin.isTableAvailable("HbaseEntitySimple"))
+        {
+            admin.disableTable("HbaseEntitySimple");
+            admin.deleteTable("HbaseEntitySimple");
+        }
         admin.createTable(descriptor1);
         Assert.assertTrue(admin.isTableAvailable("HbaseEntitySimple"));
         HTableDescriptor descriptor2 = admin.getTableDescriptor("HbaseEntitySimple".getBytes());
@@ -216,7 +228,11 @@ public class HBaseSchemaOperationTest
         descriptor1.addFamily(columnDescriptor1);
         HColumnDescriptor columnDescriptor2 = new HColumnDescriptor("AGE");
         descriptor1.addFamily(columnDescriptor2);
-
+        if (admin.isTableAvailable("HbaseEntitySimple"))
+        {
+            admin.disableTable("HbaseEntitySimple");
+            admin.deleteTable("HbaseEntitySimple");
+        }
         admin.createTable(descriptor1);
 
         Assert.assertTrue(admin.isTableAvailable("HbaseEntitySimple"));
@@ -250,7 +266,11 @@ public class HBaseSchemaOperationTest
             HTableDescriptor descriptor1 = new HTableDescriptor("HbaseEntitySimple");
             HColumnDescriptor columnDescriptor1 = new HColumnDescriptor("PERSON_NAME");
             descriptor1.addFamily(columnDescriptor1);
-
+            if (admin.isTableAvailable("HbaseEntitySimple"))
+            {
+                admin.disableTable("HbaseEntitySimple");
+                admin.deleteTable("HbaseEntitySimple");
+            }
             admin.createTable(descriptor1);
             Assert.assertTrue(admin.isTableAvailable("HbaseEntitySimple"));
             HTableDescriptor descriptor2 = admin.getTableDescriptor("HbaseEntitySimple".getBytes());
@@ -307,7 +327,9 @@ public class HBaseSchemaOperationTest
 
             clientMetadata.setLuceneIndexDir(null);
         }
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        // appMetadata = null;
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
         puMetadata.setPersistenceUnitName(persistenceUnit);
         Properties p = new Properties();

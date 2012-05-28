@@ -19,18 +19,19 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.InvalidFamilyOperationException;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
+import org.apache.zookeeper.jmx.ZKMBeanInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,19 +44,24 @@ import org.slf4j.LoggerFactory;
 public class HBaseCli
 {
     /** The utility. */
-    public static HBaseTestingUtility utility;
+    public HBaseTestingUtility utility;
 
-    private static Boolean isStarted = false;
+    public Boolean isStarted = false;
 
     private static final Logger logger = LoggerFactory.getLogger(HBaseCli.class);
 
+    File zkDir ;
+    File masterDir;
+    MiniZooKeeperCluster zkCluster;
+
+    private HTablePool hTablePool;
     public static void main(String arg[])
     {
         HBaseCli cli = new HBaseCli();
-        cli.init();
+     //s   cli.init();
     }
 
-    public static void startCluster()
+    public void startCluster()
     {
         if (!isStarted)
         {
@@ -69,7 +75,8 @@ public class HBaseCli
             conf.set("hbase.zookeeper.property.clientPort", "2181");
             try
             {
-                conf.set(HConstants.HBASE_DIR, new File(workingDirectory, "hbase").toURI().toURL().toString());
+                masterDir = new File(workingDirectory, "hbase");
+                conf.set(HConstants.HBASE_DIR, masterDir.toURI().toURL().toString());
             }
             catch (MalformedURLException e1)
             {
@@ -78,12 +85,16 @@ public class HBaseCli
 
             Configuration hbaseConf = HBaseConfiguration.create(conf);
             utility = new HBaseTestingUtility(hbaseConf);
+            hTablePool = new HTablePool(conf, 1);
             try
             {
-                MiniZooKeeperCluster zkCluster = new MiniZooKeeperCluster(conf);
+                zkCluster = new MiniZooKeeperCluster(conf);
                 zkCluster.setClientPort(2181);
                 zkCluster.setTickTime(18000);
-                zkCluster.startup(utility.setupClusterTestBuildDir());
+                zkDir = utility.setupClusterTestBuildDir();
+                System.out.println("*******************************"+zkDir.getAbsolutePath());
+
+                zkCluster.startup(zkDir);
                 utility.setZkCluster(zkCluster);
                 utility.startMiniCluster();
                 utility.getHbaseCluster().startMaster();
@@ -97,51 +108,6 @@ public class HBaseCli
         }
     }
 
-    public void init()
-    {
-        File workingDirectory = new File("./");
-        Configuration conf = new Configuration();
-        System.setProperty("test.build.data", workingDirectory.getAbsolutePath());
-        conf.set("test.build.data", new File(workingDirectory, "zookeeper").getAbsolutePath());
-        conf.set("fs.default.name", "file:///");
-        try
-        {
-            conf.set(HConstants.HBASE_DIR, new File(workingDirectory, "hbase").toURI().toURL().toString());
-        }
-        catch (MalformedURLException e1)
-        {
-            logger.error(e1.getMessage());
-        }
-
-        Configuration hbaseConf = HBaseConfiguration.create(conf);
-        HBaseTestingUtility utility = new HBaseTestingUtility(hbaseConf);
-        try
-        {
-            utility.startMiniCluster();
-            HTable table = utility.createTable("test".getBytes(), "testcol".getBytes());
-            utility.getHBaseAdmin().disableTable("test");
-            utility.getHBaseAdmin().addColumn("test", new HColumnDescriptor("testColFamily"));
-            utility.getHBaseAdmin().enableTable("test");
-            logger.info("Server is running : " + utility.getHBaseAdmin().isMasterRunning());
-
-            Put p = new Put(Bytes.toBytes("1"));
-            p.add(Bytes.toBytes("testColFamily"), Bytes.toBytes("col1"), "col1".getBytes());
-            table.put(p);
-            logger.info("Table exist:" + utility.getHBaseAdmin().tableExists("test"));
-            Get g = new Get(Bytes.toBytes("1"));
-            Result r = table.get(g);
-            logger.info("Row count:" + r.list().size());
-            utility.getHBaseAdmin().disableTable("test");
-            logger.info("Deleting table...");
-            utility.getHBaseAdmin().deleteTable("test");
-            logger.info("Shutting down now...");
-            utility.shutdownMiniCluster();
-        }
-        catch (Exception e)
-        {
-            logger.error(e.getMessage());
-        }
-    }
 
     /**
      * Creates the table.
@@ -149,7 +115,7 @@ public class HBaseCli
      * @param tableName
      *            the table name
      */
-    public static void createTable(String tableName)
+    public void createTable(String tableName)
     {
         try
         {
@@ -168,6 +134,18 @@ public class HBaseCli
         }
     }
 
+    public void createTable(byte[] tableName, byte[][] families)
+    {
+        try
+        {
+            utility.createTable(tableName, families);
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
     /**
      * Adds the column family.
      * 
@@ -176,13 +154,14 @@ public class HBaseCli
      * @param columnFamily
      *            the column family
      */
-    public static void addColumnFamily(String tableName, String columnFamily)
+    public void addColumnFamily(String tableName, String columnFamily)
     {
         try
         {
             utility.getHBaseAdmin().disableTable(tableName);
             utility.getHBaseAdmin().addColumn(tableName, new HColumnDescriptor(columnFamily));
             utility.getHBaseAdmin().enableTable(tableName);
+
         }
         catch (InvalidFamilyOperationException ife)
         {
@@ -194,25 +173,46 @@ public class HBaseCli
         }
     }
 
-    
-    
     /**
      * Destroys cluster.
      */
-    public static void stopCluster()
+    public void stopCluster(String...tableName)
     {
         try
         {
             if (utility != null)
             {
+                // utility.getMiniHBaseCluster().shutdown();
+//                File workingDirectory = new File("./");
+//                utility.closeRegion("localhost");
+                utility.cleanupTestDir();
+//                utility.cleanupTestDir(dir.getAbsolutePath());
+//                ZooKeeperServer server = new ZooKeeperServer(zkDir, zkDir, 2000);
+//                ZooKeeperServerBean bean = new ZooKeeperServerBean(server);
+//                String path = (String)this.makeFullPath(null,bean);
+//                System.out.println("***************" + bean.toString());
+                
+//                MBeanS
+//                MBeanRegistry.getInstance().unregister(bean);
+//                MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+//                mbs.unregisterMBean(makeObjectName(path,bean));
+//                utility.getHbaseCluster().shutdown();
                 utility.shutdownMiniCluster();
+                FileUtil.fullyDelete(zkDir);
+                FileUtil.fullyDelete(masterDir);
                 utility = null;
+                isStarted = false;
             }
         }
         catch (IOException e)
         {
             logger.error(e.getMessage());
         }
+        catch (NullPointerException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+     
     }
-
 }

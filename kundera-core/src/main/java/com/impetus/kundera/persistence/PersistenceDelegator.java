@@ -49,8 +49,6 @@ import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.JoinTableMetadata;
-import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.FlushStack;
 import com.impetus.kundera.persistence.context.MainCache;

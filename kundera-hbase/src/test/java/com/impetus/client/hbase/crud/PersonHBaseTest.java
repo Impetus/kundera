@@ -24,6 +24,8 @@ public class PersonHBaseTest extends BaseTest
 
     private Map<Object, Object> col;
 
+    private HBaseCli cli;
+
     /**
      * Sets the up.
      * 
@@ -33,18 +35,22 @@ public class PersonHBaseTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
+        cli = new HBaseCli();
+//        cli.init();
+        cli.startCluster();
         emf = Persistence.createEntityManagerFactory("hbaseTest");
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
     }
-
+    
     @Test
     public void onInsertHbase() throws Exception
     {
-        HBaseCli.startCluster();
-        HBaseCli.createTable("PERSON");
-        HBaseCli.addColumnFamily("PERSON", "PERSON_NAME");
-        HBaseCli.addColumnFamily("PERSON", "AGE");
+        // if (!cli.isStarted)
+//        cli.startCluster();
+        cli.createTable("PERSON");
+        cli.addColumnFamily("PERSON", "PERSON_NAME");
+        cli.addColumnFamily("PERSON", "AGE");
         Object p1 = prepareHbaseInstance("1", 10);
         Object p2 = prepareHbaseInstance("2", 20);
         Object p3 = prepareHbaseInstance("3", 15);
@@ -85,17 +91,24 @@ public class PersonHBaseTest extends BaseTest
      */
     @After
     public void tearDown() throws Exception
-    {/*
-      * Delete is working, but as row keys are not deleted from cassandra, so
-      * resulting in issue while reading back. // Delete
-      * em.remove(em.find(Person.class, "1")); em.remove(em.find(Person.class,
-      * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
-      * em = null; emf = null;
-      */
+    {
+        /*
+         * Delete is working, but as row keys are not deleted from cassandra, so
+         * resulting in issue while reading back. // Delete
+         * em.remove(em.find(Person.class, "1"));
+         * em.remove(em.find(Person.class, "2"));
+         * em.remove(em.find(Person.class, "3")); em.close(); emf.close(); em =
+         * null; emf = null;
+         */
         for (Object val : col.values())
         {
             em.remove(val);
         }
-//        HBaseCli.stopCluster();
+        em.close();
+        emf.close();
+        cli.stopCluster("PERSON");
+        // TestUtilities.cleanLuceneDirectory("hbaseTest");
+        // if (cli.isStarted)
+
     }
 }

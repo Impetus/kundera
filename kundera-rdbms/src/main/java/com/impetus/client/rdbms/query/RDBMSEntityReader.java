@@ -305,8 +305,10 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                     String fieldName = clause.getProperty();
                     boolean isString = isStringProperty(entityMetadata, fieldName);
 
+//                    queryBuilder.append(StringUtils.replace(clause.getProperty(),
+//                            clause.getProperty().substring(0, clause.getProperty().indexOf(".")), aliasName));
                     queryBuilder.append(StringUtils.replace(clause.getProperty(),
-                            clause.getProperty().substring(0, clause.getProperty().indexOf(".")), aliasName));
+                            aliasName, aliasName));
                     queryBuilder.append(" ");
                     queryBuilder.append(clause.getCondition());
 
