@@ -64,7 +64,9 @@ public class Node implements NodeStateContext
     Client client;
 
     // Reference to Persistence cache where this node is stored
-    private PersistenceCache persistenceCache;;
+    private PersistenceCache persistenceCache;
+    
+    private boolean isGraphCompleted;
 
     PersistenceDelegator pd;
 
@@ -499,4 +501,20 @@ public class Node implements NodeStateContext
         this.persistenceCache = persistenceCache;
     }
 
+    /**
+     * @return the isGraphCompleted
+     */
+    public boolean isGraphCompleted()
+    {
+        return isGraphCompleted;
+    }
+
+    /**
+     * @param isGraphCompleted the isGraphCompleted to set
+     */
+    public void setGraphCompleted(boolean isGraphCompleted)
+    {
+        this.isGraphCompleted = isGraphCompleted;
+    }
+    
 }

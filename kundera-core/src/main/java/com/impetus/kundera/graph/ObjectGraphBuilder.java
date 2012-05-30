@@ -77,10 +77,17 @@ public class ObjectGraphBuilder
 
         // If this node is already there in graph (may happen for bidirectional
         // relationship, do nothing and return null)
-        if (graph.getNode(nodeId) != null)
+        Node node = graph.getNode(nodeId); 
+        if (node != null)
         {
-
-            return null;
+            if (node.isGraphCompleted())
+            {
+                return node;
+            }
+            else
+            {
+                return null;
+            }
         }
         /*
          * Node node = graph.getNode(nodeId); if(node != null) { return node; }
@@ -88,7 +95,7 @@ public class ObjectGraphBuilder
 
         // Construct this Node first, if one not already there in Persistence
         // Cache
-        Node node = null;
+        node = null;
         Node nodeInPersistenceCache = persistenceCache.getMainCache().getNodeFromCache(nodeId);
 
         // Make a deep copy of entity data
@@ -162,7 +169,9 @@ public class ObjectGraphBuilder
             }
 
         }
-
+        
+        // Means compelte graph is build.
+        node.setGraphCompleted(true);
         return node;
     }
 

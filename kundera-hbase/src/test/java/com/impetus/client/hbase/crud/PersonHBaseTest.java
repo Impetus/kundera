@@ -36,18 +36,18 @@ public class PersonHBaseTest extends BaseTest
     public void setUp() throws Exception
     {
         cli = new HBaseCli();
-//        cli.init();
+        // cli.init();
         cli.startCluster();
         emf = Persistence.createEntityManagerFactory("hbaseTest");
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
     }
-    
+
     @Test
     public void onInsertHbase() throws Exception
     {
         // if (!cli.isStarted)
-//        cli.startCluster();
+        // cli.startCluster();
         cli.createTable("PERSON");
         cli.addColumnFamily("PERSON", "PERSON_NAME");
         cli.addColumnFamily("PERSON", "AGE");
@@ -107,7 +107,7 @@ public class PersonHBaseTest extends BaseTest
         em.close();
         emf.close();
         cli.stopCluster("PERSON");
-        // TestUtilities.cleanLuceneDirectory("hbaseTest");
+        LuceneCleanupUtilities.cleanLuceneDirectory("hbaseTest");
         // if (cli.isStarted)
 
     }

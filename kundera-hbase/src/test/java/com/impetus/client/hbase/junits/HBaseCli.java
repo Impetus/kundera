@@ -19,9 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -31,7 +28,6 @@ import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.InvalidFamilyOperationException;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.zookeeper.MiniZooKeeperCluster;
-import org.apache.zookeeper.jmx.ZKMBeanInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,15 +46,18 @@ public class HBaseCli
 
     private static final Logger logger = LoggerFactory.getLogger(HBaseCli.class);
 
-    File zkDir ;
-    File masterDir;
-    MiniZooKeeperCluster zkCluster;
+    private File zkDir;
+
+    private File masterDir;
+
+    private MiniZooKeeperCluster zkCluster;
 
     private HTablePool hTablePool;
+
     public static void main(String arg[])
     {
         HBaseCli cli = new HBaseCli();
-     //s   cli.init();
+        // s cli.init();
     }
 
     public void startCluster()
@@ -92,7 +91,7 @@ public class HBaseCli
                 zkCluster.setClientPort(2181);
                 zkCluster.setTickTime(18000);
                 zkDir = utility.setupClusterTestBuildDir();
-                System.out.println("*******************************"+zkDir.getAbsolutePath());
+                // System.out.println("*******************************"+zkDir.getAbsolutePath());
 
                 zkCluster.startup(zkDir);
                 utility.setZkCluster(zkCluster);
@@ -108,6 +107,10 @@ public class HBaseCli
         }
     }
 
+    public boolean isStarted()
+    {
+        return isStarted;
+    }
 
     /**
      * Creates the table.
@@ -146,6 +149,7 @@ public class HBaseCli
             e.printStackTrace();
         }
     }
+
     /**
      * Adds the column family.
      * 
@@ -176,27 +180,28 @@ public class HBaseCli
     /**
      * Destroys cluster.
      */
-    public void stopCluster(String...tableName)
+    public void stopCluster(String... tableName)
     {
         try
         {
             if (utility != null)
             {
                 // utility.getMiniHBaseCluster().shutdown();
-//                File workingDirectory = new File("./");
-//                utility.closeRegion("localhost");
+                // File workingDirectory = new File("./");
+                // utility.closeRegion("localhost");
                 utility.cleanupTestDir();
-//                utility.cleanupTestDir(dir.getAbsolutePath());
-//                ZooKeeperServer server = new ZooKeeperServer(zkDir, zkDir, 2000);
-//                ZooKeeperServerBean bean = new ZooKeeperServerBean(server);
-//                String path = (String)this.makeFullPath(null,bean);
-//                System.out.println("***************" + bean.toString());
-                
-//                MBeanS
-//                MBeanRegistry.getInstance().unregister(bean);
-//                MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-//                mbs.unregisterMBean(makeObjectName(path,bean));
-//                utility.getHbaseCluster().shutdown();
+                // utility.cleanupTestDir(dir.getAbsolutePath());
+                // ZooKeeperServer server = new ZooKeeperServer(zkDir, zkDir,
+                // 2000);
+                // ZooKeeperServerBean bean = new ZooKeeperServerBean(server);
+                // String path = (String)this.makeFullPath(null,bean);
+                // System.out.println("***************" + bean.toString());
+
+                // MBeanS
+                // MBeanRegistry.getInstance().unregister(bean);
+                // MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+                // mbs.unregisterMBean(makeObjectName(path,bean));
+                // utility.getHbaseCluster().shutdown();
                 utility.shutdownMiniCluster();
                 FileUtil.fullyDelete(zkDir);
                 FileUtil.fullyDelete(masterDir);
@@ -213,6 +218,6 @@ public class HBaseCli
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-     
+
     }
 }

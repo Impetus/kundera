@@ -63,94 +63,49 @@ public class FlushManager
      */
     public void addNodesToFlushStack(PersistenceCache pc, Node node)
     {
-        FlushStack flushStack = pc.getFlushStack();
-        MainCache mainCache = (MainCache) pc.getMainCache();
+        
+            FlushStack flushStack = pc.getFlushStack();
+            MainCache mainCache = (MainCache) pc.getMainCache();
 
-        Map<NodeLink, Node> children = node.getChildren();
+            Map<NodeLink, Node> children = node.getChildren();
 
-        // If this is a leaf node (not having any child, no need to go any
-        // deeper
-        if (children != null)
-        {
-            Map<NodeLink, Node> oneToOneChildren = new HashMap<NodeLink, Node>();
-            Map<NodeLink, Node> oneToManyChildren = new HashMap<NodeLink, Node>();
-            Map<NodeLink, Node> manyToOneChildren = new HashMap<NodeLink, Node>();
-            Map<NodeLink, Node> manyToManyChildren = new HashMap<NodeLink, Node>();
-
-            for (NodeLink nodeLink : children.keySet())
+            // If this is a leaf node (not having any child, no need to go any
+            // deeper
+            if (children != null)
             {
-                Relation.ForeignKey multiplicity = nodeLink.getMultiplicity();
+                Map<NodeLink, Node> oneToOneChildren = new HashMap<NodeLink, Node>();
+                Map<NodeLink, Node> oneToManyChildren = new HashMap<NodeLink, Node>();
+                Map<NodeLink, Node> manyToOneChildren = new HashMap<NodeLink, Node>();
+                Map<NodeLink, Node> manyToManyChildren = new HashMap<NodeLink, Node>();
 
-                switch (multiplicity)
+                for (NodeLink nodeLink : children.keySet())
                 {
-                case ONE_TO_ONE:
-                    oneToOneChildren.put(nodeLink, children.get(nodeLink));
-                    break;
-                case ONE_TO_MANY:
-                    oneToManyChildren.put(nodeLink, children.get(nodeLink));
-                    break;
-                case MANY_TO_ONE:
-                    manyToOneChildren.put(nodeLink, children.get(nodeLink));
-                    break;
-                case MANY_TO_MANY:
-                    manyToManyChildren.put(nodeLink, children.get(nodeLink));
-                    break;
-                }
+                    Relation.ForeignKey multiplicity = nodeLink.getMultiplicity();
 
-            }
-
-            // Process One-To-Many children
-            for (NodeLink nodeLink : oneToManyChildren.keySet())
-            {
-                // Process child node Graph recursively first
-                Node childNode = mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
-
-                if (!childNode.isTraversed())
-                {
-                    addNodesToFlushStack(pc, childNode);
-                }
-
-            }
-
-            // Process Many-To-Many children
-            for (NodeLink nodeLink : manyToManyChildren.keySet())
-            {
-                Node childNode = mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
-
-                if (childNode != null)
-                {
-                    // Extract information required to be persisted into Join
-                    // Table
-                    if (node.isDirty() && !node.isTraversed())
+                    switch (multiplicity)
                     {
-                        JoinTableMetadata jtmd = (JoinTableMetadata) nodeLink
-                                .getLinkProperty(LinkProperty.JOIN_TABLE_METADATA);
-                        if (jtmd != null)
-                        {
-                            String joinColumnName = (String) jtmd.getJoinColumns().toArray()[0];
-                            String inverseJoinColumnName = (String) jtmd.getInverseJoinColumns().toArray()[0];
-                            Object entityId = ObjectGraphBuilder.getEntityId(node.getNodeId());
-                            Object childId = ObjectGraphBuilder.getEntityId(childNode.getNodeId());
-
-                            Set<Object> childValues = new HashSet<Object>();
-                            childValues.add(childId);
-
-                            OPERATION operation = null;
-                            if (node.getCurrentNodeState().getClass().equals(ManagedState.class))
-                            {
-                                operation = OPERATION.INSERT;
-                            }
-                            else if (node.getCurrentNodeState().getClass().equals(RemovedState.class))
-                            {
-                                operation = OPERATION.DELETE;
-                            }
-
-                            pc.addJoinTableDataIntoMap(operation, jtmd.getJoinTableName(), joinColumnName,
-                                    inverseJoinColumnName, node.getDataClass(), entityId, childValues);
-                        }
+                    case ONE_TO_ONE:
+                        oneToOneChildren.put(nodeLink, children.get(nodeLink));
+                        break;
+                    case ONE_TO_MANY:
+                        oneToManyChildren.put(nodeLink, children.get(nodeLink));
+                        break;
+                    case MANY_TO_ONE:
+                        manyToOneChildren.put(nodeLink, children.get(nodeLink));
+                        break;
+                    case MANY_TO_MANY:
+                        manyToManyChildren.put(nodeLink, children.get(nodeLink));
+                        break;
                     }
 
+                }
+
+                // Process One-To-Many children
+                for (NodeLink nodeLink : oneToManyChildren.keySet())
+                {
                     // Process child node Graph recursively first
+                    Node childNode = mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
+
                     if (!childNode.isTraversed())
                     {
                         addNodesToFlushStack(pc, childNode);
@@ -158,75 +113,123 @@ public class FlushManager
 
                 }
 
-            }
-            // Process One-To-One children
-            for (NodeLink nodeLink : oneToOneChildren.keySet())
-            {
-                if (!node.isTraversed())
+                // Process Many-To-Many children
+                for (NodeLink nodeLink : manyToManyChildren.keySet())
                 {
-                    // Push this node to stack
-                    node.setTraversed(true);
-                    flushStack.push(node);
-
-                    // Process child node Graph recursively
                     Node childNode = mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
-                    addNodesToFlushStack(pc, childNode);
-                }
-            }
 
-            // Process Many-To-One children
-            for (NodeLink nodeLink : manyToOneChildren.keySet())
-            {
-                if (!node.isTraversed())
-                {
-                    // Push this node to stack
-                    node.setTraversed(true);
-                    flushStack.push(node);
-                }
-
-                // Child node of this node
-                Node childNode = mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
-
-                // Process all parents of child node with Many-To-One
-                // relationship first
-                Map<NodeLink, Node> parents = childNode.getParents();
-                for (NodeLink parentLink : parents.keySet())
-                {
-                    Relation.ForeignKey multiplicity = parentLink.getMultiplicity();
-                    if (multiplicity.equals(Relation.ForeignKey.MANY_TO_ONE))
+                    if (childNode != null)
                     {
-                        Node parentNode = parents.get(parentLink);
-
-                        if (!parentNode.isTraversed() && parentNode.isDirty())
+                        // Extract information required to be persisted into
+                        // Join
+                        // Table
+                        if (node.isDirty() && !node.isTraversed())
                         {
-                            addNodesToFlushStack(pc, parentNode);
+                            JoinTableMetadata jtmd = (JoinTableMetadata) nodeLink
+                                    .getLinkProperty(LinkProperty.JOIN_TABLE_METADATA);
+                            if (jtmd != null)
+                            {
+                                String joinColumnName = (String) jtmd.getJoinColumns().toArray()[0];
+                                String inverseJoinColumnName = (String) jtmd.getInverseJoinColumns().toArray()[0];
+                                Object entityId = ObjectGraphBuilder.getEntityId(node.getNodeId());
+                                Object childId = ObjectGraphBuilder.getEntityId(childNode.getNodeId());
+
+                                Set<Object> childValues = new HashSet<Object>();
+                                childValues.add(childId);
+
+                                OPERATION operation = null;
+                                if (node.getCurrentNodeState().getClass().equals(ManagedState.class))
+                                {
+                                    operation = OPERATION.INSERT;
+                                }
+                                else if (node.getCurrentNodeState().getClass().equals(RemovedState.class))
+                                {
+                                    operation = OPERATION.DELETE;
+                                }
+
+                                pc.addJoinTableDataIntoMap(operation, jtmd.getJoinTableName(), joinColumnName,
+                                        inverseJoinColumnName, node.getDataClass(), entityId, childValues);
+                            }
                         }
+
+                        // Process child node Graph recursively first
+                        if (!childNode.isTraversed())
+                        {
+                            addNodesToFlushStack(pc, childNode);
+                        }
+
+                    }
+
+                }
+                // Process One-To-One children
+                for (NodeLink nodeLink : oneToOneChildren.keySet())
+                {
+                    if (!node.isTraversed())
+                    {
+                        // Push this node to stack
+                        node.setTraversed(true);
+                        flushStack.push(node);
+
+                        // Process child node Graph recursively
+                        Node childNode = mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
+                        addNodesToFlushStack(pc, childNode);
                     }
                 }
 
-                // Finally process this child node
-                if (!childNode.isTraversed() && childNode.isDirty())
+                // Process Many-To-One children
+                for (NodeLink nodeLink : manyToOneChildren.keySet())
                 {
-                    addNodesToFlushStack(pc, childNode);
-                }
-                else if (!childNode.isDirty())
-                {
-                    childNode.setTraversed(true);
-                    flushStack.push(childNode);
+                    if (!node.isTraversed())
+                    {
+                        // Push this node to stack
+                        node.setTraversed(true);
+                        flushStack.push(node);
+                    }
+
+                    // Child node of this node
+                    Node childNode = mainCache.getNodeFromCache(nodeLink.getTargetNodeId());
+
+                    // Process all parents of child node with Many-To-One
+                    // relationship first
+                    Map<NodeLink, Node> parents = childNode.getParents();
+                    for (NodeLink parentLink : parents.keySet())
+                    {
+                        Relation.ForeignKey multiplicity = parentLink.getMultiplicity();
+                        if (multiplicity.equals(Relation.ForeignKey.MANY_TO_ONE))
+                        {
+                            Node parentNode = parents.get(parentLink);
+
+                            if (!parentNode.isTraversed() && parentNode.isDirty())
+                            {
+                                addNodesToFlushStack(pc, parentNode);
+                            }
+                        }
+                    }
+
+                    // Finally process this child node
+                    if (!childNode.isTraversed() && childNode.isDirty())
+                    {
+                        addNodesToFlushStack(pc, childNode);
+                    }
+                    else if (!childNode.isDirty())
+                    {
+                        childNode.setTraversed(true);
+                        flushStack.push(childNode);
+                    }
                 }
             }
-        }
 
-        // Finally, if this node itself is not traversed yet, (as may happen in
-        // 1-1 and M-1
-        // cases), push it to stack
-        if (!node.isTraversed() && node.isDirty())
-        {
-            node.setTraversed(true);
-            flushStack.push(node);
+            // Finally, if this node itself is not traversed yet, (as may happen
+            // in
+            // 1-1 and M-1
+            // cases), push it to stack
+            if (!node.isTraversed() && node.isDirty())
+            {
+                node.setTraversed(true);
+                flushStack.push(node);
+            }
         }
-
-    }
+    
 
     /**
      * Empties Flush stack present in a PersistenceCache

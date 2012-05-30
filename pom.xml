@@ -120,7 +120,7 @@
         <module>kundera-hbase</module>
         <module>kundera-mongo</module>
         <module>kundera-rdbms</module>
-        <module>kundera-tests</module>
+<module>kundera-tests</module>
       </modules>
     </profile>
 

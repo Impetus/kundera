@@ -193,7 +193,7 @@ public class AbstractEntityReader
                                                 .getClass().getCanonicalName().toLowerCase(),
                                                 DocumentIndexer.PARENT_ID_FIELD, e.getEntityId(), childClass
                                                         .getCanonicalName().toLowerCase());
-                                        
+
                                         Map<String, String> results = childClient.getIndexManager().search(query);
                                         Set<String> rsSet = new HashSet<String>(results.values());
                                         // childs = (List<Object>)
@@ -228,23 +228,27 @@ public class AbstractEntityReader
                                 List childCol = new ArrayList(childs.size());
                                 for (Object child : childs)
                                 {
-                                    Object o = child instanceof EnhanceEntity ? ((EnhanceEntity) child).getEntity()
-                                            : child;
-                                    // biDirectionalField =
-                                    // getBiDirectionalField(e.getEntity().getClass(),
-                                    // childClass);
-                                    if (!o.getClass().equals(e.getEntity().getClass()))
+                                    if (child != null)
                                     {
-                                        recursivelyFindEntities(
-                                                new EnhanceEntity(o, PropertyAccessorHelper.getId(o, childMetadata),
-                                                        null), childClient, childMetadata, pd);
-                                    }
-                                    onBiDirection(pd, e, client, relation, biDirectionalField,
-                                            relation.getJoinColumnName(), m, o, childMetadata, childClient);
-                                    childCol.add(o);
+                                        Object o = child instanceof EnhanceEntity ? ((EnhanceEntity) child).getEntity()
+                                                : child;
+                                        // biDirectionalField =
+                                        // getBiDirectionalField(e.getEntity().getClass(),
+                                        // childClass);
+                                        if (!o.getClass().equals(e.getEntity().getClass()))
+                                        {
+                                            recursivelyFindEntities(
+                                                    new EnhanceEntity(o,
+                                                            PropertyAccessorHelper.getId(o, childMetadata), null),
+                                                    childClient, childMetadata, pd);
+                                        }
+                                        onBiDirection(pd, e, client, relation, biDirectionalField,
+                                                relation.getJoinColumnName(), m, o, childMetadata, childClient);
+                                        childCol.add(o);
 
+                                    }
+                                    relationValuesMap.put(relationalValue + childClass.getName(), childCol);
                                 }
-                                relationValuesMap.put(relationalValue + childClass.getName(), childCol);
                             }
                         }
                     }

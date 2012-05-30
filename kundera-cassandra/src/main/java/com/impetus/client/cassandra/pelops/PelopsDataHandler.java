@@ -101,6 +101,7 @@ final class PelopsDataHandler
         {
 
             List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
+            
             ByteBuffer rKeyAsByte = ByteBufferUtil.bytes(rowKey);
             rowKeys.add(ByteBufferUtil.bytes(rowKey));
 
@@ -152,13 +153,16 @@ final class PelopsDataHandler
     List<Object> fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, List<String> relationNames,
             boolean isWrapReq, Object... rowIds) throws Exception
     {
-        List<Object> entities = new ArrayList<Object>(rowIds.length);
+        List<Object> entities = new ArrayList<Object>();
         if (rowIds != null)
         {
             for (Object rowKey : rowIds)
             {
                 Object e = fromThriftRow(selector, clazz, m, rowKey.toString(), relationNames, isWrapReq);
-                entities.add(e);
+                if( e != null)
+                {
+                 entities.add(e);
+                }
             }
         }
         return entities;
