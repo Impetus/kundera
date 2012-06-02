@@ -125,9 +125,9 @@ public class PersistenceDelegator
     
 
     /**
-     * Writes an entity into Persistence cache
+     * Writes an entity into Persistence cache. 
+     * (Actual database write is done while flushing)
      */
-
     public void persist(Object e)
     {
         // Invoke Pre Persist Events
@@ -159,15 +159,13 @@ public class PersistenceDelegator
     }
 
     /**
-     * Finds an entity from persistence cache, if not there, fetches from
-     * database.
-     * Nodes to be added to persistence cache as and when they are found from DB
-     * If node for this nodeData is not already there in PC.
-     * No need to create a deep copy. While adding nodes to persistence cache, 
-     * a deep copy is added instead of this one Return a deep copy of the node data
+     * Finds an entity from persistence cache, if not there, fetches from database.
+     * Nodes are added into persistence cache (if not already there) as and when they are found from DB.
+     * While adding nodes to persistence cache, a deep copy is added, so that
+     *  found object doesn't refer to managed entity in persistence cache.
      * @param entityClass Entity Class
      * @param primaryKey Primary Key
-     * @return
+     * @return Entity Object for the given primary key
      * 
      */
     public <E> E find(Class<E> entityClass, Object primaryKey)
@@ -206,7 +204,7 @@ public class PersistenceDelegator
      * @param entityClass Entity Class
      * @param primaryKeys Array of Primary Keys
      * @see {@link PersistenceDelegator#find(Class, Object)}
-     * @return
+     * @return List of found entities
      */
     public <E> List<E> find(Class<E> entityClass, Object... primaryKeys)
     {
@@ -221,9 +219,10 @@ public class PersistenceDelegator
     
     /**
      * Retrieves {@link List} of entities for a given {@link Map} of embedded column values.
+     * Purpose of this method is to provide functionality of search based on columns inside embedded objects.
      * @param entityClass Entity Class
      * @param embeddedColumnMap Embedded column map values
-     * @return
+     * @return List of found entities.
      */
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
@@ -251,6 +250,7 @@ public class PersistenceDelegator
         entities = childClient.findByRelation(joinColumnName, (String)entityId, childClass);
         
         if(entities == null) return null;        
+        
         return entities;
     }
 

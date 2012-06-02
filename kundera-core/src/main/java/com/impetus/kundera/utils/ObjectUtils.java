@@ -46,7 +46,16 @@ public class ObjectUtils
 
     public static final Object deepCopy(Object objectToCopy)
     {
-        Object destObject = Cloner.deepClone(objectToCopy, objectToCopy.getClass());
+        Object destObject;
+        try
+        {
+            destObject = Cloner.deepClone(objectToCopy, objectToCopy.getClass());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
         return destObject;
 
     }

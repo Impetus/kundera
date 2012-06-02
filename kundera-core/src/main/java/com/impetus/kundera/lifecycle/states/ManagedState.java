@@ -113,31 +113,33 @@ public class ManagedState extends NodeState
             if ((entityMetadata.getRelationNames() == null || entityMetadata.getRelationNames().isEmpty())
                     && !entityMetadata.isRelationViaJoinTable())
             {
-                nodeData = entity;
+                //There is no relation (not even via Join Table), Construct Node out of this enhance entity,
+                // put into Persistence Cache, and just return.
                 
-                //Construct Node out of this enhance entity and put into Persistence Cache               
+                nodeData = entity;                              
                 nodeStateContext.setData(nodeData);
                 nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);
-                nodeStateContext.setDirty(false);
+                nodeStateContext.setDirty(false);    // This node is fresh and hence NOT dirty
                 return;
             }
           
             else
             {
+                //This entity has associated entities, find them recursively.
                 nodeData = reader.recursivelyFindEntities(ee.getEntity(), ee.getRelations(), entityMetadata,
                         nodeStateContext.getPersistenceDelegator());
             }
         }
         
+        //Construct Node out of this entity and put into Persistence Cache
         if(nodeData != null) {
-          //Construct Node out of this enhance entity and put into Persistence Cache
+          
             nodeStateContext.setData(nodeData);
             nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);
 
             // This node is fresh and hence NOT dirty
             nodeStateContext.setDirty(false);
-        }
-                
+        }                
 
         //No state change, Node to remain in Managed state
     }

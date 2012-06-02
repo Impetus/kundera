@@ -46,8 +46,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.utils.ObjectUtils;
 
 /**
- * This class is responsible for building association for given entities.
- * 
+ * This class is responsible for building association for given entities. 
  * @author vivek.mishra
  */
 final class AssociationBuilder
@@ -87,25 +86,22 @@ final class AssociationBuilder
         List childrenEntities = new ArrayList();
         for (Object foreignKey : foreignKeys)
         {
-            EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());
-            
+            EntityMetadata childMetadata = delegator.getMetadata(relation.getTargetEntity());      
 
             Object child = delegator.find(relation.getTargetEntity(), foreignKey);
-
             Object obj = child instanceof EnhanceEntity && child != null ? ((EnhanceEntity) child).getEntity() : child;            
             
             //If child has any bidirectional relationship, process them here
             Field biDirectionalField = getBiDirectionalField(entity.getClass(), relation.getTargetEntity());
             boolean isBidirectionalRelation = (biDirectionalField != null);
             
-            if(isBidirectionalRelation && obj != null) {      
+            if(isBidirectionalRelation && obj != null) {    
                 
                 String columnValue = PropertyAccessorHelper.getId(obj, childMetadata);
                 Object[] pKeys = pClient.findIdsByColumn(joinTableName, joinColumnName,
                         inverseJoinColumnName, columnValue, entityMetadata.getEntityClazz());             
                 List parents = delegator.find(entity.getClass(), pKeys);                
-                PropertyAccessorHelper.set(obj, biDirectionalField, ObjectUtils.getFieldInstance(parents, biDirectionalField));              
-                
+                PropertyAccessorHelper.set(obj, biDirectionalField, ObjectUtils.getFieldInstance(parents, biDirectionalField));                    
             }    
             
             childrenEntities.add(obj);
@@ -144,27 +140,20 @@ final class AssociationBuilder
         child = child != null && child instanceof EnhanceEntity ? ((EnhanceEntity) child)
                 .getEntity() : child;
         
-        PropertyAccessorHelper.set(entity, relation.getProperty(), child);
-        
-        //If child has any bidirectional relationship, process them here
-        Field biDirectionalField = getBiDirectionalField(entity.getClass(), relation.getTargetEntity());
-        boolean isBidirectionalRelation = (biDirectionalField != null);
-        
-        if(isBidirectionalRelation) {
-            Relation reverseRelation = childMetadata.getRelation(biDirectionalField.getName());
-            String childId = PropertyAccessorHelper.getId(child, childMetadata);
-            EntityMetadata reverseEntityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-            populateRelationViaQuery(child, pd, childId, reverseRelation, relation.getJoinColumnName(), reverseEntityMetadata);
-        }  
-        
-        //Save this entity to persistence cache
-        /*String entityId = PropertyAccessorHelper.getId(entity, KunderaMetadataManager.getEntityMetadata(entity.getClass()));
-        MainCache mainCache = (MainCache) pd.getPersistenceCache().getMainCache();        
-        String nodeId = ObjectGraphUtils.getNodeId(entityId, entity.getClass());
-        Node node = new Node(nodeId, entity.getClass(), new ManagedState(), pd.getPersistenceCache());
-        node.setData(entity);        
-        node.setPersistenceDelegator(pd);
-        mainCache.addNodeToCache(node);  */
+        if(child != null) {
+            PropertyAccessorHelper.set(entity, relation.getProperty(), child);
+            
+            //If child has any bidirectional relationship, process them here
+            Field biDirectionalField = getBiDirectionalField(entity.getClass(), relation.getTargetEntity());
+            boolean isBidirectionalRelation = (biDirectionalField != null);
+            
+            if(isBidirectionalRelation) {
+                Relation reverseRelation = childMetadata.getRelation(biDirectionalField.getName());
+                String childId = PropertyAccessorHelper.getId(child, childMetadata);
+                EntityMetadata reverseEntityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+                populateRelationViaQuery(child, pd, childId, reverseRelation, relation.getJoinColumnName(), reverseEntityMetadata);
+            } 
+        }
     }
     
     /**
@@ -180,48 +169,32 @@ final class AssociationBuilder
         Class<?> childClass = relation.getTargetEntity();                            
         Client childClient = pd.getClient(childMetadata);                    
         
-        List children = null;
+        List associatedEntities = null;
         
         //Since ID is stored at other side of the relationship, we have to query that table
                            
         if (MetadataUtils.useSecondryIndex(childClient.getPersistenceUnit()))        {
             //Pass this entity id as a value to be searched for 
-            children = pd.find(childClass, entityId, relationName);
+            associatedEntities = pd.find(childClass, entityId, relationName);
         }
         else
         {
-            // Lucene query, where entity class is child class, parent class is entity's class
-            // and parent Id is entity ID! that's it!
-            String query = LuceneQueryUtils.getQuery(DocumentIndexer.PARENT_ID_CLASS, entity
-                    .getClass().getCanonicalName().toLowerCase(),
-                    DocumentIndexer.PARENT_ID_FIELD, entityId, childClass
-                            .getCanonicalName().toLowerCase());
-            
-            Map<String, String> results = childClient.getIndexManager().search(query);
-            Set<String> rsSet = new HashSet<String>(results.values());
-
-            if (childClass.equals(entity.getClass()))
-            {
-                children = (List<Object>) childClient.findAll(childClass,
-                        rsSet.toArray(new String[] {}));
-            }
-            else
-            {
-                children = (List<Object>) childClient.findAll(childClass,
-                        rsSet.toArray(new String[] {}));
-            }
+            associatedEntities = getAssociatedEntitiesFromLucene(entity, entityId, childClass, childClient);
         } 
         
-        onReflect(entity, relation.getProperty(), children);
+        if(associatedEntities != null && ! associatedEntities.isEmpty()) {
+            setAssociatedEntities(entity, relation.getProperty(), associatedEntities);
+        }
+        
         
         //If child has any bidirectional relationship, process them here
         Field biDirectionalField = getBiDirectionalField(entity.getClass(), relation.getTargetEntity());
         boolean isBidirectionalRelation = (biDirectionalField != null);
         
-        if(isBidirectionalRelation && children != null) {
+        if(isBidirectionalRelation && associatedEntities != null) {
             Relation reverseRelation = childMetadata.getRelation(biDirectionalField.getName());
             
-            for(Object child : children) {
+            for(Object child : associatedEntities) {
                 //String childId = PropertyAccessorHelper.getId(child, childMetadata);
                 //EntityMetadata reverseEntityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
                 
@@ -231,11 +204,11 @@ final class AssociationBuilder
             
         }        
         
-        if(children != null) {
+        if(associatedEntities != null) {
           //Save children entities to persistence cache
             MainCache mainCache = (MainCache) pd.getPersistenceCache().getMainCache();
             
-            for(Object child : children) {
+            for(Object child : associatedEntities) {
                 Object childId = PropertyAccessorHelper.getId(child, childMetadata);
                 
                 String nodeId = ObjectGraphUtils.getNodeId(childId, childMetadata.getEntityClazz());
@@ -245,8 +218,52 @@ final class AssociationBuilder
                 mainCache.addNodeToCache(node);    
             }            
         }
-                     
         
+        //Recursively find associated entities        
+        if ((childMetadata.getRelationNames() == null || childMetadata.getRelationNames().isEmpty())
+                && !childMetadata.isRelationViaJoinTable())
+        {
+            // There is no relation (not even via Join Table), nothing to do
+        }
+
+        else if(associatedEntities != null)        {
+            //These entities has associated entities, find them recursively.
+            for(Object associatedEntity : associatedEntities) {
+               associatedEntity = pd.getReader(childClient).recursivelyFindEntities(associatedEntity,
+                       null, childMetadata,
+                       pd);
+           }           
+        }                
+        
+    }
+
+    /**
+     * Retrieves associated entities via running query into Lucene indexing.
+     */
+    private List getAssociatedEntitiesFromLucene(Object entity, String entityId, Class<?> childClass, Client childClient)
+    {
+        List associatedEntities;
+        // Lucene query, where entity class is child class, parent class is entity's class
+        // and parent Id is entity ID! that's it!
+        String query = LuceneQueryUtils.getQuery(DocumentIndexer.PARENT_ID_CLASS, entity
+                .getClass().getCanonicalName().toLowerCase(),
+                DocumentIndexer.PARENT_ID_FIELD, entityId, childClass
+                        .getCanonicalName().toLowerCase());
+        
+        Map<String, String> results = childClient.getIndexManager().search(query);
+        Set<String> rsSet = new HashSet<String>(results.values());
+
+        if (childClass.equals(entity.getClass()))
+        {
+            associatedEntities = (List<Object>) childClient.findAll(childClass,
+                    rsSet.toArray(new String[] {}));
+        }
+        else
+        {
+            associatedEntities = (List<Object>) childClient.findAll(childClass,
+                    rsSet.toArray(new String[] {}));
+        }
+        return associatedEntities;
     }   
     
     
@@ -282,29 +299,24 @@ final class AssociationBuilder
         return biDirectionalField;
     }
     
+    
     /**
-     * On reflect.
-     * 
+     * Sets associated entities to <code>entity</code>
      * @param entity
-     *            the entity
      * @param f
-     *            the f
-     * @param childs
-     *            the childs
-     * @return the sets the
+     * @param associatedEntities
+     * @return
      * @throws PropertyAccessException
-     *             the property access exception
      */
-    private Set<?> onReflect(Object entity, Field f, List<?> childs) throws PropertyAccessException
+    private Set<?> setAssociatedEntities(Object entity, Field f, List<?> associatedEntities) throws PropertyAccessException
     {
         Set chids = new HashSet();
-        if (childs != null)
+        if (associatedEntities != null)
         {
-            chids = new HashSet(childs);
-            // TODO: need to store object in sesion.
-            // getSession().store(id, entity)
+            chids = new HashSet(associatedEntities);
             PropertyAccessorHelper.set(entity, f,
-                    PropertyAccessorHelper.isCollection(f.getType()) ? ObjectUtils.getFieldInstance(childs, f) : childs.get(0));
+                    PropertyAccessorHelper.isCollection(f.getType()) ? ObjectUtils.getFieldInstance(associatedEntities, f) :
+                        associatedEntities.get(0));
         }
         return chids;
     }

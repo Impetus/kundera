@@ -77,14 +77,14 @@ public class AbstractEntityReader
         }
         catch (Exception e)
         {
-            throw new PersistenceException(e);
+            throw new EntityReaderException(e);
         }
     }
 
     
     
     /**
-     * Recursively fetches child entities for a given <code>entity</code>
+     * Recursively fetches associated entities for a given <code>entity</code>
      * @param entity
      * @param relationsMap
      * @param client
@@ -103,9 +103,8 @@ public class AbstractEntityReader
             {
                 //M-M relationship. Relationship entities are always fetched from Join Table.
                 
-                //Save this entity to persistence cache        
-                PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);
-                
+                //First, Save this entity to persistence cache        
+                PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);                
                 associationBuilder.populateRelationFromJoinTable(entity, m, pd, relation);
             }
             else
@@ -125,7 +124,7 @@ public class AbstractEntityReader
                 } else {
                     //1-M relationship, since ID is stored at other side of entity and as a result relation value will be null
                     //This requires running query (either Lucene or Native based on secondary indexes supported by underlying database)
-                    //Running query returns all those child entities that hold parent entity ID as foreign key 
+                    //Running query returns all those associated entities that hold parent entity ID as foreign key 
                     associationBuilder.populateRelationViaQuery(entity, pd, entityId, relation, relationName, childMetadata);                    
                 }               
                 

@@ -147,7 +147,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
         String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entityClass);
         CacheBase mainCache =  getPersistenceDelegator().getPersistenceCache().getMainCache();
         Node node = mainCache.getNodeFromCache(nodeId);
-        if(node.getParents() == null && ! mainCache.getHeadNodes().contains(node)) {
+        if(node != null && node.getParents() == null && ! mainCache.getHeadNodes().contains(node)) {
             mainCache.addHeadNode(node);
         }       
         

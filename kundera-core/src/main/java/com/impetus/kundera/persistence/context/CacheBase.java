@@ -112,6 +112,7 @@ public class CacheBase
         {
             node.getPersistenceCache().getMainCache().addHeadNode(node);
         }
+
     }
 
     public void removeNodeFromCache(Node node)
