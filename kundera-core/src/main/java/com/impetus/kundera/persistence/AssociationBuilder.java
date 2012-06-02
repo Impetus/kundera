@@ -229,15 +229,23 @@ final class AssociationBuilder
                 PropertyAccessorHelper.set(child, reverseRelation.getProperty(), entity);
             }
             
-        }
+        }        
         
-        //Save this entity to persistence cache
-        /*MainCache mainCache = (MainCache) pd.getPersistenceCache().getMainCache();        
-        String nodeId = ObjectGraphUtils.getNodeId(entityId, entity.getClass());
-        Node node = new Node(nodeId, entity.getClass(), new ManagedState(), pd.getPersistenceCache());
-        node.setData(entity);        
-        node.setPersistenceDelegator(pd);
-        mainCache.addNodeToCache(node);    */        
+        if(children != null) {
+          //Save children entities to persistence cache
+            MainCache mainCache = (MainCache) pd.getPersistenceCache().getMainCache();
+            
+            for(Object child : children) {
+                Object childId = PropertyAccessorHelper.getId(child, childMetadata);
+                
+                String nodeId = ObjectGraphUtils.getNodeId(childId, childMetadata.getEntityClazz());
+                Node node = new Node(nodeId, childMetadata.getEntityClazz(), new ManagedState(), pd.getPersistenceCache());
+                node.setData(child);        
+                node.setPersistenceDelegator(pd);
+                mainCache.addNodeToCache(node);    
+            }            
+        }
+                     
         
     }   
     
