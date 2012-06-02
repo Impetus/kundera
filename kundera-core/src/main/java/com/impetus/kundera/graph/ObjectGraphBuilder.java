@@ -73,7 +73,7 @@ public class ObjectGraphBuilder
             return null;
         }
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
-        String nodeId = getNodeId(id, entity);
+        String nodeId = ObjectGraphUtils.getNodeId(id, entity);
 
         // If this node is already there in graph (may happen for bidirectional
         // relationship, do nothing and return null)

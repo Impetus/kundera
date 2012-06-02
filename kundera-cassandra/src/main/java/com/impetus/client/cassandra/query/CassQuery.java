@@ -228,7 +228,7 @@ public class CassQuery extends QueryImpl implements Query
 
             ((CassandraEntityReader) getReader()).setConditions(ixClause);
 
-            ls = reader.populateRelation(m, m.getRelationNames(), m.isParent(), client);
+            ls = reader.populateRelation(m, client);
         }
         return setRelationEntities(ls, client, m);
 

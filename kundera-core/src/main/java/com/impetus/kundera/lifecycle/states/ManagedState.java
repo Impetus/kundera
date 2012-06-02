@@ -20,7 +20,7 @@ import javax.persistence.PersistenceContextType;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -94,40 +94,52 @@ public class ManagedState extends NodeState
     @Override
     public void handleFind(NodeStateContext nodeStateContext)
     {
-        // Fetch Node data from Client
+        //Fetch Node data from Client
         Client client = nodeStateContext.getClient();
         Class<?> nodeDataClass = nodeStateContext.getDataClass();
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass);
-        String entityId = ObjectGraphBuilder.getEntityId(nodeStateContext.getNodeId());
+        String entityId = ObjectGraphUtils.getEntityId(nodeStateContext.getNodeId());
 
         Object nodeData = null; // Node data
 
         EntityReader reader = client.getReader();
-        EnhanceEntity enhanceEntity = reader.findById(entityId, entityMetadata, client);
-
-        if (enhanceEntity != null && enhanceEntity.getEntity() != null)
+        EnhanceEntity ee = reader.findById(entityId, entityMetadata, client);
+        
+        //Recursively retrieve relationship entities (if there are any)
+        if (ee != null && ee.getEntity() != null)
         {
-            Object entity = enhanceEntity.getEntity();
+            Object entity = ee.getEntity();
 
             if ((entityMetadata.getRelationNames() == null || entityMetadata.getRelationNames().isEmpty())
                     && !entityMetadata.isRelationViaJoinTable())
             {
                 nodeData = entity;
+                
+                //Construct Node out of this enhance entity and put into Persistence Cache               
+                nodeStateContext.setData(nodeData);
+                nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);
+                nodeStateContext.setDirty(false);
+                return;
             }
+          
             else
             {
-                nodeData = reader.recursivelyFindEntities(enhanceEntity, client, entityMetadata,
+                nodeData = reader.recursivelyFindEntities(ee.getEntity(), ee.getRelations(), entityMetadata,
                         nodeStateContext.getPersistenceDelegator());
             }
         }
+        
+        if(nodeData != null) {
+          //Construct Node out of this enhance entity and put into Persistence Cache
+            nodeStateContext.setData(nodeData);
+            nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);
 
-        nodeStateContext.setData(nodeData);
+            // This node is fresh and hence NOT dirty
+            nodeStateContext.setDirty(false);
+        }
+                
 
-        // This node is fresh and hence NOT dirty
-        nodeStateContext.setDirty(false);
-
-        // Node to remain in Managed state
-
+        //No state change, Node to remain in Managed state
     }
 
     @Override

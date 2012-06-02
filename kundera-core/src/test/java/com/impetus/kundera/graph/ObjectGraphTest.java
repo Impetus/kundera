@@ -66,10 +66,10 @@ public class ObjectGraphTest
         BillingCounter b2 = new BillingCounter();
         BillingCounter b3 = new BillingCounter();
 
-        String storeId = ObjectGraphBuilder.getNodeId("1", store);
-        String b1Id = ObjectGraphBuilder.getNodeId("A1", b1);
-        String b2Id = ObjectGraphBuilder.getNodeId("A2", b2);
-        String b3Id = ObjectGraphBuilder.getNodeId("A3", b3);
+        String storeId = ObjectGraphUtils.getNodeId("1", store);
+        String b1Id = ObjectGraphUtils.getNodeId("A1", b1);
+        String b2Id = ObjectGraphUtils.getNodeId("A2", b2);
+        String b3Id = ObjectGraphUtils.getNodeId("A3", b3);
 
         Node headNode = new Node(storeId, store, pc);
 

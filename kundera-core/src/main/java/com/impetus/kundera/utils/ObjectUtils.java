@@ -20,13 +20,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 
 import org.cloner.Cloner;
-import org.hibernate.mapping.Set;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.Column;
@@ -187,6 +188,27 @@ public class ObjectUtils
         }
 
         return target;
+    }
+    
+    
+    /**
+     * Gets the field instance.
+     * 
+     * @param chids
+     *            the chids
+     * @param f
+     *            the f
+     * @return the field instance
+     */
+    public static Object getFieldInstance(List chids, Field f)
+    {
+
+        if (Set.class.isAssignableFrom(f.getType()))
+        {
+            Set col = new HashSet(chids);
+            return col;
+        }
+        return chids;
     }
 
 }

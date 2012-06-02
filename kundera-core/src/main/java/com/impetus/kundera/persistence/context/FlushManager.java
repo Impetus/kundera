@@ -22,6 +22,7 @@ import java.util.Set;
 
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
+import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.lifecycle.states.ManagedState;

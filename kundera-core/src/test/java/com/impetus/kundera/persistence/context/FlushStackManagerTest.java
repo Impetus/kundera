@@ -50,6 +50,7 @@ import com.impetus.kundera.graph.BillingCounter;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.graph.Store;
 
 /**
@@ -103,7 +104,7 @@ public class FlushStackManagerTest
         Assert.assertNotNull(pc.getMainCache());
         Assert.assertEquals(1, pc.getMainCache().getHeadNodes().size());
 
-        Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphBuilder.getNodeId("1", Store.class));
+        Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphUtils.getNodeId("1", Store.class));
 
         Assert.assertNull(headNode.getParents());
         Assert.assertEquals(3, headNode.getChildren().size());

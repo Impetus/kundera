@@ -35,6 +35,9 @@ public class Node implements NodeStateContext
 
     // ID of a node into object graph
     private String nodeId;
+    
+    //Primary key of entity data contained in this node
+    private Object entityId;
 
     // Actual node data
     private Object data;
@@ -59,6 +62,11 @@ public class Node implements NodeStateContext
 
     // Whether this is a head node
     private boolean isHeadNode;
+    
+    /* Depth of this node in the tree
+     * Head node has a depth of 1 and so on.
+     */
+    private int depth;
 
     /** Client for this node */
     Client client;
@@ -344,6 +352,23 @@ public class Node implements NodeStateContext
     public void setDirty(boolean dirty)
     {
         this.dirty = dirty;
+    }   
+    
+
+    /**
+     * @return the depth
+     */
+    public int getDepth()
+    {
+        return depth;
+    }
+
+    /**
+     * @param depth the depth to set
+     */
+    public void setDepth(int depth)
+    {
+        this.depth = depth;
     }
 
     /**

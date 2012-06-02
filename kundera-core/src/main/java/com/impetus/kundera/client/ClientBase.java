@@ -23,6 +23,7 @@ import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -74,7 +75,7 @@ public abstract class ClientBase
     public void persist(Node node)
     {
         Object entity = node.getData();
-        String id = ObjectGraphBuilder.getEntityId(node.getNodeId());
+        String id = ObjectGraphUtils.getEntityId(node.getNodeId());
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
 
         List<RelationHolder> relationHolders = getRelationHolders(node);

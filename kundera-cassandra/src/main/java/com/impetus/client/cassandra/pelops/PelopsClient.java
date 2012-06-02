@@ -55,6 +55,7 @@ import org.scale7.cassandra.pelops.Mutator;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
+import org.scale7.cassandra.pelops.exceptions.PelopsException;
 import org.scale7.cassandra.pelops.pool.IThriftPool;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
@@ -511,8 +512,17 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         List<Object> entities = null;
         IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000,
                 Selector.newIndexExpression(colName, IndexOperator.EQ, Bytes.fromByteArray(colValue.getBytes())));
-        Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
-                ConsistencyLevel.ONE);
+        Map<Bytes, List<Column>> qResults;
+        try
+        {
+            qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
+                    ConsistencyLevel.ONE);
+        }
+        catch (PelopsException e)
+        {
+            log.warn(e.getMessage());
+            return entities;
+        }
         entities = new ArrayList<Object>(qResults.size());
         // iterate through complete map and
         populateData(m, qResults, entities, false, null);

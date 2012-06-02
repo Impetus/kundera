@@ -37,10 +37,14 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.cache.Cache;
+import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.context.CacheBase;
 import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.PersistenceCache;
+import com.impetus.kundera.utils.ObjectUtils;
 
 /**
  * The Class EntityManagerImpl.
@@ -135,7 +139,20 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
             throw new IllegalArgumentException("PrimaryKey value must not be null for object you want to find.");
         }
 
-        return getPersistenceDelegator().find(entityClass, primaryKey);
+        E e = getPersistenceDelegator().find(entityClass, primaryKey);
+        
+        if(e == null) return null;
+        
+        //Set this returned entity as head node if applicable
+        String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entityClass);
+        CacheBase mainCache =  getPersistenceDelegator().getPersistenceCache().getMainCache();
+        Node node = mainCache.getNodeFromCache(nodeId);
+        if(node.getParents() == null && ! mainCache.getHeadNodes().contains(node)) {
+            mainCache.addHeadNode(node);
+        }       
+        
+        //Return a deep copy of this entity
+        return (E)ObjectUtils.deepCopy((Object)e);
     }
 
     @Override
@@ -172,11 +189,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
         return getPersistenceDelegator().merge(e);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#persist(java.lang.Object)
-     */
+
     @Override
     public final void persist(Object e)
     {

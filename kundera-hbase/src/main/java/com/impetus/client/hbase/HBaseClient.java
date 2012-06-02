@@ -40,6 +40,7 @@ import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -207,7 +208,7 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
     public void persist(Node node)
     {
         Object entity = node.getData();
-        String id = ObjectGraphBuilder.getEntityId(node.getNodeId());
+        String id = ObjectGraphUtils.getEntityId(node.getNodeId());
 
         List<RelationHolder> relationHolders = getRelationHolders(node);
 

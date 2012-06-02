@@ -74,7 +74,7 @@ public class RDBMSQuery extends QueryImpl implements Query
         log.debug("On handleAssociation() retrieve associations ");
 
         initializeReader();
-        List<EnhanceEntity> ls = getReader().populateRelation(m, m.getRelationNames(), m.isParent(), client);
+        List<EnhanceEntity> ls = getReader().populateRelation(m, client);
 
         return setRelationEntities(ls, client, m);
     }

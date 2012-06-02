@@ -40,8 +40,7 @@ public class HBaseEntityReader extends AbstractEntityReader implements EntityRea
      * com.impetus.kundera.client.Client)
      */
     @Override
-    public List<EnhanceEntity> populateRelation(EntityMetadata m, List<String> relationNames, boolean isParent,
-            Client client)
+    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
     {
         throw new UnsupportedOperationException("Method is not supported");
     }

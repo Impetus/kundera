@@ -186,8 +186,7 @@ public abstract class QueryImpl implements Query
         // Enhance entities can contain or may not contain relation.
         // if it contain a relation means it is a child
         // if it does not then it means it is a parent.
-        List<Object> result = null;
-        Map<Object, Object> relationalValues = new HashMap<Object, Object>();
+        List<Object> result = null;        
         if (enhanceEntities != null)
         {
             for (Object e : enhanceEntities)
@@ -202,8 +201,9 @@ public abstract class QueryImpl implements Query
                     e = new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m), null);
                 }  
                 
-                result.add(getReader().recursivelyFindEntities((EnhanceEntity)e, client, m, persistenceDelegeator));
+                EnhanceEntity ee = (EnhanceEntity)e;
                 
+                result.add(getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m, persistenceDelegeator));                
             }
         }
 

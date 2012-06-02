@@ -75,7 +75,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     }
 
     /**
-     * Method responsible for reading bacl entity and relations using secondary
+     * Method responsible for reading back entity and relations using secondary
      * indexes(if it holds any relation), else retrieve row keys using lucene.
      * 
      * @param m
@@ -90,10 +90,11 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
      */
 
     @Override
-    public List<EnhanceEntity> populateRelation(EntityMetadata m, List<String> relationNames, boolean isParent,
-            Client client)
+    public List<EnhanceEntity> populateRelation(EntityMetadata m, Client client)
     {
         List<EnhanceEntity> ls = null;
+        List<String> relationNames = m.getRelationNames();
+        boolean isParent = m.isParent();
 
         boolean isRowKeyQuery = conditions != null ? conditions.keySet().iterator().next() : false;
 

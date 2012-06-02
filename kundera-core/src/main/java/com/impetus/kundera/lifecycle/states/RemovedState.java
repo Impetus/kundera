@@ -20,6 +20,7 @@ import javax.persistence.PersistenceContextType;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 
 /**
@@ -96,7 +97,7 @@ public class RemovedState extends NodeState
         Client client = nodeStateContext.getClient();
 
         Node node = (Node) nodeStateContext;
-        String entityId = ObjectGraphBuilder.getEntityId(node.getNodeId());
+        String entityId = ObjectGraphUtils.getEntityId(node.getNodeId());
         client.delete(node.getData(), entityId);
 
         // Since node is flushed, mark it as NOT dirty

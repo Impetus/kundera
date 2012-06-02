@@ -16,6 +16,7 @@
 package com.impetus.kundera.persistence;
 
 import java.util.List;
+import java.util.Map;
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -46,7 +47,7 @@ public interface EntityReader
      *            client instance
      * @return list of wrapped enhance entities.
      */
-    List<EnhanceEntity> populateRelation(EntityMetadata m, List<String> relationNames, boolean isParent, Client client);
+    List<EnhanceEntity> populateRelation(EntityMetadata m, Client client);
 
     /**
      * Returns populated entity along with all relational value.
@@ -68,7 +69,7 @@ public interface EntityReader
      *             the exception
      */
 
-    Object recursivelyFindEntities(EnhanceEntity e, Client client, EntityMetadata m, PersistenceDelegator pd);
+    Object recursivelyFindEntities(Object entity, Map<String, Object> relationsMap, EntityMetadata m, PersistenceDelegator pd);
 
     /**
      * Find by id.

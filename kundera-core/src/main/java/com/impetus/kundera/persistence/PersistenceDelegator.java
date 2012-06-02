@@ -44,6 +44,7 @@ import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.lifecycle.states.TransientState;
@@ -96,7 +97,7 @@ public class PersistenceDelegator
     private boolean isTransactionInProgress;
 
     private PersistenceCache persistenceCache;
-
+    
     /**
      * Instantiates a new persistence delegator.
      * 
@@ -112,11 +113,16 @@ public class PersistenceDelegator
         graphBuilder = new ObjectGraphBuilder();
         flushManager = new FlushManager();
         this.persistenceCache = pc;
-    }
+        
+        //TODO: Derive this from persistence.xml, if provided
+    }   
+    
 
     /***********************************************************************/
     /***************** CRUD Methods ****************************************/
     /***********************************************************************/
+
+    
 
     /**
      * Writes an entity into Persistence cache
@@ -154,19 +160,22 @@ public class PersistenceDelegator
 
     /**
      * Finds an entity from persistence cache, if not there, fetches from
-     * database
-     * 
-     * @param <E>
-     * @param entityClass
-     * @param primaryKey
+     * database.
+     * Nodes to be added to persistence cache as and when they are found from DB
+     * If node for this nodeData is not already there in PC.
+     * No need to create a deep copy. While adding nodes to persistence cache, 
+     * a deep copy is added instead of this one Return a deep copy of the node data
+     * @param entityClass Entity Class
+     * @param primaryKey Primary Key
      * @return
+     * 
      */
     public <E> E find(Class<E> entityClass, Object primaryKey)
     {
 
         EntityMetadata entityMetadata = getMetadata(entityClass);
 
-        String nodeId = ObjectGraphBuilder.getNodeId(primaryKey, entityClass);
+        String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entityClass);
 
         MainCache mainCache = (MainCache) getPersistenceCache().getMainCache();
         Node node = mainCache.getNodeFromCache(nodeId);
@@ -176,38 +185,29 @@ public class PersistenceDelegator
         {
 
             node = new Node(nodeId, entityClass, new ManagedState(), getPersistenceCache());
-            Client client = getClient(entityMetadata);
-            node.setClient(client);
+            node.setClient(getClient(entityMetadata));
             node.setPersistenceDelegator(this);
 
             node.find();
-        }
-
+        }    
+     
         Object nodeData = node.getData();
-
-        // If node for this nodeData is not already there in PC,
-        // Generate an object graph of this found entity, and put it into cache
-        // with Managed state
-        if (nodeData != null)
-        {
-            if (getPersistenceCache().getMainCache().getNodeFromCache(nodeId) == null)
-            {
-                ObjectGraph graph = new ObjectGraphBuilder().getObjectGraph(nodeData, new ManagedState(),
-                        getPersistenceCache());
-                getPersistenceCache().getMainCache().addGraphToCache(graph, getPersistenceCache());
-            }
-
-        }
-        else
-        {
+        if(nodeData == null) {
             return null;
+        } else {
+            return (E) node.getData();
         }
-
-        // Return a deep copy of the node data
-        return (E) ObjectUtils.deepCopy(nodeData);
+                
 
     }
 
+    /**
+     * Retrieves a {@link List} of Entities for given Primary Keys
+     * @param entityClass Entity Class
+     * @param primaryKeys Array of Primary Keys
+     * @see {@link PersistenceDelegator#find(Class, Object)}
+     * @return
+     */
     public <E> List<E> find(Class<E> entityClass, Object... primaryKeys)
     {
         List<E> entities = new ArrayList<E>();
@@ -216,6 +216,41 @@ public class PersistenceDelegator
         {
             entities.add(find(entityClass, primaryKey));
         }
+        return entities;
+    }
+    
+    /**
+     * Retrieves {@link List} of entities for a given {@link Map} of embedded column values.
+     * @param entityClass Entity Class
+     * @param embeddedColumnMap Embedded column map values
+     * @return
+     */
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
+    {
+        EntityMetadata entityMetadata = getMetadata(entityClass);
+
+        List<E> entities = new ArrayList<E>();
+        entities = getClient(entityMetadata).find(entityClass, embeddedColumnMap);
+
+        return entities;
+    }
+    
+    /**
+     * Finds {@link List} of child entities who contain given <code>entityId</code> as <code>joinColumnName</code>
+     * @param childClass Class of child entity
+     * @param entityId Entity ID of parent entity
+     * @param joinColumnName Join Column Name
+     * @return
+     */
+    public List<?> find(Class<?> childClass, Object entityId, String joinColumnName)
+    {
+        EntityMetadata childMetadata = getMetadata(childClass);
+        List<?> entities = new ArrayList();
+        Client childClient = getClient(childMetadata);        
+        
+        entities = childClient.findByRelation(joinColumnName, (String)entityId, childClass);
+        
+        if(entities == null) return null;        
         return entities;
     }
 
@@ -295,7 +330,7 @@ public class PersistenceDelegator
                         for (NodeLink parentNodeLink : parents.keySet())
                         {
                             parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
-                                    ObjectGraphBuilder.getEntityId(node.getNodeId()));
+                                    ObjectGraphUtils.getEntityId(node.getNodeId()));
                         }
                     }
 
@@ -304,7 +339,7 @@ public class PersistenceDelegator
                         for (NodeLink childNodeLink : children.keySet())
                         {
                             childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
-                                    ObjectGraphBuilder.getEntityId(node.getNodeId()));
+                                    ObjectGraphUtils.getEntityId(node.getNodeId()));
                         }
                     }
                 }
@@ -426,27 +461,7 @@ public class PersistenceDelegator
     {
         return eventDispatcher;
     }
-
-    /**
-     * Find.
-     * 
-     * @param <E>
-     *            the element type
-     * @param entityClass
-     *            the entity class
-     * @param embeddedColumnMap
-     *            the embedded column map
-     * @return the list
-     */
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
-    {
-        EntityMetadata entityMetadata = getMetadata(entityClass);
-
-        List<E> entities = new ArrayList<E>();
-        entities = getClient(entityMetadata).find(entityClass, embeddedColumnMap);
-
-        return entities;
-    }
+    
 
     /**
      * Creates the query.
