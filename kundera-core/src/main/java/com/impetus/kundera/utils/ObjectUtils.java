@@ -60,20 +60,17 @@ public class ObjectUtils
 
     }
 
-    public static final Object deepCopyUsingMetadata(Object source)
+    public static final Object deepCopyUsingMetadata(Object source, EntityMetadata metadata)
     {
 
         Class<?> sourceObjectClass = source.getClass();
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(sourceObjectClass);
-
         Object target = null;
         try
         {
             target = sourceObjectClass.newInstance();
 
             // Copy ID field
-            Object id = metadata.getReadIdentifierMethod().invoke(source);
-            
+            Object id = metadata.getReadIdentifierMethod().invoke(source);            
             metadata.getWriteIdentifierMethod().invoke(target, id);
 
             // Copy Columns (in a table that doesn't have any embedded objects
@@ -86,16 +83,12 @@ public class ObjectUtils
             // Copy Embedded Columns, Element Collections are columns (in a table that only has embedded objects)
             for (EmbeddedColumn embeddedColumn : metadata.getEmbeddedColumnsAsList())
             {
-                Field embeddedColumnField = embeddedColumn.getField();
-                
-                Annotation embeddedAnnotation = embeddedColumnField.getAnnotation(Embedded.class);
-                Annotation ecAnnotation = embeddedColumnField.getAnnotation(ElementCollection.class);
-                Annotation columnAnnotation = embeddedColumnField.getAnnotation(javax.persistence.Column.class);
+                Field embeddedColumnField = embeddedColumn.getField();                
                 
                 Object sourceEmbeddedObj = PropertyAccessorHelper.getObject(source, embeddedColumnField);
                 
                 
-                if(embeddedAnnotation != null) {                    
+                if(embeddedColumnField.getAnnotation(Embedded.class) != null) {                    
                     //Copy embedded objects
                     Class<?> embeddedColumnClass = embeddedColumnField.getType();                    
                     Object targetEmbeddedObj = embeddedColumnClass.newInstance();                    
@@ -107,7 +100,7 @@ public class ObjectUtils
                     }
                     
                     PropertyAccessorHelper.set(target, embeddedColumnField, targetEmbeddedObj);
-                } else if(ecAnnotation != null){
+                } else if(embeddedColumnField.getAnnotation(ElementCollection.class) != null){
                     //Copy element collections
                     if(sourceEmbeddedObj instanceof Collection) {
                         Class<?> ecDeclaredClass = embeddedColumnField.getType();
@@ -139,7 +132,7 @@ public class ObjectUtils
                     }                 
                     
                     
-                } else if(columnAnnotation != null){
+                } else if(embeddedColumnField.getAnnotation(javax.persistence.Column.class) != null){
                     //Copy columns
                     PropertyAccessorHelper.set(target, embeddedColumnField, sourceEmbeddedObj);
                 }

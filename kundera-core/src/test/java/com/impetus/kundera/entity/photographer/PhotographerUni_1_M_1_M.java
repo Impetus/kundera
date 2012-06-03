@@ -153,7 +153,22 @@ public class PhotographerUni_1_M_1_M
         }
         tweets.add(tweet);
     }
-    
+
+    /**
+     * @param tweets the tweets to set
+     */
+    public void setTweets(List<Tweet> tweets)
+    {
+        this.tweets = tweets;
+    }
+
+    /**
+     * @param albums the albums to set
+     */
+    public void setAlbums(List<AlbumUni_1_M_1_M> albums)
+    {
+        this.albums = albums;
+    } 
     
 
 }
