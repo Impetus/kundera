@@ -88,15 +88,16 @@ public class HBaseCli
             try
             {
                 zkCluster = new MiniZooKeeperCluster(conf);
-                zkCluster.setClientPort(2181);
+                zkCluster.setDefaultClientPort(2181);
                 zkCluster.setTickTime(18000);
-                zkDir = utility.setupClusterTestBuildDir();
+                // utility.setupClusterTestDir();
+                zkDir = new File(utility.getClusterTestDir().toString());
                 // System.out.println("*******************************"+zkDir.getAbsolutePath());
 
                 zkCluster.startup(zkDir);
                 utility.setZkCluster(zkCluster);
                 utility.startMiniCluster();
-                utility.getHbaseCluster().startMaster();
+                utility.getHBaseCluster().startMaster();
             }
             catch (Exception e)
             {
@@ -214,6 +215,11 @@ public class HBaseCli
             logger.error(e.getMessage());
         }
         catch (NullPointerException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (Exception e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();

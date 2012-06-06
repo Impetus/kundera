@@ -215,7 +215,11 @@ public class HBaseSchemaOperationTest
             Assert.assertTrue(columns.contains(columnDescriptor.getNameAsString()));
         }
 
-        admin.disableTable("HbaseEntitySimple");
+        if (!admin.isTableDisabled("HbaseEntitySimple"))
+        {
+            admin.disableTable("HbaseEntitySimple");
+        }
+
         admin.deleteTable("HbaseEntitySimple");
         Assert.assertFalse(admin.isTableAvailable("HbaseEntitySimple"));
     }
@@ -252,8 +256,10 @@ public class HBaseSchemaOperationTest
         getEntityManagerFactory("validate");
         schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName());
         schemaManager.exportSchema();
-
-        admin.disableTable("HbaseEntitySimple");
+        if (!admin.isTableDisabled("HbaseEntitySimple"))
+        {
+            admin.disableTable("HbaseEntitySimple");
+        }
         admin.deleteTable("HbaseEntitySimple");
         Assert.assertFalse(admin.isTableAvailable("HbaseEntitySimple"));
     }

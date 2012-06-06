@@ -265,13 +265,19 @@
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase</artifactId>
-			<version>0.90.4</version>
+			<version>0.92.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase</artifactId>
-			<version>0.90.4</version>
+			<version>0.92.1</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
@@ -279,13 +285,13 @@
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId> hadoop-test </artifactId>
-			<version>0.20.2</version>
+			<version>1.0.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-core</artifactId>
-			<version>0.20.2</version>
+			<version>1.0.2</version>
 		</dependency>
 
 		<!-- Kundera Dependencies -->

@@ -150,15 +150,30 @@ public class HBaseDataHandler implements DataHandler
 
                 // Before any modification to table schema, it's necessary to
                 // disable it
-                if (admin.isTableEnabled(tableName))
+                if (!admin.isTableEnabled(tableName))
                 {
-                    admin.disableTable(tableName);
+                    admin.enableTable(tableName);
                 }
+                HTableDescriptor descriptor = admin.getTableDescriptor(tableName.getBytes());
+                boolean found = false;
+                for (HColumnDescriptor hColumnDescriptor : descriptor.getColumnFamilies())
+                {
+                    if (hColumnDescriptor.getNameAsString().equalsIgnoreCase(columnFamilyName))
+                        found = true;
+                }
+                if (!found)
+                {
 
-                admin.addColumn(tableName, cfDesciptor);
+                    if (admin.isTableEnabled(tableName))
+                    {
+                        admin.disableTable(tableName);
+                    }
 
-                // Enable table once done
-                admin.enableTable(tableName);
+                    admin.addColumn(tableName, cfDesciptor);
+
+                    // Enable table once done
+                    admin.enableTable(tableName);
+                }
             }
             else
             {
@@ -430,7 +445,7 @@ public class HBaseDataHandler implements DataHandler
             catch (IOException e)
             {
 
-              // Do nothing.
+                // Do nothing.
             }
         }
         return foreignKeys;
