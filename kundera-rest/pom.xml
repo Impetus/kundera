@@ -42,7 +42,7 @@
 			<artifactId>persistence-api</artifactId>
 			<version>2.0</version>
 		</dependency>
-		
+
 		<!-- Kundera Libraries -->
 		<dependency>
 			<groupId>com.impetus.core</groupId>
@@ -51,7 +51,7 @@
 		</dependency>
 
 		<!-- JAX-RS Libraries -->
-		
+
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-server</artifactId>

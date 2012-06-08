@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.rest;
+package com.impetus.kundera.rest.resources;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -24,31 +24,38 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.impetus.kundera.rest.EMFRepository;
-import com.impetus.kundera.rest.TokenUtils;
+import com.impetus.kundera.rest.common.TokenUtils;
+import com.impetus.kundera.rest.repository.EMFRepository;
+import com.impetus.kundera.rest.repository.EMRepository;
 
 /**
- * Application Token Resource
+ * Session Token Resource
  * @author amresh.singh
  */
 
-@Path("/kundera/api/initialize/pu/{persistenceUnits}")
-public class KunderaRESTResource
-{ 
-    // This method is called if TEXT_PLAIN is request    
+@Path("/kundera/api/session/at/{applicationToken}")
+public class SessionTokenResource
+{
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.TEXT_PLAIN)    
-    public String getApplicationToken(@PathParam("persistenceUnits") String persistenceUnits) {
-        System.out.println("PUssssssssssssss:" + persistenceUnits);
+    public String getSessionToken(@PathParam("applicationToken") String applicationToken) {        
         
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnits);
+        EntityManagerFactory emf = EMFRepository.INSTANCE.getEMF(applicationToken);
         
-        String applicationToken = TokenUtils.generateApplicationToken();        
+        if(emf == null) {
+            //Handle error
+        }
         
-        EMFRepository.INSTANCE.addEmf(applicationToken, emf);
+        String sessionToken = TokenUtils.generateSessionToken();        
+        EntityManager em = emf.createEntityManager();
         
-        return applicationToken;
+        
+        EMRepository.INSTANCE.addEm(sessionToken, em);
+        
+        return sessionToken;
     }    
+    
+    
 
 }

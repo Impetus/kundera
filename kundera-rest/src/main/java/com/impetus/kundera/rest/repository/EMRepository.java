@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.rest;
+package com.impetus.kundera.rest.repository;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 /**
  * <Prove description of functionality provided by this Type> 
@@ -41,6 +42,14 @@ public class EMRepository
         return emMap;
     }
     
+    public EntityManager getEM(String sessionToken) {
+        if(emMap == null)  {
+            return null;
+        } else {
+            return emMap.get(sessionToken);
+        }
+    }
+    
     /**
      * @param emMap the emMap to set
      */
@@ -56,6 +65,8 @@ public class EMRepository
         }
         emMap.put(sessionToken, em);
     }
+    
+    
     
     
 

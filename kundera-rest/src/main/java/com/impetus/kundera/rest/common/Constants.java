@@ -13,22 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.rest;
-
-import java.util.UUID;
+package com.impetus.kundera.rest.common;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Holds constants
  * @author amresh.singh
  */
-public class TokenUtils
+public interface Constants
 {
-    public static String generateApplicationToken() {
-        return "AT_" + UUID.randomUUID();
-    }
+    public static final String APPLICATION_TOKEN_PREFIX = "AT";
+    public static final String SESSION_TOKEN_PREFIX = "ST";
     
-    public static String generateSessionToken() {
-        return "ST_" + UUID.randomUUID();
-    }  
+    public static final String KUNDERA_API_PATH = "/kundera/api";
 
 }

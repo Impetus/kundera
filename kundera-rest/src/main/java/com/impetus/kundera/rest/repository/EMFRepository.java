@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.rest;
+package com.impetus.kundera.rest.repository;
 
 import java.util.HashMap;
 import java.util.Map;
