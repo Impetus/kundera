@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.rest;
+package com.impetus.kundera.rest.resources;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

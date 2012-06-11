@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.rest;
+package com.impetus.kundera.rest.resources;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.ws.rs.Consumes;
@@ -25,34 +24,31 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.impetus.kundera.rest.common.TokenUtils;
+import com.impetus.kundera.rest.repository.EMFRepository;
+
 /**
- * <Prove description of functionality provided by this Type> 
+ * Application Token Resource
  * @author amresh.singh
  */
 
-@Path("/kundera/api/session/at/{applicationToken}")
-public class SessionTokenResource
-{
+@Path("/kundera/api/initialize/pu/{persistenceUnits}")
+public class ApplicationTokenResource
+{ 
+    // This method is called if TEXT_PLAIN is request    
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.TEXT_PLAIN)    
-    public String getSessionToken(@PathParam("applicationToken") String applicationToken) {        
+    public String getApplicationToken(@PathParam("persistenceUnits") String persistenceUnits) {
+        System.out.println("PUssssssssssssss:" + persistenceUnits);
         
-        EntityManagerFactory emf = EMFRepository.INSTANCE.getEMF(applicationToken);
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnits);
         
-        if(emf == null) {
-            //Handle error
-        }
+        String applicationToken = TokenUtils.generateApplicationToken();        
         
-        String sessionToken = TokenUtils.generateSessionToken();        
-        EntityManager em = emf.createEntityManager();
+        EMFRepository.INSTANCE.addEmf(applicationToken, emf);
         
-        
-        EMRepository.INSTANCE.addEm(sessionToken, em);
-        
-        return sessionToken;
+        return applicationToken;
     }    
-    
-    
 
 }
