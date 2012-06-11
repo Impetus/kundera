@@ -92,13 +92,13 @@ public final class HBaseCli
             try
             {
                 MiniZooKeeperCluster zkCluster = new MiniZooKeeperCluster(conf);
-                zkCluster.setClientPort(2181);
+                zkCluster.setDefaultClientPort(2181);
                 zkCluster.setTickTime(18000);
-                zkDir = utility.setupClusterTestBuildDir();
+                zkDir = new File(utility.getClusterTestDir().toString());
                 zkCluster.startup(zkDir);
                 utility.setZkCluster(zkCluster);
                 utility.startMiniCluster();
-                utility.getHbaseCluster().startMaster();
+                utility.getHBaseCluster().startMaster();
             }
             catch (Exception e)
             {
@@ -202,6 +202,11 @@ public final class HBaseCli
          * utility.getHBaseAdmin().deleteTable("test");
          * logger.info("Shutting down now..."); utility.shutdownMiniCluster();
          */
+        catch (Exception e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public static boolean isStarted()
