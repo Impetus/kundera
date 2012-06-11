@@ -35,9 +35,9 @@ public class PersonHBaseTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        cli = new HBaseCli();
-        // cli.init();
-        cli.startCluster();
+//        cli = new HBaseCli();
+//        // cli.init();
+//        cli.startCluster();
         emf = Persistence.createEntityManagerFactory("hbaseTest");
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
@@ -111,7 +111,7 @@ public class PersonHBaseTest extends BaseTest
         }
         em.close();
         emf.close();
-        cli.stopCluster("PERSON");
+//        cli.stopCluster("PERSON");
         LuceneCleanupUtilities.cleanLuceneDirectory("hbaseTest");
         // if (cli.isStarted)
 
