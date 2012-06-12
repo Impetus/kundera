@@ -66,13 +66,14 @@ public class EntityTransactionTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        emf = Persistence.createEntityManagerFactory("secIdxCassandraTest");
-        em = emf.createEntityManager();
 
         // cassandraSetUp();
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
         loadData();
+
+        emf = Persistence.createEntityManagerFactory("secIdxCassandraTest");
+        em = emf.createEntityManager();
     }
 
     /**
@@ -219,6 +220,34 @@ public class EntityTransactionTest extends BaseTest
 
             p = findById(PersonCassandra.class, "3", em);
             Assert.assertNull(p);
+        }
+        em.clear();
+        // persist with 1 em
+        EntityManager em1 = emf.createEntityManager();
+        em1.setFlushMode(FlushModeType.COMMIT);
+        em1.getTransaction().begin();
+        Object p3 = prepareData("4", 15);
+        em1.persist(p3);
+        em1.getTransaction().commit();
+        
+        try
+        {
+            // remove with another em with auto flush.
+            EntityManager em2 = emf.createEntityManager();
+            PersonCassandra person = em2.find(PersonCassandra.class, "4");
+            em2.remove(person);
+            em2.merge(null);
+        }
+        catch (Exception ex)
+        {
+            // Deleted records cannot be rolled back in cassandra!
+//            em1.clear();
+
+            p = findById(PersonCassandra.class, "4", em1);
+            Assert.assertNotNull(p);
+            Assert.assertEquals("vivek", p.getPersonName());
+            
+//            assertFindByName(em1, "PersonCassandra", PersonCassandra.class, "vivek", "personName");
         }
     }
 

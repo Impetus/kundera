@@ -581,7 +581,9 @@ public class PersistenceDelegator
     public final void clear()
     {
         // Move all nodes tied to this EM into detached state
-        new PersistenceCacheManager(getPersistenceCache()).clearPersistenceCache();
+        flushManager.clearFlushStack();
+        getPersistenceCache().clean();
+
     }
 
     /**
