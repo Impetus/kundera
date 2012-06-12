@@ -289,7 +289,4 @@
     </plugins>
   </build>
 
-  <modules>
-    <module>kundera-rdbms</module>
-  </modules>
 </project>
