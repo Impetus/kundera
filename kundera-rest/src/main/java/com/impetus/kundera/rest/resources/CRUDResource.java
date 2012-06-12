@@ -29,8 +29,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.JAXBUtils;
+import com.impetus.kundera.rest.common.Response;
 import com.impetus.kundera.rest.common.StreamUtils;
 import com.impetus.kundera.rest.repository.EMRepository;
 
@@ -39,9 +44,11 @@ import com.impetus.kundera.rest.repository.EMRepository;
  * @author amresh.singh
  */
 
-@Path("/kundera/api/crud/{sessionToken}/{entityClass}")
+@Path(Constants.KUNDERA_API_PATH + Constants.CRUD_RESOURCE_PATH + "/{sessionToken}/{entityClass}")
 public class CRUDResource
 {
+    /** log for this class. */
+    private static Log log = LogFactory.getLog(CRUDResource.class);
     
  
     @POST
@@ -60,19 +67,19 @@ public class CRUDResource
         {
             e.printStackTrace();
         }
-        System.out.println("sessionToken:" + sessionToken);
-        System.out.println("entityClass:" + entityClassName);
-        System.out.println(xml);
+        log.debug("POST: SessionToken:" + sessionToken);
+        log.debug("POST: entityClass:" + entityClassName);
+        log.debug("POST: XML:" + xml);
         
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
         Class<?> entityClass = metamodel.getEntityClass(entityClassName);
-        System.out.println("entityClass" + entityClass);
+        log.debug("POST: entityClass" + entityClass);
         
         Object entity = JAXBUtils.toObject(xml, entityClass);
         em.persist(entity);
 
-        return "Data saved successfully";
+        return Response.POST_RESPONSE_SUCCESS;
     }
     
     @GET
@@ -81,17 +88,17 @@ public class CRUDResource
     @Path("/{id}")
     public Object find(@PathParam("sessionToken") String sessionToken, 
             @PathParam("entityClass") String entityClassName, @PathParam("id") String id) {
-        System.out.println("sessionToken:" + sessionToken);
-        System.out.println("entityClass:" + entityClassName);
-        System.out.println("ID:" + id);
+        log.debug("GET: sessionToken:" + sessionToken);
+        log.debug("GET: entityClass:" + entityClassName);
+        log.debug("GET: ID:" + id);
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
         Class<?> entityClass = metamodel.getEntityClass(entityClassName);
-        System.out.println("entityClass" + entityClass);
+        log.debug("GET: entityClass" + entityClass);
         
         Object entity = em.find(entityClass, id);
         
-        System.out.println(entity);
+        log.debug("GET: " + entity);
         return entity;        
     }
     
@@ -111,14 +118,14 @@ public class CRUDResource
         {
             e.printStackTrace();
         }
-        System.out.println("sessionToken:" + sessionToken);
-        System.out.println("entityClass:" + entityClassName);
-        System.out.println(xml);
+        log.debug("PUT: sessionToken:" + sessionToken);
+        log.debug("PUT: entityClass:" + entityClassName);
+        log.debug("PUT: XML:" + xml);
         
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
         Class<?> entityClass = metamodel.getEntityClass(entityClassName);
-        System.out.println("entityClass" + entityClass);
+        log.debug("PUT: entityClass" + entityClass);
         
         Object entity = JAXBUtils.toObject(xml, entityClass);
         Object output = em.merge(entity);
@@ -126,36 +133,28 @@ public class CRUDResource
     }
     
     @DELETE
-    @Consumes(MediaType.APPLICATION_XML)
+    @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/delete/{id}")
-    public void delete(@PathParam("sessionToken") String sessionToken, 
-            @PathParam("entityClass") String entityClassName, @PathParam("id") String id,
-            InputStream in) {      
+    public String delete(@PathParam("sessionToken") String sessionToken, 
+            @PathParam("entityClass") String entityClassName, @PathParam("id") String id) {      
         
         
-        System.out.println("sessionToken:" + sessionToken);
-        System.out.println("entityClass:" + entityClassName);
-        System.out.println("ID:" + id);
+        log.debug("DELETE: sessionToken:" + sessionToken);
+        log.debug("DELETE: entityClass Name:" + entityClassName);
+        log.debug("DELETE: ID:" + id);    
         
-        String xml = null;
-        try
-        {
-            xml = StreamUtils.toString(in);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        System.out.println(xml);
         
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
         Class<?> entityClass = metamodel.getEntityClass(entityClassName);
-        System.out.println("entityClass" + entityClass);
+        log.debug("DELETE: entityClass" + entityClass);
         
-        Object entity = JAXBUtils.toObject(xml, entityClass);
-        em.remove(entity);        
+        //Object entity = JAXBUtils.toObject(xml, entityClass);
+        Object entity = em.find(entityClass, id);
+        em.remove(entity);     
+        
+        return Response.DELETE_RESPONSE_SUCCESS;
     }
 
 }
