@@ -25,7 +25,7 @@ public interface Constants
     public static final String SESSION_TOKEN_PREFIX = "ST";
     
     public static final String KUNDERA_API_PATH = "/kundera/api";
-    public static final String APPLICATION_TOKEN_RESOURCE_PATH = "/initialize";
+    public static final String APPLICATION_TOKEN_RESOURCE_PATH = "/application";
     public static final String SESSION_TOKEN_RESOURCE_PATH = "/session";
     public static final String CRUD_RESOURCE_PATH = "/crud";
     

@@ -67,6 +67,12 @@ public class EMFRepository
         emfMap.put(applicationToken, emf);
     }
     
+    public void removeEMF(String applicationToken) {
+        if(emfMap != null) {
+            emfMap.remove(applicationToken);
+        }
+    }
+    
     
 
 }

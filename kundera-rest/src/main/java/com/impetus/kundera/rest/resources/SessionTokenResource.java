@@ -18,6 +18,7 @@ package com.impetus.kundera.rest.resources;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -28,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.rest.common.Constants;
+import com.impetus.kundera.rest.common.Response;
 import com.impetus.kundera.rest.common.TokenUtils;
 import com.impetus.kundera.rest.repository.EMFRepository;
 import com.impetus.kundera.rest.repository.EMRepository;
@@ -37,7 +39,7 @@ import com.impetus.kundera.rest.repository.EMRepository;
  * @author amresh.singh
  */
 
-@Path(Constants.KUNDERA_API_PATH + Constants.SESSION_TOKEN_RESOURCE_PATH + "/at/{applicationToken}")
+@Path(Constants.KUNDERA_API_PATH + Constants.SESSION_TOKEN_RESOURCE_PATH)
 public class SessionTokenResource
 {
     private static Log log = LogFactory.getLog(SessionTokenResource.class);
@@ -45,6 +47,7 @@ public class SessionTokenResource
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.TEXT_PLAIN)    
+    @Path("/at/{applicationToken}")
     public String getSessionToken(@PathParam("applicationToken") String applicationToken) {        
         log.debug("GET: Application Token:" + applicationToken);
         
@@ -60,6 +63,22 @@ public class SessionTokenResource
         
         EMRepository.INSTANCE.addEm(sessionToken, em);        
         return sessionToken;
+    } 
+    
+    @DELETE
+    @Produces(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.TEXT_PLAIN) 
+    @Path("{id}")
+    public String deleteSession(@PathParam("id") String id) {        
+        log.debug("DELETE: Session Token:" + id);
+        
+        EntityManager em = EMRepository.INSTANCE.getEM(id);
+        if(em == null) {
+            //Handle Error
+        }
+        
+        EMRepository.INSTANCE.removeEm(id);        
+        return Response.DELETE_ST_SUCCESS;        
     }    
     
     

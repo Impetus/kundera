@@ -18,6 +18,7 @@ package com.impetus.kundera.rest.resources;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -28,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.rest.common.Constants;
+import com.impetus.kundera.rest.common.Response;
 import com.impetus.kundera.rest.common.TokenUtils;
 import com.impetus.kundera.rest.repository.EMFRepository;
 
@@ -36,14 +38,15 @@ import com.impetus.kundera.rest.repository.EMFRepository;
  * @author amresh.singh
  */
 
-@Path(Constants.KUNDERA_API_PATH + Constants.APPLICATION_TOKEN_RESOURCE_PATH + "/pu/{persistenceUnits}")
+@Path(Constants.KUNDERA_API_PATH + Constants.APPLICATION_TOKEN_RESOURCE_PATH)
 public class ApplicationTokenResource
 {  
     private static Log log = LogFactory.getLog(ApplicationTokenResource.class);
     
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    @Consumes(MediaType.TEXT_PLAIN)    
+    @Consumes(MediaType.TEXT_PLAIN)   
+    @Path("/pu/{persistenceUnits}")
     public String getApplicationToken(@PathParam("persistenceUnits") String persistenceUnits) {
         log.debug("GET Persistence Unit(s):" + persistenceUnits);
         
@@ -54,6 +57,23 @@ public class ApplicationTokenResource
         EMFRepository.INSTANCE.addEmf(applicationToken, emf);
         
         return applicationToken;
+    }  
+    
+    @DELETE
+    @Produces(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.TEXT_PLAIN) 
+    @Path("/close/" + "{id}")
+    public String closeApplication(@PathParam("id") String id) {        
+        log.debug("DELETE: Application Token:" + id);
+        
+        EntityManagerFactory emf = EMFRepository.INSTANCE.getEMF(id);
+        if(emf == null) {
+            //Handle Error
+        }
+        
+        EMFRepository.INSTANCE.removeEMF(id);       
+        return Response.DELETE_AT_SUCCESS;     
     }    
+    
 
 }
