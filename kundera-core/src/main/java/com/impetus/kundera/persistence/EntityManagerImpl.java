@@ -36,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.cache.Cache;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraphUtils;
@@ -167,7 +168,15 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
             throw new IllegalArgumentException("Entity to be removed must not be null.");
         }
 
+        try
+        {
         getPersistenceDelegator().remove(e);
+        }catch(Exception ex)
+        {
+            // on rollback.
+            getPersistenceDelegator().rollback();
+            throw new KunderaException(ex);
+        }
     }
 
     /*
@@ -183,10 +192,21 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
 
         if (e == null)
         {
+            getPersistenceDelegator().rollback();
             throw new IllegalArgumentException("Entity to be merged must not be null.");
         }
 
-        return getPersistenceDelegator().merge(e);
+        try
+        {
+         return getPersistenceDelegator().merge(e);
+        }catch(Exception ex)
+        {
+            // on Rollback
+            getPersistenceDelegator().rollback();
+            
+            throw new KunderaException(ex);
+        }
+        
     }
 
 
@@ -201,8 +221,15 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
             throw new IllegalArgumentException("Entity to be persisted must not be null.");
         }
 
-        getPersistenceDelegator().persist(e);
-
+        try
+        {
+         getPersistenceDelegator().persist(e);
+        } catch(Exception ex)
+        {
+            // onRollBack.
+            getPersistenceDelegator().rollback();
+            throw new KunderaException(ex);
+        }
     }
 
     /*
@@ -265,7 +292,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     public final void flush()
     {
         checkClosed();
-        persistenceDelegator.flush();
+//        persistenceDelegator.flush();
     }
 
     /*

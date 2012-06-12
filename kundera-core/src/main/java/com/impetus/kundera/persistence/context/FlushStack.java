@@ -45,4 +45,19 @@ public class FlushStack extends Stack<Node>
         return sb.toString();
     }
 
+    @Override
+    public Node push(Node node)
+    {
+        int i = indexOf(node);
+        if (i == -1)
+        {
+            super.push(node);
+        }
+        else
+        {
+            remove(i);
+            insertElementAt(node, i);
+        }
+        return node;
+    }
 }

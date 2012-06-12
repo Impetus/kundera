@@ -5,6 +5,9 @@
   <projects>
     <project>kundera-cassandra</project>
     <project>kundera-core</project>
+    <project>kundera-hbase</project>
+    <project>kundera-mongo</project>
+    <project>kundera-rdbms</project>
   </projects>
   <buildSpec>
     <buildCommand>

@@ -25,6 +25,7 @@ import com.impetus.kundera.lifecycle.NodeStateContext;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.utils.ObjectUtils;
 
 /**
  * @author amresh
@@ -120,6 +121,12 @@ public class ManagedState extends NodeState
                 nodeStateContext.setData(nodeData);
                 nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);
                 nodeStateContext.setDirty(false);    // This node is fresh and hence NOT dirty
+                
+                // One time set as required for rollback.
+//                Object original = ObjectUtils.deepCopy((Node) nodeStateContext);
+                Object original = ((Node) nodeStateContext).clone();
+                ((Node)nodeStateContext).setOriginalNode((Node) original);
+                
                 return;
             }
           
@@ -139,6 +146,9 @@ public class ManagedState extends NodeState
 
             // This node is fresh and hence NOT dirty
             nodeStateContext.setDirty(false);
+            // One time set as required for rollback.
+            Object original = ObjectUtils.deepCopy((Node) nodeStateContext);
+            ((Node)nodeStateContext).setOriginalNode((Node) original);
         }                
 
         //No state change, Node to remain in Managed state

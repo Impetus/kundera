@@ -18,12 +18,15 @@ package com.impetus.kundera.graph;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.context.PersistenceCache;
+import com.impetus.kundera.utils.ObjectUtils;
 
 /**
  * Represents a node in object graph
@@ -77,6 +80,10 @@ public class Node implements NodeStateContext
     private boolean isGraphCompleted;
 
     PersistenceDelegator pd;
+    
+    private Node originalNode;
+
+    private boolean isProcessed;
 
     public Node(String nodeId, Object data, PersistenceCache pc)
     {
@@ -126,6 +133,7 @@ public class Node implements NodeStateContext
         this.nodeId = nodeId;
         this.data = data;
         this.dataClass = data.getClass();
+        this.dirty=true;
     }
 
     /**
@@ -247,16 +255,7 @@ public class Node implements NodeStateContext
      */
     public boolean isHeadNode()
     {
-        return isHeadNode;
-    }
-
-    /**
-     * @param isHeadNode
-     *            the isHeadNode to set
-     */
-    public void setHeadNode(boolean isHeadNode)
-    {
-        this.isHeadNode = isHeadNode;
+        return this != null && this.parents == null? true:false;
     }
 
     /**
@@ -406,15 +405,31 @@ public class Node implements NodeStateContext
     @Override
     public String toString()
     {
-        return "[" + nodeId + "]";
+        return "[" + nodeId + "]" + nodeId;
     }
 
     @Override
     public boolean equals(Object otherNode)
     {
-        return super.equals(otherNode);
+        if(otherNode ==null)
+        {
+            return false;
+        }
+        
+        if(!(otherNode instanceof Node))
+        {
+            return false;
+        }
+        
+        return this.nodeId.equals(((Node)otherNode).getNodeId());
     }
 
+    @Override
+    public int hashCode()
+    {
+        return HashCodeBuilder.reflectionHashCode(this.nodeId);
+    }
+    
     // ////////////////////////////////////////
     /* CRUD related operations on this node */
     // ////////////////////////////////////////
@@ -503,6 +518,7 @@ public class Node implements NodeStateContext
         if (isDirty())
         {
             getCurrentNodeState().handleFlush(this);
+            this.isProcessed = true;
         }
     }
 
@@ -541,5 +557,43 @@ public class Node implements NodeStateContext
     {
         this.isGraphCompleted = isGraphCompleted;
     }
-    
+
+    /**
+     * @return the originalNode
+     */
+    public Node getOriginalNode()
+    {
+        return originalNode;
+    }
+
+    /**
+     * @param originalNode the originalNode to set
+     */
+    public void setOriginalNode(Node originalNode)
+    {
+        this.originalNode = originalNode;
+    }
+
+    /**
+     * @return the isProcessed
+     */
+    public boolean isProcessed()
+    {
+        return isProcessed;
+    }
+
+
+    @Override
+    public Node clone()
+    {
+        Node cloneCopy = new Node(this.nodeId, ObjectUtils.deepCopy(this.getData()), this.persistenceCache);
+        cloneCopy.setChildren(this.children);
+        cloneCopy.setParents(this.parents);
+        cloneCopy.setDataClass(this.dataClass);
+        cloneCopy.setDepth(this.depth);
+        cloneCopy.setTraversed(this.traversed);
+        
+        return cloneCopy;
+        
+    }
 }

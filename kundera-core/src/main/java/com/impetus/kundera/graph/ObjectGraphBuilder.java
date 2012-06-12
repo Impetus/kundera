@@ -38,9 +38,14 @@ import com.impetus.kundera.utils.ObjectUtils;
  */
 public class ObjectGraphBuilder
 {
-    PersistenceCache persistenceCache;
+    private PersistenceCache persistenceCache;
 
-    public ObjectGraph getObjectGraph(Object entity, NodeState initialNodeState, PersistenceCache persistenceCache)
+    public ObjectGraphBuilder(PersistenceCache pcCache)
+    {
+        this.persistenceCache = pcCache;
+    }
+    
+    public ObjectGraph getObjectGraph(Object entity, NodeState initialNodeState)
     {
         // Initialize object graph
         ObjectGraph objectGraph = new ObjectGraph();

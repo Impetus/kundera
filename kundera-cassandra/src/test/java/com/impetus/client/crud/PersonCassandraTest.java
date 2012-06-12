@@ -1,5 +1,21 @@
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.client.crud;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +23,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.FlushModeType;
 import javax.persistence.Persistence;
 
 import junit.framework.Assert;
@@ -48,6 +65,7 @@ public class PersonCassandraTest extends BaseTest
     /** The em. */
     private static EntityManager em;
 
+    /** The col. */
     private Map<Object, Object> col;
 
     /**
@@ -66,6 +84,8 @@ public class PersonCassandraTest extends BaseTest
 
     /**
      * On insert cassandra.
+     *
+     * @throws Exception the exception
      */
     @Test
     public void onInsertCassandra() throws Exception
@@ -95,9 +115,155 @@ public class PersonCassandraTest extends BaseTest
         assertFindByRange(em, "PersonCassandra", PersonCassandra.class, "1", "2", "personId");
         assertFindWithoutWhereClause(em, "PersonCassandra", PersonCassandra.class);
     }
+    
+    /**
+     * On rollback.
+     *
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws TException the t exception
+     * @throws InvalidRequestException the invalid request exception
+     * @throws UnavailableException the unavailable exception
+     * @throws TimedOutException the timed out exception
+     * @throws SchemaDisagreementException the schema disagreement exception
+     */
+    @Test
+    public void onRollback() throws IOException, TException, InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
+    {
+        em.setFlushMode(FlushModeType.COMMIT);
+        em.getTransaction().begin();
+
+        // cassandraSetUp();
+        CassandraCli.cassandraSetUp();
+        CassandraCli.createKeySpace("KunderaExamples");
+        loadData();
+        Object p1 = prepareData("1", 10);
+        Object p2 = prepareData("2", 20);
+        Object p3 = prepareData("3", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+        
+        // roll back.
+        em.getTransaction().rollback();
+        PersonCassandra p = findById(PersonCassandra.class, "1", em);
+        Assert.assertNull(p);
+        
+        // on commit.
+        em.getTransaction().commit();
+
+        // Still no record should be flushed as already rollback!
+        p = findById(PersonCassandra.class, "1", em);
+        Assert.assertNull(p);
+    }
+
+
+    /**
+     * On commit.
+     *
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws TException the t exception
+     * @throws InvalidRequestException the invalid request exception
+     * @throws UnavailableException the unavailable exception
+     * @throws TimedOutException the timed out exception
+     * @throws SchemaDisagreementException the schema disagreement exception
+     */
+    @Test
+    public void onCommit() throws IOException, TException, InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
+    {
+        em.setFlushMode(FlushModeType.COMMIT);
+
+        em.getTransaction().begin();
+
+        // cassandraSetUp();
+        CassandraCli.cassandraSetUp();
+        CassandraCli.createKeySpace("KunderaExamples");
+        loadData();
+        Object p1 = prepareData("1", 10);
+        Object p2 = prepareData("2", 20);
+        Object p3 = prepareData("3", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+        
+        
+        
+        // on commit.
+        em.getTransaction().commit();
+        
+        PersonCassandra p = findById(PersonCassandra.class, "1", em);
+        Assert.assertNotNull(p);
+
+        
+        ((PersonCassandra) p2).setPersonName("rollback");
+        em.merge(p2);
+        
+        
+        // roll back, should roll back person name for p2!
+        em.getTransaction().rollback();
+        p = findById(PersonCassandra.class, "1", em);
+        Assert.assertNotNull(p);
+
+        p = findById(PersonCassandra.class, "2", em);
+        Assert.assertNotNull(p);
+        Assert.assertEquals("vivek",p.getPersonName());
+        Assert.assertNotSame("rollback",p.getPersonName());
+
+    }
+
+    
+    /**
+     * Rollback on error.
+     *
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws TException the t exception
+     * @throws InvalidRequestException the invalid request exception
+     * @throws UnavailableException the unavailable exception
+     * @throws TimedOutException the timed out exception
+     * @throws SchemaDisagreementException the schema disagreement exception
+     */
+    @Test
+    public void rollbackOnError() throws IOException, TException, InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
+    {
+        PersonCassandra p = null;
+        try
+        {
+        // cassandraSetUp();
+        CassandraCli.cassandraSetUp();
+        CassandraCli.createKeySpace("KunderaExamples");
+        loadData();
+        Object p1 = prepareData("1", 10);
+        Object p2 = prepareData("2", 20);
+        em.persist(p1);
+        em.persist(p2);
+        
+        p = findById(PersonCassandra.class, "1", em);
+        Assert.assertNotNull(p);
+
+        Object p3 = prepareData("3", 15);
+        em.persist(p3);
+        
+        // Assert on rollback on error.
+           ((PersonCassandra) p2).setPersonName("rollback");
+            em.merge(p2);
+            em.merge(null);
+        }
+        catch (Exception ex)
+        {
+            p = findById(PersonCassandra.class, "1", em);
+            Assert.assertNull(p);
+
+            p = findById(PersonCassandra.class, "2", em);
+            Assert.assertNull(p);
+            
+            p = findById(PersonCassandra.class, "3", em);
+            Assert.assertNull(p);
+        }
+    }
 
     /**
      * On merge cassandra.
+     *
+     * @throws Exception the exception
      */
     @Test
     public void onMergeCassandra() throws Exception
@@ -144,12 +310,12 @@ public class PersonCassandraTest extends BaseTest
 
     /**
      * Load cassandra specific data.
-     * 
-     * @throws TException
-     * @throws InvalidRequestException
-     * @throws UnavailableException
-     * @throws TimedOutException
-     * @throws SchemaDisagreementException
+     *
+     * @throws TException the t exception
+     * @throws InvalidRequestException the invalid request exception
+     * @throws UnavailableException the unavailable exception
+     * @throws TimedOutException the timed out exception
+     * @throws SchemaDisagreementException the schema disagreement exception
      */
     private void loadData() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException

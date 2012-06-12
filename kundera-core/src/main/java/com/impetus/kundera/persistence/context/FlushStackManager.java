@@ -29,7 +29,7 @@ import com.impetus.kundera.metadata.model.Relation;
  * @author amresh.singh
  */
 public class FlushStackManager
-{
+{/*
     public void buildFlushStack(PersistenceCache pc)
     {
 
@@ -45,16 +45,16 @@ public class FlushStackManager
 
     }
 
-    /**
+    *//**
      * Pushes <code>node</code> and its descendants recursively to flush stack
      * residing into persistence cache
      * 
      * @param pc
      * @param node
-     */
+     *//*
     public void addNodesToFlushStack(PersistenceCache pc, Node node)
     {
-        FlushStack flushStack = pc.getFlushStack();
+//        FlushStack flushStack = pc.getFlushStack();
         MainCache mainCache = (MainCache) pc.getMainCache();
 
         Map<NodeLink, Node> children = node.getChildren();
@@ -177,12 +177,12 @@ public class FlushStackManager
 
     }
 
-    /**
+    *//**
      * Empties Flush stack present in a PersistenceCache
      * 
      * @param pc
      *            Persistence Cache holding flush stack
-     */
+     *//*
     public void clearFlushStack(PersistenceCache pc)
     {
         FlushStack flushStack = pc.getFlushStack();
@@ -192,4 +192,4 @@ public class FlushStackManager
             flushStack.clear();
         }
     }
-}
+*/}

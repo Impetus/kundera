@@ -31,8 +31,8 @@ public class FlushStackTest
 {
 
     FlushStack fs;
-
-    PersistenceCache pc;
+    
+    FlushManager flushManager;
 
     /**
      * @throws java.lang.Exception
@@ -40,8 +40,9 @@ public class FlushStackTest
     @Before
     public void setUp() throws Exception
     {
-        pc = new PersistenceCache();
-        fs = pc.getFlushStack();
+        flushManager = new FlushManager();
+        
+        fs = flushManager.getFlushStack();
     }
 
     /**
@@ -55,6 +56,7 @@ public class FlushStackTest
     @Test
     public void testFlushStackPush()
     {
+        PersistenceCache pc = new PersistenceCache();
         fs.push(new Node("A", new Object(), pc));
         fs.push(new Node("B", new Object(), pc));
         fs.push(new Node("C", new Object(), pc));
