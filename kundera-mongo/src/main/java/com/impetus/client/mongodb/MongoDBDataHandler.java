@@ -149,8 +149,13 @@ final class MongoDBDataHandler
                     {
                         relationValue = new HashMap<String, Object>();
                     }
-                    Object colValue = document.get(r);
-                    relationValue.put(r, colValue);
+                    if(r != null && ! r.equals(m.getIdColumn().getName())) {
+                        Object colValue = document.get(r);
+                        relationValue.put(r, colValue);
+                    } else {
+                        relationValue.put(r, null);
+                    }
+                    
                 }
 
                 if (!relationValue.isEmpty())
