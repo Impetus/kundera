@@ -68,7 +68,7 @@ public class SessionTokenResource
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.TEXT_PLAIN) 
-    @Path("{id}")
+    @Path("/{id}")
     public String deleteSession(@PathParam("id") String id) {        
         log.debug("DELETE: Session Token:" + id);
         

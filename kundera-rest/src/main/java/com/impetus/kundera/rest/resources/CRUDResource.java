@@ -52,7 +52,7 @@ public class CRUDResource
     
  
     @POST
-    @Consumes(MediaType.APPLICATION_XML)
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.TEXT_PLAIN)
     public String insert(@PathParam("sessionToken") String sessionToken, 
             @PathParam("entityClass") String entityClassName, 
@@ -84,7 +84,7 @@ public class CRUDResource
     
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.APPLICATION_XML)
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Path("/{id}")
     public Object find(@PathParam("sessionToken") String sessionToken, 
             @PathParam("entityClass") String entityClassName, @PathParam("id") String id) {
@@ -103,8 +103,8 @@ public class CRUDResource
     }
     
     @PUT
-    @Consumes(MediaType.APPLICATION_XML)
-    @Produces(MediaType.APPLICATION_XML)
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Object update(@PathParam("sessionToken") String sessionToken, 
             @PathParam("entityClass") String entityClassName, 
             InputStream in) {      

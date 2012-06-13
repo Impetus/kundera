@@ -62,7 +62,7 @@ public class ApplicationTokenResource
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.TEXT_PLAIN) 
-    @Path("/close/" + "{id}")
+    @Path("/{id}")
     public String closeApplication(@PathParam("id") String id) {        
         log.debug("DELETE: Application Token:" + id);
         
