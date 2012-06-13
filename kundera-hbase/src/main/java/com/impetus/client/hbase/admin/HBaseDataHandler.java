@@ -233,7 +233,8 @@ public class HBaseDataHandler implements DataHandler
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            log.error("Error while creating an instance of " + clazz);
+            throw new PersistenceException(e);
         }
         finally
         {

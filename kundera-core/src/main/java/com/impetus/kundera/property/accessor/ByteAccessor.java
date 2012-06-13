@@ -17,6 +17,9 @@ package com.impetus.kundera.property.accessor;
 
 import java.nio.ByteBuffer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
@@ -27,6 +30,9 @@ import com.impetus.kundera.property.PropertyAccessor;
  */
 public class ByteAccessor implements PropertyAccessor<Byte>
 {
+
+    /** The log. */
+    private static Logger log = LoggerFactory.getLogger(ByteAccessor.class);
 
     /*
      * (non-Javadoc)
@@ -43,7 +49,7 @@ public class ByteAccessor implements PropertyAccessor<Byte>
         }
         catch (NumberFormatException e)
         {
-            e.printStackTrace();
+            log.warn("number format exception caught!,returning null!");   
             return null;
         }
     }

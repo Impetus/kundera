@@ -15,7 +15,6 @@
  */
 package com.impetus.kundera.utils;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,8 +27,9 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 
 import org.cloner.Cloner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -44,6 +44,9 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
 public class ObjectUtils
 {
 
+    /** The log. */
+    private static Logger log = LoggerFactory.getLogger(ObjectUtils.class);
+
     public static final Object deepCopy(Object objectToCopy)
     {
         Object destObject;
@@ -53,7 +56,7 @@ public class ObjectUtils
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            log.warn("Returning null as error during clone, caused by:" + e.getMessage());
             return null;
         }
         return destObject;
@@ -168,24 +171,24 @@ public class ObjectUtils
         }
         catch (InstantiationException e)
         {
-            e.printStackTrace();
+            log.warn("Returning null as error during clone, caused by:" + e.getMessage());
             return null;
         }
         catch (IllegalAccessException e)
         {
-            e.printStackTrace();
+            log.warn("Returning null as error during clone, caused by:" + e.getMessage());
             return null;
         }
 
         catch (InvocationTargetException e)
         {
-            e.printStackTrace();
+            log.warn("Returning null as error during clone, caused by:" + e.getMessage());
             return null;
         }
         
         catch (NoSuchMethodException e)
         {
-            e.printStackTrace();
+            log.warn("Returning null as error during clone, caused by:" + e.getMessage());
             return null;
         }
 

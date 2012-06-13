@@ -42,6 +42,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;
 
@@ -197,13 +198,13 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
         }
         catch (InstantiationException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error during populating entities:" + e.getMessage());
+            throw new EntityReaderException(e);
         }
         catch (IllegalAccessException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error during populating entities:" + e.getMessage());
+            throw new EntityReaderException(e);
         }
         return ls;
 

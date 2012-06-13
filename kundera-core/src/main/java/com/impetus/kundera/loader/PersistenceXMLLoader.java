@@ -114,8 +114,8 @@ public class PersistenceXMLLoader
             }
             catch (ParserConfigurationException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error("Error during parsing, Caused by: " + e.getMessage());
+                throw new PersistenceLoaderException(e);
             }
 
             List errors = new ArrayList();

@@ -45,7 +45,7 @@ import com.impetus.client.persistence.CassandraCli;
 
 /**
  * The Class EntityTransactionTest.
- *
+ * 
  * @author vivek.mishra
  */
 public class EntityTransactionTest extends BaseTest
@@ -229,7 +229,7 @@ public class EntityTransactionTest extends BaseTest
         Object p3 = prepareData("4", 15);
         em1.persist(p3);
         em1.getTransaction().commit();
-        
+
         try
         {
             // remove with another em with auto flush.
@@ -241,13 +241,12 @@ public class EntityTransactionTest extends BaseTest
         catch (Exception ex)
         {
             // Deleted records cannot be rolled back in cassandra!
-//            em1.clear();
+            // em1.clear();
 
             p = findById(PersonCassandra.class, "4", em1);
             Assert.assertNotNull(p);
             Assert.assertEquals("vivek", p.getPersonName());
-            
-//            assertFindByName(em1, "PersonCassandra", PersonCassandra.class, "vivek", "personName");
+
         }
     }
 

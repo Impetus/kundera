@@ -2,13 +2,7 @@
 <projectDescription>
   <name>kundera-tests</name>
   <comment>NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
-  <projects>
-    <project>kundera-cassandra</project>
-    <project>kundera-core</project>
-    <project>kundera-hbase</project>
-    <project>kundera-mongo</project>
-    <project>kundera-rdbms</project>
-  </projects>
+  <projects/>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.jdt.core.javabuilder</name>
