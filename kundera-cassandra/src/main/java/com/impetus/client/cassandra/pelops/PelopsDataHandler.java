@@ -57,7 +57,6 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  */
 final class PelopsDataHandler
 {
-
     /** The timestamp. */
     private long timestamp = System.currentTimeMillis();
 
@@ -84,7 +83,7 @@ final class PelopsDataHandler
      *             the exception
      */
     Object fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String rowKey,
-            List<String> relationNames, boolean isWrapReq) throws Exception
+            List<String> relationNames, boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
     {
         List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
         Object e = null;
@@ -92,22 +91,20 @@ final class PelopsDataHandler
         if (!superColumnNames.isEmpty())
         {
             List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(), rowKey,
-                    Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
+                    Selector.newColumnsPredicateAll(true, 10000), consistencyLevel);
             e = fromSuperColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null, thriftSuperColumns),
                     relationNames, isWrapReq);
-
         }
         else
         {
-
             List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
-            
+
             ByteBuffer rKeyAsByte = ByteBufferUtil.bytes(rowKey);
             rowKeys.add(ByteBufferUtil.bytes(rowKey));
 
             Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow = selector
                     .getColumnOrSuperColumnsFromRows(new ColumnParent(m.getTableName()), rowKeys,
-                            Selector.newColumnsPredicateAll(true, 10000), ConsistencyLevel.ONE);
+                            Selector.newColumnsPredicateAll(true, 10000), consistencyLevel);
 
             List<ColumnOrSuperColumn> colList = columnOrSuperColumnsFromRow.get(rKeyAsByte);
 
@@ -151,17 +148,18 @@ final class PelopsDataHandler
      *             the exception
      */
     List<Object> fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, List<String> relationNames,
-            boolean isWrapReq, Object... rowIds) throws Exception
+            boolean isWrapReq, ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception
     {
         List<Object> entities = new ArrayList<Object>();
         if (rowIds != null)
         {
             for (Object rowKey : rowIds)
             {
-                Object e = fromThriftRow(selector, clazz, m, rowKey.toString(), relationNames, isWrapReq);
-                if( e != null)
+                Object e = fromThriftRow(selector, clazz, m, rowKey.toString(), relationNames, isWrapReq,
+                        consistencyLevel);
+                if (e != null)
                 {
-                 entities.add(e);
+                    entities.add(e);
                 }
             }
         }
@@ -651,7 +649,7 @@ final class PelopsDataHandler
                 try
                 {
                     byte[] value = PropertyAccessorHelper.get(e, field);
-                    
+
                     if (value != null)
                     {
                         Column col = new Column();
@@ -1044,5 +1042,4 @@ final class PelopsDataHandler
     {
         return System.currentTimeMillis();
     }
-
 }

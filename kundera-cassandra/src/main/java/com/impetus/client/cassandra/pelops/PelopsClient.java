@@ -85,6 +85,8 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 public class PelopsClient extends ClientBase implements Client<CassQuery>
 {
 
+    private ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
+
     /** log for this class. */
     private static Log log = LogFactory.getLog(PelopsClient.class);
 
@@ -131,7 +133,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         List<String> relationNames = entityMetadata.getRelationNames();
         return find(entityClass, entityMetadata, rowId != null ? rowId.toString() : null, relationNames);
     }
-
 
     /*
      * (non-Javadoc)
@@ -180,7 +181,9 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         List entities = null;
         try
         {
-            entities = handler.fromThriftRow(selector, entityClass, metadata, relationNames, isWrapReq, rowIds);
+            // TODO
+            entities = handler.fromThriftRow(selector, entityClass, metadata, relationNames, isWrapReq,
+                    consistencyLevel, rowIds);
         }
         catch (Exception e)
         {
@@ -222,7 +225,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         return entities;
     }
 
-
     /*
      * (non-Javadoc)
      * 
@@ -239,7 +241,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
 
         RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        rowDeletor.deleteRow(metadata.getTableName(), pKey.toString(), ConsistencyLevel.ONE);
+        rowDeletor.deleteRow(metadata.getTableName(), pKey.toString(), consistencyLevel);
         getIndexManager().remove(metadata, entity, pKey.toString());
     }
 
@@ -290,11 +292,10 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             String pk = (String) key;
 
             mutator.writeColumns(joinTableName, Bytes.fromUTF8(pk), Arrays.asList(columns.toArray(new Column[0])));
-            mutator.execute(ConsistencyLevel.ONE);
+            mutator.execute(consistencyLevel);
         }
 
     }
-
 
     /*
      * (non-Javadoc)
@@ -311,7 +312,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
         List<Column> columns = selector.getColumnsFromRow(joinTableName, Bytes.fromUTF8(parentId),
-                Selector.newColumnsPredicateAll(true, 10), ConsistencyLevel.ONE);
+                Selector.newColumnsPredicateAll(true, 10), consistencyLevel);
 
         // PelopsDataHandler handler = new PelopsDataHandler(this);
         List<E> foreignKeys = handler.getForeignKeysFromJoinTable(inverseJoinColumnName, columns);
@@ -339,8 +340,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                 Selector.newIndexExpression(columnName + "_" + childIdStr, IndexOperator.EQ,
                         Bytes.fromByteArray(childIdStr.getBytes())));
 
-        Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(tableName, ix, slicePredicate,
-                ConsistencyLevel.ONE);
+        Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(tableName, ix, slicePredicate, consistencyLevel);
 
         List<Object> rowKeys = new ArrayList<Object>();
 
@@ -380,7 +380,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         }
 
         RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        rowDeletor.deleteRow(tableName, columnValue.toString(), ConsistencyLevel.ONE);
+        rowDeletor.deleteRow(tableName, columnValue.toString(), consistencyLevel);
     }
 
     /**
@@ -406,7 +406,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         if (ixClause.isEmpty())
         {
             Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(),
-                    selector.newKeyRange("", "", 100), slicePredicate, ConsistencyLevel.ONE);
+                    selector.newKeyRange("", "", 100), slicePredicate, consistencyLevel);
             entities = new ArrayList<Object>(qResults.size());
             populateData(m, qResults, entities, isRelation, relations);
         }
@@ -416,7 +416,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             for (IndexClause ix : ixClause)
             {
                 Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
-                        ConsistencyLevel.ONE);
+                        consistencyLevel);
                 // iterate through complete map and
                 populateData(m, qResults, entities, isRelation, relations);
             }
@@ -451,7 +451,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
 
         List<KeySlice> keys = selector.getKeySlices(new ColumnParent(m.getTableName()),
                 selector.newKeyRange(Bytes.fromByteArray(minVal), Bytes.fromByteArray(maxVal), 10000), slicePredicate,
-                ConsistencyLevel.ONE);
+                consistencyLevel);
 
         List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
 
@@ -515,8 +515,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         Map<Bytes, List<Column>> qResults;
         try
         {
-            qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
-                    ConsistencyLevel.ONE);
+            qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate, consistencyLevel);
         }
         catch (PelopsException e)
         {
@@ -597,74 +596,81 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit()));
         // thrift.get
         IPooledConnection connection = thrift.getConnection();
-		try {
-			org.apache.cassandra.thrift.Cassandra.Client thriftClient = connection.getAPI();
-	
-	        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
-	        CqlResult result = null;
-	        List returnedEntities = null;
-	        try
-	        {
-	            result = thriftClient.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
-	                    org.apache.cassandra.thrift.Compression.NONE);
-	            if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
-	            {
-	                returnedEntities = new ArrayList<Object>(result.getRowsSize());
-	                Iterator<CqlRow> iter = result.getRowsIterator();
-	                while (iter.hasNext())
-	                {
-	                    CqlRow row = iter.next();
-	                    String rowKey = Bytes.toUTF8(row.getKey());
-	
-	                    ThriftRow thriftRow = handler.new ThriftRow(rowKey, entityMetadata.getTableName(),
-	                            row.getColumns(), null);
-	
-	                    Object entity = handler.fromColumnThriftRow(clazz, entityMetadata, thriftRow, relationalField,
-	                            relationalField != null && !relationalField.isEmpty());
-	                    returnedEntities.add(entity);
-	                }
-	            }
-	        }
-	        catch (InvalidRequestException e)
-	        {
-	            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-	            throw new PersistenceException(e);
-	        }
-	        catch (UnavailableException e)
-	        {
-	            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-	            throw new PersistenceException(e);
-	        }
-	        catch (TimedOutException e)
-	        {
-	            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-	            throw new PersistenceException(e);
-	        }
-	        catch (SchemaDisagreementException e)
-	        {
-	            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-	            throw new PersistenceException(e);
-	        }
-	        catch (TException e)
-	        {
-	            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-	            throw new PersistenceException(e);
-	        }
-	        catch (Exception e)
-	        {
-	            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-	            throw new PersistenceException(e);
-	        }
-	        return returnedEntities;
-		} finally {
-			try {
-				if (connection != null) {
-					connection.release();
-				}
-			} catch (Exception e) {
-				log.warn("Releasing connection for native CQL query failed", e);
-			}
-		}
+        try
+        {
+            org.apache.cassandra.thrift.Cassandra.Client thriftClient = connection.getAPI();
+
+            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
+            CqlResult result = null;
+            List returnedEntities = null;
+            try
+            {
+                result = thriftClient.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
+                        org.apache.cassandra.thrift.Compression.NONE);
+                if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
+                {
+                    returnedEntities = new ArrayList<Object>(result.getRowsSize());
+                    Iterator<CqlRow> iter = result.getRowsIterator();
+                    while (iter.hasNext())
+                    {
+                        CqlRow row = iter.next();
+                        String rowKey = Bytes.toUTF8(row.getKey());
+
+                        ThriftRow thriftRow = handler.new ThriftRow(rowKey, entityMetadata.getTableName(),
+                                row.getColumns(), null);
+
+                        Object entity = handler.fromColumnThriftRow(clazz, entityMetadata, thriftRow, relationalField,
+                                relationalField != null && !relationalField.isEmpty());
+                        returnedEntities.add(entity);
+                    }
+                }
+            }
+            catch (InvalidRequestException e)
+            {
+                log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+                throw new PersistenceException(e);
+            }
+            catch (UnavailableException e)
+            {
+                log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+                throw new PersistenceException(e);
+            }
+            catch (TimedOutException e)
+            {
+                log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+                throw new PersistenceException(e);
+            }
+            catch (SchemaDisagreementException e)
+            {
+                log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+                throw new PersistenceException(e);
+            }
+            catch (TException e)
+            {
+                log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+                throw new PersistenceException(e);
+            }
+            catch (Exception e)
+            {
+                log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+                throw new PersistenceException(e);
+            }
+            return returnedEntities;
+        }
+        finally
+        {
+            try
+            {
+                if (connection != null)
+                {
+                    connection.release();
+                }
+            }
+            catch (Exception e)
+            {
+                log.warn("Releasing connection for native CQL query failed", e);
+            }
+        }
     }
 
     /*
@@ -717,7 +723,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
 
         }
 
-        mutator.execute(ConsistencyLevel.ONE);
+        mutator.execute(consistencyLevel);
         tf = null;
     }
 
@@ -999,7 +1005,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             throw new PersistenceException("PelopsClient is closed.");
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
         return selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames),
-                ConsistencyLevel.ONE);
+                consistencyLevel);
     }
 
     /**
@@ -1012,5 +1018,8 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         return !closed;
     }
 
-
+    public void setConsistencyLevel(ConsistencyLevel cLevel)
+    {
+        this.consistencyLevel = cLevel;
+    }
 }
