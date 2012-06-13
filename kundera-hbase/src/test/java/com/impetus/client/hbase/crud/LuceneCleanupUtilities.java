@@ -41,18 +41,19 @@ public class LuceneCleanupUtilities
                 File directory = new File(luceneDir);
                 // Get all files in directory
                 File[] files = directory.listFiles();
-                for (File file : files)
+                if (files != null)
                 {
-                    // Delete each file
-                    if (!file.delete())
+                    for (File file : files)
                     {
-                        // Failed to delete file
-                        System.out.println("Failed to delete " + file);
+                        // Delete each file
+                        if (!file.delete())
+                        {
+                            // Failed to delete file
+                            System.out.println("Failed to delete " + file);
+                        }
                     }
                 }
             }
         }
-
     }
-
 }
