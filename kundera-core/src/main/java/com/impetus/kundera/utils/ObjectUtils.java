@@ -122,64 +122,66 @@ public class ObjectUtils
                 Field embeddedColumnField = embeddedColumn.getField();
 
                 Object sourceEmbeddedObj = PropertyAccessorHelper.getObject(source, embeddedColumnField);
-
-                if (embeddedColumnField.getAnnotation(Embedded.class) != null)
+                if(sourceEmbeddedObj != null)
                 {
-                    // Copy embedded objects
-                    Class<?> embeddedColumnClass = embeddedColumnField.getType();
-                    Object targetEmbeddedObj = embeddedColumnClass.newInstance();
-
-                    for (Column column : embeddedColumn.getColumns())
+                    if (embeddedColumnField.getAnnotation(Embedded.class) != null)
                     {
-                        PropertyAccessorHelper.set(targetEmbeddedObj, column.getField(),
-                                PropertyAccessorHelper.getObject(sourceEmbeddedObj, column.getField()));
-                    }
+                        // Copy embedded objects
+                        Class<?> embeddedColumnClass = embeddedColumnField.getType();
+                        Object targetEmbeddedObj = embeddedColumnClass.newInstance();
 
-                    PropertyAccessorHelper.set(target, embeddedColumnField, targetEmbeddedObj);
-                }
-                else if (embeddedColumnField.getAnnotation(ElementCollection.class) != null)
-                {
-                    // Copy element collections
-                    if (sourceEmbeddedObj instanceof Collection)
-                    {
-                        Class<?> ecDeclaredClass = embeddedColumnField.getType();
-                        Class<?> actualEcObjectClass = sourceEmbeddedObj.getClass();
-                        Class<?> genericClass = PropertyAccessorHelper.getGenericClass(embeddedColumnField);
-
-                        Object targetCollectionObject = actualEcObjectClass.newInstance();
-
-                        for (Object sourceEcObj : (Collection) sourceEmbeddedObj)
+                        for (Column column : embeddedColumn.getColumns())
                         {
-                            Object targetEcObj = genericClass.newInstance();
-                            for (Field f : genericClass.getDeclaredFields())
-                            {
-                                PropertyAccessorHelper.set(targetEcObj, f,
-                                        PropertyAccessorHelper.getObject(sourceEcObj, f));
-
-                            }
-
-                            if (List.class.isAssignableFrom(ecDeclaredClass))
-                            {
-                                Method m = actualEcObjectClass.getMethod("add", Object.class);
-                                m.invoke(targetCollectionObject, targetEcObj);
-
-                            }
-                            else if (Set.class.isAssignableFrom(ecDeclaredClass))
-                            {
-                                Method m = actualEcObjectClass.getMethod("add", Object.class);
-                                m.invoke(targetCollectionObject, targetEcObj);
-                            }
-
+                            PropertyAccessorHelper.set(targetEmbeddedObj, column.getField(),
+                                    PropertyAccessorHelper.getObject(sourceEmbeddedObj, column.getField()));
                         }
-                        PropertyAccessorHelper.set(target, embeddedColumnField, targetCollectionObject);
-                    }
 
-                }
-                else if (embeddedColumnField.getAnnotation(javax.persistence.Column.class) != null)
-                {
-                    // Copy columns
-                    PropertyAccessorHelper.set(target, embeddedColumnField, sourceEmbeddedObj);
-                }
+                        PropertyAccessorHelper.set(target, embeddedColumnField, targetEmbeddedObj);
+                    }
+                    else if (embeddedColumnField.getAnnotation(ElementCollection.class) != null)
+                    {
+                        // Copy element collections
+                        if (sourceEmbeddedObj instanceof Collection)
+                        {
+                            Class<?> ecDeclaredClass = embeddedColumnField.getType();
+                            Class<?> actualEcObjectClass = sourceEmbeddedObj.getClass();
+                            Class<?> genericClass = PropertyAccessorHelper.getGenericClass(embeddedColumnField);
+
+                            Object targetCollectionObject = actualEcObjectClass.newInstance();
+
+                            for (Object sourceEcObj : (Collection) sourceEmbeddedObj)
+                            {
+                                Object targetEcObj = genericClass.newInstance();
+                                for (Field f : genericClass.getDeclaredFields())
+                                {
+                                    PropertyAccessorHelper.set(targetEcObj, f,
+                                            PropertyAccessorHelper.getObject(sourceEcObj, f));
+
+                                }
+
+                                if (List.class.isAssignableFrom(ecDeclaredClass))
+                                {
+                                    Method m = actualEcObjectClass.getMethod("add", Object.class);
+                                    m.invoke(targetCollectionObject, targetEcObj);
+
+                                }
+                                else if (Set.class.isAssignableFrom(ecDeclaredClass))
+                                {
+                                    Method m = actualEcObjectClass.getMethod("add", Object.class);
+                                    m.invoke(targetCollectionObject, targetEcObj);
+                                }
+
+                            }
+                            PropertyAccessorHelper.set(target, embeddedColumnField, targetCollectionObject);
+                        }
+
+                    }
+                    else if (embeddedColumnField.getAnnotation(javax.persistence.Column.class) != null)
+                    {
+                        // Copy columns
+                        PropertyAccessorHelper.set(target, embeddedColumnField, sourceEmbeddedObj);
+                    } 
+                }                
             }
 
             // Put this object into copied object map
