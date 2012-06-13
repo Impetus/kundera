@@ -15,9 +15,14 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.schemamanager;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
@@ -60,6 +65,16 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private Cassandra.Client cassandra_client;
 
     /**
+     * replication_factor will use in keyspace creation;
+     */
+    public static String replication_factor = "1";
+
+    /**
+     * placement_strategy will use in keyspace creation;
+     */
+    public static String placement_strategy = "org.apache.cassandra.locator.SimpleStrategy";
+
+    /**
      * logger used for logging statement.
      */
     private static final Logger logger = LoggerFactory.getLogger(CassandraSchemaManager.class);
@@ -76,6 +91,30 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     public CassandraSchemaManager(String clientFactory)
     {
         super(clientFactory);
+        loadCassandraProperties();
+    }
+
+    /**
+     * loadCassandraProperties load's all cassandra specific properties
+     */
+    private void loadCassandraProperties()
+    {
+        Properties properties = new Properties();
+        try
+        {
+            InputStream inStream = ClassLoader.getSystemResourceAsStream("kundera-cassandra.properties");
+            properties.load(inStream);
+            replication_factor = properties.getProperty("replication_factor");
+            placement_strategy = properties.getProperty("placement_strategy");
+        }
+        catch (FileNotFoundException e)
+        {
+            logger.warn("kundera cassandra property not found, kundera will use default properties");
+        }
+        catch (IOException e)
+        {
+            logger.warn("kundera cassandra property not found, kundera will use default properties");
+        }
     }
 
     @Override
@@ -134,6 +173,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", sdex, "Cassandra",
                     databaseName);
         }
+        catch (InterruptedException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -144,9 +188,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @throws InvalidRequestException
      * @throws SchemaDisagreementException
      * @throws TException
+     * @throws InterruptedException
      */
     private void addTablesToKeyspace(List<TableInfo> tableInfos, KsDef ksDef) throws InvalidRequestException,
-            SchemaDisagreementException, TException
+            SchemaDisagreementException, TException, InterruptedException
     {
         cassandra_client.set_keyspace(databaseName);
         for (TableInfo tableInfo : tableInfos)
@@ -158,7 +203,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 // &&
                 // cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))
                 {
+                    TimeUnit.SECONDS.sleep(3);
                     cassandra_client.system_drop_column_family(tableInfo.getTableName());
+                    TimeUnit.SECONDS.sleep(3);
                     cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
                     found = true;
                     break;
@@ -446,8 +493,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void createKeyspaceAndTables(List<TableInfo> tableInfos)
     {
-        KsDef ksDef = new KsDef(databaseName, "org.apache.cassandra.locator.SimpleStrategy", null);
-        ksDef.setReplication_factor(1);
+        KsDef ksDef = new KsDef(databaseName, placement_strategy, null);
+        ksDef.setReplication_factor(Integer.parseInt(replication_factor));
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         for (TableInfo tableInfo : tableInfos)
         {

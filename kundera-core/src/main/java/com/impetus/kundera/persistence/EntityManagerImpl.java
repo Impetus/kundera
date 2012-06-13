@@ -38,10 +38,14 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.cache.Cache;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraphUtils;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.context.CacheBase;
 import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.PersistenceCache;
@@ -141,19 +145,21 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
         }
 
         E e = getPersistenceDelegator().find(entityClass, primaryKey);
-        
-        if(e == null) return null;
-        
-        //Set this returned entity as head node if applicable
+
+        if (e == null)
+            return null;
+
+        // Set this returned entity as head node if applicable
         String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entityClass);
-        CacheBase mainCache =  getPersistenceDelegator().getPersistenceCache().getMainCache();
+        CacheBase mainCache = getPersistenceDelegator().getPersistenceCache().getMainCache();
         Node node = mainCache.getNodeFromCache(nodeId);
-        if(node != null && node.getParents() == null && ! mainCache.getHeadNodes().contains(node)) {
+        if (node != null && node.getParents() == null && !mainCache.getHeadNodes().contains(node))
+        {
             mainCache.addHeadNode(node);
-        }       
-        
-        //Return a deep copy of this entity
-        return (E)ObjectUtils.deepCopy((Object)e);
+        }
+
+        // Return a deep copy of this entity
+        return (E) ObjectUtils.deepCopy((Object) e);
     }
 
     @Override
@@ -208,7 +214,6 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
         }
         
     }
-
 
     @Override
     public final void persist(Object e)
@@ -304,6 +309,13 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     public final Object getDelegate()
     {
         return null;
+    }
+
+    public final Object getDelegate(Class clazz)
+    {
+
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+        return persistenceDelegator.getClient(metadata);
     }
 
     /*
