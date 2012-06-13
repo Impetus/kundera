@@ -44,7 +44,7 @@ public class PersistenceCache
     /* Cache of transactional objects */
     private CacheBase transactionalCache;
 
-    FlushManager flushManager;
+//    FlushManager flushManager;
 
     private PersistenceContextType persistenceContextType;
 
@@ -52,14 +52,14 @@ public class PersistenceCache
      * Stack containing Nodes to be flushed Entities are always flushed from the
      * top, there way to bottom until stack is empty
      */
-    private FlushStack flushStack;
+//    private FlushStack flushStack;
 
     /**
      * Map containing data required for inserting records for each join table.
      * Key -> Name of Join Table Value -> records to be persisted in the join
      * table
      */
-    private Map<String, JoinTableData> joinTableDataMap;
+//    private Map<String, JoinTableData> joinTableDataMap;
 
     public PersistenceCache()
     {
@@ -73,10 +73,10 @@ public class PersistenceCache
         elementCollectionCache = new ElementCollectionCache();
         transactionalCache = new TransactionalCache();
 
-        flushStack = new FlushStack();
-        joinTableDataMap = new HashMap<String, JoinTableData>();
-
-        flushManager = new FlushManager();
+//        flushStack = new FlushStack();
+//        joinTableDataMap = new HashMap<String, JoinTableData>();
+//
+//        flushManager = new FlushManager();
     }
 
     /**
@@ -102,15 +102,6 @@ public class PersistenceCache
         if (transactionalCache != null)
         {
             transactionalCache.clear();
-        }
-
-        if (flushStack != null)
-        {
-            flushStack.clear();
-        }
-        if (joinTableDataMap != null)
-        {
-            joinTableDataMap.clear();
         }
 
     }
@@ -182,32 +173,6 @@ public class PersistenceCache
     {
         this.transactionalCache = transactionalCache;
     }
-
-    /**
-     * @return the flushStack
-     */
-    public FlushStack getFlushStack()
-    {
-        return flushStack;
-    }
-
-    /**
-     * @param flushStack
-     *            the flushStack to set
-     */
-    public void setFlushStack(FlushStack flushStack)
-    {
-        this.flushStack = flushStack;
-    }
-
-    /**
-     * @return the joinTableDataMap
-     */
-    public Map<String, JoinTableData> getJoinTableDataMap()
-    {
-        return joinTableDataMap;
-    }
-
     /**
      * @return the persistenceContextType
      */
@@ -223,27 +188,6 @@ public class PersistenceCache
     public void setPersistenceContextType(PersistenceContextType persistenceContextType)
     {
         this.persistenceContextType = persistenceContextType;
-    }
-
-    /**
-     * @param joinTableDataMap
-     *            the joinTableDataMap to set
-     */
-    public void addJoinTableDataIntoMap(OPERATION operation, String joinTableName, String joinColumnName,
-            String invJoinColumnName, Class<?> entityClass, Object joinColumnValue, Set<Object> invJoinColumnValues)
-    {
-        JoinTableData joinTableData = joinTableDataMap.get(joinTableName);
-        if (joinTableData == null)
-        {
-            joinTableData = new JoinTableData(operation, joinTableName, joinColumnName, invJoinColumnName, entityClass);
-            joinTableData.addJoinTableRecord(joinColumnValue, invJoinColumnValues);
-            joinTableDataMap.put(joinTableName, joinTableData);
-        }
-        else
-        {
-            joinTableData.addJoinTableRecord(joinColumnValue, invJoinColumnValues);
-        }
-
     }
 
 }

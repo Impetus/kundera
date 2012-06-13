@@ -52,6 +52,7 @@ import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.graph.Store;
+import com.impetus.kundera.persistence.context.EventLog.EventType;
 
 /**
  * Test case for {@link FlushManager}
@@ -62,7 +63,6 @@ public class FlushStackManagerTest
 {
     PersistenceCache pc;
 
-    FlushManager flushManager;
 
     ObjectGraphBuilder graphBuilder;
 
@@ -75,8 +75,7 @@ public class FlushStackManagerTest
     public void setUp() throws Exception
     {
         pc = new PersistenceCache();
-        flushManager = new FlushManager();
-        graphBuilder = new ObjectGraphBuilder();
+        graphBuilder = new ObjectGraphBuilder(pc);
 
         configurator.configure();
     }
@@ -92,12 +91,15 @@ public class FlushStackManagerTest
     @Test
     public void testFlashStockForStore()
     {
+  
+        FlushManager flushManager = new FlushManager();
+
         Store store = new Store(1, "Food Bazaar, Noida");
         store.addCounter(new BillingCounter(1, "A"));
         store.addCounter(new BillingCounter(2, "B"));
         store.addCounter(new BillingCounter(3, "C"));
 
-        ObjectGraph graph = graphBuilder.getObjectGraph(store, null, pc);
+        ObjectGraph graph = graphBuilder.getObjectGraph(store, null);
 
         pc.getMainCache().addGraphToCache(graph, pc);
 
@@ -112,15 +114,16 @@ public class FlushStackManagerTest
         Assert.assertEquals(4, pc.getMainCache().size());
 
         markAllNodeAsDirty();
-        flushManager.buildFlushStack(pc);
-
-        FlushStack fs = pc.getFlushStack();
+        flushManager.buildFlushStack(headNode, EventType.INSERT);
+        
+        FlushStack fs = flushManager.getFlushStack();
         Assert.assertEquals(4, fs.size());
     }
 
     @Test
     public void test_1_1_1_1()
     {
+        FlushManager flushManager = new FlushManager();
         PhotographerUni_1_1_1_1 a = new PhotographerUni_1_1_1_1();
         a.setPhotographerId(1);
         AlbumUni_1_1_1_1 b = new AlbumUni_1_1_1_1();
@@ -130,19 +133,22 @@ public class FlushStackManagerTest
         a.setAlbum(b);
         b.setPhoto(c);
 
-        ObjectGraph graph = graphBuilder.getObjectGraph(a, null, pc);
+        ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
         pc.getMainCache().addGraphToCache(graph, pc);
 
-        markAllNodeAsDirty();
-        flushManager.buildFlushStack(pc);
+        Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphUtils.getNodeId("c1", PhotoUni_1_1_1_1.class));
 
-        FlushStack fs = pc.getFlushStack();
+        markAllNodeAsDirty();
+        flushManager.buildFlushStack(graph.getHeadNode(),EventType.INSERT);
+
+        FlushStack fs = flushManager.getFlushStack();
         Assert.assertEquals(3, fs.size());
     }
 
     @Test
     public void test_1_1_1_M()
     {
+        FlushManager flushManager = new FlushManager();
         PhotographerUni_1_1_1_M a = new PhotographerUni_1_1_1_M();
         a.setPhotographerId(1);
         AlbumUni_1_1_1_M b = new AlbumUni_1_1_1_M();
@@ -158,18 +164,19 @@ public class FlushStackManagerTest
         b.addPhoto(c2);
         b.addPhoto(c3);
 
-        ObjectGraph graph = graphBuilder.getObjectGraph(a, null, pc);
+        ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
         pc.getMainCache().addGraphToCache(graph, pc);
 
         markAllNodeAsDirty();
-        flushManager.buildFlushStack(pc);
-        FlushStack fs = pc.getFlushStack();
+        flushManager.buildFlushStack(graph.getHeadNode(),EventType.INSERT);
+        FlushStack fs = flushManager.getFlushStack();
         Assert.assertEquals(5, fs.size());
     }
 
     @Test
     public void test_1_1_M_1()
     {
+        FlushManager flushManager = new FlushManager();
         PhotographerUni_1_1_M_1 a = new PhotographerUni_1_1_M_1();
         a.setPhotographerId(1);
         AlbumUni_1_1_M_1 b1 = new AlbumUni_1_1_M_1();
@@ -186,23 +193,35 @@ public class FlushStackManagerTest
         b2.setPhoto(c);
         b3.setPhoto(c);
 
-        ObjectGraph graph = graphBuilder.getObjectGraph(a, null, pc);
-        ObjectGraph graphb2 = graphBuilder.getObjectGraph(b2, null, pc);
-        ObjectGraph graphb3 = graphBuilder.getObjectGraph(b3, null, pc);
+        ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
+        ObjectGraph graphb2 = graphBuilder.getObjectGraph(b2, null);
+        ObjectGraph graphb3 = graphBuilder.getObjectGraph(b3, null);
 
         pc.getMainCache().addGraphToCache(graph, pc);
         pc.getMainCache().addGraphToCache(graphb2, pc);
         pc.getMainCache().addGraphToCache(graphb3, pc);
 
         markAllNodeAsDirty();
-        flushManager.buildFlushStack(pc);
-        FlushStack fs = pc.getFlushStack();
-        Assert.assertEquals(5, fs.size());
+        flushManager.buildFlushStack(graph.getHeadNode(),EventType.INSERT);
+        FlushStack fs = flushManager.getFlushStack();
+        Assert.assertEquals(3, fs.size());
+        flushManager.clearFlushStack();
+        flushManager = new FlushManager();
+        flushManager.buildFlushStack(graphb2.getHeadNode(),EventType.INSERT);
+        fs = flushManager.getFlushStack();
+        Assert.assertEquals(2, fs.size());
+        flushManager.clearFlushStack();
+        flushManager = new FlushManager();
+        flushManager.buildFlushStack(graphb3.getHeadNode(),EventType.INSERT);
+        fs = flushManager.getFlushStack();
+        Assert.assertEquals(2, fs.size());
+        flushManager.clearFlushStack();
     }
 
     @Test
     public void test_1_M_1_M()
     {
+        FlushManager flushManager = new FlushManager();
         PhotographerUni_1_M_1_M a = new PhotographerUni_1_M_1_M();
         a.setPhotographerId(1);
         AlbumUni_1_M_1_M b1 = new AlbumUni_1_M_1_M();
@@ -226,18 +245,19 @@ public class FlushStackManagerTest
         a.addAlbum(b1);
         a.addAlbum(b2);
 
-        ObjectGraph graph = graphBuilder.getObjectGraph(a, null, pc);
+        ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
         pc.getMainCache().addGraphToCache(graph, pc);
 
         markAllNodeAsDirty();
-        flushManager.buildFlushStack(pc);
-        FlushStack fs = pc.getFlushStack();
+        flushManager.buildFlushStack(graph.getHeadNode(),EventType.INSERT);
+        FlushStack fs = flushManager.getFlushStack();
         Assert.assertEquals(7, fs.size());
     }
 
     @Test
     public void test_1_M_M_M()
     {
+        FlushManager flushManager = new FlushManager();
         PhotographerUni_1_M_M_M a = new PhotographerUni_1_M_M_M();
         a.setPhotographerId(1);
         AlbumUni_1_M_M_M b1 = new AlbumUni_1_M_M_M();
@@ -259,18 +279,19 @@ public class FlushStackManagerTest
         a.addAlbum(b1);
         a.addAlbum(b2);
 
-        ObjectGraph graph = graphBuilder.getObjectGraph(a, null, pc);
+        ObjectGraph graph = graphBuilder.getObjectGraph(a, null);
         pc.getMainCache().addGraphToCache(graph, pc);
 
         markAllNodeAsDirty();
-        flushManager.buildFlushStack(pc);
-        FlushStack fs = pc.getFlushStack();
+        flushManager.buildFlushStack(graph.getHeadNode(),EventType.INSERT);
+        FlushStack fs = flushManager.getFlushStack();
         Assert.assertEquals(6, fs.size());
     }
 
     @Test
     public void test_M_1_1_M()
     {
+        FlushManager flushManager = new FlushManager();
         PhotographerUni_M_1_1_M a1 = new PhotographerUni_M_1_1_M();
         a1.setPhotographerId(1);
         PhotographerUni_M_1_1_M a2 = new PhotographerUni_M_1_1_M();
@@ -292,26 +313,43 @@ public class FlushStackManagerTest
         b.addPhoto(c2);
         b.addPhoto(c3);
         a1.setAlbum(b);
-        a2.setAlbum(b);
-        a3.setAlbum(b);
 
-        ObjectGraph graph1 = graphBuilder.getObjectGraph(a1, null, pc);
-        ObjectGraph graph2 = graphBuilder.getObjectGraph(a2, null, pc);
-        ObjectGraph graph3 = graphBuilder.getObjectGraph(a3, null, pc);
+        ObjectGraph graph1 = graphBuilder.getObjectGraph(a1, null);
+        ObjectGraph graph2 = graphBuilder.getObjectGraph(a2, null);
+        ObjectGraph graph3 = graphBuilder.getObjectGraph(a3, null);
 
         pc.getMainCache().addGraphToCache(graph1, pc);
-        pc.getMainCache().addGraphToCache(graph2, pc);
-        pc.getMainCache().addGraphToCache(graph3, pc);
 
         markAllNodeAsDirty();
-        flushManager.buildFlushStack(pc);
-        FlushStack fs = pc.getFlushStack();
-        Assert.assertEquals(7, fs.size());
+        
+        flushManager.buildFlushStack(graph1.getHeadNode(),EventType.INSERT);
+        FlushStack fs = flushManager.getFlushStack();
+        Assert.assertEquals(5, fs.size());
+        flushManager.clearFlushStack();
+
+        a2.setAlbum(b);
+        pc.getMainCache().addGraphToCache(graph2, pc);
+        markAllNodeAsDirty();
+        flushManager = new FlushManager();
+        flushManager.buildFlushStack(graph2.getHeadNode(),EventType.INSERT);
+        fs = flushManager.getFlushStack();
+        Assert.assertEquals(1, fs.size());
+        flushManager.clearFlushStack();
+        
+        a3.setAlbum(b);
+        pc.getMainCache().addGraphToCache(graph3, pc);
+        markAllNodeAsDirty();
+        flushManager = new FlushManager();
+        flushManager.buildFlushStack(graph3.getHeadNode(),EventType.INSERT);
+        fs = flushManager.getFlushStack();
+        Assert.assertEquals(1, fs.size());
+        flushManager.clearFlushStack();
     }
 
     @Test
     public void test_M_M_1_1()
     {
+        FlushManager flushManager = new FlushManager();
         PhotographerUni_M_M_1_1 a1 = new PhotographerUni_M_M_1_1();
         a1.setPhotographerId(1);
         PhotographerUni_M_M_1_1 a2 = new PhotographerUni_M_M_1_1();
@@ -336,24 +374,34 @@ public class FlushStackManagerTest
         b3.setPhoto(c3);
         a1.addAlbum(b1);
         a1.addAlbum(b2);
-        a2.addAlbum(b2);
-        a2.addAlbum(b3);
 
-        ObjectGraph graph1 = graphBuilder.getObjectGraph(a1, null, pc);
-        ObjectGraph graph2 = graphBuilder.getObjectGraph(a2, null, pc);
+        ObjectGraph graph1 = graphBuilder.getObjectGraph(a1, null);
 
         pc.getMainCache().addGraphToCache(graph1, pc);
-        pc.getMainCache().addGraphToCache(graph2, pc);
 
         markAllNodeAsDirty();
-        flushManager.buildFlushStack(pc);
-        FlushStack fs = pc.getFlushStack();
-        Assert.assertEquals(8, fs.size());
+        
+        flushManager.buildFlushStack(graph1.getHeadNode(),EventType.INSERT);
+        FlushStack fs = flushManager.getFlushStack();
+        Assert.assertEquals(5, fs.size());
+        flushManager.clearFlushStack();
+        
+        a2.addAlbum(b2);
+        a2.addAlbum(b3);
+        ObjectGraph graph2 = graphBuilder.getObjectGraph(a2, null);
+        pc.getMainCache().addGraphToCache(graph2, pc);
+        markAllNodeAsDirty();
+        flushManager = new FlushManager();
+        flushManager.buildFlushStack(graph2.getHeadNode(),EventType.INSERT);
+        fs = flushManager.getFlushStack();
+        Assert.assertEquals(3, fs.size());
     }
 
     @Test
     public void test_M_M_M_M()
     {
+        FlushManager flushManager = new FlushManager();
+
         PhotographerUni_M_M_M_M a1 = new PhotographerUni_M_M_M_M();
         a1.setPhotographerId(1);
         PhotographerUni_M_M_M_M a2 = new PhotographerUni_M_M_M_M();
@@ -383,19 +431,27 @@ public class FlushStackManagerTest
         b3.addPhoto(c4);
         a1.addAlbum(b1);
         a1.addAlbum(b2);
-        a2.addAlbum(b2);
-        a2.addAlbum(b3);
 
-        ObjectGraph graph1 = graphBuilder.getObjectGraph(a1, null, pc);
-        ObjectGraph graph2 = graphBuilder.getObjectGraph(a2, null, pc);
+        ObjectGraph graph1 = graphBuilder.getObjectGraph(a1, null);
 
         pc.getMainCache().addGraphToCache(graph1, pc);
+
+        markAllNodeAsDirty();
+        flushManager.buildFlushStack(graph1.getHeadNode(),EventType.INSERT);
+        FlushStack fs = flushManager.getFlushStack();
+        Assert.assertEquals(6, fs.size());
+        flushManager.clearFlushStack();
+        
+        a2.addAlbum(b2);
+        a2.addAlbum(b3);
+        ObjectGraph graph2 = graphBuilder.getObjectGraph(a2, null);
         pc.getMainCache().addGraphToCache(graph2, pc);
 
         markAllNodeAsDirty();
-        flushManager.buildFlushStack(pc);
-        FlushStack fs = pc.getFlushStack();
-        Assert.assertEquals(9, fs.size());
+        flushManager = new FlushManager();
+        flushManager.buildFlushStack(graph2.getHeadNode(),EventType.INSERT);
+        fs = flushManager.getFlushStack();
+        Assert.assertEquals(3, fs.size());
     }
 
     /**

@@ -16,18 +16,16 @@
 package com.impetus.kundera.rest.common;
 
 /**
- * Holds constants
+ * <Prove description of functionality provided by this Type> 
  * @author amresh.singh
  */
-public interface Constants
+public interface Response
 {
-    public static final String APPLICATION_TOKEN_PREFIX = "AT";
-    public static final String SESSION_TOKEN_PREFIX = "ST";
+    public static final String POST_RESPONSE_SUCCESS = "POST_SUCCESS";
+    public static final String DELETE_RESPONSE_SUCCESS = "DELETE_SUCCESS";
     
-    public static final String KUNDERA_API_PATH = "/kundera/api";
-    public static final String APPLICATION_TOKEN_RESOURCE_PATH = "/application";
-    public static final String SESSION_TOKEN_RESOURCE_PATH = "/session";
-    public static final String CRUD_RESOURCE_PATH = "/crud";
+    public static final String DELETE_AT_SUCCESS = "APPLICATION_TOKEN_ DELETE_SUCCESS";
+    public static final String DELETE_ST_SUCCESS = "SESSION_TOKEN_ DELETE_SUCCESS";
     
 
 }

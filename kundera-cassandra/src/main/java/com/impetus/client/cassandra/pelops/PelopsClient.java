@@ -959,7 +959,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         }
         catch (InvalidRequestException e)
         {
-            e.printStackTrace();
             log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
 
         }

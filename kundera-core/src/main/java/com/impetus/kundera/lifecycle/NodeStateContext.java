@@ -75,7 +75,7 @@ public interface NodeStateContext
 
     boolean isHeadNode();
 
-    void setHeadNode(boolean isHeadNode);
+//    void setHeadNode(boolean isHeadNode);
 
     Client getClient();
 

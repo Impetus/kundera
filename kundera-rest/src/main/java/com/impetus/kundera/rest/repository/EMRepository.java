@@ -66,6 +66,12 @@ public class EMRepository
         emMap.put(sessionToken, em);
     }
     
+    public void removeEm(String sessionToken) {
+        if(emMap != null) {
+            emMap.remove(sessionToken);
+        }
+    }
+    
     
     
     

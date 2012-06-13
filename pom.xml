@@ -76,7 +76,18 @@
 
 
   <repositories>
-    <repository>
+     <repository>
+      <id>atlassian</id>
+      <name>Clover maven repo</name>
+      <url>https://repository.atlassian.com/maven2/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+     <repository>
       <id>kundera-missing</id>
       <name>Kundera Public Missing Resources Repository</name>
       <url>http://kundera.googlecode.com/svn/maven2/maven-missing-resources</url>
@@ -100,11 +111,7 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
- <repository>
-      <id>atlassian</id>
-      <name>Clover maven repo</name>
-      <url>http://repository.atlassian.com/maven2/</url>
-    </repository>
+    
   </repositories>
   <!-- Build profiles -->
   <profiles>
@@ -270,19 +277,16 @@
             </goals>
           </execution>
         </executions>
-      </plugin> -->
-     <!--<plugin>
+      </plugin> 
+     <plugin>
             <groupId>com.atlassian.maven.plugins</groupId>
             <artifactId>maven-clover2-plugin</artifactId>
             <version>3.0.0</version>
             <configuration>
-                <licenseLocation>/home/impadmin/Downloads/clover.license</licenseLocation>
+                <licenseLocation>/home/impadmin/Desktop/clover.license</licenseLocation>
             </configuration>
-        </plugin> -->
+        </plugin>-->
     </plugins>
   </build>
 
-  <modules>
-    <module>kundera-rdbms</module>
-  </modules>
 </project>

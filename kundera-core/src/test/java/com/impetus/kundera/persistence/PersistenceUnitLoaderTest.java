@@ -96,7 +96,6 @@ public class PersistenceUnitLoaderTest
         catch (Exception e)
         {
             log.error(e.getMessage());
-            e.printStackTrace();
             Assert.fail();
         }
 

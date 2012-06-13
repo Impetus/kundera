@@ -98,14 +98,14 @@ public class ObjectUtilsCloneBidirectionalTest
 
         // Create a deep copy using cloner
         long t1 = System.currentTimeMillis();
-        PhotographerBi_1_M_1_M a3 = (PhotographerBi_1_M_1_M) ObjectUtils.deepCopy(a1);
+        PhotographerBi_1_M_1_M a3 = (PhotographerBi_1_M_1_M) ObjectUtils.deepCopyUsingCloner(a1);
         long t2 = System.currentTimeMillis();
         System.out.println("Time taken by Deep Cloner:" + (t2 - t1));
 
         // Create a deep copy using Kundera
         long t3 = System.currentTimeMillis();
         metadata = KunderaMetadataManager.getEntityMetadata(PhotographerBi_1_M_1_M.class);
-        PhotographerBi_1_M_1_M a2 = (PhotographerBi_1_M_1_M) ObjectUtils.deepCopyUsingMetadata(a1, metadata);
+        PhotographerBi_1_M_1_M a2 = (PhotographerBi_1_M_1_M) ObjectUtils.deepCopy(a1);
         long t4 = System.currentTimeMillis();
         System.out.println("Time taken by Kundera:" + (t4 - t3));
 

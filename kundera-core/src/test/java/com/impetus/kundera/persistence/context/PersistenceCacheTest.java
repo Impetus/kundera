@@ -53,7 +53,7 @@ public class PersistenceCacheTest
     {
         pc = new PersistenceCache();
         flushManager = new FlushManager();
-        graphBuilder = new ObjectGraphBuilder();
+        graphBuilder = new ObjectGraphBuilder(pc);
 
         configurator.configure();
 
@@ -75,7 +75,7 @@ public class PersistenceCacheTest
         store.addCounter(new BillingCounter(2, "B"));
         store.addCounter(new BillingCounter(3, "C"));
 
-        ObjectGraph graph = graphBuilder.getObjectGraph(store, null, pc);
+        ObjectGraph graph = graphBuilder.getObjectGraph(store, null);
 
         pc.getMainCache().addGraphToCache(graph, pc);
 

@@ -34,6 +34,8 @@ public class JoinTableData
     private String joinColumnName;
 
     private String inverseJoinColumnName;
+    
+    private boolean isProcessed;
 
     public static enum OPERATION
     {
@@ -177,4 +179,21 @@ public class JoinTableData
         }
     }
 
+    /**
+     * @return the isProcessed
+     */
+    public boolean isProcessed()
+    {
+        return isProcessed;
+    }
+
+    /**
+     * @param isProcessed the isProcessed to set
+     */
+    public void setProcessed(boolean isProcessed)
+    {
+        this.isProcessed = isProcessed;
+    }
+
+    
 }
