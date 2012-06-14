@@ -70,10 +70,6 @@ public class EMRepository
         if(emMap != null) {
             emMap.remove(sessionToken);
         }
-    }
-    
-    
-    
-    
+    } 
 
 }
