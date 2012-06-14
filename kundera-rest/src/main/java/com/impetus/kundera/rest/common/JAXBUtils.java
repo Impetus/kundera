@@ -15,9 +15,16 @@
  */
 package com.impetus.kundera.rest.common;
 
+import java.io.InputStream;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.impetus.kundera.rest.resources.ApplicationTokenResource;
 
 /**
  * Utility for converting objects into XML and vice versa 
@@ -25,7 +32,15 @@ import javax.xml.bind.Unmarshaller;
  */
 public class JAXBUtils
 {
-    public static Object toObject(String xml, Class<?> objectClass) {
+    private static Log log = LogFactory.getLog(ApplicationTokenResource.class);
+    
+    /**
+     * Converts <code>InputStream</code> to Object using JAXB
+     * @param str
+     * @param objectClass
+     * @return
+     */
+    public static Object toObject(InputStream is, Class<?> objectClass) {
         Object output = null;
         try
         {
@@ -34,19 +49,22 @@ public class JAXBUtils
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             
             output = objectClass.newInstance();
-            output = jaxbUnmarshaller.unmarshal(StreamUtils.toInputStream(xml));
+            output = jaxbUnmarshaller.unmarshal(is);
         }
         catch (JAXBException e)
         {
-            e.printStackTrace();
+            log.warn("Error while converting String to Object using JAXB:" + e.getMessage());
+            return null;
         }
         catch (InstantiationException e)
         {
-            e.printStackTrace();
+            log.warn("Error while converting String to Object using JAXB:" + e.getMessage());
+            return null;
         }
         catch (IllegalAccessException e)
         {
-            e.printStackTrace();
+            log.warn("Error while converting String to Object using JAXB:" + e.getMessage());
+            return null;
         }
         return output;
     }

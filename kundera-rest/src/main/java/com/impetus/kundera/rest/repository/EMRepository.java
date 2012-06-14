@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 
 /**
  * Repository for holding Session Tokens and {@link EntityManager} 
@@ -42,6 +41,11 @@ public class EMRepository
         return emMap;
     }
     
+    /**
+     * Retrieves EM
+     * @param sessionToken
+     * @return
+     */
     public EntityManager getEM(String sessionToken) {
         if(emMap == null)  {
             return null;
@@ -58,6 +62,11 @@ public class EMRepository
         this.emMap = emMap;
     }
     
+    /**
+     * Adds EM
+     * @param sessionToken
+     * @param em
+     */
     public void addEm(String sessionToken, EntityManager em)
     {
         if(emMap == null) {
@@ -66,6 +75,10 @@ public class EMRepository
         emMap.put(sessionToken, em);
     }
     
+    /**
+     * Removes EM
+     * @param sessionToken
+     */
     public void removeEm(String sessionToken) {
         if(emMap != null) {
             emMap.remove(sessionToken);

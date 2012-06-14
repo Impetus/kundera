@@ -42,7 +42,8 @@ public class JAXBUtilsTest extends TestCase
         String xml = "<book><isbn>34523423423423</isbn><author>Amresh</author><publication>Willey</publication></book>";
         try
         {
-            Book book = (Book)JAXBUtils.toObject(xml, Book.class);
+            
+            Book book = (Book)JAXBUtils.toObject(StreamUtils.toInputStream(xml), Book.class);
             assertNotNull(book);
             assertEquals("34523423423423", book.getIsbn());
             assertEquals("Amresh", book.getAuthor());
