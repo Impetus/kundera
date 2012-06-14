@@ -58,10 +58,10 @@ public class CRUDResource
             @PathParam("entityClass") String entityClassName, 
             InputStream in) {      
         
-        String xml = null;
+        String inputBody = null;
         try
         {
-            xml = StreamUtils.toString(in);
+            inputBody = StreamUtils.toString(in);
         }
         catch (IOException e)
         {
@@ -69,14 +69,14 @@ public class CRUDResource
         }
         log.debug("POST: SessionToken:" + sessionToken);
         log.debug("POST: entityClass:" + entityClassName);
-        log.debug("POST: XML:" + xml);
+        log.debug("POST: Input Body:" + inputBody);
         
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
         Class<?> entityClass = metamodel.getEntityClass(entityClassName);
         log.debug("POST: entityClass" + entityClass);
         
-        Object entity = JAXBUtils.toObject(xml, entityClass);
+        Object entity = JAXBUtils.toObject(inputBody, entityClass);
         em.persist(entity);
 
         return Response.POST_RESPONSE_SUCCESS;
