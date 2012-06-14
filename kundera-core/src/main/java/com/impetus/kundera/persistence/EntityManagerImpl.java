@@ -223,6 +223,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
 
         if (e == null)
         {
+            getPersistenceDelegator().rollback();
             throw new IllegalArgumentException("Entity to be persisted must not be null.");
         }
 
