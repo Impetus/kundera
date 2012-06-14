@@ -21,7 +21,7 @@ import java.io.InputStream;
 import junit.framework.TestCase;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Test case for {@link StreamUtils} 
  * @author amresh.singh
  */
 public class StreamUtilsTest extends TestCase

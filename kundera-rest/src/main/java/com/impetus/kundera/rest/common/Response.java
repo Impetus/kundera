@@ -16,7 +16,7 @@
 package com.impetus.kundera.rest.common;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Constants for REST responses
  * @author amresh.singh
  */
 public interface Response

@@ -21,7 +21,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 /**
- * REST Service resource for Kundera 
+ * Demo Greeting REST resource
  * @author amresh.singh
  */
 

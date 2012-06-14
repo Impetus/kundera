@@ -22,7 +22,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Utilities for converting InputStream to various forms and vice versa
  * @author amresh.singh
  */
 public class StreamUtils

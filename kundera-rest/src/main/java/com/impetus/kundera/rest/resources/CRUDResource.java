@@ -40,7 +40,7 @@ import com.impetus.kundera.rest.common.StreamUtils;
 import com.impetus.kundera.rest.repository.EMRepository;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * REST resource for CRUD operations
  * @author amresh.singh
  */
 

@@ -35,7 +35,7 @@ import com.impetus.kundera.rest.repository.EMFRepository;
 import com.impetus.kundera.rest.repository.EMRepository;
 
 /**
- * Session Token Resource
+ * Session Token REST Resource
  * @author amresh.singh
  */
 

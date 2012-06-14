@@ -21,7 +21,7 @@ import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Repository for holding Application Tokens and {@link EntityManagerFactory} 
  * @author amresh.singh
  */
 public class EMFRepository

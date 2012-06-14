@@ -18,7 +18,7 @@ package com.impetus.kundera.rest.common;
 import junit.framework.TestCase;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Test case for {@link TokenUtils} 
  * @author amresh.singh
  */
 public class TokenUtilsTest extends TestCase

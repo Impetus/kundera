@@ -22,7 +22,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Repository for holding Session Tokens and {@link EntityManager} 
  * @author amresh.singh
  */
 public class EMRepository
