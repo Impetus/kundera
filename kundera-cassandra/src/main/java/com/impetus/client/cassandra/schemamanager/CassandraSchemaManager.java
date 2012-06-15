@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -67,17 +69,19 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     /**
      * replication_factor will use in keyspace creation;
      */
-    public static String replication_factor = "1";
+    private static String replication_factor = "1";
 
     /**
      * placement_strategy will use in keyspace creation;
      */
-    public static String placement_strategy = "org.apache.cassandra.locator.SimpleStrategy";
+    private static String placement_strategy = "org.apache.cassandra.locator.SimpleStrategy";
 
     /**
      * logger used for logging statement.
      */
-    private static final Logger logger = LoggerFactory.getLogger(CassandraSchemaManager.class);
+    private static final Logger log = LoggerFactory.getLogger(CassandraSchemaManager.class);
+
+    private static Map<String, String> dataCenterToNode = new HashMap<String, String>();
 
     /**
      * Instantiates a new cassandra schema manager.
@@ -103,17 +107,49 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         try
         {
             InputStream inStream = ClassLoader.getSystemResourceAsStream("kundera-cassandra.properties");
-            properties.load(inStream);
-            replication_factor = properties.getProperty("replication_factor");
-            placement_strategy = properties.getProperty("placement_strategy");
+            if (inStream != null)
+            {
+
+                properties.load(inStream);
+                String placementStrategy = properties.getProperty("placement_strategy");
+
+                if (CassandraValidationClassMapper.getReplicationStrategies().contains(placementStrategy))
+                {
+                    placement_strategy = placementStrategy;
+                    if (placementStrategy.equalsIgnoreCase("org.apache.cassandra.locator.SimpleStrategy"))
+                    {
+                        replication_factor = properties.getProperty("replication_factor");
+                    }
+                    else
+                    {
+                        for (Object keySet : properties.keySet())
+                        {
+                            String dataCenterName = keySet.toString();
+
+                            if (dataCenterName != null && dataCenterName.startsWith("datacenter"))
+                            {
+                                String noOfNode = properties.getProperty(dataCenterName);
+                                dataCenterName = dataCenterName.substring(dataCenterName.indexOf(".") + 1,
+                                        dataCenterName.length());
+                                dataCenterToNode.put(dataCenterName, noOfNode);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    log.warn("Give a valid replica placement strategy" + placementStrategy
+                            + "is not a valid replica placement strategy");
+                }
+            }
         }
         catch (FileNotFoundException e)
         {
-            logger.warn("kundera cassandra property not found, kundera will use default properties");
+            log.warn("kundera cassandra property not found, kundera will use default properties");
         }
         catch (IOException e)
         {
-            logger.warn("kundera cassandra property not found, kundera will use default properties");
+            log.warn("kundera cassandra property not found, kundera will use default properties");
         }
     }
 
@@ -157,19 +193,19 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException irex)
         {
-            logger.error("keyspace " + databaseName + " does not exist caused by :" + irex.getMessage());
+            log.error("keyspace " + databaseName + " does not exist caused by :" + irex.getMessage());
             throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", irex, "Cassandra",
                     databaseName);
         }
         catch (TException tex)
         {
-            logger.error("keyspace " + databaseName + " does not exist caused by :" + tex.getMessage());
+            log.error("keyspace " + databaseName + " does not exist caused by :" + tex.getMessage());
             throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", tex, "Cassandra",
                     databaseName);
         }
         catch (SchemaDisagreementException sdex)
         {
-            logger.error("keyspace " + databaseName + " does not exist caused by :" + sdex.getMessage());
+            log.error("keyspace " + databaseName + " does not exist caused by :" + sdex.getMessage());
             throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", sdex, "Cassandra",
                     databaseName);
         }
@@ -203,7 +239,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 // &&
                 // cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))
                 {
-                    TimeUnit.SECONDS.sleep(3);
+                    // TimeUnit.SECONDS.sleep(5);
                     cassandra_client.system_drop_column_family(tableInfo.getTableName());
                     TimeUnit.SECONDS.sleep(3);
                     cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
@@ -237,19 +273,19 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException e)
         {
-            logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
+            log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
             throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
                     databaseName);
         }
         catch (TException e)
         {
-            logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
+            log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
             throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
                     databaseName);
         }
         catch (SchemaDisagreementException e)
         {
-            logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
+            log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
             throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
                     databaseName);
         }
@@ -270,19 +306,19 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (NotFoundException e)
         {
-            logger.error("keyspace " + databaseName + " does not exist :");
+            log.error("keyspace " + databaseName + " does not exist :");
             throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
                     databaseName);
         }
         catch (InvalidRequestException e)
         {
-            logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
+            log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
             throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
                     databaseName);
         }
         catch (TException e)
         {
-            logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
+            log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
             throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
                     databaseName);
         }
@@ -302,13 +338,13 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException e)
         {
-            logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
+            log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
             throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
                     databaseName);
         }
         catch (TException e)
         {
-            logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
+            log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
             throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
                     databaseName);
         }
@@ -494,7 +530,20 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private void createKeyspaceAndTables(List<TableInfo> tableInfos)
     {
         KsDef ksDef = new KsDef(databaseName, placement_strategy, null);
-        ksDef.setReplication_factor(Integer.parseInt(replication_factor));
+        Map<String, String> strategy_options = new HashMap<String, String>();
+        if (dataCenterToNode != null && !dataCenterToNode.isEmpty())
+        {
+            for (String dataCeneteName : dataCenterToNode.keySet())
+            {
+                strategy_options.put(dataCeneteName, dataCenterToNode.get(dataCeneteName));
+            }
+        }
+        else
+        {
+            strategy_options.put("replication_factor", replication_factor);
+        }
+        // ksDef.setReplication_factor(Integer.parseInt(replication_factor));
+        ksDef.setStrategy_options(strategy_options);
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         for (TableInfo tableInfo : tableInfos)
         {
@@ -507,19 +556,25 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException e)
         {
-            logger.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
+            log.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
             throw new SchemaGenerationException(e, "Cassandra", databaseName);
         }
         catch (SchemaDisagreementException e)
         {
-            logger.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
+            log.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
             throw new SchemaGenerationException(e, "Cassandra", databaseName);
         }
         catch (TException e)
         {
-            logger.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
+            log.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
             throw new SchemaGenerationException(e, "Cassandra", databaseName);
         }
+        // catch (NumberFormatException e)
+        // {
+        // log.error("Error during creating schema in cassandra, Caused by:" +
+        // e.getMessage());
+        // throw new SchemaGenerationException(e, "Cassandra");
+        // }
     }
 
     /**
@@ -619,17 +674,17 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             catch (InvalidRequestException e)
             {
-                logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
+                log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
                 throw new SchemaGenerationException(e, "Cassandra");
             }
             catch (TException e)
             {
-                logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
+                log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
                 throw new SchemaGenerationException(e, "Cassandra");
             }
             catch (SchemaDisagreementException e)
             {
-                logger.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
+                log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
                 throw new SchemaGenerationException(e, "Cassandra");
             }
         }
@@ -659,7 +714,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             catch (TTransportException e)
             {
-                logger.error("Error while opening socket , Caused by:" + e.getMessage());
+                log.error("Error while opening socket , Caused by:" + e.getMessage());
+                throw new SchemaGenerationException(e, "Cassandra");
+            }
+            catch (NumberFormatException e)
+            {
+                log.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
                 throw new SchemaGenerationException(e, "Cassandra");
             }
             return true;

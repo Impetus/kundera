@@ -396,7 +396,8 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
      *            the relations
      * @return the list
      */
-    public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations)
+    public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
+            int maxResult)
     {
         // ixClause can be 0,1 or more!
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
@@ -406,7 +407,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         if (ixClause.isEmpty())
         {
             Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(),
-                    selector.newKeyRange("", "", 100), slicePredicate, consistencyLevel);
+                    selector.newKeyRange("", "", maxResult), slicePredicate, consistencyLevel);
             entities = new ArrayList<Object>(qResults.size());
             populateData(m, qResults, entities, isRelation, relations);
         }
@@ -540,10 +541,11 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
      *            the conditions
      * @return the list
      */
-    public List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames, List<IndexClause> conditions)
+    public List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames, List<IndexClause> conditions,
+            int maxResult)
     {
 
-        return (List<EnhanceEntity>) find(conditions, m, true, relationNames);
+        return (List<EnhanceEntity>) find(conditions, m, true, relationNames, maxResult);
     }
 
     /**
