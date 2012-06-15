@@ -43,6 +43,12 @@ public class ApplicationTokenResource
 {  
     private static Log log = LogFactory.getLog(ApplicationTokenResource.class);
     
+    /**
+     * Handler for GET method requests for this resource
+     * Generates Application token and returns, creates and puts EMF into repository
+     * @param persistenceUnits
+     * @return
+     */
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.TEXT_PLAIN)   
@@ -59,6 +65,12 @@ public class ApplicationTokenResource
         return applicationToken;
     }  
     
+    /**
+     * Handler for DELETE method requests for this resource
+     * Closes EMF and removes application token alongwith from repository
+     * @param id
+     * @return
+     */
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.TEXT_PLAIN) 
@@ -68,7 +80,8 @@ public class ApplicationTokenResource
         
         EntityManagerFactory emf = EMFRepository.INSTANCE.getEMF(id);
         if(emf == null) {
-            //Handle Error
+            log.warn("DELETE: Application Token:" + id + " doesn't exist and hence can't be closed");
+            return Response.DELETE_AT_FAILED;
         }
         
         EMFRepository.INSTANCE.removeEMF(id);       

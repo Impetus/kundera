@@ -40,7 +40,7 @@ import com.impetus.kundera.rest.common.StreamUtils;
 import com.impetus.kundera.rest.repository.EMRepository;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * REST resource for CRUD operations
  * @author amresh.singh
  */
 
@@ -51,6 +51,14 @@ public class CRUDResource
     private static Log log = LogFactory.getLog(CRUDResource.class);
     
  
+    /**
+     * Handler for POST method requests for this resource
+     * Inserts an entity into datastore
+     * @param sessionToken
+     * @param entityClassName
+     * @param in
+     * @return
+     */
     @POST
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.TEXT_PLAIN)
@@ -58,39 +66,50 @@ public class CRUDResource
             @PathParam("entityClass") String entityClassName, 
             InputStream in) {      
         
-        String xml = null;
-        try
-        {
-            xml = StreamUtils.toString(in);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        
         log.debug("POST: SessionToken:" + sessionToken);
         log.debug("POST: entityClass:" + entityClassName);
-        log.debug("POST: XML:" + xml);
+        if(log.isDebugEnabled()) {
+            try
+            {
+                log.debug("POST: Input Body:" + StreamUtils.toString(in));
+            }
+            catch (IOException e)
+            {
+                log.warn("Error while converting POST body to string. Further processing would possibly be failed. " + e.getMessage());
+            }
+        }        
         
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
         Class<?> entityClass = metamodel.getEntityClass(entityClassName);
         log.debug("POST: entityClass" + entityClass);
         
-        Object entity = JAXBUtils.toObject(xml, entityClass);
+        Object entity = JAXBUtils.toObject(in, entityClass);
         em.persist(entity);
 
         return Response.POST_RESPONSE_SUCCESS;
     }
     
+    /**
+     * Handler for GET method requests for this resource
+     * Finds an entity from datastore
+     * @param sessionToken
+     * @param entityClassName
+     * @param id
+     * @return
+     */
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Path("/{id}")
     public Object find(@PathParam("sessionToken") String sessionToken, 
             @PathParam("entityClass") String entityClassName, @PathParam("id") String id) {
+        
         log.debug("GET: sessionToken:" + sessionToken);
         log.debug("GET: entityClass:" + entityClassName);
         log.debug("GET: ID:" + id);
+        
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
         Class<?> entityClass = metamodel.getEntityClass(entityClassName);
@@ -102,6 +121,14 @@ public class CRUDResource
         return entity;        
     }
     
+    /**
+     * Handler for PUT method requests for this resource
+     * Updates an entity into datastore
+     * @param sessionToken
+     * @param entityClassName
+     * @param in
+     * @return
+     */
     @PUT
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -109,29 +136,38 @@ public class CRUDResource
             @PathParam("entityClass") String entityClassName, 
             InputStream in) {      
         
-        String xml = null;
-        try
-        {
-            xml = StreamUtils.toString(in);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        
         log.debug("PUT: sessionToken:" + sessionToken);
         log.debug("PUT: entityClass:" + entityClassName);
-        log.debug("PUT: XML:" + xml);
+        if(log.isDebugEnabled()) {
+            try
+            {
+                log.debug("PUT: Input Body:" + StreamUtils.toString(in));
+            }
+            catch (IOException e)
+            {
+                log.warn("Error while converting PUT body to string. Further processing would possibly be failed. " + e.getMessage());
+            }
+        }   
         
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
         Class<?> entityClass = metamodel.getEntityClass(entityClassName);
         log.debug("PUT: entityClass" + entityClass);
         
-        Object entity = JAXBUtils.toObject(xml, entityClass);
+        Object entity = JAXBUtils.toObject(in, entityClass);
         Object output = em.merge(entity);
         return output;
     }
     
+    /**
+     * Handler for DELETE method requests for this resource
+     * Deletes an entity from datastore
+     * @param sessionToken
+     * @param entityClassName
+     * @param id
+     * @return
+     */
     @DELETE
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)

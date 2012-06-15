@@ -23,10 +23,18 @@ import java.util.UUID;
  */
 public class TokenUtils
 {
+    /**
+     * Generates Application Token
+     * @return
+     */
     public static String generateApplicationToken() {
         return Constants.APPLICATION_TOKEN_PREFIX + "_" + UUID.randomUUID();
     }
     
+    /**
+     * Generates Session Token
+     * @return
+     */
     public static String generateSessionToken() {
         return Constants.SESSION_TOKEN_PREFIX + "_" + UUID.randomUUID();
     }  

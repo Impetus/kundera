@@ -22,12 +22,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Utilities for converting InputStream to various forms and vice versa
  * @author amresh.singh
  */
 public class StreamUtils
 {
     
+    /**
+     * Converts Input stream to String
+     * @param is
+     * @return
+     * @throws IOException
+     */
     public static String toString(InputStream is) throws IOException {
         String output = new String();
         try
@@ -43,6 +49,11 @@ public class StreamUtils
         return output;
     }
     
+    /**
+     * Converts String to Input Stream
+     * @param s
+     * @return
+     */
     public static InputStream toInputStream(String s) {
         InputStream is = new ByteArrayInputStream(s.getBytes());
         return is;
