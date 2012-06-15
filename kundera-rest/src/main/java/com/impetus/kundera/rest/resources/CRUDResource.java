@@ -15,8 +15,8 @@
  */
 package com.impetus.kundera.rest.resources;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.Consumes;
@@ -28,15 +28,18 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.JAXBUtils;
-import com.impetus.kundera.rest.common.Response;
-import com.impetus.kundera.rest.common.StreamUtils;
 import com.impetus.kundera.rest.repository.EMRepository;
 
 /**
@@ -60,35 +63,27 @@ public class CRUDResource
      * @return
      */
     @POST
-    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    @Produces(MediaType.TEXT_PLAIN)
-    public String insert(@PathParam("sessionToken") String sessionToken, 
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON}) 
+    public Response insert(@PathParam("sessionToken") String sessionToken, 
             @PathParam("entityClass") String entityClassName, 
             InputStream in) {      
         
         
-        log.debug("POST: SessionToken:" + sessionToken);
-        log.debug("POST: entityClass:" + entityClassName);
-        if(log.isDebugEnabled()) {
-            try
-            {
-                log.debug("POST: Input Body:" + StreamUtils.toString(in));
-            }
-            catch (IOException e)
-            {
-                log.warn("Error while converting POST body to string. Further processing would possibly be failed. " + e.getMessage());
-            }
-        }        
+        log.debug("POST: SessionToken: " + sessionToken);
+        log.debug("POST: entityClass: " + entityClassName);                
         
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
         Class<?> entityClass = metamodel.getEntityClass(entityClassName);
         log.debug("POST: entityClass" + entityClass);
         
-        Object entity = JAXBUtils.toObject(in, entityClass);
+        Object entity = JAXBUtils.toObject(in, entityClass);        
         em.persist(entity);
-
-        return Response.POST_RESPONSE_SUCCESS;
+        
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
+        Object id = PropertyAccessorHelper.getId(entity, m);
+        
+        return Response.created(URI.create("/" + sessionToken + "/" + entityClassName + "/" + id)).build();
     }
     
     /**
@@ -99,8 +94,7 @@ public class CRUDResource
      * @param id
      * @return
      */
-    @GET
-    @Consumes(MediaType.TEXT_PLAIN)
+    @GET    
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Path("/{id}")
     public Object find(@PathParam("sessionToken") String sessionToken, 
@@ -138,17 +132,7 @@ public class CRUDResource
         
         
         log.debug("PUT: sessionToken:" + sessionToken);
-        log.debug("PUT: entityClass:" + entityClassName);
-        if(log.isDebugEnabled()) {
-            try
-            {
-                log.debug("PUT: Input Body:" + StreamUtils.toString(in));
-            }
-            catch (IOException e)
-            {
-                log.warn("Error while converting PUT body to string. Further processing would possibly be failed. " + e.getMessage());
-            }
-        }   
+        log.debug("PUT: entityClass:" + entityClassName);          
         
         EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
         MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
@@ -172,7 +156,7 @@ public class CRUDResource
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/delete/{id}")
-    public String delete(@PathParam("sessionToken") String sessionToken, 
+    public Response delete(@PathParam("sessionToken") String sessionToken, 
             @PathParam("entityClass") String entityClassName, @PathParam("id") String id) {      
         
         
@@ -190,7 +174,7 @@ public class CRUDResource
         Object entity = em.find(entityClass, id);
         em.remove(entity);     
         
-        return Response.DELETE_RESPONSE_SUCCESS;
+        return Response.ok().build();        
     }
 
 }

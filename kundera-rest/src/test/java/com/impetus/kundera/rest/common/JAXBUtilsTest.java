@@ -39,7 +39,7 @@ public class JAXBUtilsTest extends TestCase
      */
     public void testToObject()
     {
-        String xml = "<book><isbn>34523423423423</isbn><author>Amresh</author><publication>Willey</publication></book>";
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><book><isbn>34523423423423</isbn><author>Amresh</author><publication>Willey</publication></book>";
         try
         {
             
