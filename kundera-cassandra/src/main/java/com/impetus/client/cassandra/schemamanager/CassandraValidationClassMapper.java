@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.schemamanager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * The Class CassandraValidationClassMapper holds the map of validation
@@ -27,10 +29,15 @@ final class CassandraValidationClassMapper
 {
 
     /** The Constant validationClassMapper. */
-    final static HashMap<Class, String> validationClassMapper = new HashMap<Class, String>();
+    private final static HashMap<Class, String> validationClassMapper = new HashMap<Class, String>();
+
+    private final static List<String> replication_startegies = new ArrayList<String>();
 
     static
     {
+
+        replication_startegies.add("org.apache.cassandra.locator.SimpleStrategy");
+        replication_startegies.add("org.apache.cassandra.locator.NetworkTopologyStrategy");
 
         validationClassMapper.put(java.lang.String.class, "UTF8Type");
         validationClassMapper.put(char.class, "UTF8Type");
@@ -74,5 +81,10 @@ final class CassandraValidationClassMapper
             validation_class = "BytesType";
         }
         return validation_class;
+    }
+
+    static List<String> getReplicationStrategies()
+    {
+        return replication_startegies;
     }
 }

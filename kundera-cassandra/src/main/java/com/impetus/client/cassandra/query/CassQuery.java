@@ -105,7 +105,7 @@ public class CassQuery extends QueryImpl implements Query
                 boolean isRowKeyQuery = ixClause.keySet().iterator().next();
                 if (!isRowKeyQuery)
                 {
-                    result = ((PelopsClient) client).find(ixClause.get(isRowKeyQuery), m, false, null);
+                    result = ((PelopsClient) client).find(ixClause.get(isRowKeyQuery), m, false, null,maxResult);
                 }
                 else
                 {

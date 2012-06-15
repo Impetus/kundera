@@ -107,7 +107,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                 // In case need to use secondary indexes.
                 if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
                 {
-                    ls = ((PelopsClient) client).find(m, relationNames, this.conditions.get(isRowKeyQuery));
+                    ls = ((PelopsClient) client).find(m, relationNames, this.conditions.get(isRowKeyQuery),100);
                 }
                 else
                 {
@@ -133,7 +133,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                     // in case need to search on secondry columns and it is not
                     // set
                     // to true!
-                    ls = ((PelopsClient) client).find(this.conditions.get(isRowKeyQuery), m, true, null);
+                    ls = ((PelopsClient) client).find(this.conditions.get(isRowKeyQuery), m, true, null,100);
                 }
                 else
                 {
