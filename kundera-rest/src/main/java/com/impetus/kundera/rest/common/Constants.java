@@ -28,6 +28,7 @@ public interface Constants
     public static final String APPLICATION_TOKEN_RESOURCE_PATH = "/application";
     public static final String SESSION_TOKEN_RESOURCE_PATH = "/session";
     public static final String CRUD_RESOURCE_PATH = "/crud";
+    public static final String QUERY_RESOURCE_PATH = "/query";
     public static final String META_DATA_RESOURCE_PATH = "/metadata";
     
 

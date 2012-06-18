@@ -15,15 +15,19 @@
  */
 package com.impetus.kundera.rest.common;
 
-import java.io.IOException;
 import java.io.InputStream;
 
+import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.sun.jersey.api.json.JSONConfiguration;
+import com.sun.jersey.api.json.JSONJAXBContext;
+import com.sun.jersey.api.json.JSONUnmarshaller;
 
 /**
  * Utility for converting objects into XML and vice versa 
@@ -39,16 +43,27 @@ public class JAXBUtils
      * @param objectClass
      * @return
      */
-    public static Object toObject(InputStream is, Class<?> objectClass) {
+    public static Object toObject(InputStream is, Class<?> objectClass, String mediaType) {
         Object output = null;
+        
         try
         {
-            JAXBContext jaxbContext = JAXBContext.newInstance(objectClass);
+            output = objectClass.newInstance();
             
-            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+            if(MediaType.APPLICATION_XML.equals(mediaType)) {
+                JAXBContext jaxbContext = JAXBContext.newInstance(objectClass);
+                
+                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();                
+                           
+                output = jaxbUnmarshaller.unmarshal(is);
+            } else if(MediaType.APPLICATION_JSON.equals(mediaType)) {
+                
+                JSONJAXBContext context = new JSONJAXBContext(JSONConfiguration.mappedJettison().build(), objectClass);
+                JSONUnmarshaller jsonUnmarshaller = context.createJSONUnmarshaller();           
+                
+                output = jsonUnmarshaller.unmarshalFromJSON(is, objectClass);               
+            }  
             
-            output = objectClass.newInstance();           
-            output = jaxbUnmarshaller.unmarshal(is);
             
         }
         catch (JAXBException e)

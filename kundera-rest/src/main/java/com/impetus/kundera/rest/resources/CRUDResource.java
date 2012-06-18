@@ -27,9 +27,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,6 +56,8 @@ public class CRUDResource
     /** log for this class. */
     private static Log log = LogFactory.getLog(CRUDResource.class);
     
+    @Context UriInfo uriInfo;
+    
  
     /**
      * Handler for POST method requests for this resource
@@ -65,7 +70,7 @@ public class CRUDResource
     @POST
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON}) 
     public Response insert(@PathParam("sessionToken") String sessionToken, 
-            @PathParam("entityClass") String entityClassName, 
+            @PathParam("entityClass") String entityClassName, @Context HttpHeaders headers,
             InputStream in) {      
         
         
@@ -78,9 +83,12 @@ public class CRUDResource
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
             MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
             Class<?> entityClass = metamodel.getEntityClass(entityClassName);
-            log.debug("POST: entityClass" + entityClass);
+            log.debug("POST: entityClass" + entityClass);           
             
-            Object entity = JAXBUtils.toObject(in, entityClass);        
+            String mediaType = headers.getRequestHeader("content-type").get(0);
+            log.debug("POST: Media Type:" + mediaType);
+            
+            Object entity = JAXBUtils.toObject(in, entityClass, mediaType);        
             em.persist(entity);
             
             EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
@@ -150,12 +158,14 @@ public class CRUDResource
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response update(@PathParam("sessionToken") String sessionToken, 
-            @PathParam("entityClass") String entityClassName, 
+            @PathParam("entityClass") String entityClassName, @Context HttpHeaders headers,
             InputStream in) {      
         
         
         log.debug("PUT: sessionToken:" + sessionToken);
-        log.debug("PUT: entityClass:" + entityClassName);          
+        log.debug("PUT: entityClassName:" + entityClassName); 
+        String mediaType = headers.getRequestHeader("content-type").get(0);
+        log.debug("POST: Media Type:" + mediaType);
         
         Object output;
         try
@@ -163,9 +173,11 @@ public class CRUDResource
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
             MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
             Class<?> entityClass = metamodel.getEntityClass(entityClassName);
-            log.debug("PUT: entityClass" + entityClass);
+            log.debug("PUT: entityClass: " + entityClass);
             
-            Object entity = JAXBUtils.toObject(in, entityClass);
+            
+            
+            Object entity = JAXBUtils.toObject(in, entityClass, mediaType);
             output = em.merge(entity);
         }
         catch (Exception e)
