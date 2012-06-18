@@ -189,3 +189,4 @@ public class CassandraPropertiesTest
         return null;
     }
 }
+

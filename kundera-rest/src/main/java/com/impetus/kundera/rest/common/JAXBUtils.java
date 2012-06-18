@@ -15,6 +15,7 @@
  */
 package com.impetus.kundera.rest.common;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import javax.xml.bind.JAXBContext;
@@ -24,15 +25,13 @@ import javax.xml.bind.Unmarshaller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.rest.resources.ApplicationTokenResource;
-
 /**
  * Utility for converting objects into XML and vice versa 
  * @author amresh.singh
  */
 public class JAXBUtils
 {
-    private static Log log = LogFactory.getLog(ApplicationTokenResource.class);
+    private static Log log = LogFactory.getLog(JAXBUtils.class);
     
     /**
      * Converts <code>InputStream</code> to Object using JAXB
@@ -48,8 +47,9 @@ public class JAXBUtils
             
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             
-            output = objectClass.newInstance();
+            output = objectClass.newInstance();           
             output = jaxbUnmarshaller.unmarshal(is);
+            
         }
         catch (JAXBException e)
         {
