@@ -35,7 +35,7 @@ import com.impetus.kundera.rest.repository.EMFRepository;
 import com.impetus.kundera.rest.repository.EMRepository;
 
 /**
- * Session Token Resource
+ * Session Token REST Resource
  * @author amresh.singh
  */
 
@@ -44,6 +44,12 @@ public class SessionTokenResource
 {
     private static Log log = LogFactory.getLog(SessionTokenResource.class);
     
+    /**
+     * Handler for GET method requests for this resource
+     * Generates Session token and returns, creates and puts EM into repository
+     * @param applicationToken
+     * @return
+     */
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.TEXT_PLAIN)    
@@ -54,7 +60,8 @@ public class SessionTokenResource
         EntityManagerFactory emf = EMFRepository.INSTANCE.getEMF(applicationToken);
         
         if(emf == null) {
-            //Handle error
+            log.warn("GET: Application Token:" + applicationToken + " doesn't exist and hence Session can't be created");
+            return Response.GET_ST_FAILED;
         }
         
         String sessionToken = TokenUtils.generateSessionToken();        
@@ -65,6 +72,12 @@ public class SessionTokenResource
         return sessionToken;
     } 
     
+    /**
+     * Handler for DELETE method requests for this resource
+     * Closes EM and removes session token alongwith from repository
+     * @param id
+     * @return
+     */
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.TEXT_PLAIN) 
@@ -74,7 +87,8 @@ public class SessionTokenResource
         
         EntityManager em = EMRepository.INSTANCE.getEM(id);
         if(em == null) {
-            //Handle Error
+            log.warn("DELETE: Session Token:" + id + " doesn't exist and hence can't be deleted");
+            return Response.DELETE_ST_FAILED;
         }
         
         EMRepository.INSTANCE.removeEm(id);        

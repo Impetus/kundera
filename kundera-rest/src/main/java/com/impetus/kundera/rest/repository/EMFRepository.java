@@ -21,7 +21,7 @@ import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Repository for holding Application Tokens and {@link EntityManagerFactory} 
  * @author amresh.singh
  */
 public class EMFRepository
@@ -40,6 +40,11 @@ public class EMFRepository
         return emfMap;
     }
     
+    /**
+     * Retrieves EMF
+     * @param applicationToken
+     * @return
+     */
     public EntityManagerFactory getEMF(String applicationToken) {
         if(emfMap == null)  {
             return null;
@@ -67,6 +72,10 @@ public class EMFRepository
         emfMap.put(applicationToken, emf);
     }
     
+    /**
+     * Removes EMF
+     * @param applicationToken
+     */
     public void removeEMF(String applicationToken) {
         if(emfMap != null) {
             emfMap.remove(applicationToken);

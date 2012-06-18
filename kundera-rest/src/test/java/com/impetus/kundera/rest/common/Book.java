@@ -15,18 +15,32 @@
  */
 package com.impetus.kundera.rest.common;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Book class for test cases  
+ * Entity class for Book 
  * @author amresh.singh
  */
+
+@Entity
+@Table(name="BOOK", schema="KunderaExamples@twissandra")
 @XmlRootElement
 public class Book
 {
-    private String isbn;
-    private String author;
-    private String publication;
+    @Id
+    @Column(name="ISBN")
+    String isbn;
+    
+    @Column(name="AUTHOR")
+    String author;
+    
+    @Column(name="PUBLICATION")
+    String publication;
+
     /**
      * @return the isbn
      */
@@ -34,6 +48,7 @@ public class Book
     {
         return isbn;
     }
+
     /**
      * @param isbn the isbn to set
      */
@@ -41,6 +56,7 @@ public class Book
     {
         this.isbn = isbn;
     }
+
     /**
      * @return the author
      */
@@ -48,6 +64,7 @@ public class Book
     {
         return author;
     }
+
     /**
      * @param author the author to set
      */
@@ -55,6 +72,7 @@ public class Book
     {
         this.author = author;
     }
+
     /**
      * @return the publication
      */
@@ -62,14 +80,13 @@ public class Book
     {
         return publication;
     }
+
     /**
      * @param publication the publication to set
      */
     public void setPublication(String publication)
     {
         this.publication = publication;
-    }
-    
-    
+    }   
 
 }

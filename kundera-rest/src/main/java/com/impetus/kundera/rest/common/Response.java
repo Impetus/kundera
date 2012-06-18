@@ -16,7 +16,7 @@
 package com.impetus.kundera.rest.common;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Constants for REST responses
  * @author amresh.singh
  */
 public interface Response
@@ -25,7 +25,12 @@ public interface Response
     public static final String DELETE_RESPONSE_SUCCESS = "DELETE_SUCCESS";
     
     public static final String DELETE_AT_SUCCESS = "APPLICATION_TOKEN_ DELETE_SUCCESS";
+    public static final String DELETE_AT_FAILED = "APPLICATION_TOKEN_ DELETE_FAILED";
+    
     public static final String DELETE_ST_SUCCESS = "SESSION_TOKEN_ DELETE_SUCCESS";
+    public static final String DELETE_ST_FAILED = "SESSION_TOKEN_ DELETE_FAILED";
+    
+    public static final String GET_ST_FAILED = "SESSION_TOKEN_ GET_FAILED";
     
 
 }

@@ -123,7 +123,7 @@ public class ManagedState extends NodeState
                 nodeStateContext.setDirty(false);    // This node is fresh and hence NOT dirty
                 
                 // One time set as required for rollback.
-//                Object original = ObjectUtils.deepCopy((Node) nodeStateContext);
+                // Object original = ObjectUtils.deepCopy((Node) nodeStateContext);
                 Object original = ((Node) nodeStateContext).clone();
                 ((Node)nodeStateContext).setOriginalNode((Node) original);
                 
@@ -147,7 +147,7 @@ public class ManagedState extends NodeState
             // This node is fresh and hence NOT dirty
             nodeStateContext.setDirty(false);
             // One time set as required for rollback.
-            Object original = ObjectUtils.deepCopy((Node) nodeStateContext);
+            Object original = ((Node) nodeStateContext).clone();
             ((Node)nodeStateContext).setOriginalNode((Node) original);
         }                
 
