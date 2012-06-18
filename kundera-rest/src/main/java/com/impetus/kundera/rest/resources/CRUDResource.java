@@ -42,6 +42,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.rest.common.Constants;
+import com.impetus.kundera.rest.common.EntityUtils;
 import com.impetus.kundera.rest.common.JAXBUtils;
 import com.impetus.kundera.rest.repository.EMRepository;
 
@@ -81,8 +82,7 @@ public class CRUDResource
         try
         {
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-            MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
-            Class<?> entityClass = metamodel.getEntityClass(entityClassName);
+            Class<?> entityClass = EntityUtils.getEntityClass(entityClassName, em);
             log.debug("POST: entityClass" + entityClass);           
             
             String mediaType = headers.getRequestHeader("content-type").get(0);
@@ -125,8 +125,7 @@ public class CRUDResource
         try
         {
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-            MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
-            Class<?> entityClass = metamodel.getEntityClass(entityClassName);
+            Class<?> entityClass = EntityUtils.getEntityClass(entityClassName, em);
             log.debug("GET: entityClass" + entityClass);
             
             entity = em.find(entityClass, id);
@@ -171,8 +170,7 @@ public class CRUDResource
         try
         {
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-            MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
-            Class<?> entityClass = metamodel.getEntityClass(entityClassName);
+            Class<?> entityClass = EntityUtils.getEntityClass(entityClassName, em);
             log.debug("PUT: entityClass: " + entityClass);
             
             
@@ -215,8 +213,7 @@ public class CRUDResource
         try
         {
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-            MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
-            Class<?> entityClass = metamodel.getEntityClass(entityClassName);
+            Class<?> entityClass = EntityUtils.getEntityClass(entityClassName, em);
             log.debug("DELETE: entityClass" + entityClass);
             
             Object entity = em.find(entityClass, id);
