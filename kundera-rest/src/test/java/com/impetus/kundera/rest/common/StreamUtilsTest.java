@@ -42,18 +42,13 @@ public class StreamUtilsTest extends TestCase
      */
     public void testToStringInputStream()
     {
-        try
-        {
-            String str = "<book><isbn>34523423423423</isbn><author>Amresh</author><publication>Willey</publication></book>";
-            InputStream is = StreamUtils.toInputStream(str);
-            String str2 = StreamUtils.toString(is);
-            assertNotNull(str2);
-            assertEquals(str2, str);
-        }
-        catch (IOException e)
-        {
-            fail(e.getMessage());
-        }
+        
+        String str = "<book><isbn>34523423423423</isbn><author>Amresh</author><publication>Willey</publication></book>";
+        InputStream is = StreamUtils.toInputStream(str);
+        String str2 = StreamUtils.toString(is);
+        assertNotNull(str2);
+        assertEquals(str2, str);
+        
     }
 
     /**
