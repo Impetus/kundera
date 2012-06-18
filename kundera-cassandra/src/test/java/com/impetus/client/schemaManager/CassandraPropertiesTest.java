@@ -15,6 +15,7 @@ import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Assert;
@@ -69,6 +70,10 @@ public class CassandraPropertiesTest
      */
     private final boolean useLucene = true;
 
+    private CassandraCli cassandraCli;
+
+    private org.apache.commons.logging.Log log = LogFactory.getLog(CassandraPropertiesTest.class);
+
     /**
      * @throws java.lang.Exception
      */
@@ -76,8 +81,9 @@ public class CassandraPropertiesTest
     public void setUp() throws Exception
     {
         configuration = new SchemaConfiguration(pu);
-        CassandraCli.cassandraSetUp();
-        client = CassandraCli.getClient();
+        cassandraCli = new CassandraCli();
+        cassandraCli.cassandraSetUp();
+        client = cassandraCli.getClient();
     }
 
     /**
@@ -86,11 +92,11 @@ public class CassandraPropertiesTest
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli.dropKeySpace(keyspace);
+        cassandraCli.dropKeySpace(keyspace);
     }
 
     @Test
-    public void test() throws NotFoundException, InvalidRequestException, TException, IOException
+    public void testValid() throws NotFoundException, InvalidRequestException, TException, IOException
     {
         getEntityManagerFactory("create");
         schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
@@ -98,12 +104,21 @@ public class CassandraPropertiesTest
 
         Properties properties = new Properties();
         InputStream inStream = ClassLoader.getSystemResourceAsStream("kundera-cassandra.properties");
-        properties.load(inStream);
-        String expected_replication = properties.getProperty("replication_factor");
-        String expected_strategyClass = properties.getProperty("placement_strategy");
-        KsDef ksDef = client.describe_keyspace(keyspace);
-        Assert.assertEquals(Integer.parseInt(expected_replication), ksDef.getReplication_factor());
-        Assert.assertEquals(expected_strategyClass, ksDef.getStrategy_class());
+        try
+        {
+
+            properties.load(inStream);
+            String expected_replication = properties.getProperty("replication_factor");
+            String expected_strategyClass = properties.getProperty("placement_strategy");
+
+            KsDef ksDef = client.describe_keyspace(keyspace);
+            Assert.assertEquals(Integer.parseInt(expected_replication), ksDef.getReplication_factor());
+            Assert.assertEquals(expected_strategyClass, ksDef.getStrategy_class());
+        }
+        catch (NullPointerException e)
+        {
+            log .warn("kundera-cassandra.properties file not found");
+        }
     }
 
     /**
