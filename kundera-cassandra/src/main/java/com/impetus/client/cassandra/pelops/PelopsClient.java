@@ -1021,6 +1021,13 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
 
     public void setConsistencyLevel(ConsistencyLevel cLevel)
     {
-        this.consistencyLevel = cLevel;
+        if (cLevel != null)
+        {
+            this.consistencyLevel = cLevel;
+        }
+        else
+        {
+            log.warn("Please provide resonable consistency Level");
+        }
     }
 }
