@@ -70,16 +70,6 @@ public class OTOUniAssociationTest extends TwinAssociation
     @BeforeClass
     public static void init() throws Exception
     {
-        // if (RUN_IN_EMBEDDED_MODE)
-        // {
-        // CassandraCli.cassandraSetUp();
-        // } else {
-        // if(AUTO_MANAGE_SCHEMA) {
-        // CassandraCli.initClient();
-        // }
-        //
-        // }
-
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelUni1To1FK.class);
         clazzz.add(HabitatUni1To1FK.class);
@@ -220,12 +210,7 @@ public class OTOUniAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();
-
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            CassandraCli.dropKeySpace("KunderaTests");
-        }
+        tearDownInternal();       
 
     }
 

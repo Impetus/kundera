@@ -36,14 +36,6 @@ public class MTOBiAssociationTest extends TwinAssociation
     @BeforeClass
     public static void init() throws Exception
     {
-//        if (RUN_IN_EMBEDDED_MODE)
-//        {
-//            CassandraCli.cassandraSetUp();
-//        } else {
-//            if(AUTO_MANAGE_SCHEMA) {
-//                CassandraCli.initClient();
-//            }
-//        }
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelBiMTo1.class);
         clazzz.add(HabitatBiMTo1.class);
@@ -160,8 +152,7 @@ public class MTOBiAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();
-        CassandraCli.dropKeySpace("KunderaTests");
+        tearDownInternal();        
     }
 
     @Override

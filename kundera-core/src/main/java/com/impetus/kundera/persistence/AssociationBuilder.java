@@ -39,6 +39,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.JoinTableMetadata;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.persistence.context.MainCache;
 import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -149,9 +150,15 @@ final class AssociationBuilder
             
             if(isBidirectionalRelation) {
                 Relation reverseRelation = childMetadata.getRelation(biDirectionalField.getName());
-                String childId = PropertyAccessorHelper.getId(child, childMetadata);
-                EntityMetadata reverseEntityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-                populateRelationViaQuery(child, pd, childId, reverseRelation, relation.getJoinColumnName(), reverseEntityMetadata);
+                
+                if(relation.getType().equals(ForeignKey.ONE_TO_ONE)) {
+                    PropertyAccessorHelper.set(child, reverseRelation.getProperty(), entity);
+                } else {
+                    String childId = PropertyAccessorHelper.getId(child, childMetadata);
+                    EntityMetadata reverseEntityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+                    populateRelationViaQuery(child, pd, childId, reverseRelation, relation.getJoinColumnName(), reverseEntityMetadata);
+                }            
+                
             } 
         }
     }
@@ -169,20 +176,29 @@ final class AssociationBuilder
         Class<?> childClass = relation.getTargetEntity();                            
         Client childClient = pd.getClient(childMetadata);                    
         
-        List associatedEntities = null;
+        List associatedObjects = null;
         
         //Since ID is stored at other side of the relationship, we have to query that table
                            
         if (MetadataUtils.useSecondryIndex(childClient.getPersistenceUnit()))        {
             //Pass this entity id as a value to be searched for 
-            associatedEntities = pd.find(childClass, entityId, relationName);
+            associatedObjects = pd.find(childClass, entityId, relationName);
         }
         else
         {
-            associatedEntities = getAssociatedEntitiesFromLucene(entity, entityId, childClass, childClient);
+            associatedObjects = getAssociatedEntitiesFromLucene(entity, entityId, childClass, childClient);
         } 
         
-        if(associatedEntities != null && ! associatedEntities.isEmpty()) {
+
+        List associatedEntities = new ArrayList();       
+        if(associatedObjects != null && ! associatedObjects.isEmpty()) {
+            for(Object o : associatedObjects) {
+                if(o instanceof EnhanceEntity) {
+                    associatedEntities.add(((EnhanceEntity)o).getEntity());
+                } else {
+                    associatedEntities.add(o);
+                }
+            }
             setAssociatedEntities(entity, relation.getProperty(), associatedEntities);
         }
         

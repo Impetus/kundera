@@ -34,7 +34,7 @@ public class StreamUtils
      * @return
      * @throws IOException
      */
-    public static String toString(InputStream is) throws IOException {
+    public static String toString(InputStream is) {
         String output = new String();
         try
         {
@@ -44,7 +44,7 @@ public class StreamUtils
         }
         catch (IOException e)
         {
-           throw e;
+           return null;
         }
         return output;
     }
