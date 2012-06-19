@@ -196,8 +196,7 @@ public class MTOUniAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();
-        CassandraCli.dropKeySpace("KunderaTests");
+        tearDownInternal();        
     }
 
     @Override
