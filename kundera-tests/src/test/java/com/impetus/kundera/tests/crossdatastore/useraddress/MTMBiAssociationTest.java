@@ -41,12 +41,13 @@ public class MTMBiAssociationTest extends TwinAssociation
         {
             CassandraCli.cassandraSetUp();
             
-        } else {
-            if(AUTO_MANAGE_SCHEMA) {
-                CassandraCli.initClient();
-            }
-            
         }
+        
+        if (AUTO_MANAGE_SCHEMA)
+        {
+            CassandraCli.initClient();
+        }          
+        
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelBiMToM.class);
         clazzz.add(HabitatBiMToM.class);
@@ -73,7 +74,8 @@ public class MTMBiAssociationTest extends TwinAssociation
     public void dummyTest(){
         
     }
-//    @Test
+
+    @Test
     public void testCRUD()
     {
         tryOperation();

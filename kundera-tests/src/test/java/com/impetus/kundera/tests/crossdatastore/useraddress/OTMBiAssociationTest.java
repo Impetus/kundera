@@ -216,7 +216,7 @@ public class OTMBiAssociationTest extends TwinAssociation
         //cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
-        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
+        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");       
 
         cfDef.addToColumn_metadata(columnDef);
 
