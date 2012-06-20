@@ -15,19 +15,23 @@
  ******************************************************************************/
 package com.impetus.kundera.rest.resources;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.rest.common.Book;
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.EntityUtils;
 import com.impetus.kundera.rest.repository.EMRepository;
@@ -56,7 +60,7 @@ public class QueryResource
     @GET    
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Path("/all")
-    public Response find(@PathParam("sessionToken") String sessionToken, 
+    public Response findAll(@PathParam("sessionToken") String sessionToken, 
             @PathParam("entityClass") String entityClassName) {
         
         log.debug("GET: sessionToken:" + sessionToken);
@@ -84,13 +88,15 @@ public class QueryResource
             return Response.serverError().build();
         }
         
-        log.debug("GET: " + result);       
+        log.debug("GET: Find All Result: " + result);       
         
         if(result == null) {
             return Response.noContent().build();
         }
         
-        return Response.ok(result).build();              
+        GenericEntity<List<Object>> entity = new GenericEntity(result, result.getClass().getGenericSuperclass());
+        log.debug("GET: Find All Entity: " + entity);
+        return Response.ok(entity).build();              
     }   
 
 }
