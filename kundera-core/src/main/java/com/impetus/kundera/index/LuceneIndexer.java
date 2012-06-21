@@ -97,9 +97,19 @@ public class LuceneIndexer extends DocumentIndexer
         try
         {
             luceneDirPath = lucDirPath;
-            index = new RAMDirectory();/*
-                                        * FSDirectory.open(getIndexDirectory( ))
-                                        */
+            File file = new File(luceneDirPath);
+            if (file.exists())
+            {
+                Directory sourceDir = FSDirectory.open(getIndexDirectory());
+                index = new RAMDirectory(sourceDir);
+            }
+            else
+            {
+                index = new RAMDirectory();
+            }
+            /*
+             * FSDirectory.open(getIndexDirectory( ))
+             */
             // isInitialized
             /* writer */
             w = new IndexWriter(index, new IndexWriterConfig(Version.LUCENE_34, analyzer));
