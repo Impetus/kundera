@@ -15,6 +15,8 @@
  */
 package com.impetus.kundera.rest.common;
 
+import javax.ws.rs.core.MediaType;
+
 import junit.framework.TestCase;
 
 /**
@@ -37,17 +39,39 @@ public class JAXBUtilsTest extends TestCase
     /**
      * Test method for {@link com.impetus.kundera.rest.common.JAXBUtils#toObject(java.lang.String, java.lang.Class)}.
      */
-    public void testToObject()
+    public void testXMLToObject()
     {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><book><isbn>34523423423423</isbn><author>Amresh</author><publication>Willey</publication></book>";
         try
         {
             
-            Book book = (Book)JAXBUtils.toObject(StreamUtils.toInputStream(xml), Book.class);
+            Book book = (Book)JAXBUtils.toObject(StreamUtils.toInputStream(xml), Book.class, MediaType.APPLICATION_XML);
             assertNotNull(book);
             assertEquals("34523423423423", book.getIsbn());
             assertEquals("Amresh", book.getAuthor());
             assertEquals("Willey", book.getPublication());
+        }
+        catch (Exception e)
+        {
+            fail(e.getMessage());
+        }
+    }
+    
+    /**
+     * Test method for {@link com.impetus.kundera.rest.common.JAXBUtils#toObject(java.lang.String, java.lang.Class)}.
+     */
+    public void testJSONToObject()
+    {
+        
+        String json = "{book:{\"isbn\":\"2222\",\"author\":\"Kuldeep\", \"publication\":\"McGraw\"}}";
+        try
+        {
+            
+            Book book = (Book)JAXBUtils.toObject(StreamUtils.toInputStream(json), Book.class, MediaType.APPLICATION_JSON);
+            assertNotNull(book);
+            assertEquals("2222", book.getIsbn());
+            assertEquals("Kuldeep", book.getAuthor());
+            assertEquals("McGraw", book.getPublication());
         }
         catch (Exception e)
         {

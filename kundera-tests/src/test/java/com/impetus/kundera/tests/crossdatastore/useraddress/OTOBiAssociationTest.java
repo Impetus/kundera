@@ -175,19 +175,7 @@ public class OTOBiAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-//        tearDownInternal();
-        if (AUTO_MANAGE_SCHEMA)
-        {
-            CassandraCli.dropKeySpace("KunderaTests");
-        }
-        else
-        {
-            if (AUTO_MANAGE_SCHEMA)
-            {
-//                CassandraCli.initClient();
-            }
-
-        }
+        tearDownInternal();        
     }
 
     @Override
@@ -203,9 +191,15 @@ public class OTOBiAssociationTest extends TwinAssociation
         // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
-        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
-
-        cfDef.addToColumn_metadata(columnDef);
+        
+        ColumnDef columnDefPersonName = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
+        columnDefPersonName.index_type = IndexType.KEYS;
+        
+        ColumnDef columnDefAddressId = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "UTF8Type");
+        columnDefAddressId.index_type = IndexType.KEYS;
+        
+        cfDef.addToColumn_metadata(columnDefPersonName);
+        cfDef.addToColumn_metadata(columnDefAddressId);
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(cfDef);
@@ -253,9 +247,11 @@ public class OTOBiAssociationTest extends TwinAssociation
         cfDef2.name = "ADDRESS";
         cfDef2.keyspace = "KunderaTests";
 
-        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
-        columnDef2.index_type = IndexType.KEYS;
-        cfDef2.addToColumn_metadata(columnDef2);
+        ColumnDef columnDefStreet = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
+        columnDefStreet.index_type = IndexType.KEYS;          
+        
+        cfDef2.addToColumn_metadata(columnDefStreet);
+        
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(cfDef2);

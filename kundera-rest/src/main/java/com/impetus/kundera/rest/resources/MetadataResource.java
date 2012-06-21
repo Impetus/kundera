@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.kundera.rest.common;
+package com.impetus.kundera.rest.resources;
+
+import javax.ws.rs.Path;
+
+import com.impetus.kundera.rest.common.Constants;
 
 /**
- * Holds constants
+ * REST Resource for Meta data related operations 
  * @author amresh.singh
  */
-public interface Constants
+
+@Path(Constants.KUNDERA_API_PATH + Constants.META_DATA_RESOURCE_PATH)
+public class MetadataResource
 {
-    public static final String APPLICATION_TOKEN_PREFIX = "AT";
-    public static final String SESSION_TOKEN_PREFIX = "ST";
-    
-    public static final String KUNDERA_API_PATH = "/kundera/api";
-    public static final String APPLICATION_TOKEN_RESOURCE_PATH = "/application";
-    public static final String SESSION_TOKEN_RESOURCE_PATH = "/session";
-    public static final String CRUD_RESOURCE_PATH = "/crud";
-    public static final String QUERY_RESOURCE_PATH = "/query";
-    public static final String META_DATA_RESOURCE_PATH = "/metadata";
-    
 
 }
