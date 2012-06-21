@@ -18,12 +18,12 @@ import com.impetus.kundera.KunderaException;
  * @author vivek.mishra
  * 
  */
-public class KunderaJTATransaction implements UserTransaction
+public class KunderaJTAUserTransaction implements UserTransaction
 {
     private boolean isTransactionInProgress;
 
     /** The Constant log. */
-    private static final Log log = LogFactory.getLog(KunderaJTATransaction.class);
+    private static final Log log = LogFactory.getLog(KunderaJTAUserTransaction.class);
 
     /*
      * (non-Javadoc)

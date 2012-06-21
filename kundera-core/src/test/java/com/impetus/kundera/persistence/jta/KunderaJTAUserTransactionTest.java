@@ -19,7 +19,7 @@ import org.junit.Test;
 import com.impetus.kundera.KunderaException;
 
 /**
- * Junit test case for {@link KunderaJTATransaction}. 
+ * Junit test case for {@link KunderaJTAUserTransaction}. 
  * 
  * @author vivek.mishra
  * 
@@ -45,7 +45,7 @@ public class KunderaJTAUserTransactionTest
         // This is what we need to bind to get handle of JTA's
         // UserTransaction.
 
-        ctx.bind("java:comp/UserTransaction", new KunderaJTATransaction());
+        ctx.bind("java:comp/UserTransaction", new KunderaJTAUserTransaction());
 
     }
 
@@ -73,7 +73,7 @@ public class KunderaJTAUserTransactionTest
         try
         {
             Assert.assertNotNull(utx);
-            Assert.assertSame(KunderaJTATransaction.class, utx.getClass());
+            Assert.assertSame(KunderaJTAUserTransaction.class, utx.getClass());
             utx.begin();
             // pass true, as transaction has already begun.
             assertOnCommit(utx, true);
@@ -100,7 +100,7 @@ public class KunderaJTAUserTransactionTest
         try
         {
             Assert.assertNotNull(utx);
-            Assert.assertSame(KunderaJTATransaction.class, utx.getClass());
+            Assert.assertSame(KunderaJTAUserTransaction.class, utx.getClass());
             // utx.begin();
             // pass true, as transaction has already begun.
             assertOnCommit(utx, false);
