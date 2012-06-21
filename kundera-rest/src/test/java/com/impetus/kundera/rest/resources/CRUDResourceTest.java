@@ -78,10 +78,10 @@ public class CRUDResourceTest extends JerseyTest
     }
 
     @After
-    public void tearDown()
+    public void tearDown() throws Exception
     {
-        CassandraCli.dropKeySpace("KunderaExamples");
-        CassandraCli.ca
+        super.tearDown();
+        CassandraCli.dropKeySpace("KunderaExamples");        
     }
 
     @Test
