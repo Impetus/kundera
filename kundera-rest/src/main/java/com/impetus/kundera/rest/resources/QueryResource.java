@@ -15,9 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.rest.resources;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.ws.rs.GET;
@@ -87,13 +84,13 @@ public class QueryResource
             return Response.serverError().build();
         }
         
-        log.debug("GET: Find All Result: " + result);       
+        log.debug("GET: Find All Result: " + result + ";Entity Class:" + result.getClass().getGenericSuperclass());       
         
         if(result == null) {
             return Response.noContent().build();
         }
         
-        GenericEntity<List<Object>> entity = new GenericEntity(result, result.getClass().getGenericSuperclass());
+        GenericEntity entity = new GenericEntity(result, result.getClass().getGenericSuperclass().getClass().getGenericSuperclass());
         log.debug("GET: Find All Entity: " + entity);
         return Response.ok(entity).build();              
     }   
