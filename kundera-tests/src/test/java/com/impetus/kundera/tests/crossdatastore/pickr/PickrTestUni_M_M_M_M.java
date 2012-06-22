@@ -79,7 +79,7 @@ public class PickrTestUni_M_M_M_M extends PickrBaseTest
         
     }
     
-//    @Test
+    @Test
     public void test()
     {
         executeTests();

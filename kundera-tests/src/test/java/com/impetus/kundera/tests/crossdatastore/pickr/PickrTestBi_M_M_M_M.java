@@ -69,16 +69,8 @@ public class PickrTestBi_M_M_M_M extends PickrBaseTest
         super.tearDown();
     }
 
-    /**
-     * Test.
-     */
     
     @Test
-    public void dummyTest(){
-        
-    }
-    
-//    @Test
     public void test()
     {
         executeTests();

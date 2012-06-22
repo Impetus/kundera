@@ -70,16 +70,8 @@ public class PickrTestBi_1_M_M_M extends PickrBaseTest
     {
         super.tearDown();
     }
-
-    /**
-     * Test.
-     */
     
     @Test
-    public void dummyTest(){
-        
-    }
-//    @Test
     public void test()
     {
         executeTests();
@@ -162,7 +154,17 @@ public class PickrTestBi_1_M_M_M extends PickrBaseTest
         album2.addPhoto(photo2);
         album2.addPhoto(photo3);
         album2.addPhoto(photo4);
-        album2.addPhoto(photo5);
+        album2.addPhoto(photo5);      
+        
+        photo1.addAlbum(album1);
+        photo2.addAlbum(album1);photo2.addAlbum(album2);
+        photo3.addAlbum(album1);photo3.addAlbum(album2);
+        photo4.addAlbum(album1);photo4.addAlbum(album2);        
+        photo5.addAlbum(album2);
+        
+        
+        album1.setPhotographer(p);
+        album2.setPhotographer(p);
 
         p.addAlbum(album1);
         p.addAlbum(album2);

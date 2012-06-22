@@ -74,7 +74,7 @@ public class PickrTestBi_1_1_1_1 extends PickrBaseTest
      * Test.
      */
     @Test
-    public void testPickr()
+    public void test()
     {
         executeTests();
 

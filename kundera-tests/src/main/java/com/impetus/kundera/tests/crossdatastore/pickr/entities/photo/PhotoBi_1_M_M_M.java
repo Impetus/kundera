@@ -14,6 +14,7 @@
  */
 package com.impetus.kundera.tests.crossdatastore.pickr.entities.photo;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -125,5 +126,17 @@ public class PhotoBi_1_M_M_M
     {
         this.albums = albums;
     }  
+    
+    /**
+     * @param albums the albums to set
+     */
+    public void addAlbum(AlbumBi_1_M_M_M album)
+    {
+        if(albums == null) {
+            albums = new HashSet<AlbumBi_1_M_M_M>();
+        }
+        albums.add(album);
+    }  
+    
 
 }

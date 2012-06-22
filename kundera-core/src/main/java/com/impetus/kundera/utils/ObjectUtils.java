@@ -98,7 +98,7 @@ public class ObjectUtils
 
             Object id = metadata.getReadIdentifierMethod().invoke(source);            
             
-            Object copiedObjectInMap = copiedObjectMap.get(sourceObjectClass + "#" + id);
+            Object copiedObjectInMap = copiedObjectMap.get(sourceObjectClass.getName() + "#" + id);
             if(copiedObjectInMap != null) {
                 return copiedObjectInMap;
             }            
@@ -185,7 +185,7 @@ public class ObjectUtils
             }
 
             // Put this object into copied object map
-            copiedObjectMap.put(sourceObjectClass + "#" + id, target);
+            copiedObjectMap.put(sourceObjectClass.getName() + "#" + id, target);
 
             // Copy Relationships recursively
             for (Relation relation : metadata.getRelations())
@@ -199,7 +199,6 @@ public class ObjectUtils
 
                     Class<?> relationObjectClass = relation.getProperty().getType();
                     Class<?> actualRelationObjectClass = sourceRelationObject.getClass();
-                    // Class<?> genericClass = relation.getTargetEntity();
 
                     if (!Collection.class.isAssignableFrom(relationObjectClass))
                     {
@@ -213,10 +212,12 @@ public class ObjectUtils
                         for (Object obj : (Collection) sourceRelationObject)
                         {
                             Object copyTargetRelObj = deepCopyUsingMetadata(obj, copiedObjectMap);
+                            
                             m.invoke(targetRelationObject, copyTargetRelObj);
                         }
                     }
-
+                    // Put this object into copied object map
+                    //copiedObjectMap.put(sourceObjectClass.getName() + "#" + id, target);
                     PropertyAccessorHelper.set(target, relationField, targetRelationObject);
                 }
 
