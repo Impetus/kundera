@@ -28,7 +28,7 @@ public interface RESTClient
     
     void initialize(WebResource wr, String mediaType);
     
-    String getApplicationToken();  
+    String getApplicationToken(String persistenceUnit);  
     void closeApplication(String applicationToken);
     
     String getSessionToken(String applicationToken);  
@@ -39,4 +39,5 @@ public interface RESTClient
     String updateBook(String sessionToken, String oldBook);
     void deleteBook(String sessionToken, String updatedBook, String isbn); 
     String getAllBooks(String sessionToken); 
+    String getSchemaList(String persistenceUnit);
 }

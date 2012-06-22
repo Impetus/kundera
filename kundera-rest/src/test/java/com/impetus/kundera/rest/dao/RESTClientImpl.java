@@ -49,13 +49,13 @@ public class RESTClientImpl implements RESTClient
     } 
 
     @Override
-    public String getApplicationToken()
+    public String getApplicationToken(String persistenceUnit)
     {
         String applicationToken;
         try
         {
             System.out.println("\n\nGetting Application Token...");
-            WebResource.Builder atBuilder = webResource.path("kundera/api/application/pu/twissandra")
+            WebResource.Builder atBuilder = webResource.path("kundera/api/application/pu/" + persistenceUnit)
                     .accept(MediaType.TEXT_PLAIN);
             String atResponse = atBuilder.get(ClientResponse.class).toString();
             applicationToken = atBuilder.get(String.class);
@@ -178,6 +178,20 @@ public class RESTClientImpl implements RESTClient
         
         System.out.println("Found All Entities:" + allBookStr);
         return allBookStr;
-    }  
+    }
+
+    @Override
+    public String getSchemaList(String persistenceUnit)
+    {
+        System.out.println("\n\nGetting Schema List for PU :" + persistenceUnit);
+        WebResource.Builder slBuilder = webResource.path("kundera/api/metadata/schemaList/" + persistenceUnit)
+                .accept(MediaType.TEXT_PLAIN);
+        String slResponse = slBuilder.get(ClientResponse.class).toString();
+        String schemaList = slBuilder.get(String.class);
+        System.out.println("Response: " + slResponse);
+        System.out.println("Schema List:" + schemaList);
+        return schemaList;
+    }   
+    
 
 }

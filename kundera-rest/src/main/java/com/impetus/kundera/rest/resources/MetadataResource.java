@@ -15,8 +15,18 @@
  */
 package com.impetus.kundera.rest.resources;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.rest.common.Constants;
 
 /**
@@ -27,5 +37,25 @@ import com.impetus.kundera.rest.common.Constants;
 @Path(Constants.KUNDERA_API_PATH + Constants.META_DATA_RESOURCE_PATH)
 public class MetadataResource
 {
+    private static Log log = LogFactory.getLog(MetadataResource.class);
+    
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.TEXT_PLAIN)    
+    @Path("/schemaList/{persistenceUnit}")
+    public String getSchemaList(@PathParam("persistenceUnit") String persistenceUnit) {        
+        log.debug("GET: Persistence Unit:" + persistenceUnit);
+        
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+        
+        String schema = puMetadata.getProperty("kundera.keyspace");
+        if(schema == null) {
+            log.warn("GET: getSchemaList: Can't find Schema for PU " + persistenceUnit);
+            return "Failed";
+        } else {
+            return schema;
+        }     
+        
+    } 
 
 }

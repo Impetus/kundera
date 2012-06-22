@@ -115,7 +115,7 @@ public class CRUDResourceTest extends JerseyTest
         restClient.initialize(webResource, mediaType);
 
         // Get Application Token
-        applicationToken = restClient.getApplicationToken();
+        applicationToken = restClient.getApplicationToken("twissandra");
         Assert.assertNotNull(applicationToken);
         Assert.assertTrue(applicationToken.startsWith("AT_"));
 
