@@ -109,37 +109,42 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             InputStream inStream = ClassLoader.getSystemResourceAsStream("kundera-cassandra.properties");
             if (inStream != null)
             {
-
                 properties.load(inStream);
                 String placementStrategy = properties.getProperty("placement_strategy");
-
-                if (CassandraValidationClassMapper.getReplicationStrategies().contains(placementStrategy))
+                if (placementStrategy != null)
                 {
-                    placement_strategy = placementStrategy;
-                    if (placementStrategy.equalsIgnoreCase("org.apache.cassandra.locator.SimpleStrategy"))
+                    if (CassandraValidationClassMapper.getReplicationStrategies().contains(placementStrategy))
                     {
-                        replication_factor = properties.getProperty("replication_factor");
+                        placement_strategy = placementStrategy;
                     }
                     else
                     {
-                        for (Object keySet : properties.keySet())
-                        {
-                            String dataCenterName = keySet.toString();
+                        log.warn("Give a valid replica placement strategy" + placementStrategy
+                                + "is not a valid replica placement strategy");
+                    }
+                }
+                if (placementStrategy.equalsIgnoreCase("org.apache.cassandra.locator.SimpleStrategy"))
+                {
+                    String replicationFactor = properties.getProperty("replication_factor");
+                    replication_factor = replicationFactor != null ? replicationFactor : "1";
+                }
+                else
+                {
+                    for (Object keySet : properties.keySet())
+                    {
+                        String dataCenterName = keySet.toString();
 
-                            if (dataCenterName != null && dataCenterName.startsWith("datacenter"))
+                        if (dataCenterName != null && dataCenterName.startsWith("datacenter"))
+                        {
+                            String noOfNode = properties.getProperty(dataCenterName);
+                            dataCenterName = dataCenterName.substring(dataCenterName.indexOf(".") + 1,
+                                    dataCenterName.length());
+                            if (noOfNode != null)
                             {
-                                String noOfNode = properties.getProperty(dataCenterName);
-                                dataCenterName = dataCenterName.substring(dataCenterName.indexOf(".") + 1,
-                                        dataCenterName.length());
                                 dataCenterToNode.put(dataCenterName, noOfNode);
                             }
                         }
                     }
-                }
-                else
-                {
-                    log.warn("Give a valid replica placement strategy" + placementStrategy
-                            + "is not a valid replica placement strategy");
                 }
             }
         }

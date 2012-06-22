@@ -445,6 +445,7 @@ final class PelopsDataHandler
                         Field columnField = columnNameToFieldMap.get(name);
                         if (columnField != null)
                         {
+
                             try
                             {
                                 PropertyAccessorHelper.set(superColumnObj, columnField, value);
@@ -457,7 +458,11 @@ final class PelopsDataHandler
                                 // have just one column with the same name
                                 log.debug(e.getMessage()
                                         + ". Possible case of entity column in a super column family. Will be treated as a super column.");
-                                superColumnObj = Bytes.toUTF8(value);
+                                com.impetus.kundera.metadata.model.Column col = m.getColumn(name);
+                                if (col != null)
+                                {
+                                    superColumnObj = Bytes.toUTF8(value);
+                                }
                             }
 
                         }
