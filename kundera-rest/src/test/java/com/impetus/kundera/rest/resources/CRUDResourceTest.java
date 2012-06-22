@@ -122,7 +122,7 @@ public class CRUDResourceTest extends JerseyTest
         // Get Session Token
         sessionToken = restClient.getSessionToken(applicationToken);
         Assert.assertNotNull(sessionToken);
-        Assert.assertTrue(applicationToken.startsWith("ST_"));
+        Assert.assertTrue(sessionToken.startsWith("ST_"));
         
         // Insert Record
         restClient.insertBook(sessionToken, bookStr1);
