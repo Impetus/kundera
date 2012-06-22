@@ -70,7 +70,7 @@ public class PickrTestBi_M_M_M_M extends PickrBaseTest
     }
 
     
-    @Test
+    //@Test
     public void test()
     {
         executeTests();
