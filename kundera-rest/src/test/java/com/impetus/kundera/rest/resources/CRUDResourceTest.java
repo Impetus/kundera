@@ -49,7 +49,6 @@ public class CRUDResourceTest extends JerseyTest
 {
 
     String mediaType = MediaType.APPLICATION_XML;
-
     RESTClient restClient;
 
     String applicationToken = null;
@@ -63,6 +62,9 @@ public class CRUDResourceTest extends JerseyTest
     String pk1;
 
     String pk2;
+    
+    private final static boolean USE_EMBEDDED_SERVER = false;
+    private final static boolean AUTO_MANAGE_SCHEMA = false;
 
     public CRUDResourceTest() throws Exception
     {
@@ -72,16 +74,25 @@ public class CRUDResourceTest extends JerseyTest
     @Before
     public void setup() throws Exception
     {
-        CassandraCli.cassandraSetUp();
-        CassandraCli.createKeySpace("KunderaExamples");
-        loadData();
+        
+        if(USE_EMBEDDED_SERVER) {
+            CassandraCli.cassandraSetUp();
+        }
+        
+        if(AUTO_MANAGE_SCHEMA) {
+            CassandraCli.createKeySpace("KunderaExamples");
+            loadData();
+        }       
     }
 
     @After
     public void tearDown() throws Exception
     {
         super.tearDown();
-        CassandraCli.dropKeySpace("KunderaExamples");        
+        
+        if(AUTO_MANAGE_SCHEMA) {
+            CassandraCli.dropKeySpace("KunderaExamples");
+        }                
     }
 
     @Test
@@ -141,11 +152,14 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertNotNull(updatedBook);
 
         // Get All Books
-        // String allBooks = restClient.getAllBooks(sessionToken);
+        String allBooks = restClient.getAllBooks(sessionToken);
+         
+         
+         System.out.println(allBooks);
 
         // Delete Records
-        restClient.deleteBook(sessionToken, updatedBook, pk1);
-        restClient.deleteBook(sessionToken, updatedBook, pk2);
+        //restClient.deleteBook(sessionToken, updatedBook, pk1);
+        //restClient.deleteBook(sessionToken, updatedBook, pk2);
 
         // Close Session
         restClient.closeSession(sessionToken);

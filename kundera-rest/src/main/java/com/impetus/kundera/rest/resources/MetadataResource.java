@@ -15,19 +15,27 @@
  */
 package com.impetus.kundera.rest.resources;
 
-import javax.ws.rs.Consumes;
+import java.util.Map;
+import java.util.StringTokenizer;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.rest.common.Constants;
+import com.impetus.kundera.rest.dto.Schema;
+import com.impetus.kundera.rest.dto.SchemaMetadata;
+import com.impetus.kundera.rest.dto.Table;
 
 /**
  * REST Resource for Meta data related operations 
@@ -40,20 +48,45 @@ public class MetadataResource
     private static Log log = LogFactory.getLog(MetadataResource.class);
     
     @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    @Consumes(MediaType.TEXT_PLAIN)    
-    @Path("/schemaList/{persistenceUnit}")
-    public String getSchemaList(@PathParam("persistenceUnit") String persistenceUnit) {        
-        log.debug("GET: Persistence Unit:" + persistenceUnit);
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})    
+    @Path("/schemaList/{persistenceUnits}")
+    public Response getSchemaList(@PathParam("persistenceUnits") String persistenceUnits) {        
+        log.debug("GET: Persistence Units:" + persistenceUnits);
         
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+        StringTokenizer st = new StringTokenizer(persistenceUnits, ",");
+                
+        SchemaMetadata schemaMetadata = new SchemaMetadata();
         
-        String schema = puMetadata.getProperty("kundera.keyspace");
-        if(schema == null) {
-            log.warn("GET: getSchemaList: Can't find Schema for PU " + persistenceUnit);
-            return "Failed";
+        while(st.hasMoreTokens()) {
+            
+            String persistenceUnit = st.nextToken();
+            PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+            String schemaStr = puMetadata.getProperty("kundera.keyspace");
+            
+            if(schemaStr != null) {
+                Schema schema = new Schema();
+                schema.setSchemaName(schemaStr);
+                
+                MetamodelImpl metamodel = KunderaMetadataManager.getMetamodel(persistenceUnit);
+                Map<Class<?>, EntityMetadata> metamodelMap = metamodel.getEntityMetadataMap();
+                
+                for(Class<?> clazz : metamodelMap.keySet()) {
+                    EntityMetadata m = metamodelMap.get(clazz);
+                    Table table = new Table();
+                    table.setEntityClassName(clazz.getSimpleName());
+                    table.setTableName(m.getTableName());
+                    
+                    schema.addTable(table);
+                }     
+                schemaMetadata.addSchema(schema); 
+            }           
+        }       
+        
+        if(schemaMetadata.getSchemaList().isEmpty()) {
+            log.warn("GET: getSchemaList: Can't find Schema for PUs " + persistenceUnits);
+            return Response.noContent().build();
         } else {
-            return schema;
+            return Response.ok(schemaMetadata).build();  
         }     
         
     } 

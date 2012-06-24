@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.rest.resources;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.ws.rs.GET;
@@ -62,7 +64,7 @@ public class QueryResource
         log.debug("GET: sessionToken:" + sessionToken);
         log.debug("GET: entityClass:" + entityClassName);
         
-        Object result = null;
+        List result = null;
         try
         {
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
@@ -81,18 +83,26 @@ public class QueryResource
         catch (Exception e)
         {
             log.error(e.getMessage());
-            return Response.serverError().build();
+            return Response.serverError().build();            
         }
         
         log.debug("GET: Find All Result: " + result + ";Entity Class:" + result.getClass().getGenericSuperclass());       
         
         if(result == null) {
-            return Response.noContent().build();
+            return Response.noContent().build();            
         }
         
-        GenericEntity entity = new GenericEntity(result, result.getClass().getGenericSuperclass().getClass().getGenericSuperclass());
-        log.debug("GET: Find All Entity: " + entity);
-        return Response.ok(entity).build();              
+        GenericEntity entity = new GenericEntity<List>(result) {};
+        //GenericEntity entity = new GenericEntity(result, List<Book>.class);
+        /*QueryResult  qr = new QueryResult();
+        qr.getList().addAll(result);*/
+        
+        return Response.ok(entity).build();
+        
+        //GenericEntity entity = new GenericEntity(result, List.class);
+        //log.debug("GET: Find All Entity: " + entity);
+        //return Response.ok(entity).build();
+        
     }   
 
 }

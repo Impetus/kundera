@@ -17,11 +17,13 @@ package com.impetus.kundera.rest.dao;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
+import com.impetus.kundera.rest.common.JAXBUtils;
 import com.impetus.kundera.rest.common.StreamUtils;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
@@ -170,14 +172,16 @@ public class RESTClientImpl implements RESTClient
         WebResource.Builder queryBuilder = webResource
                 .path("kundera/api/query/" + sessionToken + "/Book/all")
                 .accept(mediaType);
-        ClientResponse queryResponse = (ClientResponse) queryBuilder.get(List.class);
+        ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
         System.out.println("Find All Response:" + queryResponse.getStatus());
         
         InputStream is = queryResponse.getEntityInputStream();
+        List books = (List)JAXBUtils.toObject(is, ArrayList.class, MediaType.APPLICATION_XML);
+        
         String allBookStr = StreamUtils.toString(is);  
         
         System.out.println("Found All Entities:" + allBookStr);
-        return allBookStr;
+        return "";
     }
 
     @Override
@@ -185,13 +189,14 @@ public class RESTClientImpl implements RESTClient
     {
         System.out.println("\n\nGetting Schema List for PU :" + persistenceUnit);
         WebResource.Builder slBuilder = webResource.path("kundera/api/metadata/schemaList/" + persistenceUnit)
-                .accept(MediaType.TEXT_PLAIN);
-        String slResponse = slBuilder.get(ClientResponse.class).toString();
-        String schemaList = slBuilder.get(String.class);
-        System.out.println("Response: " + slResponse);
+                .accept(mediaType);
+        ClientResponse schemaResponse = (ClientResponse)slBuilder.get(ClientResponse.class);
+        
+        InputStream is = schemaResponse.getEntityInputStream();
+        String schemaList = StreamUtils.toString(is);  
+        
         System.out.println("Schema List:" + schemaList);
-        return schemaList;
-    }   
-    
+        return schemaList;        
+    }    
 
 }
