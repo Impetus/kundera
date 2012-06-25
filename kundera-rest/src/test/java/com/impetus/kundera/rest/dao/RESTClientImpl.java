@@ -181,7 +181,7 @@ public class RESTClientImpl implements RESTClient
 
         String allBookStr = StreamUtils.toString(is);
 
-        log.debug("Found All Entities:" + allBookStr);
+        log.debug("Found Entities:" + allBookStr);
         return allBookStr;
     }
 
@@ -195,7 +195,7 @@ public class RESTClientImpl implements RESTClient
         log.debug("Find All Response:" + queryResponse.getStatus());
 
         InputStream is = queryResponse.getEntityInputStream();
-        List books = (List) JAXBUtils.toObject(is, ArrayList.class, MediaType.APPLICATION_XML);
+        //List books = (List) JAXBUtils.toObject(is, ArrayList.class, MediaType.APPLICATION_XML);
 
         String allBookStr = StreamUtils.toString(is);
 

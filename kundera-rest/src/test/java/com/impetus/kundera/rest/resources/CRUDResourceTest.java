@@ -163,17 +163,17 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertNotNull(updatedBook);
         Assert.assertTrue(updatedBook.indexOf("Saurabh") > 0);
         
-        //String jpaQuery = "select b from Book b";
-        //String queryResult = restClient.runQuery(sessionToken, jpaQuery);
-        //log.debug("Query Result:" + queryResult);
+        String jpaQuery = "select b from Book b";
+        String queryResult = restClient.runQuery(sessionToken, jpaQuery);
+        log.debug("Query Result:" + queryResult);
 
         // Get All Books
         String allBooks = restClient.getAllBooks(sessionToken);
         log.debug(allBooks);
 
         // Delete Records
-        //restClient.deleteBook(sessionToken, updatedBook, pk1);
-        //restClient.deleteBook(sessionToken, updatedBook, pk2);
+        restClient.deleteBook(sessionToken, updatedBook, pk1);
+        restClient.deleteBook(sessionToken, updatedBook, pk2);
 
         // Close Session
         restClient.closeSession(sessionToken);

@@ -16,10 +16,12 @@
 package com.impetus.kundera.rest.common;
 
 import java.io.InputStream;
+import java.io.StringWriter;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.logging.Log;
@@ -87,6 +89,34 @@ public class JAXBUtils
             return null;
         }
         return output;
+    }
+    
+    public static String toString(Class<?> objectClass, Object object, String mediaType) {
+        try
+        {
+            if (MediaType.APPLICATION_XML.equals(mediaType))
+            {
+                JAXBContext jaxbContext = JAXBContext.newInstance(objectClass);
+                Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+                
+                StringWriter writer = new StringWriter();
+                
+                jaxbMarshaller.marshal(object, writer);
+                return writer.toString();
+                
+            } 
+            else if (MediaType.APPLICATION_JSON.equals(mediaType))
+            {
+                return null;
+            } else {
+                return null;
+            }
+        }
+        catch (JAXBException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

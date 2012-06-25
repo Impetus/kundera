@@ -24,15 +24,20 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.GenericEntity;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.query.QueryImpl;
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.EntityUtils;
+import com.impetus.kundera.rest.common.JAXBUtils;
+import com.impetus.kundera.rest.converters.CollectionConverter;
 import com.impetus.kundera.rest.dto.QueryResult;
 import com.impetus.kundera.rest.repository.EMRepository;
 
@@ -61,16 +66,17 @@ public class QueryResource
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Path("/{entityClass}/all")
     public Response findAll(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken, 
-            @PathParam("entityClass") String entityClassName) {
+            @PathParam("entityClass") String entityClassName, @Context HttpHeaders headers) {
         
         log.debug("GET: sessionToken:" + sessionToken);
         log.debug("GET: entityClass:" + entityClassName);
         
         List result = null;
+        Class<?> entityClass = null;
         try
         {
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-            Class<?> entityClass = EntityUtils.getEntityClass(entityClassName, em);
+            entityClass = EntityUtils.getEntityClass(entityClassName, em);
             log.debug("GET: entityClass" + entityClass);
             
             String alias = entityClassName.substring(0, 1).toLowerCase();
@@ -94,16 +100,12 @@ public class QueryResource
             return Response.noContent().build();            
         }
         
-        GenericEntity entity = new GenericEntity<List>(result) {};
-        //GenericEntity entity = new GenericEntity(result, List<Book>.class);
-        /*QueryResult  qr = new QueryResult();
-        qr.getList().addAll(result);*/
+        String mediaType = headers.getRequestHeader("accept").get(0);
+        log.debug("GET: Media Type:" + mediaType);
         
-        return Response.ok(entity).build();
+        String output = CollectionConverter.toString(result, entityClass, mediaType);     
         
-        //GenericEntity entity = new GenericEntity(result, List.class);
-        //log.debug("GET: Find All Entity: " + entity);
-        //return Response.ok(entity).build();
+        return Response.ok(output).build();    
         
     }   
     
@@ -120,19 +122,18 @@ public class QueryResource
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Path("/{jpaQuery}")
     public Response executeQuery(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken, 
-            @PathParam("jpaQuery") String jpaQuery) {
+            @PathParam("jpaQuery") String jpaQuery, @Context HttpHeaders headers) {
         
         log.debug("GET: sessionToken:" + sessionToken);
         log.debug("GET: jpaQuery:" + jpaQuery);
         
         List result = null;
+        Query q = null;
         try
         {
-            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-                   
+            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);                   
             
-            Query q = em.createQuery(jpaQuery);
-            
+            q = em.createQuery(jpaQuery);            
             
             result = q.getResultList();
         }
@@ -148,17 +149,14 @@ public class QueryResource
             return Response.noContent().build();            
         }
         
-        //GenericEntity entity = new GenericEntity<List>(result) {};
-        //GenericEntity entity = new GenericEntity(result, List<Book>.class);
-        QueryResult  qr = new QueryResult();
-        qr.getList().addAll(result);
+        String mediaType = headers.getRequestHeader("accept").get(0);
+        log.debug("GET: Media Type:" + mediaType);
         
-        return Response.ok(qr).build();
+        Class<?> genericClass = ((QueryImpl)q).getKunderaQuery().getEntityClass();
         
-        //GenericEntity entity = new GenericEntity(result, List.class);
-        //log.debug("GET: Find All Entity: " + entity);
-        //return Response.ok(entity).build();
+        String output = CollectionConverter.toString(result, genericClass, mediaType);
         
+        return Response.ok(output).build();        
     }   
 
 }
