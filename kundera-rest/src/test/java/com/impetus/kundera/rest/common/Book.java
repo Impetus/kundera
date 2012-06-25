@@ -22,23 +22,24 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Entity class for Book 
+ * Entity class for Book
+ * 
  * @author amresh.singh
  */
 
 @Entity
-@Table(name="BOOK", schema="KunderaExamples@twissandra")
+@Table(name = "BOOK", schema = "KunderaExamples@twissandra")
 @XmlRootElement
 public class Book
 {
     @Id
-    @Column(name="ISBN")
+    @Column(name = "ISBN")
     String isbn;
-    
-    @Column(name="AUTHOR")
+
+    @Column(name = "AUTHOR")
     String author;
-    
-    @Column(name="PUBLICATION")
+
+    @Column(name = "PUBLICATION")
     String publication;
 
     /**
@@ -50,7 +51,8 @@ public class Book
     }
 
     /**
-     * @param isbn the isbn to set
+     * @param isbn
+     *            the isbn to set
      */
     public void setIsbn(String isbn)
     {
@@ -66,7 +68,8 @@ public class Book
     }
 
     /**
-     * @param author the author to set
+     * @param author
+     *            the author to set
      */
     public void setAuthor(String author)
     {
@@ -82,11 +85,12 @@ public class Book
     }
 
     /**
-     * @param publication the publication to set
+     * @param publication
+     *            the publication to set
      */
     public void setPublication(String publication)
     {
         this.publication = publication;
-    }   
+    }
 
 }

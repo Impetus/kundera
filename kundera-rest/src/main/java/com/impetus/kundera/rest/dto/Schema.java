@@ -21,7 +21,8 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Holds schema information
+ * 
  * @author amresh.singh
  */
 
@@ -29,7 +30,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Schema
 {
     private String schemaName;
-    
+
     private List<Table> tables;
 
     /**
@@ -41,7 +42,8 @@ public class Schema
     }
 
     /**
-     * @param schemaName the schemaName to set
+     * @param schemaName
+     *            the schemaName to set
      */
     public void setSchemaName(String schemaName)
     {
@@ -57,18 +59,21 @@ public class Schema
     }
 
     /**
-     * @param tables the tables to set
+     * @param tables
+     *            the tables to set
      */
     public void setTables(List<Table> tables)
     {
         this.tables = tables;
-    }  
-    
-    public void addTable(Table table) {
-        if(tables == null) {
+    }
+
+    public void addTable(Table table)
+    {
+        if (tables == null)
+        {
             tables = new ArrayList<Table>();
         }
         tables.add(table);
-    } 
+    }
 
 }

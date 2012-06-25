@@ -19,24 +19,29 @@ import java.util.UUID;
 
 /**
  * Utility class for generating tokens
+ * 
  * @author amresh.singh
  */
 public class TokenUtils
 {
     /**
      * Generates Application Token
+     * 
      * @return
      */
-    public static String generateApplicationToken() {
+    public static String generateApplicationToken()
+    {
         return Constants.APPLICATION_TOKEN_PREFIX + "_" + UUID.randomUUID();
     }
-    
+
     /**
      * Generates Session Token
+     * 
      * @return
      */
-    public static String generateSessionToken() {
+    public static String generateSessionToken()
+    {
         return Constants.SESSION_TOKEN_PREFIX + "_" + UUID.randomUUID();
-    }  
+    }
 
 }

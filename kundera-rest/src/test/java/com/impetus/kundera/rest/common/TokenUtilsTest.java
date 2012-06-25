@@ -18,16 +18,17 @@ package com.impetus.kundera.rest.common;
 import junit.framework.TestCase;
 
 /**
- * Test case for {@link TokenUtils} 
+ * Test case for {@link TokenUtils}
+ * 
  * @author amresh.singh
  */
 public class TokenUtilsTest extends TestCase
-{    
+{
 
     protected void setUp() throws Exception
     {
         super.setUp();
-         
+
     }
 
     protected void tearDown() throws Exception
@@ -36,7 +37,9 @@ public class TokenUtilsTest extends TestCase
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.rest.common.TokenUtils#generateApplicationToken()}.
+     * Test method for
+     * {@link com.impetus.kundera.rest.common.TokenUtils#generateApplicationToken()}
+     * .
      */
     public void testGenerateApplicationToken()
     {
@@ -46,7 +49,9 @@ public class TokenUtilsTest extends TestCase
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.rest.common.TokenUtils#generateSessionToken()}.
+     * Test method for
+     * {@link com.impetus.kundera.rest.common.TokenUtils#generateSessionToken()}
+     * .
      */
     public void testGenerateSessionToken()
     {

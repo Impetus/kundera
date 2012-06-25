@@ -20,6 +20,7 @@ import javax.persistence.Persistence;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -35,58 +36,62 @@ import com.impetus.kundera.rest.repository.EMFRepository;
 
 /**
  * Application Token Resource
+ * 
  * @author amresh.singh
  */
 
-@Path(Constants.KUNDERA_API_PATH + Constants.APPLICATION_TOKEN_RESOURCE_PATH)
-public class ApplicationTokenResource
-{  
-    private static Log log = LogFactory.getLog(ApplicationTokenResource.class);
-    
+@Path(Constants.KUNDERA_API_PATH + Constants.APPLICATION_RESOURCE_PATH)
+public class ApplicationResource
+{
+    private static Log log = LogFactory.getLog(ApplicationResource.class);
+
     /**
-     * Handler for GET method requests for this resource
-     * Generates Application token and returns, creates and puts EMF into repository
+     * Handler for GET method requests for this resource Generates Application
+     * token and returns, creates and puts EMF into repository
+     * 
      * @param persistenceUnits
      * @return
      */
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    @Consumes(MediaType.TEXT_PLAIN)   
-    @Path("/pu/{persistenceUnits}")
-    public String getApplicationToken(@PathParam("persistenceUnits") String persistenceUnits) {
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Path("/{persistenceUnits}")
+    public String getApplicationToken(@PathParam("persistenceUnits") String persistenceUnits)
+    {
         log.debug("GET Persistence Unit(s):" + persistenceUnits);
-        
+
         EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnits);
-        
-        String applicationToken = TokenUtils.generateApplicationToken();        
-        
+
+        String applicationToken = TokenUtils.generateApplicationToken();
+
         EMFRepository.INSTANCE.addEmf(applicationToken, emf);
-        
+
         return applicationToken;
-    }  
-    
+    }
+
     /**
-     * Handler for DELETE method requests for this resource
-     * Closes EMF and removes application token alongwith from repository
+     * Handler for DELETE method requests for this resource Closes EMF and
+     * removes application token along with from repository
+     * 
      * @param id
      * @return
      */
     @DELETE
     @Produces(MediaType.TEXT_PLAIN)
-    @Consumes(MediaType.TEXT_PLAIN) 
-    @Path("/{id}")
-    public String closeApplication(@PathParam("id") String id) {        
-        log.debug("DELETE: Application Token:" + id);
-        
-        EntityManagerFactory emf = EMFRepository.INSTANCE.getEMF(id);
-        if(emf == null) {
-            log.warn("DELETE: Application Token:" + id + " doesn't exist and hence can't be closed");
+    @Consumes(MediaType.TEXT_PLAIN)
+    public String closeApplication(@HeaderParam(Constants.APPLICATION_TOKEN_HEADER_NAME) String applicationToken)
+    {
+        log.debug("DELETE: Application Token:" + applicationToken);
+
+        EntityManagerFactory emf = EMFRepository.INSTANCE.getEMF(applicationToken);
+        if (emf == null)
+        {
+            log.warn("DELETE: Application Token:" + applicationToken + " doesn't exist and hence can't be closed");
             return Response.DELETE_AT_FAILED;
         }
-        
-        EMFRepository.INSTANCE.removeEMF(id);       
-        return Response.DELETE_AT_SUCCESS;     
-    }    
-    
+
+        EMFRepository.INSTANCE.removeEMF(applicationToken);
+        return Response.DELETE_AT_SUCCESS;
+    }
 
 }

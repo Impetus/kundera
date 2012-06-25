@@ -15,13 +15,13 @@
  */
 package com.impetus.kundera.rest.common;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import junit.framework.TestCase;
 
 /**
- * Test case for {@link StreamUtils} 
+ * Test case for {@link StreamUtils}
+ * 
  * @author amresh.singh
  */
 public class StreamUtilsTest extends TestCase
@@ -38,21 +38,25 @@ public class StreamUtilsTest extends TestCase
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.rest.common.StreamUtils#toString(java.io.InputStream)}.
+     * Test method for
+     * {@link com.impetus.kundera.rest.common.StreamUtils#toString(java.io.InputStream)}
+     * .
      */
     public void testToStringInputStream()
     {
-        
+
         String str = "<book><isbn>34523423423423</isbn><author>Amresh</author><publication>Willey</publication></book>";
         InputStream is = StreamUtils.toInputStream(str);
         String str2 = StreamUtils.toString(is);
         assertNotNull(str2);
         assertEquals(str2, str);
-        
+
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.rest.common.StreamUtils#toInputStream(java.lang.String)}.
+     * Test method for
+     * {@link com.impetus.kundera.rest.common.StreamUtils#toInputStream(java.lang.String)}
+     * .
      */
     public void testToInputStream()
     {

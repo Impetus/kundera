@@ -38,7 +38,8 @@ import com.impetus.kundera.rest.dto.SchemaMetadata;
 import com.impetus.kundera.rest.dto.Table;
 
 /**
- * REST Resource for Meta data related operations 
+ * REST Resource for Meta data related operations
+ * 
  * @author amresh.singh
  */
 
@@ -46,49 +47,56 @@ import com.impetus.kundera.rest.dto.Table;
 public class MetadataResource
 {
     private static Log log = LogFactory.getLog(MetadataResource.class);
-    
+
     @GET
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})    
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("/schemaList/{persistenceUnits}")
-    public Response getSchemaList(@PathParam("persistenceUnits") String persistenceUnits) {        
+    public Response getSchemaList(@PathParam("persistenceUnits") String persistenceUnits)
+    {
         log.debug("GET: Persistence Units:" + persistenceUnits);
-        
+
         StringTokenizer st = new StringTokenizer(persistenceUnits, ",");
-                
+
         SchemaMetadata schemaMetadata = new SchemaMetadata();
-        
-        while(st.hasMoreTokens()) {
-            
+
+        while (st.hasMoreTokens())
+        {
+
             String persistenceUnit = st.nextToken();
             PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
             String schemaStr = puMetadata.getProperty("kundera.keyspace");
-            
-            if(schemaStr != null) {
+
+            if (schemaStr != null)
+            {
                 Schema schema = new Schema();
                 schema.setSchemaName(schemaStr);
-                
+
                 MetamodelImpl metamodel = KunderaMetadataManager.getMetamodel(persistenceUnit);
                 Map<Class<?>, EntityMetadata> metamodelMap = metamodel.getEntityMetadataMap();
-                
-                for(Class<?> clazz : metamodelMap.keySet()) {
+
+                for (Class<?> clazz : metamodelMap.keySet())
+                {
                     EntityMetadata m = metamodelMap.get(clazz);
                     Table table = new Table();
                     table.setEntityClassName(clazz.getSimpleName());
                     table.setTableName(m.getTableName());
-                    
+
                     schema.addTable(table);
-                }     
-                schemaMetadata.addSchema(schema); 
-            }           
-        }       
-        
-        if(schemaMetadata.getSchemaList().isEmpty()) {
+                }
+                schemaMetadata.addSchema(schema);
+            }
+        }
+
+        if (schemaMetadata.getSchemaList().isEmpty())
+        {
             log.warn("GET: getSchemaList: Can't find Schema for PUs " + persistenceUnits);
             return Response.noContent().build();
-        } else {
-            return Response.ok(schemaMetadata).build();  
-        }     
-        
-    } 
+        }
+        else
+        {
+            return Response.ok(schemaMetadata).build();
+        }
+
+    }
 
 }

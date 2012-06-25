@@ -69,7 +69,7 @@ public final class CassandraCli
         if (!checkIfServerRunning())
         {
             cassandra = new EmbeddedCassandraService();
-            cassandra.start();            
+            cassandra.start();
             initClient();
         }
     }

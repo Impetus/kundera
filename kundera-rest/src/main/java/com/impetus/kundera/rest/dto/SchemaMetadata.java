@@ -21,8 +21,10 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
+ * Holds List of schema information
+ * 
  * @author amresh
- *
+ * 
  */
 
 @XmlRootElement
@@ -39,19 +41,21 @@ public class SchemaMetadata
     }
 
     /**
-     * @param schemaList the schemaList to set
+     * @param schemaList
+     *            the schemaList to set
      */
     public void setSchemaList(List<Schema> schemaList)
     {
         this.schemaList = schemaList;
     }
-    
-    public void addSchema(Schema schema) {
-        if(schemaList == null) {
+
+    public void addSchema(Schema schema)
+    {
+        if (schemaList == null)
+        {
             schemaList = new ArrayList<Schema>();
         }
         schemaList.add(schema);
     }
-    
-    
+
 }

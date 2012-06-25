@@ -29,6 +29,8 @@ import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
@@ -42,13 +44,16 @@ import com.sun.jersey.test.framework.JerseyTest;
 
 /**
  * Test case for {@link CRUDResource}
+ * 
  * @author amresh
  * 
  */
 public class CRUDResourceTest extends JerseyTest
 {
+    private static Log log = LogFactory.getLog(CRUDResourceTest.class);
 
     String mediaType = MediaType.APPLICATION_XML;
+
     RESTClient restClient;
 
     String applicationToken = null;
@@ -62,9 +67,10 @@ public class CRUDResourceTest extends JerseyTest
     String pk1;
 
     String pk2;
-    
-    private final static boolean USE_EMBEDDED_SERVER = false;
-    private final static boolean AUTO_MANAGE_SCHEMA = false;
+
+    private final static boolean USE_EMBEDDED_SERVER = true;
+
+    private final static boolean AUTO_MANAGE_SCHEMA = true;
 
     public CRUDResourceTest() throws Exception
     {
@@ -74,25 +80,28 @@ public class CRUDResourceTest extends JerseyTest
     @Before
     public void setup() throws Exception
     {
-        
-        if(USE_EMBEDDED_SERVER) {
+
+        if (USE_EMBEDDED_SERVER)
+        {
             CassandraCli.cassandraSetUp();
         }
-        
-        if(AUTO_MANAGE_SCHEMA) {
+
+        if (AUTO_MANAGE_SCHEMA)
+        {
             CassandraCli.createKeySpace("KunderaExamples");
             loadData();
-        }       
+        }
     }
 
     @After
     public void tearDown() throws Exception
     {
         super.tearDown();
-        
-        if(AUTO_MANAGE_SCHEMA) {
+
+        if (AUTO_MANAGE_SCHEMA)
+        {
             CassandraCli.dropKeySpace("KunderaExamples");
-        }                
+        }
     }
 
     @Test
@@ -134,7 +143,7 @@ public class CRUDResourceTest extends JerseyTest
         sessionToken = restClient.getSessionToken(applicationToken);
         Assert.assertNotNull(sessionToken);
         Assert.assertTrue(sessionToken.startsWith("ST_"));
-        
+
         // Insert Record
         restClient.insertBook(sessionToken, bookStr1);
         restClient.insertBook(sessionToken, bookStr2);
@@ -151,15 +160,17 @@ public class CRUDResourceTest extends JerseyTest
         String updatedBook = restClient.updateBook(sessionToken, foundBook);
         Assert.assertNotNull(updatedBook);
 
+        String jpaQuery = "select b from Book b";
+        String queryResult = restClient.runQuery(sessionToken, jpaQuery);
+        log.debug("Query Result:" + queryResult);
+
         // Get All Books
         String allBooks = restClient.getAllBooks(sessionToken);
-         
-         
-         System.out.println(allBooks);
+        log.debug(allBooks);
 
         // Delete Records
-        //restClient.deleteBook(sessionToken, updatedBook, pk1);
-        //restClient.deleteBook(sessionToken, updatedBook, pk2);
+        restClient.deleteBook(sessionToken, updatedBook, pk1);
+        restClient.deleteBook(sessionToken, updatedBook, pk2);
 
         // Close Session
         restClient.closeSession(sessionToken);

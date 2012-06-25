@@ -18,7 +18,8 @@ package com.impetus.kundera.rest.dto;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Holds Table information
+ * 
  * @author amresh.singh
  */
 
@@ -26,7 +27,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Table
 {
     private String tableName;
+
     private String entityClassName;
+
     /**
      * @return the tableName
      */
@@ -34,13 +37,16 @@ public class Table
     {
         return tableName;
     }
+
     /**
-     * @param tableName the tableName to set
+     * @param tableName
+     *            the tableName to set
      */
     public void setTableName(String tableName)
     {
         this.tableName = tableName;
     }
+
     /**
      * @return the entityClassName
      */
@@ -48,13 +54,14 @@ public class Table
     {
         return entityClassName;
     }
+
     /**
-     * @param entityClassName the entityClassName to set
+     * @param entityClassName
+     *            the entityClassName to set
      */
     public void setEntityClassName(String entityClassName)
     {
         this.entityClassName = entityClassName;
     }
-    
 
 }

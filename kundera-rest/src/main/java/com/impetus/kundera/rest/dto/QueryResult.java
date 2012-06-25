@@ -21,8 +21,9 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
+ * Wrapper for query results
+ * 
  * @author amresh
- *
  */
 
 @XmlRootElement
@@ -35,14 +36,16 @@ public class QueryResult
      */
     public List getList()
     {
-        if(list == null) {
+        if (list == null)
+        {
             list = new ArrayList();
         }
         return list;
     }
 
     /**
-     * @param list the list to set
+     * @param list
+     *            the list to set
      */
     public void setList(List list)
     {

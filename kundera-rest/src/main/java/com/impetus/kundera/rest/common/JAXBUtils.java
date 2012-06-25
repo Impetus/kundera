@@ -30,41 +30,46 @@ import com.sun.jersey.api.json.JSONJAXBContext;
 import com.sun.jersey.api.json.JSONUnmarshaller;
 
 /**
- * Utility for converting objects into XML and vice versa 
+ * Utility for converting objects into XML and vice versa
+ * 
  * @author amresh.singh
  */
 public class JAXBUtils
 {
     private static Log log = LogFactory.getLog(JAXBUtils.class);
-    
+
     /**
      * Converts <code>InputStream</code> to Object using JAXB
+     * 
      * @param str
      * @param objectClass
      * @return
      */
-    public static Object toObject(InputStream is, Class<?> objectClass, String mediaType) {
+    public static Object toObject(InputStream is, Class<?> objectClass, String mediaType)
+    {
         Object output = null;
-        
+
         try
         {
             output = objectClass.newInstance();
-            
-            if(MediaType.APPLICATION_XML.equals(mediaType)) {
+
+            if (MediaType.APPLICATION_XML.equals(mediaType))
+            {
                 JAXBContext jaxbContext = JAXBContext.newInstance(objectClass);
-                
-                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();                
-                           
+
+                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+
                 output = jaxbUnmarshaller.unmarshal(is);
-            } else if(MediaType.APPLICATION_JSON.equals(mediaType)) {
-                
+            }
+            else if (MediaType.APPLICATION_JSON.equals(mediaType))
+            {
+
                 JSONJAXBContext context = new JSONJAXBContext(JSONConfiguration.mappedJettison().build(), objectClass);
-                JSONUnmarshaller jsonUnmarshaller = context.createJSONUnmarshaller();           
-                
-                output = jsonUnmarshaller.unmarshalFromJSON(is, objectClass);               
-            }  
-            
-            
+                JSONUnmarshaller jsonUnmarshaller = context.createJSONUnmarshaller();
+
+                output = jsonUnmarshaller.unmarshalFromJSON(is, objectClass);
+            }
+
         }
         catch (JAXBException e)
         {

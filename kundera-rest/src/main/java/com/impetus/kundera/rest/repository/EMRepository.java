@@ -21,18 +21,18 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 
 /**
- * Repository for holding Session Tokens and {@link EntityManager} 
+ * Repository for holding Session Tokens and {@link EntityManager}
+ * 
  * @author amresh.singh
  */
 public class EMRepository
 {
-    
+
     /** The Constant INSTANCE. */
     public static final EMRepository INSTANCE = new EMRepository();
-    
-    private Map<String, EntityManager> emMap;   
-    
-    
+
+    private Map<String, EntityManager> emMap;
+
     /**
      * @return the emMap
      */
@@ -40,49 +40,60 @@ public class EMRepository
     {
         return emMap;
     }
-    
+
     /**
      * Retrieves EM
+     * 
      * @param sessionToken
      * @return
      */
-    public EntityManager getEM(String sessionToken) {
-        if(emMap == null)  {
+    public EntityManager getEM(String sessionToken)
+    {
+        if (emMap == null)
+        {
             return null;
-        } else {
+        }
+        else
+        {
             return emMap.get(sessionToken);
         }
     }
-    
+
     /**
-     * @param emMap the emMap to set
+     * @param emMap
+     *            the emMap to set
      */
     public void setEmMap(Map<String, EntityManager> emMap)
     {
         this.emMap = emMap;
     }
-    
+
     /**
      * Adds EM
+     * 
      * @param sessionToken
      * @param em
      */
     public void addEm(String sessionToken, EntityManager em)
     {
-        if(emMap == null) {
+        if (emMap == null)
+        {
             emMap = new HashMap<String, EntityManager>();
         }
         emMap.put(sessionToken, em);
     }
-    
+
     /**
      * Removes EM
+     * 
      * @param sessionToken
      */
-    public void removeEm(String sessionToken) {
-        if(emMap != null) {
+    public void removeEm(String sessionToken)
+    {
+        if (emMap != null)
+        {
             emMap.remove(sessionToken);
         }
-    } 
+    }
 
 }

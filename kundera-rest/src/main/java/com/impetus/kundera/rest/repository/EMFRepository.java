@@ -21,15 +21,16 @@ import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 
 /**
- * Repository for holding Application Tokens and {@link EntityManagerFactory} 
+ * Repository for holding Application Tokens and {@link EntityManagerFactory}
+ * 
  * @author amresh.singh
  */
 public class EMFRepository
 {
-    
+
     /** The Constant INSTANCE. */
     public static final EMFRepository INSTANCE = new EMFRepository();
-    
+
     private Map<String, EntityManagerFactory> emfMap;
 
     /**
@@ -39,49 +40,58 @@ public class EMFRepository
     {
         return emfMap;
     }
-    
+
     /**
      * Retrieves EMF
+     * 
      * @param applicationToken
      * @return
      */
-    public EntityManagerFactory getEMF(String applicationToken) {
-        if(emfMap == null)  {
+    public EntityManagerFactory getEMF(String applicationToken)
+    {
+        if (emfMap == null)
+        {
             return null;
-        } else {
+        }
+        else
+        {
             return emfMap.get(applicationToken);
         }
     }
 
     /**
-     * @param emfMap the emfMap to set
+     * @param emfMap
+     *            the emfMap to set
      */
     public void setEmfMap(Map<String, EntityManagerFactory> emfMap)
     {
         this.emfMap = emfMap;
     }
-    
+
     /**
-     * @param emfMap the emfMap to set
+     * @param emfMap
+     *            the emfMap to set
      */
     public void addEmf(String applicationToken, EntityManagerFactory emf)
     {
-        if(emfMap == null) {
+        if (emfMap == null)
+        {
             emfMap = new HashMap<String, EntityManagerFactory>();
         }
         emfMap.put(applicationToken, emf);
     }
-    
+
     /**
      * Removes EMF
+     * 
      * @param applicationToken
      */
-    public void removeEMF(String applicationToken) {
-        if(emfMap != null) {
+    public void removeEMF(String applicationToken)
+    {
+        if (emfMap != null)
+        {
             emfMap.remove(applicationToken);
         }
     }
-    
-    
 
 }

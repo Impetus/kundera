@@ -21,7 +21,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 
 /**
  * @author amresh
- *
+ * 
  */
 public class EntityUtils
 {
@@ -33,7 +33,7 @@ public class EntityUtils
      */
     public static Class<?> getEntityClass(String entityClassName, EntityManager em)
     {
-        MetamodelImpl metamodel = (MetamodelImpl)em.getEntityManagerFactory().getMetamodel();
+        MetamodelImpl metamodel = (MetamodelImpl) em.getEntityManagerFactory().getMetamodel();
         Class<?> entityClass = metamodel.getEntityClass(entityClassName);
         return entityClass;
     }

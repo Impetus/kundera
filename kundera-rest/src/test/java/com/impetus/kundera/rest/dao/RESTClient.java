@@ -17,27 +17,35 @@ package com.impetus.kundera.rest.dao;
 
 import com.sun.jersey.api.client.WebResource;
 
-
-
 /**
- * <Prove description of functionality provided by this Type> 
+ * <Prove description of functionality provided by this Type>
+ * 
  * @author amresh.singh
  */
 public interface RESTClient
-{    
-    
+{
+
     void initialize(WebResource wr, String mediaType);
-    
-    String getApplicationToken(String persistenceUnit);  
+
+    String getApplicationToken(String persistenceUnit);
+
     void closeApplication(String applicationToken);
-    
-    String getSessionToken(String applicationToken);  
+
+    String getSessionToken(String applicationToken);
+
     void closeSession(String sessionToken);
-    
+
     String insertBook(String sessionToken, String book);
+
     String findBook(String sessionToken, String isbn);
+
     String updateBook(String sessionToken, String oldBook);
-    void deleteBook(String sessionToken, String updatedBook, String isbn); 
-    String getAllBooks(String sessionToken); 
+
+    void deleteBook(String sessionToken, String updatedBook, String isbn);
+
+    String getAllBooks(String sessionToken);
+
+    String runQuery(String sessionToken, String jpaQuery);
+
     String getSchemaList(String persistenceUnit);
 }
