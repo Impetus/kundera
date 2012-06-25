@@ -69,9 +69,9 @@ public class CRUDResourceTest extends JerseyTest
 
     String pk2;
 
-    private final static boolean USE_EMBEDDED_SERVER = true;
+    private final static boolean USE_EMBEDDED_SERVER = false;
 
-    private final static boolean AUTO_MANAGE_SCHEMA = true;
+    private final static boolean AUTO_MANAGE_SCHEMA = false;
 
     public CRUDResourceTest() throws Exception
     {
@@ -172,8 +172,8 @@ public class CRUDResourceTest extends JerseyTest
         log.debug(allBooks);
 
         // Delete Records
-        restClient.deleteBook(sessionToken, updatedBook, pk1);
-        restClient.deleteBook(sessionToken, updatedBook, pk2);
+        //restClient.deleteBook(sessionToken, updatedBook, pk1);
+        //restClient.deleteBook(sessionToken, updatedBook, pk2);
 
         // Close Session
         restClient.closeSession(sessionToken);

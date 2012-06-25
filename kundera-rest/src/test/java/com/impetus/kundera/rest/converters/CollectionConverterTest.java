@@ -18,6 +18,7 @@ package com.impetus.kundera.rest.converters;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
@@ -76,6 +77,18 @@ public class CollectionConverterTest
         
         String s = CollectionConverter.toString(books, Book.class, MediaType.APPLICATION_XML);
         Assert.assertNotNull(s);       
+    }
+    
+    @Test
+    public void testToCollection() {
+        
+        String s = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><books><book><author>Saurabh</author><isbn>1111111111111</isbn><publication>Willey</publication></book><book><author>Vivek</author><isbn>2222222222222</isbn><publication>OReilly</publication></book><books>";        
+        Collection c = CollectionConverter.toCollection(s, ArrayList.class, Book.class, MediaType.APPLICATION_XML);       
+        Assert.assertNotNull(c);
+        Assert.assertFalse(c.isEmpty());
+        Assert.assertEquals(2, c.size());
+        
+        
     }
 
 }
