@@ -33,141 +33,132 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.EntityUtils;
+import com.impetus.kundera.rest.dto.QueryResult;
 import com.impetus.kundera.rest.repository.EMRepository;
 
 /**
  * REST based resource for JPA query
- * 
  * @author amresh
- * 
+ *
  */
 
 @Path(Constants.KUNDERA_API_PATH + Constants.QUERY_RESOURCE_PATH)
 public class QueryResource
 {
-
+    
     private static Log log = LogFactory.getLog(QueryResource.class);
-
+    
     /**
-     * Handler for GET method requests for this resource Retrieves all entities
-     * for a given table from datasource
-     * 
+     * Handler for GET method requests for this resource
+     * Retrieves all entities for a given table from datasource
      * @param sessionToken
      * @param entityClassName
      * @param id
      * @return
      */
-
-    @GET
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+   
+    @GET    
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Path("/{entityClass}/all")
-    public Response findAll(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
-            @PathParam("entityClass") String entityClassName)
-    {
-
+    public Response findAll(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken, 
+            @PathParam("entityClass") String entityClassName) {
+        
         log.debug("GET: sessionToken:" + sessionToken);
         log.debug("GET: entityClass:" + entityClassName);
-
+        
         List result = null;
         try
         {
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
             Class<?> entityClass = EntityUtils.getEntityClass(entityClassName, em);
             log.debug("GET: entityClass" + entityClass);
-
+            
             String alias = entityClassName.substring(0, 1).toLowerCase();
-
-            StringBuilder sb = new StringBuilder().append("SELECT ").append(alias).append(" FROM ")
-                    .append(entityClassName).append(" ").append(alias);
-
+            
+            StringBuilder sb = new StringBuilder().append("SELECT ").append(alias)
+            .append(" FROM ").append(entityClassName).append(" ").append(alias);         
+            
             Query q = em.createQuery(sb.toString());
-
+            
             result = q.getResultList();
         }
         catch (Exception e)
         {
             log.error(e.getMessage());
-            return Response.serverError().build();
+            return Response.serverError().build();            
         }
-
-        log.debug("GET: Find All Result: " + result);
-
-        if (result == null)
-        {
-            return Response.noContent().build();
+        
+        log.debug("GET: Find All Result: " + result);       
+        
+        if(result == null) {
+            return Response.noContent().build();            
         }
-
-        GenericEntity entity = new GenericEntity<List>(result)
-        {
-        };
-        // GenericEntity entity = new GenericEntity(result, List<Book>.class);
-        /*
-         * QueryResult qr = new QueryResult(); qr.getList().addAll(result);
-         */
-
+        
+        GenericEntity entity = new GenericEntity<List>(result) {};
+        //GenericEntity entity = new GenericEntity(result, List<Book>.class);
+        /*QueryResult  qr = new QueryResult();
+        qr.getList().addAll(result);*/
+        
         return Response.ok(entity).build();
-
-        // GenericEntity entity = new GenericEntity(result, List.class);
-        // log.debug("GET: Find All Entity: " + entity);
-        // return Response.ok(entity).build();
-
-    }
-
+        
+        //GenericEntity entity = new GenericEntity(result, List.class);
+        //log.debug("GET: Find All Entity: " + entity);
+        //return Response.ok(entity).build();
+        
+    }   
+    
     /**
-     * Handler for GET method requests for this resource Retrieves records from
-     * datasource for a given JPA query
-     * 
+     * Handler for GET method requests for this resource
+     * Retrieves records from datasource for a given JPA query
      * @param sessionToken
      * @param entityClassName
      * @param id
      * @return
      */
-
-    @GET
-    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+   
+    @GET    
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Path("/{jpaQuery}")
-    public Response executeQuery(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
-            @PathParam("jpaQuery") String jpaQuery)
-    {
-
+    public Response executeQuery(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken, 
+            @PathParam("jpaQuery") String jpaQuery) {
+        
         log.debug("GET: sessionToken:" + sessionToken);
         log.debug("GET: jpaQuery:" + jpaQuery);
-
+        
         List result = null;
         try
         {
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
-
+                   
+            
             Query q = em.createQuery(jpaQuery);
-
+            
+            
             result = q.getResultList();
         }
         catch (Exception e)
         {
             log.error(e.getMessage());
-            return Response.serverError().build();
+            return Response.serverError().build();            
         }
-
-        log.debug("GET: Result for JPA Query: " + result);
-
-        if (result == null)
-        {
-            return Response.noContent().build();
+        
+        log.debug("GET: Result for JPA Query: " + result);       
+        
+        if(result == null) {
+            return Response.noContent().build();            
         }
+        
+        //GenericEntity entity = new GenericEntity<List>(result) {};
+        //GenericEntity entity = new GenericEntity(result, List<Book>.class);
+        QueryResult  qr = new QueryResult();
+        qr.getList().addAll(result);
+        
+        return Response.ok(qr).build();
+        
+        //GenericEntity entity = new GenericEntity(result, List.class);
+        //log.debug("GET: Find All Entity: " + entity);
+        //return Response.ok(entity).build();
+        
+    }   
 
-        GenericEntity entity = new GenericEntity<List>(result)
-        {
-        };
-        // GenericEntity entity = new GenericEntity(result, List<Book>.class);
-        /*
-         * QueryResult qr = new QueryResult(); qr.getList().addAll(result);
-         */
-
-        return Response.ok(entity).build();
-
-        // GenericEntity entity = new GenericEntity(result, List.class);
-        // log.debug("GET: Find All Entity: " + entity);
-        // return Response.ok(entity).build();
-
-    }
 }

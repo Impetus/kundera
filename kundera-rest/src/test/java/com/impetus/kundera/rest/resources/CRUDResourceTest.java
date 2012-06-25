@@ -37,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.rest.common.CassandraCli;
+import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.dao.RESTClient;
 import com.impetus.kundera.rest.dao.RESTClientImpl;
 import com.sun.jersey.api.client.WebResource;
@@ -74,7 +75,7 @@ public class CRUDResourceTest extends JerseyTest
 
     public CRUDResourceTest() throws Exception
     {
-        super("com.impetus.kundera.rest.resources");
+        super(Constants.KUNDERA_REST_RESOURCES_PACKAGE);
     }
 
     @Before
@@ -155,22 +156,24 @@ public class CRUDResourceTest extends JerseyTest
         {
             foundBook = "{book:" + foundBook + "}";
         }
+        Assert.assertTrue(foundBook.indexOf("Amresh") > 0);
 
         // Update Record
         String updatedBook = restClient.updateBook(sessionToken, foundBook);
         Assert.assertNotNull(updatedBook);
-
-        String jpaQuery = "select b from Book b";
-        String queryResult = restClient.runQuery(sessionToken, jpaQuery);
-        log.debug("Query Result:" + queryResult);
+        Assert.assertTrue(updatedBook.indexOf("Saurabh") > 0);
+        
+        //String jpaQuery = "select b from Book b";
+        //String queryResult = restClient.runQuery(sessionToken, jpaQuery);
+        //log.debug("Query Result:" + queryResult);
 
         // Get All Books
         String allBooks = restClient.getAllBooks(sessionToken);
         log.debug(allBooks);
 
         // Delete Records
-        restClient.deleteBook(sessionToken, updatedBook, pk1);
-        restClient.deleteBook(sessionToken, updatedBook, pk2);
+        //restClient.deleteBook(sessionToken, updatedBook, pk1);
+        //restClient.deleteBook(sessionToken, updatedBook, pk2);
 
         // Close Session
         restClient.closeSession(sessionToken);

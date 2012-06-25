@@ -23,6 +23,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.rest.common.Constants;
 import com.impetus.kundera.rest.common.JAXBUtils;
 import com.impetus.kundera.rest.common.StreamUtils;
 import com.impetus.kundera.rest.dao.RESTClient;
@@ -46,7 +47,7 @@ public class MetadataResourceTest extends JerseyTest
 
     public MetadataResourceTest() throws Exception
     {
-        super("com.impetus.kundera.rest.resources");
+        super(Constants.KUNDERA_REST_RESOURCES_PACKAGE);
     }
 
     /**

@@ -23,6 +23,8 @@ package com.impetus.kundera.rest.common;
 public interface Constants
 {
     public static final String KUNDERA_API_PATH = "/kundera/api";
+    
+    public static final String KUNDERA_REST_RESOURCES_PACKAGE = "com.impetus.kundera.rest.resources";
 
     /** Token prefixes */
     public static final String APPLICATION_TOKEN_PREFIX = "AT";

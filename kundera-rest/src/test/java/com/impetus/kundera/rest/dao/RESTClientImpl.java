@@ -94,11 +94,6 @@ public class RESTClientImpl implements RESTClient
     public String getSessionToken(String applicationToken)
     {
         log.debug("\n\nGetting Session Token...");
-        /*
-         * WebResource.Builder stBuilder =
-         * webResource.path("kundera/api/session/at/" + applicationToken)
-         * .accept(MediaType.TEXT_PLAIN);
-         */
         WebResource.Builder stBuilder = webResource.path("kundera/api/session").accept(MediaType.TEXT_PLAIN)
                 .header(Constants.APPLICATION_TOKEN_HEADER_NAME, applicationToken);
 
