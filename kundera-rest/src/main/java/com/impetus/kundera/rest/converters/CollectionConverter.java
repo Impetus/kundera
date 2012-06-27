@@ -34,12 +34,14 @@ public class CollectionConverter
             StringBuilder sb = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>")
             .append("<").append(genericClass.getSimpleName().toLowerCase()).append("s>");
             for(Object obj : input) {
-                String s = JAXBUtils.toString(genericClass, obj, mediaType);
-                
-                if(s.startsWith("<?xml")) {
-                    s = s.substring(s.indexOf(">") + 1, s.length());
-                }            
-                sb.append(s);
+                if(obj != null) {
+                    String s = JAXBUtils.toString(genericClass, obj, mediaType);
+                    
+                    if(s.startsWith("<?xml")) {
+                        s = s.substring(s.indexOf(">") + 1, s.length());
+                    }            
+                    sb.append(s);
+                }                
             }
             sb.append("<").append(genericClass.getSimpleName().toLowerCase()).append("s>");         
             return sb.toString();
