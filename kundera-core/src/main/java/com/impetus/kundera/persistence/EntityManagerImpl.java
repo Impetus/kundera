@@ -123,7 +123,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
 
     private void onLookUp(PersistenceUnitTransactionType transactionType)
     {
-        if (transactionType.equals(PersistenceUnitTransactionType.JTA))
+        if (transactionType != null && transactionType.equals(PersistenceUnitTransactionType.JTA))
         {
             Context ctx;
             try

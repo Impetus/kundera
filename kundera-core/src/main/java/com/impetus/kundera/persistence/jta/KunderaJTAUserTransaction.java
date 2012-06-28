@@ -102,7 +102,7 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
             threadLocal.set(null);
         }
 //        if (isTransactionInProgress)
-//        {
+//        {com.impetus.client.persistence.UpdateDeleteNamedQueryTest
 ////            status = Status.STATUS_COMMITTING;
 //            // Do commit!
 //            if (implementors != null)
