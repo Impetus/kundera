@@ -15,10 +15,16 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence.jta;
 
+import java.io.Serializable;
+
+import javax.naming.NamingException;
+import javax.naming.Reference;
+import javax.naming.Referenceable;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
+import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
@@ -26,17 +32,43 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.persistence.ResourceManager;
 
 /**
- * Kundera implementation for JTA {@link UserTransaction}. 
- * This needs to hooked up with initial context for use of Kundera's commit/rollback handling.
+ * Kundera implementation for JTA {@link UserTransaction}. This needs to hooked
+ * up with initial context for use of Kundera's commit/rollback handling.
+ * 
  * @author vivek.mishra
  * 
  */
-public class KunderaJTAUserTransaction implements UserTransaction
+
+public class KunderaJTAUserTransaction implements UserTransaction, Referenceable, Serializable
 {
     private boolean isTransactionInProgress;
 
+    private boolean setRollBackOnly;
+
+//    private java.util.List<ResourceManager> implementors;
+    
+    private static transient ThreadLocal<KunderaTransaction> threadLocal = new ThreadLocal<KunderaTransaction>();
+    
+    private int transactionTimeout;
+
+//    private int status = Status.STATUS_NO_TRANSACTION;
+    
+    private static transient KunderaJTAUserTransaction currentTx;
+    
+    public KunderaJTAUserTransaction()
+    {
+        currentTx = this;
+    }
+
+
+    public static KunderaJTAUserTransaction getCurrentTx()
+    {
+        return currentTx;
+    }
+    
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(KunderaJTAUserTransaction.class);
 
@@ -49,6 +81,8 @@ public class KunderaJTAUserTransaction implements UserTransaction
     public void begin() throws NotSupportedException, SystemException
     {
         isTransactionInProgress = true;
+//        status = Status.STATUS_ACTIVE;
+        threadLocal.set(new KunderaTransaction());
     }
 
     /*
@@ -60,15 +94,37 @@ public class KunderaJTAUserTransaction implements UserTransaction
     public void commit() throws RollbackException, HeuristicMixedException, HeuristicRollbackException,
             SecurityException, IllegalStateException, SystemException
     {
-        if (isTransactionInProgress)
-        {
-            // Do commit!
-        }
-        else
-        {
-
-            throw new KunderaException("No transaction in progress.");
-        }
+        threadLocal.get().commit();
+        threadLocal.set(null);
+        
+//        if (isTransactionInProgress)
+//        {
+////            status = Status.STATUS_COMMITTING;
+//            // Do commit!
+//            if (implementors != null)
+//            {
+//                if (!setRollBackOnly)
+//                {
+//                    for(ResourceManager implementor: implementors)
+//                    {
+//                        implementor.doCommit();
+//                    }
+//                }
+//                else
+//                {
+//                    for (ResourceManager implementor : implementors)
+//                    {
+//                        implementor.doRollback();
+//                    }
+//                }
+//            }
+//        }
+//        else
+//        {
+//
+//            throw new KunderaException("No transaction in progress.");
+//        }
+//        status = Status.STATUS_COMMITTED;
     }
 
     /*
@@ -79,8 +135,12 @@ public class KunderaJTAUserTransaction implements UserTransaction
     @Override
     public int getStatus() throws SystemException
     {
-        // TODO Auto-generated method stub
-        return 0;
+        KunderaTransaction tx = threadLocal.get();
+        if(tx ==null)
+        {
+            return Status.STATUS_NO_TRANSACTION;
+        }
+        return tx.getStatus();
     }
 
     /*
@@ -93,14 +153,22 @@ public class KunderaJTAUserTransaction implements UserTransaction
     {
         if (isTransactionInProgress)
         {
-            // Do commit!
+            threadLocal.get().rollback();
+            
+//            if (implementors != null)
+//            {
+//                for(ResourceManager implementor: implementors)
+//                {
+//                    implementor.doRollback();
+//                }
+//            }
         }
         else
         {
 
             throw new KunderaException("No transaction in progress.");
         }
-
+//        status = Status.STATUS_ROLLEDBACK;
     }
 
     /*
@@ -111,8 +179,9 @@ public class KunderaJTAUserTransaction implements UserTransaction
     @Override
     public void setRollbackOnly() throws IllegalStateException, SystemException
     {
-        // TODO Auto-generated method stub
-
+        threadLocal.get().setRollbackOnly();
+//        setRollBackOnly = true;
+//        status = Status.STATUS_MARKED_ROLLBACK;
     }
 
     /*
@@ -123,8 +192,32 @@ public class KunderaJTAUserTransaction implements UserTransaction
     @Override
     public void setTransactionTimeout(int arg0) throws SystemException
     {
-        // TODO Auto-generated method stub
-
+        this.transactionTimeout = arg0;
+    }
+    
+    
+    /**
+     * 
+     * @param implementor
+     */
+    public void setImplementor(ResourceManager implementor)
+    {
+        threadLocal.get().setImplementor(implementor);
+        
+//        if(implementors == null)
+//        {
+//            implementors = new ArrayList<ResourceManager>();
+//        }
+//        implementors.add(implementor);
     }
 
+    /* (non-Javadoc)
+     * @see javax.naming.Referenceable#getReference()
+     */
+    @Override
+    public Reference getReference() throws NamingException
+    {
+        return UserTransactionFactory.getReference(this);
+    }
+    
 }

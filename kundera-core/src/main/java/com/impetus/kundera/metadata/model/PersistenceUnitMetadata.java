@@ -274,7 +274,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     @Override
     public PersistenceUnitTransactionType getTransactionType()
     {
-        return null;
+        return transactionType;
     }
 
     /*

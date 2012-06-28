@@ -22,8 +22,9 @@
 		</properties>
 
 	</persistence-unit>
-	<persistence-unit name="secIdxAddCassandra">
+	<persistence-unit name="secIdxAddCassandra" transaction-type="JTA">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<jta-data-source>JTA</jta-data-source>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="9160" />
@@ -55,11 +56,11 @@
 		</properties>
 	</persistence-unit>
 
-	<persistence-unit name="addMongo">
+	<persistence-unit name="addMongo" transaction-type="JTA">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<property name="kundera.nodes" value="192.168.145.84" />
-			 <!-- <property name="kundera.nodes" value="localhost" /> -->
+			<!-- <property name="kundera.nodes" value="192.168.145.84" /> -->
+			 <property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaTests" />
 			<property name="kundera.dialect" value="mongodb" />

@@ -16,7 +16,11 @@
 package com.impetus.kundera.persistence;
 
 import java.util.Map;
+import java.util.Properties;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -30,6 +34,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.spi.PersistenceUnitTransactionType;
+import javax.transaction.UserTransaction;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
@@ -38,17 +43,16 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.cache.Cache;
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.context.CacheBase;
 import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.PersistenceCache;
+import com.impetus.kundera.persistence.jta.KunderaJTAUserTransaction;
 import com.impetus.kundera.utils.ObjectUtils;
 
 /**
@@ -56,7 +60,7 @@ import com.impetus.kundera.utils.ObjectUtils;
  * 
  * @author animesh.kumar
  */
-public class EntityManagerImpl implements EntityManager, EntityTransaction
+public class EntityManagerImpl implements EntityManager, EntityTransaction, ResourceManager
 {
 
     /** The Constant log. */
@@ -90,6 +94,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
 
     FlushManager flushStackManager;
 
+    UserTransaction utx;
+
     /**
      * Instantiates a new entity manager impl.
      * 
@@ -110,7 +116,51 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
         this.persistenceContextType = persistenceContextType;
         this.transactionType = transactionType;
 
+//        onLookUp(transactionType);
+
         logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
+    }
+
+    private void onLookUp(PersistenceUnitTransactionType transactionType)
+    {
+        if (transactionType.equals(PersistenceUnitTransactionType.JTA))
+        {
+            Context ctx;
+            try
+            {
+                 System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
+                 "org.apache.naming.java.javaURLContextFactory");
+                 System.setProperty(Context.URL_PKG_PREFIXES,
+                 "org.apache.naming");
+
+                ctx = new InitialContext();
+                // ctx.createSubcontext("java:comp");
+
+
+                utx = (KunderaJTAUserTransaction) ctx.lookup("java:comp/UserTransaction");
+
+                if (utx == null)
+                {
+                    throw new KunderaException(
+                            "Lookup for UserTransaction returning null for :{java:comp/UserTransaction}");
+                }
+                if (!(utx instanceof KunderaJTAUserTransaction))
+                {
+
+                    throw new KunderaException("Please bind [" + KunderaJTAUserTransaction.class.getName()
+                            + "] for :{java:comp/UserTransaction} lookup" + utx.getClass());
+
+                }
+
+                ((KunderaJTAUserTransaction) utx).setImplementor(this);
+            }
+            catch (NamingException e)
+            {
+                logger.error("Error during initialization of entity manager, Caused by:" + e.getMessage());
+                throw new KunderaException(e);
+            }
+
+        }
     }
 
     /**
@@ -138,6 +188,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     public final <E> E find(Class<E> entityClass, Object primaryKey)
     {
         checkClosed();
+        checkTransactionNeeded();
         // TODO Check for validity also as per JPA
         if (primaryKey == null)
         {
@@ -176,8 +227,9 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
 
         try
         {
-        getPersistenceDelegator().remove(e);
-        }catch(Exception ex)
+            getPersistenceDelegator().remove(e);
+        }
+        catch (Exception ex)
         {
             // on rollback.
             getPersistenceDelegator().rollback();
@@ -204,15 +256,16 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
 
         try
         {
-         return getPersistenceDelegator().merge(e);
-        }catch(Exception ex)
+            return getPersistenceDelegator().merge(e);
+        }
+        catch (Exception ex)
         {
             // on Rollback
             getPersistenceDelegator().rollback();
-            
+
             throw new KunderaException(ex);
         }
-        
+
     }
 
     @Override
@@ -229,8 +282,9 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
 
         try
         {
-         getPersistenceDelegator().persist(e);
-        } catch(Exception ex)
+            getPersistenceDelegator().persist(e);
+        }
+        catch (Exception ex)
         {
             // onRollBack.
             getPersistenceDelegator().rollback();
@@ -291,6 +345,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     @Override
     public final Query createQuery(String query)
     {
+        checkTransactionNeeded();
         return persistenceDelegator.createQuery(query);
     }
 
@@ -298,7 +353,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     public final void flush()
     {
         checkClosed();
-//        persistenceDelegator.flush();
+        doCommit();
+//         persistenceDelegator.flush();
     }
 
     /*
@@ -327,6 +383,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     @Override
     public final Query createNamedQuery(String name)
     {
+        checkTransactionNeeded();
         return persistenceDelegator.createQuery(name);
     }
 
@@ -350,6 +407,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     @Override
     public final Query createNativeQuery(String sqlString, Class resultClass)
     {
+        checkTransactionNeeded();
         // Add to meta data first.
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
 
@@ -415,7 +473,16 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     @Override
     public final void joinTransaction()
     {
-        throw new NotImplementedException("TODO");
+        if (utx != null)
+        {
+            return;
+        }
+        else
+        {
+            throw new TransactionRequiredException("No transaction in progress");
+        }
+
+        // throw new NotImplementedException("TODO");
     }
 
     /*
@@ -446,35 +513,10 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
      * (non-Javadoc)
      * 
      * @see javax.persistence.EntityManager#find(java.lang.Class,
-     * java.lang.Object, java.util.Map)
-     */
-    @Override
-    public <T> T find(Class<T> paramClass, Object paramObject, Map<String, Object> paramMap)
-    {
-        throw new NotImplementedException("TODO");
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#find(java.lang.Class,
      * java.lang.Object, javax.persistence.LockModeType)
      */
     @Override
     public <T> T find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType)
-    {
-        throw new NotImplementedException("TODO");
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#find(java.lang.Class,
-     * java.lang.Object, javax.persistence.LockModeType, java.util.Map)
-     */
-    @Override
-    public <T> T find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType,
-            Map<String, Object> paramMap)
     {
         throw new NotImplementedException("TODO");
     }
@@ -688,6 +730,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
 
     private void checkTransactionNeeded()
     {
+        onLookUp(transactionType);
+        
         if ((this.persistenceContextType != PersistenceContextType.TRANSACTION)
                 || (persistenceDelegator.isTransactionInProgress()))
             return;
@@ -734,6 +778,58 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
         return persistenceContextType;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.persistence.EntityImplementor#doCommit()
+     */
+    @Override
+    public void doCommit()
+    {
+
+        checkClosed();
+        persistenceDelegator.commit();
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.persistence.EntityImplementor#doRollback()
+     */
+    @Override
+    public void doRollback()
+    {
+        checkClosed();
+        persistenceDelegator.rollback();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#find(java.lang.Class,
+     * java.lang.Object, java.util.Map)
+     */
+    @Override
+    public <T> T find(Class<T> arg0, Object arg1, Map<String, Object> arg2)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.EntityManager#find(java.lang.Class,
+     * java.lang.Object, javax.persistence.LockModeType, java.util.Map)
+     */
+    @Override
+    public <T> T find(Class<T> arg0, Object arg1, LockModeType arg2, Map<String, Object> arg3)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     // ///////////////////////////////////////////////////////////////////////
     /** Methods from {@link EntityTransaction} interface */
     // ///////////////////////////////////////////////////////////////////////
@@ -747,8 +843,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     @Override
     public void commit()
     {
-        checkClosed();
-        persistenceDelegator.commit();
+        doCommit();
     }
 
     @Override
@@ -776,8 +871,6 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction
     @Override
     public void rollback()
     {
-        checkClosed();
-        persistenceDelegator.rollback();
+        doRollback();
     }
-
 }

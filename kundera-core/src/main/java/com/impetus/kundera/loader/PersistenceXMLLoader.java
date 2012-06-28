@@ -267,6 +267,18 @@ public class PersistenceXMLLoader
         {
             log.trace("Persistent Unit name from persistence.xml: " + puName);
             metadata.setPersistenceUnitName(puName);
+            String transactionType = top.getAttribute("transaction-type");
+            if (StringUtils.isEmpty(transactionType)
+                    || PersistenceUnitTransactionType.RESOURCE_LOCAL.name().equals(transactionType))
+            {
+
+                metadata.setTransactionType(PersistenceUnitTransactionType.RESOURCE_LOCAL);
+
+            }
+            else if (PersistenceUnitTransactionType.JTA.name().equals(transactionType))
+            {
+                metadata.setTransactionType(PersistenceUnitTransactionType.JTA);
+            }
         }
 
         NodeList children = top.getChildNodes();
@@ -282,24 +294,25 @@ public class PersistenceXMLLoader
                     metadata.setProvider(getElementContent(element));
                 }
 
-                else if (tag.equals("transaction-type"))
-                {
-                    String transactionType = getElementContent(element);
-
-                    if (StringUtils.isEmpty(transactionType)
-                            || PersistenceUnitTransactionType.RESOURCE_LOCAL.name().equals(transactionType))
-                    {
-
-                        metadata.setTransactionType(PersistenceUnitTransactionType.RESOURCE_LOCAL);
-
-                    }
-                    else if (PersistenceUnitTransactionType.JTA.name().equals(transactionType))
-                    {
-                        metadata.setTransactionType(PersistenceUnitTransactionType.JTA);
-                    }
-
-                }
-                else if (tag.equals("properties"))
+                /*
+                 * else if (tag.equals("transaction-type")) { String
+                 * transactionType = getElementContent(element);
+                 * 
+                 * if (StringUtils.isEmpty(transactionType) ||
+                 * PersistenceUnitTransactionType
+                 * .RESOURCE_LOCAL.name().equals(transactionType)) {
+                 * 
+                 * metadata.setTransactionType(PersistenceUnitTransactionType.
+                 * RESOURCE_LOCAL);
+                 * 
+                 * } else if
+                 * (PersistenceUnitTransactionType.JTA.name().equals(transactionType
+                 * )) {
+                 * metadata.setTransactionType(PersistenceUnitTransactionType
+                 * .JTA); }
+                 * 
+                 * }
+                 */else if (tag.equals("properties"))
                 {
                     NodeList props = element.getChildNodes();
                     for (int j = 0; j < props.getLength(); j++)

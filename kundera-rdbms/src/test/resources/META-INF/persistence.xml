@@ -37,18 +37,4 @@
 
 	</persistence-unit>
 
-	<persistence-unit name="kcassandra">
-		<provider>com.impetus.kundera.KunderaPersistence</provider>
-		<properties>
-			<property name="kundera.nodes" value="localhost" />
-			<property name="kundera.port" value="9160" />
-			<property name="kundera.keyspace" value="KunderaKeyspace" />
-			<property name="kundera.dialect" value="cassandra" />
-			<property name="kundera.client" value="Pelops" />
-			<property name="kundera.cache.provider.class"
-				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-		</properties>
-
-	</persistence-unit>
-
 </persistence>
