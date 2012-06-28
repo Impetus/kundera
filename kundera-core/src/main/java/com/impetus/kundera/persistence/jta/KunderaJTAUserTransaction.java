@@ -26,6 +26,7 @@ import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.SystemException;
+import javax.transaction.Transaction;
 import javax.transaction.UserTransaction;
 
 import org.apache.commons.logging.Log;
@@ -94,9 +95,12 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     public void commit() throws RollbackException, HeuristicMixedException, HeuristicRollbackException,
             SecurityException, IllegalStateException, SystemException
     {
-        threadLocal.get().commit();
-        threadLocal.set(null);
-        
+        Transaction tx = threadLocal.get();
+        if (tx != null)
+        {
+            tx.commit();
+            threadLocal.set(null);
+        }
 //        if (isTransactionInProgress)
 //        {
 ////            status = Status.STATUS_COMMITTING;

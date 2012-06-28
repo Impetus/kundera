@@ -128,10 +128,10 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
             Context ctx;
             try
             {
-                 System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-                 "org.apache.naming.java.javaURLContextFactory");
-                 System.setProperty(Context.URL_PKG_PREFIXES,
-                 "org.apache.naming");
+//                 System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
+//                 "org.apache.naming.java.javaURLContextFactory");
+//                 System.setProperty(Context.URL_PKG_PREFIXES,
+//                 "org.apache.naming");
 
                 ctx = new InitialContext();
                 // ctx.createSubcontext("java:comp");

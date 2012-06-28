@@ -34,15 +34,20 @@ public class KunderaTransaction implements Transaction
     {
         if (!setRollBackOnly)
         {
+            if (implementor != null)
+            {
                 implementor.doCommit();
                 status = Status.STATUS_COMMITTED;
+            }
         }
         else
         {
+            if (implementor != null)
+            {
                 implementor.doRollback();
                 status = Status.STATUS_ROLLEDBACK;
+            }
         }
-
 
     }
 
@@ -95,8 +100,11 @@ public class KunderaTransaction implements Transaction
     @Override
     public void rollback() throws IllegalStateException, SystemException
     {
-        implementor.doRollback();
-        status = Status.STATUS_ROLLEDBACK;
+        if (implementor != null)
+        {
+            implementor.doRollback();
+            status = Status.STATUS_ROLLEDBACK;
+        }
     }
 
     /* (non-Javadoc)
