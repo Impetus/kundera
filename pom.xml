@@ -278,7 +278,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin> 
+      </plugin>  -->
      <plugin>
             <groupId>com.atlassian.maven.plugins</groupId>
             <artifactId>maven-clover2-plugin</artifactId>
@@ -286,7 +286,7 @@
             <configuration>
                 <licenseLocation>/home/impadmin/Desktop/clover.license</licenseLocation>
             </configuration>
-        </plugin>-->
+        </plugin>
     </plugins>
   </build>
 
