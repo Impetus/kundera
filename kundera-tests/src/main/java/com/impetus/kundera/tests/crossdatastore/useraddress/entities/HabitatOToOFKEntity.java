@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "ADDRESS", schema = "KunderaTests@addMongo")
+@Table(name = "ADDRESS", schema = "KunderaTests@addMongoJTA")
 public class HabitatOToOFKEntity
 {
     @Id

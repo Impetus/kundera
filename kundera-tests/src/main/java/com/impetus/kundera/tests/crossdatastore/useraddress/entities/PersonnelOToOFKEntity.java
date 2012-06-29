@@ -10,7 +10,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "PERSONNEL", schema = "KunderaTests@secIdxAddCassandra")
+@Table(name = "PERSONNEL", schema = "KunderaTests@secIdxAddCassandraJTA")
 public class PersonnelOToOFKEntity
 {
     @Id

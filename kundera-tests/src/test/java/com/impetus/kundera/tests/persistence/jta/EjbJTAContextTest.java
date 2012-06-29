@@ -1,6 +1,8 @@
 package com.impetus.kundera.tests.persistence.jta;
 
-import java.util.Properties;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -18,11 +20,22 @@ import javax.transaction.UserTransaction;
 
 import junit.framework.Assert;
 
+import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.ColumnDef;
+import org.apache.cassandra.thrift.IndexType;
+import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.KsDef;
+import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.cassandra.thrift.SchemaDisagreementException;
+import org.apache.cassandra.thrift.TimedOutException;
+import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.persistence.jta.KunderaJTAUserTransaction;
+import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatOToOFKEntity;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelOToOFKEntity;
 
@@ -69,8 +82,11 @@ public class EjbJTAContextTest
 
         initialContext.bind("java:comp/UserTransaction", new KunderaJTAUserTransaction());
 
-        emf = Persistence.createEntityManagerFactory("secIdxAddCassandra,addMongo");
+        emf = Persistence.createEntityManagerFactory("secIdxAddCassandraJTA,addMongoJTA");
         em = emf.createEntityManager();
+        CassandraCli.cassandraSetUp();
+        CassandraCli.createKeySpace("KunderaTests");
+        loadData();
     }
 
     @Test
@@ -107,6 +123,69 @@ public class EjbJTAContextTest
     @After
     public void tearDown() throws Exception
     {
+        CassandraCli.dropKeySpace("KunderaTests");
     }
+    
+    /**
+     * Load cassandra specific data.
+     *
+     * @throws TException the t exception
+     * @throws InvalidRequestException the invalid request exception
+     * @throws UnavailableException the unavailable exception
+     * @throws TimedOutException the timed out exception
+     * @throws SchemaDisagreementException the schema disagreement exception
+     */
+    private void loadData() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
+            SchemaDisagreementException
+    {
+
+        KsDef ksDef = null;
+        CfDef user_Def = new CfDef();
+        user_Def.name = "PERSONNEL";
+        user_Def.keyspace = "KunderaTests";
+        user_Def.setComparator_type("UTF8Type");
+        user_Def.setDefault_validation_class("UTF8Type");
+        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
+        columnDef.index_type = IndexType.KEYS;
+        user_Def.addToColumn_metadata(columnDef);
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("AGE".getBytes()), "UTF8Type");
+        columnDef1.index_type = IndexType.KEYS;
+        user_Def.addToColumn_metadata(columnDef1);
+
+        List<CfDef> cfDefs = new ArrayList<CfDef>();
+        cfDefs.add(user_Def);
+
+        try
+        {
+            ksDef = CassandraCli.client.describe_keyspace("KunderaTests");
+            CassandraCli.client.set_keyspace("KunderaTests");
+
+            List<CfDef> cfDefn = ksDef.getCf_defs();
+
+            for (CfDef cfDef1 : cfDefn)
+            {
+
+                if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
+                {
+
+                    CassandraCli.client.system_drop_column_family("PERSONNEL");
+
+                }
+            }
+            CassandraCli.client.system_add_column_family(user_Def);
+
+        }
+        catch (NotFoundException e)
+        {
+
+            ksDef = new KsDef("KunderaTests", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
+            ksDef.setReplication_factor(1);
+            CassandraCli.client.system_add_keyspace(ksDef);
+        }
+
+        com.impetus.kundera.tests.cli.CassandraCli.client.set_keyspace("KunderaTests");
+
+    }
+
 
 }
