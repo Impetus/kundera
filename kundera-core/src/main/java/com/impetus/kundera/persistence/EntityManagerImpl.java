@@ -16,7 +16,6 @@
 package com.impetus.kundera.persistence;
 
 import java.util.Map;
-import java.util.Properties;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;

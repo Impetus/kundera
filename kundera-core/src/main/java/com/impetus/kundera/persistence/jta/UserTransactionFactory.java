@@ -1,6 +1,6 @@
 /*******************************************************************************
 
- * * Copyright 2011 Impetus Infotech.
+ * * Copyright 2012 Impetus Infotech.
  *  *
  *  * Licensed under the Apache License, Version 2.0 (the "License");
  *  * you may not use this file except in compliance with the License.
@@ -31,22 +31,25 @@ import javax.naming.Reference;
 import javax.naming.spi.ObjectFactory;
 
 /**
- * 
- * 
- * The factory for JNDI lookup of UserTransactionImp objects.
+ * The factory for JNDI lookup of <code> KunderaJTAUserTransaction</code> objects.
+ * @author vivek.mishra@impetus.co.in
  */
 
 public class UserTransactionFactory implements ObjectFactory
 {
-    
+    /**
+     * Default constructor.
+     */
     public UserTransactionFactory()
     {
     }
 
     /**
+     * Returns reference to userTransaction object.
+     * 
      * @see javax.naming.spi.ObjectFactory
      */
-
+    @Override
     public Object getObjectInstance(Object obj, Name name, Context nameCtx, Hashtable environment) throws Exception
     {
         Reference ref = (Reference) obj;
@@ -65,6 +68,13 @@ public class UserTransactionFactory implements ObjectFactory
 
     }
 
+    /**
+     * Method to return reference for serialized object.(i.e. KunderJTAUserTransaction)
+     * 
+     * @param object serilized object.
+     * @return    reference to that object.
+     * @throws NamingException naming exception.
+     */
     public static Reference getReference(Serializable object) throws NamingException
     {
         ByteArrayOutputStream outStream;

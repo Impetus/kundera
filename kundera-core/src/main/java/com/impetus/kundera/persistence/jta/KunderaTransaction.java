@@ -9,9 +9,14 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.xa.XAResource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.impetus.kundera.persistence.ResourceManager;
 
 /**
+ * Implementation for <code> javax.transaction.Transaction </code>
+ * 
  * @author vivek.mishra
  *
  */
@@ -23,8 +28,23 @@ public class KunderaTransaction implements Transaction
     private boolean setRollBackOnly;
     
     private int status = Status.STATUS_ACTIVE;
+    
+    /** The time out in millis. */
+    private int timeOutInMillis;
 
-//    public Kundera
+
+    /** The Constant log. */
+    private static final Log log = LogFactory.getLog(KunderaTransaction.class);
+
+    
+    /**
+     *  Default constructor with timeout parameter.
+     */
+    KunderaTransaction(int timeOutInMillis)
+    {
+        this.timeOutInMillis = timeOutInMillis;
+    }
+    
     /* (non-Javadoc)
      * @see javax.transaction.Transaction#commit()
      */
@@ -42,6 +62,8 @@ public class KunderaTransaction implements Transaction
         }
         else
         {
+            log.debug("Transaction is set for rollback only, processing rollback.");
+            
             if (implementor != null)
             {
                 implementor.doRollback();
@@ -58,7 +80,7 @@ public class KunderaTransaction implements Transaction
     public boolean delistResource(XAResource paramXAResource, int paramInt) throws IllegalStateException,
             SystemException
     {
-        // TODO Auto-generated method stub
+        //TODD: need to look into.
         return false;
     }
 
@@ -69,7 +91,7 @@ public class KunderaTransaction implements Transaction
     public boolean enlistResource(XAResource paramXAResource) throws RollbackException, IllegalStateException,
             SystemException
     {
-        // TODO Auto-generated method stub
+        //TODD: need to look into.
         return false;
     }
 
@@ -79,7 +101,6 @@ public class KunderaTransaction implements Transaction
     @Override
     public int getStatus() throws SystemException
     {
-        // TODO Auto-generated method stub
         return status;
     }
 
@@ -90,8 +111,7 @@ public class KunderaTransaction implements Transaction
     public void registerSynchronization(Synchronization paramSynchronization) throws RollbackException,
             IllegalStateException, SystemException
     {
-        // TODO Auto-generated method stub
-
+        throw new UnsupportedOperationException("Currently it is not supported.");
     }
 
     /* (non-Javadoc)
@@ -121,4 +141,13 @@ public class KunderaTransaction implements Transaction
     {
         this.implementor = implementor;
     }
+
+    /**
+     * @return the transactionTimeout
+     */
+    public int getTransactionTimeout()
+    {
+        return timeOutInMillis;
+    }
+    
 }

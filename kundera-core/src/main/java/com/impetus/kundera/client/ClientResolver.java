@@ -85,17 +85,17 @@ public final class ClientResolver
         }
         catch (InstantiationException e)
         {
-            logger.error("Error while initializing client factory, Caused b: " + e.getMessage());
+            logger.error("Error while initializing client factory, Caused by: " + e.getMessage());
             throw new ClientResolverException("Couldn't instantiate class", e);
         }
         catch (IllegalAccessException e)
         {
-            logger.error("Error while initializing client factory, Caused b: " + e.getMessage());
+            logger.error("Error while initializing client factory, Caused by: " + e.getMessage());
             throw new ClientResolverException(e);
         }
         catch (ClassNotFoundException e)
         {
-            logger.error("Error while initializing client factory, Caused b: " + e.getMessage());
+            logger.error("Error while initializing client factory, Caused by: " + e.getMessage());
             throw new ClientResolverException(e);
         }
 

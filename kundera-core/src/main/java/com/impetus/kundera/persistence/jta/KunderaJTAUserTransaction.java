@@ -36,42 +36,54 @@ import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.persistence.ResourceManager;
 
 /**
- * Kundera implementation for JTA {@link UserTransaction}. This needs to hooked
- * up with initial context for use of Kundera's commit/rollback handling.
+ * Kundera implementation for JTA <code> UserTransaction</code>
  * 
- * @author vivek.mishra
+ * This needs to hooked up with initial context for use of Kundera's
+ * commit/rollback handling.
+ * 
+ * @author vivek.mishra@impetus.co.in
  * 
  */
 
 public class KunderaJTAUserTransaction implements UserTransaction, Referenceable, Serializable
 {
+    
+    /** boolean variable to hold reference for GLOBAL transaction is in progress on not. */
     private boolean isTransactionInProgress;
 
-    private boolean setRollBackOnly;
-
-//    private java.util.List<ResourceManager> implementors;
-    
+    /** The thread local. */
     private static transient ThreadLocal<KunderaTransaction> threadLocal = new ThreadLocal<KunderaTransaction>();
-    
-    private int transactionTimeout;
 
-//    private int status = Status.STATUS_NO_TRANSACTION;
-    
+    /** The timer thead. */
+    private static transient ThreadLocal<Integer> timerThead = new ThreadLocal<Integer>();
+
+    /** The Constant DEFAULT_TIME_OUT. */
+    private static final Integer DEFAULT_TIME_OUT = 60;
+
+    /** The current tx. */
     private static transient KunderaJTAUserTransaction currentTx;
-    
+
+
+    /** The Constant log. */
+    private static final Log log = LogFactory.getLog(KunderaJTAUserTransaction.class);
+
+    /**
+     * Instantiates a new kundera jta user transaction.
+     */
     public KunderaJTAUserTransaction()
     {
         currentTx = this;
     }
 
-
+    /**
+     * Gets the current tx.
+     *
+     * @return the current tx
+     */
     public static KunderaJTAUserTransaction getCurrentTx()
     {
         return currentTx;
     }
-    
-    /** The Constant log. */
-    private static final Log log = LogFactory.getLog(KunderaJTAUserTransaction.class);
 
     /*
      * (non-Javadoc)
@@ -81,9 +93,20 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     @Override
     public void begin() throws NotSupportedException, SystemException
     {
+        log.info("beginning JTA transaction");
+        
         isTransactionInProgress = true;
-//        status = Status.STATUS_ACTIVE;
-        threadLocal.set(new KunderaTransaction());
+        Transaction tx = threadLocal.get();
+        if(tx != null)
+        {
+            if((tx.getStatus() == Status.STATUS_MARKED_ROLLBACK))
+            {
+                throw new NotSupportedException("Nested Transaction not supported!");
+            }
+        }
+        
+        Integer timer = timerThead.get();
+        threadLocal.set(new KunderaTransaction(timer != null? timer:DEFAULT_TIME_OUT));
     }
 
     /*
@@ -96,39 +119,27 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
             SecurityException, IllegalStateException, SystemException
     {
         Transaction tx = threadLocal.get();
-        if (tx != null)
+        
+        
+        try
         {
-            tx.commit();
-            threadLocal.set(null);
+            if (tx != null)
+            {
+                log.info("Commiting transaction:"+ tx);
+                tx.commit();
+            }
+            else
+            {
+                log.debug("Cannot locate a transaction to commit.");
+
+            }
         }
-//        if (isTransactionInProgress)
-//        {com.impetus.client.persistence.UpdateDeleteNamedQueryTest
-////            status = Status.STATUS_COMMITTING;
-//            // Do commit!
-//            if (implementors != null)
-//            {
-//                if (!setRollBackOnly)
-//                {
-//                    for(ResourceManager implementor: implementors)
-//                    {
-//                        implementor.doCommit();
-//                    }
-//                }
-//                else
-//                {
-//                    for (ResourceManager implementor : implementors)
-//                    {
-//                        implementor.doRollback();
-//                    }
-//                }
-//            }
-//        }
-//        else
-//        {
-//
-//            throw new KunderaException("No transaction in progress.");
-//        }
-//        status = Status.STATUS_COMMITTED;
+        finally
+        {
+            log.info("Resetting after commit.");
+            threadLocal.set(null);
+            timerThead.set(null);
+        }
     }
 
     /*
@@ -139,8 +150,8 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     @Override
     public int getStatus() throws SystemException
     {
-        KunderaTransaction tx = threadLocal.get();
-        if(tx ==null)
+        Transaction tx = threadLocal.get();
+        if (tx == null)
         {
             return Status.STATUS_NO_TRANSACTION;
         }
@@ -157,22 +168,31 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     {
         if (isTransactionInProgress)
         {
-            threadLocal.get().rollback();
-            
-//            if (implementors != null)
-//            {
-//                for(ResourceManager implementor: implementors)
-//                {
-//                    implementor.doRollback();
-//                }
-//            }
+            try
+            {
+                Transaction tx = threadLocal.get();
+                if (tx == null)
+                {
+                    throw new IllegalStateException("Cannot locate a Transaction for rollback.");
+                }
+                
+                log.info("Rollback transaction:"+ tx);
+
+                tx.rollback();
+                
+            }
+            finally
+            {
+                log.info("Resetting after rollback.");
+                threadLocal.set(null);
+                timerThead.set(null);
+            }
         }
         else
         {
 
             throw new KunderaException("No transaction in progress.");
         }
-//        status = Status.STATUS_ROLLEDBACK;
     }
 
     /*
@@ -183,9 +203,13 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     @Override
     public void setRollbackOnly() throws IllegalStateException, SystemException
     {
-        threadLocal.get().setRollbackOnly();
-//        setRollBackOnly = true;
-//        status = Status.STATUS_MARKED_ROLLBACK;
+        Transaction tx = threadLocal.get();
+        if (tx == null)
+        {
+            throw new IllegalStateException("Cannot get Transaction for setRollbackOnly");
+        }
+        tx.setRollbackOnly();
+
     }
 
     /*
@@ -194,28 +218,54 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
      * @see javax.transaction.UserTransaction#setTransactionTimeout(int)
      */
     @Override
-    public void setTransactionTimeout(int arg0) throws SystemException
+    public void setTransactionTimeout(int timeout) throws SystemException
     {
-        this.transactionTimeout = arg0;
+        Transaction tx = threadLocal.get();
+        if (tx == null)
+        {
+            timerThead.set(timeout);
+        }
+        else
+        {
+            log.debug("Cannot reset running transaction:"+ tx);
+        }
+
     }
-    
-    
+
     /**
+     * Returns transaction time out. If no timeout is associate with current thread, returns default timeout(e.g. 60).
      * 
-     * @param implementor
+     * @return the transactionTimeout transaction timeout.
+     */
+    public int getTransactionTimeout()
+    {
+        Integer timeOut = timerThead.get();
+        if (timeOut == null)
+        {
+            return DEFAULT_TIME_OUT;
+        }
+        return timeOut;
+    }
+
+    /**
+     * Links referenced resource to current transaction thread.
+     * 
+     * @param implementor resource implementor.
      */
     public void setImplementor(ResourceManager implementor)
     {
-        threadLocal.get().setImplementor(implementor);
-        
-//        if(implementors == null)
-//        {
-//            implementors = new ArrayList<ResourceManager>();
-//        }
-//        implementors.add(implementor);
+        KunderaTransaction tx = threadLocal.get();
+        if (tx == null)
+        {
+            throw new IllegalStateException("Cannot get Transaction to start");
+        }
+        tx.setImplementor(implementor);
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.naming.Referenceable#getReference()
      */
     @Override
@@ -223,5 +273,4 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     {
         return UserTransactionFactory.getReference(this);
     }
-    
 }
