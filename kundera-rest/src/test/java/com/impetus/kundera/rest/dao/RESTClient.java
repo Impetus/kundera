@@ -29,11 +29,11 @@ public interface RESTClient
 
     String getApplicationToken(String persistenceUnit);
 
-    void closeApplication(String applicationToken);
+    String closeApplication(String applicationToken);
 
     String getSessionToken(String applicationToken);
 
-    void closeSession(String sessionToken);
+    String closeSession(String sessionToken);
 
     String insertBook(String sessionToken, String book);
 

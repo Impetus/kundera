@@ -81,13 +81,14 @@ public class RESTClientImpl implements RESTClient
     }
 
     @Override
-    public void closeApplication(String applicationToken)
+    public String closeApplication(String applicationToken)
     {
         log.debug("\n\nClosing Application for Token:" + applicationToken);
         WebResource.Builder atBuilder = webResource.path("kundera/api/application").accept(MediaType.TEXT_PLAIN)
                 .header(Constants.APPLICATION_TOKEN_HEADER_NAME, applicationToken);
         String response = atBuilder.delete(String.class);
         log.debug("Application Closure Response: " + response);
+        return response;
     }
 
     @Override
@@ -104,7 +105,7 @@ public class RESTClientImpl implements RESTClient
     }
 
     @Override
-    public void closeSession(String sessionToken)
+    public String closeSession(String sessionToken)
     {
 
         log.debug("\n\nClosing Session for Token:" + sessionToken);
@@ -112,6 +113,7 @@ public class RESTClientImpl implements RESTClient
                 .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
         String response = stBuilder.delete(String.class);
         log.debug("Session Deletion Response: " + response);
+        return response;
     }
 
     @Override

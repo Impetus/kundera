@@ -69,9 +69,9 @@ public class CRUDResourceTest extends JerseyTest
 
     String pk2;
 
-    private final static boolean USE_EMBEDDED_SERVER = false;
+    private final static boolean USE_EMBEDDED_SERVER = true;
 
-    private final static boolean AUTO_MANAGE_SCHEMA = false;
+    private final static boolean AUTO_MANAGE_SCHEMA = true;
 
     public CRUDResourceTest() throws Exception
     {
@@ -146,8 +146,14 @@ public class CRUDResourceTest extends JerseyTest
         Assert.assertTrue(sessionToken.startsWith("ST_"));
 
         // Insert Record
-        restClient.insertBook(sessionToken, bookStr1);
-        restClient.insertBook(sessionToken, bookStr2);
+        String insertResponse1 = restClient.insertBook(sessionToken, bookStr1);
+        String insertResponse2 = restClient.insertBook(sessionToken, bookStr2);
+        
+        Assert.assertNotNull(insertResponse1);
+        Assert.assertNotNull(insertResponse2);
+        Assert.assertTrue(insertResponse1.indexOf("201") > 0);
+        Assert.assertTrue(insertResponse2.indexOf("201") > 0);
+        
 
         // Find Record
         String foundBook = restClient.findBook(sessionToken, pk1);
@@ -169,6 +175,8 @@ public class CRUDResourceTest extends JerseyTest
 
         // Get All Books
         String allBooks = restClient.getAllBooks(sessionToken);
+        Assert.assertNotNull(allBooks);
+        Assert.assertTrue(allBooks.indexOf("books") > 0);
         log.debug(allBooks);
 
         // Delete Records
