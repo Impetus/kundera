@@ -150,7 +150,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
                             + "] for :{java:comp/UserTransaction} lookup" + utx.getClass());
 
                 }
-
+                
+                this.setFlushMode(FlushModeType.COMMIT);
                 ((KunderaJTAUserTransaction) utx).setImplementor(this);
             }
             catch (NamingException e)
