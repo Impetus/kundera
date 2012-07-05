@@ -426,7 +426,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     {
         return null;
     }
-sdvdsvdssdvsdvsvsdvsdvsv
+
     /*
      * (non-Javadoc)
      * 
