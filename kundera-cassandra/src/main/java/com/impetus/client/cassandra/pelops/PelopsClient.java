@@ -67,8 +67,10 @@ import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -450,6 +452,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
         List<Object> entities = null;
 
+        
         List<KeySlice> keys = selector.getKeySlices(new ColumnParent(m.getTableName()),
                 selector.newKeyRange(Bytes.fromByteArray(minVal), Bytes.fromByteArray(maxVal), 10000), slicePredicate,
                 consistencyLevel);
@@ -727,6 +730,39 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
 
         mutator.execute(consistencyLevel);
         tf = null;
+    }
+    
+    /**
+     * Indexes @Embedded and @ElementCollection objects of this entity to a separate column family
+     */
+    @Override
+    protected void indexNode(Node node, EntityMetadata entityMetadata)
+    {
+        super.indexNode(node, entityMetadata);
+        
+        //Check whether Embedded data storage using Composite Columns is enabled
+        boolean embeddedDataStoredAsCompositeColumns = false;   //TODO: Read from property
+        
+        if(embeddedDataStoredAsCompositeColumns) {
+          //Not required for lucene indexing
+            if (MetadataUtils.useSecondryIndex(getPersistenceUnit()) && entityMetadata.getType().isSuperColumnFamilyMetadata()) {
+                String indexColumnFamily = entityMetadata.getTableName() + "_INDEX";
+                
+                 
+                Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
+                
+                
+                List<PelopsDataHandler.ThriftRow> indexThriftyRows = handler.toIndexThriftRow(node.getData(), entityMetadata, indexColumnFamily);           
+                System.out.println(indexThriftyRows);
+                
+                for(PelopsDataHandler.ThriftRow thriftRow : indexThriftyRows) {
+                    mutator.writeColumns(indexColumnFamily, Bytes.fromUTF8(thriftRow.getId()),
+                            Arrays.asList(thriftRow.getColumns().toArray(new Column[0])));
+                }
+                mutator.execute(consistencyLevel);
+                indexThriftyRows = null;            
+            }
+        }       
     }
 
     /**

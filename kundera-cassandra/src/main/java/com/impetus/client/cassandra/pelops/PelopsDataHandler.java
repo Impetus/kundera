@@ -622,6 +622,44 @@ final class PelopsDataHandler
 
         return tr;
     }
+    
+    List<ThriftRow> toIndexThriftRow(Object e, EntityMetadata m, String columnFamily) {       
+        List<ThriftRow> indexThriftRows = new ArrayList<PelopsDataHandler.ThriftRow>();
+        
+        byte[] indexValue = PropertyAccessorHelper.get(e, m.getIdColumn().getField());  
+        
+        for(EmbeddedColumn embeddedColumn : m.getEmbeddedColumnsAsList()) {
+            Object embeddedObject = PropertyAccessorHelper.getObject(e, embeddedColumn.getField());
+            
+            if(embeddedObject instanceof Collection) {
+                //TODO: Handle collections
+            } else {
+                for(com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns()) {             
+                    
+                    ThriftRow tr = new ThriftRow();
+                    tr.setColumnFamilyName(columnFamily); //Index column-family name
+                    tr.setId(embeddedColumn.getName() + "_" + column.getName()); // Id
+                    
+                    Field columnField = column.getField();
+                    
+                    byte[] indexColumnName = PropertyAccessorHelper.get(embeddedObject, columnField);             
+                    
+                    
+                    Column thriftColumn = new Column();
+                    thriftColumn.setName(indexColumnName);
+                    thriftColumn.setValue(indexValue);
+                    thriftColumn.setTimestamp(timestamp);
+                    
+                    tr.addColumn(thriftColumn);
+                    
+                    indexThriftRows.add(tr);
+                }  
+            }           
+                     
+        }   
+        
+        return indexThriftRows;
+    }
 
     /**
      * Adds the columns to thrift row.
