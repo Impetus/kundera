@@ -18,7 +18,7 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="index_home_dir" value="/home/impadmin/lucene" />
+			<property name="index_home_dir" value="./lucene" />
 		</properties>
 
 	</persistence-unit>
@@ -141,7 +141,7 @@
 			<property name="hibernate.connection.password" value="impetus" />
 			<property name="hibernate.current_session_context_class"
 				value="org.hibernate.context.ThreadLocalSessionContext" />
-			<property name="index_home_dir" value="/home/impadmin/lucene" />
+			<property name="index_home_dir" value="./lucene" />
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="piccandra">
@@ -156,7 +156,7 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="index_home_dir" value="/home/impadmin/lucene" />
+			<property name="index_home_dir" value="./lucene" />
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="picbase">
@@ -170,7 +170,7 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="index_home_dir" value="/home/impadmin/lucene" />
+			<property name="index_home_dir" value="./lucene" />
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="picongo">
@@ -186,7 +186,7 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="index_home_dir" value="/home/impadmin/lucene" />
+			<property name="index_home_dir" value="./lucene" />
 		</properties>
 	</persistence-unit>
 
