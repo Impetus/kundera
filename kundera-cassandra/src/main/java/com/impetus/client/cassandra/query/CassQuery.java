@@ -100,18 +100,26 @@ public class CassQuery extends QueryImpl implements Query
         {
             if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
             {
+                
+                //Check whether Embedded data storage using Composite Columns is enabled
+                boolean embeddedDataStoredAsCompositeColumns = true;   //TODO: Read from property
+                
+                //Check whether it's a query over super column
+                
+                
 
                 Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m);
                 boolean isRowKeyQuery = ixClause.keySet().iterator().next();
                 if (!isRowKeyQuery)
                 {
-                    result = ((PelopsClient) client).find(ixClause.get(isRowKeyQuery), m, false, null,maxResult);
+                    result = ((PelopsClient) client).find(ixClause.get(isRowKeyQuery), m, false, null, maxResult);
                 }
                 else
                 {
                     result = ((CassandraEntityReader) getReader()).handleFindByRange(m, client, result, ixClause,
                             isRowKeyQuery);
                 }
+
             }
             else
             {
@@ -120,6 +128,71 @@ public class CassQuery extends QueryImpl implements Query
             }
         }
         return result;
+    }
+    
+    @Override
+    protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
+    {
+        List<EnhanceEntity> ls = null;
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        if (appMetadata.isNative(getJPAQuery()))
+        {
+            ls = (List<EnhanceEntity>) ((PelopsClient) client).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
+        }
+        else
+        {
+            //Check whether Embedded data storage using Composite Columns is enabled
+            boolean embeddedDataStoredAsCompositeColumns = false;   //TODO: Read from property
+            
+            if(embeddedDataStoredAsCompositeColumns) {
+                List<FilterClause> embeddedFilterClauseList = getEmbeddedQueryMap(m);
+                if(! embeddedFilterClauseList.isEmpty()) {
+                                                
+                } 
+                
+                
+            }
+            
+            
+            Map<Boolean, List<IndexClause>> ixClause = MetadataUtils.useSecondryIndex(m.getPersistenceUnit()) ? prepareIndexClause(m)
+                    : null;
+
+            ((CassandraEntityReader) getReader()).setConditions(ixClause);
+
+            ls = reader.populateRelation(m, client);
+        }
+        return setRelationEntities(ls, client, m);
+
+    }
+    
+    
+    
+    private List<FilterClause> getEmbeddedQueryMap(EntityMetadata m) {
+        List<FilterClause> embeddedFilterClauseList = new ArrayList<KunderaQuery.FilterClause>();
+        
+        for (Object o : getKunderaQuery().getFilterClauseQueue())
+        {
+            if (o instanceof FilterClause)
+            {
+                FilterClause clause = ((FilterClause) o);
+                String property = clause.getProperty();
+                String condition = clause.getCondition();
+                String value = clause.getValue();
+                
+                Column col = m.getColumn(property);
+                if(col == null) {   //No column present in this entity with the given name
+                    
+                    String embeddedFieldName = MetadataUtils.getEnclosingEmbeddedFieldName(m, property);
+                    
+                    if(embeddedFieldName != null) {
+                        KunderaQuery.FilterClause filterClause = new KunderaQuery().new FilterClause(embeddedFieldName + "." + property, condition, value);                        
+                        embeddedFilterClauseList.add(filterClause);
+                    }                    
+                }                
+            }
+        }        
+        
+        return embeddedFilterClauseList;
     }
 
     /**
@@ -146,6 +219,8 @@ public class CassQuery extends QueryImpl implements Query
 
         return 0;
     }
+    
+    
 
     /**
      * Prepare index clause.
@@ -168,7 +243,7 @@ public class CassQuery extends QueryImpl implements Query
             if (o instanceof FilterClause)
             {
                 FilterClause clause = ((FilterClause) o);
-//                String fieldName = getColumnName(clause.getProperty());
+                // String fieldName = getColumnName(clause.getProperty());
                 String fieldName = clause.getProperty();
                 // in case id column matches with field name, set it for first
                 // time.
@@ -212,27 +287,7 @@ public class CassQuery extends QueryImpl implements Query
         return idxClauses;
     }
 
-    @Override
-    protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
-    {
-        List<EnhanceEntity> ls = null;
-        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        if (appMetadata.isNative(getJPAQuery()))
-        {
-            ls = (List<EnhanceEntity>) ((PelopsClient) client).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
-        }
-        else
-        {
-            Map<Boolean, List<IndexClause>> ixClause = MetadataUtils.useSecondryIndex(m.getPersistenceUnit()) ? prepareIndexClause(m)
-                    : null;
-
-            ((CassandraEntityReader) getReader()).setConditions(ixClause);
-
-            ls = reader.populateRelation(m, client);
-        }
-        return setRelationEntities(ls, client, m);
-
-    }
+    
 
     /**
      * Gets the operator.

@@ -638,7 +638,7 @@ final class PelopsDataHandler
                     
                     ThriftRow tr = new ThriftRow();
                     tr.setColumnFamilyName(columnFamily); //Index column-family name
-                    tr.setId(embeddedColumn.getName() + "_" + column.getName()); // Id
+                    tr.setId(embeddedColumn.getName() + "." + column.getName()); // Id
                     
                     Field columnField = column.getField();
                     

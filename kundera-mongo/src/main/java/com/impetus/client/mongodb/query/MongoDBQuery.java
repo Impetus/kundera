@@ -29,6 +29,7 @@ import com.impetus.client.mongodb.MongoDBClient;
 import com.impetus.client.mongodb.MongoEntityReader;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -177,7 +178,7 @@ public class MongoDBQuery extends QueryImpl
                 // documentName.embeddedDocumentName.column, remove below if
                 // block once this is decided
 
-                String enclosingDocumentName = getEnclosingDocumentName(m, property);
+                String enclosingDocumentName = MetadataUtils.getEnclosingEmbeddedFieldName(m, property);
                 if (enclosingDocumentName != null)
                 {
                     property = enclosingDocumentName + "." + property;
@@ -270,38 +271,7 @@ public class MongoDBQuery extends QueryImpl
 
         return orderByClause;
     }
-
-    /**
-     * Gets the enclosing document name.
-     * 
-     * @param m
-     *            the m
-     * @param columnName
-     *            the column name
-     * @return the enclosing document name
-     */
-    private String getEnclosingDocumentName(EntityMetadata m, String columnName)
-    {
-        String enclosingDocumentName = null;
-        if (!m.getColumnFieldNames().contains(columnName))
-        {
-
-            for (EmbeddedColumn superColumn : m.getEmbeddedColumnsAsList())
-            {
-                List<Column> columns = superColumn.getColumns();
-                for (Column column : columns)
-                {
-                    if (column.getName().equals(columnName))
-                    {
-                        enclosingDocumentName = superColumn.getName();
-                        break;
-                    }
-                }
-            }
-
-        }
-        return enclosingDocumentName;
-    }
+    
 
     /*
      * (non-Javadoc)

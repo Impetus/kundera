@@ -346,5 +346,36 @@ public class MetadataUtils
         }
         return null;
     }
+    
+    /**
+     * Gets the enclosing document name.
+     * 
+     * @param m
+     *            the m
+     * @param columnName
+     *            the column name
+     * @return the enclosing document name
+     */
+    public static String getEnclosingEmbeddedFieldName(EntityMetadata m, String columnName)
+    {
+        String enclosingEmbeddedFieldName = null;
+        if (!m.getColumnFieldNames().contains(columnName))
+        {
+            for (EmbeddedColumn embeddedColumn : m.getEmbeddedColumnsAsList())
+            {
+                List<Column> columns = embeddedColumn.getColumns();
+                for (Column column : columns)
+                {
+                    if (column.getName().equals(columnName))
+                    {
+                        enclosingEmbeddedFieldName = embeddedColumn.getName();
+                        break;
+                    }
+                }
+            }
+
+        }
+        return enclosingEmbeddedFieldName;
+    }
 
 }
