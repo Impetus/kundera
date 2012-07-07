@@ -231,8 +231,6 @@ public abstract class QueryImpl implements Query
             String[] primaryKeys = searchFilter.values().toArray(new String[] {});
             Set<String> uniquePKs = new HashSet<String>(Arrays.asList(primaryKeys));
 
-            // result = (List<Object>) client.findAll(m.getEntityClazz(),
-            // uniquePKs.toArray());
             result = (List<Object>) persistenceDelegeator.find(m.getEntityClazz(), uniquePKs.toArray());
 
         }

@@ -15,9 +15,11 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.query;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import org.apache.cassandra.thrift.IndexClause;
@@ -26,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.cassandra.pelops.PelopsClient;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -33,6 +36,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.query.QueryHandlerException;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
  * The Class CassandraEntityReader.
@@ -182,6 +186,20 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
             throw new QueryHandlerException(e.getMessage());
         }
         return result;
+    }
+    
+    public List<EnhanceEntity> readFromIndexTable(EntityMetadata m, Client client, Queue<FilterClause> filterClauseQueue) {
+        
+        List<Object> primaryKeys = new ArrayList<Object>();
+        
+        String columnFamilyName = m.getTableName() + Constants.INDEX_TABLE_SUFFIX; 
+    
+        primaryKeys = ((PelopsClient) client).searchInWideRows(columnFamilyName, m, filterClauseQueue);
+        
+        
+        List<EnhanceEntity> enhanceEntityList = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(), m.getRelationNames(),
+                true, m, primaryKeys.toArray(new String[] {}));        
+        return enhanceEntityList;
     }
 
     /**

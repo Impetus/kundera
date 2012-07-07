@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
@@ -61,6 +62,7 @@ import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.pelops.PelopsDataHandler.ThriftRow;
 import com.impetus.client.cassandra.query.CassQuery;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
@@ -77,6 +79,8 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
  * Client implementation using Pelops. http://code.google.com/p/pelops/
@@ -320,6 +324,32 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         List<E> foreignKeys = handler.getForeignKeysFromJoinTable(inverseJoinColumnName, columns);
         return foreignKeys;
     }
+    
+    public List<Object> searchInWideRows(String columnFamilyName, EntityMetadata m, Queue<FilterClause> filterClauseQueue) {
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));     
+
+        List<Object> primaryKeys = new ArrayList<Object>();
+        
+        for (FilterClause o : filterClauseQueue)
+        {
+            FilterClause clause = ((FilterClause) o);
+            String rowKey = clause.getProperty();
+            String columnName = clause.getValue();
+            String condition = clause.getCondition();
+            log.debug("rowKey:" + rowKey + ";columnName:" + columnName + ";condition:" + condition);
+            
+            Column thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
+            
+            
+            byte[] pk = thriftColumn.getValue();
+            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(m.getIdColumn().getField());
+            Object value = accessor.fromBytes(m.getIdColumn().getField().getClass(), pk);
+
+            primaryKeys.add(value);
+
+        }
+        return primaryKeys;
+    }
 
     /*
      * (non-Javadoc)
@@ -366,6 +396,8 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         return null;
     }
 
+    
+    
     /*
      * (non-Javadoc)
      * 
@@ -744,9 +776,9 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         boolean embeddedDataStoredAsCompositeColumns = false;   //TODO: Read from property
         
         if(embeddedDataStoredAsCompositeColumns) {
-          //Not required for lucene indexing
+            //Not required for lucene indexing
             if (MetadataUtils.useSecondryIndex(getPersistenceUnit()) && entityMetadata.getType().isSuperColumnFamilyMetadata()) {
-                String indexColumnFamily = entityMetadata.getTableName() + "_INDEX";
+                String indexColumnFamily = entityMetadata.getTableName() + Constants.INDEX_TABLE_SUFFIX;
                 
                  
                 Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
@@ -764,6 +796,8 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             }
         }       
     }
+    
+    
 
     /**
      * Populate tf row.

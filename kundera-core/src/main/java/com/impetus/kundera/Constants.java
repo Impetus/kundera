@@ -79,4 +79,6 @@ public final class Constants
     public final static String RDBMS_CLIENT_FACTORY = "com.impetus.client.rdbms.RDBMSClientFactory";
     
     public final static int DEFAULT_MAX_FETCH_DEPTH = 2;
+    
+    public final static String INDEX_TABLE_SUFFIX = "_INDEX";
 }

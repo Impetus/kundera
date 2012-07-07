@@ -430,8 +430,15 @@ public class KunderaQuery
                 // String columnName = getColumnNameFromFieldName(metadata,
                 // property);
                 String columnName = metadata.getColumnName(property);
-                // columnName = indexName + "." + columnName;
-                // verify condition
+                
+                //where condition may be for search within embedded object
+                if(columnName == null && property.indexOf(".") > 0) {
+                    String enclosingEmbeddedField = MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property.substring(property.indexOf(".") + 1, property.length()));
+                    if(enclosingEmbeddedField != null) {
+                        columnName = property;
+                    }
+                }
+                
                 String condition = tokens.get(1);
                 if (!Arrays.asList(INTRA_CLAUSE_OPERATORS).contains(condition.toUpperCase()))
                 {

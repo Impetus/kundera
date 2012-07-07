@@ -141,59 +141,26 @@ public class CassQuery extends QueryImpl implements Query
         }
         else
         {
-            //Check whether Embedded data storage using Composite Columns is enabled
-            boolean embeddedDataStoredAsCompositeColumns = false;   //TODO: Read from property
+            // Check whether Embedded data storage using Composite Columns is
+            // enabled
+            boolean embeddedDataStoredAsCompositeColumns = false; // TODO: Read from property file
             
             if(embeddedDataStoredAsCompositeColumns) {
-                List<FilterClause> embeddedFilterClauseList = getEmbeddedQueryMap(m);
-                if(! embeddedFilterClauseList.isEmpty()) {
-                                                
-                } 
+                ls = ((CassandraEntityReader) getReader()).readFromIndexTable(m, client, getKunderaQuery().getFilterClauseQueue());
                 
-                
-            }
-            
-            
-            Map<Boolean, List<IndexClause>> ixClause = MetadataUtils.useSecondryIndex(m.getPersistenceUnit()) ? prepareIndexClause(m)
-                    : null;
+            } else {
+                Map<Boolean, List<IndexClause>> ixClause = MetadataUtils.useSecondryIndex(m.getPersistenceUnit()) ? prepareIndexClause(m)
+                        : null;
 
-            ((CassandraEntityReader) getReader()).setConditions(ixClause);
+                ((CassandraEntityReader) getReader()).setConditions(ixClause);
 
-            ls = reader.populateRelation(m, client);
+                ls = reader.populateRelation(m, client);
+            }         
         }
         return setRelationEntities(ls, client, m);
 
-    }
+    }  
     
-    
-    
-    private List<FilterClause> getEmbeddedQueryMap(EntityMetadata m) {
-        List<FilterClause> embeddedFilterClauseList = new ArrayList<KunderaQuery.FilterClause>();
-        
-        for (Object o : getKunderaQuery().getFilterClauseQueue())
-        {
-            if (o instanceof FilterClause)
-            {
-                FilterClause clause = ((FilterClause) o);
-                String property = clause.getProperty();
-                String condition = clause.getCondition();
-                String value = clause.getValue();
-                
-                Column col = m.getColumn(property);
-                if(col == null) {   //No column present in this entity with the given name
-                    
-                    String embeddedFieldName = MetadataUtils.getEnclosingEmbeddedFieldName(m, property);
-                    
-                    if(embeddedFieldName != null) {
-                        KunderaQuery.FilterClause filterClause = new KunderaQuery().new FilterClause(embeddedFieldName + "." + property, condition, value);                        
-                        embeddedFilterClauseList.add(filterClause);
-                    }                    
-                }                
-            }
-        }        
-        
-        return embeddedFilterClauseList;
-    }
 
     /**
      * On executeUpdate.
