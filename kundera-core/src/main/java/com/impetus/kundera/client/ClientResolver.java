@@ -51,7 +51,12 @@ public final class ClientResolver
     public static Client discoverClient(String persistenceUnit)
     {
         logger.info("Returning client instance for:" + persistenceUnit);
-        return clientFactories.get(persistenceUnit).getClientInstance();
+        ClientFactory clientFactory = clientFactories.get(persistenceUnit);
+        if (clientFactory != null)
+        {
+            return clientFactory.getClientInstance();
+        }
+        throw new ClientResolverException(" No client configured for:" + persistenceUnit);
     }
 
     /**

@@ -111,11 +111,14 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         persistenceCache.setPersistenceContextType(persistenceContextType);
 
         persistenceDelegator = new PersistenceDelegator(session, persistenceCache);
-
+        
+        for(String pu : ((EntityManagerFactoryImpl)this.factory).getPersistenceUnits())
+        {
+            persistenceDelegator.loadClient(pu);
+        }
         this.persistenceContextType = persistenceContextType;
         this.transactionType = transactionType;
 
-//        onLookUp(transactionType);
 
         logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
     }
@@ -127,13 +130,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
             Context ctx;
             try
             {
-//                 System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-//                 "org.apache.naming.java.javaURLContextFactory");
-//                 System.setProperty(Context.URL_PKG_PREFIXES,
-//                 "org.apache.naming");
 
                 ctx = new InitialContext();
-                // ctx.createSubcontext("java:comp");
 
 
                 utx = (KunderaJTAUserTransaction) ctx.lookup("java:comp/UserTransaction");
@@ -365,16 +363,10 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public final Object getDelegate()
     {
-        return null;
+        return persistenceDelegator.getDelegate();
     }
 
-    public final Object getDelegate(Class clazz)
-    {
-
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
-        return persistenceDelegator.getClient(metadata);
-    }
-
+  
     /*
      * (non-Javadoc)
      * 

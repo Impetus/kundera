@@ -492,32 +492,32 @@ public class PersistenceDelegator
      */
     public Client getClient(EntityMetadata m)
     {
-        Client client = null;
-
-        // Persistence Unit used to retrieve client
+//
+//        // Persistence Unit used to retrieve client
         String persistenceUnit = m.getPersistenceUnit();
-
-        // single persistence unit given and entity is annotated with '@'.
-        // validate persistence unit given is same
-
-        // If client has already been created, return it, or create it and put
-        // it into client map
-        if (clientMap == null || clientMap.isEmpty())
-        {
-            clientMap = new HashMap<String, Client>();
-            client = ClientResolver.discoverClient(persistenceUnit);
-            clientMap.put(persistenceUnit, client);
-
-        }
-        else if (clientMap.get(persistenceUnit) == null)
-        {
-            client = ClientResolver.discoverClient(persistenceUnit);
-            clientMap.put(persistenceUnit, client);
-        }
-        else
-        {
-            client = clientMap.get(persistenceUnit);
-        }
+//
+        Client client = clientMap.get(persistenceUnit);
+//        // single persistence unit given and entity is annotated with '@'.
+//        // validate persistence unit given is same
+//
+//        // If client has already been created, return it, or create it and put
+//        // it into client map
+//        if (clientMap == null || clientMap.isEmpty())
+//        {
+//            clientMap = new HashMap<String, Client>();
+//            client = ClientResolver.discoverClient(persistenceUnit);
+//            clientMap.put(persistenceUnit, client);
+//
+//        }
+//        else if (clientMap.get(persistenceUnit) == null)
+//        {
+//            client = ClientResolver.discoverClient(persistenceUnit);
+//            clientMap.put(persistenceUnit, client);
+//        }
+//        else
+//        {
+//            client = clientMap.get(persistenceUnit);
+//        }
 
         return client;
     }
@@ -736,4 +736,33 @@ public class PersistenceDelegator
         return isTransactionInProgress;
     }
 
+    /**
+     * Pre load client specific to persistence unit.
+     * 
+     * @param persistenceUnit persistence unit.
+     */
+    
+    void loadClient(String persistenceUnit)
+    {
+        if(clientMap == null)
+        {
+          clientMap = new HashMap<String, Client>();   
+        }
+        
+        if(!clientMap.containsKey(persistenceUnit))
+        {
+            clientMap.put(persistenceUnit, ClientResolver.discoverClient(persistenceUnit));
+        }
+        
+    }
+    
+    /**
+     * Returns map of client as delegate to entity manager.
+     * 
+     * @return clientMap client map
+     */
+    Map<String, Client> getDelegate()
+    {
+        return clientMap;
+    }
 }

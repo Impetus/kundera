@@ -71,7 +71,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      * Array of persistence units. (Contains only one string usually except when
      * persisting in multiple data-stores)
      */
-    String[] persistenceUnits;
+    private String[] persistenceUnits;
 
     // Transaction type
     PersistenceUnitTransactionType transactionType;
@@ -308,7 +308,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
      * 
      * @return the persistence units
      */
-    private String[] getPersistenceUnits()
+    String[] getPersistenceUnits()
     {
         return persistenceUnits;
     }
