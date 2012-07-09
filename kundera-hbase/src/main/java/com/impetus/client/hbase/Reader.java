@@ -18,6 +18,7 @@ package com.impetus.client.hbase;
 import java.io.IOException;
 
 import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.filter.Filter;
 
 /**
  * The Interface Reader.
@@ -38,7 +39,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    HBaseData LoadData(HTable hTable, String columnFamily, String rowKey) throws IOException;
+    HBaseData LoadData(HTable hTable, String columnFamily, String rowKey,Filter filter) throws IOException;
 
     /**
      * Load data.
@@ -51,7 +52,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    HBaseData LoadData(HTable hTable, String rowKey) throws IOException;
+    HBaseData LoadData(HTable hTable, String rowKey, Filter filter) throws IOException;
 
     /**
      * Load all.
@@ -64,6 +65,6 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    HBaseData loadAll(HTable hTable, String... qualifiers) throws IOException;
+    HBaseData loadAll(HTable hTable, Filter filter, String... qualifiers) throws IOException;
 
 }

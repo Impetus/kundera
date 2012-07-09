@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTablePool;
+import org.apache.hadoop.hbase.filter.Filter;
 
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
@@ -198,6 +199,10 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
 
     }
 
+    public void setFilter(Filter filter)
+    {
+        ((HBaseDataHandler)handler).setFilter(filter);
+    }
     /*
      * (non-Javadoc)
      * 

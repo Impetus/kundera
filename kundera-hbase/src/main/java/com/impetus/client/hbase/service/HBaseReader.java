@@ -24,6 +24,7 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.HBaseData;
@@ -46,11 +47,15 @@ public class HBaseReader implements Reader
      */
     @SuppressWarnings("unused")
     @Override
-    public HBaseData LoadData(HTable hTable, String columnFamily, String rowKey) throws IOException
+    public HBaseData LoadData(HTable hTable, String columnFamily, String rowKey,Filter filter) throws IOException
     {
         HBaseData data = new HBaseData(columnFamily, rowKey);
 
         Get g = new Get(Bytes.toBytes(rowKey));
+        if (filter != null)
+        {
+            g.setFilter(filter);
+        }
 
         Result r = hTable.get(g);
 
@@ -70,11 +75,15 @@ public class HBaseReader implements Reader
      * .HTable, java.lang.String)
      */
     @Override
-    public HBaseData LoadData(HTable hTable, String rowKey) throws IOException
+    public HBaseData LoadData(HTable hTable, String rowKey,Filter filter) throws IOException
     {
         HBaseData data = new HBaseData(rowKey);
 
         Get g = new Get(Bytes.toBytes(rowKey));
+        if (filter != null)
+        {
+            g.setFilter(filter);
+        }
 
         Result r = hTable.get(g);
 
@@ -93,12 +102,17 @@ public class HBaseReader implements Reader
      * .HTable, java.lang.String[])
      */
     @Override
-    public HBaseData loadAll(HTable hTable, String... qualifiers) throws IOException
+    public HBaseData loadAll(HTable hTable,Filter filter, String... qualifiers) throws IOException
     {
         String rowKey;
         String columnFamily;
         HBaseData data = null;
         Scan s = new Scan();
+        if(filter != null)
+        {
+            s.setFilter(filter);
+        }
+        
         ResultScanner scanner = hTable.getScanner(s);
         for (Result rr : scanner)
         {

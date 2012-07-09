@@ -39,6 +39,7 @@ import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.HTablePool;
+import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.HBaseData;
@@ -81,6 +82,8 @@ public class HBaseDataHandler implements DataHandler
 
     /** The hbase writer. */
     private Writer hbaseWriter = new HBaseWriter();
+
+    private Filter filter;
 
     /**
      * Instantiates a new h base data handler.
@@ -211,7 +214,7 @@ public class HBaseDataHandler implements DataHandler
             hTable = gethTable(tableName);
 
             // Load raw data from HBase
-            HBaseData data = hbaseReader.LoadData(hTable, rowKey);
+            HBaseData data = hbaseReader.LoadData(hTable, rowKey, this.filter);
 
             // Populate raw data from HBase into entity
 
@@ -412,7 +415,7 @@ public class HBaseDataHandler implements DataHandler
         {
             hTable = gethTable(joinTableName);
 
-            HBaseData data = hbaseReader.LoadData(hTable, Constants.JOIN_COLUMNS_FAMILY_NAME, rowKey);
+            HBaseData data = hbaseReader.LoadData(hTable, Constants.JOIN_COLUMNS_FAMILY_NAME, rowKey, filter);
             List<KeyValue> hbaseValues = data.getColumns();
 
             for (KeyValue colData : hbaseValues)
@@ -777,5 +780,10 @@ public class HBaseDataHandler implements DataHandler
     {
 
         throw new PersistenceException("Not applicable for HBase");
+    }
+
+     public void setFilter(Filter filter)
+    {
+         this.filter = filter;
     }
 }
