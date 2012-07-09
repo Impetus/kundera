@@ -77,17 +77,25 @@ public class ObjectAccessor implements PropertyAccessor<Object>
 
         try
         {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(o);
-            oos.close();
-            return baos.toByteArray();
+            if (o != null)
+            {
+                if (o instanceof byte[])
+                {
+                    return (byte[]) o;
+                }
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(baos);
+                oos.writeObject(o);
+                oos.close();
+                return baos.toByteArray();
+            }
         }
         catch (IOException e)
         {
             throw new PropertyAccessException(e);
         }
-
+        return null;
     }
 
     /*
