@@ -111,7 +111,9 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                 // In case need to use secondary indexes.
                 if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
                 {
-                    ls = ((PelopsClient) client).find(m, relationNames, this.conditions.get(isRowKeyQuery),100);
+
+                    ls = ((PelopsClient) client).find(m, relationNames, this.conditions.get(isRowKeyQuery), 100);
+
                 }
                 else
                 {

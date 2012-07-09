@@ -50,28 +50,20 @@ public class TwissandraTest extends TwitterTestBase
     private static final Log log = LogFactory.getLog(TwissandraTest.class);
 
     @Before
-    protected void setUp() throws Exception
+    public void setUp() throws Exception
     {
-        setUpInternal("twissandraTest");
+        setUpInternal(persistenceUnit);
     }
 
-    /**
-     * Test on execute.
-     */
     
     @Test
-    public void testDummy(){
-        
-    }
-    
-//    @Test
     public void onExecute() throws Exception
     {
         executeTestSuite();
     }
 
     @After
-    protected void tearDown() throws Exception
+    public void tearDown() throws Exception
     {
         tearDownInternal();
     }
@@ -121,14 +113,14 @@ public class TwissandraTest extends TwitterTestBase
 
         CfDef userCfDef = new CfDef();
         userCfDef.name = "USER";
-        userCfDef.keyspace = "KunderaExamples";
+        userCfDef.keyspace = keyspace;
         userCfDef.column_type = "Super";
         userCfDef.setComparator_type("UTF8Type");
         userCfDef.setDefault_validation_class("UTF8Type");
 
         CfDef prefrenceCfDef = new CfDef();
         prefrenceCfDef.name = "PREFERENCE";
-        prefrenceCfDef.keyspace = "KunderaExamples";
+        prefrenceCfDef.keyspace = keyspace;
         prefrenceCfDef.setComparator_type("UTF8Type");
         prefrenceCfDef.setDefault_validation_class("UTF8Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("WEBSITE_THEME".getBytes()), "UTF8Type");
@@ -140,7 +132,7 @@ public class TwissandraTest extends TwitterTestBase
 
         CfDef externalLinkCfDef = new CfDef();
         externalLinkCfDef.name = "EXTERNAL_LINK";
-        externalLinkCfDef.keyspace = "KunderaExamples";
+        externalLinkCfDef.keyspace = keyspace;
         externalLinkCfDef.setComparator_type("UTF8Type");
         externalLinkCfDef.setDefault_validation_class("UTF8Type");
         ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("LINK_TYPE".getBytes()), "UTF8Type");
@@ -156,8 +148,8 @@ public class TwissandraTest extends TwitterTestBase
         cfDefs.add(externalLinkCfDef);
         try
         {
-            ksDef = CassandraCli.client.describe_keyspace("KunderaExamples");
-            CassandraCli.client.set_keyspace("KunderaExamples");
+            ksDef = CassandraCli.client.describe_keyspace(keyspace);
+            CassandraCli.client.set_keyspace(keyspace);
             List<CfDef> cfDefn = ksDef.getCf_defs();
 
             for (CfDef cfDef1 : cfDefn)
@@ -182,7 +174,7 @@ public class TwissandraTest extends TwitterTestBase
         }
         catch (NotFoundException e)
         {
-            ksDef = new KsDef("KunderaExamples", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
+            ksDef = new KsDef(keyspace, "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
             ksDef.setReplication_factor(1);
             CassandraCli.client.system_add_keyspace(ksDef);
         }
@@ -202,10 +194,10 @@ public class TwissandraTest extends TwitterTestBase
         /*
          * LOG.warn(
          * "Truncating Column families and finally dropping Keyspace KunderaExamples in Cassandra...."
-         * ); CassandraCli.dropColumnFamily("USER", "KunderaExamples");
-         * CassandraCli.dropColumnFamily("PREFERENCE", "KunderaExamples");
-         * CassandraCli.dropColumnFamily("EXTERNAL_LINKS", "KunderaExamples");
-         * CassandraCli.dropKeySpace("KunderaExamples");
+         * ); CassandraCli.dropColumnFamily("USER", keyspace);
+         * CassandraCli.dropColumnFamily("PREFERENCE", keyspace);
+         * CassandraCli.dropColumnFamily("EXTERNAL_LINKS", keyspace);
+         * CassandraCli.dropKeySpace(keyspace);
          */
     }
 

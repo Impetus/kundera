@@ -22,6 +22,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 
 import com.impetus.client.twitter.entities.ExternalLinkCassandra;
+import com.impetus.client.twitter.entities.PersonalDetail;
 import com.impetus.client.twitter.entities.PreferenceCassandra;
 import com.impetus.client.twitter.entities.Tweet;
 import com.impetus.client.twitter.entities.UserCassandra;
@@ -201,6 +202,15 @@ public class TwitterService extends SuperDao implements Twitter
             return null;
         }
         return users.get(0).getFollowers();
+    }
+    
+    @Override
+    public List<UserCassandra> findPersonalDetailByName(String name)
+    {
+        Query q = em.createQuery("select u.personalDetail.name from UserCassandra u where u.personalDetail.name =:name");
+        q.setParameter("name", name);
+        List<UserCassandra> users = q.getResultList();        
+        return users;        
     }
 
     @Override

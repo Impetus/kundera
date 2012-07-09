@@ -338,15 +338,19 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             String condition = clause.getCondition();
             log.debug("rowKey:" + rowKey + ";columnName:" + columnName + ";condition:" + condition);
             
-            Column thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
-            
-            
-            byte[] pk = thriftColumn.getValue();
-            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(m.getIdColumn().getField());
-            Object value = accessor.fromBytes(m.getIdColumn().getField().getClass(), pk);
+            if(rowKey.equals(m.getIdColumn().getName())) {
+                primaryKeys.add(columnName);
+            } else {
+                Column thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
+                
+                
+                byte[] pk = thriftColumn.getValue();
+                PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(m.getIdColumn().getField());
+                Object value = accessor.fromBytes(m.getIdColumn().getField().getClass(), pk);
 
-            primaryKeys.add(value);
-
+                primaryKeys.add(value);
+            }           
+           
         }
         return primaryKeys;
     }
@@ -443,7 +447,11 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(),
                     selector.newKeyRange("", "", maxResult), slicePredicate, consistencyLevel);
             entities = new ArrayList<Object>(qResults.size());
+            
+            
             populateData(m, qResults, entities, isRelation, relations);
+            
+            
         }
         else
         {
@@ -744,7 +752,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
         if (thriftColumns != null && !thriftColumns.isEmpty())
         {
-            // Bytes.fromL
             mutator.writeColumns(metadata.getTableName(), Bytes.fromUTF8(tf.getId()),
                     Arrays.asList(tf.getColumns().toArray(new Column[0])));
         }
@@ -915,28 +922,47 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     private void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities,
             boolean isRelational, List<String> relationNames)
     {
-        Iterator<Bytes> rowIter = qResults.keySet().iterator();
-        while (rowIter.hasNext())
-        {
-            Bytes rowKey = rowIter.next();
-            List<Column> columns = qResults.get(rowKey);
-            try
+        if(m.getType().isSuperColumnFamilyMetadata()) {
+            Set<Bytes> primaryKeys = qResults.keySet();
+            
+            if(primaryKeys != null && ! primaryKeys.isEmpty()) {
+                Object[] rowIds = new Object[primaryKeys.size()];
+                int i = 0;
+                for(Bytes b : primaryKeys) {
+                    rowIds[i] = Bytes.toUTF8(b.toByteArray());
+                    i++;
+                }                
+                
+                entities.addAll(findAll(m.getEntityClazz(), rowIds));
+            }      
+            
+            
+        } else {
+            Iterator<Bytes> rowIter = qResults.keySet().iterator();
+            while (rowIter.hasNext())
             {
-                Object e = handler.fromColumnThriftRow(m.getEntityClazz(), m,
-                        handler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null),
-                        relationNames, isRelational);
-                entities.add(e);
+                Bytes rowKey = rowIter.next();
+                List<Column> columns = qResults.get(rowKey);
+                try
+                {
+                    Object e = handler.fromColumnThriftRow(m.getEntityClazz(), m,
+                            handler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null),
+                            relationNames, isRelational);
+                    entities.add(e);
+                }
+                catch (IllegalStateException e)
+                {
+                    throw new KunderaException(e);
+                }
+                catch (Exception e)
+                {
+                    throw new KunderaException(e);
+                }
             }
-            catch (IllegalStateException e)
-            {
-                throw new KunderaException(e);
-            }
-            catch (Exception e)
-            {
-                throw new KunderaException(e);
-            }
-        }
-    }
+        }       
+        
+    }  
+   
 
     /**
      * Creates secondary indexes on columns if not already created.
