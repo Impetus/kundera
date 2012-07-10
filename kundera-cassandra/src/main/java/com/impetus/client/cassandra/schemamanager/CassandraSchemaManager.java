@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.ColumnDef;
@@ -255,6 +256,17 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             if (!found)
             {
                 cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
+                
+                //Create Index Table if required
+                boolean indexTableRequired = false;   //TODO: Read from property
+                if(indexTableRequired) {
+                    CfDef cfDef = new CfDef();
+                    cfDef.setKeyspace(databaseName);
+                    cfDef.setName(tableInfo.getTableName() + Constants.INDEX_TABLE_SUFFIX);
+                    cfDef.setKey_validation_class(UTF8Type.class.getSimpleName());                    
+                    cassandra_client.system_add_column_family(cfDef);
+                }
+                
             }
         }
     }

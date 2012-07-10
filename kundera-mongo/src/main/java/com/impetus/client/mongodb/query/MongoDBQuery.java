@@ -178,7 +178,7 @@ public class MongoDBQuery extends QueryImpl
                 // documentName.embeddedDocumentName.column, remove below if
                 // block once this is decided
 
-                String enclosingDocumentName = MetadataUtils.getEnclosingEmbeddedFieldName(m, property);
+                String enclosingDocumentName = MetadataUtils.getEnclosingEmbeddedFieldName(m, property, true);
                 if (enclosingDocumentName != null)
                 {
                     property = enclosingDocumentName + "." + property;

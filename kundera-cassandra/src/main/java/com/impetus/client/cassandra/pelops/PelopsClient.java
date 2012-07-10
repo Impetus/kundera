@@ -80,6 +80,7 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
@@ -325,7 +326,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         return foreignKeys;
     }
     
-    public List<Object> searchInWideRows(String columnFamilyName, EntityMetadata m, Queue<FilterClause> filterClauseQueue) {
+    public List<Object> searchInInvertedIndex(String columnFamilyName, EntityMetadata m, Queue<FilterClause> filterClauseQueue) {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));     
 
         List<Object> primaryKeys = new ArrayList<Object>();
@@ -338,15 +339,61 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             String condition = clause.getCondition();
             log.debug("rowKey:" + rowKey + ";columnName:" + columnName + ";condition:" + condition);
             
-            if(rowKey.equals(m.getIdColumn().getName())) {
+            
+            //TODO: Second check unnecessary but unavoidable as filter clause property is incorrectly passed as column name
+            if(rowKey.equals(m.getIdColumn().getField().getName()) || rowKey.equals(m.getIdColumn().getName())) {
                 primaryKeys.add(columnName);
-            } else {
-                Column thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
+            } else {                
+                Column thriftColumn = null;
+                
+                if (condition.equals("="))
+                {
+                    thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
+                }
+                
+                else if (condition.equalsIgnoreCase("LIKE"))
+                {
+                    thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
+                    
+                }
+                
+                else if (condition.equals(">"))
+                {
+                    throw new QueryHandlerException(condition + " comparison operator not supported currently for Cassandra Inverted Index");  
+                }                
+                
+                else if (condition.equals("<"))
+                {
+                    throw new QueryHandlerException(condition + " comparison operator not supported currently for Cassandra Inverted Index");
+                }
+                else if (condition.equals(">="))
+                {
+                    throw new QueryHandlerException(condition + " comparison operator not supported currently for Cassandra Inverted Index"); 
+                }
+                else if (condition.equals("<="))
+                {
+                    throw new QueryHandlerException(condition + " comparison operator not supported currently for Cassandra Inverted Index");
+                }
+                else
+                {
+                    throw new QueryHandlerException(condition + " comparison operator not supported currently for Cassandra Inverted Index");
+                }     
                 
                 
-                byte[] pk = thriftColumn.getValue();
+                
+                byte[] columnValue = thriftColumn.getValue();
+                String columnValueStr = Bytes.toUTF8(columnValue);
+                
                 PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(m.getIdColumn().getField());
-                Object value = accessor.fromBytes(m.getIdColumn().getField().getClass(), pk);
+                Object value = null;
+                
+                if(columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER) > 0) {
+                    String pk = columnValueStr.substring(0, columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER));
+                    String ecName = columnValueStr.substring(columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER) + 1, columnValueStr.length());
+                    value = pk;
+                } else {
+                    value = accessor.fromBytes(m.getIdColumn().getField().getClass(), columnValue);
+                }                
 
                 primaryKeys.add(value);
             }           
@@ -792,7 +839,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                 
                 
                 List<PelopsDataHandler.ThriftRow> indexThriftyRows = handler.toIndexThriftRow(node.getData(), entityMetadata, indexColumnFamily);           
-                System.out.println(indexThriftyRows);
                 
                 for(PelopsDataHandler.ThriftRow thriftRow : indexThriftyRows) {
                     mutator.writeColumns(indexColumnFamily, Bytes.fromUTF8(thriftRow.getId()),

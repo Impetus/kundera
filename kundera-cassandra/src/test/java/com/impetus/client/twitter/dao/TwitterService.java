@@ -22,7 +22,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 
 import com.impetus.client.twitter.entities.ExternalLinkCassandra;
-import com.impetus.client.twitter.entities.PersonalDetail;
 import com.impetus.client.twitter.entities.PreferenceCassandra;
 import com.impetus.client.twitter.entities.Tweet;
 import com.impetus.client.twitter.entities.UserCassandra;
@@ -216,7 +215,7 @@ public class TwitterService extends SuperDao implements Twitter
     @Override
     public List<Tweet> findTweetByBody(String tweetBody)
     {
-        Query q = em.createQuery("select u.tweet_body from UserCassandra u where u.tweet_body like :body");
+        Query q = em.createQuery("select u.tweets.body from UserCassandra u where u.tweets.body like :body");
         q.setParameter("body", tweetBody);
         List<Tweet> tweets = q.getResultList();
         return tweets;
@@ -225,7 +224,7 @@ public class TwitterService extends SuperDao implements Twitter
     @Override
     public List<Tweet> findTweetByDevice(String deviceName)
     {
-        Query q = em.createQuery("select u.tweeted_from from UserCassandra u where u.tweeted_from like :device");
+        Query q = em.createQuery("select u.tweets.device from UserCassandra u where u.tweets.device like :device");
         q.setParameter("device", deviceName);
         List<Tweet> tweets = q.getResultList();
         return tweets;

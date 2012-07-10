@@ -32,10 +32,10 @@ public class PersonalDetail
     @Column(name = "personal_detail_id")
     private String personalDetailId;
 
-    @Column(name = "name")
+    @Column(name = "person_name")
     private String name;
 
-    @Column(name = "password")
+    @Column(name = "person_password")
     private String password;
 
     @Column(name = "rel_status")

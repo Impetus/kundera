@@ -124,9 +124,12 @@ public abstract class TwitterTestBase
         updateUser();
 
         // Queries
-        //getPersonalDetailByName();
+        getPersonalDetailByName();
         getAllUsers();
         getAllTweets();
+        
+        //getTweetsByBody();
+        //getTweetsByDevice();
 
         // Remove Users
         removeUser();

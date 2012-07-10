@@ -352,11 +352,39 @@ public class MetadataUtils
      * 
      * @param m
      *            the m
-     * @param columnName
-     *            the column name
+     * @param criteria
+     *            Input criteria
+     * @param viaColumnName true if <code>criteria</code> is column Name, false if <code>criteria</code> is column field name 
      * @return the enclosing document name
      */
-    public static String getEnclosingEmbeddedFieldName(EntityMetadata m, String columnName)
+    public static String getEnclosingEmbeddedFieldName(EntityMetadata m, String criteria, boolean viaColumnName)
+    {
+        String enclosingEmbeddedFieldName = null;
+        if (!m.getColumnFieldNames().contains(criteria))
+        {
+            for (EmbeddedColumn embeddedColumn : m.getEmbeddedColumnsAsList())
+            {
+                List<Column> columns = embeddedColumn.getColumns();
+                for (Column column : columns)
+                {
+                    if (viaColumnName && column.getName().equals(criteria))
+                    {
+                        enclosingEmbeddedFieldName = embeddedColumn.getName();
+                        break;
+                    }
+                    
+                    if(!viaColumnName && column.getField().getName().equals(criteria)) {
+                        enclosingEmbeddedFieldName = embeddedColumn.getName();
+                        break;
+                    }
+                }
+            }
+
+        }
+        return enclosingEmbeddedFieldName;
+    }
+    
+   /* public static String getEnclosingEmbeddedFieldName(EntityMetadata m, String columnName)
     {
         String enclosingEmbeddedFieldName = null;
         if (!m.getColumnFieldNames().contains(columnName))
@@ -376,6 +404,6 @@ public class MetadataUtils
 
         }
         return enclosingEmbeddedFieldName;
-    }
+    }*/
 
 }

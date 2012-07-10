@@ -196,7 +196,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         
         String columnFamilyName = m.getTableName() + Constants.INDEX_TABLE_SUFFIX; 
     
-        primaryKeys = ((PelopsClient) client).searchInWideRows(columnFamilyName, m, filterClauseQueue);
+        primaryKeys = ((PelopsClient) client).searchInInvertedIndex(columnFamilyName, m, filterClauseQueue);
         
         
         List<EnhanceEntity> enhanceEntityList = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(), m.getRelationNames(),
