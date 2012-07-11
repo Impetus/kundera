@@ -228,12 +228,12 @@ public class CassQuery extends QueryImpl implements Query
                 String condition = clause.getCondition();
                 String value = clause.getValue();
                 // value.e
-                if(idPresent) {
+               /* if(idPresent) {
                     expr = null;
-                } else {
+                } else {*/
                     expr.add(Selector.newIndexExpression(fieldName, getOperator(condition, idPresent),
                             getBytesValue(fieldName, m, value)));
-                }
+              //  }
                 
             }
             else
