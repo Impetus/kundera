@@ -145,7 +145,7 @@ public class CassQuery extends QueryImpl implements Query
             // enabled
             boolean embeddedDataStoredAsCompositeColumns = false; // TODO: Read from property file
             
-            if(embeddedDataStoredAsCompositeColumns) {
+            if(embeddedDataStoredAsCompositeColumns && ! getKunderaQuery().getFilterClauseQueue().isEmpty()) {
                 ls = ((CassandraEntityReader) getReader()).readFromIndexTable(m, client, getKunderaQuery().getFilterClauseQueue());
                 
             } else {
@@ -158,7 +158,6 @@ public class CassQuery extends QueryImpl implements Query
             }         
         }
         return setRelationEntities(ls, client, m);
-
     }  
     
 
@@ -228,8 +227,13 @@ public class CassQuery extends QueryImpl implements Query
                 String condition = clause.getCondition();
                 String value = clause.getValue();
                 // value.e
-                expr.add(Selector.newIndexExpression(fieldName, getOperator(condition, idPresent),
-                        getBytesValue(fieldName, m, value)));
+                if(idPresent) {
+                    expr = null;
+                } else {
+                    expr.add(Selector.newIndexExpression(fieldName, getOperator(condition, idPresent),
+                            getBytesValue(fieldName, m, value)));
+                }
+                
             }
             else
             {

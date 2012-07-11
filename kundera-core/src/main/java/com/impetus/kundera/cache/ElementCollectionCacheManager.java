@@ -133,7 +133,7 @@ public class ElementCollectionCacheManager
      */
     public String getElementCollectionObjectName(String rowKey, Object elementCollectionObject)
     {
-        if (getElementCollectionCache().get(rowKey) == null)
+        if (getElementCollectionCache().isEmpty() || getElementCollectionCache().get(rowKey) == null)
         {
             log.debug("No element collection object map found in cache for Row key " + rowKey);
             return null;

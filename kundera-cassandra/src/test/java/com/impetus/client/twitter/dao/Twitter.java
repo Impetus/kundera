@@ -2,6 +2,7 @@ package com.impetus.client.twitter.dao;
 
 import java.util.List;
 
+import com.impetus.client.twitter.entities.PersonalDetail;
 import com.impetus.client.twitter.entities.PreferenceCassandra;
 import com.impetus.client.twitter.entities.Tweet;
 import com.impetus.client.twitter.entities.UserCassandra;
@@ -112,6 +113,9 @@ public interface Twitter
      * @return list of all followers.
      */
     List<UserCassandra> getFollowers(String userId);
+    
+    List<UserCassandra> findPersonalDetailByName(String name);
+    
 
     /**
      * Find tweet by tweet body.

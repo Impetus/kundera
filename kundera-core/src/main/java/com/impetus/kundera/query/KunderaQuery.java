@@ -433,7 +433,7 @@ public class KunderaQuery
                 
                 //where condition may be for search within embedded object
                 if(columnName == null && property.indexOf(".") > 0) {
-                    String enclosingEmbeddedField = MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property.substring(property.indexOf(".") + 1, property.length()));
+                    String enclosingEmbeddedField = MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property.substring(property.indexOf(".") + 1, property.length()), false);
                     if(enclosingEmbeddedField != null) {
                         columnName = property;
                     }

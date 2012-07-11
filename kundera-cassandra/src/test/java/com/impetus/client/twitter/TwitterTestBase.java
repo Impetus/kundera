@@ -23,8 +23,6 @@ import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.thrift.TException;
 import org.junit.Assert;
 
-import junit.framework.TestCase;
-
 import com.impetus.client.twitter.dao.Twitter;
 import com.impetus.client.twitter.dao.TwitterService;
 import com.impetus.client.twitter.entities.ExternalLinkCassandra;
@@ -38,11 +36,15 @@ import com.impetus.client.twitter.entities.UserCassandra;
  * 
  * @author amresh.singh
  */
-public abstract class TwitterTestBase extends TestCase
+public abstract class TwitterTestBase 
 {
     public static final boolean RUN_IN_EMBEDDED_MODE = true;
 
     public static final boolean AUTO_MANAGE_SCHEMA = true;
+    
+    public static final String persistenceUnit = "twissandraTest";
+    
+    public static final String keyspace = "KunderaExamples";
 
     /** The user id1. */
     String userId1;
@@ -122,8 +124,12 @@ public abstract class TwitterTestBase extends TestCase
         updateUser();
 
         // Queries
+        getPersonalDetailByName();
         getAllUsers();
         getAllTweets();
+        
+        //getTweetsByBody();
+        //getTweetsByDevice();
 
         // Remove Users
         removeUser();
@@ -316,14 +322,35 @@ public abstract class TwitterTestBase extends TestCase
 
         twitter.closeEntityManager();
 
-        assertNotNull(tweetsUser1);
-        assertNotNull(tweetsUser2);
+        Assert.assertNotNull(tweetsUser1);
+        Assert.assertNotNull(tweetsUser2);
 
-        assertFalse(tweetsUser1.isEmpty());
-        assertFalse(tweetsUser2.isEmpty());
+        Assert.assertFalse(tweetsUser1.isEmpty());
+        Assert.assertFalse(tweetsUser2.isEmpty());
 
-        assertEquals(3, tweetsUser1.size());
-        assertEquals(2, tweetsUser2.size());
+        Assert.assertEquals(3, tweetsUser1.size());
+        Assert.assertEquals(2, tweetsUser2.size());
+    }
+    
+    public void getPersonalDetailByName()
+    {
+        twitter.createEntityManager();
+        List<UserCassandra> users = twitter.findPersonalDetailByName("Vivek");
+        Assert.assertNotNull(users);
+        Assert.assertFalse(users.isEmpty());
+        Assert.assertTrue(users.size() == 1);
+        
+        UserCassandra user = users.get(0);
+        Assert.assertNotNull(user);
+        PersonalDetail pd = user.getPersonalDetail();
+        Assert.assertNotNull(pd);
+        Assert.assertTrue(pd.getPersonalDetailId() != null && ! pd.getPersonalDetailId().trim().equals(""));
+        Assert.assertTrue("Vivek", pd.getName() != null );
+        Assert.assertEquals("unknown", pd.getPassword());
+        Assert.assertEquals("Married", pd.getRelationshipStatus());
+        
+        
+        twitter.closeEntityManager();
     }
 
     /**
@@ -339,10 +366,10 @@ public abstract class TwitterTestBase extends TestCase
 
         twitter.closeEntityManager();
 
-        assertNotNull(user1Tweet);
-        assertNotNull(user2Tweet);
-        assertEquals(1, user1Tweet.size());
-        assertEquals(1, user2Tweet.size());
+        Assert.assertNotNull(user1Tweet);
+        Assert.assertNotNull(user2Tweet);
+        Assert.assertEquals(1, user1Tweet.size());
+        Assert.assertEquals(1, user2Tweet.size());
     }
 
     /**
@@ -358,10 +385,10 @@ public abstract class TwitterTestBase extends TestCase
 
         twitter.closeEntityManager();
 
-        assertNotNull(webTweets);
-        assertNotNull(mobileTweets);
-        assertEquals(1, webTweets.size());
-        assertEquals(1, mobileTweets.size());
+        Assert.assertNotNull(webTweets);
+        Assert.assertNotNull(mobileTweets);
+        Assert.assertEquals(1, webTweets.size());
+        Assert.assertEquals(1, mobileTweets.size());
 
     }
 
@@ -380,8 +407,8 @@ public abstract class TwitterTestBase extends TestCase
         List<UserCassandra> follower2 = twitter.getFollowers(userId2);
         twitter.closeEntityManager();
 
-        assertNull(follower1);
-        assertNotNull(follower2);
+        Assert.assertNull(follower1);
+        Assert.assertNotNull(follower2);
     }
 
     /**
