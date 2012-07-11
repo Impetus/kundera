@@ -886,31 +886,33 @@ final class PelopsDataHandler
     List<ThriftRow> toIndexThriftRow(Object e, EntityMetadata m, String columnFamily) {       
         List<ThriftRow> indexThriftRows = new ArrayList<PelopsDataHandler.ThriftRow>();
         
-        byte[] indexValue = PropertyAccessorHelper.get(e, m.getIdColumn().getField());  
+        byte[] value = PropertyAccessorHelper.get(e, m.getIdColumn().getField());  
         
         for(EmbeddedColumn embeddedColumn : m.getEmbeddedColumnsAsList()) {
             Object embeddedObject = PropertyAccessorHelper.getObject(e, embeddedColumn.getField());
             
-            if(embeddedObject instanceof Collection) {
-                //TODO: Handle collections
+            if(embeddedObject instanceof Collection) {               
+                ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
+                
+                for(Object obj : (Collection) embeddedObject) {
+                    for(com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns()) {
+                        
+                        //Column Value
+                        String id = Bytes.toUTF8(value);                        
+                        String superColumnName = ecCacheHandler.getElementCollectionObjectName(id, obj);
+                        byte[] indexColumnValue = (id + Constants.INDEX_TABLE_EC_DELIMITER + superColumnName).getBytes();
+                        
+                        ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedColumn, obj, column,
+                                indexColumnValue);
+                        
+                        indexThriftRows.add(tr);
+                    }
+                }
             } else {
                 for(com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns()) {             
                     
-                    ThriftRow tr = new ThriftRow();
-                    tr.setColumnFamilyName(columnFamily); //Index column-family name
-                    tr.setId(embeddedColumn.getName() + "." + column.getName()); // Id
-                    
-                    Field columnField = column.getField();
-                    
-                    byte[] indexColumnName = PropertyAccessorHelper.get(embeddedObject, columnField);             
-                    
-                    
-                    Column thriftColumn = new Column();
-                    thriftColumn.setName(indexColumnName);
-                    thriftColumn.setValue(indexValue);
-                    thriftColumn.setTimestamp(timestamp);
-                    
-                    tr.addColumn(thriftColumn);
+                    ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedColumn, embeddedObject, column,
+                            value);                                   
                     
                     indexThriftRows.add(tr);
                 }  
@@ -919,6 +921,36 @@ final class PelopsDataHandler
         }   
         
         return indexThriftRows;
+    }
+
+    /**
+     * Constructs Thrift Tow (each record) for Index Table
+     * @param columnFamily Column family Name for Index Table
+     * @param embeddedColumn Instance of {@link EmbeddedColumn} 
+     * @param obj Embedded Object instance
+     * @param column Instance of {@link Column}
+     * @param indexColumnValue Name of Index Column
+     * @return Instance of {@link ThriftRow}
+     */
+    private ThriftRow constructIndexTableThriftRow(String columnFamily, EmbeddedColumn embeddedColumn, Object obj,
+            com.impetus.kundera.metadata.model.Column column, byte[] indexColumnValue)
+    {
+        //Column Name
+        Field columnField = column.getField();                        
+        byte[] indexColumnName = PropertyAccessorHelper.get(obj, columnField);
+        
+        //Construct Index Table Thrift Row
+        ThriftRow tr = new ThriftRow();
+        tr.setColumnFamilyName(columnFamily); //Index column-family name
+        tr.setId(embeddedColumn.getField().getName() + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + column.getField().getName()); // Id       
+        
+        Column thriftColumn = new Column();
+        thriftColumn.setName(indexColumnName);
+        thriftColumn.setValue(indexColumnValue);
+        thriftColumn.setTimestamp(timestamp);
+        
+        tr.addColumn(thriftColumn);
+        return tr;
     }
 
     private void addCounterColumnsToThriftRow(long timestamp2, ThriftRow tr, EntityMetadata m, Object e)
@@ -1192,7 +1224,8 @@ final class PelopsDataHandler
                         SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp, superColumn,
                                 obj);
                         tr.addSuperColumn(thriftSuperColumn);
-
+                        ecCacheHandler.addElementCollectionCacheMapping(id, obj, superColumnName);
+                        
                         count++;
                     }
                 }
@@ -1214,7 +1247,12 @@ final class PelopsDataHandler
                         SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp, superColumn,
                                 obj);
                         tr.addSuperColumn(thriftSuperColumn);
+                        ecCacheHandler.addElementCollectionCacheMapping(id, obj, superColumnName);
                     }
+                    
+                    //TODO: Why are we not clearing EC Cache as in HBaseDataHandler
+                    // Clear embedded collection cache for GC
+                    //ecCacheHandler.clearCache();
                 }
 
             }
