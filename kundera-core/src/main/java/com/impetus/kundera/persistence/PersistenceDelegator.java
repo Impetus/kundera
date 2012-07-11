@@ -444,6 +444,13 @@ public class PersistenceDelegator
         log.debug("Merging Entity : " + e);
         EntityMetadata m = getMetadata(e.getClass());
 
+        // check for counter column
+        if (m.isCounterColumnType())
+        {
+            log.error("merge is  not supported for counter column type column family");
+            return null;
+        }
+        
         // TODO: throw OptisticLockException if wrong version and
         // optimistic locking enabled
 

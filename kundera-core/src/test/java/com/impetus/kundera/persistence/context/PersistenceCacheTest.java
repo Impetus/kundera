@@ -22,6 +22,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.configure.Configurator;
+import com.impetus.kundera.configure.MetamodelConfiguration;
+import com.impetus.kundera.configure.PersistenceUnitConfiguration;
+import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.graph.BillingCounter;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraph;
@@ -43,7 +46,7 @@ public class PersistenceCacheTest
 
     ObjectGraphBuilder graphBuilder;
 
-    Configurator configurator = new Configurator("kunderatest");
+//    Configurator configurator = new Configurator("kunderatest");
 
     /**
      * @throws java.lang.Exception
@@ -55,8 +58,9 @@ public class PersistenceCacheTest
         flushManager = new FlushManager();
         graphBuilder = new ObjectGraphBuilder(pc);
 
-        configurator.configure();
-
+//        configurator.configure();
+        new PersistenceUnitConfiguration("kunderatest").configure();
+        new MetamodelConfiguration("kunderatest").configure();        
     }
 
     /**
@@ -87,8 +91,6 @@ public class PersistenceCacheTest
         Assert.assertNull(headNode.getParents());
         Assert.assertEquals(3, headNode.getChildren().size());
 
-        Assert.assertEquals(4, pc.getMainCache().size());     
-
+        Assert.assertEquals(4, pc.getMainCache().size());
     }
-
 }

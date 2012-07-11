@@ -158,6 +158,7 @@ public class CassQuery extends QueryImpl implements Query
             }         
         }
         return setRelationEntities(ls, client, m);
+
     }  
     
 

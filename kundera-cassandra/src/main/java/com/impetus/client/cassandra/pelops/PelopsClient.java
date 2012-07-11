@@ -16,6 +16,7 @@
 
 package com.impetus.client.cassandra.pelops;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -32,7 +33,10 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
+import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.CounterColumn;
+import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.CqlResult;
 import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.IndexClause;
@@ -246,9 +250,41 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             throw new PersistenceException("PelopsClient is closed.");
         }
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-
-        RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        rowDeletor.deleteRow(metadata.getTableName(), pKey.toString(), consistencyLevel);
+        if (metadata.isCounterColumnType())
+        {
+            ColumnPath path = new ColumnPath(metadata.getTableName());
+            Cassandra.Client cassandra_client = Pelops
+                    .getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit())).getConnection().getAPI();
+            try
+            {
+                cassandra_client.remove_counter(ByteBuffer.wrap(pKey.toString().getBytes()), path, consistencyLevel);
+            }
+            catch (InvalidRequestException ire)
+            {
+                log.error("invalid request exception caused by :" + ire.getMessage());
+                throw new PersistenceException(ire.getMessage());
+            }
+            catch (UnavailableException ue)
+            {
+                log.error("unavailable exception caused by :" + ue.getMessage());
+                throw new PersistenceException(ue.getMessage());
+            }
+            catch (TimedOutException toe)
+            {
+                log.error("time out exception caused by :" + toe.getMessage());
+                throw new PersistenceException(toe.getMessage());
+            }
+            catch (TException te)
+            {
+                log.error("exception caused by :" + te.getMessage());
+                throw new PersistenceException(te.getMessage());
+            }
+        }
+        else
+        {
+            RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
+            rowDeletor.deleteRow(metadata.getTableName(), pKey.toString(), consistencyLevel);
+        }
         getIndexManager().remove(metadata, entity, pKey.toString());
     }
 
@@ -330,7 +366,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));     
 
         List<Object> primaryKeys = new ArrayList<Object>();
-        
+
         for (FilterClause o : filterClauseQueue)
         {
             FilterClause clause = ((FilterClause) o);
@@ -564,8 +600,9 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                         superColumns.add(supCol.getSuper_column());
                     }
 
-                    Object r = handler.fromSuperColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(
-                            new String(rowKey), m.getTableName(), null, superColumns), relations, isWrapReq);
+                    Object r = handler
+                            .fromSuperColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(new String(rowKey),
+                                    m.getTableName(), null, superColumns, null, null), relations, isWrapReq);
                     results.add(r);
                     // List<SuperColumn> superCol = columns.
                 }
@@ -578,7 +615,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                     }
 
                     Object r = handler.fromColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(new String(
-                            rowKey), m.getTableName(), cols, null), relations, isWrapReq);
+                            rowKey), m.getTableName(), cols, null,null,null), relations, isWrapReq);
                     results.add(r);
                 }
             }
@@ -709,7 +746,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                         String rowKey = Bytes.toUTF8(row.getKey());
 
                         ThriftRow thriftRow = handler.new ThriftRow(rowKey, entityMetadata.getTableName(),
-                                row.getColumns(), null);
+                                row.getColumns(), null,null,null);
 
                         Object entity = handler.fromColumnThriftRow(clazz, entityMetadata, thriftRow, relationalField,
                                 relationalField != null && !relationalField.isEmpty());
@@ -794,32 +831,54 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         addRelationsToThriftRow(metadata, tf, rlHolders);
 
         Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
-
-        List<Column> thriftColumns = tf.getColumns();
-        List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
-        if (thriftColumns != null && !thriftColumns.isEmpty())
+        if (metadata.isCounterColumnType())
         {
-            mutator.writeColumns(metadata.getTableName(), Bytes.fromUTF8(tf.getId()),
-                    Arrays.asList(tf.getColumns().toArray(new Column[0])));
-        }
-
-        if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
-        {
-            for (SuperColumn sc : thriftSuperColumns)
+            List<CounterColumn> thriftCounterColumns = tf.getCounterColumns();
+            List<CounterSuperColumn> thriftCounterSuperColumns = tf.getCounterSuperColumns();
+            if (thriftCounterColumns != null && !thriftCounterColumns.isEmpty())
             {
-                mutator.writeSubColumns(metadata.getTableName(), tf.getId(), Bytes.toUTF8(sc.getName()),
-                        sc.getColumns());
-
+                // Bytes.fromL
+                mutator.writeCounterColumns(metadata.getTableName(), Bytes.fromUTF8(tf.getId()),
+                        Arrays.asList(tf.getCounterColumns().toArray(new CounterColumn[0])));
             }
 
+            if (thriftCounterSuperColumns != null && !thriftCounterSuperColumns.isEmpty())
+            {
+                for (CounterSuperColumn sc : thriftCounterSuperColumns)
+                {
+                    mutator.writeSubCounterColumns(metadata.getTableName(), Bytes.fromUTF8(tf.getId()),
+                            Bytes.fromByteArray(sc.getName()), sc.getColumns());
+                }
+            }
+        }
+        else
+        {
+            List<Column> thriftColumns = tf.getColumns();
+            List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
+            if (thriftColumns != null && !thriftColumns.isEmpty())
+            {
+                // Bytes.fromL
+                mutator.writeColumns(metadata.getTableName(), Bytes.fromUTF8(tf.getId()),
+                        Arrays.asList(tf.getColumns().toArray(new Column[0])));
+            }
+
+            if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
+            {
+                for (SuperColumn sc : thriftSuperColumns)
+                {
+                    mutator.writeSubColumns(metadata.getTableName(), tf.getId(), Bytes.toUTF8(sc.getName()),
+                            sc.getColumns());
+                }
+            }
         }
 
         mutator.execute(consistencyLevel);
         tf = null;
     }
-    
+
     /**
-     * Indexes @Embedded and @ElementCollection objects of this entity to a separate column family
+     * Indexes @Embedded and @ElementCollection objects of this entity to a
+     * separate column family
      */
     @Override
     protected void indexNode(Node node, EntityMetadata entityMetadata)
@@ -904,20 +963,48 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                 {
                     if (metadata.getEmbeddedColumnsAsList().isEmpty())
                     {
-                        Column col = populateFkey(linkName, linkValue, timestamp);
-                        tf.addColumn(col);
+                        if (metadata.isCounterColumnType())
+                        {
+                            CounterColumn col = populateCounterFkey(linkName, linkValue);
+                            tf.addCounterColumn(col);
+                        }
+                        else
+                        {
+                            Column col = populateFkey(linkName, linkValue, timestamp);
+                            tf.addColumn(col);
+                        }
+
                     }
                     else
                     {
-                        SuperColumn superColumn = new SuperColumn();
-                        superColumn.setName(linkName.getBytes());
-                        Column column = populateFkey(linkName, linkValue, timestamp);
-                        superColumn.addToColumns(column);
-                        tf.addSuperColumn(superColumn);
+                        if (metadata.isCounterColumnType())
+                        {
+                            CounterSuperColumn counterSuperColumn = new CounterSuperColumn();
+                            counterSuperColumn.setName(linkName.getBytes());
+                            CounterColumn column = populateCounterFkey(linkName, linkValue);
+                            counterSuperColumn.addToColumns(column);
+                            tf.addCounterSuperColumn(counterSuperColumn);
+                        }
+                        else
+                        {
+                            SuperColumn superColumn = new SuperColumn();
+                            superColumn.setName(linkName.getBytes());
+                            Column column = populateFkey(linkName, linkValue, timestamp);
+                            superColumn.addToColumns(column);
+                            tf.addSuperColumn(superColumn);
+                        }
                     }
                 }
             }
         }
+    }
+
+    private CounterColumn populateCounterFkey(String rlName, String rlValue)
+    {
+        CounterColumn counterCol = new CounterColumn();
+        counterCol.setName(PropertyAccessorFactory.STRING.toBytes(rlName));
+        counterCol.setValue(new Long(rlValue));
+        return counterCol;
     }
 
     /**
@@ -992,7 +1079,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                 try
                 {
                     Object e = handler.fromColumnThriftRow(m.getEntityClazz(), m,
-                            handler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null),
+                            handler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null,null,null),
                             relationNames, isRelational);
                     entities.add(e);
                 }

@@ -16,6 +16,7 @@
 package com.impetus.kundera.loader;
 
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.configure.schema.api.SchemaManager;
 
 /**
  * Interface for client factory.
@@ -41,4 +42,10 @@ public interface ClientFactory
      */
     Client getClientInstance();
 
+    /**
+     * return the instance of schema manager
+     * 
+     * @return schemaManager interface.
+     */
+    SchemaManager getSchemaManager();
 }

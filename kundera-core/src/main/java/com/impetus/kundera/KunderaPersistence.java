@@ -68,9 +68,12 @@ public class KunderaPersistence implements PersistenceProvider
             // if (!loaded)
             // {
             // loaded = true;
-            initializeKundera(persistenceUnit);
+            // initializeKundera(persistenceUnit);
 
             // }
+
+            initializeKundera(persistenceUnit);
+
             EntityManagerFactory emf = new EntityManagerFactoryImpl(persistenceUnit, map);
 
             return emf;

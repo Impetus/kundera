@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.rdbms.query.RDBMSEntityReader;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
@@ -97,4 +98,9 @@ public class RDBMSClientFactory extends GenericClientFactory
         return true;
     }
 
+    @Override
+    public SchemaManager getSchemaManager()
+    {
+        return null;
+    }
 }

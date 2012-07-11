@@ -57,8 +57,11 @@ public class ConfiguratorTest
         final String kundera_client = "com.impetus.client.rdbms.RDBMSClientFactory";
 
         // invoke configure.
-        Configurator configurator = new Configurator(puName);
-        configurator.configure();
+//        Configurator configurator = new Configurator(puName);
+//        configurator.configure();
+        
+        new PersistenceUnitConfiguration(puName).configure();
+        new MetamodelConfiguration(puName).configure();
 
         // Assert entity metadata
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(PersonnelDTO.class);

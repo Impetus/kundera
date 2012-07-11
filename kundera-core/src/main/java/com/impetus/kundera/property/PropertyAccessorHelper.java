@@ -400,4 +400,10 @@ public class PropertyAccessorHelper
 
     }
 
+    
+    public static final Object getObject(Class<?> clazz)
+    {
+      PropertyAccessor accessor =  PropertyAccessorFactory.getPropertyAccessor(clazz);
+      return accessor.getInstance(clazz);
+    }
 }

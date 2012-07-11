@@ -30,8 +30,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -158,6 +160,10 @@ public class UpdateDeleteNamedQueryTest
         metaModel.addEntityMetadata(CassandraEntitySample.class, m);
         metaModel.addEntityNameToClassMapping("CassandraEntitySample", CassandraEntitySample.class);
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
+        CassandraPropertyReader reader = new CassandraPropertyReader();
+        reader.read(persistenceUnit);
+        String[] persistenceUnits = new String[] { persistenceUnit };
+        new ClientFactoryConfiguraton(persistenceUnits).configure();
         EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
         return emf;
     }

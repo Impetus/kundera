@@ -83,4 +83,8 @@ public class EnumAccessor implements PropertyAccessor<Enum>
         return null;
     }
 
+    public Enum getInstance(Class<?> clazz)
+    {
+        return null;
+    }
 }

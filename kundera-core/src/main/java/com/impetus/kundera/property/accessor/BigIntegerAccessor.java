@@ -76,5 +76,8 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
     {
         return new BigInteger(s);
     }
-
+    public BigInteger getInstance(Class<?> clazz)
+    {
+        return BigInteger.TEN ;
+    }
 }

@@ -90,4 +90,8 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
         return t;
     }
 
+    public Timestamp getInstance(Class<?> clazz)
+    {
+        return new Timestamp(Integer.MAX_VALUE);
+    }
 }

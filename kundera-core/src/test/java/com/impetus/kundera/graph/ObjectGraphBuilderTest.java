@@ -23,6 +23,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.configure.Configurator;
+import com.impetus.kundera.configure.MetamodelConfiguration;
+import com.impetus.kundera.configure.PersistenceUnitConfiguration;
+import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
@@ -34,7 +37,7 @@ public class ObjectGraphBuilderTest
 {
     ObjectGraphBuilder graphBuilder;
 
-    Configurator configurator = new Configurator("kunderatest");
+    // Configurator configurator = new Configurator("kunderatest");
 
     /**
      * @throws java.lang.Exception
@@ -42,7 +45,11 @@ public class ObjectGraphBuilderTest
     @Before
     public void setUp() throws Exception
     {
-        configurator.configure();
+        // configurator.configure();
+
+        new PersistenceUnitConfiguration("kunderatest").configure();
+        new MetamodelConfiguration("kunderatest").configure();       
+
         PersistenceCache persistenceCache = new PersistenceCache();
 
         graphBuilder = new ObjectGraphBuilder(persistenceCache);

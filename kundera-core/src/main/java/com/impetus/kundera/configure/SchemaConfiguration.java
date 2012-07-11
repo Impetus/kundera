@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.TableInfo;
@@ -128,6 +129,7 @@ public class SchemaConfiguration implements Configuration
                     }
                 }
                 puToSchemaMetadata.put(persistenceUnit, tableInfos);
+                ClientResolver.getClientFactory(persistenceUnit).getSchemaManager().exportSchema();
             }
         }
     }

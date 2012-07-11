@@ -193,4 +193,11 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
 
         return true;
     }
+
+    @Override
+    public boolean validateEntity(Class clazz)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

@@ -118,5 +118,8 @@ public class DoubleAccessor implements PropertyAccessor<Double>
             throw new PropertyAccessException(e);
         }
     }
-
+    public Double getInstance(Class<?> clazz)
+    {
+        return Double.MAX_VALUE;
+    }
 }

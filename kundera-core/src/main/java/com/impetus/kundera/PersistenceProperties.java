@@ -70,5 +70,9 @@ public interface PersistenceProperties
      */
     public static final String KUNDERA_INDEX_HOME_DIR = "index_home_dir";
 
+    /** Option to create schema. */
     public static final String KUNDERA_DDL_AUTO_PREPARE = "kundera_ddl_auto_prepare";
+
+    /** Option to give kundera-cassandra property information */
+    public static final String KUNDERA_CLIENT_PROPERTY = "kundera_client_property";
 }

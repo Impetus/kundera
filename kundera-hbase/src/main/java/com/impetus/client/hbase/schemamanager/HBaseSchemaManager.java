@@ -91,7 +91,10 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 HTableDescriptor descriptor = admin.getTableDescriptor(tableInfo.getTableName().getBytes());
                 if (descriptor.getNameAsString().equalsIgnoreCase(tableInfo.getTableName()))
                 {
-                    admin.disableTable(tableInfo.getTableName().getBytes());
+                    if (admin.isTableEnabled(tableInfo.getTableName().getBytes()))
+                    {
+                        admin.disableTable(tableInfo.getTableName().getBytes());
+                    }
                     HColumnDescriptor[] descriptors = descriptor.getColumnFamilies();
                     if (tableInfo.getColumnMetadatas() != null)
                     {
@@ -361,6 +364,13 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             }
         }
         return hTableDescriptor;
+    }
+
+    @Override
+    public boolean validateEntity(Class clazz)
+    {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }

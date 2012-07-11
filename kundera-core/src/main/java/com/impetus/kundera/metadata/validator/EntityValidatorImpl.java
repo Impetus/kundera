@@ -26,6 +26,11 @@ import javax.persistence.Table;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.kundera.client.ClientResolver;
+import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+
 /**
  * Validates entity for JPA rules.
  * 
@@ -110,6 +115,19 @@ public class EntityValidatorImpl implements EntityValidator
         // }
 
         // save in cache
+
         classes.add(clazz);
+    }
+
+    @Override
+    public void validateEntity(Class<?> clazz)
+    {
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+        if (metadata != null)
+        {
+            SchemaManager schemaManager = ClientResolver.getClientFactory(metadata.getPersistenceUnit())
+                    .getSchemaManager();
+            schemaManager.validateEntity(clazz);
+        }
     }
 }

@@ -95,5 +95,8 @@ public class LongAccessor implements PropertyAccessor<Long>
             throw new PropertyAccessException(e);
         }
     }
-
+    public Long getInstance(Class<?> clazz)
+    {
+        return Long.MAX_VALUE;
+    }
 }

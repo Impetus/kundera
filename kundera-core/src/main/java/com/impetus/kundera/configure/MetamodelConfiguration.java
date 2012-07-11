@@ -29,6 +29,7 @@ import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.persistence.metamodel.Metamodel;
 
 import org.slf4j.Logger;
@@ -44,6 +45,8 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.validator.EntityValidator;
+import com.impetus.kundera.metadata.validator.EntityValidatorImpl;
 
 /**
  * The Metamodel configurer: a) Configure application meta data b) loads entity
@@ -51,7 +54,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  * 
  * @author vivek.mishra
  */
-class MetamodelConfiguration implements Configuration
+public class MetamodelConfiguration implements Configuration
 {
 
     /** The log. */
@@ -66,7 +69,7 @@ class MetamodelConfiguration implements Configuration
      * @param persistenceUnits
      *            persistence units.
      */
-    MetamodelConfiguration(String... persistenceUnits)
+    public MetamodelConfiguration(String... persistenceUnits)
     {
         this.persistenceUnits = persistenceUnits;
     }
@@ -204,6 +207,57 @@ class MetamodelConfiguration implements Configuration
         ((MetamodelImpl) metamodel).setEntityMetadataMap(entityMetadataMap);
         appMetadata.getMetamodelMap().put(persistenceUnit, metamodel);
         appMetadata.setClazzToPuMap(puToClazzMap);
+        validateEntityForClientSpecificProperty(resources, reader, persistenceUnit);
+    }
+
+    /**
+     * @param resources
+     * @param reader
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private void validateEntityForClientSpecificProperty(URL[] resources, Reader reader, String persistenceUnit)
+    {
+        for (URL resource : resources)
+        {
+            ResourceIterator itr = reader.getResourceIterator(resource, reader.getFilter());
+            InputStream is = null;
+            EntityValidator validator = new EntityValidatorImpl();
+            while ((is = itr.next()) != null)
+            {
+                DataInputStream dstream = new DataInputStream(new BufferedInputStream(is));
+                ClassFile cf = null;
+                String className = null;
+                try
+                {
+                    cf = new ClassFile(dstream);
+                    className = cf.getName();
+                    Class<?> clazz = Class.forName(className);
+                    if (clazz.isAnnotationPresent(Entity.class) && clazz.isAnnotationPresent(Table.class))
+                    {
+                        String schema = clazz.getAnnotation(Table.class).schema();
+                        String pu = null;
+                        if (schema != null && schema.indexOf("@") > 0)
+                        {
+                            pu = schema.substring(schema.indexOf("@") + 1, schema.length());
+                        }
+                        if (persistenceUnit.equalsIgnoreCase(pu))
+                        {
+                            validator.validateEntity(clazz);
+                        }
+                    }
+                }
+                catch (IOException e)
+                {
+                    log.error("Error while retreiving and storing entity metadata. Details:" + e.getMessage());
+                    throw new MetamodelLoaderException("Error while retreiving and storing entity metadata");
+                }
+                catch (ClassNotFoundException e)
+                {
+                    log.error("Class " + className + " not found, it won't be loaded as entity");
+                }
+            }
+        }
     }
 
     /**

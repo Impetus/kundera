@@ -24,7 +24,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.configure.Configurator;
+import com.impetus.kundera.configure.MetamodelConfiguration;
+import com.impetus.kundera.configure.PersistenceUnitConfiguration;
 import com.impetus.kundera.entity.PersonalDetail;
 import com.impetus.kundera.entity.Tweet;
 import com.impetus.kundera.entity.album.AlbumBi_1_M_1_M;
@@ -43,7 +44,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  */
 public class ObjectUtilsCloneBidirectionalM2MTest
 {
-    Configurator configurator = new Configurator("kunderatest");
+    // Configurator configurator = new Configurator("kunderatest");
     EntityMetadata metadata;
 
     /**
@@ -52,8 +53,9 @@ public class ObjectUtilsCloneBidirectionalM2MTest
     @Before
     public void setUp() throws Exception
     {
-        configurator.configure();
-
+        // configurator.configure();
+        new PersistenceUnitConfiguration("kunderatest").configure();
+        new MetamodelConfiguration("kunderatest").configure();
     }
 
     /**

@@ -22,9 +22,11 @@ import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.util.Version;
 
+import com.impetus.client.hbase.config.HBasePropertyReader;
 import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
@@ -61,6 +63,8 @@ public class HBaseClientFactory extends GenericClientFactory
     /** Configure schema manager. */
     private SchemaManager schemaManager;
 
+    private PropertyReader propertyReader;
+
     /*
      * (non-Javadoc)
      * 
@@ -90,14 +94,18 @@ public class HBaseClientFactory extends GenericClientFactory
             this.poolSize = Integer.parseInt(poolSize);
         }
 
+        propertyReader = new HBasePropertyReader();
+        propertyReader.read(getPersistenceUnit());
+
         Configuration hadoopConf = new Configuration();
         hadoopConf.set("hbase.master", node + ":" + port);
         hadoopConf.set("hbase.zookeeper.quorum", node);
         conf = new HBaseConfiguration(hadoopConf);
         reader = new HBaseEntityReader();
-
-        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName());
-        schemaManager.exportSchema();
+        //
+        // schemaManager = new
+        // HBaseSchemaManager(HBaseClientFactory.class.getName());
+        // schemaManager.exportSchema();
     }
 
     /*
@@ -147,7 +155,16 @@ public class HBaseClientFactory extends GenericClientFactory
         // hTablePool = null;
 
         indexManager.close();
-        schemaManager.dropSchema();
+        getSchemaManager().dropSchema();
     }
 
+    @Override
+    public SchemaManager getSchemaManager()
+    {
+        if (schemaManager == null)
+        {
+            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName());
+        }
+        return schemaManager;
+    }
 }

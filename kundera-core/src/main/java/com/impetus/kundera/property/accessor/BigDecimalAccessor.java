@@ -88,4 +88,8 @@ public class BigDecimalAccessor implements PropertyAccessor<BigDecimal>
         return new BigDecimal(s);
     }
 
+    public BigDecimal getInstance(Class<?> clazz)
+    {
+        return BigDecimal.TEN;
+    }
 }

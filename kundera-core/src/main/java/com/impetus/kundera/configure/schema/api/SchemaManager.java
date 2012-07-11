@@ -35,4 +35,10 @@ public interface SchemaManager
      */
     void dropSchema();
 
+    /**
+     * validates the entity against the Client specific properties.
+     * @return 
+     * 
+     */
+    boolean validateEntity(Class clazz);
 }

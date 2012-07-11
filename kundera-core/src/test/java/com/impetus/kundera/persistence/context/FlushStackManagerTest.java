@@ -21,7 +21,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.configure.Configurator;
+import com.impetus.kundera.configure.MetamodelConfiguration;
+import com.impetus.kundera.configure.PersistenceUnitConfiguration;
 import com.impetus.kundera.entity.album.AlbumUni_1_1_1_1;
 import com.impetus.kundera.entity.album.AlbumUni_1_1_1_M;
 import com.impetus.kundera.entity.album.AlbumUni_1_1_M_1;
@@ -63,10 +64,9 @@ public class FlushStackManagerTest
 {
     PersistenceCache pc;
 
-
     ObjectGraphBuilder graphBuilder;
 
-    Configurator configurator = new Configurator("kunderatest");
+    // Configurator configurator = new Configurator("kunderatest");
 
     /**
      * @throws java.lang.Exception
@@ -77,7 +77,8 @@ public class FlushStackManagerTest
         pc = new PersistenceCache();
         graphBuilder = new ObjectGraphBuilder(pc);
 
-        configurator.configure();
+        new PersistenceUnitConfiguration("kunderatest").configure();
+        new MetamodelConfiguration("kunderatest").configure();
     }
 
     /**
@@ -91,7 +92,7 @@ public class FlushStackManagerTest
     @Test
     public void testFlashStockForStore()
     {
-  
+
         FlushManager flushManager = new FlushManager();
 
         Store store = new Store(1, "Food Bazaar, Noida");
@@ -108,6 +109,7 @@ public class FlushStackManagerTest
 
         Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphUtils.getNodeId("1", Store.class));
 
+        Assert.assertNotNull(headNode);
         Assert.assertNull(headNode.getParents());
         Assert.assertEquals(3, headNode.getChildren().size());
 
@@ -115,7 +117,7 @@ public class FlushStackManagerTest
 
         markAllNodeAsDirty();
         flushManager.buildFlushStack(headNode, EventType.INSERT);
-        
+
         FlushStack fs = flushManager.getFlushStack();
         Assert.assertEquals(4, fs.size());
     }
@@ -139,7 +141,7 @@ public class FlushStackManagerTest
         Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphUtils.getNodeId("c1", PhotoUni_1_1_1_1.class));
 
         markAllNodeAsDirty();
-        flushManager.buildFlushStack(graph.getHeadNode(),EventType.INSERT);
+        flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
 
         FlushStack fs = flushManager.getFlushStack();
         Assert.assertEquals(3, fs.size());
@@ -168,7 +170,7 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graph, pc);
 
         markAllNodeAsDirty();
-        flushManager.buildFlushStack(graph.getHeadNode(),EventType.INSERT);
+        flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
         FlushStack fs = flushManager.getFlushStack();
         Assert.assertEquals(5, fs.size());
     }
@@ -202,17 +204,17 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graphb3, pc);
 
         markAllNodeAsDirty();
-        flushManager.buildFlushStack(graph.getHeadNode(),EventType.INSERT);
+        flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
         FlushStack fs = flushManager.getFlushStack();
         Assert.assertEquals(3, fs.size());
         flushManager.clearFlushStack();
         flushManager = new FlushManager();
-        flushManager.buildFlushStack(graphb2.getHeadNode(),EventType.INSERT);
+        flushManager.buildFlushStack(graphb2.getHeadNode(), EventType.INSERT);
         fs = flushManager.getFlushStack();
         Assert.assertEquals(2, fs.size());
         flushManager.clearFlushStack();
         flushManager = new FlushManager();
-        flushManager.buildFlushStack(graphb3.getHeadNode(),EventType.INSERT);
+        flushManager.buildFlushStack(graphb3.getHeadNode(), EventType.INSERT);
         fs = flushManager.getFlushStack();
         Assert.assertEquals(2, fs.size());
         flushManager.clearFlushStack();
@@ -249,7 +251,7 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graph, pc);
 
         markAllNodeAsDirty();
-        flushManager.buildFlushStack(graph.getHeadNode(),EventType.INSERT);
+        flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
         FlushStack fs = flushManager.getFlushStack();
         Assert.assertEquals(7, fs.size());
     }
@@ -283,7 +285,7 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graph, pc);
 
         markAllNodeAsDirty();
-        flushManager.buildFlushStack(graph.getHeadNode(),EventType.INSERT);
+        flushManager.buildFlushStack(graph.getHeadNode(), EventType.INSERT);
         FlushStack fs = flushManager.getFlushStack();
         Assert.assertEquals(6, fs.size());
     }
@@ -321,8 +323,8 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graph1, pc);
 
         markAllNodeAsDirty();
-        
-        flushManager.buildFlushStack(graph1.getHeadNode(),EventType.INSERT);
+
+        flushManager.buildFlushStack(graph1.getHeadNode(), EventType.INSERT);
         FlushStack fs = flushManager.getFlushStack();
         Assert.assertEquals(5, fs.size());
         flushManager.clearFlushStack();
@@ -331,16 +333,16 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graph2, pc);
         markAllNodeAsDirty();
         flushManager = new FlushManager();
-        flushManager.buildFlushStack(graph2.getHeadNode(),EventType.INSERT);
+        flushManager.buildFlushStack(graph2.getHeadNode(), EventType.INSERT);
         fs = flushManager.getFlushStack();
         Assert.assertEquals(1, fs.size());
         flushManager.clearFlushStack();
-        
+
         a3.setAlbum(b);
         pc.getMainCache().addGraphToCache(graph3, pc);
         markAllNodeAsDirty();
         flushManager = new FlushManager();
-        flushManager.buildFlushStack(graph3.getHeadNode(),EventType.INSERT);
+        flushManager.buildFlushStack(graph3.getHeadNode(), EventType.INSERT);
         fs = flushManager.getFlushStack();
         Assert.assertEquals(1, fs.size());
         flushManager.clearFlushStack();
@@ -380,19 +382,19 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graph1, pc);
 
         markAllNodeAsDirty();
-        
-        flushManager.buildFlushStack(graph1.getHeadNode(),EventType.INSERT);
+
+        flushManager.buildFlushStack(graph1.getHeadNode(), EventType.INSERT);
         FlushStack fs = flushManager.getFlushStack();
         Assert.assertEquals(5, fs.size());
         flushManager.clearFlushStack();
-        
+
         a2.addAlbum(b2);
         a2.addAlbum(b3);
         ObjectGraph graph2 = graphBuilder.getObjectGraph(a2, null);
         pc.getMainCache().addGraphToCache(graph2, pc);
         markAllNodeAsDirty();
         flushManager = new FlushManager();
-        flushManager.buildFlushStack(graph2.getHeadNode(),EventType.INSERT);
+        flushManager.buildFlushStack(graph2.getHeadNode(), EventType.INSERT);
         fs = flushManager.getFlushStack();
         Assert.assertEquals(3, fs.size());
     }
@@ -437,11 +439,11 @@ public class FlushStackManagerTest
         pc.getMainCache().addGraphToCache(graph1, pc);
 
         markAllNodeAsDirty();
-        flushManager.buildFlushStack(graph1.getHeadNode(),EventType.INSERT);
+        flushManager.buildFlushStack(graph1.getHeadNode(), EventType.INSERT);
         FlushStack fs = flushManager.getFlushStack();
         Assert.assertEquals(6, fs.size());
         flushManager.clearFlushStack();
-        
+
         a2.addAlbum(b2);
         a2.addAlbum(b3);
         ObjectGraph graph2 = graphBuilder.getObjectGraph(a2, null);
@@ -449,7 +451,7 @@ public class FlushStackManagerTest
 
         markAllNodeAsDirty();
         flushManager = new FlushManager();
-        flushManager.buildFlushStack(graph2.getHeadNode(),EventType.INSERT);
+        flushManager.buildFlushStack(graph2.getHeadNode(), EventType.INSERT);
         fs = flushManager.getFlushStack();
         Assert.assertEquals(3, fs.size());
     }

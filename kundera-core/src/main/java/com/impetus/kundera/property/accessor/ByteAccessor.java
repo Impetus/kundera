@@ -101,5 +101,8 @@ public class ByteAccessor implements PropertyAccessor<Byte>
             throw new PropertyAccessException(e);
         }
     }
-
+    public Byte getInstance(Class<?> clazz)
+    {
+        return Byte.MAX_VALUE;
+    }
 }

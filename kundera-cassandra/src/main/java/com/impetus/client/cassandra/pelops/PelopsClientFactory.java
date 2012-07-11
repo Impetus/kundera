@@ -26,14 +26,17 @@ import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.query.CassandraEntityReader;
 import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -57,6 +60,8 @@ public class PelopsClientFactory extends GenericClientFactory
     /** Configure schema manager. */
     private SchemaManager schemaManager;
 
+    private PropertyReader propertyReader;
+
     /*
      * (non-Javadoc)
      * 
@@ -74,9 +79,12 @@ public class PelopsClientFactory extends GenericClientFactory
                 luceneDirPath));
 
         reader = new CassandraEntityReader();
+        propertyReader = new CassandraPropertyReader();
+        propertyReader.read(getPersistenceUnit());
 
-        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
-        schemaManager.exportSchema();
+        // schemaManager = new
+        // CassandraSchemaManager(PelopsClientFactory.class.getName());
+        // schemaManager.exportSchema();
     }
 
     /*
@@ -139,8 +147,19 @@ public class PelopsClientFactory extends GenericClientFactory
     public void destroy()
     {
         indexManager.close();
-        schemaManager.dropSchema();
+        getSchemaManager().dropSchema();
         // Pelops.shutdown();
+    }
+
+    @Override
+    public SchemaManager getSchemaManager()
+    {
+        if (schemaManager == null)
+        {
+            schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
+        }
+
+        return schemaManager;
     }
 
 }

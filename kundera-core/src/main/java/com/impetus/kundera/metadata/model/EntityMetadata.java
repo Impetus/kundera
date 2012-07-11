@@ -66,6 +66,7 @@ public final class EntityMetadata
     /** Cacheable?. */
     private boolean cacheable = false; // default is to not set second-level
 
+    private boolean isCounterColumnType = false;
     /*
      * Fields related metadata properties
      */
@@ -915,4 +916,19 @@ public final class EntityMetadata
         return columnName != null ? columnName : relation.getName();
     }
 
+    /**
+     * @return the isCounterColumnType
+     */
+    public boolean isCounterColumnType()
+    {
+        return isCounterColumnType;
+    }
+
+    /**
+     * @param isCounterColumnType the isCounterColumnType to set
+     */
+    public void setCounterColumnType(boolean isCounterColumnType)
+    {
+        this.isCounterColumnType = isCounterColumnType;
+    }        
 }

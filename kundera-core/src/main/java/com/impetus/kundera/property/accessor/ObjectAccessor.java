@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
@@ -31,6 +34,8 @@ import com.impetus.kundera.property.PropertyAccessor;
  */
 public class ObjectAccessor implements PropertyAccessor<Object>
 {
+
+    public static Log log = LogFactory.getLog(ObjectAccessor.class);
 
     /* @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[]) */
     /*
@@ -131,4 +136,23 @@ public class ObjectAccessor implements PropertyAccessor<Object>
         }
     }
 
+    public Object getInstance(Class<?> clazz)
+    {
+        Object o = null;
+        try
+        {
+            o = clazz.newInstance();
+            return o;
+        }
+        catch (InstantiationException ie)
+        {
+            log.warn("Instantiation exception,caused by :" + ie.getMessage());
+            return null;
+        }
+        catch (IllegalAccessException iae)
+        {
+            log.warn("Illegal access exception,caused by :" + iae.getMessage());
+            return null;
+        }
+    }
 }

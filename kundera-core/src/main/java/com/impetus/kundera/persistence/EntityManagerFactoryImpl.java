@@ -114,7 +114,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         cacheProvider.createCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
 
         // Invoke Client Loaders
-        logger.info("Loading Client(s) For Persistence Unit(s) " + persistenceUnit);
+        // logger.info("Loading Client(s) For Persistence Unit(s) " +
+        // persistenceUnit);
 
         Set<PersistenceUnitTransactionType> txTypes = new HashSet<PersistenceUnitTransactionType>();
 
@@ -124,7 +125,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
                     .getTransactionType();
             txTypes.add(txType);
 
-            ClientResolver.getClientFactory(pu).load(pu);
+            // ClientResolver.getClientFactory(pu).load(pu);
         }
 
         if (txTypes.size() != 1)

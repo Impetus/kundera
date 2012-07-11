@@ -31,4 +31,11 @@ public interface EntityValidator
      */
     void validate(Class<?> clazz);
 
+    /**
+     * Validate entity.
+     * 
+     * @param clazz
+     *            the clazz
+     */
+    void validateEntity(Class<?> clazz);
 }

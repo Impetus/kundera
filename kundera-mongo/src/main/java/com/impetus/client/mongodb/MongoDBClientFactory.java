@@ -67,8 +67,8 @@ public class MongoDBClientFactory extends GenericClientFactory
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
                 luceneDirPath));
         reader = new MongoEntityReader();
-        schemaManager = new MongoDBSchemaManager(MongoDBClientFactory.class.getName());
-        schemaManager.exportSchema();
+        // s
+        // schemaManager.exportSchema();
     }
 
     /*
@@ -164,7 +164,7 @@ public class MongoDBClientFactory extends GenericClientFactory
     public void destroy()
     {
         indexManager.close();
-        schemaManager.dropSchema();
+        getSchemaManager().dropSchema();
         if (mongoDB != null)
         {
             logger.info("Closing connection to mongodb.");
@@ -175,5 +175,15 @@ public class MongoDBClientFactory extends GenericClientFactory
         {
             logger.warn("Can't close connection to MONGODB, it was already disconnected");
         }
+    }
+
+   @Override
+    public SchemaManager getSchemaManager()
+    {
+        if (schemaManager == null)
+        {
+            schemaManager = new MongoDBSchemaManager(MongoDBClientFactory.class.getName());
+        }
+        return schemaManager;
     }
 }

@@ -15,18 +15,16 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.schemamanager;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.cassandra.db.marshal.CounterColumnType;
 import org.apache.cassandra.db.marshal.UTF8Type;
+import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.ColumnDef;
@@ -45,13 +43,21 @@ import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.cassandra.config.CassandraPropertyReader;
+import com.impetus.client.cassandra.config.CassandraPropertyReader.CassandraSchemaMetadata;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.Column;
+import com.impetus.kundera.metadata.model.EmbeddedColumn;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
+import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.property.PropertyAccessException;
 
 /**
@@ -68,21 +74,14 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private Cassandra.Client cassandra_client;
 
     /**
-     * replication_factor will use in keyspace creation;
-     */
-    private static String replication_factor = "1";
-
-    /**
-     * placement_strategy will use in keyspace creation;
-     */
-    private static String placement_strategy = "org.apache.cassandra.locator.SimpleStrategy";
-
-    /**
      * logger used for logging statement.
      */
     private static final Logger log = LoggerFactory.getLogger(CassandraSchemaManager.class);
 
-    private static Map<String, String> dataCenterToNode = new HashMap<String, String>();
+    // private static Map<String, String> dataCentersMap = new HashMap<String,
+    // String>();
+
+    private CassandraSchemaMetadata csmd = CassandraPropertyReader.csmd;
 
     /**
      * Instantiates a new cassandra schema manager.
@@ -96,67 +95,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     public CassandraSchemaManager(String clientFactory)
     {
         super(clientFactory);
-        loadCassandraProperties();
-    }
-
-    /**
-     * loadCassandraProperties load's all cassandra specific properties
-     */
-    private void loadCassandraProperties()
-    {
-        Properties properties = new Properties();
-        try
-        {
-            InputStream inStream = ClassLoader.getSystemResourceAsStream("kundera-cassandra.properties");
-            if (inStream != null)
-            {
-                properties.load(inStream);
-                String placementStrategy = properties.getProperty("placement_strategy");
-                if (placementStrategy != null)
-                {
-                    if (CassandraValidationClassMapper.getReplicationStrategies().contains(placementStrategy))
-                    {
-                        placement_strategy = placementStrategy;
-                    }
-                    else
-                    {
-                        log.warn("Give a valid replica placement strategy" + placementStrategy
-                                + "is not a valid replica placement strategy");
-                    }
-                }
-                if (placementStrategy.equalsIgnoreCase("org.apache.cassandra.locator.SimpleStrategy"))
-                {
-                    String replicationFactor = properties.getProperty("replication_factor");
-                    replication_factor = replicationFactor != null ? replicationFactor : "1";
-                }
-                else
-                {
-                    for (Object keySet : properties.keySet())
-                    {
-                        String dataCenterName = keySet.toString();
-
-                        if (dataCenterName != null && dataCenterName.startsWith("datacenter"))
-                        {
-                            String noOfNode = properties.getProperty(dataCenterName);
-                            dataCenterName = dataCenterName.substring(dataCenterName.indexOf(".") + 1,
-                                    dataCenterName.length());
-                            if (noOfNode != null)
-                            {
-                                dataCenterToNode.put(dataCenterName, noOfNode);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch (FileNotFoundException e)
-        {
-            log.warn("kundera cassandra property not found, kundera will use default properties");
-        }
-        catch (IOException e)
-        {
-            log.warn("kundera cassandra property not found, kundera will use default properties");
-        }
     }
 
     @Override
@@ -215,10 +153,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", sdex, "Cassandra",
                     databaseName);
         }
-        catch (InterruptedException e)
+        catch (InterruptedException ie)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("keyspace " + databaseName + " does not exist caused by :" + ie.getMessage());
+            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", ie, "Cassandra",
+                    databaseName);
         }
     }
 
@@ -546,19 +485,20 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      */
     private void createKeyspaceAndTables(List<TableInfo> tableInfos)
     {
-        KsDef ksDef = new KsDef(databaseName, placement_strategy, null);
+        KsDef ksDef = new KsDef(databaseName, csmd.getPlacement_strategy(), null);
         Map<String, String> strategy_options = new HashMap<String, String>();
-        if (dataCenterToNode != null && !dataCenterToNode.isEmpty())
+        if (csmd.getPlacement_strategy().equalsIgnoreCase(SimpleStrategy.class.getName()))
         {
-            for (String dataCeneteName : dataCenterToNode.keySet())
-            {
-                strategy_options.put(dataCeneteName, dataCenterToNode.get(dataCeneteName));
-            }
+            strategy_options.put("replication_factor", csmd.getReplication_factor());
         }
         else
         {
-            strategy_options.put("replication_factor", replication_factor);
+            for (String dataCeneteName : csmd.getDataCenters().keySet())
+            {
+                strategy_options.put(dataCeneteName, csmd.getDataCenters().get(dataCeneteName));
+            }
         }
+
         // ksDef.setReplication_factor(Integer.parseInt(replication_factor));
         ksDef.setStrategy_options(strategy_options);
         List<CfDef> cfDefs = new ArrayList<CfDef>();
@@ -624,28 +564,38 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
         {
             cfDef.setColumn_type("Standard");
-            List<ColumnDef> columnDefs = new ArrayList<ColumnDef>();
-            List<ColumnInfo> columnInfos = tableInfo.getColumnMetadatas();
-            if (columnInfos != null)
+            if (csmd.isCounterColumn(tableInfo.getTableName()))
             {
-                for (ColumnInfo columnInfo : columnInfos)
-                {
-                    ColumnDef columnDef = new ColumnDef();
-                    if (columnInfo.isIndexable())
-                    {
-                        columnDef.setIndex_type(IndexType.KEYS);
-                        // columnDef.setIndex_typeIsSet(columnInfo.isIndexable());
-                    }
-                    columnDef.setName(columnInfo.getColumnName().getBytes());
-                    columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(columnInfo
-                            .getType()));
-                    columnDefs.add(columnDef);
-                }
+                cfDef.setDefault_validation_class(CounterColumnType.class.getSimpleName());
             }
-            cfDef.setColumn_metadata(columnDefs);
+            else
+            {
+                List<ColumnDef> columnDefs = new ArrayList<ColumnDef>();
+                List<ColumnInfo> columnInfos = tableInfo.getColumnMetadatas();
+                if (columnInfos != null)
+                {
+                    for (ColumnInfo columnInfo : columnInfos)
+                    {
+                        ColumnDef columnDef = new ColumnDef();
+                        if (columnInfo.isIndexable())
+                        {
+                            columnDef.setIndex_type(IndexType.KEYS);
+                        }
+                        columnDef.setName(columnInfo.getColumnName().getBytes());
+                        columnDef.setValidation_class(CassandraValidationClassMapper.getValidationClass(columnInfo
+                                .getType()));
+                        columnDefs.add(columnDef);
+                    }
+                }
+                cfDef.setColumn_metadata(columnDefs);
+            }
         }
         else if (tableInfo.getType() != null)
         {
+            if (csmd.isCounterColumn(tableInfo.getTableName()))
+            {
+                cfDef.setDefault_validation_class(CounterColumnType.class.getSimpleName());
+            }
             cfDef.setColumn_type("Super");
         }
         return cfDef;
@@ -742,5 +692,114 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             return true;
         }
         return false;
+    }
+
+    /**
+     * validates entity for CounterColumnType.
+     */
+    @Override
+    public boolean validateEntity(Class clazz)
+    {
+        boolean isvalid = false;
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+        String tableName = metadata.getTableName();
+        if (csmd.isCounterColumn(tableName))
+        {
+            metadata.setCounterColumnType(true);
+            List<EmbeddedColumn> embeddedColumns = metadata.getEmbeddedColumnsAsList();
+            if (!embeddedColumns.isEmpty())
+            {
+                isvalid = validateEmbeddedColumns(embeddedColumns) ? true : false;
+            }
+            else
+            {
+                isvalid = validateColumns(metadata.getColumnsAsList()) ? true : false;
+            }
+            isvalid = isvalid && validateRelations(metadata) ? true : false;
+        }
+        return isvalid;
+    }
+
+    /**
+     * validates entity relations if any present.
+     * 
+     * @param metadata
+     */
+    private boolean validateRelations(EntityMetadata metadata)
+    {
+        boolean isValid = true;
+        for (Relation relation : metadata.getRelations())
+        {
+            EntityMetadata targetEntityMetadata = KunderaMetadataManager.getEntityMetadata(relation.getTargetEntity());
+            if (((relation.getType().equals(ForeignKey.ONE_TO_ONE) && !relation.isJoinedByPrimaryKey()) || relation
+                    .getType().equals(ForeignKey.MANY_TO_MANY)) && relation.getMappedBy() == null)
+            {
+                // validate Id column of target entity
+                validateColumn(targetEntityMetadata.getIdColumn());
+            }
+            else if (relation.getType().equals(ForeignKey.ONE_TO_MANY) && relation.getMappedBy() == null)
+            {
+                // if target entity is also counter column the validate source
+                // IdColumn
+                String targetTableName = targetEntityMetadata.getTableName();
+                if (csmd.isCounterColumn(targetTableName))
+                {
+                    isValid = validateColumn(metadata.getIdColumn()) ? true : false;
+                }
+            }
+        }
+        return isValid;
+    }
+
+    /**
+     * validate embedded column .
+     * 
+     * @param embeddedColumns
+     */
+    private boolean validateEmbeddedColumns(List<EmbeddedColumn> embeddedColumns)
+    {
+        boolean isValid = false;
+        for (EmbeddedColumn embeddedColumn : embeddedColumns)
+        {
+            isValid = validateColumns(embeddedColumn.getColumns()) ? true : false;
+        }
+        return isValid;
+    }
+
+    /**
+     * validate columns.
+     * 
+     * @param columns
+     */
+    private boolean validateColumns(List<Column> columns)
+    {
+        boolean isValid = true;
+        for (Column column : columns)
+        {
+            if (!validateColumn(column))
+            {
+                isValid = false;
+                break;
+            }
+        }
+        return isValid;
+    }
+
+    /**
+     * validate a single column.
+     * 
+     * @param column
+     */
+    private boolean validateColumn(Column column)
+    {
+        boolean isValid = true;
+        if (!(column.getField().getType().equals(Integer.class) || column.getField().getType().equals(int.class)
+                || column.getField().getType().equals(Long.class) || column.getField().getType().equals(long.class)))
+        {
+            log.warn("you have given dafault valdation class :" + CounterColumnType.class.getSimpleName()
+                    + ", For counter column type, fields of Entity should be either long type or integer type");
+            return isValid = false;
+        }
+        return isValid;
     }
 }

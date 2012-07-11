@@ -44,7 +44,7 @@ import com.impetus.kundera.utils.InvalidConfigurationException;
  * @author vivek.mishra
  */
 
-class PersistenceUnitConfiguration implements Configuration
+public class PersistenceUnitConfiguration implements Configuration
 {
 
     /** The log instance. */
@@ -62,7 +62,7 @@ class PersistenceUnitConfiguration implements Configuration
      * @param persistenceUnits
      *            persistence units.
      */
-    PersistenceUnitConfiguration(String... persistenceUnits)
+    public PersistenceUnitConfiguration(String... persistenceUnits)
     {
         this.persistenceUnits = persistenceUnits;
     }
@@ -92,6 +92,7 @@ class PersistenceUnitConfiguration implements Configuration
                             + "please validate with persistence.xml");
                     throw new IllegalArgumentException("Invalid persistence unit: " + persistenceUnit + " provided");
                 }
+                metadatas.get(persistenceUnit);
             }
             log.info("Finishing persistence unit metadata configuration ...");
             appMetadata.addPersistenceUnitMetadata(metadatas);

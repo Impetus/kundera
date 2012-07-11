@@ -206,4 +206,8 @@ public class DateAccessor implements PropertyAccessor<Date>
     {
         return getDateByPattern(date).toString();
     }
+    public Date getInstance(Class<?> clazz)
+    {
+        return new Date();
+    }
 }
