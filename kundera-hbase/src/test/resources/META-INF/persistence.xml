@@ -17,7 +17,7 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="index_home_dir" value="./lucene" />
+			<!-- <property name="index_home_dir" value="./lucene" /> -->
 			<!-- <property name="kundera_ddl_auto_prepare" value="create"/> -->
 		</properties>
 	</persistence-unit>

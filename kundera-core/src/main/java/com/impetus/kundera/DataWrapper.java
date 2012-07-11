@@ -35,6 +35,6 @@ public interface DataWrapper
      * 
      * @return rowKey.
      */
-    String getRowKey();
+    byte[] getRowKey();
 
 }

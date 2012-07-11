@@ -16,10 +16,12 @@
 package com.impetus.client.hbase;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.filter.Filter;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Interface Reader.
  */
@@ -28,43 +30,38 @@ public interface Reader
 
     /**
      * Populates HBase data for given family name.
-     * 
-     * @param hTable
-     *            HBase table
-     * @param columnFamily
-     *            HBase column family
-     * @param rowKey
-     *            HBase row key.
+     *
+     * @param hTable HBase table
+     * @param columnFamily HBase column family
+     * @param rowKey HBase row key.
+     * @param filter the filter
      * @return HBase data wrapper containing all column names along with values.
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    HBaseData LoadData(HTable hTable, String columnFamily, String rowKey,Filter filter) throws IOException;
+    List<HBaseData> LoadData(HTable hTable, String columnFamily, String rowKey,Filter filter) throws IOException;
 
     /**
      * Load data.
-     * 
-     * @param hTable
-     *            the h table
-     * @param rowKey
-     *            the row key
+     *
+     * @param hTable the h table
+     * @param rowKey the row key
+     * @param filter the filter
      * @return the h base data
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    HBaseData LoadData(HTable hTable, String rowKey, Filter filter) throws IOException;
+    List<HBaseData> LoadData(HTable hTable, String rowKey, Filter filter) throws IOException;
 
+    
     /**
      * Load all.
-     * 
-     * @param hTable
-     *            the h table
-     * @param qualifiers
-     *            the qualifiers
-     * @return the h base data
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
+     *
+     * @param hTable the h table
+     * @param filter the filter
+     * @param startRow the start row
+     * @param endRow the end row
+     * @return the list
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    HBaseData loadAll(HTable hTable, Filter filter, String... qualifiers) throws IOException;
+    List<HBaseData> loadAll(HTable hTable,Filter filter, byte[] startRow, byte[] endRow) throws IOException;
 
 }

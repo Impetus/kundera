@@ -30,6 +30,24 @@ public class PersonCassandra
     @Column(name = "AGE")
     private Integer age;
 
+    @Column(name = "AGEss") private byte[] a;
+    
+    /**
+     * @return the a
+     */
+    public byte[] getA()
+    {
+        return a;
+    }
+
+    /**
+     * @param a the a to set
+     */
+    public void setA(byte[] a)
+    {
+        this.a = a;
+    }
+
     /**
      * Gets the person id.
      * 

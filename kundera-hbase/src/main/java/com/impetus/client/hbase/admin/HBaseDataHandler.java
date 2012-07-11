@@ -201,9 +201,11 @@ public class HBaseDataHandler implements DataHandler
      * java.lang.String, java.util.List)
      */
     @Override
-    public Object readData(final String tableName, Class clazz, EntityMetadata m, final String rowKey,
+    public List readData(final String tableName, Class clazz, EntityMetadata m, final String rowKey,
             List<String> relationNames) throws IOException
     {
+        
+        List output = null;
 
         Object entity = null;
 
@@ -214,14 +216,27 @@ public class HBaseDataHandler implements DataHandler
             hTable = gethTable(tableName);
 
             // Load raw data from HBase
-            HBaseData data = hbaseReader.LoadData(hTable, rowKey, this.filter);
+            List<HBaseData> results = hbaseReader.LoadData(hTable, rowKey, this.filter);
 
             // Populate raw data from HBase into entity
-
-            if (data.getColumns() != null)
+            
+            if(results != null)
             {
-                entity = clazz.newInstance(); // Entity Object
-                entity = populateEntityFromHbaseData(entity, data, m, rowKey, relationNames);
+                for(HBaseData data : results)
+                {
+                    
+                    if (data.getColumns() != null)
+                    {
+                        entity = clazz.newInstance(); // Entity Object
+                        entity = populateEntityFromHbaseData(entity, data, m, rowKey, relationNames);
+                        if(output == null)
+                        {
+                            output =  new ArrayList();
+                        }
+                        output.add(entity);
+                    }
+                    
+                }
             }
         }
         catch (InstantiationException e1)
@@ -247,9 +262,67 @@ public class HBaseDataHandler implements DataHandler
             }
 
         }
-        return entity;
+        return output;
     }
 
+    @Override
+    public List readDataByRange(String tableName, Class clazz, EntityMetadata m, List<String> relationNames, byte[] startRow, byte[] endRow) throws IOException
+    {
+        List output = null;
+        HTable hTable = null;
+        Object entity = null;
+        // Load raw data from HBase
+        try
+        {
+            hTable = gethTable(tableName);
+            List<HBaseData> results = hbaseReader.loadAll(hTable, filter, startRow, endRow);
+            // Populate raw data from HBase into entity
+            
+            if(results != null)
+            {
+                for(HBaseData data : results)
+                {
+                    
+                    if (data.getColumns() != null)
+                    {
+                        entity = clazz.newInstance(); // Entity Object
+                        entity = populateEntityFromHbaseData(entity, data, m, null, relationNames);
+                        if(output == null)
+                        {
+                            output =  new ArrayList();
+                        }
+                        output.add(entity);
+                    }
+                    
+                }
+            }
+        }
+        catch (InstantiationException e1)
+        {
+            log.error("Error while creating an instance of " + clazz);
+            // return enhancedEntity;
+        }
+        catch (IllegalAccessException e1)
+        {
+            log.error("Illegal Access while reading data from " + tableName + ";Details: " + e1.getMessage());
+            // return enhancedEntity;
+        }
+        catch (Exception e)
+        {
+            log.error("Error while creating an instance of " + clazz);
+            throw new PersistenceException(e);
+        }
+        finally
+        {
+            if (hTable != null)
+            {
+                puthTable(hTable);
+            }
+
+        }
+        
+        return output;
+    }
     /*
      * (non-Javadoc)
      * 
@@ -415,21 +488,31 @@ public class HBaseDataHandler implements DataHandler
         {
             hTable = gethTable(joinTableName);
 
-            HBaseData data = hbaseReader.LoadData(hTable, Constants.JOIN_COLUMNS_FAMILY_NAME, rowKey, filter);
-            List<KeyValue> hbaseValues = data.getColumns();
-
-            for (KeyValue colData : hbaseValues)
+            List<HBaseData> results = hbaseReader.LoadData(hTable, Constants.JOIN_COLUMNS_FAMILY_NAME, rowKey, filter);
+            
+            // assuming rowKey is not null.
+            if (results != null)
             {
-                String hbaseColumn = Bytes.toString(colData.getQualifier());
-                String hbaseColumnFamily = Bytes.toString(colData.getFamily());
 
-                if (hbaseColumnFamily.equals(Constants.JOIN_COLUMNS_FAMILY_NAME)
-                        && hbaseColumn.startsWith(inverseJoinColumnName))
+                HBaseData data = results.get(0);
+
+                List<KeyValue> hbaseValues = data.getColumns();
+                if (hbaseValues != null)
                 {
-                    byte[] val = colData.getValue();
-                    String hbaseColumnValue = Bytes.toString(val);
+                    for (KeyValue colData : hbaseValues)
+                    {
+                        String hbaseColumn = Bytes.toString(colData.getQualifier());
+                        String hbaseColumnFamily = Bytes.toString(colData.getFamily());
 
-                    foreignKeys.add((E) hbaseColumnValue);
+                        if (hbaseColumnFamily.equals(Constants.JOIN_COLUMNS_FAMILY_NAME)
+                                && hbaseColumn.startsWith(inverseJoinColumnName))
+                        {
+                            byte[] val = colData.getValue();
+                            String hbaseColumnValue = Bytes.toString(val);
+
+                            foreignKeys.add((E) hbaseColumnValue);
+                        }
+                    }
                 }
             }
         }
@@ -526,7 +609,8 @@ public class HBaseDataHandler implements DataHandler
         try
         {
             /* Set Row Key */
-            PropertyAccessorHelper.setId(entity, m, rowKey);
+            
+            PropertyAccessorHelper.setId(entity, m, hbaseData.getRowKey());
 
             // Raw data retrieved from HBase for a particular row key (contains
             // all column families)

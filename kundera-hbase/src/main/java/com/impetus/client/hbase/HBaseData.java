@@ -34,7 +34,7 @@ public class HBaseData implements DataWrapper
     private String columnFamily;
 
     /** The row key. */
-    private String rowKey;
+    private byte[] rowKey;
 
     /** The columns. */
     private List<KeyValue> columns;
@@ -47,7 +47,7 @@ public class HBaseData implements DataWrapper
      * @param rowKey
      *            Row key
      */
-    public HBaseData(String columnFamily, String rowKey)
+    public HBaseData(String columnFamily, byte[] rowKey)
     {
         this.columnFamily = columnFamily;
         this.rowKey = rowKey;
@@ -59,7 +59,7 @@ public class HBaseData implements DataWrapper
      * @param rowKey
      *            the row key
      */
-    public HBaseData(String rowKey)
+    public HBaseData(byte[] rowKey)
     {
         this.rowKey = rowKey;
     }
@@ -79,7 +79,7 @@ public class HBaseData implements DataWrapper
      * 
      * @return rowKey
      */
-    public String getRowKey()
+    public byte[] getRowKey()
     {
         return rowKey;
     }
