@@ -92,7 +92,7 @@ public class KunderaQuery
 
     /** The sort orders. */
     private List<SortOrdering> sortOrders;
-
+    
     /** Persistence Unit(s). */
     // String[] persistenceUnits;
 
@@ -625,6 +625,8 @@ public class KunderaQuery
 
         /** The value. */
         String value;
+        
+        
 
         /**
          * The Constructor.

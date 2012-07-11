@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -33,11 +34,14 @@ import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
+import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.kundera.Constants;
@@ -45,13 +49,17 @@ import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
+import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.query.QueryHandlerException;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
  * Provides Pelops utility methods for data held in Column family based stores.
@@ -922,6 +930,8 @@ final class PelopsDataHandler
         
         return indexThriftRows;
     }
+    
+    
 
     /**
      * Constructs Thrift Tow (each record) for Index Table
@@ -951,6 +961,159 @@ final class PelopsDataHandler
         
         tr.addColumn(thriftColumn);
         return tr;
+    }
+    
+    /**
+     * @param columnFamilyName
+     * @param m
+     * @param filterClauseQueue
+     * @return
+     */
+    public List<SearchResult> getSearchResults(String columnFamilyName, EntityMetadata m,
+            Queue<FilterClause> filterClauseQueue, String persistenceUnit, ConsistencyLevel consistencyLevel)
+    {
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(persistenceUnit));
+
+        List<SearchResult> searchResults = new ArrayList<SearchResult>();
+
+        for (FilterClause o : filterClauseQueue)
+        {
+            SearchResult searchResult = new SearchResult();
+            
+            FilterClause clause = ((FilterClause) o);
+            String rowKey = clause.getProperty();
+            String columnName = clause.getValue();
+            String condition = clause.getCondition();
+            log.debug("rowKey:" + rowKey + ";columnName:" + columnName + ";condition:" + condition);
+
+            // TODO: Second check unnecessary but unavoidable as filter clause
+            // property is incorrectly passed as column name
+            
+            //Search based on Primary key
+            if (rowKey.equals(m.getIdColumn().getField().getName()) || rowKey.equals(m.getIdColumn().getName()))
+            {
+                
+                searchResult.setPrimaryKey(columnName);
+                          
+            }
+            else
+            {
+                //Search results in the form of thrift columns
+                List<Column> thriftColumns = new ArrayList<Column>();
+
+                
+                //EQUAL Operator
+                if (condition.equals("="))
+                {
+                    Column thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
+                    thriftColumns.add(thriftColumn);
+                }
+
+                //LIKE operation
+                else if (condition.equalsIgnoreCase("LIKE"))
+                {
+
+                    searchColumnsInRange(columnFamilyName, consistencyLevel, selector, rowKey, columnName,
+                            thriftColumns, columnName.getBytes(), new byte[0]);
+                }
+
+                //Greater than operator
+                else if (condition.equals(">"))
+                {
+                    searchColumnsInRange(columnFamilyName, consistencyLevel, selector, rowKey, columnName,
+                            thriftColumns, columnName.getBytes(), new byte[0]);
+                }
+
+                //Less than Operator
+                else if (condition.equals("<"))
+                {
+                    searchColumnsInRange(columnFamilyName, consistencyLevel, selector, rowKey, columnName,
+                            thriftColumns, new byte[0], columnName.getBytes());
+                }
+                
+                //Greater than-equals to operator
+                else if (condition.equals(">="))
+                {
+                    searchColumnsInRange(columnFamilyName, consistencyLevel, selector, rowKey, columnName,
+                            thriftColumns, columnName.getBytes(), new byte[0]);
+                }
+                
+                //Less than equal to operator
+                else if (condition.equals("<="))
+                {
+                    searchColumnsInRange(columnFamilyName, consistencyLevel, selector, rowKey, columnName,
+                            thriftColumns, new byte[0], columnName.getBytes());
+                }
+                else
+                {
+                    throw new QueryHandlerException(condition
+                            + " comparison operator not supported currently for Cassandra Inverted Index");
+                }
+
+                
+                //Construct search results out of these thrift columns
+                for(Column thriftColumn : thriftColumns) {
+                    byte[] columnValue = thriftColumn.getValue();
+                    String columnValueStr = Bytes.toUTF8(columnValue);
+
+                    PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(m.getIdColumn().getField());
+                    Object value = null;
+
+                    if (columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER) > 0)
+                    {
+                        String pk = columnValueStr.substring(0, columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER));
+                        String ecName = columnValueStr.substring(columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER)
+                                + Constants.INDEX_TABLE_EC_DELIMITER.length(), columnValueStr.length());
+                        
+                        searchResult.setPrimaryKey(pk);
+                        searchResult.setEmbeddedColumnName(rowKey.substring(0, rowKey.indexOf(Constants.INDEX_TABLE_ROW_KEY_DELIMITER)));
+                        searchResult.addEmbeddedColumnValue(ecName);
+                        
+                    }
+                    else
+                    {
+                        value = accessor.fromBytes(m.getIdColumn().getField().getClass(), columnValue);
+                        searchResult.setPrimaryKey(value);
+                    } 
+                    searchResults.add(searchResult); 
+                }     
+                               
+            }                 
+
+        }
+        return searchResults;
+    }
+
+    /**
+     * Searches <code>searchString</code> into <code>columnFamilyName</code> (usually a wide row column family) for a given <code>rowKey</code>
+     * from start to finish columns. Adds matching thrift columns into <code>thriftColumns</code> 
+     * @param columnFamilyName
+     * @param consistencyLevel
+     * @param selector
+     * @param rowKey
+     * @param searchString
+     * @param thriftColumns
+     */
+    private void searchColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel, Selector selector,
+            String rowKey, String searchString, List<Column> thriftColumns, byte[] start, byte[] finish)
+    {
+        SlicePredicate colPredicate = new SlicePredicate();
+        SliceRange sliceRange = new SliceRange();
+        sliceRange.setStart(start);
+        sliceRange.setFinish(finish);
+        colPredicate.setSlice_range(sliceRange);
+        List<Column> allThriftColumns = selector.getColumnsFromRow(columnFamilyName, rowKey, colPredicate,
+                consistencyLevel);
+
+        for (Column column : allThriftColumns)
+        {
+            String colName = Bytes.toUTF8(column.getName());
+            //String colValue = Bytes.toUTF8(column.getValue());
+            if (colName.indexOf(searchString) >= 0)
+            {
+                thriftColumns.add(column);                            
+            }
+        }
     }
 
     private void addCounterColumnsToThriftRow(long timestamp2, ThriftRow tr, EntityMetadata m, Object e)

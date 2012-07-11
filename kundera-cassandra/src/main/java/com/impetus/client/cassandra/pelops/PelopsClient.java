@@ -75,6 +75,7 @@ import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -364,113 +365,13 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         return foreignKeys;
     }
 
-    public List<Object> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
+    public List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
             Queue<FilterClause> filterClauseQueue)
     {
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-
-        List<Object> primaryKeys = new ArrayList<Object>();
-
-        for (FilterClause o : filterClauseQueue)
-        {
-            FilterClause clause = ((FilterClause) o);
-            String rowKey = clause.getProperty();
-            String columnName = clause.getValue();
-            String condition = clause.getCondition();
-            log.debug("rowKey:" + rowKey + ";columnName:" + columnName + ";condition:" + condition);
-
-            // TODO: Second check unnecessary but unavoidable as filter clause
-            // property is incorrectly passed as column name
-            if (rowKey.equals(m.getIdColumn().getField().getName()) || rowKey.equals(m.getIdColumn().getName()))
-            {
-                primaryKeys.add(columnName);
-            }
-            else
-            {
-                Column thriftColumn = null;
-
-                if (condition.equals("="))
-                {
-                    thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
-                }
-
-                else if (condition.equalsIgnoreCase("LIKE"))
-                {
-
-                    SlicePredicate colPredicate = new SlicePredicate();
-                    SliceRange sliceRange = new SliceRange();
-                    sliceRange.setStart(columnName.getBytes());
-                    sliceRange.setFinish(new byte[0]);
-                    colPredicate.setSlice_range(sliceRange);
-                    List<Column> thriftColumns = selector.getColumnsFromRow(columnFamilyName, rowKey, colPredicate,
-                            consistencyLevel);
-
-                    for (Column column : thriftColumns)
-                    {
-                        String colName = Bytes.toUTF8(column.getName());
-                        String colValue = Bytes.toUTF8(column.getValue());
-
-                        if (colName.indexOf(columnName) >= 0)
-                        {
-                            thriftColumn = column;
-                            System.out.println(thriftColumn);
-                            break;
-                        }
-
-                    }
-                }
-
-                else if (condition.equals(">"))
-                {
-                    throw new QueryHandlerException(condition
-                            + " comparison operator not supported currently for Cassandra Inverted Index");
-                }
-
-                else if (condition.equals("<"))
-                {
-                    throw new QueryHandlerException(condition
-                            + " comparison operator not supported currently for Cassandra Inverted Index");
-                }
-                else if (condition.equals(">="))
-                {
-                    throw new QueryHandlerException(condition
-                            + " comparison operator not supported currently for Cassandra Inverted Index");
-                }
-                else if (condition.equals("<="))
-                {
-                    throw new QueryHandlerException(condition
-                            + " comparison operator not supported currently for Cassandra Inverted Index");
-                }
-                else
-                {
-                    throw new QueryHandlerException(condition
-                            + " comparison operator not supported currently for Cassandra Inverted Index");
-                }
-
-                byte[] columnValue = thriftColumn.getValue();
-                String columnValueStr = Bytes.toUTF8(columnValue);
-
-                PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(m.getIdColumn().getField());
-                Object value = null;
-
-                if (columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER) > 0)
-                {
-                    String pk = columnValueStr.substring(0, columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER));
-                    String ecName = columnValueStr.substring(columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER)
-                            + Constants.INDEX_TABLE_EC_DELIMITER.length(), columnValueStr.length());
-                    value = pk;
-                }
-                else
-                {
-                    value = accessor.fromBytes(m.getIdColumn().getField().getClass(), columnValue);
-                }
-
-                primaryKeys.add(value);
-            }
-
-        }
-        return primaryKeys;
+        List<SearchResult> searchResults = handler.getSearchResults(columnFamilyName, m, filterClauseQueue, getPersistenceUnit(), consistencyLevel);
+        return searchResults;
     }
+    
 
     /*
      * (non-Javadoc)

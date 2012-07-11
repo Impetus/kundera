@@ -31,6 +31,7 @@ import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
+import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
@@ -192,12 +193,17 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     
     public List<EnhanceEntity> readFromIndexTable(EntityMetadata m, Client client, Queue<FilterClause> filterClauseQueue) {
         
+        List<SearchResult> searchResults = new ArrayList<SearchResult>();
         List<Object> primaryKeys = new ArrayList<Object>();
+        
         
         String columnFamilyName = m.getTableName() + Constants.INDEX_TABLE_SUFFIX; 
     
-        primaryKeys = ((PelopsClient) client).searchInInvertedIndex(columnFamilyName, m, filterClauseQueue);
+        searchResults = ((PelopsClient) client).searchInInvertedIndex(columnFamilyName, m, filterClauseQueue);
         
+        for(SearchResult searchResult : searchResults) {
+            primaryKeys.add(searchResult.getPrimaryKey());
+        }
         
         List<EnhanceEntity> enhanceEntityList = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(), m.getRelationNames(),
                 true, m, primaryKeys.toArray(new String[] {}));        
