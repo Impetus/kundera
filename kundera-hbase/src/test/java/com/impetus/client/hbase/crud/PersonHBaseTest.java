@@ -42,37 +42,33 @@ public class PersonHBaseTest extends BaseTest
      */
     @Before
     public void setUp() throws Exception
-    {/*
-        emf = Persistence.createEntityManagerFactory("hbaseTest");
-        em = emf.createEntityManager();
-
-        
+    {
         cli = new HBaseCli();
         // cli.init();
         cli.startCluster();
         emf = Persistence.createEntityManagerFactory("hbaseTest");
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
-    */}
-
-    @Test
-    public void testDummy()
-    {
-        // just to fix CI issue. TO BE DELETED!!!
     }
+
 //    @Test
+//    public void testDummy()
+//    {
+//        // just to fix CI issue. TO BE DELETED!!!
+//    }
+    @Test
     public void onInsertHbase() throws Exception
     {
         init();
-        PersonHBase personHBase = findById(PersonHBase.class, "1", em);
-        Assert.assertNotNull(personHBase);
-        Assert.assertEquals("vivek", personHBase.getPersonName());
-        assertFindByName(em, "PersonHBase", PersonHBase.class, "vivek", "personName");
-        assertFindByNameAndAge(em, "PersonHBase", PersonHBase.class, "vivek", "10", "personName");
-        assertFindByNameAndAgeGTAndLT(em, "PersonHBase", PersonHBase.class, "vivek", "10", "20", "personName");
-        assertFindByNameAndAgeBetween(em, "PersonHBase", PersonHBase.class, "vivek", "10", "15", "personName");
-        assertFindByRange(em, "PersonHBase", PersonHBase.class, "1", "2", "personId");
-        assertFindWithoutWhereClause(em, "PersonHBase", PersonHBase.class);
+//        PersonHBase personHBase = findById(PersonHBase.class, "1", em);
+//        Assert.assertNotNull(personHBase);
+//        Assert.assertEquals("vivek", personHBase.getPersonName());
+//        assertFindByName(em, "PersonHBase", PersonHBase.class, "vivek", "personName");
+//        assertFindByNameAndAge(em, "PersonHBase", PersonHBase.class, "vivek", "10", "personName");
+//        assertFindByNameAndAgeGTAndLT(em, "PersonHBase", PersonHBase.class, "vivek", "10", "20", "personName");
+//        assertFindByNameAndAgeBetween(em, "PersonHBase", PersonHBase.class, "vivek", "10", "15", "personName");
+        assertFindByRange(em, "PersonHBase", PersonHBase.class, "1", "3", "personId");
+//        assertFindWithoutWhereClause(em, "PersonHBase", PersonHBase.class);
     }
 
     private void init()
@@ -140,15 +136,15 @@ public class PersonHBaseTest extends BaseTest
      */
     @After
     public void tearDown() throws Exception
-    {/*
+    {
         
-         * Delete is working, but as row keys are not deleted from cassandra, so
+      /*   * Delete is working, but as row keys are not deleted from cassandra, so
          * resulting in issue while reading back. // Delete
          * em.remove(em.find(Person.class, "1"));
          * em.remove(em.find(Person.class, "2"));
          * em.remove(em.find(Person.class, "3")); em.close(); emf.close(); em =
          * null; emf = null;
-         
+        */ 
         for (Object val : col.values())
         {
             em.remove(val);
@@ -159,8 +155,8 @@ public class PersonHBaseTest extends BaseTest
         {
         cli.stopCluster("PERSON");
         }
-        LuceneCleanupUtilities.cleanLuceneDirectory("hbaseTest");
+//        LuceneCleanupUtilities.cleanLuceneDirectory("hbaseTest");
         // if (cli.isStarted)
 
-    */}
+    }
 }

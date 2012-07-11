@@ -34,13 +34,13 @@ import org.apache.hadoop.hbase.filter.Filter;
 
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
+import com.impetus.client.hbase.query.HBaseQuery;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -50,14 +50,13 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.LuceneQuery;
 
 /**
  * HBase client.
  * 
  * @author impetus
  */
-public class HBaseClient extends ClientBase implements Client<LuceneQuery>
+public class HBaseClient extends ClientBase implements Client<HBaseQuery>
 {
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseClient.class);
@@ -106,10 +105,19 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
         // here
         String tableName = entityMetadata.getTableName();
         Object enhancedEntity = null;
+        List results = null;
         try
         {
-            enhancedEntity = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata,
-                    rowId != null ? rowId.toString() : null, relationNames);
+            if(rowId == null)
+            {
+                return null;
+            }
+            results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata,
+                    rowId.toString(), relationNames);
+            if(results != null)
+            {
+                enhancedEntity = results.get(0);
+            }
         }
         catch (IOException e)
         {
@@ -129,19 +137,31 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<E> entities = new ArrayList<E>();
+        if(rowIds == null)
+        {
+            return null;
+        }
         for (Object rowKey : rowIds)
         {
             E e = null;
             try
             {
-                e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
-                        entityMetadata, rowKey.toString(), entityMetadata.getRelationNames());
+                if (rowKey != null)
+                {
+                    List results  = handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
+                            entityMetadata, rowKey.toString(), entityMetadata.getRelationNames());
+                    if(results != null)
+                    {
+                        e = (E) results.get(0);
+                        entities.add(e);
+                    }
+                }
             }
             catch (IOException e1)
             {
                 throw new KunderaException(e1);
             }
-            entities.add(e);
+            
         }
         return entities;
     }
@@ -161,32 +181,87 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
         for (String columnFamilyName : col.keySet())
         {
             String entityId = col.get(columnFamilyName);
-            E e = null;
-            try
+            if (entityId != null)
             {
-                e = (E) handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
-                        entityMetadata, entityId, null);
-            }
-            catch (IOException e1)
-            {
-                throw new KunderaException(e1);
-            }
+                E e = null;
+                try
+                {
 
-            Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName.substring(0,
-                    columnFamilyName.indexOf("|")));
-            Object columnFamilyValue = PropertyAccessorHelper.getObject(e, columnFamilyField);
-            if (Collection.class.isAssignableFrom(columnFamilyField.getType()))
-            {
-                entities.addAll((Collection) columnFamilyValue);
-            }
-            else
-            {
-                entities.add((E) columnFamilyValue);
+                    List results = handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
+                            entityMetadata, entityId, null);
+                    if (results != null)
+                    {
+                        e = (E) results.get(0);
+                        // entities.add(e);
+                    }
+                }
+                catch (IOException e1)
+                {
+                    throw new KunderaException(e1);
+                }
+
+                Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName.substring(0,
+                        columnFamilyName.indexOf("|")));
+                Object columnFamilyValue = PropertyAccessorHelper.getObject(e, columnFamilyField);
+                if (Collection.class.isAssignableFrom(columnFamilyField.getType()))
+                {
+                    entities.addAll((Collection) columnFamilyValue);
+                }
+                else
+                {
+                    entities.add((E) columnFamilyValue);
+                }
             }
         }
         return entities;
     }
+    
+    public <E> List<E> findByQuery(Class<E> entityClass, EntityMetadata metadata)
+    {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        List<String> relationNames = entityMetadata.getRelationNames();
+        // columnFamily has a different meaning for HBase, so it won't be used
+        // here
+        String tableName = entityMetadata.getTableName();
+        Object enhancedEntity = null;
+        List results = null;
+        try
+        {
 
+            results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata,
+                    null, relationNames);
+        }
+        catch (IOException e)
+        {
+            throw new KunderaException(e);
+        }
+        return results;
+
+    }
+
+    public <E> List<E> findByRange(Class<E> entityClass, EntityMetadata metadata, byte[] startRow, byte[] endRow)
+    {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        List<String> relationNames = entityMetadata.getRelationNames();
+        // columnFamily has a different meaning for HBase, so it won't be used
+        // here
+        String tableName = entityMetadata.getTableName();
+        Object enhancedEntity = null;
+        List results = null;
+        
+        try
+        {
+
+            results = handler.readDataByRange(tableName,entityClass,metadata,relationNames,startRow,endRow);
+        }
+        catch (IOException e)
+        {
+            throw new KunderaException(e);
+        }
+        return results;
+
+    }
+    
     /*
      * (non-Javadoc)
      * 
@@ -203,6 +278,7 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
     {
         ((HBaseDataHandler)handler).setFilter(filter);
     }
+    
     /*
      * (non-Javadoc)
      * 
@@ -392,9 +468,9 @@ public class HBaseClient extends ClientBase implements Client<LuceneQuery>
      * @see com.impetus.kundera.client.Client#getQueryImplementor()
      */
     @Override
-    public Class<LuceneQuery> getQueryImplementor()
+    public Class<HBaseQuery> getQueryImplementor()
     {
-        return LuceneQuery.class;
+        return HBaseQuery.class;
     }
 
     /*

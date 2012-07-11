@@ -58,5 +58,5 @@ public class HBaseEntityReader extends AbstractEntityReader implements EntityRea
     {
         return super.findById(primaryKey, m, client);
     }
-
+    
 }
