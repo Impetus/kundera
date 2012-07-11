@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.PropertyReader;
@@ -130,6 +131,13 @@ public class CassandraPropertyReader implements PropertyReader
             String dataCenters = properties.getProperty("datacenters");
             csmd.addDataCenter(dataCenters);
         }
+        
+        String invertedIndexingEnabled = properties.getProperty(Constants.INVERTED_INDEXING_ENABLED);
+        if(invertedIndexingEnabled != null) {
+            if("true".equalsIgnoreCase(invertedIndexingEnabled)) {
+                csmd.setInvertedIndexingEnabled(true);
+            }            
+        }
     }
 
     /**
@@ -154,6 +162,10 @@ public class CassandraPropertyReader implements PropertyReader
          * placement_strategy will use in keyspace creation;
          */
         private String placement_strategy;
+        
+        /** Whether Inverted Indexing is enabled*/
+        private boolean invertedIndexingEnabled;        
+        
 
         /**
          * dataCenterToNode map holds information about no of node per data
@@ -255,6 +267,23 @@ public class CassandraPropertyReader implements PropertyReader
         public String getPlacement_strategy()
         {
             return placement_strategy;
+        }      
+        
+
+        /**
+         * @return the invertedIndexingEnabled
+         */
+        public boolean isInvertedIndexingEnabled()
+        {
+            return invertedIndexingEnabled;
+        }
+
+        /**
+         * @param invertedIndexingEnabled the invertedIndexingEnabled to set
+         */
+        public void setInvertedIndexingEnabled(boolean invertedIndexingEnabled)
+        {
+            this.invertedIndexingEnabled = invertedIndexingEnabled;
         }
 
         /**

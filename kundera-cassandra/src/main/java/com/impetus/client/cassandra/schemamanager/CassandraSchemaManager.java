@@ -197,7 +197,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
                 
                 //Create Index Table if required
-                boolean indexTableRequired = false;   //TODO: Read from property
+                boolean indexTableRequired = CassandraPropertyReader.csmd.isInvertedIndexingEnabled();     
                 if(indexTableRequired) {
                     CfDef cfDef = new CfDef();
                     cfDef.setKeyspace(databaseName);

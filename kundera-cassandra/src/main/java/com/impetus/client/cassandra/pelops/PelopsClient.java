@@ -48,6 +48,7 @@ import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
@@ -64,6 +65,7 @@ import org.scale7.cassandra.pelops.exceptions.PelopsException;
 import org.scale7.cassandra.pelops.pool.IThriftPool;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
+import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.pelops.PelopsDataHandler.ThriftRow;
 import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.kundera.Constants;
@@ -361,9 +363,11 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         List<E> foreignKeys = handler.getForeignKeysFromJoinTable(inverseJoinColumnName, columns);
         return foreignKeys;
     }
-    
-    public List<Object> searchInInvertedIndex(String columnFamilyName, EntityMetadata m, Queue<FilterClause> filterClauseQueue) {
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));     
+
+    public List<Object> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
+            Queue<FilterClause> filterClauseQueue)
+    {
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
         List<Object> primaryKeys = new ArrayList<Object>();
 
@@ -374,66 +378,96 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             String columnName = clause.getValue();
             String condition = clause.getCondition();
             log.debug("rowKey:" + rowKey + ";columnName:" + columnName + ";condition:" + condition);
-            
-            
-            //TODO: Second check unnecessary but unavoidable as filter clause property is incorrectly passed as column name
-            if(rowKey.equals(m.getIdColumn().getField().getName()) || rowKey.equals(m.getIdColumn().getName())) {
+
+            // TODO: Second check unnecessary but unavoidable as filter clause
+            // property is incorrectly passed as column name
+            if (rowKey.equals(m.getIdColumn().getField().getName()) || rowKey.equals(m.getIdColumn().getName()))
+            {
                 primaryKeys.add(columnName);
-            } else {                
+            }
+            else
+            {
                 Column thriftColumn = null;
-                
+
                 if (condition.equals("="))
                 {
                     thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
                 }
-                
+
                 else if (condition.equalsIgnoreCase("LIKE"))
                 {
-                    thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
-                    
+
+                    SlicePredicate colPredicate = new SlicePredicate();
+                    SliceRange sliceRange = new SliceRange();
+                    sliceRange.setStart(columnName.getBytes());
+                    sliceRange.setFinish(new byte[0]);
+                    colPredicate.setSlice_range(sliceRange);
+                    List<Column> thriftColumns = selector.getColumnsFromRow(columnFamilyName, rowKey, colPredicate,
+                            consistencyLevel);
+
+                    for (Column column : thriftColumns)
+                    {
+                        String colName = Bytes.toUTF8(column.getName());
+                        String colValue = Bytes.toUTF8(column.getValue());
+
+                        if (colName.indexOf(columnName) >= 0)
+                        {
+                            thriftColumn = column;
+                            System.out.println(thriftColumn);
+                            break;
+                        }
+
+                    }
                 }
-                
+
                 else if (condition.equals(">"))
                 {
-                    throw new QueryHandlerException(condition + " comparison operator not supported currently for Cassandra Inverted Index");  
-                }                
-                
+                    throw new QueryHandlerException(condition
+                            + " comparison operator not supported currently for Cassandra Inverted Index");
+                }
+
                 else if (condition.equals("<"))
                 {
-                    throw new QueryHandlerException(condition + " comparison operator not supported currently for Cassandra Inverted Index");
+                    throw new QueryHandlerException(condition
+                            + " comparison operator not supported currently for Cassandra Inverted Index");
                 }
                 else if (condition.equals(">="))
                 {
-                    throw new QueryHandlerException(condition + " comparison operator not supported currently for Cassandra Inverted Index"); 
+                    throw new QueryHandlerException(condition
+                            + " comparison operator not supported currently for Cassandra Inverted Index");
                 }
                 else if (condition.equals("<="))
                 {
-                    throw new QueryHandlerException(condition + " comparison operator not supported currently for Cassandra Inverted Index");
+                    throw new QueryHandlerException(condition
+                            + " comparison operator not supported currently for Cassandra Inverted Index");
                 }
                 else
                 {
-                    throw new QueryHandlerException(condition + " comparison operator not supported currently for Cassandra Inverted Index");
-                }     
-                
-                
-                
+                    throw new QueryHandlerException(condition
+                            + " comparison operator not supported currently for Cassandra Inverted Index");
+                }
+
                 byte[] columnValue = thriftColumn.getValue();
                 String columnValueStr = Bytes.toUTF8(columnValue);
-                
+
                 PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(m.getIdColumn().getField());
                 Object value = null;
-                
-                if(columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER) > 0) {
+
+                if (columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER) > 0)
+                {
                     String pk = columnValueStr.substring(0, columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER));
-                    String ecName = columnValueStr.substring(columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER) + 1, columnValueStr.length());
+                    String ecName = columnValueStr.substring(columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER)
+                            + Constants.INDEX_TABLE_EC_DELIMITER.length(), columnValueStr.length());
                     value = pk;
-                } else {
+                }
+                else
+                {
                     value = accessor.fromBytes(m.getIdColumn().getField().getClass(), columnValue);
-                }                
+                }
 
                 primaryKeys.add(value);
-            }           
-           
+            }
+
         }
         return primaryKeys;
     }
@@ -483,8 +517,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         return null;
     }
 
-    
-    
     /*
      * (non-Javadoc)
      * 
@@ -530,11 +562,9 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(),
                     selector.newKeyRange("", "", maxResult), slicePredicate, consistencyLevel);
             entities = new ArrayList<Object>(qResults.size());
-            
-            
+
             populateData(m, qResults, entities, isRelation, relations);
-            
-            
+
         }
         else
         {
@@ -575,7 +605,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
         List<Object> entities = null;
 
-        
         List<KeySlice> keys = selector.getKeySlices(new ColumnParent(m.getTableName()),
                 selector.newKeyRange(Bytes.fromByteArray(minVal), Bytes.fromByteArray(maxVal), 10000), slicePredicate,
                 consistencyLevel);
@@ -615,7 +644,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                     }
 
                     Object r = handler.fromColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(new String(
-                            rowKey), m.getTableName(), cols, null,null,null), relations, isWrapReq);
+                            rowKey), m.getTableName(), cols, null, null, null), relations, isWrapReq);
                     results.add(r);
                 }
             }
@@ -746,7 +775,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                         String rowKey = Bytes.toUTF8(row.getKey());
 
                         ThriftRow thriftRow = handler.new ThriftRow(rowKey, entityMetadata.getTableName(),
-                                row.getColumns(), null,null,null);
+                                row.getColumns(), null, null, null);
 
                         Object entity = handler.fromColumnThriftRow(clazz, entityMetadata, thriftRow, relationalField,
                                 relationalField != null && !relationalField.isEmpty());
@@ -884,32 +913,34 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     protected void indexNode(Node node, EntityMetadata entityMetadata)
     {
         super.indexNode(node, entityMetadata);
-        
-        //Check whether Embedded data storage using Composite Columns is enabled
-        boolean embeddedDataStoredAsCompositeColumns = false;   //TODO: Read from property
-        
-        if(embeddedDataStoredAsCompositeColumns) {
-            //Not required for lucene indexing
-            if (MetadataUtils.useSecondryIndex(getPersistenceUnit()) && entityMetadata.getType().isSuperColumnFamilyMetadata()) {
+
+        // Check whether Embedded data storage using Composite Columns is
+        // enabled
+        boolean invertedIndexingEnabled = CassandraPropertyReader.csmd.isInvertedIndexingEnabled();     
+
+        if (invertedIndexingEnabled)
+        {
+            // Not required for lucene indexing
+            if (MetadataUtils.useSecondryIndex(getPersistenceUnit())
+                    && entityMetadata.getType().isSuperColumnFamilyMetadata())
+            {
                 String indexColumnFamily = entityMetadata.getTableName() + Constants.INDEX_TABLE_SUFFIX;
-                
-                 
+
                 Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
-                
-                
-                List<PelopsDataHandler.ThriftRow> indexThriftyRows = handler.toIndexThriftRow(node.getData(), entityMetadata, indexColumnFamily);           
-                
-                for(PelopsDataHandler.ThriftRow thriftRow : indexThriftyRows) {
+
+                List<PelopsDataHandler.ThriftRow> indexThriftyRows = handler.toIndexThriftRow(node.getData(),
+                        entityMetadata, indexColumnFamily);
+
+                for (PelopsDataHandler.ThriftRow thriftRow : indexThriftyRows)
+                {
                     mutator.writeColumns(indexColumnFamily, Bytes.fromUTF8(thriftRow.getId()),
                             Arrays.asList(thriftRow.getColumns().toArray(new Column[0])));
                 }
                 mutator.execute(consistencyLevel);
-                indexThriftyRows = null;            
+                indexThriftyRows = null;
             }
-        }       
+        }
     }
-    
-    
 
     /**
      * Populate tf row.
@@ -1055,22 +1086,26 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     private void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities,
             boolean isRelational, List<String> relationNames)
     {
-        if(m.getType().isSuperColumnFamilyMetadata()) {
+        if (m.getType().isSuperColumnFamilyMetadata())
+        {
             Set<Bytes> primaryKeys = qResults.keySet();
-            
-            if(primaryKeys != null && ! primaryKeys.isEmpty()) {
+
+            if (primaryKeys != null && !primaryKeys.isEmpty())
+            {
                 Object[] rowIds = new Object[primaryKeys.size()];
                 int i = 0;
-                for(Bytes b : primaryKeys) {
+                for (Bytes b : primaryKeys)
+                {
                     rowIds[i] = Bytes.toUTF8(b.toByteArray());
                     i++;
-                }                
-                
+                }
+
                 entities.addAll(findAll(m.getEntityClazz(), rowIds));
-            }      
-            
-            
-        } else {
+            }
+
+        }
+        else
+        {
             Iterator<Bytes> rowIter = qResults.keySet().iterator();
             while (rowIter.hasNext())
             {
@@ -1079,8 +1114,8 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                 try
                 {
                     Object e = handler.fromColumnThriftRow(m.getEntityClazz(), m,
-                            handler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null,null,null),
-                            relationNames, isRelational);
+                            handler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null,
+                                    null, null), relationNames, isRelational);
                     entities.add(e);
                 }
                 catch (IllegalStateException e)
@@ -1092,10 +1127,9 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                     throw new KunderaException(e);
                 }
             }
-        }       
-        
-    }  
-   
+        }
+
+    }
 
     /**
      * Creates secondary indexes on columns if not already created.

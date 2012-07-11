@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -143,9 +144,9 @@ public class CassQuery extends QueryImpl implements Query
         {
             // Check whether Embedded data storage using Composite Columns is
             // enabled
-            boolean embeddedDataStoredAsCompositeColumns = false; // TODO: Read from property file
+            boolean invertedIndexingEnabled = CassandraPropertyReader.csmd.isInvertedIndexingEnabled();            
             
-            if(embeddedDataStoredAsCompositeColumns && ! getKunderaQuery().getFilterClauseQueue().isEmpty()) {
+            if(invertedIndexingEnabled && ! getKunderaQuery().getFilterClauseQueue().isEmpty()) {
                 ls = ((CassandraEntityReader) getReader()).readFromIndexTable(m, client, getKunderaQuery().getFilterClauseQueue());
                 
             } else {

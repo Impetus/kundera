@@ -83,4 +83,6 @@ public final class Constants
     public final static String INDEX_TABLE_SUFFIX = "_INDEX";    
     public final static String INDEX_TABLE_ROW_KEY_DELIMITER = ".";
     public final static String INDEX_TABLE_EC_DELIMITER = "@SuperColumn:";
+    
+    public final static String INVERTED_INDEXING_ENABLED = "inverted.indexing.enabled";
 }
