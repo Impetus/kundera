@@ -22,6 +22,7 @@ import org.apache.lucene.util.Version;
 import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.IConnection;
 import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.SimpleConnectionAuthenticator;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,6 @@ import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -60,6 +60,7 @@ public class PelopsClientFactory extends GenericClientFactory
     /** Configure schema manager. */
     private SchemaManager schemaManager;
 
+    /** Property reader. */
     private PropertyReader propertyReader;
 
     /*
@@ -70,7 +71,7 @@ public class PelopsClientFactory extends GenericClientFactory
     @Override
     public void initialize()
     {
-        // TODO StandardAnalyzer is thread safe. So it looks like indexManager
+        // StandardAnalyzer is thread safe. So it looks like indexManager
         // is threadsafe an hence using a single instance
         logger.info("Initializing Threadsafe Indexmanager. Is it really threadsafe?");
 
@@ -82,9 +83,6 @@ public class PelopsClientFactory extends GenericClientFactory
         propertyReader = new CassandraPropertyReader();
         propertyReader.read(getPersistenceUnit());
 
-        // schemaManager = new
-        // CassandraSchemaManager(PelopsClientFactory.class.getName());
-        // schemaManager.exportSchema();
     }
 
     /*
@@ -104,11 +102,11 @@ public class PelopsClientFactory extends GenericClientFactory
         String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
         String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         String poolName = PelopsUtils.generatePoolName(getPersistenceUnit());
-
+        
         if (Pelops.getDbConnPool(poolName) == null)
         {
             Cluster cluster = new Cluster(contactNodes,
-                    new IConnection.Config(Integer.parseInt(defaultPort), true, -1), false);
+                    new IConnection.Config(Integer.parseInt(defaultPort), true, -1, getAuthenticationRequest(props)), false);
 
             Policy policy = PelopsUtils.getPoolConfigPolicy(persistenceUnitMetadata);
 
@@ -160,6 +158,27 @@ public class PelopsClientFactory extends GenericClientFactory
         }
 
         return schemaManager;
+    }
+
+    /**
+     * If userName and password provided, Method prepares for AuthenticationRequest.
+     * 
+     * @param props properties
+     * 
+     * @return simple authenticator request. returns null if userName/password are not provided.
+     * 
+     */
+    private SimpleConnectionAuthenticator getAuthenticationRequest(Properties props)
+    {
+        String userName = (String) props.get(PersistenceProperties.KUNDERA_USERNAME);
+        String password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+
+        SimpleConnectionAuthenticator authenticator = null;
+        if(userName != null || password != null)
+        {
+            authenticator = new SimpleConnectionAuthenticator(userName, password);
+        }
+        return authenticator;
     }
 
 }
