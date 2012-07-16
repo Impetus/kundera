@@ -231,23 +231,23 @@
 			<groupId>javassist</groupId>
 			<artifactId>javassist</artifactId>
 			<version>3.9.0.GA</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.cassandra</groupId>
-			<artifactId>cassandra-all</artifactId>
-			<version>1.0.6</version>
-		</dependency>
+		</dependency>		
 
 		<!-- Cassandra Dependencies -->
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
+			<artifactId>cassandra-all</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-thrift</artifactId>
-			<version>1.0.6</version>
+			<version>1.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-clientutil</artifactId>
-			<version>1.0.6</version>
+			<version>1.1.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

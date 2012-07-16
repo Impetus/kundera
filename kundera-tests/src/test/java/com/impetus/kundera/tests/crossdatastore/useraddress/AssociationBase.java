@@ -18,13 +18,17 @@ package com.impetus.kundera.tests.crossdatastore.useraddress;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.Metamodel;
 
+import org.apache.cassandra.locator.SimpleStrategy;
+import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
@@ -236,6 +240,20 @@ public abstract class AssociationBase
             HBaseCli.stopCluster();
         }
 
+    }
+    
+    protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs) throws InvalidRequestException,
+            SchemaDisagreementException, TException
+    {
+        ksDef = new KsDef("KunderaTests", SimpleStrategy.class.getSimpleName(), cfDefs);
+        // Set replication factor
+        if (ksDef.strategy_options == null)
+        {
+            ksDef.strategy_options = new LinkedHashMap<String, String>();
+        }
+        // Set replication factor, the value MUST be an integer
+        ksDef.strategy_options.put("replication_factor", "1");
+        CassandraCli.client.system_add_keyspace(ksDef);
     }
 
     /**

@@ -202,9 +202,7 @@ public class MTOBiAssociationTest extends TwinAssociation
         catch (NotFoundException e)
         {
 
-            ksDef = new KsDef("KunderaTests", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-            ksDef.setReplication_factor(1);
-            CassandraCli.client.system_add_keyspace(ksDef);
+            addKeyspace(ksDef, cfDefs);
         }
 
         CassandraCli.client.set_keyspace("KunderaTests");
@@ -247,12 +245,7 @@ public class MTOBiAssociationTest extends TwinAssociation
         }
         catch (NotFoundException e)
         {
-
-            ksDef = new KsDef("KunderaTests", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-
-            ksDef.setReplication_factor(1);
-            CassandraCli.client.system_add_keyspace(ksDef);
-
+            addKeyspace(ksDef, cfDefs);
         }
         CassandraCli.client.set_keyspace("KunderaTests");
 
