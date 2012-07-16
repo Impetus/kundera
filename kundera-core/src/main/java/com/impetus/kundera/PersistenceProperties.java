@@ -75,4 +75,8 @@ public interface PersistenceProperties
 
     /** Option to give kundera-cassandra property information */
     public static final String KUNDERA_CLIENT_PROPERTY = "kundera_client_property";
+    
+    public static final String KUNDERA_USERNAME = "kundera.username";
+    
+    public static final String KUNDERA_PASSWORD = "kundera.password";
 }

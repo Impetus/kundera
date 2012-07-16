@@ -30,7 +30,9 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
+import com.impetus.kundera.loader.ClientLoaderException;
 import com.impetus.kundera.loader.GenericClientFactory;
+import com.impetus.kundera.loader.KunderaAuthenticationException;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -129,20 +131,28 @@ public class MongoDBClientFactory extends GenericClientFactory
         catch (NumberFormatException e)
         {
             logger.error("Invalid format for MONGODB port, Unale to connect!" + "; Details:" + e.getMessage());
+            throw new ClientLoaderException(e);
         }
         catch (UnknownHostException e)
         {
             logger.error("Unable to connect to MONGODB at host " + contactNode + "; Details:" + e.getMessage());
+            throw new ClientLoaderException(e);
         }
         catch (MongoException e)
         {
             logger.error("Unable to connect to MONGODB; Details:" + e.getMessage());
+            throw new ClientLoaderException(e);
         }
 
         DB mongoDB = mongo.getDB(keyspace);
+
+        authenticate(props, mongoDB);
+        logger.info("Connected to mongodb at " + contactNode + " on port " + defaultPort);
         return mongoDB;
 
     }
+
+    
 
     /*
      * (non-Javadoc)
@@ -186,4 +196,38 @@ public class MongoDBClientFactory extends GenericClientFactory
         }
         return schemaManager;
     }
+
+   /**
+    * Method to authenticate connection with mongodb.
+    * throws runtime error if:
+    *  a) userName and password, any one is not null.
+    *  b) if authentication fails.
+    *  
+    * 
+    * @param props           persistence properties.
+    * @param mongoDB         mongo db connection.
+    */
+   private void authenticate(Properties props, DB mongoDB)
+   {
+       String userName = (String) props.get(PersistenceProperties.KUNDERA_USERNAME);
+       String password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+       boolean authenticate = true;
+       String errMsg = null;
+       if(userName != null && password != null)
+       {
+           authenticate =  mongoDB.authenticate(userName, password.toCharArray());
+       } else if((userName != null && password == null) || (userName == null && password != null))
+       {
+           errMsg = "Invalid configuration provided for authentication, please specify both non-nullable 'kundera.username' and 'kundera.password' properties";
+           logger.error(errMsg);
+           throw new ClientLoaderException(errMsg);
+       }
+       
+       if(!authenticate)
+       {
+           
+           errMsg = "Authentication failed, invalid 'kundera.username' :" + userName + "and 'kundera.password' :" + password + " provided";
+           throw new KunderaAuthenticationException(errMsg);
+       }
+   }
 }
