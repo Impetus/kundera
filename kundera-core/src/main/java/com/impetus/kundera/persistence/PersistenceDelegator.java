@@ -40,6 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientResolver;
+import com.impetus.kundera.client.ClientResolverException;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
@@ -186,6 +187,10 @@ public class PersistenceDelegator
 
         EntityMetadata entityMetadata = getMetadata(entityClass);
 
+        if(entityMetadata == null)
+        {
+            throw new KunderaException("Unable to load entity metadata for :" + entityClass);
+        }
         String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entityClass);
 
         MainCache mainCache = (MainCache) getPersistenceCache().getMainCache();
@@ -499,11 +504,16 @@ public class PersistenceDelegator
      */
     public Client getClient(EntityMetadata m)
     {
+        
 //
 //        // Persistence Unit used to retrieve client
         String persistenceUnit = m.getPersistenceUnit();
 //
         Client client = clientMap.get(persistenceUnit);
+        if(client == null)
+        {
+            throw new ClientResolverException("No client configured for persistenceUnit"+ persistenceUnit);
+        }
 //        // single persistence unit given and entity is annotated with '@'.
 //        // validate persistence unit given is same
 //
