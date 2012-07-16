@@ -46,9 +46,12 @@ public class ObjectAccessor implements PropertyAccessor<Object>
     @Override
     public final Object fromBytes(Class targetClass, byte[] bytes)
     {
-
         try
         {
+            if(targetClass != null && targetClass.equals(byte[].class))
+            {
+                return bytes;
+            }
             ObjectInputStream ois;
             ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
             Object o = ois.readObject();
