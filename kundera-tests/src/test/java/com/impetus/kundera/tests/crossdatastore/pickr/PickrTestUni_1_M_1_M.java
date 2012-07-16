@@ -339,9 +339,7 @@ public class PickrTestUni_1_M_1_M extends PickrBaseTest
             }
             catch (NotFoundException e)
             {
-                ksDef = new KsDef("Pickr", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-                ksDef.setReplication_factor(1);
-                CassandraCli.client.system_add_keyspace(ksDef);
+                addKeyspace(ksDef, cfDefs);
             }
             catch (InvalidRequestException e)
             {

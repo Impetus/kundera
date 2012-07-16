@@ -577,7 +577,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         }
         catch (PelopsException e)
         {
-            log.warn(e.getMessage());
+            log.info(e.getMessage());
             return entities;
         }
         entities = new ArrayList<Object>(qResults.size());

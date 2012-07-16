@@ -28,6 +28,13 @@
 	<!-- Dependencies -->
 	<dependencies>
 		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.5</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
 			<groupId>com.impetus.core</groupId>
 			<artifactId>kundera-core</artifactId>
 			<version>2.0.7-SNAPSHOT</version>
@@ -37,17 +44,17 @@
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-thrift</artifactId>
-			<version>1.0.6</version>
+			<version>1.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-all</artifactId>
-			<version>1.0.6</version>
+			<version>1.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-clientutil</artifactId>
-			<version>1.0.6</version>
+			<version>1.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>

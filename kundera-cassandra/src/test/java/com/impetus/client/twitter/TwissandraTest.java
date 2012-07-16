@@ -18,8 +18,10 @@ package com.impetus.client.twitter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.IndexType;
@@ -117,6 +119,12 @@ public class TwissandraTest extends TwitterTestBase
         userCfDef.column_type = "Super";
         userCfDef.setComparator_type("UTF8Type");
         userCfDef.setDefault_validation_class("UTF8Type");
+        
+        CfDef userIndexCfDef = new CfDef();
+        userIndexCfDef.name = "USER_INDEX";
+        userIndexCfDef.keyspace = keyspace;
+        userIndexCfDef.setComparator_type("UTF8Type");
+        userIndexCfDef.setDefault_validation_class("UTF8Type");        
 
         CfDef prefrenceCfDef = new CfDef();
         prefrenceCfDef.name = "PREFERENCE";
@@ -139,11 +147,15 @@ public class TwissandraTest extends TwitterTestBase
         columnDef1.index_type = IndexType.KEYS;
         ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("LINK_ADDRESS".getBytes()), "UTF8Type");
         columnDef2.index_type = IndexType.KEYS;
+        ColumnDef columnDef4 = new ColumnDef(ByteBuffer.wrap("USER_ID".getBytes()), "UTF8Type");
+        columnDef4.index_type = IndexType.KEYS;
         externalLinkCfDef.addToColumn_metadata(columnDef1);
         externalLinkCfDef.addToColumn_metadata(columnDef2);
+        externalLinkCfDef.addToColumn_metadata(columnDef4);
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(userCfDef);
+        cfDefs.add(userIndexCfDef);
         cfDefs.add(prefrenceCfDef);
         cfDefs.add(externalLinkCfDef);
         try
@@ -159,6 +171,10 @@ public class TwissandraTest extends TwitterTestBase
                 {
                     CassandraCli.client.system_drop_column_family("USER");
                 }
+                if (cfDef1.getName().equalsIgnoreCase("USER_INDEX"))
+                {
+                    CassandraCli.client.system_drop_column_family("USER_INDEX");
+                }
                 if (cfDef1.getName().equalsIgnoreCase("PREFERENCE"))
                 {
                     CassandraCli.client.system_drop_column_family("PREFERENCE");
@@ -169,13 +185,21 @@ public class TwissandraTest extends TwitterTestBase
                 }
             }
             CassandraCli.client.system_add_column_family(userCfDef);
+            CassandraCli.client.system_add_column_family(userIndexCfDef);
             CassandraCli.client.system_add_column_family(externalLinkCfDef);
             CassandraCli.client.system_add_column_family(prefrenceCfDef);
         }
         catch (NotFoundException e)
         {
-            ksDef = new KsDef(keyspace, "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-            ksDef.setReplication_factor(1);
+            ksDef = new KsDef(keyspace, SimpleStrategy.class.getSimpleName(), cfDefs);
+            
+            //Set replication factor
+            if (ksDef.strategy_options == null) {
+                ksDef.strategy_options = new LinkedHashMap<String, String>();
+            }
+            //Set replication factor, the value MUST be an integer
+            ksDef.strategy_options.put("replication_factor", "1");
+            
             CassandraCli.client.system_add_keyspace(ksDef);
         }
         catch (InvalidRequestException e)
