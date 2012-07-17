@@ -18,6 +18,8 @@ package com.impetus.kundera.tests.file.dao;
 import java.io.File;
 import java.io.IOException;
 
+import junit.framework.Assert;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +28,7 @@ import com.google.common.io.Files;
 import com.impetus.kundera.tests.file.entities.ProfilePicture;
 
 /**
- * <Prove description of functionality provided by this Type> 
+ * Test case for {@link ProfilePictureDao} 
  * @author amresh.singh
  */
 public class ProfilePictureDaoTest
@@ -53,6 +55,11 @@ public class ProfilePictureDaoTest
     {
         dao.closeEntityManagerfactory();
     }
+    
+    @Test
+    public void dummyTest() {
+        
+    }
 
     /**
      * Test method for {@link com.impetus.kundera.tests.file.dao.ProfilePictureDao#addProfilePicture(int, java.io.File)}.
@@ -73,12 +80,8 @@ public class ProfilePictureDaoTest
         }
         catch (IOException e)
         {
-            e.printStackTrace();
-        }
-        System.out.println(pp);
-        
-        
-        
+            Assert.fail(e.getMessage());
+        }       
     }
 
 }
