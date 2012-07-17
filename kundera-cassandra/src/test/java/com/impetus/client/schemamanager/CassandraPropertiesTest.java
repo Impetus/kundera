@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
+import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.schemamanager.entites.Doctor;
 import com.impetus.kundera.Constants;
@@ -45,6 +46,10 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
  */
 public class CassandraPropertiesTest
 {
+    private static final String HOME_IMPADMIN_LUCENE = "/home/impadmin/lucene";
+
+    private static final String KUNDERA_CASSANDRA_PROPERTIES = "kundera-cassandra.properties";
+
     /** The configuration. */
     private SchemaConfiguration configuration;
 
@@ -106,7 +111,7 @@ public class CassandraPropertiesTest
 //        schemaManager.exportSchema();
 
         Properties properties = new Properties();
-        InputStream inStream = ClassLoader.getSystemResourceAsStream("kundera-cassandra.properties");
+        InputStream inStream = ClassLoader.getSystemResourceAsStream(KUNDERA_CASSANDRA_PROPERTIES);
         try
         {
 
@@ -115,7 +120,7 @@ public class CassandraPropertiesTest
             String expected_strategyClass = properties.getProperty("placement_strategy");
 
             KsDef ksDef = client.describe_keyspace(keyspace);
-            Assert.assertEquals(Integer.parseInt(expected_replication), ksDef.getReplication_factor());
+            Assert.assertEquals(expected_replication, ksDef.strategy_options.get("replication_factor"));
             Assert.assertEquals(expected_strategyClass, ksDef.getStrategy_class());
         }
         catch (NullPointerException e)
@@ -143,11 +148,13 @@ public class CassandraPropertiesTest
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, keyspace);
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
+        props.put(PersistenceProperties.KUNDERA_CLIENT_PROPERTY, KUNDERA_CASSANDRA_PROPERTIES);
+        
         if (useLucene)
         {
-            props.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "/home/impadmin/lucene");
+            props.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, HOME_IMPADMIN_LUCENE);
 
-            clientMetadata.setLuceneIndexDir("/home/impadmin/lucene");
+            clientMetadata.setLuceneIndexDir(HOME_IMPADMIN_LUCENE);
         }
         else
         {
