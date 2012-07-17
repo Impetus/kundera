@@ -136,12 +136,13 @@
 			<property name="hibernate.format_sql" value="true" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
 			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" />
-			<property name="hibernate.connection.url" value="jdbc:mysql://192.168.145.168:3306/Pickr" />
+			<!--<property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/Pickr" />-->
+			<property name="hibernate.connection.url" value="jdbc:mysql://192.168.145.168:3306/Pickr" />			
 			<property name="hibernate.connection.username" value="root" />
 			<property name="hibernate.connection.password" value="impetus" />
 			<property name="hibernate.current_session_context_class"
 				value="org.hibernate.context.ThreadLocalSessionContext" />
-			<property name="index_home_dir" value="./lucene" />
+<!--			<property name="index_home_dir" value="./lucene" />-->
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="piccandra">
@@ -156,7 +157,6 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="index_home_dir" value="./lucene" />
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="picbase">
@@ -177,7 +177,7 @@
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
 			<property name="kundera.nodes" value="192.168.145.168" />
-			<!-- <property name="kundera.nodes" value="localhost" /> -->
+<!--			<property name="kundera.nodes" value="localhost" />-->
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="Pickr" />
 			<property name="kundera.dialect" value="mongodb" />
@@ -186,7 +186,6 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="index_home_dir" value="./lucene" />
 		</properties>
 	</persistence-unit>
 
