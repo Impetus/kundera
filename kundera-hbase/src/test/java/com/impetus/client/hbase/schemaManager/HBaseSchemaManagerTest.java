@@ -31,13 +31,11 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.client.hbase.HBaseClientFactory;
 import com.impetus.client.hbase.junits.HBaseCli;
-import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
-import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -58,20 +56,8 @@ public class HBaseSchemaManagerTest
 {
     private final boolean useLucene = true;
 
-    /** Configure schema manager. */
-    private SchemaManager schemaManager;
-
-    /** The pu metadata. */
-    private PersistenceUnitMetadata puMetadata;
-
     /** The configuration. */
     private SchemaConfiguration configuration;
-
-    /** The port. */
-    private String port;
-
-    /** The host. */
-    private String host;
 
     /** The admin. */
     private static HBaseAdmin admin;
@@ -79,6 +65,8 @@ public class HBaseSchemaManagerTest
     private ApplicationMetadata appMetadata;
 
     private HBaseCli cli;
+
+    private String persistenceUnit = "hbase";
 
     /** The Constant logger. */
     private static final Logger logger = LoggerFactory.getLogger(HBaseSchemaManagerTest.class);
@@ -121,19 +109,20 @@ public class HBaseSchemaManagerTest
     @Test
     public void testDu()
     {
-        
+
     }
+
     /**
      * Test schema operation.
      */
-//    @Test
+    // @Test
     public void testSchemaOperation()
     {
         try
         {
             getEntityManagerFactory("create");
-            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName());
-            schemaManager.exportSchema();
+//            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName());
+//            schemaManager.exportSchema();
             Assert.assertTrue(admin.isTableAvailable("HbaseEntitySimple"));
             Assert.assertTrue(admin.isTableAvailable("HbaseEntitySuper"));
             Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUni1To1"));
@@ -164,7 +153,6 @@ public class HBaseSchemaManagerTest
     {
         ClientMetadata clientMetadata = new ClientMetadata();
         Map<String, Object> props = new HashMap<String, Object>();
-        String persistenceUnit = "hbase";
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
@@ -260,7 +248,8 @@ public class HBaseSchemaManagerTest
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
-
+        String[] persistenceUnits = { persistenceUnit };
+        new ClientFactoryConfiguraton(persistenceUnits).configure();
         configuration.configure();
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);

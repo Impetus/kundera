@@ -15,19 +15,21 @@
  ******************************************************************************/
 package com.impetus.client.cassandra.config;
 
+import org.apache.cassandra.db.marshal.BytesType;
+
 /**
- * Class Column family properties has some column family related attribute
+ * Class Cassandra Column family properties has some column family related attribute
  * 
  * @author kuldeep.mishra
  * 
  */
-public class ColumnFamilyProperties
+public class CassandraColumnFamilyProperties
 {
     /** dafault validation class for column family */
-    private String default_validation_class;
+    private String default_validation_class = BytesType.class.getSimpleName();
 
     /** comparator type for column family */
-    private String comparator;
+    private String comparator = BytesType.class.getSimpleName();
 
     /**
      * @return the default_validation_class

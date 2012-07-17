@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.db.marshal.CounterColumnType;
 import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.commons.logging.Log;
@@ -78,20 +77,13 @@ public class CassandraPropertyReader implements PropertyReader
             }
             else
             {
-                log.warn(propertyName + "not found in class path, kundera will use default values");
-                csmd.setPlacement_strategy(SimpleStrategy.class.getName());
-                csmd.setReplication_factor("1");
+                log.warn("No properties found in class path, kundera will use default property");
             }
         }
         catch (IOException e)
         {
             log.warn("error in loading properties , caused by :" + e.getMessage());
             throw new KunderaException(e);
-        }
-        finally
-        {
-            csmd.setPlacement_strategy(SimpleStrategy.class.getName());
-            csmd.setReplication_factor("1");
         }
     }
 
@@ -104,7 +96,7 @@ public class CassandraPropertyReader implements PropertyReader
      */
     private void readColumnFamilySpecificProperties(Properties properties)
     {
-        String cf_defs = properties.getProperty("cf_defs");
+        String cf_defs = properties.getProperty(Constants.CF_DEFS);
         csmd.addCf_defs(cf_defs);
     }
 
@@ -118,25 +110,27 @@ public class CassandraPropertyReader implements PropertyReader
     private void readKeyspaceSpecificProprerties(Properties properties)
     {
 
-        String placementStrategy = properties.getProperty("placement_strategy");
+        String placementStrategy = properties.getProperty(Constants.PLACEMENT_STRATEGY);
         csmd.setPlacement_strategy(placementStrategy);
 
         if (csmd.getPlacement_strategy().equalsIgnoreCase(SimpleStrategy.class.getName()))
         {
-            String replicationFactor = properties.getProperty("replication_factor");
+            String replicationFactor = properties.getProperty(Constants.REPLICATION_FACTOR);
             csmd.setReplication_factor(replicationFactor);
         }
         else
         {
-            String dataCenters = properties.getProperty("datacenters");
+            String dataCenters = properties.getProperty(Constants.DATA_CENTERS);
             csmd.addDataCenter(dataCenters);
         }
-        
+
         String invertedIndexingEnabled = properties.getProperty(Constants.INVERTED_INDEXING_ENABLED);
-        if(invertedIndexingEnabled != null) {
-            if("true".equalsIgnoreCase(invertedIndexingEnabled)) {
+        if (invertedIndexingEnabled != null)
+        {
+            if ("true".equalsIgnoreCase(invertedIndexingEnabled))
+            {
                 csmd.setInvertedIndexingEnabled(true);
-            }            
+            }
         }
     }
 
@@ -151,21 +145,20 @@ public class CassandraPropertyReader implements PropertyReader
         /**
          * It holds all property related to columnFamily.
          */
-        private Map<String, ColumnFamilyProperties> columnFamilyProperties;
+        private Map<String, CassandraColumnFamilyProperties> columnFamilyProperties;
 
         /**
          * replication_factor will use in keyspace creation;
          */
-        private String replication_factor;
+        private String replication_factor = "1";
 
         /**
          * placement_strategy will use in keyspace creation;
          */
-        private String placement_strategy;
-        
-        /** Whether Inverted Indexing is enabled*/
-        private boolean invertedIndexingEnabled;        
-        
+        private String placement_strategy = SimpleStrategy.class.getName();
+
+        /** Whether Inverted Indexing is enabled */
+        private boolean invertedIndexingEnabled;
 
         /**
          * dataCenterToNode map holds information about no of node per data
@@ -176,11 +169,11 @@ public class CassandraPropertyReader implements PropertyReader
         /**
          * @return the familyToProperties
          */
-        public Map<String, ColumnFamilyProperties> getColumnFamilyProperties()
+        public Map<String, CassandraColumnFamilyProperties> getColumnFamilyProperties()
         {
             if (columnFamilyProperties == null)
             {
-                columnFamilyProperties = new HashMap<String, ColumnFamilyProperties>();
+                columnFamilyProperties = new HashMap<String, CassandraColumnFamilyProperties>();
             }
             return columnFamilyProperties;
         }
@@ -192,7 +185,7 @@ public class CassandraPropertyReader implements PropertyReader
                 StringTokenizer cf_def = new StringTokenizer(cf_defs, ",");
                 while (cf_def.hasMoreTokens())
                 {
-                    ColumnFamilyProperties familyProperties = new ColumnFamilyProperties();
+                    CassandraColumnFamilyProperties familyProperties = new CassandraColumnFamilyProperties();
                     StringTokenizer tokenizer = new StringTokenizer(cf_def.nextToken(), "|");
                     if (tokenizer.countTokens() != 0 && tokenizer.countTokens() >= 2)
                     {
@@ -200,10 +193,6 @@ public class CassandraPropertyReader implements PropertyReader
                         String defaultValidationClass = tokenizer.nextToken();
                         if (validate(defaultValidationClass))
                             familyProperties.setDefault_validation_class(defaultValidationClass);
-                        else
-                        {
-                            familyProperties.setDefault_validation_class(BytesType.class.getSimpleName());
-                        }
                         if (tokenizer.countTokens() != 0)
                         {
                             String comparator = tokenizer.nextToken();
@@ -211,10 +200,6 @@ public class CassandraPropertyReader implements PropertyReader
                                     && validate(comparator))
                             {
                                 familyProperties.setComparator(comparator);
-                            }
-                            else
-                            {
-                                familyProperties.setComparator(BytesType.class.getSimpleName());
                             }
                         }
                         getColumnFamilyProperties().put(columnFamilyName, familyProperties);
@@ -258,7 +243,8 @@ public class CassandraPropertyReader implements PropertyReader
          */
         public void setReplication_factor(String replication_factor)
         {
-            this.replication_factor = replication_factor != null ? replication_factor : "1";
+            if (replication_factor != null)
+                this.replication_factor = replication_factor;
         }
 
         /**
@@ -267,8 +253,7 @@ public class CassandraPropertyReader implements PropertyReader
         public String getPlacement_strategy()
         {
             return placement_strategy;
-        }      
-        
+        }
 
         /**
          * @return the invertedIndexingEnabled
@@ -279,7 +264,8 @@ public class CassandraPropertyReader implements PropertyReader
         }
 
         /**
-         * @param invertedIndexingEnabled the invertedIndexingEnabled to set
+         * @param invertedIndexingEnabled
+         *            the invertedIndexingEnabled to set
          */
         public void setInvertedIndexingEnabled(boolean invertedIndexingEnabled)
         {
@@ -304,10 +290,6 @@ public class CassandraPropertyReader implements PropertyReader
                     log.warn("Give a valid replica placement strategy," + placement_strategy
                             + "is not a valid replica placement strategy");
                 }
-            }
-            else
-            {
-                this.placement_strategy = SimpleStrategy.class.getName();
             }
         }
 

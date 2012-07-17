@@ -34,8 +34,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.config.CassandraPropertyReader.CassandraSchemaMetadata;
-import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
-import com.impetus.kundera.configure.PropertyReader;
+import com.impetus.kundera.Constants;
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
@@ -44,10 +45,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  */
 public class CassandraPropertyReaderTest
 {
-
-    private PropertyReader reader;   
-
-    private Map<String, ColumnFamilyProperties> familyToProperties = new HashMap<String, ColumnFamilyProperties>();
+    private Map<String, CassandraColumnFamilyProperties> familyToProperties = new HashMap<String, CassandraColumnFamilyProperties>();
 
     private Map<String, String> dataCenterToNode = new HashMap<String, String>();
 
@@ -59,6 +57,8 @@ public class CassandraPropertyReaderTest
     private org.apache.commons.logging.Log log = LogFactory.getLog(CassandraPropertyReaderTest.class);
 
     private CassandraSchemaMetadata metadata;
+
+    private String pu = "CassandraCounterTest";
 
     /**
      * @throws java.lang.Exception
@@ -87,19 +87,21 @@ public class CassandraPropertyReaderTest
     public void testReadProperty() throws IOException
     {
         log.info("running CassandraPropertyReaderTest");
-//        reader = new CassandraPropertyReader();
-//        reader.read("CassandraCounterTest");
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("CassandraCounterTest");
-//        metadata = CassandraPropertyReader.csmd;
+        // reader = new CassandraPropertyReader();
+        // reader.read("CassandraCounterTest");
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(pu);
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
+        // metadata = CassandraPropertyReader.csmd;
         Properties properties = new Properties();
-        InputStream inStream = ClassLoader.getSystemResourceAsStream("kundera-cassandra.properties");
+        InputStream inStream = ClassLoader.getSystemResourceAsStream(puMetadata
+                .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY));
 
         if (inStream != null)
         {
             properties.load(inStream);
-            replication = properties.getProperty("replication_factor");
-            strategy = properties.getProperty("placement_strategy");
-            String dataCenters = properties.getProperty("datacenters");
+            replication = properties.getProperty(Constants.REPLICATION_FACTOR);
+            strategy = properties.getProperty(Constants.PLACEMENT_STRATEGY);
+            String dataCenters = properties.getProperty(Constants.DATA_CENTERS);
             if (dataCenters != null)
             {
                 StringTokenizer stk = new StringTokenizer(dataCenters, ",");
@@ -113,13 +115,13 @@ public class CassandraPropertyReaderTest
                 }
             }
 
-            String cf_defs = properties.getProperty("cf_defs");
+            String cf_defs = properties.getProperty(Constants.CF_DEFS);
             if (cf_defs != null)
             {
                 StringTokenizer stk = new StringTokenizer(cf_defs, ",");
                 while (stk.hasMoreTokens())
                 {
-                    ColumnFamilyProperties familyProperties = new ColumnFamilyProperties();
+                    CassandraColumnFamilyProperties familyProperties = new CassandraColumnFamilyProperties();
                     StringTokenizer tokenizer = new StringTokenizer(stk.nextToken(), "|");
                     if (tokenizer.countTokens() != 0 && tokenizer.countTokens() >= 2)
                     {

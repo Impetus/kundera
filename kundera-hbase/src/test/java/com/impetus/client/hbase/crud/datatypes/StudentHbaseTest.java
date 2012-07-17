@@ -54,12 +54,12 @@ public class StudentHbaseTest extends StudentBase<StudentHbase>
 
     }
 
-    @Test
+//    @Test
     public void dummyTest(){
         //TODO HBase embedded server , connection refused  
     }
     
-//    @Test
+    @Test
     public void executeTests()
     {
         onInsert();
@@ -111,7 +111,7 @@ public class StudentHbaseTest extends StudentBase<StudentHbase>
         assertFindByNameAndAgeBetween(em, "StudentHbase", StudentHbase.class, "Amresh", "10", "15", "studentName");
 
         // find by Range.
-        assertFindByRange(em, "StudentHbase", StudentHbase.class, "12345677", "12345678", "studentId");
+        assertFindByRange(em, "StudentHbase", StudentHbase.class, "12345677", "12345679", "studentId");
 
         // find by without where clause.
         assertFindWithoutWhereClause(em, "StudentHbase", StudentHbase.class);

@@ -30,6 +30,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -47,9 +48,6 @@ public class CassandraPropertiesTest
 {
     /** The configuration. */
     private SchemaConfiguration configuration;
-
-    /** Configure schema manager. */
-    private SchemaManager schemaManager;
 
     /**
      * cassandra client
@@ -71,8 +69,6 @@ public class CassandraPropertiesTest
      */
     private final boolean useLucene = true;
 
-    private CassandraCli cassandraCli;
-
     private org.apache.commons.logging.Log log = LogFactory.getLog(CassandraPropertiesTest.class);
 
     /**
@@ -82,9 +78,8 @@ public class CassandraPropertiesTest
     public void setUp() throws Exception
     {
         configuration = new SchemaConfiguration(pu);
-        cassandraCli = new CassandraCli();
-        cassandraCli.cassandraSetUp();
-        client = cassandraCli.getClient();
+        CassandraCli.cassandraSetUp();
+        client = CassandraCli.getClient();
     }
 
     /**
@@ -93,7 +88,7 @@ public class CassandraPropertiesTest
     @After
     public void tearDown() throws Exception
     {
-        cassandraCli.dropKeySpace(keyspace);
+        CassandraCli.dropKeySpace(keyspace);
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
     }
 
@@ -102,23 +97,21 @@ public class CassandraPropertiesTest
     {
         getEntityManagerFactory("create");
 
-//        schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
-//        schemaManager.exportSchema();
-
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
         Properties properties = new Properties();
-        InputStream inStream = ClassLoader.getSystemResourceAsStream("kundera-cassandra.properties");
         try
         {
-
+            InputStream inStream = puMetadata != null ? ClassLoader.getSystemResourceAsStream(puMetadata
+                    .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY)) : null;
             properties.load(inStream);
-            String expected_replication = properties.getProperty("replication_factor");
-            String expected_strategyClass = properties.getProperty("placement_strategy");
+            String expected_replication = properties.getProperty(Constants.REPLICATION_FACTOR);
+            String expected_strategyClass = properties.getProperty(Constants.PLACEMENT_STRATEGY);
 
             KsDef ksDef = client.describe_keyspace(keyspace);
             Assert.assertEquals(Integer.parseInt(expected_replication), ksDef.getReplication_factor());
             Assert.assertEquals(expected_strategyClass, ksDef.getStrategy_class());
         }
-        catch (NullPointerException e)
+        catch (IOException e)
         {
             log.warn("kundera-cassandra.properties file not found");
         }
@@ -143,6 +136,7 @@ public class CassandraPropertiesTest
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, keyspace);
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
+        props.put(PersistenceProperties.KUNDERA_CLIENT_PROPERTY, "kundera-cassandra.properties");
         if (useLucene)
         {
             props.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "/home/impadmin/lucene");

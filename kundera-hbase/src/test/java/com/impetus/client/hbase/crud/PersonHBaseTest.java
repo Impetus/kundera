@@ -60,15 +60,15 @@ public class PersonHBaseTest extends BaseTest
     public void onInsertHbase() throws Exception
     {
         init();
-//        PersonHBase personHBase = findById(PersonHBase.class, "1", em);
-//        Assert.assertNotNull(personHBase);
-//        Assert.assertEquals("vivek", personHBase.getPersonName());
-//        assertFindByName(em, "PersonHBase", PersonHBase.class, "vivek", "personName");
-//        assertFindByNameAndAge(em, "PersonHBase", PersonHBase.class, "vivek", "10", "personName");
-//        assertFindByNameAndAgeGTAndLT(em, "PersonHBase", PersonHBase.class, "vivek", "10", "20", "personName");
-//        assertFindByNameAndAgeBetween(em, "PersonHBase", PersonHBase.class, "vivek", "10", "15", "personName");
+        PersonHBase personHBase = findById(PersonHBase.class, "1", em);
+        Assert.assertNotNull(personHBase);
+        Assert.assertEquals("vivek", personHBase.getPersonName());
+        assertFindByName(em, "PersonHBase", PersonHBase.class, "vivek", "personName");
+        assertFindByNameAndAge(em, "PersonHBase", PersonHBase.class, "vivek", "10", "personName");
+        assertFindByNameAndAgeGTAndLT(em, "PersonHBase", PersonHBase.class, "vivek", "10", "20", "personName");
+        assertFindByNameAndAgeBetween(em, "PersonHBase", PersonHBase.class, "vivek", "10", "15", "personName");
         assertFindByRange(em, "PersonHBase", PersonHBase.class, "1", "3", "personId");
-//        assertFindWithoutWhereClause(em, "PersonHBase", PersonHBase.class);
+        assertFindWithoutWhereClause(em, "PersonHBase", PersonHBase.class);
     }
 
     private void init()

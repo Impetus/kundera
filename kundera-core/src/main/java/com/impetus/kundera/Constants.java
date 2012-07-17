@@ -77,12 +77,26 @@ public final class Constants
     public final static String NODE_ID_SEPARATOR = "$";
 
     public final static String RDBMS_CLIENT_FACTORY = "com.impetus.client.rdbms.RDBMSClientFactory";
-    
+
     public final static int DEFAULT_MAX_FETCH_DEPTH = 2;
-    
-    public final static String INDEX_TABLE_SUFFIX = "_INDEX";    
+
+    public final static String INDEX_TABLE_SUFFIX = "_INDEX";
+
     public final static String INDEX_TABLE_ROW_KEY_DELIMITER = ".";
+
     public final static String INDEX_TABLE_EC_DELIMITER = "@SuperColumn:";
-    
+
     public final static String INVERTED_INDEXING_ENABLED = "inverted.indexing.enabled";
+
+    public final static String ZOOKEEPER_PORT = "zookeeper_port";
+
+    public final static String ZOOKEEPER_HOST = "zookeeper_host";
+
+    public final static String PLACEMENT_STRATEGY = "placement_strategy";
+
+    public final static String REPLICATION_FACTOR = "replication_factor";
+
+    public final static String CF_DEFS = "cf_defs";
+
+    public final static String DATA_CENTERS = "datacenters";
 }

@@ -29,6 +29,8 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.hbase.config.HBaseColumnFamilyProperties;
+import com.impetus.client.hbase.config.HBasePropertyReader;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
@@ -319,7 +321,8 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     {
         Configuration hadoopConf = new Configuration();
         hadoopConf.set("hbase.master", host + ":" + port);
-        hadoopConf.set("hbase.zookeeper.quorum", host);
+        hadoopConf.set("hbase.zookeeper.quorum", HBasePropertyReader.hsmd.getZookeeper_host());
+        hadoopConf.set("hbase.zookeeper.property.clientPort", HBasePropertyReader.hsmd.getZookeeper_port());
         HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
         try
         {
@@ -347,11 +350,13 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     private HTableDescriptor getTableMetaData(TableInfo tableInfo)
     {
         HTableDescriptor hTableDescriptor = new HTableDescriptor(tableInfo.getTableName());
+
         if (tableInfo.getColumnMetadatas() != null)
         {
             for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
             {
                 HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(columnInfo.getColumnName());
+                setColumnFamilyProperties(hColumnDescriptor, tableInfo.getTableName());
                 hTableDescriptor.addFamily(hColumnDescriptor);
             }
         }
@@ -360,10 +365,25 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             for (EmbeddedColumnInfo embeddedColumnInfo : tableInfo.getEmbeddedColumnMetadatas())
             {
                 HColumnDescriptor hColumnDescriptor = new HColumnDescriptor(embeddedColumnInfo.getEmbeddedColumnName());
+                setColumnFamilyProperties(hColumnDescriptor, tableInfo.getTableName());
                 hTableDescriptor.addFamily(hColumnDescriptor);
             }
         }
         return hTableDescriptor;
+    }
+
+    private void setColumnFamilyProperties(HColumnDescriptor hColumnDescriptor, String tableName)
+    {
+        if (HBasePropertyReader.hsmd.getColumnFamilyProperties().containsKey(tableName))
+        {
+            HBaseColumnFamilyProperties familyProperties = HBasePropertyReader.hsmd.getColumnFamilyProperties().get(
+                    tableName);
+            hColumnDescriptor.setTimeToLive(familyProperties.getTtl());
+            hColumnDescriptor.setMaxVersions(familyProperties.getMaxVersion());
+            hColumnDescriptor.setMinVersions(familyProperties.getMinVersion());
+            hColumnDescriptor.setCompactionCompressionType(familyProperties.getAlgorithm());
+            hColumnDescriptor.setCompressionType(familyProperties.getAlgorithm());
+        }
     }
 
     @Override

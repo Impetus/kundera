@@ -37,6 +37,8 @@ import com.impetus.client.hbase.junits.HBaseCli;
 import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.ClientResolver;
+import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
@@ -49,14 +51,12 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
+/**
+ * @author Kuldeep.Kumar
+ * 
+ */
 public class HBaseSchemaOperationTest
 {
-
-    /**
-     * @author Kuldeep.Kumar
-     * 
-     */
-
     /** The configuration. */
     private static SchemaConfiguration configuration;
 
@@ -68,6 +68,8 @@ public class HBaseSchemaOperationTest
     private static HBaseAdmin admin;
 
     private static HBaseCli cli;
+
+    private String persistenceUnit = "HBaseSchemaOperationTest";
 
     /**
      * @throws java.lang.Exception
@@ -119,9 +121,6 @@ public class HBaseSchemaOperationTest
     public void testCreate() throws IOException
     {
         getEntityManagerFactory("create");
-        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName());
-        schemaManager.exportSchema();
-
         Assert.assertTrue(admin.isTableAvailable("HbaseEntitySimple"));
 
         HTableDescriptor descriptor = admin.getTableDescriptor("HbaseEntitySimple".getBytes());
@@ -146,8 +145,6 @@ public class HBaseSchemaOperationTest
     public void testCreatedrop() throws IOException
     {
         getEntityManagerFactory("create-drop");
-        schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName());
-        schemaManager.exportSchema();
 
         Assert.assertTrue(admin.isTableAvailable("HbaseEntitySimple"));
 
@@ -163,13 +160,7 @@ public class HBaseSchemaOperationTest
             Assert.assertNotNull(columnDescriptor.getNameAsString());
             Assert.assertTrue(columns.contains(columnDescriptor.getNameAsString()));
         }
-
-        // if (admin.isTableAvailable("HbaseEntitySimple"))
-        // {
-        // admin.disableTable("HbaseEntitySimple");
-        // admin.deleteTable("HbaseEntitySimple");
-        // }
-        schemaManager.dropSchema();
+        ClientResolver.getClientFactory(persistenceUnit).getSchemaManager().dropSchema();
         Assert.assertFalse(admin.isTableAvailable("HbaseEntitySimple"));
     }
 
@@ -315,7 +306,7 @@ public class HBaseSchemaOperationTest
     {
         ClientMetadata clientMetadata = new ClientMetadata();
         Map<String, Object> props = new HashMap<String, Object>();
-        String persistenceUnit = "HBaseSchemaOperationTest";
+
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, HBaseClientFactory.class.getName());
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
@@ -367,9 +358,9 @@ public class HBaseSchemaOperationTest
 
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 
+        String[] persistenceUnits = { persistenceUnit };
+        new ClientFactoryConfiguraton(persistenceUnits).configure();
         configuration.configure();
-        // EntityManagerFactoryImpl impl = new
-        // EntityManagerFactoryImpl(puMetadata, props);
         return null;
     }
 }
