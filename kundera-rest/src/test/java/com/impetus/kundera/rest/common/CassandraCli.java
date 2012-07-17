@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.cassandra.locator.SimpleStrategy;
@@ -91,8 +92,15 @@ public final class CassandraCli
         catch (NotFoundException e)
         {
             List<CfDef> cfDefs = new ArrayList<CfDef>();
-            KsDef ks_Def = new KsDef(keyspaceName, SimpleStrategy.class.getName(), cfDefs);
-            ks_Def.setReplication_factor(1);
+            KsDef ks_Def = new KsDef(keyspaceName, SimpleStrategy.class.getName(), cfDefs);            
+            
+            //Set replication factor
+            if (ks_Def.strategy_options == null) {
+                ks_Def.strategy_options = new LinkedHashMap<String, String>();
+            }
+            //Set replication factor, the value MUST be an integer
+            ks_Def.strategy_options.put("replication_factor", "1");
+            
             try
             {
                 client.system_add_keyspace(ks_Def);
