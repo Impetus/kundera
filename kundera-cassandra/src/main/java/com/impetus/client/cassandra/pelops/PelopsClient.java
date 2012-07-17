@@ -48,7 +48,6 @@ import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
-import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
@@ -86,8 +85,6 @@ import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
@@ -229,7 +226,10 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                         new String[] { superColumnName.substring(0, superColumnName.indexOf("|")) });
                 E e = (E) handler.fromThriftRow(entityMetadata.getEntityClazz(), entityMetadata,
                         new DataRow<SuperColumn>(entityId, entityMetadata.getTableName(), superColumnList));
-                entities.add(e);
+                if(e != null)
+                {
+                    entities.add(e);
+                }
             }
         }
         catch (Exception e)
@@ -533,7 +533,10 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                     Object r = handler
                             .fromSuperColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(new String(rowKey),
                                     m.getTableName(), null, superColumns, null, null), relations, isWrapReq);
-                    results.add(r);
+                    if(r != null)
+                    {
+                        results.add(r);
+                    }
                     // List<SuperColumn> superCol = columns.
                 }
                 else
@@ -546,7 +549,10 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
 
                     Object r = handler.fromColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(new String(
                             rowKey), m.getTableName(), cols, null, null, null), relations, isWrapReq);
-                    results.add(r);
+                    if(r != null)
+                    {
+                        results.add(r);
+                    }
                 }
             }
         }
@@ -680,7 +686,10 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
 
                         Object entity = handler.fromColumnThriftRow(clazz, entityMetadata, thriftRow, relationalField,
                                 relationalField != null && !relationalField.isEmpty());
-                        returnedEntities.add(entity);
+                        if(entity != null)
+                        {
+                            returnedEntities.add(entity);
+                        }
                     }
                 }
             }
@@ -1017,7 +1026,10 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                     Object e = handler.fromColumnThriftRow(m.getEntityClazz(), m,
                             handler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null,
                                     null, null), relationNames, isRelational);
-                    entities.add(e);
+                    if(e != null)
+                    {
+                        entities.add(e);
+                    }
                 }
                 catch (IllegalStateException e)
                 {
