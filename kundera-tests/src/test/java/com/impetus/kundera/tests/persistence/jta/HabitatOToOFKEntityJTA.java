@@ -1,4 +1,4 @@
-package com.impetus.kundera.tests.crossdatastore.useraddress.entities;
+package com.impetus.kundera.tests.persistence.jta;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -6,8 +6,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "ADDRESS", schema = "KunderaTests@addMongo")
-public class HabitatOToOFKEntity
+@Table(name = "ADDRESS", schema = "KunderaTests@addMongoJTA")
+public class HabitatOToOFKEntityJTA
 {
     @Id
     @Column(name = "ADDRESS_ID")
@@ -19,7 +19,7 @@ public class HabitatOToOFKEntity
     /**
      * 
      */
-    public HabitatOToOFKEntity()
+    public HabitatOToOFKEntityJTA()
     {
     }
 

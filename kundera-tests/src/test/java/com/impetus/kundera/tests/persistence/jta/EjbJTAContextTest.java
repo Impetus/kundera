@@ -99,10 +99,10 @@ public class EjbJTAContextTest
         em.setFlushMode(FlushModeType.COMMIT);
 
         userTransaction.begin();
-        PersonnelOToOFKEntity person = new PersonnelOToOFKEntity();
+        PersonnelOToOFKEntityJTA person = new PersonnelOToOFKEntityJTA();
         person.setPersonId("1_p");
         person.setPersonName("crossdata-store");
-        HabitatOToOFKEntity address = new HabitatOToOFKEntity();
+        HabitatOToOFKEntityJTA address = new HabitatOToOFKEntityJTA();
         address.setAddressId("1_a");
         address.setStreet("my street");
         person.setAddress(address);
@@ -112,7 +112,7 @@ public class EjbJTAContextTest
         }
         catch (Exception ex)
         {
-            HabitatOToOFKEntity found = em.find(HabitatOToOFKEntity.class, "1_a");
+            HabitatOToOFKEntityJTA found = em.find(HabitatOToOFKEntityJTA.class, "1_a");
             Assert.assertNull(found);
         }
         userTransaction.commit();
