@@ -120,16 +120,15 @@ public abstract class TwitterTestBase
     {
         // Insert, Find and Update
         addAllUserInfo();
-        getUserById();
+        //getUserById();
         updateUser();
 
         // Queries
-        //getPersonalDetailByName();
+        getPersonalDetailByName();
         getAllUsers();
-        getAllTweets();
         
-        //getTweetsByBody();
-        //getTweetsByDevice();
+        getTweetsByBody();
+        getTweetsByDevice();
 
         // Remove Users
         removeUser();
@@ -188,6 +187,14 @@ public abstract class TwitterTestBase
 
         UserCassandra user1AfterRemoval = twitter.findUserById(userId1);
         Assert.assertNull(user1AfterRemoval);
+        
+        UserCassandra user2 = twitter.findUserById(userId2);
+        assertUser2(user2);
+
+        twitter.removeUser(user2);
+
+        UserCassandra user2AfterRemoval = twitter.findUserById(userId2);
+        Assert.assertNull(user2AfterRemoval);
 
         twitter.closeEntityManager();
 

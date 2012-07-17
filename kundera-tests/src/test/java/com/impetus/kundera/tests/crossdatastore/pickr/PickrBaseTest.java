@@ -16,14 +16,20 @@
 package com.impetus.kundera.tests.crossdatastore.pickr;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.StringTokenizer;
 
+import org.apache.cassandra.locator.SimpleStrategy;
+import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 
+import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.cli.CleanupUtilities;
 import com.impetus.kundera.tests.crossdatastore.pickr.dao.Pickr;
 import com.impetus.kundera.tests.crossdatastore.pickr.dao.PickrImpl;
@@ -76,6 +82,19 @@ public abstract class PickrBaseTest
         {
             CleanupUtilities.cleanLuceneDirectory(tokenizer.nextToken());
         }
+    }
+    
+    protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs) throws InvalidRequestException, 
+            SchemaDisagreementException, TException
+    {
+        ksDef = new KsDef("Pickr", SimpleStrategy.class.getSimpleName(), cfDefs);
+        //Set replication factor
+        if (ksDef.strategy_options == null) {
+            ksDef.strategy_options = new LinkedHashMap<String, String>();
+        }
+        //Set replication factor, the value MUST be an integer
+        ksDef.strategy_options.put("replication_factor", "1");
+        CassandraCli.client.system_add_keyspace(ksDef);
     }
 
     protected abstract void addPhotographer();

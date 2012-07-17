@@ -499,7 +499,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
         }
 
-        // ksDef.setReplication_factor(Integer.parseInt(replication_factor));
         ksDef.setStrategy_options(strategy_options);
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         for (TableInfo tableInfo : tableInfos)

@@ -102,13 +102,6 @@ public class CassQuery extends QueryImpl implements Query
             if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
             {
                 
-                //Check whether Embedded data storage using Composite Columns is enabled
-                boolean embeddedDataStoredAsCompositeColumns = true;   //TODO: Read from property
-                
-                //Check whether it's a query over super column
-                
-                
-
                 Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m);
                 boolean isRowKeyQuery = ixClause.keySet().iterator().next();
                 if (!isRowKeyQuery)

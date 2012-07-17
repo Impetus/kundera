@@ -2,6 +2,7 @@ package com.impetus.kundera.tests.persistence.jta;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.naming.Context;
@@ -179,7 +180,12 @@ public class EjbJTAContextTest
         {
 
             ksDef = new KsDef("KunderaTests", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-            ksDef.setReplication_factor(1);
+            //Set replication factor
+            if (ksDef.strategy_options == null) {
+                ksDef.strategy_options = new LinkedHashMap<String, String>();
+            }
+            //Set replication factor, the value MUST be an integer
+            ksDef.strategy_options.put("replication_factor", "1");
             CassandraCli.client.system_add_keyspace(ksDef);
         }
 
