@@ -71,7 +71,7 @@ public class PickrTestBi_M_M_1_1 extends PickrBaseTest
         super.tearDown();
     }    
     
-    //@Test
+    @Test
     public void test()
     {
         executeTests();
@@ -151,16 +151,6 @@ public class PickrTestBi_M_M_1_1 extends PickrBaseTest
         PhotographerBi_M_M_1_1 p1AfterDeletion = (PhotographerBi_M_M_1_1) pickr.getPhotographer(
                 PhotographerBi_M_M_1_1.class, "" + 1);
         Assert.assertNull(p1AfterDeletion);
-
-        PhotographerBi_M_M_1_1 p2 = (PhotographerBi_M_M_1_1) pickr.getPhotographer(PhotographerBi_M_M_1_1.class,
-                "" + 2);
-        Assert.assertNotNull(p2);
-        pickr.deletePhotographer(p2);
-
-        PhotographerBi_M_M_1_1 p2AfterDeletion = (PhotographerBi_M_M_1_1) pickr.getPhotographer(
-                PhotographerBi_M_M_1_1.class, "" + 2);
-        Assert.assertNull(p2AfterDeletion);
-
     }
 
     private void assertPhotographer(PhotographerBi_M_M_1_1 p, int photographerId)
