@@ -1,4 +1,4 @@
-package com.impetus.kundera.tests.crossdatastore.useraddress.entities;
+package com.impetus.kundera.tests.persistence.jta;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -10,8 +10,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "PERSONNEL", schema = "KunderaTests@secIdxAddCassandra")
-public class PersonnelOToOFKEntity
+@Table(name = "PERSONNEL", schema = "KunderaTests@secIdxAddCassandraJTA")
+public class PersonnelOToOFKEntityJTA
 {
     @Id
     @Column(name = "PERSON_ID")
@@ -22,13 +22,13 @@ public class PersonnelOToOFKEntity
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "ADDRESS_ID")
-    private HabitatOToOFKEntity address;
+    private HabitatOToOFKEntityJTA address;
 
     
     /**
      * 
      */
-    public PersonnelOToOFKEntity()
+    public PersonnelOToOFKEntityJTA()
     {
     }
 
@@ -52,12 +52,12 @@ public class PersonnelOToOFKEntity
         this.personId = personId;
     }
 
-    public HabitatOToOFKEntity getAddress()
+    public HabitatOToOFKEntityJTA getAddress()
     {
         return address;
     }
 
-    public void setAddress(HabitatOToOFKEntity address)
+    public void setAddress(HabitatOToOFKEntityJTA address)
     {
         this.address = address;
     }

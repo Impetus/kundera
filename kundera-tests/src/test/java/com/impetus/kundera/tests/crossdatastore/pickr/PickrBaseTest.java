@@ -18,7 +18,6 @@ package com.impetus.kundera.tests.crossdatastore.pickr;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.cassandra.thrift.CfDef;
@@ -30,18 +29,15 @@ import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 
 import com.impetus.kundera.tests.cli.CassandraCli;
-import com.impetus.kundera.tests.cli.CleanupUtilities;
 import com.impetus.kundera.tests.crossdatastore.pickr.dao.Pickr;
 import com.impetus.kundera.tests.crossdatastore.pickr.dao.PickrImpl;
 
 /**
  * @author amresh.singh
- * 
  */
 public abstract class PickrBaseTest
 {
     protected static final boolean RUN_IN_EMBEDDED_MODE = true;
-
     protected static final boolean AUTO_MANAGE_SCHEMA = true;
 
     protected Pickr pickr;
@@ -74,14 +70,8 @@ public abstract class PickrBaseTest
         pickr.close();
         if (RUN_IN_EMBEDDED_MODE)
         {
-//            stopServer();
-        }
-        stopServer();
-        StringTokenizer tokenizer = new StringTokenizer(pu, ",");
-        while (tokenizer.hasMoreTokens())
-        {
-            CleanupUtilities.cleanLuceneDirectory(tokenizer.nextToken());
-        }
+            stopServer();
+        }           
     }
     
     protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs) throws InvalidRequestException, 

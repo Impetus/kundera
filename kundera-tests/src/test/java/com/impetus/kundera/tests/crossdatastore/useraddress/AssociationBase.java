@@ -76,7 +76,7 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-    private String persistenceUnits = "addCassandra,addHbase,addMongo,rdbms";
+    private String persistenceUnits = "addCassandra,addMongo,rdbms";
     //private String persistenceUnits = "addCassandra,rdbms";
 
     /**
