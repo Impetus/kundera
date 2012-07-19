@@ -467,20 +467,20 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         BasicDBObject query = new BasicDBObject();
         query.put(entityMetadata.getIdColumn().getName(), id.toString());
 
-        DBCursor cursor = dbCollection.find(query);
+//        DBCursor cursor = dbCollection.find(query);
         DBObject document = null;
-
-        if (cursor.hasNext())
-        {
-            document = cursor.next();
-        }
-        else
-        {
+//
+//        if (cursor.hasNext())
+//        {
+//            document = cursor.next();
+//        }
+//        else
+//        {
             document = new BasicDBObject();
-        }
+//        }
 
         document = handler.getDocumentFromEntity(document, entityMetadata,entity, rlHolders);
-        dbCollection.save(document);
+        dbCollection.findAndModify(query,document);
         
     }
 
