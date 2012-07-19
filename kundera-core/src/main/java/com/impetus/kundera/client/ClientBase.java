@@ -48,6 +48,7 @@ public abstract class ClientBase
     /** persistence unit */
     protected String persistenceUnit;
 
+    protected boolean isUpdate;
     /*
      * (non-Javadoc)
      * 
@@ -77,7 +78,7 @@ public abstract class ClientBase
         Object entity = node.getData();
         String id = ObjectGraphUtils.getEntityId(node.getNodeId());
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-
+        isUpdate = node.getOriginalNode() != null;
         List<RelationHolder> relationHolders = getRelationHolders(node);
         onPersist(metadata, entity, id, relationHolders);
         indexNode(node, metadata);

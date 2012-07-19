@@ -479,8 +479,16 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
             document = new BasicDBObject();
 //        }
 
+            // TODO: Still we need to see why mongo updates other values to NULL. 
         document = handler.getDocumentFromEntity(document, entityMetadata,entity, rlHolders);
-        dbCollection.findAndModify(query,document);
+        if(isUpdate)
+        {
+            dbCollection.findAndModify(query,document);
+        } else
+        {
+            dbCollection.insert(document);
+        }
+        
         
     }
 
