@@ -195,17 +195,18 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             if (!found)
             {
                 cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
-                
-                //Create Index Table if required
-                boolean indexTableRequired = CassandraPropertyReader.csmd.isInvertedIndexingEnabled();     
-                if(indexTableRequired) {
+
+                // Create Index Table if required
+                boolean indexTableRequired = CassandraPropertyReader.csmd.isInvertedIndexingEnabled();
+                if (indexTableRequired)
+                {
                     CfDef cfDef = new CfDef();
                     cfDef.setKeyspace(databaseName);
                     cfDef.setName(tableInfo.getTableName() + Constants.INDEX_TABLE_SUFFIX);
-                    cfDef.setKey_validation_class(UTF8Type.class.getSimpleName());                    
+                    cfDef.setKey_validation_class(UTF8Type.class.getSimpleName());
                     cassandra_client.system_add_column_family(cfDef);
                 }
-                
+
             }
         }
     }
@@ -487,7 +488,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         KsDef ksDef = new KsDef(databaseName, csmd.getPlacement_strategy(), null);
         Map<String, String> strategy_options = new HashMap<String, String>();
-        if (csmd.getPlacement_strategy().equalsIgnoreCase(SimpleStrategy.class.getName()))
+        if (csmd.getPlacement_strategy().equalsIgnoreCase(SimpleStrategy.class.getName())
+                || csmd.getPlacement_strategy().equalsIgnoreCase(SimpleStrategy.class.getSimpleName()))
         {
             strategy_options.put("replication_factor", csmd.getReplication_factor());
         }
@@ -498,7 +500,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 strategy_options.put(dataCeneteName, csmd.getDataCenters().get(dataCeneteName));
             }
         }
-
         ksDef.setStrategy_options(strategy_options);
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         for (TableInfo tableInfo : tableInfos)

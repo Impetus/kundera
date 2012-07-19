@@ -77,7 +77,7 @@ public class CassandraPropertyReader implements PropertyReader
             }
             else
             {
-                log.warn("No properties found in class path, kundera will use default property");
+                log.info("No property file found in class path, kundera will use default property");
             }
         }
         catch (IOException e)
@@ -312,10 +312,27 @@ public class CassandraPropertyReader implements PropertyReader
                 StringTokenizer stk = new StringTokenizer(dataCenters, ",");
                 while (stk.hasMoreTokens())
                 {
+                    String dCName;
+                    String noOfNode;
+                    String[] token = { "dCName", "noOfNode" };
+                    Map<String, String> dataCeneter = new HashMap<String, String>();
                     StringTokenizer tokenizer = new StringTokenizer(stk.nextToken(), ":");
-                    if (tokenizer.countTokens() == 2)
+
+                    int count = 0;
+                    while (tokenizer.hasMoreTokens())
                     {
-                        getDataCenters().put(tokenizer.nextToken(), tokenizer.nextToken());
+                        dataCeneter.put(token[count++], tokenizer.nextToken());
+                    }
+                    dCName = dataCeneter.get(token[0]);
+                    noOfNode = dataCeneter.get(token[1]);
+                    if (dCName != null && noOfNode != null)
+                    {
+                        getDataCenters().put(dCName, noOfNode);
+                    }
+                    else
+                    {
+                        // TODO
+                        return ;
                     }
                 }
             }

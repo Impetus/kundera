@@ -63,6 +63,7 @@ public class HBaseClientFactory extends GenericClientFactory
     /** Configure schema manager. */
     private SchemaManager schemaManager;
 
+    /** property reader instance */
     private PropertyReader propertyReader;
 
     /*

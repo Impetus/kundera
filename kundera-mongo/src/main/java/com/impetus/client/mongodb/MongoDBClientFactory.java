@@ -16,7 +16,10 @@
 package com.impetus.client.mongodb;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -24,9 +27,13 @@ import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.mongodb.config.MongoDBPropertyReader;
+import com.impetus.client.mongodb.config.MongoDBPropertyReader.MongoDBSchemaMetadata;
+import com.impetus.client.mongodb.config.MongoDBPropertyReader.MongoDBSchemaMetadata.MongoDBConnection;
 import com.impetus.client.mongodb.schemamanager.MongoDBSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.index.LuceneIndexer;
@@ -41,6 +48,8 @@ import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.MongoOptions;
+import com.mongodb.ReadPreference;
+import com.mongodb.ServerAddress;
 
 /**
  * A factory for creating MongoDBClient objects.
@@ -62,6 +71,9 @@ public class MongoDBClientFactory extends GenericClientFactory
     /** Configure schema manager. */
     private SchemaManager schemaManager;
 
+    /** property reader instance */
+    private PropertyReader propertyReader;
+
     @Override
     public void initialize()
     {
@@ -69,8 +81,9 @@ public class MongoDBClientFactory extends GenericClientFactory
         indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
                 luceneDirPath));
         reader = new MongoEntityReader();
-        // s
-        // schemaManager.exportSchema();
+
+        propertyReader = new MongoDBPropertyReader();
+        propertyReader.read(getPersistenceUnit());
     }
 
     /*
@@ -114,15 +127,34 @@ public class MongoDBClientFactory extends GenericClientFactory
         String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         String poolSize = props.getProperty(PersistenceProperties.KUNDERA_POOL_SIZE_MAX_ACTIVE);
 
+        List<ServerAddress> addrs = new ArrayList<ServerAddress>();
+
         Mongo mongo = null;
-        logger.info("Connecting to mongodb at " + contactNode + " on port " + defaultPort);
+        MongoOptions mo = null;
         try
         {
-            mongo = new Mongo(contactNode, Integer.parseInt(defaultPort));
+            MongoDBSchemaMetadata metadata = MongoDBPropertyReader.msmd;
+            if (metadata != null && metadata.getConnections() != null && !metadata.getConnections().isEmpty())
+            {
+                for (MongoDBConnection connection : metadata.getConnections())
+                {
+                    logger.info("Connecting to mongodb at " + connection.getHost() + " on port " + connection.getPort());
+                    addrs.add(new ServerAddress(connection.getHost(), Integer.parseInt(connection.getPort())));
+                }
+                mongo = new Mongo(addrs);
+                mo = mongo.getMongoOptions();
+                mo.socketTimeout = metadata.getSocketTimeOut();
+                mongo.setReadPreference(metadata.getReadPreference());
+            }
+            else
+            {
+                logger.info("Connecting to mongodb at " + contactNode + " on port " + defaultPort);
+                mongo = new Mongo(contactNode, Integer.parseInt(defaultPort));
+                mo = mongo.getMongoOptions();
+            }
 
             if (!StringUtils.isEmpty(poolSize))
             {
-                MongoOptions mo = mongo.getMongoOptions();
                 mo.connectionsPerHost = Integer.parseInt(poolSize);
             }
 
@@ -151,8 +183,6 @@ public class MongoDBClientFactory extends GenericClientFactory
         return mongoDB;
 
     }
-
-    
 
     /*
      * (non-Javadoc)
@@ -187,7 +217,7 @@ public class MongoDBClientFactory extends GenericClientFactory
         }
     }
 
-   @Override
+    @Override
     public SchemaManager getSchemaManager()
     {
         if (schemaManager == null)
@@ -197,37 +227,40 @@ public class MongoDBClientFactory extends GenericClientFactory
         return schemaManager;
     }
 
-   /**
-    * Method to authenticate connection with mongodb.
-    * throws runtime error if:
-    *  a) userName and password, any one is not null.
-    *  b) if authentication fails.
-    *  
-    * 
-    * @param props           persistence properties.
-    * @param mongoDB         mongo db connection.
-    */
-   private void authenticate(Properties props, DB mongoDB)
-   {
-       String userName = (String) props.get(PersistenceProperties.KUNDERA_USERNAME);
-       String password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
-       boolean authenticate = true;
-       String errMsg = null;
-       if(userName != null && password != null)
-       {
-           authenticate =  mongoDB.authenticate(userName, password.toCharArray());
-       } else if((userName != null && password == null) || (userName == null && password != null))
-       {
-           errMsg = "Invalid configuration provided for authentication, please specify both non-nullable 'kundera.username' and 'kundera.password' properties";
-           logger.error(errMsg);
-           throw new ClientLoaderException(errMsg);
-       }
-       
-       if(!authenticate)
-       {
-           
-           errMsg = "Authentication failed, invalid 'kundera.username' :" + userName + "and 'kundera.password' :" + password + " provided";
-           throw new KunderaAuthenticationException(errMsg);
-       }
-   }
+    /**
+     * Method to authenticate connection with mongodb. throws runtime error if:
+     * a) userName and password, any one is not null. b) if authentication
+     * fails.
+     * 
+     * 
+     * @param props
+     *            persistence properties.
+     * @param mongoDB
+     *            mongo db connection.
+     */
+    private void authenticate(Properties props, DB mongoDB)
+    {
+        String userName = (String) props.get(PersistenceProperties.KUNDERA_USERNAME);
+        String password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+        boolean authenticate = true;
+        String errMsg = null;
+        if (userName != null && password != null)
+        {
+            authenticate = mongoDB.authenticate(userName, password.toCharArray());
+        }
+        else if ((userName != null && password == null) || (userName == null && password != null))
+        {
+            errMsg = "Invalid configuration provided for authentication, please specify both non-nullable 'kundera.username' and 'kundera.password' properties";
+            logger.error(errMsg);
+            throw new ClientLoaderException(errMsg);
+        }
+
+        if (!authenticate)
+        {
+
+            errMsg = "Authentication failed, invalid 'kundera.username' :" + userName + "and 'kundera.password' :"
+                    + password + " provided";
+            throw new KunderaAuthenticationException(errMsg);
+        }
+    }
 }

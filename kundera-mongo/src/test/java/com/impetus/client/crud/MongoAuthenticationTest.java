@@ -29,6 +29,7 @@ import com.impetus.kundera.loader.KunderaAuthenticationException;
 
 /**
  * The Class MongoAuthenticationTest.
+ * 
  * @author vivek.mishra
  */
 public class MongoAuthenticationTest extends BaseTest
@@ -62,6 +63,7 @@ public class MongoAuthenticationTest extends BaseTest
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
 

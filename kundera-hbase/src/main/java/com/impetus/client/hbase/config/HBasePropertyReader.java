@@ -81,7 +81,7 @@ public class HBasePropertyReader implements PropertyReader
         }
         else
         {
-            log.warn("No properties found in class path, kundera will use default property");
+            log.warn("No property file found in class path, kundera will use default property");
         }
     }
 
