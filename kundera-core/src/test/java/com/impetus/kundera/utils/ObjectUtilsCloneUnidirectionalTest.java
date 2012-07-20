@@ -64,36 +64,36 @@ public class ObjectUtilsCloneUnidirectionalTest
     public void tearDown() throws Exception
     {
     }
+    
+    @Test
+    public void testBulkCopyUsingDeepCloner() {
+        int n = 100000;
+        long t1 = System.currentTimeMillis();
+        for(int i = 0; i < n; i++) {
+            PhotographerUni_1_M_1_M a1 = constructPhotographer(i + 1);
+            PhotographerUni_1_M_1_M a2 = (PhotographerUni_1_M_1_M) ObjectUtils.deepCopyUsingCloner(a1);
+        }
+        long t2 = System.currentTimeMillis();
+        System.out.println("Time taken by Deep Cloner for " + n + " records:" + (t2 - t1));
+    }
+    
+    @Test
+    public void testBulkCopyUsingKunderaCloner() {
+        int n = 100000;
+        long t1 = System.currentTimeMillis();
+        for(int i = 0; i < n; i++) {
+            PhotographerUni_1_M_1_M a1 = constructPhotographer(i + 1);
+            PhotographerUni_1_M_1_M a2 = (PhotographerUni_1_M_1_M) ObjectUtils.deepCopy(a1);
+        }
+        long t2 = System.currentTimeMillis();
+        System.out.println("Time taken by Kundera Cloner for " + n + " records:" + (t2 - t1));
+    }
 
     @Test
     public void testPhotographer()
     {
         // Construct photographer object
-        PhotographerUni_1_M_1_M a1 = new PhotographerUni_1_M_1_M();
-        a1.setPhotographerId(1);
-        a1.setPhotographerName("Amresh");
-
-        a1.setPersonalDetail(new PersonalDetail("xamry", "password1", "Single"));
-
-        a1.addTweet(new Tweet("My First Tweet", "Web"));
-        a1.addTweet(new Tweet("My Second Tweet", "Android"));
-        a1.addTweet(new Tweet("My Third Tweet", "iPad"));
-
-        AlbumUni_1_M_1_M b11 = new AlbumUni_1_M_1_M("b1", "Album 1", "This is album 1");
-        AlbumUni_1_M_1_M b12 = new AlbumUni_1_M_1_M("b2", "Album 2", "This is album 2");
-
-        PhotoUni_1_M_1_M c11 = new PhotoUni_1_M_1_M("c1", "Photo 1", "This is Photo 1");
-        PhotoUni_1_M_1_M c12 = new PhotoUni_1_M_1_M("c2", "Photo 2", "This is Photo 2");
-        PhotoUni_1_M_1_M c13 = new PhotoUni_1_M_1_M("c3", "Photo 3", "This is Photo 3");
-        PhotoUni_1_M_1_M c14 = new PhotoUni_1_M_1_M("c4", "Photo 4", "This is Photo 4");
-
-        b11.addPhoto(c11);
-        b11.addPhoto(c12);
-        b12.addPhoto(c13);
-        b12.addPhoto(c14);
-        a1.addAlbum(b11);
-        a1.addAlbum(b12);
-
+        PhotographerUni_1_M_1_M a1 = constructPhotographer(1);
         // Create a deep copy using cloner
         long t1 = System.currentTimeMillis();
         PhotographerUni_1_M_1_M a3 = (PhotographerUni_1_M_1_M) ObjectUtils.deepCopyUsingCloner(a1);
@@ -122,6 +122,38 @@ public class ObjectUtilsCloneUnidirectionalTest
         assertOriginalObjectValues(a2);
         assertOriginalObjectValues(a3);
 
+    }
+
+    /**
+     * @return
+     */
+    private PhotographerUni_1_M_1_M constructPhotographer(int photographerId)
+    {
+        PhotographerUni_1_M_1_M a1 = new PhotographerUni_1_M_1_M();
+        a1.setPhotographerId(photographerId);
+        a1.setPhotographerName("Amresh");
+
+        a1.setPersonalDetail(new PersonalDetail("xamry", "password1", "Single"));
+
+        a1.addTweet(new Tweet("My First Tweet", "Web"));
+        a1.addTweet(new Tweet("My Second Tweet", "Android"));
+        a1.addTweet(new Tweet("My Third Tweet", "iPad"));
+
+        AlbumUni_1_M_1_M b11 = new AlbumUni_1_M_1_M("b1", "Album 1", "This is album 1");
+        AlbumUni_1_M_1_M b12 = new AlbumUni_1_M_1_M("b2", "Album 2", "This is album 2");
+
+        PhotoUni_1_M_1_M c11 = new PhotoUni_1_M_1_M("c1", "Photo 1", "This is Photo 1");
+        PhotoUni_1_M_1_M c12 = new PhotoUni_1_M_1_M("c2", "Photo 2", "This is Photo 2");
+        PhotoUni_1_M_1_M c13 = new PhotoUni_1_M_1_M("c3", "Photo 3", "This is Photo 3");
+        PhotoUni_1_M_1_M c14 = new PhotoUni_1_M_1_M("c4", "Photo 4", "This is Photo 4");
+
+        b11.addPhoto(c11);
+        b11.addPhoto(c12);
+        b12.addPhoto(c13);
+        b12.addPhoto(c14);
+        a1.addAlbum(b11);
+        a1.addAlbum(b12);
+        return a1;
     }
 
     private void modifyPhotographer(PhotographerUni_1_M_1_M p)
