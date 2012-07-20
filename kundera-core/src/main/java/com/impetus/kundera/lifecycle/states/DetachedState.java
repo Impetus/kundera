@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
+import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.lifecycle.NodeStateContext;
 
 /**
@@ -55,6 +56,8 @@ public class DetachedState extends NodeState
         // Detached ---> Managed
         moveNodeToNextState(nodeStateContext, new ManagedState());
 
+        ((Node)nodeStateContext).setUpdate(true);
+        
         // Copy detached entity's current state to existing managed instance of
         // the
         // same entity identity (if one exists), or create a new managed copy

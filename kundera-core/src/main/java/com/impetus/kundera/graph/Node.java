@@ -66,6 +66,9 @@ public class Node implements NodeStateContext
     // Whether this is a head node
     private boolean isHeadNode;
     
+    private boolean isUpdate;
+    
+    
     /* Depth of this node in the tree
      * Head node has a depth of 1 and so on.
      */
@@ -582,6 +585,21 @@ public class Node implements NodeStateContext
         return isProcessed;
     }
 
+    /**
+     * @return the isUpdate
+     */
+    public boolean isUpdate()
+    {
+        return isUpdate;
+    }
+
+    /**
+     * @param isUpdate the isUpdate to set
+     */
+    public void setUpdate(boolean isUpdate)
+    {
+        this.isUpdate = isUpdate;
+    }
 
     @Override
     public Node clone()

@@ -342,20 +342,6 @@ public class PersistenceDelegator
      */
     public void flush()
     {
-
-        // TODO: Event Log is done. Now only need to handle commit & Rollback.
-        // TODO: handling for many-2-many dataSet.
-
-        // Check for flush mode, if commit, do nothing (state will be updated at
-        // commit) else if AUTO, synchronize with DB
-        // if (FlushModeType.COMMIT.equals(getFlushMode()))
-        // {
-        // // Do nothing
-        // // TODO NEED TO HANDLE.
-        // }
-        // else if (FlushModeType.AUTO.equals(getFlushMode()))
-        // {
-
         // Get flush stack from Flush Manager
         if (applyFlush())
         {
@@ -430,7 +416,9 @@ public class PersistenceDelegator
                 }
                 joinTableDataMap.clear(); // All Join table operation performed,
                                           // clear it.
+
             }
+            
         }
     }
 

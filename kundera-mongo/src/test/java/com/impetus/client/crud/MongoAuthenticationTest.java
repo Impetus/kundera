@@ -63,7 +63,6 @@ public class MongoAuthenticationTest extends BaseTest
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             Assert.fail(e.getMessage());
         }
 
