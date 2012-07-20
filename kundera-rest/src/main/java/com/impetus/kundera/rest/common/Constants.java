@@ -48,4 +48,5 @@ public interface Constants
     public static final String QUERY_RESOURCE_PATH = "/query";
 
     public static final String META_DATA_RESOURCE_PATH = "/metadata";
+
 }

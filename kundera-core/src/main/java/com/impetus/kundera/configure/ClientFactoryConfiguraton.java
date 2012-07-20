@@ -40,7 +40,7 @@ public class ClientFactoryConfiguraton implements Configuration
      * @param persistenceUnits
      *            persistence units.
      */
-    public ClientFactoryConfiguraton(String[] persistenceUnits)
+    public ClientFactoryConfiguraton(String... persistenceUnits)
     {
         this.persistenceUnits = persistenceUnits;
     }

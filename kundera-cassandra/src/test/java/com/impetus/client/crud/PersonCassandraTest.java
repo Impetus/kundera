@@ -76,6 +76,7 @@ public class PersonCassandraTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
+        CassandraCli.cassandraSetUp();
         emf = Persistence.createEntityManagerFactory("secIdxCassandraTest");
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
@@ -90,7 +91,7 @@ public class PersonCassandraTest extends BaseTest
     public void onInsertCassandra() throws Exception
     {
         // cassandraSetUp();
-        CassandraCli.cassandraSetUp();
+//        CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
         loadData();
 
@@ -161,6 +162,7 @@ public class PersonCassandraTest extends BaseTest
       * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
       * em = null; emf = null;
       */
+//        emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
     }
 

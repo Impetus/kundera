@@ -35,12 +35,14 @@ import org.junit.Test;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.configure.ClientFactoryConfiguraton;
+import com.impetus.kundera.configure.PersistenceUnitConfiguration;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 public class HBasePropertyReaderTest
 {
-    private static Log log = LogFactory.getLog(HBasePropertyReader.class);
+    private static Log log = LogFactory.getLog(HBasePropertyReaderTest.class);
 
     private String port = "2181";
 
@@ -56,7 +58,9 @@ public class HBasePropertyReaderTest
     @Before
     public void setUp() throws Exception
     {
-        Persistence.createEntityManagerFactory(pu);
+//        Persistence.createEntityManagerFactory(pu);
+        new PersistenceUnitConfiguration(pu).configure();
+        new ClientFactoryConfiguraton(pu).configure();
     }
 
     @After

@@ -96,14 +96,15 @@ public class CountersTest
     @Test
     public void testCRUDOnCounter()
     {
-        persistCounter();
+        incrCounter();
+        decrCounter();
         findCounter();
         queryOnCounter();
         mergeCounter();
         deleteCounter();
     }
 
-    public void persistCounter()
+    public void incrCounter()
     {
         em = emf.createEntityManager();
         Counters counters = new Counters();
@@ -111,9 +112,25 @@ public class CountersTest
         counters.setId("sk");
         em.persist(counters);
 
-        counters = em.find(Counters.class, "sk");
-        Assert.assertNotNull(counters);
-        Assert.assertNotNull(counters.getCounter1());
+        // counters = em.find(Counters.class, "sk");
+        // Assert.assertNotNull(counters);
+        // Assert.assertNotNull(counters.getCounter1());
+        // Assert.as
+
+        em.close();
+    }
+
+    private void decrCounter()
+    {
+        em = emf.createEntityManager();
+        Counters counters = new Counters();
+        counters.setCounter1(-10);
+        counters.setId("sk");
+        em.persist(counters);
+
+        // counters = em.find(Counters.class, "sk");
+        // Assert.assertNotNull(counters);
+        // Assert.assertNotNull(counters.getCounter1());
 
         em.close();
     }
@@ -125,6 +142,7 @@ public class CountersTest
         counters = em.find(Counters.class, "sk");
         Assert.assertNotNull(counters);
         Assert.assertNotNull(counters.getCounter1());
+        Assert.assertEquals(2, counters.getCounter1());
         em.close();
     }
 
@@ -162,10 +180,12 @@ public class CountersTest
         Query q = em.createQuery("select c from Counters c");
         List<Counters> r = q.getResultList();
         Assert.assertNotNull(r);
+        Assert.assertEquals(1, r.size());
         for (Counters counters : r)
         {
             Assert.assertNotNull(counters);
             Assert.assertNotNull(counters.getCounter1());
+            Assert.assertEquals(2, counters.getCounter1());
         }
     }
 }

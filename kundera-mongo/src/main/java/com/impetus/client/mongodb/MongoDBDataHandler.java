@@ -229,8 +229,9 @@ final class MongoDBDataHandler
         List<Column> columns = m.getColumnsAsList();
 
         // Populate Row Key
-        dbObj.put("_id", PropertyAccessorHelper.getId(entity, m));
-        dbObj.put(m.getIdColumn().getName(), PropertyAccessorHelper.getId(entity, m));
+        String id  = PropertyAccessorHelper.getId(entity, m);
+        dbObj.put("_id", id);
+        dbObj.put(m.getIdColumn().getName(), id);
 
         // Populate columns
         for (Column column : columns)
@@ -330,8 +331,11 @@ final class MongoDBDataHandler
         {
             // TODO : this should have been handled by DocumentObjectMapper.
             Object valObj = PropertyAccessorHelper.getObject(entity, column.getField());
-            dbObj.put(column.getName(), valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString()
-                    : PropertyAccessorHelper.getObject(entity, column.getField()).toString());
+            if(valObj != null)
+            {
+                dbObj.put(column.getName(), valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString()
+                    :  valObj.toString())/*PropertyAccessorHelper.getObject(entity, column.getField()).toString())*/;
+            }
         }
     }
 
