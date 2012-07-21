@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.client.hbase.query;
 
 import java.lang.reflect.Field;
@@ -30,8 +45,10 @@ import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.QueryImpl;
 
 /**
+ * Query implementation for HBase, translates JPQL into HBase Filters using {@link QueryTranslator}.
+ * 
  * @author vivek.mishra
- *
+ * 
  */
 public class HBaseQuery extends QueryImpl implements Query
 {
@@ -39,11 +56,16 @@ public class HBaseQuery extends QueryImpl implements Query
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseQuery.class);
     
+    /**
+     * Holds reference to entity reader.
+     */
     private EntityReader reader = new HBaseEntityReader();
 
     /**
-     * @param query
-     * @param persistenceDelegator
+     * Constructor using fields.
+     * 
+     * @param query jpa query.
+     * @param persistenceDelegator persistence delegator interface.
      */
     public HBaseQuery(String query, KunderaQuery kunderaQuery, PersistenceDelegator persistenceDelegator)
     {
@@ -100,7 +122,13 @@ public class HBaseQuery extends QueryImpl implements Query
     }
 
     
-
+    /**
+     * Parses and translates query into HBase filter and invokes client's method to return list of entities.
+     * 
+     * @param m        Entity metadata
+     * @param client   hbase client
+     * @return         list of entities.
+     */
     private List onQuery(EntityMetadata m, Client client)
     {
         // Called only in case of standalone entity.
@@ -163,24 +191,45 @@ public class HBaseQuery extends QueryImpl implements Query
         return null;
     }
 
+    /**
+     * Query translator to translate JPQL into HBase query definition(e.g. Filter/Filterlist)
+     * 
+     * @author vivek.mishra
+     *
+     */
     class QueryTranslator
     {
+        /* filter list to hold collection for applied filters*/
         private List<Filter> filterList;
         
+        /* Returns true, if intended for id column*/
         private boolean isIdColumn;
         
+        /* byte[] value for start row, in case of range query, else will contain null. */
         private byte[] startRow;
+        /* byte[] value for end row, in case of range query, else will contain null. */
         private byte[] endRow;
+        
+        /* is true, if query intended for row key equality. */
         private boolean isFindById;
+        
+        /* row key value. */
         String rowKey;
         
-        
+        /**
+         * Translates kundera query into collection of to be applied HBase filter/s.
+         * 
+         * @param query  kundera query.
+         * @param m      entity's metadata.
+         */
         void translate(KunderaQuery query, EntityMetadata m)
         {
             String idColumn = m.getIdColumn().getName();
             boolean isIdColumn = false;
             for(Object obj : query.getFilterClauseQueue())
             {
+                // parse for filter(e.g. where) clause.
+                
                 if (obj instanceof FilterClause)
                 {
                     String condition = ((FilterClause) obj).getCondition();
@@ -207,6 +256,11 @@ public class HBaseQuery extends QueryImpl implements Query
             }
         }
         
+        /**
+         * Returns collection of parsed filter.
+         * 
+         * @return  map.
+         */
         Map<Boolean, Filter> getFilter()
         {
             if(filterList != null)
@@ -219,6 +273,15 @@ public class HBaseQuery extends QueryImpl implements Query
             return null;
         }
     
+        /**
+         * On parsing filter clause(e.g. WHERE clause).
+         * 
+         * @param condition       condition
+         * @param name            column name.
+         * @param value           column value.
+         * @param isIdColumn      if it is an id column.
+         * @param m               entity metadata.
+         */
         private void onParseFilter(String condition, String name, String value, boolean isIdColumn, EntityMetadata m)
         {
             CompareOp operator = getOperator(condition, isIdColumn);
@@ -229,11 +292,11 @@ public class HBaseQuery extends QueryImpl implements Query
                 addToFilter(f);
             } else
             {
-                if (operator.equals(CompareOp.GREATER_OR_EQUAL))
+                if (operator.equals(CompareOp.GREATER_OR_EQUAL) || operator.equals(CompareOp.GREATER))
                 {
                     startRow = valueInBytes;
                 }
-                else if (operator.equals(CompareOp.LESS_OR_EQUAL))
+                else if (operator.equals(CompareOp.LESS_OR_EQUAL) || operator.equals(CompareOp.LESS))
                 {
                     endRow = valueInBytes;
                 } else if(operator.equals(CompareOp.EQUAL))
@@ -302,15 +365,15 @@ public class HBaseQuery extends QueryImpl implements Query
          */
         private CompareOp getOperator(String condition, boolean idPresent)
         {
-            if (!idPresent && condition.equals("="))
+            if (/*!idPresent && */condition.equals("="))
             {
                 return CompareOp.EQUAL;
             }
-            else if (!idPresent && condition.equals(">"))
+            else if (/*!idPresent && */condition.equals(">"))
             {
                 return CompareOp.GREATER;
             }
-            else if (!idPresent && condition.equals("<"))
+            else if (/*!idPresent && */condition.equals("<"))
             {
                 return CompareOp.LESS;
             }
@@ -326,7 +389,7 @@ public class HBaseQuery extends QueryImpl implements Query
             {
                 if (!idPresent)
                 {
-                    throw new UnsupportedOperationException(" Condition " + condition + " is not suported in  cassandra!");
+                    throw new UnsupportedOperationException(" Condition " + condition + " is not suported in  hbase!");
                 }
                 else
                 {

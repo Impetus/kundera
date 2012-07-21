@@ -20,19 +20,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.Filter;
-import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.HBaseData;
 import com.impetus.client.hbase.Reader;
 
 /**
- * HBase reader.
+ * Implmentation class for HBase for <code>Reader</code> interface.
  * 
  * @author vivek.mishra
  */
@@ -53,16 +51,17 @@ public class HBaseReader implements Reader
     {
         List<HBaseData> results = null;
 
-//        Get g = prepareGet(rowKey, filter);
-         
+        // Get g = prepareGet(rowKey, filter);
+
         ResultScanner scanner = null;
-        if(columnFamily != null)
+        if (columnFamily != null)
         {
             scanner = hTable.getScanner(columnFamily.getBytes());
-        } else
+        }
+        else
         {
             Scan scan = new Scan();
-            if(filter != null)
+            if (filter != null)
             {
                 scan.setFilter(filter);
             }
@@ -85,6 +84,9 @@ public class HBaseReader implements Reader
         return LoadData(hTable, null, rowKey, filter);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.client.hbase.Reader#loadAll(org.apache.hadoop.hbase.client.HTable, org.apache.hadoop.hbase.filter.Filter, byte[], byte[])
+     */
     @Override
     public List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow) throws IOException
     {
@@ -112,8 +114,14 @@ public class HBaseReader implements Reader
         return scanResults(null, results, scanner);
     }
 
-
-
+    /**
+     * Scan and populate {@link HBaseData} collection using scanned results.
+     * 
+     * @param columnFamily       column family.
+     * @param results            results.
+     * @param scanner            result scanner.
+     * @return                   collection of scanned results.
+     */
     private List<HBaseData> scanResults(String columnFamily, List<HBaseData> results, ResultScanner scanner)
     {
         HBaseData data = null;

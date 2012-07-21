@@ -25,11 +25,10 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 /**
  * Data handler for HBase queries.
  * 
- * @author impetus
+ * @author vivek.mishra
  */
 
-// TODO: Do we really require this interface? If yes, then should we move it
-// kundera-core?
+
 public interface DataHandler
 {
 
@@ -45,16 +44,6 @@ public interface DataHandler
      */
     void createTableIfDoesNotExist(String tableName, String... colFamily) throws IOException;
 
-    // /**
-    // * Writes data help in entity into HBase table
-    // *
-    // * @param tableName
-    // * @param m
-    // * @param e
-    // * @throws IOException
-    // */
-    // public void writeData(String tableName, EntityMetadata m, EnhancedEntity
-    // e) throws IOException;
 
     /**
      * Populates data for give column family, column name, and HBase table name.
@@ -73,8 +62,7 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List readData(String tableName, Class clazz, EntityMetadata m, String rowKey, List<String> relationNames)
-            throws IOException;
+    List readData(String tableName, Class clazz, EntityMetadata m, String rowKey, List<String> relatationNames) throws IOException;
 
     
     /**
@@ -86,7 +74,7 @@ public interface DataHandler
      * @param endRow
      * @return
      */
-    List readDataByRange(String tableName, Class clazz, EntityMetadata m, List<String> relationNames, byte[] startRow, byte[] endRow) throws IOException;
+    List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow) throws IOException;
     
     /**
      * Write data.
@@ -136,6 +124,16 @@ public interface DataHandler
      */
     <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String rowKey, String inverseJoinColumnName);
 
+    /**
+     * Retrieves a list of parent entity from join table..
+     * @param <E>
+     * @param parentMetadata
+     * @param joinTableName
+     * @param joinColumnName
+     * @param inverseJoinColumnName
+     * @param childId
+     * @return
+     */
     <E> List<E> findParentEntityFromJoinTable(EntityMetadata parentMetadata, String joinTableName,
             String joinColumnName, String inverseJoinColumnName, Object childId);
 
