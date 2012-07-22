@@ -26,5 +26,4 @@ public class SubCounter
     {
         this.subCounter = subCounter;
     }
-
 }

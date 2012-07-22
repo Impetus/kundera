@@ -43,9 +43,9 @@ public class PersonHBaseTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-        cli = new HBaseCli();
-        // cli.init();
-        cli.startCluster();
+//        cli = new HBaseCli();
+//        // cli.init();
+//        cli.startCluster();
         emf = Persistence.createEntityManagerFactory("hbaseTest");
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
@@ -73,14 +73,14 @@ public class PersonHBaseTest extends BaseTest
 
     private void init()
     {
-        if (!cli.isStarted)
-        {
-            cli.startCluster();
-        }
-            cli.createTable("PERSON");
-            cli.addColumnFamily("PERSON", "PERSON_NAME");
-            cli.addColumnFamily("PERSON", "AGE");
+//        if (!cli.isStarted)
+//        {
+//            cli.startCluster();
 //        }
+//            cli.createTable("PERSON");
+//            cli.addColumnFamily("PERSON", "PERSON_NAME");
+//            cli.addColumnFamily("PERSON", "AGE");
+////        }
         Object p1 = prepareHbaseInstance("1", 10);
         Object p2 = prepareHbaseInstance("2", 20);
         Object p3 = prepareHbaseInstance("3", 15);
@@ -151,10 +151,10 @@ public class PersonHBaseTest extends BaseTest
         }
         em.close();
         emf.close();
-        if(cli != null && cli.isStarted())
-        {
-        cli.stopCluster("PERSON");
-        }
+//        if(cli != null && cli.isStarted())
+//        {
+//        cli.stopCluster("PERSON");
+//        }
 //        LuceneCleanupUtilities.cleanLuceneDirectory("hbaseTest");
         // if (cli.isStarted)
 

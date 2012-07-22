@@ -4,10 +4,12 @@
 package com.impetus.client.crud.countercolumns;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.InvalidRequestException;
@@ -29,13 +31,15 @@ import com.impetus.client.persistence.CassandraCli;
  */
 public class SuperCountersTest
 {
+    private static final String id = "sk";
+
     private EntityManagerFactory emf;
 
     private EntityManager em;
 
-    private static final boolean RUN_IN_EMBEDDED_MODE = true;
+    private static final boolean RUN_IN_EMBEDDED_MODE = false;
 
-    private static final boolean AUTO_MANAGE_SCHEMA = true;
+    private static final boolean AUTO_MANAGE_SCHEMA = false;
 
     private String keyspace = "KunderaCounterColumn";
 
@@ -52,7 +56,7 @@ public class SuperCountersTest
 
         if (AUTO_MANAGE_SCHEMA)
         {
-            createSchema();
+//            createSchema();
         }
         emf = Persistence.createEntityManagerFactory("CassandraCounterTest");
     }
@@ -96,6 +100,7 @@ public class SuperCountersTest
     {
         persistSuperCounter();
         findSuperCounter();
+        queryOnSuperCounter();
         deleteSuperCounter();
     }
 
@@ -103,7 +108,7 @@ public class SuperCountersTest
     {
         em = emf.createEntityManager();
         SuperCounters counters = new SuperCounters();
-        counters = em.find(SuperCounters.class, "sk");
+        counters = em.find(SuperCounters.class, id);
         Assert.assertNotNull(counters);
         Assert.assertNotNull(counters.getCounter());
         Assert.assertNotNull(counters.getSubCounter());
@@ -111,7 +116,7 @@ public class SuperCountersTest
         em.remove(counters);
 
         EntityManager em1 = emf.createEntityManager();
-        counters = em1.find(SuperCounters.class, "sk");
+        counters = em1.find(SuperCounters.class, id);
         Assert.assertNull(counters);
 
         em.close();
@@ -123,9 +128,12 @@ public class SuperCountersTest
 
         em = emf.createEntityManager();
         SuperCounters superCounters = new SuperCounters();
-        superCounters = em.find(SuperCounters.class, "sk");
+        superCounters = em.find(SuperCounters.class, id);
         Assert.assertNotNull(superCounters);
         Assert.assertNotNull(superCounters.getCounter());
+        Assert.assertNotNull(superCounters.getSubCounter());
+        Assert.assertEquals(12, superCounters.getCounter());
+        Assert.assertEquals(23, superCounters.getSubCounter().getSubCounter());
         em.close();
     }
 
@@ -135,7 +143,7 @@ public class SuperCountersTest
         em = emf.createEntityManager();
         SuperCounters superCounters = new SuperCounters();
         superCounters.setCounter(12);
-        superCounters.setId("sk");
+        superCounters.setId(id);
 
         SubCounter subCounter = new SubCounter();
         subCounter.setSubCounter(23);
@@ -145,11 +153,29 @@ public class SuperCountersTest
         em.persist(superCounters);
 
         EntityManager newEM = emf.createEntityManager();
-        superCounters = newEM.find(SuperCounters.class, "sk");
+        superCounters = newEM.find(SuperCounters.class, id);
         Assert.assertNotNull(superCounters);
         Assert.assertNotNull(superCounters.getCounter());
 
         em.close();
         newEM.close();
+    }
+
+    public void queryOnSuperCounter()
+    {
+        em = emf.createEntityManager();
+        Query q = em.createQuery("select c from SuperCounters c");
+        List<SuperCounters> r = q.getResultList();
+        Assert.assertNotNull(r);
+        Assert.assertEquals(1, r.size());
+        for (SuperCounters counters : r)
+        {
+            Assert.assertNotNull(counters);
+            Assert.assertEquals(id, counters.getId());
+            Assert.assertNotNull(counters.getCounter());
+//            Assert.assertEquals(12, counters.getCounter());
+            Assert.assertNotNull(counters.getSubCounter());
+            Assert.assertEquals(23, counters.getSubCounter().getSubCounter());
+        }
     }
 }

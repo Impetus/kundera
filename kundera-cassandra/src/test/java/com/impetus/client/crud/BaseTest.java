@@ -20,6 +20,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import com.impetus.client.crud.datatypes.StudentCassandra;
+
 import junit.framework.Assert;
 
 /**
@@ -94,6 +96,17 @@ public abstract class BaseTest
         Assert.assertFalse(results.isEmpty());
         Assert.assertEquals(3, results.size());
 
+    }
+
+    protected <E extends Object> void assertFindByGTId(EntityManager em, String clazz, E e, String id, String fieldName)
+    {
+        String query = "Select p from " + clazz + " p where p." + fieldName + " = " + id;
+        // // find by name.
+        Query q = em.createQuery(query);
+        List<E> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertFalse(results.isEmpty());
+        Assert.assertEquals(3, results.size());
     }
 
     /**
@@ -290,8 +303,7 @@ public abstract class BaseTest
      */
     private <E extends Object> String getPersonName(E e, Object result)
     {
-       
-  
+
         return ((PersonCassandra) result).getPersonName();
     }
 

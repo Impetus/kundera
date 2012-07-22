@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
+import com.impetus.kundera.KunderaException;
 
 /**
  * @author kuldeep.mishra
@@ -32,9 +33,13 @@ import com.impetus.client.persistence.CassandraCli;
  */
 public class CountersTest
 {
-    private EntityManagerFactory emf;
+    private static final String id1 = "12";
 
-    private EntityManager em;
+    private static final String id2 = "15";
+
+    private static final String id3 = "18";
+
+    private EntityManagerFactory emf;
 
     private static final boolean RUN_IN_EMBEDDED_MODE = true;
 
@@ -55,7 +60,7 @@ public class CountersTest
 
         if (AUTO_MANAGE_SCHEMA)
         {
-            createSchema();
+            // createSchema();
         }
         emf = Persistence.createEntityManagerFactory("CassandraCounterTest");
     }
@@ -71,6 +76,7 @@ public class CountersTest
         cfDef.name = "counters";
         cfDef.default_validation_class = "CounterColumnType";
         cfDef.comparator_type = "UTF8Type";
+
         client.system_add_column_family(cfDef);
     }
 
@@ -99,64 +105,93 @@ public class CountersTest
         incrCounter();
         decrCounter();
         findCounter();
-        queryOnCounter();
+        selectAllQuery();
+        queryGTEQOnId();
+        queryLTEQOnId();
+        rangeQuery();
         mergeCounter();
+        updateNamedQueryOnCounter();
+        deleteNamedQueryOnCounter();
         deleteCounter();
     }
 
     public void incrCounter()
     {
-        em = emf.createEntityManager();
-        Counters counters = new Counters();
-        counters.setCounter1(12);
-        counters.setId("sk");
-        em.persist(counters);
+        EntityManager em = emf.createEntityManager();
+        Counters counter = new Counters();
+        counter.setCounter(12);
+        counter.setId(id1);
+        em.persist(counter);
 
-        // counters = em.find(Counters.class, "sk");
-        // Assert.assertNotNull(counters);
-        // Assert.assertNotNull(counters.getCounter1());
-        // Assert.as
+        Counters counter1 = new Counters();
+        counter1.setCounter(15);
+        counter1.setId(id2);
+        em.persist(counter1);
+
+        Counters counter2 = new Counters();
+        counter2.setCounter(18);
+        counter2.setId(id3);
+        em.persist(counter2);
 
         em.close();
     }
 
     private void decrCounter()
     {
-        em = emf.createEntityManager();
-        Counters counters = new Counters();
-        counters.setCounter1(-10);
-        counters.setId("sk");
-        em.persist(counters);
+        EntityManager em = emf.createEntityManager();
+        Counters counter1 = new Counters();
+        counter1.setCounter(-10);
+        counter1.setId(id1);
+        em.persist(counter1);
 
-        // counters = em.find(Counters.class, "sk");
-        // Assert.assertNotNull(counters);
-        // Assert.assertNotNull(counters.getCounter1());
+        Counters counter2 = new Counters();
+        counter2.setCounter(-10);
+        counter2.setId(id2);
+        em.persist(counter2);
+
+        Counters counter3 = new Counters();
+        counter3.setCounter(-10);
+        counter3.setId(id3);
+        em.persist(counter3);
 
         em.close();
     }
 
     public void findCounter()
     {
-        em = emf.createEntityManager();
-        Counters counters = new Counters();
-        counters = em.find(Counters.class, "sk");
-        Assert.assertNotNull(counters);
-        Assert.assertNotNull(counters.getCounter1());
-        Assert.assertEquals(2, counters.getCounter1());
+        EntityManager em = emf.createEntityManager();
+        Counters counter1 = new Counters();
+        counter1 = em.find(Counters.class, id1);
+        Assert.assertNotNull(counter1);
+        Assert.assertNotNull(counter1.getCounter());
+        Assert.assertEquals(2, counter1.getCounter());
+
+        Counters counter2 = new Counters();
+        counter2 = em.find(Counters.class, id2);
+        Assert.assertNotNull(counter2);
+        Assert.assertNotNull(counter2.getCounter());
+        Assert.assertEquals(5, counter2.getCounter());
+
+        Counters counter3 = new Counters();
+        counter3 = em.find(Counters.class, id3);
+        Assert.assertNotNull(counter3);
+        Assert.assertNotNull(counter3.getCounter());
+        Assert.assertEquals(8, counter3.getCounter());
+
         em.close();
     }
 
     public void deleteCounter()
     {
-        em = emf.createEntityManager();
+        EntityManager em = emf.createEntityManager();
         Counters counters = new Counters();
-        counters = em.find(Counters.class, "sk");
+        counters = em.find(Counters.class, id3);
         Assert.assertNotNull(counters);
-        Assert.assertNotNull(counters.getCounter1());
+        Assert.assertNotNull(counters.getCounter());
         em.remove(counters);
 
         EntityManager em1 = emf.createEntityManager();
-        counters = em1.find(Counters.class, "sk");
+        counters = em1.find(Counters.class, id3);
         Assert.assertNull(counters);
 
         em.close();
@@ -164,28 +199,188 @@ public class CountersTest
 
     public void mergeCounter()
     {
-        em = emf.createEntityManager();
+        EntityManager em = emf.createEntityManager();
         Counters counters = new Counters();
-        counters = em.find(Counters.class, "sk");
+        counters = em.find(Counters.class, id1);
         Assert.assertNotNull(counters);
-        Assert.assertNotNull(counters.getCounter1());
-        counters = em.merge(counters);
-        Assert.assertNull(counters);
-        em.close();
+        Assert.assertNotNull(counters.getCounter());
+        try
+        {
+            em.merge(counters);
+        }
+        catch (KunderaException ke)
+        {
+            Assert.assertEquals("java.lang.UnsupportedOperationException:  Merge is not permitted on counter column! ",
+                    ke.getMessage());
+        }
+        finally
+        {
+            em.close();
+        }
     }
 
-    public void queryOnCounter()
+    public void selectAllQuery()
     {
-        em = emf.createEntityManager();
+        EntityManager em = emf.createEntityManager();
         Query q = em.createQuery("select c from Counters c");
         List<Counters> r = q.getResultList();
         Assert.assertNotNull(r);
-        Assert.assertEquals(1, r.size());
+        Assert.assertEquals(3, r.size());
+        int counter = 0;
         for (Counters counters : r)
         {
-            Assert.assertNotNull(counters);
-            Assert.assertNotNull(counters.getCounter1());
-            Assert.assertEquals(2, counters.getCounter1());
+            if (counters.getId().equals(id1))
+            {
+                counter++;
+                Assert.assertNotNull(counters);
+                Assert.assertNotNull(counters.getCounter());
+                Assert.assertEquals(2, counters.getCounter());
+            }
+            else if (counters.getId().equals(id2))
+            {
+                counter++;
+                Assert.assertNotNull(counters);
+                Assert.assertNotNull(counters.getCounter());
+                Assert.assertEquals(5, counters.getCounter());
+            }
+            else
+            {
+                counter++;
+                Assert.assertNotNull(counters);
+                Assert.assertNotNull(counters.getCounter());
+                Assert.assertEquals(id3, counters.getId());
+                Assert.assertEquals(8, counters.getCounter());
+            }
+
         }
+        Assert.assertEquals(3, counter);
+        em.close();
+    }
+
+    /**
+     * 
+     */
+    private void rangeQuery()
+    {
+        EntityManager em = emf.createEntityManager();
+        Query q = em.createQuery("select c from Counters c where c.id between 12 and 15");
+        List<Counters> r = q.getResultList();
+        Assert.assertNotNull(r);
+        Assert.assertEquals(2, r.size());
+        int counter = 0;
+        for (Counters counters : r)
+        {
+            if (counters.getId().equals(id1))
+            {
+                counter++;
+                Assert.assertNotNull(counters);
+                Assert.assertNotNull(counters.getCounter());
+                Assert.assertEquals(2, counters.getCounter());
+            }
+            else
+            {
+                counter++;
+                Assert.assertNotNull(counters);
+                Assert.assertNotNull(counters.getCounter());
+                Assert.assertEquals(id2, counters.getId());
+                Assert.assertEquals(5, counters.getCounter());
+            }
+        }
+        Assert.assertEquals(2, counter);
+        em.close();
+    }
+
+    private void queryGTEQOnId()
+    {
+        EntityManager em = emf.createEntityManager();
+        Query q = em.createQuery("select c from Counters c where c.id >= 15");
+        List<Counters> r = q.getResultList();
+        Assert.assertNotNull(r);
+        Assert.assertEquals(2, r.size());
+        int counter = 0;
+        for (Counters counters : r)
+        {
+            if (counters.getId().equals(id2))
+            {
+                counter++;
+                Assert.assertNotNull(counters);
+                Assert.assertNotNull(counters.getCounter());
+                Assert.assertEquals(5, counters.getCounter());
+            }
+            else
+            {
+                counter++;
+                Assert.assertNotNull(counters);
+                Assert.assertNotNull(counters.getCounter());
+                Assert.assertEquals(id3, counters.getId());
+                Assert.assertEquals(8, counters.getCounter());
+            }
+
+        }
+        Assert.assertEquals(2, counter);
+        em.close();
+    }
+
+    private void queryLTEQOnId()
+    {
+        EntityManager em = emf.createEntityManager();
+        Query q = em.createQuery("select c from Counters c where c.id <= 15");
+        List<Counters> r = q.getResultList();
+        Assert.assertNotNull(r);
+        Assert.assertEquals(2, r.size());
+        int counter = 0;
+        for (Counters counters : r)
+        {
+            if (counters.getId().equals(id1))
+            {
+                counter++;
+                Assert.assertNotNull(counters);
+                Assert.assertNotNull(counters.getCounter());
+                Assert.assertEquals(2, counters.getCounter());
+            }
+            else
+            {
+                counter++;
+                Assert.assertNotNull(counters);
+                Assert.assertNotNull(counters.getCounter());
+                Assert.assertEquals(id2, counters.getId());
+                Assert.assertEquals(5, counters.getCounter());
+            }
+
+        }
+        Assert.assertEquals(2, counter);
+        em.close();
+    }
+
+    private void updateNamedQueryOnCounter()
+    {
+        EntityManager em = emf.createEntityManager();
+        String updateQuery = "Update Counters c SET c.counter=23 where c.id=12";
+        Query q = em.createQuery(updateQuery);
+        q.executeUpdate();
+        Counters counter1 = new Counters();
+        counter1 = em.find(Counters.class, id1);
+        Assert.assertNotNull(counter1);
+        Assert.assertNotNull(counter1.getCounter());
+        Assert.assertEquals(2, counter1.getCounter());
+    }
+
+    private void deleteNamedQueryOnCounter()
+    {
+        EntityManager em = emf.createEntityManager();
+        String deleteQuery = "Delete From Counters c where c.id <= " + id2;
+
+        Query q = em.createQuery(deleteQuery);
+        q.executeUpdate();
+
+        Counters counter2 = new Counters();
+        counter2 = em.find(Counters.class, id1);
+        Assert.assertNull(counter2);
+
+        Counters counter3 = new Counters();
+        counter3 = em.find(Counters.class, id2);
+        Assert.assertNull(counter3);
+
+        em.close();
     }
 }

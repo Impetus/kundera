@@ -181,6 +181,8 @@ public class MetamodelConfiguration implements Configuration
         Map<Class<?>, EntityMetadata> entityMetadataMap = ((MetamodelImpl) metamodel).getEntityMetadataMap();
         Map<String, Class<?>> entityNameToClassMap = ((MetamodelImpl) metamodel).getEntityNameToClassMap();
         Map<String, List<String>> puToClazzMap = new HashMap<String, List<String>>();
+        List<Class<?>> classes = new ArrayList<Class<?>>();
+
         if (resources != null)
         {
             for (URL resource : resources)
@@ -192,8 +194,8 @@ public class MetamodelConfiguration implements Configuration
                     InputStream is = null;
                     while ((is = itr.next()) != null)
                     {
-                        scanClassAndPutMetadata(is, reader, entityMetadataMap, entityNameToClassMap, persistenceUnit,
-                                client, puToClazzMap);
+                        classes.addAll(scanClassAndPutMetadata(is, reader, entityMetadataMap, entityNameToClassMap,
+                                persistenceUnit, client, puToClazzMap));
                     }
                 }
                 catch (IOException e)
@@ -207,7 +209,7 @@ public class MetamodelConfiguration implements Configuration
         ((MetamodelImpl) metamodel).setEntityMetadataMap(entityMetadataMap);
         appMetadata.getMetamodelMap().put(persistenceUnit, metamodel);
         appMetadata.setClazzToPuMap(puToClazzMap);
-        validateEntityForClientSpecificProperty(resources, reader, persistenceUnit);
+        validateEntityForClientSpecificProperty(classes, persistenceUnit);
     }
 
     /**
@@ -216,46 +218,21 @@ public class MetamodelConfiguration implements Configuration
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    private void validateEntityForClientSpecificProperty(URL[] resources, Reader reader, String persistenceUnit)
+    private void validateEntityForClientSpecificProperty(List<Class<?>> classes, final String persistenceUnit)
     {
-        for (URL resource : resources)
+        for (Class clazz : classes)
         {
-            ResourceIterator itr = reader.getResourceIterator(resource, reader.getFilter());
-            InputStream is = null;
-            EntityValidator validator = new EntityValidatorImpl();
-            while ((is = itr.next()) != null)
+            String schema = ((Table) clazz.getAnnotation(Table.class)).schema();
+            String pu = null;
+            if (schema != null && schema.indexOf("@") > 0)
             {
-                DataInputStream dstream = new DataInputStream(new BufferedInputStream(is));
-                ClassFile cf = null;
-                String className = null;
-                try
-                {
-                    cf = new ClassFile(dstream);
-                    className = cf.getName();
-                    Class<?> clazz = Class.forName(className);
-                    if (clazz.isAnnotationPresent(Entity.class) && clazz.isAnnotationPresent(Table.class))
-                    {
-                        String schema = clazz.getAnnotation(Table.class).schema();
-                        String pu = null;
-                        if (schema != null && schema.indexOf("@") > 0)
-                        {
-                            pu = schema.substring(schema.indexOf("@") + 1, schema.length());
-                        }
-                        if (persistenceUnit.equalsIgnoreCase(pu))
-                        {
-                            validator.validateEntity(clazz);
-                        }
-                    }
-                }
-                catch (IOException e)
-                {
-                    log.error("Error while retreiving and storing entity metadata. Details:" + e.getMessage());
-                    throw new MetamodelLoaderException("Error while retreiving and storing entity metadata");
-                }
-                catch (ClassNotFoundException e)
-                {
-                    log.error("Class " + className + " not found, it won't be loaded as entity");
-                }
+                pu = schema.substring(schema.indexOf("@") + 1, schema.length());
+            }
+            EntityValidator validator = new EntityValidatorImpl();
+            if (clazz.isAnnotationPresent(Entity.class) && clazz.isAnnotationPresent(Table.class)
+                    && persistenceUnit.equalsIgnoreCase(pu))
+            {
+                validator.validateEntity(clazz);
             }
         }
     }
@@ -276,13 +253,15 @@ public class MetamodelConfiguration implements Configuration
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    private void scanClassAndPutMetadata(InputStream bits, Reader reader,
+    private List<Class<?>> scanClassAndPutMetadata(InputStream bits, Reader reader,
             Map<Class<?>, EntityMetadata> entityMetadataMap, Map<String, Class<?>> entityNameToClassMap,
             String persistenceUnit, String client, Map<String, List<String>> clazzToPuMap) throws IOException
     {
         DataInputStream dstream = new DataInputStream(new BufferedInputStream(bits));
         ClassFile cf = null;
         String className = null;
+
+        List<Class<?>> classes = new ArrayList<Class<?>>();
 
         try
         {
@@ -340,6 +319,10 @@ public class MetamodelConfiguration implements Configuration
                             }
                         }
                     }
+
+                    // TODO :
+                    onValidateClientProperties(classes, clazz, persistenceUnit);
+
                 }
             }
         }
@@ -352,6 +335,21 @@ public class MetamodelConfiguration implements Configuration
             dstream.close();
             bits.close();
         }
+
+        return classes;
+    }
+
+    /**
+     * @param clazz
+     */
+    private List<Class<?>> onValidateClientProperties(List<Class<?>> classes, Class<?> clazz,
+            final String persistenceUnit)
+    {
+        if (clazz.isAnnotationPresent(Entity.class) && clazz.isAnnotationPresent(Table.class))
+        {
+            classes.add(clazz);
+        }
+        return classes;
     }
 
     /**

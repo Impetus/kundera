@@ -44,6 +44,7 @@ import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.impetus.client.cassandra.pelops.PelopsDataHandler.ThriftRow;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
@@ -109,17 +110,11 @@ final class PelopsDataHandler
                 Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = selector
                         .getColumnOrSuperColumnsFromRows(new ColumnParent(m.getTableName()), rowKeys,
                                 Selector.newColumnsPredicateAll(true, 10000), consistencyLevel);
-                for (Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry : thriftColumnOrSuperColumns.entrySet())
-                {
-                    for (ColumnOrSuperColumn col : entry.getValue())
-                    {
-                        thriftCounterSuperColumns.add(col.getCounter_super_column());
-                    }
-                }
+                getThriftCounterSuperColumn(thriftCounterSuperColumns, thriftColumnOrSuperColumns);
                 if (thriftCounterSuperColumns != null)
                 {
-                    e = fromSuperColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null, null, null,
-                            thriftCounterSuperColumns), relationNames, isWrapReq);
+                    e = fromCounterSuperColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null, null,
+                            null, thriftCounterSuperColumns), relationNames, isWrapReq);
                 }
             }
             else
@@ -158,8 +153,8 @@ final class PelopsDataHandler
 
                 }
 
-                e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null, null, thriftColumns,
-                        null), relationNames, isWrapReq);
+                e = fromCounterColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null, null,
+                        thriftColumns, null), relationNames, isWrapReq);
             }
             else
             {
@@ -182,6 +177,22 @@ final class PelopsDataHandler
             }
         }
         return e;
+    }
+
+    /**
+     * @param thriftCounterSuperColumns
+     * @param thriftColumnOrSuperColumns
+     */
+    private void getThriftCounterSuperColumn(List<CounterSuperColumn> thriftCounterSuperColumns,
+            Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns)
+    {
+        for (Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry : thriftColumnOrSuperColumns.entrySet())
+        {
+            for (ColumnOrSuperColumn col : entry.getValue())
+            {
+                thriftCounterSuperColumns.add(col.getCounter_super_column());
+            }
+        }
     }
 
     /**
@@ -347,102 +358,107 @@ final class PelopsDataHandler
         // thriftRow.getId());
 
         // Iterate through each column
-        if (m.isCounterColumnType())
+        // if (m.isCounterColumnType())
+        // {
+        // for (CounterColumn c : thriftRow.getCounterColumns())
+        // {
+        // if (entity == null)
+        // {
+        // entity = clazz.newInstance();
+        // // Set row-key
+        // PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
+        // }
+        //
+        // String thriftColumnName =
+        // PropertyAccessorFactory.STRING.fromBytes(String.class, c.getName());
+        // Long thriftColumnValue = c.getValue();
+        //
+        // if (null == thriftColumnValue)
+        // {
+        // continue;
+        // }
+        //
+        // // Check if this is a property, or a column representing foreign
+        // // keys
+        // com.impetus.kundera.metadata.model.Column column =
+        // m.getColumn(thriftColumnName);
+        // if (column != null)
+        // {
+        // try
+        // {
+        // if ((column.getField().getType().equals(Integer.class) ||
+        // column.getField().getType()
+        // .equals(int.class))
+        // && thriftColumnValue != null)
+        // {
+        // PropertyAccessorHelper.set(entity, column.getField(),
+        // thriftColumnValue.intValue());
+        // }
+        // else
+        // {
+        // PropertyAccessorHelper.set(entity, column.getField(),
+        // thriftColumnValue);
+        // }
+        // }
+        // catch (PropertyAccessException pae)
+        // {
+        // log.warn(pae.getMessage());
+        // }
+        // }
+        // else
+        // {
+        // if (relationNames != null && !relationNames.isEmpty() &&
+        // relationNames.contains(thriftColumnName))
+        // {
+        // // relations = new HashMap<String, Object>();
+        // String value = thriftColumnValue.toString();
+        // relations.put(thriftColumnName, value);
+        // // prepare EnhanceEntity and return it
+        // }
+        // }
+        // }
+        // }
+        // else
+        // {
+        for (Column c : thriftRow.getColumns())
         {
-            for (CounterColumn c : thriftRow.getCounterColumns())
+            if (entity == null)
             {
-                if (entity == null)
-                {
-                    entity = clazz.newInstance();
-                    // Set row-key
-                    PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
-                }
+                entity = clazz.newInstance();
+                // Set row-key
+                PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
+            }
 
-                String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, c.getName());
-                Long thriftColumnValue = c.getValue();
+            String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, c.getName());
+            byte[] thriftColumnValue = c.getValue();
 
-                if (null == thriftColumnValue)
-                {
-                    continue;
-                }
+            if (null == thriftColumnValue)
+            {
+                continue;
+            }
 
-                // Check if this is a property, or a column representing foreign
-                // keys
-                com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
-                if (column != null)
+            // Check if this is a property, or a column representing foreign
+            // keys
+            com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
+            if (column != null)
+            {
+                try
                 {
-                    try
-                    {
-                        if ((column.getField().getType().equals(Integer.class) || column.getField().getType()
-                                .equals(int.class))
-                                && thriftColumnValue != null)
-                        {
-                            PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue.intValue());
-                        }
-                        else
-                        {
-                            PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue);
-                        }
-                    }
-                    catch (PropertyAccessException pae)
-                    {
-                        log.warn(pae.getMessage());
-                    }
+                    PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue);
                 }
-                else
+                catch (PropertyAccessException pae)
                 {
-                    if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
-                    {
-                        // relations = new HashMap<String, Object>();
-                        String value = thriftColumnValue.toString();
-                        relations.put(thriftColumnName, value);
-                        // prepare EnhanceEntity and return it
-                    }
+                    log.warn(pae.getMessage());
                 }
             }
-        }
-        else
-        {
-            for (Column c : thriftRow.getColumns())
+            else
             {
-                if (entity == null)
+                if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
                 {
-                    entity = clazz.newInstance();
-                    // Set row-key
-                    PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
-                }
-
-                String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, c.getName());
-                byte[] thriftColumnValue = c.getValue();
-
-                if (null == thriftColumnValue)
-                {
-                    continue;
-                }
-
-                // Check if this is a property, or a column representing foreign
-                // keys
-                com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
-                if (column != null)
-                {
-                    try
-                    {
-                        PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue);
-                    }
-                    catch (PropertyAccessException pae)
-                    {
-                        log.warn(pae.getMessage());
-                    }
-                }
-                else
-                {
-                    if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
-                    {
-                        // relations = new HashMap<String, Object>();
-                        String value = PropertyAccessorFactory.STRING.fromBytes(String.class, thriftColumnValue);
-                        relations.put(thriftColumnName, value);
-                        // prepare EnhanceEntity and return it
-                    }
+                    // relations = new HashMap<String, Object>();
+                    String value = PropertyAccessorFactory.STRING.fromBytes(String.class, thriftColumnValue);
+                    relations.put(thriftColumnName, value);
+                    // prepare EnhanceEntity and return it
                 }
             }
         }
@@ -450,6 +466,75 @@ final class PelopsDataHandler
         return isWrapperReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, thriftRow.getId(),
                 relations) : entity;
         // return new EnhanceEntity(entity, thriftRow.getId(), relations);
+    }
+
+    public Object fromCounterColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
+            List<String> relationNames, boolean isWrapperReq) throws Exception
+    {
+        // Instantiate a new instance
+        Object entity = null;
+        Map<String, Object> relations = new HashMap<String, Object>();
+
+        // Set row-key.
+        // PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
+        // PropertyAccessorHelper.set(entity, m.getIdColumn().getField(),
+        // thriftRow.getId());
+
+        // Iterate through each column
+        for (CounterColumn c : thriftRow.getCounterColumns())
+        {
+            if (entity == null)
+            {
+                entity = clazz.newInstance();
+                // Set row-key
+                PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
+            }
+
+            String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, c.getName());
+            Long thriftColumnValue = c.getValue();
+
+            if (null == thriftColumnValue)
+            {
+                continue;
+            }
+
+            // Check if this is a property, or a column representing foreign
+            // keys
+            com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
+            if (column != null)
+            {
+                try
+                {
+                    if ((column.getField().getType().equals(Integer.class) || column.getField().getType()
+                            .equals(int.class))
+                            && thriftColumnValue != null)
+                    {
+                        PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue.intValue());
+                    }
+                    else
+                    {
+                        PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue);
+                    }
+                }
+                catch (PropertyAccessException pae)
+                {
+                    log.warn(pae.getMessage());
+                }
+            }
+            else
+            {
+                if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
+                {
+                    // relations = new HashMap<String, Object>();
+                    String value = thriftColumnValue.toString();
+                    relations.put(thriftColumnName, value);
+                    // prepare EnhanceEntity and return it
+                }
+            }
+        }
+
+        return isWrapperReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, thriftRow.getId(),
+                relations) : entity;
     }
 
     /**
@@ -490,253 +575,114 @@ final class PelopsDataHandler
         Field embeddedCollectionField = null;
         Map<String, Object> relations = new HashMap<String, Object>();
 
-        if (m.isCounterColumnType())
+        for (SuperColumn sc : tr.getSuperColumns())
         {
-            for (CounterSuperColumn sc : tr.getCounterSuperColumns())
+            if (entity == null)
             {
-                if (entity == null)
-                {
-                    entity = clazz.newInstance();
-                    // Set row-key
-                    PropertyAccessorHelper.setId(entity, m, tr.getId());
-                }
-                String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, sc.getName());
-                String scNamePrefix = null;
-
-                // If this super column is variable in number (name#sequence
-                // format)
-                if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
-                {
-                    scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
-                    embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
-
-                    if (embeddedCollection == null)
-                    {
-                        embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
-                    }
-
-                    Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
-
-                    for (CounterColumn column : sc.getColumns())
-                    {
-                        String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-                        Long value = column.getValue();
-                        if (value == null)
-                        {
-                            continue;
-                        }
-
-                        Field columnField = columnNameToFieldMap.get(name);
-                        if (columnField != null)
-                        {
-                            if ((columnField.getType().equals(Integer.class) || columnField.getType().equals(int.class))
-                                    && value != null)
-                            {
-                                int colValue = value.intValue();
-                                PropertyAccessorHelper.set(embeddedObject, columnField, colValue);
-                            }
-                            else
-                            {
-                                PropertyAccessorHelper.set(embeddedObject, columnField, value);
-                            }
-                            // PropertyAccessorHelper.set(embeddedObject,
-                            // columnField, value);
-                        }
-                        else if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(name))
-                        {
-                            String valueAsStr = value.toString();
-                            relations.put(name, valueAsStr);
-                        }
-                    }
-                    embeddedCollection.add(embeddedObject);
-
-                    // Add this embedded object to cache
-                    ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(),
-                            embeddedObject, scName);
-                }
-                else
-                {
-                    // For embedded super columns, create embedded entities and
-                    // add them to parent entity
-                    Field superColumnField = superColumnNameToFieldMap.get(scName);
-                    Object superColumnObj = null;
-                    if (superColumnField != null
-                            || (relationNames != null && !relationNames.isEmpty() && relationNames.contains(scName)))
-                    {
-                        Class superColumnClass = superColumnField != null ? superColumnField.getType() : null;
-                        superColumnObj = PropertyAccessorHelper.getObject(superColumnClass);
-
-                        for (CounterColumn column : sc.getColumns())
-                        {
-                            String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-                            Long value = column.getValue();
-                            Field columnField = columnNameToFieldMap.get(name);
-                            if (columnField != null)
-                            {
-                                try
-                                {
-                                    if ((columnField.getType().equals(Integer.class) || columnField.getType().equals(
-                                            int.class))
-                                            && value != null)
-                                    {
-                                        int colValue = value.intValue();
-                                        PropertyAccessorHelper.set(superColumnObj, columnField, colValue);
-                                    }
-                                    else
-                                    {
-                                        PropertyAccessorHelper.set(superColumnObj, columnField, value);
-                                    }
-
-                                }
-                                catch (PropertyAccessException e)
-                                {
-                                    // This is an entity column to be retrieved
-                                    // in a
-                                    // super column family. It's stored as a
-                                    // super
-                                    // column that would
-                                    // have just one column with the same name
-                                    log.debug(e.getMessage()
-                                            + ". Possible case of entity column in a super column family. Will be treated as a super column.");
-                                    com.impetus.kundera.metadata.model.Column col = m.getColumn(name);
-                                    if (col != null)
-                                    {
-                                        superColumnObj = value;
-                                    }
-                                }
-
-                            }
-                            else
-                            {
-                                String valueAsStr = value.toString();
-                                relations.put(name, valueAsStr);
-                            }
-                        }
-                    }
-
-                    if (superColumnField != null)
-                    {
-                        PropertyAccessorHelper.set(entity, superColumnField, superColumnObj);
-                    }
-                }
+                entity = clazz.newInstance();
+                // Set row-key
+                PropertyAccessorHelper.setId(entity, m, tr.getId());
             }
+            String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, sc.getName());
+            String scNamePrefix = null;
 
-        }
-        else
-        {
-            for (SuperColumn sc : tr.getSuperColumns())
+            // If this super column is variable in number (name#sequence
+            // format)
+            if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
             {
-                if (entity == null)
+                scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
+                embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
+
+                if (embeddedCollection == null)
                 {
-                    entity = clazz.newInstance();
-                    // Set row-key
-                    PropertyAccessorHelper.setId(entity, m, tr.getId());
+                    embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
                 }
-                String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, sc.getName());
-                String scNamePrefix = null;
 
-                // If this super column is variable in number (name#sequence
-                // format)
-                if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
+                Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
+
+                for (Column column : sc.getColumns())
                 {
-                    scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
-                    embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
-
-                    if (embeddedCollection == null)
+                    String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
+                    byte[] value = column.getValue();
+                    if (value == null)
                     {
-                        embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
+                        continue;
                     }
 
-                    Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
+                    Field columnField = columnNameToFieldMap.get(name);
+                    if (columnField != null)
+                    {
+                        PropertyAccessorHelper.set(embeddedObject, columnField, value);
+                    }
+                    else if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(name))
+                    {
+                        String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(String.class, value);
+                        relations.put(name, valueAsStr);
+                    }
+                }
+                embeddedCollection.add(embeddedObject);
 
+                // Add this embedded object to cache
+                ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(),
+                        embeddedObject, scName);
+            }
+            else
+            {
+                // For embedded super columns, create embedded entities and
+                // add them to parent entity
+                Field superColumnField = superColumnNameToFieldMap.get(scName);
+                Object superColumnObj = null;
+                if (superColumnField != null
+                        || (relationNames != null && !relationNames.isEmpty() && relationNames.contains(scName)))
+                {
+
+                    Class superColumnClass = superColumnField != null ? superColumnField.getType() : null;
+                    superColumnObj = superColumnClass != null ? superColumnClass.newInstance() : null;
                     for (Column column : sc.getColumns())
                     {
                         String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
                         byte[] value = column.getValue();
-                        if (value == null)
-                        {
-                            continue;
-                        }
-
                         Field columnField = columnNameToFieldMap.get(name);
                         if (columnField != null)
                         {
-                            PropertyAccessorHelper.set(embeddedObject, columnField, value);
+                            try
+                            {
+                                PropertyAccessorHelper.set(superColumnObj, columnField, value);
+                            }
+                            catch (PropertyAccessException e)
+                            {
+                                // This is an entity column to be retrieved
+                                // in a
+                                // super column family. It's stored as a
+                                // super
+                                // column that would
+                                // have just one column with the same name
+                                log.debug(e.getMessage()
+                                        + ". Possible case of entity column in a super column family. Will be treated as a super column.");
+                                com.impetus.kundera.metadata.model.Column col = m.getColumn(name);
+                                if (col != null)
+                                {
+                                    superColumnObj = Bytes.toUTF8(value);
+                                }
+                            }
+
                         }
-                        else if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(name))
+                        else
                         {
                             String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(String.class, value);
                             relations.put(name, valueAsStr);
                         }
                     }
-                    embeddedCollection.add(embeddedObject);
-
-                    // Add this embedded object to cache
-                    ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(),
-                            embeddedObject, scName);
                 }
-                else
+
+                if (superColumnField != null)
                 {
-                    // For embedded super columns, create embedded entities and
-                    // add them to parent entity
-                    Field superColumnField = superColumnNameToFieldMap.get(scName);
-                    Object superColumnObj = null;
-                    if (superColumnField != null
-                            || (relationNames != null && !relationNames.isEmpty() && relationNames.contains(scName)))
-                    {
-
-                        Class superColumnClass = superColumnField != null ? superColumnField.getType() : null;
-                        superColumnObj = superColumnClass != null ? superColumnClass.newInstance() : null;
-                        for (Column column : sc.getColumns())
-                        {
-                            String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-                            byte[] value = column.getValue();
-                            Field columnField = columnNameToFieldMap.get(name);
-                            if (columnField != null)
-                            {
-
-                                try
-                                {
-                                    PropertyAccessorHelper.set(superColumnObj, columnField, value);
-                                }
-                                catch (PropertyAccessException e)
-                                {
-                                    // This is an entity column to be retrieved
-                                    // in a
-                                    // super column family. It's stored as a
-                                    // super
-                                    // column that would
-                                    // have just one column with the same name
-                                    log.debug(e.getMessage()
-                                            + ". Possible case of entity column in a super column family. Will be treated as a super column.");
-                                    com.impetus.kundera.metadata.model.Column col = m.getColumn(name);
-                                    if (col != null)
-                                    {
-                                        superColumnObj = Bytes.toUTF8(value);
-                                    }
-                                }
-
-                            }
-                            else
-                            {
-                                String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(String.class, value);
-                                relations.put(name, valueAsStr);
-                            }
-
-                        }
-
-                    }
-
-                    if (superColumnField != null)
-                    {
-                        PropertyAccessorHelper.set(entity, superColumnField, superColumnObj);
-                    }
-
+                    PropertyAccessorHelper.set(entity, superColumnField, superColumnObj);
                 }
-
             }
-
         }
+
+        // }
 
         if (embeddedCollection != null && !embeddedCollection.isEmpty())
         {
@@ -748,6 +694,166 @@ final class PelopsDataHandler
         return isWrapReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, tr.getId(), relations)
                 : entity;
         // return new EnhanceEntity(entity, tr.getId(), relations);
+    }
+
+    public Object fromCounterSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr,
+            List<String> relationNames, boolean isWrapReq) throws Exception
+    {
+
+        // Instantiate a new instance
+        Object entity = null;
+
+        // Map to hold property-name=>foreign-entity relations
+        Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+
+        // Get a name->field map for super-columns
+        Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
+        Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
+        MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
+
+        // Add all super columns to entity
+        Collection embeddedCollection = null;
+        Field embeddedCollectionField = null;
+        Map<String, Object> relations = new HashMap<String, Object>();
+
+        for (CounterSuperColumn sc : tr.getCounterSuperColumns())
+        {
+            if (entity == null)
+            {
+                entity = clazz.newInstance();
+                // Set row-key
+                PropertyAccessorHelper.setId(entity, m, tr.getId());
+            }
+            String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, sc.getName());
+            String scNamePrefix = null;
+
+            // If this super column is variable in number (name#sequence
+            // format)
+            if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
+            {
+                scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
+                embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
+
+                if (embeddedCollection == null)
+                {
+                    embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
+                }
+
+                Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
+
+                for (CounterColumn column : sc.getColumns())
+                {
+                    String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
+                    Long value = column.getValue();
+                    if (value == null)
+                    {
+                        continue;
+                    }
+
+                    Field columnField = columnNameToFieldMap.get(name);
+                    if (columnField != null)
+                    {
+                        if ((columnField.getType().equals(Integer.class) || columnField.getType().equals(int.class))
+                                && value != null)
+                        {
+                            int colValue = value.intValue();
+                            PropertyAccessorHelper.set(embeddedObject, columnField, colValue);
+                        }
+                        else
+                        {
+                            PropertyAccessorHelper.set(embeddedObject, columnField, value);
+                        }
+                        // PropertyAccessorHelper.set(embeddedObject,
+                        // columnField, value);
+                    }
+                    else if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(name))
+                    {
+                        String valueAsStr = value.toString();
+                        relations.put(name, valueAsStr);
+                    }
+                }
+                embeddedCollection.add(embeddedObject);
+
+                // Add this embedded object to cache
+                ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(),
+                        embeddedObject, scName);
+            }
+            else
+            {
+                // For embedded super columns, create embedded entities and
+                // add them to parent entity
+                Field superColumnField = superColumnNameToFieldMap.get(scName);
+                Object superColumnObj = null;
+                if (superColumnField != null
+                        || (relationNames != null && !relationNames.isEmpty() && relationNames.contains(scName)))
+                {
+                    Class superColumnClass = superColumnField != null ? superColumnField.getType() : null;
+                    superColumnObj = PropertyAccessorHelper.getObject(superColumnClass);
+
+                    for (CounterColumn column : sc.getColumns())
+                    {
+                        String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
+                        Long value = column.getValue();
+                        Field columnField = columnNameToFieldMap.get(name);
+                        if (columnField != null)
+                        {
+                            try
+                            {
+                                if ((columnField.getType().equals(Integer.class) || columnField.getType().equals(
+                                        int.class))
+                                        && value != null)
+                                {
+                                    int colValue = value.intValue();
+                                    PropertyAccessorHelper.set(superColumnObj, columnField, colValue);
+                                }
+                                else
+                                {
+                                    PropertyAccessorHelper.set(superColumnObj, columnField, value);
+                                }
+
+                            }
+                            catch (PropertyAccessException e)
+                            {
+                                // This is an entity column to be retrieved
+                                // in a
+                                // super column family. It's stored as a
+                                // super
+                                // column that would
+                                // have just one column with the same name
+                                log.debug(e.getMessage()
+                                        + ". Possible case of entity column in a super column family. Will be treated as a super column.");
+                                com.impetus.kundera.metadata.model.Column col = m.getColumn(name);
+                                if (col != null)
+                                {
+                                    superColumnObj = value;
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            String valueAsStr = value.toString();
+                            relations.put(name, valueAsStr);
+                        }
+                    }
+                }
+
+                if (superColumnField != null)
+                {
+                    PropertyAccessorHelper.set(entity, superColumnField, superColumnObj);
+                }
+            }
+        }
+
+        if (embeddedCollection != null && !embeddedCollection.isEmpty())
+        {
+            PropertyAccessorHelper.set(entity, embeddedCollectionField, embeddedCollection);
+        }
+
+        // EnhancedEntity e = EntityResolver.getEnhancedEntity(entity,
+        // tr.getId(), foreignKeysMap);
+        return isWrapReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, tr.getId(), relations)
+                : entity;
     }
 
     /**
@@ -890,79 +996,93 @@ final class PelopsDataHandler
 
         return tr;
     }
-    
-    List<ThriftRow> toIndexThriftRow(Object e, EntityMetadata m, String columnFamily) {       
+
+    List<ThriftRow> toIndexThriftRow(Object e, EntityMetadata m, String columnFamily)
+    {
         List<ThriftRow> indexThriftRows = new ArrayList<PelopsDataHandler.ThriftRow>();
-        
-        byte[] value = PropertyAccessorHelper.get(e, m.getIdColumn().getField());  
-        
-        for(EmbeddedColumn embeddedColumn : m.getEmbeddedColumnsAsList()) {
+
+        byte[] value = PropertyAccessorHelper.get(e, m.getIdColumn().getField());
+
+        for (EmbeddedColumn embeddedColumn : m.getEmbeddedColumnsAsList())
+        {
             Object embeddedObject = PropertyAccessorHelper.getObject(e, embeddedColumn.getField());
-            
-            if(embeddedObject instanceof Collection) {               
+
+            if (embeddedObject instanceof Collection)
+            {
                 ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
-                
-                for(Object obj : (Collection) embeddedObject) {
-                    for(com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns()) {
-                        
-                        //Column Value
-                        String id = Bytes.toUTF8(value);                        
+
+                for (Object obj : (Collection) embeddedObject)
+                {
+                    for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
+                    {
+
+                        // Column Value
+                        String id = Bytes.toUTF8(value);
                         String superColumnName = ecCacheHandler.getElementCollectionObjectName(id, obj);
-                        byte[] indexColumnValue = (id + Constants.INDEX_TABLE_EC_DELIMITER + superColumnName).getBytes();
-                        
+                        byte[] indexColumnValue = (id + Constants.INDEX_TABLE_EC_DELIMITER + superColumnName)
+                                .getBytes();
+
                         ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedColumn, obj, column,
                                 indexColumnValue);
-                        
+
                         indexThriftRows.add(tr);
                     }
                 }
-            } else {
-                for(com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns()) {             
-                    
+            }
+            else
+            {
+                for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
+                {
+
                     ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedColumn, embeddedObject, column,
-                            value);                                   
-                    
+                            value);
+
                     indexThriftRows.add(tr);
-                }  
-            }           
-                     
-        }   
-        
+                }
+            }
+
+        }
+
         return indexThriftRows;
     }
-    
-    
 
     /**
      * Constructs Thrift Tow (each record) for Index Table
-     * @param columnFamily Column family Name for Index Table
-     * @param embeddedColumn Instance of {@link EmbeddedColumn} 
-     * @param obj Embedded Object instance
-     * @param column Instance of {@link Column}
-     * @param indexColumnValue Name of Index Column
+     * 
+     * @param columnFamily
+     *            Column family Name for Index Table
+     * @param embeddedColumn
+     *            Instance of {@link EmbeddedColumn}
+     * @param obj
+     *            Embedded Object instance
+     * @param column
+     *            Instance of {@link Column}
+     * @param indexColumnValue
+     *            Name of Index Column
      * @return Instance of {@link ThriftRow}
      */
     private ThriftRow constructIndexTableThriftRow(String columnFamily, EmbeddedColumn embeddedColumn, Object obj,
             com.impetus.kundera.metadata.model.Column column, byte[] indexColumnValue)
     {
-        //Column Name
-        Field columnField = column.getField();                        
+        // Column Name
+        Field columnField = column.getField();
         byte[] indexColumnName = PropertyAccessorHelper.get(obj, columnField);
-        
-        //Construct Index Table Thrift Row
+
+        // Construct Index Table Thrift Row
         ThriftRow tr = new ThriftRow();
-        tr.setColumnFamilyName(columnFamily); //Index column-family name
-        tr.setId(embeddedColumn.getField().getName() + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + column.getField().getName()); // Id       
-        
+        tr.setColumnFamilyName(columnFamily); // Index column-family name
+        tr.setId(embeddedColumn.getField().getName() + Constants.INDEX_TABLE_ROW_KEY_DELIMITER
+                + column.getField().getName()); // Id
+
         Column thriftColumn = new Column();
         thriftColumn.setName(indexColumnName);
         thriftColumn.setValue(indexColumnValue);
         thriftColumn.setTimestamp(timestamp);
-        
+
         tr.addColumn(thriftColumn);
         return tr;
     }
-    
+
     /**
      * @param columnFamilyName
      * @param m
@@ -979,7 +1099,7 @@ final class PelopsDataHandler
         for (FilterClause o : filterClauseQueue)
         {
             SearchResult searchResult = new SearchResult();
-            
+
             FilterClause clause = ((FilterClause) o);
             String rowKey = clause.getProperty();
             String columnName = clause.getValue();
@@ -988,28 +1108,28 @@ final class PelopsDataHandler
 
             // TODO: Second check unnecessary but unavoidable as filter clause
             // property is incorrectly passed as column name
-            
-            //Search based on Primary key
+
+            // Search based on Primary key
             if (rowKey.equals(m.getIdColumn().getField().getName()) || rowKey.equals(m.getIdColumn().getName()))
             {
-                
+
                 searchResult.setPrimaryKey(columnName);
-                          
+
             }
             else
             {
-                //Search results in the form of thrift columns
+                // Search results in the form of thrift columns
                 List<Column> thriftColumns = new ArrayList<Column>();
 
-                
-                //EQUAL Operator
+                // EQUAL Operator
                 if (condition.equals("="))
                 {
-                    Column thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
+                    Column thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName,
+                            consistencyLevel);
                     thriftColumns.add(thriftColumn);
                 }
 
-                //LIKE operation
+                // LIKE operation
                 else if (condition.equalsIgnoreCase("LIKE"))
                 {
 
@@ -1017,28 +1137,28 @@ final class PelopsDataHandler
                             thriftColumns, columnName.getBytes(), new byte[0]);
                 }
 
-                //Greater than operator
+                // Greater than operator
                 else if (condition.equals(">"))
                 {
                     searchColumnsInRange(columnFamilyName, consistencyLevel, selector, rowKey, columnName,
                             thriftColumns, columnName.getBytes(), new byte[0]);
                 }
 
-                //Less than Operator
+                // Less than Operator
                 else if (condition.equals("<"))
                 {
                     searchColumnsInRange(columnFamilyName, consistencyLevel, selector, rowKey, columnName,
                             thriftColumns, new byte[0], columnName.getBytes());
                 }
-                
-                //Greater than-equals to operator
+
+                // Greater than-equals to operator
                 else if (condition.equals(">="))
                 {
                     searchColumnsInRange(columnFamilyName, consistencyLevel, selector, rowKey, columnName,
                             thriftColumns, columnName.getBytes(), new byte[0]);
                 }
-                
-                //Less than equal to operator
+
+                // Less than equal to operator
                 else if (condition.equals("<="))
                 {
                     searchColumnsInRange(columnFamilyName, consistencyLevel, selector, rowKey, columnName,
@@ -1050,43 +1170,50 @@ final class PelopsDataHandler
                             + " comparison operator not supported currently for Cassandra Inverted Index");
                 }
 
-                
-                //Construct search results out of these thrift columns
-                for(Column thriftColumn : thriftColumns) {
+                // Construct search results out of these thrift columns
+                for (Column thriftColumn : thriftColumns)
+                {
                     byte[] columnValue = thriftColumn.getValue();
                     String columnValueStr = Bytes.toUTF8(columnValue);
 
-                    PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(m.getIdColumn().getField());
+                    PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(m.getIdColumn()
+                            .getField());
                     Object value = null;
 
                     if (columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER) > 0)
                     {
-                        String pk = columnValueStr.substring(0, columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER));
-                        String ecName = columnValueStr.substring(columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER)
-                                + Constants.INDEX_TABLE_EC_DELIMITER.length(), columnValueStr.length());
-                        
+                        String pk = columnValueStr.substring(0,
+                                columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER));
+                        String ecName = columnValueStr.substring(
+                                columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER)
+                                        + Constants.INDEX_TABLE_EC_DELIMITER.length(), columnValueStr.length());
+
                         searchResult.setPrimaryKey(pk);
-                        searchResult.setEmbeddedColumnName(rowKey.substring(0, rowKey.indexOf(Constants.INDEX_TABLE_ROW_KEY_DELIMITER)));
+                        searchResult.setEmbeddedColumnName(rowKey.substring(0,
+                                rowKey.indexOf(Constants.INDEX_TABLE_ROW_KEY_DELIMITER)));
                         searchResult.addEmbeddedColumnValue(ecName);
-                        
+
                     }
                     else
                     {
                         value = accessor.fromBytes(m.getIdColumn().getField().getClass(), columnValue);
                         searchResult.setPrimaryKey(value);
-                    } 
-                    searchResults.add(searchResult); 
-                }     
-                               
-            }                 
+                    }
+                    searchResults.add(searchResult);
+                }
+
+            }
 
         }
         return searchResults;
     }
 
     /**
-     * Searches <code>searchString</code> into <code>columnFamilyName</code> (usually a wide row column family) for a given <code>rowKey</code>
-     * from start to finish columns. Adds matching thrift columns into <code>thriftColumns</code> 
+     * Searches <code>searchString</code> into <code>columnFamilyName</code>
+     * (usually a wide row column family) for a given <code>rowKey</code> from
+     * start to finish columns. Adds matching thrift columns into
+     * <code>thriftColumns</code>
+     * 
      * @param columnFamilyName
      * @param consistencyLevel
      * @param selector
@@ -1108,10 +1235,10 @@ final class PelopsDataHandler
         for (Column column : allThriftColumns)
         {
             String colName = Bytes.toUTF8(column.getName());
-            //String colValue = Bytes.toUTF8(column.getValue());
+            // String colValue = Bytes.toUTF8(column.getValue());
             if (colName.indexOf(searchString) >= 0)
             {
-                thriftColumns.add(column);                            
+                thriftColumns.add(column);
             }
         }
     }
@@ -1388,7 +1515,7 @@ final class PelopsDataHandler
                                 obj);
                         tr.addSuperColumn(thriftSuperColumn);
                         ecCacheHandler.addElementCollectionCacheMapping(id, obj, superColumnName);
-                        
+
                         count++;
                     }
                 }
@@ -1412,10 +1539,11 @@ final class PelopsDataHandler
                         tr.addSuperColumn(thriftSuperColumn);
                         ecCacheHandler.addElementCollectionCacheMapping(id, obj, superColumnName);
                     }
-                    
-                    //TODO: Why are we not clearing EC Cache as in HBaseDataHandler
+
+                    // TODO: Why are we not clearing EC Cache as in
+                    // HBaseDataHandler
                     // Clear embedded collection cache for GC
-                    //ecCacheHandler.clearCache();
+                    // ecCacheHandler.clearCache();
                 }
 
             }
@@ -1780,4 +1908,5 @@ final class PelopsDataHandler
     {
         return System.currentTimeMillis();
     }
+
 }

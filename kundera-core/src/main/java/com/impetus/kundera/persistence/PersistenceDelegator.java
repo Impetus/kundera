@@ -57,7 +57,6 @@ import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.FlushStack;
 import com.impetus.kundera.persistence.context.MainCache;
 import com.impetus.kundera.persistence.context.PersistenceCache;
-import com.impetus.kundera.persistence.context.PersistenceCacheManager;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 import com.impetus.kundera.persistence.event.EntityEventDispatcher;
@@ -187,7 +186,7 @@ public class PersistenceDelegator
 
         EntityMetadata entityMetadata = getMetadata(entityClass);
 
-        if(entityMetadata == null)
+        if (entityMetadata == null)
         {
             throw new KunderaException("Unable to load entity metadata for :" + entityClass);
         }
@@ -449,13 +448,6 @@ public class PersistenceDelegator
         log.debug("Merging Entity : " + e);
         EntityMetadata m = getMetadata(e.getClass());
 
-        // check for counter column
-        if (m.isCounterColumnType())
-        {
-            log.error("merge is  not supported for counter column type column family");
-            return null;
-        }
-        
         // TODO: throw OptisticLockException if wrong version and
         // optimistic locking enabled
 
@@ -504,37 +496,38 @@ public class PersistenceDelegator
      */
     public Client getClient(EntityMetadata m)
     {
-        
-//
-//        // Persistence Unit used to retrieve client
+
+        //
+        // // Persistence Unit used to retrieve client
         String persistenceUnit = m.getPersistenceUnit();
-//
+        //
         Client client = clientMap.get(persistenceUnit);
-        if(client == null)
+        if (client == null)
         {
-            throw new ClientResolverException("No client configured for persistenceUnit"+ persistenceUnit);
+            throw new ClientResolverException("No client configured for persistenceUnit" + persistenceUnit);
         }
-//        // single persistence unit given and entity is annotated with '@'.
-//        // validate persistence unit given is same
-//
-//        // If client has already been created, return it, or create it and put
-//        // it into client map
-//        if (clientMap == null || clientMap.isEmpty())
-//        {
-//            clientMap = new HashMap<String, Client>();
-//            client = ClientResolver.discoverClient(persistenceUnit);
-//            clientMap.put(persistenceUnit, client);
-//
-//        }
-//        else if (clientMap.get(persistenceUnit) == null)
-//        {
-//            client = ClientResolver.discoverClient(persistenceUnit);
-//            clientMap.put(persistenceUnit, client);
-//        }
-//        else
-//        {
-//            client = clientMap.get(persistenceUnit);
-//        }
+        // // single persistence unit given and entity is annotated with '@'.
+        // // validate persistence unit given is same
+        //
+        // // If client has already been created, return it, or create it and
+        // put
+        // // it into client map
+        // if (clientMap == null || clientMap.isEmpty())
+        // {
+        // clientMap = new HashMap<String, Client>();
+        // client = ClientResolver.discoverClient(persistenceUnit);
+        // clientMap.put(persistenceUnit, client);
+        //
+        // }
+        // else if (clientMap.get(persistenceUnit) == null)
+        // {
+        // client = ClientResolver.discoverClient(persistenceUnit);
+        // clientMap.put(persistenceUnit, client);
+        // }
+        // else
+        // {
+        // client = clientMap.get(persistenceUnit);
+        // }
 
         return client;
     }
@@ -756,23 +749,23 @@ public class PersistenceDelegator
     /**
      * Pre load client specific to persistence unit.
      * 
-     * @param persistenceUnit persistence unit.
+     * @param persistenceUnit
+     *            persistence unit.
      */
-    
+
     void loadClient(String persistenceUnit)
     {
-        if(clientMap == null)
+        if (clientMap == null)
         {
-          clientMap = new HashMap<String, Client>();   
+            clientMap = new HashMap<String, Client>();
         }
-        
-        if(!clientMap.containsKey(persistenceUnit))
+
+        if (!clientMap.containsKey(persistenceUnit))
         {
             clientMap.put(persistenceUnit, ClientResolver.discoverClient(persistenceUnit));
         }
-        
     }
-    
+
     /**
      * Returns map of client as delegate to entity manager.
      * 

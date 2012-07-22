@@ -26,6 +26,8 @@ import javax.persistence.Table;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import sun.util.logging.resources.logging;
+
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -40,7 +42,7 @@ public class EntityValidatorImpl implements EntityValidator
 {
 
     /** The Constant log. */
-    private static final Log LOG = LogFactory.getLog(EntityValidatorImpl.class);
+    private static final Log log = LogFactory.getLog(EntityValidatorImpl.class);
 
     /** cache for validated classes. */
     private List<Class<?>> classes = new ArrayList<Class<?>>();
@@ -63,7 +65,7 @@ public class EntityValidatorImpl implements EntityValidator
             return;
         }
 
-        LOG.debug("Validating " + clazz.getName());
+        log.debug("Validating " + clazz.getName());
 
         // Is Entity?
         if (!clazz.isAnnotationPresent(Entity.class))
@@ -127,7 +129,10 @@ public class EntityValidatorImpl implements EntityValidator
         {
             SchemaManager schemaManager = ClientResolver.getClientFactory(metadata.getPersistenceUnit())
                     .getSchemaManager();
-            schemaManager.validateEntity(clazz);
+            if (!schemaManager.validateEntity(clazz))
+            {
+                log.warn("Validation for : " + clazz + " failed , any operation on this class will result in fail.");
+            }
         }
     }
 }

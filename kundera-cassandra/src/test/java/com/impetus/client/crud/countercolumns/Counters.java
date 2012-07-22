@@ -13,7 +13,7 @@ public class Counters
     private String id;
 
     @Column
-    private int counter1;
+    private int counter;
 
     /**
      * @return the id
@@ -35,17 +35,17 @@ public class Counters
     /**
      * @return the counter1
      */
-    public int getCounter1()
+    public int getCounter()
     {
-        return counter1;
+        return counter;
     }
 
     /**
      * @param counter1
      *            the counter1 to set
      */
-    public void setCounter1(int counter1)
+    public void setCounter(int counter)
     {
-        this.counter1 = counter1;
+        this.counter = counter;
     }
 }

@@ -100,8 +100,8 @@ public class HBaseClientFactory extends GenericClientFactory
 
         Configuration hadoopConf = new Configuration();
         hadoopConf.set("hbase.master", node + ":" + port);
-        hadoopConf.set("hbase.zookeeper.quorum", HBasePropertyReader.hsmd.getZookeeper_host());
-        hadoopConf.set("hbase.zookeeper.property.clientPort", HBasePropertyReader.hsmd.getZookeeper_port());
+        hadoopConf.set("hbase.zookeeper.quorum", HBasePropertyReader.hsmd.getZookeeperHost());
+        hadoopConf.set("hbase.zookeeper.property.clientPort", HBasePropertyReader.hsmd.getZookeeperPort());
         conf = new HBaseConfiguration(hadoopConf);
         reader = new HBaseEntityReader();
         //

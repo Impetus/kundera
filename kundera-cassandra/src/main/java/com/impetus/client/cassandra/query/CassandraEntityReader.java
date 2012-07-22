@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
+import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -140,7 +141,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                     // in case need to search on secondry columns and it is not
                     // set
                     // to true!
-                    ls = ((PelopsClient) client).find(this.conditions.get(isRowKeyQuery), m, true, null,100);
+                    ls = ((PelopsClient) client).find(this.conditions.get(isRowKeyQuery), m, true, null, 100);
                 }
                 else
                 {
@@ -177,8 +178,34 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
     {
         List<IndexExpression> expressions = ixClause.get(isRowKeyQuery).get(0).getExpressions();
 
-        byte[] minValue = expressions.get(0).getValue();
-        byte[] maxVal = expressions.get(1).getValue();
+        if (expressions == null)
+        {
+            return null;
+        }
+        
+        byte[] minValue = null;
+        byte[] maxVal = null; 
+
+        // If one field for range is given.
+        
+        if(expressions.size() == 1)
+        {
+           IndexOperator operator = expressions.get(0).op;
+           if(operator.equals(IndexOperator.LTE))
+           {
+               maxVal =expressions.get(0) != null ? expressions.get(0).getValue() : null;
+               minValue = null;
+           } else 
+           {
+               minValue =expressions.get(0) != null ? expressions.get(0).getValue() : null;
+               maxVal = null;
+           }
+        } else
+        {
+           minValue = expressions.get(0) != null ? expressions.get(0).getValue() : null;
+           maxVal = expressions.size() > 1 && expressions.get(1) != null ? expressions.get(1).getValue() : null;
+        }
+        
         try
         {
             result = ((PelopsClient) client).findByRange(minValue, maxVal, m, false, null);
@@ -190,23 +217,24 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         }
         return result;
     }
-    
-    public List<EnhanceEntity> readFromIndexTable(EntityMetadata m, Client client, Queue<FilterClause> filterClauseQueue) {
-        
+
+    public List<EnhanceEntity> readFromIndexTable(EntityMetadata m, Client client, Queue<FilterClause> filterClauseQueue)
+    {
+
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
         List<Object> primaryKeys = new ArrayList<Object>();
-        
-        
-        String columnFamilyName = m.getTableName() + Constants.INDEX_TABLE_SUFFIX; 
-    
+
+        String columnFamilyName = m.getTableName() + Constants.INDEX_TABLE_SUFFIX;
+
         searchResults = ((PelopsClient) client).searchInInvertedIndex(columnFamilyName, m, filterClauseQueue);
-        
-        for(SearchResult searchResult : searchResults) {
+
+        for (SearchResult searchResult : searchResults)
+        {
             primaryKeys.add(searchResult.getPrimaryKey());
         }
-        
-        List<EnhanceEntity> enhanceEntityList = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(), m.getRelationNames(),
-                true, m, primaryKeys.toArray(new String[] {}));        
+
+        List<EnhanceEntity> enhanceEntityList = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(),
+                m.getRelationNames(), true, m, primaryKeys.toArray(new String[] {}));
         return enhanceEntityList;
     }
 

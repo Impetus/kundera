@@ -39,7 +39,7 @@ public class CassandraSchemaManagerValidateEntityTest
 {
 
     private String persistenceUnit = "cassandraProperties";
-    private String[] persistenceUnits = new String[] {persistenceUnit};
+//    private String[] persistenceUnits = new String[] {persistenceUnit};
    
     /**
      * @throws java.lang.Exception

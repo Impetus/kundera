@@ -10,7 +10,6 @@ import javax.persistence.Table;
 @Table(name = "SuperCounters", schema = "KunderaCounterColumn@CassandraCounterTest")
 public class SuperCounters
 {
-
     @Id
     @Column(name = "ID")
     private String id;

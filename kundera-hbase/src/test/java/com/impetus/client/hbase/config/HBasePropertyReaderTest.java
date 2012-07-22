@@ -134,11 +134,11 @@ public class HBasePropertyReaderTest
         }
         else
         {
-            Assert.assertEquals("localhost", HBasePropertyReader.hsmd.getZookeeper_host());
-            Assert.assertEquals("2181", HBasePropertyReader.hsmd.getZookeeper_port());
+            Assert.assertEquals("localhost", HBasePropertyReader.hsmd.getZookeeperHost());
+            Assert.assertEquals("2181", HBasePropertyReader.hsmd.getZookeeperPort());
         }
 
-        Assert.assertEquals(port, HBasePropertyReader.hsmd.getZookeeper_port());
-        Assert.assertEquals(host, HBasePropertyReader.hsmd.getZookeeper_host());
+        Assert.assertEquals(port, HBasePropertyReader.hsmd.getZookeeperPort());
+        Assert.assertEquals(host, HBasePropertyReader.hsmd.getZookeeperHost());
     }
 }

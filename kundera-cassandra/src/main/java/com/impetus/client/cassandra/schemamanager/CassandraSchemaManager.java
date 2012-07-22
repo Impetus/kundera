@@ -717,6 +717,10 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             isvalid = isvalid && validateRelations(metadata) ? true : false;
         }
+        else
+        {
+            return true;
+        }
         return isvalid;
     }
 

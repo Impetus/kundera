@@ -47,6 +47,8 @@ public class HBasePropertyReader implements PropertyReader
 
     public static HBaseSchemaMetadata hsmd;
 
+    private PersistenceUnitMetadata puMetadata;
+
     public HBasePropertyReader()
     {
         hsmd = new HBaseSchemaMetadata();
@@ -61,7 +63,7 @@ public class HBasePropertyReader implements PropertyReader
     public void read(String pu)
     {
         Properties properties = new Properties();
-        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
+        puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
         String propertyName = puMetadata != null ? puMetadata
                 .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
 
@@ -92,8 +94,8 @@ public class HBasePropertyReader implements PropertyReader
      */
     private void readProperties(Properties properties)
     {
-        hsmd.setZookeeper_port(properties.getProperty(Constants.ZOOKEEPER_PORT));
-        hsmd.setZookeeper_host(properties.getProperty(Constants.ZOOKEEPER_HOST));
+        hsmd.setZookeeperPort(properties.getProperty(Constants.ZOOKEEPER_PORT));
+        hsmd.setZookeeperHost(properties.getProperty(Constants.ZOOKEEPER_HOST));
 
         hsmd.addColumnFamilyProperty(properties.getProperty(Constants.CF_DEFS));
     }
@@ -103,12 +105,14 @@ public class HBasePropertyReader implements PropertyReader
         /**
          * zookeeper port.
          */
-        private String zookeeper_port = "2181";
+        private String zookeeperPort = puMetadata != null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_PORT)
+                : null;
 
         /**
          * zookeeper host.
          */
-        private String zookeeper_host = "localhost";
+        private String zookeeperHost = puMetadata != null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_NODES)
+                : null;
 
         /**
          * It holds all property related to columnFamily.
@@ -118,20 +122,20 @@ public class HBasePropertyReader implements PropertyReader
         /**
          * @return the zookeeper_port
          */
-        public String getZookeeper_port()
+        public String getZookeeperPort()
         {
-            return zookeeper_port;
+            return zookeeperPort;
         }
 
         /**
          * @param zookeeper_port
          *            the zookeeper_port to set
          */
-        public void setZookeeper_port(String zookeeper_port)
+        public void setZookeeperPort(String zookeeperPort)
         {
-            if (zookeeper_port != null)
+            if (zookeeperPort != null)
             {
-                this.zookeeper_port = zookeeper_port;
+                this.zookeeperPort = zookeeperPort;
             }
 
         }
@@ -139,20 +143,20 @@ public class HBasePropertyReader implements PropertyReader
         /**
          * @return the zookeeper_host
          */
-        public String getZookeeper_host()
+        public String getZookeeperHost()
         {
-            return zookeeper_host;
+            return zookeeperHost;
         }
 
         /**
          * @param zookeeper_host
          *            the zookeeper_host to set
          */
-        public void setZookeeper_host(String zookeeper_host)
+        public void setZookeeperHost(String zookeeperHost)
         {
-            if (zookeeper_host != null)
+            if (zookeeperHost != null)
             {
-                this.zookeeper_host = zookeeper_host;
+                this.zookeeperHost = zookeeperHost;
             }
 
         }

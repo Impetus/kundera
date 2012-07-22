@@ -321,8 +321,8 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     {
         Configuration hadoopConf = new Configuration();
         hadoopConf.set("hbase.master", host + ":" + port);
-        hadoopConf.set("hbase.zookeeper.quorum", HBasePropertyReader.hsmd.getZookeeper_host());
-        hadoopConf.set("hbase.zookeeper.property.clientPort", HBasePropertyReader.hsmd.getZookeeper_port());
+        hadoopConf.set("hbase.zookeeper.quorum", HBasePropertyReader.hsmd.getZookeeperHost());
+        hadoopConf.set("hbase.zookeeper.property.clientPort", HBasePropertyReader.hsmd.getZookeeperPort());
         HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
         try
         {
@@ -390,7 +390,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     public boolean validateEntity(Class clazz)
     {
         // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
 }

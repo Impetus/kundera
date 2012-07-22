@@ -56,6 +56,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.ColumnOrSuperColumnHelper;
 import org.scale7.cassandra.pelops.Mutator;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.RowDeletor;
@@ -226,7 +227,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                         new String[] { superColumnName.substring(0, superColumnName.indexOf("|")) });
                 E e = (E) handler.fromThriftRow(entityMetadata.getEntityClazz(), entityMetadata,
                         new DataRow<SuperColumn>(entityId, entityMetadata.getTableName(), superColumnList));
-                if(e != null)
+                if (e != null)
                 {
                     entities.add(e);
                 }
@@ -368,10 +369,10 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     public List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
             Queue<FilterClause> filterClauseQueue)
     {
-        List<SearchResult> searchResults = handler.getSearchResults(columnFamilyName, m, filterClauseQueue, getPersistenceUnit(), consistencyLevel);
+        List<SearchResult> searchResults = handler.getSearchResults(columnFamilyName, m, filterClauseQueue,
+                getPersistenceUnit(), consistencyLevel);
         return searchResults;
     }
-    
 
     /*
      * (non-Javadoc)
@@ -457,15 +458,74 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
+
         List<Object> entities = null;
         if (ixClause.isEmpty())
         {
-            Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(),
-                    selector.newKeyRange("", "", maxResult), slicePredicate, consistencyLevel);
-            entities = new ArrayList<Object>(qResults.size());
+            if (m.isCounterColumnType())
+            {
+                IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit()));
+                // thrift.get
+                IPooledConnection connection = thrift.getConnection();
+                org.apache.cassandra.thrift.Cassandra.Client thriftClient = connection.getAPI();
+                try
+                {
+                    List<KeySlice> ks = thriftClient.get_range_slices(new ColumnParent(m.getTableName()),
+                            slicePredicate, selector.newKeyRange("", "", maxResult), consistencyLevel);
+                    if (m.getType().isSuperColumnFamilyMetadata())
+                    {
+                        Map<Bytes, List<CounterSuperColumn>> qCounterSuperColumnResults = ColumnOrSuperColumnHelper
+                                .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_SUPER_COLUMN);
+                        entities = new ArrayList<Object>(qCounterSuperColumnResults.size());
 
-            populateData(m, qResults, entities, isRelation, relations);
+                        populateDataForSuperCounter(m, qCounterSuperColumnResults, entities, isRelation, relations);
+                    }
+                    else
+                    {
 
+                        Map<Bytes, List<CounterColumn>> qCounterColumnResults = ColumnOrSuperColumnHelper
+                                .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_COLUMN);
+                        entities = new ArrayList<Object>(qCounterColumnResults.size());
+
+                        populateDataForCounter(m, qCounterColumnResults, entities, isRelation, relations);
+                    }
+
+                }
+                catch (InvalidRequestException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                catch (UnavailableException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                catch (TimedOutException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                catch (TException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+
+                Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(),
+                        selector.newKeyRange("", "", maxResult), slicePredicate, consistencyLevel);
+
+                // selector.getCounterColumnsFromRows(m.getTableName(),
+                // selector.newKeyRange("", "", maxResult), slicePredicate,
+                // consistencyLevel);
+                // selector.getCounterColumnsFromRows
+                entities = new ArrayList<Object>(qResults.size());
+
+                populateData(m, qResults, entities, isRelation, relations);
+            }
         }
         else
         {
@@ -505,9 +565,9 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
         List<Object> entities = null;
-
-        List<KeySlice> keys = selector.getKeySlices(new ColumnParent(m.getTableName()),
-                selector.newKeyRange(Bytes.fromByteArray(minVal), Bytes.fromByteArray(maxVal), 10000), slicePredicate,
+        List<KeySlice> keys = selector.getKeySlices(new ColumnParent(m.getTableName()), selector.newKeyRange(
+                minVal != null ? Bytes.fromByteArray(minVal) : Bytes.fromUTF8(""),
+                maxVal != null ? Bytes.fromByteArray(maxVal) : Bytes.fromUTF8(""), 10000), slicePredicate,
                 consistencyLevel);
 
         List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
@@ -523,17 +583,31 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
 
                 if (!superColumnNames.isEmpty())
                 {
-                    List<SuperColumn> superColumns = new ArrayList<SuperColumn>(columns.size());
+                    Object r = null;
 
-                    for (ColumnOrSuperColumn supCol : columns)
+                    if (m.isCounterColumnType())
                     {
-                        superColumns.add(supCol.getSuper_column());
+                        List<CounterSuperColumn> superCounterColumns = new ArrayList<CounterSuperColumn>(columns.size());
+                        for (ColumnOrSuperColumn supCol : columns)
+                        {
+                            superCounterColumns.add(supCol.getCounter_super_column());
+                        }
+                        r = handler.fromCounterSuperColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(
+                                new String(rowKey), m.getTableName(), null, null, null, superCounterColumns),
+                                relations, isWrapReq);
                     }
+                    else
+                    {
+                        List<SuperColumn> superColumns = new ArrayList<SuperColumn>(columns.size());
+                        for (ColumnOrSuperColumn supCol : columns)
+                        {
+                            superColumns.add(supCol.getSuper_column());
+                        }
 
-                    Object r = handler
-                            .fromSuperColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(new String(rowKey),
-                                    m.getTableName(), null, superColumns, null, null), relations, isWrapReq);
-                    if(r != null)
+                        r = handler.fromSuperColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(new String(
+                                rowKey), m.getTableName(), null, superColumns, null, null), relations, isWrapReq);
+                    }
+                    if (r != null)
                     {
                         results.add(r);
                     }
@@ -541,15 +615,30 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                 }
                 else
                 {
-                    List<Column> cols = new ArrayList<Column>(columns.size());
-                    for (ColumnOrSuperColumn supCol : columns)
+                    Object r = null;
+                    if (m.isCounterColumnType())
                     {
-                        cols.add(supCol.getColumn());
-                    }
+                        List<CounterColumn> cols = new ArrayList<CounterColumn>(columns.size());
+                        for (ColumnOrSuperColumn supCol : columns)
+                        {
+                            cols.add(supCol.getCounter_column());
+                        }
 
-                    Object r = handler.fromColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(new String(
-                            rowKey), m.getTableName(), cols, null, null, null), relations, isWrapReq);
-                    if(r != null)
+                        r = handler.fromCounterColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(new String(
+                                rowKey), m.getTableName(), null, null, cols, null), relations, isWrapReq);
+                    }
+                    else
+                    {
+                        List<Column> cols = new ArrayList<Column>(columns.size());
+                        for (ColumnOrSuperColumn supCol : columns)
+                        {
+                            cols.add(supCol.getColumn());
+                        }
+
+                        r = handler.fromColumnThriftRow(m.getEntityClazz(), m, handler.new ThriftRow(
+                                new String(rowKey), m.getTableName(), cols, null, null, null), relations, isWrapReq);
+                    }
+                    if (r != null)
                     {
                         results.add(r);
                     }
@@ -607,7 +696,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     public List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames, List<IndexClause> conditions,
             int maxResult)
     {
-
         return (List<EnhanceEntity>) find(conditions, m, true, relationNames, maxResult);
     }
 
@@ -680,13 +768,25 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                     {
                         CqlRow row = iter.next();
                         String rowKey = Bytes.toUTF8(row.getKey());
+                        ThriftRow thriftRow = null;
+                        if (entityMetadata.isCounterColumnType())
+                        {
 
-                        ThriftRow thriftRow = handler.new ThriftRow(rowKey, entityMetadata.getTableName(),
-                                row.getColumns(), null, null, null);
+                            // TODO
+                            return null;
+                            // handler.new ThriftRow(rowKey,
+                            // entityMetadata.getTableName(), null, null, null,
+                            // null);
+                        }
+                        else
+                        {
+                            thriftRow = handler.new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
+                                    null, null, null);
+                        }
 
                         Object entity = handler.fromColumnThriftRow(clazz, entityMetadata, thriftRow, relationalField,
                                 relationalField != null && !relationalField.isEmpty());
-                        if(entity != null)
+                        if (entity != null)
                         {
                             returnedEntities.add(entity);
                         }
@@ -755,6 +855,12 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     @Override
     protected void onPersist(EntityMetadata metadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
+
+        // check for counter column
+        if (isUpdate && metadata.isCounterColumnType())
+        {
+            throw new UnsupportedOperationException(" Merge is not permitted on counter column! ");
+        }
 
         PelopsDataHandler.ThriftRow tf = null;
         try
@@ -826,13 +932,13 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
 
         // Check whether Embedded data storage using Composite Columns is
         // enabled
-        boolean invertedIndexingEnabled = CassandraPropertyReader.csmd.isInvertedIndexingEnabled();     
+        boolean invertedIndexingEnabled = CassandraPropertyReader.csmd.isInvertedIndexingEnabled();
 
         if (invertedIndexingEnabled)
         {
             // Not required for lucene indexing
             if (MetadataUtils.useSecondryIndex(getPersistenceUnit())
-                    && entityMetadata.getType().isSuperColumnFamilyMetadata())
+                    && entityMetadata.getType().isSuperColumnFamilyMetadata() && !entityMetadata.isCounterColumnType())
             {
                 String indexColumnFamily = entityMetadata.getTableName() + Constants.INDEX_TABLE_SUFFIX;
 
@@ -1009,7 +1115,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                     rowIds[i] = Bytes.toUTF8(b.toByteArray());
                     i++;
                 }
-
                 entities.addAll(findAll(m.getEntityClazz(), rowIds));
             }
 
@@ -1026,7 +1131,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                     Object e = handler.fromColumnThriftRow(m.getEntityClazz(), m,
                             handler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null,
                                     null, null), relationNames, isRelational);
-                    if(e != null)
+                    if (e != null)
                     {
                         entities.add(e);
                     }
@@ -1042,6 +1147,67 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             }
         }
 
+    }
+
+    /**
+     * Populate data.
+     * 
+     * @param m
+     *            the m
+     * @param qResults
+     *            the q results
+     * @param entities
+     *            the entities
+     * @param isRelational
+     *            the is relational
+     * @param relationNames
+     *            the relation names
+     */
+    private void populateDataForCounter(EntityMetadata m, Map<Bytes, List<CounterColumn>> qCounterResults,
+            List<Object> entities, boolean isRelational, List<String> relationNames)
+    {
+        Iterator<Bytes> rowIter = qCounterResults.keySet().iterator();
+        while (rowIter.hasNext())
+        {
+            Bytes rowKey = rowIter.next();
+            List<CounterColumn> counterColumns = qCounterResults.get(rowKey);
+            try
+            {
+                Object e = handler.fromCounterColumnThriftRow(m.getEntityClazz(), m,
+                        handler.new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), null, null,
+                                counterColumns, null), relationNames, isRelational);
+                if (e != null)
+                {
+                    entities.add(e);
+                }
+            }
+            catch (IllegalStateException e)
+            {
+                throw new KunderaException(e);
+            }
+            catch (Exception e)
+            {
+                throw new KunderaException(e);
+            }
+        }
+    }
+
+    private void populateDataForSuperCounter(EntityMetadata m, Map<Bytes, List<CounterSuperColumn>> qCounterResults,
+            List<Object> entities, boolean isRelational, List<String> relationNames)
+    {
+        Set<Bytes> primaryKeys = qCounterResults.keySet();
+
+        if (primaryKeys != null && !primaryKeys.isEmpty())
+        {
+            Object[] rowIds = new Object[primaryKeys.size()];
+            int i = 0;
+            for (Bytes b : primaryKeys)
+            {
+                rowIds[i] = Bytes.toUTF8(b.toByteArray());
+                i++;
+            }
+            entities.addAll(findAll(m.getEntityClazz(), rowIds));
+        }
     }
 
     /**
@@ -1181,6 +1347,12 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         if (!isOpen())
             throw new PersistenceException("PelopsClient is closed.");
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>();
+        rowKeys.add(ByteBuffer.wrap(rowId.getBytes()));
+
+        // selector.getColumnOrSuperColumnsFromRows(new
+        // ColumnParent(columnFamily),rowKeys ,
+        // Selector.newColumnsPredicate(superColumnNames), consistencyLevel);
         return selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames),
                 consistencyLevel);
     }

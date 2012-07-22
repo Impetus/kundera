@@ -24,13 +24,11 @@ import org.junit.Test;
 
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
-import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.schemamanager.entites.Doctor;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.SchemaConfiguration;
-import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.ClientMetadata;
@@ -82,9 +80,9 @@ public class CassandraPropertiesTest
     @Before
     public void setUp() throws Exception
     {
-        configuration = new SchemaConfiguration(pu);
         CassandraCli.cassandraSetUp();
         client = CassandraCli.getClient();
+        configuration = new SchemaConfiguration(pu);
     }
 
     /**
@@ -143,7 +141,6 @@ public class CassandraPropertiesTest
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
 
         props.put(PersistenceProperties.KUNDERA_CLIENT_PROPERTY, KUNDERA_CASSANDRA_PROPERTIES);
-        
 
         if (useLucene)
         {

@@ -266,7 +266,7 @@ public class CassQuery extends QueryImpl implements Query
      */
     private IndexOperator getOperator(String condition, boolean idPresent)
     {
-        if (!idPresent && condition.equals("="))
+        if (/*!idPresent && */condition.equals("="))
         {
             return IndexOperator.EQ;
         }

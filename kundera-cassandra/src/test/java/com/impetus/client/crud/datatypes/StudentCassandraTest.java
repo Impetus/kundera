@@ -121,6 +121,9 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         // // find by name.
         assertFindByName(em, "StudentCassandra", StudentCassandra.class, "Amresh", "studentName");
 
+        // find by Id 
+//        assertFindByGTId(em, "StudentCassandra", StudentCassandra.class, "12345677", "studentId");
+        
         // find by name and age.
         assertFindByNameAndAge(em, "StudentCassandra", StudentCassandra.class, "Amresh", "10", "studentName");
 
@@ -139,6 +142,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         assertFindWithoutWhereClause(em, "StudentCassandra", StudentCassandra.class);
         }catch(Exception e)
         {
+            e.printStackTrace();
             Assert.fail("Failure onInsert test");
         }
     }
