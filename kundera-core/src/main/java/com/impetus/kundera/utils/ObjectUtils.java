@@ -226,24 +226,24 @@ public class ObjectUtils
         }
         catch (InstantiationException e)
         {
-            log.warn("Returning null as error during clone, caused by:" + e.getMessage());
+            log.warn("Returning null as error during clone, Caused by:" + e.getMessage());
             return null;
         }
         catch (IllegalAccessException e)
         {
-            log.warn("Returning null as error during clone, caused by:" + e.getMessage());
+            log.warn("Returning null as error during clone, Caused by:" + e.getMessage());
             return null;
         }
 
         catch (InvocationTargetException e)
         {
-            log.warn("Returning null as error during clone, caused by:" + e.getMessage());
+            log.warn("Returning null as error during clone, Caused by:" + e.getMessage());
             return null;
         }
         
         catch (NoSuchMethodException e)
         {
-            log.warn("Returning null as error during clone, caused by:" + e.getMessage());
+            log.warn("Returning null as error during clone, Caused by:" + e.getMessage());
             return null;
         }
 

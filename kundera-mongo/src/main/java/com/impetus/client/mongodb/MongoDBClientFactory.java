@@ -162,17 +162,17 @@ public class MongoDBClientFactory extends GenericClientFactory
         }
         catch (NumberFormatException e)
         {
-            logger.error("Invalid format for MONGODB port, Unale to connect!" + "; Details:" + e.getMessage());
+            logger.error("Invalid format for MONGODB port, Unale to connect!" + "; Caused by:" + e.getMessage());
             throw new ClientLoaderException(e);
         }
         catch (UnknownHostException e)
         {
-            logger.error("Unable to connect to MONGODB at host " + contactNode + "; Details:" + e.getMessage());
+            logger.error("Unable to connect to MONGODB at host " + contactNode + "; Caused by:" + e.getMessage());
             throw new ClientLoaderException(e);
         }
         catch (MongoException e)
         {
-            logger.error("Unable to connect to MONGODB; Details:" + e.getMessage());
+            logger.error("Unable to connect to MONGODB; Caused by:" + e.getMessage());
             throw new ClientLoaderException(e);
         }
 

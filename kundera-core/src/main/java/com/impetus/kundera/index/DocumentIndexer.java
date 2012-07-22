@@ -311,7 +311,7 @@ public abstract class DocumentIndexer implements Indexer
         }
         catch (PropertyAccessException e)
         {
-            LOG.error("Error in accessing field:" + e.getMessage());
+            LOG.error("Error in accessing field, Caused by:" + e.getMessage());
             throw new LuceneIndexingException("Error in accessing field:" + field.getName(), e);
         }
     }

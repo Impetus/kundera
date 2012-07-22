@@ -552,7 +552,7 @@ public class PersistenceXMLLoader
         }
         catch (MalformedURLException mex)
         {
-            log.error(mex.getMessage());
+            log.error("Error during getPersistenceRootUrl(), Caused by: " + mex.getMessage());
             throw new IllegalArgumentException("invalid jar URL[] provided!" + url);
         }
 

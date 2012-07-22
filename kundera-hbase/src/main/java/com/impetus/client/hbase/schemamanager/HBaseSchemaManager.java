@@ -150,7 +150,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 }
                 catch (IOException e1)
                 {
-                    logger.error("check for network connection caused by" + e.getMessage());
+                    logger.error("Check for network connection, Caused by:" + e.getMessage());
                     throw new SchemaGenerationException(e, "Hbase");
                 }
 
@@ -223,7 +223,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             }
             catch (IOException e)
             {
-                logger.error("either check for network connection or table isn't in enabled state caused by"
+                logger.error("Either check for network connection or table isn't in enabled state, Caused by:"
                         + e.getMessage());
                 throw new SchemaGenerationException(e, "Hbase");
             }
@@ -264,7 +264,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             }
             catch (IOException ioex)
             {
-                logger.error("either table isn't in enabled state or some network problem caused by "
+                logger.error("Either table isn't in enabled state or some network problem, Caused by: "
                         + ioex.getMessage());
                 throw new SchemaGenerationException(ioex, "Hbase");
             }
@@ -275,7 +275,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             }
             catch (IOException ioex1)
             {
-                logger.error("table isn't in enabled state caused by" + ioex1.getMessage());
+                logger.error("Table isn't in enabled state, Caused by:" + ioex1.getMessage());
                 throw new SchemaGenerationException(ioex1, "Hbase");
             }
         }
@@ -297,12 +297,12 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 }
                 catch (TableNotFoundException e)
                 {
-                    logger.error("table doesn't exist caused by " + e.getMessage());
+                    logger.error("Table doesn't exist, Caused by " + e.getMessage());
                     throw new SchemaGenerationException(e, "Hbase");
                 }
                 catch (IOException e)
                 {
-                    logger.error("table isn't in enabled state caused by" + e.getMessage());
+                    logger.error("Table isn't in enabled state, Caused by" + e.getMessage());
                     throw new SchemaGenerationException(e, "Hbase");
                 }
             }
@@ -330,12 +330,12 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         }
         catch (MasterNotRunningException e)
         {
-            logger.error("master not running exception caused by" + e.getMessage());
+            logger.error("Master not running exception, Caused by:" + e.getMessage());
             throw new SchemaGenerationException(e, "Hbase");
         }
         catch (ZooKeeperConnectionException e)
         {
-            logger.equals("unable to connect to zookeeper caused by" + e.getMessage());
+            logger.equals("Unable to connect to zookeeper, Caused by:" + e.getMessage());
             throw new SchemaGenerationException(e, "Hbase");
         }
         return true;

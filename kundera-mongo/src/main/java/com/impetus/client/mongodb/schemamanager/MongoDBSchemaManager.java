@@ -131,7 +131,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         if (db == null)
         {
 
-            logger.error("database " + databaseName + "does not exist");
+            logger.error("Database " + databaseName + "does not exist");
             throw new SchemaGenerationException("database " + databaseName + "does not exist", "mongoDb", databaseName);
         }
         else
@@ -182,7 +182,7 @@ public class MongoDBSchemaManager extends AbstractSchemaManager implements Schem
         }
         catch (UnknownHostException e)
         {
-            logger.error("database host cannot be resolved caused by" + e.getMessage());
+            logger.error("Database host cannot be resolved, Caused by" + e.getMessage());
             throw new SchemaGenerationException(e, "mongoDb");
         }
         catch (MongoException e)

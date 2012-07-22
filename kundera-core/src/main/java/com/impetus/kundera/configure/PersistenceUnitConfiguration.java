@@ -122,7 +122,7 @@ public class PersistenceUnitConfiguration implements Configuration
         }
         catch (IOException ioex)
         {
-            log.warn("Error while loading persistence.xml caused by:" + ioex.getMessage());
+            log.warn("Error while loading persistence.xml Caused by:" + ioex.getMessage());
         }
 
         if (xmls == null || !xmls.hasMoreElements())
