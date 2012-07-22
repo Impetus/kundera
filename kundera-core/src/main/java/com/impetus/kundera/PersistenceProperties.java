@@ -68,13 +68,13 @@ public interface PersistenceProperties
     /**
      * Home directory for alternative secondary indexing, Lucene to be specific.
      */
-    public static final String KUNDERA_INDEX_HOME_DIR = "index_home_dir";
+    public static final String KUNDERA_INDEX_HOME_DIR = "index.home.dir";
 
     /** Option to create schema. */
-    public static final String KUNDERA_DDL_AUTO_PREPARE = "kundera_ddl_auto_prepare";
+    public static final String KUNDERA_DDL_AUTO_PREPARE = "kundera.ddl.auto.prepare";
 
     /** Option to give kundera-cassandra property information */
-    public static final String KUNDERA_CLIENT_PROPERTY = "kundera_client_property";
+    public static final String KUNDERA_CLIENT_PROPERTY = "kundera.client.property";
     
     public static final String KUNDERA_USERNAME = "kundera.username";
     

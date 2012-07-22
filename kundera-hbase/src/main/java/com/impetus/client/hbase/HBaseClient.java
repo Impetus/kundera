@@ -344,33 +344,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     {
         String tableName = entityMetadata.getTableName();
 
-        List<String> columnFamilyNames = new ArrayList<String>();
-
-        // If this entity has columns(apart from embedded objects, they will be
-        // treated as column family)
-        List<Column> columns = entityMetadata.getColumnsAsList();
-        if (columns != null && !columns.isEmpty())
-        {
-            columnFamilyNames.addAll(entityMetadata.getColumnFieldNames());
-        }
-
-        // Check whether this table exists, if not create it
-        columnFamilyNames.addAll(entityMetadata.getEmbeddedColumnFieldNames());
-
-        // Add relationship fields if they are there
-        if (relations != null)
-        {
-            for (RelationHolder rh : relations)
-            {
-                columnFamilyNames.add(rh.getRelationName());
-            }
-        }
-
         try
         {
-            // handler.createTableIfDoesNotExist(tableName,
-            // columnFamilyNames.toArray(new String[0]));
-
             // Write data to HBase
 
             handler.writeData(tableName, entityMetadata, entity, id.toString(), relations);
