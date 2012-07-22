@@ -37,7 +37,7 @@ public class SuperCountersTest
 
     private EntityManager em;
 
-    private static final boolean RUN_IN_EMBEDDED_MODE = false;
+    private static final boolean RUN_IN_EMBEDDED_MODE = true;
 
     private static final boolean AUTO_MANAGE_SCHEMA = false;
 
@@ -56,7 +56,7 @@ public class SuperCountersTest
 
         if (AUTO_MANAGE_SCHEMA)
         {
-//            createSchema();
+            createSchema();
         }
         emf = Persistence.createEntityManagerFactory("CassandraCounterTest");
     }
@@ -99,8 +99,8 @@ public class SuperCountersTest
     public void testCRUDOnCounter()
     {
         persistSuperCounter();
-        findSuperCounter();
-        queryOnSuperCounter();
+//        findSuperCounter();
+//        queryOnSuperCounter();
         deleteSuperCounter();
     }
 

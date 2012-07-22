@@ -43,19 +43,18 @@ public class PersonHBaseTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-//        cli = new HBaseCli();
-//        // cli.init();
-//        cli.startCluster();
+        cli = new HBaseCli();
+        cli.startCluster();
         emf = Persistence.createEntityManagerFactory("hbaseTest");
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
     }
 
-//    @Test
-//    public void testDummy()
-//    {
-//        // just to fix CI issue. TO BE DELETED!!!
-//    }
+    // @Test
+    // public void testDummy()
+    // {
+    // // just to fix CI issue. TO BE DELETED!!!
+    // }
     @Test
     public void onInsertHbase() throws Exception
     {
@@ -73,14 +72,14 @@ public class PersonHBaseTest extends BaseTest
 
     private void init()
     {
-//        if (!cli.isStarted)
-//        {
-//            cli.startCluster();
-//        }
-//            cli.createTable("PERSON");
-//            cli.addColumnFamily("PERSON", "PERSON_NAME");
-//            cli.addColumnFamily("PERSON", "AGE");
-////        }
+        if (!cli.isStarted)
+        {
+            cli.startCluster();
+        }
+        cli.createTable("PERSON");
+        cli.addColumnFamily("PERSON", "PERSON_NAME");
+        cli.addColumnFamily("PERSON", "AGE");
+        // }
         Object p1 = prepareHbaseInstance("1", 10);
         Object p2 = prepareHbaseInstance("2", 20);
         Object p3 = prepareHbaseInstance("3", 15);
@@ -91,21 +90,21 @@ public class PersonHBaseTest extends BaseTest
         col.put("2", p2);
         col.put("3", p3);
     }
-    
 
-//    @Test
+    // @Test
     public void onFilterOperation()
     {
         init();
-        
+
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();
         Client client = clients.get("hbaseTest");
 
         Filter f = new QualifierFilter();
-        f = new SingleColumnValueFilter("PERSON_NAME".getBytes(),"PERSON_NAME".getBytes(),CompareOp.EQUAL, "vivek".getBytes());
+        f = new SingleColumnValueFilter("PERSON_NAME".getBytes(), "PERSON_NAME".getBytes(), CompareOp.EQUAL,
+                "vivek".getBytes());
 
         ((HBaseClient) client).setFilter(f);
-        
+
         em.clear();
         // find by without where clause.
         Query q = em.createQuery("Select p from " + PersonHBase.class.getSimpleName() + " p");
@@ -115,7 +114,6 @@ public class PersonHBaseTest extends BaseTest
         Assert.assertEquals(3, results.size());
     }
 
-    
     // @Test
     // public void onMergeHbase() {
     // em.persist(prepareHbaseInstance("1", 10));
@@ -137,25 +135,26 @@ public class PersonHBaseTest extends BaseTest
     @After
     public void tearDown() throws Exception
     {
-        
-      /*   * Delete is working, but as row keys are not deleted from cassandra, so
-         * resulting in issue while reading back. // Delete
+
+        /*
+         * * Delete is working, but as row keys are not deleted from cassandra,
+         * so resulting in issue while reading back. // Delete
          * em.remove(em.find(Person.class, "1"));
          * em.remove(em.find(Person.class, "2"));
          * em.remove(em.find(Person.class, "3")); em.close(); emf.close(); em =
          * null; emf = null;
-        */ 
+         */
         for (Object val : col.values())
         {
             em.remove(val);
         }
         em.close();
         emf.close();
-//        if(cli != null && cli.isStarted())
-//        {
-//        cli.stopCluster("PERSON");
-//        }
-//        LuceneCleanupUtilities.cleanLuceneDirectory("hbaseTest");
+        if (cli != null && cli.isStarted())
+        {
+            cli.stopCluster("PERSON");
+        }
+        LuceneCleanupUtilities.cleanLuceneDirectory("hbaseTest");
         // if (cli.isStarted)
 
     }

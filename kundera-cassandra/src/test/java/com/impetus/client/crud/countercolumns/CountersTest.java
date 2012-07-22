@@ -357,12 +357,20 @@ public class CountersTest
         EntityManager em = emf.createEntityManager();
         String updateQuery = "Update Counters c SET c.counter=23 where c.id=12";
         Query q = em.createQuery(updateQuery);
-        q.executeUpdate();
-        Counters counter1 = new Counters();
-        counter1 = em.find(Counters.class, id1);
-        Assert.assertNotNull(counter1);
-        Assert.assertNotNull(counter1.getCounter());
-        Assert.assertEquals(2, counter1.getCounter());
+
+        try
+        {
+            q.executeUpdate();
+        }
+        catch (UnsupportedOperationException uoe)
+        {
+            Assert.assertEquals(" Merge is not permitted on counter column! ",
+                    uoe.getMessage());
+        }
+        finally
+        {
+            em.close();
+        }
     }
 
     private void deleteNamedQueryOnCounter()

@@ -64,6 +64,7 @@ public class HBasePropertyReader implements PropertyReader
     {
         Properties properties = new Properties();
         puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
+        hsmd.onInitialize();
         String propertyName = puMetadata != null ? puMetadata
                 .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
 
@@ -105,14 +106,21 @@ public class HBasePropertyReader implements PropertyReader
         /**
          * zookeeper port.
          */
-        private String zookeeperPort = puMetadata != null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_PORT)
-                : null;
+        private String zookeeperPort;
 
         /**
          * zookeeper host.
          */
-        private String zookeeperHost = puMetadata != null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_NODES)
-                : null;
+        private String zookeeperHost;
+
+        /**
+         * 
+         */
+        private void onInitialize()
+        {
+            zookeeperPort = puMetadata != null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_PORT) : null;
+            zookeeperHost = puMetadata != null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_NODES) : null;
+        }
 
         /**
          * It holds all property related to columnFamily.

@@ -310,7 +310,7 @@ public class HBaseSchemaOperationTest
         props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
         props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, HBaseClientFactory.class.getName());
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
-        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
+        props.put(PersistenceProperties.KUNDERA_PORT, "2181");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCassandraTests");
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
         if (useLucene)

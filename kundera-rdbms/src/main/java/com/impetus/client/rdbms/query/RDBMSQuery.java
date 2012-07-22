@@ -121,6 +121,7 @@ public class RDBMSQuery extends QueryImpl implements Query
         catch (Exception e)
         {
             log.error("Error during query execution" + e.getMessage());
+            e.printStackTrace();
             throw new QueryHandlerException(e.getMessage());
         }
 

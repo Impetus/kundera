@@ -66,6 +66,7 @@ public class HBasePropertyReaderTest
     @After
     public void tearDown() throws Exception
     {
+        
     }
 
     @Test
@@ -81,8 +82,12 @@ public class HBasePropertyReaderTest
     {
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
         Properties properties = new Properties();
-        InputStream inStream = ClassLoader.getSystemResourceAsStream(puMetadata
-                .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY));
+        String property = puMetadata.getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY);
+        InputStream inStream = null;
+        if (property != null)
+        {
+            inStream = ClassLoader.getSystemResourceAsStream(property);
+        }
         HBaseColumnFamilyProperties familyProperties = new HBaseColumnFamilyProperties();
         if (inStream != null)
         {
@@ -134,11 +139,13 @@ public class HBasePropertyReaderTest
         }
         else
         {
-            Assert.assertEquals("localhost", HBasePropertyReader.hsmd.getZookeeperHost());
-            Assert.assertEquals("2181", HBasePropertyReader.hsmd.getZookeeperPort());
+            // Assertion on default property set in persistence.xml
+            Assert.assertEquals(puMetadata.getProperty(PersistenceProperties.KUNDERA_NODES), HBasePropertyReader.hsmd.getZookeeperHost());
+            Assert.assertEquals(puMetadata.getProperty(PersistenceProperties.KUNDERA_PORT), HBasePropertyReader.hsmd.getZookeeperPort());
         }
-
-        Assert.assertEquals(port, HBasePropertyReader.hsmd.getZookeeperPort());
-        Assert.assertEquals(host, HBasePropertyReader.hsmd.getZookeeperHost());
+           // not same as reading default properties
+        Assert.assertNotSame(port, HBasePropertyReader.hsmd.getZookeeperPort());
+        Assert.assertNotSame(host, HBasePropertyReader.hsmd.getZookeeperHost());
     }
+        
 }

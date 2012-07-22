@@ -43,7 +43,7 @@
 		<persistence-unit name="addMongoJTA" transaction-type="JTA">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<property name="kundera.nodes" value="192.168.145.168" />
+			<property name="kundera.nodes" value="192.168.145.67" />
 			 <!-- <property name="kundera.nodes" value="localhost" /> -->
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaTests" />
@@ -93,7 +93,7 @@
 	<persistence-unit name="addMongo">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<property name="kundera.nodes" value="192.168.145.168" />
+			<property name="kundera.nodes" value="192.168.145.67" />
 <!-- 			 <property name="kundera.nodes" value="localhost" /> -->
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaTests" />
@@ -176,7 +176,7 @@
 	<persistence-unit name="picongo">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<property name="kundera.nodes" value="192.168.145.168" />
+			<property name="kundera.nodes" value="192.168.145.67" />
 <!--			<property name="kundera.nodes" value="localhost" />-->
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="Pickr" />
