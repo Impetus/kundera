@@ -84,7 +84,7 @@ public class ClasspathReader extends Reader
             }
             catch (IOException e)
             {
-                logger.error(e.getMessage());
+                logger.error("Error during reading via classpath, Caused by:" + e.getMessage());
                 throw new ResourceReadingException(e);
             }
         }
