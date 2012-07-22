@@ -331,8 +331,11 @@ final class MongoDBDataHandler
         {
             // TODO : this should have been handled by DocumentObjectMapper.
             Object valObj = PropertyAccessorHelper.getObject(entity, column.getField());
-            dbObj.put(column.getName(), valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString()
-                    : PropertyAccessorHelper.getObject(entity, column.getField()).toString());
+            if(valObj != null)
+            {
+                dbObj.put(column.getName(), valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString()
+                    :  valObj.toString())/*PropertyAccessorHelper.getObject(entity, column.getField()).toString())*/;
+            }
         }
     }
 

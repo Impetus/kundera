@@ -112,7 +112,13 @@ public interface Client<Q extends Query>
      */
     IndexManager getIndexManager();
 
+    /**
+     * Data node to persist entity with specific client.
+     * 
+     * @param node data node.
+     */
     void persist(Node node);
+
 
     void persistJoinTable(JoinTableData joinTableData);
 

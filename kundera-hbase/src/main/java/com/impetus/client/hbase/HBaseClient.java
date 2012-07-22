@@ -121,6 +121,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
         }
         catch (IOException e)
         {
+            log.error("Error during find by id, Caused by:"+ e.getMessage());
             throw new KunderaException(e);
         }
         return enhancedEntity;
@@ -157,9 +158,10 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
                     }
                 }
             }
-            catch (IOException e1)
+            catch (IOException ioex)
             {
-                throw new KunderaException(e1);
+                log.error("Error during find All, Caused by:"+ ioex.getMessage());
+                throw new KunderaException(ioex);
             }
             
         }
@@ -195,9 +197,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
                         // entities.add(e);
                     }
                 }
-                catch (IOException e1)
+                catch (IOException ioex)
                 {
-                    throw new KunderaException(e1);
+                    log.error("Error during find for embedded entities, Caused by:"+ ioex.getMessage());
+                    
+                    throw new KunderaException(ioex);
                 }
 
                 Field columnFamilyField = columnFamilyNameToFieldMap.get(columnFamilyName.substring(0,
@@ -216,6 +220,13 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
         return entities;
     }
     
+    /**
+     * Method to find entities using JPQL(converted into FilterList.)
+     * @param <E>               parameterized entity class.
+     * @param entityClass       entity class.
+     * @param metadata          entity metadata.
+     * @return                  list of entities.
+     */
     public <E> List<E> findByQuery(Class<E> entityClass, EntityMetadata metadata)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
@@ -231,14 +242,25 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
             results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata,
                     null, relationNames);
         }
-        catch (IOException e)
+        catch (IOException ioex)
         {
-            throw new KunderaException(e);
+            log.error("Error during find All, Caused by:"+ ioex.getMessage());
+            throw new KunderaException(ioex);
         }
         return results;
 
     }
 
+    /**
+     * Handles find by range query for given start and end row key range values.
+     * 
+     * @param <E>                      parameterized entity class.
+     * @param entityClass              entity class.
+     * @param metadata                 entity metadata
+     * @param startRow                 start row.
+     * @param endRow                   end row.
+     * @return                         collection holding results.
+     */
     public <E> List<E> findByRange(Class<E> entityClass, EntityMetadata metadata, byte[] startRow, byte[] endRow)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
@@ -252,11 +274,12 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
         try
         {
 
-            results = handler.readDataByRange(tableName,entityClass,metadata,relationNames,startRow,endRow);
+            results = handler.readDataByRange(tableName,entityClass,metadata,startRow,endRow);
         }
-        catch (IOException e)
+        catch (IOException ioex)
         {
-            throw new KunderaException(e);
+            log.error("Error during find All, Caused by:"+ ioex.getMessage());
+            throw new KunderaException(ioex);
         }
         return results;
 
@@ -274,6 +297,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
 
     }
 
+    /**
+     * Setter for filter.
+     * 
+     * @param filter filter.
+     */
     public void setFilter(Filter filter)
     {
         ((HBaseDataHandler)handler).setFilter(filter);

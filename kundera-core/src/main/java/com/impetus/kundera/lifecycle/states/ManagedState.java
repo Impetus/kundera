@@ -84,9 +84,11 @@ public class ManagedState extends NodeState
         // one in persistence cache
         // nodeStateContext.setDirty(true);
 
+        ((Node)nodeStateContext).setUpdate(true);
         // Add this node into persistence cache
         nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node) nodeStateContext);
 
+        
         // Cascade merge operation for all related entities for whom cascade=ALL
         // or MERGE
         recursivelyPerformOperation(nodeStateContext, OPERATION.MERGE);

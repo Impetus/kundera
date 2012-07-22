@@ -464,8 +464,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
     {
         String documentName = entityMetadata.getTableName();
         DBCollection dbCollection = mongoDb.getCollection(documentName);
-        BasicDBObject query = new BasicDBObject();
-        query.put(entityMetadata.getIdColumn().getName(), id.toString());
 
 //        DBCursor cursor = dbCollection.find(query);
         DBObject document = null;
@@ -483,6 +481,10 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         document = handler.getDocumentFromEntity(document, entityMetadata,entity, rlHolders);
         if(isUpdate)
         {
+            BasicDBObject query = new BasicDBObject();
+            
+            // Why can't we put "_id" here?
+            query.put(entityMetadata.getIdColumn().getName(), id.toString());
             dbCollection.findAndModify(query,document);
         } else
         {

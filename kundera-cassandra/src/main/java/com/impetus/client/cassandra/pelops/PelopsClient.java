@@ -132,6 +132,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         this.reader = reader;
     }
 
+
     /*
      * (non-Javadoc)
      * 

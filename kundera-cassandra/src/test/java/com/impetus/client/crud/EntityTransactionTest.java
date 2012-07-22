@@ -210,9 +210,12 @@ public class EntityTransactionTest extends BaseTest
             ((PersonCassandra) p2).setPersonName("rollback");
             em.merge(p2);
             em.merge(null);
+            
+            // As this is a runtime exception so rollback should happen and delete out commited data.
         }
         catch (Exception ex)
         {
+            
             p = findById(PersonCassandra.class, "1", em);
             Assert.assertNull(p);
 
