@@ -1,0 +1,191 @@
+/**
+ * 
+ */
+package com.impetus.client.mongodb.config;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
+
+import junit.framework.Assert;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.impetus.client.mongodb.config.MongoDBPropertyReader.MongoDBSchemaMetadata;
+import com.impetus.kundera.Constants;
+import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.configure.PersistenceUnitConfiguration;
+import com.impetus.kundera.configure.PropertyReader;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.mongodb.ReadPreference;
+
+/**
+ * @author impadmin
+ * 
+ */
+public class MongoDBPropertyReaderTest
+{
+
+    private static Log log = LogFactory.getLog(MongoDBPropertyReaderTest.class);
+
+    private List<Connection> connections = new ArrayList<Connection>();
+
+    private String pu = "mongoTest";
+
+    private MongoDBSchemaMetadata dbSchemaMetadata;
+
+    private int timeOut;
+
+    private ReadPreference readPreference;
+
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception
+    {
+        new PersistenceUnitConfiguration(pu).configure();
+    }
+
+    /**
+     * @throws java.lang.Exception
+     */
+    @After
+    public void tearDown() throws Exception
+    {
+    }
+
+    /**
+     * Test method for
+     * {@link com.impetus.client.mongodb.config.MongoDBPropertyReader#read(java.lang.String)}
+     * .
+     */
+    @Test
+    public void testRead()
+    {
+        PropertyReader reader = new MongoDBPropertyReader();
+        reader.read(pu);
+        dbSchemaMetadata = MongoDBPropertyReader.msmd;
+
+        Properties properties = new Properties();
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(pu);
+        String propertyName = puMetadata != null ? puMetadata
+                .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
+
+        InputStream inStream = propertyName != null ? ClassLoader.getSystemResourceAsStream(propertyName) : null;
+        if (inStream != null)
+        {
+            try
+            {
+                properties.load(inStream);
+                String readPreference = properties.getProperty(Constants.READ_PREFERENCE);
+                if (readPreference != null)
+                {
+                    if (readPreference.equalsIgnoreCase("primary"))
+                    {
+                        this.readPreference = ReadPreference.PRIMARY;
+                    }
+                    else if (readPreference.equalsIgnoreCase("secondary"))
+                    {
+                        this.readPreference = ReadPreference.SECONDARY;
+                    }
+                    else
+                    {
+                        log.warn("Incorrect Read Preference specified. Only primary/ secondary allowed");
+                    }
+                }
+                timeOut = Integer.parseInt(properties.getProperty(Constants.SOCKET_TIMEOUT));
+
+                parseConnectionString(properties.getProperty(Constants.CONNECTIONS));
+
+                Assert.assertEquals(timeOut, dbSchemaMetadata.getSocketTimeOut());
+                Assert.assertEquals(this.readPreference, dbSchemaMetadata.getReadPreference());
+                Assert.assertEquals(connections.size(), dbSchemaMetadata.getConnections().size());
+            }
+            catch (NumberFormatException nfe)
+            {
+                log.info("time out should be numeric");
+            }
+            catch (IOException e)
+            {
+                log.info("property file not found in class path");
+            }
+        }
+    }
+
+    private void parseConnectionString(String connectionStr)
+    {
+        String[] tokens = { "host", "port" };
+        Map<String, String> hostPort = new HashMap<String, String>();
+        // parse connectionStr
+        StringTokenizer connections = new StringTokenizer(connectionStr, ",");
+        while (connections.hasMoreTokens())
+        {
+            StringTokenizer connection = new StringTokenizer(connections.nextToken(), ":");
+            int count = 0;
+            while (connection.hasMoreTokens())
+            {
+                hostPort.put(tokens[count++], connection.nextToken());
+            }
+            addConnection(hostPort.get(tokens[0]), hostPort.get(tokens[1]));
+        }
+    }
+
+    private void addConnection(String host, String port)
+    {
+        Connection connection = null;
+        if (host != null && port != null)
+        {
+            connection = new Connection(host, port);
+        }
+        else
+        {
+            // TODO
+            return;
+        }
+
+        if (connection != null && !connections.contains(connection))
+        {
+            connections.add(connection);
+        }
+    }
+
+    private class Connection
+    {
+        private String host;
+
+        private String port;
+
+        public Connection(String host, String port)
+        {
+            this.host = host;
+            this.port = port;
+        }
+
+        /**
+         * @return the host
+         */
+        public String getHost()
+        {
+            return host;
+        }
+
+        /**
+         * @return the port
+         */
+        public String getPort()
+        {
+            return port;
+        }
+    }
+}
