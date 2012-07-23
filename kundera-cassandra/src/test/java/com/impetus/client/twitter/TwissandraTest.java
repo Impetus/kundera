@@ -61,7 +61,7 @@ public class TwissandraTest extends TwitterTestBase
     @Test
     public void onExecute() throws Exception
     {
-//        executeTestSuite();
+        executeTestSuite();
     }
 
     @After

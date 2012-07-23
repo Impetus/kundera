@@ -15,14 +15,19 @@
  ******************************************************************************/
 package com.impetus.kundera.rest.resources;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
 
 import junit.framework.Assert;
 
 import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.ColumnDef;
+import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
@@ -33,11 +38,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.kundera.rest.common.CassandraCli;
 import com.impetus.kundera.rest.common.Constants;
+import com.impetus.kundera.rest.common.HabitatUni1ToM;
+import com.impetus.kundera.rest.common.JAXBUtils;
+import com.impetus.kundera.rest.common.PersonnelUni1ToM;
 import com.impetus.kundera.rest.dao.RESTClient;
 import com.impetus.kundera.rest.dao.RESTClientImpl;
 import com.sun.jersey.api.client.WebResource;
@@ -53,9 +63,9 @@ public class CRUDResourceTest extends JerseyTest
 {
     private static Log log = LogFactory.getLog(CRUDResourceTest.class);
 
-    String mediaType = MediaType.APPLICATION_XML;
+    static String mediaType = MediaType.APPLICATION_XML;
 
-    RESTClient restClient;
+    static RESTClient restClient;
 
     String applicationToken = null;
 
@@ -78,10 +88,9 @@ public class CRUDResourceTest extends JerseyTest
         super(Constants.KUNDERA_REST_RESOURCES_PACKAGE);
     }
 
-    @Before
-    public void setup() throws Exception
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception
     {
-
         if (USE_EMBEDDED_SERVER)
         {
             CassandraCli.cassandraSetUp();
@@ -92,12 +101,26 @@ public class CRUDResourceTest extends JerseyTest
             CassandraCli.createKeySpace("KunderaExamples");
             loadData();
         }
+
+        // Initialize REST Client
+
+    }
+
+    @Before
+    public void setup() throws Exception
+    {
+
     }
 
     @After
     public void tearDown() throws Exception
     {
         super.tearDown();
+    }
+
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
 
         if (AUTO_MANAGE_SCHEMA)
         {
@@ -108,8 +131,9 @@ public class CRUDResourceTest extends JerseyTest
     @Test
     public void testCRUD()
     {
-
         WebResource webResource = resource();
+        restClient = new RESTClientImpl();
+        restClient.initialize(webResource, mediaType);
 
         if (MediaType.APPLICATION_XML.equals(mediaType))
         {
@@ -131,10 +155,6 @@ public class CRUDResourceTest extends JerseyTest
             return;
         }
 
-        RESTClient restClient = new RESTClientImpl();
-        // Initialize REST Client
-        restClient.initialize(webResource, mediaType);
-
         // Get Application Token
         applicationToken = restClient.getApplicationToken("twissandra");
         Assert.assertNotNull(applicationToken);
@@ -148,12 +168,11 @@ public class CRUDResourceTest extends JerseyTest
         // Insert Record
         String insertResponse1 = restClient.insertBook(sessionToken, bookStr1);
         String insertResponse2 = restClient.insertBook(sessionToken, bookStr2);
-        
+
         Assert.assertNotNull(insertResponse1);
         Assert.assertNotNull(insertResponse2);
         Assert.assertTrue(insertResponse1.indexOf("201") > 0);
         Assert.assertTrue(insertResponse2.indexOf("201") > 0);
-        
 
         // Find Record
         String foundBook = restClient.findBook(sessionToken, pk1);
@@ -168,7 +187,7 @@ public class CRUDResourceTest extends JerseyTest
         String updatedBook = restClient.updateBook(sessionToken, foundBook);
         Assert.assertNotNull(updatedBook);
         Assert.assertTrue(updatedBook.indexOf("Saurabh") > 0);
-        
+
         String jpaQuery = "select b from Book b";
         String queryResult = restClient.runQuery(sessionToken, jpaQuery);
         log.debug("Query Result:" + queryResult);
@@ -180,8 +199,106 @@ public class CRUDResourceTest extends JerseyTest
         log.debug(allBooks);
 
         // Delete Records
-        //restClient.deleteBook(sessionToken, updatedBook, pk1);
-        //restClient.deleteBook(sessionToken, updatedBook, pk2);
+        // restClient.deleteBook(sessionToken, updatedBook, pk1);
+        // restClient.deleteBook(sessionToken, updatedBook, pk2);
+
+        // Close Session
+        restClient.closeSession(sessionToken);
+
+        // Close Application
+        restClient.closeApplication(applicationToken);
+    }
+
+    @Test
+    public void testCRUDOnAssociation()
+    {
+        String personStr;
+
+        String personStr1;
+        String personPk = "1234567";
+
+        String person1Pk = "1234568";
+        String addressPk = "201001";
+
+        Set<HabitatUni1ToM> addresses = new HashSet<HabitatUni1ToM>();
+
+        HabitatUni1ToM add1 = new HabitatUni1ToM();
+        add1.setAddressId(addressPk);
+        add1.setStreet("XXXXXXXXX");
+
+        HabitatUni1ToM add = new HabitatUni1ToM();
+        add.setAddressId(addressPk);
+        add.setStreet("XXXXXXXXX");
+
+        addresses.add(add1);
+        addresses.add(add);
+
+        PersonnelUni1ToM p = new PersonnelUni1ToM();
+        p.setPersonId(personPk);
+        p.setPersonName("kuldeep");
+        p.setAddresses(addresses);
+
+        PersonnelUni1ToM p1 = new PersonnelUni1ToM();
+        p1.setPersonId(person1Pk);
+        p1.setPersonName("kuldeep");
+        p1.setAddresses(addresses);
+
+        personStr = JAXBUtils.toString(PersonnelUni1ToM.class, p, mediaType);
+        personStr1 = JAXBUtils.toString(PersonnelUni1ToM.class, p1, mediaType);
+
+        // Get Application Token
+        applicationToken = restClient.getApplicationToken("twissandra");
+        Assert.assertNotNull(applicationToken);
+        Assert.assertTrue(applicationToken.startsWith("AT_"));
+
+        // Get Session Token
+        sessionToken = restClient.getSessionToken(applicationToken);
+        Assert.assertNotNull(sessionToken);
+        Assert.assertTrue(sessionToken.startsWith("ST_"));
+
+        // Insert person.
+        String insertResponse = restClient.insertPerson(sessionToken, personStr);
+        String insertResponse1 = restClient.insertPerson(sessionToken, personStr1);
+
+        Assert.assertNotNull(insertResponse);
+        Assert.assertTrue(insertResponse.indexOf("201") > 0);
+        Assert.assertNotNull(insertResponse1);
+        Assert.assertTrue(insertResponse1.indexOf("201") > 0);
+
+        // Find person.
+        String foundPerson = restClient.findPerson(sessionToken, personPk);
+        Assert.assertNotNull(foundPerson);
+        if (MediaType.APPLICATION_JSON.equals(mediaType))
+        {
+            foundPerson = "{personnelUni1ToM:" + foundPerson + "}";
+        }
+        Assert.assertTrue(foundPerson.indexOf(addressPk) > 0);
+        Assert.assertTrue(foundPerson.indexOf("XXXXXXXXX") > 0);
+        Assert.assertTrue(foundPerson.indexOf("kuldeep") > 0);
+
+        // Update Record
+        String updatedPerson = restClient.updatePerson(sessionToken, foundPerson);
+        Assert.assertNotNull(updatedPerson);
+        Assert.assertTrue(updatedPerson.indexOf("YYYYYYYYY") > 0);
+
+        // Find all persons.
+        String allPersons = restClient.getAllPersons(sessionToken);
+        Assert.assertNotNull(allPersons);
+        Assert.assertTrue(allPersons.indexOf("personneluni1toms") > 0);
+        log.debug(allPersons);
+
+        // Run Query.
+        String jpaQuery = "select p from PersonnelUni1ToM p where p.personId >= " + person1Pk;
+        String queryResult = restClient.runQuery(sessionToken, jpaQuery);
+        log.debug("Query Result:" + queryResult);
+
+        // Delete person.
+        restClient.deletePerson(sessionToken, updatedPerson, personPk);
+        foundPerson = restClient.findPerson(sessionToken, personPk);
+        Assert.assertEquals("", foundPerson);
+
+        // NamedQuery on person.
+        restClient.executeNamedQuery();
 
         // Close Session
         restClient.closeSession(sessionToken);
@@ -204,7 +321,7 @@ public class CRUDResourceTest extends JerseyTest
      * @throws SchemaDisagreementException
      *             the schema disagreement exception
      */
-    private void loadData() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
+    private static void loadData() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
     {
         KsDef ksDef = null;
@@ -214,8 +331,31 @@ public class CRUDResourceTest extends JerseyTest
         user_Def.setComparator_type("UTF8Type");
         user_Def.setDefault_validation_class("UTF8Type");
 
+        CfDef person_Def = new CfDef();
+        person_Def.name = "PERSONNEL";
+        person_Def.keyspace = "KunderaExamples";
+        // cfDef.column_type = "Super";
+        person_Def.setComparator_type("UTF8Type");
+        person_Def.setDefault_validation_class("UTF8Type");
+        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
+        person_Def.addToColumn_metadata(columnDef);
+
+        CfDef address_Def = new CfDef();
+        address_Def.name = "ADDRESS";
+        address_Def.keyspace = "KunderaExamples";
+
+        ColumnDef street = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
+        street.index_type = IndexType.KEYS;
+        address_Def.addToColumn_metadata(street);
+
+        ColumnDef personId = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "IntegerType");
+        personId.index_type = IndexType.KEYS;
+        address_Def.addToColumn_metadata(personId);
+
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(user_Def);
+        cfDefs.add(person_Def);
+        cfDefs.add(address_Def);
 
         try
         {
@@ -230,8 +370,22 @@ public class CRUDResourceTest extends JerseyTest
                 {
                     CassandraCli.client.system_drop_column_family("BOOK");
                 }
+                if (cfDef1.getName().equalsIgnoreCase("PERSONNEL"))
+                {
+
+                    CassandraCli.client.system_drop_column_family("PERSONNEL");
+
+                }
+                if (cfDef1.getName().equalsIgnoreCase("ADDRESS"))
+                {
+
+                    CassandraCli.client.system_drop_column_family("ADDRESS");
+
+                }
             }
             CassandraCli.client.system_add_column_family(user_Def);
+            CassandraCli.client.system_add_column_family(person_Def);
+            CassandraCli.client.system_add_column_family(address_Def);
 
         }
         catch (NotFoundException e)

@@ -58,7 +58,7 @@ public class HBasePropertyReaderTest
     @Before
     public void setUp() throws Exception
     {
-//        Persistence.createEntityManagerFactory(pu);
+        // Persistence.createEntityManagerFactory(pu);
         new PersistenceUnitConfiguration(pu).configure();
         new ClientFactoryConfiguraton(pu).configure();
     }
@@ -66,7 +66,7 @@ public class HBasePropertyReaderTest
     @After
     public void tearDown() throws Exception
     {
-        
+
     }
 
     @Test
@@ -140,12 +140,13 @@ public class HBasePropertyReaderTest
         else
         {
             // Assertion on default property set in persistence.xml
-            Assert.assertEquals(puMetadata.getProperty(PersistenceProperties.KUNDERA_NODES), HBasePropertyReader.hsmd.getZookeeperHost());
-            Assert.assertEquals(puMetadata.getProperty(PersistenceProperties.KUNDERA_PORT), HBasePropertyReader.hsmd.getZookeeperPort());
+            Assert.assertEquals(puMetadata.getProperty(PersistenceProperties.KUNDERA_NODES),
+                    HBasePropertyReader.hsmd.getZookeeperHost());
+            Assert.assertEquals("2181", HBasePropertyReader.hsmd.getZookeeperPort());
         }
-           // not same as reading default properties
+        // not same as reading default properties
         Assert.assertNotSame(port, HBasePropertyReader.hsmd.getZookeeperPort());
         Assert.assertNotSame(host, HBasePropertyReader.hsmd.getZookeeperHost());
     }
-        
+
 }

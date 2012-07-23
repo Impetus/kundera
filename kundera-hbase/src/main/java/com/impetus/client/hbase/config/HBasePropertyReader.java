@@ -106,7 +106,7 @@ public class HBasePropertyReader implements PropertyReader
         /**
          * zookeeper port.
          */
-        private String zookeeperPort;
+        private String zookeeperPort = "2181";
 
         /**
          * zookeeper host.
@@ -118,7 +118,7 @@ public class HBasePropertyReader implements PropertyReader
          */
         private void onInitialize()
         {
-            zookeeperPort = puMetadata != null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_PORT) : null;
+//            zookeeperPort = puMetadata != null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_PORT) : null;
             zookeeperHost = puMetadata != null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_NODES) : null;
         }
 

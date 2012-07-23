@@ -20,7 +20,7 @@
 		<class>com.impetus.client.manytoone.MTOAddress</class>
 		<class>com.impetus.client.manytomany.MTMAddress</class>
 		<properties>
-			<!-- <property name="hibernate.hbm2ddl.auto" value="create" /> -->
+			<property name="hibernate.hbm2ddl.auto" value="create" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
 			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" />
 			<property name="hibernate.connection.url" value="jdbc:mysql://192.168.145.168:3306/test" />
