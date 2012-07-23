@@ -48,4 +48,16 @@ public interface RESTClient
     String runQuery(String sessionToken, String jpaQuery);
 
     String getSchemaList(String persistenceUnit);
+
+    String insertPerson(String sessionToken, String person);
+
+    String findPerson(String sessionToken, String isbn);
+
+    String updatePerson(String sessionToken, String oldPerson);
+    
+    String getAllPersons(String sessionToken);
+    
+    void deletePerson(String sessionToken, String updatedPerson, String isbn);
+    
+    String executeNamedQuery();
 }

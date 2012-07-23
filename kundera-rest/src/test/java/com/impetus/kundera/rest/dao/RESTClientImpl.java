@@ -179,12 +179,12 @@ public class RESTClientImpl implements RESTClient
         log.debug("Query Response:" + queryResponse.getStatus());
 
         InputStream is = queryResponse.getEntityInputStream();
-        List books = (List) JAXBUtils.toObject(is, ArrayList.class, MediaType.APPLICATION_XML);
+        List records = (List) JAXBUtils.toObject(is, ArrayList.class, MediaType.APPLICATION_XML);
 
-        String allBookStr = StreamUtils.toString(is);
+        String allStr = StreamUtils.toString(is);
 
-        log.debug("Found Entities:" + allBookStr);
-        return allBookStr;
+        log.debug("Found Entities:" + allStr);
+        return allStr;
     }
 
     @Override
@@ -197,7 +197,8 @@ public class RESTClientImpl implements RESTClient
         log.debug("Find All Response:" + queryResponse.getStatus());
 
         InputStream is = queryResponse.getEntityInputStream();
-        //List books = (List) JAXBUtils.toObject(is, ArrayList.class, MediaType.APPLICATION_XML);
+        // List books = (List) JAXBUtils.toObject(is, ArrayList.class,
+        // MediaType.APPLICATION_XML);
 
         String allBookStr = StreamUtils.toString(is);
 
@@ -220,4 +221,88 @@ public class RESTClientImpl implements RESTClient
         return schemaList;
     }
 
+    @Override
+    public String insertPerson(String sessionToken, String personStr)
+    {
+
+        log.debug("\n\nInserting Entity...");
+        WebResource.Builder insertBuilder = webResource.path("kundera/api/crud/PersonnelUni1ToM").type(mediaType)
+                .accept(MediaType.APPLICATION_OCTET_STREAM).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        StringBuffer sb = new StringBuffer().append(personStr);
+        ClientResponse insertResponse = (ClientResponse) insertBuilder.post(ClientResponse.class, sb.toString());
+        log.debug("Response From Insert person: " + insertResponse);
+        return insertResponse.toString();
+
+    }
+
+    @Override
+    public String findPerson(String sessionToken, String isbn)
+    {
+
+        log.debug("\n\nFinding Entity...");
+        WebResource.Builder findBuilder = webResource.path("kundera/api/crud/PersonnelUni1ToM/" + isbn)
+                .accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ;
+
+        ClientResponse findResponse = (ClientResponse) findBuilder.get(ClientResponse.class);
+
+        InputStream is = findResponse.getEntityInputStream();
+        String personkStr = StreamUtils.toString(is);
+
+        log.debug("Found Entity:" + personkStr);
+        return personkStr;
+    }
+
+    @Override
+    public String updatePerson(String sessionToken, String oldPersonStr)
+    {
+
+        log.debug("\n\nUpdating Entity... " + oldPersonStr);
+        oldPersonStr = oldPersonStr.replaceAll("XXXXXXXXX", "YYYYYYYYY");
+        WebResource.Builder updateBuilder = webResource.path("kundera/api/crud/PersonnelUni1ToM").type(mediaType)
+                .accept(mediaType).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ClientResponse updateResponse = updateBuilder.put(ClientResponse.class, oldPersonStr);
+        InputStream is = updateResponse.getEntityInputStream();
+        String updatedPersonStr = StreamUtils.toString(is);
+        log.debug("Updated Person: " + updatedPersonStr);
+        return updatedPersonStr;
+
+    }
+
+    @Override
+    public String getAllPersons(String sessionToken)
+    {
+        log.debug("\n\nFinding all Entities... ");
+        WebResource.Builder queryBuilder = webResource.path("kundera/api/query/PersonnelUni1ToM/all").accept(mediaType)
+                .header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ClientResponse queryResponse = (ClientResponse) queryBuilder.get(ClientResponse.class);
+        log.debug("Find All Response:" + queryResponse.getStatus());
+
+        InputStream is = queryResponse.getEntityInputStream();
+        // List books = (List) JAXBUtils.toObject(is, ArrayList.class,
+        // MediaType.APPLICATION_XML);
+
+        String allPersonStr = StreamUtils.toString(is);
+
+        log.debug("Found All Entities:" + allPersonStr);
+        return allPersonStr;
+    }
+
+    @Override
+    public void deletePerson(String sessionToken, String updatedPerson, String isbn)
+    {
+        log.debug("\n\nDeleting Entity... " + updatedPerson);
+        WebResource.Builder deleteBuilder = webResource.path("kundera/api/crud/PersonnelUni1ToM/delete/" + isbn)
+                .accept(MediaType.TEXT_PLAIN).header(Constants.SESSION_TOKEN_HEADER_NAME, sessionToken);
+        ClientResponse deleteResponse = (ClientResponse) deleteBuilder.delete(ClientResponse.class);
+        log.debug("Delete Response:" + deleteResponse.getStatus());
+    }
+
+    @Override
+    public String executeNamedQuery()
+    {
+        log.debug("\n\nExecuting named Query... ");
+        
+        return null;
+    }
 }

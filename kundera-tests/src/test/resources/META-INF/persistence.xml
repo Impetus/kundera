@@ -43,7 +43,7 @@
 		<persistence-unit name="addMongoJTA" transaction-type="JTA">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<property name="kundera.nodes" value="192.168.145.67" />
+			<property name="kundera.nodes" value="192.168.145.168" />
 			 <!-- <property name="kundera.nodes" value="localhost" /> -->
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaTests" />
@@ -117,7 +117,7 @@
 				value="true" /> -->
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
 			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" />
-			<property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/KunderaTests" />
+			<property name="hibernate.connection.url" value="jdbc:mysql://192.168.145.168:3306/KunderaTests" />
 			<property name="hibernate.connection.username" value="root" />
 			<property name="hibernate.connection.password" value="impetus" />
 			<property name="hibernate.current_session_context_class"
