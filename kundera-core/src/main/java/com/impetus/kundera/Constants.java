@@ -80,7 +80,7 @@ public final class Constants
 
     public final static int DEFAULT_MAX_FETCH_DEPTH = 2;
 
-    public final static String INDEX_TABLE_SUFFIX = "_INDEX";
+    public final static String INDEX_TABLE_SUFFIX = "_INVRTD_IDX";
 
     public final static String INDEX_TABLE_ROW_KEY_DELIMITER = ".";
 

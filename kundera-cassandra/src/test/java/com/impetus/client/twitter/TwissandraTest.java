@@ -39,6 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
+import com.impetus.kundera.Constants;
 
 /**
  * Test case for Cassandra.
@@ -61,7 +62,7 @@ public class TwissandraTest extends TwitterTestBase
     @Test
     public void onExecute() throws Exception
     {
-//        executeTestSuite();
+        executeTestSuite();
     }
 
     @After
@@ -121,7 +122,7 @@ public class TwissandraTest extends TwitterTestBase
         userCfDef.setDefault_validation_class("UTF8Type");
         
         CfDef userIndexCfDef = new CfDef();
-        userIndexCfDef.name = "USER_INDEX";
+        userIndexCfDef.name = "USER" + Constants.INDEX_TABLE_SUFFIX;
         userIndexCfDef.keyspace = keyspace;
         userIndexCfDef.setComparator_type("UTF8Type");
         userIndexCfDef.setDefault_validation_class("UTF8Type");        
@@ -171,9 +172,9 @@ public class TwissandraTest extends TwitterTestBase
                 {
                     CassandraCli.client.system_drop_column_family("USER");
                 }
-                if (cfDef1.getName().equalsIgnoreCase("USER_INDEX"))
+                if (cfDef1.getName().equalsIgnoreCase("USER" + Constants.INDEX_TABLE_SUFFIX))
                 {
-                    CassandraCli.client.system_drop_column_family("USER_INDEX");
+                    CassandraCli.client.system_drop_column_family("USER" + Constants.INDEX_TABLE_SUFFIX);
                 }
                 if (cfDef1.getName().equalsIgnoreCase("PREFERENCE"))
                 {
