@@ -537,17 +537,17 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
+            log.error("Error while creating schema in cassandra, Caused by:" + e.getMessage());
             throw new SchemaGenerationException(e, "Cassandra", databaseName);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
+            log.error("Error while creating schema in cassandra, Caused by:" + e.getMessage());
             throw new SchemaGenerationException(e, "Cassandra", databaseName);
         }
         catch (TException e)
         {
-            log.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
+            log.error("Error while creating schema in cassandra, Caused by:" + e.getMessage());
             throw new SchemaGenerationException(e, "Cassandra", databaseName);
         }
 

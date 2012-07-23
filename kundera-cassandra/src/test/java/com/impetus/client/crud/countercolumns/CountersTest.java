@@ -57,7 +57,7 @@ public class CountersTest
 
     private static final boolean RUN_IN_EMBEDDED_MODE = true;
 
-    private static final boolean AUTO_MANAGE_SCHEMA = false;
+    private static final boolean AUTO_MANAGE_SCHEMA = true;
 
     private String keyspace = "KunderaCounterColumn";
 

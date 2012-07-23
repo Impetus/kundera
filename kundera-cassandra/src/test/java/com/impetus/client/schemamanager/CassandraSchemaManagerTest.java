@@ -55,6 +55,7 @@ import com.impetus.client.schemamanager.entites.CassandraEntitySimple;
 import com.impetus.client.schemamanager.entites.CassandraEntitySuper;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -277,6 +278,7 @@ public class CassandraSchemaManagerTest
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 
+        new ClientFactoryConfiguraton(persistenceUnit).configure();
         configuration.configure();
         EntityManagerFactoryImpl impl = new EntityManagerFactoryImpl(puMetadata, props);
         return impl;
