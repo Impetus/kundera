@@ -3,6 +3,10 @@
  */
 package com.impetus.client.crud.datatypes;
 
+import java.util.List;
+
+import javax.persistence.Query;
+
 import junit.framework.Assert;
 
 import org.junit.After;
@@ -39,7 +43,7 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
     @After
     public void tearDown() throws Exception
     {
-//        teardownInternal(persistenceUnit);
+         teardownInternal(persistenceUnit);
     }
 
     @SuppressWarnings("deprecation")
@@ -116,9 +120,18 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         // modify record.
         s.setStudentName("NewAmresh");
         em.merge(s);
-        // emf.close();
-        // assertOnMerge(em, "StudentMongo", StudentMongo.class, "Amresh",
-        // "NewAmresh","STUDENT_NAME");
+//        emf.close();
+        Query q = em.createQuery("Select p from StudentMongo p where p.studentName = NewAmresh");
+        try
+        {
+            List<StudentMongo> results = q.getResultList();
+            Assert.assertNotNull(results);
+            Assert.assertEquals(1, results.size());
+        }
+        catch (Exception e)
+        {
+            Assert.fail("Failure onMerge test");
+        }
     }
 
     @Override
@@ -139,9 +152,9 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
     @Override
     void deleteSchema()
     {
-//        em.remove(em.find(StudentMongo.class, studentId1));
-//        em.remove(em.find(StudentMongo.class, studentId2));
-//        em.remove(em.find(StudentMongo.class, studentId3));
+         em.remove(em.find(StudentMongo.class, studentId1));
+         em.remove(em.find(StudentMongo.class, studentId2));
+         em.remove(em.find(StudentMongo.class, studentId3));
     }
 
 }

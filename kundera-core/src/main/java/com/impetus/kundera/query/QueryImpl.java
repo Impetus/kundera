@@ -72,13 +72,12 @@ public abstract class QueryImpl implements Query
     private static Log log = LogFactory.getLog(QueryImpl.class);
 
     private Set<Parameter<?>> parameters;
+
     /**
      * Default maximum result to fetch.
      */
     protected int maxResult = 100;
 
-   
-    
     /**
      * Instantiates a new query impl.
      * 
@@ -186,7 +185,7 @@ public abstract class QueryImpl implements Query
         // Enhance entities can contain or may not contain relation.
         // if it contain a relation means it is a child
         // if it does not then it means it is a parent.
-        List<Object> result = null;        
+        List<Object> result = null;
         if (enhanceEntities != null)
         {
             for (Object e : enhanceEntities)
@@ -196,14 +195,15 @@ public abstract class QueryImpl implements Query
                     result = new ArrayList<Object>(enhanceEntities.size());
                 }
 
-                if(!(e instanceof EnhanceEntity))
+                if (!(e instanceof EnhanceEntity))
                 {
                     e = new EnhanceEntity(e, PropertyAccessorHelper.getId(e, m), null);
-                }  
-                
-                EnhanceEntity ee = (EnhanceEntity)e;
-                
-                result.add(getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m, persistenceDelegeator));                
+                }
+
+                EnhanceEntity ee = (EnhanceEntity) e;
+
+                result.add(getReader().recursivelyFindEntities(ee.getEntity(), ee.getRelations(), m,
+                        persistenceDelegeator));
             }
         }
 
@@ -471,6 +471,7 @@ public abstract class QueryImpl implements Query
 
     /**
      * Method to be invoked on query.executeUpdate().
+     * 
      * @return
      */
     protected abstract int onExecuteUpdate();
@@ -523,13 +524,15 @@ public abstract class QueryImpl implements Query
                     String columnName = c.getProperty();
                     Column column = entityMetadata.getColumn(columnName);
 
-                    PropertyAccessorHelper.set(result, column.getField(), c.getValue());
+                    if (column != null)
+                    {
+                        PropertyAccessorHelper.set(result, column.getField(), c.getValue());
+                    }
                     persistenceDelegeator.merge(result);
                 }
 
             }
         }
-
     }
 
     /************************* Methods from {@link Query} interface *******************************/
@@ -736,19 +739,20 @@ public abstract class QueryImpl implements Query
     @Override
     public <T> Query setParameter(Parameter<T> paramParameter, T paramT)
     {
-        if(!getParameters().contains(paramParameter))
+        if (!getParameters().contains(paramParameter))
         {
             throw new IllegalArgumentException("parameter does not correspond to a parameter of the query");
         }
-        
-        if(paramParameter.getName() != null)
+
+        if (paramParameter.getName() != null)
         {
             kunderaQuery.setParameter(paramParameter.getName(), paramT.toString());
-        } else
+        }
+        else
         {
             kunderaQuery.setParameter(paramParameter.getPosition(), paramT.toString());
         }
-        
+
         return this;
     }
 
@@ -784,11 +788,11 @@ public abstract class QueryImpl implements Query
     @Override
     public Set<Parameter<?>> getParameters()
     {
-        if(parameters == null)
+        if (parameters == null)
         {
             parameters = kunderaQuery.getParameters();
         }
-        
+
         return parameters;
     }
 
@@ -818,7 +822,6 @@ public abstract class QueryImpl implements Query
         Parameter parameter = getParameterByName(paramString);
         return onTypeCheck(paramClass, parameter);
     }
-
 
     /*
      * (non-Javadoc)
@@ -856,7 +859,7 @@ public abstract class QueryImpl implements Query
     public boolean isBound(Parameter<?> paramParameter)
     {
         return kunderaQuery.isBound(paramParameter);
-        
+
     }
 
     /*
@@ -869,7 +872,7 @@ public abstract class QueryImpl implements Query
     public <T> T getParameterValue(Parameter<T> paramParameter)
     {
         Object value = kunderaQuery.getClauseValue(paramParameter);
-        if(value == null)
+        if (value == null)
         {
             throw new IllegalStateException("parameter has not been bound" + paramParameter);
         }
@@ -884,8 +887,8 @@ public abstract class QueryImpl implements Query
     @Override
     public Object getParameterValue(String paramString)
     {
-        
-        return onParameterValue(":"+paramString);
+
+        return onParameterValue(":" + paramString);
     }
 
     /*
@@ -896,7 +899,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Object getParameterValue(int paramInt)
     {
-        return onParameterValue("?"+paramInt);
+        return onParameterValue("?" + paramInt);
     }
 
     /*
@@ -950,85 +953,95 @@ public abstract class QueryImpl implements Query
         }
     }
 
-
     /**
      * Returns specific parameter instance for given name
      * 
-     * @param name  parameter name.
+     * @param name
+     *            parameter name.
      * 
      * @return parameter
      */
     private Parameter getParameterByName(String name)
     {
-        for(Parameter p : parameters)
+        for (Parameter p : parameters)
         {
-            if(name.equals(p.getName()))
+            if (name.equals(p.getName()))
             {
                 return p;
             }
         }
-        
+
         return null;
     }
-    
+
     /**
      * Returns parameter by ordinal
      * 
-     * @param position   position
-     * @return      parameter instance.
+     * @param position
+     *            position
+     * @return parameter instance.
      */
     private Parameter getParameterByOrdinal(Integer position)
     {
-        for(Parameter p : parameters)
+        for (Parameter p : parameters)
         {
-            if(position.equals(p.getPosition()))
+            if (position.equals(p.getPosition()))
             {
                 return p;
             }
         }
-        
+
         return null;
     }
-    
+
     /**
      * Method to handle get/set Parameter supplied for native query.
      */
     private void onNativeCondition()
     {
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
-        if(appMetadata.isNative(query))
+        if (appMetadata.isNative(query))
         {
-            throw new IllegalStateException("invoked on a native query when the implementation does not support this use");
+            throw new IllegalStateException(
+                    "invoked on a native query when the implementation does not support this use");
         }
     }
-    
+
     /**
-     * Validated parameter's class with input paramClass. Returns back parameter if it matches, else throws an {@link IllegalArgumentException}.
-     * @param <T>               type of class.
-     * @param paramClass        expected class type.
-     * @param parameter         parameter
-     * @return                  parameter if it matches, else throws an {@link IllegalArgumentException}.
+     * Validated parameter's class with input paramClass. Returns back parameter
+     * if it matches, else throws an {@link IllegalArgumentException}.
+     * 
+     * @param <T>
+     *            type of class.
+     * @param paramClass
+     *            expected class type.
+     * @param parameter
+     *            parameter
+     * @return parameter if it matches, else throws an
+     *         {@link IllegalArgumentException}.
      */
     private <T> Parameter<T> onTypeCheck(Class<T> paramClass, Parameter<T> parameter)
     {
-        if(parameter.getParameterType() != null && parameter.getParameterType().equals(paramClass))
+        if (parameter.getParameterType() != null && parameter.getParameterType().equals(paramClass))
         {
             return parameter;
         }
-        throw new IllegalArgumentException("The parameter of the specified name does not exist or is not assignable to the type");
+        throw new IllegalArgumentException(
+                "The parameter of the specified name does not exist or is not assignable to the type");
     }
 
     /**
      * Returns parameter value.
      * 
-     * @param paramString parameter as string.
+     * @param paramString
+     *            parameter as string.
      * 
      * @return value of parameter.
      */
     private Object onParameterValue(String paramString)
     {
         Object value = kunderaQuery.getClauseValue(paramString);
-        if(value == null)
+        if (value == null)
         {
             throw new IllegalStateException("parameter has not been bound" + paramString);
         }

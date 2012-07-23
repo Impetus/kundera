@@ -98,7 +98,8 @@ public class HBaseWriter implements Writer
             try
             {
 
-                p.add(Bytes.toBytes(qualifier), Bytes.toBytes(qualifier), System.currentTimeMillis(),
+                byte[] qualValInBytes = Bytes.toBytes(qualifier);
+                p.add(qualValInBytes, qualValInBytes, System.currentTimeMillis(),
                         PropertyAccessorHelper.get(entity, column.getField()));
                 // p.add(Bytes.toBytes(qualifier), System.currentTimeMillis(),
                 // PropertyAccessorHelper.get(entity, column.getField()));

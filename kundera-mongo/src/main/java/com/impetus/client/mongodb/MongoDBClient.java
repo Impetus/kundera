@@ -464,18 +464,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
     {
         String documentName = entityMetadata.getTableName();
         DBCollection dbCollection = mongoDb.getCollection(documentName);
-
-//        DBCursor cursor = dbCollection.find(query);
         DBObject document = null;
-//
-//        if (cursor.hasNext())
-//        {
-//            document = cursor.next();
-//        }
-//        else
-//        {
-            document = new BasicDBObject();
-//        }
+        document = new BasicDBObject();
 
             // TODO: Still we need to see why mongo updates other values to NULL. 
         document = handler.getDocumentFromEntity(document, entityMetadata,entity, rlHolders);
@@ -484,7 +474,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
             BasicDBObject query = new BasicDBObject();
             
             // Why can't we put "_id" here?
-            query.put(entityMetadata.getIdColumn().getName(), id.toString());
+            query.put("_id", id.toString());
             dbCollection.findAndModify(query,document);
         } else
         {

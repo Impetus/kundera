@@ -308,8 +308,8 @@ public class CassandraSchemaOperationTest
         catch (SchemaGenerationException e)
         {
             List<String> errors = new ArrayList<String>();
-            errors.add("column " + "AGE" + " does not exist in column family " + "CassandraEntitySimple" + "");
-            errors.add("column " + "PERSON_NAME" + " does not exist in column family " + "CassandraEntitySimple" + "");
+            errors.add("Column AGE does not exist in column family CassandraEntitySimple");
+            errors.add("column PERSON_NAME does not exist in column family CassandraEntitySimple");
             // errors.add("column family " + "CassandraEntitySimple " +
             // " does not exist in keyspace "
             // + "KunderaCassandraExamples" + "");
@@ -404,10 +404,9 @@ public class CassandraSchemaOperationTest
         catch (SchemaGenerationException sgex)
         {
             List<String> errors = new ArrayList<String>();
-            errors.add("column " + "AGE" + " does not exist in column family " + "CassandraEntitySimple" + "");
-            errors.add("column " + "PERSON_NAME" + " does not exist in column family " + "CassandraEntitySimple" + "");
-            errors.add("column family " + "CassandraEntitySimple " + " does not exist in keyspace "
-                    + "KunderaCoreExmples" + "");
+            errors.add("Column AGE does not exist in column family CassandraEntitySimple");
+            errors.add("column PERSON_NAME does not exist in column family CassandraEntitySimple");
+            errors.add("column family CassandraEntitySimple does not exist in keyspace KunderaCoreExmples");
             Assert.assertTrue(errors.contains(sgex.getMessage()));
         }
     }

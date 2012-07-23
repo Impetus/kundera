@@ -788,7 +788,7 @@ final class PelopsDataHandler
                         || (relationNames != null && !relationNames.isEmpty() && relationNames.contains(scName)))
                 {
                     Class superColumnClass = superColumnField != null ? superColumnField.getType() : null;
-                    superColumnObj = PropertyAccessorHelper.getObject(superColumnClass);
+                    
 
                     for (CounterColumn column : sc.getColumns())
                     {
@@ -804,11 +804,19 @@ final class PelopsDataHandler
                                         && value != null)
                                 {
                                     int colValue = value.intValue();
-                                    PropertyAccessorHelper.set(superColumnObj, columnField, colValue);
-                                }
+                                    superColumnObj = populateColumnValue(superColumnClass, colValue, columnField);
+/*                                    if(superColumnClass.isPrimitive())
+                                    {
+                                        superColumnObj = colValue;
+                                    } else
+                                    {
+                                        superColumnObj = PropertyAccessorHelper.getObject(superColumnClass);
+                                        PropertyAccessorHelper.set(superColumnObj, columnField, colValue);
+                                    }
+*/                                }
                                 else
                                 {
-                                    PropertyAccessorHelper.set(superColumnObj, columnField, value);
+                                    superColumnObj = populateColumnValue(superColumnClass, value, columnField);
                                 }
 
                             }
@@ -854,6 +862,26 @@ final class PelopsDataHandler
         // tr.getId(), foreignKeysMap);
         return isWrapReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, tr.getId(), relations)
                 : entity;
+    }
+
+    /**
+     * @param superColumnClass
+     * @param value
+     * @param columnField
+     * @return
+     */
+    private Object populateColumnValue(Class superColumnClass, Object value, Field columnField)
+    {
+        Object superColumnObj;
+        if(superColumnClass.isPrimitive())
+        {
+            superColumnObj = value;
+        } else
+        {
+            superColumnObj = PropertyAccessorHelper.getObject(superColumnClass);
+            PropertyAccessorHelper.set(superColumnObj, columnField, value);
+        }
+        return superColumnObj;
     }
 
     /**

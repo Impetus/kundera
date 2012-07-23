@@ -17,6 +17,9 @@ public class SuperCounters
     @Column(name = "COUNTER")
     private int counter;
 
+    @Column(name = "Long_COUNTER")
+    private long lCounter;
+
     @Embedded
     private SubCounter subCounter;
 
@@ -69,5 +72,22 @@ public class SuperCounters
     public void setSubCounter(SubCounter subCounter)
     {
         this.subCounter = subCounter;
+    }
+
+    /**
+     * @return the lCounter
+     */
+    public long getlCounter()
+    {
+        return lCounter;
+    }
+
+    /**
+     * @param lCounter
+     *            the lCounter to set
+     */
+    public void setlCounter(long lCounter)
+    {
+        this.lCounter = lCounter;
     }
 }

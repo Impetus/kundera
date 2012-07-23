@@ -1,6 +1,18 @@
-/**
- * 
- */
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
 package com.impetus.client.crud.countercolumns;
 
 import java.io.IOException;
@@ -28,6 +40,8 @@ import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.KunderaException;
 
 /**
+ * Counter column test case for Counter column family in cassandra.
+ * 
  * @author kuldeep.mishra
  * 
  */
@@ -43,7 +57,7 @@ public class CountersTest
 
     private static final boolean RUN_IN_EMBEDDED_MODE = true;
 
-    private static final boolean AUTO_MANAGE_SCHEMA = true;
+    private static final boolean AUTO_MANAGE_SCHEMA = false;
 
     private String keyspace = "KunderaCounterColumn";
 
@@ -60,7 +74,7 @@ public class CountersTest
 
         if (AUTO_MANAGE_SCHEMA)
         {
-            // createSchema();
+             createSchema();
         }
         emf = Persistence.createEntityManagerFactory("CassandraCounterTest");
     }
@@ -92,7 +106,7 @@ public class CountersTest
     @After
     public void tearDown() throws Exception
     {
-        if (AUTO_MANAGE_SCHEMA && CassandraCli.keyspaceExist(keyspace))
+        if (/* AUTO_MANAGE_SCHEMA && CassandraCli.keyspaceExist(keyspace) */CassandraCli.client != null)
         {
             CassandraCli.client.system_drop_keyspace(keyspace);
         }
@@ -364,8 +378,7 @@ public class CountersTest
         }
         catch (UnsupportedOperationException uoe)
         {
-            Assert.assertEquals(" Merge is not permitted on counter column! ",
-                    uoe.getMessage());
+            Assert.assertEquals(" Merge is not permitted on counter column! ", uoe.getMessage());
         }
         finally
         {

@@ -137,26 +137,26 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException irex)
         {
-            log.error("keyspace " + databaseName + " does not exist caused by :" + irex.getMessage());
-            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", irex, "Cassandra",
+            log.error("Error occurred while creating " + databaseName + " Caused by :" + irex.getMessage());
+            throw new SchemaGenerationException("Error occurred while creating " + databaseName , irex, "Cassandra",
                     databaseName);
         }
         catch (TException tex)
         {
-            log.error("keyspace " + databaseName + " does not exist caused by :" + tex.getMessage());
-            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", tex, "Cassandra",
+            log.error("Error occurred while creating " + databaseName + " Caused by :" + tex.getMessage());
+            throw new SchemaGenerationException("Error occurred while creating " + databaseName, tex, "Cassandra",
                     databaseName);
         }
         catch (SchemaDisagreementException sdex)
         {
-            log.error("keyspace " + databaseName + " does not exist caused by :" + sdex.getMessage());
-            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", sdex, "Cassandra",
+            log.error("Error occurred while creating " + databaseName + " Caused by :" + sdex.getMessage());
+            throw new SchemaGenerationException("Error occurred while creating " + databaseName, sdex, "Cassandra",
                     databaseName);
         }
         catch (InterruptedException ie)
         {
-            log.error("keyspace " + databaseName + " does not exist caused by :" + ie.getMessage());
-            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", ie, "Cassandra",
+            log.error("Error occurred while creating " + databaseName + " Caused by :" + ie.getMessage());
+            throw new SchemaGenerationException("Error occurred while creating " + databaseName, ie, "Cassandra",
                     databaseName);
         }
     }
@@ -230,20 +230,20 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException e)
         {
-            log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+            log.error("Error occurred while updating " + databaseName + " Caused by :" + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while updating " + databaseName , e, "Cassandra",
                     databaseName);
         }
         catch (TException e)
         {
-            log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+            log.error("Error occurred while updating " + databaseName  + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while updating " + databaseName , e, "Cassandra",
                     databaseName);
         }
         catch (SchemaDisagreementException e)
         {
-            log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+            log.error("Error occurred while updating " + databaseName  + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while updating " + databaseName , e, "Cassandra",
                     databaseName);
         }
     }
@@ -263,20 +263,20 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (NotFoundException e)
         {
-            log.error("keyspace " + databaseName + " does not exist :");
-            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while validating " + databaseName , e, "Cassandra",
                     databaseName);
         }
         catch (InvalidRequestException e)
         {
-            log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while validating " + databaseName , e, "Cassandra",
                     databaseName);
         }
         catch (TException e)
         {
-            log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while validating " + databaseName , e, "Cassandra",
                     databaseName);
         }
     }
@@ -295,14 +295,14 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         catch (InvalidRequestException e)
         {
-            log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while validating "  + databaseName , e, "Cassandra",
                     databaseName);
         }
         catch (TException e)
         {
-            log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
-            throw new SchemaGenerationException("keyspace " + databaseName + " does not exist :", e, "Cassandra",
+            log.error("Error occurred while validating " + databaseName + " Caused by:"+ e.getMessage());
+            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
                     databaseName);
         }
         for (TableInfo tableInfo : tableInfos)
@@ -339,7 +339,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                                 // columnInfo.getColumnName()
                                 // + " does not exist in column family " +
                                 // tableInfo.getTableName() + "");
-                                throw new SchemaGenerationException("column " + columnInfo.getColumnName()
+                                throw new SchemaGenerationException("Column " + columnInfo.getColumnName()
                                         + " does not exist in column family " + tableInfo.getTableName() + "",
                                         "Cassandra", databaseName, tableInfo.getTableName());
                             }
@@ -358,7 +358,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 // logger.error("column family " + tableInfo.getTableName() +
                 // " does not exist in keyspace "
                 // + databaseName + "");
-                throw new SchemaGenerationException("column family " + tableInfo.getTableName()
+                throw new SchemaGenerationException("Column family " + tableInfo.getTableName()
                         + " does not exist in keyspace " + databaseName + "", "Cassandra", databaseName,
                         tableInfo.getTableName());
             }
@@ -526,12 +526,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             log.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
             throw new SchemaGenerationException(e, "Cassandra", databaseName);
         }
-        // catch (NumberFormatException e)
-        // {
-        // log.error("Error during creating schema in cassandra, Caused by:" +
-        // e.getMessage());
-        // throw new SchemaGenerationException(e, "Cassandra");
-        // }
+
     }
 
     /**
@@ -641,17 +636,17 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             catch (InvalidRequestException e)
             {
-                log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
+                log.error("Error during dropping schema in cassandra, Caused by:" + e.getMessage());
                 throw new SchemaGenerationException(e, "Cassandra");
             }
             catch (TException e)
             {
-                log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
+                log.error("Error during dropping schema in cassandra, Caused by:" + e.getMessage());
                 throw new SchemaGenerationException(e, "Cassandra");
             }
             catch (SchemaDisagreementException e)
             {
-                log.error("keyspace " + databaseName + " does not exist :" + e.getMessage());
+                log.error("Error during dropping schema in cassandra, Caused by:" + e.getMessage());
                 throw new SchemaGenerationException(e, "Cassandra");
             }
         }
@@ -800,7 +795,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         if (!(column.getField().getType().equals(Integer.class) || column.getField().getType().equals(int.class)
                 || column.getField().getType().equals(Long.class) || column.getField().getType().equals(long.class)))
         {
-            log.warn("you have given dafault valdation class :" + CounterColumnType.class.getSimpleName()
+            log.warn("Default valdation class :" + CounterColumnType.class.getSimpleName()
                     + ", For counter column type, fields of Entity should be either long type or integer type");
             return isValid = false;
         }
