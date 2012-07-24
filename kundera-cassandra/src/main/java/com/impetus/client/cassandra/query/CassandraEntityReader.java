@@ -227,16 +227,35 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         List<Object> primaryKeys = new ArrayList<Object>();
 
         String columnFamilyName = m.getTableName() + Constants.INDEX_TABLE_SUFFIX;
-
-        searchResults = ((PelopsClient) client).searchInInvertedIndex(columnFamilyName, m, filterClauseQueue);
-
-        for (SearchResult searchResult : searchResults)
+        searchResults = ((PelopsClient) client).searchInInvertedIndex(columnFamilyName, m, filterClauseQueue);        
+        
+        Map<String, String> embeddedColumns = new HashMap<String, String>();
+        for(SearchResult searchResult : searchResults)
         {
-            primaryKeys.add(searchResult.getPrimaryKey());
+            if(searchResult.getEmbeddedColumnValues() != null) {
+                for(String embeddedColVal : searchResult.getEmbeddedColumnValues()) {
+                    if(embeddedColVal != null) {
+                        StringBuilder strBuilder = new StringBuilder(embeddedColVal);
+                        strBuilder.append("|");
+                        strBuilder.append(searchResult.getPrimaryKey().toString());
+                        embeddedColumns.put(strBuilder.toString(),searchResult.getPrimaryKey().toString());
+                    }                    
+                }  
+            }                       
         }
-
-        List<EnhanceEntity> enhanceEntityList = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(),
-                m.getRelationNames(), true, m, primaryKeys.toArray(new String[] {}));
+        
+        List<EnhanceEntity> enhanceEntityList = null;
+        if(embeddedColumns != null && ! embeddedColumns.isEmpty()) {
+            enhanceEntityList = client.find(m.getEntityClazz(), embeddedColumns);
+        } else {
+            for (SearchResult searchResult : searchResults)
+            {
+                primaryKeys.add(searchResult.getPrimaryKey());
+            }
+            enhanceEntityList = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(),
+                    m.getRelationNames(), true, m, primaryKeys.toArray(new String[] {}));
+        }      
+        
         return enhanceEntityList;
     }
 
