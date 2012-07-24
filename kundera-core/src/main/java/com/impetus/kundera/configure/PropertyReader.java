@@ -25,7 +25,8 @@ public interface PropertyReader
 {
     /**
      * reads all properties from property.
-     * @param string 
+     * 
+     * @param string
      */
     void read(String string);
 }

@@ -64,7 +64,6 @@ import com.impetus.client.persistence.CassandraCli;
 public class StudentCassandraTest extends StudentBase<StudentCassandra>
 {
     String persistenceUnit = "secIdxCassandraTest";
-    
 
     /**
      * Sets the up.
@@ -74,7 +73,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
      */
     @Before
     public void setUp() throws Exception
-    {        
+    {
         setupInternal(persistenceUnit);
     }
 
@@ -87,12 +86,13 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
     @After
     public void tearDown() throws Exception
     {
-        teardownInternal(persistenceUnit);        
+        teardownInternal(persistenceUnit);
     }
-    
+
     @SuppressWarnings("deprecation")
     @Test
-    public void executeTests() {
+    public void executeTests()
+    {
         onInsert();
         onMerge();
     }
@@ -107,40 +107,42 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
      *             {@link com.impetus.kundera.examples.student.StudentDao#saveStudent(com.impetus.kundera.examples.crud.datatype.entities.StudentCassandra)}
      *             .
      */
-    
-    public void onInsert() 
+
+    public void onInsert()
     {
         try
         {
-        onInsert(new StudentCassandra());
+            onInsert(new StudentCassandra());
 
-        // find by id.
-        StudentEntityDef s = em.find(StudentCassandra.class, studentId1);
-        assertOnDataTypes((StudentCassandra) s);
+            // find by id.
+            StudentEntityDef s = em.find(StudentCassandra.class, studentId1);
+            assertOnDataTypes((StudentCassandra) s);
 
-        // // find by name.
-        assertFindByName(em, "StudentCassandra", StudentCassandra.class, "Amresh", "studentName");
+            // // find by name.
+            assertFindByName(em, "StudentCassandra", StudentCassandra.class, "Amresh", "studentName");
 
-        // find by Id 
-//        assertFindByGTId(em, "StudentCassandra", StudentCassandra.class, "12345677", "studentId");
-        
-        // find by name and age.
-        assertFindByNameAndAge(em, "StudentCassandra", StudentCassandra.class, "Amresh", "10", "studentName");
+            // find by Id
+            // assertFindByGTId(em, "StudentCassandra", StudentCassandra.class,
+            // "12345677", "studentId");
 
-        // find by name, age clause
-        assertFindByNameAndAgeGTAndLT(em, "StudentCassandra", StudentCassandra.class, "Amresh", "10", "20",
-                "studentName");
-        //
-        // // find by between clause
-        assertFindByNameAndAgeBetween(em, "StudentCassandra", StudentCassandra.class, "Amresh", "10", "15",
-                "studentName");
+            // find by name and age.
+            assertFindByNameAndAge(em, "StudentCassandra", StudentCassandra.class, "Amresh", "10", "studentName");
 
-        // find by Range.
-        assertFindByRange(em, "StudentCassandra", StudentCassandra.class, "12345677", "12345678", "studentId");
+            // find by name, age clause
+            assertFindByNameAndAgeGTAndLT(em, "StudentCassandra", StudentCassandra.class, "Amresh", "10", "20",
+                    "studentName");
+            //
+            // // find by between clause
+            assertFindByNameAndAgeBetween(em, "StudentCassandra", StudentCassandra.class, "Amresh", "10", "15",
+                    "studentName");
 
-        // find by without where clause.
-        assertFindWithoutWhereClause(em, "StudentCassandra", StudentCassandra.class);
-        }catch(Exception e)
+            // find by Range.
+            assertFindByRange(em, "StudentCassandra", StudentCassandra.class, "12345677", "12345678", "studentId");
+
+            // find by without where clause.
+            assertFindWithoutWhereClause(em, "StudentCassandra", StudentCassandra.class);
+        }
+        catch (Exception e)
         {
             e.printStackTrace();
             Assert.fail("Failure onInsert test");
@@ -152,33 +154,36 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
      */
     public void onMerge()
     {
-         try
-         {
-        em.persist(prepareData((Long) studentId1, 78575785897L, "Amresh", true, 10, 'C', (byte) 5, (short) 8,
-                (float) 69.6, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
-                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, bigInteger, calendar,
-                new StudentCassandra()));
-        StudentCassandra s = em.find(StudentCassandra.class, studentId1);
-        Assert.assertNotNull(s);
-        Assert.assertEquals("Amresh", s.getStudentName());
-        // modify record.
-        s.setStudentName("NewAmresh");
-        em.merge(s);
-        // emf.close();
-//        assertOnMerge(em, "StudentCassandra", StudentCassandra.class, "Amresh", "NewAmresh", "STUDENT_NAME");
-        Query q = em.createQuery("Select p from StudentCassandra p where p.studentName = NewAmresh");
-        List<StudentCassandra> results = q.getResultList();
-        Assert.assertNotNull(results);
-        Assert.assertEquals(1, results.size());
-         }catch(Exception e)
-         {
-             Assert.fail("Failure onMerge test");
-         }
+        try
+        {
+            em.persist(prepareData((Long) studentId1, 78575785897L, "Amresh", true, 10, 'C', (byte) 5, (short) 8,
+                    (float) 69.6, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3),
+                    new Long(978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, bigInteger,
+                    calendar, new StudentCassandra()));
+            StudentCassandra s = em.find(StudentCassandra.class, studentId1);
+            Assert.assertNotNull(s);
+            Assert.assertEquals("Amresh", s.getStudentName());
+            // modify record.
+            s.setStudentName("NewAmresh");
+            em.merge(s);
+            // emf.close();
+            // assertOnMerge(em, "StudentCassandra", StudentCassandra.class,
+            // "Amresh", "NewAmresh", "STUDENT_NAME");
+            Query q = em.createQuery("Select p from StudentCassandra p where p.studentName = NewAmresh");
+            List<StudentCassandra> results = q.getResultList();
+            Assert.assertNotNull(results);
+            Assert.assertEquals(1, results.size());
+        }
+        catch (Exception e)
+        {
+            Assert.fail("Failure onMerge test");
+        }
 
     }
 
     /**
      * Loads cassandra specific data.
+     * 
      * @throws TException
      * @throws InvalidRequestException
      * @throws UnavailableException
@@ -302,11 +307,12 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         {
 
             ksDef = new KsDef("KunderaExamples", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-            //Set replication factor
-            if (ksDef.strategy_options == null) {
+            // Set replication factor
+            if (ksDef.strategy_options == null)
+            {
                 ksDef.strategy_options = new LinkedHashMap<String, String>();
             }
-            //Set replication factor, the value MUST be an integer
+            // Set replication factor, the value MUST be an integer
             ksDef.strategy_options.put("replication_factor", "1");
             CassandraCli.client.system_add_keyspace(ksDef);
         }
@@ -379,7 +385,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         catch (SchemaDisagreementException e)
         {
             e.printStackTrace();
-        } 
+        }
     }
 
     @Override
@@ -387,7 +393,5 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
     {
         CassandraCli.dropKeySpace("KunderaExamples");
     }
-    
-    
 
 }

@@ -202,14 +202,15 @@ public class TwitterService extends SuperDao implements Twitter
         }
         return users.get(0).getFollowers();
     }
-    
+
     @Override
     public List<UserCassandra> findPersonalDetailByName(String name)
     {
-        Query q = em.createQuery("select u.personalDetail.name from UserCassandra u where u.personalDetail.name =:name");
+        Query q = em
+                .createQuery("select u.personalDetail.name from UserCassandra u where u.personalDetail.name =:name");
         q.setParameter("name", name);
-        List<UserCassandra> users = q.getResultList();        
-        return users;        
+        List<UserCassandra> users = q.getResultList();
+        return users;
     }
 
     @Override

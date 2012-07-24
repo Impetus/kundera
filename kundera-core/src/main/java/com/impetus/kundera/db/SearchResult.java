@@ -20,15 +20,16 @@ import java.util.List;
 
 /**
  * Holds High level search result info from database records
+ * 
  * @author amresh
- *
+ * 
  */
 public class SearchResult
 {
     private Object primaryKey;
-    
-    private String embeddedColumnName; 
-    
+
+    private String embeddedColumnName;
+
     private List<String> embeddedColumnValues;
 
     /**
@@ -40,7 +41,8 @@ public class SearchResult
     }
 
     /**
-     * @param primaryKey the primaryKey to set
+     * @param primaryKey
+     *            the primaryKey to set
      */
     public void setPrimaryKey(Object primaryKey)
     {
@@ -56,7 +58,8 @@ public class SearchResult
     }
 
     /**
-     * @param embeddedColumnName the embeddedColumnName to set
+     * @param embeddedColumnName
+     *            the embeddedColumnName to set
      */
     public void setEmbeddedColumnName(String embeddedColumnName)
     {
@@ -72,17 +75,16 @@ public class SearchResult
     }
 
     /**
-     * @param embeddedColumnValues the embeddedColumnValues to set
+     * @param embeddedColumnValues
+     *            the embeddedColumnValues to set
      */
     public void addEmbeddedColumnValue(String embeddedColumnValue)
     {
-        if(embeddedColumnValues == null) {
+        if (embeddedColumnValues == null)
+        {
             embeddedColumnValues = new ArrayList<String>();
         }
         embeddedColumnValues.add(embeddedColumnValue);
     }
-    
-    
-    
 
 }

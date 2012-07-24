@@ -183,11 +183,12 @@ public class PersonAssociationTest extends BaseTest
         {
 
             ksDef = new KsDef("KunderaExamples", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-            //Set replication factor
-            if (ksDef.strategy_options == null) {
+            // Set replication factor
+            if (ksDef.strategy_options == null)
+            {
                 ksDef.strategy_options = new LinkedHashMap<String, String>();
             }
-            //Set replication factor, the value MUST be an integer
+            // Set replication factor, the value MUST be an integer
             ksDef.strategy_options.put("replication_factor", "1");
             CassandraCli.client.system_add_keyspace(ksDef);
         }

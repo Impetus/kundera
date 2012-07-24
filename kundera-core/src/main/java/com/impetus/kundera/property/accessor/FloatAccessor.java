@@ -113,6 +113,7 @@ public class FloatAccessor implements PropertyAccessor<Float>
             throw new PropertyAccessException(e);
         }
     }
+
     public Float getInstance(Class<?> clazz)
     {
         return Float.MAX_VALUE;

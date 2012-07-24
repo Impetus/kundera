@@ -101,8 +101,8 @@ public final class Constants
     public final static String DATA_CENTERS = "datacenters";
 
     public final static String CONNECTIONS = "mongodb.servers";
-    
+
     public final static String SOCKET_TIMEOUT = "scoket.timeout";
-    
+
     public final static String READ_PREFERENCE = "read.preference";
 }

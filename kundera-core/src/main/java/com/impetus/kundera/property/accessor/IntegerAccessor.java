@@ -88,7 +88,7 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
             throw new PropertyAccessException(e);
         }
     }
-    
+
     public Integer getInstance(Class<?> clazz)
     {
         return Integer.MAX_VALUE;

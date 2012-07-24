@@ -2,7 +2,6 @@ package com.impetus.client.twitter.dao;
 
 import java.util.List;
 
-import com.impetus.client.twitter.entities.PersonalDetail;
 import com.impetus.client.twitter.entities.PreferenceCassandra;
 import com.impetus.client.twitter.entities.Tweet;
 import com.impetus.client.twitter.entities.UserCassandra;
@@ -13,9 +12,9 @@ import com.impetus.client.twitter.entities.UserCassandra;
  */
 public interface Twitter
 {
-	
-	void addUser(UserCassandra user);
-	
+
+    void addUser(UserCassandra user);
+
     /**
      * Registers a new user with Twitter application
      * 
@@ -87,22 +86,20 @@ public interface Twitter
     void addFollower(String userId, String followerUserId);
 
     UserCassandra findUserById(String userId);
-    
+
     void removeUser(UserCassandra user);
-    
+
     void mergeUser(UserCassandra user);
-    
+
     /**
      * Retrieves all tweets for a given user
      * 
      * @param userId
      *            the user id
      * @return the all tweets
-     */   
+     */
     List<UserCassandra> getAllUsers();
-    	
-    
-    
+
     List<Tweet> getAllTweets(String userId);
 
     /**
@@ -113,9 +110,8 @@ public interface Twitter
      * @return list of all followers.
      */
     List<UserCassandra> getFollowers(String userId);
-    
+
     List<UserCassandra> findPersonalDetailByName(String name);
-    
 
     /**
      * Find tweet by tweet body.
@@ -139,10 +135,9 @@ public interface Twitter
      * Close.
      */
     void close();
-    
+
     void createEntityManager();
-    
-    void closeEntityManager(); 
-    
+
+    void closeEntityManager();
 
 }

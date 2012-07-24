@@ -30,8 +30,9 @@ public class PersonCassandra
     @Column(name = "AGE")
     private Integer age;
 
-    @Column(name = "AGEss") private byte[] a;
-    
+    @Column(name = "AGEss")
+    private byte[] a;
+
     /**
      * @return the a
      */
@@ -41,7 +42,8 @@ public class PersonCassandra
     }
 
     /**
-     * @param a the a to set
+     * @param a
+     *            the a to set
      */
     public void setA(byte[] a)
     {

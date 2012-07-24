@@ -89,6 +89,7 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
         Date d = Date.valueOf(s);
         return d;
     }
+
     public Date getInstance(Class<?> clazz)
     {
         return new Date(Integer.MAX_VALUE);

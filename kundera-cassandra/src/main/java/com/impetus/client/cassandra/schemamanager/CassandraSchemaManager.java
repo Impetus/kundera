@@ -217,7 +217,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             cassandra_client.system_add_column_family(cfDef);
         }
     }
-    
+
     /**
      * @param tableInfo
      * @throws InvalidRequestException
@@ -230,7 +230,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         boolean indexTableRequired = CassandraPropertyReader.csmd.isInvertedIndexingEnabled()
                 && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
         if (indexTableRequired)
-        {            
+        {
             cassandra_client.system_drop_column_family(tableInfo.getTableName() + Constants.INDEX_TABLE_SUFFIX);
         }
     }

@@ -69,7 +69,8 @@ public interface EntityReader
      *             the exception
      */
 
-    Object recursivelyFindEntities(Object entity, Map<String, Object> relationsMap, EntityMetadata m, PersistenceDelegator pd);
+    Object recursivelyFindEntities(Object entity, Map<String, Object> relationsMap, EntityMetadata m,
+            PersistenceDelegator pd);
 
     /**
      * Find by id.

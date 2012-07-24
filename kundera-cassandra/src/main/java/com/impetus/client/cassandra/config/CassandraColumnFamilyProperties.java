@@ -18,7 +18,8 @@ package com.impetus.client.cassandra.config;
 import org.apache.cassandra.db.marshal.BytesType;
 
 /**
- * Class Cassandra Column family properties has some column family related attribute
+ * Class Cassandra Column family properties has some column family related
+ * attribute
  * 
  * @author kuldeep.mishra
  * 

@@ -90,8 +90,9 @@ public class CharAccessor implements PropertyAccessor<Character>
             throw new PropertyAccessException(e);
         }
     }
+
     public Character getInstance(Class<?> clazz)
     {
-        return Character.MAX_VALUE ;
+        return Character.MAX_VALUE;
     }
 }

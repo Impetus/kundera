@@ -18,7 +18,8 @@ package com.impetus.kundera.graph;
 import com.impetus.kundera.Constants;
 
 /**
- * Provides utility methods for object graph 
+ * Provides utility methods for object graph
+ * 
  * @author amresh.singh
  */
 public class ObjectGraphUtils

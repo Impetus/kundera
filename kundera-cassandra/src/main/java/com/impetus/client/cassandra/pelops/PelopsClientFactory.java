@@ -102,11 +102,11 @@ public class PelopsClientFactory extends GenericClientFactory
         String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
         String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         String poolName = PelopsUtils.generatePoolName(getPersistenceUnit());
-        
+
         if (Pelops.getDbConnPool(poolName) == null)
         {
-            Cluster cluster = new Cluster(contactNodes,
-                    new IConnection.Config(Integer.parseInt(defaultPort), true, -1, getAuthenticationRequest(props)), false);
+            Cluster cluster = new Cluster(contactNodes, new IConnection.Config(Integer.parseInt(defaultPort), true, -1,
+                    getAuthenticationRequest(props)), false);
 
             Policy policy = PelopsUtils.getPoolConfigPolicy(persistenceUnitMetadata);
 
@@ -161,11 +161,14 @@ public class PelopsClientFactory extends GenericClientFactory
     }
 
     /**
-     * If userName and password provided, Method prepares for AuthenticationRequest.
+     * If userName and password provided, Method prepares for
+     * AuthenticationRequest.
      * 
-     * @param props properties
+     * @param props
+     *            properties
      * 
-     * @return simple authenticator request. returns null if userName/password are not provided.
+     * @return simple authenticator request. returns null if userName/password
+     *         are not provided.
      * 
      */
     private SimpleConnectionAuthenticator getAuthenticationRequest(Properties props)
@@ -174,7 +177,7 @@ public class PelopsClientFactory extends GenericClientFactory
         String password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
 
         SimpleConnectionAuthenticator authenticator = null;
-        if(userName != null || password != null)
+        if (userName != null || password != null)
         {
             authenticator = new SimpleConnectionAuthenticator(userName, password);
         }

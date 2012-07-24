@@ -58,7 +58,6 @@ public class TwissandraTest extends TwitterTestBase
         setUpInternal(persistenceUnit);
     }
 
-    
     @Test
     public void onExecute() throws Exception
     {
@@ -120,12 +119,12 @@ public class TwissandraTest extends TwitterTestBase
         userCfDef.column_type = "Super";
         userCfDef.setComparator_type("UTF8Type");
         userCfDef.setDefault_validation_class("UTF8Type");
-        
+
         CfDef userIndexCfDef = new CfDef();
         userIndexCfDef.name = "USER" + Constants.INDEX_TABLE_SUFFIX;
         userIndexCfDef.keyspace = keyspace;
         userIndexCfDef.setComparator_type("UTF8Type");
-        userIndexCfDef.setDefault_validation_class("UTF8Type");        
+        userIndexCfDef.setDefault_validation_class("UTF8Type");
 
         CfDef prefrenceCfDef = new CfDef();
         prefrenceCfDef.name = "PREFERENCE";
@@ -193,14 +192,15 @@ public class TwissandraTest extends TwitterTestBase
         catch (NotFoundException e)
         {
             ksDef = new KsDef(keyspace, SimpleStrategy.class.getSimpleName(), cfDefs);
-            
-            //Set replication factor
-            if (ksDef.strategy_options == null) {
+
+            // Set replication factor
+            if (ksDef.strategy_options == null)
+            {
                 ksDef.strategy_options = new LinkedHashMap<String, String>();
             }
-            //Set replication factor, the value MUST be an integer
+            // Set replication factor, the value MUST be an integer
             ksDef.strategy_options.put("replication_factor", "1");
-            
+
             CassandraCli.client.system_add_keyspace(ksDef);
         }
         catch (InvalidRequestException e)

@@ -49,15 +49,18 @@ import org.junit.Test;
 import com.impetus.client.persistence.CassandraCli;
 
 /**
- * The Class CassandraAuthenticationTest to test scenarios for cassandra authentication test.
+ * The Class CassandraAuthenticationTest to test scenarios for cassandra
+ * authentication test.
  * 
  * @author vivek.mishra
  */
 public class CassandraAuthenticationTest extends BaseTest
 {
 
-  private String userName;
-  private String password;
+    private String userName;
+
+    private String password;
+
     /**
      * Sets the up.
      * 
@@ -67,14 +70,16 @@ public class CassandraAuthenticationTest extends BaseTest
     @Before
     public void setUp() throws Exception
     {
-//        userName = "kunderauser";
-//        password = "kunderapassword";
-//        System.setProperty("passwd.properties", "../resources/passwd.properties");
-//        System.setProperty("access.properties", "../resources/access.properties");
-//        
-//        CassandraCli.cassandraSetUp();
+        // userName = "kunderauser";
+        // password = "kunderapassword";
+        // System.setProperty("passwd.properties",
+        // "../resources/passwd.properties");
+        // System.setProperty("access.properties",
+        // "../resources/access.properties");
+        //
+        // CassandraCli.cassandraSetUp();
     }
-    
+
     @Test
     public void testDummy()
     {
@@ -85,12 +90,12 @@ public class CassandraAuthenticationTest extends BaseTest
     /**
      * Authenticate with valid credentials.
      */
-//    @Test
+    // @Test
     public void authenticateWithValidCredentials()
     {
         try
         {
-            EntityManagerFactory emf= Persistence.createEntityManagerFactory("authenticationTest");
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("authenticationTest");
             Assert.assertNotNull(emf);
             loadData();
             EntityManager em = emf.createEntityManager();
@@ -100,10 +105,10 @@ public class CassandraAuthenticationTest extends BaseTest
             o.setPersonName("vivek");
             o.setAge(10);
             em.persist(o);
-            
+
             PersonAuth p = em.find(PersonAuth.class, "1");
             Assert.assertNotNull(p);
-            
+
         }
         catch (Exception e)
         {
@@ -111,18 +116,20 @@ public class CassandraAuthenticationTest extends BaseTest
         }
 
     }
-    
+
     /**
      * Authenticate with invalid credentials.
-     * @throws SchemaDisagreementException 
-     * @throws TimedOutException 
-     * @throws UnavailableException 
-     * @throws InvalidRequestException 
-     * @throws TException 
-     * @throws IOException 
+     * 
+     * @throws SchemaDisagreementException
+     * @throws TimedOutException
+     * @throws UnavailableException
+     * @throws InvalidRequestException
+     * @throws TException
+     * @throws IOException
      */
-//    @Test
-    public void authenticateWithInValidCredentials() throws IOException, TException, InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
+    // @Test
+    public void authenticateWithInValidCredentials() throws IOException, TException, InvalidRequestException,
+            UnavailableException, TimedOutException, SchemaDisagreementException
     {
         EntityManagerFactory emf = null;
         EntityManager em = null;
@@ -131,7 +138,7 @@ public class CassandraAuthenticationTest extends BaseTest
             userName = "kunderauser";
             password = "invalid";
             loadData();
-            emf= Persistence.createEntityManagerFactory("invalidauthenticationTest");
+            emf = Persistence.createEntityManagerFactory("invalidauthenticationTest");
             em = emf.createEntityManager();
             Assert.fail("Shouldn't be called");
         }
@@ -141,7 +148,8 @@ public class CassandraAuthenticationTest extends BaseTest
             Assert.assertNull(em);
             userName = "kunderauser";
             password = "kunderapassword";
-        }catch (AuthorizationException e)
+        }
+        catch (AuthorizationException e)
         {
             Assert.assertNull(emf);
             Assert.assertNull(em);
@@ -150,17 +158,17 @@ public class CassandraAuthenticationTest extends BaseTest
         }
 
     }
-    
+
     /**
      * No authentication test.
      * 
      */
-//    @Test
+    // @Test
     public void noAuthenticationTest()
     {
         try
         {
-            EntityManagerFactory emf= Persistence.createEntityManagerFactory("cass_pu");
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("cass_pu");
             Assert.assertNotNull(emf);
             EntityManager em = emf.createEntityManager();
             Assert.assertNotNull(em);
@@ -171,19 +179,22 @@ public class CassandraAuthenticationTest extends BaseTest
         }
 
     }
-    
-        
-   
+
     /**
      * Load cassandra specific data.
-     *
-     * @throws TException the t exception
-     * @throws InvalidRequestException the invalid request exception
-     * @throws UnavailableException the unavailable exception
-     * @throws TimedOutException the timed out exception
-     * @throws SchemaDisagreementException the schema disagreement exception
-     * @throws AuthorizationException 
-     * @throws AuthenticationException 
+     * 
+     * @throws TException
+     *             the t exception
+     * @throws InvalidRequestException
+     *             the invalid request exception
+     * @throws UnavailableException
+     *             the unavailable exception
+     * @throws TimedOutException
+     *             the timed out exception
+     * @throws SchemaDisagreementException
+     *             the schema disagreement exception
+     * @throws AuthorizationException
+     * @throws AuthenticationException
      */
     private void loadData() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException, AuthenticationException, AuthorizationException
@@ -211,9 +222,9 @@ public class CassandraAuthenticationTest extends BaseTest
             credentials.put(IAuthenticator.USERNAME_KEY, userName);
             credentials.put(IAuthenticator.PASSWORD_KEY, password);
             CassandraCli.client.login(new AuthenticationRequest(credentials));
-            
+
             CassandraCli.createKeySpace("KunderaAuthentication");
-            
+
             ksDef = CassandraCli.client.describe_keyspace("KunderaAuthentication");
             CassandraCli.client.set_keyspace("KunderaAuthentication");
 
@@ -243,25 +254,25 @@ public class CassandraAuthenticationTest extends BaseTest
         CassandraCli.client.set_keyspace("KunderaAuthentication");
 
     }
-    
 
     /**
      * Tear down.
-     * @throws TException 
-     * @throws AuthorizationException 
-     * @throws AuthenticationException 
+     * 
+     * @throws TException
+     * @throws AuthorizationException
+     * @throws AuthenticationException
      * 
      * @throws Exception
      *             the exception
      */
     @After
-    public void tearDown() throws AuthenticationException, AuthorizationException, TException 
+    public void tearDown() throws AuthenticationException, AuthorizationException, TException
     {
-//        Map<String, String> credentials = new HashMap<String, String>();
-//        credentials.put(IAuthenticator.USERNAME_KEY, userName);
-//        credentials.put(IAuthenticator.PASSWORD_KEY, password);
-//        CassandraCli.client.login(new AuthenticationRequest(credentials));
-//        
-//        CassandraCli.dropKeySpace("KunderaAuthentication");
+        // Map<String, String> credentials = new HashMap<String, String>();
+        // credentials.put(IAuthenticator.USERNAME_KEY, userName);
+        // credentials.put(IAuthenticator.PASSWORD_KEY, password);
+        // CassandraCli.client.login(new AuthenticationRequest(credentials));
+        //
+        // CassandraCli.dropKeySpace("KunderaAuthentication");
     }
 }

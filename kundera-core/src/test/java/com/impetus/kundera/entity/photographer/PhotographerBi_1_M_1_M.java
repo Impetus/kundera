@@ -48,7 +48,7 @@ public class PhotographerBi_1_M_1_M
 
     @Column(name = "PHOTOGRAPHER_NAME")
     private String photographerName;
-    
+
     // Embedded object, will persist co-located
     @Embedded
     private PersonalDetail personalDetail;
@@ -125,7 +125,8 @@ public class PhotographerBi_1_M_1_M
     }
 
     /**
-     * @param personalDetail the personalDetail to set
+     * @param personalDetail
+     *            the personalDetail to set
      */
     public void setPersonalDetail(PersonalDetail personalDetail)
     {
@@ -141,30 +142,34 @@ public class PhotographerBi_1_M_1_M
     }
 
     /**
-     * @param tweets the tweets to set
+     * @param tweets
+     *            the tweets to set
      */
     public void setTweets(List<Tweet> tweets)
     {
         this.tweets = tweets;
     }
-    
+
     /**
-     * @param tweets the tweets to set
+     * @param tweets
+     *            the tweets to set
      */
     public void addTweet(Tweet tweet)
     {
-        if(tweets == null) {
-            tweets = new ArrayList<Tweet>();            
+        if (tweets == null)
+        {
+            tweets = new ArrayList<Tweet>();
         }
         tweets.add(tweet);
     }
 
     /**
-     * @param albums the albums to set
+     * @param albums
+     *            the albums to set
      */
     public void setAlbums(List<AlbumBi_1_M_1_M> albums)
     {
         this.albums = albums;
-    }   
+    }
 
 }

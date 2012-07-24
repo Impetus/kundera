@@ -26,19 +26,19 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
-
 /**
  * @author kuldeep.mishra
  * 
- * The Class PersistWithNullField.
+ *         The Class PersistWithNullField.
  */
 public class NullableFieldAccessorTest
 {
-    
+
     /**
      * Sets the up.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Before
     public void setUp() throws Exception
@@ -124,8 +124,9 @@ public class NullableFieldAccessorTest
 
     /**
      * Tear down.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @After
     public void tearDown() throws Exception

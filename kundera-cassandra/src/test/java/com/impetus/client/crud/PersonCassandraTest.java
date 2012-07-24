@@ -84,14 +84,15 @@ public class PersonCassandraTest extends BaseTest
 
     /**
      * On insert cassandra.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Test
     public void onInsertCassandra() throws Exception
     {
         // cassandraSetUp();
-//        CassandraCli.cassandraSetUp();
+        // CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace("KunderaExamples");
         loadData();
 
@@ -115,12 +116,12 @@ public class PersonCassandraTest extends BaseTest
         assertFindByRange(em, "PersonCassandra", PersonCassandra.class, "1", "2", "personId");
         assertFindWithoutWhereClause(em, "PersonCassandra", PersonCassandra.class);
     }
-    
 
     /**
      * On merge cassandra.
-     *
-     * @throws Exception the exception
+     * 
+     * @throws Exception
+     *             the exception
      */
     @Test
     public void onMergeCassandra() throws Exception
@@ -162,18 +163,23 @@ public class PersonCassandraTest extends BaseTest
       * "2")); em.remove(em.find(Person.class, "3")); em.close(); emf.close();
       * em = null; emf = null;
       */
-//        emf.close();
+        // emf.close();
         CassandraCli.dropKeySpace("KunderaExamples");
     }
 
     /**
      * Load cassandra specific data.
-     *
-     * @throws TException the t exception
-     * @throws InvalidRequestException the invalid request exception
-     * @throws UnavailableException the unavailable exception
-     * @throws TimedOutException the timed out exception
-     * @throws SchemaDisagreementException the schema disagreement exception
+     * 
+     * @throws TException
+     *             the t exception
+     * @throws InvalidRequestException
+     *             the invalid request exception
+     * @throws UnavailableException
+     *             the unavailable exception
+     * @throws TimedOutException
+     *             the timed out exception
+     * @throws SchemaDisagreementException
+     *             the schema disagreement exception
      */
     private void loadData() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
@@ -219,11 +225,12 @@ public class PersonCassandraTest extends BaseTest
         {
 
             ksDef = new KsDef("KunderaExamples", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-            //Set replication factor
-            if (ksDef.strategy_options == null) {
+            // Set replication factor
+            if (ksDef.strategy_options == null)
+            {
                 ksDef.strategy_options = new LinkedHashMap<String, String>();
             }
-            //Set replication factor, the value MUST be an integer
+            // Set replication factor, the value MUST be an integer
             ksDef.strategy_options.put("replication_factor", "1");
             CassandraCli.client.system_add_keyspace(ksDef);
         }

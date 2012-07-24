@@ -1,4 +1,5 @@
 package org.apache.cassandra.auth;
+
 /*
  * 
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -20,7 +21,6 @@ package org.apache.cassandra.auth;
  * 
  */
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.EnumSet;
@@ -33,17 +33,19 @@ import org.apache.cassandra.io.util.FileUtils;
 public class SimpleAuthority implements IAuthority
 {
     public final static String ACCESS_FILENAME_PROPERTY = "access.properties";
+
     // magical property for WRITE permissions to the keyspaces list
     public final static String KEYSPACES_WRITE_PROPERTY = "<modify-keyspaces>";
 
     public EnumSet<Permission> authorize(AuthenticatedUser user, List<Object> resource)
     {
-        if (resource.size() < 2 || !Resources.ROOT.equals(resource.get(0)) || !Resources.KEYSPACES.equals(resource.get(1)))
+        if (resource.size() < 2 || !Resources.ROOT.equals(resource.get(0))
+                || !Resources.KEYSPACES.equals(resource.get(1)))
             return Permission.NONE;
-        
+
         String keyspace, columnFamily = null;
         EnumSet<Permission> authorized = Permission.NONE;
-        
+
         // /cassandra/keyspaces
         if (resource.size() == 2)
         {
@@ -53,26 +55,27 @@ public class SimpleAuthority implements IAuthority
         // /cassandra/keyspaces/<keyspace name>
         else if (resource.size() == 3)
         {
-            keyspace = (String)resource.get(2);
+            keyspace = (String) resource.get(2);
         }
         // /cassandra/keyspaces/<keyspace name>/<cf name>
         else if (resource.size() == 4)
         {
-            keyspace = (String)resource.get(2);
-            columnFamily = (String)resource.get(3);
+            keyspace = (String) resource.get(2);
+            columnFamily = (String) resource.get(3);
         }
         else
         {
             // We don't currently descend any lower in the hierarchy.
             throw new UnsupportedOperationException();
         }
-        
+
         String accessFilename = System.getProperty(ACCESS_FILENAME_PROPERTY);
-        InputStream in=null;
+        InputStream in = null;
         try
         {
-             in = Thread.currentThread().getContextClassLoader().getResourceAsStream("access.properties");
-//            in = new BufferedInputStream(new FileInputStream(accessFilename));
+            in = Thread.currentThread().getContextClassLoader().getResourceAsStream("access.properties");
+            // in = new BufferedInputStream(new
+            // FileInputStream(accessFilename));
             Properties accessProperties = new Properties();
             accessProperties.load(in);
 
@@ -84,12 +87,12 @@ public class SimpleAuthority implements IAuthority
                     if (admin.equals(user.username))
                         return Permission.ALL;
             }
-            
+
             boolean canRead = false, canWrite = false;
             String readers = null, writers = null;
-            
+
             if (columnFamily == null)
-            {    
+            {
                 readers = accessProperties.getProperty(keyspace + ".<ro>");
                 writers = accessProperties.getProperty(keyspace + ".<rw>");
             }
@@ -98,7 +101,7 @@ public class SimpleAuthority implements IAuthority
                 readers = accessProperties.getProperty(keyspace + "." + columnFamily + ".<ro>");
                 writers = accessProperties.getProperty(keyspace + "." + columnFamily + ".<rw>");
             }
-            
+
             if (readers != null)
             {
                 for (String reader : readers.split(","))
@@ -110,7 +113,7 @@ public class SimpleAuthority implements IAuthority
                     }
                 }
             }
-            
+
             if (writers != null)
             {
                 for (String writer : writers.split(","))
@@ -122,18 +125,17 @@ public class SimpleAuthority implements IAuthority
                     }
                 }
             }
-            
+
             if (canWrite)
                 authorized = Permission.ALL;
             else if (canRead)
                 authorized = EnumSet.of(Permission.READ);
-                
+
         }
         catch (IOException e)
         {
             throw new RuntimeException(String.format("Authorization table file '%s' could not be opened: %s",
-                                                     accessFilename,
-                                                     e.getMessage()));
+                    accessFilename, e.getMessage()));
         }
         finally
         {
@@ -148,9 +150,8 @@ public class SimpleAuthority implements IAuthority
         String afilename = System.getProperty(ACCESS_FILENAME_PROPERTY);
         if (afilename == null)
         {
-            throw new ConfigurationException(String.format("When using %s, '%s' property must be defined.",
-                                                           this.getClass().getCanonicalName(),
-                                                           ACCESS_FILENAME_PROPERTY));	
+            throw new ConfigurationException(String.format("When using %s, '%s' property must be defined.", this
+                    .getClass().getCanonicalName(), ACCESS_FILENAME_PROPERTY));
         }
     }
 }

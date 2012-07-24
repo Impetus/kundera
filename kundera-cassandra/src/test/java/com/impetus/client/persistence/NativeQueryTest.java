@@ -28,10 +28,10 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.cli.CliParser.newColumnFamily_return;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;

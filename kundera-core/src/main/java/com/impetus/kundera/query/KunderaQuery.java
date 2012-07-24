@@ -92,7 +92,7 @@ public class KunderaQuery
 
     /** The sort orders. */
     private List<SortOrdering> sortOrders;
-    
+
     /** Persistence Unit(s). */
     // String[] persistenceUnits;
 
@@ -430,15 +430,18 @@ public class KunderaQuery
                 // String columnName = getColumnNameFromFieldName(metadata,
                 // property);
                 String columnName = metadata.getColumnName(property);
-                
-                //where condition may be for search within embedded object
-                if(columnName == null && property.indexOf(".") > 0) {
-                    String enclosingEmbeddedField = MetadataUtils.getEnclosingEmbeddedFieldName(metadata, property.substring(property.indexOf(".") + 1, property.length()), false);
-                    if(enclosingEmbeddedField != null) {
+
+                // where condition may be for search within embedded object
+                if (columnName == null && property.indexOf(".") > 0)
+                {
+                    String enclosingEmbeddedField = MetadataUtils.getEnclosingEmbeddedFieldName(metadata,
+                            property.substring(property.indexOf(".") + 1, property.length()), false);
+                    if (enclosingEmbeddedField != null)
+                    {
                         columnName = property;
                     }
                 }
-                
+
                 String condition = tokens.get(1);
                 if (!Arrays.asList(INTRA_CLAUSE_OPERATORS).contains(condition.toUpperCase()))
                 {
@@ -446,7 +449,7 @@ public class KunderaQuery
                 }
 
                 FilterClause filterClause = new FilterClause(
-                        MetadataUtils.useSecondryIndex(persistenceUnit) ?  columnName : indexName + "." + columnName ,
+                        MetadataUtils.useSecondryIndex(persistenceUnit) ? columnName : indexName + "." + columnName,
                         condition, tokens.get(2));
                 filtersQueue.add(filterClause);
 
@@ -625,8 +628,6 @@ public class KunderaQuery
 
         /** The value. */
         String value;
-        
-        
 
         /**
          * The Constructor.

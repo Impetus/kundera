@@ -39,7 +39,6 @@ public class Tweet
     @Column(name = "tweeted_from")
     private String device;
 
-
     public Tweet(String body, String device)
     {
         this.tweetId = UUID.randomUUID().toString();

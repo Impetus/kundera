@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.persistence.event.CallbackMethod;
-import com.impetus.kundera.query.QueryImpl;
 
 /**
  * Holds metadata for entities.
@@ -67,6 +66,7 @@ public final class EntityMetadata
     private boolean cacheable = false; // default is to not set second-level
 
     private boolean isCounterColumnType = false;
+
     /*
      * Fields related metadata properties
      */
@@ -115,9 +115,9 @@ public final class EntityMetadata
 
     // Whether it contains One-To-Many relationship
     private boolean isParent;
-    
-    private Map<String, String> fieldToColMap = new HashMap<String, String>(); 
-    
+
+    private Map<String, String> fieldToColMap = new HashMap<String, String>();
+
     /** The log. */
     private static Log log = LogFactory.getLog(EntityMetadata.class);
 
@@ -317,7 +317,7 @@ public final class EntityMetadata
     {
         this.idColumn = idColumn;
         fieldToColMap.put(idColumn.getField().getName(), idColumn.getName());
-        
+
     }
 
     /**
@@ -473,7 +473,7 @@ public final class EntityMetadata
     public void addEmbeddedColumn(String key, EmbeddedColumn embeddedColumn)
     {
         embeddedColumnsMap.put(key, embeddedColumn);
-        for(Column col : embeddedColumn.getColumns())
+        for (Column col : embeddedColumn.getColumns())
         {
             fieldToColMap.put(col.getField().getName(), col.getName());
         }
@@ -830,35 +830,39 @@ public final class EntityMetadata
     /**
      * Returns mapped class of field type.
      * 
-     * @param fieldName field name.
-     * @return   mapped class of field.
+     * @param fieldName
+     *            field name.
+     * @return mapped class of field.
      */
     public Class<?> getFieldType(String fieldName)
     {
-        if(fieldToColMap.isEmpty() || columnsMap.isEmpty())
+        if (fieldToColMap.isEmpty() || columnsMap.isEmpty())
         {
             log.warn("No column found mapped for:" + fieldName);
             return null;
         }
         return columnsMap.get(fieldToColMap.get(fieldName)).getField().getType();
     }
-    
+
     /**
      * Returns mapped column name.
      * 
-     * @param fieldName column field name.
+     * @param fieldName
+     *            column field name.
      * 
-     * @return mapped column name(e.g. actual name represented by {@link Column.name}
+     * @return mapped column name(e.g. actual name represented by
+     *         {@link Column.name}
      */
     public String getColumnName(String fieldName)
     {
-        if(fieldToColMap.isEmpty())
+        if (fieldToColMap.isEmpty())
         {
             log.warn("No column found mapped for:" + fieldName);
         }
 
         return fieldToColMap.get(fieldName);
     }
+
     /**
      * Method to add specific relation name for given relational field.
      * 
@@ -925,10 +929,11 @@ public final class EntityMetadata
     }
 
     /**
-     * @param isCounterColumnType the isCounterColumnType to set
+     * @param isCounterColumnType
+     *            the isCounterColumnType to set
      */
     public void setCounterColumnType(boolean isCounterColumnType)
     {
         this.isCounterColumnType = isCounterColumnType;
-    }        
+    }
 }

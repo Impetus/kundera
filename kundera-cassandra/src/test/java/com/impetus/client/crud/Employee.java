@@ -50,7 +50,6 @@ public class Employee
     @JoinColumn(name = "MANAGER_ID")
     private Employee manager;
 
-    
     public Employee()
     {
     }
@@ -64,7 +63,8 @@ public class Employee
     }
 
     /**
-     * @param personId the personId to set
+     * @param personId
+     *            the personId to set
      */
     public void setPersonId(String personId)
     {
@@ -80,7 +80,8 @@ public class Employee
     }
 
     /**
-     * @param personName the personName to set
+     * @param personName
+     *            the personName to set
      */
     public void setPersonName(String personName)
     {
@@ -96,7 +97,8 @@ public class Employee
     }
 
     /**
-     * @param employees the employees to set
+     * @param employees
+     *            the employees to set
      */
     public void setEmployees(Set<Employee> employees)
     {
@@ -112,14 +114,13 @@ public class Employee
     }
 
     /**
-     * @param manager the manager to set
+     * @param manager
+     *            the manager to set
      */
     public void setManager(Employee manager)
     {
         this.manager = manager;
     }
 
- 
-    
     // Constructors, Getters, setters here
 }

@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.utils.ReflectUtils;
@@ -93,7 +92,7 @@ public class PropertyAccessorHelper
      *             the property access exception
      */
     public static void set(Object target, Field field, Object value)
-    {       
+    {
 
         if (!field.isAccessible())
         {
@@ -255,7 +254,6 @@ public class PropertyAccessorHelper
         }
     }
 
-    
     /**
      * Sets Primary Key (Row key) into entity field that was annotated with @Id.
      * 
@@ -437,10 +435,9 @@ public class PropertyAccessorHelper
 
     }
 
-    
     public static final Object getObject(Class<?> clazz)
     {
-      PropertyAccessor accessor =  PropertyAccessorFactory.getPropertyAccessor(clazz);
-      return accessor.getInstance(clazz);
+        PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(clazz);
+        return accessor.getInstance(clazz);
     }
 }

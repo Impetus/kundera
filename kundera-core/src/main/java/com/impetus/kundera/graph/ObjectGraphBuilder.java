@@ -44,7 +44,7 @@ public class ObjectGraphBuilder
     {
         this.persistenceCache = pcCache;
     }
-    
+
     public ObjectGraph getObjectGraph(Object entity, NodeState initialNodeState)
     {
         // Initialize object graph
@@ -82,7 +82,7 @@ public class ObjectGraphBuilder
 
         // If this node is already there in graph (may happen for bidirectional
         // relationship, do nothing and return null)
-        Node node = graph.getNode(nodeId); 
+        Node node = graph.getNode(nodeId);
         if (node != null)
         {
             if (node.isGraphCompleted())
@@ -174,7 +174,7 @@ public class ObjectGraphBuilder
             }
 
         }
-        
+
         // Means compelte graph is build.
         node.setGraphCompleted(true);
         return node;

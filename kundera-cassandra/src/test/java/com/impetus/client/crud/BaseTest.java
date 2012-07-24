@@ -20,8 +20,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import com.impetus.client.crud.datatypes.StudentCassandra;
-
 import junit.framework.Assert;
 
 /**

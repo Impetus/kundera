@@ -93,14 +93,15 @@ public final class CassandraCli
         {
             List<CfDef> cfDefs = new ArrayList<CfDef>();
             KsDef ks_Def = new KsDef(keyspaceName, SimpleStrategy.class.getName(), cfDefs);
-            
-            //Set replication factor
-            if (ks_Def.strategy_options == null) {
+
+            // Set replication factor
+            if (ks_Def.strategy_options == null)
+            {
                 ks_Def.strategy_options = new LinkedHashMap<String, String>();
             }
-            //Set replication factor, the value MUST be an integer
-            ks_Def.strategy_options.put("replication_factor", "1");            
-            
+            // Set replication factor, the value MUST be an integer
+            ks_Def.strategy_options.put("replication_factor", "1");
+
             try
             {
                 client.system_add_keyspace(ks_Def);

@@ -36,14 +36,14 @@ import com.impetus.client.twitter.entities.UserCassandra;
  * 
  * @author amresh.singh
  */
-public abstract class TwitterTestBase 
+public abstract class TwitterTestBase
 {
     public static final boolean RUN_IN_EMBEDDED_MODE = true;
 
     public static final boolean AUTO_MANAGE_SCHEMA = true;
-    
+
     public static final String persistenceUnit = "twissandraTest";
-    
+
     public static final String keyspace = "KunderaExamples";
 
     /** The user id1. */
@@ -120,13 +120,13 @@ public abstract class TwitterTestBase
     {
         // Insert, Find and Update
         addAllUserInfo();
-        //getUserById();
+        getUserById();
         updateUser();
 
         // Queries
         getPersonalDetailByName();
-        //getAllUsers();
-        
+        getAllUsers();
+
         getTweetsByBody();
         getTweetsByDevice();
 
@@ -187,7 +187,7 @@ public abstract class TwitterTestBase
 
         UserCassandra user1AfterRemoval = twitter.findUserById(userId1);
         Assert.assertNull(user1AfterRemoval);
-        
+
         UserCassandra user2 = twitter.findUserById(userId2);
         assertUser2(user2);
 
@@ -338,7 +338,7 @@ public abstract class TwitterTestBase
         Assert.assertEquals(3, tweetsUser1.size());
         Assert.assertEquals(2, tweetsUser2.size());
     }
-    
+
     public void getPersonalDetailByName()
     {
         twitter.createEntityManager();
@@ -346,17 +346,16 @@ public abstract class TwitterTestBase
         Assert.assertNotNull(users);
         Assert.assertFalse(users.isEmpty());
         Assert.assertTrue(users.size() == 1);
-        
+
         UserCassandra user = users.get(0);
         Assert.assertNotNull(user);
         PersonalDetail pd = user.getPersonalDetail();
         Assert.assertNotNull(pd);
-        Assert.assertTrue(pd.getPersonalDetailId() != null && ! pd.getPersonalDetailId().trim().equals(""));
-        Assert.assertTrue("Vivek", pd.getName() != null );
+        Assert.assertTrue(pd.getPersonalDetailId() != null && !pd.getPersonalDetailId().trim().equals(""));
+        Assert.assertTrue("Vivek", pd.getName() != null);
         Assert.assertEquals("unknown", pd.getPassword());
         Assert.assertEquals("Married", pd.getRelationshipStatus());
-        
-        
+
         twitter.closeEntityManager();
     }
 
@@ -507,5 +506,6 @@ public abstract class TwitterTestBase
 
     abstract void deleteSchema();
 
-    abstract void createSchema() throws NotFoundException, InvalidRequestException, TException, SchemaDisagreementException;
+    abstract void createSchema() throws NotFoundException, InvalidRequestException, TException,
+            SchemaDisagreementException;
 }

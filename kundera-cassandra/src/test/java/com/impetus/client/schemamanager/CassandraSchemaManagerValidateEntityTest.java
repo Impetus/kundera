@@ -18,7 +18,6 @@ import org.junit.Test;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
 import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
-
 import com.impetus.client.schemamanager.entites.InvalidCounterColumnEntity;
 import com.impetus.client.schemamanager.entites.ValidCounterColumnFamily;
 import com.impetus.kundera.Constants;
@@ -39,8 +38,9 @@ public class CassandraSchemaManagerValidateEntityTest
 {
 
     private String persistenceUnit = "cassandraProperties";
-//    private String[] persistenceUnits = new String[] {persistenceUnit};
-   
+
+    // private String[] persistenceUnits = new String[] {persistenceUnit};
+
     /**
      * @throws java.lang.Exception
      */
@@ -68,7 +68,7 @@ public class CassandraSchemaManagerValidateEntityTest
         getEntityManagerFactory();
         CassandraPropertyReader reader = new CassandraPropertyReader();
         reader.read(persistenceUnit);
-        CassandraSchemaManager manager = new CassandraSchemaManager(PelopsClientFactory.class.getName());      
+        CassandraSchemaManager manager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
         boolean valid = manager.validateEntity(ValidCounterColumnFamily.class);
         Assert.assertTrue(valid);
         valid = manager.validateEntity(InvalidCounterColumnEntity.class);
@@ -91,9 +91,9 @@ public class CassandraSchemaManagerValidateEntityTest
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
         props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCounterColumn");
         props.put(PersistenceProperties.KUNDERA_CLIENT_PROPERTY, "kundera-cassandra.properties");
-        
+
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
-        
+
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
         puMetadata.setPersistenceUnitName(persistenceUnit);

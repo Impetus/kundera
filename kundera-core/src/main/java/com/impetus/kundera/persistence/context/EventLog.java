@@ -18,18 +18,20 @@ package com.impetus.kundera.persistence.context;
 import com.impetus.kundera.graph.Node;
 
 /**
- * Logs CRUD events, 
+ * Logs CRUD events,
+ * 
  * @author vivek.mishra
- *
+ * 
  */
 public class EventLog
 {
 
     private EventType eventType;
+
     private long timeinMillies;
+
     private Node node;
-    
-    
+
     EventLog(EventType eventType, Node transactional)
     {
         this.node = transactional;
@@ -41,7 +43,7 @@ public class EventLog
     {
         return node.getOriginalNode();
     }
-    
+
     /**
      * @return the entityId
      */
@@ -49,8 +51,6 @@ public class EventLog
     {
         return node.getNodeId();
     }
-
-    
 
     /**
      * @return the eventType
@@ -76,12 +76,8 @@ public class EventLog
         return node;
     }
 
-
-
     public enum EventType
     {
-        INSERT,
-        UPDATE,
-        DELETE;
+        INSERT, UPDATE, DELETE;
     }
 }

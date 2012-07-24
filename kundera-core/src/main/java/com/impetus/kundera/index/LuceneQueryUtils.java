@@ -16,7 +16,8 @@
 package com.impetus.kundera.index;
 
 /**
- * Provides utility methods for Lucene Query related functionality 
+ * Provides utility methods for Lucene Query related functionality
+ * 
  * @author amresh.singh
  */
 public class LuceneQueryUtils
@@ -47,7 +48,7 @@ public class LuceneQueryUtils
         sb.append(idFieldValue);
         return sb.toString();
     }
-    
+
     /**
      * Returns lucene based query.
      * 

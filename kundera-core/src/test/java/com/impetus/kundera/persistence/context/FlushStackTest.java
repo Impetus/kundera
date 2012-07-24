@@ -31,7 +31,7 @@ public class FlushStackTest
 {
 
     FlushStack fs;
-    
+
     FlushManager flushManager;
 
     /**
@@ -41,7 +41,7 @@ public class FlushStackTest
     public void setUp() throws Exception
     {
         flushManager = new FlushManager();
-        
+
         fs = flushManager.getFlushStack();
     }
 

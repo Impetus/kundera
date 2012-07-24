@@ -41,10 +41,11 @@ import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.Mutator;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
-import com.impetus.client.cassandra.pelops.PelopsDataHandler.ThriftRow;
+import com.impetus.client.cassandra.common.CassandraIndexHelper;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
@@ -59,8 +60,8 @@ import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.QueryHandlerException;
 
 /**
  * Provides Pelops utility methods for data held in Column family based stores.
@@ -299,28 +300,33 @@ final class PelopsDataHandler
 
                 for (Column column : sc.getColumns())
                 {
-                    String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-                    byte[] value = column.getValue();
-
-                    if (value == null)
+                    if (column != null)
                     {
-                        continue;
+                        String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
+                        byte[] value = column.getValue();
+
+                        if (value == null)
+                        {
+                            continue;
+                        }
+
+                        if (intoRelations)
+                        {
+                            Relation relation = m.getRelation(name);
+
+                            String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(String.class, value);
+                            Set<String> keys = MetadataUtils.deserializeKeys(foreignKeys);
+                        }
+                        else
+                        {
+                            // set value of the field in the bean
+                            Field field = columnNameToFieldMap.get(name);
+                            Object embeddedObject = PropertyAccessorHelper.getObject(e, scName);
+                            PropertyAccessorHelper.set(embeddedObject, field, value);
+                        }
+
                     }
 
-                    if (intoRelations)
-                    {
-                        Relation relation = m.getRelation(name);
-
-                        String foreignKeys = PropertyAccessorFactory.STRING.fromBytes(String.class, value);
-                        Set<String> keys = MetadataUtils.deserializeKeys(foreignKeys);
-                    }
-                    else
-                    {
-                        // set value of the field in the bean
-                        Field field = columnNameToFieldMap.get(name);
-                        Object embeddedObject = PropertyAccessorHelper.getObject(e, scName);
-                        PropertyAccessorHelper.set(embeddedObject, field, value);
-                    }
                 }
             }
         }
@@ -788,7 +794,6 @@ final class PelopsDataHandler
                         || (relationNames != null && !relationNames.isEmpty() && relationNames.contains(scName)))
                 {
                     Class superColumnClass = superColumnField != null ? superColumnField.getType() : null;
-                    
 
                     for (CounterColumn column : sc.getColumns())
                     {
@@ -805,15 +810,16 @@ final class PelopsDataHandler
                                 {
                                     int colValue = value.intValue();
                                     superColumnObj = populateColumnValue(superColumnClass, colValue, columnField);
-/*                                    if(superColumnClass.isPrimitive())
-                                    {
-                                        superColumnObj = colValue;
-                                    } else
-                                    {
-                                        superColumnObj = PropertyAccessorHelper.getObject(superColumnClass);
-                                        PropertyAccessorHelper.set(superColumnObj, columnField, colValue);
-                                    }
-*/                                }
+                                    /*
+                                     * if(superColumnClass.isPrimitive()) {
+                                     * superColumnObj = colValue; } else {
+                                     * superColumnObj =
+                                     * PropertyAccessorHelper.getObject
+                                     * (superColumnClass);
+                                     * PropertyAccessorHelper
+                                     * .set(superColumnObj, columnField,
+                                     * colValue); }
+                                     */}
                                 else
                                 {
                                     superColumnObj = populateColumnValue(superColumnClass, value, columnField);
@@ -873,10 +879,11 @@ final class PelopsDataHandler
     private Object populateColumnValue(Class superColumnClass, Object value, Field columnField)
     {
         Object superColumnObj;
-        if(superColumnClass.isPrimitive())
+        if (superColumnClass.isPrimitive())
         {
             superColumnObj = value;
-        } else
+        }
+        else
         {
             superColumnObj = PropertyAccessorHelper.getObject(superColumnClass);
             PropertyAccessorHelper.set(superColumnObj, columnField, value);
@@ -1061,7 +1068,6 @@ final class PelopsDataHandler
             {
                 for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
                 {
-
                     ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedColumn, embeddedObject, column,
                             value);
 
@@ -1109,6 +1115,49 @@ final class PelopsDataHandler
 
         tr.addColumn(thriftColumn);
         return tr;
+    }
+
+    /**
+     * Deletes records from inverted index table
+     * 
+     * @param entity
+     * @param metadata
+     */
+    public void deleteRecordsFromIndexTable(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel)
+    {
+        Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(metadata.getPersistenceUnit()));
+        String indexColumnFamily = CassandraIndexHelper.getInvertedIndexTableName(metadata.getTableName());
+        for (EmbeddedColumn embeddedColumn : metadata.getEmbeddedColumnsAsList())
+        {
+            Object embeddedObject = PropertyAccessorHelper.getObject(entity, embeddedColumn.getField());
+
+            if (embeddedObject instanceof Collection)
+            {
+                for (Object obj : (Collection) embeddedObject)
+                {
+                    for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
+                    {
+                        String rowKey = embeddedColumn.getField().getName() + Constants.INDEX_TABLE_ROW_KEY_DELIMITER
+                                + column.getField().getName();
+                        byte[] columnName = PropertyAccessorHelper.get(obj, column.getField());
+                        mutator.deleteColumn(indexColumnFamily, rowKey, Bytes.fromByteArray(columnName));
+
+                    }
+                }
+
+            }
+            else
+            {
+                for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
+                {
+                    String rowKey = embeddedColumn.getField().getName() + Constants.INDEX_TABLE_ROW_KEY_DELIMITER
+                            + column.getField().getName();
+                    byte[] columnName = PropertyAccessorHelper.get(embeddedObject, column.getField());
+                    mutator.deleteColumn(indexColumnFamily, rowKey, Bytes.fromByteArray(columnName));
+                }
+            }
+        }
+        mutator.execute(consistencyLevel);
     }
 
     /**

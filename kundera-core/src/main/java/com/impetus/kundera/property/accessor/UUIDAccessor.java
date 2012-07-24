@@ -122,7 +122,7 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
 
         return buffer;
     }
-    
+
     public UUID getInstance(Class<?> clazz)
     {
         return UUID.randomUUID();

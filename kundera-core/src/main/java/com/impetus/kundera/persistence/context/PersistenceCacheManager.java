@@ -72,7 +72,7 @@ public class PersistenceCacheManager
             node.setTraversed(false);
         }
     }
-    
+
     /**
      * @param entity
      * @param pd
@@ -80,12 +80,12 @@ public class PersistenceCacheManager
      */
     public static void addEntityToPersistenceCache(Object entity, PersistenceDelegator pd, String entityId)
     {
-        MainCache mainCache = (MainCache) pd.getPersistenceCache().getMainCache();        
+        MainCache mainCache = (MainCache) pd.getPersistenceCache().getMainCache();
         String nodeId = ObjectGraphUtils.getNodeId(entityId, entity.getClass());
         Node node = new Node(nodeId, entity.getClass(), new ManagedState(), pd.getPersistenceCache());
-        node.setData(entity);        
+        node.setData(entity);
         node.setPersistenceDelegator(pd);
         mainCache.addNodeToCache(node);
-    }   
+    }
 
 }

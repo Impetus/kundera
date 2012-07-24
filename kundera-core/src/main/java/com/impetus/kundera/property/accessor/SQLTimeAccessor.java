@@ -88,6 +88,7 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
         Time t = Time.valueOf(s);
         return t;
     }
+
     public Time getInstance(Class<?> clazz)
     {
         return new Time(Integer.MAX_VALUE);

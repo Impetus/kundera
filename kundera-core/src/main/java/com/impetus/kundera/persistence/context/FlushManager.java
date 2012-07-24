@@ -25,14 +25,12 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import antlr.debug.Event;
-
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
-import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
+import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -43,8 +41,6 @@ import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.persistence.context.EventLog.EventType;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
-import com.impetus.kundera.utils.ObjectUtils;
-import com.sun.java.swing.plaf.windows.WindowsTreeUI.CollapsedIcon;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -335,29 +331,30 @@ public class FlushManager
         if (flushStack != null && !flushStack.isEmpty())
         {
             flushStack.clear();
-//            flushStack = null;
+            // flushStack = null;
         }
         if (joinTableDataMap != null && !joinTableDataMap.isEmpty())
         {
             joinTableDataMap.clear();
-//            joinTableDataMap = null;
+            // joinTableDataMap = null;
         }
-        
-        if(eventLogQueue != null)
+
+        if (eventLogQueue != null)
         {
             eventLogQueue.clear();
-//            eventLogQueue = null;
+            // eventLogQueue = null;
         }
     }
 
     /**
      * Rollback.
-     *
-     * @param delegator the delegator
+     * 
+     * @param delegator
+     *            the delegator
      */
     public void rollback(PersistenceDelegator delegator)
     {
-        if(eventLogQueue != null)
+        if (eventLogQueue != null)
         {
             onRollBack(delegator, eventLogQueue.getInsertEvents());
             onRollBack(delegator, eventLogQueue.getUpdateEvents());
@@ -367,11 +364,11 @@ public class FlushManager
         }
     }
 
-
     /**
      * Rollback.
-     *
-     * @param delegator the delegator
+     * 
+     * @param delegator
+     *            the delegator
      */
     public void commit()
     {
@@ -381,7 +378,6 @@ public class FlushManager
 
     }
 
-    
     /**
      * @param deleteEvents
      */
@@ -420,9 +416,11 @@ public class FlushManager
 
     /**
      * On roll back.
-     *
-     * @param delegator the delegator
-     * @param eventCol the event col
+     * 
+     * @param delegator
+     *            the delegator
+     * @param eventCol
+     *            the event col
      */
     private void onRollBack(PersistenceDelegator delegator, Map<Object, EventLog> eventCol)
     {
@@ -440,7 +438,7 @@ public class FlushManager
                     Class clazz = node.getDataClass();
                     EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
                     Client client = delegator.getClient(metadata);
-                    if(node.isProcessed())
+                    if (node.isProcessed())
                     {
                         if (node.getOriginalNode() == null)
                         {
@@ -462,8 +460,8 @@ public class FlushManager
                 }
             }
         }
-        
-        //mark it null for garbage collection.
+
+        // mark it null for garbage collection.
         eventCol = null;
     }
 
@@ -516,7 +514,6 @@ public class FlushManager
         EventLog log = new EventLog(eventType, node);
         eventLogQueue.onEvent(log, eventType);
     }
-
 
     private void rollbackJoinTableData(PersistenceDelegator delegator)
     {

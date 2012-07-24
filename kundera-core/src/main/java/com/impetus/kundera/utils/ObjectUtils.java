@@ -91,18 +91,20 @@ public class ObjectUtils
                 return null;
 
             Class<?> sourceObjectClass = source.getClass();
-            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(sourceObjectClass); 
-            if(metadata == null) {
+            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(sourceObjectClass);
+            if (metadata == null)
+            {
                 return null;
             }
 
-            Object id = metadata.getReadIdentifierMethod().invoke(source);            
-            
+            Object id = metadata.getReadIdentifierMethod().invoke(source);
+
             Object copiedObjectInMap = copiedObjectMap.get(sourceObjectClass.getName() + "#" + id);
-            if(copiedObjectInMap != null) {
+            if (copiedObjectInMap != null)
+            {
                 return copiedObjectInMap;
-            }            
-            
+            }
+
             target = sourceObjectClass.newInstance();
 
             // Copy ID field
@@ -122,7 +124,7 @@ public class ObjectUtils
                 Field embeddedColumnField = embeddedColumn.getField();
 
                 Object sourceEmbeddedObj = PropertyAccessorHelper.getObject(source, embeddedColumnField);
-                if(sourceEmbeddedObj != null)
+                if (sourceEmbeddedObj != null)
                 {
                     if (embeddedColumnField.getAnnotation(Embedded.class) != null)
                     {
@@ -180,8 +182,8 @@ public class ObjectUtils
                     {
                         // Copy columns
                         PropertyAccessorHelper.set(target, embeddedColumnField, sourceEmbeddedObj);
-                    } 
-                }                
+                    }
+                }
             }
 
             // Put this object into copied object map
@@ -193,7 +195,7 @@ public class ObjectUtils
                 Field relationField = relation.getProperty();
                 Object sourceRelationObject = PropertyAccessorHelper.getObject(source, relationField);
 
-                if (sourceRelationObject != null && ! (sourceRelationObject instanceof AbstractPersistentCollection))
+                if (sourceRelationObject != null && !(sourceRelationObject instanceof AbstractPersistentCollection))
                 {
                     Object targetRelationObject = null;
 
@@ -212,12 +214,13 @@ public class ObjectUtils
                         for (Object obj : (Collection) sourceRelationObject)
                         {
                             Object copyTargetRelObj = deepCopyUsingMetadata(obj, copiedObjectMap);
-                            
+
                             m.invoke(targetRelationObject, copyTargetRelObj);
                         }
                     }
                     // Put this object into copied object map
-                    //copiedObjectMap.put(sourceObjectClass.getName() + "#" + id, target);
+                    // copiedObjectMap.put(sourceObjectClass.getName() + "#" +
+                    // id, target);
                     PropertyAccessorHelper.set(target, relationField, targetRelationObject);
                 }
 
@@ -240,13 +243,12 @@ public class ObjectUtils
             log.warn("Returning null as error during clone, Caused by:" + e.getMessage());
             return null;
         }
-        
+
         catch (NoSuchMethodException e)
         {
             log.warn("Returning null as error during clone, Caused by:" + e.getMessage());
             return null;
         }
-
 
         return target;
     }

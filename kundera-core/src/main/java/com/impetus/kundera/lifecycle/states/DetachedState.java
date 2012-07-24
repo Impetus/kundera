@@ -56,8 +56,8 @@ public class DetachedState extends NodeState
         // Detached ---> Managed
         moveNodeToNextState(nodeStateContext, new ManagedState());
 
-        ((Node)nodeStateContext).setUpdate(true);
-        
+        ((Node) nodeStateContext).setUpdate(true);
+
         // Copy detached entity's current state to existing managed instance of
         // the
         // same entity identity (if one exists), or create a new managed copy

@@ -34,7 +34,7 @@ import org.junit.Test;
 import com.impetus.kundera.KunderaException;
 
 /**
- * Junit test case for {@link KunderaJTAUserTransaction}. 
+ * Junit test case for {@link KunderaJTAUserTransaction}.
  * 
  * @author vivek.mishra
  * 
@@ -43,7 +43,6 @@ public class KunderaJTAUserTransactionTest
 {
     private UserTransaction utx;
 
-    
     /**
      * Static initialisation and binding UserTransaction.
      * 
@@ -78,9 +77,8 @@ public class KunderaJTAUserTransactionTest
     }
 
     /**
-     * Method to test positive scenario:
-     * A) begin transaction.
-     * B) assertion on invocation of commit method.
+     * Method to test positive scenario: A) begin transaction. B) assertion on
+     * invocation of commit method.
      */
     @Test
     public void testInitializeViaLookup()
@@ -105,9 +103,7 @@ public class KunderaJTAUserTransactionTest
     }
 
     /**
-     * Test case for:
-     * A) utx.begin was not invoked.
-     * B) Assert on invalid commit.
+     * Test case for: A) utx.begin was not invoked. B) Assert on invalid commit.
      */
     @Test
     public void testInvalidCommit()

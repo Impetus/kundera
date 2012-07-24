@@ -18,34 +18,34 @@ import com.impetus.kundera.persistence.ResourceManager;
  * Implementation for <code> javax.transaction.Transaction </code>
  * 
  * @author vivek.mishra
- *
+ * 
  */
 public class KunderaTransaction implements Transaction
 {
 
     private ResourceManager implementor;
-    
+
     private boolean setRollBackOnly;
-    
+
     private int status = Status.STATUS_ACTIVE;
-    
+
     /** The time out in millis. */
     private int timeOutInMillis;
-
 
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(KunderaTransaction.class);
 
-    
     /**
-     *  Default constructor with timeout parameter.
+     * Default constructor with timeout parameter.
      */
     KunderaTransaction(int timeOutInMillis)
     {
         this.timeOutInMillis = timeOutInMillis;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.transaction.Transaction#commit()
      */
     @Override
@@ -63,7 +63,7 @@ public class KunderaTransaction implements Transaction
         else
         {
             log.debug("Transaction is set for rollback only, processing rollback.");
-            
+
             if (implementor != null)
             {
                 implementor.doRollback();
@@ -73,29 +73,39 @@ public class KunderaTransaction implements Transaction
 
     }
 
-    /* (non-Javadoc)
-     * @see javax.transaction.Transaction#delistResource(javax.transaction.xa.XAResource, int)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.transaction.Transaction#delistResource(javax.transaction.xa.XAResource
+     * , int)
      */
     @Override
     public boolean delistResource(XAResource paramXAResource, int paramInt) throws IllegalStateException,
             SystemException
     {
-        //TODD: need to look into.
+        // TODD: need to look into.
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see javax.transaction.Transaction#enlistResource(javax.transaction.xa.XAResource)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.transaction.Transaction#enlistResource(javax.transaction.xa.XAResource
+     * )
      */
     @Override
     public boolean enlistResource(XAResource paramXAResource) throws RollbackException, IllegalStateException,
             SystemException
     {
-        //TODD: need to look into.
+        // TODD: need to look into.
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.transaction.Transaction#getStatus()
      */
     @Override
@@ -104,8 +114,12 @@ public class KunderaTransaction implements Transaction
         return status;
     }
 
-    /* (non-Javadoc)
-     * @see javax.transaction.Transaction#registerSynchronization(javax.transaction.Synchronization)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.transaction.Transaction#registerSynchronization(javax.transaction
+     * .Synchronization)
      */
     @Override
     public void registerSynchronization(Synchronization paramSynchronization) throws RollbackException,
@@ -114,7 +128,9 @@ public class KunderaTransaction implements Transaction
         throw new UnsupportedOperationException("Currently it is not supported.");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.transaction.Transaction#rollback()
      */
     @Override
@@ -127,7 +143,9 @@ public class KunderaTransaction implements Transaction
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.transaction.Transaction#setRollbackOnly()
      */
     @Override
@@ -149,5 +167,5 @@ public class KunderaTransaction implements Transaction
     {
         return timeOutInMillis;
     }
-    
+
 }

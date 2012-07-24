@@ -25,7 +25,6 @@ import com.impetus.kundera.lifecycle.NodeStateContext;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
-import com.impetus.kundera.utils.ObjectUtils;
 
 /**
  * @author amresh
@@ -84,11 +83,10 @@ public class ManagedState extends NodeState
         // one in persistence cache
         // nodeStateContext.setDirty(true);
 
-        ((Node)nodeStateContext).setUpdate(true);
+        ((Node) nodeStateContext).setUpdate(true);
         // Add this node into persistence cache
         nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node) nodeStateContext);
 
-        
         // Cascade merge operation for all related entities for whom cascade=ALL
         // or MERGE
         recursivelyPerformOperation(nodeStateContext, OPERATION.MERGE);
@@ -97,7 +95,7 @@ public class ManagedState extends NodeState
     @Override
     public void handleFind(NodeStateContext nodeStateContext)
     {
-        //Fetch Node data from Client
+        // Fetch Node data from Client
         Client client = nodeStateContext.getClient();
         Class<?> nodeDataClass = nodeStateContext.getDataClass();
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass);
@@ -107,8 +105,8 @@ public class ManagedState extends NodeState
 
         EntityReader reader = client.getReader();
         EnhanceEntity ee = reader.findById(entityId, entityMetadata, client);
-        
-        //Recursively retrieve relationship entities (if there are any)
+
+        // Recursively retrieve relationship entities (if there are any)
         if (ee != null && ee.getEntity() != null)
         {
             Object entity = ee.getEntity();
@@ -116,44 +114,48 @@ public class ManagedState extends NodeState
             if ((entityMetadata.getRelationNames() == null || entityMetadata.getRelationNames().isEmpty())
                     && !entityMetadata.isRelationViaJoinTable())
             {
-                //There is no relation (not even via Join Table), Construct Node out of this enhance entity,
+                // There is no relation (not even via Join Table), Construct
+                // Node out of this enhance entity,
                 // put into Persistence Cache, and just return.
-                
-                nodeData = entity;                              
+
+                nodeData = entity;
                 nodeStateContext.setData(nodeData);
-                nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);
-                nodeStateContext.setDirty(false);    // This node is fresh and hence NOT dirty
-                
+                nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node) nodeStateContext);
+                nodeStateContext.setDirty(false); // This node is fresh and
+                                                  // hence NOT dirty
+
                 // One time set as required for rollback.
-                // Object original = ObjectUtils.deepCopy((Node) nodeStateContext);
+                // Object original = ObjectUtils.deepCopy((Node)
+                // nodeStateContext);
                 Object original = ((Node) nodeStateContext).clone();
-                ((Node)nodeStateContext).setOriginalNode((Node) original);
-                
+                ((Node) nodeStateContext).setOriginalNode((Node) original);
+
                 return;
             }
-          
+
             else
             {
-                //This entity has associated entities, find them recursively.
+                // This entity has associated entities, find them recursively.
                 nodeData = reader.recursivelyFindEntities(ee.getEntity(), ee.getRelations(), entityMetadata,
                         nodeStateContext.getPersistenceDelegator());
             }
         }
-        
-        //Construct Node out of this entity and put into Persistence Cache
-        if(nodeData != null) {
-          
+
+        // Construct Node out of this entity and put into Persistence Cache
+        if (nodeData != null)
+        {
+
             nodeStateContext.setData(nodeData);
-            nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node)nodeStateContext);
+            nodeStateContext.getPersistenceCache().getMainCache().addNodeToCache((Node) nodeStateContext);
 
             // This node is fresh and hence NOT dirty
             nodeStateContext.setDirty(false);
             // One time set as required for rollback.
             Object original = ((Node) nodeStateContext).clone();
-            ((Node)nodeStateContext).setOriginalNode((Node) original);
-        }                
+            ((Node) nodeStateContext).setOriginalNode((Node) original);
+        }
 
-        //No state change, Node to remain in Managed state
+        // No state change, Node to remain in Managed state
     }
 
     @Override

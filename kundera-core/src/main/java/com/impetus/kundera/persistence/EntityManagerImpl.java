@@ -109,14 +109,13 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         persistenceCache.setPersistenceContextType(persistenceContextType);
 
         persistenceDelegator = new PersistenceDelegator(session, persistenceCache);
-        
-        for(String pu : ((EntityManagerFactoryImpl)this.factory).getPersistenceUnits())
+
+        for (String pu : ((EntityManagerFactoryImpl) this.factory).getPersistenceUnits())
         {
             persistenceDelegator.loadClient(pu);
         }
         this.persistenceContextType = persistenceContextType;
         this.transactionType = transactionType;
-
 
         logger.debug("Created EntityManager for persistence unit : " + getPersistenceUnit());
     }
@@ -130,7 +129,6 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
             {
 
                 ctx = new InitialContext();
-
 
                 utx = (KunderaJTAUserTransaction) ctx.lookup("java:comp/UserTransaction");
 
@@ -146,7 +144,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
                             + "] for :{java:comp/UserTransaction} lookup" + utx.getClass());
 
                 }
-                
+
                 this.setFlushMode(FlushModeType.COMMIT);
                 ((KunderaJTAUserTransaction) utx).setImplementor(this);
             }
@@ -350,7 +348,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     {
         checkClosed();
         doCommit();
-//         persistenceDelegator.flush();
+        // persistenceDelegator.flush();
     }
 
     /*
@@ -364,7 +362,6 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         return persistenceDelegator.getDelegate();
     }
 
-  
     /*
      * (non-Javadoc)
      * 
@@ -721,7 +718,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     private void checkTransactionNeeded()
     {
         onLookUp(transactionType);
-        
+
         if ((this.persistenceContextType != PersistenceContextType.TRANSACTION)
                 || (persistenceDelegator.isTransactionInProgress()))
             return;

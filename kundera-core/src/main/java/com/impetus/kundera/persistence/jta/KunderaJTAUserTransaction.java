@@ -47,8 +47,11 @@ import com.impetus.kundera.persistence.ResourceManager;
 
 public class KunderaJTAUserTransaction implements UserTransaction, Referenceable, Serializable
 {
-    
-    /** boolean variable to hold reference for GLOBAL transaction is in progress on not. */
+
+    /**
+     * boolean variable to hold reference for GLOBAL transaction is in progress
+     * on not.
+     */
     private boolean isTransactionInProgress;
 
     /** The thread local. */
@@ -63,7 +66,6 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     /** The current tx. */
     private static transient KunderaJTAUserTransaction currentTx;
 
-
     /** The Constant log. */
     private static final Log log = LogFactory.getLog(KunderaJTAUserTransaction.class);
 
@@ -77,7 +79,7 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
 
     /**
      * Gets the current tx.
-     *
+     * 
      * @return the current tx
      */
     public static KunderaJTAUserTransaction getCurrentTx()
@@ -94,19 +96,19 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     public void begin() throws NotSupportedException, SystemException
     {
         log.info("beginning JTA transaction");
-        
+
         isTransactionInProgress = true;
         Transaction tx = threadLocal.get();
-        if(tx != null)
+        if (tx != null)
         {
-            if((tx.getStatus() == Status.STATUS_MARKED_ROLLBACK))
+            if ((tx.getStatus() == Status.STATUS_MARKED_ROLLBACK))
             {
                 throw new NotSupportedException("Nested Transaction not supported!");
             }
         }
-        
+
         Integer timer = timerThead.get();
-        threadLocal.set(new KunderaTransaction(timer != null? timer:DEFAULT_TIME_OUT));
+        threadLocal.set(new KunderaTransaction(timer != null ? timer : DEFAULT_TIME_OUT));
     }
 
     /*
@@ -119,13 +121,12 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
             SecurityException, IllegalStateException, SystemException
     {
         Transaction tx = threadLocal.get();
-        
-        
+
         try
         {
             if (tx != null)
             {
-                log.info("Commiting transaction:"+ tx);
+                log.info("Commiting transaction:" + tx);
                 tx.commit();
             }
             else
@@ -175,11 +176,11 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
                 {
                     throw new IllegalStateException("Cannot locate a Transaction for rollback.");
                 }
-                
-                log.info("Rollback transaction:"+ tx);
+
+                log.info("Rollback transaction:" + tx);
 
                 tx.rollback();
-                
+
             }
             finally
             {
@@ -227,13 +228,14 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
         }
         else
         {
-            log.debug("Cannot reset running transaction:"+ tx);
+            log.debug("Cannot reset running transaction:" + tx);
         }
 
     }
 
     /**
-     * Returns transaction time out. If no timeout is associate with current thread, returns default timeout(e.g. 60).
+     * Returns transaction time out. If no timeout is associate with current
+     * thread, returns default timeout(e.g. 60).
      * 
      * @return the transactionTimeout transaction timeout.
      */
@@ -250,7 +252,8 @@ public class KunderaJTAUserTransaction implements UserTransaction, Referenceable
     /**
      * Links referenced resource to current transaction thread.
      * 
-     * @param implementor resource implementor.
+     * @param implementor
+     *            resource implementor.
      */
     public void setImplementor(ResourceManager implementor)
     {

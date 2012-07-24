@@ -37,7 +37,8 @@ public interface SchemaManager
 
     /**
      * validates the entity against the Client specific properties.
-     * @return 
+     * 
+     * @return
      * 
      */
     boolean validateEntity(Class clazz);

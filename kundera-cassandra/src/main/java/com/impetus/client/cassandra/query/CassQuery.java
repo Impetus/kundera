@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
 
-import com.impetus.client.cassandra.config.CassandraPropertyReader;
+import com.impetus.client.cassandra.common.CassandraIndexHelper;
 import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -101,7 +101,7 @@ public class CassQuery extends QueryImpl implements Query
         {
             if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
             {
-                
+
                 Map<Boolean, List<IndexClause>> ixClause = prepareIndexClause(m);
                 boolean isRowKeyQuery = ixClause.keySet().iterator().next();
                 if (!isRowKeyQuery)
@@ -123,7 +123,7 @@ public class CassQuery extends QueryImpl implements Query
         }
         return result;
     }
-    
+
     @Override
     protected List<Object> recursivelyPopulateEntities(EntityMetadata m, Client client)
     {
@@ -135,26 +135,28 @@ public class CassQuery extends QueryImpl implements Query
         }
         else
         {
-            // Check whether Embedded data storage using Composite Columns is
-            // enabled
-            boolean invertedIndexingEnabled = CassandraPropertyReader.csmd.isInvertedIndexingEnabled();            
-            
-            if(invertedIndexingEnabled && ! getKunderaQuery().getFilterClauseQueue().isEmpty()) {
-                ls = ((CassandraEntityReader) getReader()).readFromIndexTable(m, client, getKunderaQuery().getFilterClauseQueue());
-                
-            } else {
+            // Index in Inverted Index table if applicable
+            boolean useInvertedIndex = CassandraIndexHelper.isInvertedIndexingApplicable(m);
+
+            if (useInvertedIndex && !getKunderaQuery().getFilterClauseQueue().isEmpty())
+            {
+                ls = ((CassandraEntityReader) getReader()).readFromIndexTable(m, client, getKunderaQuery()
+                        .getFilterClauseQueue());
+
+            }
+            else
+            {
                 Map<Boolean, List<IndexClause>> ixClause = MetadataUtils.useSecondryIndex(m.getPersistenceUnit()) ? prepareIndexClause(m)
                         : null;
 
                 ((CassandraEntityReader) getReader()).setConditions(ixClause);
 
                 ls = reader.populateRelation(m, client);
-            }         
+            }
         }
         return setRelationEntities(ls, client, m);
 
-    }  
-    
+    }
 
     /**
      * On executeUpdate.
@@ -180,8 +182,6 @@ public class CassQuery extends QueryImpl implements Query
 
         return 0;
     }
-    
-    
 
     /**
      * Prepare index clause.
@@ -222,13 +222,13 @@ public class CassQuery extends QueryImpl implements Query
                 String condition = clause.getCondition();
                 String value = clause.getValue();
                 // value.e
-               /* if(idPresent) {
-                    expr = null;
-                } else {*/
-                    expr.add(Selector.newIndexExpression(fieldName, getOperator(condition, idPresent),
-                            getBytesValue(fieldName, m, value)));
-              //  }
-                
+                /*
+                 * if(idPresent) { expr = null; } else {
+                 */
+                expr.add(Selector.newIndexExpression(fieldName, getOperator(condition, idPresent),
+                        getBytesValue(fieldName, m, value)));
+                // }
+
             }
             else
             {
@@ -253,8 +253,6 @@ public class CassQuery extends QueryImpl implements Query
         return idxClauses;
     }
 
-    
-
     /**
      * Gets the operator.
      * 
@@ -266,7 +264,7 @@ public class CassQuery extends QueryImpl implements Query
      */
     private IndexOperator getOperator(String condition, boolean idPresent)
     {
-        if (/*!idPresent && */condition.equals("="))
+        if (/* !idPresent && */condition.equals("="))
         {
             return IndexOperator.EQ;
         }

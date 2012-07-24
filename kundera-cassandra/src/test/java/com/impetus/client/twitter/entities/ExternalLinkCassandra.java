@@ -32,7 +32,7 @@ public class ExternalLinkCassandra
 {
 
     @Id
-    @Column(name="EXT_LINK_ID")
+    @Column(name = "EXT_LINK_ID")
     private String extLinkId;
 
     @Column(name = "LINK_TYPE")

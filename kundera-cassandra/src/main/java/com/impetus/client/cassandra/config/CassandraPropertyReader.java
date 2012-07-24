@@ -332,7 +332,7 @@ public class CassandraPropertyReader implements PropertyReader
                     else
                     {
                         // TODO
-                        return ;
+                        return;
                     }
                 }
             }

@@ -74,7 +74,7 @@ public class CountersTest
 
         if (AUTO_MANAGE_SCHEMA)
         {
-             createSchema();
+            createSchema();
         }
         emf = Persistence.createEntityManagerFactory("CassandraCounterTest");
     }

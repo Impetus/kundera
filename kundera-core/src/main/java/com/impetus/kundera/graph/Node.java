@@ -38,8 +38,8 @@ public class Node implements NodeStateContext
 
     // ID of a node into object graph
     private String nodeId;
-    
-    //Primary key of entity data contained in this node
+
+    // Primary key of entity data contained in this node
     private Object entityId;
 
     // Actual node data
@@ -65,12 +65,11 @@ public class Node implements NodeStateContext
 
     // Whether this is a head node
     private boolean isHeadNode;
-    
+
     private boolean isUpdate;
-    
-    
-    /* Depth of this node in the tree
-     * Head node has a depth of 1 and so on.
+
+    /*
+     * Depth of this node in the tree Head node has a depth of 1 and so on.
      */
     private int depth;
 
@@ -79,11 +78,11 @@ public class Node implements NodeStateContext
 
     // Reference to Persistence cache where this node is stored
     private PersistenceCache persistenceCache;
-    
+
     private boolean isGraphCompleted;
 
     PersistenceDelegator pd;
-    
+
     private Node originalNode;
 
     private boolean isProcessed;
@@ -136,7 +135,7 @@ public class Node implements NodeStateContext
         this.nodeId = nodeId;
         this.data = data;
         this.dataClass = data.getClass();
-        this.dirty=true;
+        this.dirty = true;
     }
 
     /**
@@ -258,7 +257,7 @@ public class Node implements NodeStateContext
      */
     public boolean isHeadNode()
     {
-        return this != null && this.parents == null? true:false;
+        return this != null && this.parents == null ? true : false;
     }
 
     /**
@@ -354,8 +353,7 @@ public class Node implements NodeStateContext
     public void setDirty(boolean dirty)
     {
         this.dirty = dirty;
-    }   
-    
+    }
 
     /**
      * @return the depth
@@ -366,7 +364,8 @@ public class Node implements NodeStateContext
     }
 
     /**
-     * @param depth the depth to set
+     * @param depth
+     *            the depth to set
      */
     public void setDepth(int depth)
     {
@@ -414,17 +413,17 @@ public class Node implements NodeStateContext
     @Override
     public boolean equals(Object otherNode)
     {
-        if(otherNode ==null)
+        if (otherNode == null)
         {
             return false;
         }
-        
-        if(!(otherNode instanceof Node))
+
+        if (!(otherNode instanceof Node))
         {
             return false;
         }
-        
-        return this.nodeId.equals(((Node)otherNode).getNodeId());
+
+        return this.nodeId.equals(((Node) otherNode).getNodeId());
     }
 
     @Override
@@ -432,7 +431,7 @@ public class Node implements NodeStateContext
     {
         return HashCodeBuilder.reflectionHashCode(this.nodeId);
     }
-    
+
     // ////////////////////////////////////////
     /* CRUD related operations on this node */
     // ////////////////////////////////////////
@@ -554,7 +553,8 @@ public class Node implements NodeStateContext
     }
 
     /**
-     * @param isGraphCompleted the isGraphCompleted to set
+     * @param isGraphCompleted
+     *            the isGraphCompleted to set
      */
     public void setGraphCompleted(boolean isGraphCompleted)
     {
@@ -570,7 +570,8 @@ public class Node implements NodeStateContext
     }
 
     /**
-     * @param originalNode the originalNode to set
+     * @param originalNode
+     *            the originalNode to set
      */
     public void setOriginalNode(Node originalNode)
     {
@@ -594,7 +595,8 @@ public class Node implements NodeStateContext
     }
 
     /**
-     * @param isUpdate the isUpdate to set
+     * @param isUpdate
+     *            the isUpdate to set
      */
     public void setUpdate(boolean isUpdate)
     {
@@ -610,8 +612,8 @@ public class Node implements NodeStateContext
         cloneCopy.setDataClass(this.dataClass);
         cloneCopy.setDepth(this.depth);
         cloneCopy.setTraversed(this.traversed);
-        
+
         return cloneCopy;
-        
+
     }
 }

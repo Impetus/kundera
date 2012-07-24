@@ -31,7 +31,7 @@ import javax.persistence.Table;
 public class PreferenceCassandra
 {
     @Id
-    @Column(name="PREFERENCE_ID")
+    @Column(name = "PREFERENCE_ID")
     String preferenceId;
 
     @Column(name = "WEBSITE_THEME")

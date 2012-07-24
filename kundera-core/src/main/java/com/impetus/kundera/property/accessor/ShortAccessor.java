@@ -89,6 +89,7 @@ public class ShortAccessor implements PropertyAccessor<Short>
             throw new PropertyAccessException(e);
         }
     }
+
     public Short getInstance(Class<?> clazz)
     {
         return Short.MAX_VALUE;

@@ -65,10 +65,9 @@ import org.scale7.cassandra.pelops.exceptions.PelopsException;
 import org.scale7.cassandra.pelops.pool.IThriftPool;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
-import com.impetus.client.cassandra.config.CassandraPropertyReader;
+import com.impetus.client.cassandra.common.CassandraIndexHelper;
 import com.impetus.client.cassandra.pelops.PelopsDataHandler.ThriftRow;
 import com.impetus.client.cassandra.query.CassQuery;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
@@ -79,7 +78,6 @@ import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -131,7 +129,6 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         this.handler = new PelopsDataHandler();
         this.reader = reader;
     }
-
 
     /*
      * (non-Javadoc)
@@ -289,8 +286,17 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         {
             RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
             rowDeletor.deleteRow(metadata.getTableName(), pKey.toString(), consistencyLevel);
+
         }
+
+        // Delete from Lucene if applicable
         getIndexManager().remove(metadata, entity, pKey.toString());
+
+        // Delete from Inverted Index if applicable
+        if (CassandraIndexHelper.isInvertedIndexingApplicable(metadata))
+        {
+            handler.deleteRecordsFromIndexTable(entity, metadata, consistencyLevel);
+        }
     }
 
     /*
@@ -931,31 +937,27 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
     {
         super.indexNode(node, entityMetadata);
 
-        // Check whether Embedded data storage using Composite Columns is
-        // enabled
-        boolean invertedIndexingEnabled = CassandraPropertyReader.csmd.isInvertedIndexingEnabled();
+        // Index in Inverted Index table if applicable
+        boolean invertedIndexingApplicable = CassandraIndexHelper.isInvertedIndexingApplicable(entityMetadata);
 
-        if (invertedIndexingEnabled)
+        if (invertedIndexingApplicable)
         {
-            // Not required for lucene indexing
-            if (MetadataUtils.useSecondryIndex(getPersistenceUnit())
-                    && entityMetadata.getType().isSuperColumnFamilyMetadata() && !entityMetadata.isCounterColumnType())
+
+            String indexColumnFamily = CassandraIndexHelper.getInvertedIndexTableName(entityMetadata.getTableName());
+
+            Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
+
+            List<PelopsDataHandler.ThriftRow> indexThriftyRows = handler.toIndexThriftRow(node.getData(),
+                    entityMetadata, indexColumnFamily);
+
+            for (PelopsDataHandler.ThriftRow thriftRow : indexThriftyRows)
             {
-                String indexColumnFamily = entityMetadata.getTableName() + Constants.INDEX_TABLE_SUFFIX;
+                mutator.writeColumns(indexColumnFamily, Bytes.fromUTF8(thriftRow.getId()),
+                        Arrays.asList(thriftRow.getColumns().toArray(new Column[0])));
 
-                Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
-
-                List<PelopsDataHandler.ThriftRow> indexThriftyRows = handler.toIndexThriftRow(node.getData(),
-                        entityMetadata, indexColumnFamily);
-
-                for (PelopsDataHandler.ThriftRow thriftRow : indexThriftyRows)
-                {
-                    mutator.writeColumns(indexColumnFamily, Bytes.fromUTF8(thriftRow.getId()),
-                            Arrays.asList(thriftRow.getColumns().toArray(new Column[0])));
-                }
-                mutator.execute(consistencyLevel);
-                indexThriftyRows = null;
             }
+            mutator.execute(consistencyLevel);
+            indexThriftyRows = null;
         }
     }
 

@@ -151,7 +151,7 @@ class EventLogQueue
 
     /**
      * Gets the insert events.
-     *
+     * 
      * @return the insert events
      */
     Map<Object, EventLog> getInsertEvents()
@@ -161,7 +161,7 @@ class EventLogQueue
 
     /**
      * Gets the update events.
-     *
+     * 
      * @return the update events
      */
     Map<Object, EventLog> getUpdateEvents()
@@ -171,7 +171,7 @@ class EventLogQueue
 
     /**
      * Gets the delete events.
-     *
+     * 
      * @return the delete events
      */
     Map<Object, EventLog> getDeleteEvents()

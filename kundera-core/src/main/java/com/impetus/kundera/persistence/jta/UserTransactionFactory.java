@@ -31,7 +31,9 @@ import javax.naming.Reference;
 import javax.naming.spi.ObjectFactory;
 
 /**
- * The factory for JNDI lookup of <code> KunderaJTAUserTransaction</code> objects.
+ * The factory for JNDI lookup of <code> KunderaJTAUserTransaction</code>
+ * objects.
+ * 
  * @author vivek.mishra@impetus.co.in
  */
 
@@ -54,13 +56,14 @@ public class UserTransactionFactory implements ObjectFactory
     {
         Reference ref = (Reference) obj;
         Object ret = null;
-        
-        if(ref.getClassName().equals("javax.transaction.UserTransaction") || ref.getClassName().equals("com.impetus.kundera.persistence.jta.KunderaJTAUserTransaction"))
+
+        if (ref.getClassName().equals("javax.transaction.UserTransaction")
+                || ref.getClassName().equals("com.impetus.kundera.persistence.jta.KunderaJTAUserTransaction"))
         {
             ret = KunderaJTAUserTransaction.getCurrentTx();
         }
-        
-        if(ret == null)
+
+        if (ret == null)
         {
             ret = new KunderaJTAUserTransaction();
         }
@@ -69,11 +72,14 @@ public class UserTransactionFactory implements ObjectFactory
     }
 
     /**
-     * Method to return reference for serialized object.(i.e. KunderJTAUserTransaction)
+     * Method to return reference for serialized object.(i.e.
+     * KunderJTAUserTransaction)
      * 
-     * @param object serilized object.
-     * @return    reference to that object.
-     * @throws NamingException naming exception.
+     * @param object
+     *            serilized object.
+     * @return reference to that object.
+     * @throws NamingException
+     *             naming exception.
      */
     public static Reference getReference(Serializable object) throws NamingException
     {

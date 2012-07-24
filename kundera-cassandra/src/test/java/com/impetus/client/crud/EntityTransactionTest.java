@@ -210,12 +210,13 @@ public class EntityTransactionTest extends BaseTest
             ((PersonCassandra) p2).setPersonName("rollback");
             em.merge(p2);
             em.merge(null);
-            
-            // As this is a runtime exception so rollback should happen and delete out commited data.
+
+            // As this is a runtime exception so rollback should happen and
+            // delete out commited data.
         }
         catch (Exception ex)
         {
-            
+
             p = findById(PersonCassandra.class, "1", em);
             Assert.assertNull(p);
 
@@ -377,13 +378,14 @@ public class EntityTransactionTest extends BaseTest
         {
 
             ksDef = new KsDef("KunderaExamples", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-            //Set replication factor
-            if (ksDef.strategy_options == null) {
+            // Set replication factor
+            if (ksDef.strategy_options == null)
+            {
                 ksDef.strategy_options = new LinkedHashMap<String, String>();
             }
-            //Set replication factor, the value MUST be an integer
+            // Set replication factor, the value MUST be an integer
             ksDef.strategy_options.put("replication_factor", "1");
-            
+
             CassandraCli.client.system_add_keyspace(ksDef);
         }
 

@@ -75,10 +75,10 @@ public interface PropertyAccessor<T>
      *             a result of NumberFormatException
      */
     T fromString(Class targetClass, String s);
-    
+
     /**
-     * @param clazz 
+     * @param clazz
      * 
      */
-    Object getInstance(Class<?> clazz);   
+    Object getInstance(Class<?> clazz);
 }

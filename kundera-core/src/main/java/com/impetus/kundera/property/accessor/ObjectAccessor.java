@@ -48,7 +48,7 @@ public class ObjectAccessor implements PropertyAccessor<Object>
     {
         try
         {
-            if(targetClass != null && targetClass.equals(byte[].class))
+            if (targetClass != null && targetClass.equals(byte[].class))
             {
                 return bytes;
             }

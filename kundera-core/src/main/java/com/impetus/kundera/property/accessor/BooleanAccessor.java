@@ -88,8 +88,9 @@ public class BooleanAccessor implements PropertyAccessor<Boolean>
             throw new PropertyAccessException(e);
         }
     }
+
     public Boolean getInstance(Class<?> clazz)
     {
-        return Boolean.TRUE ;
+        return Boolean.TRUE;
     }
 }

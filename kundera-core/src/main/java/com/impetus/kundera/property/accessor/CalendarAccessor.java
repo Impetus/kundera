@@ -102,8 +102,9 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
         cal.setTime(d);
         return cal;
     }
+
     public Calendar getInstance(Class<?> clazz)
     {
-        return Calendar.getInstance() ;
+        return Calendar.getInstance();
     }
 }

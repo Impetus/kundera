@@ -417,7 +417,7 @@ public class PersistenceDelegator
                                           // clear it.
 
             }
-            
+
         }
     }
 

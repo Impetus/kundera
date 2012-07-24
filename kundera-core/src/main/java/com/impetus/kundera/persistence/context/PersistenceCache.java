@@ -15,14 +15,7 @@
  */
 package com.impetus.kundera.persistence.context;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import javax.persistence.PersistenceContextType;
-
-import com.impetus.kundera.persistence.context.jointable.JoinTableData;
-import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 
 /**
  * Implementation of Persistence Context as defined in JPA. Acts as a cache of
@@ -44,7 +37,7 @@ public class PersistenceCache
     /* Cache of transactional objects */
     private CacheBase transactionalCache;
 
-//    FlushManager flushManager;
+    // FlushManager flushManager;
 
     private PersistenceContextType persistenceContextType;
 
@@ -52,14 +45,14 @@ public class PersistenceCache
      * Stack containing Nodes to be flushed Entities are always flushed from the
      * top, there way to bottom until stack is empty
      */
-//    private FlushStack flushStack;
+    // private FlushStack flushStack;
 
     /**
      * Map containing data required for inserting records for each join table.
      * Key -> Name of Join Table Value -> records to be persisted in the join
      * table
      */
-//    private Map<String, JoinTableData> joinTableDataMap;
+    // private Map<String, JoinTableData> joinTableDataMap;
 
     public PersistenceCache()
     {
@@ -73,10 +66,10 @@ public class PersistenceCache
         elementCollectionCache = new ElementCollectionCache();
         transactionalCache = new TransactionalCache();
 
-//        flushStack = new FlushStack();
-//        joinTableDataMap = new HashMap<String, JoinTableData>();
-//
-//        flushManager = new FlushManager();
+        // flushStack = new FlushStack();
+        // joinTableDataMap = new HashMap<String, JoinTableData>();
+        //
+        // flushManager = new FlushManager();
     }
 
     /**
@@ -173,6 +166,7 @@ public class PersistenceCache
     {
         this.transactionalCache = transactionalCache;
     }
+
     /**
      * @return the persistenceContextType
      */

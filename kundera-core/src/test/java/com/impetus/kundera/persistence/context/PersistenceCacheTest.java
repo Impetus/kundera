@@ -44,7 +44,7 @@ public class PersistenceCacheTest
 
     ObjectGraphBuilder graphBuilder;
 
-//    Configurator configurator = new Configurator("kunderatest");
+    // Configurator configurator = new Configurator("kunderatest");
 
     /**
      * @throws java.lang.Exception
@@ -56,9 +56,9 @@ public class PersistenceCacheTest
         flushManager = new FlushManager();
         graphBuilder = new ObjectGraphBuilder(pc);
 
-//        configurator.configure();
+        // configurator.configure();
         new PersistenceUnitConfiguration("kunderatest").configure();
-        new MetamodelConfiguration("kunderatest").configure();        
+        new MetamodelConfiguration("kunderatest").configure();
     }
 
     /**

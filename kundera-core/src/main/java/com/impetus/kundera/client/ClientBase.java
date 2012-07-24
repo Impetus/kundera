@@ -48,6 +48,7 @@ public abstract class ClientBase
     protected String persistenceUnit;
 
     protected boolean isUpdate;
+
     /*
      * (non-Javadoc)
      * 
@@ -67,9 +68,10 @@ public abstract class ClientBase
     {
         return persistenceUnit;
     }
-    
+
     /**
-     * Method to handle 
+     * Method to handle
+     * 
      * @param node
      */
     public void persist(Node node)
@@ -82,7 +84,7 @@ public abstract class ClientBase
         onPersist(metadata, entity, id, relationHolders);
         indexNode(node, metadata);
     }
-    
+
     /**
      * @param node
      * @return
@@ -181,14 +183,21 @@ public abstract class ClientBase
             }
         }
     }
-    
-    /**
-     * Method to be implemented by inherited classes. On receiving persist event specific client need to implement this method.  
 
-     * @param entityMetadata   entity metadata.
-     * @param entity           entity object.
-     * @param id               entity id.
-     * @param rlHolders        relation holders. This field is only required in case Entity is holding up any associations with other entities.
+    /**
+     * Method to be implemented by inherited classes. On receiving persist event
+     * specific client need to implement this method.
+     * 
+     * @param entityMetadata
+     *            entity metadata.
+     * @param entity
+     *            entity object.
+     * @param id
+     *            entity id.
+     * @param rlHolders
+     *            relation holders. This field is only required in case Entity
+     *            is holding up any associations with other entities.
      */
-    protected abstract void onPersist(EntityMetadata entityMetadata,Object entity, Object id, List<RelationHolder> rlHolders);
+    protected abstract void onPersist(EntityMetadata entityMetadata, Object entity, Object id,
+            List<RelationHolder> rlHolders);
 }

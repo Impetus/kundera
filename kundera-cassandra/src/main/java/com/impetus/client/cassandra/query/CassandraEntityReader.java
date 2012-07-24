@@ -37,8 +37,8 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
-import com.impetus.kundera.query.QueryHandlerException;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
+import com.impetus.kundera.query.QueryHandlerException;
 
 /**
  * The Class CassandraEntityReader.
@@ -182,30 +182,32 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         {
             return null;
         }
-        
+
         byte[] minValue = null;
-        byte[] maxVal = null; 
+        byte[] maxVal = null;
 
         // If one field for range is given.
-        
-        if(expressions.size() == 1)
+
+        if (expressions.size() == 1)
         {
-           IndexOperator operator = expressions.get(0).op;
-           if(operator.equals(IndexOperator.LTE))
-           {
-               maxVal =expressions.get(0) != null ? expressions.get(0).getValue() : null;
-               minValue = null;
-           } else 
-           {
-               minValue =expressions.get(0) != null ? expressions.get(0).getValue() : null;
-               maxVal = null;
-           }
-        } else
-        {
-           minValue = expressions.get(0) != null ? expressions.get(0).getValue() : null;
-           maxVal = expressions.size() > 1 && expressions.get(1) != null ? expressions.get(1).getValue() : null;
+            IndexOperator operator = expressions.get(0).op;
+            if (operator.equals(IndexOperator.LTE))
+            {
+                maxVal = expressions.get(0) != null ? expressions.get(0).getValue() : null;
+                minValue = null;
+            }
+            else
+            {
+                minValue = expressions.get(0) != null ? expressions.get(0).getValue() : null;
+                maxVal = null;
+            }
         }
-        
+        else
+        {
+            minValue = expressions.get(0) != null ? expressions.get(0).getValue() : null;
+            maxVal = expressions.size() > 1 && expressions.get(1) != null ? expressions.get(1).getValue() : null;
+        }
+
         try
         {
             result = ((PelopsClient) client).findByRange(minValue, maxVal, m, false, null);
