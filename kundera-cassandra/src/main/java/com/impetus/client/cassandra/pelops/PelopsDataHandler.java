@@ -1141,33 +1141,41 @@ final class PelopsDataHandler
         for (EmbeddedColumn embeddedColumn : metadata.getEmbeddedColumnsAsList())
         {
             Object embeddedObject = PropertyAccessorHelper.getObject(entity, embeddedColumn.getField());
-
-            if (embeddedObject instanceof Collection)
+            if (embeddedObject != null)
             {
-                for (Object obj : (Collection) embeddedObject)
+                if (embeddedObject instanceof Collection)
+                {
+                    for (Object obj : (Collection) embeddedObject)
+                    {
+                        for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
+                        {
+                            String rowKey = embeddedColumn.getField().getName()
+                                    + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + column.getField().getName();
+                            byte[] columnName = PropertyAccessorHelper.get(obj, column.getField());
+                            if (columnName != null)
+                            {
+                                mutator.deleteColumn(indexColumnFamily, rowKey, Bytes.fromByteArray(columnName));
+                            }
+
+                        }
+                    }
+
+                }
+                else
                 {
                     for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
                     {
                         String rowKey = embeddedColumn.getField().getName() + Constants.INDEX_TABLE_ROW_KEY_DELIMITER
                                 + column.getField().getName();
-                        byte[] columnName = PropertyAccessorHelper.get(obj, column.getField());
-                        mutator.deleteColumn(indexColumnFamily, rowKey, Bytes.fromByteArray(columnName));
-
+                        byte[] columnName = PropertyAccessorHelper.get(embeddedObject, column.getField());
+                        if (columnName != null)
+                        {
+                            mutator.deleteColumn(indexColumnFamily, rowKey, Bytes.fromByteArray(columnName));
+                        }
                     }
                 }
-
             }
-            else
-            {
-                for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
-                {
-                    String rowKey = embeddedColumn.getField().getName() + Constants.INDEX_TABLE_ROW_KEY_DELIMITER
-                            + column.getField().getName();
-                    byte[] columnName = PropertyAccessorHelper.get(embeddedObject, column.getField());
-                    mutator.deleteColumn(indexColumnFamily, rowKey, Bytes.fromByteArray(columnName));
-                }
-            }
-        }
+        }            
         mutator.execute(consistencyLevel);
     }
 
