@@ -1340,12 +1340,12 @@ final class PelopsDataHandler
         for (com.impetus.kundera.metadata.model.Column column : m.getColumnsAsList())
         {
             Field field = column.getField();
-            if (field.getType().isAssignableFrom(Set.class) || field.getType().isAssignableFrom(Collection.class))
+            if (!(field.getType().isAssignableFrom(Set.class) || field.getType().isAssignableFrom(Collection.class)))
             {
-            }
+                /*            }
             else
             {
-                String name = column.getName();
+*/                String name = column.getName();
                 try
                 {
                     String value = PropertyAccessorHelper.getString(e, field);

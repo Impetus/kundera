@@ -230,9 +230,9 @@ public class EhCacheProvider implements CacheProvider
                         {
                             backingCache.getCacheEventNotificationService().registerListener(listener);
                         }
-                        else
+                        /*else
                         {
-                        }
+                        }*/
                     }
                 }
             }

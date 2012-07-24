@@ -395,14 +395,14 @@ public class LuceneIndexer extends DocumentIndexer
     @Override
     public void flush()
     {
-        if (w != null)
+/*        if (w != null)
         {
 
             // w.commit();
             // w.close();
             // index.copy(index, FSDirectory.open(getIndexDirectory()),
             // false);
-        }
+        }*/
     }
 
     @Override

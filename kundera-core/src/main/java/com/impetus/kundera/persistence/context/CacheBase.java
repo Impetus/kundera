@@ -53,10 +53,10 @@ public class CacheBase
 
         Node node = nodeMappings.get(nodeId);
 
-        if (node != null)
-        {
-            // logCacheEvent("FETCHED FROM ", nodeId);
-        }
+//        if (node != null)
+//        {
+//            // logCacheEvent("FETCHED FROM ", nodeId);
+//        }
         return node;
     }
 
