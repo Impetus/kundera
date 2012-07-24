@@ -71,7 +71,7 @@ public class CassandraPropertyReader implements PropertyReader
             InputStream inStream = propertyName != null ? ClassLoader.getSystemResourceAsStream(propertyName) : null;
             
             if(inStream == null) {
-                inStream = this.getClass().getClassLoader().getResourceAsStream(propertyName);  
+                inStream = propertyName != null ? this.getClass().getClassLoader().getResourceAsStream(propertyName) : null;  
             }
             if (inStream != null)
             {
