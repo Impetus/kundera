@@ -1041,6 +1041,9 @@ final class PelopsDataHandler
         for (EmbeddedColumn embeddedColumn : m.getEmbeddedColumnsAsList())
         {
             Object embeddedObject = PropertyAccessorHelper.getObject(e, embeddedColumn.getField());
+            if(embeddedObject == null) {
+                continue;
+            }
 
             if (embeddedObject instanceof Collection)
             {
@@ -1059,8 +1062,10 @@ final class PelopsDataHandler
 
                         ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedColumn, obj, column,
                                 indexColumnValue);
-
-                        indexThriftRows.add(tr);
+                        if(tr != null) {
+                            indexThriftRows.add(tr);
+                        }
+                        
                     }
                 }
             }
@@ -1070,8 +1075,10 @@ final class PelopsDataHandler
                 {
                     ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedColumn, embeddedObject, column,
                             value);
-
-                    indexThriftRows.add(tr);
+                    if(tr != null) {
+                        indexThriftRows.add(tr);
+                    }
+                    
                 }
             }
 
@@ -1102,18 +1109,22 @@ final class PelopsDataHandler
         Field columnField = column.getField();
         byte[] indexColumnName = PropertyAccessorHelper.get(obj, columnField);
 
-        // Construct Index Table Thrift Row
-        ThriftRow tr = new ThriftRow();
-        tr.setColumnFamilyName(columnFamily); // Index column-family name
-        tr.setId(embeddedColumn.getField().getName() + Constants.INDEX_TABLE_ROW_KEY_DELIMITER
-                + column.getField().getName()); // Id
+        ThriftRow tr = null;
+        if (indexColumnName != null)
+        {
+            // Construct Index Table Thrift Row
+            tr = new ThriftRow();
+            tr.setColumnFamilyName(columnFamily); // Index column-family name
+            tr.setId(embeddedColumn.getField().getName() + Constants.INDEX_TABLE_ROW_KEY_DELIMITER
+                    + column.getField().getName()); // Id
 
-        Column thriftColumn = new Column();
-        thriftColumn.setName(indexColumnName);
-        thriftColumn.setValue(indexColumnValue);
-        thriftColumn.setTimestamp(timestamp);
+            Column thriftColumn = new Column();
+            thriftColumn.setName(indexColumnName);
+            thriftColumn.setValue(indexColumnValue);
+            thriftColumn.setTimestamp(timestamp);
 
-        tr.addColumn(thriftColumn);
+            tr.addColumn(thriftColumn);
+        }
         return tr;
     }
 
