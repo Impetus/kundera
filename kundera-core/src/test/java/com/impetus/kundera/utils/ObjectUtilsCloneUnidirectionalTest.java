@@ -23,6 +23,8 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.configure.MetamodelConfiguration;
 import com.impetus.kundera.configure.PersistenceUnitConfiguration;
@@ -41,6 +43,9 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  */
 public class ObjectUtilsCloneUnidirectionalTest
 {
+    
+    /** The log. */
+    private static Logger log = LoggerFactory.getLogger(ObjectUtils.class);
 
     // Configurator configurator = new Configurator("kunderatest");
     EntityMetadata metadata;
@@ -75,7 +80,7 @@ public class ObjectUtilsCloneUnidirectionalTest
             PhotographerUni_1_M_1_M a2 = (PhotographerUni_1_M_1_M) ObjectUtils.deepCopyUsingCloner(a1);
         }
         long t2 = System.currentTimeMillis();
-        System.out.println("Time taken by Deep Cloner for " + n + " records:" + (t2 - t1));
+        log.info("Time taken by Deep Cloner for " + n + " records:" + (t2 - t1));
     }
 
     @Test
@@ -89,7 +94,7 @@ public class ObjectUtilsCloneUnidirectionalTest
             PhotographerUni_1_M_1_M a2 = (PhotographerUni_1_M_1_M) ObjectUtils.deepCopy(a1);
         }
         long t2 = System.currentTimeMillis();
-        System.out.println("Time taken by Kundera Cloner for " + n + " records:" + (t2 - t1));
+        log.info("Time taken by Kundera Cloner for " + n + " records:" + (t2 - t1));
     }
 
     @Test
@@ -101,14 +106,14 @@ public class ObjectUtilsCloneUnidirectionalTest
         long t1 = System.currentTimeMillis();
         PhotographerUni_1_M_1_M a3 = (PhotographerUni_1_M_1_M) ObjectUtils.deepCopyUsingCloner(a1);
         long t2 = System.currentTimeMillis();
-        System.out.println("Time taken by Deep Cloner:" + (t2 - t1));
+        log.info("Time taken by Deep Cloner:" + (t2 - t1));
 
         // Create a deep copy using Kundera
         long t3 = System.currentTimeMillis();
         metadata = KunderaMetadataManager.getEntityMetadata(PhotographerUni_1_M_1_M.class);
         PhotographerUni_1_M_1_M a2 = (PhotographerUni_1_M_1_M) ObjectUtils.deepCopy(a1);
         long t4 = System.currentTimeMillis();
-        System.out.println("Time taken by Kundera:" + (t4 - t3));
+        log.info("Time taken by Kundera:" + (t4 - t3));
 
         // Check for reference inequality
         assertObjectReferenceInequality(a1, a2);

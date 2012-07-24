@@ -75,7 +75,6 @@ public class ListMessageBodyProvider implements MessageBodyWriter<ArrayList<Obje
         while (i.hasNext())
         {
             ts += i.next().toString();
-            System.out.println("La String tString est :\n" + ts);
         }
         bw.write(ts);
         bw.flush();

@@ -200,7 +200,6 @@ public abstract class AssociationBase
                 }
 
                 String schema = puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE);
-                // System.out.println(schema);
                 mAdd.setSchema(schema != null ? schema : "test");
                 // mAdd.setSchema(schema)
 

@@ -91,8 +91,7 @@ public class HBaseCli
                 zkCluster.setDefaultClientPort(2181);
                 zkCluster.setTickTime(18000);
                 // utility.setupClusterTestDir();
-                zkDir = new File(utility.getClusterTestDir().toString());
-                // System.out.println("*******************************"+zkDir.getAbsolutePath());
+                zkDir = new File(utility.getClusterTestDir().toString());                
 
                 zkCluster.startup(zkDir);
                 utility.setZkCluster(zkCluster);
@@ -196,7 +195,6 @@ public class HBaseCli
                 // 2000);
                 // ZooKeeperServerBean bean = new ZooKeeperServerBean(server);
                 // String path = (String)this.makeFullPath(null,bean);
-                // System.out.println("***************" + bean.toString());
 
                 // MBeanS
                 // MBeanRegistry.getInstance().unregister(bean);

@@ -17,9 +17,13 @@ package com.impetus.client.hbase.crud;
 
 import java.io.File;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.utils.ObjectUtils;
 
 /**
  * Provides utility methods for all Kundera Examples test cases
@@ -28,6 +32,9 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  */
 public class LuceneCleanupUtilities
 {
+    /** The log. */
+    private static Logger log = LoggerFactory.getLogger(LuceneCleanupUtilities.class);
+    
     public static void cleanLuceneDirectory(String persistenceUnit)
     {
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
@@ -37,7 +44,7 @@ public class LuceneCleanupUtilities
             String luceneDir = puMetadata.getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
             if (luceneDir != null && luceneDir.length() > 0)
             {
-                System.out.println("Cleaning up lucene folder " + luceneDir);
+                log.debug("Cleaning up lucene folder " + luceneDir);
                 File directory = new File(luceneDir);
                 // Get all files in directory
                 File[] files = directory.listFiles();
@@ -49,7 +56,7 @@ public class LuceneCleanupUtilities
                         if (!file.delete())
                         {
                             // Failed to delete file
-                            System.out.println("Failed to delete " + file);
+                            log.info("Failed to delete " + file);
                         }
                     }
                 }

@@ -33,11 +33,6 @@ public class ExampleUtils
     public static long getCurrentTimestamp()
     {
         return new Date().getTime();
-    }
-
-    /*
-     * public static void main(String[] args) {
-     * System.out.println(getCurrentTimestamp()); }
-     */
+    } 
 
 }

@@ -23,6 +23,8 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.configure.MetamodelConfiguration;
 import com.impetus.kundera.configure.PersistenceUnitConfiguration;
@@ -41,6 +43,10 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  */
 public class ObjectUtilsCloneBidirectionalTest
 {
+    /** The log. */
+    private static Logger log = LoggerFactory.getLogger(ObjectUtilsCloneBidirectionalTest.class);
+    
+    
     // Configurator configurator = new Configurator("kunderatest");
     EntityMetadata metadata;
 
@@ -103,14 +109,14 @@ public class ObjectUtilsCloneBidirectionalTest
         long t1 = System.currentTimeMillis();
         PhotographerBi_1_M_1_M a3 = (PhotographerBi_1_M_1_M) ObjectUtils.deepCopyUsingCloner(a1);
         long t2 = System.currentTimeMillis();
-        System.out.println("Time taken by Deep Cloner:" + (t2 - t1));
+        log.info("Time taken by Deep Cloner:" + (t2 - t1));
 
         // Create a deep copy using Kundera
         long t3 = System.currentTimeMillis();
         metadata = KunderaMetadataManager.getEntityMetadata(PhotographerBi_1_M_1_M.class);
         PhotographerBi_1_M_1_M a2 = (PhotographerBi_1_M_1_M) ObjectUtils.deepCopy(a1);
         long t4 = System.currentTimeMillis();
-        System.out.println("Time taken by Kundera:" + (t4 - t3));
+        log.info("Time taken by Kundera:" + (t4 - t3));
 
         // Check for reference inequality
         assertObjectReferenceInequality(a1, a2);
