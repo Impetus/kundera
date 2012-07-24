@@ -145,7 +145,7 @@ public class MongoDBPropertyReader implements PropertyReader
                 // TODO
                 return;
             }
-            
+
             if (connection != null && !connections.contains(connection))
             {
                 connections.add(connection);

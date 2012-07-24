@@ -98,8 +98,8 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
 
         if (RUN_IN_EMBEDDED_MODE)
         {
-//            if (!HBaseCli.isStarted)
-                startServer();
+            // if (!HBaseCli.isStarted)
+            startServer();
         }
 
         if (AUTO_MANAGE_SCHEMA)
@@ -121,11 +121,12 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
      * @param persistenceUnit
      *            the new up internal
      * @throws InterruptedException
-     * @throws IOException 
-     * @throws ZooKeeperConnectionException 
-     * @throws MasterNotRunningException 
+     * @throws IOException
+     * @throws ZooKeeperConnectionException
+     * @throws MasterNotRunningException
      */
-    protected void teardownInternal(String persistenceUnit) throws InterruptedException, MasterNotRunningException, ZooKeeperConnectionException, IOException
+    protected void teardownInternal(String persistenceUnit) throws InterruptedException, MasterNotRunningException,
+            ZooKeeperConnectionException, IOException
     {
         if (AUTO_MANAGE_SCHEMA)
         {
@@ -141,8 +142,8 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
         }
         if (RUN_IN_EMBEDDED_MODE)
         {
-//            if (HBaseCli.isStarted)
-                stopServer();
+            // if (HBaseCli.isStarted)
+            stopServer();
         }
     }
 
@@ -337,7 +338,8 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
 
     abstract void startServer() throws InterruptedException;
 
-    abstract void stopServer() throws InterruptedException, MasterNotRunningException, ZooKeeperConnectionException, IOException;
+    abstract void stopServer() throws InterruptedException, MasterNotRunningException, ZooKeeperConnectionException,
+            IOException;
 
     abstract void createSchema();
 

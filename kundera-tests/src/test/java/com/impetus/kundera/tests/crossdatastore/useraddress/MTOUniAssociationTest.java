@@ -57,12 +57,15 @@ public class MTOUniAssociationTest extends TwinAssociation
         if (RUN_IN_EMBEDDED_MODE)
         {
             CassandraCli.cassandraSetUp();
-        } else {
-            if(AUTO_MANAGE_SCHEMA) {
+        }
+        else
+        {
+            if (AUTO_MANAGE_SCHEMA)
+            {
                 CassandraCli.initClient();
             }
         }
-        
+
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelUniMTo1.class);
         clazzz.add(HabitatUniMTo1.class);
@@ -95,11 +98,11 @@ public class MTOUniAssociationTest extends TwinAssociation
     {
         PersonnelUniMTo1 person1 = new PersonnelUniMTo1();
         person1.setPersonId("unimanytoone_1");
-        person1.setPersonName("Amresh");        
+        person1.setPersonName("Amresh");
 
         PersonnelUniMTo1 person2 = new PersonnelUniMTo1();
         person2.setPersonId("unimanytoone_2");
-        person2.setPersonName("Vivek");        
+        person2.setPersonName("Vivek");
 
         HabitatUniMTo1 address = new HabitatUniMTo1();
         address.setAddressId("unimanytoone_a");
@@ -127,7 +130,7 @@ public class MTOUniAssociationTest extends TwinAssociation
         Assert.assertNotNull(p1);
         Assert.assertEquals("unimanytoone_1", p1.getPersonId());
         Assert.assertEquals("Amresh", p1.getPersonName());
-        
+
         HabitatUniMTo1 add = p1.getAddress();
         Assert.assertNotNull(add);
 
@@ -139,7 +142,7 @@ public class MTOUniAssociationTest extends TwinAssociation
         Assert.assertNotNull(p2);
         Assert.assertEquals("unimanytoone_2", p2.getPersonId());
         Assert.assertEquals("Vivek", p2.getPersonName());
-        
+
         HabitatUniMTo1 add2 = p2.getAddress();
         Assert.assertNotNull(add2);
 
@@ -196,7 +199,7 @@ public class MTOUniAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();        
+        tearDownInternal();
     }
 
     @Override
@@ -208,7 +211,7 @@ public class MTOUniAssociationTest extends TwinAssociation
         CfDef cfDef = new CfDef();
         cfDef.name = "PERSONNEL";
         cfDef.keyspace = "KunderaTests";
-        //cfDef.column_type = "Super";
+        // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");

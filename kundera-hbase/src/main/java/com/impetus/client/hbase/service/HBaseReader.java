@@ -84,8 +84,12 @@ public class HBaseReader implements Reader
         return LoadData(hTable, null, rowKey, filter);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.Reader#loadAll(org.apache.hadoop.hbase.client.HTable, org.apache.hadoop.hbase.filter.Filter, byte[], byte[])
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.Reader#loadAll(org.apache.hadoop.hbase.client
+     * .HTable, org.apache.hadoop.hbase.filter.Filter, byte[], byte[])
      */
     @Override
     public List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow) throws IOException
@@ -117,10 +121,13 @@ public class HBaseReader implements Reader
     /**
      * Scan and populate {@link HBaseData} collection using scanned results.
      * 
-     * @param columnFamily       column family.
-     * @param results            results.
-     * @param scanner            result scanner.
-     * @return                   collection of scanned results.
+     * @param columnFamily
+     *            column family.
+     * @param results
+     *            results.
+     * @param scanner
+     *            result scanner.
+     * @return collection of scanned results.
      */
     private List<HBaseData> scanResults(String columnFamily, List<HBaseData> results, ResultScanner scanner)
     {

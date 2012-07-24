@@ -43,7 +43,7 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  */
 public class ObjectUtilsCloneUnidirectionalTest
 {
-    
+
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(ObjectUtils.class);
 

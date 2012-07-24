@@ -19,9 +19,10 @@ public class BaseDao
             em = emf.createEntityManager();
         }
 
-        if(em == null) {
+        if (em == null)
+        {
             em = emf.createEntityManager();
-        }              
+        }
 
         return em;
     }
@@ -32,16 +33,16 @@ public class BaseDao
         {
             em.close();
             em = null;
-        }          
+        }
     }
-    
-    public void closeEntityManagerFactory() {
-    	if(emf != null) {
-    		emf.close();
-    	}
-    	emf = null;
+
+    public void closeEntityManagerFactory()
+    {
+        if (emf != null)
+        {
+            emf.close();
+        }
+        emf = null;
     }
-    
-    
 
 }

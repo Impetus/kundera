@@ -59,17 +59,20 @@ public class EjbJTAContextTest
     public void setUp() throws Exception
     {
 
-//        Properties properties = new Properties();
-//        properties.put(Context.INITIAL_CONTEXT_FACTORY, "org.apache.openejb.client.LocalInitialContextFactory");
-//        // DO NOT DELETE IT !!!
-//        // properties.put("openejb.deployments.classpath.ear", "true");
-//        // properties.put("openejb.jndiname.format","{deploymentId}/{interfaceType.annotationName}");
-//        // properties.put("openejb.altdd.prefix", "test");
-//        // properties.put("openejb.validation.output.level", "VERBOSE");
-//        // initialContext = new InitialContext(properties);
-//        initialContext = new InitialContext(properties);
-//        initialContext.bind("inject", this);
-//        initialContext.bind("java:comp/UserTransaction", new KunderaJTAUserTransaction());
+        // Properties properties = new Properties();
+        // properties.put(Context.INITIAL_CONTEXT_FACTORY,
+        // "org.apache.openejb.client.LocalInitialContextFactory");
+        // // DO NOT DELETE IT !!!
+        // // properties.put("openejb.deployments.classpath.ear", "true");
+        // //
+        // properties.put("openejb.jndiname.format","{deploymentId}/{interfaceType.annotationName}");
+        // // properties.put("openejb.altdd.prefix", "test");
+        // // properties.put("openejb.validation.output.level", "VERBOSE");
+        // // initialContext = new InitialContext(properties);
+        // initialContext = new InitialContext(properties);
+        // initialContext.bind("inject", this);
+        // initialContext.bind("java:comp/UserTransaction", new
+        // KunderaJTAUserTransaction());
 
         System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.naming.java.javaURLContextFactory");
         System.setProperty(Context.URL_PKG_PREFIXES, "org.apache.naming");
@@ -124,15 +127,20 @@ public class EjbJTAContextTest
     {
         CassandraCli.dropKeySpace("KunderaTests");
     }
-    
+
     /**
      * Load cassandra specific data.
-     *
-     * @throws TException the t exception
-     * @throws InvalidRequestException the invalid request exception
-     * @throws UnavailableException the unavailable exception
-     * @throws TimedOutException the timed out exception
-     * @throws SchemaDisagreementException the schema disagreement exception
+     * 
+     * @throws TException
+     *             the t exception
+     * @throws InvalidRequestException
+     *             the invalid request exception
+     * @throws UnavailableException
+     *             the unavailable exception
+     * @throws TimedOutException
+     *             the timed out exception
+     * @throws SchemaDisagreementException
+     *             the schema disagreement exception
      */
     private void loadData() throws TException, InvalidRequestException, UnavailableException, TimedOutException,
             SchemaDisagreementException
@@ -178,11 +186,12 @@ public class EjbJTAContextTest
         {
 
             ksDef = new KsDef("KunderaTests", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-            //Set replication factor
-            if (ksDef.strategy_options == null) {
+            // Set replication factor
+            if (ksDef.strategy_options == null)
+            {
                 ksDef.strategy_options = new LinkedHashMap<String, String>();
             }
-            //Set replication factor, the value MUST be an integer
+            // Set replication factor, the value MUST be an integer
             ksDef.strategy_options.put("replication_factor", "1");
             CassandraCli.client.system_add_keyspace(ksDef);
         }
@@ -190,6 +199,5 @@ public class EjbJTAContextTest
         com.impetus.kundera.tests.cli.CassandraCli.client.set_keyspace("KunderaTests");
 
     }
-
 
 }

@@ -40,7 +40,7 @@ import com.impetus.kundera.tests.crossdatastore.pickr.entities.photo.PhotoUni_1_
 public class AlbumUni_1_M_M_M
 {
     @Id
-    @Column(name="ALBUM_ID")
+    @Column(name = "ALBUM_ID")
     private String albumId;
 
     @Column(name = "ALBUM_NAME")
@@ -50,14 +50,7 @@ public class AlbumUni_1_M_M_M
     private String albumDescription;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinTable(name = "ALBUM_PHOTO", 
-      joinColumns = {
-        @JoinColumn(name="ALBUM_ID")           
-      },
-      inverseJoinColumns = {
-        @JoinColumn(name="PHOTO_ID")
-      }
-    )
+    @JoinTable(name = "ALBUM_PHOTO", joinColumns = { @JoinColumn(name = "ALBUM_ID") }, inverseJoinColumns = { @JoinColumn(name = "PHOTO_ID") })
     private List<PhotoUni_1_M_M_M> photos;
 
     public AlbumUni_1_M_M_M()
@@ -114,28 +107,31 @@ public class AlbumUni_1_M_M_M
     public void setAlbumDescription(String albumDescription)
     {
         this.albumDescription = albumDescription;
-    }    
-    
+    }
+
     /**
      * @return the photos
      */
     public List<PhotoUni_1_M_M_M> getPhotos()
     {
-        if(this.photos == null || this.photos.isEmpty()) {
+        if (this.photos == null || this.photos.isEmpty())
+        {
             this.photos = new ArrayList<PhotoUni_1_M_M_M>();
         }
         return photos;
     }
 
     /**
-     * @param photos the photos to set
+     * @param photos
+     *            the photos to set
      */
     public void setPhotos(List<PhotoUni_1_M_M_M> photos)
     {
         this.photos = photos;
     }
 
-    public void addPhoto(PhotoUni_1_M_M_M photo) {
+    public void addPhoto(PhotoUni_1_M_M_M photo)
+    {
         getPhotos().add(photo);
     }
 

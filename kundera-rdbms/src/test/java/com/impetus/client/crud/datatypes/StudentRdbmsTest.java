@@ -47,7 +47,7 @@ public class StudentRdbmsTest extends StudentBase<StudentRdbms>
     public void executeTests()
     {
         onInsert();
-//        onMerge();
+        // onMerge();
     }
 
     /**

@@ -57,28 +57,29 @@ public class MTOBiAssociationTest extends TwinAssociation
     /**
      * Test insert.
      */
-    
-//    @Test
-    public void dummyTest(){
-        
+
+    // @Test
+    public void dummyTest()
+    {
+
     }
-    
+
     @Test
     public void testCRUD()
     {
         tryOperation();
-    }   
+    }
 
     @Override
     protected void insert()
     {
         PersonnelBiMTo1 person1 = new PersonnelBiMTo1();
         person1.setPersonId("bimanytoone_1");
-        person1.setPersonName("Amresh");        
+        person1.setPersonName("Amresh");
 
         PersonnelBiMTo1 person2 = new PersonnelBiMTo1();
         person2.setPersonId("bimanytoone_2");
-        person2.setPersonName("Vivek");        
+        person2.setPersonName("Vivek");
 
         HabitatBiMTo1 address = new HabitatBiMTo1();
         address.setAddressId("bimanytoone_b");
@@ -97,7 +98,7 @@ public class MTOBiAssociationTest extends TwinAssociation
         col.add(address);
 
     }
-    
+
     @Override
     protected void find()
     {
@@ -105,8 +106,8 @@ public class MTOBiAssociationTest extends TwinAssociation
         PersonnelBiMTo1 p1 = (PersonnelBiMTo1) dao.findPerson(PersonnelBiMTo1.class, "bimanytoone_1");
         Assert.assertNotNull(p1);
         Assert.assertEquals("bimanytoone_1", p1.getPersonId());
-        Assert.assertEquals("Amresh", p1.getPersonName());        
-        
+        Assert.assertEquals("Amresh", p1.getPersonName());
+
         HabitatBiMTo1 add = p1.getAddress();
         Assert.assertNotNull(add);
 
@@ -120,7 +121,7 @@ public class MTOBiAssociationTest extends TwinAssociation
         PersonnelBiMTo1 p2 = (PersonnelBiMTo1) dao.findPerson(PersonnelBiMTo1.class, "bimanytoone_2");
         Assert.assertNotNull(p2);
         Assert.assertEquals("bimanytoone_2", p2.getPersonId());
-        Assert.assertEquals("Vivek", p2.getPersonName());        
+        Assert.assertEquals("Vivek", p2.getPersonName());
 
         HabitatBiMTo1 add2 = p2.getAddress();
         Assert.assertNotNull(add2);
@@ -152,7 +153,7 @@ public class MTOBiAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();        
+        tearDownInternal();
     }
 
     @Override
@@ -164,7 +165,7 @@ public class MTOBiAssociationTest extends TwinAssociation
         CfDef cfDef = new CfDef();
         cfDef.name = "PERSONNEL";
         cfDef.keyspace = "KunderaTests";
-        //cfDef.column_type = "Super";
+        // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");

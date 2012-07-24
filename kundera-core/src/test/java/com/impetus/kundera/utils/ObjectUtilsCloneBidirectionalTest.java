@@ -45,8 +45,7 @@ public class ObjectUtilsCloneBidirectionalTest
 {
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(ObjectUtilsCloneBidirectionalTest.class);
-    
-    
+
     // Configurator configurator = new Configurator("kunderatest");
     EntityMetadata metadata;
 

@@ -31,164 +31,176 @@ import org.apache.thrift.transport.TTransportException;
  * 
  * @author vivek.mishra
  */
-public final class CassandraCli {
+public final class CassandraCli
+{
 
-	/** The cassandra. */
-	private static EmbeddedCassandraService cassandra;
+    /** The cassandra. */
+    private static EmbeddedCassandraService cassandra;
 
-	/** The client. */
-	public static Cassandra.Client client;
+    /** The client. */
+    public static Cassandra.Client client;
 
-	/** the log used by this class. */
-	private static Log log = LogFactory.getLog(CassandraCli.class);
+    /** the log used by this class. */
+    private static Log log = LogFactory.getLog(CassandraCli.class);
 
-	/** The tr. */
-	private static TTransport tr;
+    /** The tr. */
+    private static TTransport tr;
 
-        /**
-         * Cassandra set up.
-         *
-         * @throws IOException Signals that an I/O exception has occurred.
-         * @throws TException the t exception
-         * @throws InvalidRequestException the invalid request exception
-         * @throws UnavailableException the unavailable exception
-         * @throws TimedOutException the timed out exception
-         * @throws SchemaDisagreementException the schema disagreement exception
-         */
-        public static void cassandraSetUp() throws IOException, TException,
-			InvalidRequestException, UnavailableException, TimedOutException,
-			SchemaDisagreementException {
+    /**
+     * Cassandra set up.
+     * 
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     * @throws TException
+     *             the t exception
+     * @throws InvalidRequestException
+     *             the invalid request exception
+     * @throws UnavailableException
+     *             the unavailable exception
+     * @throws TimedOutException
+     *             the timed out exception
+     * @throws SchemaDisagreementException
+     *             the schema disagreement exception
+     */
+    public static void cassandraSetUp() throws IOException, TException, InvalidRequestException, UnavailableException,
+            TimedOutException, SchemaDisagreementException
+    {
 
-		if (!checkIfServerRunning()) {
-			cassandra = new EmbeddedCassandraService();
-			cassandra.start();
-			initClient();
-		}
-	}
-
-        /**
-         * Create keyspace.
-         * @param keyspaceName keyspace name.
-         */
-        public static void createKeySpace(String keyspaceName)
+        if (!checkIfServerRunning())
         {
-            String nativeSql="CREATE KEYSPACE " + keyspaceName+" with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
+            cassandra = new EmbeddedCassandraService();
+            cassandra.start();
+            initClient();
+        }
+    }
+
+    /**
+     * Create keyspace.
+     * 
+     * @param keyspaceName
+     *            keyspace name.
+     */
+    public static void createKeySpace(String keyspaceName)
+    {
+        String nativeSql = "CREATE KEYSPACE " + keyspaceName
+                + " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
+        try
+        {
+            KsDef ks_Def = client.describe_keyspace(keyspaceName);
+        }
+        catch (NotFoundException e)
+        {
+            List<CfDef> cfDefs = new ArrayList<CfDef>();
+            KsDef ks_Def = new KsDef(keyspaceName, SimpleStrategy.class.getName(), cfDefs);
+            ks_Def.setReplication_factor(1);
             try
             {
-                KsDef ks_Def = client.describe_keyspace(keyspaceName);
+                client.system_add_keyspace(ks_Def);
             }
-            catch (NotFoundException e)
+            catch (TException e1)
             {
-                List<CfDef> cfDefs = new ArrayList<CfDef>();
-                KsDef ks_Def = new KsDef(keyspaceName, SimpleStrategy.class.getName(), cfDefs);
-                ks_Def.setReplication_factor(1);
-                try
-                {
-                    client.system_add_keyspace(ks_Def);
-                }
-                catch (TException e1)
-                {
-                    log.error(e1.getMessage());
-                }
-                catch (InvalidRequestException ess)
-                {
-                    log.error(ess.getMessage());
-                }
-                catch (SchemaDisagreementException sde)
-                {
-                    log.error(sde.getMessage());
-                }
-                
+                log.error(e1.getMessage());
             }
-            
-            catch (InvalidRequestException e)
+            catch (InvalidRequestException ess)
             {
-                log.error(e.getMessage());
+                log.error(ess.getMessage());
             }
-            catch (TException e)
+            catch (SchemaDisagreementException sde)
             {
-                log.error(e.getMessage());
+                log.error(sde.getMessage());
             }
 
         }
-        
-        /**
-         * Drop out key space.
-         *
-         * @param keyspaceName keyspace name
-         */
-        public static void dropKeySpace(String keyspaceName)
-        {
-          try
-          {
-              if(keyspaceExist(keyspaceName))
-              {
-                  client.system_drop_keyspace(keyspaceName);
-              }
-          }
-          catch (InvalidRequestException e)
-          {
-              log.error(e.getMessage());
-          }
-          catch (SchemaDisagreementException e)
-          {
-              log.error(e.getMessage());
-          }
-          catch (TException e)
-          {
-              log.error(e.getMessage());
-          }
 
+        catch (InvalidRequestException e)
+        {
+            log.error(e.getMessage());
+        }
+        catch (TException e)
+        {
+            log.error(e.getMessage());
         }
 
-        public static boolean keyspaceExist(String keySpaceName)
+    }
+
+    /**
+     * Drop out key space.
+     * 
+     * @param keyspaceName
+     *            keyspace name
+     */
+    public static void dropKeySpace(String keyspaceName)
+    {
+        try
         {
-            try
+            if (keyspaceExist(keyspaceName))
             {
-                if(client != null)
-                {
-                    return client.describe_keyspace(keySpaceName)!=null;
-                }
-                return false;
+                client.system_drop_keyspace(keyspaceName);
             }
-            catch (NotFoundException e)
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error(e.getMessage());
+        }
+        catch (SchemaDisagreementException e)
+        {
+            log.error(e.getMessage());
+        }
+        catch (TException e)
+        {
+            log.error(e.getMessage());
+        }
+
+    }
+
+    public static boolean keyspaceExist(String keySpaceName)
+    {
+        try
+        {
+            if (client != null)
             {
-                return false;
-            }
-            catch (InvalidRequestException e)
-            {
-                log.error(e.getMessage());
-            }
-            catch (TException e)
-            {
-                log.error(e.getMessage());
+                return client.describe_keyspace(keySpaceName) != null;
             }
             return false;
         }
-        
-        public static boolean columnFamilyExist(String columnfamilyName, String keyspaceName)
+        catch (NotFoundException e)
         {
-            try
-            {
-                client.set_keyspace(keyspaceName);
-                client.system_add_column_family(new CfDef(keyspaceName, columnfamilyName));
-            }
-            catch (InvalidRequestException e)
-            {
-                return true;
-            }
-            catch (SchemaDisagreementException e)
-            {
-                return false;
-            }
-            catch (TException e)
-            {
-                return false;
-            }
             return false;
         }
-        
-        public static boolean dropColumnFamily(String columnFamilyName, String keyspaceName)
+        catch (InvalidRequestException e)
+        {
+            log.error(e.getMessage());
+        }
+        catch (TException e)
+        {
+            log.error(e.getMessage());
+        }
+        return false;
+    }
+
+    public static boolean columnFamilyExist(String columnfamilyName, String keyspaceName)
+    {
+        try
+        {
+            client.set_keyspace(keyspaceName);
+            client.system_add_column_family(new CfDef(keyspaceName, columnfamilyName));
+        }
+        catch (InvalidRequestException e)
+        {
+            return true;
+        }
+        catch (SchemaDisagreementException e)
+        {
+            return false;
+        }
+        catch (TException e)
+        {
+            return false;
+        }
+        return false;
+    }
+
+    public static boolean dropColumnFamily(String columnFamilyName, String keyspaceName)
     {
         try
         {
@@ -210,37 +222,46 @@ public final class CassandraCli {
             return false;
         }
         return false;
-   
+
+    }
+
+    /**
+     * Check if server running.
+     * 
+     * @return true, if successful
+     */
+    private static boolean checkIfServerRunning()
+    {
+        try
+        {
+            Socket socket = new Socket("127.0.0.1", 9160);
+            return socket.getInetAddress() != null;
         }
-        /**
-         * Check if server running.
-         *
-         * @return true, if successful
-         */
-        private static boolean checkIfServerRunning() {
-		try {
-			Socket socket = new Socket("127.0.0.1", 9160);
-			return socket.getInetAddress() != null;
-		} catch (UnknownHostException e) {
-			return false;
-		} catch (IOException e) {
-			return false;
-		}
+        catch (UnknownHostException e)
+        {
+            return false;
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
 
-	}
+    }
 
-	/**
-	 * Inits the client.
-	 *
-	 * @throws TTransportException the t transport exception
-	 */
-	public static void initClient() throws TTransportException {
-		TSocket socket = new TSocket("127.0.0.1", 9160);
-		TTransport transport = new TFramedTransport(socket);
-		TProtocol protocol = new TBinaryProtocol(transport);
-		client = new Cassandra.Client(protocol);
-		socket.open();
+    /**
+     * Inits the client.
+     * 
+     * @throws TTransportException
+     *             the t transport exception
+     */
+    public static void initClient() throws TTransportException
+    {
+        TSocket socket = new TSocket("127.0.0.1", 9160);
+        TTransport transport = new TFramedTransport(socket);
+        TProtocol protocol = new TBinaryProtocol(transport);
+        client = new Cassandra.Client(protocol);
+        socket.open();
 
-	}
-	
+    }
+
 }

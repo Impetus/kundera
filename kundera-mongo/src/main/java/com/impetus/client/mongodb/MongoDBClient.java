@@ -57,11 +57,10 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
     /** The data handler. */
     // private MongoDBDataHandler dataHandler;
 
-
     /** The reader. */
     private EntityReader reader;
-    
-    private MongoDBDataHandler handler; 
+
+    private MongoDBDataHandler handler;
 
     /** The log. */
     private static Log log = LogFactory.getLog(MongoDBClient.class);
@@ -86,7 +85,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         this.persistenceUnit = persistenceUnit;
         handler = new MongoDBDataHandler();
     }
-
 
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
@@ -208,8 +206,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
             return null;
         }
 
-        Object enhancedEntity = handler.getEntityFromDocument(
-                entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument, relationNames);
+        Object enhancedEntity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata,
+                fetchedDocument, relationNames);
 
         return enhancedEntity;
     }
@@ -239,8 +237,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         while (cursor.hasNext())
         {
             DBObject fetchedDocument = cursor.next();
-            Object entity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata, fetchedDocument,
-                            entityMetadata.getRelationNames());
+            Object entity = handler.getEntityFromDocument(entityMetadata.getEntityClazz(), entityMetadata,
+                    fetchedDocument, entityMetadata.getRelationNames());
             entities.add(entity);
         }
         return entities;
@@ -283,8 +281,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         if (result.indexOf(".") >= 0)
         {
             // TODO i need to discuss with Amresh before modifying it.
-            entities.addAll(handler.getEmbeddedObjectList(dbCollection,
-                    entityMetadata, documentName, mongoQuery, result, orderBy));
+            entities.addAll(handler.getEmbeddedObjectList(dbCollection, entityMetadata, documentName, mongoQuery,
+                    result, orderBy));
 
         }
         else
@@ -387,7 +385,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         throw new NotImplementedException("Not yet implemented");
     }
 
-
     /**
      * Method to find entity for given association name and association value.
      * 
@@ -460,28 +457,28 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
     }
 
     @Override
-    protected void onPersist(EntityMetadata entityMetadata,Object entity, Object id, List<RelationHolder> rlHolders)
+    protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
         String documentName = entityMetadata.getTableName();
         DBCollection dbCollection = mongoDb.getCollection(documentName);
         DBObject document = null;
         document = new BasicDBObject();
 
-            // TODO: Still we need to see why mongo updates other values to NULL. 
-        document = handler.getDocumentFromEntity(document, entityMetadata,entity, rlHolders);
-        if(isUpdate)
+        // TODO: Still we need to see why mongo updates other values to NULL.
+        document = handler.getDocumentFromEntity(document, entityMetadata, entity, rlHolders);
+        if (isUpdate)
         {
             BasicDBObject query = new BasicDBObject();
-            
+
             // Why can't we put "_id" here?
             query.put("_id", id.toString());
-            dbCollection.findAndModify(query,document);
-        } else
+            dbCollection.findAndModify(query, document);
+        }
+        else
         {
             dbCollection.insert(document);
         }
-        
-        
+
     }
 
     /**

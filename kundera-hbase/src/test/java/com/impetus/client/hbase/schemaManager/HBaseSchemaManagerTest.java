@@ -121,8 +121,9 @@ public class HBaseSchemaManagerTest
         try
         {
             getEntityManagerFactory("create");
-//            schemaManager = new HBaseSchemaManager(HBaseClientFactory.class.getName());
-//            schemaManager.exportSchema();
+            // schemaManager = new
+            // HBaseSchemaManager(HBaseClientFactory.class.getName());
+            // schemaManager.exportSchema();
             Assert.assertTrue(admin.isTableAvailable("HbaseEntitySimple"));
             Assert.assertTrue(admin.isTableAvailable("HbaseEntitySuper"));
             Assert.assertTrue(admin.isTableAvailable("HbaseEntityAddressUni1To1"));

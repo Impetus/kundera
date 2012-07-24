@@ -69,8 +69,7 @@ final class MongoDBDataHandler
      *            the relations
      * @return the entity from document
      */
-    Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document,
-            List<String> relations)
+    Object getEntityFromDocument(Class<?> entityClass, EntityMetadata m, DBObject document, List<String> relations)
     {
         // Entity object
         Object entity = null;
@@ -149,13 +148,16 @@ final class MongoDBDataHandler
                     {
                         relationValue = new HashMap<String, Object>();
                     }
-                    if(r != null && ! r.equals(m.getIdColumn().getName())) {
+                    if (r != null && !r.equals(m.getIdColumn().getName()))
+                    {
                         Object colValue = document.get(r);
                         relationValue.put(r, colValue);
-                    } else {
+                    }
+                    else
+                    {
                         relationValue.put(r, null);
                     }
-                    
+
                 }
 
                 if (!relationValue.isEmpty())
@@ -209,7 +211,6 @@ final class MongoDBDataHandler
         }
     }
 
-
     /**
      * Gets the document from entity.
      * 
@@ -223,13 +224,13 @@ final class MongoDBDataHandler
      * @throws PropertyAccessException
      *             the property access exception
      */
-    DBObject getDocumentFromEntity(DBObject dbObj, EntityMetadata m, Object entity,
-            List<RelationHolder> relations) throws PropertyAccessException
+    DBObject getDocumentFromEntity(DBObject dbObj, EntityMetadata m, Object entity, List<RelationHolder> relations)
+            throws PropertyAccessException
     {
         List<Column> columns = m.getColumnsAsList();
 
         // Populate Row Key
-        String id  = PropertyAccessorHelper.getId(entity, m);
+        String id = PropertyAccessorHelper.getId(entity, m);
         dbObj.put("_id", id);
         dbObj.put(m.getIdColumn().getName(), id);
 
@@ -331,10 +332,14 @@ final class MongoDBDataHandler
         {
             // TODO : this should have been handled by DocumentObjectMapper.
             Object valObj = PropertyAccessorHelper.getObject(entity, column.getField());
-            if(valObj != null)
+            if (valObj != null)
             {
                 dbObj.put(column.getName(), valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString()
-                    :  valObj.toString())/*PropertyAccessorHelper.getObject(entity, column.getField()).toString())*/;
+                        : valObj.toString())/*
+                                             * PropertyAccessorHelper.getObject(
+                                             * entity,
+                                             * column.getField()).toString())
+                                             */;
             }
         }
     }

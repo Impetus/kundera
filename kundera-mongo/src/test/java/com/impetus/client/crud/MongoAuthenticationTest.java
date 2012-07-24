@@ -35,7 +35,6 @@ import com.impetus.kundera.loader.KunderaAuthenticationException;
 public class MongoAuthenticationTest extends BaseTest
 {
 
-  
     /**
      * Sets the up.
      * 
@@ -56,7 +55,7 @@ public class MongoAuthenticationTest extends BaseTest
     {
         try
         {
-            EntityManagerFactory emf= Persistence.createEntityManagerFactory("validAuthenticationMongoPu");
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("validAuthenticationMongoPu");
             Assert.assertNotNull(emf);
             EntityManager em = emf.createEntityManager();
             Assert.assertNotNull(em);
@@ -67,7 +66,7 @@ public class MongoAuthenticationTest extends BaseTest
         }
 
     }
-    
+
     /**
      * Authenticate with invalid credentials.
      */
@@ -78,7 +77,7 @@ public class MongoAuthenticationTest extends BaseTest
         EntityManager em = null;
         try
         {
-            emf= Persistence.createEntityManagerFactory("invalidAuthenticationMongoPu");
+            emf = Persistence.createEntityManagerFactory("invalidAuthenticationMongoPu");
             em = emf.createEntityManager();
             Assert.fail("Shouldn't be called");
         }
@@ -89,7 +88,7 @@ public class MongoAuthenticationTest extends BaseTest
         }
 
     }
-    
+
     /**
      * No authentication test.
      * 
@@ -99,7 +98,7 @@ public class MongoAuthenticationTest extends BaseTest
     {
         try
         {
-            EntityManagerFactory emf= Persistence.createEntityManagerFactory("mongoTest");
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("mongoTest");
             Assert.assertNotNull(emf);
             EntityManager em = emf.createEntityManager();
             Assert.assertNotNull(em);
@@ -110,8 +109,7 @@ public class MongoAuthenticationTest extends BaseTest
         }
 
     }
-    
-        
+
     /**
      * Tear down.
      * 

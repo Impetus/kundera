@@ -21,7 +21,7 @@ import java.util.Calendar;
 
 /**
  * @author vivek.mishra
- *
+ * 
  */
 public interface StudentEntityDef
 {

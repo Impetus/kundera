@@ -43,34 +43,37 @@ import com.impetus.kundera.rest.repository.EMRepository;
 
 /**
  * REST based resource for JPA query
+ * 
  * @author amresh
- *
+ * 
  */
 
 @Path(Constants.KUNDERA_API_PATH + Constants.QUERY_RESOURCE_PATH)
 public class QueryResource
 {
-    
+
     private static Log log = LogFactory.getLog(QueryResource.class);
-    
+
     /**
-     * Handler for GET method requests for this resource
-     * Retrieves all entities for a given table from datasource
+     * Handler for GET method requests for this resource Retrieves all entities
+     * for a given table from datasource
+     * 
      * @param sessionToken
      * @param entityClassName
      * @param id
      * @return
      */
-   
-    @GET    
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+
+    @GET
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("/{entityClass}/all")
-    public Response findAll(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken, 
-            @PathParam("entityClass") String entityClassName, @Context HttpHeaders headers) {
-        
+    public Response findAll(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
+            @PathParam("entityClass") String entityClassName, @Context HttpHeaders headers)
+    {
+
         log.debug("GET: sessionToken:" + sessionToken);
         log.debug("GET: entityClass:" + entityClassName);
-        
+
         List result = null;
         Class<?> entityClass = null;
         try
@@ -78,85 +81,89 @@ public class QueryResource
             EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
             entityClass = EntityUtils.getEntityClass(entityClassName, em);
             log.debug("GET: entityClass" + entityClass);
-            
+
             String alias = entityClassName.substring(0, 1).toLowerCase();
-            
-            StringBuilder sb = new StringBuilder().append("SELECT ").append(alias)
-            .append(" FROM ").append(entityClassName).append(" ").append(alias);         
-            
+
+            StringBuilder sb = new StringBuilder().append("SELECT ").append(alias).append(" FROM ")
+                    .append(entityClassName).append(" ").append(alias);
+
             Query q = em.createQuery(sb.toString());
-            
+
             result = q.getResultList();
         }
         catch (Exception e)
         {
             log.error(e.getMessage());
-            return Response.serverError().build();            
+            return Response.serverError().build();
         }
-        
-        log.debug("GET: Find All Result: " + result);       
-        
-        if(result == null) {
-            return Response.noContent().build();            
+
+        log.debug("GET: Find All Result: " + result);
+
+        if (result == null)
+        {
+            return Response.noContent().build();
         }
-        
+
         String mediaType = headers.getRequestHeader("accept").get(0);
         log.debug("GET: Media Type:" + mediaType);
-        
-        String output = CollectionConverter.toString(result, entityClass, mediaType);     
-        
-        return Response.ok(output).build();    
-        
-    }   
-    
+
+        String output = CollectionConverter.toString(result, entityClass, mediaType);
+
+        return Response.ok(output).build();
+
+    }
+
     /**
-     * Handler for GET method requests for this resource
-     * Retrieves records from datasource for a given JPA query
+     * Handler for GET method requests for this resource Retrieves records from
+     * datasource for a given JPA query
+     * 
      * @param sessionToken
      * @param entityClassName
      * @param id
      * @return
      */
-   
-    @GET    
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+
+    @GET
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Path("/{jpaQuery}")
-    public Response executeQuery(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken, 
-            @PathParam("jpaQuery") String jpaQuery, @Context HttpHeaders headers) {
-        
+    public Response executeQuery(@HeaderParam(Constants.SESSION_TOKEN_HEADER_NAME) String sessionToken,
+            @PathParam("jpaQuery") String jpaQuery, @Context HttpHeaders headers)
+    {
+
         log.debug("GET: sessionToken:" + sessionToken);
         log.debug("GET: jpaQuery:" + jpaQuery);
-        
+
         List result = null;
         Query q = null;
         try
         {
-            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);                   
-            
-            q = em.createQuery(jpaQuery);            
-            
+            EntityManager em = EMRepository.INSTANCE.getEM(sessionToken);
+
+            q = em.createQuery(jpaQuery);
+
             result = q.getResultList();
         }
         catch (Exception e)
         {
             log.error(e.getMessage());
-            return Response.serverError().build();            
+            return Response.serverError().build();
         }
-        
-        log.debug("GET: Result for JPA Query: " + result);       
-        
-        if(result == null) {
-            return Response.noContent().build();            
+
+        log.debug("GET: Result for JPA Query: " + result);
+
+        if (result == null)
+        {
+            return Response.noContent().build();
         }
-        
+
         String mediaType = headers.getRequestHeader("accept").get(0);
         log.debug("GET: Media Type:" + mediaType);
-        
-        Class<?> genericClass = ((QueryImpl)q).getKunderaQuery().getEntityClass();
-        
+
+        Class<?> genericClass = ((QueryImpl) q).getKunderaQuery().getEntityClass();
+
         String output = CollectionConverter.toString(result, genericClass, mediaType);
-        
-        return Response.ok(output).build();        
-    }   
+
+        return Response.ok(output).build();
+    }
 
 }

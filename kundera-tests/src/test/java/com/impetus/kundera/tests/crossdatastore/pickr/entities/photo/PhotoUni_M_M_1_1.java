@@ -22,14 +22,14 @@ import javax.persistence.Table;
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 @Entity
 @Table(name = "PHOTO", schema = "Pickr@picongo")
 public class PhotoUni_M_M_1_1
 {
     @Id
-    @Column(name="PHOTO_ID")
+    @Column(name = "PHOTO_ID")
     private String photoId;
 
     @Column(name = "PHOTO_CAPTION")
@@ -37,33 +37,37 @@ public class PhotoUni_M_M_1_1
 
     @Column(name = "PHOTO_DESC")
     private String photoDescription;
-    
+
     public PhotoUni_M_M_1_1()
     {
 
     }
-    
-    public PhotoUni_M_M_1_1(String photoId, String caption, String description) {
+
+    public PhotoUni_M_M_1_1(String photoId, String caption, String description)
+    {
         this.photoId = photoId;
         this.photoCaption = caption;
         this.photoDescription = description;
     }
-    
+
     /**
- * @return the photoId
- */
-public String getPhotoId() {
-return photoId;
-}
+     * @return the photoId
+     */
+    public String getPhotoId()
+    {
+        return photoId;
+    }
 
-/**
- * @param photoId the photoId to set
- */
-public void setPhotoId(String photoId) {
-this.photoId = photoId;
-}
+    /**
+     * @param photoId
+     *            the photoId to set
+     */
+    public void setPhotoId(String photoId)
+    {
+        this.photoId = photoId;
+    }
 
-/**
+    /**
      * @return the photoCaption
      */
     public String getPhotoCaption()

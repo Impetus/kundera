@@ -109,7 +109,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         this.reader = reader;
     }
 
-
     /*
      * (non-Javadoc)
      * 
@@ -204,7 +203,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         return c.list();
     }
 
-   
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
@@ -553,7 +551,6 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         return null;
     }
-
 
     /**
      * Gets the data type.

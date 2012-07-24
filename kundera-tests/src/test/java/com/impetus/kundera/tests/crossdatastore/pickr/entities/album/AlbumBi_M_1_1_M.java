@@ -40,7 +40,7 @@ import com.impetus.kundera.tests.crossdatastore.pickr.entities.photographer.Phot
 public class AlbumBi_M_1_1_M
 {
     @Id
-    @Column(name="ALBUM_ID")
+    @Column(name = "ALBUM_ID")
     private String albumId;
 
     @Column(name = "ALBUM_NAME")
@@ -50,10 +50,10 @@ public class AlbumBi_M_1_1_M
     private String albumDescription;
 
     // One to many, will be persisted separately
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy="album")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "album")
     private List<PhotoBi_M_1_1_M> photos;
-    
-    @OneToMany(mappedBy="album", fetch = FetchType.LAZY)
+
+    @OneToMany(mappedBy = "album", fetch = FetchType.LAZY)
     private List<PhotographerBi_M_1_1_M> photographers;
 
     public AlbumBi_M_1_1_M()
@@ -117,7 +117,8 @@ public class AlbumBi_M_1_1_M
      */
     public List<PhotoBi_M_1_1_M> getPhotos()
     {
-        if(photos == null) {
+        if (photos == null)
+        {
             photos = new ArrayList<PhotoBi_M_1_1_M>();
         }
         return photos;
@@ -131,8 +132,9 @@ public class AlbumBi_M_1_1_M
     {
         this.photos = photos;
     }
-    
-    public void addPhoto(PhotoBi_M_1_1_M photo) {
+
+    public void addPhoto(PhotoBi_M_1_1_M photo)
+    {
         getPhotos().add(photo);
     }
 
@@ -145,13 +147,12 @@ public class AlbumBi_M_1_1_M
     }
 
     /**
-     * @param photographers the photographers to set
+     * @param photographers
+     *            the photographers to set
      */
     public void setPhotographers(List<PhotographerBi_M_1_1_M> photographers)
     {
         this.photographers = photographers;
     }
-    
-    
 
 }

@@ -210,7 +210,7 @@ public class OTOUniAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();       
+        tearDownInternal();
 
     }
 

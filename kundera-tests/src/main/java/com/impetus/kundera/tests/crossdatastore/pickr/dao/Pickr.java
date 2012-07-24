@@ -23,14 +23,14 @@ import java.util.List;
  */
 public interface Pickr
 {
-    void addPhotographer(Object p);    
-    
+    void addPhotographer(Object p);
+
     Object getPhotographer(Class<?> entityClass, String photographerId);
 
     public List<Object> getAllPhotographers(String className);
-    
-    
+
     public void deletePhotographer(Object p);
+
     public void mergePhotographer(Object p);
 
     public void close();

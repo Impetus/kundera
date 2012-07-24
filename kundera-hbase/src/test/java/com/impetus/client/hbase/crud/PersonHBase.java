@@ -13,7 +13,7 @@ import javax.persistence.Table;
 @Table(name = "PERSON", schema = "KunderaExamples@hbaseTest")
 public class PersonHBase
 {
-    
+
     /** The person id. */
     @Id
     @Column(name = "PERSON_ID")
@@ -29,7 +29,7 @@ public class PersonHBase
 
     /**
      * Gets the person id.
-     *
+     * 
      * @return the person id
      */
     public String getPersonId()
@@ -39,7 +39,7 @@ public class PersonHBase
 
     /**
      * Gets the person name.
-     *
+     * 
      * @return the person name
      */
     public String getPersonName()
@@ -49,8 +49,9 @@ public class PersonHBase
 
     /**
      * Sets the person name.
-     *
-     * @param personName the new person name
+     * 
+     * @param personName
+     *            the new person name
      */
     public void setPersonName(String personName)
     {
@@ -59,8 +60,9 @@ public class PersonHBase
 
     /**
      * Sets the person id.
-     *
-     * @param personId the new person id
+     * 
+     * @param personId
+     *            the new person id
      */
     public void setPersonId(String personId)
     {
@@ -76,12 +78,12 @@ public class PersonHBase
     }
 
     /**
-     * @param age the age to set
+     * @param age
+     *            the age to set
      */
     public void setAge(int age)
     {
         this.age = age;
     }
-    
-    
+
 }

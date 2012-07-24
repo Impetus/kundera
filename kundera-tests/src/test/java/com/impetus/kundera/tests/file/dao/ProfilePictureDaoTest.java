@@ -28,14 +28,15 @@ import com.google.common.io.Files;
 import com.impetus.kundera.tests.file.entities.ProfilePicture;
 
 /**
- * Test case for {@link ProfilePictureDao} 
+ * Test case for {@link ProfilePictureDao}
+ * 
  * @author amresh.singh
  */
 public class ProfilePictureDaoTest
 {
     String inputFilePath;
+
     ProfilePictureDao dao;
-    
 
     /**
      * @throws java.lang.Exception
@@ -55,24 +56,27 @@ public class ProfilePictureDaoTest
     {
         dao.closeEntityManagerfactory();
     }
-    
+
     @Test
-    public void dummyTest() {
-        
+    public void dummyTest()
+    {
+
     }
 
     /**
-     * Test method for {@link com.impetus.kundera.tests.file.dao.ProfilePictureDao#addProfilePicture(int, java.io.File)}.
+     * Test method for
+     * {@link com.impetus.kundera.tests.file.dao.ProfilePictureDao#addProfilePicture(int, java.io.File)}
+     * .
      */
-    //@Test
+    // @Test
     public void test()
     {
-        //Insert picture        
+        // Insert picture
         int id = 1;
-        File fullPictureFile = new File(inputFilePath); 
+        File fullPictureFile = new File(inputFilePath);
         dao.addProfilePicture(id, fullPictureFile);
-        
-        //Find Picture
+
+        // Find Picture
         ProfilePicture pp = dao.getProfilePicture(1);
         try
         {
@@ -81,7 +85,7 @@ public class ProfilePictureDaoTest
         catch (IOException e)
         {
             Assert.fail(e.getMessage());
-        }       
+        }
     }
 
 }

@@ -376,13 +376,14 @@ public class PickrTestBi_M_1_1_M extends PickrBaseTest
      * ()
      */
     @Override
-    protected void startServer() throws IOException, TException, InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
+    protected void startServer() throws IOException, TException, InvalidRequestException, UnavailableException,
+            TimedOutException, SchemaDisagreementException
     {
 
         if (RUN_IN_EMBEDDED_MODE)
         {
             CassandraCli.cassandraSetUp();
-//            HBaseCli.startCluster();
+            // HBaseCli.startCluster();
         }
         if (AUTO_MANAGE_SCHEMA)
         {
@@ -480,18 +481,18 @@ public class PickrTestBi_M_1_1_M extends PickrBaseTest
              * schema generation for HBase.
              * */
 
-//            HBaseCli.createTable("PHOTOGRAPHER");
-//            HBaseCli.addColumnFamily("PHOTOGRAPHER", "PHOTOGRAPHER_NAME");
-//            HBaseCli.addColumnFamily("PHOTOGRAPHER", "ALBUM_ID");
-//
-//            HBaseCli.createTable("ALBUM");
-//            HBaseCli.addColumnFamily("ALBUM", "ALBUM_NAME");
-//            HBaseCli.addColumnFamily("ALBUM", "ALBUM_DESC");
-//
-//            HBaseCli.createTable("PHOTO");
-//            HBaseCli.addColumnFamily("PHOTO", "PHOTO_CAPTION");
-//            HBaseCli.addColumnFamily("PHOTO", "PHOTO_DESC");
-//            HBaseCli.addColumnFamily("PHOTO", "ALBUM_ID");
+            // HBaseCli.createTable("PHOTOGRAPHER");
+            // HBaseCli.addColumnFamily("PHOTOGRAPHER", "PHOTOGRAPHER_NAME");
+            // HBaseCli.addColumnFamily("PHOTOGRAPHER", "ALBUM_ID");
+            //
+            // HBaseCli.createTable("ALBUM");
+            // HBaseCli.addColumnFamily("ALBUM", "ALBUM_NAME");
+            // HBaseCli.addColumnFamily("ALBUM", "ALBUM_DESC");
+            //
+            // HBaseCli.createTable("PHOTO");
+            // HBaseCli.addColumnFamily("PHOTO", "PHOTO_CAPTION");
+            // HBaseCli.addColumnFamily("PHOTO", "PHOTO_DESC");
+            // HBaseCli.addColumnFamily("PHOTO", "ALBUM_ID");
         }
 
     }

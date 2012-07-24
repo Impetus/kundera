@@ -175,7 +175,7 @@ public class OTOBiAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();        
+        tearDownInternal();
     }
 
     @Override
@@ -191,13 +191,13 @@ public class OTOBiAssociationTest extends TwinAssociation
         // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
-        
+
         ColumnDef columnDefPersonName = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         columnDefPersonName.index_type = IndexType.KEYS;
-        
+
         ColumnDef columnDefAddressId = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "UTF8Type");
         columnDefAddressId.index_type = IndexType.KEYS;
-        
+
         cfDef.addToColumn_metadata(columnDefPersonName);
         cfDef.addToColumn_metadata(columnDefAddressId);
 
@@ -245,10 +245,9 @@ public class OTOBiAssociationTest extends TwinAssociation
         cfDef2.keyspace = "KunderaTests";
 
         ColumnDef columnDefStreet = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
-        columnDefStreet.index_type = IndexType.KEYS;          
-        
+        columnDefStreet.index_type = IndexType.KEYS;
+
         cfDef2.addToColumn_metadata(columnDefStreet);
-        
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(cfDef2);

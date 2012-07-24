@@ -24,7 +24,7 @@ import org.apache.hadoop.hbase.io.hfile.Compression;
  * Class HBase Column family properties has some column family related attribute
  * 
  * @author kuldeep.mishra
- *
+ * 
  */
 public class HBaseColumnFamilyProperties
 {

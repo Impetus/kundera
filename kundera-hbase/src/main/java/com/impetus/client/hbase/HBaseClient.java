@@ -108,20 +108,20 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
         List results = null;
         try
         {
-            if(rowId == null)
+            if (rowId == null)
             {
                 return null;
             }
-            results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata,
-                    rowId.toString(), relationNames);
-            if(results != null)
+            results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId.toString(),
+                    relationNames);
+            if (results != null)
             {
                 enhancedEntity = results.get(0);
             }
         }
         catch (IOException e)
         {
-            log.error("Error during find by id, Caused by:"+ e.getMessage());
+            log.error("Error during find by id, Caused by:" + e.getMessage());
             throw new KunderaException(e);
         }
         return enhancedEntity;
@@ -138,7 +138,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<E> entities = new ArrayList<E>();
-        if(rowIds == null)
+        if (rowIds == null)
         {
             return null;
         }
@@ -149,9 +149,9 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
             {
                 if (rowKey != null)
                 {
-                    List results  = handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
+                    List results = handler.readData(entityMetadata.getTableName(), entityMetadata.getEntityClazz(),
                             entityMetadata, rowKey.toString(), entityMetadata.getRelationNames());
-                    if(results != null)
+                    if (results != null)
                     {
                         e = (E) results.get(0);
                         entities.add(e);
@@ -160,10 +160,10 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
             }
             catch (IOException ioex)
             {
-                log.error("Error during find All, Caused by:"+ ioex.getMessage());
+                log.error("Error during find All, Caused by:" + ioex.getMessage());
                 throw new KunderaException(ioex);
             }
-            
+
         }
         return entities;
     }
@@ -199,8 +199,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
                 }
                 catch (IOException ioex)
                 {
-                    log.error("Error during find for embedded entities, Caused by:"+ ioex.getMessage());
-                    
+                    log.error("Error during find for embedded entities, Caused by:" + ioex.getMessage());
+
                     throw new KunderaException(ioex);
                 }
 
@@ -219,13 +219,17 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
         }
         return entities;
     }
-    
+
     /**
      * Method to find entities using JPQL(converted into FilterList.)
-     * @param <E>               parameterized entity class.
-     * @param entityClass       entity class.
-     * @param metadata          entity metadata.
-     * @return                  list of entities.
+     * 
+     * @param <E>
+     *            parameterized entity class.
+     * @param entityClass
+     *            entity class.
+     * @param metadata
+     *            entity metadata.
+     * @return list of entities.
      */
     public <E> List<E> findByQuery(Class<E> entityClass, EntityMetadata metadata)
     {
@@ -239,12 +243,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
         try
         {
 
-            results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata,
-                    null, relationNames);
+            results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, null, relationNames);
         }
         catch (IOException ioex)
         {
-            log.error("Error during find All, Caused by:"+ ioex.getMessage());
+            log.error("Error during find All, Caused by:" + ioex.getMessage());
             throw new KunderaException(ioex);
         }
         return results;
@@ -254,12 +257,17 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     /**
      * Handles find by range query for given start and end row key range values.
      * 
-     * @param <E>                      parameterized entity class.
-     * @param entityClass              entity class.
-     * @param metadata                 entity metadata
-     * @param startRow                 start row.
-     * @param endRow                   end row.
-     * @return                         collection holding results.
+     * @param <E>
+     *            parameterized entity class.
+     * @param entityClass
+     *            entity class.
+     * @param metadata
+     *            entity metadata
+     * @param startRow
+     *            start row.
+     * @param endRow
+     *            end row.
+     * @return collection holding results.
      */
     public <E> List<E> findByRange(Class<E> entityClass, EntityMetadata metadata, byte[] startRow, byte[] endRow)
     {
@@ -270,21 +278,21 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
         String tableName = entityMetadata.getTableName();
         Object enhancedEntity = null;
         List results = null;
-        
+
         try
         {
 
-            results = handler.readDataByRange(tableName,entityClass,metadata,startRow,endRow);
+            results = handler.readDataByRange(tableName, entityClass, metadata, startRow, endRow);
         }
         catch (IOException ioex)
         {
-            log.error("Error during find All, Caused by:"+ ioex.getMessage());
+            log.error("Error during find All, Caused by:" + ioex.getMessage());
             throw new KunderaException(ioex);
         }
         return results;
 
     }
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -300,13 +308,14 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     /**
      * Setter for filter.
      * 
-     * @param filter filter.
+     * @param filter
+     *            filter.
      */
     public void setFilter(Filter filter)
     {
-        ((HBaseDataHandler)handler).setFilter(filter);
+        ((HBaseDataHandler) handler).setFilter(filter);
     }
-    
+
     /*
      * (non-Javadoc)
      * 

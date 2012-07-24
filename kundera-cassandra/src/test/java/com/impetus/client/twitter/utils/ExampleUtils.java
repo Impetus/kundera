@@ -33,6 +33,6 @@ public class ExampleUtils
     public static long getCurrentTimestamp()
     {
         return new Date().getTime();
-    } 
+    }
 
 }

@@ -32,7 +32,7 @@ public class TwibaseTest extends TwitterTestBase
     @Override
     protected void setUp() throws Exception
     {
-//        setUpInternal("hbaseTest");
+        // setUpInternal("hbaseTest");
     }
 
     /**
@@ -47,25 +47,25 @@ public class TwibaseTest extends TwitterTestBase
     @Override
     protected void tearDown() throws Exception
     {
-//        tearDownInternal();
+        // tearDownInternal();
     }
 
     @Override
     void startServer()
     {
-//        if (!cli.isStarted())
-//        {
-//            cli.startCluster();
-//        }
+        // if (!cli.isStarted())
+        // {
+        // cli.startCluster();
+        // }
     }
 
     @Override
     void stopServer()
     {
-//        if (cli.isStarted())
-//        {
-//            cli.stopCluster();
-//        }
+        // if (cli.isStarted())
+        // {
+        // cli.stopCluster();
+        // }
     }
 
     @Override

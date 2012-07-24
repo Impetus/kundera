@@ -58,17 +58,20 @@ public class MTMUniAssociationTest extends TwinAssociation
         {
             CassandraCli.cassandraSetUp();
 
-        } else {
-            if(AUTO_MANAGE_SCHEMA) {
+        }
+        else
+        {
+            if (AUTO_MANAGE_SCHEMA)
+            {
                 CassandraCli.initClient();
             }
-            
+
         }
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelUniMToM.class);
         clazzz.add(HabitatUniMToM.class);
-        init(clazzz, ALL_PUs_UNDER_TEST); 
-        
+        init(clazzz, ALL_PUs_UNDER_TEST);
+
     }
 
     /**
@@ -104,11 +107,11 @@ public class MTMUniAssociationTest extends TwinAssociation
     {
         PersonnelUniMToM person1 = new PersonnelUniMToM();
         person1.setPersonId("unimanytomany_1");
-        person1.setPersonName("Amresh");        
+        person1.setPersonName("Amresh");
 
         PersonnelUniMToM person2 = new PersonnelUniMToM();
         person2.setPersonId("unimanytomany_2");
-        person2.setPersonName("Vivek");        
+        person2.setPersonName("Vivek");
 
         HabitatUniMToM address1 = new HabitatUniMToM();
         address1.setAddressId("unimanytomany_a");
@@ -155,7 +158,7 @@ public class MTMUniAssociationTest extends TwinAssociation
         Assert.assertNotNull(person1);
         Assert.assertEquals("unimanytomany_1", person1.getPersonId());
         Assert.assertEquals("Amresh", person1.getPersonName());
-        
+
         Set<HabitatUniMToM> addresses1 = person1.getAddresses();
         Assert.assertNotNull(addresses1);
         Assert.assertFalse(addresses1.isEmpty());
@@ -170,7 +173,7 @@ public class MTMUniAssociationTest extends TwinAssociation
 
         Assert.assertEquals("unimanytomany_2", person2.getPersonId());
         Assert.assertEquals("Vivek", person2.getPersonName());
-        
+
         Set<HabitatUniMToM> addresses2 = person2.getAddresses();
         Assert.assertNotNull(addresses2);
         Assert.assertFalse(addresses2.isEmpty());
@@ -240,7 +243,7 @@ public class MTMUniAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();        
+        tearDownInternal();
     }
 
     @Override
@@ -253,7 +256,7 @@ public class MTMUniAssociationTest extends TwinAssociation
         CfDef cfDef = new CfDef();
         cfDef.name = "PERSONNEL";
         cfDef.keyspace = "KunderaTests";
-        //cfDef.column_type = "Super";
+        // cfDef.column_type = "Super";
 
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
@@ -297,10 +300,8 @@ public class MTMUniAssociationTest extends TwinAssociation
         }
 
         CassandraCli.client.set_keyspace("KunderaTests");
-        
-        
+
         loadDataForPersonnelAddress();
-       
 
     }
 
@@ -316,7 +317,6 @@ public class MTMUniAssociationTest extends TwinAssociation
         ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
         columnDef1.index_type = IndexType.KEYS;
         cfDef2.addToColumn_metadata(columnDef1);
-
 
         ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "IntegerType");
         columnDef2.index_type = IndexType.KEYS;
@@ -352,7 +352,7 @@ public class MTMUniAssociationTest extends TwinAssociation
         CassandraCli.client.set_keyspace("KunderaTests");
     }
 
-    static void loadDataForPersonnelAddress() 
+    static void loadDataForPersonnelAddress()
     {
         try
         {
@@ -361,7 +361,7 @@ public class MTMUniAssociationTest extends TwinAssociation
             cfDef2.name = "PERSONNEL_ADDRESS";
             cfDef2.keyspace = "KunderaTests";
 
-            List<CfDef> cfDefss = ksDef.getCf_defs(); 
+            List<CfDef> cfDefss = ksDef.getCf_defs();
             CassandraCli.client.set_keyspace("KunderaTests");
             for (CfDef cfDef : cfDefss)
             {
@@ -393,5 +393,5 @@ public class MTMUniAssociationTest extends TwinAssociation
         }
 
     }
-     
+
 }

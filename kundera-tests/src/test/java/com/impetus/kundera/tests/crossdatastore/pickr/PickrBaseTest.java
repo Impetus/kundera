@@ -38,6 +38,7 @@ import com.impetus.kundera.tests.crossdatastore.pickr.dao.PickrImpl;
 public abstract class PickrBaseTest
 {
     protected static final boolean RUN_IN_EMBEDDED_MODE = true;
+
     protected static final boolean AUTO_MANAGE_SCHEMA = true;
 
     protected Pickr pickr;
@@ -71,18 +72,19 @@ public abstract class PickrBaseTest
         if (RUN_IN_EMBEDDED_MODE)
         {
             stopServer();
-        }           
+        }
     }
-    
-    protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs) throws InvalidRequestException, 
+
+    protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs) throws InvalidRequestException,
             SchemaDisagreementException, TException
     {
         ksDef = new KsDef("Pickr", SimpleStrategy.class.getSimpleName(), cfDefs);
-        //Set replication factor
-        if (ksDef.strategy_options == null) {
+        // Set replication factor
+        if (ksDef.strategy_options == null)
+        {
             ksDef.strategy_options = new LinkedHashMap<String, String>();
         }
-        //Set replication factor, the value MUST be an integer
+        // Set replication factor, the value MUST be an integer
         ksDef.strategy_options.put("replication_factor", "1");
         CassandraCli.client.system_add_keyspace(ksDef);
     }

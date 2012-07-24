@@ -35,7 +35,7 @@ import com.impetus.kundera.tests.crossdatastore.pickr.entities.album.AlbumBi_1_M
 public class PhotoBi_1_M_1_M
 {
     @Id
-    @Column(name="PHOTO_ID")
+    @Column(name = "PHOTO_ID")
     private String photoId;
 
     @Column(name = "PHOTO_CAPTION")
@@ -43,16 +43,18 @@ public class PhotoBi_1_M_1_M
 
     @Column(name = "PHOTO_DESC")
     private String photoDescription;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="ALBUM_ID")
+    @JoinColumn(name = "ALBUM_ID")
     private AlbumBi_1_M_1_M album;
-    
-    public PhotoBi_1_M_1_M() {
-        
+
+    public PhotoBi_1_M_1_M()
+    {
+
     }
-    
-    public PhotoBi_1_M_1_M(String photoId, String caption, String description) {
+
+    public PhotoBi_1_M_1_M(String photoId, String caption, String description)
+    {
         this.photoId = photoId;
         this.photoCaption = caption;
         this.photoDescription = description;
@@ -118,11 +120,12 @@ public class PhotoBi_1_M_1_M
     }
 
     /**
-     * @param album the album to set
+     * @param album
+     *            the album to set
      */
     public void setAlbum(AlbumBi_1_M_1_M album)
     {
         this.album = album;
-    }  
+    }
 
 }

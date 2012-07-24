@@ -26,17 +26,21 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.utils.ObjectUtils;
 
 /**
- * Provides utility methods for all Kundera Examples test cases 
+ * Provides utility methods for all Kundera Examples test cases
+ * 
  * @author amresh.singh
  */
 public class CleanupUtilities
 {
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(CleanupUtilities.class);
-    
-    public static void cleanLuceneDirectory(String persistenceUnit) {
-        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata().getPersistenceUnitMetadata(persistenceUnit);
-        if(puMetadata != null ) {
+
+    public static void cleanLuceneDirectory(String persistenceUnit)
+    {
+        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getPersistenceUnitMetadata(persistenceUnit);
+        if (puMetadata != null)
+        {
             String luceneDir = puMetadata.getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
             if (luceneDir != null && luceneDir.length() > 0)
             {
@@ -54,8 +58,8 @@ public class CleanupUtilities
                     }
                 }
             }
-        }        
-        
+        }
+
     }
 
 }

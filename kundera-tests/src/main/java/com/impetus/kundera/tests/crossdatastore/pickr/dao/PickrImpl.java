@@ -31,6 +31,7 @@ public class PickrImpl implements Pickr
 {
 
     EntityManagerFactory emf;
+
     EntityManager em;
 
     public PickrImpl(String persistenceUnitName)
@@ -64,7 +65,7 @@ public class PickrImpl implements Pickr
         EntityManager em = getEntityManager();
         Query q = em.createQuery("select p from " + className + " p");
         List<Object> photographers = q.getResultList();
-//        closeEntityManager();
+        // closeEntityManager();
         return photographers;
     }
 
@@ -83,16 +84,20 @@ public class PickrImpl implements Pickr
         em.merge(p);
         closeEntityManager();
     }
-    
-    EntityManager getEntityManager() {
-        if(em == null) {
+
+    EntityManager getEntityManager()
+    {
+        if (em == null)
+        {
             em = emf.createEntityManager();
         }
         return em;
     }
-    
-    void closeEntityManager() {
-        if (em != null) {
+
+    void closeEntityManager()
+    {
+        if (em != null)
+        {
             em.close();
             em = null;
         }

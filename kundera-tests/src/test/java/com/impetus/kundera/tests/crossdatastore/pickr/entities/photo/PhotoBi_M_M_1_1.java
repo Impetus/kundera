@@ -41,8 +41,8 @@ public class PhotoBi_M_M_1_1
 
     @Column(name = "PHOTO_DESC")
     private String photoDescription;
-    
-    @OneToOne(mappedBy = "photo", fetch=FetchType.LAZY)
+
+    @OneToOne(mappedBy = "photo", fetch = FetchType.LAZY)
     private AlbumBi_M_M_1_1 album;
 
     public PhotoBi_M_M_1_1()
@@ -117,11 +117,12 @@ public class PhotoBi_M_M_1_1
     }
 
     /**
-     * @param album the album to set
+     * @param album
+     *            the album to set
      */
     public void setAlbum(AlbumBi_M_M_1_1 album)
     {
         this.album = album;
-    }  
-    
+    }
+
 }

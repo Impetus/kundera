@@ -86,17 +86,17 @@ public class JAXBUtilsTest extends TestCase
             fail(e.getMessage());
         }
     }
-    
-    public void testObjectToXML() {
+
+    public void testObjectToXML()
+    {
         Book b = new Book();
         b.setIsbn("11111111111");
         b.setAuthor("Xamry");
         b.setPublication("McGraw");
-        
-        
+
         String s = JAXBUtils.toString(Book.class, b, MediaType.APPLICATION_XML);
         Assert.assertNotNull(s);
-        
+
     }
 
 }

@@ -73,12 +73,13 @@ public class PickrTestUni_M_M_M_M extends PickrBaseTest
     /**
      * Test.
      */
-    
+
     @Test
-    public void dummyTest(){
-        
+    public void dummyTest()
+    {
+
     }
-    
+
     @Test
     public void test()
     {
@@ -352,7 +353,7 @@ public class PickrTestUni_M_M_M_M extends PickrBaseTest
         if (RUN_IN_EMBEDDED_MODE)
         {
             CassandraCli.cassandraSetUp();
-//            HBaseCli.startCluster();
+            // HBaseCli.startCluster();
         }
         if (AUTO_MANAGE_SCHEMA)
         {
@@ -473,26 +474,27 @@ public class PickrTestUni_M_M_M_M extends PickrBaseTest
              * schema generation for cassandra.
              * */
 
-//            HBaseCli.createTable("PHOTOGRAPHER");
-//            HBaseCli.addColumnFamily("PHOTOGRAPHER", "PHOTOGRAPHER_NAME");
-//
-//            HBaseCli.createTable("PHOTO");
-//            HBaseCli.addColumnFamily("PHOTO", "PHOTO_CAPTION");
-//            HBaseCli.addColumnFamily("PHOTO", "PHOTO_DESC");
-//
-//            HBaseCli.createTable("ALBUM");
-//            HBaseCli.addColumnFamily("ALBUM", "ALBUM_NAME");
-//            HBaseCli.addColumnFamily("ALBUM", "ALBUM_DESC");
-//
-//            HBaseCli.createTable("PHOTOGRAPHER_ALBUM");
-//            HBaseCli.addColumnFamily("PHOTOGRAPHER_ALBUM", "PHOTOGRAPHER_ID");
-//            HBaseCli.addColumnFamily("PHOTOGRAPHER_ALBUM", "ALBUM_ID");
-//            HBaseCli.addColumnFamily("PHOTOGRAPHER_ALBUM", "JoinColumns");
-//
-//            HBaseCli.createTable("ALBUM_PHOTO");
-//            HBaseCli.addColumnFamily("ALBUM_PHOTO", "PHOTO_ID");
-//            HBaseCli.addColumnFamily("ALBUM_PHOTO", "ALBUM_ID");
-//            HBaseCli.addColumnFamily("ALBUM_PHOTO", "JoinColumns");
+            // HBaseCli.createTable("PHOTOGRAPHER");
+            // HBaseCli.addColumnFamily("PHOTOGRAPHER", "PHOTOGRAPHER_NAME");
+            //
+            // HBaseCli.createTable("PHOTO");
+            // HBaseCli.addColumnFamily("PHOTO", "PHOTO_CAPTION");
+            // HBaseCli.addColumnFamily("PHOTO", "PHOTO_DESC");
+            //
+            // HBaseCli.createTable("ALBUM");
+            // HBaseCli.addColumnFamily("ALBUM", "ALBUM_NAME");
+            // HBaseCli.addColumnFamily("ALBUM", "ALBUM_DESC");
+            //
+            // HBaseCli.createTable("PHOTOGRAPHER_ALBUM");
+            // HBaseCli.addColumnFamily("PHOTOGRAPHER_ALBUM",
+            // "PHOTOGRAPHER_ID");
+            // HBaseCli.addColumnFamily("PHOTOGRAPHER_ALBUM", "ALBUM_ID");
+            // HBaseCli.addColumnFamily("PHOTOGRAPHER_ALBUM", "JoinColumns");
+            //
+            // HBaseCli.createTable("ALBUM_PHOTO");
+            // HBaseCli.addColumnFamily("ALBUM_PHOTO", "PHOTO_ID");
+            // HBaseCli.addColumnFamily("ALBUM_PHOTO", "ALBUM_ID");
+            // HBaseCli.addColumnFamily("ALBUM_PHOTO", "JoinColumns");
         }
     }
 

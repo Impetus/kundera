@@ -54,10 +54,10 @@ public interface RESTClient
     String findPerson(String sessionToken, String isbn);
 
     String updatePerson(String sessionToken, String oldPerson);
-    
+
     String getAllPersons(String sessionToken);
-    
+
     void deletePerson(String sessionToken, String updatedPerson, String isbn);
-    
+
     String executeNamedQuery();
 }

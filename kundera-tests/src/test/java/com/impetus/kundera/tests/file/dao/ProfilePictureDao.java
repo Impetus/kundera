@@ -64,13 +64,13 @@ public class ProfilePictureDao
         em.persist(pp);
         closeEntityManager();
     }
-    
+
     public ProfilePicture getProfilePicture(int id)
     {
         EntityManager em = getEntityManager();
 
-        ProfilePicture pp =  em.find(ProfilePicture.class, 1);
-        
+        ProfilePicture pp = em.find(ProfilePicture.class, 1);
+
         closeEntityManager();
         return pp;
     }

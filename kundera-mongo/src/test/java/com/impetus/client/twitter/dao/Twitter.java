@@ -12,9 +12,9 @@ import com.impetus.client.twitter.entities.UserMongo;
  */
 public interface Twitter
 {
-	
-	void addUser(UserMongo user);
-	
+
+    void addUser(UserMongo user);
+
     /**
      * Registers a new user with Twitter application
      * 
@@ -86,22 +86,20 @@ public interface Twitter
     void addFollower(String userId, String followerUserId);
 
     UserMongo findUserById(String userId);
-    
+
     void removeUser(UserMongo user);
-    
+
     void mergeUser(UserMongo user);
-    
+
     /**
      * Retrieves all tweets for a given user
      * 
      * @param userId
      *            the user id
      * @return the all tweets
-     */   
+     */
     List<UserMongo> getAllUsers();
-    	
-    
-    
+
     List<Tweet> getAllTweets(String userId);
 
     /**
@@ -135,10 +133,9 @@ public interface Twitter
      * Close.
      */
     void close();
-    
+
     void createEntityManager();
-    
-    void closeEntityManager(); 
-    
+
+    void closeEntityManager();
 
 }

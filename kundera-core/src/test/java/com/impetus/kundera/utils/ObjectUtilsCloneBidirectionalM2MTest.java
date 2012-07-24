@@ -48,7 +48,7 @@ public class ObjectUtilsCloneBidirectionalM2MTest
 {
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(ObjectUtilsCloneBidirectionalM2MTest.class);
-    
+
     // Configurator configurator = new Configurator("kunderatest");
     EntityMetadata metadata;
 
@@ -113,7 +113,6 @@ public class ObjectUtilsCloneBidirectionalM2MTest
         a1.addAlbum(album1);
         a1.addAlbum(album2);
 
-
         // Create a deep copy using Kundera
         long t3 = System.currentTimeMillis();
         metadata = KunderaMetadataManager.getEntityMetadata(PhotographerBi_1_M_1_M.class);
@@ -134,7 +133,6 @@ public class ObjectUtilsCloneBidirectionalM2MTest
 
         // Check whether clones are unaffected from change in original object
         // assertOriginalObjectValues(a2);
-         
 
     }
 

@@ -8,42 +8,43 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="ADDRESS", schema="hibernatepoc")
+@Table(name = "ADDRESS", schema = "hibernatepoc")
 public class HabitatBi1To1PK
 {
-	@Id
-	@Column(name="PERSON_ID")
+    @Id
+    @Column(name = "PERSON_ID")
     private String personId;
-	
-	
+
     @Column(name = "ADDRESS_ID")
-    private String addressId;   
-   
+    private String addressId;
 
     @Column(name = "STREET")
-    private String street;  
-    
-    @OneToOne(mappedBy="address", fetch=FetchType.LAZY)
-    private PersonnelBi1To1PK person;  
-    
+    private String street;
 
-	public String getPersonId() {
-		return personId;
-	}
+    @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
+    private PersonnelBi1To1PK person;
 
-	public void setPersonId(String personId) {
-		this.personId = personId;
-	}
+    public String getPersonId()
+    {
+        return personId;
+    }
 
-	public String getAddressId() {
-		return addressId;
-	}
+    public void setPersonId(String personId)
+    {
+        this.personId = personId;
+    }
 
-	public void setAddressId(String addressId) {
-		this.addressId = addressId;
-	}
+    public String getAddressId()
+    {
+        return addressId;
+    }
 
-	public String getStreet()
+    public void setAddressId(String addressId)
+    {
+        this.addressId = addressId;
+    }
+
+    public String getStreet()
     {
         return street;
     }
@@ -53,12 +54,14 @@ public class HabitatBi1To1PK
         this.street = street;
     }
 
-	public PersonnelBi1To1PK getPerson() {
-		return person;
-	}
+    public PersonnelBi1To1PK getPerson()
+    {
+        return person;
+    }
 
-	public void setPerson(PersonnelBi1To1PK person) {
-		this.person = person;
-	}    
+    public void setPerson(PersonnelBi1To1PK person)
+    {
+        this.person = person;
+    }
 
 }

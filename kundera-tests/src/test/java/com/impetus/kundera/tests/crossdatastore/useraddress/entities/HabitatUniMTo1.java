@@ -6,27 +6,27 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="ADDRESS", schema="KunderaTests")
-public class HabitatUniMTo1 {
-	@Id    
+@Table(name = "ADDRESS", schema = "KunderaTests")
+public class HabitatUniMTo1
+{
+    @Id
     @Column(name = "ADDRESS_ID")
-    private String addressId;   
-   
+    private String addressId;
 
     @Column(name = "STREET")
-    private String street;  
-    
-    	
+    private String street;
 
-	public String getAddressId() {
-		return addressId;
-	}
+    public String getAddressId()
+    {
+        return addressId;
+    }
 
-	public void setAddressId(String addressId) {
-		this.addressId = addressId;
-	}
+    public void setAddressId(String addressId)
+    {
+        this.addressId = addressId;
+    }
 
-	public String getStreet()
+    public String getStreet()
     {
         return street;
     }

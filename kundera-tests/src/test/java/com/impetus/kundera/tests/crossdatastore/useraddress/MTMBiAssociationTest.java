@@ -40,14 +40,14 @@ public class MTMBiAssociationTest extends TwinAssociation
         if (RUN_IN_EMBEDDED_MODE)
         {
             CassandraCli.cassandraSetUp();
-            
+
         }
-        
+
         if (AUTO_MANAGE_SCHEMA)
         {
             CassandraCli.initClient();
-        }          
-        
+        }
+
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelBiMToM.class);
         clazzz.add(HabitatBiMToM.class);
@@ -69,28 +69,29 @@ public class MTMBiAssociationTest extends TwinAssociation
     /**
      * Test insert.
      */
-    
+
     @Test
-    public void dummyTest(){
-        
+    public void dummyTest()
+    {
+
     }
 
     @Test
     public void testCRUD()
     {
         tryOperation();
-    }   
+    }
 
     @Override
     protected void insert()
     {
         PersonnelBiMToM person1 = new PersonnelBiMToM();
         person1.setPersonId("bimanytomany_1");
-        person1.setPersonName("Amresh");        
+        person1.setPersonName("Amresh");
 
         PersonnelBiMToM person2 = new PersonnelBiMToM();
         person2.setPersonId("bimanytomany_2");
-        person2.setPersonName("Vivek");        
+        person2.setPersonName("Vivek");
 
         HabitatBiMToM address1 = new HabitatBiMToM();
         address1.setAddressId("bimanytomany_a");
@@ -115,7 +116,7 @@ public class MTMBiAssociationTest extends TwinAssociation
 
         person1.setAddresses(person1Addresses);
         person2.setAddresses(person2Addresses);
-        
+
         Set<PersonnelBiMToM> persons = new HashSet<PersonnelBiMToM>();
         persons.add(person1);
         persons.add(person2);
@@ -129,7 +130,7 @@ public class MTMBiAssociationTest extends TwinAssociation
         col.add(address3);
 
     }
-    
+
     @Override
     protected void find()
     {
@@ -137,7 +138,7 @@ public class MTMBiAssociationTest extends TwinAssociation
         Assert.assertNotNull(person1);
         Assert.assertEquals("bimanytomany_1", person1.getPersonId());
         Assert.assertEquals("Amresh", person1.getPersonName());
-        
+
         Set<HabitatBiMToM> addresses1 = person1.getAddresses();
         Assert.assertNotNull(addresses1);
         Assert.assertFalse(addresses1.isEmpty());
@@ -152,7 +153,7 @@ public class MTMBiAssociationTest extends TwinAssociation
 
         Assert.assertEquals("bimanytomany_2", person2.getPersonId());
         Assert.assertEquals("Vivek", person2.getPersonName());
-        
+
         Set<HabitatBiMToM> addresses2 = person2.getAddresses();
         Assert.assertNotNull(addresses2);
         Assert.assertFalse(addresses2.isEmpty());
@@ -183,7 +184,7 @@ public class MTMBiAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();        
+        tearDownInternal();
     }
 
     @Override
@@ -196,7 +197,7 @@ public class MTMBiAssociationTest extends TwinAssociation
         CfDef cfDef = new CfDef();
         cfDef.name = "PERSONNEL";
         cfDef.keyspace = "KunderaTests";
-        //cfDef.column_type = "Super";
+        // cfDef.column_type = "Super";
 
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
@@ -241,7 +242,7 @@ public class MTMBiAssociationTest extends TwinAssociation
         }
 
         CassandraCli.client.set_keyspace("KunderaTests");
-        
+
         loadDataForPersonnelAddress();
 
     }
@@ -297,8 +298,8 @@ public class MTMBiAssociationTest extends TwinAssociation
         CassandraCli.client.set_keyspace("KunderaTests");
 
     }
-    
-    static void loadDataForPersonnelAddress() 
+
+    static void loadDataForPersonnelAddress()
     {
         try
         {
@@ -307,7 +308,7 @@ public class MTMBiAssociationTest extends TwinAssociation
             cfDef2.name = "PERSONNEL_ADDRESS";
             cfDef2.keyspace = "KunderaTests";
 
-            List<CfDef> cfDefss = ksDef.getCf_defs(); 
+            List<CfDef> cfDefss = ksDef.getCf_defs();
             CassandraCli.client.set_keyspace("KunderaTests");
             for (CfDef cfDef : cfDefss)
             {

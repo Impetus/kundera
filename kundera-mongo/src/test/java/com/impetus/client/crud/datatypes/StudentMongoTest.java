@@ -43,7 +43,7 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
     @After
     public void tearDown() throws Exception
     {
-         teardownInternal(persistenceUnit);
+        teardownInternal(persistenceUnit);
     }
 
     @SuppressWarnings("deprecation")
@@ -120,7 +120,7 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         // modify record.
         s.setStudentName("NewAmresh");
         em.merge(s);
-//        emf.close();
+        // emf.close();
         Query q = em.createQuery("Select p from StudentMongo p where p.studentName = NewAmresh");
         try
         {
@@ -152,9 +152,9 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
     @Override
     void deleteSchema()
     {
-         em.remove(em.find(StudentMongo.class, studentId1));
-         em.remove(em.find(StudentMongo.class, studentId2));
-         em.remove(em.find(StudentMongo.class, studentId3));
+        em.remove(em.find(StudentMongo.class, studentId1));
+        em.remove(em.find(StudentMongo.class, studentId2));
+        em.remove(em.find(StudentMongo.class, studentId3));
     }
 
 }

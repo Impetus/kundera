@@ -38,9 +38,11 @@ public class OTMBiAssociationTest extends TwinAssociation
         if (RUN_IN_EMBEDDED_MODE)
         {
             CassandraCli.cassandraSetUp();
-        } else
+        }
+        else
         {
-            if(AUTO_MANAGE_SCHEMA) {
+            if (AUTO_MANAGE_SCHEMA)
+            {
                 CassandraCli.initClient();
             }
         }
@@ -102,11 +104,9 @@ public class OTMBiAssociationTest extends TwinAssociation
     {
         // Find Person
         PersonnelBi1ToM p = (PersonnelBi1ToM) dao.findPerson(PersonnelBi1ToM.class, "bionetomany_1");
-        assertPerson(p);       
-        
-    }
+        assertPerson(p);
 
-    
+    }
 
     @Override
     protected void update()
@@ -114,15 +114,15 @@ public class OTMBiAssociationTest extends TwinAssociation
         // Find Person
         PersonnelBi1ToM p = (PersonnelBi1ToM) dao.findPerson(PersonnelBi1ToM.class, "bionetomany_1");
         assertPerson(p);
-        
-      
-        p.setPersonName("Saurabh");        
-        for(HabitatBi1ToM address : p.getAddresses()) {
+
+        p.setPersonName("Saurabh");
+        for (HabitatBi1ToM address : p.getAddresses())
+        {
             address.setStreet("Brand New Street");
-        }        
+        }
         dao.merge(p);
         PersonnelBi1ToM pAfterMerge = (PersonnelBi1ToM) dao.findPerson(PersonnelBi1ToM.class, "bionetomany_1");
-        
+
         assertPersonAfterUpdate(pAfterMerge);
     }
 
@@ -132,13 +132,12 @@ public class OTMBiAssociationTest extends TwinAssociation
         // Find Person
         PersonnelBi1ToM p = (PersonnelBi1ToM) dao.findPerson(PersonnelBi1ToM.class, "bionetomany_1");
         assertPersonAfterUpdate(p);
-        
+
         dao.remove("bionetomany_1", PersonnelBi1ToM.class);
         PersonnelBi1ToM pAfterRemoval = (PersonnelBi1ToM) dao.findPerson(PersonnelBi1ToM.class, "bionetomany_1");
         Assert.assertNull(pAfterRemoval);
     }
-    
-    
+
     private void assertPerson(PersonnelBi1ToM p)
     {
         Assert.assertNotNull(p);
@@ -162,7 +161,7 @@ public class OTMBiAssociationTest extends TwinAssociation
             Assert.assertEquals(2, person.getAddresses().size());
         }
     }
-    
+
     private void assertPersonAfterUpdate(PersonnelBi1ToM p)
     {
         Assert.assertNotNull(p);
@@ -197,7 +196,7 @@ public class OTMBiAssociationTest extends TwinAssociation
     @After
     public void tearDown() throws Exception
     {
-        tearDownInternal();       
+        tearDownInternal();
     }
 
     @Override
@@ -209,10 +208,10 @@ public class OTMBiAssociationTest extends TwinAssociation
         CfDef cfDef = new CfDef();
         cfDef.name = "PERSONNEL";
         cfDef.keyspace = "KunderaTests";
-        //cfDef.column_type = "Super";
+        // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
-        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");       
+        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
 
         cfDef.addToColumn_metadata(columnDef);
 

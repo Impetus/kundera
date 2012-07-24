@@ -113,7 +113,7 @@ public class MongoDBQuery extends QueryImpl
         catch (Exception e)
         {
             e.printStackTrace();
-            log.error("Error during executing query, Caused by:"+ e.getMessage());
+            log.error("Error during executing query, Caused by:" + e.getMessage());
             throw new QueryHandlerException(e);
         }
 
@@ -169,7 +169,7 @@ public class MongoDBQuery extends QueryImpl
             if (object instanceof FilterClause)
             {
                 FilterClause filter = (FilterClause) object;
-//                String property = getColumnName(filter.getProperty());
+                // String property = getColumnName(filter.getProperty());
                 String property = filter.getProperty();
                 String condition = filter.getCondition();
                 String value = filter.getValue();
@@ -273,7 +273,6 @@ public class MongoDBQuery extends QueryImpl
 
         return orderByClause;
     }
-    
 
     /*
      * (non-Javadoc)

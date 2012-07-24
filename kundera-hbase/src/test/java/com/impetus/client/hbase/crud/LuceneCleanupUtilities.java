@@ -34,7 +34,7 @@ public class LuceneCleanupUtilities
 {
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(LuceneCleanupUtilities.class);
-    
+
     public static void cleanLuceneDirectory(String persistenceUnit)
     {
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()

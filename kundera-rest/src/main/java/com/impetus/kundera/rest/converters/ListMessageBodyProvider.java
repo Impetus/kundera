@@ -58,16 +58,17 @@ public class ListMessageBodyProvider implements MessageBodyWriter<ArrayList<Obje
     }
 
     @Override
-    public long getSize(ArrayList<Object> paramT, Class<?> paramClass, Type paramType, Annotation[] paramArrayOfAnnotation,
-            MediaType paramMediaType)
+    public long getSize(ArrayList<Object> paramT, Class<?> paramClass, Type paramType,
+            Annotation[] paramArrayOfAnnotation, MediaType paramMediaType)
     {
         return -1;
     }
 
     @Override
-    public void writeTo(ArrayList<Object> paramT, Class<?> paramClass, Type paramType, Annotation[] paramArrayOfAnnotation,
-            MediaType paramMediaType, MultivaluedMap<String, Object> paramMultivaluedMap, OutputStream paramOutputStream)
-            throws IOException, WebApplicationException
+    public void writeTo(ArrayList<Object> paramT, Class<?> paramClass, Type paramType,
+            Annotation[] paramArrayOfAnnotation, MediaType paramMediaType,
+            MultivaluedMap<String, Object> paramMultivaluedMap, OutputStream paramOutputStream) throws IOException,
+            WebApplicationException
     {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(paramOutputStream));
         String ts = null;

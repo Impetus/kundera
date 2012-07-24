@@ -24,54 +24,69 @@ import com.impetus.kundera.rest.common.StreamUtils;
 
 /**
  * Converts a Collection object to XML/ JSON representation and vice-versa
+ * 
  * @author amresh
- *
+ * 
  */
 public class CollectionConverter
 {
-    public static String toString(Collection<?> input, Class<?> genericClass, String mediaType) {
-        if(MediaType.APPLICATION_XML.equals(mediaType)) {
+    public static String toString(Collection<?> input, Class<?> genericClass, String mediaType)
+    {
+        if (MediaType.APPLICATION_XML.equals(mediaType))
+        {
             StringBuilder sb = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>")
-            .append("<").append(genericClass.getSimpleName().toLowerCase()).append("s>");
-            for(Object obj : input) {
-                if(obj != null) {
+                    .append("<").append(genericClass.getSimpleName().toLowerCase()).append("s>");
+            for (Object obj : input)
+            {
+                if (obj != null)
+                {
                     String s = JAXBUtils.toString(genericClass, obj, mediaType);
-                    
-                    if(s.startsWith("<?xml")) {
+
+                    if (s.startsWith("<?xml"))
+                    {
                         s = s.substring(s.indexOf(">") + 1, s.length());
-                    }            
+                    }
                     sb.append(s);
-                }                
+                }
             }
-            sb.append("<").append(genericClass.getSimpleName().toLowerCase()).append("s>");         
+            sb.append("<").append(genericClass.getSimpleName().toLowerCase()).append("s>");
             return sb.toString();
-        } else {
+        }
+        else
+        {
             return null;
-        }        
+        }
     }
-    
-    public static Collection toCollection(String input, Class<?> collectionClass, Class<?> genericClass, String mediaType) {                   
-        
+
+    public static Collection toCollection(String input, Class<?> collectionClass, Class<?> genericClass,
+            String mediaType)
+    {
+
         try
         {
-            if(MediaType.APPLICATION_XML.equals(mediaType)) {
-                Collection c = (Collection)collectionClass.newInstance();
-                if(input.startsWith("<?xml")) {
+            if (MediaType.APPLICATION_XML.equals(mediaType))
+            {
+                Collection c = (Collection) collectionClass.newInstance();
+                if (input.startsWith("<?xml"))
+                {
                     input = input.substring(input.indexOf(">") + 1, input.length());
                 }
-                
+
                 input = input.replaceAll("<" + genericClass.getSimpleName().toLowerCase() + "s>", "");
-                
-                while(!input.equals("")) {
+
+                while (!input.equals(""))
+                {
                     int i = input.indexOf("</" + genericClass.getSimpleName().toLowerCase() + ">");
                     String s = input.substring(0, i + 3 + genericClass.getSimpleName().length());
-                    input = input.substring(i + 3 + genericClass.getSimpleName().length(), input.length());                   
+                    input = input.substring(i + 3 + genericClass.getSimpleName().length(), input.length());
                     Object o = JAXBUtils.toObject(StreamUtils.toInputStream(s), genericClass, mediaType);
-                    c.add(o);                    
-                }                
+                    c.add(o);
+                }
                 return c;
-                
-            } else {
+
+            }
+            else
+            {
                 return null;
             }
         }

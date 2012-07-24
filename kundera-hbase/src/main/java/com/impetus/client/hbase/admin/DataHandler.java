@@ -28,7 +28,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  * @author vivek.mishra
  */
 
-
 public interface DataHandler
 {
 
@@ -43,7 +42,6 @@ public interface DataHandler
      *             Signals that an I/O exception has occurred.
      */
     void createTableIfDoesNotExist(String tableName, String... colFamily) throws IOException;
-
 
     /**
      * Populates data for give column family, column name, and HBase table name.
@@ -62,9 +60,9 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List readData(String tableName, Class clazz, EntityMetadata m, String rowKey, List<String> relatationNames) throws IOException;
+    List readData(String tableName, Class clazz, EntityMetadata m, String rowKey, List<String> relatationNames)
+            throws IOException;
 
-    
     /**
      * @param tableName
      * @param clazz
@@ -74,8 +72,9 @@ public interface DataHandler
      * @param endRow
      * @return
      */
-    List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow) throws IOException;
-    
+    List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow)
+            throws IOException;
+
     /**
      * Write data.
      * 
@@ -126,6 +125,7 @@ public interface DataHandler
 
     /**
      * Retrieves a list of parent entity from join table..
+     * 
      * @param <E>
      * @param parentMetadata
      * @param joinTableName

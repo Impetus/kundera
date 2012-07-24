@@ -12,40 +12,47 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "PERSONNEL", schema = "KunderaTests")
-public class PersonnelBi1To1FK {
-	@Id
-	@Column(name = "PERSON_ID")
-	private String personId;
+public class PersonnelBi1To1FK
+{
+    @Id
+    @Column(name = "PERSON_ID")
+    private String personId;
 
-	@Column(name = "PERSON_NAME")
-	private String personName;
-	
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name="ADDRESS_ID")	
-	private HabitatBi1To1FK address;
+    @Column(name = "PERSON_NAME")
+    private String personName;
 
-	public String getPersonId() {
-		return personId;
-	}
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "ADDRESS_ID")
+    private HabitatBi1To1FK address;
 
-	public String getPersonName() {
-		return personName;
-	}
+    public String getPersonId()
+    {
+        return personId;
+    }
 
-	public void setPersonName(String personName) {
-		this.personName = personName;
-	}
+    public String getPersonName()
+    {
+        return personName;
+    }
 
-	public void setPersonId(String personId) {
-		this.personId = personId;
-	}
+    public void setPersonName(String personName)
+    {
+        this.personName = personName;
+    }
 
-	public HabitatBi1To1FK getAddress() {
-		return address;
-	}
+    public void setPersonId(String personId)
+    {
+        this.personId = personId;
+    }
 
-	public void setAddress(HabitatBi1To1FK address) {
-		this.address = address;
-	}
+    public HabitatBi1To1FK getAddress()
+    {
+        return address;
+    }
+
+    public void setAddress(HabitatBi1To1FK address)
+    {
+        this.address = address;
+    }
 
 }

@@ -11,40 +11,47 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "PERSONNEL", schema = "KunderaTests")
-public class PersonnelUniMTo1 {
-	@Id
-	@Column(name = "PERSON_ID")
-	private String personId;
+public class PersonnelUniMTo1
+{
+    @Id
+    @Column(name = "PERSON_ID")
+    private String personId;
 
-	@Column(name = "PERSON_NAME")
-	private String personName;
-	
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name="ADDRESS_ID")
-	private HabitatUniMTo1 address;
+    @Column(name = "PERSON_NAME")
+    private String personName;
 
-	public String getPersonId() {
-		return personId;
-	}
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "ADDRESS_ID")
+    private HabitatUniMTo1 address;
 
-	public String getPersonName() {
-		return personName;
-	}
+    public String getPersonId()
+    {
+        return personId;
+    }
 
-	public void setPersonName(String personName) {
-		this.personName = personName;
-	}
+    public String getPersonName()
+    {
+        return personName;
+    }
 
-	public void setPersonId(String personId) {
-		this.personId = personId;
-	}
+    public void setPersonName(String personName)
+    {
+        this.personName = personName;
+    }
 
-	public HabitatUniMTo1 getAddress() {
-		return address;
-	}
+    public void setPersonId(String personId)
+    {
+        this.personId = personId;
+    }
 
-	public void setAddress(HabitatUniMTo1 address) {
-		this.address = address;
-	}
+    public HabitatUniMTo1 getAddress()
+    {
+        return address;
+    }
+
+    public void setAddress(HabitatUniMTo1 address)
+    {
+        this.address = address;
+    }
 
 }

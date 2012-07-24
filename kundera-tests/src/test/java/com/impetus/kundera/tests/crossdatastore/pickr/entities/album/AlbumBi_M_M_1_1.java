@@ -52,7 +52,7 @@ public class AlbumBi_M_M_1_1
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "PHOTO_ID")
     private PhotoBi_M_M_1_1 photo;
-    
+
     @ManyToMany(mappedBy = "albums", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<PhotographerBi_M_M_1_1> photographers;
 
@@ -145,13 +145,12 @@ public class AlbumBi_M_M_1_1
     }
 
     /**
-     * @param photographers the photographers to set
+     * @param photographers
+     *            the photographers to set
      */
     public void setPhotographers(List<PhotographerBi_M_M_1_1> photographers)
     {
         this.photographers = photographers;
     }
-    
-    
 
 }

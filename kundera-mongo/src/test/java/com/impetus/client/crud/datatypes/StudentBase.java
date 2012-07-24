@@ -15,13 +15,15 @@ import com.impetus.client.crud.BaseTest;
 
 /**
  * The Class StudentBase.
- *
- * @param <E> the element type
+ * 
+ * @param <E>
+ *            the element type
  */
 public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
 {
-    public static final boolean RUN_IN_EMBEDDED_MODE = true;    
-    public static final boolean AUTO_MANAGE_SCHEMA = true;  
+    public static final boolean RUN_IN_EMBEDDED_MODE = true;
+
+    public static final boolean AUTO_MANAGE_SCHEMA = true;
 
     /** The emf. */
     protected EntityManagerFactory emf;
@@ -43,7 +45,6 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
 
     /** The enrolment date. */
     protected Date enrolmentDate = new Date();
-
 
     /** The joining date and time. */
     protected Date joiningDateAndTime = new Date();
@@ -76,25 +77,28 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
     protected Calendar calendar = Calendar.getInstance();
 
     /** The dao. */
-//    StudentDao dao;
+    // StudentDao dao;
 
     /**
      * Sets the up internal.
-     *
-     * @param persisntenceUnit the new up internal
+     * 
+     * @param persisntenceUnit
+     *            the new up internal
      */
     protected void setupInternal(String persisntenceUnit)
     {
         // dao = new StudentDao(persistenceUnit);
-        
-        if(RUN_IN_EMBEDDED_MODE) {
+
+        if (RUN_IN_EMBEDDED_MODE)
+        {
             startServer();
         }
-        
-        if(AUTO_MANAGE_SCHEMA) {
+
+        if (AUTO_MANAGE_SCHEMA)
+        {
             createSchema();
         }
-        
+
         studentId1 = new Long(12345677);
         studentId2 = new Long(12345678);
         studentId3 = new Long(12345679);
@@ -102,34 +106,41 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
         emf = Persistence.createEntityManagerFactory(persisntenceUnit);
         em = emf.createEntityManager();
     }
-    
+
     /**
-    * Sets the up internal.
-    *
-    * @param persistenceUnit the new up internal
-    */
-   protected void teardownInternal(String persistenceUnit)
-   {
-      
-       if(RUN_IN_EMBEDDED_MODE) {
-           stopServer();
-       }
-       
-       if(AUTO_MANAGE_SCHEMA) {
-           deleteSchema();
-       }       
-       
-       if(emf != null) {
-           emf.close();
-       }
-   }
+     * Sets the up internal.
+     * 
+     * @param persistenceUnit
+     *            the new up internal
+     */
+    protected void teardownInternal(String persistenceUnit)
+    {
+
+        if (RUN_IN_EMBEDDED_MODE)
+        {
+            stopServer();
+        }
+
+        if (AUTO_MANAGE_SCHEMA)
+        {
+            deleteSchema();
+        }
+
+        if (emf != null)
+        {
+            emf.close();
+        }
+    }
 
     /**
      * on insert.
-     *
-     * @param instance the instance
-     * @throws InstantiationException the instantiation exception
-     * @throws IllegalAccessException the illegal access exception
+     * 
+     * @param instance
+     *            the instance
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
      */
     protected void onInsert(E instance) throws InstantiationException, IllegalAccessException
     {
@@ -153,30 +164,53 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
 
     /**
      * Prepare data.
-     *
-     * @param studentId the student id
-     * @param uniqueId the unique id
-     * @param studentName the student name
-     * @param isExceptional the is exceptional
-     * @param age the age
-     * @param semester the semester
-     * @param digitalSignature the digital signature
-     * @param cgpa the cgpa
-     * @param percentage the percentage
-     * @param height the height
-     * @param enrolmentDate the enrolment date
-     * @param enrolmentTime the enrolment time
-     * @param joiningDateAndTime the joining date and time
-     * @param yearsSpent the years spent
-     * @param rollNumber the roll number
-     * @param monthlyFee the monthly fee
-     * @param newSqlDate the new sql date
-     * @param sqlTime the sql time
-     * @param sqlTimestamp the sql timestamp
-     * @param bigDecimal the big decimal
-     * @param bigInteger the big integer
-     * @param calendar the calendar
-     * @param o the o
+     * 
+     * @param studentId
+     *            the student id
+     * @param uniqueId
+     *            the unique id
+     * @param studentName
+     *            the student name
+     * @param isExceptional
+     *            the is exceptional
+     * @param age
+     *            the age
+     * @param semester
+     *            the semester
+     * @param digitalSignature
+     *            the digital signature
+     * @param cgpa
+     *            the cgpa
+     * @param percentage
+     *            the percentage
+     * @param height
+     *            the height
+     * @param enrolmentDate
+     *            the enrolment date
+     * @param enrolmentTime
+     *            the enrolment time
+     * @param joiningDateAndTime
+     *            the joining date and time
+     * @param yearsSpent
+     *            the years spent
+     * @param rollNumber
+     *            the roll number
+     * @param monthlyFee
+     *            the monthly fee
+     * @param newSqlDate
+     *            the new sql date
+     * @param sqlTime
+     *            the sql time
+     * @param sqlTimestamp
+     *            the sql timestamp
+     * @param bigDecimal
+     *            the big decimal
+     * @param bigInteger
+     *            the big integer
+     * @param calendar
+     *            the calendar
+     * @param o
+     *            the o
      * @return the person
      */
     protected E prepareData(long studentId, long uniqueId, String studentName, boolean isExceptional, int age,
@@ -214,8 +248,9 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
 
     /**
      * Assert on data types.
-     *
-     * @param s the s
+     * 
+     * @param s
+     *            the s
      */
     protected void assertOnDataTypes(E s)
     {
@@ -261,10 +296,10 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
         Assert.assertEquals(sqlTimestamp.getHours(), s.getSqlTimestamp().getHours());
         Assert.assertEquals(sqlTimestamp.getMinutes(), s.getSqlTimestamp().getMinutes());
         Assert.assertEquals(sqlTimestamp.getSeconds(), s.getSqlTimestamp().getSeconds());
-        
+
         Assert.assertEquals(Math.round(bigDecimal.doubleValue()), Math.round(s.getBigDecimal().doubleValue()));
         Assert.assertEquals(bigInteger, s.getBigInteger());
-        
+
         Assert.assertEquals(calendar.get(Calendar.YEAR), s.getCalendar().get(Calendar.YEAR));
         Assert.assertEquals(calendar.get(Calendar.MONTH), s.getCalendar().get(Calendar.MONTH));
         Assert.assertEquals(calendar.get(Calendar.WEEK_OF_YEAR), s.getCalendar().get(Calendar.WEEK_OF_YEAR));
@@ -285,10 +320,13 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
         Assert.assertEquals(new Double(135434.89), s.getMonthlyFee());
 
     }
-    
+
     abstract void startServer();
+
     abstract void stopServer();
+
     abstract void createSchema();
+
     abstract void deleteSchema();
-    
+
 }

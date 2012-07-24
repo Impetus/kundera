@@ -46,7 +46,7 @@ import com.impetus.kundera.tests.crossdatastore.pickr.entities.photographer.Phot
 
 /**
  * @author amresh.singh
- *
+ * 
  */
 public class PickrTestBi_1_1_1_M extends PickrBaseTest
 {
@@ -85,7 +85,7 @@ public class PickrTestBi_1_1_1_M extends PickrBaseTest
         PhotographerBi_1_1_1_M p = populatePhotographer();
         pickr.addPhotographer(p);
     }
-    
+
     @Override
     protected void getPhotographer()
     {
@@ -109,7 +109,7 @@ public class PickrTestBi_1_1_1_M extends PickrBaseTest
                 + photographerId);
         assertModifiedPhotographer(p2);
     }
-    
+
     @Override
     protected void getAllPhotographers()
     {
@@ -137,15 +137,15 @@ public class PickrTestBi_1_1_1_M extends PickrBaseTest
     {
         PhotographerBi_1_1_1_M p = new PhotographerBi_1_1_1_M();
         p.setPhotographerId(photographerId);
-        p.setPhotographerName("Amresh");       
+        p.setPhotographerName("Amresh");
 
         AlbumBi_1_1_1_M album1 = new AlbumBi_1_1_1_M("album_1", "My Phuket Vacation", "Went Phuket with friends");
         album1.addPhoto(new PhotoBi_1_1_1_M("photo_1", "One beach", "On beach with friends"));
         album1.addPhoto(new PhotoBi_1_1_1_M("photo_2", "In Hotel", "Chilling out in room"));
-        album1.addPhoto(new PhotoBi_1_1_1_M("photo_3", "At Airport", "So tired"));      
+        album1.addPhoto(new PhotoBi_1_1_1_M("photo_3", "At Airport", "So tired"));
 
         p.setAlbum(album1);
-        
+
         return p;
 
     }
@@ -161,7 +161,7 @@ public class PickrTestBi_1_1_1_M extends PickrBaseTest
         Assert.assertEquals("album_1", album.getAlbumId());
         Assert.assertEquals("My Phuket Vacation", album.getAlbumName());
         Assert.assertEquals("Went Phuket with friends", album.getAlbumDescription());
-        
+
         List<PhotoBi_1_1_1_M> photos = album.getPhotos();
         Assert.assertNotNull(photos);
         Assert.assertFalse(photos.isEmpty());
@@ -170,11 +170,11 @@ public class PickrTestBi_1_1_1_M extends PickrBaseTest
         PhotoBi_1_1_1_M photo1 = photos.get(0);
         Assert.assertNotNull(photo1);
         Assert.assertEquals(7, photo1.getPhotoId().length());
-        
+
         AlbumBi_1_1_1_M albumRev = photo1.getAlbum();
-        Assert.assertNotNull(albumRev);        
+        Assert.assertNotNull(albumRev);
     }
-    
+
     private void assertModifiedPhotographer(PhotographerBi_1_1_1_M p)
     {
         Assert.assertNotNull(p);
@@ -186,7 +186,7 @@ public class PickrTestBi_1_1_1_M extends PickrBaseTest
         Assert.assertEquals("album_1", album.getAlbumId());
         Assert.assertEquals("My Phuket Vacation", album.getAlbumName());
         Assert.assertEquals("Went Phuket with friends", album.getAlbumDescription());
-        
+
         List<PhotoBi_1_1_1_M> photos = album.getPhotos();
         Assert.assertNotNull(photos);
         Assert.assertFalse(photos.isEmpty());
@@ -195,23 +195,27 @@ public class PickrTestBi_1_1_1_M extends PickrBaseTest
         PhotoBi_1_1_1_M photo1 = photos.get(0);
         Assert.assertNotNull(photo1);
         Assert.assertEquals(7, photo1.getPhotoId().length());
-        
+
         AlbumBi_1_1_1_M albumRev = photo1.getAlbum();
-        Assert.assertNotNull(albumRev);        
+        Assert.assertNotNull(albumRev);
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.tests.crossdatastore.pickr.PickrBaseTest#startServer()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.tests.crossdatastore.pickr.PickrBaseTest#startServer
+     * ()
      */
     @Override
-    protected void startServer() throws IOException, TException, InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
+    protected void startServer() throws IOException, TException, InvalidRequestException, UnavailableException,
+            TimedOutException, SchemaDisagreementException
     {
-
 
         if (RUN_IN_EMBEDDED_MODE)
         {
             CassandraCli.cassandraSetUp();
-//            HBaseCli.startCluster();
+            // HBaseCli.startCluster();
         }
         if (AUTO_MANAGE_SCHEMA)
         {
@@ -308,32 +312,33 @@ public class PickrTestBi_1_1_1_M extends PickrBaseTest
              * schema generation for cassandra.
              * */
 
-//            HBaseCli.createTable("PHOTOGRAPHER");
-//            HBaseCli.addColumnFamily("PHOTOGRAPHER", "ALBUM_ID");
-//            HBaseCli.addColumnFamily("PHOTOGRAPHER", "PHOTOGRAPHER_NAME");
-//
-//            HBaseCli.createTable("PHOTO");
-//            HBaseCli.addColumnFamily("PHOTO", "PHOTO_CAPTION");
-//            HBaseCli.addColumnFamily("PHOTO", "PHOTO_DESC");
-//            HBaseCli.addColumnFamily("PHOTO", "ALBUM_ID");
-//
-//            HBaseCli.createTable("ALBUM");
-//            HBaseCli.addColumnFamily("ALBUM", "ALBUM_NAME");
-//            HBaseCli.addColumnFamily("ALBUM", "ALBUM_DESC");
+            // HBaseCli.createTable("PHOTOGRAPHER");
+            // HBaseCli.addColumnFamily("PHOTOGRAPHER", "ALBUM_ID");
+            // HBaseCli.addColumnFamily("PHOTOGRAPHER", "PHOTOGRAPHER_NAME");
+            //
+            // HBaseCli.createTable("PHOTO");
+            // HBaseCli.addColumnFamily("PHOTO", "PHOTO_CAPTION");
+            // HBaseCli.addColumnFamily("PHOTO", "PHOTO_DESC");
+            // HBaseCli.addColumnFamily("PHOTO", "ALBUM_ID");
+            //
+            // HBaseCli.createTable("ALBUM");
+            // HBaseCli.addColumnFamily("ALBUM", "ALBUM_NAME");
+            // HBaseCli.addColumnFamily("ALBUM", "ALBUM_DESC");
         }
 
-    
-        
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.tests.crossdatastore.pickr.PickrBaseTest#stopServer()
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.tests.crossdatastore.pickr.PickrBaseTest#stopServer()
      */
     @Override
     protected void stopServer()
     {
-       HBaseCli.stopCluster();
-        
+        HBaseCli.stopCluster();
+
     }
-    
+
 }

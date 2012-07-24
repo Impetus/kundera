@@ -302,14 +302,14 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                 if (o instanceof FilterClause)
                 {
                     FilterClause clause = ((FilterClause) o);
-//                    String fieldName = getColumnName(clause.getProperty());
+                    // String fieldName = getColumnName(clause.getProperty());
                     String fieldName = clause.getProperty();
                     boolean isString = isStringProperty(entityMetadata, fieldName);
 
-//                    queryBuilder.append(StringUtils.replace(clause.getProperty(),
-//                            clause.getProperty().substring(0, clause.getProperty().indexOf(".")), aliasName));
-                    queryBuilder.append(StringUtils.replace(clause.getProperty(),
-                            aliasName, aliasName));
+                    // queryBuilder.append(StringUtils.replace(clause.getProperty(),
+                    // clause.getProperty().substring(0,
+                    // clause.getProperty().indexOf(".")), aliasName));
+                    queryBuilder.append(StringUtils.replace(clause.getProperty(), aliasName, aliasName));
                     queryBuilder.append(" ");
                     queryBuilder.append(clause.getCondition());
 
@@ -453,7 +453,6 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             return o != null ? new EnhanceEntity(o, getId(o, m), null) : null;
         }
     }
-
 
     /**
      * Checks if is string property.

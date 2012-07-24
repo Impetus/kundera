@@ -12,9 +12,9 @@ import com.impetus.client.twitter.entities.UserHBase;
  */
 public interface Twitter
 {
-	
-	void addUser(UserHBase user);
-	
+
+    void addUser(UserHBase user);
+
     /**
      * Registers a new user with Twitter application
      * 
@@ -86,22 +86,20 @@ public interface Twitter
     void addFollower(String userId, String followerUserId);
 
     UserHBase findUserById(String userId);
-    
+
     void removeUser(UserHBase user);
-    
+
     void mergeUser(UserHBase user);
-    
+
     /**
      * Retrieves all tweets for a given user
      * 
      * @param userId
      *            the user id
      * @return the all tweets
-     */   
+     */
     List<UserHBase> getAllUsers();
-    	
-    
-    
+
     List<Tweet> getAllTweets(String userId);
 
     /**
@@ -135,10 +133,9 @@ public interface Twitter
      * Close.
      */
     void close();
-    
+
     void createEntityManager();
-    
-    void closeEntityManager(); 
-    
+
+    void closeEntityManager();
 
 }

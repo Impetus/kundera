@@ -118,7 +118,9 @@ public class HBasePropertyReader implements PropertyReader
          */
         private void onInitialize()
         {
-//            zookeeperPort = puMetadata != null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_PORT) : null;
+            // zookeeperPort = puMetadata != null ?
+            // puMetadata.getProperty(PersistenceProperties.KUNDERA_PORT) :
+            // null;
             zookeeperHost = puMetadata != null ? puMetadata.getProperty(PersistenceProperties.KUNDERA_NODES) : null;
         }
 

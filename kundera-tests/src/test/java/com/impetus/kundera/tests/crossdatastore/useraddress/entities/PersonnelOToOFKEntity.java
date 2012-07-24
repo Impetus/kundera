@@ -24,7 +24,6 @@ public class PersonnelOToOFKEntity
     @JoinColumn(name = "ADDRESS_ID")
     private HabitatOToOFKEntity address;
 
-    
     /**
      * 
      */

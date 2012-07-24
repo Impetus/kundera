@@ -58,7 +58,9 @@ public abstract class AssociationBase
     public static final boolean AUTO_MANAGE_SCHEMA = true;
 
     public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "rdbms" };
-    //public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra"};
+
+    // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
+    // "addCassandra"};
 
     // public static final String[] ALL_PUs_UNDER_TEST = new
     // String[]{/*"rdbms",*/ "twissandra", "twihbase","twingo"};
@@ -77,7 +79,8 @@ public abstract class AssociationBase
     protected List<Object> col = new ArrayList<Object>();
 
     private String persistenceUnits = "addCassandra,addMongo,rdbms";
-    //private String persistenceUnits = "addCassandra,rdbms";
+
+    // private String persistenceUnits = "addCassandra,rdbms";
 
     /**
      * Sets the up internal.
@@ -240,7 +243,7 @@ public abstract class AssociationBase
         }
 
     }
-    
+
     protected void addKeyspace(KsDef ksDef, List<CfDef> cfDefs) throws InvalidRequestException,
             SchemaDisagreementException, TException
     {

@@ -302,7 +302,7 @@ public class RESTClientImpl implements RESTClient
     public String executeNamedQuery()
     {
         log.debug("\n\nExecuting named Query... ");
-        
+
         return null;
     }
 }

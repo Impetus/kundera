@@ -54,11 +54,12 @@ public class StudentHbaseTest extends StudentBase<StudentHbase>
 
     }
 
-//    @Test
-    public void dummyTest(){
-        //TODO HBase embedded server , connection refused  
+    // @Test
+    public void dummyTest()
+    {
+        // TODO HBase embedded server , connection refused
     }
-    
+
     @Test
     public void executeTests()
     {

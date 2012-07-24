@@ -60,7 +60,7 @@ public class PersonRdbmsTest extends BaseTest
         assertFindWithoutWhereClause(em, "PersonRDBMS", PersonRDBMS.class);
     }
 
-//    @Test
+    // @Test
     public void onMergeRdbms()
     {
         Object p1 = prepareRDBMSInstance("1", 10);

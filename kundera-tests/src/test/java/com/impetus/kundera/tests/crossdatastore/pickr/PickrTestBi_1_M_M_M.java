@@ -70,7 +70,7 @@ public class PickrTestBi_1_M_M_M extends PickrBaseTest
     {
         super.tearDown();
     }
-    
+
     @Test
     public void test()
     {
@@ -154,15 +154,17 @@ public class PickrTestBi_1_M_M_M extends PickrBaseTest
         album2.addPhoto(photo2);
         album2.addPhoto(photo3);
         album2.addPhoto(photo4);
-        album2.addPhoto(photo5);      
-        
+        album2.addPhoto(photo5);
+
         photo1.addAlbum(album1);
-        photo2.addAlbum(album1);photo2.addAlbum(album2);
-        photo3.addAlbum(album1);photo3.addAlbum(album2);
-        photo4.addAlbum(album1);photo4.addAlbum(album2);        
+        photo2.addAlbum(album1);
+        photo2.addAlbum(album2);
+        photo3.addAlbum(album1);
+        photo3.addAlbum(album2);
+        photo4.addAlbum(album1);
+        photo4.addAlbum(album2);
         photo5.addAlbum(album2);
-        
-        
+
         album1.setPhotographer(p);
         album2.setPhotographer(p);
 
@@ -274,7 +276,7 @@ public class PickrTestBi_1_M_M_M extends PickrBaseTest
         Assert.assertEquals(photographerId, revP2.getPhotographerId());
 
         List<PhotoBi_1_M_M_M> album2Photos = album2.getPhotos();
-        Assert.assertNotNull(album2Photos);        
+        Assert.assertNotNull(album2Photos);
     }
 
     /*
@@ -285,13 +287,14 @@ public class PickrTestBi_1_M_M_M extends PickrBaseTest
      * ()
      */
     @Override
-    protected void startServer() throws IOException, TException, InvalidRequestException, UnavailableException, TimedOutException, SchemaDisagreementException
+    protected void startServer() throws IOException, TException, InvalidRequestException, UnavailableException,
+            TimedOutException, SchemaDisagreementException
     {
 
         if (RUN_IN_EMBEDDED_MODE)
         {
             CassandraCli.cassandraSetUp();
-//            HBaseCli.startCluster();
+            // HBaseCli.startCluster();
         }
         if (AUTO_MANAGE_SCHEMA)
         {
@@ -403,21 +406,21 @@ public class PickrTestBi_1_M_M_M extends PickrBaseTest
              * schema generation for cassandra.
              * */
 
-//            HBaseCli.createTable("PHOTOGRAPHER");
-//            HBaseCli.addColumnFamily("PHOTOGRAPHER", "PHOTOGRAPHER_NAME");
-//
-//            HBaseCli.createTable("PHOTO");
-//            HBaseCli.addColumnFamily("PHOTO", "PHOTO_CAPTION");
-//            HBaseCli.addColumnFamily("PHOTO", "PHOTO_DESC");
-//
-//            HBaseCli.createTable("ALBUM");
-//            HBaseCli.addColumnFamily("ALBUM", "ALBUM_NAME");
-//            HBaseCli.addColumnFamily("ALBUM", "ALBUM_DESC");
-//            HBaseCli.addColumnFamily("ALBUM", "PHOTOGRAPHER_ID");
-//
-//            HBaseCli.createTable("ALBUM_PHOTO");
-//            HBaseCli.addColumnFamily("ALBUM_PHOTO", "PHOTO_ID");
-//            HBaseCli.addColumnFamily("ALBUM_PHOTO", "ALBUM_ID");
+            // HBaseCli.createTable("PHOTOGRAPHER");
+            // HBaseCli.addColumnFamily("PHOTOGRAPHER", "PHOTOGRAPHER_NAME");
+            //
+            // HBaseCli.createTable("PHOTO");
+            // HBaseCli.addColumnFamily("PHOTO", "PHOTO_CAPTION");
+            // HBaseCli.addColumnFamily("PHOTO", "PHOTO_DESC");
+            //
+            // HBaseCli.createTable("ALBUM");
+            // HBaseCli.addColumnFamily("ALBUM", "ALBUM_NAME");
+            // HBaseCli.addColumnFamily("ALBUM", "ALBUM_DESC");
+            // HBaseCli.addColumnFamily("ALBUM", "PHOTOGRAPHER_ID");
+            //
+            // HBaseCli.createTable("ALBUM_PHOTO");
+            // HBaseCli.addColumnFamily("ALBUM_PHOTO", "PHOTO_ID");
+            // HBaseCli.addColumnFamily("ALBUM_PHOTO", "ALBUM_ID");
         }
 
     }

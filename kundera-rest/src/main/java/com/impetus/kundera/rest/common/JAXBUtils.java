@@ -90,25 +90,28 @@ public class JAXBUtils
         }
         return output;
     }
-    
-    public static String toString(Class<?> objectClass, Object object, String mediaType) {
+
+    public static String toString(Class<?> objectClass, Object object, String mediaType)
+    {
         try
         {
             if (MediaType.APPLICATION_XML.equals(mediaType))
             {
                 JAXBContext jaxbContext = JAXBContext.newInstance(objectClass);
                 Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-                
+
                 StringWriter writer = new StringWriter();
-                
+
                 jaxbMarshaller.marshal(object, writer);
                 return writer.toString();
-                
-            } 
+
+            }
             else if (MediaType.APPLICATION_JSON.equals(mediaType))
             {
                 return null;
-            } else {
+            }
+            else
+            {
                 return null;
             }
         }

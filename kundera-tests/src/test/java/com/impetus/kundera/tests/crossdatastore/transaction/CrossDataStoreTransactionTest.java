@@ -33,9 +33,9 @@ public class CrossDataStoreTransactionTest
     {
         emf = Persistence.createEntityManagerFactory("secIdxAddCassandra,addMongo");
         em = emf.createEntityManager();
-        
-//        CassandraCli.cassandraSetUp();
-//        CassandraCli.createKeySpace("KunderaTests");
+
+        // CassandraCli.cassandraSetUp();
+        // CassandraCli.createKeySpace("KunderaTests");
     }
 
     @Test
@@ -51,19 +51,21 @@ public class CrossDataStoreTransactionTest
         try
         {
             em.persist(person);
-        }catch(Exception ex)
+        }
+        catch (Exception ex)
         {
-            HabitatOToOFKEntity found =  em.find(HabitatOToOFKEntity.class, "1_a");
+            HabitatOToOFKEntity found = em.find(HabitatOToOFKEntity.class, "1_a");
             Assert.assertNull(found);
         }
     }
+
     /**
      * @throws java.lang.Exception
      */
     @After
     public void tearDown() throws Exception
     {
-//        CassandraCli.dropKeySpace("KunderaExamples");
+        // CassandraCli.dropKeySpace("KunderaExamples");
     }
 
 }

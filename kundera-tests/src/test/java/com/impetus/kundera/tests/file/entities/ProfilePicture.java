@@ -21,23 +21,24 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * Entity Class for User's profile picture 
+ * Entity Class for User's profile picture
+ * 
  * @author amresh.singh
  */
 
 @Entity
-@Table(name="PROFILE_PICTURE", schema="KunderaTests@secIdxAddCassandra")
+@Table(name = "PROFILE_PICTURE", schema = "KunderaTests@secIdxAddCassandra")
 public class ProfilePicture
 {
     @Id
-    private int profilePicId;   
-    
+    private int profilePicId;
+
     @Column(name = "FULL_PICTURE")
     private byte[] fullPicture;
-    
+
     @Column(name = "CROPPED_PICTURE")
     private byte[] croppedPicture;
-    
+
     @Column(name = "SMALL_PICTURE")
     private byte[] smallPicture;
 
@@ -50,7 +51,8 @@ public class ProfilePicture
     }
 
     /**
-     * @param profilePicId the profilePicId to set
+     * @param profilePicId
+     *            the profilePicId to set
      */
     public void setProfilePicId(int profilePicId)
     {
@@ -66,7 +68,8 @@ public class ProfilePicture
     }
 
     /**
-     * @param fullPicture the fullPicture to set
+     * @param fullPicture
+     *            the fullPicture to set
      */
     public void setFullPicture(byte[] fullPicture)
     {
@@ -82,7 +85,8 @@ public class ProfilePicture
     }
 
     /**
-     * @param croppedPicture the croppedPicture to set
+     * @param croppedPicture
+     *            the croppedPicture to set
      */
     public void setCroppedPicture(byte[] croppedPicture)
     {
@@ -98,11 +102,12 @@ public class ProfilePicture
     }
 
     /**
-     * @param smallPicture the smallPicture to set
+     * @param smallPicture
+     *            the smallPicture to set
      */
     public void setSmallPicture(byte[] smallPicture)
     {
         this.smallPicture = smallPicture;
-    }  
+    }
 
 }

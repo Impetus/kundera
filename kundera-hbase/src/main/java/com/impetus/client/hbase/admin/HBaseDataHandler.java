@@ -204,7 +204,7 @@ public class HBaseDataHandler implements DataHandler
     public List readData(final String tableName, Class clazz, EntityMetadata m, final String rowKey,
             List<String> relationNames) throws IOException
     {
-        
+
         List output = null;
 
         Object entity = null;
@@ -215,15 +215,22 @@ public class HBaseDataHandler implements DataHandler
 
         // Load raw data from HBase
         List<HBaseData> results = hbaseReader.LoadData(hTable, rowKey, this.filter);
-        output = onRead(tableName, clazz, m, output, hTable, entity, relationNames,results);
+        output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
         return output;
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.hbase.admin.DataHandler#readDataByRange(java.lang.String, java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata, java.util.List, byte[], byte[])
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.client.hbase.admin.DataHandler#readDataByRange(java.lang.
+     * String, java.lang.Class,
+     * com.impetus.kundera.metadata.model.EntityMetadata, java.util.List,
+     * byte[], byte[])
      */
     @Override
-    public List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow) throws IOException
+    public List readDataByRange(String tableName, Class clazz, EntityMetadata m, byte[] startRow, byte[] endRow)
+            throws IOException
     {
         List output = null;
         HTable hTable = null;
@@ -232,12 +239,12 @@ public class HBaseDataHandler implements DataHandler
         // Load raw data from HBase
         hTable = gethTable(tableName);
         List<HBaseData> results = hbaseReader.loadAll(hTable, filter, startRow, endRow);
-        output = onRead(tableName, clazz, m, output, hTable, entity, relationNames,results);
-        
+        output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
+
         return output;
     }
-    
-        /*
+
+    /*
      * (non-Javadoc)
      * 
      * @see
@@ -403,7 +410,7 @@ public class HBaseDataHandler implements DataHandler
             hTable = gethTable(joinTableName);
 
             List<HBaseData> results = hbaseReader.LoadData(hTable, Constants.JOIN_COLUMNS_FAMILY_NAME, rowKey, filter);
-            
+
             // assuming rowKey is not null.
             if (results != null)
             {
@@ -523,7 +530,7 @@ public class HBaseDataHandler implements DataHandler
         try
         {
             /* Set Row Key */
-            
+
             PropertyAccessorHelper.setId(entity, m, hbaseData.getRowKey());
 
             // Raw data retrieved from HBase for a particular row key (contains
@@ -765,85 +772,85 @@ public class HBaseDataHandler implements DataHandler
 
         throw new PersistenceException("Not applicable for HBase");
     }
-    
+
     /**
      * Set filter to data handler.
      * 
-     * @param filter hbase filter.
+     * @param filter
+     *            hbase filter.
      */
-     public void setFilter(Filter filter)
+    public void setFilter(Filter filter)
     {
-         this.filter = filter;
+        this.filter = filter;
     }
 
+    /**
+     * 
+     * @param tableName
+     * @param clazz
+     * @param m
+     * @param startRow
+     * @param endRow
+     * @param output
+     * @param hTable
+     * @param entity
+     * @param relationNames
+     * @param results
+     * @return
+     * @throws IOException
+     */
+    private List onRead(String tableName, Class clazz, EntityMetadata m, List output, HTable hTable, Object entity,
+            List<String> relationNames, List<HBaseData> results) throws IOException
+    {
+        try
+        {
+            // Populate raw data from HBase into entity
 
-     /**
-      * 
-      * @param tableName
-      * @param clazz
-      * @param m
-      * @param startRow
-      * @param endRow
-      * @param output
-      * @param hTable
-      * @param entity
-      * @param relationNames
-      * @param results
-      * @return
-      * @throws IOException
-      */
-     private List onRead(String tableName, Class clazz, EntityMetadata m, List output,
-             HTable hTable, Object entity, List<String> relationNames,List<HBaseData> results) throws IOException
-     {
-         try
-         {
-             // Populate raw data from HBase into entity
-             
-             if(results != null)
-             {
-                 for(HBaseData data : results)
-                 {
-                     
-                     if (data.getColumns() != null)
-                     {
-                         entity = clazz.newInstance(); // Entity Object
-                         entity = populateEntityFromHbaseData(entity, data, m, null, relationNames);
-                         if(output == null)
-                         {
-                             output =  new ArrayList();
-                         }
-                         output.add(entity);
-                     }
-                     
-                 }
-             }
-         }
-         catch (InstantiationException iex)
-         {
-             log.error("Error while creating an instance of " + clazz);
-             throw new PersistenceException(iex);
-             // return enhancedEntity;
-         }
-         catch (IllegalAccessException iaex)
-         {
-             log.error("Illegal Access while reading data from " + tableName + ", Caused by:" + iaex.getMessage());
-             throw new PersistenceException(iaex);
-             // return enhancedEntity;
-         }
-         catch (Exception e)
-         {
-             log.error("Error while creating an instance of " + clazz);
-             throw new PersistenceException(e);
-         }
-         finally
-         {
-             if (hTable != null)
-             {
-                 puthTable(hTable);
-             }
+            if (results != null)
+            {
+                for (HBaseData data : results)
+                {
 
-         }
-         return output;
-     }
+                    if (data.getColumns() != null)
+                    {
+                        entity = clazz.newInstance(); // Entity Object
+                        entity = populateEntityFromHbaseData(entity, data, m, null, relationNames);
+                        if (output == null)
+                        {
+                            output = new ArrayList();
+                        }
+                        output.add(entity);
+                    }
+
+                }
+            }
+        }
+        catch (InstantiationException iex)
+        {
+            log.error("Error while creating an instance of " + clazz);
+            throw new PersistenceException(iex);
+            // return enhancedEntity;
+        }
+        catch (IllegalAccessException iaex)
+        {
+            log.error("Illegal Access while reading data from " + tableName + ", Caused by:" + iaex.getMessage());
+            throw new PersistenceException(iaex);
+            // return enhancedEntity;
+        }
+        catch (Exception e)
+        {
+            log.error("Error while creating an instance of " + clazz);
+            throw new PersistenceException(e);
+        }
+        finally
+        {
+            if (hTable != null)
+            {
+                puthTable(hTable);
+            }
+
+        }
+        return output;
+    }
 
 }
