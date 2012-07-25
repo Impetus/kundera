@@ -43,7 +43,7 @@ This release includes bug fixes, performance improvements and the following new 
 * MongoDB 2.0.4 migration
 * JPA EntityTransaction commit and rollback
 * JTA Transactions integration over web server
-* * Kundera-REST API
+* Kundera-REST API
 * Support for Counter column in cassandra
 * Inverted wide-row indexing support for Cassandra
 * Login Authentication support for Cassandra and MongoDB
