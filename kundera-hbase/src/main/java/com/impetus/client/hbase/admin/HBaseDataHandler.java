@@ -531,7 +531,7 @@ public class HBaseDataHandler implements DataHandler
         {
             /* Set Row Key */
 
-            PropertyAccessorHelper.setId(entity, m, hbaseData.getRowKey());
+            PropertyAccessorHelper.setId(entity, m, new String(hbaseData.getRowKey()));
 
             // Raw data retrieved from HBase for a particular row key (contains
             // all column families)
