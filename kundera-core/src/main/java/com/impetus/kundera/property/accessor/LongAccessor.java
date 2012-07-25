@@ -37,9 +37,9 @@ public class LongAccessor implements PropertyAccessor<Long>
     @Override
     public final Long fromBytes(Class targetClass, byte[] bytes)
     {
-        if (bytes.length != 8)
+        if (bytes == null || bytes.length != 8)
         {
-            throw new PropertyAccessException("must be 8 bytes");
+            return null;
         }
         return (ByteBuffer.wrap(bytes).getLong());
     }
