@@ -361,7 +361,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
         }
         catch (IOException e)
         {
-            throw new PersistenceException(e.getMessage());
+            throw new PersistenceException(e);
         }
     }
 

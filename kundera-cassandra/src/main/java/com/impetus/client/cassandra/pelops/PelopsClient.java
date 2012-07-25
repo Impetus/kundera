@@ -263,23 +263,23 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
             }
             catch (InvalidRequestException ire)
             {
-                log.error("invalid request exception caused by :" + ire.getMessage());
-                throw new PersistenceException(ire.getMessage());
+                log.error("Error during executing delete, Caused by :" + ire.getMessage());
+                throw new PersistenceException(ire);
             }
             catch (UnavailableException ue)
             {
-                log.error("unavailable exception caused by :" + ue.getMessage());
-                throw new PersistenceException(ue.getMessage());
+                log.error("Error during executing delete, Caused by :" + ue.getMessage());
+                throw new PersistenceException(ue);
             }
             catch (TimedOutException toe)
             {
-                log.error("time out exception caused by :" + toe.getMessage());
-                throw new PersistenceException(toe.getMessage());
+                log.error("Error during executing delete, Caused by :" + toe.getMessage());
+                throw new PersistenceException(toe);
             }
             catch (TException te)
             {
-                log.error("exception caused by :" + te.getMessage());
-                throw new PersistenceException(te.getMessage());
+                log.error("Error during executing delete, Caused by :" + te.getMessage());
+                throw new PersistenceException(te);
             }
         }
         else
@@ -498,25 +498,25 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                     }
 
                 }
-                catch (InvalidRequestException e)
+                catch (InvalidRequestException irex)
                 {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error("Error during executing find, Caused by :" + irex.getMessage());
+                    throw new PersistenceException(irex);
                 }
-                catch (UnavailableException e)
+                catch (UnavailableException uex)
                 {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                     log.error("Error during executing find, Caused by :" + uex.getMessage());
+                    throw new PersistenceException(uex);
                 }
-                catch (TimedOutException e)
+                catch (TimedOutException tex)
                 {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error("Error during executing find, Caused by :" + tex.getMessage());
+                    throw new PersistenceException(tex);
                 }
-                catch (TException e)
+                catch (TException tex)
                 {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error("Error during executing find, Caused by :" + tex.getMessage());
+                    throw new PersistenceException(tex);
                 }
             }
             else
@@ -1049,6 +1049,11 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         }
     }
 
+    /**
+     * @param rlName
+     * @param rlValue
+     * @return
+     */
     private CounterColumn populateCounterFkey(String rlName, String rlValue)
     {
         CounterColumn counterCol = new CounterColumn();
@@ -1082,7 +1087,7 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         catch (Exception e)
         {
             log.error("Error on retrieval" + e.getMessage());
-            throw new PersistenceException(e.getMessage());
+            throw new PersistenceException(e);
         }
 
         return result != null & !result.isEmpty() ? result.get(0) : null;
@@ -1195,6 +1200,13 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
         }
     }
 
+    /**
+     * @param m
+     * @param qCounterResults
+     * @param entities
+     * @param isRelational
+     * @param relationNames
+     */
     private void populateDataForSuperCounter(EntityMetadata m, Map<Bytes, List<CounterSuperColumn>> qCounterResults,
             List<Object> entities, boolean isRelational, List<String> relationNames)
     {

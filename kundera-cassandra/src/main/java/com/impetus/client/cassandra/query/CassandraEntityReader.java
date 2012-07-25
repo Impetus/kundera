@@ -130,7 +130,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                     catch (Exception e)
                     {
                         log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
-                        throw new QueryHandlerException(e.getMessage());
+                        throw new QueryHandlerException(e);
                     }
                 }
             }
@@ -215,7 +215,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         catch (Exception e)
         {
             log.error("Error while executing find by range. Details: " + e.getMessage());
-            throw new QueryHandlerException(e.getMessage());
+            throw new QueryHandlerException(e);
         }
         return result;
     }

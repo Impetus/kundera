@@ -44,7 +44,7 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
         }
         catch (Exception e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
     }
 
@@ -64,7 +64,7 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
         }
         catch (Exception e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
     }
 
@@ -96,7 +96,7 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
         }
         catch (Exception e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
     }
 

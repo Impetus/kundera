@@ -701,15 +701,15 @@ public class HBaseDataHandler implements DataHandler
         }
         catch (PropertyAccessException e1)
         {
-            throw new RuntimeException(e1.getMessage());
+            throw new RuntimeException(e1);
         }
         catch (InstantiationException e1)
         {
-            throw new RuntimeException(e1.getMessage());
+            throw new RuntimeException(e1);
         }
         catch (IllegalAccessException e1)
         {
-            throw new RuntimeException(e1.getMessage());
+            throw new RuntimeException(e1);
         }
 
     }

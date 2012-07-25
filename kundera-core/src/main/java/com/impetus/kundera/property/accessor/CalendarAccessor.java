@@ -52,7 +52,7 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
         }
         catch (UnsupportedEncodingException e)
         {
-            throw new PropertyAccessException(e.getMessage());
+            throw new PropertyAccessException(e);
         }
 
         return fromString(targetClass, s);

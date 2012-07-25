@@ -366,7 +366,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         catch (PersistenceException pe)
         {
             throw new MetamodelLoaderException("Error with relationship in @Entity(" + entityClass + "."
-                    + relationField.getName() + "), reason: " + pe.getMessage());
+                    + relationField.getName() + "), reason: " + pe);
         }
     }
 

@@ -139,7 +139,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                 catch (Exception e)
                 {
                     log.error("Error while executing handleAssociation for cassandra:" + e.getMessage());
-                    throw new QueryHandlerException(e.getMessage());
+                    throw new QueryHandlerException(e);
                 }
             }
             else
@@ -448,7 +448,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             }
             catch (Exception e)
             {
-                throw new PersistenceException(e.getMessage());
+                throw new PersistenceException(e);
             }
             return o != null ? new EnhanceEntity(o, getId(o, m), null) : null;
         }

@@ -135,7 +135,7 @@ public class MongoDBQuery extends QueryImpl
         }
         catch (Exception e)
         {
-            throw new QueryHandlerException(e.getMessage());
+            throw new QueryHandlerException(e);
         }
 
         return setRelationEntities(ls, client, m);

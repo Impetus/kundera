@@ -135,15 +135,15 @@ public class DocumentObjectMapper
         }
         catch (InstantiationException e)
         {
-            throw new PersistenceException(e.getMessage());
+            throw new PersistenceException(e);
         }
         catch (IllegalAccessException e)
         {
-            throw new PersistenceException(e.getMessage());
+            throw new PersistenceException(e);
         }
         catch (PropertyAccessException e)
         {
-            throw new PersistenceException(e.getMessage());
+            throw new PersistenceException(e);
         }
     }
 
