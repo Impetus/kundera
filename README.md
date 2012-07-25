@@ -37,8 +37,8 @@ Recent Releases
 This release includes bug fixes, performance improvements and the following new features compared to version 2.0.6:
 
 
-* HBase 0.92.1 migration.
-* Hadoop 1.0.2
+* HBase 0.92.1 migration
+* Hadoop 1.0.2 migration
 * Cassandra 1.1.2 migration
 * MongoDB 2.0.4 migration
 * JPA EntityTransaction commit and rollback
