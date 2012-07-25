@@ -23,6 +23,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.apache.cassandra.db.marshal.CounterColumnType;
+import org.apache.cassandra.locator.NetworkTopologyStrategy;
 import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -69,9 +70,11 @@ public class CassandraPropertyReader implements PropertyReader
                     .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
 
             InputStream inStream = propertyName != null ? ClassLoader.getSystemResourceAsStream(propertyName) : null;
-            
-            if(inStream == null) {
-                inStream = propertyName != null ? this.getClass().getClassLoader().getResourceAsStream(propertyName) : null;  
+
+            if (inStream == null)
+            {
+                inStream = propertyName != null ? this.getClass().getClassLoader().getResourceAsStream(propertyName)
+                        : null;
             }
             if (inStream != null)
             {
@@ -335,7 +338,9 @@ public class CassandraPropertyReader implements PropertyReader
                     }
                     else
                     {
-                        // TODO
+                        log.warn("You have choosen placement strategy : "
+                                + NetworkTopologyStrategy.class.getSimpleName()
+                                + " but not provided datacenters information, kundera will use default property ");
                         return;
                     }
                 }

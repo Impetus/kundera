@@ -498,25 +498,25 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                     }
 
                 }
-                catch (InvalidRequestException e)
+                catch (InvalidRequestException ire)
                 {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error("Error during find, caused by :" + ire.getMessage());
+                    throw new PersistenceException(ire);
                 }
-                catch (UnavailableException e)
+                catch (UnavailableException ue)
                 {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error("Error during find, caused by :" + ue.getMessage());
+                    throw new PersistenceException(ue);
                 }
-                catch (TimedOutException e)
+                catch (TimedOutException toe)
                 {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error("Error during find, caused by :" + toe.getMessage());
+                    throw new PersistenceException(toe);
                 }
-                catch (TException e)
+                catch (TException te)
                 {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error("Error during find, caused by :" + te.getMessage());
+                    throw new PersistenceException(te);
                 }
             }
             else
@@ -778,12 +778,8 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                         ThriftRow thriftRow = null;
                         if (entityMetadata.isCounterColumnType())
                         {
-
-                            // TODO
+                            log.info("Native query is not permitted on counter column returning null ");
                             return null;
-                            // handler.new ThriftRow(rowKey,
-                            // entityMetadata.getTableName(), null, null, null,
-                            // null);
                         }
                         else
                         {
