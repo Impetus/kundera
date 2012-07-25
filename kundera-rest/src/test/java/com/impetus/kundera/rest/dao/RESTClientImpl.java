@@ -69,12 +69,12 @@ public class RESTClientImpl implements RESTClient
         }
         catch (UniformInterfaceException e)
         {
-            e.printStackTrace();
+            log.error("Error during getApplicationToken, Caused by:" + e.getMessage() + ", returning null");
             return null;
         }
         catch (ClientHandlerException e)
         {
-            e.printStackTrace();
+            log.error("Error during getApplicationToken, Caused by:" + e.getMessage() + ", returning null");
             return null;
         }
         return applicationToken;

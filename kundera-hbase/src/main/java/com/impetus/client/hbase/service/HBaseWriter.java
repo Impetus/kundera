@@ -70,7 +70,7 @@ public class HBaseWriter implements Writer
             }
             catch (PropertyAccessException e1)
             {
-                throw new IOException(e1.getMessage());
+                throw new IOException(e1);
             }
         }
         htable.put(p);
@@ -107,7 +107,7 @@ public class HBaseWriter implements Writer
             }
             catch (PropertyAccessException e1)
             {
-                throw new IOException(e1.getMessage());
+                throw new IOException(e1);
             }
         }
         htable.put(p);
@@ -218,7 +218,7 @@ public class HBaseWriter implements Writer
         catch (IOException e)
         {
             log.error("Error while delete on hbase for : " + rowKey);
-            throw new PersistenceException(e.getMessage());
+            throw new PersistenceException(e);
         }
     }
 

@@ -514,7 +514,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         catch (MalformedURLException e)
         {
             log.error("Error while mapping jar-file url" + jarFile + "caused by:" + e.getMessage());
-            throw new IllegalArgumentException("Invalid jar-file URL:" + jarFile + "caused by: " + e.getMessage());
+            throw new IllegalArgumentException("Invalid jar-file URL:" + jarFile + "Caused by: " + e);
         }
     }
 

@@ -59,7 +59,6 @@ public class ObjectUtils
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             return null;
         }
         return destObject;

@@ -49,15 +49,7 @@
 			<id>morphia.googlecode.com</id>
 			<name>Morphia Repo at Google Code</name>
 			<url>http://morphia.googlecode.com/svn/mavenrepo</url>
-		</repository>
-		<repository>
-			<id>maven.scale7.org</id>
-			<name>Scale7 Maven Repo</name>
-			<url>https://github.com/s7/mvnrepo/raw/master</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
+		</repository>		
 		<repository>
 			<id>sonatype-nexus</id>
 			<name>Kundera Public Repository</name>
@@ -249,11 +241,6 @@
 			<artifactId>cassandra-clientutil</artifactId>
 			<version>1.1.2</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.scale7</groupId>
-			<artifactId>scale7-pelops</artifactId>
-			<version>1.3-1.0.x-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xerial</groupId>

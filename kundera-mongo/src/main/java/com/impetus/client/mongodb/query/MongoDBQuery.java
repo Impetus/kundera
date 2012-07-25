@@ -112,7 +112,6 @@ public class MongoDBQuery extends QueryImpl
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             log.error("Error during executing query, Caused by:" + e.getMessage());
             throw new QueryHandlerException(e);
         }
@@ -135,7 +134,7 @@ public class MongoDBQuery extends QueryImpl
         }
         catch (Exception e)
         {
-            throw new QueryHandlerException(e.getMessage());
+            throw new QueryHandlerException(e);
         }
 
         return setRelationEntities(ls, client, m);
