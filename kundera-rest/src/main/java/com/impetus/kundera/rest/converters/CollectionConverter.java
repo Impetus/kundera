@@ -19,6 +19,9 @@ import java.util.Collection;
 
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.impetus.kundera.rest.common.JAXBUtils;
 import com.impetus.kundera.rest.common.StreamUtils;
 
@@ -30,6 +33,8 @@ import com.impetus.kundera.rest.common.StreamUtils;
  */
 public class CollectionConverter
 {
+    private static Log log = LogFactory.getLog(CollectionConverter.class);
+    
     public static String toString(Collection<?> input, Class<?> genericClass, String mediaType)
     {
         if (MediaType.APPLICATION_XML.equals(mediaType))
@@ -92,12 +97,12 @@ public class CollectionConverter
         }
         catch (InstantiationException e)
         {
-            e.printStackTrace();
+            log.error("Error during translation, Caused by:" + e.getMessage() + ", returning null");
             return null;
         }
         catch (IllegalAccessException e)
         {
-            e.printStackTrace();
+            log.error("Error during translation, Caused by:" + e.getMessage() + ", returning null");
             return null;
         }
     }

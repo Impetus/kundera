@@ -112,7 +112,6 @@ public class MongoDBQuery extends QueryImpl
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             log.error("Error during executing query, Caused by:" + e.getMessage());
             throw new QueryHandlerException(e);
         }

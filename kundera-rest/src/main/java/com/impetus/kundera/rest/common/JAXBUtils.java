@@ -117,7 +117,7 @@ public class JAXBUtils
         }
         catch (JAXBException e)
         {
-            e.printStackTrace();
+            log.error("Error during translation, Caused by:" + e.getMessage() + ", returning null");
             return null;
         }
     }
