@@ -31,7 +31,34 @@ Currently Supported Datasources
 
 Recent Releases
 ================================
-####Please Note: trunk is current development branch. 2.0.6 is released tag.
+####Please Note: trunk is current development branch. 2.0.7 is released tag.
+
+#### 25-July-2012 - Kundera 2.0.7 released
+This release includes bug fixes, performance improvements and the following new features compared to version 2.0.6:
+
+
+* HBase 0.92.1 migration
+* Hadoop 1.0.2 migration
+* Cassandra 1.1.2 migration
+* MongoDB 2.0.4 migration
+* JPA EntityTransaction commit and rollback
+* JTA Transactions integration over web server
+* Kundera-REST API
+* Support for Counter column in cassandra
+* Inverted wide-row indexing support for Cassandra
+* Login Authentication support for Cassandra and MongoDB
+* Filters and filters list for HBase
+* Deprecated Lucene based indexing for HBase.
+* Datastore specific configuration files for specifying:
+   - Replication factor
+   - Placement strategy
+   - Consistency level per operation.
+   - Counter column family configuration
+   - Inverted indexing switch
+   - Zookeeper host and port
+   - Hbase column family configurations
+   - MongoDB servers list, read preference and socket timeout.
+ ...etc.
 
 
 #### 20-Apr-2012 - Kundera 2.0.6 released
