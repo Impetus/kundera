@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,6 +122,7 @@ public class MetamodelConfiguration implements Configuration
         List<String> classesToScan;
         URL[] resources = null;
         String client = null;
+        List<URL> managedURLs = null;
         if (persistentUnitMetadataMap == null || persistentUnitMetadataMap.isEmpty())
         {
             log.error("It is necessary to load Persistence Unit metadata  for persistence unit " + persistenceUnit
@@ -132,12 +134,12 @@ public class MetamodelConfiguration implements Configuration
         {
             PersistenceUnitMetadata puMetadata = persistentUnitMetadataMap.get(persistenceUnit);
             classesToScan = puMetadata.getManagedClassNames();
-            List<URL> managedURLs = puMetadata.getManagedURLs();
+            managedURLs = puMetadata.getManagedURLs();
             client = puMetadata.getClient();
-            if (managedURLs != null)
-            {
-                resources = managedURLs.toArray(new URL[] {});
-            }
+//            if (managedURLs != null)
+//            {
+//                resources = managedURLs.toArray(new URL[] {});
+//            }
         }
 
         /*
@@ -169,6 +171,19 @@ public class MetamodelConfiguration implements Configuration
             reader = new ClasspathReader(classesToScan);
             // resources = reader.findResourcesByContextLoader();
         }
+
+        URL[] managedClasses = reader.findResources();
+        if(managedClasses != null)
+        {
+            List<URL> managedResources =  Arrays.asList(managedClasses);
+            managedURLs.addAll(managedResources);
+        }
+        
+      if (managedURLs != null)
+      {
+          resources = managedURLs.toArray(new URL[] {});
+      }
+        
         // All entities to load should be annotated with @Entity
         reader.addValidAnnotations(Entity.class.getName());
 
