@@ -580,7 +580,7 @@ public class PersistenceXMLLoader
     /**
      * Allowed protocols
      */
-    private enum AllowedProtocol
+    public enum AllowedProtocol
     {
         WSJAR, JAR, ZIP, FILE, VFSZIP;
 

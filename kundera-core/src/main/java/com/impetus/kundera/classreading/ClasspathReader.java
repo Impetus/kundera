@@ -24,9 +24,13 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.impetus.kundera.loader.PersistenceXMLLoader.AllowedProtocol;
 
 /**
  * The Class ClasspathReader.
@@ -145,7 +149,23 @@ public class ClasspathReader extends Reader
 
             for (URL url : urls)
             {
-                if (url.getPath().endsWith("/"))
+                if(AllowedProtocol.isValidProtocol(url.getProtocol().toUpperCase()) && url.getPath().endsWith(".jar"))
+                {
+                    try
+                    {
+                        JarFile jarFile = new JarFile(url.getFile());
+                        JarEntry present =  jarFile.getJarEntry(classRelativePath + ".class");
+                        if( present != null)
+                        {
+                            list.add(url);
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        logger.warn("Error during loading from context , Caused by:" + e.getMessage());
+                    }
+                    
+                } else if (url.getPath().endsWith("/"))
                 {
                     File file = new File(url.getPath() + classRelativePath + ".class");
                     if (file.exists())
@@ -182,10 +202,10 @@ public class ClasspathReader extends Reader
         {
             result = findResourcesByContextLoader();
         }
-        else
-        {
-            result = findResourcesByClasspath();
-        }
+//        else
+//        {
+//            result = findResourcesByClasspath();
+//        }
         return result;
     }
 
