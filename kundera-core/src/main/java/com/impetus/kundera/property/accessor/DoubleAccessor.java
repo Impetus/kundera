@@ -49,7 +49,7 @@ public class DoubleAccessor implements PropertyAccessor<Double>
     @Override
     public byte[] toBytes(Object object) throws PropertyAccessException
     {
-        return fromLong(Double.doubleToRawLongBits((Double) object));
+        return object != null ? fromLong(Double.doubleToRawLongBits((Double) object)) : null;
     }
 
     /*
@@ -61,7 +61,7 @@ public class DoubleAccessor implements PropertyAccessor<Double>
     @Override
     public String toString(Object object)
     {
-        return object.toString();
+        return object != null? object.toString() : null;
     }
 
     /**
@@ -110,6 +110,10 @@ public class DoubleAccessor implements PropertyAccessor<Double>
     {
         try
         {
+            if(s == null)
+            {
+                return null;
+            }
             Double d = new Double(s);
             return d;
         }

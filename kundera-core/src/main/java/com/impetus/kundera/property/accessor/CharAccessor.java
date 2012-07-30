@@ -49,6 +49,10 @@ public class CharAccessor implements PropertyAccessor<Character>
     @Override
     public byte[] toBytes(Object object)
     {
+        if(object == null)
+        {
+            return null;
+        }
         Character data = (Character) object;
         return new byte[] { (byte) ((data >> 8) & 0xff), (byte) ((data >> 0) & 0xff), };
     }

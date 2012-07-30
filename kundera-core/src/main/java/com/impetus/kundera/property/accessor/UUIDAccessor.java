@@ -40,6 +40,10 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
     {
         try
         {
+            if(bytes == null)
+            {
+                return null;
+            }
             return UUID.nameUUIDFromBytes(bytes);
         }
         catch (Exception e)
@@ -59,6 +63,10 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
     {
         try
         {
+            if(object == null)
+            {
+                return null;
+            }
             UUID uuid = (UUID) object;
             return asByteArray(uuid);
         }
@@ -77,6 +85,10 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
     @Override
     public String toString(Object object)
     {
+        if(object == null)
+        {
+            return null;
+        }
         return ((UUID) object).toString();
     }
 
@@ -92,6 +104,10 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
     {
         try
         {
+            if(s == null)
+            {
+                return null;
+            }
             return UUID.fromString(s);
         }
         catch (Exception e)
@@ -109,6 +125,10 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
      */
     private static byte[] asByteArray(UUID uuid)
     {
+        if(uuid == null)
+        {
+            return null;
+        }
         long msb = uuid.getMostSignificantBits();
         long lsb = uuid.getLeastSignificantBits();
         byte[] buffer = new byte[16];

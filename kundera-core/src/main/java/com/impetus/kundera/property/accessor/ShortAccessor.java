@@ -66,7 +66,7 @@ public class ShortAccessor implements PropertyAccessor<Short>
     @Override
     public String toString(Object object)
     {
-        return object.toString();
+        return object != null ? object.toString() : null;
     }
 
     /*
@@ -81,6 +81,11 @@ public class ShortAccessor implements PropertyAccessor<Short>
     {
         try
         {
+
+            if(s == null)
+            {
+                return null;
+            }
             Short sh = new Short(s);
             return sh;
         }

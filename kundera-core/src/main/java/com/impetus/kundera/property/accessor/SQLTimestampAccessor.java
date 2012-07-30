@@ -42,6 +42,10 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
         String s;
         try
         {
+            if(b == null)
+            {
+                return null;
+            }
             s = new String(b, Constants.ENCODING);
         }
         catch (UnsupportedEncodingException e)
@@ -60,6 +64,10 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
     @Override
     public byte[] toBytes(Object object)
     {
+        if(object == null)
+        {
+            return null;
+        }
         Timestamp t = (Timestamp) object;
         return t.toString().getBytes();
     }
@@ -73,7 +81,7 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
     @Override
     public String toString(Object object)
     {
-        return object.toString();
+        return object != null ? object.toString() : null;
     }
 
     /*
@@ -86,6 +94,10 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
     @Override
     public Timestamp fromString(Class targetClass, String s)
     {
+        if(s == null)
+        {
+            return null;
+        }
         Timestamp t = Timestamp.valueOf(s);
         return t;
     }

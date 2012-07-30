@@ -95,6 +95,10 @@ public class DateAccessor implements PropertyAccessor<Date>
     {
         try
         {
+            if(bytes == null)
+            {
+                return null;
+            }
             // return DATE_FORMATTER.parse(new String(bytes,
             // Constants.ENCODING));
             return getDateByPattern(new String(bytes, Constants.ENCODING));
@@ -133,7 +137,7 @@ public class DateAccessor implements PropertyAccessor<Date>
     @Override
     public final String toString(Object object)
     {
-        return object.toString();
+        return object != null? object.toString():null;
     }
 
     /*
@@ -148,6 +152,10 @@ public class DateAccessor implements PropertyAccessor<Date>
     {
         try
         {
+            if(s == null)
+            {
+                return null;
+            }
             Date d = getDateByPattern(s);
             return d;
         }
@@ -204,7 +212,7 @@ public class DateAccessor implements PropertyAccessor<Date>
      */
     public static String getFormattedObect(String date)
     {
-        return getDateByPattern(date).toString();
+        return date != null ? getDateByPattern(date).toString() : null;
     }
 
     public Date getInstance(Class<?> clazz)

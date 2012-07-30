@@ -48,6 +48,10 @@ public class ObjectAccessor implements PropertyAccessor<Object>
     {
         try
         {
+            if(bytes == null)
+            {
+                return null;
+            }
             if (targetClass != null && targetClass.equals(byte[].class))
             {
                 return bytes;
@@ -115,7 +119,7 @@ public class ObjectAccessor implements PropertyAccessor<Object>
     @Override
     public final String toString(Object object)
     {
-        return object.toString();
+        return object != null ? object.toString() : null;
     }
 
     /*
@@ -130,6 +134,10 @@ public class ObjectAccessor implements PropertyAccessor<Object>
     {
         try
         {
+            if(s == null)
+            {
+                return null;
+            }
             Object o = (Object) s;
             return o;
         }

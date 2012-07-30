@@ -44,6 +44,10 @@ public class ByteAccessor implements PropertyAccessor<Byte>
     {
         try
         {
+            if( b == null)
+            {
+                return null;
+            }
             // return new Byte(new String(b, Constants.ENCODING));
             return (ByteBuffer.wrap(b).get());
         }
@@ -63,6 +67,10 @@ public class ByteAccessor implements PropertyAccessor<Byte>
     @Override
     public byte[] toBytes(Object object)
     {
+        if(object == null)
+        {
+            return null;
+        }
         Byte b = (Byte) object;
         ByteBuffer buffer = ByteBuffer.allocate(8);
         buffer.put(b);
@@ -78,7 +86,7 @@ public class ByteAccessor implements PropertyAccessor<Byte>
     @Override
     public String toString(Object object)
     {
-        return object.toString();
+        return object != null? object.toString() : null;
     }
 
     /*
@@ -93,6 +101,10 @@ public class ByteAccessor implements PropertyAccessor<Byte>
     {
         try
         {
+            if(s == null)
+            {
+                return null;
+            }
             Byte b = new Byte(s);
             return b;
         }

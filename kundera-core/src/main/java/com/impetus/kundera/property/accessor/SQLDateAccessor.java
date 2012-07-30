@@ -41,6 +41,11 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
         String s;
         try
         {
+
+            if(b == null)
+            {
+                return null;
+            }
             s = new String(b, Constants.ENCODING);
         }
         catch (UnsupportedEncodingException e)
@@ -60,6 +65,11 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
     @Override
     public byte[] toBytes(Object object)
     {
+
+        if(object == null)
+        {
+            return null;
+        }
         Date d = (Date) object;
         return d.toString().getBytes();
     }
@@ -73,7 +83,7 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
     @Override
     public String toString(Object object)
     {
-        return object.toString();
+        return object != null ? object.toString() : null;
     }
 
     /*
@@ -86,6 +96,11 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
     @Override
     public Date fromString(Class targetClass, String s)
     {
+
+        if(s == null)
+        {
+            return null;
+        }
         Date d = Date.valueOf(s);
         return d;
     }

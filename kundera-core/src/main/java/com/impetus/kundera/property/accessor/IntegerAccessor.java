@@ -35,6 +35,10 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
     @Override
     public final Integer fromBytes(Class targetClass, byte[] b)
     {
+        if(b == null)
+        {
+            return null;
+        }
         return ((b[0] << 24) + ((b[1] & 0xFF) << 16) + ((b[2] & 0xFF) << 8) + (b[3] & 0xFF));
     }
 
@@ -65,7 +69,7 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
     @Override
     public String toString(Object object)
     {
-        return object.toString();
+        return object != null ? object.toString() : null;
     }
 
     /*
@@ -80,6 +84,10 @@ public class IntegerAccessor implements PropertyAccessor<Integer>
     {
         try
         {
+            if(s == null)
+            {
+                return null;
+            }
             Integer i = new Integer(s);
             return i;
         }

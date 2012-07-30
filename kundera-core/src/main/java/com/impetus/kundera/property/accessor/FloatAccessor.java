@@ -49,7 +49,7 @@ public class FloatAccessor implements PropertyAccessor<Float>
     @Override
     public byte[] toBytes(Object object)
     {
-        return fromInt(Float.floatToRawIntBits((Float) object));
+        return object != null ? fromInt(Float.floatToRawIntBits((Float) object)) : null;
     }
 
     /*
@@ -61,7 +61,7 @@ public class FloatAccessor implements PropertyAccessor<Float>
     @Override
     public String toString(Object object)
     {
-        return object.toString();
+        return object != null ? object.toString() : null;
     }
 
     /**
@@ -105,6 +105,10 @@ public class FloatAccessor implements PropertyAccessor<Float>
     {
         try
         {
+            if(s == null)
+            {
+                return null;
+            }
             Float f = new Float(s);
             return f;
         }

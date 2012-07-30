@@ -76,7 +76,7 @@ public class LongAccessor implements PropertyAccessor<Long>
     @Override
     public final String toString(Object object)
     {
-        return object.toString();
+        return object != null ? object.toString() : null;
     }
 
     /*
@@ -91,6 +91,10 @@ public class LongAccessor implements PropertyAccessor<Long>
     {
         try
         {
+            if(s == null)
+            {
+                return null;
+            }
             Long l = new Long(s);
             return l;
         }

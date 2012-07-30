@@ -65,7 +65,7 @@ public class BooleanAccessor implements PropertyAccessor<Boolean>
     @Override
     public String toString(Object object)
     {
-        return object.toString();
+        return object != null ? object.toString() : null;
     }
 
     /*
@@ -80,6 +80,11 @@ public class BooleanAccessor implements PropertyAccessor<Boolean>
     {
         try
         {
+            if(s == null)
+            {
+                return null;
+            }
+            
             Boolean b = new Boolean(s);
             return b;
         }

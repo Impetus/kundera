@@ -35,6 +35,10 @@ public class EnumAccessor implements PropertyAccessor<Enum>
         String s = null;
         try
         {
+            if(b == null)
+            {
+                return null;
+            }
             s = new String(b, Constants.ENCODING);
         }
         catch (UnsupportedEncodingException e)
@@ -61,6 +65,10 @@ public class EnumAccessor implements PropertyAccessor<Enum>
     @Override
     public String toString(Object object)
     {
+        if(object == null)
+        {
+            return null;
+        }
         Enum en = (Enum) object;
         return en.toString();
     }

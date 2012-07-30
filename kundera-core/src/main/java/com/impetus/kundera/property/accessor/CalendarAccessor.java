@@ -47,6 +47,10 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
         String s;
         try
         {
+            if(b == null)
+            {
+                return null;
+            }
             String s1 = new String(b);
             s = new String(b, Constants.ENCODING);
         }
@@ -68,6 +72,10 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
     @Override
     public byte[] toBytes(Object object)
     {
+        if(object == null)
+        {
+            return null;
+        }
         Calendar cal = (Calendar) object;
         return DateAccessor.getFormattedObect(cal.getTime().toString()).getBytes();
     }
@@ -82,7 +90,7 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
     public String toString(Object object)
     {
 
-        return object.toString();
+        return object != null ? object.toString() : null;
     }
 
     /*
@@ -95,6 +103,10 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
     @Override
     public Calendar fromString(Class targetClass, String s)
     {
+        if(s == null)
+        {
+            return null;
+        }
         Calendar cal = Calendar.getInstance();
         Date d;
         // d = (Date)DATE_FORMATTER.parse(s);

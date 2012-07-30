@@ -35,7 +35,7 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
     @Override
     public BigInteger fromBytes(Class targetClass, byte[] b)
     {
-        return new BigInteger(b);
+        return b != null ? new BigInteger(b) : null;
     }
 
     /*
@@ -47,6 +47,10 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
     @Override
     public byte[] toBytes(Object object)
     {
+        if(object == null)
+        {
+            return null;
+        }
         BigInteger b = (BigInteger) object;
         return b.toByteArray();
     }
@@ -60,7 +64,10 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
     @Override
     public String toString(Object object)
     {
-
+        if(object == null)
+        {
+            return null;
+        }
         return object.toString();
     }
 
@@ -74,7 +81,7 @@ public class BigIntegerAccessor implements PropertyAccessor<BigInteger>
     @Override
     public BigInteger fromString(Class targetClass, String s)
     {
-        return new BigInteger(s);
+        return s != null ? new BigInteger(s) : null;
     }
 
     public BigInteger getInstance(Class<?> clazz)

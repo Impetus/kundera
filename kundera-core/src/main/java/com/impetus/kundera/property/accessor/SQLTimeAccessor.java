@@ -41,6 +41,11 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
         String s;
         try
         {
+
+            if(b == null)
+            {
+                return null;
+            }
             s = new String(b, Constants.ENCODING);
         }
         catch (UnsupportedEncodingException e)
@@ -59,6 +64,11 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
     @Override
     public byte[] toBytes(Object object)
     {
+
+        if(object == null)
+        {
+            return null;
+        }
         Time t = (Time) object;
         return t.toString().getBytes();
     }
@@ -72,7 +82,7 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
     @Override
     public String toString(Object object)
     {
-        return object.toString();
+        return object != null ? object.toString() : null;
     }
 
     /*
@@ -85,6 +95,10 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
     @Override
     public Time fromString(Class targetClass, String s)
     {
+        if(s == null)
+        {
+            return null;
+        }
         Time t = Time.valueOf(s);
         return t;
     }
