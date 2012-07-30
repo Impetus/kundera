@@ -57,10 +57,14 @@ public class LongAccessor implements PropertyAccessor<Long>
     @Override
     public final byte[] toBytes(Object object)
     {
-        Long l = (Long) object;
-        ByteBuffer buffer = ByteBuffer.allocate(8);
-        buffer.putLong(l);
-        return buffer.array();
+        if(object != null)
+        {
+            Long l = (Long) object;
+            ByteBuffer buffer = ByteBuffer.allocate(8);
+            buffer.putLong(l);
+            return buffer.array();
+        }
+        return null;
     }
 
     /*
