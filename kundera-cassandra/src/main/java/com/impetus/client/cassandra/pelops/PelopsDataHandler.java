@@ -357,83 +357,9 @@ final class PelopsDataHandler
         // Instantiate a new instance
         Object entity = null;
         Map<String, Object> relations = new HashMap<String, Object>();
-
-        // Set row-key.
-        // PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
-        // PropertyAccessorHelper.set(entity, m.getIdColumn().getField(),
-        // thriftRow.getId());
-
-        // Iterate through each column
-        // if (m.isCounterColumnType())
-        // {
-        // for (CounterColumn c : thriftRow.getCounterColumns())
-        // {
-        // if (entity == null)
-        // {
-        // entity = clazz.newInstance();
-        // // Set row-key
-        // PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
-        // }
-        //
-        // String thriftColumnName =
-        // PropertyAccessorFactory.STRING.fromBytes(String.class, c.getName());
-        // Long thriftColumnValue = c.getValue();
-        //
-        // if (null == thriftColumnValue)
-        // {
-        // continue;
-        // }
-        //
-        // // Check if this is a property, or a column representing foreign
-        // // keys
-        // com.impetus.kundera.metadata.model.Column column =
-        // m.getColumn(thriftColumnName);
-        // if (column != null)
-        // {
-        // try
-        // {
-        // if ((column.getField().getType().equals(Integer.class) ||
-        // column.getField().getType()
-        // .equals(int.class))
-        // && thriftColumnValue != null)
-        // {
-        // PropertyAccessorHelper.set(entity, column.getField(),
-        // thriftColumnValue.intValue());
-        // }
-        // else
-        // {
-        // PropertyAccessorHelper.set(entity, column.getField(),
-        // thriftColumnValue);
-        // }
-        // }
-        // catch (PropertyAccessException pae)
-        // {
-        // log.warn(pae.getMessage());
-        // }
-        // }
-        // else
-        // {
-        // if (relationNames != null && !relationNames.isEmpty() &&
-        // relationNames.contains(thriftColumnName))
-        // {
-        // // relations = new HashMap<String, Object>();
-        // String value = thriftColumnValue.toString();
-        // relations.put(thriftColumnName, value);
-        // // prepare EnhanceEntity and return it
-        // }
-        // }
-        // }
-        // }
-        // else
-        // {
+      
         for (Column c : thriftRow.getColumns())
         {
-            if (entity == null)
-            {
-                entity = clazz.newInstance();
-                // Set row-key
-                PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
-            }
 
             String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, c.getName());
             byte[] thriftColumnValue = c.getValue();
@@ -448,6 +374,13 @@ final class PelopsDataHandler
             com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
             if (column != null)
             {
+                if (entity == null)
+                {
+                    entity = clazz.newInstance();
+                    // Set row-key
+                    PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
+                }
+                
                 try
                 {
                     PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue);
