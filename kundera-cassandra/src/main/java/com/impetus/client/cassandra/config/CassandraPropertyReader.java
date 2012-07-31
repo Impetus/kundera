@@ -69,13 +69,14 @@ public class CassandraPropertyReader implements PropertyReader
             String propertyName = puMetadata != null ? puMetadata
                     .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
 
-            InputStream inStream = propertyName != null ? ClassLoader.getSystemResourceAsStream(propertyName) : null;
+            InputStream inStream = propertyName != null ? Thread.currentThread().getContextClassLoader().getResourceAsStream(propertyName) : null;
 
-            if (inStream == null)
-            {
-                inStream = propertyName != null ? this.getClass().getClassLoader().getResourceAsStream(propertyName)
-                        : null;
-            }
+//            if (inStream == null)
+//            {
+//                inStream = propertyName != null ? this.getClass().getClassLoader().getResourceAsStream(propertyName)
+//                        : null;
+//            }
+            
             if (inStream != null)
             {
                 properties.load(inStream);
