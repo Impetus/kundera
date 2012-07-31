@@ -91,6 +91,8 @@ public class PersistenceDelegator
     private FlushModeType flushMode = FlushModeType.AUTO;
 
     private ObjectGraphBuilder graphBuilder;
+    
+    private PersistenceValidator validator;
 
     private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -114,6 +116,7 @@ public class PersistenceDelegator
     public PersistenceDelegator(EntityManagerSession session, PersistenceCache pc)
     {
         this.session = session;
+        validator = new PersistenceValidator();
         eventDispatcher = new EntityEventDispatcher();
         graphBuilder = new ObjectGraphBuilder(pc);
         this.persistenceCache = pc;
@@ -128,9 +131,14 @@ public class PersistenceDelegator
      * while flushing)
      */
     public void persist(Object e)
-    {
-        // Invoke Pre Persist Events
-        EntityMetadata metadata = getMetadata(e.getClass());
+    {       
+        //Validate entity
+        if(! validator.isValidEntityObject(e)) {
+            throw new IllegalArgumentException("Entity object is invalid, operation failed. Please check previous log message for details");
+        }        
+        
+        EntityMetadata metadata = getMetadata(e.getClass());        
+        // Invoke Pre-Persist Events
         getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
 
         // Create an object graph of the entity object

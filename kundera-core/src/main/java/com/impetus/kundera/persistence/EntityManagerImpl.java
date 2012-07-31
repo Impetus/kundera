@@ -266,13 +266,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     public final void persist(Object e)
     {
         checkClosed();
-        checkTransactionNeeded();
-
-        if (e == null)
-        {
-            getPersistenceDelegator().rollback();
-            throw new IllegalArgumentException("Entity to be persisted must not be null.");
-        }
+        checkTransactionNeeded();      
 
         try
         {
