@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -98,6 +99,12 @@ public class AbstractEntityReader
 
         for (Relation relation : m.getRelations())
         {
+            // Check whether that relation is already populated or not, before proceeding further.
+            Field f = relation.getProperty();
+            
+            if(PropertyAccessorHelper.getObject(entity, f) == null)
+            {
+            
             if (relation.isRelatedViaJoinTable())
             {
                 // M-M relationship. Relationship entities are always fetched
@@ -137,6 +144,8 @@ public class AbstractEntityReader
                             childMetadata);
                 }
 
+            }
+            
             }
 
         }

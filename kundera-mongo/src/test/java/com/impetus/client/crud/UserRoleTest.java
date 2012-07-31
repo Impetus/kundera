@@ -8,6 +8,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
+import junit.framework.Assert;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,11 +61,23 @@ public class UserRoleTest
     }
     
     @Test
-    public void testFind()
+    public void testFindbyRole()
     {
         String query = "Select r from Role r";
         Query q = em.createQuery(query);
-        q.getResultList();
+        List<Role> roles = q.getResultList();
+        Assert.assertNotNull(roles);
+        Assert.assertEquals(1, roles.size());
+    }
+    
+    @Test
+    public void testFindbyUser()
+    {
+        String query = "Select u from User u";
+        Query q = em.createQuery(query);
+        List<User> users = q.getResultList();
+        Assert.assertNotNull(users);
+        Assert.assertEquals(2, users.size());
     }
     
     @After
