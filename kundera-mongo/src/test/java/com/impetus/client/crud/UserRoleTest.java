@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * * Copyright 2012 Impetus Infotech.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ ******************************************************************************/
+
 package com.impetus.client.crud;
 
 import java.util.ArrayList;
@@ -18,13 +34,17 @@ import com.impetus.client.twitter.entities.Role;
 import com.impetus.client.twitter.entities.User;
 
 /**
- * @author vivek.mishra
- *
+ * The Class UserRoleTest.
  */
 public class UserRoleTest
 {
+    
+    /** The em. */
     private EntityManager em;
 
+    /**
+     * Sets the up.
+     */
     @Before
     public void setUp()
     {
@@ -32,8 +52,11 @@ public class UserRoleTest
         em = emf.createEntityManager();
     }
     
-//    @Test
-    public void testAssociation()
+    /**
+     * Test association.
+     */
+    @Test
+    public void testPersist()
     {
         Role rol = new Role();
         rol.setRolId(1);
@@ -60,6 +83,9 @@ public class UserRoleTest
         
     }
     
+    /**
+     * Test findby role.
+     */
     @Test
     public void testFindbyRole()
     {
@@ -70,6 +96,9 @@ public class UserRoleTest
         Assert.assertEquals(1, roles.size());
     }
     
+    /**
+     * Test findby user.
+     */
     @Test
     public void testFindbyUser()
     {
@@ -80,8 +109,13 @@ public class UserRoleTest
         Assert.assertEquals(2, users.size());
     }
     
+    /**
+     * Tear down.
+     */
     @After
     public void tearDown()
     {
+        em.close();
+        em = null;
     }
 }
