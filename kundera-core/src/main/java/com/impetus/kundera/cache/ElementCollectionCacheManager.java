@@ -213,7 +213,7 @@ public class ElementCollectionCacheManager
      */
     public void clearCache()
     {
-        this.elementCollectionCache = null;
+        elementCollectionCache = null;
         try
         {
             finalize();

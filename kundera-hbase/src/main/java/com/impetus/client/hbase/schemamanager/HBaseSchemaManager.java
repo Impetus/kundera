@@ -335,7 +335,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         }
         catch (ZooKeeperConnectionException e)
         {
-            logger.equals("Unable to connect to zookeeper, Caused by:" + e.getMessage());
+            logger.error("Unable to connect to zookeeper, Caused by:" + e.getMessage());
             throw new SchemaGenerationException(e, "Hbase");
         }
         return true;

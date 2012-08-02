@@ -79,8 +79,7 @@ public class CassandraSchemaOperationTest
     {
         configuration = new SchemaConfiguration("CassandraSchemaOperationTest");
         CassandraCli.cassandraSetUp();
-        CassandraCli cli = new CassandraCli();
-        client = cli.getClient();
+         client = new CassandraCli().getClient();
     }
 
     /**

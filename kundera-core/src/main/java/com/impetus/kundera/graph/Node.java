@@ -33,7 +33,7 @@ import com.impetus.kundera.utils.ObjectUtils;
  * 
  * @author amresh.singh
  */
-public class Node implements NodeStateContext
+public class Node implements NodeStateContext, Cloneable
 {
 
     // ID of a node into object graph

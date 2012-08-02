@@ -167,7 +167,7 @@ public class LuceneIndexer extends DocumentIndexer
      * 
      * @return index reader.
      */
-    private IndexReader getIndexReader()
+    private void getIndexReader()
     {
         flushInternal();
 
@@ -192,7 +192,7 @@ public class LuceneIndexer extends DocumentIndexer
                 throw new LuceneIndexingException(e);
             }
         }
-        return reader;
+//        return reader;
     }
 
     /**
@@ -242,7 +242,7 @@ public class LuceneIndexer extends DocumentIndexer
     public final Map<String, String> search(String luceneQuery, int start, int count, boolean fetchRelation)
     {
 
-        reader = getIndexReader();
+        getIndexReader();
         if (Constants.INVALID == count)
         {
             count = 100;

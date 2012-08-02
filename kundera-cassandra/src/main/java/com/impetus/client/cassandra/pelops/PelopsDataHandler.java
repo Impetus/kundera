@@ -502,7 +502,7 @@ final class PelopsDataHandler
         Object entity = null;
 
         // Map to hold property-name=>foreign-entity relations
-        Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+//        Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
@@ -643,7 +643,7 @@ final class PelopsDataHandler
         Object entity = null;
 
         // Map to hold property-name=>foreign-entity relations
-        Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+//        Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
         // Get a name->field map for super-columns
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();

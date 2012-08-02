@@ -821,7 +821,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         {
             log.warn("Default valdation class :" + CounterColumnType.class.getSimpleName()
                     + ", For counter column type, fields of Entity should be either long type or integer type");
-            return isValid = false;
+            return false;
         }
         return isValid;
     }

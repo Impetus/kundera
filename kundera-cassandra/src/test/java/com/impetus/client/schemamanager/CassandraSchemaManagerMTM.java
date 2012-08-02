@@ -72,8 +72,7 @@ public class CassandraSchemaManagerMTM
     {
         configuration = new SchemaConfiguration("cassandra");
         CassandraCli.cassandraSetUp();
-        CassandraCli cli = new CassandraCli();
-        client = cli.getClient();
+        client = new CassandraCli().getClient();
     }
 
     /**

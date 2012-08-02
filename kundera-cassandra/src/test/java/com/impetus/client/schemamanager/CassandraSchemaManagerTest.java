@@ -100,8 +100,7 @@ public class CassandraSchemaManagerTest
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli cli = new CassandraCli();
-        cli.getClient().system_drop_keyspace("KunderaCoreExmples");
+        new CassandraCli().getClient().system_drop_keyspace("KunderaCoreExmples");
     }
 
     /**

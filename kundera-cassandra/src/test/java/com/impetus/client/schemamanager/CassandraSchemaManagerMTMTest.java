@@ -72,8 +72,7 @@ public class CassandraSchemaManagerMTMTest
     {
         configuration = new SchemaConfiguration("CassandraSchemaManagerMTMTest");
         CassandraCli.cassandraSetUp();
-        CassandraCli cli = new CassandraCli();
-        client = cli.getClient();
+        client = new CassandraCli().getClient();
     }
 
     /**
