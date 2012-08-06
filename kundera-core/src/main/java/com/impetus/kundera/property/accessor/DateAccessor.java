@@ -99,9 +99,18 @@ public class DateAccessor implements PropertyAccessor<Date>
             {
                 return null;
             }
-            // return DATE_FORMATTER.parse(new String(bytes,
-            // Constants.ENCODING));
-            return getDateByPattern(new String(bytes, Constants.ENCODING));
+            
+            try
+            {
+                // In case date.getTime() is stored in DB.
+                LongAccessor longAccessor = new LongAccessor();
+                
+                return new Date(longAccessor.fromBytes(targetClass, bytes));
+            } catch(NumberFormatException nfex)
+            {
+                return getDateByPattern(new String(bytes, Constants.ENCODING));
+                
+            }
         }
         catch (Exception e)
         {
@@ -120,7 +129,13 @@ public class DateAccessor implements PropertyAccessor<Date>
     {
         try
         {
-            return DATE_FORMATTER.format(((Date) date)).getBytes(Constants.ENCODING);
+            if(date == null)
+            {
+                return null;
+            }
+            LongAccessor longAccessor = new LongAccessor();
+            return longAccessor.toBytes(((Date) date).getTime());
+//            return DATE_FORMATTER.format(((Date) date)).getBytes(Constants.ENCODING);
         }
         catch (Exception e)
         {

@@ -352,7 +352,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     @Override
     public boolean excludeUnlistedClasses()
     {
-        return false;
+        return excludeUnlistedClasses;
     }
 
     /*

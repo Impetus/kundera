@@ -1131,7 +1131,8 @@ final class PelopsDataHandler
 
             FilterClause clause = ((FilterClause) o);
             String rowKey = clause.getProperty();
-            String columnName = clause.getValue();
+            String columnName = clause.getValue().toString();
+
             String condition = clause.getCondition();
             log.debug("rowKey:" + rowKey + ";columnName:" + columnName + ";condition:" + condition);
 
