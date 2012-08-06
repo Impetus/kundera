@@ -171,7 +171,7 @@ public class MongoDBQuery extends QueryImpl
                 // String property = getColumnName(filter.getProperty());
                 String property = filter.getProperty();
                 String condition = filter.getCondition();
-                String value = filter.getValue();
+                String value = filter.getValue().toString();
 
                 // Property, if doesn't exist in entity, may be there in a
                 // document embedded within it, so we have to check that

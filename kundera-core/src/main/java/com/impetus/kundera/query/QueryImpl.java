@@ -294,22 +294,22 @@ public abstract class QueryImpl implements Query
                 }
                 else if (filter.getCondition().equalsIgnoreCase(">"))
                 {
-                    sb.append(appendRange(filter.getValue(), false, true));
+                    sb.append(appendRange(filter.getValue().toString(), false, true));
                     appended = true;
                 }
                 else if (filter.getCondition().equalsIgnoreCase(">="))
                 {
-                    sb.append(appendRange(filter.getValue(), true, true));
+                    sb.append(appendRange(filter.getValue().toString(), true, true));
                     appended = true;
                 }
                 else if (filter.getCondition().equalsIgnoreCase("<"))
                 {
-                    sb.append(appendRange(filter.getValue(), false, false));
+                    sb.append(appendRange(filter.getValue().toString(), false, false));
                     appended = true;
                 }
                 else if (filter.getCondition().equalsIgnoreCase("<="))
                 {
-                    sb.append(appendRange(filter.getValue(), true, false));
+                    sb.append(appendRange(filter.getValue().toString(), true, false));
                     appended = true;
                 }
 
@@ -615,7 +615,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Query setParameter(String name, Object value)
     {
-        kunderaQuery.setParameter(name, value.toString());
+        kunderaQuery.setParameter(name, value);
         return this;
     }
 
@@ -628,7 +628,7 @@ public abstract class QueryImpl implements Query
     @Override
     public Query setParameter(int position, Object value)
     {
-        kunderaQuery.setParameter(position, value.toString());
+        kunderaQuery.setParameter(position, value);
         return this;
     }
 
@@ -746,11 +746,11 @@ public abstract class QueryImpl implements Query
 
         if (paramParameter.getName() != null)
         {
-            kunderaQuery.setParameter(paramParameter.getName(), paramT.toString());
+            kunderaQuery.setParameter(paramParameter.getName(), paramT);
         }
         else
         {
-            kunderaQuery.setParameter(paramParameter.getPosition(), paramT.toString());
+            kunderaQuery.setParameter(paramParameter.getPosition(), paramT);
         }
 
         return this;

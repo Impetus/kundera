@@ -36,7 +36,7 @@ import com.impetus.client.crud.BaseTest;
  */
 public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
 {
-    public static final boolean RUN_IN_EMBEDDED_MODE = true;
+    public static final boolean RUN_IN_EMBEDDED_MODE = false;
 
     public static final boolean AUTO_MANAGE_SCHEMA = true;
 
@@ -59,7 +59,7 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
     protected Object studentId3;
 
     /** The enrolment date. */
-    protected Date enrolmentDate = new Date();
+    protected Date enrolmentDate = new Date(Long.parseLong("1344079065781"));
 
     /** The joining date and time. */
     protected Date joiningDateAndTime = new Date();
@@ -160,19 +160,19 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
     protected void onInsert(E instance) throws InstantiationException, IllegalAccessException
     {
 
-        em.persist(prepareData((Long) studentId1, 78575785897L, "Amresh", true, 10, 'C', (byte) 5, (short) 8,
-                (float) 69.6, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
+        em.persist(prepareData((Long) studentId1, 78575785897L, "Amresh", false, 10, 'A', (byte) 5, (short) 8,
+                (float) 69.3, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
                         978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, bigInteger, calendar,
                 ((E) instance.getClass().newInstance())));
 
-        em.persist(prepareData((Long) studentId2, 78575785897L, "Amresh", true, 20, 'C', (byte) 5, (short) 8,
-                (float) 69.6, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
-                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, bigInteger, calendar,
+        em.persist(prepareData((Long) studentId2, 78575785898L, "Amresh", true, 20, 'B', (byte) 50, (short) 8,
+                (float) 69.2, 163.86765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
+                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, new BigInteger("123456788"), calendar,
                 ((E) instance.getClass().newInstance())));
 
-        em.persist(prepareData((Long) studentId3, 78575785897L, "Amresh", true, 15, 'C', (byte) 5, (short) 8,
-                (float) 69.6, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
-                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, bigInteger, calendar,
+        em.persist(prepareData((Long) studentId3, 78575785899L, "Amresh", true, 15, 'C', (byte) 50, (short) 8,
+                (float) 61.6, 163.96765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
+                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, new BigInteger("123456787"), calendar,
                 ((E) instance.getClass().newInstance())));
 
     }
@@ -235,7 +235,7 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
             java.sql.Timestamp sqlTimestamp, BigDecimal bigDecimal, BigInteger bigInteger, Calendar calendar, E o)
     {
         o.setStudentId((Long) studentId);
-        o.setUniqueId(78575785897L);
+        o.setUniqueId(uniqueId);
         o.setStudentName(studentName);
         o.setExceptional(isExceptional);
         o.setAge(age);

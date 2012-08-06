@@ -543,12 +543,12 @@ public class KunderaQuery
      * @param value
      *            the value
      */
-    public final void setParameter(String name, String value)
+    public final void setParameter(String name, Object value)
     {
         setParameterValue(":" + name, value);
     }
 
-    public final void setParameter(int position, String value)
+    public final void setParameter(int position, Object value)
     {
         setParameterValue("?" + position, value);
     }
@@ -561,7 +561,7 @@ public class KunderaQuery
      * @param value
      *            parameter value.
      */
-    private void setParameterValue(String name, String value)
+    private void setParameterValue(String name, Object value)
     {
         if (typedParameter != null)
         {
@@ -627,7 +627,7 @@ public class KunderaQuery
         private String condition;
 
         /** The value. */
-        String value;
+        Object value;
 
         /**
          * The Constructor.
@@ -639,7 +639,7 @@ public class KunderaQuery
          * @param value
          *            the value
          */
-        public FilterClause(String property, String condition, String value)
+        public FilterClause(String property, String condition, Object value)
         {
             super();
             this.property = property;
@@ -672,7 +672,7 @@ public class KunderaQuery
          * 
          * @return the value
          */
-        public final String getValue()
+        public final Object getValue()
         {
             return value;
         }
@@ -683,7 +683,7 @@ public class KunderaQuery
          * @param value
          *            the value to set
          */
-        protected void setValue(String value)
+        protected void setValue(Object value)
         {
             this.value = value;
         }

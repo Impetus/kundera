@@ -17,9 +17,11 @@ package com.impetus.client.cassandra.query;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.persistence.Query;
 
@@ -43,6 +45,9 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.property.accessor.DateAccessor;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;
@@ -220,7 +225,7 @@ public class CassQuery extends QueryImpl implements Query
 
                 }
                 String condition = clause.getCondition();
-                String value = clause.getValue();
+                Object value = clause.getValue();
                 // value.e
                 /*
                  * if(idPresent) { expr = null; } else {
@@ -327,7 +332,7 @@ public class CassQuery extends QueryImpl implements Query
      *            value.
      * @return bytes value.
      */
-    private Bytes getBytesValue(String fieldName, EntityMetadata m, String value)
+    private Bytes getBytesValue(String fieldName, EntityMetadata m, Object value)
     {
         Column idCol = m.getIdColumn();
         Field f = null;
@@ -347,42 +352,46 @@ public class CassQuery extends QueryImpl implements Query
             f = col.getField();
         }
 
+        // need to do integer.parseInt..as value will be string in case of create query.
         if (f != null && f.getType() != null)
         {
             if (isId || f.getType().isAssignableFrom(String.class))
             {
 
-                return Bytes.fromByteArray(value.trim().getBytes());
+                return Bytes.fromByteArray(((String)value).getBytes());
             }
             else if (f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
             {
-                return Bytes.fromInt(Integer.parseInt(value));
+                return Bytes.fromInt(Integer.parseInt(value.toString()));
             }
             else if (f.getType().equals(long.class) || f.getType().isAssignableFrom(Long.class))
             {
 
-                return Bytes.fromLong(Long.parseLong(value));
+                return Bytes.fromLong(Long.parseLong(value.toString()));
             }
             else if (f.getType().equals(boolean.class) || f.getType().isAssignableFrom(Boolean.class))
             {
-                return Bytes.fromBoolean(Boolean.valueOf(value));
+                return Bytes.fromBoolean(Boolean.valueOf(value.toString()));
             }
             else if (f.getType().equals(double.class) || f.getType().isAssignableFrom(Double.class))
             {
-                return Bytes.fromDouble(Double.valueOf(value));
+                return Bytes.fromDouble(Double.valueOf(value.toString()));
             }
             else if (f.getType().isAssignableFrom(java.util.UUID.class))
             {
-                return Bytes.fromUuid(value);
+                return Bytes.fromUuid(UUID.fromString(value.toString()));
             }
             else if (f.getType().equals(float.class) || f.getType().isAssignableFrom(Float.class))
             {
-                return Bytes.fromFloat(Float.valueOf(value));
+                return Bytes.fromFloat(Float.valueOf(value.toString()));
+            } else if(f.getType().isAssignableFrom(Date.class))
+            {
+                DateAccessor dateAccessor = new DateAccessor();
+                return Bytes.fromByteArray(dateAccessor.toBytes(value));
             }
             else
             {
-                log.error("Error while handling data type for:" + fieldName);
-                throw new QueryHandlerException("unsupported data type:" + f.getType());
+                return Bytes.fromByteArray(PropertyAccessorFactory.getPropertyAccessor(f).toBytes(value));
             }
         }
         else
