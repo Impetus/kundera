@@ -314,27 +314,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     public void setFilter(Filter filter)
     {
         ((HBaseDataHandler) handler).setFilter(filter);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.client.Client#persist(com.impetus.kundera.graph.Node)
-     */
-    @Override
-    public void persist(Node node)
-    {
-        Object entity = node.getData();
-        String id = ObjectGraphUtils.getEntityId(node.getNodeId());
-
-        List<RelationHolder> relationHolders = getRelationHolders(node);
-
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-
-        onPersist(entityMetadata, entity, id, relationHolders);
-        indexNode(node, entityMetadata);
-    }
+    }    
 
     /**
      * On persist.

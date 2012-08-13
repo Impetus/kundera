@@ -259,7 +259,8 @@ public class PelopsClient extends ClientBase implements Client<CassQuery>
                     .getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit())).getConnection().getAPI();
             try
             {
-                cassandra_client.remove_counter(ByteBuffer.wrap(pKey.toString().getBytes()), path, consistencyLevel);
+                cassandra_client.remove_counter(ByteBuffer.wrap(pKey.toString().getBytes()), path, consistencyLevel);              
+                
             }
             catch (InvalidRequestException ire)
             {

@@ -46,6 +46,8 @@ import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.client.cassandra.common.CassandraIndexHelper;
+import com.impetus.client.cassandra.datahandler.DataHandler;
+import com.impetus.client.cassandra.datahandler.DataHandlerBase;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
@@ -68,7 +70,7 @@ import com.impetus.kundera.query.QueryHandlerException;
  * 
  * @author amresh.singh
  */
-final class PelopsDataHandler
+final class PelopsDataHandler extends DataHandlerBase implements DataHandler
 {
     /** The timestamp. */
     private long timestamp = System.currentTimeMillis();
