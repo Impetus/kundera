@@ -18,6 +18,7 @@ package com.impetus.client.cassandra.pelops;
 import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
+import org.scale7.cassandra.pelops.SimpleConnectionAuthenticator;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,6 +102,30 @@ public class PelopsUtils
             policy = null;
         }
         return policy;
+    }
+    
+    /**
+     * If userName and password provided, Method prepares for
+     * AuthenticationRequest.
+     * 
+     * @param props
+     *            properties
+     * 
+     * @return simple authenticator request. returns null if userName/password
+     *         are not provided.
+     * 
+     */
+    public static SimpleConnectionAuthenticator getAuthenticationRequest(Properties props)
+    {
+        String userName = (String) props.get(PersistenceProperties.KUNDERA_USERNAME);
+        String password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
+
+        SimpleConnectionAuthenticator authenticator = null;
+        if (userName != null || password != null)
+        {
+            authenticator = new SimpleConnectionAuthenticator(userName, password);
+        }
+        return authenticator;
     }
 
 }

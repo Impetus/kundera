@@ -17,8 +17,6 @@ package com.impetus.client.cassandra.thrift;
 
 import java.util.Properties;
 
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.util.Version;
 import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.IConnection;
 import org.scale7.cassandra.pelops.Pelops;
@@ -34,15 +32,10 @@ import com.impetus.client.cassandra.query.CassandraEntityReader;
 import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
-import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.persistence.EntityReader;
 
 /**
  * A factory of {@link ThriftClient}
@@ -55,17 +48,6 @@ public class ThriftClientFactory extends GenericClientFactory
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(ThriftClientFactory.class);
 
-    /** The index manager. */
-    private IndexManager indexManager;
-
-    /** The reader. */
-    private EntityReader reader;
-
-    /** Configure schema manager. */
-    private SchemaManager schemaManager;
-
-    /** Property reader. */
-    private PropertyReader propertyReader;
 
     @Override
     public SchemaManager getSchemaManager()
@@ -86,14 +68,7 @@ public class ThriftClientFactory extends GenericClientFactory
 
     @Override
     public void initialize()
-    {
-
-        logger.info("Initializing Threadsafe Indexmanager. Is it really threadsafe?");
-
-        String luceneDirPath = MetadataUtils.getLuceneDirectory(getPersistenceUnit());
-        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
-                luceneDirPath));
-
+    {       
         reader = new CassandraEntityReader();
         propertyReader = new CassandraPropertyReader();
         propertyReader.read(getPersistenceUnit());
@@ -114,7 +89,7 @@ public class ThriftClientFactory extends GenericClientFactory
         if (Pelops.getDbConnPool(poolName) == null)
         {
             Cluster cluster = new Cluster(contactNodes, new IConnection.Config(Integer.parseInt(defaultPort), true, -1,
-                    getAuthenticationRequest(props)), false);
+                    PelopsUtils.getAuthenticationRequest(props)), false);
 
             Policy policy = PelopsUtils.getPoolConfigPolicy(persistenceUnitMetadata);
 
@@ -137,30 +112,6 @@ public class ThriftClientFactory extends GenericClientFactory
     public boolean isThreadSafe()
     {
         return false;
-    }
-    
-    /**
-     * If userName and password provided, Method prepares for
-     * AuthenticationRequest.
-     * 
-     * @param props
-     *            properties
-     * 
-     * @return simple authenticator request. returns null if userName/password
-     *         are not provided.
-     * 
-     */
-    private SimpleConnectionAuthenticator getAuthenticationRequest(Properties props)
-    {
-        String userName = (String) props.get(PersistenceProperties.KUNDERA_USERNAME);
-        String password = (String) props.get(PersistenceProperties.KUNDERA_PASSWORD);
-
-        SimpleConnectionAuthenticator authenticator = null;
-        if (userName != null || password != null)
-        {
-            authenticator = new SimpleConnectionAuthenticator(userName, password);
-        }
-        return authenticator;
-    }
+    }   
 
 }

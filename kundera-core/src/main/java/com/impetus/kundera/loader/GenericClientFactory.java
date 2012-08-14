@@ -15,13 +15,21 @@
  ******************************************************************************/
 package com.impetus.kundera.loader;
 
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.configure.PropertyReader;
+import com.impetus.kundera.configure.schema.api.SchemaManager;
+import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.index.LuceneIndexer;
+import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ClientMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.persistence.EntityReader;
 
 /**
  * Abstract class to hold generic definitions for client factory
@@ -43,8 +51,19 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
 
     /** The connection pool or connection. */
     private Object connectionPoolOrConnection;
+    
+    /** The index manager. */
+    protected IndexManager indexManager;
 
-    // private SchemaExpo
+    /** The reader. */
+    protected EntityReader reader;
+
+    /** Configure schema manager. */
+    protected SchemaManager schemaManager;
+
+    /** property reader instance */
+    protected PropertyReader propertyReader;
+
 
     /**
      * Load.
@@ -79,11 +98,18 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
         if (KunderaMetadata.INSTANCE.getClientMetadata(persistenceUnit) == null)
         {
             ClientMetadata clientMetadata = new ClientMetadata();
-            String secIndex = KunderaMetadata.INSTANCE.getApplicationMetadata()
+            String luceneDirectoryPath = KunderaMetadata.INSTANCE.getApplicationMetadata()
                     .getPersistenceUnitMetadata(persistenceUnit)
                     .getProperty(PersistenceProperties.KUNDERA_INDEX_HOME_DIR);
-            clientMetadata.setLuceneIndexDir(secIndex);
+
+            // Add client metadata
+            clientMetadata.setLuceneIndexDir(luceneDirectoryPath);
             KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
+
+            // Set Index Manager
+            indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
+                    luceneDirectoryPath));       
+            
         }
     }
 
@@ -172,5 +198,6 @@ public abstract class GenericClientFactory implements ClientFactory, ClientLifeC
     private void setPersistenceUnit(String persistenceUnit)
     {
         this.persistenceUnit = persistenceUnit;
-    }
+    }      
+    
 }

@@ -19,66 +19,37 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTablePool;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.util.Version;
 
 import com.impetus.client.hbase.config.HBasePropertyReader;
 import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
-import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.persistence.EntityReader;
 
 /**
  * HBaseClientFactory, instantiates client for HBase
  */
 public class HBaseClientFactory extends GenericClientFactory
-{
-
-    /** The index manager. */
-    private IndexManager indexManager;
+{    
 
     /** The conf. */
     private HBaseConfiguration conf;
 
     /** The h table pool. */
-    private HTablePool hTablePool;
-
-    /** The reader. */
-    private EntityReader reader;
+    private HTablePool hTablePool;   
 
     /** The Constant DEFAULT_POOL_SIZE. */
     private static final int DEFAULT_POOL_SIZE = 100;
 
     /** The pool size. */
     private int poolSize;
-
-    /** Configure schema manager. */
-    private SchemaManager schemaManager;
-
-    /** property reader instance */
-    private PropertyReader propertyReader;
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.loader.GenericClientFactory#initializeClient()
-     */
+    
     @Override
     public void initialize()
     {
-        // Initialize Index Manager
-        String luceneDirPath = MetadataUtils.getLuceneDirectory(getPersistenceUnit());
-        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
-                luceneDirPath));
-
         // Initialize HBase configuration
         PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(getPersistenceUnit());
 
@@ -110,12 +81,7 @@ public class HBaseClientFactory extends GenericClientFactory
         // schemaManager.exportSchema();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
-     */
+
     @Override
     protected Object createPoolOrConnection()
     {
@@ -123,33 +89,19 @@ public class HBaseClientFactory extends GenericClientFactory
         return hTablePool;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient()
-     */
+
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
         return new HBaseClient(indexManager, conf, hTablePool, reader, persistenceUnit);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.loader.GenericClientFactory#isClientThreadSafe()
-     */
     @Override
     public boolean isThreadSafe()
     {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.loader.Loader#unload(java.lang.String[])
-     */
     @Override
     public void destroy()
     {

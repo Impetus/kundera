@@ -19,11 +19,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,22 +30,16 @@ import com.impetus.client.mongodb.config.MongoDBPropertyReader.MongoDBSchemaMeta
 import com.impetus.client.mongodb.schemamanager.MongoDBSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
-import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
-import com.impetus.kundera.index.IndexManager;
-import com.impetus.kundera.index.LuceneIndexer;
 import com.impetus.kundera.loader.ClientLoaderException;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.loader.KunderaAuthenticationException;
-import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.persistence.EntityReader;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.MongoOptions;
-import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
 
 /**
@@ -57,41 +48,20 @@ import com.mongodb.ServerAddress;
 public class MongoDBClientFactory extends GenericClientFactory
 {
     /** The logger. */
-    private static Logger logger = LoggerFactory.getLogger(MongoDBClientFactory.class);
-
-    /** The index manager. */
-    IndexManager indexManager;
+    private static Logger logger = LoggerFactory.getLogger(MongoDBClientFactory.class);    
 
     /** The mongo db. */
-    private DB mongoDB;
-
-    /** The reader. */
-    private EntityReader reader;
-
-    /** Configure schema manager. */
-    private SchemaManager schemaManager;
-
-    /** property reader instance */
-    private PropertyReader propertyReader;
+    private DB mongoDB;    
+    
 
     @Override
     public void initialize()
-    {
-        String luceneDirPath = MetadataUtils.getLuceneDirectory(getPersistenceUnit());
-        indexManager = new IndexManager(LuceneIndexer.getInstance(new StandardAnalyzer(Version.LUCENE_34),
-                luceneDirPath));
-        reader = new MongoEntityReader();
-
+    {      
+        reader = new MongoEntityReader();        
         propertyReader = new MongoDBPropertyReader();
         propertyReader.read(getPersistenceUnit());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.loader.GenericClientFactory#createPoolOrConnection()
-     */
     @Override
     protected Object createPoolOrConnection()
     {
@@ -99,11 +69,7 @@ public class MongoDBClientFactory extends GenericClientFactory
         return mongoDB;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.loader.GenericClientFactory#instantiateClient()
-     */
+
     @Override
     protected Client instantiateClient(String persistenceUnit)
     {
@@ -184,27 +150,17 @@ public class MongoDBClientFactory extends GenericClientFactory
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.loader.GenericClientFactory#isClientThreadSafe()
-     */
     @Override
     public boolean isThreadSafe()
     {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.loader.Loader#unload(java.lang.String[])
-     */
     @Override
     public void destroy()
     {
         indexManager.close();
-        getSchemaManager().dropSchema();
+        schemaManager.dropSchema();
         if (mongoDB != null)
         {
             logger.info("Closing connection to mongodb.");
