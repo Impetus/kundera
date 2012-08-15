@@ -77,7 +77,7 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
             return null;
         }
         Calendar cal = (Calendar) object;
-        return DateAccessor.getFormattedObect(cal.getTime().toString()).getBytes();
+        return DateAccessor.getFormattedObject(cal.getTime().toString()).getBytes();
     }
 
     /*

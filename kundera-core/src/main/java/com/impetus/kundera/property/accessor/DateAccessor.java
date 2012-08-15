@@ -225,7 +225,7 @@ public class DateAccessor implements PropertyAccessor<Date>
      * @throws PropertyAccessException
      *             throws only if invalid format is supplied.
      */
-    public static String getFormattedObect(String date)
+    public static String getFormattedObject(String date)
     {
         return date != null ? getDateByPattern(date).toString() : null;
     }
