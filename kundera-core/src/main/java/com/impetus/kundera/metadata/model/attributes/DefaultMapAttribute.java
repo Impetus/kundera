@@ -13,17 +13,16 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-
-package com.impetus.kundera.metadata.model.attributes.impl;
+package com.impetus.kundera.metadata.model.attributes;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
+import java.util.Map;
 
-import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.ManagedType;
+import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.Type;
 
-import com.impetus.kundera.metadata.model.attributes.AbstractPluralAttribute;
+
 
 /**
  * TODO::::: comments required.
@@ -33,8 +32,8 @@ import com.impetus.kundera.metadata.model.attributes.AbstractPluralAttribute;
  * @param <X>
  * @param <E>
  */
-public class DefaultCollectionAttribute<X, E> extends AbstractPluralAttribute<X, E, Collection<E>> implements
-        CollectionAttribute<X, E>
+public class DefaultMapAttribute<X, K, V> extends AbstractPluralAttribute<X, V, Map<K, V>> implements
+        MapAttribute<X, K, V>
 {
 
     /**
@@ -44,11 +43,36 @@ public class DefaultCollectionAttribute<X, E> extends AbstractPluralAttribute<X,
      * @param managedType
      * @param member
      */
-    public DefaultCollectionAttribute(Type<E> attribType, String attribName,
+    public DefaultMapAttribute(Type<V> attribType, String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
             ManagedType<X> managedType, Field member)
     {
         super(attribType, attribName, persistenceAttribType, managedType, member);
+        // TODO Auto-generated constructor stub
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.metamodel.MapAttribute#getKeyJavaType()
+     */
+    @Override
+    public Class<K> getKeyJavaType()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.metamodel.MapAttribute#getKeyType()
+     */
+    @Override
+    public Type<K> getKeyType()
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /*
@@ -73,7 +97,7 @@ public class DefaultCollectionAttribute<X, E> extends AbstractPluralAttribute<X,
      * #getElementType()
      */
     @Override
-    public Type<E> getElementType()
+    public Type<V> getElementType()
     {
         // TODO Auto-generated method stub
         return null;
@@ -105,5 +129,4 @@ public class DefaultCollectionAttribute<X, E> extends AbstractPluralAttribute<X,
         // TODO Auto-generated method stub
         return false;
     }
-
 }
