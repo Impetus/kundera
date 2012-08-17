@@ -36,7 +36,7 @@ public class DateAccessor implements PropertyAccessor<Date>
 {
 
     /** The Constant DATE_FORMATTER. */
-    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("dd MMM yyyy HH:mm:ss:S Z",
+    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS Z",
             Locale.ENGLISH);
 
     /** The patterns. */
@@ -44,6 +44,7 @@ public class DateAccessor implements PropertyAccessor<Date>
 
     static
     {
+        patterns.add("yyyy-MM-dd HH:mm:ss,SSS Z");
         patterns.add("E MMM dd HH:mm:ss z yyyy");
         patterns.add("dd MMM yyyy HH:mm:ss:SSS");
         patterns.add("dd MMM yyyy H:mm:ss:SSS");
@@ -152,7 +153,18 @@ public class DateAccessor implements PropertyAccessor<Date>
     @Override
     public final String toString(Object object)
     {
-        return object != null? object.toString():null;
+        if(object == null)
+        {
+            return null;
+        }
+        else if(object instanceof Date)
+        {
+            return DATE_FORMATTER.format((Date)object);
+        }
+        else
+        {
+            return object.toString();
+        }
     }
 
     /*
@@ -195,7 +207,7 @@ public class DateAccessor implements PropertyAccessor<Date>
         {
             try
             {
-                DateFormat formatter = new SimpleDateFormat(p);
+                DateFormat formatter = new SimpleDateFormat(p, Locale.ENGLISH);
                 Date dt = formatter.parse(date);
                 return dt;
             }
@@ -225,7 +237,7 @@ public class DateAccessor implements PropertyAccessor<Date>
      * @throws PropertyAccessException
      *             throws only if invalid format is supplied.
      */
-    public static String getFormattedObect(String date)
+    public static String getFormattedObject(String date)
     {
         return date != null ? getDateByPattern(date).toString() : null;
     }
