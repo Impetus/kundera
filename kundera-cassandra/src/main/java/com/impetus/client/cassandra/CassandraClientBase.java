@@ -15,13 +15,27 @@
  */
 package com.impetus.client.cassandra;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
+import javax.persistence.PersistenceException;
+
+import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
+import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.thrift.TimedOutException;
+import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.thrift.TException;
 
+import com.impetus.client.cassandra.pelops.PelopsClient;
+import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
@@ -36,6 +50,9 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
  */
 public abstract class CassandraClientBase extends ClientBase
 {
+    
+    /** log for this class. */
+    private static Log log = LogFactory.getLog(CassandraClientBase.class);
     
     /**
      * Populates foreign key as column.
@@ -131,6 +148,41 @@ public abstract class CassandraClientBase extends ClientBase
         return counterCol;
     }
     
+    /**
+     * Deletes record for given primary key from counter column family
+     * @param pKey
+     * @param metadata
+     */
+    protected void deleteRecordFromCounterColumnFamily(Object pKey, EntityMetadata metadata, ConsistencyLevel consistencyLevel, Cassandra.Client cassandra_client)
+    {
+        ColumnPath path = new ColumnPath(metadata.getTableName());
+        
+        try
+        {
+            cassandra_client.remove_counter(ByteBuffer.wrap(pKey.toString().getBytes()), path, consistencyLevel);              
+            
+        }
+        catch (InvalidRequestException ire)
+        {
+            log.error("Error during executing delete, Caused by :" + ire.getMessage());
+            throw new PersistenceException(ire);
+        }
+        catch (UnavailableException ue)
+        {
+            log.error("Error during executing delete, Caused by :" + ue.getMessage());
+            throw new PersistenceException(ue);
+        }
+        catch (TimedOutException toe)
+        {
+            log.error("Error during executing delete, Caused by :" + toe.getMessage());
+            throw new PersistenceException(toe);
+        }
+        catch (TException te)
+        {
+            log.error("Error during executing delete, Caused by :" + te.getMessage());
+            throw new PersistenceException(te);
+        }
+    }  
     
 
 }

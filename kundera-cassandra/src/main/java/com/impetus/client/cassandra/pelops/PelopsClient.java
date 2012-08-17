@@ -33,7 +33,6 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
-import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
@@ -244,33 +243,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
         if (metadata.isCounterColumnType())
         {
-            ColumnPath path = new ColumnPath(metadata.getTableName());
             Cassandra.Client cassandra_client = PelopsUtils.getCassandraClient(getPersistenceUnit());
-            try
-            {
-                cassandra_client.remove_counter(ByteBuffer.wrap(pKey.toString().getBytes()), path, consistencyLevel);              
-                
-            }
-            catch (InvalidRequestException ire)
-            {
-                log.error("Error during executing delete, Caused by :" + ire.getMessage());
-                throw new PersistenceException(ire);
-            }
-            catch (UnavailableException ue)
-            {
-                log.error("Error during executing delete, Caused by :" + ue.getMessage());
-                throw new PersistenceException(ue);
-            }
-            catch (TimedOutException toe)
-            {
-                log.error("Error during executing delete, Caused by :" + toe.getMessage());
-                throw new PersistenceException(toe);
-            }
-            catch (TException te)
-            {
-                log.error("Error during executing delete, Caused by :" + te.getMessage());
-                throw new PersistenceException(te);
-            }
+            deleteRecordFromCounterColumnFamily(pKey, metadata, consistencyLevel, cassandra_client);
         }
         else
         {
@@ -286,6 +260,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         invertedIndexHandler.deleteRecordsFromIndexTable(entity, metadata, consistencyLevel);
         
     }
+
+    
 
 
     @Override
@@ -837,7 +813,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             List<CounterSuperColumn> thriftCounterSuperColumns = tf.getCounterSuperColumns();
             if (thriftCounterColumns != null && !thriftCounterColumns.isEmpty())
             {
-                // Bytes.fromL
                 mutator.writeCounterColumns(metadata.getTableName(), Bytes.fromUTF8(tf.getId()),
                         Arrays.asList(tf.getCounterColumns().toArray(new CounterColumn[0])));
             }

@@ -53,7 +53,7 @@ public class ThriftClientFactory extends GenericClientFactory
     {
         if (schemaManager == null)
         {
-            schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
+            schemaManager = new CassandraSchemaManager(ThriftClientFactory.class.getName());
         }
         return schemaManager;
     }
