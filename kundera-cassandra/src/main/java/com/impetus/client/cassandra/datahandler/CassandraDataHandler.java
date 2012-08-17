@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.client.cassandra.thrift;
-
-import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
-import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
+package com.impetus.client.cassandra.datahandler;
 
 /**
- * Data handler for Thrift Clients 
+ * Defines low level database methods for Cassandra 
  * @author amresh.singh
  */
-public final class ThriftDataHandler extends CassandraDataHandlerBase implements CassandraDataHandler
+public interface CassandraDataHandler
 {
 
 }

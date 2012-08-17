@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
 
-import com.impetus.client.cassandra.common.CassandraIndexHelper;
+import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;

@@ -17,7 +17,9 @@ package com.impetus.client.cassandra.pelops;
 
 import java.util.Properties;
 
+import org.apache.cassandra.thrift.Cassandra;
 import org.apache.commons.lang.StringUtils;
+import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.SimpleConnectionAuthenticator;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
 import org.slf4j.Logger;
@@ -126,6 +128,17 @@ public class PelopsUtils
             authenticator = new SimpleConnectionAuthenticator(userName, password);
         }
         return authenticator;
+    }
+    
+    
+    /**
+     * Returns instance of {@link Cassandra.Client} for a given persistence unit
+     * @param persistenceUnit
+     * @return
+     */
+    public static Cassandra.Client getCassandraClient(String persistenceUnit)
+    {
+        return Pelops.getDbConnPool(PelopsUtils.generatePoolName(persistenceUnit)).getConnection().getAPI();
     }
 
 }
