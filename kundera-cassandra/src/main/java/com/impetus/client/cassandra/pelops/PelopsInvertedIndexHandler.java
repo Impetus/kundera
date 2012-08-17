@@ -94,7 +94,7 @@ public class PelopsInvertedIndexHandler implements InvertedIndexHandler
     public List<SearchResult> getSearchResults(EntityMetadata m, Queue<FilterClause> filterClauseQueue,
             String persistenceUnit, ConsistencyLevel consistencyLevel)
     {
-        String columnFamilyName = m.getTableName();
+        String columnFamilyName = m.getTableName() + Constants.INDEX_TABLE_SUFFIX;
 
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(persistenceUnit));
 
