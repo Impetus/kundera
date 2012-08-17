@@ -216,7 +216,8 @@ public class PropertyAccessorHelper
         // Otherwise, as Kundera currently supports only field access, access
         // the underlying Entity's id field
         return getString(entity, metadata.getIdColumn().getField());
-    }
+    }  
+    
 
     /**
      * Sets Primary Key (Row key) into entity field that was annotated with @Id.

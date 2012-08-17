@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.client.cassandra.thrift;
+package com.impetus.client.cassandra.common;
 
-import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
-import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
+import java.nio.charset.Charset;
 
 /**
- * Data handler for Thrift Clients 
+ * Provides utilities methods
  * @author amresh.singh
  */
-public final class ThriftDataHandler extends CassandraDataHandlerBase implements CassandraDataHandler
+public class Utilities
 {
+    
+    public static String toUTF8(byte[] value) {
+        return value == null ? null : new String(value, Charset.forName("UTF-8")); 
+    }
 
 }
