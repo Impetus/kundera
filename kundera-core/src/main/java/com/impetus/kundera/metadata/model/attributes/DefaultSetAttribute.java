@@ -35,6 +35,7 @@ import javax.persistence.metamodel.Type;
 public class DefaultSetAttribute<X, E> extends AbstractPluralAttribute<X, E, Set<E>> implements SetAttribute<X, E>
 {
 
+    
     /**
      * @param attribType
      * @param attribName
@@ -42,11 +43,11 @@ public class DefaultSetAttribute<X, E> extends AbstractPluralAttribute<X, E, Set
      * @param managedType
      * @param member
      */
-    public DefaultSetAttribute(Type<E> attribType, String attribName,
-            javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
-            ManagedType<X> managedType, Field member)
+    public DefaultSetAttribute(Type<E> attribType, String attribName, 
+                               javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
+                               ManagedType<X> managedType, Field member, Class<Set<E>> clazz)
     {
-        super(attribType, attribName, persistenceAttribType, managedType, member);
+        super(attribType, attribName, persistenceAttribType, managedType, member, clazz);
     }
 
     /* (non-Javadoc)
@@ -55,38 +56,25 @@ public class DefaultSetAttribute<X, E> extends AbstractPluralAttribute<X, E, Set
     @Override
     public javax.persistence.metamodel.PluralAttribute.CollectionType getCollectionType()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return CollectionType.SET;
     }
 
+    
     /* (non-Javadoc)
-     * @see com.impetus.kundera.metadata.model.attributes.AbstractPluralAttribute#getElementType()
+     * @see javax.persistence.metamodel.PluralAttribute#getElementType()
      */
     @Override
     public Type<E> getElementType()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return this.attribType;
     }
 
     /* (non-Javadoc)
-     * @see com.impetus.kundera.metadata.model.attributes.AbstractAttribute#getBindableType()
+     * @see javax.persistence.metamodel.Attribute#getJavaType()
      */
     @Override
-    public javax.persistence.metamodel.Bindable.BindableType getBindableType()
+    public Class<Set<E>> getJavaType()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return  super.getBoundJavaType();
     }
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.metadata.model.attributes.AbstractAttribute#isCollection()
-     */
-    @Override
-    public boolean isCollection()
-    {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
 }

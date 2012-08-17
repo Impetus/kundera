@@ -22,8 +22,6 @@ import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.Type;
 
-
-
 /**
  * TODO::::: comments required.
  * 
@@ -36,6 +34,10 @@ public class DefaultMapAttribute<X, K, V> extends AbstractPluralAttribute<X, V, 
         MapAttribute<X, K, V>
 {
 
+    private Class<K> keyClazz;
+
+    private Type<K> keyType;
+
     /**
      * @param attribType
      * @param attribName
@@ -45,10 +47,11 @@ public class DefaultMapAttribute<X, K, V> extends AbstractPluralAttribute<X, V, 
      */
     public DefaultMapAttribute(Type<V> attribType, String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
-            ManagedType<X> managedType, Field member)
+            ManagedType<X> managedType, Field member, Class<Map<K, V>> clazz, Class<K> keyClazz, Type<K> keyType)
     {
-        super(attribType, attribName, persistenceAttribType, managedType, member);
-        // TODO Auto-generated constructor stub
+        super(attribType, attribName, persistenceAttribType, managedType, member, clazz);
+        this.keyClazz = keyClazz;
+        this.keyType = keyType;
     }
 
     /*
@@ -59,8 +62,7 @@ public class DefaultMapAttribute<X, K, V> extends AbstractPluralAttribute<X, V, 
     @Override
     public Class<K> getKeyJavaType()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return this.keyClazz;
     }
 
     /*
@@ -71,8 +73,7 @@ public class DefaultMapAttribute<X, K, V> extends AbstractPluralAttribute<X, V, 
     @Override
     public Type<K> getKeyType()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return this.keyType;
     }
 
     /*
@@ -85,8 +86,7 @@ public class DefaultMapAttribute<X, K, V> extends AbstractPluralAttribute<X, V, 
     @Override
     public javax.persistence.metamodel.PluralAttribute.CollectionType getCollectionType()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return CollectionType.MAP;
     }
 
     /*
@@ -99,21 +99,7 @@ public class DefaultMapAttribute<X, K, V> extends AbstractPluralAttribute<X, V, 
     @Override
     public Type<V> getElementType()
     {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.metadata.model.attributes.AbstractAttribute#
-     * getBindableType()
-     */
-    @Override
-    public javax.persistence.metamodel.Bindable.BindableType getBindableType()
-    {
-        // TODO Auto-generated method stub
-        return null;
+        return attribType;
     }
 
     /*
@@ -126,7 +112,18 @@ public class DefaultMapAttribute<X, K, V> extends AbstractPluralAttribute<X, V, 
     @Override
     public boolean isCollection()
     {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.persistence.metamodel.Attribute#getJavaType()
+     */
+    @Override
+    public Class<Map<K, V>> getJavaType()
+    {
+        return super.getBoundJavaType();
+    }
+
 }

@@ -17,6 +17,7 @@ package com.impetus.kundera.metadata.model.attributes;
 
 import java.lang.reflect.Field;
 
+import javax.persistence.metamodel.Bindable.BindableType;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.PluralAttribute.CollectionType;
 import javax.persistence.metamodel.Type;
@@ -30,6 +31,9 @@ import javax.persistence.metamodel.Type;
  */
 public abstract class AbstractPluralAttribute<X,E,T> extends AbstractAttribute<X,E>
 {
+    
+    private Class<T> collectionClazz;
+
     /**
      * @param attribType
      * @param attribName
@@ -39,9 +43,28 @@ public abstract class AbstractPluralAttribute<X,E,T> extends AbstractAttribute<X
      */
     public AbstractPluralAttribute(Type<E> attribType, String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
-            ManagedType<X> managedType, Field member)
+            ManagedType<X> managedType, Field member, Class<T> clazz)
     {
         super(attribType, attribName, persistenceAttribType, managedType, member);
+        this.collectionClazz = clazz;
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.metadata.model.attributes.AbstractAttribute#getBindableType()
+     */
+    @Override
+    public javax.persistence.metamodel.Bindable.BindableType getBindableType()
+    {
+        return BindableType.PLURAL_ATTRIBUTE;
+    }
+    
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.metadata.model.attributes.AbstractAttribute#isCollection()
+     */
+    @Override
+    public boolean isCollection()
+    {
+        return true;
     }
 
     /**
@@ -52,20 +75,13 @@ public abstract class AbstractPluralAttribute<X,E,T> extends AbstractAttribute<X
     public abstract CollectionType getCollectionType();
 
     /**
-     * Return the type representing the element type of the collection.
+     * Returns get java type.
      * 
-     * @return element type
+     * @return java type.
      */
-    public abstract Type<E> getElementType();
-    
-
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.metadata.model.attributes.AbstractAttribute#getJavaType()
-     */
-    public Class<T> getJavaType()
+    protected Class<T> getBoundJavaType()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return collectionClazz;
     }
 
 }

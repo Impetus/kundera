@@ -45,9 +45,9 @@ public class DefaultCollectionAttribute<X, E> extends AbstractPluralAttribute<X,
      */
     public DefaultCollectionAttribute(Type<E> attribType, String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
-            ManagedType<X> managedType, Field member)
+            ManagedType<X> managedType, Field member, Class<Collection<E>> clazz)
     {
-        super(attribType, attribName, persistenceAttribType, managedType, member);
+        super(attribType, attribName, persistenceAttribType, managedType, member,clazz);
     }
 
     /*
@@ -60,8 +60,7 @@ public class DefaultCollectionAttribute<X, E> extends AbstractPluralAttribute<X,
     @Override
     public javax.persistence.metamodel.PluralAttribute.CollectionType getCollectionType()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return CollectionType.COLLECTION;
     }
 
     /*
@@ -74,35 +73,18 @@ public class DefaultCollectionAttribute<X, E> extends AbstractPluralAttribute<X,
     @Override
     public Type<E> getElementType()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return attribType;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.metadata.model.attributes.AbstractAttribute#
-     * getBindableType()
+  
+    
+    /* (non-Javadoc)
+     * @see javax.persistence.metamodel.Attribute#getJavaType()
      */
     @Override
-    public javax.persistence.metamodel.Bindable.BindableType getBindableType()
+    public Class<Collection<E>> getJavaType()
     {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.metadata.model.attributes.AbstractAttribute#isCollection
-     * ()
-     */
-    @Override
-    public boolean isCollection()
-    {
-        // TODO Auto-generated method stub
-        return false;
+        return  super.getBoundJavaType();
     }
 
 }
