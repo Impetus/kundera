@@ -160,7 +160,7 @@ public interface Client<Q extends Query>
     /**
      * Delete rows from given table for given column name and corresponding
      * value..
-     * 
+     * @param schemaName Schema Name
      * @param tableName
      *            Name of the table
      * @param columnName
@@ -168,7 +168,7 @@ public interface Client<Q extends Query>
      * @param columnValue
      *            Name of column value
      */
-    void deleteByColumn(String tableName, String columnName, Object columnValue);
+    void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue);
 
     /**
      * Find list of entities for given column name and column value, if index

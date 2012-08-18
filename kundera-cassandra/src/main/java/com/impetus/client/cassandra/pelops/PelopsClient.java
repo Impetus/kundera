@@ -28,9 +28,7 @@ import java.util.Set;
 import javax.persistence.PersistenceException;
 
 import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
@@ -40,11 +38,8 @@ import org.apache.cassandra.thrift.CqlResult;
 import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexOperator;
-import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeySlice;
-import org.apache.cassandra.thrift.KsDef;
-import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -80,7 +75,6 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
-import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
@@ -132,19 +126,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         this.invertedIndexHandler = new PelopsInvertedIndexHandler();
         this.reader = reader;
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
-     * java.lang.String)
-     */
+    
     @Override
     public final Object find(Class entityClass, Object rowId)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
-        List<String> relationNames = entityMetadata.getRelationNames();
-        return find(entityClass, entityMetadata, rowId != null ? rowId.toString() : null, relationNames);
+        return super.find(entityClass, rowId);
     }
 
     /*
@@ -178,6 +164,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      *            array of row key s
      * @return list of wrapped entities.
      */
+    @Override
     public final List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
             Object... rowIds)
     {
@@ -374,7 +361,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
 
     // Incorrect
-    public void deleteByColumn(String tableName, String columnName, Object columnValue)
+    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
 
         if (!isOpen())
@@ -866,36 +853,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     }
       
 
-    /**
-     * Find.
-     * 
-     * @param clazz
-     *            the clazz
-     * @param metadata
-     *            the metadata
-     * @param rowId
-     *            the row id
-     * @param relationNames
-     *            the relation names
-     * @return the object
-     */
-    private final Object find(Class<?> clazz, EntityMetadata metadata, Object rowId, List<String> relationNames)
-    {
-
-        List<Object> result = null;
-        try
-        {
-            result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata,
-                    rowId != null ? rowId.toString() : null);
-        }
-        catch (Exception e)
-        {
-            log.error("Error on retrieval" + e.getMessage());
-            throw new PersistenceException(e);
-        }
-
-        return result != null & !result.isEmpty() ? result.get(0) : null;
-    }
+    
 
     /**
      * Populate data.
@@ -1029,123 +987,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
     }
 
-    /**
-     * Creates secondary indexes on columns if not already created.
-     * 
-     * @param tableName
-     *            Column family name
-     * @param poolName
-     *            Pool Name
-     * @param columns
-     *            List of columns
-     */
-    private void createIndexesOnColumns(String tableName, String poolName, List<Column> columns)
-    {
-        String keyspace = Pelops.getDbConnPool(poolName).getKeyspace();
-        try
-        {
-            Cassandra.Client api = Pelops.getDbConnPool(poolName).getConnection().getAPI();
-            KsDef ksDef = api.describe_keyspace(keyspace);
-            List<CfDef> cfDefs = ksDef.getCf_defs();
-
-            // Column family definition on which secondary index creation is
-            // required
-            CfDef columnFamilyDefToUpdate = null;
-            boolean isUpdatable = false;
-            // boolean isNew=false;
-            for (CfDef cfDef : cfDefs)
-            {
-                if (cfDef.getName().equals(tableName))
-                {
-                    columnFamilyDefToUpdate = cfDef;
-                    // isNew=false;
-                    break;
-                }
-            }
-
-            // //create a column family, in case it is not already available.
-            // if(columnFamilyDefToUpdate == null)
-            // {
-            // isNew = true;
-            // columnFamilyDefToUpdate = new CfDef(keyspace, tableName);
-            // ksDef.addToCf_defs(columnFamilyDefToUpdate);
-            // }
-
-            // Get list of indexes already created
-            List<ColumnDef> columnMetadataList = columnFamilyDefToUpdate.getColumn_metadata();
-            List<String> indexList = new ArrayList<String>();
-
-            if (columnMetadataList != null)
-            {
-                for (ColumnDef columnDef : columnMetadataList)
-                {
-                    indexList.add(Bytes.toUTF8(columnDef.getName()));
-                }
-                // need to set them to null else it is giving problem on update
-                // column family and trying to add again existing indexes.
-                // columnFamilyDefToUpdate.column_metadata = null;
-            }
-
-            // Iterate over all columns for creating secondary index on them
-            for (Column column : columns)
-            {
-
-                ColumnDef columnDef = new ColumnDef();
-
-                columnDef.setName(column.getName());
-                columnDef.setValidation_class("UTF8Type");
-                columnDef.setIndex_type(IndexType.KEYS);
-
-                // String indexName =
-                // PelopsUtils.getSecondaryIndexName(tableName, column);
-
-                // Add secondary index only if it's not already created
-                // (if already created, it would be there in column family
-                // definition)
-                if (!indexList.contains(Bytes.toUTF8(column.getName())))
-                {
-                    isUpdatable = true;
-                    columnFamilyDefToUpdate.addToColumn_metadata(columnDef);
-                }
-            }
-
-            // Finally, update column family with modified column family
-            // definition
-            if (isUpdatable)
-            {
-                api.system_update_column_family(columnFamilyDefToUpdate);
-            }// } else
-             // {
-             // api.system_add_column_family(columnFamilyDefToUpdate);
-             // }
-
-        }
-        catch (InvalidRequestException e)
-        {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
-
-        }
-        catch (SchemaDisagreementException e)
-        {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
-
-        }
-        catch (TException e)
-        {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
-
-        }
-        catch (NotFoundException e)
-        {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
-
-        }
-        catch (PropertyAccessException e)
-        {
-            log.warn("Could not create secondary index on column family " + tableName + ".Details:" + e.getMessage());
-
-        }
-    }
+    
 
     /**
      * Load super columns.

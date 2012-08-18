@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
@@ -52,6 +53,8 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
+import com.impetus.kundera.property.PropertyAccessor;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
@@ -98,6 +101,18 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     @Override
     public Object find(Class entityClass, Object key)
     {
+        return super.find(entityClass, key);
+    }
+    
+    @Override
+    public final List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
+            Object... rowIds)
+    {
+        if (!isOpen())
+        {
+            throw new PersistenceException("ThriftClient is closed.");
+        }
+        
         return null;
     }
 
@@ -175,11 +190,45 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         // Delete from Inverted Index if applicable        
         invertedIndexHandler.deleteRecordsFromIndexTable(entity, metadata, consistencyLevel);
     }
-
+    
     @Override
-    public void persistJoinTable(JoinTableData joinTableData)
+    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
+        if (!isOpen())
+        {
+            throw new PersistenceException("ThriftClient is closed.");
+        }
+        
+        try
+        {
+            cassandra_client.set_keyspace(schemaName);         
+            ColumnPath path = new ColumnPath(tableName);        
+            cassandra_client.remove(ByteBuffer.wrap(columnValue.toString().getBytes()), path, System.currentTimeMillis(), consistencyLevel);
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error while deleting column value. Details:" + e.getMessage());
+            throw new PersistenceException("Error while deleting column value", e);
+        }
+        catch (TException e)
+        {
+            log.error("Error while deleting column value. Details:" + e.getMessage());
+            throw new PersistenceException("Error while deleting column value", e);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error while deleting column value. Details:" + e.getMessage());
+            throw new PersistenceException("Error while deleting column value", e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while deleting column value. Details:" + e.getMessage());
+            throw new PersistenceException("Error while deleting column value", e);
+        }
+
     }
+
+    
 
     @Override
     public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, String pKeyColumnValue)
@@ -194,10 +243,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return null;
     }
 
-    @Override
-    public void deleteByColumn(String tableName, String columnName, Object columnValue)
-    {
-    }
+    
 
     @Override
     public List<Object> findByRelation(String colName, String colValue, Class entityClazz)
@@ -374,6 +420,79 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             throw new KunderaException(e);
         }
 
+    }
+    
+    @Override
+    public void persistJoinTable(JoinTableData joinTableData)
+    {
+        String poolName = PelopsUtils.generatePoolName(getPersistenceUnit());        
+
+        String joinTableName = joinTableData.getJoinTableName();
+        String invJoinColumnName = joinTableData.getInverseJoinColumnName();
+        Map<Object, Set<Object>> joinTableRecords = joinTableData.getJoinTableRecords();
+        
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(joinTableData.getEntityClass());
+        
+        try
+        {
+            cassandra_client.set_keyspace(entityMetadata.getSchema());       
+            // Create Insertion List
+            List<Mutation> insertion_list = new ArrayList<Mutation>();
+
+            for (Object key : joinTableRecords.keySet())
+            {
+                PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(entityMetadata.getIdColumn().getField());
+                byte[] rowKey = accessor.toBytes(key);          
+                
+                Set<Object> values = joinTableRecords.get(key);
+                List<Column> columns = new ArrayList<Column>();
+                for (Object value : values)
+                {
+                    Column column = new Column();
+                    column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName + "_" + (String) value));
+                    column.setValue(PropertyAccessorFactory.STRING.toBytes((String) value));
+                    column.setTimestamp(System.currentTimeMillis());
+
+                    columns.add(column);
+                    
+                    Mutation mut = new Mutation();
+                    mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setColumn(column));
+                    insertion_list.add(mut);
+                }
+
+                createIndexesOnColumns(joinTableName, poolName, columns);
+                
+                // Create Mutation Map
+                Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
+                columnFamilyValues.put(joinTableName, insertion_list);
+                Map<ByteBuffer, Map<String, List<Mutation>>> mulationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
+                mulationMap.put(ByteBuffer.wrap(rowKey), columnFamilyValues);
+
+                // Write Mutation map to database
+                cassandra_client.batch_mutate(mulationMap, consistencyLevel);     
+                
+            }
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error while inserting record into join table. Details: " + e.getMessage());
+            throw new PersistenceException("Error while inserting record into join table", e);
+        }
+        catch (TException e)
+        {
+            log.error("Error while inserting record into join table. Details: " + e.getMessage());
+            throw new PersistenceException("Error while inserting record into join table", e);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error while inserting record into join table. Details: " + e.getMessage());
+            throw new PersistenceException("Error while inserting record into join table", e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while inserting record into join table. Details: " + e.getMessage());
+            throw new PersistenceException("Error while inserting record into join table", e);
+        }
     }
 
     /**
