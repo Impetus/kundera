@@ -331,7 +331,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
      * java.lang.String, java.lang.Object)
      */
-    public void deleteByColumn(String tableName, String columnName, Object columnValue)
+    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
 
         StringBuffer query = new StringBuffer();

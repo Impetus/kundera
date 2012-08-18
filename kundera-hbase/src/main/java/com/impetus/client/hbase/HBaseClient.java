@@ -40,12 +40,9 @@ import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
-import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -399,13 +396,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
-     * java.lang.String, java.lang.Object)
-     */
-    public void deleteByColumn(String tableName, String columnName, Object columnValue)
+    
+    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
     {
         try
         {
@@ -428,7 +420,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     public void delete(Object entity, Object pKey)
     {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-        deleteByColumn(metadata.getTableName(), metadata.getIdColumn().getName(), pKey);
+        deleteByColumn(metadata.getSchema(), metadata.getTableName(), metadata.getIdColumn().getName(), pKey);
     }
 
     /*
