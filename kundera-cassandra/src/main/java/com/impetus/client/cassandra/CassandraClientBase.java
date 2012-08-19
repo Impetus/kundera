@@ -317,6 +317,15 @@ public abstract class CassandraClientBase extends ClientBase
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<String> relationNames = entityMetadata.getRelationNames();
         return find(entityClass, entityMetadata, rowId != null ? rowId.toString() : null, relationNames);
+    }       
+    
+    public <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
+    {
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+        List<E> results = new ArrayList<E>();
+        results = find(entityClass, entityMetadata.getRelationNames(), entityMetadata.getRelationNames() != null
+                && !entityMetadata.getRelationNames().isEmpty(), entityMetadata, rowIds);
+        return results.isEmpty() ? null : results;
     }
     
     /**

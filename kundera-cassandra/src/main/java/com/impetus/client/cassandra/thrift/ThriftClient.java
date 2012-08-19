@@ -18,27 +18,46 @@ package com.impetus.client.cassandra.thrift;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
+import org.apache.cassandra.db.ColumnFamilyStore;
+import org.apache.cassandra.db.Row;
+import org.apache.cassandra.db.Table;
+import org.apache.cassandra.db.columniterator.IdentityQueryFilter;
+import org.apache.cassandra.db.filter.IFilter;
+import org.apache.cassandra.dht.IPartitioner;
+import org.apache.cassandra.dht.Range;
+import org.apache.cassandra.dht.Token;
+import org.apache.cassandra.service.StorageService;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
+import org.apache.cassandra.thrift.IndexClause;
+import org.apache.cassandra.thrift.IndexExpression;
+import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.Mutation;
+import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
+import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
@@ -52,6 +71,7 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -97,202 +117,13 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         this.reader = reader;
 
     }
-
-    @Override
-    public Object find(Class entityClass, Object key)
-    {
-        return super.find(entityClass, key);
-    }
     
-    @Override
-    public final List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
-            Object... rowIds)
-    {
-        if (!isOpen())
-        {
-            throw new PersistenceException("ThriftClient is closed.");
-        }
-        
-        return null;
-    }
-
-    @Override
-    public <E> List<E> findAll(Class<E> entityClass, Object... keys)
-    {
-        return null;
-    }
-
-    @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
-    {
-        return null;
-    }
-
-    @Override
-    public void close()
-    {
-        this.indexManager.flush();
-        this.dataHandler = null;
-        this.invertedIndexHandler = null;
-        this.cassandra_client = null;
-
-        closed = true;
-    }
-
-    @Override
-    public void delete(Object entity, Object pKey)
-    {
-        if (!isOpen())
-        {
-            throw new PersistenceException("ThriftClient is closed.");
-        }
-        
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-        try
-        {
-            cassandra_client.set_keyspace(metadata.getSchema());            
-            
-            if (metadata.isCounterColumnType())
-            {
-                deleteRecordFromCounterColumnFamily(pKey, metadata, consistencyLevel, cassandra_client);
-            }
-            else
-            {
-                ColumnPath path = new ColumnPath(metadata.getTableName());
-                
-                cassandra_client.remove(ByteBuffer.wrap(pKey.toString().getBytes()), path, System.currentTimeMillis(), consistencyLevel);
-            }
-        }
-        catch (InvalidRequestException e)
-        {
-            log.error("Error while deleting row from table. Details:" + e.getMessage());
-            throw new KunderaException("Error while deleting row from table", e);
-        }
-        catch (TException e)
-        {
-            log.error("Error while deleting row from table. Details:" + e.getMessage());
-            throw new KunderaException("Error while deleting row from table", e);
-        }
-        catch (UnavailableException e)
-        {
-            log.error("Error while deleting row from table. Details:" + e.getMessage());
-            throw new KunderaException("Error while deleting row from table", e);
-        }
-        catch (TimedOutException e)
-        {
-            log.error("Error while deleting row from table. Details:" + e.getMessage());
-            throw new KunderaException("Error while deleting row from table", e);
-        }
-        
-        // Delete from Lucene if applicable
-        getIndexManager().remove(metadata, entity, pKey.toString());
-        
-        // Delete from Inverted Index if applicable        
-        invertedIndexHandler.deleteRecordsFromIndexTable(entity, metadata, consistencyLevel);
-    }
-    
-    @Override
-    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
-    {
-        if (!isOpen())
-        {
-            throw new PersistenceException("ThriftClient is closed.");
-        }
-        
-        try
-        {
-            cassandra_client.set_keyspace(schemaName);         
-            ColumnPath path = new ColumnPath(tableName);        
-            cassandra_client.remove(ByteBuffer.wrap(columnValue.toString().getBytes()), path, System.currentTimeMillis(), consistencyLevel);
-        }
-        catch (InvalidRequestException e)
-        {
-            log.error("Error while deleting column value. Details:" + e.getMessage());
-            throw new PersistenceException("Error while deleting column value", e);
-        }
-        catch (TException e)
-        {
-            log.error("Error while deleting column value. Details:" + e.getMessage());
-            throw new PersistenceException("Error while deleting column value", e);
-        }
-        catch (UnavailableException e)
-        {
-            log.error("Error while deleting column value. Details:" + e.getMessage());
-            throw new PersistenceException("Error while deleting column value", e);
-        }
-        catch (TimedOutException e)
-        {
-            log.error("Error while deleting column value. Details:" + e.getMessage());
-            throw new PersistenceException("Error while deleting column value", e);
-        }
-
-    }
-
-    
-
-    @Override
-    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, String pKeyColumnValue)
-    {
-        return null;
-    }
-
-    @Override
-    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
-            Class entityClazz)
-    {
-        return null;
-    }
-
-    
-
-    @Override
-    public List<Object> findByRelation(String colName, String colValue, Class entityClazz)
-    {
-        return null;
-    }
-
-    @Override
-    public EntityReader getReader()
-    {
-        return null;
-    }
-
-    @Override
-    public Class<CassQuery> getQueryImplementor()
-    {
-        return null;
-    }
-
-    @Override
-    public String getPersistenceUnit()
-    {
-        return super.getPersistenceUnit();
-    }
-
     @Override
     public void persist(Node node)
     {
         super.persist(node);
     }
-
-    @Override
-    protected List<RelationHolder> getRelationHolders(Node node)
-    {
-        return super.getRelationHolders(node);
-    }
-
-    @Override
-    protected void indexNode(Node node, EntityMetadata entityMetadata)
-    {
-        super.indexNode(node, entityMetadata);
-
-        // Write to inverted index table if applicable
-        //setCassandraClient();
-        invertedIndexHandler.writeToInvertedIndexTable(node, entityMetadata, getPersistenceUnit(), consistencyLevel,
-                dataHandler);
-
-    }
-
+    
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
@@ -494,6 +325,277 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             throw new PersistenceException("Error while inserting record into join table", e);
         }
     }
+    
+    @Override
+    protected void indexNode(Node node, EntityMetadata entityMetadata)
+    {
+        super.indexNode(node, entityMetadata);
+
+        // Write to inverted index table if applicable
+        //setCassandraClient();
+        invertedIndexHandler.writeToInvertedIndexTable(node, entityMetadata, getPersistenceUnit(), consistencyLevel,
+                dataHandler);
+
+    }
+
+    @Override
+    public Object find(Class entityClass, Object key)
+    {
+        return super.find(entityClass, key);
+    }
+    
+    @Override
+    public <E> List<E> findAll(Class<E> entityClass, Object... keys)
+    {
+        return super.findAll(entityClass, keys);
+    }
+    
+    @Override
+    public final List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
+            Object... rowIds)
+    {
+        if (!isOpen())
+        {
+            throw new PersistenceException("ThriftClient is closed.");
+        }
+        
+        List entities = null;
+        
+        
+        //TODO: Implement this
+        
+        return entities;
+    }
+    
+
+    @Override
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
+    {
+        //TODO: Implement this
+        
+        return null;
+    }
+    
+    @Override
+    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, String pKeyColumnValue)
+    {        
+       
+        byte[] rowKey = pKeyColumnValue.getBytes();
+        
+        SlicePredicate predicate = new SlicePredicate(); 
+        SliceRange sliceRange = new SliceRange(); 
+        sliceRange.setStart(new byte[0]); 
+        sliceRange.setFinish(new byte[0]); 
+        predicate.setSlice_range(sliceRange);
+
+        ColumnParent parent = new ColumnParent(tableName); 
+        List<ColumnOrSuperColumn> results;
+        try
+        {
+            results = cassandra_client.get_slice(ByteBuffer.wrap(rowKey), parent, predicate, consistencyLevel);
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error while getting columns for row Key " + pKeyColumnValue + ". Details:" + e.getMessage());
+            throw new EntityReaderException("Error while getting columns for row Key " + pKeyColumnValue, e);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error while getting columns for row Key " + pKeyColumnValue + ". Details:" + e.getMessage());
+            throw new EntityReaderException("Error while getting columns for row Key " + pKeyColumnValue, e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while getting columns for row Key " + pKeyColumnValue + ". Details:" + e.getMessage());
+            throw new EntityReaderException("Error while getting columns for row Key " + pKeyColumnValue, e);
+        }
+        catch (TException e)
+        {
+            log.error("Error while getting columns for row Key " + pKeyColumnValue + ". Details:" + e.getMessage());
+            throw new EntityReaderException("Error while getting columns for row Key " + pKeyColumnValue, e);
+        } 
+
+        List<Column> columns = new ArrayList<Column>();
+        for (ColumnOrSuperColumn result : results) {     
+          Column column = result.column;     
+          columns.add(column);
+        }      
+        
+        List<E> foreignKeys = dataHandler.getForeignKeysFromJoinTable(columnName, columns);
+        return foreignKeys;
+    }
+
+    @Override
+    public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
+            Class entityClazz)
+    {       
+        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        String childIdStr = (String) columnValue;
+
+        
+        IndexExpression ie = new IndexExpression(Bytes.fromUTF8(columnName + "_" + childIdStr).getBytes(),
+                IndexOperator.EQ, Bytes.fromUTF8(childIdStr).getBytes());
+        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, ie);
+        
+        IFilter filter = new IdentityQueryFilter();
+        IPartitioner p = StorageService.getPartitioner();
+        Range range = new Range(p.getMinimumToken(), p.getMinimumToken());
+        ColumnFamilyStore cfs = Table.open(metadata.getSchema()).getColumnFamilyStore(tableName);
+
+        //List<Row> rows = cfs.scan(ix, range, filter);
+        
+        
+
+        Map<Bytes, List<Column>> qResults = null; 
+            //selector.getIndexedColumns(tableName, ix, slicePredicate, consistencyLevel);
+
+        List<Object> rowKeys = new ArrayList<Object>();
+
+        // iterate through complete map and
+        Iterator<Bytes> rowIter = qResults.keySet().iterator();
+        while (rowIter.hasNext())
+        {
+            Bytes rowKey = rowIter.next();
+
+            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn()
+                    .getField());
+            Object value = accessor.fromBytes(metadata.getIdColumn().getField().getClass(), rowKey.toByteArray());
+
+            rowKeys.add(value);
+        }
+
+        if (rowKeys != null && !rowKeys.isEmpty())
+        {
+            return rowKeys.toArray(new Object[0]);
+        }
+        return null;
+    }    
+
+    @Override
+    public List<Object> findByRelation(String colName, String colValue, Class entityClazz)
+    {
+        return null;
+    }
+
+
+    
+
+    @Override
+    public void delete(Object entity, Object pKey)
+    {
+        if (!isOpen())
+        {
+            throw new PersistenceException("ThriftClient is closed.");
+        }
+        
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
+        try
+        {
+            cassandra_client.set_keyspace(metadata.getSchema());            
+            
+            if (metadata.isCounterColumnType())
+            {
+                deleteRecordFromCounterColumnFamily(pKey, metadata, consistencyLevel, cassandra_client);
+            }
+            else
+            {
+                ColumnPath path = new ColumnPath(metadata.getTableName());
+                
+                cassandra_client.remove(ByteBuffer.wrap(pKey.toString().getBytes()), path, System.currentTimeMillis(), consistencyLevel);
+            }
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error while deleting row from table. Details:" + e.getMessage());
+            throw new KunderaException("Error while deleting row from table", e);
+        }
+        catch (TException e)
+        {
+            log.error("Error while deleting row from table. Details:" + e.getMessage());
+            throw new KunderaException("Error while deleting row from table", e);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error while deleting row from table. Details:" + e.getMessage());
+            throw new KunderaException("Error while deleting row from table", e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while deleting row from table. Details:" + e.getMessage());
+            throw new KunderaException("Error while deleting row from table", e);
+        }
+        
+        // Delete from Lucene if applicable
+        getIndexManager().remove(metadata, entity, pKey.toString());
+        
+        // Delete from Inverted Index if applicable        
+        invertedIndexHandler.deleteRecordsFromIndexTable(entity, metadata, consistencyLevel);
+    }
+    
+    @Override
+    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
+    {
+        if (!isOpen())
+        {
+            throw new PersistenceException("ThriftClient is closed.");
+        }
+        
+        try
+        {
+            cassandra_client.set_keyspace(schemaName);         
+            ColumnPath path = new ColumnPath(tableName);        
+            cassandra_client.remove(ByteBuffer.wrap(columnValue.toString().getBytes()), path, System.currentTimeMillis(), consistencyLevel);
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error while deleting column value. Details:" + e.getMessage());
+            throw new PersistenceException("Error while deleting column value", e);
+        }
+        catch (TException e)
+        {
+            log.error("Error while deleting column value. Details:" + e.getMessage());
+            throw new PersistenceException("Error while deleting column value", e);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error while deleting column value. Details:" + e.getMessage());
+            throw new PersistenceException("Error while deleting column value", e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while deleting column value. Details:" + e.getMessage());
+            throw new PersistenceException("Error while deleting column value", e);
+        }
+
+    }
+
+    
+    @Override
+    public EntityReader getReader()
+    {
+        return null;
+    }
+
+    @Override
+    public Class<CassQuery> getQueryImplementor()
+    {
+        return null;
+    }
+
+    @Override
+    public String getPersistenceUnit()
+    {
+        return super.getPersistenceUnit();
+    }
+
+    
+
+    @Override
+    protected List<RelationHolder> getRelationHolders(Node node)
+    {
+        return super.getRelationHolders(node);
+    } 
 
     /**
      * Checks if is open.
@@ -503,6 +605,17 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     private final boolean isOpen()
     {
         return !closed;
+    }
+    
+    @Override
+    public void close()
+    {
+        this.indexManager.flush();
+        this.dataHandler = null;
+        this.invertedIndexHandler = null;
+        this.cassandra_client = null;
+
+        closed = true;
     }
     
     private void setCassandraClient() {

@@ -133,20 +133,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return super.find(entityClass, rowId);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#find(java.lang.Class,
-     * java.lang.String[])
-     */
+    
     @Override
     public final <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
     {
-        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
-        List<E> results = new ArrayList<E>();
-        results = find(entityClass, entityMetadata.getRelationNames(), entityMetadata.getRelationNames() != null
-                && !entityMetadata.getRelationNames().isEmpty(), entityMetadata, rowIds);
-        return results.isEmpty() ? null : results;
+        return super.findAll(entityClass, rowIds);
     }
 
     /**
