@@ -41,15 +41,19 @@ import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
+import org.apache.cassandra.thrift.CqlResult;
+import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.Mutation;
+import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
@@ -432,7 +436,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
             Class entityClazz)
     {       
-        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
+        /*SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
         String childIdStr = (String) columnValue;
 
@@ -453,17 +457,55 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         List<Object> rowKeys = new ArrayList<Object>();
         
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn()
-                .getField());
-        for(Row row : rows) {
-            ByteBuffer key = row.key.key;
-            byte[] keyArr = key.array();
-            Object value = accessor.fromBytes(metadata.getIdColumn().getField().getClass(), keyArr);
-            rowKeys.add(value);
-        }
-        if (rowKeys != null && !rowKeys.isEmpty())
+                .getField());*/
+        
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        List<Object> rowKeys = new ArrayList<Object>();
+        CqlResult result = null;
+        String cqlQuery = "select * from " + tableName + " where " + columnName + "_" + columnValue + "=" + columnValue;
+        try
         {
-            return rowKeys.toArray(new Object[0]);
+            result = cassandra_client.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
+                    org.apache.cassandra.thrift.Compression.NONE);
+            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn()
+                    .getField());
+            
+            List<CqlRow> rows = result.getRows();
+            
+            for(CqlRow row : rows) {
+                byte[] key = row.getKey();
+                
+                Object value = accessor.fromBytes(metadata.getIdColumn().getField().getClass(), key);
+                rowKeys.add(value);
+            }
+            if (rowKeys != null && !rowKeys.isEmpty())
+            {
+                return rowKeys.toArray(new Object[0]);
+            }
         }
+        catch (InvalidRequestException e)
+        {
+            e.printStackTrace();
+        }
+        catch (UnavailableException e)
+        {
+            e.printStackTrace();
+        }
+        catch (TimedOutException e)
+        {
+            e.printStackTrace();
+        }
+        catch (SchemaDisagreementException e)
+        {
+            e.printStackTrace();
+        }
+        catch (TException e)
+        {
+            e.printStackTrace();
+        }
+        
+        
+        
         return null;
     }    
 
