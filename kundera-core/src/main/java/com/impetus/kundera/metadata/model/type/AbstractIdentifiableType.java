@@ -15,9 +15,12 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model.type;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.metamodel.IdentifiableType;
+import javax.persistence.metamodel.ManagedType;
+import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
@@ -28,6 +31,20 @@ import javax.persistence.metamodel.Type;
  */
 public class AbstractIdentifiableType<X> extends AbstractManagedType<X> implements IdentifiableType<X>
 {
+
+    /**
+     * @param clazz
+     * @param persistenceType
+     * @param superClazzType
+     * @param declaredSingluarAttribs
+     * @param declaredPluralAttributes
+     */
+    public AbstractIdentifiableType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
+            ManagedType<? super X> superClazzType, Map<String, SingularAttribute<X, ?>> declaredSingluarAttribs,
+            Map<String, PluralAttribute<X, ?, ?>> declaredPluralAttributes)
+    {
+        super(clazz, persistenceType, superClazzType, declaredSingluarAttribs, declaredPluralAttributes);
+    }
 
     /* (non-Javadoc)
      * @see javax.persistence.metamodel.IdentifiableType#getId(java.lang.Class)
