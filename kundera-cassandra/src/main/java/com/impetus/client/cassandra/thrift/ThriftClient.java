@@ -18,9 +18,9 @@ package com.impetus.client.cassandra.thrift;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
@@ -32,7 +32,6 @@ import org.apache.cassandra.db.columniterator.IdentityQueryFilter;
 import org.apache.cassandra.db.filter.IFilter;
 import org.apache.cassandra.dht.IPartitioner;
 import org.apache.cassandra.dht.Range;
-import org.apache.cassandra.dht.Token;
 import org.apache.cassandra.service.StorageService;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
@@ -42,7 +41,6 @@ import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
-import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.InvalidRequestException;
@@ -56,7 +54,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
-import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.client.cassandra.CassandraClientBase;
@@ -64,12 +61,15 @@ import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.EntityReaderException;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
@@ -267,8 +267,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         try
         {
             cassandra_client.set_keyspace(entityMetadata.getSchema());       
-            // Create Insertion List
-            List<Mutation> insertion_list = new ArrayList<Mutation>();
+            
 
             for (Object key : joinTableRecords.keySet())
             {
@@ -277,6 +276,10 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 
                 Set<Object> values = joinTableRecords.get(key);
                 List<Column> columns = new ArrayList<Column>();
+                
+                // Create Insertion List
+                List<Mutation> insertionList = new ArrayList<Mutation>();
+                
                 for (Object value : values)
                 {
                     Column column = new Column();
@@ -288,14 +291,14 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     
                     Mutation mut = new Mutation();
                     mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setColumn(column));
-                    insertion_list.add(mut);
+                    insertionList.add(mut);
                 }
 
                 createIndexesOnColumns(joinTableName, poolName, columns);
                 
                 // Create Mutation Map
                 Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
-                columnFamilyValues.put(joinTableName, insertion_list);
+                columnFamilyValues.put(joinTableName, insertionList);
                 Map<ByteBuffer, Map<String, List<Mutation>>> mulationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
                 mulationMap.put(ByteBuffer.wrap(rowKey), columnFamilyValues);
 
@@ -436,35 +439,27 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         
         IndexExpression ie = new IndexExpression(Bytes.fromUTF8(columnName + "_" + childIdStr).getBytes(),
                 IndexOperator.EQ, Bytes.fromUTF8(childIdStr).getBytes());
-        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, ie);
+        
+        List<IndexExpression> expressions = new ArrayList<IndexExpression>();
+        expressions.add(ie);
+        //IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, ie);
         
         IFilter filter = new IdentityQueryFilter();
         IPartitioner p = StorageService.getPartitioner();
         Range range = new Range(p.getMinimumToken(), p.getMinimumToken());
         ColumnFamilyStore cfs = Table.open(metadata.getSchema()).getColumnFamilyStore(tableName);
-
-        //List<Row> rows = cfs.scan(ix, range, filter);
-        
-        
-
-        Map<Bytes, List<Column>> qResults = null; 
-            //selector.getIndexedColumns(tableName, ix, slicePredicate, consistencyLevel);
+        List<Row> rows = cfs.search(expressions, range, 1000, filter);       
 
         List<Object> rowKeys = new ArrayList<Object>();
-
-        // iterate through complete map and
-        Iterator<Bytes> rowIter = qResults.keySet().iterator();
-        while (rowIter.hasNext())
-        {
-            Bytes rowKey = rowIter.next();
-
-            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn()
-                    .getField());
-            Object value = accessor.fromBytes(metadata.getIdColumn().getField().getClass(), rowKey.toByteArray());
-
+        
+        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn()
+                .getField());
+        for(Row row : rows) {
+            ByteBuffer key = row.key.key;
+            byte[] keyArr = key.array();
+            Object value = accessor.fromBytes(metadata.getIdColumn().getField().getClass(), keyArr);
             rowKeys.add(value);
         }
-
         if (rowKeys != null && !rowKeys.isEmpty())
         {
             return rowKeys.toArray(new Object[0]);
@@ -534,8 +529,13 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
     
     @Override
-    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
+    public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
+        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        .getPersistenceUnitMetadata(getPersistenceUnit());
+
+        Properties props = persistenceUnitMetadata.getProperties();
+        String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         if (!isOpen())
         {
             throw new PersistenceException("ThriftClient is closed.");
@@ -543,7 +543,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         
         try
         {
-            cassandra_client.set_keyspace(schemaName);         
+            cassandra_client.set_keyspace(keyspace);         
             ColumnPath path = new ColumnPath(tableName);        
             cassandra_client.remove(ByteBuffer.wrap(columnValue.toString().getBytes()), path, System.currentTimeMillis(), consistencyLevel);
         }
@@ -621,7 +621,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     private void setCassandraClient() {
         if(cassandra_client == null) {
             cassandra_client = PelopsUtils.getCassandraClient(persistenceUnit);
-        }
+        }        
     }
 
 }

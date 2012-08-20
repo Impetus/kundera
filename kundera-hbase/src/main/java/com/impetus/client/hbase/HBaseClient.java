@@ -397,7 +397,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     }
 
     
-    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
+    public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
         try
         {
@@ -420,7 +420,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     public void delete(Object entity, Object pKey)
     {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-        deleteByColumn(metadata.getSchema(), metadata.getTableName(), metadata.getIdColumn().getName(), pKey);
+        deleteByColumn(metadata.getTableName(), metadata.getIdColumn().getName(), pKey);
     }
 
     /*

@@ -352,7 +352,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
 
     // Incorrect
-    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
+    public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
 
         if (!isOpen())
