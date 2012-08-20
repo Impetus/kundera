@@ -16,8 +16,8 @@
 package com.impetus.kundera.metadata.model.type;
 
 import java.util.Map;
+import java.util.Set;
 
-import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.MappedSuperclassType;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
@@ -36,14 +36,22 @@ public class DefaultMappedSuperClass<X> extends AbstractIdentifiableType<X> impl
      * @param superClazzType
      * @param declaredSingluarAttribs
      * @param declaredPluralAttributes
+     * @param idAttribute
+     * @param isIdClass
+     * @param idClassAttributes
      */
     public DefaultMappedSuperClass(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
-            ManagedType<? super X> superClazzType, Map<String, SingularAttribute<X, ?>> declaredSingluarAttribs,
-            Map<String, PluralAttribute<X, ?, ?>> declaredPluralAttributes)
+            AbstractIdentifiableType<? super X> superClazzType,
+            Map<String, SingularAttribute<X, ?>> declaredSingluarAttribs,
+            Map<String, PluralAttribute<X, ?, ?>> declaredPluralAttributes,
+            SingularAttribute<? super X, ?> idAttribute, boolean isIdClass,
+            Set<SingularAttribute<? super X, ?>> idClassAttributes)
     {
-        super(clazz, persistenceType, superClazzType, declaredSingluarAttribs, declaredPluralAttributes);
-        // TODO Auto-generated constructor stub
+        super(clazz, persistenceType, superClazzType, declaredSingluarAttribs, declaredPluralAttributes, idAttribute,
+                isIdClass, idClassAttributes);
     }
+
+    
 
     
 }

@@ -724,6 +724,11 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
                 "attribute of the given name and type is not present in the managed type, for name:" + paramName);
     }
 
+
+    ManagedType<? super X> getSuperClazzType()
+    {
+        return superClazzType;
+    }
     /**
      * Gets the declared plural attribute.
      *
