@@ -35,12 +35,15 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 public class ThriftDataResultHelper
 {
     public enum ColumnFamilyType {
-        COLUMN,
-        SUPER_COLUMN,
-        COUNTER_COLUMN,
-        COUNTER_SUPER_COLUMN
+        COLUMN,                /* Column family */
+        SUPER_COLUMN,          /* Super Column family */
+        COUNTER_COLUMN,        /* Counter Column family */
+        COUNTER_SUPER_COLUMN   /* Super Counter Column family */
     }
     
+    /**
+     * Transforms data retrieved as result via thrift to a List whose content type is determined by {@link ColumnFamilyType}   
+     */
     public static <T> List<T> fetchDataFromThriftResult(List<ColumnOrSuperColumn> coscList, ColumnFamilyType columnFamilyType)
     {
         List result = new ArrayList(coscList.size());
@@ -68,7 +71,9 @@ public class ThriftDataResultHelper
         return result;
     }
     
-    
+    /**
+     * Transforms data retrieved as result via thrift to a List whose content type is determined by {@link ColumnFamilyType}   
+     */
     public static <T> List<T> fetchDataFromThriftResult(Map<ByteBuffer, List<ColumnOrSuperColumn>> coscResultMap, ColumnFamilyType columnFamilyType) {
         
         List<ColumnOrSuperColumn> coscList = new ArrayList<ColumnOrSuperColumn>();
@@ -80,6 +85,9 @@ public class ThriftDataResultHelper
         return fetchDataFromThriftResult(coscList, columnFamilyType);        
     } 
     
+    /**
+     * Fetches Row keys from a {@link List} of {@link KeySlice} 
+     */
     public static List<Object> getRowKeys(List<KeySlice> keySlices, EntityMetadata metadata) {
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn().getField());
         List<Object> rowKeys = new ArrayList<Object>();
