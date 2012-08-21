@@ -30,10 +30,13 @@ import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
+import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
+import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -50,7 +53,7 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
 
     /** The log. */
     private static Log log = LogFactory.getLog(PelopsDataHandler.class);
-
+    
     /**
      * From thrift row.
      * 
@@ -70,9 +73,13 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
      * @throws Exception
      *             the exception
      */
-    Object fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String rowKey,
+    
+    @Override
+    public Object fromThriftRow(Class<?> clazz, EntityMetadata m, String rowKey,
             List<String> relationNames, boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
     {
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(m.getPersistenceUnit()));
+        
         List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
         Object e = null;
 
@@ -80,13 +87,15 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
         {
             if (m.isCounterColumnType())
             {
-                List<CounterSuperColumn> thriftCounterSuperColumns = new ArrayList<CounterSuperColumn>();
+                
                 List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
                 rowKeys.add(ByteBufferUtil.bytes(rowKey));
                 Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = selector
                         .getColumnOrSuperColumnsFromRows(new ColumnParent(m.getTableName()), rowKeys,
                                 Selector.newColumnsPredicateAll(true, 10000), consistencyLevel);
-                getThriftCounterSuperColumn(thriftCounterSuperColumns, thriftColumnOrSuperColumns);
+                
+                List<CounterSuperColumn> thriftCounterSuperColumns = ThriftDataResultHelper.fetchDataFromThriftResult(thriftColumnOrSuperColumns, ColumnFamilyType.COUNTER_SUPER_COLUMN);
+                
                 if (thriftCounterSuperColumns != null)
                 {
                     e = fromCounterSuperColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null, null,
@@ -174,28 +183,17 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
      * @throws Exception
      *             the exception
      */
-    List<Object> fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, List<String> relationNames,
+    @Override
+    public List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames,
             boolean isWrapReq, ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception
     {
-        List<Object> entities = new ArrayList<Object>();
-        if (rowIds != null)
-        {
-            for (Object rowKey : rowIds)
-            {
-                Object e = fromThriftRow(selector, clazz, m, rowKey.toString(), relationNames, isWrapReq,
-                        consistencyLevel);
-                if (e != null)
-                {
-                    entities.add(e);
-                }
-            }
-        }
-        return entities;
+        return super.fromThriftRow(clazz, m, relationNames, isWrapReq, consistencyLevel, rowIds);
     }     
     
     @Override
     public <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception {
         return super.fromThriftRow(clazz, m, tr);
-    }
+    }  
+    
 
 }

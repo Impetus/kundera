@@ -25,14 +25,6 @@ import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
-import org.apache.cassandra.db.ColumnFamilyStore;
-import org.apache.cassandra.db.Row;
-import org.apache.cassandra.db.Table;
-import org.apache.cassandra.db.columniterator.IdentityQueryFilter;
-import org.apache.cassandra.db.filter.IFilter;
-import org.apache.cassandra.dht.IPartitioner;
-import org.apache.cassandra.dht.Range;
-import org.apache.cassandra.service.StorageService;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
@@ -41,21 +33,17 @@ import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
-import org.apache.cassandra.thrift.CqlResult;
-import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.Mutation;
-import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
@@ -67,6 +55,7 @@ import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.query.CassQuery;
+import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
@@ -118,11 +107,10 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     {
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;        
-        this.dataHandler = new ThriftDataHandler();
         setCassandraClient();
+        this.dataHandler = new ThriftDataHandler(this.cassandra_client);        
         this.invertedIndexHandler = new ThriftInvertedIndexHandler(this.cassandra_client);
         this.reader = reader;
-
     }
     
     @Override
@@ -369,12 +357,19 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             throw new PersistenceException("ThriftClient is closed.");
         }
         
-        List entities = null;
+        List entities = null;        
         
-        
-        //TODO: Implement this
-        
-        return entities;
+        try
+        {
+            entities = dataHandler.fromThriftRow(entityClass, metadata, relationNames, isWrapReq,
+                    consistencyLevel, rowIds);
+        }
+        catch (Exception e)
+        {
+            throw new KunderaException(e);
+        }
+
+        return entities;        
     }
     
 
@@ -391,8 +386,45 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         if (!isOpen())
             throw new PersistenceException("ThriftClient is closed.");
         
-        return null;
+        byte[] rowKey = rowId.getBytes();
         
+        SlicePredicate predicate = new SlicePredicate(); 
+        List<ByteBuffer> columnNames = new ArrayList<ByteBuffer>();
+        for(String superColumnName : superColumnNames) {
+            columnNames.add(ByteBuffer.wrap(superColumnName.getBytes()));
+        }
+        
+        predicate.setColumn_names(columnNames);
+
+        ColumnParent parent = new ColumnParent(columnFamily); 
+        List<ColumnOrSuperColumn> coscList;
+        try
+        {
+            coscList = cassandra_client.get_slice(ByteBuffer.wrap(rowKey), parent, predicate, consistencyLevel);
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error while getting super columns for row Key " + rowId + ". Details:" + e.getMessage());
+            throw new EntityReaderException("Error while getting super columns for row Key " + rowId, e);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error while getting columns for row Key " + rowId + ". Details:" + e.getMessage());
+            throw new EntityReaderException("Error while getting super columns for row Key " + rowId, e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while getting columns for row Key " + rowId + ". Details:" + e.getMessage());
+            throw new EntityReaderException("Error while getting super columns for row Key " + rowId, e);
+        }
+        catch (TException e)
+        {
+            log.error("Error while getting columns for row Key " + rowId + ". Details:" + e.getMessage());
+            throw new EntityReaderException("Error while getting super columns for row Key " + rowId, e);
+        } 
+
+        List<SuperColumn> superColumns = ThriftDataResultHelper.fetchDataFromThriftResult(coscList, ColumnFamilyType.SUPER_COLUMN);       
+        return superColumns;        
     }
     
     @Override
@@ -434,11 +466,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             throw new EntityReaderException("Error while getting columns for row Key " + pKeyColumnValue, e);
         } 
 
-        List<Column> columns = new ArrayList<Column>();
-        for (ColumnOrSuperColumn result : results) {     
-          Column column = result.column;     
-          columns.add(column);
-        }      
+        List<Column> columns = ThriftDataResultHelper.fetchDataFromThriftResult(results, ColumnFamilyType.COLUMN);        
         
         List<E> foreignKeys = dataHandler.getForeignKeysFromJoinTable(columnName, columns);
         return foreignKeys;
@@ -453,11 +481,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         String childIdStr = (String) columnValue;        
         IndexExpression ie = new IndexExpression(Bytes.fromUTF8(columnName + "_" + childIdStr).getBytes(),
                 IndexOperator.EQ, Bytes.fromUTF8(childIdStr).getBytes());       
+        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, ie);       
         
-        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, ie);          
         
-        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn()
-                .getField());
         List<Object> rowKeys = new ArrayList<Object>();        
         ColumnParent columnParent = new ColumnParent(tableName);
         try
@@ -465,11 +491,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             List<KeySlice> keySlices = cassandra_client.get_indexed_slices(columnParent, ix, slicePredicate,
                     consistencyLevel);
             
-            for(KeySlice keySlice : keySlices) {
-                byte[] key = keySlice.getKey();                
-                Object rowKey = accessor.fromBytes(metadata.getIdColumn().getField().getType(), key);                
-                rowKeys.add(rowKey);
-            }            
+            rowKeys = ThriftDataResultHelper.getRowKeys(keySlices, metadata);            
         }
         catch (InvalidRequestException e)
         {
@@ -503,7 +525,49 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     @Override
     public List<Object> findByRelation(String colName, String colValue, Class entityClazz)
     {
-        return null;
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);       
+
+        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
+        List<Object> entities = null;
+        
+        IndexExpression ie = new IndexExpression(Bytes.fromUTF8(colName).getBytes(),
+                IndexOperator.EQ, Bytes.fromUTF8(colValue).getBytes());       
+        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, ie);   
+        ColumnParent columnParent = new ColumnParent(m.getTableName());        
+        
+        List<KeySlice> keySlices;
+        try
+        {
+            keySlices = cassandra_client.get_indexed_slices(columnParent, ix, slicePredicate,
+                    consistencyLevel);
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error while finding relations. Details:" + e.getMessage());
+            throw new KunderaException("Error while finding relations", e);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error while finding relations. Details:" + e.getMessage());
+            throw new KunderaException("Error while finding relations", e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while finding relations. Details:" + e.getMessage());
+            throw new KunderaException("Error while finding relations", e);
+        }
+        catch (TException e)
+        {
+            log.error("Error while finding relations. Details:" + e.getMessage());
+            throw new KunderaException("Error while finding relations", e);
+        }        
+ 
+        if(keySlices != null) {
+            entities = new ArrayList<Object>(keySlices.size());           
+            populateData(m, keySlices, entities, false, null);            
+        }       
+
+        return entities;
     }   
 
     @Override
@@ -652,6 +716,45 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         if(cassandra_client == null) {
             cassandra_client = PelopsUtils.getCassandraClient(persistenceUnit);
         }        
+    }
+    
+
+    private void populateData(EntityMetadata m, List<KeySlice> keySlices, List<Object> entities,
+            boolean isRelational, List<String> relationNames)
+    {
+        try
+        {
+            if (m.getType().isSuperColumnFamilyMetadata())
+            {
+                List<Object> rowKeys = ThriftDataResultHelper.getRowKeys(keySlices, m);
+                
+                Object[] rowIds = rowKeys.toArray();                
+                entities.addAll(findAll(m.getEntityClazz(), rowIds)); 
+            }
+            else
+            {
+                for(KeySlice keySlice : keySlices) {
+                    byte[] key = keySlice.getKey();                
+                    List<ColumnOrSuperColumn> coscList = keySlice.getColumns();
+                    
+                    List<Column> columns = ThriftDataResultHelper.fetchDataFromThriftResult(coscList, ColumnFamilyType.COLUMN);        
+                    
+                    Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m,
+                            new ThriftRow(Bytes.toUTF8(key), m.getTableName(), columns, null,
+                                    null, null), relationNames, isRelational);
+                    if (e != null)
+                    {
+                        entities.add(e);
+                    }
+                }            
+            }
+        }
+        catch (Exception e)
+        {
+            log.error("Error while populating data for relations. Details: " + e.getMessage());
+            throw new KunderaException("Error while populating data for relations", e);
+        }
+
     }
 
 }

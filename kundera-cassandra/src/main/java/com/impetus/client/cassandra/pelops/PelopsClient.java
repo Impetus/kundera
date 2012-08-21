@@ -162,14 +162,12 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         if (!isOpen())
         {
             throw new PersistenceException("PelopsClient is closed.");
-        }
-
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        }       
 
         List entities = null;
         try
         {
-            entities = dataHandler.fromThriftRow(selector, entityClass, metadata, relationNames, isWrapReq,
+            entities = dataHandler.fromThriftRow(entityClass, metadata, relationNames, isWrapReq,
                     consistencyLevel, rowIds);
         }
         catch (Exception e)
@@ -178,10 +176,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
 
         return entities;
-    }
-
-
-    
+    }  
 
 
     @Override

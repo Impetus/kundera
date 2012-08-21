@@ -17,10 +17,8 @@ package com.impetus.client.cassandra.datahandler;
 
 import java.util.List;
 
-import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -30,15 +28,13 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  * @author amresh.singh
  */
 public interface CassandraDataHandler
-{
-   /* Object fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String rowKey,
-            List<String> relationNames, boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception;
+{   
+    <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception;
     
-    public List<Object> fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, List<String> relationNames,
+    List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames,
             boolean isWrapReq, ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception;
     
-    <E> List<E> getForeignKeysFromJoinTable(String inverseJoinColumnName, List<Column> columns);*/
-    
-    <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception;
+    Object fromThriftRow(Class<?> clazz, EntityMetadata m, String rowKey,
+            List<String> relationNames, boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception;
 
 }

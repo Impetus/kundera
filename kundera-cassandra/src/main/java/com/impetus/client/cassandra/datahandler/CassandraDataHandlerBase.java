@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,12 +30,14 @@ import javax.persistence.PersistenceException;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.SuperColumn;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.client.cassandra.common.Utilities;
 import com.impetus.client.cassandra.thrift.ThriftRow;
@@ -61,21 +64,6 @@ public abstract class CassandraDataHandlerBase
     /** The log. */
     private static Log log = LogFactory.getLog(CassandraDataHandlerBase.class);
     
-    /**
-     * @param thriftCounterSuperColumns
-     * @param thriftColumnOrSuperColumns
-     */
-    protected void getThriftCounterSuperColumn(List<CounterSuperColumn> thriftCounterSuperColumns,
-            Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns)
-    {
-        for (Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry : thriftColumnOrSuperColumns.entrySet())
-        {
-            for (ColumnOrSuperColumn col : entry.getValue())
-            {
-                thriftCounterSuperColumns.add(col.getCounter_super_column());
-            }
-        }
-    }
     
     /**
      * From thrift row.
@@ -175,6 +163,28 @@ public abstract class CassandraDataHandlerBase
         }
         return e;
     }
+    
+    public List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames,
+            boolean isWrapReq, ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception
+    {
+        List<Object> entities = new ArrayList<Object>();
+        if (rowIds != null)
+        {
+            for (Object rowKey : rowIds)
+            {
+                Object e = fromThriftRow(clazz, m, rowKey.toString(), relationNames, isWrapReq,
+                        consistencyLevel);
+                if (e != null)
+                {
+                    entities.add(e);
+                }
+            }
+        }
+        return entities;
+    }    
+    
+    public abstract Object fromThriftRow(Class<?> clazz, EntityMetadata m, String rowKey,
+            List<String> relationNames, boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception;
     
     /**
      * Populate embedded object.
@@ -1323,6 +1333,8 @@ public abstract class CassandraDataHandlerBase
 
         return thriftSuperColumn;
     }
+    
+    
 
 
 }
