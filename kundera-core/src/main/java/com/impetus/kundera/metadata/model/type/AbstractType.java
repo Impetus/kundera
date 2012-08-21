@@ -19,19 +19,39 @@ import javax.persistence.metamodel.Type;
 
 
 /**
- *  TODO::::: comments required.
+ * Implements <code> Type</code> interface of MetaModel API.
+ *
+ * @param <X> the generic type
  * @author vivek.mishra
  */
-public class AbstractType<X> implements Type<X>
+public abstract class AbstractType<X> implements Type<X>
 {
-
+    
+    /** The clazz type. */
+    private Class<X> clazzType;
+    
+    /** The persistence type. */
+    private PersistenceType persistenceType;
+    
+    /**
+     * Instantiates a new default type.
+     *
+     * @param clazz the clazz
+     * @param persistenceType the persistence type
+     */
+    public AbstractType(Class<X> clazz,PersistenceType persistenceType)
+    {
+        this.clazzType = clazz;
+        this.persistenceType = persistenceType;
+    }
+    
     /* (non-Javadoc)
      * @see javax.persistence.metamodel.Type#getPersistenceType()
      */
     @Override
     public javax.persistence.metamodel.Type.PersistenceType getPersistenceType()
     {
-        return null;
+        return this.persistenceType;
     }
 
     /* (non-Javadoc)
@@ -40,7 +60,7 @@ public class AbstractType<X> implements Type<X>
     @Override
     public Class<X> getJavaType()
     {
-        return null;
+        return this.clazzType;
     }
 
 }

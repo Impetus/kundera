@@ -15,19 +15,48 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model.type;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.metamodel.IdentifiableType;
+import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
- *  TODO::::: comments required.
+ *  Abstract implementation for <code>IdentifiableType</code>
+ *  
  * @author vivek.mishra
  *
  */
-public class AbstractIdentifiableType<X> extends AbstractManagedType<X> implements IdentifiableType<X>
+public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X> implements IdentifiableType<X>
 {
+    private SingularAttribute<? super X, ?> idAttribute;
+    private boolean isIdClass;
+    private Set<SingularAttribute<? super X, ?>> idClassAttributes;
+    
+    private static Log log = LogFactory.getLog(AbstractIdentifiableType.class);
+    
+    /**
+     * @param clazz
+     * @param persistenceType
+     * @param superClazzType
+     * @param declaredSingluarAttribs
+     * @param declaredPluralAttributes
+     */
+    public AbstractIdentifiableType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
+            AbstractIdentifiableType<? super X> superClazzType, Map<String, SingularAttribute<X, ?>> declaredSingluarAttribs,
+            Map<String, PluralAttribute<X, ?, ?>> declaredPluralAttributes, SingularAttribute<? super X, ?> idAttribute, 
+            boolean isIdClass,Set<SingularAttribute<? super X, ?>> idClassAttributes)
+    {
+        super(clazz, persistenceType, superClazzType, declaredSingluarAttribs, declaredPluralAttributes);
+        this.idAttribute = idAttribute;
+        this.isIdClass = isIdClass;
+        this.idClassAttributes = idClassAttributes;
+    }
 
     /* (non-Javadoc)
      * @see javax.persistence.metamodel.IdentifiableType#getId(java.lang.Class)
@@ -35,8 +64,37 @@ public class AbstractIdentifiableType<X> extends AbstractManagedType<X> implemen
     @Override
     public <Y> SingularAttribute<? super X, Y> getId(Class<Y> paramClass)
     {
-        // TODO Auto-generated method stub
-        return null;
+        if (idAttribute != null)
+        {
+            if (idAttribute.getJavaType().equals(paramClass) && !isIdClass)
+            {
+                return (SingularAttribute<? super X, Y>) idAttribute;
+            }
+            else
+            {
+                onError();
+            }
+        }
+        else
+        {
+
+            AbstractIdentifiableType<? super X> superType = (AbstractIdentifiableType<? super X>) getSupertype();
+            if (superType != null)
+            {
+                return superType.getId(paramClass);
+            }
+        }
+        
+       onError();
+       
+       return null;
+
+    }
+
+    private void onError()
+    {
+        throw new IllegalArgumentException(
+        "id attribute of the given type is not declared in the identifiable type or if the identifiable type has an id class(e.g. @IdClass is in use)");
     }
 
     /* (non-Javadoc)
@@ -45,7 +103,15 @@ public class AbstractIdentifiableType<X> extends AbstractManagedType<X> implemen
     @Override
     public <Y> SingularAttribute<X, Y> getDeclaredId(Class<Y> paramClass)
     {
-        // TODO Auto-generated method stub
+        if(idAttribute != null)
+        {
+            if(idAttribute.getJavaType().equals(paramClass) && !isIdClass)
+            {
+                return (SingularAttribute<X, Y>) idAttribute;
+            } 
+        }
+        
+        onError();
         return null;
     }
 
@@ -55,8 +121,8 @@ public class AbstractIdentifiableType<X> extends AbstractManagedType<X> implemen
     @Override
     public <Y> SingularAttribute<? super X, Y> getVersion(Class<Y> paramClass)
     {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO: Versioning not yet supported.
+        throw new UnsupportedOperationException("Method not supported");
     }
 
     /* (non-Javadoc)
@@ -65,8 +131,8 @@ public class AbstractIdentifiableType<X> extends AbstractManagedType<X> implemen
     @Override
     public <Y> SingularAttribute<X, Y> getDeclaredVersion(Class<Y> paramClass)
     {
-        // TODO Auto-generated method stub
-        return null;
+        // TODO: Versioning not yet supported.
+        throw new UnsupportedOperationException("Method not supported");
     }
 
     /* (non-Javadoc)
@@ -75,8 +141,7 @@ public class AbstractIdentifiableType<X> extends AbstractManagedType<X> implemen
     @Override
     public IdentifiableType<? super X> getSupertype()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return (AbstractIdentifiableType<? super X>) super.getSuperClazzType();
     }
 
     /* (non-Javadoc)
@@ -85,8 +150,7 @@ public class AbstractIdentifiableType<X> extends AbstractManagedType<X> implemen
     @Override
     public boolean hasSingleIdAttribute()
     {
-        // TODO Auto-generated method stub
-        return false;
+        return !isIdClass;
     }
 
     /* (non-Javadoc)
@@ -95,7 +159,7 @@ public class AbstractIdentifiableType<X> extends AbstractManagedType<X> implemen
     @Override
     public boolean hasVersionAttribute()
     {
-        // TODO Auto-generated method stub
+        log.warn("Versioning not yet supported. returning false, By default");
         return false;
     }
 
@@ -105,8 +169,11 @@ public class AbstractIdentifiableType<X> extends AbstractManagedType<X> implemen
     @Override
     public Set<SingularAttribute<? super X, ?>> getIdClassAttributes()
     {
-        // TODO Auto-generated method stub
-        return null;
+        if(isIdClass)
+        {
+            return idClassAttributes;
+        }
+        throw new IllegalArgumentException("The identifiable type does not have an id class");
     }
 
     /* (non-Javadoc)
@@ -115,8 +182,12 @@ public class AbstractIdentifiableType<X> extends AbstractManagedType<X> implemen
     @Override
     public Type<?> getIdType()
     {
-        // TODO Auto-generated method stub
-        return null;
+        if(idAttribute != null && !isIdClass)
+        {
+            return idAttribute.getType();
+        }
+        
+        return getSupertype().getIdType();
     }
 
 }
