@@ -15,8 +15,12 @@
  */
 package com.impetus.client.cassandra.thrift;
 
+import org.apache.cassandra.thrift.SuperColumn;
+
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
+import com.impetus.kundera.db.DataRow;
+import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * Data handler for Thrift Clients 
@@ -24,5 +28,10 @@ import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
  */
 public final class ThriftDataHandler extends CassandraDataHandlerBase implements CassandraDataHandler
 {
+    
+    @Override
+    public <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception {
+        return super.fromThriftRow(clazz, m, tr);
+    }
 
 }

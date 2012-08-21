@@ -18,9 +18,11 @@ package com.impetus.client.cassandra;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.PersistenceException;
 
+import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
@@ -43,10 +45,13 @@ import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Pelops;
 
+import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftRow;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -257,12 +262,9 @@ public abstract class CassandraClientBase extends ClientBase
 
                 ColumnDef columnDef = new ColumnDef();
 
-                columnDef.setName(column.getName());
-                columnDef.setValidation_class("UTF8Type");
+                columnDef.setName(column.getName());                
+                columnDef.setValidation_class(BytesType.class.getSimpleName());
                 columnDef.setIndex_type(IndexType.KEYS);
-
-                // String indexName =
-                // PelopsUtils.getSecondaryIndexName(tableName, column);
 
                 // Add secondary index only if it's not already created
                 // (if already created, it would be there in column family
@@ -357,10 +359,40 @@ public abstract class CassandraClientBase extends ClientBase
         }
 
         return result != null & !result.isEmpty() ? result.get(0) : null;
+    }    
+    
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> superColumnMap, CassandraDataHandler dataHandler)
+    {
+        List<E> entities = null;
+        try
+        {
+            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
+            entities = new ArrayList<E>();
+            for (String superColumnName : superColumnMap.keySet())
+            {
+                String entityId = superColumnMap.get(superColumnName);
+                List<SuperColumn> superColumnList = loadSuperColumns(entityMetadata.getSchema(),
+                        entityMetadata.getTableName(), entityId,
+                        new String[] { superColumnName.substring(0, superColumnName.indexOf("|")) });
+                E e = (E) dataHandler.fromThriftRow(entityMetadata.getEntityClazz(), entityMetadata,
+                        new DataRow<SuperColumn>(entityId, entityMetadata.getTableName(), superColumnList));
+                if (e != null)
+                {
+                    entities.add(e);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            throw new KunderaException(e);
+        }
+        return entities;
     }
     
     protected abstract List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
             Object... rowIds);
     
+    protected abstract List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
+            String... superColumnNames);    
 
 }

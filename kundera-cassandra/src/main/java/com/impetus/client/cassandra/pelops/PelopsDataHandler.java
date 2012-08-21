@@ -35,6 +35,7 @@ import org.scale7.cassandra.pelops.Selector;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
 import com.impetus.client.cassandra.thrift.ThriftRow;
+import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
@@ -191,5 +192,10 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
         }
         return entities;
     }     
+    
+    @Override
+    public <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception {
+        return super.fromThriftRow(clazz, m, tr);
+    }
 
 }

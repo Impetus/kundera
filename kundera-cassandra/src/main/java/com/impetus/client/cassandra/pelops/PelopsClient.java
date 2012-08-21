@@ -181,34 +181,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     }
 
 
-    @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> superColumnMap)
-    {
-        List<E> entities = null;
-        try
-        {
-            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
-            entities = new ArrayList<E>();
-            for (String superColumnName : superColumnMap.keySet())
-            {
-                String entityId = superColumnMap.get(superColumnName);
-                List<SuperColumn> superColumnList = loadSuperColumns(entityMetadata.getSchema(),
-                        entityMetadata.getTableName(), entityId,
-                        new String[] { superColumnName.substring(0, superColumnName.indexOf("|")) });
-                E e = (E) dataHandler.fromThriftRow(entityMetadata.getEntityClazz(), entityMetadata,
-                        new DataRow<SuperColumn>(entityId, entityMetadata.getTableName(), superColumnList));
-                if (e != null)
-                {
-                    entities.add(e);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            throw new KunderaException(e);
-        }
-        return entities;
-    }
+    
 
 
     @Override
@@ -444,10 +417,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(),
                         selector.newKeyRange("", "", maxResult), slicePredicate, consistencyLevel);
 
-                // selector.getCounterColumnsFromRows(m.getTableName(),
-                // selector.newKeyRange("", "", maxResult), slicePredicate,
-                // consistencyLevel);
-                // selector.getCounterColumnsFromRows
                 entities = new ArrayList<Object>(qResults.size());
 
                 populateData(m, qResults, entities, isRelation, relations);
@@ -465,6 +434,12 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             }
         }
         return entities;
+    }
+    
+    @Override
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
+    {
+        return super.find(entityClass, embeddedColumnMap, dataHandler);
     }
 
     /**
@@ -743,11 +718,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getQueryImplementor()
-     */
     @Override
     public Class<CassQuery> getQueryImplementor()
     {
@@ -993,7 +963,9 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      *            the super column names
      * @return the list
      */
-    private final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
+    
+    @Override
+    public final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
             String... superColumnNames)
     {
         if (!isOpen())
