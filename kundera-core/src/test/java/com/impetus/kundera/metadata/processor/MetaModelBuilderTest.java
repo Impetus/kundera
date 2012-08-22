@@ -17,12 +17,15 @@ package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
 
+import javax.persistence.metamodel.SingularAttribute;
+
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.metadata.model.type.AbstractIdentifiableType;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 
 /**
@@ -51,7 +54,7 @@ public class MetaModelBuilderTest
      * @param <T> the generic type
      */
     @Test
-    public <X extends Class, T extends Object> void testConstruct()
+    public <X extends Class, T extends Object> void testEntityWithSingularAttribute()
     {
         X clazz = (X) SingularEntity.class;
         MetaModelBuilder builder = new MetaModelBuilder<X, T>(clazz);
@@ -74,6 +77,11 @@ public class MetaModelBuilderTest
             Assert.assertNotNull(managedType);
             Assert.assertEquals(3, managedType.getSingularAttributes().size());
             Assert.assertEquals("key", managedType.getSingularAttribute("key").getName());
+            Assert.assertTrue(((AbstractIdentifiableType<X>)managedType).hasSingleIdAttribute());
+            SingularAttribute<? super X, Integer> idAttribute = ((AbstractIdentifiableType<X>)managedType).getId(Integer.class);
+            Assert.assertNotNull(idAttribute);
+            Assert.assertTrue(idAttribute.isId());
+            Assert.assertEquals(idAttribute.getName(), "key");
             Assert.assertEquals("name", managedType.getSingularAttribute("name").getName());
             Assert.assertEquals("field", managedType.getSingularAttribute("field").getName());
 

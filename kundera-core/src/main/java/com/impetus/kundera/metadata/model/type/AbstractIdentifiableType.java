@@ -163,7 +163,7 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
     @Override
     public boolean hasSingleIdAttribute()
     {
-        return !isIdClass;
+        return !isIdClass && idAttribute != null;
     }
 
     /*
@@ -209,7 +209,7 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
         return getSupertype().getIdType();
     }
 
-    protected void addIdAttribute(SingularAttribute<? super X, ?> idAttribute, boolean isIdClass,
+    public void addIdAttribute(SingularAttribute<? super X, ?> idAttribute, boolean isIdClass,
             Set<SingularAttribute<? super X, ?>> idClassAttributes)
     {
 

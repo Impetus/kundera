@@ -41,6 +41,7 @@ public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> impl
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(DefaultSingularAttribute.class);
     
+    private boolean isId;
     /**
      * @param attribName
      * @param persistenceAttribType
@@ -50,10 +51,10 @@ public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> impl
      */
     public DefaultSingularAttribute(String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType, Field member,
-            Type<T> attribType, ManagedType<X> managedType)
+            Type<T> attribType, ManagedType<X> managedType, boolean isId)
     {
         super(attribType,attribName,persistenceAttribType,managedType,member);
-//        this.javaType = javaType;
+        this.isId = isId;
     }
     
 
@@ -83,7 +84,7 @@ public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> impl
     @Override
     public boolean isId()
     {
-        return member.isAnnotationPresent(Id.class) || member.isAnnotationPresent(IdClass.class) ;
+        return isId;
     }
 
     /* (non-Javadoc)

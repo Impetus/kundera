@@ -23,6 +23,8 @@ import java.util.Set;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -30,12 +32,14 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
+import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 import javax.persistence.metamodel.Type.PersistenceType;
 
 import org.hibernate.mapping.Collection;
 
 import com.impetus.kundera.metadata.model.attributes.DefaultSingularAttribute;
+import com.impetus.kundera.metadata.model.type.AbstractIdentifiableType;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 import com.impetus.kundera.metadata.model.type.DefaultBasicType;
 import com.impetus.kundera.metadata.model.type.DefaultEmbeddableType;
@@ -48,10 +52,10 @@ import com.impetus.kundera.metadata.model.type.DefaultMappedSuperClass;
  * @param <X> the generic managed type
  * @param <T> the generic attribute type
  * 
- *TODO : Handle of @ID, {@link MappedSuperclass}, {@link IdClass} 
+ *TODO : Handle of {@link MappedSuperclass}, {@link IdClass} 
  * @author vivek.mishra
  */
-public class MetaModelBuilder<X, T>
+public final class MetaModelBuilder<X, T>
 {
     
     /** The managed type. */
@@ -181,13 +185,38 @@ public class MetaModelBuilder<X, T>
                 }
                 else
                 {
+                    SingularAttribute<X, T> singularAttribute = new DefaultSingularAttribute(attribute.getName(), getAttributeType(), attribute,
+                            attributeType, managedType, checkId(attribute));
                     ((AbstractManagedType<X>) managedType).addSingularAttribute(attribute.getName(),
-                            (new DefaultSingularAttribute(attribute.getName(), getAttributeType(), attribute,
-                                    attributeType, managedType)));
+                            singularAttribute);
+                    if(checkSimpleId(attribute))
+                    {
+                        ((AbstractIdentifiableType<X>)managedType).addIdAttribute(singularAttribute, false, null);
+                    } else if(checkIdClass(attribute))
+                    {
+                        //TODO:: need to handle this.
+                    }
                 }
 
             }
 
+            boolean checkId(Field member)
+            {
+                return checkSimpleId(member) || checkIdClass(member) || checkEmbeddedId(member);
+            }
+            boolean checkSimpleId(Field member)
+            {
+                return member.isAnnotationPresent(Id.class);
+            }
+            boolean checkIdClass(Field member)
+            {
+                return member.isAnnotationPresent(IdClass.class);
+            }
+            
+            boolean checkEmbeddedId(Field member)
+            {
+                return member.isAnnotationPresent(EmbeddedId.class);
+            }
             /**
              * Gets the attribute type.
              *
