@@ -31,9 +31,6 @@ public class EmbeddableEntity
     @Column(name = "field")
     private String embeddedField;
 
-    @Column(name = "name")
-    private String embeddedName;
-
 
     /**
      * @return the field
@@ -50,22 +47,6 @@ public class EmbeddableEntity
     public void setField(String field)
     {
         this.embeddedField = field;
-    }
-
-    /**
-     * @return the name
-     */
-    public String getName()
-    {
-        return embeddedName;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name)
-    {
-        this.embeddedName = name;
     }
 
 }

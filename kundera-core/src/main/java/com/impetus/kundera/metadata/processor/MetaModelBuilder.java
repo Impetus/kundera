@@ -55,6 +55,7 @@ import com.impetus.kundera.metadata.model.type.DefaultMappedSuperClass;
  * @param <T> the generic attribute type
  * 
  *TODO : Handle of {@link MappedSuperclass}, {@link IdClass} 
+ *
  * @author vivek.mishra
  */
 public final class MetaModelBuilder<X, T>
@@ -64,16 +65,31 @@ public final class MetaModelBuilder<X, T>
     /** The managed type. */
     private AbstractManagedType<X> managedType;
     
+    /** The managed types. */
     private Map<Class<?>, ManagedType<?>> managedTypes = new HashMap<Class<?>, ManagedType<?>> ();
 
+    /** The embeddables. */
     private Map<Class<?>, AbstractManagedType<?>> embeddables = new HashMap<Class<?>, AbstractManagedType<?>>();
     
+    /**
+     * Process.
+     *
+     * @param clazz the clazz
+     */
     public void process(Class<X> clazz)
     {
         this.managedType = buildManagedType(clazz);
+        //TODO: this.managedType has to be removed.
+        // Need a validation that TypeBuilder class must be same as MetaModelBuilder class.
         managedTypes.put(clazz, managedType);
     }
 
+    /**
+     * Adds the embeddables.
+     *
+     * @param clazz the clazz
+     * @param embeddable the embeddable
+     */
     void addEmbeddables(Class<?> clazz, AbstractManagedType<?> embeddable)
     {
         embeddables.put(clazz, embeddable);
@@ -137,6 +153,12 @@ public final class MetaModelBuilder<X, T>
             // TODO: Throw an error.
         }
 
+        /**
+         * Process on embeddables.
+         *
+         * @param <T> the generic type
+         * @return the abstract managed type
+         */
         private <T> AbstractManagedType<T>  processOnEmbeddables()
         {
             // Check if this embeddable type is already present in
@@ -231,19 +253,45 @@ public final class MetaModelBuilder<X, T>
 
             }
 
+            /**
+             * Check id.
+             *
+             * @param member the member
+             * @return true, if successful
+             */
             boolean checkId(Field member)
             {
                 return checkSimpleId(member) || checkIdClass(member) || checkEmbeddedId(member);
             }
+            
+            /**
+             * Check simple id.
+             *
+             * @param member the member
+             * @return true, if successful
+             */
             boolean checkSimpleId(Field member)
             {
                 return member.isAnnotationPresent(Id.class);
             }
+            
+            /**
+             * Check id class.
+             *
+             * @param member the member
+             * @return true, if successful
+             */
             boolean checkIdClass(Field member)
             {
                 return member.isAnnotationPresent(IdClass.class);
             }
             
+            /**
+             * Check embedded id.
+             *
+             * @param member the member
+             * @return true, if successful
+             */
             boolean checkEmbeddedId(Field member)
             {
                 return member.isAnnotationPresent(EmbeddedId.class);

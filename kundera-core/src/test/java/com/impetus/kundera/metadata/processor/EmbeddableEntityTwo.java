@@ -29,7 +29,7 @@ import javax.persistence.Embeddable;
 public class EmbeddableEntityTwo
 {
     @Column(name = "field")
-    private String embeddedField;
+    private Float embeddedField;
 
     @Column(name = "name")
     private String embeddedName;
@@ -38,7 +38,7 @@ public class EmbeddableEntityTwo
     /**
      * @return the field
      */
-    public String getField()
+    public Float getField()
     {
         return embeddedField;
     }
@@ -47,7 +47,7 @@ public class EmbeddableEntityTwo
      * @param field
      *            the field to set
      */
-    public void setField(String field)
+    public void setField(Float field)
     {
         this.embeddedField = field;
     }
