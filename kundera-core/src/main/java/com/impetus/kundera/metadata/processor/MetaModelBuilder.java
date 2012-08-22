@@ -57,6 +57,7 @@ import com.impetus.kundera.metadata.model.type.DefaultMappedSuperClass;
  */
 public final class MetaModelBuilder<X, T>
 {
+
     
     /** The managed type. */
     private AbstractManagedType<X> managedType;

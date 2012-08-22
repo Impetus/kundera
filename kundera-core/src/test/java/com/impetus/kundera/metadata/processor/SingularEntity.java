@@ -35,7 +35,7 @@ public class SingularEntity
     @Id
     private Integer key;
 
-    @Column(name = "field")
+    @Column(name = "field",nullable=false )
     private String field;
 
     @Column(name = "name")
