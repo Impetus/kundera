@@ -20,6 +20,7 @@ import java.util.List;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SuperColumn;
 
+import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
@@ -36,5 +37,11 @@ public interface CassandraDataHandler
     
     Object fromThriftRow(Class<?> clazz, EntityMetadata m, String rowKey,
             List<String> relationNames, boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception;
+    
+    Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow, List<String> relationNames,
+            boolean isWrapperReq) throws Exception;
+    
+    Object fromCounterColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
+            List<String> relationNames, boolean isWrapperReq) throws Exception;
 
 }

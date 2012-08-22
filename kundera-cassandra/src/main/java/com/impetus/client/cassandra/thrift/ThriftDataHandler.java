@@ -32,14 +32,9 @@ import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.scale7.cassandra.pelops.Bytes;
-import org.scale7.cassandra.pelops.Pelops;
-import org.scale7.cassandra.pelops.Selector;
-import org.scale7.cassandra.pelops.Validation;
 
-import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
-import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -56,12 +51,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
         this.cassandra_client = cassandra_client;
     }
     
-    @Override
-    public List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames,
-            boolean isWrapReq, ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception
-    {
-        return super.fromThriftRow(clazz, m, relationNames, isWrapReq, consistencyLevel, rowIds);
-    }  
+    
     
     @Override
     public Object fromThriftRow(Class<?> clazz, EntityMetadata m, String rowKey, List<String> relationNames,
@@ -86,7 +76,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
                 Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = cassandra_client
                         .multiget_slice(rowKeys, new ColumnParent(m.getTableName()), predicate, consistencyLevel);               
                 
-                List<CounterSuperColumn> thriftCounterSuperColumns = ThriftDataResultHelper.fetchDataFromThriftResult(
+                List<CounterSuperColumn> thriftCounterSuperColumns = ThriftDataResultHelper.transformThriftResultAndAddToList(
                         thriftColumnOrSuperColumns, ColumnFamilyType.COUNTER_SUPER_COLUMN);               
                 
                 if (thriftCounterSuperColumns != null)
@@ -105,7 +95,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
                         ByteBuffer.wrap(rowKey.getBytes()), new ColumnParent(m.getTableName()), predicate,
                         consistencyLevel);
 
-                List<SuperColumn> thriftSuperColumns = ThriftDataResultHelper.fetchDataFromThriftResult(
+                List<SuperColumn> thriftSuperColumns = ThriftDataResultHelper.transformThriftResult(
                         columnOrSuperColumns, ColumnFamilyType.SUPER_COLUMN);
 
                 e = fromSuperColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null,
@@ -169,8 +159,27 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
     }
     
     @Override
+    public List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames,
+            boolean isWrapReq, ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception
+    {
+        return super.fromThriftRow(clazz, m, relationNames, isWrapReq, consistencyLevel, rowIds);
+    }  
+    
+    @Override
     public <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception {
         return super.fromThriftRow(clazz, m, tr);
     }    
+    
+    @Override
+    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow, List<String> relationNames,
+            boolean isWrapperReq) throws Exception {
+        return super.fromColumnThriftRow(clazz, m, thriftRow, relationNames, isWrapperReq);
+    }
+    
+    @Override
+    public Object fromCounterColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
+            List<String> relationNames, boolean isWrapperReq) throws Exception {
+        return super.fromCounterColumnThriftRow(clazz, m, thriftRow, relationNames, isWrapperReq);
+    }
     
 }

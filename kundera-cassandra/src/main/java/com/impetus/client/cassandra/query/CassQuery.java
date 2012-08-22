@@ -34,8 +34,8 @@ import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
-import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -46,7 +46,6 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.DateAccessor;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
@@ -100,7 +99,7 @@ public class CassQuery extends QueryImpl implements Query
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         if (appMetadata.isNative(getJPAQuery()))
         {
-            result = ((PelopsClient) client).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
+            result = ((CassandraClientBase) client).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
         }
         else
         {
@@ -111,7 +110,7 @@ public class CassQuery extends QueryImpl implements Query
                 boolean isRowKeyQuery = ixClause.keySet().iterator().next();
                 if (!isRowKeyQuery)
                 {
-                    result = ((PelopsClient) client).find(ixClause.get(isRowKeyQuery), m, false, null, maxResult);
+                    result = ((CassandraClientBase) client).find(ixClause.get(isRowKeyQuery), m, false, null, maxResult);
                 }
                 else
                 {
@@ -136,7 +135,7 @@ public class CassQuery extends QueryImpl implements Query
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         if (appMetadata.isNative(getJPAQuery()))
         {
-            ls = (List<EnhanceEntity>) ((PelopsClient) client).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
+            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
         }
         else
         {
@@ -175,7 +174,7 @@ public class CassQuery extends QueryImpl implements Query
         EntityMetadata m = getEntityMetadata();
         if (KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(getJPAQuery()))
         {
-            ((PelopsClient) persistenceDelegeator.getClient(m)).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
+            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
         }
         else if (kunderaQuery.isDeleteUpdate())
         {
@@ -305,11 +304,7 @@ public class CassQuery extends QueryImpl implements Query
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.query.QueryImpl#getReader()
-     */
+
     @Override
     protected EntityReader getReader()
     {
