@@ -75,32 +75,14 @@ public class MetaModelBuilderTest
 
         try
         {
-            MetaModelBuilder.class.getDeclaredFields();
             Field managedTypeField = builder.getClass().getDeclaredField("managedType");
             if (!managedTypeField.isAccessible())
             {
                 managedTypeField.setAccessible(true);
             }
 
-            log.info("Assert on managedType");
-            AbstractManagedType<X> managedType = (AbstractManagedType<X>) managedTypeField.get(builder);
-            Assert.assertNotNull(managedType);
-            Assert.assertEquals(SingularEntity.class,((EntityType<X>)managedType).getBindableJavaType());
-            Assert.assertEquals(BindableType.ENTITY_TYPE, ((EntityType<X>)managedType).getBindableType());
-            Assert.assertEquals(PersistenceType.ENTITY, ((EntityType<X>)managedType).getPersistenceType());
-            Assert.assertEquals(SingularEntity.class.getSimpleName(), ((EntityType<X>)managedType).getName());
-            Assert.assertEquals(3, managedType.getSingularAttributes().size());
-            
-            //assert on id attribute.
-            log.info("Assert on id attribute");
-            Assert.assertEquals("key", managedType.getSingularAttribute("key").getName());
-            Assert.assertTrue(((AbstractIdentifiableType<X>)managedType).hasSingleIdAttribute());
-            SingularAttribute<? super X, Integer> idAttribute = ((AbstractIdentifiableType<X>)managedType).getId(Integer.class);
-            Assert.assertNotNull(idAttribute);
-            Assert.assertTrue(idAttribute.isId());
-            Assert.assertFalse(idAttribute.isOptional());
-            Assert.assertEquals(idAttribute.getName(), "key");
-            Assert.assertEquals(Integer.class, idAttribute.getJavaType());
+            AbstractManagedType<X> managedType = assertOnManagedType(builder, managedTypeField, SingularEntity.class);
+            assertOnIdAttribute(managedType);
             
             // on optional attribute
             log.info("Assert on optional attribute");
@@ -154,6 +136,8 @@ public class MetaModelBuilderTest
             Assert.fail(e.getMessage());
         }
     }
+
+    
     
     @Test
     public <X extends Class, T extends Object> void testOnEntityWithEmbeddable()
@@ -169,17 +153,26 @@ public class MetaModelBuilderTest
         }
         
         MetaModelBuilder.class.getDeclaredFields();
-        Field managedTypeField;
+        Field embeddableField;
         try
         {
-            managedTypeField = builder.getClass().getDeclaredField("embeddables");
+            embeddableField = builder.getClass().getDeclaredField("embeddables");
+            if (!embeddableField.isAccessible())
+            {
+                embeddableField.setAccessible(true);
+            }
+            Map<Class<?>, AbstractManagedType<?>> embeddables = ((Map<Class<?>, AbstractManagedType<?>>)embeddableField.get(builder));
+            Assert.assertEquals(2, embeddables.size());
+            
+            Field managedTypeField = builder.getClass().getDeclaredField("managedType");
             if (!managedTypeField.isAccessible())
             {
                 managedTypeField.setAccessible(true);
             }
-            Map<Class<?>, AbstractManagedType<?>> embeddables = ((Map<Class<?>, AbstractManagedType<?>>)managedTypeField.get(builder));
-            Assert.assertEquals(1, embeddables.size());
             
+            AbstractManagedType<X> managedType = assertOnManagedType(builder, managedTypeField, SingularEntityEmbeddable.class);
+            
+            assertOnIdAttribute(managedType);
             //TODO: Assertion on attribute type and as well as on Embeddable type.
         }
         catch (SecurityException e)
@@ -201,6 +194,20 @@ public class MetaModelBuilderTest
        
     }
 
+    private <X> AbstractManagedType<X> assertOnManagedType(MetaModelBuilder builder, Field managedTypeField, Class<?> clazz)
+            throws IllegalAccessException
+    {
+        log.info("Assert on managedType");
+        AbstractManagedType<X> managedType = (AbstractManagedType<X>) managedTypeField.get(builder);
+        Assert.assertNotNull(managedType);
+        Assert.assertEquals(clazz,((EntityType<X>)managedType).getBindableJavaType());
+        Assert.assertEquals(BindableType.ENTITY_TYPE, ((EntityType<X>)managedType).getBindableType());
+        Assert.assertEquals(PersistenceType.ENTITY, ((EntityType<X>)managedType).getPersistenceType());
+        Assert.assertEquals(clazz.getSimpleName(), ((EntityType<X>)managedType).getName());
+        Assert.assertEquals(clazz.getDeclaredFields().length, managedType.getSingularAttributes().size());
+        return managedType;
+    }
+
     /**
      * Tear down.
      *
@@ -211,4 +218,17 @@ public class MetaModelBuilderTest
     {
     }
 
+    private <X> void assertOnIdAttribute(AbstractManagedType<X> managedType)
+    {
+        //assert on id attribute.
+        log.info("Assert on id attribute");
+        Assert.assertEquals("key", managedType.getSingularAttribute("key").getName());
+        Assert.assertTrue(((AbstractIdentifiableType<X>)managedType).hasSingleIdAttribute());
+        SingularAttribute<? super X, Integer> idAttribute = ((AbstractIdentifiableType<X>)managedType).getId(Integer.class);
+        Assert.assertNotNull(idAttribute);
+        Assert.assertTrue(idAttribute.isId());
+        Assert.assertFalse(idAttribute.isOptional());
+        Assert.assertEquals(idAttribute.getName(), "key");
+        Assert.assertEquals(Integer.class, idAttribute.getJavaType());
+    }
 }

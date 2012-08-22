@@ -44,6 +44,9 @@ public class SingularEntityEmbeddable
     
     @Embedded
     private EmbeddableEntity embeddableEntity;
+    
+    @Embedded
+    private EmbeddableEntityTwo embeddableEntityTwo;
 
     /**
      * @return the key
@@ -109,6 +112,22 @@ public class SingularEntityEmbeddable
     public void setEmbeddableEntity(EmbeddableEntity embeddableEntity)
     {
         this.embeddableEntity = embeddableEntity;
+    }
+
+    /**
+     * @return the embeddableEntityTwo
+     */
+    public EmbeddableEntityTwo getEmbeddableEntityTwo()
+    {
+        return embeddableEntityTwo;
+    }
+
+    /**
+     * @param embeddableEntityTwo the embeddableEntityTwo to set
+     */
+    public void setEmbeddableEntityTwo(EmbeddableEntityTwo embeddableEntityTwo)
+    {
+        this.embeddableEntityTwo = embeddableEntityTwo;
     }
 
 }
