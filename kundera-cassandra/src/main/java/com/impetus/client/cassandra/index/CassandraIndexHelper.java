@@ -15,13 +15,22 @@
  */
 package com.impetus.client.cassandra.index;
 
+import java.util.List;
+
 import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.SliceRange;
+import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
+import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 
 /**
@@ -73,5 +82,6 @@ public class CassandraIndexHelper
 
         return invertedIndexingApplicable;
     }
+    
 
 }
