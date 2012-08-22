@@ -167,14 +167,22 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
     public final EntityManager createEntityManager()
     {
         // For Application managed persistence context, type is always EXTENDED
-        return new EntityManagerImpl(this, transactionType, PersistenceContextType.EXTENDED);
+        if(isOpen())
+        {
+            return new EntityManagerImpl(this, transactionType, PersistenceContextType.EXTENDED);
+        }
+        throw new IllegalStateException("entity manager factory has been closed");
     }
 
     @Override
     public final EntityManager createEntityManager(Map map)
     {
         // For Application managed persistence context, type is always EXTENDED
+        if(isOpen())
+        {
         return new EntityManagerImpl(this, map, transactionType, PersistenceContextType.EXTENDED);
+        }
+        throw new IllegalStateException("entity manager factory has been closed");
     }
 
     /*
