@@ -15,17 +15,13 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model.type;
 
-import java.util.Map;
-import java.util.Set;
-
 import javax.persistence.metamodel.MappedSuperclassType;
-import javax.persistence.metamodel.PluralAttribute;
-import javax.persistence.metamodel.SingularAttribute;
 
 /**
- *  TODO::::: comments required.
+ * TODO::::: comments required.
+ * 
  * @author vivek.mishra
- *
+ * 
  */
 public class DefaultMappedSuperClass<X> extends AbstractIdentifiableType<X> implements MappedSuperclassType<X>
 {
@@ -34,24 +30,11 @@ public class DefaultMappedSuperClass<X> extends AbstractIdentifiableType<X> impl
      * @param clazz
      * @param persistenceType
      * @param superClazzType
-     * @param declaredSingluarAttribs
-     * @param declaredPluralAttributes
-     * @param idAttribute
-     * @param isIdClass
-     * @param idClassAttributes
      */
     public DefaultMappedSuperClass(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
-            AbstractIdentifiableType<? super X> superClazzType,
-            Map<String, SingularAttribute<X, ?>> declaredSingluarAttribs,
-            Map<String, PluralAttribute<X, ?, ?>> declaredPluralAttributes,
-            SingularAttribute<? super X, ?> idAttribute, boolean isIdClass,
-            Set<SingularAttribute<? super X, ?>> idClassAttributes)
+            AbstractIdentifiableType<? super X> superClazzType)
     {
-        super(clazz, persistenceType, superClazzType, declaredSingluarAttribs, declaredPluralAttributes, idAttribute,
-                isIdClass, idClassAttributes);
+        super(clazz, persistenceType, superClazzType);
     }
 
-    
-
-    
 }

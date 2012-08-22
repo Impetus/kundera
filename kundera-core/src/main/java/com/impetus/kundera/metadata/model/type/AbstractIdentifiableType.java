@@ -15,11 +15,9 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model.type;
 
-import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.metamodel.IdentifiableType;
-import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
@@ -27,19 +25,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- *  Abstract implementation for <code>IdentifiableType</code>
- *  
+ * Abstract implementation for <code>IdentifiableType</code>
+ * 
  * @author vivek.mishra
- *
+ * 
  */
 public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X> implements IdentifiableType<X>
 {
     private SingularAttribute<? super X, ?> idAttribute;
+
     private boolean isIdClass;
+
     private Set<SingularAttribute<? super X, ?>> idClassAttributes;
-    
+
     private static Log log = LogFactory.getLog(AbstractIdentifiableType.class);
-    
+
     /**
      * @param clazz
      * @param persistenceType
@@ -48,17 +48,15 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
      * @param declaredPluralAttributes
      */
     public AbstractIdentifiableType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
-            AbstractIdentifiableType<? super X> superClazzType, Map<String, SingularAttribute<X, ?>> declaredSingluarAttribs,
-            Map<String, PluralAttribute<X, ?, ?>> declaredPluralAttributes, SingularAttribute<? super X, ?> idAttribute, 
-            boolean isIdClass,Set<SingularAttribute<? super X, ?>> idClassAttributes)
+            AbstractIdentifiableType<? super X> superClazzType)
     {
-        super(clazz, persistenceType, superClazzType, declaredSingluarAttribs, declaredPluralAttributes);
-        this.idAttribute = idAttribute;
-        this.isIdClass = isIdClass;
-        this.idClassAttributes = idClassAttributes;
+        super(clazz, persistenceType, superClazzType);
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.IdentifiableType#getId(java.lang.Class)
      */
     @Override
@@ -84,39 +82,46 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
                 return superType.getId(paramClass);
             }
         }
-        
-       onError();
-       
-       return null;
+
+        onError();
+
+        return null;
 
     }
 
     private void onError()
     {
         throw new IllegalArgumentException(
-        "id attribute of the given type is not declared in the identifiable type or if the identifiable type has an id class(e.g. @IdClass is in use)");
+                "id attribute of the given type is not declared in the identifiable type or if the identifiable type has an id class(e.g. @IdClass is in use)");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.metamodel.IdentifiableType#getDeclaredId(java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.metamodel.IdentifiableType#getDeclaredId(java.lang.
+     * Class)
      */
     @Override
     public <Y> SingularAttribute<X, Y> getDeclaredId(Class<Y> paramClass)
     {
-        if(idAttribute != null)
+        if (idAttribute != null)
         {
-            if(idAttribute.getJavaType().equals(paramClass) && !isIdClass)
+            if (idAttribute.getJavaType().equals(paramClass) && !isIdClass)
             {
                 return (SingularAttribute<X, Y>) idAttribute;
-            } 
+            }
         }
-        
+
         onError();
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.metamodel.IdentifiableType#getVersion(java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.metamodel.IdentifiableType#getVersion(java.lang.Class)
      */
     @Override
     public <Y> SingularAttribute<? super X, Y> getVersion(Class<Y> paramClass)
@@ -125,8 +130,12 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
         throw new UnsupportedOperationException("Method not supported");
     }
 
-    /* (non-Javadoc)
-     * @see javax.persistence.metamodel.IdentifiableType#getDeclaredVersion(java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * javax.persistence.metamodel.IdentifiableType#getDeclaredVersion(java.
+     * lang.Class)
      */
     @Override
     public <Y> SingularAttribute<X, Y> getDeclaredVersion(Class<Y> paramClass)
@@ -135,7 +144,9 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
         throw new UnsupportedOperationException("Method not supported");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.IdentifiableType#getSupertype()
      */
     @Override
@@ -144,7 +155,9 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
         return (AbstractIdentifiableType<? super X>) super.getSuperClazzType();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.IdentifiableType#hasSingleIdAttribute()
      */
     @Override
@@ -153,7 +166,9 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
         return !isIdClass;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.IdentifiableType#hasVersionAttribute()
      */
     @Override
@@ -163,31 +178,43 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
         return false;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.IdentifiableType#getIdClassAttributes()
      */
     @Override
     public Set<SingularAttribute<? super X, ?>> getIdClassAttributes()
     {
-        if(isIdClass)
+        if (isIdClass)
         {
             return idClassAttributes;
         }
         throw new IllegalArgumentException("The identifiable type does not have an id class");
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.persistence.metamodel.IdentifiableType#getIdType()
      */
     @Override
     public Type<?> getIdType()
     {
-        if(idAttribute != null && !isIdClass)
+        if (idAttribute != null && !isIdClass)
         {
             return idAttribute.getType();
         }
-        
+
         return getSupertype().getIdType();
     }
 
+    protected void addIdAttribute(SingularAttribute<? super X, ?> idAttribute, boolean isIdClass,
+            Set<SingularAttribute<? super X, ?>> idClassAttributes)
+    {
+
+        this.idAttribute = idAttribute;
+        this.isIdClass = isIdClass;
+        this.idClassAttributes = idClassAttributes;
+    }
 }

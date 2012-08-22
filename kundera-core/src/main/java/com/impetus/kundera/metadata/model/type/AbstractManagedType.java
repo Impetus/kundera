@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model.type;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -58,12 +59,9 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
      * @param declaredPluralAttributes the declared plural attributes
      */
     public AbstractManagedType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
-            ManagedType<? super X> superClazzType, Map<String, SingularAttribute<X, ?>> declaredSingluarAttribs,
-            Map<String, PluralAttribute<X, ?, ?>> declaredPluralAttributes)
+            ManagedType<? super X> superClazzType)
     {
         super(clazz, persistenceType);
-        this.declaredPluralAttributes = declaredPluralAttributes;
-        this.declaredSingluarAttribs = declaredSingluarAttribs;
         this.superClazzType = superClazzType;
     }
 
@@ -729,6 +727,28 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     {
         return superClazzType;
     }
+    
+    public void addSingularAttribute(String attributeName, SingularAttribute<X, ?> attribute)
+    {
+        if(declaredSingluarAttribs == null)
+        {
+            declaredSingluarAttribs = new HashMap<String, SingularAttribute<X,?>>();
+        }
+        
+        declaredSingluarAttribs.put(attributeName, attribute);
+    }
+    
+    protected void addPluarlAttribute(String attributeName, PluralAttribute<X,?,?> attribute)
+    {
+        if(declaredPluralAttributes== null)
+        {
+            declaredPluralAttributes = new HashMap<String, PluralAttribute<X,?,?>>();
+        }
+        
+        declaredPluralAttributes.put(attributeName, attribute);
+    }
+    
+    
     /**
      * Gets the declared plural attribute.
      *

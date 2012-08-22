@@ -53,6 +53,7 @@ public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> impl
             Type<T> attribType, ManagedType<X> managedType)
     {
         super(attribType,attribName,persistenceAttribType,managedType,member);
+//        this.javaType = javaType;
     }
     
 
