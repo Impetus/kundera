@@ -50,13 +50,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
-import org.scale7.cassandra.pelops.ColumnOrSuperColumnHelper;
-import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
-import org.scale7.cassandra.pelops.pool.IThriftPool;
-import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.CassandraClientBase;
+import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.query.CassQuery;
@@ -407,7 +404,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         ColumnParent parent = new ColumnParent(columnFamily); 
         List<ColumnOrSuperColumn> coscList;
         try
-        {
+        {                 
+            cassandra_client.set_keyspace(keyspace);
             coscList = cassandra_client.get_slice(ByteBuffer.wrap(rowKey), parent, predicate, consistencyLevel);
         }
         catch (InvalidRequestException e)
@@ -451,6 +449,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         List<ColumnOrSuperColumn> results;
         try
         {
+            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);     
+            cassandra_client.set_keyspace(keyspace);
             results = cassandra_client.get_slice(ByteBuffer.wrap(rowKey), parent, predicate, consistencyLevel);
         }
         catch (InvalidRequestException e)
@@ -496,6 +496,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         ColumnParent columnParent = new ColumnParent(tableName);
         try
         {
+            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);     
+            cassandra_client.set_keyspace(keyspace);
             List<KeySlice> keySlices = cassandra_client.get_indexed_slices(columnParent, ix, slicePredicate,
                     consistencyLevel);
             
@@ -545,7 +547,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         
         List<KeySlice> keySlices;
         try
-        {
+        {                 
+            cassandra_client.set_keyspace(m.getSchema());
             keySlices = cassandra_client.get_indexed_slices(columnParent, ix, slicePredicate,
                     consistencyLevel);
         }
@@ -588,7 +591,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
         try
-        {
+        {                 
+            cassandra_client.set_keyspace(metadata.getSchema());
             cassandra_client.set_keyspace(metadata.getSchema());            
             
             if (metadata.isCounterColumnType())
@@ -782,6 +786,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         {
             // ixClause can be 0,1 or more!
             SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
+            cassandra_client.set_keyspace(m.getSchema());
 
             if (ixClause.isEmpty())
             {
@@ -790,8 +795,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 keyRange.setEnd_key(Bytes.nullSafeGet(Bytes.fromUTF8("")));
 
                 if (m.isCounterColumnType())
-                {
-
+                {                       
+                    
                     List<KeySlice> ks = cassandra_client.get_range_slices(new ColumnParent(m.getTableName()),
                             slicePredicate, keyRange, consistencyLevel);
                     if (m.getType().isSuperColumnFamilyMetadata())

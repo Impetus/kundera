@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Queue;
 
 import org.apache.cassandra.thrift.Cassandra;
@@ -40,15 +41,19 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
 
+import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandlerBase;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexingException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
@@ -86,8 +91,9 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             
             try
             {
-                cassandra_client.set_keyspace(entityMetadata.getSchema());   
-                
+                String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);     
+                cassandra_client.set_keyspace(keyspace);
+                cassandra_client.set_keyspace(entityMetadata.getSchema());               
                 
                 for (ThriftRow thriftRow : indexThriftyRows)
                 {
@@ -166,6 +172,8 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         List<ColumnOrSuperColumn> coscList = null;
         try
         {
+            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);     
+            cassandra_client.set_keyspace(keyspace);
             coscList = cassandra_client.get_slice(ByteBuffer.wrap(rowKey.getBytes()), new ColumnParent(columnFamilyName),
                     colPredicate, consistencyLevel);
         }
@@ -213,6 +221,8 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         ColumnOrSuperColumn cosc;
         try
         {
+            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);     
+            cassandra_client.set_keyspace(keyspace);
             cosc = cassandra_client.get(ByteBuffer.wrap(rowKey.getBytes()), cp, consistencyLevel);
         }
         catch (InvalidRequestException e)
@@ -247,7 +257,47 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
     @Override
     public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel)
-    {
+    {       
+        
+        super.delete(entity, metadata, consistencyLevel);
+        
+    }
+
+    @Override
+    protected void deleteColumn(String indexColumnFamily, String rowKey, byte[] columnName, String persistenceUnit,
+            ConsistencyLevel consistencyLevel)
+    {        
+        ColumnPath cp = new ColumnPath(indexColumnFamily);
+        cp.setColumn(columnName);       
+        
+        try
+        {
+            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);     
+            cassandra_client.set_keyspace(keyspace);
+            cassandra_client.remove(ByteBuffer.wrap(rowKey.getBytes()), cp, System.currentTimeMillis(), consistencyLevel);
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error(e.getMessage());
+            throw new IndexingException("Unable to delete data from inverted index", e); 
+        }
+        catch (UnavailableException e)
+        {
+            log.error(e.getMessage());
+            throw new IndexingException("Unable to delete data from inverted index", e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error(e.getMessage());
+            throw new IndexingException("Unable to delete data from inverted index", e);
+        }
+        catch (TException e)
+        {
+            log.error(e.getMessage());
+            throw new IndexingException("Unable to delete data from inverted index", e);
+        }
     }   
+    
+    
 
 }

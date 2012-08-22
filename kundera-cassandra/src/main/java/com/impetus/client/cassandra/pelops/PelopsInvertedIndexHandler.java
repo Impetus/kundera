@@ -144,56 +144,13 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     @Override
     public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel)
     {
-        if (CassandraIndexHelper.isInvertedIndexingApplicable(metadata))
-        {
-            Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(metadata.getPersistenceUnit()));
-            String indexColumnFamily = CassandraIndexHelper.getInvertedIndexTableName(metadata.getTableName());
-            for (EmbeddedColumn embeddedColumn : metadata.getEmbeddedColumnsAsList())
-            {
-                Object embeddedObject = PropertyAccessorHelper.getObject(entity, embeddedColumn.getField());
-                if (embeddedObject != null)
-                {
-                    if (embeddedObject instanceof Collection)
-                    {
-                        for (Object obj : (Collection) embeddedObject)
-                        {
-                            for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
-                            {
-                                String rowKey = embeddedColumn.getField().getName()
-                                        + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + column.getField().getName();
-                                byte[] columnName = PropertyAccessorHelper.get(obj, column.getField());
-                                if (columnName != null)
-                                {
-                                    mutator.deleteColumn(indexColumnFamily, rowKey, Bytes.fromByteArray(columnName));
-                                }
-
-                            }
-                        }
-
-                    }
-                    else
-                    {
-                        for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
-                        {
-                            String rowKey = embeddedColumn.getField().getName()
-                                    + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + column.getField().getName();
-                            byte[] columnName = PropertyAccessorHelper.get(embeddedObject, column.getField());
-                            if (columnName != null)
-                            {
-                                mutator.deleteColumn(indexColumnFamily, rowKey, Bytes.fromByteArray(columnName));
-                            }
-                        }
-                    }
-                }
-            }
-            mutator.execute(consistencyLevel);
-        }
+        super.delete(entity, metadata, consistencyLevel);
     }
     
  
 
     @Override
-    protected Column getColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName, String rowKey,
+    public Column getColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName, String rowKey,
             String columnName, String persistenceUnit)
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(persistenceUnit));
@@ -201,6 +158,19 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         return thriftColumn;
     }   
     
+    
+    /**
+     * @param mutator
+     * @param indexColumnFamily
+     * @param rowKey
+     * @param columnName
+     */
+    public void deleteColumn(String indexColumnFamily, String rowKey, byte[] columnName, String persistenceUnit, ConsistencyLevel consistencyLevel)
+    {
+        Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(persistenceUnit));
+        mutator.deleteColumn(indexColumnFamily, rowKey, Bytes.fromByteArray(columnName));
+        mutator.execute(consistencyLevel);
+    }
     
 
 }

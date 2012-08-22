@@ -39,7 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 
-import com.impetus.client.cassandra.common.Utilities;
+import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
@@ -538,7 +538,7 @@ public abstract class CassandraDataHandlerBase
                                 com.impetus.kundera.metadata.model.Column col = m.getColumn(name);
                                 if (col != null)
                                 {
-                                    superColumnObj = Utilities.toUTF8(value);                                        
+                                    superColumnObj = CassandraUtilities.toUTF8(value);                                        
                                 }
                             }
 
@@ -842,7 +842,7 @@ public abstract class CassandraDataHandlerBase
                     {
 
                         // Column Value
-                        String id = Utilities.toUTF8(value); 
+                        String id = CassandraUtilities.toUTF8(value); 
                             
                         String superColumnName = ecCacheHandler.getElementCollectionObjectName(id, obj);
                         byte[] indexColumnValue = (id + Constants.INDEX_TABLE_EC_DELIMITER + superColumnName)
