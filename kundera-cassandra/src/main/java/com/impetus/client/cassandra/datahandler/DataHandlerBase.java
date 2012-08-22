@@ -16,7 +16,8 @@
 package com.impetus.client.cassandra.datahandler;
 
 /**
- * Base class for all Cassandra Data Handlers 
+ * Base class for all Cassandra Data Handlers
+ * 
  * @author amresh.singh
  */
 public abstract class DataHandlerBase

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Queue;
 
 import org.apache.cassandra.thrift.Cassandra;
@@ -47,29 +46,27 @@ import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandlerBase;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
-import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexingException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
  * Thrift implementation of {@link InvertedIndexHandler}
+ * 
  * @author amresh.singh
  */
 public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase implements InvertedIndexHandler
 {
-    
+
     Cassandra.Client cassandra_client;
-    
+
     /** log for this class. */
     private static Log log = LogFactory.getLog(ThriftInvertedIndexHandler.class);
-    
-    
-    public ThriftInvertedIndexHandler(Cassandra.Client cassandra_client) {
+
+    public ThriftInvertedIndexHandler(Cassandra.Client cassandra_client)
+    {
         this.cassandra_client = cassandra_client;
     }
 
@@ -83,81 +80,83 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         if (invertedIndexingApplicable)
         {
             String indexColumnFamily = CassandraIndexHelper.getInvertedIndexTableName(entityMetadata.getTableName());
-            
+
             ThriftDataHandler thriftDataHandler = (ThriftDataHandler) cdHandler;
-            
-            List<ThriftRow> indexThriftyRows = thriftDataHandler.toIndexThriftRow(node.getData(),
-                    entityMetadata, indexColumnFamily);
-            
+
+            List<ThriftRow> indexThriftyRows = thriftDataHandler.toIndexThriftRow(node.getData(), entityMetadata,
+                    indexColumnFamily);
+
             try
             {
-                String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);     
+                String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
                 cassandra_client.set_keyspace(keyspace);
-                cassandra_client.set_keyspace(entityMetadata.getSchema());               
-                
+                cassandra_client.set_keyspace(entityMetadata.getSchema());
+
                 for (ThriftRow thriftRow : indexThriftyRows)
                 {
                     byte[] rowKey = Bytes.fromUTF8(thriftRow.getId()).toByteArray();
-                    
-                    //Create Insertion List
+
+                    // Create Insertion List
                     List<Mutation> insertion_list = new ArrayList<Mutation>();
-                    
+
                     List<Column> thriftColumns = thriftRow.getColumns();
-                    if(thriftColumns != null && !thriftColumns.isEmpty())
+                    if (thriftColumns != null && !thriftColumns.isEmpty())
                     {
-                        for(Column column : thriftColumns) {
-                            Mutation mut = new Mutation();  
+                        for (Column column : thriftColumns)
+                        {
+                            Mutation mut = new Mutation();
                             mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setColumn(column));
                             insertion_list.add(mut);
-                        }                   
+                        }
                     }
-                    
-                    //Create Mutation Map               
-                    Map<String,List<Mutation>> columnFamilyValues = new HashMap<String,List<Mutation>>();               
-                    columnFamilyValues.put(indexColumnFamily, insertion_list);              
-                    Map<ByteBuffer, Map<String, List<Mutation>>> mulationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();                
-                    mulationMap.put(ByteBuffer.wrap(rowKey), columnFamilyValues);    
-                   
-                    //Write Mutation map to database
+
+                    // Create Mutation Map
+                    Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
+                    columnFamilyValues.put(indexColumnFamily, insertion_list);
+                    Map<ByteBuffer, Map<String, List<Mutation>>> mulationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
+                    mulationMap.put(ByteBuffer.wrap(rowKey), columnFamilyValues);
+
+                    // Write Mutation map to database
                     cassandra_client.batch_mutate(mulationMap, consistencyLevel);
                 }
             }
             catch (IllegalStateException e)
             {
                 log.error(e.getMessage());
-                throw new IndexingException("Unable to insert records into inverted index", e); 
+                throw new IndexingException("Unable to insert records into inverted index", e);
             }
             catch (InvalidRequestException e)
             {
                 log.error(e.getMessage());
-                throw new IndexingException("Unable to insert records into inverted index", e); 
+                throw new IndexingException("Unable to insert records into inverted index", e);
             }
             catch (TException e)
             {
                 log.error(e.getMessage());
-                throw new IndexingException("Unable to insert records into inverted index", e); 
+                throw new IndexingException("Unable to insert records into inverted index", e);
             }
             catch (UnavailableException e)
             {
                 log.error(e.getMessage());
-                throw new IndexingException("Unable to insert records into inverted index", e); 
+                throw new IndexingException("Unable to insert records into inverted index", e);
             }
             catch (TimedOutException e)
             {
                 log.error(e.getMessage());
-                throw new IndexingException("Unable to insert records into inverted index", e); 
-            }           
+                throw new IndexingException("Unable to insert records into inverted index", e);
+            }
         }
-        
+
     }
 
     @Override
-    public List<SearchResult> search(EntityMetadata m, Queue<FilterClause> filterClauseQueue,
-            String persistenceUnit, ConsistencyLevel consistencyLevel)
+    public List<SearchResult> search(EntityMetadata m, Queue<FilterClause> filterClauseQueue, String persistenceUnit,
+            ConsistencyLevel consistencyLevel)
     {
-        
+
         return super.search(m, filterClauseQueue, persistenceUnit, consistencyLevel);
     }
+
     @Override
     protected void searchColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel,
             String persistenceUnit, String rowKey, String searchString, List<Column> thriftColumns, byte[] start,
@@ -167,39 +166,38 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         SliceRange sliceRange = new SliceRange();
         sliceRange.setStart(start);
         sliceRange.setFinish(finish);
-        colPredicate.setSlice_range(sliceRange);        
-        
+        colPredicate.setSlice_range(sliceRange);
+
         List<ColumnOrSuperColumn> coscList = null;
         try
         {
-            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);     
+            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
             cassandra_client.set_keyspace(keyspace);
-            coscList = cassandra_client.get_slice(ByteBuffer.wrap(rowKey.getBytes()), new ColumnParent(columnFamilyName),
-                    colPredicate, consistencyLevel);
+            coscList = cassandra_client.get_slice(ByteBuffer.wrap(rowKey.getBytes()),
+                    new ColumnParent(columnFamilyName), colPredicate, consistencyLevel);
         }
         catch (InvalidRequestException e)
         {
             log.error(e.getMessage());
-            throw new IndexingException("Unable to search from inverted index", e); 
+            throw new IndexingException("Unable to search from inverted index", e);
         }
         catch (UnavailableException e)
         {
             log.error(e.getMessage());
-            throw new IndexingException("Unable to search from inverted index", e); 
+            throw new IndexingException("Unable to search from inverted index", e);
         }
         catch (TimedOutException e)
         {
             log.error(e.getMessage());
-            throw new IndexingException("Unable to search from inverted index", e); 
+            throw new IndexingException("Unable to search from inverted index", e);
         }
         catch (TException e)
         {
             log.error(e.getMessage());
-            throw new IndexingException("Unable to search from inverted index", e); 
+            throw new IndexingException("Unable to search from inverted index", e);
         }
-        
-        List<Column> allThriftColumns = ThriftDataResultHelper.transformThriftResult(coscList, ColumnFamilyType.COLUMN);    
-        
+
+        List<Column> allThriftColumns = ThriftDataResultHelper.transformThriftResult(coscList, ColumnFamilyType.COLUMN);
 
         for (Column column : allThriftColumns)
         {
@@ -209,9 +207,9 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             {
                 thriftColumns.add(column);
             }
-        }        
-    }  
-    
+        }
+    }
+
     @Override
     protected Column getColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName, String rowKey,
             String columnName, String persistenceUnit)
@@ -221,65 +219,66 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         ColumnOrSuperColumn cosc;
         try
         {
-            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);     
+            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
             cassandra_client.set_keyspace(keyspace);
             cosc = cassandra_client.get(ByteBuffer.wrap(rowKey.getBytes()), cp, consistencyLevel);
         }
         catch (InvalidRequestException e)
         {
             log.error(e.getMessage());
-            throw new IndexingException("Unable to search from inverted index", e); 
+            throw new IndexingException("Unable to search from inverted index", e);
         }
         catch (NotFoundException e)
         {
             log.error(e.getMessage());
-            throw new IndexingException("Unable to search from inverted index", e); 
+            throw new IndexingException("Unable to search from inverted index", e);
         }
         catch (UnavailableException e)
         {
             log.error(e.getMessage());
-            throw new IndexingException("Unable to search from inverted index", e); 
+            throw new IndexingException("Unable to search from inverted index", e);
         }
         catch (TimedOutException e)
         {
             log.error(e.getMessage());
-            throw new IndexingException("Unable to search from inverted index", e); 
+            throw new IndexingException("Unable to search from inverted index", e);
         }
         catch (TException e)
         {
             log.error(e.getMessage());
-            throw new IndexingException("Unable to search from inverted index", e); 
-        } 
-            
+            throw new IndexingException("Unable to search from inverted index", e);
+        }
+
         Column thriftColumn = ThriftDataResultHelper.transformThriftResult(cosc, ColumnFamilyType.COLUMN);
         return thriftColumn;
-    }   
+    }
 
     @Override
     public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel)
-    {       
-        
+    {
+
         super.delete(entity, metadata, consistencyLevel);
-        
+
     }
 
     @Override
     protected void deleteColumn(String indexColumnFamily, String rowKey, byte[] columnName, String persistenceUnit,
             ConsistencyLevel consistencyLevel)
-    {        
+    {
         ColumnPath cp = new ColumnPath(indexColumnFamily);
-        cp.setColumn(columnName);       
-        
+        cp.setColumn(columnName);
+
         try
         {
-            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);     
+            String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
             cassandra_client.set_keyspace(keyspace);
-            cassandra_client.remove(ByteBuffer.wrap(rowKey.getBytes()), cp, System.currentTimeMillis(), consistencyLevel);
+            cassandra_client.remove(ByteBuffer.wrap(rowKey.getBytes()), cp, System.currentTimeMillis(),
+                    consistencyLevel);
         }
         catch (InvalidRequestException e)
         {
             log.error(e.getMessage());
-            throw new IndexingException("Unable to delete data from inverted index", e); 
+            throw new IndexingException("Unable to delete data from inverted index", e);
         }
         catch (UnavailableException e)
         {
@@ -296,8 +295,6 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             log.error(e.getMessage());
             throw new IndexingException("Unable to delete data from inverted index", e);
         }
-    }   
-    
-    
+    }
 
 }

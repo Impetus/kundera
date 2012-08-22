@@ -110,7 +110,8 @@ public class CassQuery extends QueryImpl implements Query
                 boolean isRowKeyQuery = ixClause.keySet().iterator().next();
                 if (!isRowKeyQuery)
                 {
-                    result = ((CassandraClientBase) client).find(ixClause.get(isRowKeyQuery), m, false, null, maxResult);
+                    result = ((CassandraClientBase) client)
+                            .find(ixClause.get(isRowKeyQuery), m, false, null, maxResult);
                 }
                 else
                 {
@@ -135,7 +136,8 @@ public class CassQuery extends QueryImpl implements Query
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         if (appMetadata.isNative(getJPAQuery()))
         {
-            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
+            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(getJPAQuery(), m.getEntityClazz(),
+                    null);
         }
         else
         {
@@ -174,7 +176,8 @@ public class CassQuery extends QueryImpl implements Query
         EntityMetadata m = getEntityMetadata();
         if (KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(getJPAQuery()))
         {
-            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
+            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(getJPAQuery(), m.getEntityClazz(),
+                    null);
         }
         else if (kunderaQuery.isDeleteUpdate())
         {
@@ -304,7 +307,6 @@ public class CassQuery extends QueryImpl implements Query
 
     }
 
-
     @Override
     protected EntityReader getReader()
     {
@@ -347,13 +349,14 @@ public class CassQuery extends QueryImpl implements Query
             f = col.getField();
         }
 
-        // need to do integer.parseInt..as value will be string in case of create query.
+        // need to do integer.parseInt..as value will be string in case of
+        // create query.
         if (f != null && f.getType() != null)
         {
             if (isId || f.getType().isAssignableFrom(String.class))
             {
 
-                return Bytes.fromByteArray(((String)value).getBytes());
+                return Bytes.fromByteArray(((String) value).getBytes());
             }
             else if (f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
             {
@@ -379,7 +382,8 @@ public class CassQuery extends QueryImpl implements Query
             else if (f.getType().equals(float.class) || f.getType().isAssignableFrom(Float.class))
             {
                 return Bytes.fromFloat(Float.valueOf(value.toString()));
-            } else if(f.getType().isAssignableFrom(Date.class))
+            }
+            else if (f.getType().isAssignableFrom(Date.class))
             {
                 DateAccessor dateAccessor = new DateAccessor();
                 return Bytes.fromByteArray(dateAccessor.toBytes(value));

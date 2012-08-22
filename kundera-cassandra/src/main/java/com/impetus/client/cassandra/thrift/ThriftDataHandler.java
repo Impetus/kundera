@@ -40,23 +40,23 @@ import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
- * Data handler for Thrift Clients 
+ * Data handler for Thrift Clients
+ * 
  * @author amresh.singh
  */
 public final class ThriftDataHandler extends CassandraDataHandlerBase implements CassandraDataHandler
 {
     Cassandra.Client cassandra_client;
-    
-    public ThriftDataHandler(Cassandra.Client cassandra_client) {
+
+    public ThriftDataHandler(Cassandra.Client cassandra_client)
+    {
         this.cassandra_client = cassandra_client;
     }
-    
-    
-    
+
     @Override
     public Object fromThriftRow(Class<?> clazz, EntityMetadata m, String rowKey, List<String> relationNames,
             boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
-    {        
+    {
 
         List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
         Object e = null;
@@ -65,20 +65,20 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
         {
             if (m.isCounterColumnType())
             {
-                
+
                 List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
-                rowKeys.add(ByteBufferUtil.bytes(rowKey));        
-                
-                
+                rowKeys.add(ByteBufferUtil.bytes(rowKey));
+
                 SlicePredicate predicate = new SlicePredicate();
                 predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
-                
+
                 Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = cassandra_client
-                        .multiget_slice(rowKeys, new ColumnParent(m.getTableName()), predicate, consistencyLevel);               
-                
-                List<CounterSuperColumn> thriftCounterSuperColumns = ThriftDataResultHelper.transformThriftResultAndAddToList(
-                        thriftColumnOrSuperColumns, ColumnFamilyType.COUNTER_SUPER_COLUMN);               
-                
+                        .multiget_slice(rowKeys, new ColumnParent(m.getTableName()), predicate, consistencyLevel);
+
+                List<CounterSuperColumn> thriftCounterSuperColumns = ThriftDataResultHelper
+                        .transformThriftResultAndAddToList(thriftColumnOrSuperColumns,
+                                ColumnFamilyType.COUNTER_SUPER_COLUMN);
+
                 if (thriftCounterSuperColumns != null)
                 {
                     e = fromCounterSuperColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null, null,
@@ -87,10 +87,10 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
             }
             else
             {
-             
-               SlicePredicate predicate = new SlicePredicate();
-               predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
-                
+
+                SlicePredicate predicate = new SlicePredicate();
+                predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
+
                 List<ColumnOrSuperColumn> columnOrSuperColumns = cassandra_client.get_slice(
                         ByteBuffer.wrap(rowKey.getBytes()), new ColumnParent(m.getTableName()), predicate,
                         consistencyLevel);
@@ -111,10 +111,10 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
 
             SlicePredicate predicate = new SlicePredicate();
             predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
-            
-            Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow = cassandra_client
-                    .multiget_slice(rowKeys, new ColumnParent(m.getTableName()), predicate, consistencyLevel);
-            
+
+            Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow = cassandra_client.multiget_slice(
+                    rowKeys, new ColumnParent(m.getTableName()), predicate, consistencyLevel);
+
             List<ColumnOrSuperColumn> colList = columnOrSuperColumnsFromRow.get(rKeyAsByte);
             if (m.isCounterColumnType())
             {
@@ -157,29 +157,48 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
         }
         return e;
     }
-    
+
+    /** Translation Methods */
+
     @Override
-    public List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames,
-            boolean isWrapReq, ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception
+    public List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames, boolean isWrapReq,
+            ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception
     {
         return super.fromThriftRow(clazz, m, relationNames, isWrapReq, consistencyLevel, rowIds);
-    }  
-    
+    }
+
     @Override
-    public <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception {
+    public <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception
+    {
         return super.fromThriftRow(clazz, m, tr);
-    }    
-    
+    }
+
     @Override
-    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow, List<String> relationNames,
-            boolean isWrapperReq) throws Exception {
+    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
+            List<String> relationNames, boolean isWrapperReq) throws Exception
+    {
         return super.fromColumnThriftRow(clazz, m, thriftRow, relationNames, isWrapperReq);
     }
-    
+
     @Override
     public Object fromCounterColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
-            List<String> relationNames, boolean isWrapperReq) throws Exception {
+            List<String> relationNames, boolean isWrapperReq) throws Exception
+    {
         return super.fromCounterColumnThriftRow(clazz, m, thriftRow, relationNames, isWrapperReq);
     }
-    
+
+    @Override
+    public Object fromSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr, List<String> relationNames,
+            boolean isWrapReq) throws Exception
+    {
+        return super.fromSuperColumnThriftRow(clazz, m, tr, relationNames, isWrapReq);
+    }
+
+    @Override
+    public Object fromCounterSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr,
+            List<String> relationNames, boolean isWrapReq) throws Exception
+    {
+        return super.fromCounterSuperColumnThriftRow(clazz, m, tr, relationNames, isWrapReq);
+    }
+
 }

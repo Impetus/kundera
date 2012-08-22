@@ -29,23 +29,18 @@ import javax.persistence.PersistenceException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
-import org.apache.cassandra.thrift.CqlResult;
-import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeySlice;
-import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
@@ -66,7 +61,6 @@ import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
-import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
@@ -98,7 +92,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
     /** The data handler. */
     private PelopsDataHandler dataHandler;
-    
+
     /** Handler for Inverted indexing */
     private InvertedIndexHandler invertedIndexHandler;
 
@@ -126,14 +120,13 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         this.invertedIndexHandler = new PelopsInvertedIndexHandler();
         this.reader = reader;
     }
-    
+
     @Override
     public final Object find(Class entityClass, Object rowId)
     {
         return super.find(entityClass, rowId);
     }
 
-    
     @Override
     public final <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
     {
@@ -162,13 +155,13 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         if (!isOpen())
         {
             throw new PersistenceException("PelopsClient is closed.");
-        }       
+        }
 
         List entities = null;
         try
         {
-            entities = dataHandler.fromThriftRow(entityClass, metadata, relationNames, isWrapReq,
-                    consistencyLevel, rowIds);
+            entities = dataHandler.fromThriftRow(entityClass, metadata, relationNames, isWrapReq, consistencyLevel,
+                    rowIds);
         }
         catch (Exception e)
         {
@@ -176,8 +169,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
 
         return entities;
-    }  
-
+    }
 
     @Override
     public void delete(Object entity, Object pKey)
@@ -201,14 +193,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
         // Delete from Lucene if applicable
         getIndexManager().remove(metadata, entity, pKey.toString());
-        
-        // Delete from Inverted Index if applicable        
+
+        // Delete from Inverted Index if applicable
         invertedIndexHandler.delete(entity, metadata, consistencyLevel);
-        
+
     }
-
-    
-
 
     @Override
     public final void close()
@@ -258,7 +247,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
     }
 
-
     @Override
     public <E> List<E> getColumnsById(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             String parentId)
@@ -269,8 +257,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
         List<E> foreignKeys = dataHandler.getForeignKeysFromJoinTable(inverseJoinColumnName, columns);
         return foreignKeys;
-    }   
-
+    }
 
     @Override
     public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
@@ -311,7 +298,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return null;
     }
 
-
     // Incorrect
     public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
@@ -325,15 +311,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         rowDeletor.deleteRow(tableName, columnValue.toString(), consistencyLevel);
     }
 
-    
-    
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
         return super.find(entityClass, embeddedColumnMap, dataHandler);
     }
-
-    
 
     /*
      * (non-Javadoc)
@@ -367,7 +349,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
         return entities;
     }
-    
 
     /*
      * (non-Javadoc)
@@ -380,8 +361,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return reader;
     }
 
-    
-
     @Override
     public Class<CassQuery> getQueryImplementor()
     {
@@ -391,7 +370,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     @Override
     protected void onPersist(EntityMetadata metadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-        
+
         if (!isOpen())
         {
             throw new PersistenceException("PelopsClient is closed.");
@@ -408,7 +387,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         {
             String columnFamily = metadata.getTableName();
             tf = dataHandler.toThriftRow(entity, id.toString(), metadata, columnFamily);
-            timestamp = System.currentTimeMillis();            
+            timestamp = System.currentTimeMillis();
         }
         catch (Exception e)
         {
@@ -470,20 +449,12 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     @Override
     protected void indexNode(Node node, EntityMetadata entityMetadata)
     {
-        //Index to lucene if applicable
+        // Index to lucene if applicable
         super.indexNode(node, entityMetadata);
 
-        //Write to inverted index table if applicable
+        // Write to inverted index table if applicable
         invertedIndexHandler.write(node, entityMetadata, getPersistenceUnit(), consistencyLevel, dataHandler);
     }
-      
-
-    
-
-
-    
-
-    
 
     /**
      * Load super columns.
@@ -498,7 +469,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      *            the super column names
      * @return the list
      */
-    
+
     @Override
     public final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
             String... superColumnNames)
@@ -508,8 +479,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
         List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>();
         rowKeys.add(ByteBuffer.wrap(rowId.getBytes()));
-        
-        //Pelops.getDbConnPool("").getConnection().getAPI().
+
+        // Pelops.getDbConnPool("").getConnection().getAPI().
 
         // selector.getColumnOrSuperColumnsFromRows(new
         // ColumnParent(columnFamily),rowKeys ,
@@ -517,9 +488,9 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames),
                 consistencyLevel);
     }
-    
+
     /** Query related methods */
-    
+
     /**
      * Method to execute cql query and return back entity/enhance entities.
      * 
@@ -559,7 +530,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             }
         }
     }
-    
+
     /**
      * Find.
      * 
@@ -659,7 +630,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
         return entities;
     }
-    
+
     /**
      * Find.
      * 
@@ -676,7 +647,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     {
         return (List<EnhanceEntity>) find(conditions, m, true, relationNames, maxResult);
     }
-    
+
     /**
      * Find by range.
      * 
@@ -707,92 +678,20 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                 maxVal != null ? Bytes.fromByteArray(maxVal) : Bytes.fromUTF8(""), 10000), slicePredicate,
                 consistencyLevel);
 
-        List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
-
         List results = null;
         if (keys != null)
         {
-            results = new ArrayList(keys.size());
-            for (KeySlice key : keys)
-            {
-                List<ColumnOrSuperColumn> columns = key.getColumns();
-                byte[] rowKey = key.getKey();
-
-                if (!superColumnNames.isEmpty())
-                {
-                    Object r = null;
-
-                    if (m.isCounterColumnType())
-                    {
-                        List<CounterSuperColumn> superCounterColumns = new ArrayList<CounterSuperColumn>(columns.size());
-                        for (ColumnOrSuperColumn supCol : columns)
-                        {
-                            superCounterColumns.add(supCol.getCounter_super_column());
-                        }
-                        r = dataHandler.fromCounterSuperColumnThriftRow(m.getEntityClazz(), m, new ThriftRow(
-                                new String(rowKey), m.getTableName(), null, null, null, superCounterColumns),
-                                relations, isWrapReq);
-                    }
-                    else
-                    {
-                        List<SuperColumn> superColumns = new ArrayList<SuperColumn>(columns.size());
-                        for (ColumnOrSuperColumn supCol : columns)
-                        {
-                            superColumns.add(supCol.getSuper_column());
-                        }
-
-                        r = dataHandler.fromSuperColumnThriftRow(m.getEntityClazz(), m, new ThriftRow(new String(
-                                rowKey), m.getTableName(), null, superColumns, null, null), relations, isWrapReq);
-                    }
-                    if (r != null)
-                    {
-                        results.add(r);
-                    }
-                    // List<SuperColumn> superCol = columns.
-                }
-                else
-                {
-                    Object r = null;
-                    if (m.isCounterColumnType())
-                    {
-                        List<CounterColumn> cols = new ArrayList<CounterColumn>(columns.size());
-                        for (ColumnOrSuperColumn supCol : columns)
-                        {
-                            cols.add(supCol.getCounter_column());
-                        }
-
-                        r = dataHandler.fromCounterColumnThriftRow(m.getEntityClazz(), m, new ThriftRow(new String(
-                                rowKey), m.getTableName(), null, null, cols, null), relations, isWrapReq);
-                    }
-                    else
-                    {
-                        List<Column> cols = new ArrayList<Column>(columns.size());
-                        for (ColumnOrSuperColumn supCol : columns)
-                        {
-                            cols.add(supCol.getColumn());
-                        }
-
-                        r = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m, new ThriftRow(
-                                new String(rowKey), m.getTableName(), cols, null, null, null), relations, isWrapReq);
-                    }
-                    if (r != null)
-                    {
-                        results.add(r);
-                    }
-                }
-            }
+            results = populateEntitiesFromKeySlices(m, isWrapReq, relations, keys, dataHandler);
         }
 
         return results;
     }
-    
+
     public List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
             Queue<FilterClause> filterClauseQueue)
     {
-        return  invertedIndexHandler.search(m, filterClauseQueue,
-                getPersistenceUnit(), consistencyLevel);        
-    }     
-    
+        return invertedIndexHandler.search(m, filterClauseQueue, getPersistenceUnit(), consistencyLevel);
+    }
 
     /**
      * Checks if is open.
@@ -815,7 +714,5 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             log.warn("Please provide resonable consistency Level");
         }
     }
-    
-    
-    
+
 }

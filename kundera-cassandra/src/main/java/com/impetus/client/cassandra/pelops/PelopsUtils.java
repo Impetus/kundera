@@ -105,7 +105,7 @@ public class PelopsUtils
         }
         return policy;
     }
-    
+
     /**
      * If userName and password provided, Method prepares for
      * AuthenticationRequest.
@@ -129,10 +129,10 @@ public class PelopsUtils
         }
         return authenticator;
     }
-    
-    
+
     /**
      * Returns instance of {@link Cassandra.Client} for a given persistence unit
+     * 
      * @param persistenceUnit
      * @return
      */

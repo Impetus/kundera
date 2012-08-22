@@ -16,7 +16,6 @@
 package com.impetus.client.cassandra.pelops;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 
@@ -36,12 +35,9 @@ import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandlerBase;
 import com.impetus.client.cassandra.thrift.ThriftRow;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
@@ -88,14 +84,12 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
      * @return
      */
     @Override
-    public List<SearchResult> search(EntityMetadata m, Queue<FilterClause> filterClauseQueue,
-            String persistenceUnit, ConsistencyLevel consistencyLevel)
-    {        
+    public List<SearchResult> search(EntityMetadata m, Queue<FilterClause> filterClauseQueue, String persistenceUnit,
+            ConsistencyLevel consistencyLevel)
+    {
         return super.search(m, filterClauseQueue, persistenceUnit, consistencyLevel);
     }
 
-    
-    
     /**
      * Searches <code>searchString</code> into <code>columnFamilyName</code>
      * (usually a wide row column family) for a given <code>rowKey</code> from
@@ -110,15 +104,16 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
      * @param thriftColumns
      */
     @Override
-    public void searchColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel, String persistenceUnit,
-            String rowKey, String searchString, List<Column> thriftColumns, byte[] start, byte[] finish)
+    public void searchColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel,
+            String persistenceUnit, String rowKey, String searchString, List<Column> thriftColumns, byte[] start,
+            byte[] finish)
     {
         SlicePredicate colPredicate = new SlicePredicate();
         SliceRange sliceRange = new SliceRange();
         sliceRange.setStart(start);
         sliceRange.setFinish(finish);
         colPredicate.setSlice_range(sliceRange);
-        
+
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(persistenceUnit));
         List<Column> allThriftColumns = selector.getColumnsFromRow(columnFamilyName, rowKey, colPredicate,
                 consistencyLevel);
@@ -146,8 +141,6 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
     {
         super.delete(entity, metadata, consistencyLevel);
     }
-    
- 
 
     @Override
     public Column getColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName, String rowKey,
@@ -156,21 +149,20 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(persistenceUnit));
         Column thriftColumn = selector.getColumnFromRow(columnFamilyName, rowKey, columnName, consistencyLevel);
         return thriftColumn;
-    }   
-    
-    
+    }
+
     /**
      * @param mutator
      * @param indexColumnFamily
      * @param rowKey
      * @param columnName
      */
-    public void deleteColumn(String indexColumnFamily, String rowKey, byte[] columnName, String persistenceUnit, ConsistencyLevel consistencyLevel)
+    public void deleteColumn(String indexColumnFamily, String rowKey, byte[] columnName, String persistenceUnit,
+            ConsistencyLevel consistencyLevel)
     {
         Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(persistenceUnit));
         mutator.deleteColumn(indexColumnFamily, rowKey, Bytes.fromByteArray(columnName));
         mutator.execute(consistencyLevel);
     }
-    
 
 }

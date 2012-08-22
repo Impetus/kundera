@@ -37,18 +37,19 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;
 
 /**
- * Base class for 
+ * Base class for
+ * 
  * @author amresh.singh
  */
 public abstract class InvertedIndexHandlerBase
 {
     /** log for this class. */
     private static Log log = LogFactory.getLog(InvertedIndexHandlerBase.class);
-    
-    public List<SearchResult> search(EntityMetadata m, Queue<FilterClause> filterClauseQueue,
-            String persistenceUnit, ConsistencyLevel consistencyLevel)
+
+    public List<SearchResult> search(EntityMetadata m, Queue<FilterClause> filterClauseQueue, String persistenceUnit,
+            ConsistencyLevel consistencyLevel)
     {
-        String columnFamilyName = m.getTableName() + Constants.INDEX_TABLE_SUFFIX;       
+        String columnFamilyName = m.getTableName() + Constants.INDEX_TABLE_SUFFIX;
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
 
@@ -81,8 +82,9 @@ public abstract class InvertedIndexHandlerBase
                 // EQUAL Operator
                 if (condition.equals("="))
                 {
-                   Column thriftColumn = getColumnForRow(consistencyLevel, columnFamilyName, rowKey, columnName, persistenceUnit);
-                   thriftColumns.add(thriftColumn);
+                    Column thriftColumn = getColumnForRow(consistencyLevel, columnFamilyName, rowKey, columnName,
+                            persistenceUnit);
+                    thriftColumns.add(thriftColumn);
                 }
 
                 // LIKE operation
@@ -163,12 +165,12 @@ public abstract class InvertedIndexHandlerBase
         }
         return searchResults;
     }
-    
+
     public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel)
     {
         if (CassandraIndexHelper.isInvertedIndexingApplicable(metadata))
         {
-            
+
             String indexColumnFamily = CassandraIndexHelper.getInvertedIndexTableName(metadata.getTableName());
             for (EmbeddedColumn embeddedColumn : metadata.getEmbeddedColumnsAsList())
             {
@@ -186,7 +188,8 @@ public abstract class InvertedIndexHandlerBase
                                 byte[] columnName = PropertyAccessorHelper.get(obj, column.getField());
                                 if (columnName != null)
                                 {
-                                    deleteColumn(indexColumnFamily, rowKey, columnName, metadata.getPersistenceUnit(), consistencyLevel);
+                                    deleteColumn(indexColumnFamily, rowKey, columnName, metadata.getPersistenceUnit(),
+                                            consistencyLevel);
                                 }
 
                             }
@@ -202,12 +205,13 @@ public abstract class InvertedIndexHandlerBase
                             byte[] columnName = PropertyAccessorHelper.get(embeddedObject, column.getField());
                             if (columnName != null)
                             {
-                                deleteColumn(indexColumnFamily, rowKey, columnName, metadata.getPersistenceUnit(), consistencyLevel);
+                                deleteColumn(indexColumnFamily, rowKey, columnName, metadata.getPersistenceUnit(),
+                                        consistencyLevel);
                             }
                         }
                     }
                 }
-            }            
+            }
         }
     }
 
@@ -216,7 +220,8 @@ public abstract class InvertedIndexHandlerBase
      * @param rowKey
      * @param columnName
      */
-    protected abstract void deleteColumn(String indexColumnFamily, String rowKey, byte[] columnName, String persistenceUnit, ConsistencyLevel consistencyLevel);
+    protected abstract void deleteColumn(String indexColumnFamily, String rowKey, byte[] columnName,
+            String persistenceUnit, ConsistencyLevel consistencyLevel);
 
     /**
      * @param consistencyLevel
@@ -225,10 +230,11 @@ public abstract class InvertedIndexHandlerBase
      * @param columnName
      * @return
      */
-    protected abstract Column getColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName, String rowKey,
-            String columnName, String persistenceUnit);
-    
-    protected abstract void searchColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel, String persistenceUnit,
-            String rowKey, String searchString, List<Column> thriftColumns, byte[] start, byte[] finish);
+    protected abstract Column getColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName,
+            String rowKey, String columnName, String persistenceUnit);
+
+    protected abstract void searchColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel,
+            String persistenceUnit, String rowKey, String searchString, List<Column> thriftColumns, byte[] start,
+            byte[] finish);
 
 }

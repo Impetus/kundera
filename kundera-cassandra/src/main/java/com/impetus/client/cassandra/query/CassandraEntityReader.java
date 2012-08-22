@@ -124,8 +124,8 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
                     try
                     {
-                        ls = (List<EnhanceEntity>) ((CassandraClientBase) client).find(m.getEntityClazz(), relationNames,
-                                true, m, rSet.toArray(new String[] {}));
+                        ls = (List<EnhanceEntity>) ((CassandraClientBase) client).find(m.getEntityClazz(),
+                                relationNames, true, m, rSet.toArray(new String[] {}));
                     }
                     catch (Exception e)
                     {
@@ -227,35 +227,41 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         List<Object> primaryKeys = new ArrayList<Object>();
 
         String columnFamilyName = m.getTableName() + Constants.INDEX_TABLE_SUFFIX;
-        searchResults = ((CassandraClientBase) client).searchInInvertedIndex(columnFamilyName, m, filterClauseQueue);        
-        
+        searchResults = ((CassandraClientBase) client).searchInInvertedIndex(columnFamilyName, m, filterClauseQueue);
+
         Map<String, String> embeddedColumns = new HashMap<String, String>();
-        for(SearchResult searchResult : searchResults)
+        for (SearchResult searchResult : searchResults)
         {
-            if(searchResult.getEmbeddedColumnValues() != null) {
-                for(String embeddedColVal : searchResult.getEmbeddedColumnValues()) {
-                    if(embeddedColVal != null) {
+            if (searchResult.getEmbeddedColumnValues() != null)
+            {
+                for (String embeddedColVal : searchResult.getEmbeddedColumnValues())
+                {
+                    if (embeddedColVal != null)
+                    {
                         StringBuilder strBuilder = new StringBuilder(embeddedColVal);
                         strBuilder.append("|");
                         strBuilder.append(searchResult.getPrimaryKey().toString());
-                        embeddedColumns.put(strBuilder.toString(),searchResult.getPrimaryKey().toString());
-                    }                    
-                }  
-            }                       
+                        embeddedColumns.put(strBuilder.toString(), searchResult.getPrimaryKey().toString());
+                    }
+                }
+            }
         }
-        
+
         List<EnhanceEntity> enhanceEntityList = null;
-        if(embeddedColumns != null && ! embeddedColumns.isEmpty()) {
+        if (embeddedColumns != null && !embeddedColumns.isEmpty())
+        {
             enhanceEntityList = client.find(m.getEntityClazz(), embeddedColumns);
-        } else {
+        }
+        else
+        {
             for (SearchResult searchResult : searchResults)
             {
                 primaryKeys.add(searchResult.getPrimaryKey());
             }
             enhanceEntityList = (List<EnhanceEntity>) ((CassandraClientBase) client).find(m.getEntityClazz(),
                     m.getRelationNames(), true, m, primaryKeys.toArray(new String[] {}));
-        }      
-        
+        }
+
         return enhanceEntityList;
     }
 

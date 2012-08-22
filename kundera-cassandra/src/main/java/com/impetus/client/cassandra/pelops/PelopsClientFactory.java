@@ -45,7 +45,7 @@ public class PelopsClientFactory extends GenericClientFactory
 
     @Override
     public void initialize()
-    {        
+    {
         reader = new CassandraEntityReader();
         propertyReader = new CassandraPropertyReader();
         propertyReader.read(getPersistenceUnit());
@@ -91,7 +91,6 @@ public class PelopsClientFactory extends GenericClientFactory
         return false;
     }
 
-
     @Override
     public void destroy()
     {
@@ -109,6 +108,6 @@ public class PelopsClientFactory extends GenericClientFactory
         }
 
         return schemaManager;
-    }  
+    }
 
 }
