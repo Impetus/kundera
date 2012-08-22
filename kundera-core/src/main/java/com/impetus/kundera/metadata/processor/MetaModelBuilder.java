@@ -16,6 +16,7 @@
 package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,7 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
+import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 import javax.persistence.metamodel.Type.PersistenceType;
@@ -61,17 +63,22 @@ public final class MetaModelBuilder<X, T>
     
     /** The managed type. */
     private AbstractManagedType<X> managedType;
+    
+    private Map<Class<?>, ManagedType<?>> managedTypes = new HashMap<Class<?>, ManagedType<?>> ();
 
-    /**
-     * Instantiates a new meta model builder.
-     *
-     * @param clazz the clazz
-     */
-    public MetaModelBuilder(Class<X> clazz)
+    private Map<Class<?>, AbstractManagedType<?>> embeddables = new HashMap<Class<?>, AbstractManagedType<?>>();
+    
+    public void process(Class<X> clazz)
     {
         this.managedType = buildManagedType(clazz);
+        managedTypes.put(clazz, managedType);
     }
 
+    void addEmbeddables(Class<?> clazz, AbstractManagedType<?> embeddable)
+    {
+        embeddables.put(clazz, embeddable);
+    }
+    
     /**
      * Construct.
      *
@@ -89,7 +96,7 @@ public final class MetaModelBuilder<X, T>
      *
      * @param <X> the generic type
      */
-    private static class TypeBuilder<X>
+    private class TypeBuilder<X>
     {
 
         /** The attribute. */
@@ -111,7 +118,7 @@ public final class MetaModelBuilder<X, T>
          * @param <T> the generic type
          * @return the type
          */
-        public <T> Type<T> buildType()
+        <T> Type<T> buildType()
         {
             PersistentAttributeType attributeType = MetaModelBuilder.getPersistentAttributeType(attribute);
             switch (attributeType)
@@ -119,16 +126,39 @@ public final class MetaModelBuilder<X, T>
             case BASIC:
                 return new DefaultBasicType<T>((Class<T>) attribute.getType());
             case EMBEDDED:
-                return (Type<T>) new DefaultEmbeddableType<T>((Class<T>) attribute.getType(),
-                        PersistenceType.EMBEDDABLE, null);
+                return processOnEmbeddables();
+                
             case ELEMENT_COLLECTION:
-                return (Type<T>) new DefaultEmbeddableType<T>((Class<T>) attribute.getType(),
-                        PersistenceType.EMBEDDABLE, null);
+                return processOnEmbeddables();
             default:
-                return (Type<T>) new DefaultEntityType<T>((Class<T>) attribute.getType(), PersistenceType.ENTITY, null);
+                return new DefaultEntityType<T>((Class<T>) attribute.getType(), PersistenceType.ENTITY, null);
             }
 
             // TODO: Throw an error.
+        }
+
+        private <T> AbstractManagedType<T>  processOnEmbeddables()
+        {
+            // Check if this embeddable type is already present in
+            // collection of MetaModelBuider.
+            AbstractManagedType<T> embeddableType = null;
+            if (!embeddables.containsKey(attribute.getType()))
+            {
+
+               embeddableType = new DefaultEmbeddableType<T>(
+                        (Class<T>) attribute.getType(), PersistenceType.EMBEDDABLE, null);
+                Field[] embeddedFields = attribute.getType().getDeclaredFields();
+                for (Field f : embeddedFields)
+                {
+                    new TypeBuilder<T>(f).build(embeddableType);
+                }
+                addEmbeddables(attribute.getType(), embeddableType);
+            } else
+            {
+                embeddableType = (AbstractManagedType<T>) embeddables.get(attribute.getType());
+            }
+            
+            return embeddableType;
         }
 
         /**
@@ -148,7 +178,7 @@ public final class MetaModelBuilder<X, T>
          * @param <X> the generic type
          * @param <T> the generic type
          */
-        private static class AttributeBuilder<X, T>
+        private class AttributeBuilder<X, T>
         {
             
             /** The attribute. */

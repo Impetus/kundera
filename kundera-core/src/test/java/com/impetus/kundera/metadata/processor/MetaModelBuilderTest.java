@@ -16,10 +16,11 @@
 package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
+import java.util.Map;
 
+import javax.persistence.metamodel.Bindable.BindableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
-import javax.persistence.metamodel.Bindable.BindableType;
 import javax.persistence.metamodel.Type.PersistenceType;
 
 import junit.framework.Assert;
@@ -30,7 +31,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.metadata.model.attributes.DefaultSingularAttribute;
 import com.impetus.kundera.metadata.model.type.AbstractIdentifiableType;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 
@@ -65,7 +65,8 @@ public class MetaModelBuilderTest
     public <X extends Class, T extends Object> void testEntityWithSingularAttribute()
     {
         X clazz = (X) SingularEntity.class;
-        MetaModelBuilder builder = new MetaModelBuilder<X, T>(clazz);
+        MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
         Field[] field = SingularEntity.class.getDeclaredFields();
         for (Field f : field)
         {
@@ -152,6 +153,52 @@ public class MetaModelBuilderTest
         {
             Assert.fail(e.getMessage());
         }
+    }
+    
+    @Test
+    public <X extends Class, T extends Object> void testOnEntityWithEmbeddable()
+    
+    {
+        X clazz = (X) SingularEntityEmbeddable.class;
+        MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
+        Field[] field = SingularEntityEmbeddable.class.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(SingularEntity.class, f);
+        }
+        
+        MetaModelBuilder.class.getDeclaredFields();
+        Field managedTypeField;
+        try
+        {
+            managedTypeField = builder.getClass().getDeclaredField("embeddables");
+            if (!managedTypeField.isAccessible())
+            {
+                managedTypeField.setAccessible(true);
+            }
+            Map<Class<?>, AbstractManagedType<?>> embeddables = ((Map<Class<?>, AbstractManagedType<?>>)managedTypeField.get(builder));
+            Assert.assertEquals(1, embeddables.size());
+            
+            //TODO: Assertion on attribute type and as well as on Embeddable type.
+        }
+        catch (SecurityException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (NoSuchFieldException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (IllegalArgumentException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (IllegalAccessException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+       
     }
 
     /**

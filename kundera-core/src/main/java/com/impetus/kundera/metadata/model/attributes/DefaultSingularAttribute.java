@@ -18,8 +18,6 @@ package com.impetus.kundera.metadata.model.attributes;
 import java.lang.reflect.Field;
 
 import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
