@@ -203,7 +203,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         getIndexManager().remove(metadata, entity, pKey.toString());
         
         // Delete from Inverted Index if applicable        
-        invertedIndexHandler.deleteRecordsFromIndexTable(entity, metadata, consistencyLevel);
+        invertedIndexHandler.delete(entity, metadata, consistencyLevel);
         
     }
 
@@ -474,7 +474,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         super.indexNode(node, entityMetadata);
 
         //Write to inverted index table if applicable
-        invertedIndexHandler.writeToInvertedIndexTable(node, entityMetadata, getPersistenceUnit(), consistencyLevel, dataHandler);
+        invertedIndexHandler.write(node, entityMetadata, getPersistenceUnit(), consistencyLevel, dataHandler);
     }
       
 
@@ -789,7 +789,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     public List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
             Queue<FilterClause> filterClauseQueue)
     {
-        return  invertedIndexHandler.getSearchResults(m, filterClauseQueue,
+        return  invertedIndexHandler.search(m, filterClauseQueue,
                 getPersistenceUnit(), consistencyLevel);        
     }     
     

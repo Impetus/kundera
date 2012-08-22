@@ -51,15 +51,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Pelops;
-import org.scale7.cassandra.pelops.pool.IThriftPool;
-import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
-import com.impetus.client.cassandra.pelops.PelopsClient;
-import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.KunderaException;
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;

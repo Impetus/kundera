@@ -25,9 +25,14 @@ import java.util.Queue;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ColumnParent;
+import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.Mutation;
+import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.logging.Log;
@@ -38,6 +43,8 @@ import org.scale7.cassandra.pelops.Bytes;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
+import com.impetus.client.cassandra.index.InvertedIndexHandlerBase;
+import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexingException;
@@ -48,7 +55,7 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
  * Thrift implementation of {@link InvertedIndexHandler}
  * @author amresh.singh
  */
-public class ThriftInvertedIndexHandler implements InvertedIndexHandler
+public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase implements InvertedIndexHandler
 {
     
     Cassandra.Client cassandra_client;
@@ -62,7 +69,7 @@ public class ThriftInvertedIndexHandler implements InvertedIndexHandler
     }
 
     @Override
-    public void writeToInvertedIndexTable(Node node, EntityMetadata entityMetadata, String persistenceUnit,
+    public void write(Node node, EntityMetadata entityMetadata, String persistenceUnit,
             ConsistencyLevel consistencyLevel, CassandraDataHandler cdHandler)
     {
         // Write to Inverted Index table if applicable
@@ -139,14 +146,107 @@ public class ThriftInvertedIndexHandler implements InvertedIndexHandler
     }
 
     @Override
-    public List<SearchResult> getSearchResults(EntityMetadata m, Queue<FilterClause> filterClauseQueue,
+    public List<SearchResult> search(EntityMetadata m, Queue<FilterClause> filterClauseQueue,
             String persistenceUnit, ConsistencyLevel consistencyLevel)
     {
-        return null;
+        
+        return super.search(m, filterClauseQueue, persistenceUnit, consistencyLevel);
     }
+    @Override
+    protected void searchColumnsInRange(String columnFamilyName, ConsistencyLevel consistencyLevel,
+            String persistenceUnit, String rowKey, String searchString, List<Column> thriftColumns, byte[] start,
+            byte[] finish)
+    {
+        SlicePredicate colPredicate = new SlicePredicate();
+        SliceRange sliceRange = new SliceRange();
+        sliceRange.setStart(start);
+        sliceRange.setFinish(finish);
+        colPredicate.setSlice_range(sliceRange);        
+        
+        List<ColumnOrSuperColumn> coscList = null;
+        try
+        {
+            coscList = cassandra_client.get_slice(ByteBuffer.wrap(rowKey.getBytes()), new ColumnParent(columnFamilyName),
+                    colPredicate, consistencyLevel);
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error(e.getMessage());
+            throw new IndexingException("Unable to search from inverted index", e); 
+        }
+        catch (UnavailableException e)
+        {
+            log.error(e.getMessage());
+            throw new IndexingException("Unable to search from inverted index", e); 
+        }
+        catch (TimedOutException e)
+        {
+            log.error(e.getMessage());
+            throw new IndexingException("Unable to search from inverted index", e); 
+        }
+        catch (TException e)
+        {
+            log.error(e.getMessage());
+            throw new IndexingException("Unable to search from inverted index", e); 
+        }
+        
+        List<Column> allThriftColumns = ThriftDataResultHelper.transformThriftResult(coscList, ColumnFamilyType.COLUMN);    
+        
+
+        for (Column column : allThriftColumns)
+        {
+            String colName = Bytes.toUTF8(column.getName());
+            // String colValue = Bytes.toUTF8(column.getValue());
+            if (colName.indexOf(searchString) >= 0)
+            {
+                thriftColumns.add(column);
+            }
+        }        
+    }  
+    
+    @Override
+    protected Column getColumnForRow(ConsistencyLevel consistencyLevel, String columnFamilyName, String rowKey,
+            String columnName, String persistenceUnit)
+    {
+        ColumnPath cp = new ColumnPath(columnFamilyName);
+        cp.setColumn(columnName.getBytes());
+        ColumnOrSuperColumn cosc;
+        try
+        {
+            cosc = cassandra_client.get(ByteBuffer.wrap(rowKey.getBytes()), cp, consistencyLevel);
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error(e.getMessage());
+            throw new IndexingException("Unable to search from inverted index", e); 
+        }
+        catch (NotFoundException e)
+        {
+            log.error(e.getMessage());
+            throw new IndexingException("Unable to search from inverted index", e); 
+        }
+        catch (UnavailableException e)
+        {
+            log.error(e.getMessage());
+            throw new IndexingException("Unable to search from inverted index", e); 
+        }
+        catch (TimedOutException e)
+        {
+            log.error(e.getMessage());
+            throw new IndexingException("Unable to search from inverted index", e); 
+        }
+        catch (TException e)
+        {
+            log.error(e.getMessage());
+            throw new IndexingException("Unable to search from inverted index", e); 
+        } 
+            
+        Column thriftColumn = ThriftDataResultHelper.transformThriftResult(cosc, ColumnFamilyType.COLUMN);
+        return thriftColumn;
+    }   
 
     @Override
-    public void deleteRecordsFromIndexTable(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel)
+    public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel)
     {
     }   
 

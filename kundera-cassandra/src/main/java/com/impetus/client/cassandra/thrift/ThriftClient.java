@@ -339,7 +339,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
         // Write to inverted index table if applicable
         //setCassandraClient();
-        invertedIndexHandler.writeToInvertedIndexTable(node, entityMetadata, getPersistenceUnit(), consistencyLevel,
+        invertedIndexHandler.write(node, entityMetadata, getPersistenceUnit(), consistencyLevel,
                 dataHandler);
 
     }
@@ -627,7 +627,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         getIndexManager().remove(metadata, entity, pKey.toString());
         
         // Delete from Inverted Index if applicable        
-        invertedIndexHandler.deleteRecordsFromIndexTable(entity, metadata, consistencyLevel);
+        invertedIndexHandler.delete(entity, metadata, consistencyLevel);
     }
     
     @Override
@@ -884,10 +884,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     public List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
             Queue<FilterClause> filterClauseQueue)
     {
-        return  invertedIndexHandler.getSearchResults(m, filterClauseQueue,
+        return  invertedIndexHandler.search(m, filterClauseQueue,
                 getPersistenceUnit(), consistencyLevel);  
     }
-
-     
-
+    
 }
