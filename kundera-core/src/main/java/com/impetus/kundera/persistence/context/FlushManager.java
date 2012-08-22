@@ -530,7 +530,7 @@ public class FlushManager
                 {
                     for (Object pk : jtData.getJoinTableRecords().keySet())
                     {
-                        client.deleteByColumn(m.getSchema(), jtData.getJoinTableName(), m.getIdColumn().getName(), pk);
+                        client.deleteByColumn(jtData.getJoinTableName(), m.getIdColumn().getName(), pk);
                     }
                 }
                 else if (OPERATION.DELETE.equals(jtData.getOperation()))

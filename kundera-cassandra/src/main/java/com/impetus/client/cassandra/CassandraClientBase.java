@@ -17,10 +17,15 @@ package com.impetus.client.cassandra;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
+import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
@@ -29,6 +34,9 @@ import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
+import org.apache.cassandra.thrift.CqlResult;
+import org.apache.cassandra.thrift.CqlRow;
+import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
@@ -37,21 +45,31 @@ import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.pool.IThriftPool;
+import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
+import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftRow;
+import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.client.EnhanceEntity;
+import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
  * Base Class for all Cassandra Clients
@@ -257,12 +275,9 @@ public abstract class CassandraClientBase extends ClientBase
 
                 ColumnDef columnDef = new ColumnDef();
 
-                columnDef.setName(column.getName());
-                columnDef.setValidation_class("UTF8Type");
+                columnDef.setName(column.getName());                
+                columnDef.setValidation_class(BytesType.class.getSimpleName());
                 columnDef.setIndex_type(IndexType.KEYS);
-
-                // String indexName =
-                // PelopsUtils.getSecondaryIndexName(tableName, column);
 
                 // Add secondary index only if it's not already created
                 // (if already created, it would be there in column family
@@ -357,10 +372,263 @@ public abstract class CassandraClientBase extends ClientBase
         }
 
         return result != null & !result.isEmpty() ? result.get(0) : null;
+    }    
+    
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> superColumnMap, CassandraDataHandler dataHandler)
+    {
+        List<E> entities = null;
+        try
+        {
+            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
+            entities = new ArrayList<E>();
+            for (String superColumnName : superColumnMap.keySet())
+            {
+                String entityId = superColumnMap.get(superColumnName);
+                List<SuperColumn> superColumnList = loadSuperColumns(entityMetadata.getSchema(),
+                        entityMetadata.getTableName(), entityId,
+                        new String[] { superColumnName.substring(0, superColumnName.indexOf("|")) });
+                E e = (E) dataHandler.fromThriftRow(entityMetadata.getEntityClazz(), entityMetadata,
+                        new DataRow<SuperColumn>(entityId, entityMetadata.getTableName(), superColumnList));
+                if (e != null)
+                {
+                    entities.add(e);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            throw new KunderaException(e);
+        }
+        return entities;
     }
     
-    protected abstract List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
+    /**
+     * Populate data.
+     * 
+     * @param m
+     *            the m
+     * @param qResults
+     *            the q results
+     * @param entities
+     *            the entities
+     * @param isRelational
+     *            the is relational
+     * @param relationNames
+     *            the relation names
+     */
+    protected void populateDataForCounter(EntityMetadata m, Map<Bytes, List<CounterColumn>> qCounterResults,
+            List<Object> entities, boolean isRelational, List<String> relationNames, CassandraDataHandler dataHandler)
+    {
+        Iterator<Bytes> rowIter = qCounterResults.keySet().iterator();
+        while (rowIter.hasNext())
+        {
+            Bytes rowKey = rowIter.next();
+            List<CounterColumn> counterColumns = qCounterResults.get(rowKey);
+            try
+            {
+                Object e = dataHandler.fromCounterColumnThriftRow(m.getEntityClazz(), m,
+                        new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), null, null,
+                                counterColumns, null), relationNames, isRelational);
+                if (e != null)
+                {
+                    entities.add(e);
+                }
+            }
+            catch (IllegalStateException e)
+            {
+                throw new KunderaException(e);
+            }
+            catch (Exception e)
+            {
+                throw new KunderaException(e);
+            }
+        }
+    }
+
+    /**
+     * @param m
+     * @param qCounterResults
+     * @param entities
+     * @param isRelational
+     * @param relationNames
+     */
+    protected void populateDataForSuperCounter(EntityMetadata m, Map<Bytes, List<CounterSuperColumn>> qCounterResults,
+            List<Object> entities, boolean isRelational, List<String> relationNames)
+    {
+        Set<Bytes> primaryKeys = qCounterResults.keySet();
+
+        if (primaryKeys != null && !primaryKeys.isEmpty())
+        {
+            Object[] rowIds = new Object[primaryKeys.size()];
+            int i = 0;
+            for (Bytes b : primaryKeys)
+            {
+                rowIds[i] = Bytes.toUTF8(b.toByteArray());
+                i++;
+            }
+            entities.addAll(findAll(m.getEntityClazz(), rowIds));
+        }
+    }
+    
+    
+    public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField, Cassandra.Client cassandra_client, CassandraDataHandler dataHandler)
+    {
+        
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
+        CqlResult result = null;
+        List returnedEntities = null;
+        try
+        {
+            result = cassandra_client.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
+                    org.apache.cassandra.thrift.Compression.NONE);
+            if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
+            {
+                returnedEntities = new ArrayList<Object>(result.getRowsSize());
+                Iterator<CqlRow> iter = result.getRowsIterator();
+                while (iter.hasNext())
+                {
+                    CqlRow row = iter.next();
+                    String rowKey = Bytes.toUTF8(row.getKey());
+                    ThriftRow thriftRow = null;
+                    if (entityMetadata.isCounterColumnType())
+                    {
+                        log.info("Native query is not permitted on counter column returning null ");
+                        return null;
+                    }
+                    else
+                    {
+                        thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(), null, null,
+                                null);
+                    }
+
+                    Object entity = dataHandler.fromColumnThriftRow(clazz, entityMetadata, thriftRow, relationalField,
+                            relationalField != null && !relationalField.isEmpty());
+                    if (entity != null)
+                    {
+                        returnedEntities.add(entity);
+                    }
+                }
+            }
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            throw new PersistenceException(e);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            throw new PersistenceException(e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            throw new PersistenceException(e);
+        }
+        catch (SchemaDisagreementException e)
+        {
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            throw new PersistenceException(e);
+        }
+        catch (TException e)
+        {
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            throw new PersistenceException(e);
+        }
+        catch (Exception e)
+        {
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            throw new PersistenceException(e);
+        }
+        return returnedEntities;
+                        
+    }
+    
+
+    /**
+     * Populate data.
+     * 
+     * @param m
+     *            the m
+     * @param qResults
+     *            the q results
+     * @param entities
+     *            the entities
+     * @param isRelational
+     *            the is relational
+     * @param relationNames
+     *            the relation names
+     */
+    protected void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities,
+            boolean isRelational, List<String> relationNames, CassandraDataHandler dataHandler)
+    {
+        if (m.getType().isSuperColumnFamilyMetadata())
+        {
+            Set<Bytes> primaryKeys = qResults.keySet();
+
+            if (primaryKeys != null && !primaryKeys.isEmpty())
+            {
+                Object[] rowIds = new Object[primaryKeys.size()];
+                int i = 0;
+                for (Bytes b : primaryKeys)
+                {
+                    rowIds[i] = Bytes.toUTF8(b.toByteArray());
+                    i++;
+                }
+                entities.addAll(findAll(m.getEntityClazz(), rowIds));
+            }
+
+        }
+        else
+        {
+            Iterator<Bytes> rowIter = qResults.keySet().iterator();
+            while (rowIter.hasNext())
+            {
+                Bytes rowKey = rowIter.next();
+                List<Column> columns = qResults.get(rowKey);
+                try
+                {
+                    Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m,
+                            new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null,
+                                    null, null), relationNames, isRelational);
+                    if (e != null)
+                    {
+                        entities.add(e);
+                    }
+                }
+                catch (IllegalStateException e)
+                {
+                    throw new KunderaException(e);
+                }
+                catch (Exception e)
+                {
+                    throw new KunderaException(e);
+                }
+            }
+        }
+
+    }
+    
+    
+    public abstract List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
             Object... rowIds);
     
+    protected abstract List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
+            String... superColumnNames);    
+    
+    /** Query related methods*/
+    public abstract List executeQuery(String cqlQuery, Class clazz, List<String> relationalField);
+    
+    public abstract List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
+            int maxResult);
+    
+    public abstract List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations)
+    throws Exception;
+    
+    public abstract List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
+            Queue<FilterClause> filterClauseQueue);
+    
+    public abstract List<EnhanceEntity> find(EntityMetadata m, List<String> relationNames, List<IndexClause> conditions,
+            int maxResult);
 
 }
