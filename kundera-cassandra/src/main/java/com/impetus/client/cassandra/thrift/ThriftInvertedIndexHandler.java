@@ -39,12 +39,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandlerBase;
+import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
@@ -59,15 +61,11 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
  */
 public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase implements InvertedIndexHandler
 {
-
-    Cassandra.Client cassandra_client;
-
     /** log for this class. */
     private static Log log = LogFactory.getLog(ThriftInvertedIndexHandler.class);
 
-    public ThriftInvertedIndexHandler(Cassandra.Client cassandra_client)
-    {
-        this.cassandra_client = cassandra_client;
+    public ThriftInvertedIndexHandler()
+    {        
     }
 
     @Override
@@ -85,12 +83,15 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
             List<ThriftRow> indexThriftyRows = thriftDataHandler.toIndexThriftRow(node.getData(), entityMetadata,
                     indexColumnFamily);
-
+            IPooledConnection conn = null;
             try
             {
                 String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
-                cassandra_client.set_keyspace(keyspace);
-                cassandra_client.set_keyspace(entityMetadata.getSchema());
+                
+                conn = PelopsUtils.getCassandraConnection(persistenceUnit);
+                Cassandra.Client cassandra_client = conn.getAPI();              
+                
+                cassandra_client.set_keyspace(keyspace);                
 
                 for (ThriftRow thriftRow : indexThriftyRows)
                 {
@@ -145,6 +146,10 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
                 log.error(e.getMessage());
                 throw new IndexingException("Unable to insert records into inverted index", e);
             }
+            finally
+            {
+                PelopsUtils.releaseConnection(conn);
+            }
         }
 
     }
@@ -169,9 +174,13 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         colPredicate.setSlice_range(sliceRange);
 
         List<ColumnOrSuperColumn> coscList = null;
+        IPooledConnection conn = null;
         try
         {
             String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
+            conn = PelopsUtils.getCassandraConnection(persistenceUnit);
+            Cassandra.Client cassandra_client = conn.getAPI();    
+            
             cassandra_client.set_keyspace(keyspace);
             coscList = cassandra_client.get_slice(ByteBuffer.wrap(rowKey.getBytes()),
                     new ColumnParent(columnFamilyName), colPredicate, consistencyLevel);
@@ -195,6 +204,10 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         {
             log.error(e.getMessage());
             throw new IndexingException("Unable to search from inverted index", e);
+        } 
+        finally
+        {
+            PelopsUtils.releaseConnection(conn);
         }
 
         List<Column> allThriftColumns = ThriftDataResultHelper.transformThriftResult(coscList, ColumnFamilyType.COLUMN);
@@ -217,9 +230,15 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         ColumnPath cp = new ColumnPath(columnFamilyName);
         cp.setColumn(columnName.getBytes());
         ColumnOrSuperColumn cosc;
+        
+        IPooledConnection conn = null;
         try
         {
             String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
+            
+            conn = PelopsUtils.getCassandraConnection(persistenceUnit);
+            Cassandra.Client cassandra_client = conn.getAPI();             
+            
             cassandra_client.set_keyspace(keyspace);
             cosc = cassandra_client.get(ByteBuffer.wrap(rowKey.getBytes()), cp, consistencyLevel);
         }
@@ -248,6 +267,10 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             log.error(e.getMessage());
             throw new IndexingException("Unable to search from inverted index", e);
         }
+        finally
+        {
+            PelopsUtils.releaseConnection(conn);
+        }
 
         Column thriftColumn = ThriftDataResultHelper.transformThriftResult(cosc, ColumnFamilyType.COLUMN);
         return thriftColumn;
@@ -268,9 +291,14 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         ColumnPath cp = new ColumnPath(indexColumnFamily);
         cp.setColumn(columnName);
 
+        IPooledConnection conn = null;
         try
         {
             String keyspace = CassandraUtilities.getKeyspace(persistenceUnit);
+            
+            conn = PelopsUtils.getCassandraConnection(persistenceUnit);
+            Cassandra.Client cassandra_client = conn.getAPI();              
+            
             cassandra_client.set_keyspace(keyspace);
             cassandra_client.remove(ByteBuffer.wrap(rowKey.getBytes()), cp, System.currentTimeMillis(),
                     consistencyLevel);
@@ -294,6 +322,10 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
         {
             log.error(e.getMessage());
             throw new IndexingException("Unable to delete data from inverted index", e);
+        }
+        finally
+        {
+            PelopsUtils.releaseConnection(conn);
         }
     }
 

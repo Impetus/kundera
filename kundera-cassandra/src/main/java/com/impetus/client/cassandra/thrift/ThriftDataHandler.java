@@ -32,9 +32,11 @@ import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
+import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -45,12 +47,10 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  * @author amresh.singh
  */
 public final class ThriftDataHandler extends CassandraDataHandlerBase implements CassandraDataHandler
-{
-    Cassandra.Client cassandra_client;
+{    
 
-    public ThriftDataHandler(Cassandra.Client cassandra_client)
-    {
-        this.cassandra_client = cassandra_client;
+    public ThriftDataHandler()
+    {        
     }
 
     @Override
@@ -60,6 +60,10 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
 
         List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
         Object e = null;
+        
+        IPooledConnection conn = PelopsUtils.getCassandraConnection(m.getPersistenceUnit());
+        Cassandra.Client cassandra_client = conn.getAPI();              
+        cassandra_client.set_keyspace(m.getSchema());
 
         if (!superColumnNames.isEmpty())
         {
@@ -155,6 +159,8 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
                         null), relationNames, isWrapReq);
             }
         }
+        
+        PelopsUtils.releaseConnection(conn);
         return e;
     }
 
