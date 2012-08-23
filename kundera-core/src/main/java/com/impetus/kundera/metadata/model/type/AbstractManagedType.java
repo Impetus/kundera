@@ -526,7 +526,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     @Override
     public SingularAttribute<X, ?> getDeclaredSingularAttribute(String paramString)
     {
-        SingularAttribute<X, ?> attribute = getDeclaredSingularAttribute(paramString);
+        SingularAttribute<X, ?> attribute = getDeclaredSingularAttribute(paramString, true);
 
         return attribute;
     }

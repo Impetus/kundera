@@ -17,7 +17,9 @@ package com.impetus.kundera.metadata.processor;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
@@ -26,6 +28,8 @@ import javax.persistence.metamodel.Bindable.BindableType;
 import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.PluralAttribute;
+import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type.PersistenceType;
 
@@ -38,10 +42,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.kundera.metadata.entities.AssociationEntity;
+import com.impetus.kundera.metadata.entities.CollectionTypeAssociationEntity;
 import com.impetus.kundera.metadata.entities.EmbeddableEntity;
 import com.impetus.kundera.metadata.entities.EmbeddableEntityTwo;
+import com.impetus.kundera.metadata.entities.ListTypeAssociationEntity;
+import com.impetus.kundera.metadata.entities.MapTypeAssociationEntity;
 import com.impetus.kundera.metadata.entities.OToMOwnerEntity;
 import com.impetus.kundera.metadata.entities.OToOOwnerEntity;
+import com.impetus.kundera.metadata.entities.PluralOwnerType;
+import com.impetus.kundera.metadata.entities.SetTypeAssociationEntity;
 import com.impetus.kundera.metadata.entities.SingularEntity;
 import com.impetus.kundera.metadata.entities.SingularEntityEmbeddable;
 import com.impetus.kundera.metadata.entities.bi.AssociationBiEntity;
@@ -422,9 +431,11 @@ public class MetaModelBuilderTest
 
     /**
      * Test on collection.
-     *
-     * @param <X> the generic type
-     * @param <T> the generic type
+     * 
+     * @param <X>
+     *            the generic type
+     * @param <T>
+     *            the generic type
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
@@ -477,6 +488,18 @@ public class MetaModelBuilderTest
             log.info("on invalid case with getCollection");
             Assert.assertNull(collectionAttribute);
         }
+
+        try
+        {
+            collectionAttribute = null;
+            collectionAttribute = (CollectionAttribute<? super X, ?>) managedType.getCollection("associationInvalid");
+            Assert.fail();
+        }
+        catch (IllegalArgumentException iaex)
+        {
+            log.info("on invalid case with getCollection");
+            Assert.assertNull(collectionAttribute);
+        }
         // asssert on association attribute.
         Attribute<? super X, ?> associationAttribute = (Attribute<? super X, ?>) managedType
                 .getAttribute("association");
@@ -491,29 +514,141 @@ public class MetaModelBuilderTest
 
     /**
      * Test on list.
+     * 
+     * @param <X>
+     *            the generic type
+     * @param <T>
+     *            the generic type
      */
+    @SuppressWarnings("unchecked")
     @Test
-    public void testOnList()
+    public <X extends Class, T extends Object> void testOnAllUniPlural()
     {
-        // TODO: add test cases.
+        X clazz = (X) PluralOwnerType.class;
+        // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
+        Field[] field = PluralOwnerType.class.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(PluralOwnerType.class, f);
+        }
+
+        onCollectionAssociation((X) SetTypeAssociationEntity.class);
+
+        onCollectionAssociation((X) ListTypeAssociationEntity.class);
+
+        onCollectionAssociation((X) MapTypeAssociationEntity.class);
+
+        onCollectionAssociation((X) CollectionTypeAssociationEntity.class);
+
+        Map<Class<?>, AbstractManagedType<?>> managedTypes = getManagedTypes();
+        Assert.assertNotNull(managedTypes);
+        Assert.assertEquals(5, managedTypes.size());
+
+        // assert on set association entity.
+        AbstractManagedType<? super X> managedType = (AbstractManagedType<? super X>) managedTypes
+                .get(SetTypeAssociationEntity.class);
+        assertOnCollectionAttribute(managedType, "setKey", "bytes", SetTypeAssociationEntity.class);
+
+        // assert on map association entity.
+        managedType = (AbstractManagedType<? super X>) managedTypes.get(MapTypeAssociationEntity.class);
+        assertOnCollectionAttribute(managedType, "mapKey", "bytes", MapTypeAssociationEntity.class);
+
+        // assert on map association entity.
+        managedType = (AbstractManagedType<? super X>) managedTypes.get(CollectionTypeAssociationEntity.class);
+        assertOnCollectionAttribute(managedType, "colKey", "bytes", CollectionTypeAssociationEntity.class);
+
+        // assert on map association entity.
+        managedType = (AbstractManagedType<? super X>) managedTypes.get(ListTypeAssociationEntity.class);
+        assertOnCollectionAttribute(managedType, "listKey", "bytes", ListTypeAssociationEntity.class);
+
+        // Assert on owner class.
+        managedType = (AbstractManagedType<? super X>) managedTypes.get(PluralOwnerType.class);
+        assertOnOwnerTypeAttributes(managedType, "setAssocition", SetTypeAssociationEntity.class, Set.class);
+        assertOnOwnerTypeAttributes(managedType, "listAssociation", ListTypeAssociationEntity.class, List.class);
+        assertOnOwnerTypeAttributes(managedType, "collectionAssociation", CollectionTypeAssociationEntity.class,
+                Collection.class);
+        assertOnOwnerTypeAttributes(managedType, "mapAssociation", MapTypeAssociationEntity.class, Map.class);
+
     }
 
     /**
-     * Test on set.
+     * Assert on owner type attributes.
+     *
+     * @param managedType the managed type
+     * @param fieldName the field name
+     * @param fieldClazz the field clazz
+     * @param javaClazz the java clazz
      */
-    @Test
-    public void testOnSet()
+    private void assertOnOwnerTypeAttributes(AbstractManagedType managedType, String fieldName, Class fieldClazz,
+            Class javaClazz)
     {
-        // TODO: add test cases.
+        Assert.assertNotNull(managedType);
+        Assert.assertNotNull(managedType.getPluralAttributes());
+        Assert.assertEquals(4, managedType.getPluralAttributes().size());
+        Assert.assertNotNull(managedType.getAttribute(fieldName));
+        Assert.assertEquals(javaClazz, managedType.getAttribute(fieldName).getJavaType());
+        Assert.assertEquals(fieldClazz, ((PluralAttribute) managedType.getAttribute(fieldName)).getElementType()
+                .getJavaType());
+        Assert.assertEquals(BindableType.PLURAL_ATTRIBUTE,
+                ((PluralAttribute) managedType.getAttribute(fieldName)).getBindableType());
+        Assert.assertNotNull(((PluralAttribute) managedType.getAttribute(fieldName)).getJavaMember());
+        Assert.assertNotNull(fieldName, ((PluralAttribute) managedType.getAttribute(fieldName)).getJavaMember()
+                .getName());
     }
 
     /**
-     * Test on map.
+     * Assert on collection attribute.
+     * 
+     * @param <X>
+     *            the generic type
+     * @param managedType
+     *            the managed type
+     * @param id
+     *            the id
+     * @param otherAttribute
+     *            the other attribute
+     * @param clazz
+     *            the clazz
      */
-    @Test
-    public void testOnMap()
+    private <X> void assertOnCollectionAttribute(AbstractManagedType<? super X> managedType, String id,
+            String otherAttribute, Class clazz)
     {
-        // TODO: add test cases.
+        Assert.assertNotNull(managedType);
+        Assert.assertEquals(clazz, managedType.getJavaType());
+        SingularAttribute<? super X, String> rowId = (SingularAttribute<? super X, String>) managedType
+                .getDeclaredSingularAttribute(id);
+        Assert.assertNotNull(rowId);
+        Assert.assertTrue(rowId.isId());
+        Assert.assertEquals(String.class, rowId.getBindableJavaType());
+        // other attribute
+        SingularAttribute<? super X, String> byteAttribute = (SingularAttribute<? super X, String>) managedType
+                .getDeclaredAttribute(otherAttribute);
+        Assert.assertNotNull(byteAttribute);
+        Assert.assertFalse(byteAttribute.isId());
+        Assert.assertEquals(byte[].class, byteAttribute.getBindableJavaType());
+
+    }
+
+    /**
+     * On collection association.
+     * 
+     * @param <X>
+     *            the generic type
+     * @param clazz
+     *            the clazz
+     */
+    private <X extends Class> void onCollectionAssociation(X clazz)
+    {
+        Field[] field;
+        // X clazz = (X) SetTypeAssociationEntity.class;
+        // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
+        field = clazz.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(clazz, f);
+        }
     }
 
     /**
@@ -605,11 +740,15 @@ public class MetaModelBuilderTest
 
     /**
      * Assert on id attribute.
-     *
-     * @param <X> the generic type
-     * @param managedType the managed type
-     * @param key the key
-     * @param clazz the clazz
+     * 
+     * @param <X>
+     *            the generic type
+     * @param managedType
+     *            the managed type
+     * @param key
+     *            the key
+     * @param clazz
+     *            the clazz
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private <X> void assertOnIdAttribute(AbstractManagedType<X> managedType, String key, Class clazz)
@@ -628,7 +767,7 @@ public class MetaModelBuilderTest
 
     /**
      * Gets the managed types.
-     *
+     * 
      * @return the managed types
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })

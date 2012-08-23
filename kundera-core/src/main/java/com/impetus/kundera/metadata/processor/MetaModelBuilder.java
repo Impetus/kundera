@@ -28,6 +28,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.ManyToMany;
@@ -133,6 +134,9 @@ public final class MetaModelBuilder<X, T>
 
         /** The attribute. */
         private Field attribute;
+        
+        /** The persistent attribute type. */
+        private PersistentAttributeType persistentAttribType;
 
         /**
          * Instantiates a new type builder.
@@ -144,6 +148,12 @@ public final class MetaModelBuilder<X, T>
             this.attribute = attribute;
         }
 
+        TypeBuilder(Field attribute, PersistentAttributeType persistentAttribType)
+        {
+            this.attribute = attribute;
+            this.persistentAttribType =persistentAttribType;
+        }
+
         /**
          * Builds the type.
          *
@@ -152,39 +162,50 @@ public final class MetaModelBuilder<X, T>
          */
         <T> Type<T> buildType(Class<T> attribType)
         {
-            PersistentAttributeType attributeType = MetaModelBuilder.getPersistentAttributeType(attribute);
+            // Only in case of Map attribute attribute will be null;
+            PersistentAttributeType attributeType = attribute != null ? MetaModelBuilder
+                    .getPersistentAttributeType(attribute) : persistentAttribType;
             switch (attributeType)
             {
             case BASIC:
                 return new DefaultBasicType<T>(attribType);
             case EMBEDDED:
                 return processOnEmbeddables(attribType);
-                
+
             case ELEMENT_COLLECTION:
                 return processOnEmbeddables(attribType);
             default:
                 if (!(managedTypes.get(attribType) != null))
                 {
                     // get Generic type from attribute and then pass it.
-                    if(attribute != null && isPluralAttribute(attribute))
+                    if (attribute != null && isPluralAttribute(attribute))
                     {
-                        java.lang.reflect.Type[] arguments = ((ParameterizedType)attribute.getGenericType()).getActualTypeArguments();
-                        if(arguments != null && arguments.length == 1)
+                        java.lang.reflect.Type[] arguments = ((ParameterizedType) attribute.getGenericType())
+                                .getActualTypeArguments();
+                        if (arguments != null && arguments.length == 1)
                         {
                             attribType = (Class<T>) getTypedClass(arguments[0]);
-                        } else if(arguments != null && arguments.length > 1)
+                        }
+                        else if (arguments != null && arguments.length > 1)
                         {
                             attribType = (Class<T>) getTypedClass(arguments[1]);
                         }
                     }
-                    AbstractManagedType<T> entityType = new DefaultEntityType<T>((Class<T>) attribType,
-                            PersistenceType.ENTITY, null);
-                    managedTypes.put(attribType, entityType);
+
+                    // If generic typed class is managed entity.
+                    if (attribType.isAnnotationPresent(Entity.class))
+                    {
+                        AbstractManagedType<T> entityType = new DefaultEntityType<T>((Class<T>) attribType,
+                                PersistenceType.ENTITY, null);
+                        managedTypes.put(attribType, entityType);
+                    }
+                    else
+                    {
+                        return new DefaultBasicType<T>(attribType);
+                    }
                 }
                 return (Type<T>) managedTypes.get(attribType);
             }
-
-            // TODO: Throw an error.
         }
 
         /**
@@ -285,7 +306,7 @@ public final class MetaModelBuilder<X, T>
                     {
                         java.lang.reflect.Type[] arguments = ((ParameterizedType)attribute.getGenericType()).getActualTypeArguments();
                         
-                        Type keyType = new TypeBuilder<X>(null).buildType(getTypedClass(arguments[0]));
+                        Type keyType = new TypeBuilder<X>(null,getPersistentAttributeType(attribute)).buildType(getTypedClass(arguments[0]));
                         pluralAttribute = new DefaultMapAttribute(attributeType, attribute.getName(), getAttributeType(), managedType, attribute, (Class<Map<T,?>>) attribute.getType(), keyType);
                     }
                     ((AbstractManagedType<X>) managedType).addPluralAttribute(attribute.getName(), pluralAttribute);
