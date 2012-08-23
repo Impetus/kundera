@@ -34,7 +34,7 @@ import javax.persistence.metamodel.SingularAttribute;
 /**
  * Implementation for <code>ManagedType</code> interface.
  *
- * @param <X> the generic attribute type.
+ * @param <X> the generic entity type.
  * @author vivek.mishra
  */
 public abstract class AbstractManagedType<X> extends AbstractType<X> implements ManagedType<X>
@@ -120,11 +120,13 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     @Override
     public <Y> SingularAttribute<? super X, Y> getSingularAttribute(String paramString, Class<Y> paramClass)
     {
-        if (superClazzType != null)
+        SingularAttribute<? super X, Y> attribute = getDeclaredSingularAttribute(paramString, paramClass,false);
+        if (superClazzType != null && attribute == null)
         {
             return superClazzType.getDeclaredSingularAttribute(paramString, paramClass);
         }
-        return getDeclaredSingularAttribute(paramString, paramClass);
+        checkForValid(paramString, attribute);
+        return attribute;
     }
 
     /*
@@ -138,16 +140,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     @Override
     public <Y> SingularAttribute<X, Y> getDeclaredSingularAttribute(String paramString, Class<Y> paramClass)
     {
-        SingularAttribute<X, ?> declaredAttrib = declaredSingluarAttribs.get(paramString);
-
-        if (declaredAttrib != null && declaredAttrib.getBindableJavaType().equals(paramClass))
-        {
-            return (SingularAttribute<X, Y>) declaredAttrib;
-        }
-
-        throw new IllegalArgumentException(
-                "attribute of the given name and type is not present in the managed type, for name:" + paramString
-                        + " , type:" + paramClass);
+        return getDeclaredSingularAttribute(paramString, paramClass, true);
     }
 
     /*
@@ -462,7 +455,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     @Override
     public Attribute<? super X, ?> getAttribute(String paramName)
     {
-        Attribute<? super X, ?> attribute = getDeclaredAttribute(paramName);
+        Attribute<? super X, ?> attribute = getDeclaredAttribute(paramName,false);
         if (attribute == null && superClazzType != null)
         {
             attribute = superClazzType.getDeclaredAttribute(paramName);
@@ -483,14 +476,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     @Override
     public Attribute<X, ?> getDeclaredAttribute(String paramName)
     {
-        Attribute<X, ?> attribute = (Attribute<X, ?>) getSingularAttribute(paramName);
-
-        if (attribute == null)
-        {
-            attribute = (Attribute<X, ?>) getPluralAttriute(paramName);
-        }
-
-        checkForValid(paramName, attribute);
+        Attribute<X, ?> attribute = getDeclaredAttribute(paramName, true);
         return attribute;
     }
 
@@ -504,14 +490,31 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     @Override
     public SingularAttribute<? super X, ?> getSingularAttribute(String paramString)
     {
-        SingularAttribute<? super X, ?> attribute = getDeclaredSingularAttribute(paramString);
-        if (attribute == null && superClazzType != null)
-        {
-            attribute = superClazzType.getDeclaredSingularAttribute(paramString);
-        }
-        checkForValid(paramString, attribute);
+        SingularAttribute<? super X, ?> attribute = getSingularAttribute(paramString, true);
         return attribute;
     }
+
+    private SingularAttribute<? super X, ?> getSingularAttribute(String paramString, boolean checkValidity)
+    {
+        SingularAttribute<? super X, ?> attribute = getDeclaredSingularAttribute(paramString, false);
+
+        try
+        {
+            if (attribute == null && superClazzType != null)
+            {
+                attribute = superClazzType.getDeclaredSingularAttribute(paramString);
+            }
+        }
+        catch (IllegalArgumentException iaex)
+        {
+            attribute = null;
+            onValidity(paramString, checkValidity, attribute);
+        }
+        onValidity(paramString, checkValidity, attribute);
+        return attribute;
+    }
+
+    
 
     /*
      * (non-Javadoc)
@@ -523,16 +526,12 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
     @Override
     public SingularAttribute<X, ?> getDeclaredSingularAttribute(String paramString)
     {
-        SingularAttribute<X, ?> attribute = null;
-        if (declaredSingluarAttribs != null)
-        {
-            attribute = declaredSingluarAttribs.get(paramString);
-        }
-
-        checkForValid(paramString, attribute);
+        SingularAttribute<X, ?> attribute = getDeclaredSingularAttribute(paramString);
 
         return attribute;
     }
+
+   
 
     /*
      * (non-Javadoc)
@@ -936,4 +935,91 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         }
     }
 
+
+    /**
+     * @param paramName
+     * @param checkValidity
+     * @return
+     */
+    private Attribute<X, ?> getDeclaredAttribute(String paramName, boolean checkValidity)
+    {
+        Attribute<X, ?> attribute = (Attribute<X, ?>) getSingularAttribute(paramName,false);
+
+        if (attribute == null)
+        {
+            attribute = (Attribute<X, ?>) getDeclaredPluralAttribute(paramName);
+        }
+
+        if(checkValidity)
+        {
+            checkForValid(paramName, attribute);
+        }
+        return attribute;
+    }
+
+
+    /**
+     * Returns declared singular attribute.
+     * 
+     * @param <Y>
+     * @param paramString
+     * @param paramClass
+     * @param checkValidity
+     * @return
+     */
+    private <Y> SingularAttribute<X, Y> getDeclaredSingularAttribute(String paramString, Class<Y> paramClass, boolean checkValidity)
+    {
+        SingularAttribute<X, ?> declaredAttrib = declaredSingluarAttribs.get(paramString);
+
+        if (declaredAttrib != null && declaredAttrib.getBindableJavaType().equals(paramClass))
+        {
+            return (SingularAttribute<X, Y>) declaredAttrib;
+        }
+
+        if(checkValidity)
+        {
+            throw new IllegalArgumentException(
+                "attribute of the given name and type is not present in the managed type, for name:" + paramString
+                        + " , type:" + paramClass);
+        }
+        return null;
+    }
+
+    /**
+     * Returns declared singular attribute.
+     * 
+     * @param paramString
+     * @param checkValidity
+     * @return
+     */
+    private SingularAttribute<X, ?> getDeclaredSingularAttribute(String paramString, boolean checkValidity)
+    {
+        SingularAttribute<X, ?> attribute = null;
+        if (declaredSingluarAttribs != null)
+        {
+            attribute = declaredSingluarAttribs.get(paramString);
+        }
+
+        if(checkValidity)
+        {
+            checkForValid(paramString, attribute);
+        }
+        return attribute;
+    }
+
+
+    /**
+     * On validity check
+     * @param paramString
+     * @param checkValidity
+     * @param attribute
+     */
+    private void onValidity(String paramString, boolean checkValidity, SingularAttribute<? super X, ?> attribute)
+    {
+        if(checkValidity)
+        {
+            checkForValid(paramString, attribute);
+            
+        }
+    }
 }
