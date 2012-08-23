@@ -738,7 +738,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
         declaredSingluarAttribs.put(attributeName, attribute);
     }
     
-    protected void addPluarlAttribute(String attributeName, PluralAttribute<X,?,?> attribute)
+    public void addPluralAttribute(String attributeName, PluralAttribute<X,?,?> attribute)
     {
         if(declaredPluralAttributes== null)
         {
