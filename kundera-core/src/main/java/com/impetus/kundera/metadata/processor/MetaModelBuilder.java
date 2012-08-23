@@ -18,6 +18,7 @@ package com.impetus.kundera.metadata.processor;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.TypeVariable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,6 @@ import javax.persistence.metamodel.Type;
 import javax.persistence.metamodel.Type.PersistenceType;
 
 import org.dom4j.IllegalAddException;
-import org.hibernate.mapping.Collection;
 
 import com.impetus.kundera.metadata.model.attributes.DefaultCollectionAttribute;
 import com.impetus.kundera.metadata.model.attributes.DefaultListAttribute;
@@ -165,9 +165,21 @@ public final class MetaModelBuilder<X, T>
             default:
                 if (!(managedTypes.get(attribType) != null))
                 {
+                    // get Generic type from attribute and then pass it.
+                    if(attribute != null && isPluralAttribute(attribute))
+                    {
+                        java.lang.reflect.Type[] arguments = ((ParameterizedType)attribute.getGenericType()).getActualTypeArguments();
+                        if(arguments != null && arguments.length == 1)
+                        {
+                            attribType = (Class<T>) getTypedClass(arguments[0]);
+                        } else if(arguments != null && arguments.length > 1)
+                        {
+                            attribType = (Class<T>) getTypedClass(arguments[1]);
+                        }
+                    }
                     AbstractManagedType<T> entityType = new DefaultEntityType<T>((Class<T>) attribType,
                             PersistenceType.ENTITY, null);
-                    managedTypes.put(attribute.getType(), entityType);
+                    managedTypes.put(attribType, entityType);
                 }
                 return (Type<T>) managedTypes.get(attribType);
             }
@@ -257,7 +269,7 @@ public final class MetaModelBuilder<X, T>
              */
             public <K,V> void build()
             {
-                if (isPluralAttribute())
+                if (isPluralAttribute(attribute))
                 {
                     PluralAttribute<X, ?, ?> pluralAttribute = null;
                     if(attribute.getType().equals(java.util.Collection.class))
@@ -271,7 +283,6 @@ public final class MetaModelBuilder<X, T>
                         pluralAttribute = new DefaultSetAttribute<X,T>(attributeType, attribute.getName(), getAttributeType(), managedType, attribute, (Class<Set<T>>) attribute.getType());
                     } else if(attribute.getType().equals(java.util.Map.class))
                     {
-                        //TODO: Need to look for map
                         java.lang.reflect.Type[] arguments = ((ParameterizedType)attribute.getGenericType()).getActualTypeArguments();
                         
                         Type keyType = new TypeBuilder<X>(null).buildType(getTypedClass(arguments[0]));
@@ -296,33 +307,8 @@ public final class MetaModelBuilder<X, T>
 
             }
             
-            private Class<?> getTypedClass(java.lang.reflect.Type type)
-            {
-                if (type instanceof Class)
-                {
-                    return ((Class) type);
-                }else if (type instanceof ParameterizedType)
-                {
-                    java.lang.reflect.Type rawParamterizedType = ((ParameterizedType) type).getRawType();
-                    return getTypedClass(rawParamterizedType);
-                }  else if (type instanceof TypeVariable)
-                {
-                    java.lang.reflect.Type upperBound = ((TypeVariable) type).getBounds()[0];
-                    return getTypedClass(upperBound);
-                }
-                
-                throw new IllegalAddException("Error while finding generic class for :" + type);
-            }
 
-            /**
-             * Returns true, if attribute belongs plural hierarchy.
-             * @return true, if attribute belongs plural hierarchy. else false.
-             */
-            private boolean isPluralAttribute()
-            {
-                return attribute.getType().equals(Collection.class) || attribute.getType().equals(Set.class)
-                        || attribute.getType().equals(List.class) || attribute.getType().equals(Map.class);
-            }
+         
 
             /**
              * Check id.
@@ -377,6 +363,35 @@ public final class MetaModelBuilder<X, T>
                 return MetaModelBuilder.getPersistentAttributeType(attribute);
             }
         }
+    }
+
+    /**
+     * Returns true, if attribute belongs plural hierarchy.
+     * @return true, if attribute belongs plural hierarchy. else false.
+     */
+    private boolean isPluralAttribute(Field attribute)
+    {
+        return attribute.getType().equals(Collection.class) || attribute.getType().equals(Set.class)
+                || attribute.getType().equals(List.class) || attribute.getType().equals(Map.class);
+    }
+    
+    
+    private Class<?> getTypedClass(java.lang.reflect.Type type)
+    {
+        if (type instanceof Class)
+        {
+            return ((Class) type);
+        }else if (type instanceof ParameterizedType)
+        {
+            java.lang.reflect.Type rawParamterizedType = ((ParameterizedType) type).getRawType();
+            return getTypedClass(rawParamterizedType);
+        }  else if (type instanceof TypeVariable)
+        {
+            java.lang.reflect.Type upperBound = ((TypeVariable) type).getBounds()[0];
+            return getTypedClass(upperBound);
+        }
+        
+        throw new IllegalAddException("Error while finding generic class for :" + type);
     }
 
     /**
