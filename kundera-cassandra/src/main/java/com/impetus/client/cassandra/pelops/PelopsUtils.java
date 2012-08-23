@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.SimpleConnectionAuthenticator;
 import org.scale7.cassandra.pelops.pool.CommonsBackedPool.Policy;
+import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,14 +132,22 @@ public class PelopsUtils
     }
 
     /**
-     * Returns instance of {@link Cassandra.Client} for a given persistence unit
+     * Returns instance of {@link IPooledConnection} for a given persistence unit
      * 
      * @param persistenceUnit
      * @return
      */
-    public static Cassandra.Client getCassandraClient(String persistenceUnit)
+    public static IPooledConnection getCassandraConnection(String persistenceUnit)
     {
-        return Pelops.getDbConnPool(PelopsUtils.generatePoolName(persistenceUnit)).getConnection().getAPI();
+        return Pelops.getDbConnPool(PelopsUtils.generatePoolName(persistenceUnit)).getConnection();       
     }
+    
+    public static void releaseConnection(IPooledConnection conn)
+    {
+        if(conn != null) {
+            conn.release();
+        }
+    }  
+    
 
 }

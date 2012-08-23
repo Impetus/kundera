@@ -180,9 +180,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
         if (metadata.isCounterColumnType())
-        {
-            Cassandra.Client cassandra_client = PelopsUtils.getCassandraClient(getPersistenceUnit());
-            deleteRecordFromCounterColumnFamily(pKey, metadata, consistencyLevel, cassandra_client);
+        {            
+            deleteRecordFromCounterColumnFamily(pKey, metadata, consistencyLevel);
         }
         else
         {
@@ -512,7 +511,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         try
         {
             org.apache.cassandra.thrift.Cassandra.Client cassandra_client = connection.getAPI();
-            return super.executeQuery(cqlQuery, clazz, relationalField, cassandra_client, dataHandler);
+            return super.executeQuery(cqlQuery, clazz, relationalField, dataHandler);
 
         }
         finally
@@ -557,15 +556,17 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         if (ixClause.isEmpty())
         {
             if (m.isCounterColumnType())
-            {
-                IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit()));
-                // thrift.get
-                IPooledConnection connection = thrift.getConnection();
-                org.apache.cassandra.thrift.Cassandra.Client thriftClient = connection.getAPI();
+            {  
+                
                 try
                 {
+                    IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit()));
+                    // thrift.get
+                    IPooledConnection connection = thrift.getConnection();
+                    org.apache.cassandra.thrift.Cassandra.Client thriftClient = connection.getAPI();
                     List<KeySlice> ks = thriftClient.get_range_slices(new ColumnParent(m.getTableName()),
                             slicePredicate, selector.newKeyRange("", "", maxResult), consistencyLevel);
+                    connection.release();
                     if (m.getType().isSuperColumnFamilyMetadata())
                     {
                         Map<Bytes, List<CounterSuperColumn>> qCounterSuperColumnResults = ColumnOrSuperColumnHelper

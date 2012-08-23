@@ -53,8 +53,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
+import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.ClientBase;
@@ -180,12 +182,16 @@ public abstract class CassandraClientBase extends ClientBase
      * @param metadata
      */
     protected void deleteRecordFromCounterColumnFamily(Object pKey, EntityMetadata metadata,
-            ConsistencyLevel consistencyLevel, Cassandra.Client cassandra_client)
+            ConsistencyLevel consistencyLevel)
     {
         ColumnPath path = new ColumnPath(metadata.getTableName());
 
+        IPooledConnection conn = null;
         try
         {
+            conn = PelopsUtils.getCassandraConnection(metadata.getPersistenceUnit());
+            Cassandra.Client cassandra_client = conn.getAPI();              
+            cassandra_client.set_keyspace(metadata.getSchema());
             cassandra_client.remove_counter(ByteBuffer.wrap(pKey.toString().getBytes()), path, consistencyLevel);
 
         }
@@ -208,6 +214,10 @@ public abstract class CassandraClientBase extends ClientBase
         {
             log.error("Error during executing delete, Caused by :" + te.getMessage());
             throw new PersistenceException(te);
+        }
+        finally
+        {
+            PelopsUtils.releaseConnection(conn);
         }
     }
 
@@ -470,14 +480,19 @@ public abstract class CassandraClientBase extends ClientBase
     }
 
     public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField,
-            Cassandra.Client cassandra_client, CassandraDataHandler dataHandler)
+            CassandraDataHandler dataHandler)
     {
 
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
         CqlResult result = null;
         List returnedEntities = null;
+        IPooledConnection conn = null;
         try
         {
+            conn = PelopsUtils.getCassandraConnection(entityMetadata.getPersistenceUnit());
+            Cassandra.Client cassandra_client = conn.getAPI();           
+            cassandra_client.set_keyspace(entityMetadata.getSchema());
+            
             result = cassandra_client.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
                     org.apache.cassandra.thrift.Compression.NONE);
             if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
@@ -538,6 +553,10 @@ public abstract class CassandraClientBase extends ClientBase
         {
             log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
             throw new PersistenceException(e);
+        }
+        finally
+        {
+            PelopsUtils.releaseConnection(conn);
         }
         return returnedEntities;
 

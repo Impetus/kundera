@@ -171,6 +171,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @throws TException
      * @throws InterruptedException
      */
+            
     private void addTablesToKeyspace(List<TableInfo> tableInfos, KsDef ksDef) throws InvalidRequestException,
             SchemaDisagreementException, TException, InterruptedException
     {
@@ -224,14 +225,29 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @throws SchemaDisagreementException
      * @throws TException
      */
-    private void dropInvertedIndexTable(TableInfo tableInfo) throws InvalidRequestException,
-            SchemaDisagreementException, TException
+    private void dropInvertedIndexTable(TableInfo tableInfo) 
     {
         boolean indexTableRequired = CassandraPropertyReader.csmd.isInvertedIndexingEnabled()
                 && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
         if (indexTableRequired)
         {
-            cassandra_client.system_drop_column_family(tableInfo.getTableName() + Constants.INDEX_TABLE_SUFFIX);
+            try
+            {
+                cassandra_client.system_drop_column_family(tableInfo.getTableName() + Constants.INDEX_TABLE_SUFFIX);
+            }
+            catch (InvalidRequestException e)
+            {
+                log.info(e.getMessage());
+            }
+            catch (SchemaDisagreementException e)
+            {
+                log.info(e.getMessage());
+            }
+            catch (TException e)
+            {
+                e.printStackTrace();
+            }
+            
         }
     }
 
@@ -528,12 +544,21 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         for (TableInfo tableInfo : tableInfos)
         {
-            cfDefs.add(getTableMetadata(tableInfo));
+
+            cfDefs.add(getTableMetadata(tableInfo));            
+            
+            
         }
         ksDef.setCf_defs(cfDefs);
         try
         {
             createKeyspace(ksDef);
+            
+            //Recreate Inverted Index Table if applicable
+            /*for(TableInfo tableInfo : tableInfos) {
+                dropInvertedIndexTable(tableInfo);
+                createInvertedIndexTable(tableInfo);
+            }*/
         }
         catch (InvalidRequestException e)
         {
@@ -549,7 +574,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         {
             log.error("Error while creating schema in cassandra, Caused by:" + e.getMessage());
             throw new SchemaGenerationException(e, "Cassandra", databaseName);
-        }
+        } 
 
     }
 
