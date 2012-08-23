@@ -377,6 +377,8 @@ public class MetaModelBuilderTest
         Assert.assertEquals(AssociationBiEntity.class, managedType.getJavaType());
         Assert.assertEquals(AssociationBiEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes().size());
         assertOnIdAttribute(managedType,"assoRowKey",String.class);
+        
+        // assert on owner attribute
         Attribute<? super X, ?> ownerAttribute = (Attribute<? super X, ?>)managedType.getAttribute("owner");
         Assert.assertNotNull(ownerAttribute);
         Assert.assertEquals(PersistentAttributeType.ONE_TO_ONE, ownerAttribute.getPersistentAttributeType());
@@ -384,6 +386,11 @@ public class MetaModelBuilderTest
         Assert.assertEquals(true, ownerAttribute.isAssociation());
         Assert.assertEquals(AssociationBiEntity.class, ownerAttribute.getDeclaringType().getJavaType());
         Assert.assertEquals("owner",ownerAttribute.getName());
+        Assert.assertEquals(managedTypes.get(AssociationBiEntity.class),ownerAttribute.getDeclaringType());        
+        Assert.assertEquals(AssociationBiEntity.class, ownerAttribute.getJavaMember().getDeclaringClass());
+        Assert.assertEquals(OToOOwnerBiEntity.class, ownerAttribute.getJavaType());
+        Assert.assertEquals(managedTypes.get(OToOOwnerBiEntity.class),((SingularAttribute<? super X, ?>)ownerAttribute).getType());        
+        
     }
     /**
      * Assert on embeddable type.
