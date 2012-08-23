@@ -551,8 +551,14 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while finding relations. Details:" + e.getMessage());
-            throw new KunderaException("Error while finding relations", e);
+            if(e.why != null && e.why.contains("No indexed columns"))
+            {
+                return entities;
+            } else {
+                log.error("Error while finding relations. Details:" + e.getMessage());
+                throw new KunderaException("Error while finding relations", e);
+            }          
+            
         }
         catch (UnavailableException e)
         {
