@@ -78,10 +78,18 @@ public final class MetaModelBuilder<X, T>
      */
     public void process(Class<X> clazz)
     {
-        this.managedType = buildManagedType(clazz);
+        if(managedTypes.get(clazz) == null)
+        {
+            this.managedType = buildManagedType(clazz);
         //TODO: this.managedType has to be removed.
         // Need a validation that TypeBuilder class must be same as MetaModelBuilder class.
+        
+        // TODO::: To handle association cases, need to check from managedType only and populate the same.
         managedTypes.put(clazz, managedType);
+        } else
+        {
+            this.managedType = (AbstractManagedType<X>) managedTypes.get(clazz); 
+        }
     }
 
     /**
@@ -147,7 +155,13 @@ public final class MetaModelBuilder<X, T>
             case ELEMENT_COLLECTION:
                 return processOnEmbeddables();
             default:
-                return new DefaultEntityType<T>((Class<T>) attribute.getType(), PersistenceType.ENTITY, null);
+                if (!(managedTypes.get(attribute.getType()) != null))
+                {
+                    AbstractManagedType<T> entityType = new DefaultEntityType<T>((Class<T>) attribute.getType(),
+                            PersistenceType.ENTITY, null);
+                    managedTypes.put(attribute.getType(), entityType);
+                }
+                return (Type<T>) managedTypes.get(attribute.getType());
             }
 
             // TODO: Throw an error.

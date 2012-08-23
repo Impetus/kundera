@@ -34,6 +34,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.kundera.metadata.entities.AssociationEntity;
+import com.impetus.kundera.metadata.entities.EmbeddableEntity;
+import com.impetus.kundera.metadata.entities.EmbeddableEntityTwo;
+import com.impetus.kundera.metadata.entities.OToOOwnerEntity;
+import com.impetus.kundera.metadata.entities.SingularEntity;
+import com.impetus.kundera.metadata.entities.SingularEntityEmbeddable;
 import com.impetus.kundera.metadata.model.type.AbstractIdentifiableType;
 import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 
@@ -93,7 +99,7 @@ public class MetaModelBuilderTest
             }
 
             AbstractManagedType<X> managedType = assertOnManagedType(builder, managedTypeField, SingularEntity.class);
-            assertOnIdAttribute(managedType);
+            assertOnIdAttribute(managedType,"key",Integer.class);
 
             // on optional attribute
             log.info("Assert on optional attribute");
@@ -192,7 +198,7 @@ public class MetaModelBuilderTest
             AbstractManagedType<X> managedType = assertOnManagedType(builder, managedTypeField,
                     SingularEntityEmbeddable.class);
 
-            assertOnIdAttribute(managedType);
+            assertOnIdAttribute(managedType,"key",Integer.class);
 
             // assert on embeddable first attribute
             SingularAttribute embeddableAttrib = managedType.getSingularAttribute("embeddableEntity");
@@ -235,6 +241,7 @@ public class MetaModelBuilderTest
      * @param <X> the generic type
      * @param <T> the generic type
      */
+    @Test
     public <X extends Class, T extends Object> void combinedTest()
     {
         X clazz = (X) SingularEntity.class;
@@ -254,37 +261,59 @@ public class MetaModelBuilderTest
         {
             builder.construct(SingularEntityEmbeddable.class, f);
         }
-        try
-        {
-            Field managedTypesFields = builder.getClass().getDeclaredField("managedTypes");
-            if (!managedTypesFields.isAccessible())
-            {
-                managedTypesFields.setAccessible(true);
-            }
-            Map<Class<?>, AbstractManagedType<?>> managedTypes = ((Map<Class<?>, AbstractManagedType<?>>) managedTypesFields
-                    .get(builder));
-            Assert.assertEquals(2, managedTypes.size());
-            
-            //TODO: Refactor and more assertions are required.
-        }
-        catch (SecurityException e)
-        {
-            Assert.fail(e.getMessage());
-        }
-        catch (NoSuchFieldException e)
-        {
-            Assert.fail(e.getMessage());
-        }
-        catch (IllegalArgumentException e)
-        {
-            Assert.fail(e.getMessage());
-        }
-        catch (IllegalAccessException e)
-        {
-            Assert.fail(e.getMessage());
-        }
+        Map<Class<?>, AbstractManagedType<?>> managedTypes = getManagedTypes();
+        Assert.assertEquals(2, managedTypes.size());
     }
 
+    @Test
+    public <X extends Class, T extends Object> void testOneToOneAssociation()
+    {
+        X clazz = (X) OToOOwnerEntity.class;
+        // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
+        Field[] field = OToOOwnerEntity.class.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(OToOOwnerEntity.class, f);
+        }
+        
+        clazz = (X) AssociationEntity.class;
+        // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
+        field = AssociationEntity.class.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(AssociationEntity.class, f);
+        }
+    
+        Map<Class<?>, AbstractManagedType<?>> managedTypes = getManagedTypes();
+        Assert.assertNotNull(managedTypes);
+        Assert.assertEquals(2, managedTypes.size());
+        
+        // Assertion on owner Entity
+        AbstractManagedType<?> managedType = managedTypes.get(OToOOwnerEntity.class);
+        Assert.assertNotNull(managedType);
+        Assert.assertEquals(OToOOwnerEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
+        Assert.assertEquals(OToOOwnerEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes().size());
+        assertOnIdAttribute(managedType,"rowKey",byte.class);
+        
+        // asssert on association attribute.
+        Attribute<? super X, ?> associationAttribute = (Attribute<? super X, ?>) managedType.getAttribute("association");
+        Assert.assertNotNull(associationAttribute);
+        Assert.assertEquals(PersistentAttributeType.ONE_TO_ONE, associationAttribute.getPersistentAttributeType());
+        Assert.assertEquals(AssociationEntity.class, associationAttribute.getJavaType());
+        Assert.assertEquals(true, associationAttribute.isAssociation());
+        Assert.assertEquals(OToOOwnerEntity.class, associationAttribute.getDeclaringType().getJavaType());
+        Assert.assertEquals("association",associationAttribute.getName());
+        
+        // Assertion on AssociationEntity.
+        managedType = managedTypes.get(AssociationEntity.class);
+        Assert.assertNotNull(managedType);
+        Assert.assertEquals(AssociationEntity.class.getDeclaredFields().length, managedType.getAttributes().size());
+        Assert.assertEquals(AssociationEntity.class, managedType.getJavaType());
+        Assert.assertEquals(AssociationEntity.class.getDeclaredFields().length, managedType.getDeclaredAttributes().size());
+        assertOnIdAttribute(managedType,"assoRowKey",String.class);
+    }
     /**
      * Assert on embeddable type.
      * 
@@ -359,12 +388,6 @@ public class MetaModelBuilderTest
 
     /**
      * Tear down.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    /**
-     * Tear down.
      * 
      * @throws Exception
      *             the exception
@@ -383,18 +406,55 @@ public class MetaModelBuilderTest
      * @param managedType
      *            the managed type
      */
-    private <X> void assertOnIdAttribute(AbstractManagedType<X> managedType)
+    private <X> void assertOnIdAttribute(AbstractManagedType<X> managedType, String key, Class clazz)
     {
         // assert on id attribute.
         log.info("Assert on id attribute");
-        Assert.assertEquals("key", managedType.getSingularAttribute("key").getName());
+        Assert.assertEquals(key, managedType.getSingularAttribute(key).getName());
         Assert.assertTrue(((AbstractIdentifiableType<X>) managedType).hasSingleIdAttribute());
         SingularAttribute<? super X, Integer> idAttribute = ((AbstractIdentifiableType<X>) managedType)
-                .getId(Integer.class);
+                .getId(clazz);
         Assert.assertNotNull(idAttribute);
         Assert.assertTrue(idAttribute.isId());
         Assert.assertFalse(idAttribute.isOptional());
-        Assert.assertEquals(idAttribute.getName(), "key");
-        Assert.assertEquals(Integer.class, idAttribute.getJavaType());
+        Assert.assertEquals(idAttribute.getName(), key);
+        Assert.assertEquals(clazz, idAttribute.getJavaType());
     }
+
+
+    private Map<Class<?>, AbstractManagedType<?>> getManagedTypes()
+    {
+        try
+        {
+            Field managedTypesFields = builder.getClass().getDeclaredField("managedTypes");
+            if (!managedTypesFields.isAccessible())
+            {
+                managedTypesFields.setAccessible(true);
+            }
+            
+            return ((Map<Class<?>, AbstractManagedType<?>>) managedTypesFields
+                    .get(builder));
+            
+            //TODO: Refactor and more assertions are required.
+        }
+        catch (SecurityException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (NoSuchFieldException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (IllegalArgumentException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (IllegalAccessException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        return null;
+    }
+
+
 }
