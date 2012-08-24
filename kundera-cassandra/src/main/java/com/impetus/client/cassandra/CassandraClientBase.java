@@ -601,7 +601,7 @@ public abstract class CassandraClientBase extends ClientBase
             Iterator<Bytes> rowIter = qResults.keySet().iterator();
             while (rowIter.hasNext())
             {
-                Bytes rowKey = rowIter.next();
+                Bytes rowKey = rowIter.next();                
                 List<Column> columns = qResults.get(rowKey);
                 try
                 {

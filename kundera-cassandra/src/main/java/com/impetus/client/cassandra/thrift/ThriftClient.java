@@ -222,7 +222,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
             columnFamilyValues.put(columnFamily, insertion_list);
             Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
-            mutationMap.put(ByteBuffer.wrap(rowKey), columnFamilyValues);
+            Bytes b = Bytes.fromUTF8(tf.getId());
+            mutationMap.put(b.getBytes(), columnFamilyValues);
 
             // Write Mutation map to database
             conn = PelopsUtils.getCassandraConnection(entityMetadata.getPersistenceUnit());
