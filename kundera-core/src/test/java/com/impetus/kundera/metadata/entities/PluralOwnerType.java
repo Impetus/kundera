@@ -23,6 +23,8 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
@@ -33,7 +35,6 @@ import javax.persistence.OneToMany;
 @Entity
 public class PluralOwnerType
 {
-
     @Id
     @Column(name="P_KEY")
     private Double primaryKey;
@@ -43,6 +44,7 @@ public class PluralOwnerType
     private Set<SetTypeAssociationEntity> setAssocition;
     
     @ManyToMany
+    @JoinTable(name = "OWNER_LIST", joinColumns = { @JoinColumn(name = "P_KEY") }, inverseJoinColumns = { @JoinColumn(name = "listKey") })
     @Column(name="list_type")
     private List<ListTypeAssociationEntity> listAssociation;
     

@@ -74,7 +74,7 @@ public class ConfiguratorTest
         PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(puName);
         Assert.assertEquals(kundera_client, puMetadata.getClient());
-        Assert.assertEquals(false, puMetadata.getExcludeUnlistedClasses());
+        Assert.assertEquals(true, puMetadata.getExcludeUnlistedClasses());
         Assert.assertNotNull(puMetadata.getPersistenceUnitRootUrl());
     }
 
