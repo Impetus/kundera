@@ -229,6 +229,7 @@ public class MetamodelConfiguration implements Configuration
         // assign JPA metamodel.
         ((MetamodelImpl) metamodel).assignEmbeddables(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder().getEmbeddables());
         ((MetamodelImpl) metamodel).assignManagedTypes(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder().getManagedTypes());
+        ((MetamodelImpl) metamodel).assignMappedSuperClass(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder().getMappedSuperClassTypes());
         
     }
 

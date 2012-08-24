@@ -37,7 +37,9 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
+import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
+import javax.persistence.metamodel.MappedSuperclassType;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
@@ -77,7 +79,10 @@ public final class MetaModelBuilder<X, T>
     private AbstractManagedType<X> managedType;
 
     /** The managed types. */
-    private Map<Class<?>, ManagedType<?>> managedTypes = new HashMap<Class<?>, ManagedType<?>>();
+    private Map<Class<?>, EntityType<?>> managedTypes = new HashMap<Class<?>, EntityType<?>>();
+
+    /** The mapped super class types. */
+    private Map<Class<?>, ManagedType<?>> mappedSuperClassTypes = new HashMap<Class<?>, ManagedType<?>>();
 
     /** The embeddables. */
     private Map<Class<?>, AbstractManagedType<?>> embeddables = new HashMap<Class<?>, AbstractManagedType<?>>();
@@ -212,7 +217,7 @@ public final class MetaModelBuilder<X, T>
                     // If generic typed class is managed entity.
                     if (attribType.isAnnotationPresent(Entity.class))
                     {
-                        AbstractManagedType<T> entityType = new DefaultEntityType<T>((Class<T>) attribType,
+                        EntityType<T> entityType = new DefaultEntityType<T>((Class<T>) attribType,
                                 PersistenceType.ENTITY, null);
                         managedTypes.put(attribType, entityType);
                     }
@@ -488,7 +493,7 @@ public final class MetaModelBuilder<X, T>
      * 
      * @return the managedTypes
      */
-    public Map<Class<?>, ManagedType<?>> getManagedTypes()
+    public Map<Class<?>, EntityType<?>> getManagedTypes()
     {
         return managedTypes;
     }
@@ -501,6 +506,15 @@ public final class MetaModelBuilder<X, T>
     public Map<Class<?>, AbstractManagedType<?>> getEmbeddables()
     {
         return embeddables;
+    }
+    
+
+    /**
+     * @return the mappedSuperClassTypes
+     */
+    public Map<Class<?>, ManagedType<?>> getMappedSuperClassTypes()
+    {
+        return mappedSuperClassTypes;
     }
 
     /**
@@ -597,29 +611,49 @@ public final class MetaModelBuilder<X, T>
         if (clazz.isAnnotationPresent(Embeddable.class))
         {
 
+            
             validate(clazz, true);
-            managedType = new DefaultEmbeddableType<X>(clazz, PersistenceType.EMBEDDABLE, getType(
+            if(!embeddables.containsKey(clazz))
+            {
+                managedType = new DefaultEmbeddableType<X>(clazz, PersistenceType.EMBEDDABLE, getType(
                     clazz.getSuperclass(), isIdClass));
             onDeclaredFields(clazz, managedType);
             embeddables.put(clazz, managedType);
+            } else
+            {
+                managedType = (AbstractManagedType<X>) embeddables.get(clazz); 
+            }
+            
         }
         else if (clazz.isAnnotationPresent(MappedSuperclass.class))
         {
+            
             validate(clazz, false);
-
+            if(!mappedSuperClassTypes.containsKey(clazz))
+            {
             managedType = new DefaultMappedSuperClass<X>(clazz, PersistenceType.MAPPED_SUPERCLASS,
                     (AbstractIdentifiableType) getType(clazz.getSuperclass(), isIdClass));
             onDeclaredFields(clazz, managedType);
-            managedTypes.put(clazz, managedType);
+            mappedSuperClassTypes.put(clazz, (MappedSuperclassType<?>) managedType);
+            }else
+            {
+                managedType = (AbstractManagedType<X>) mappedSuperClassTypes.get(clazz);
+            }
         }
         else if (clazz.isAnnotationPresent(Entity.class) || isIdClass)
         {
+            if(!managedTypes.containsKey(clazz))
+            {
             managedType = new DefaultEntityType<X>(clazz, PersistenceType.ENTITY, (AbstractIdentifiableType) getType(
                     clazz.getSuperclass(), isIdClass));
             // in case of @IdClass, it is a temporary managed type.
             if (!isIdClass)
             {
-                managedTypes.put(clazz, managedType);
+                managedTypes.put(clazz, (EntityType<?>) managedType);
+            }
+            } else
+            {
+                managedType = (AbstractManagedType<X>) managedTypes.get(clazz);
             }
         }
 

@@ -688,7 +688,9 @@ public class MetaModelBuilderTest
 
         Map<Class<?>, AbstractManagedType<?>> managedTypes = getManagedTypes();
         Assert.assertNotNull(managedTypes);
-        Assert.assertEquals(3, managedTypes.size());
+        Assert.assertEquals(2, managedTypes.size());
+        
+        Assert.assertEquals(1,builder.getMappedSuperClassTypes().size());
 
         // on subClass A
         AbstractManagedType managedType = managedTypes.get(SubClassA.class);
