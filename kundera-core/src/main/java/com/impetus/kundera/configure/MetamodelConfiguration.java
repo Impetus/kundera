@@ -225,6 +225,9 @@ public class MetamodelConfiguration implements Configuration
         appMetadata.getMetamodelMap().put(persistenceUnit, metamodel);
         appMetadata.setClazzToPuMap(puToClazzMap);
         validateEntityForClientSpecificProperty(classes, persistenceUnit);
+        ((MetamodelImpl) metamodel).assignEmbeddables(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder().getEmbeddables());
+        ((MetamodelImpl) metamodel).assignManagedTypes(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder().getManagedTypes());
+        
     }
 
     /**

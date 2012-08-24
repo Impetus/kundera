@@ -488,4 +488,20 @@ public final class MetaModelBuilder<X, T>
         return managedType;
     }
 
+    /**
+     * @return the managedTypes
+     */
+    public Map<Class<?>, ManagedType<?>> getManagedTypes()
+    {
+        return managedTypes;
+    }
+
+    /**
+     * @return the embeddables
+     */
+    public Map<Class<?>, AbstractManagedType<?>> getEmbeddables()
+    {
+        return embeddables;
+    }
+
 }

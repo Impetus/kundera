@@ -24,6 +24,8 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
 
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
+
 /**
  * The Class MetamodelImpl.
  * 
@@ -38,6 +40,13 @@ public class MetamodelImpl implements Metamodel
     /** The entity name to class map. */
     Map<String, Class<?>> entityNameToClassMap;
 
+    /** The managed types. */
+    private Map<Class<?>, ManagedType<?>> managedTypes = new HashMap<Class<?>, ManagedType<?>> ();
+
+    /** The embeddables. */
+    private Map<Class<?>, AbstractManagedType<?>> embeddables = new HashMap<Class<?>, AbstractManagedType<?>>();
+
+    
     /*
      * (non-Javadoc)
      * 
@@ -223,4 +232,21 @@ public class MetamodelImpl implements Metamodel
         return entityMetadataMap.toString();
     }
 
+    /**
+     * @param managedTypes the managedTypes to set
+     */
+    public void assignManagedTypes(Map<Class<?>, ManagedType<?>> managedTypes)
+    {
+        this.managedTypes = managedTypes;
+    }
+
+    /**
+     * @param embeddables the embeddables to set
+     */
+    public void assignEmbeddables(Map<Class<?>, AbstractManagedType<?>> embeddables)
+    {
+        this.embeddables = embeddables;
+    }
+
+    
 }

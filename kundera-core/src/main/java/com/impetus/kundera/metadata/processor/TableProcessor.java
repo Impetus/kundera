@@ -78,7 +78,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
      * com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
-    public void process(Class<?> clazz, EntityMetadata metadata)
+    public void process(Class clazz, EntityMetadata metadata)
     {
         if (!clazz.isAnnotationPresent(Table.class))
         {
@@ -100,7 +100,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
      * @param clazz
      *            the clazz
      */
-    private void populateMetadata(EntityMetadata metadata, Class<?> clazz)
+    private <X extends Class, T extends Object> void populateMetadata(EntityMetadata metadata, Class<X> clazz)
     {
         Table table = clazz.getAnnotation(Table.class);
         boolean isEmbeddable = false;
@@ -130,9 +130,17 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
         metadata.setType(com.impetus.kundera.metadata.model.EntityMetadata.Type.COLUMN_FAMILY);
         // scan for fields
-
+        
+        // process for metamodelImpl
+//        MetaModelBuilder<X,T> metaModelBuilder = new MetaModelBuilder<X, T>();
+        MetaModelBuilder<X,T> metaModelBuilder = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder();
+        metaModelBuilder.process(clazz);
+        
         for (Field f : clazz.getDeclaredFields())
         {
+            //construct metamodel.
+            metaModelBuilder.construct(clazz, f);
+            
             /* Scan @Id field */
             if (f.isAnnotationPresent(Id.class))
             {
