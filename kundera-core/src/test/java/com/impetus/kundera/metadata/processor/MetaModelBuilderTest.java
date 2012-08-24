@@ -57,6 +57,7 @@ import com.impetus.kundera.metadata.entities.SetTypeAssociationEntity;
 import com.impetus.kundera.metadata.entities.SingularEntity;
 import com.impetus.kundera.metadata.entities.SingularEntityEmbeddable;
 import com.impetus.kundera.metadata.entities.SubClassA;
+import com.impetus.kundera.metadata.entities.SubClassB;
 import com.impetus.kundera.metadata.entities.bi.AssociationBiEntity;
 import com.impetus.kundera.metadata.entities.bi.OToOOwnerBiEntity;
 import com.impetus.kundera.metadata.model.type.AbstractIdentifiableType;
@@ -576,6 +577,12 @@ public class MetaModelBuilderTest
 
     }
 
+    /**
+     * On id class test.
+     *
+     * @param <X> the generic type
+     * @param <T> the generic type
+     */
     @Test
     public <X extends Class, T extends Object> void onIdClassTest()
     {
@@ -587,7 +594,7 @@ public class MetaModelBuilderTest
         {
             builder.construct(clazz, f);
         }
-     
+
         Map<Class<?>, AbstractManagedType<?>> managedTypes = getManagedTypes();
         Assert.assertNotNull(managedTypes);
         Assert.assertEquals(1, managedTypes.size());
@@ -606,11 +613,17 @@ public class MetaModelBuilderTest
         {
             Assert.assertNull(idAttrib);
         }
-        Assert.assertEquals(2, ((IdentifiableType)managedType).getIdClassAttributes().size());
+        Assert.assertEquals(2, ((IdentifiableType) managedType).getIdClassAttributes().size());
         Assert.assertNotNull(idAttribute);
-        Assert.assertTrue(((SingularAttribute)idAttribute).isId());
+        Assert.assertTrue(((SingularAttribute) idAttribute).isId());
     }
-    
+
+    /**
+     * On embedded id test.
+     *
+     * @param <X> the generic type
+     * @param <T> the generic type
+     */
     @Test
     public <X extends Class, T extends Object> void onEmbeddedIdTest()
     {
@@ -641,12 +654,17 @@ public class MetaModelBuilderTest
         {
             Assert.assertNull(idAttrib);
         }
-        Assert.assertEquals(1, ((IdentifiableType)managedType).getIdClassAttributes().size());
+        Assert.assertEquals(1, ((IdentifiableType) managedType).getIdClassAttributes().size());
         Assert.assertNotNull(idAttribute);
-        Assert.assertTrue(((SingularAttribute)idAttribute).isId());
+        Assert.assertTrue(((SingularAttribute) idAttribute).isId());
     }
-    
-    
+
+    /**
+     * Test mapped super class.
+     *
+     * @param <X> the generic type
+     * @param <T> the generic type
+     */
     @Test
     public <X extends Class, T extends Object> void testMappedSuperClass()
     {
@@ -659,16 +677,45 @@ public class MetaModelBuilderTest
             builder.construct(clazz, f);
         }
 
-    // TODO ::: assert required.
+        clazz = (X) SubClassB.class;
+        // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
+        field = clazz.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(clazz, f);
+        }
+
+        Map<Class<?>, AbstractManagedType<?>> managedTypes = getManagedTypes();
+        Assert.assertNotNull(managedTypes);
+        Assert.assertEquals(3, managedTypes.size());
+
+        // on subClass A
+        AbstractManagedType managedType = managedTypes.get(SubClassA.class);
+        Assert.assertNotNull(managedType);
+        Assert.assertEquals(5, managedType.getAttributes().size());
+        Assert.assertNotNull(managedType.getAttribute("mappedInt"));
+        Assert.assertNotNull(managedType.getSingularAttribute("mappedInt", int.class));
+
+        // on subClass A
+        managedType = managedTypes.get(SubClassB.class);
+        Assert.assertNotNull(managedType);
+        Assert.assertEquals(5, managedType.getAttributes().size());
+        Assert.assertNotNull(managedType.getAttribute("mappedInt"));
+        Assert.assertNotNull(managedType.getSingularAttribute("mappedInt", int.class));
     }
-    
+
     /**
      * Assert on owner type attributes.
-     *
-     * @param managedType the managed type
-     * @param fieldName the field name
-     * @param fieldClazz the field clazz
-     * @param javaClazz the java clazz
+     * 
+     * @param managedType
+     *            the managed type
+     * @param fieldName
+     *            the field name
+     * @param fieldClazz
+     *            the field clazz
+     * @param javaClazz
+     *            the java clazz
      */
     private void assertOnOwnerTypeAttributes(AbstractManagedType managedType, String fieldName, Class fieldClazz,
             Class javaClazz)
