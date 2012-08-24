@@ -28,8 +28,8 @@ import javax.persistence.metamodel.Bindable.BindableType;
 import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.IdentifiableType;
 import javax.persistence.metamodel.PluralAttribute;
-import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type.PersistenceType;
 
@@ -45,6 +45,9 @@ import com.impetus.kundera.metadata.entities.AssociationEntity;
 import com.impetus.kundera.metadata.entities.CollectionTypeAssociationEntity;
 import com.impetus.kundera.metadata.entities.EmbeddableEntity;
 import com.impetus.kundera.metadata.entities.EmbeddableEntityTwo;
+import com.impetus.kundera.metadata.entities.EmbeddedIdOwnerEntity;
+import com.impetus.kundera.metadata.entities.IDClassEntity;
+import com.impetus.kundera.metadata.entities.IDClassOwnerEntity;
 import com.impetus.kundera.metadata.entities.ListTypeAssociationEntity;
 import com.impetus.kundera.metadata.entities.MapTypeAssociationEntity;
 import com.impetus.kundera.metadata.entities.OToMOwnerEntity;
@@ -53,6 +56,7 @@ import com.impetus.kundera.metadata.entities.PluralOwnerType;
 import com.impetus.kundera.metadata.entities.SetTypeAssociationEntity;
 import com.impetus.kundera.metadata.entities.SingularEntity;
 import com.impetus.kundera.metadata.entities.SingularEntityEmbeddable;
+import com.impetus.kundera.metadata.entities.SubClassA;
 import com.impetus.kundera.metadata.entities.bi.AssociationBiEntity;
 import com.impetus.kundera.metadata.entities.bi.OToOOwnerBiEntity;
 import com.impetus.kundera.metadata.model.type.AbstractIdentifiableType;
@@ -572,6 +576,92 @@ public class MetaModelBuilderTest
 
     }
 
+    @Test
+    public <X extends Class, T extends Object> void onIdClassTest()
+    {
+        X clazz = (X) IDClassOwnerEntity.class;
+        // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
+        Field[] field = clazz.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(clazz, f);
+        }
+     
+        Map<Class<?>, AbstractManagedType<?>> managedTypes = getManagedTypes();
+        Assert.assertNotNull(managedTypes);
+        Assert.assertEquals(1, managedTypes.size());
+        AbstractManagedType managedType = managedTypes.get(IDClassOwnerEntity.class);
+        Assert.assertNotNull(managedType);
+        Assert.assertEquals(2, managedType.getAttributes().size());
+        Attribute idAttribute = managedType.getAttribute("id");
+
+        SingularAttribute idAttrib = null;
+        try
+        {
+            idAttrib = ((IdentifiableType) managedType).getId(IDClassEntity.class);
+            Assert.fail();
+        }
+        catch (IllegalArgumentException iaex)
+        {
+            Assert.assertNull(idAttrib);
+        }
+        Assert.assertEquals(2, ((IdentifiableType)managedType).getIdClassAttributes().size());
+        Assert.assertNotNull(idAttribute);
+        Assert.assertTrue(((SingularAttribute)idAttribute).isId());
+    }
+    
+    @Test
+    public <X extends Class, T extends Object> void onEmbeddedIdTest()
+    {
+        X clazz = (X) EmbeddedIdOwnerEntity.class;
+        // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
+        Field[] field = clazz.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(clazz, f);
+        }
+
+        Map<Class<?>, AbstractManagedType<?>> managedTypes = getManagedTypes();
+        Assert.assertNotNull(managedTypes);
+        Assert.assertEquals(1, managedTypes.size());
+        AbstractManagedType managedType = managedTypes.get(clazz);
+        Assert.assertNotNull(managedType);
+        Assert.assertEquals(2, managedType.getAttributes().size());
+        Attribute idAttribute = managedType.getAttribute("id");
+
+        SingularAttribute idAttrib = null;
+        try
+        {
+            idAttrib = ((IdentifiableType) managedType).getId(EmbeddableEntity.class);
+            Assert.fail();
+        }
+        catch (IllegalArgumentException iaex)
+        {
+            Assert.assertNull(idAttrib);
+        }
+        Assert.assertEquals(1, ((IdentifiableType)managedType).getIdClassAttributes().size());
+        Assert.assertNotNull(idAttribute);
+        Assert.assertTrue(((SingularAttribute)idAttribute).isId());
+    }
+    
+    
+    @Test
+    public <X extends Class, T extends Object> void testMappedSuperClass()
+    {
+        X clazz = (X) SubClassA.class;
+        // MetaModelBuilder builder = new MetaModelBuilder<X, T>();
+        builder.process(clazz);
+        Field[] field = clazz.getDeclaredFields();
+        for (Field f : field)
+        {
+            builder.construct(clazz, f);
+        }
+
+    // TODO ::: assert required.
+    }
+    
     /**
      * Assert on owner type attributes.
      *

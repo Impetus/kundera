@@ -15,81 +15,43 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.entities;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.Table;
 
 /**
- * Entity with singular attributes for meta model processing. 
- * 
  * @author vivek.mishra
- * 
+ *
  */
-
-@Entity
-@Table(name = "table", schema = "testSchema@keyspace")
-public class SingularEntity
+public class IDClassEntity
 {
 
-    @Id
-    private Integer key;
-
-    @Column(name = "field",nullable=false )
-    private String field;
-
-    @Column(name = "name")
-    private String name;
-
+    private int key;
+    private String str;
     /**
      * @return the key
      */
-    public Integer getKey()
+    public int getKey()
     {
         return key;
     }
-
     /**
-     * @param key
-     *            the key to set
+     * @param key the key to set
      */
-    public void setKey(Integer key)
+    public void setKey(int key)
     {
         this.key = key;
     }
-
     /**
-     * @return the field
+     * @return the str
      */
-    public String getField()
+    public String getStr()
     {
-        return field;
+        return str;
     }
-
     /**
-     * @param field
-     *            the field to set
+     * @param str the str to set
      */
-    public void setField(String field)
+    public void setStr(String str)
     {
-        this.field = field;
+        this.str = str;
     }
-
-    /**
-     * @return the name
-     */
-    public String getName()
-    {
-        return name;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
+    
 }

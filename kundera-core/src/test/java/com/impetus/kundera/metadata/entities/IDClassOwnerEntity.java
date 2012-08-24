@@ -22,74 +22,46 @@ import javax.persistence.IdClass;
 import javax.persistence.Table;
 
 /**
- * Entity with singular attributes for meta model processing. 
- * 
  * @author vivek.mishra
- * 
+ *
  */
-
+@IdClass(value=IDClassEntity.class)
 @Entity
 @Table(name = "table", schema = "testSchema@keyspace")
-public class SingularEntity
+public class IDClassOwnerEntity
 {
 
-    @Id
-    private Integer key;
-
-    @Column(name = "field",nullable=false )
-    private String field;
-
-    @Column(name = "name")
-    private String name;
-
+    @Id private String id;
+    
+    @Column private long logColumn;
+    
     /**
-     * @return the key
+     * @return the id
      */
-    public Integer getKey()
+    public String getId()
     {
-        return key;
+        return id;
     }
-
     /**
-     * @param key
-     *            the key to set
+     * @param id the id to set
      */
-    public void setKey(Integer key)
+    public void setId(String id)
     {
-        this.key = key;
+        this.id = id;
     }
-
     /**
-     * @return the field
+     * @return the logColumn
      */
-    public String getField()
+    public long getLogColumn()
     {
-        return field;
+        return logColumn;
     }
-
     /**
-     * @param field
-     *            the field to set
+     * @param logColumn the logColumn to set
      */
-    public void setField(String field)
+    public void setLogColumn(long logColumn)
     {
-        this.field = field;
-    }
-
-    /**
-     * @return the name
-     */
-    public String getName()
-    {
-        return name;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name)
-    {
-        this.name = name;
+        this.logColumn = logColumn;
     }
 
 }

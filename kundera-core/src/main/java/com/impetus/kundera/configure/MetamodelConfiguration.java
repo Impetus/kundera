@@ -225,6 +225,8 @@ public class MetamodelConfiguration implements Configuration
         appMetadata.getMetamodelMap().put(persistenceUnit, metamodel);
         appMetadata.setClazzToPuMap(puToClazzMap);
         validateEntityForClientSpecificProperty(classes, persistenceUnit);
+        
+        // assign JPA metamodel.
         ((MetamodelImpl) metamodel).assignEmbeddables(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder().getEmbeddables());
         ((MetamodelImpl) metamodel).assignManagedTypes(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder().getManagedTypes());
         

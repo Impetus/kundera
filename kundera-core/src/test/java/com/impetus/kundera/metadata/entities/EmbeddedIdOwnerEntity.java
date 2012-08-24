@@ -16,80 +16,51 @@
 package com.impetus.kundera.metadata.entities;
 
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
 import javax.persistence.Table;
 
 /**
- * Entity with singular attributes for meta model processing. 
- * 
  * @author vivek.mishra
- * 
+ *
  */
-
 @Entity
 @Table(name = "table", schema = "testSchema@keyspace")
-public class SingularEntity
+public class EmbeddedIdOwnerEntity
 {
 
-    @Id
-    private Integer key;
-
-    @Column(name = "field",nullable=false )
-    private String field;
-
-    @Column(name = "name")
-    private String name;
-
+    @EmbeddedId private EmbeddableEntity id;
+    
+    @Column private long logColumn;
+    
     /**
-     * @return the key
+     * @return the logColumn
      */
-    public Integer getKey()
+    public long getLogColumn()
     {
-        return key;
+        return logColumn;
+    }
+    /**
+     * @param logColumn the logColumn to set
+     */
+    public void setLogColumn(long logColumn)
+    {
+        this.logColumn = logColumn;
+    }
+    /**
+     * @return the id
+     */
+    public EmbeddableEntity getId()
+    {
+        return id;
+    }
+    /**
+     * @param id the id to set
+     */
+    public void setId(EmbeddableEntity id)
+    {
+        this.id = id;
     }
 
-    /**
-     * @param key
-     *            the key to set
-     */
-    public void setKey(Integer key)
-    {
-        this.key = key;
-    }
-
-    /**
-     * @return the field
-     */
-    public String getField()
-    {
-        return field;
-    }
-
-    /**
-     * @param field
-     *            the field to set
-     */
-    public void setField(String field)
-    {
-        this.field = field;
-    }
-
-    /**
-     * @return the name
-     */
-    public String getName()
-    {
-        return name;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
+    
 }
