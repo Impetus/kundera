@@ -86,6 +86,7 @@ public class PersistenceCacheTest
 
         Node headNode = pc.getMainCache().getNodeFromCache(ObjectGraphUtils.getNodeId("1", Store.class));
 
+        Assert.assertNotNull(headNode);
         Assert.assertNull(headNode.getParents());
         Assert.assertEquals(3, headNode.getChildren().size());
 

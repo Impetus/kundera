@@ -69,33 +69,7 @@ public class ObjectUtilsCloneUnidirectionalTest
     {
     }
 
-    @Test
-    public void testBulkCopyUsingDeepCloner()
-    {
-        int n = 100000;
-        long t1 = System.currentTimeMillis();
-        for (int i = 0; i < n; i++)
-        {
-            PhotographerUni_1_M_1_M a1 = constructPhotographer(i + 1);
-            PhotographerUni_1_M_1_M a2 = (PhotographerUni_1_M_1_M) ObjectUtils.deepCopyUsingCloner(a1);
-        }
-        long t2 = System.currentTimeMillis();
-        log.info("Time taken by Deep Cloner for " + n + " records:" + (t2 - t1));
-    }
-
-    @Test
-    public void testBulkCopyUsingKunderaCloner()
-    {
-        int n = 100000;
-        long t1 = System.currentTimeMillis();
-        for (int i = 0; i < n; i++)
-        {
-            PhotographerUni_1_M_1_M a1 = constructPhotographer(i + 1);
-            PhotographerUni_1_M_1_M a2 = (PhotographerUni_1_M_1_M) ObjectUtils.deepCopy(a1);
-        }
-        long t2 = System.currentTimeMillis();
-        log.info("Time taken by Kundera Cloner for " + n + " records:" + (t2 - t1));
-    }
+    
 
     @Test
     public void testPhotographer()
@@ -130,6 +104,34 @@ public class ObjectUtilsCloneUnidirectionalTest
         assertOriginalObjectValues(a2);
         assertOriginalObjectValues(a3);
 
+    }
+    
+    //@Test
+    public void testBulkCopyUsingDeepCloner()
+    {
+        int n = 100000;
+        long t1 = System.currentTimeMillis();
+        for (int i = 0; i < n; i++)
+        {
+            PhotographerUni_1_M_1_M a1 = constructPhotographer(i + 1);
+            PhotographerUni_1_M_1_M a2 = (PhotographerUni_1_M_1_M) ObjectUtils.deepCopyUsingCloner(a1);
+        }
+        long t2 = System.currentTimeMillis();
+        log.info("Time taken by Deep Cloner for " + n + " records:" + (t2 - t1));
+    }
+
+    //@Test
+    public void testBulkCopyUsingKunderaCloner()
+    {
+        int n = 100000;
+        long t1 = System.currentTimeMillis();
+        for (int i = 0; i < n; i++)
+        {
+            PhotographerUni_1_M_1_M a1 = constructPhotographer(i + 1);
+            PhotographerUni_1_M_1_M a2 = (PhotographerUni_1_M_1_M) ObjectUtils.deepCopy(a1);
+        }
+        long t2 = System.currentTimeMillis();
+        log.info("Time taken by Kundera Cloner for " + n + " records:" + (t2 - t1));
     }
 
     /**

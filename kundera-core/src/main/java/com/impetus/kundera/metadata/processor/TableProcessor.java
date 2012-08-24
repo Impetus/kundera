@@ -80,11 +80,6 @@ public class TableProcessor extends AbstractEntityFieldProcessor
     @Override
     public void process(Class clazz, EntityMetadata metadata)
     {
-        if (!clazz.isAnnotationPresent(Table.class))
-        {
-            // FIXME: why return? why not throw run time exception?
-            return;
-        }
 
         LOG.debug("Processing @Entity(" + clazz.getName() + ") for Persistence Object.");
 
