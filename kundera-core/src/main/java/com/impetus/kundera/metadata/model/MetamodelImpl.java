@@ -26,12 +26,10 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
 
-import com.impetus.kundera.metadata.model.type.AbstractManagedType;
-
 /**
  * The Class MetamodelImpl.
  * 
- * @author amresh.singh
+ * @author vivek.mishra
  */
 public class MetamodelImpl implements Metamodel
 {
