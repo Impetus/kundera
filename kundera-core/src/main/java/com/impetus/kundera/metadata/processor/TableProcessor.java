@@ -121,232 +121,251 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
         metadata.setType(com.impetus.kundera.metadata.model.EntityMetadata.Type.COLUMN_FAMILY);
         // scan for fields
-        
+
         // process for metamodelImpl
 
-        MetaModelBuilder<X,T> metaModelBuilder = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder();
+        MetaModelBuilder<X, T> metaModelBuilder = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                .getMetaModelBuilder();
         metaModelBuilder.process(clazz);
-        
+
         for (Field f : clazz.getDeclaredFields())
         {
-            //construct metamodel.
+            // construct metamodel.
             metaModelBuilder.construct(clazz, f);
-            
+
             // on id attribute.
-            
+
             onIdAttribute(metaModelBuilder, metadata, clazz, f);
-            
+
             // determine if it is a column family or super column family.
-            
+
             onFamilyType(metaModelBuilder, metadata, clazz, f);
-            
-            onJPAColumnMapping(metaModelBuilder,metadata, f);
-            
+
+            onJPAColumnMapping(metaModelBuilder, metadata, f);
+
             /* Scan @Id field */
 
-            /*            if (f.isAnnotationPresent(Id.class))
-            {
-                LOG.debug(f.getName() + " => Id");
-                populateIdAccessorMethods(metadata, clazz, f);
-                populateIdColumn(metadata, clazz, f);
-            }
-
-//            else if (f.isAnnotationPresent(Embedded.class))
-//            {
-//                /* Scan @Embedded fields */
-//                metadata.setType(com.impetus.kundera.metadata.model.EntityMetadata.Type.SUPER_COLUMN_FAMILY);
-//                Class embeddedFieldClass = f.getType();
-//                
-//                isEmbeddable = true;
-//
-//                if (Collection.class.isAssignableFrom(embeddedFieldClass))
-//                {
-//                    LOG.warn(f.getName()
-//                            + " was annotated with @Embedded, and shouldn't have been a java Collection field, it won't be persisted");
-//                }
-//                else
-//                {
-//                    // An @Embedded attribute will be a DTO (@Embeddable)
-//                    populateEmbeddedFieldIntoMetadata(metadata, f, embeddedFieldClass);
-//                    /* TODO: Bad code, see how to remove this */
-//                    metadata.addToEmbedCollection(embeddedFieldClass);
-//                }
-//
-//            }
-//
-//            else if (f.isAnnotationPresent(ElementCollection.class))
-//            {
-//                /* Scan @ElementCollection fields */
-//                metadata.setType(com.impetus.kundera.metadata.model.EntityMetadata.Type.SUPER_COLUMN_FAMILY);
-//                Class elementCollectionFieldClass = f.getType();
-//                isEmbeddable = true;
-//
-//                // An @ElementCollection must be a java collection, a generic
-//                // class must be declared (@Embeddable)
-//                if (Collection.class.isAssignableFrom(elementCollectionFieldClass))
-//                {
-//                    Class elementCollectionGenericClass = PropertyAccessorHelper.getGenericClass(f);
-//                    populateElementCollectionIntoMetadata(metadata, f, elementCollectionGenericClass);
-//
-//                    /* TODO: Bad code, see how to remove this */
-//                    metadata.addToEmbedCollection(elementCollectionGenericClass);
-//                }
-//                else
-//                {
-//                    LOG.warn(f.getName()
-//                            + " was annotated with @ElementCollection but wasn't a java Collection field, it won't be persisted");
-//                }
-//            }
-//            else
-//            {
-                /* if any valid JPA annotation? */
-//                String name = getValidJPAColumnName(clazz, f);
-//                if (null != name)
-//                {
-//                    // additional check for not to load Unnecessary column
-//                    // objects in JVM.
-//                    if (!isEmbeddable)
-//                    {
-//                        metadata.addColumn(name, new com.impetus.kundera.metadata.model.Column(name, f,
-//                                colToBeIndexed != null ? colToBeIndexed.contains(name) : false));
-//                    }
-//                    EmbeddedColumn embeddedColumn = new EmbeddedColumn(name, f);
-//                    metadata.addEmbeddedColumn(name, embeddedColumn);
-//                    embeddedColumn.addColumn(name, f);
-//                }
-//            }
+            /*
+             * if (f.isAnnotationPresent(Id.class)) { LOG.debug(f.getName() +
+             * " => Id"); populateIdAccessorMethods(metadata, clazz, f);
+             * populateIdColumn(metadata, clazz, f); }
+             * 
+             * // else if (f.isAnnotationPresent(Embedded.class)) // { // /*
+             * Scan @Embedded fields
+             */
+            // metadata.setType(com.impetus.kundera.metadata.model.EntityMetadata.Type.SUPER_COLUMN_FAMILY);
+            // Class embeddedFieldClass = f.getType();
+            //
+            // isEmbeddable = true;
+            //
+            // if (Collection.class.isAssignableFrom(embeddedFieldClass))
+            // {
+            // LOG.warn(f.getName()
+            // +
+            // " was annotated with @Embedded, and shouldn't have been a java Collection field, it won't be persisted");
+            // }
+            // else
+            // {
+            // // An @Embedded attribute will be a DTO (@Embeddable)
+            // populateEmbeddedFieldIntoMetadata(metadata, f,
+            // embeddedFieldClass);
+            // /* TODO: Bad code, see how to remove this */
+            // metadata.addToEmbedCollection(embeddedFieldClass);
+            // }
+            //
+            // }
+            //
+            // else if (f.isAnnotationPresent(ElementCollection.class))
+            // {
+            // /* Scan @ElementCollection fields */
+            // metadata.setType(com.impetus.kundera.metadata.model.EntityMetadata.Type.SUPER_COLUMN_FAMILY);
+            // Class elementCollectionFieldClass = f.getType();
+            // isEmbeddable = true;
+            //
+            // // An @ElementCollection must be a java collection, a generic
+            // // class must be declared (@Embeddable)
+            // if
+            // (Collection.class.isAssignableFrom(elementCollectionFieldClass))
+            // {
+            // Class elementCollectionGenericClass =
+            // PropertyAccessorHelper.getGenericClass(f);
+            // populateElementCollectionIntoMetadata(metadata, f,
+            // elementCollectionGenericClass);
+            //
+            // /* TODO: Bad code, see how to remove this */
+            // metadata.addToEmbedCollection(elementCollectionGenericClass);
+            // }
+            // else
+            // {
+            // LOG.warn(f.getName()
+            // +
+            // " was annotated with @ElementCollection but wasn't a java Collection field, it won't be persisted");
+            // }
+            // }
+            // else
+            // {
+            /* if any valid JPA annotation? */
+            // String name = getValidJPAColumnName(clazz, f);
+            // if (null != name)
+            // {
+            // // additional check for not to load Unnecessary column
+            // // objects in JVM.
+            // if (!isEmbeddable)
+            // {
+            // metadata.addColumn(name, new
+            // com.impetus.kundera.metadata.model.Column(name, f,
+            // colToBeIndexed != null ? colToBeIndexed.contains(name) : false));
+            // }
+            // EmbeddedColumn embeddedColumn = new EmbeddedColumn(name, f);
+            // metadata.addEmbeddedColumn(name, embeddedColumn);
+            // embeddedColumn.addColumn(name, f);
+            // }
+            // }
 
             /* Scan for Relationship field */
             addRelationIntoMetadata(clazz, f, metadata);
         }
-//
-//        // TODO: Below if/else block is possibly not required, should be removed
-//        if (isEmbeddable)
-//        {
-//            Map<String, com.impetus.kundera.metadata.model.Column> cols = metadata.getColumnsMap();
-//            cols.clear();
-//            cols = null;
-//            metadata.setType(Type.SUPER_COLUMN_FAMILY);
-//        }
-//        else
-//        {
-//            Map<String, EmbeddedColumn> embeddedColumns = metadata.getEmbeddedColumnsMap();
-//            embeddedColumns.clear();
-//            embeddedColumns = null;
-//            metadata.setType(Type.COLUMN_FAMILY);
-//        }
+        //
+        // // TODO: Below if/else block is possibly not required, should be
+        // removed
+        // if (isEmbeddable)
+        // {
+        // Map<String, com.impetus.kundera.metadata.model.Column> cols =
+        // metadata.getColumnsMap();
+        // cols.clear();
+        // cols = null;
+        // metadata.setType(Type.SUPER_COLUMN_FAMILY);
+        // }
+        // else
+        // {
+        // Map<String, EmbeddedColumn> embeddedColumns =
+        // metadata.getEmbeddedColumnsMap();
+        // embeddedColumns.clear();
+        // embeddedColumns = null;
+        // metadata.setType(Type.COLUMN_FAMILY);
+        // }
 
     }
 
-//    /**
-//     * Populate embedded field into metadata.
-//     * 
-//     * @param metadata
-//     *            the metadata
-//     * @param embeddedField
-//     *            the embedded field
-//     * @param embeddedFieldClass
-//     *            the embedded field class
-//     */
-//    private void populateEmbeddedFieldIntoMetadata(EntityMetadata metadata, Field embeddedField,
-//            Class embeddedFieldClass)
-//    {
-//        // If not annotated with @Embeddable, discard.
-//        Annotation ann = embeddedFieldClass.getAnnotation(Embeddable.class);
-//        if (ann == null)
-//        {
-//            LOG.warn(embeddedField.getName() + " was declared @Embedded but wasn't annotated with @Embeddable. "
-//                    + " It won't be persisted co-located.");
-//            // return;
-//        }
-//
-//        // TODO: Provide user an option to specify this in entity class rather
-//        // than default field name
-//        String embeddedFieldName = embeddedField.getName();
-//        addEmbeddedColumnInMetadata(metadata, embeddedField, embeddedFieldClass, embeddedFieldName);
-//    }
+    // /**
+    // * Populate embedded field into metadata.
+    // *
+    // * @param metadata
+    // * the metadata
+    // * @param embeddedField
+    // * the embedded field
+    // * @param embeddedFieldClass
+    // * the embedded field class
+    // */
+    // private void populateEmbeddedFieldIntoMetadata(EntityMetadata metadata,
+    // Field embeddedField,
+    // Class embeddedFieldClass)
+    // {
+    // // If not annotated with @Embeddable, discard.
+    // Annotation ann = embeddedFieldClass.getAnnotation(Embeddable.class);
+    // if (ann == null)
+    // {
+    // LOG.warn(embeddedField.getName() +
+    // " was declared @Embedded but wasn't annotated with @Embeddable. "
+    // + " It won't be persisted co-located.");
+    // // return;
+    // }
+    //
+    // // TODO: Provide user an option to specify this in entity class rather
+    // // than default field name
+    // String embeddedFieldName = embeddedField.getName();
+    // addEmbeddedColumnInMetadata(metadata, embeddedField, embeddedFieldClass,
+    // embeddedFieldName);
+    // }
 
-//    /**
-//     * Populate element collection into metadata.
-//     * 
-//     * @param metadata
-//     *            the metadata
-//     * @param embeddedField
-//     *            the embedded field
-//     * @param embeddedFieldClass
-//     *            the embedded field class
-//     */
-//    private void populateElementCollectionIntoMetadata(EntityMetadata metadata, Field embeddedField,
-//            Class embeddedFieldClass)
-//    {
-//        // If not annotated with @Embeddable, discard.
-//        Annotation ann = embeddedFieldClass.getAnnotation(Embeddable.class);
-//        if (ann == null)
-//        {
-//            LOG.warn(embeddedField.getName()
-//                    + " was declared @ElementCollection but wasn't annotated with @Embeddable. "
-//                    + " It won't be persisted co-located.");
-//            // return;
-//        }
-//
-//        String embeddedFieldName = null;
-//
-//        // Embedded object name should be the one provided with @CollectionTable
-//        // annotation, if not, should be
-//        // equal to field name
-//        if (embeddedField.isAnnotationPresent(CollectionTable.class))
-//        {
-//            CollectionTable ct = embeddedField.getAnnotation(CollectionTable.class);
-//            if (!ct.name().isEmpty())
-//            {
-//                embeddedFieldName = ct.name();
-//            }
-//            else
-//            {
-//                embeddedFieldName = embeddedField.getName();
-//            }
-//        }
-//        else
-//        {
-//            embeddedFieldName = embeddedField.getName();
-//        }
-//
-//        addEmbeddedColumnInMetadata(metadata, embeddedField, embeddedFieldClass, embeddedFieldName);
-//    }
+    // /**
+    // * Populate element collection into metadata.
+    // *
+    // * @param metadata
+    // * the metadata
+    // * @param embeddedField
+    // * the embedded field
+    // * @param embeddedFieldClass
+    // * the embedded field class
+    // */
+    // private void populateElementCollectionIntoMetadata(EntityMetadata
+    // metadata, Field embeddedField,
+    // Class embeddedFieldClass)
+    // {
+    // // If not annotated with @Embeddable, discard.
+    // Annotation ann = embeddedFieldClass.getAnnotation(Embeddable.class);
+    // if (ann == null)
+    // {
+    // LOG.warn(embeddedField.getName()
+    // +
+    // " was declared @ElementCollection but wasn't annotated with @Embeddable. "
+    // + " It won't be persisted co-located.");
+    // // return;
+    // }
+    //
+    // String embeddedFieldName = null;
+    //
+    // // Embedded object name should be the one provided with @CollectionTable
+    // // annotation, if not, should be
+    // // equal to field name
+    // if (embeddedField.isAnnotationPresent(CollectionTable.class))
+    // {
+    // CollectionTable ct = embeddedField.getAnnotation(CollectionTable.class);
+    // if (!ct.name().isEmpty())
+    // {
+    // embeddedFieldName = ct.name();
+    // }
+    // else
+    // {
+    // embeddedFieldName = embeddedField.getName();
+    // }
+    // }
+    // else
+    // {
+    // embeddedFieldName = embeddedField.getName();
+    // }
+    //
+    // addEmbeddedColumnInMetadata(metadata, embeddedField, embeddedFieldClass,
+    // embeddedFieldName);
+    // }
 
-//    /**
-//     * TODO: Change method name once we change the name "Super Column" in entity
-//     * metadata.
-//     * 
-//     * @param metadata
-//     *            the metadata
-//     * @param embeddedField
-//     *            the embedded field
-//     * @param embeddedFieldClass
-//     *            the embedded field class
-//     * @param embeddedFieldName
-//     *            the embedded field name
-//     */
-//    private void addEmbeddedColumnInMetadata(EntityMetadata metadata, Field embeddedField, Class embeddedFieldClass,
-//            String embeddedFieldName)
-//    {
-//        EmbeddedColumn superColumn = metadata.getEmbeddedColumn(embeddedFieldName);
-//        if (null == superColumn)
-//        {
-//            superColumn = new EmbeddedColumn(embeddedFieldName, embeddedField);
-//        }
-//        // Iterate over all fields of this super column class
-//        for (Field columnField : embeddedFieldClass.getDeclaredFields())
-//        {
-//            String columnName = getValidJPAColumnName(embeddedFieldClass, columnField);
-//            if (columnName == null)
-//            {
-//                columnName = columnField.getName();
-//            }
-//            superColumn.addColumn(columnName, columnField);
-//        }
-//        metadata.addEmbeddedColumn(embeddedFieldName, superColumn);
-//    }
+    // /**
+    // * TODO: Change method name once we change the name "Super Column" in
+    // entity
+    // * metadata.
+    // *
+    // * @param metadata
+    // * the metadata
+    // * @param embeddedField
+    // * the embedded field
+    // * @param embeddedFieldClass
+    // * the embedded field class
+    // * @param embeddedFieldName
+    // * the embedded field name
+    // */
+    // private void addEmbeddedColumnInMetadata(EntityMetadata metadata, Field
+    // embeddedField, Class embeddedFieldClass,
+    // String embeddedFieldName)
+    // {
+    // EmbeddedColumn superColumn =
+    // metadata.getEmbeddedColumn(embeddedFieldName);
+    // if (null == superColumn)
+    // {
+    // superColumn = new EmbeddedColumn(embeddedFieldName, embeddedField);
+    // }
+    // // Iterate over all fields of this super column class
+    // for (Field columnField : embeddedFieldClass.getDeclaredFields())
+    // {
+    // String columnName = getValidJPAColumnName(embeddedFieldClass,
+    // columnField);
+    // if (columnName == null)
+    // {
+    // columnName = columnField.getName();
+    // }
+    // superColumn.addColumn(columnName, columnField);
+    // }
+    // metadata.addEmbeddedColumn(embeddedFieldName, superColumn);
+    // }
 
     /**
      * Adds relationship info into metadata for a given field
@@ -426,23 +445,24 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         }
     }
 
-
     private void onIdAttribute(final MetaModelBuilder builder, EntityMetadata entityMetadata, final Class clazz, Field f)
     {
-        EntityType entity= (EntityType) builder.getManagedTypes().get(clazz);
+        EntityType entity = (EntityType) builder.getManagedTypes().get(clazz);
         Attribute attrib = entity.getAttribute(f.getName());
-        if(!attrib.isCollection() && ((SingularAttribute)attrib).isId())
+        if (!attrib.isCollection() && ((SingularAttribute) attrib).isId())
         {
             entityMetadata.setIdAttribute((SingularAttribute) attrib);
+            populateIdAccessorMethods(entityMetadata, clazz, f);
         }
     }
 
     private void onFamilyType(final MetaModelBuilder builder, EntityMetadata entityMetadata, final Class clazz, Field f)
     {
-        if(builder.getEmbeddables().containsKey(clazz))
+        if (builder.getEmbeddables().containsKey(clazz))
         {
             entityMetadata.setType(Type.SUPER_COLUMN_FAMILY);
-        } else 
+        }
+        else
         {
             entityMetadata.setType(Type.COLUMN_FAMILY);
         }
@@ -454,6 +474,5 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         AbstractAttribute attribute = (AbstractAttribute) entityType.getAttribute(f.getName());
         entityMetadata.addJPAColumnMapping(attribute.getJPAColumnName(), f.getName());
     }
-    
-    
+
 }
