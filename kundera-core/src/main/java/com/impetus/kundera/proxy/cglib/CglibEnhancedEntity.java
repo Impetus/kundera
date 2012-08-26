@@ -36,10 +36,10 @@ public class CglibEnhancedEntity implements InvocationHandler, EnhancedEntity
     private Object entity;
 
     /** The id. */
-    private String id;
+    private Object id;
 
     /** The map. */
-    private Map<String, Set<String>> map = new HashMap<String, Set<String>>();
+    private Map<String, Set<Object>> map = new HashMap<String, Set<Object>>();
 
     /**
      * Instantiates a new cglib enhanced entity.
@@ -51,7 +51,7 @@ public class CglibEnhancedEntity implements InvocationHandler, EnhancedEntity
      * @param foreignKeysMap
      *            the foreign keys map
      */
-    public CglibEnhancedEntity(final Object entity, final String id, final Map<String, Set<String>> foreignKeysMap)
+    public CglibEnhancedEntity(final Object entity, final Object id, final Map<String, Set<Object>> foreignKeysMap)
     {
         this.entity = entity;
         this.id = id;
@@ -101,7 +101,7 @@ public class CglibEnhancedEntity implements InvocationHandler, EnhancedEntity
      * 
      * @see com.impetus.kundera.proxy.EnhancedEntity#getForeignKeysMap()
      */
-    public Map<String, Set<String>> getForeignKeysMap()
+    public Map<String, Set<Object>> getForeignKeysMap()
     {
         return map;
     }
@@ -124,7 +124,7 @@ public class CglibEnhancedEntity implements InvocationHandler, EnhancedEntity
      * @return the id
      */
     @Override
-    public String getId()
+    public Object getId()
     {
         return id;
     }

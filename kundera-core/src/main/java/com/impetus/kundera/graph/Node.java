@@ -87,18 +87,18 @@ public class Node implements NodeStateContext
 
     private boolean isProcessed;
 
-    public Node(String nodeId, Object data, PersistenceCache pc)
+    public Node(String nodeId, Object data, PersistenceCache pc, Object primaryKey)
     {
-        initializeNode(nodeId, data);
+        initializeNode(nodeId, data,primaryKey);
         setPersistenceCache(pc);
 
         // Initialize current node state to transient state
         this.currentNodeState = new TransientState();
     }
 
-    public Node(String nodeId, Object data, NodeState initialNodeState, PersistenceCache pc)
+    public Node(String nodeId, Object data, NodeState initialNodeState, PersistenceCache pc, Object primaryKey)
     {
-        initializeNode(nodeId, data);
+        initializeNode(nodeId, data, primaryKey);
         setPersistenceCache(pc);
 
         // Initialize current node state
@@ -112,11 +112,12 @@ public class Node implements NodeStateContext
         }
 
     }
-
-    public Node(String nodeId, Class<?> nodeDataClass, NodeState initialNodeState, PersistenceCache pc)
+    
+   public Node(String nodeId, Class<?> nodeDataClass, NodeState initialNodeState, PersistenceCache pc,Object primaryKey)
     {
         this.nodeId = nodeId;
         this.dataClass = nodeDataClass;
+        this.entityId = primaryKey;
         setPersistenceCache(pc);
 
         // Initialize current node state
@@ -130,12 +131,13 @@ public class Node implements NodeStateContext
         }
     }
 
-    private void initializeNode(String nodeId, Object data)
+    private void initializeNode(String nodeId, Object data, Object primaryKey)
     {
         this.nodeId = nodeId;
         this.data = data;
         this.dataClass = data.getClass();
         this.dirty = true;
+        this.entityId = primaryKey;
     }
 
     /**
@@ -606,7 +608,7 @@ public class Node implements NodeStateContext
     @Override
     public Node clone()
     {
-        Node cloneCopy = new Node(this.nodeId, ObjectUtils.deepCopy(this.getData()), this.persistenceCache);
+        Node cloneCopy = new Node(this.nodeId, ObjectUtils.deepCopy(this.getData()), this.persistenceCache, this.entityId);
         cloneCopy.setChildren(this.children);
         cloneCopy.setParents(this.parents);
         cloneCopy.setDataClass(this.dataClass);
@@ -615,5 +617,11 @@ public class Node implements NodeStateContext
 
         return cloneCopy;
 
+    }
+
+    @Override
+    public Object getEntityId()
+    {
+        return this.entityId;
     }
 }

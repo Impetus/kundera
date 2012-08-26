@@ -841,7 +841,14 @@ public final class EntityMetadata
             log.warn("No column found mapped for:" + fieldName);
             return null;
         }
-        return columnsMap.get(fieldToColMap.get(fieldName)).getField().getType();
+        String columnName  =  fieldToColMap.get(fieldName);
+        if(this.idColumn != null && this.idColumn.getName().equals(columnName))
+        {
+            return this.idColumn.getField().getType();
+        } else 
+        {
+            return columnsMap.get(fieldToColMap.get(fieldName)).getField().getType();
+        }
     }
 
     /**

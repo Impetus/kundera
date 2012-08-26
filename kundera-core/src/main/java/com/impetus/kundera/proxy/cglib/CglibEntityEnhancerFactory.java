@@ -44,7 +44,7 @@ public class CglibEntityEnhancerFactory implements EntityEnhancerFactory
      * , java.lang.String, java.util.Map)
      */
     @Override
-    public EnhancedEntity getProxy(Object entity, String id, Map<String, Set<String>> foreignKeyMap)
+    public EnhancedEntity getProxy(Object entity, Object id, Map<String, Set<Object>> foreignKeyMap)
     {
 
         Enhancer e = new Enhancer();

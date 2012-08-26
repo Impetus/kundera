@@ -60,7 +60,7 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List readData(String tableName, Class clazz, EntityMetadata m, String rowKey, List<String> relatationNames)
+    List readData(String tableName, Class clazz, EntityMetadata m, Object rowKey, List<String> relatationNames)
             throws IOException;
 
     /**
@@ -91,7 +91,7 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeData(String tableName, EntityMetadata m, Object entity, String rowId, List<RelationHolder> relations)
+    void writeData(String tableName, EntityMetadata m, Object entity, Object rowId, List<RelationHolder> relations)
             throws IOException;
 
     /**
@@ -121,7 +121,7 @@ public interface DataHandler
      *            the inverse join column name
      * @return the foreign keys from join table
      */
-    <E> List<E> getForeignKeysFromJoinTable(String joinTableName, String rowKey, String inverseJoinColumnName);
+    <E> List<E> getForeignKeysFromJoinTable(String joinTableName, Object rowKey, String inverseJoinColumnName);
 
     /**
      * Retrieves a list of parent entity from join table..
@@ -152,5 +152,5 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void deleteRow(String rowKey, String tableName) throws IOException;
+    void deleteRow(Object rowKey, String tableName) throws IOException;
 }

@@ -167,13 +167,13 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
 
         em.persist(prepareData((Long) studentId2, 78575785898L, "Amresh", true, 20, 'B', (byte) 50, (short) 8,
                 (float) 69.2, 163.86765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
-                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, new BigInteger("123456788"), calendar,
-                ((E) instance.getClass().newInstance())));
+                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, new BigInteger(
+                        "123456788"), calendar, ((E) instance.getClass().newInstance())));
 
         em.persist(prepareData((Long) studentId3, 78575785899L, "Amresh", true, 15, 'C', (byte) 50, (short) 8,
                 (float) 61.6, 163.96765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
-                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, new BigInteger("123456787"), calendar,
-                ((E) instance.getClass().newInstance())));
+                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, new BigInteger(
+                        "123456787"), calendar, ((E) instance.getClass().newInstance())));
 
     }
 
@@ -274,43 +274,23 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
         Assert.assertEquals(((Long) studentId1).longValue(), s.getStudentId());
         Assert.assertEquals(78575785897L, s.getUniqueId());
         Assert.assertEquals("Amresh", s.getStudentName());
-        Assert.assertEquals(true, s.isExceptional());
+        Assert.assertEquals(false, s.isExceptional());
         Assert.assertEquals(10, s.getAge());
-        Assert.assertEquals('C', s.getSemester());
+        Assert.assertEquals('A', s.getSemester());
         Assert.assertEquals((byte) 5, s.getDigitalSignature());
         Assert.assertEquals((short) 8, s.getCgpa());
-        Assert.assertEquals((float) 69.6, s.getPercentage());
+        Assert.assertEquals((float) 69.3, s.getPercentage());
         Assert.assertEquals(163.76765654, s.getHeight());
 
-        Assert.assertEquals(enrolmentDate.getDate(), s.getEnrolmentDate().getDate());
-        Assert.assertEquals(enrolmentDate.getMonth(), s.getEnrolmentDate().getMonth());
-        Assert.assertEquals(enrolmentDate.getYear(), s.getEnrolmentDate().getYear());
+        Assert.assertEquals(enrolmentDate.getTime(), s.getEnrolmentDate().getTime());
 
-        Assert.assertEquals(enrolmentTime.getHours(), s.getEnrolmentTime().getHours());
-        Assert.assertEquals(enrolmentTime.getMinutes(), s.getEnrolmentTime().getMinutes());
-        Assert.assertEquals(enrolmentTime.getSeconds(), s.getEnrolmentTime().getSeconds());
+        Assert.assertEquals(joiningDateAndTime.getTime(), s.getJoiningDateAndTime().getTime());
 
-        Assert.assertEquals(joiningDateAndTime.getDate(), s.getJoiningDateAndTime().getDate());
-        Assert.assertEquals(joiningDateAndTime.getMonth(), s.getJoiningDateAndTime().getMonth());
-        Assert.assertEquals(joiningDateAndTime.getYear(), s.getJoiningDateAndTime().getYear());
-        Assert.assertEquals(joiningDateAndTime.getHours(), s.getJoiningDateAndTime().getHours());
-        Assert.assertEquals(joiningDateAndTime.getMinutes(), s.getJoiningDateAndTime().getMinutes());
-        Assert.assertEquals(joiningDateAndTime.getSeconds(), s.getJoiningDateAndTime().getSeconds());
+        Assert.assertEquals(newSqlDate.getTime(), s.getSqlDate().getTime());
 
-        Assert.assertEquals(newSqlDate.getDate(), s.getSqlDate().getDate());
-        Assert.assertEquals(newSqlDate.getMonth(), s.getSqlDate().getMonth());
-        Assert.assertEquals(newSqlDate.getYear(), s.getSqlDate().getYear());
+        Assert.assertEquals(sqlTime.getTime(), s.getSqlTime().getTime());
 
-        Assert.assertEquals(sqlTime.getMinutes(), s.getSqlTime().getMinutes());
-        Assert.assertEquals(sqlTime.getSeconds(), s.getSqlTime().getSeconds());
-        Assert.assertEquals(sqlTime.getHours(), s.getSqlTime().getHours());
-
-        Assert.assertEquals(sqlTimestamp.getDate(), s.getSqlTimestamp().getDate());
-        Assert.assertEquals(sqlTimestamp.getMonth(), s.getSqlTimestamp().getMonth());
-        Assert.assertEquals(sqlTimestamp.getYear(), s.getSqlTimestamp().getYear());
-        Assert.assertEquals(sqlTimestamp.getHours(), s.getSqlTimestamp().getHours());
-        Assert.assertEquals(sqlTimestamp.getMinutes(), s.getSqlTimestamp().getMinutes());
-        Assert.assertEquals(sqlTimestamp.getSeconds(), s.getSqlTimestamp().getSeconds());
+        Assert.assertEquals(sqlTimestamp.getTime(), s.getSqlTimestamp().getTime());
 
         Assert.assertEquals(Math.round(bigDecimal.doubleValue()), Math.round(s.getBigDecimal().doubleValue()));
         Assert.assertEquals(bigInteger, s.getBigInteger());

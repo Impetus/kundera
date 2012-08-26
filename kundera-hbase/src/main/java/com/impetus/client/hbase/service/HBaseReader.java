@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -28,6 +29,7 @@ import org.apache.hadoop.hbase.filter.Filter;
 
 import com.impetus.client.hbase.HBaseData;
 import com.impetus.client.hbase.Reader;
+import com.impetus.client.hbase.utils.HBaseUtils;
 
 /**
  * Implmentation class for HBase for <code>Reader</code> interface.
@@ -46,7 +48,7 @@ public class HBaseReader implements Reader
      */
     @SuppressWarnings("unused")
     @Override
-    public List<HBaseData> LoadData(HTable hTable, String columnFamily, String rowKey, Filter filter)
+    public List<HBaseData> LoadData(HTable hTable, String columnFamily, Object rowKey, Filter filter)
             throws IOException
     {
         List<HBaseData> results = null;
@@ -60,7 +62,18 @@ public class HBaseReader implements Reader
         }
         else
         {
-            Scan scan = new Scan();
+            // only in case of find by id
+            Scan scan = null;
+            if (rowKey != null)
+            {
+                byte[] rowKeyBytes = HBaseUtils.getBytes(rowKey);
+                Get g = new Get(rowKeyBytes);
+                scan = new Scan(g);
+            }
+            else
+            {
+                scan = new Scan();
+            }
             if (filter != null)
             {
                 scan.setFilter(filter);
@@ -79,7 +92,7 @@ public class HBaseReader implements Reader
      * .HTable, java.lang.String)
      */
     @Override
-    public List<HBaseData> LoadData(HTable hTable, String rowKey, Filter filter) throws IOException
+    public List<HBaseData> LoadData(HTable hTable, Object rowKey, Filter filter) throws IOException
     {
         return LoadData(hTable, null, rowKey, filter);
     }

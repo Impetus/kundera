@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.client.hbase.query;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,9 +32,9 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.HBaseEntityReader;
+import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.MetadataUtils;
-import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -154,7 +153,7 @@ public class HBaseQuery extends QueryImpl implements Query
         Map<Boolean, Filter> filter = translator.getFilter();
         if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
         {
-            if (filter == null)
+            if (filter == null && !translator.isFindById)
             {
                 // means complete scan without where clause, scan all records.
                 // findAll.
@@ -172,7 +171,7 @@ public class HBaseQuery extends QueryImpl implements Query
             {
                 // means WHERE clause is present.
 
-                if (filter.values() != null && !filter.values().isEmpty())
+                if (filter != null && filter.values() != null && !filter.values().isEmpty())
                 {
                     ((HBaseClient) client).setFilter(filter.values().iterator().next());
                 }
@@ -240,7 +239,7 @@ public class HBaseQuery extends QueryImpl implements Query
         private boolean isFindById;
 
         /* row key value. */
-        String rowKey;
+        Object rowKey;
 
         /**
          * Translates kundera query into collection of to be applied HBase
@@ -263,7 +262,7 @@ public class HBaseQuery extends QueryImpl implements Query
                 {
                     String condition = ((FilterClause) obj).getCondition();
                     String name = ((FilterClause) obj).getProperty();
-                    String value = ((FilterClause) obj).getValue() != null ? ((FilterClause) obj).getValue().toString() : null;
+                    Object value = ((FilterClause) obj).getValue();
                     if (!isIdColumn && idColumn.equalsIgnoreCase(name))
                     {
                         isIdColumn = true;
@@ -317,13 +316,15 @@ public class HBaseQuery extends QueryImpl implements Query
          * @param m
          *            entity metadata.
          */
-        private void onParseFilter(String condition, String name, String value, boolean isIdColumn, EntityMetadata m)
+        private void onParseFilter(String condition, String name, Object value, boolean isIdColumn, EntityMetadata m)
         {
             CompareOp operator = getOperator(condition, isIdColumn);
-            byte[] valueInBytes = getBytes(name, m, value);
+            byte[] valueInBytes = HBaseUtils.getBytes(name, m, value);
             if (!isIdColumn)
             {
-                Filter f = new SingleColumnValueFilter(name.getBytes(), name.getBytes(), operator, valueInBytes);
+                // Filter f = new SingleColumnValueFilter(name.getBytes(),
+                // name.getBytes(), operator, valueInBytes);
+                Filter f = new SingleColumnValueFilter(Bytes.toBytes(name), Bytes.toBytes(name), operator, valueInBytes);
                 addToFilter(f);
             }
             else
@@ -338,7 +339,7 @@ public class HBaseQuery extends QueryImpl implements Query
                 }
                 else if (operator.equals(CompareOp.EQUAL))
                 {
-                    rowKey = value;
+                    rowKey = HBaseUtils.getBytes(m.getIdColumn().getName(), m, value);
                     endRow = null;
                     isFindById = true;
                 }
@@ -448,69 +449,83 @@ public class HBaseQuery extends QueryImpl implements Query
      *            value.
      * @return bytes value.
      */
-    private byte[] getBytes(String fieldName, EntityMetadata m, String value)
-    {
-        Column idCol = m.getIdColumn();
-        Field f = null;
-        boolean isId = false;
-        if (idCol.getName().equals(fieldName))
-        {
-            f = idCol.getField();
-            isId = true;
-        }
-        else
-        {
-            Column col = m.getColumn(fieldName);
-            if (col == null)
-            {
-                throw new QueryHandlerException("column type is null for: " + fieldName);
-            }
-            f = col.getField();
-        }
-
-        if (f != null && f.getType() != null)
-        {
-            if (isId || f.getType().isAssignableFrom(String.class))
-            {
-
-                return Bytes.toBytes(value.trim());
-            }
-            else if (f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
-            {
-                return Bytes.toBytes(Integer.parseInt(value));
-            }
-            else if (f.getType().equals(long.class) || f.getType().isAssignableFrom(Long.class))
-            {
-
-                return Bytes.toBytes(Long.parseLong(value));
-            }
-            else if (f.getType().equals(boolean.class) || f.getType().isAssignableFrom(Boolean.class))
-            {
-                return Bytes.toBytes(Boolean.valueOf(value));
-            }
-            else if (f.getType().equals(double.class) || f.getType().isAssignableFrom(Double.class))
-            {
-                return Bytes.toBytes(Double.valueOf(value));
-            }
-            else if (f.getType().isAssignableFrom(java.util.UUID.class))
-            {
-                return Bytes.toBytes(value);
-            }
-            else if (f.getType().equals(float.class) || f.getType().isAssignableFrom(Float.class))
-            {
-                return Bytes.toBytes(Float.valueOf(value));
-            }
-            else
-            {
-                log.error("Error while handling data type for:" + fieldName);
-                throw new QueryHandlerException("unsupported data type:" + f.getType());
-            }
-        }
-        else
-        {
-            log.error("Error while handling data type for:" + fieldName);
-            throw new QueryHandlerException("field type is null for:" + fieldName);
-        }
-    }
-
+    // private byte[] getBytes(String fieldName, EntityMetadata m, Object value)
+    // {
+    // Column idCol = m.getIdColumn();
+    // Field f = null;
+    // boolean isId = false;
+    // if (idCol.getName().equals(fieldName))
+    // {
+    // f = idCol.getField();
+    // isId = true;
+    // }
+    // else
+    // {
+    // Column col = m.getColumn(fieldName);
+    // if (col == null)
+    // {
+    // throw new QueryHandlerException("column type is null for: " + fieldName);
+    // }
+    // f = col.getField();
+    // }
+    //
+    // if (f != null && f.getType() != null)
+    // {
+    // if (/* isId || */f.getType().isAssignableFrom(String.class))
+    // {
+    // return Bytes.toBytes(value.toString());
+    // }
+    // else if (f.getType().equals(int.class) ||
+    // f.getType().isAssignableFrom(Integer.class))
+    // {
+    // return Bytes.toBytes(Integer.parseInt(value.toString()));
+    // }
+    // else if (f.getType().equals(long.class) ||
+    // f.getType().isAssignableFrom(Long.class))
+    // {
+    // return Bytes.toBytes(Long.parseLong(value.toString()));
+    // }
+    // else if (f.getType().equals(boolean.class) ||
+    // f.getType().isAssignableFrom(Boolean.class))
+    // {
+    // return Bytes.toBytes(Boolean.valueOf(value.toString()));
+    // }
+    // else if (f.getType().equals(double.class) ||
+    // f.getType().isAssignableFrom(Double.class))
+    // {
+    // return Bytes.toBytes(Double.valueOf(value.toString()));
+    // }
+    // else if (f.getType().isAssignableFrom(java.util.UUID.class))
+    // {
+    // return Bytes.toBytes(value.toString());
+    // }
+    // else if (f.getType().equals(float.class) ||
+    // f.getType().isAssignableFrom(Float.class))
+    // {
+    // return Bytes.toBytes(Float.valueOf(value.toString()));
+    // }
+    // else if (f.getType().equals(short.class) ||
+    // f.getType().isAssignableFrom(Short.class))
+    // {
+    // return Bytes.toBytes(Short.valueOf(value.toString()));
+    // }
+    // else if (f.getType().equals(BigDecimal.class))
+    // {
+    // return
+    // Bytes.toBytes(BigDecimal.valueOf(((BigDecimal)value).longValue()));
+    // }
+    // else
+    // {
+    // value =
+    // PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
+    // value.toString());
+    // return PropertyAccessorFactory.getPropertyAccessor(f).toBytes(value);
+    // }
+    // }
+    // else
+    // {
+    // log.error("Error while handling data type for:" + fieldName);
+    // throw new QueryHandlerException("field type is null for:" + fieldName);
+    // }
+    // }
 }

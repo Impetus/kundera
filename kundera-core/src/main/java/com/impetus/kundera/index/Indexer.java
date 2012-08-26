@@ -36,7 +36,7 @@ public interface Indexer
      *            the id
      */
 
-    void unindex(EntityMetadata metadata, String id);
+    void unindex(EntityMetadata metadata, Object id);
 
     /**
      * Indexes and object.

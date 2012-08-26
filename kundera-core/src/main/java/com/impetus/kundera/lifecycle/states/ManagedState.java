@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.lifecycle.states;
 
+import java.util.Date;
+
 import javax.persistence.PersistenceContextType;
 
 import com.impetus.kundera.client.Client;
@@ -99,8 +101,8 @@ public class ManagedState extends NodeState
         Client client = nodeStateContext.getClient();
         Class<?> nodeDataClass = nodeStateContext.getDataClass();
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass);
-        String entityId = ObjectGraphUtils.getEntityId(nodeStateContext.getNodeId());
-
+        Object entityId = /*ObjectGraphUtils.getEntityId(nodeStateContext.getNodeId())*/ nodeStateContext.getEntityId();
+//        System.out.println(((Date)entityId).getTime());
         Object nodeData = null; // Node data
 
         EntityReader reader = client.getReader();

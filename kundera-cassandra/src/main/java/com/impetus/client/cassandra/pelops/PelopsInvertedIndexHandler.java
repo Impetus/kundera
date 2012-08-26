@@ -75,7 +75,7 @@ public class PelopsInvertedIndexHandler implements InvertedIndexHandler
 
             for (ThriftRow thriftRow : indexThriftyRows)
             {
-                mutator.writeColumns(indexColumnFamily, Bytes.fromUTF8(thriftRow.getId()),
+                mutator.writeColumns(indexColumnFamily, Bytes.fromUTF8(thriftRow.getId().toString()),
                         Arrays.asList(thriftRow.getColumns().toArray(new Column[0])));
 
             }

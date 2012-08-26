@@ -80,7 +80,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
 
     // private static Map<String, String> dataCentersMap = new HashMap<String,
     // String>();
-
+    /**
+     * Instance of CassandraSchemaMetadata.
+     */
     private CassandraSchemaMetadata csmd = CassandraPropertyReader.csmd;
 
     /**
@@ -128,7 +130,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         try
         {
             KsDef ksDef = cassandra_client.describe_keyspace(databaseName);
-
+            cassandra_client.set_keyspace(ksDef.getName());
             addTablesToKeyspace(tableInfos, ksDef);
         }
         catch (NotFoundException nfex)
@@ -147,18 +149,22 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             throw new SchemaGenerationException("Error occurred while creating " + databaseName, tex, "Cassandra",
                     databaseName);
         }
-        catch (SchemaDisagreementException sdex)
-        {
-            log.error("Error occurred while creating " + databaseName + " Caused by :" + sdex.getMessage());
-            throw new SchemaGenerationException("Error occurred while creating " + databaseName, sdex, "Cassandra",
-                    databaseName);
-        }
-        catch (InterruptedException ie)
-        {
-            log.error("Error occurred while creating " + databaseName + " Caused by :" + ie.getMessage());
-            throw new SchemaGenerationException("Error occurred while creating " + databaseName, ie, "Cassandra",
-                    databaseName);
-        }
+        // catch (SchemaDisagreementException sdex)
+        // {
+        // log.error("Error occurred while creating " + databaseName +
+        // " Caused by :" + sdex.getMessage());
+        // throw new SchemaGenerationException("Error occurred while creating "
+        // + databaseName, sdex, "Cassandra",
+        // databaseName);
+        // }
+        // catch (InterruptedException ie)
+        // {
+        // log.error("Error occurred while creating " + databaseName +
+        // " Caused by :" + ie.getMessage());
+        // throw new SchemaGenerationException("Error occurred while creating "
+        // + databaseName, ie, "Cassandra",
+        // databaseName);
+        // }
     }
 
     /**
@@ -171,27 +177,55 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @throws TException
      * @throws InterruptedException
      */
-    private void addTablesToKeyspace(List<TableInfo> tableInfos, KsDef ksDef) throws InvalidRequestException,
-            SchemaDisagreementException, TException, InterruptedException
+    private void addTablesToKeyspace(List<TableInfo> tableInfos, KsDef ksDef)
     {
-        cassandra_client.set_keyspace(databaseName);
+
         for (TableInfo tableInfo : tableInfos)
         {
-            for (CfDef cfDef : ksDef.getCf_defs())
+            try
             {
-                if (cfDef.getName().equalsIgnoreCase(tableInfo.getTableName()))
-                // &&
-                // cfDef.getColumn_type().equals(ColumnFamilyType.getInstanceOf(tableInfo.getType()).name()))
-                {
-                    // TimeUnit.SECONDS.sleep(5);
-                    cassandra_client.system_drop_column_family(tableInfo.getTableName());
-                    dropInvertedIndexTable(tableInfo);
-                    TimeUnit.SECONDS.sleep(3);
-                    break;
-                }
+                cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
             }
-
-            cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
+            catch (InvalidRequestException e)
+            {
+                try
+                {
+                    log.info("ColumnFamily: " + tableInfo.getTableName() + " already exist, kundera droping it");
+                    cassandra_client.system_drop_column_family(tableInfo.getTableName());
+                    
+                    cassandra_client.system_add_column_family(getTableMetadata(tableInfo));
+                }
+                catch (InvalidRequestException ire)
+                {
+                    log.error("Error occurred while creating " + databaseName + " Caused by :" + ire.getMessage());
+                    throw new SchemaGenerationException("Error occurred while creating " + databaseName, ire,
+                            "Cassandra", databaseName);
+                }
+                catch (SchemaDisagreementException sde)
+                {
+                    log.error("Error occurred while creating " + databaseName + " Caused by :" + sde.getMessage());
+                    throw new SchemaGenerationException("Error occurred while creating " + databaseName, sde,
+                            "Cassandra", databaseName);
+                }
+                catch (TException te)
+                {
+                    log.error("Error occurred while creating " + databaseName + " Caused by :" + te.getMessage());
+                    throw new SchemaGenerationException("Error occurred while creating " + databaseName, te,
+                            "Cassandra", databaseName);
+                }                
+            }
+            catch (SchemaDisagreementException sde)
+            {
+                log.error("Error occurred while creating " + databaseName + " Caused by :" + sde.getMessage());
+                throw new SchemaGenerationException("Error occurred while creating " + databaseName, sde, "Cassandra",
+                        databaseName);
+            }
+            catch (TException te)
+            {
+                log.error("Error occurred while creating " + databaseName + " Caused by :" + te.getMessage());
+                throw new SchemaGenerationException("Error occurred while creating " + databaseName, te, "Cassandra",
+                        databaseName);
+            }
             // Create Index Table if required
             createInvertedIndexTable(tableInfo);
         }
@@ -203,8 +237,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @throws SchemaDisagreementException
      * @throws TException
      */
-    private void createInvertedIndexTable(TableInfo tableInfo) throws InvalidRequestException,
-            SchemaDisagreementException, TException
+    private void createInvertedIndexTable(TableInfo tableInfo)
     {
         boolean indexTableRequired = CassandraPropertyReader.csmd.isInvertedIndexingEnabled()
                 && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
@@ -214,7 +247,50 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             cfDef.setKeyspace(databaseName);
             cfDef.setName(tableInfo.getTableName() + Constants.INDEX_TABLE_SUFFIX);
             cfDef.setKey_validation_class(UTF8Type.class.getSimpleName());
-            cassandra_client.system_add_column_family(cfDef);
+            try
+            {
+                cassandra_client.system_add_column_family(cfDef);
+            }
+            catch (InvalidRequestException e)
+            {
+                try
+                {
+                    log.info("Inverted Indexed ColumnFamily: " + tableInfo.getTableName()
+                            + " already exist, kundera droping it");
+                    dropInvertedIndexTable(tableInfo);
+                    cassandra_client.system_add_column_family(cfDef);
+                }
+                catch (InvalidRequestException ire)
+                {
+                    log.error("Error occurred while creating " + databaseName + " Caused by :" + ire.getMessage());
+                    throw new SchemaGenerationException("Error occurred while creating " + databaseName, ire,
+                            "Cassandra", databaseName);
+                }
+                catch (SchemaDisagreementException sde)
+                {
+                    log.error("Error occurred while creating " + databaseName + " Caused by :" + sde.getMessage());
+                    throw new SchemaGenerationException("Error occurred while creating " + databaseName, sde,
+                            "Cassandra", databaseName);
+                }
+                catch (TException te)
+                {
+                    log.error("Error occurred while creating " + databaseName + " Caused by :" + te.getMessage());
+                    throw new SchemaGenerationException("Error occurred while creating " + databaseName, te,
+                            "Cassandra", databaseName);
+                }
+            }
+            catch (SchemaDisagreementException sde)
+            {
+                log.error("Error occurred while creating " + databaseName + " Caused by :" + sde.getMessage());
+                throw new SchemaGenerationException("Error occurred while creating " + databaseName, sde, "Cassandra",
+                        databaseName);
+            }
+            catch (TException te)
+            {
+                log.error("Error occurred while creating " + databaseName + " Caused by :" + te.getMessage());
+                throw new SchemaGenerationException("Error occurred while creating " + databaseName, te, "Cassandra",
+                        databaseName);
+            }
         }
     }
 
@@ -224,14 +300,21 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @throws SchemaDisagreementException
      * @throws TException
      */
-    private void dropInvertedIndexTable(TableInfo tableInfo) throws InvalidRequestException,
-            SchemaDisagreementException, TException
+    private void dropInvertedIndexTable(TableInfo tableInfo) throws SchemaDisagreementException, TException
     {
         boolean indexTableRequired = CassandraPropertyReader.csmd.isInvertedIndexingEnabled()
                 && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
         if (indexTableRequired)
         {
-            cassandra_client.system_drop_column_family(tableInfo.getTableName() + Constants.INDEX_TABLE_SUFFIX);
+            try
+            {
+                cassandra_client.system_drop_column_family(tableInfo.getTableName() + Constants.INDEX_TABLE_SUFFIX);
+            }
+            catch (InvalidRequestException e)
+            {
+                // TODO
+                log.info("");
+            }
         }
     }
 

@@ -33,7 +33,7 @@ public interface EnhancedEntity
      * 
      * @return the foreign keys map
      */
-    Map<String, Set<String>> getForeignKeysMap();
+    Map<String, Set<Object>> getForeignKeysMap();
 
     /**
      * Gets the entity.
@@ -48,5 +48,5 @@ public interface EnhancedEntity
      * 
      * @return the id
      */
-    String getId();
+    Object getId();
 }

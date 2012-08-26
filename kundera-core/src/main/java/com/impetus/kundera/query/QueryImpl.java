@@ -506,31 +506,35 @@ public abstract class QueryImpl implements Query
      */
     private void onDeleteOrUpdate(List results)
     {
-        if (!kunderaQuery.isUpdateClause())
+        if (results != null)
         {
-            // then case of delete
-            for (Object result : results)
+            if (!kunderaQuery.isUpdateClause())
             {
-                persistenceDelegeator.remove(result);
-            }
-        }
-        else
-        {
-            EntityMetadata entityMetadata = getEntityMetadata();
-            for (Object result : results)
-            {
-                for (UpdateClause c : kunderaQuery.getUpdateClauseQueue())
+                // then case of delete
+                for (Object result : results)
                 {
-                    String columnName = c.getProperty();
-                    Column column = entityMetadata.getColumn(columnName);
-
-                    if (column != null)
-                    {
-                        PropertyAccessorHelper.set(result, column.getField(), c.getValue());
-                    }
-                    persistenceDelegeator.merge(result);
+                    persistenceDelegeator.remove(result);
                 }
+            }
+            else
+            {
+                EntityMetadata entityMetadata = getEntityMetadata();
+                for (Object result : results)
+                {
+                    for (UpdateClause c : kunderaQuery.getUpdateClauseQueue())
+                    {
+                        String columnName = c.getProperty();
+                        columnName = entityMetadata.getColumnName(columnName);
+                        Column column = entityMetadata.getColumn(columnName);
 
+                        if (column != null)
+                        {
+                            PropertyAccessorHelper.set(result, column.getField(), c.getValue());
+                        }
+                        persistenceDelegeator.merge(result);
+                    }
+
+                }
             }
         }
     }

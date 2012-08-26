@@ -62,7 +62,7 @@ public class MongoDBIndexer implements Indexer
      * .EntityMetadata, java.lang.String)
      */
     @Override
-    public void unindex(EntityMetadata metadata, String id)
+    public void unindex(EntityMetadata metadata, Object id)
     {
         LOG.debug("No need to remove data from Index. It's handled automatically by MongoDB when document is dropped");
     }

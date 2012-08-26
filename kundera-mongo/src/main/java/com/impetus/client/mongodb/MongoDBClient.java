@@ -115,7 +115,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 
     @Override
     public <E> List<E> getColumnsById(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            String parentId)
+            Object parentId)
     {
         List<E> foreignKeys = new ArrayList<E>();
 
@@ -192,7 +192,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
 
         BasicDBObject query = new BasicDBObject();
-        query.put(entityMetadata.getIdColumn().getName(), key.toString());
+        query.put(entityMetadata.getIdColumn().getName(), handler.populateValue(key, key.getClass()));
 
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
@@ -268,7 +268,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
             List<String> relationNames, BasicDBObject orderBy) throws Exception
     {
         String documentName = entityMetadata.getTableName();
-        String dbName = entityMetadata.getSchema();
+        // String dbName = entityMetadata.getSchema();
         Class clazz = entityMetadata.getEntityClazz();
 
         DBCollection dbCollection = mongoDb.getCollection(documentName);
@@ -278,7 +278,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         // fetch that embedded object collection only
         // otherwise retrieve whole entity
         // TODO: improve code
-        if (result.indexOf(".") >= 0)
+        if (result != null && result.indexOf(".") >= 0)
         {
             // TODO i need to discuss with Amresh before modifying it.
             entities.addAll(handler.getEmbeddedObjectList(dbCollection, entityMetadata, documentName, mongoQuery,
@@ -317,7 +317,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 
         // Find the DBObject to remove first
         BasicDBObject query = new BasicDBObject();
-        query.put(entityMetadata.getIdColumn().getName(), pKey.toString());
+        query.put(entityMetadata.getIdColumn().getName(), handler.populateValue(pKey, pKey.getClass()));
 
         dbCollection.remove(query);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
@@ -471,7 +471,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
             BasicDBObject query = new BasicDBObject();
 
             // Why can't we put "_id" here?
-            query.put("_id", id.toString());
+            query.put("_id", handler.populateValue(id, id.getClass()));
             dbCollection.findAndModify(query, document);
         }
         else

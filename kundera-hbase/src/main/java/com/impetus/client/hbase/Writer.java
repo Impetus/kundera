@@ -49,7 +49,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumn(HTable htable, String columnFamily, String rowKey, Column column, Object columnObj)
+    void writeColumn(HTable htable, String columnFamily, Object rowKey, Column column, Object columnObj)
             throws IOException;
 
     /**
@@ -69,7 +69,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns, Object columnFamilyObj)
+    void writeColumns(HTable htable, String columnFamily, Object rowKey, List<Column> columns, Object columnFamilyObj)
             throws IOException;
 
     /**
@@ -87,7 +87,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity) throws IOException;
+    void writeColumns(HTable htable, Object rowKey, List<Column> columns, Object entity) throws IOException;
 
     /**
      * Write relations.
@@ -103,7 +103,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeRelations(HTable htable, String rowKey, boolean containsEmbeddedObjectsOnly,
+    void writeRelations(HTable htable, Object rowKey, boolean containsEmbeddedObjectsOnly,
             List<RelationHolder> relations) throws IOException;
 
     /**
@@ -149,5 +149,5 @@ public interface Writer
      * @param columnFamily
      *            the column family
      */
-    void delete(HTable hTable, String rowKey, String columnFamily);
+    void delete(HTable hTable, Object rowKey, String columnFamily);
 }

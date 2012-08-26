@@ -74,6 +74,8 @@ public interface NodeStateContext
     void setDirty(boolean dirty);
 
     boolean isHeadNode();
+    
+    Object getEntityId();
 
     // void setHeadNode(boolean isHeadNode);
 

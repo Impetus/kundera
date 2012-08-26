@@ -32,6 +32,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.Writer;
+import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -50,17 +51,18 @@ public class HBaseWriter implements Writer
     private static Log log = LogFactory.getLog(HBaseWriter.class);
 
     @Override
-    public void writeColumns(HTable htable, String columnFamily, String rowKey, List<Column> columns,
+    public void writeColumns(HTable htable, String columnFamily, Object rowKey, List<Column> columns,
             Object columnFamilyObj) throws IOException
     {
-        Put p = new Put(Bytes.toBytes(rowKey));
+        Put p = new Put(HBaseUtils.getBytes(rowKey));
 
         for (Column column : columns)
         {
             String qualifier = column.getName();
             try
             {
-                byte[] value = PropertyAccessorHelper.get(columnFamilyObj, column.getField());
+                Object o = PropertyAccessorHelper.getObject(columnFamilyObj, column.getField());
+                byte[] value = HBaseUtils.getBytes(o);
 
                 if (value != null)
                 {
@@ -77,10 +79,10 @@ public class HBaseWriter implements Writer
     }
 
     @Override
-    public void writeColumn(HTable htable, String columnFamily, String rowKey, Column column, Object columnObj)
+    public void writeColumn(HTable htable, String columnFamily, Object rowKey, Column column, Object columnObj)
             throws IOException
     {
-        Put p = new Put(Bytes.toBytes(rowKey));
+        Put p = new Put(HBaseUtils.getBytes(rowKey));
 
         p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(column.getName()), Bytes.toBytes(columnObj.toString()));
 
@@ -88,22 +90,18 @@ public class HBaseWriter implements Writer
     }
 
     @Override
-    public void writeColumns(HTable htable, String rowKey, List<Column> columns, Object entity) throws IOException
+    public void writeColumns(HTable htable, Object rowKey, List<Column> columns, Object entity) throws IOException
     {
-        Put p = new Put(Bytes.toBytes(rowKey));
+        Put p = new Put(HBaseUtils.getBytes(rowKey));
 
         for (Column column : columns)
         {
             String qualifier = column.getName();
             try
             {
-
                 byte[] qualValInBytes = Bytes.toBytes(qualifier);
                 p.add(qualValInBytes, qualValInBytes, System.currentTimeMillis(),
-                        PropertyAccessorHelper.get(entity, column.getField()));
-                // p.add(Bytes.toBytes(qualifier), System.currentTimeMillis(),
-                // PropertyAccessorHelper.get(entity, column.getField()));
-
+                        HBaseUtils.getBytes(PropertyAccessorHelper.getObject(entity, column.getField())));
             }
             catch (PropertyAccessException e1)
             {
@@ -121,17 +119,18 @@ public class HBaseWriter implements Writer
 
         for (String columnName : columns.keySet())
         {
-            p.add(Bytes.toBytes(Constants.JOIN_COLUMNS_FAMILY_NAME), Bytes.toBytes(columnName), columns.get(columnName)
-                    .getBytes());
+            p.add(Bytes.toBytes(Constants.JOIN_COLUMNS_FAMILY_NAME), Bytes.toBytes(columnName),
+                    Bytes.toBytes(columns.get(columnName))
+            /* .getBytes() */);
         }
         htable.put(p);
     }
 
     @Override
-    public void writeRelations(HTable htable, String rowKey, boolean containsEmbeddedObjectsOnly,
+    public void writeRelations(HTable htable, Object rowKey, boolean containsEmbeddedObjectsOnly,
             List<RelationHolder> relations) throws IOException
     {
-        Put p = new Put(Bytes.toBytes(rowKey));
+        Put p = new Put(HBaseUtils.getBytes(rowKey));
 
         for (RelationHolder r : relations)
         {
@@ -206,11 +205,13 @@ public class HBaseWriter implements Writer
      * com.impetus.client.hbase.Writer#delete(org.apache.hadoop.hbase.client
      * .HTable, java.lang.String, java.lang.String)
      */
-    public void delete(HTable hTable, String rowKey, String columnFamily)
+    public void delete(HTable hTable, Object rowKey, String columnFamily)
     {
         try
         {
-            byte[] rowBytes = Bytes.toBytes(rowKey);
+            /* = Bytes.toBytes(rowKey) */;
+            // rowBytes = PropertyAccessorHelper.getBytes(rowKey);
+            byte[] rowBytes = HBaseUtils.getBytes(rowKey);
             Delete delete = new Delete(rowBytes);
 
             hTable.delete(delete);

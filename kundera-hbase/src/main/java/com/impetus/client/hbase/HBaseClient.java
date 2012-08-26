@@ -109,7 +109,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
             {
                 return null;
             }
-            results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId.toString(),
+            results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId,
                     relationNames);
             if (results != null)
             {
@@ -334,7 +334,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
         {
             // Write data to HBase
 
-            handler.writeData(tableName, entityMetadata, entity, id.toString(), relations);
+            handler.writeData(tableName, entityMetadata, entity, id, relations);
         }
         catch (IOException e)
         {
@@ -390,7 +390,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
      */
     @Override
     public <E> List<E> getColumnsById(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            String parentId)
+            Object parentId)
     {
         return handler.getForeignKeysFromJoinTable(joinTableName, parentId, inverseJoinColumnName);
 
@@ -398,10 +398,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
 
     
     public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
-    {
+    {             
         try
         {
-            handler.deleteRow(columnValue.toString(), tableName);
+            handler.deleteRow(columnValue, tableName);
+            
         }
         catch (IOException e)
         {

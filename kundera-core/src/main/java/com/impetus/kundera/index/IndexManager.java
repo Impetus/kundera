@@ -81,7 +81,7 @@ public class IndexManager
         {
             if (!MetadataUtils.useSecondryIndex(metadata.getPersistenceUnit()))
             {
-                String id = PropertyAccessorHelper.getId(entity, metadata);
+                Object id = PropertyAccessorHelper.getId(entity, metadata);
 
                 boolean documentExists = indexer.entityExistsInIndex(entity.getClass());
                 if (documentExists)

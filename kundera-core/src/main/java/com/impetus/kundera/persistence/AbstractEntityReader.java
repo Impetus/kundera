@@ -63,6 +63,7 @@ public class AbstractEntityReader
     {
         try
         {
+//            primaryKey.getClass();
             Object o = client.find(m.getEntityClazz(), primaryKey);
 
             if (o == null)
@@ -94,7 +95,7 @@ public class AbstractEntityReader
     public Object recursivelyFindEntities(Object entity, Map<String, Object> relationsMap, EntityMetadata m,
             PersistenceDelegator pd)
     {
-        String entityId = PropertyAccessorHelper.getId(entity, m);
+        Object entityId = PropertyAccessorHelper.getId(entity, m);
         associationBuilder = new AssociationBuilder();
 
         for (Relation relation : m.getRelations())
@@ -223,7 +224,7 @@ public class AbstractEntityReader
      *            the metadata
      * @return the id
      */
-    protected String getId(Object entity, EntityMetadata metadata)
+    protected Object getId(Object entity, EntityMetadata metadata)
     {
         try
         {

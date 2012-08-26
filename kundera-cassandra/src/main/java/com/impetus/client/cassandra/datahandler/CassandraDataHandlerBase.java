@@ -52,15 +52,16 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
- * Base class for all Cassandra Data Handlers 
+ * Base class for all Cassandra Data Handlers
+ * 
  * @author amresh.singh
  */
 public abstract class CassandraDataHandlerBase
 {
-    
+
     /** The log. */
     private static Log log = LogFactory.getLog(CassandraDataHandlerBase.class);
-    
+
     /**
      * @param thriftCounterSuperColumns
      * @param thriftColumnOrSuperColumns
@@ -76,7 +77,7 @@ public abstract class CassandraDataHandlerBase
             }
         }
     }
-    
+
     /**
      * From thrift row.
      * 
@@ -175,7 +176,7 @@ public abstract class CassandraDataHandlerBase
         }
         return e;
     }
-    
+
     /**
      * Populate embedded object.
      * 
@@ -259,7 +260,7 @@ public abstract class CassandraDataHandlerBase
         }
         return embeddedObject;
     }
-    
+
     /**
      * Fetches data held in Thrift row columns and populates to Entity objects.
      * 
@@ -277,14 +278,14 @@ public abstract class CassandraDataHandlerBase
      * @throws Exception
      *             the exception
      */
-    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow, List<String> relationNames,
-            boolean isWrapperReq) throws Exception
+    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
+            List<String> relationNames, boolean isWrapperReq) throws Exception
     {
 
         // Instantiate a new instance
         Object entity = null;
         Map<String, Object> relations = new HashMap<String, Object>();
-      
+
         for (Column c : thriftRow.getColumns())
         {
 
@@ -307,7 +308,7 @@ public abstract class CassandraDataHandlerBase
                     // Set row-key
                     PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
                 }
-                
+
                 try
                 {
                     PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue);
@@ -333,7 +334,7 @@ public abstract class CassandraDataHandlerBase
                 relations) : entity;
         // return new EnhanceEntity(entity, thriftRow.getId(), relations);
     }
-    
+
     public Object fromCounterColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
             List<String> relationNames, boolean isWrapperReq) throws Exception
     {
@@ -402,7 +403,7 @@ public abstract class CassandraDataHandlerBase
         return isWrapperReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, thriftRow.getId(),
                 relations) : entity;
     }
-    
+
     /**
      * Fetches data held in Thrift row super columns and populates to Entity
      * objects.
@@ -528,7 +529,7 @@ public abstract class CassandraDataHandlerBase
                                 com.impetus.kundera.metadata.model.Column col = m.getColumn(name);
                                 if (col != null)
                                 {
-                                    superColumnObj = Utilities.toUTF8(value);                                        
+                                    superColumnObj = Utilities.toUTF8(value);
                                 }
                             }
 
@@ -561,8 +562,7 @@ public abstract class CassandraDataHandlerBase
                 : entity;
         // return new EnhanceEntity(entity, tr.getId(), relations);
     }
-    
-    
+
     public Object fromCounterSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr,
             List<String> relationNames, boolean isWrapReq) throws Exception
     {
@@ -751,7 +751,7 @@ public abstract class CassandraDataHandlerBase
         }
         return superColumnObj;
     }
-    
+
     /**
      * Helper method to convert @Entity to ThriftRow.
      * 
@@ -767,7 +767,7 @@ public abstract class CassandraDataHandlerBase
      * @throws Exception
      *             the exception
      */
-    public ThriftRow toThriftRow(Object e, String id, EntityMetadata m, String columnFamily) throws Exception
+    public ThriftRow toThriftRow(Object e, Object id, EntityMetadata m, String columnFamily) throws Exception
     {
         // timestamp to use in thrift column objects
         // long timestamp = System.currentTimeMillis();
@@ -818,7 +818,8 @@ public abstract class CassandraDataHandlerBase
         for (EmbeddedColumn embeddedColumn : m.getEmbeddedColumnsAsList())
         {
             Object embeddedObject = PropertyAccessorHelper.getObject(e, embeddedColumn.getField());
-            if(embeddedObject == null) {
+            if (embeddedObject == null)
+            {
                 continue;
             }
 
@@ -832,18 +833,19 @@ public abstract class CassandraDataHandlerBase
                     {
 
                         // Column Value
-                        String id = Utilities.toUTF8(value); 
-                            
+                        String id = Utilities.toUTF8(value);
+
                         String superColumnName = ecCacheHandler.getElementCollectionObjectName(id, obj);
                         byte[] indexColumnValue = (id + Constants.INDEX_TABLE_EC_DELIMITER + superColumnName)
                                 .getBytes();
 
                         ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedColumn, obj, column,
                                 indexColumnValue);
-                        if(tr != null) {
+                        if (tr != null)
+                        {
                             indexThriftRows.add(tr);
                         }
-                        
+
                     }
                 }
             }
@@ -853,10 +855,11 @@ public abstract class CassandraDataHandlerBase
                 {
                     ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedColumn, embeddedObject, column,
                             value);
-                    if(tr != null) {
+                    if (tr != null)
+                    {
                         indexThriftRows.add(tr);
                     }
-                    
+
                 }
             }
 
@@ -906,8 +909,6 @@ public abstract class CassandraDataHandlerBase
         return tr;
     }
 
-    
-    
     private void addCounterColumnsToThriftRow(long timestamp2, ThriftRow tr, EntityMetadata m, Object e)
     {
 
@@ -944,7 +945,7 @@ public abstract class CassandraDataHandlerBase
         }
         tr.setCounterColumns(counterColumns);
     }
-    
+
     /**
      * Gets the foreign keys from join table.
      * 
@@ -994,7 +995,7 @@ public abstract class CassandraDataHandlerBase
         return foreignKeys;
     }
 
-    private void addCounterSuperColumnsToThriftRow(long timestamp2, ThriftRow tr, EntityMetadata m, Object e, String id)
+    private void addCounterSuperColumnsToThriftRow(long timestamp2, ThriftRow tr, EntityMetadata m, Object e, Object id)
     {
 
         // Iterate through Super columns
@@ -1170,7 +1171,7 @@ public abstract class CassandraDataHandlerBase
         tr.setColumns(columns);
 
     }
-    
+
     /**
      * Adds the super columns to thrift row.
      * 
@@ -1189,7 +1190,7 @@ public abstract class CassandraDataHandlerBase
      * @throws Exception
      *             the exception
      */
-    private void addSuperColumnsToThriftRow(long timestamp, ThriftRow tr, EntityMetadata m, Object e, String id)
+    private void addSuperColumnsToThriftRow(long timestamp, ThriftRow tr, EntityMetadata m, Object e, Object id)
             throws Exception
     {
         // Iterate through Super columns
@@ -1269,7 +1270,7 @@ public abstract class CassandraDataHandlerBase
         }
 
     }
-    
+
     /**
      * Builds the thrift super column.
      * 
@@ -1323,6 +1324,5 @@ public abstract class CassandraDataHandlerBase
 
         return thriftSuperColumn;
     }
-
 
 }

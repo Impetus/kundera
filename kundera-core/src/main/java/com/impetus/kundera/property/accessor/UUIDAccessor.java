@@ -38,13 +38,51 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
     @Override
     public UUID fromBytes(Class targetClass, byte[] bytes) throws PropertyAccessException
     {
+        // try
+        // {
+        // if(bytes == null)
+        // {
+        // return null;
+        // }
+        // return UUID.nameUUIDFromBytes(bytes);
+        // }
+        // catch (Exception e)
+        // {
+        // throw new PropertyAccessException(e);
+        // }
+
+        // * Deserializes a TimeUUID from a byte array
+        // * @param uuid The bytes of the time UUID
+        // * @return The deserialized time UUID object
+        // */
+        // public static java.util.UUID timeUuidFromBytes( byte[] uuid )
+        // {
+        // long msb = 0;
+        // long lsb = 0;
+        // assert bytes.length == 16;
+        // for (int i = 0; i < 8; i++)
+        // msb = (msb << 8) | (bytes[i] & 0xff);
+        // for (int i = 8; i < 16; i++)
+        // lsb = (lsb << 8) | (bytes[i] & 0xff);
+        //
+        // com.eaio.uuid.UUID u = new com.eaio.uuid.UUID(msb, lsb);
+        //
+        // return java.util.UUID.fromString(u.toString());
+
         try
         {
-            if(bytes == null)
+            if (bytes == null)
             {
                 return null;
             }
-            return UUID.nameUUIDFromBytes(bytes);
+            long msb = 0;
+            long lsb = 0;
+            assert bytes.length == 16;
+            for (int i = 0; i < 8; i++)
+                msb = (msb << 8) | (bytes[i] & 0xff);
+            for (int i = 8; i < 16; i++)
+                lsb = (lsb << 8) | (bytes[i] & 0xff);
+            return new UUID(msb, lsb);
         }
         catch (Exception e)
         {
@@ -63,7 +101,7 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
     {
         try
         {
-            if(object == null)
+            if (object == null)
             {
                 return null;
             }
@@ -85,7 +123,7 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
     @Override
     public String toString(Object object)
     {
-        if(object == null)
+        if (object == null)
         {
             return null;
         }
@@ -104,7 +142,7 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
     {
         try
         {
-            if(s == null)
+            if (s == null)
             {
                 return null;
             }
@@ -125,7 +163,7 @@ public class UUIDAccessor implements PropertyAccessor<UUID>
      */
     private static byte[] asByteArray(UUID uuid)
     {
-        if(uuid == null)
+        if (uuid == null)
         {
             return null;
         }

@@ -74,6 +74,7 @@ public class PersonHBaseTest extends BaseTest
     public void onInsertHbase() throws Exception
     {
         init();
+        em.clear();
         PersonHBase personHBase = findById(PersonHBase.class, "1", em);
         Assert.assertNotNull(personHBase);
         Assert.assertEquals("vivek", personHBase.getPersonName());
@@ -94,7 +95,6 @@ public class PersonHBaseTest extends BaseTest
         cli.createTable("PERSON");
         cli.addColumnFamily("PERSON", "PERSON_NAME");
         cli.addColumnFamily("PERSON", "AGE");
-        // }
         Object p1 = prepareHbaseInstance("1", 10);
         Object p2 = prepareHbaseInstance("2", 20);
         Object p3 = prepareHbaseInstance("3", 15);
@@ -106,7 +106,7 @@ public class PersonHBaseTest extends BaseTest
         col.put("3", p3);
     }
 
-    // @Test
+    @Test
     public void onFilterOperation()
     {
         init();

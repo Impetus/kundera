@@ -316,7 +316,7 @@ public abstract class CassandraClientBase extends ClientBase
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<String> relationNames = entityMetadata.getRelationNames();
-        return find(entityClass, entityMetadata, rowId != null ? rowId.toString() : null, relationNames);
+        return find(entityClass, entityMetadata, rowId != null ? rowId : null, relationNames);
     }       
     
     public <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
@@ -348,7 +348,7 @@ public abstract class CassandraClientBase extends ClientBase
         try
         {
             result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata,
-                    rowId != null ? rowId.toString() : null);
+                    rowId != null ? rowId : null);
         }
         catch (Exception e)
         {

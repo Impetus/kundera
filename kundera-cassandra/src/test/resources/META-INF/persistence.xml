@@ -36,6 +36,23 @@
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
 	</persistence-unit>
+	
+	
+	<persistence-unit name="CassandraDataTypeTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="9160" />
+			<property name="kundera.keyspace" value="KunderaCassandraDataType" />
+			<property name="kundera.dialect" value="cassandra" />
+			<!-- <property name="kundera.ddl.auto.prepare" value="create-drop"/> -->
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.cassandra.pelops.PelopsClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+		</properties>
+	</persistence-unit>
 
 	<persistence-unit name="twissandraTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>

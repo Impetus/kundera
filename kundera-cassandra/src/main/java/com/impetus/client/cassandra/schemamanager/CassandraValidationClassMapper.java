@@ -70,30 +70,35 @@ public final class CassandraValidationClassMapper
         validatorsAndComparators.add(CounterColumnType.class.getSimpleName());
 
         // putting possible combination into map.
-        validationClassMapper.put(java.lang.String.class, UTF8Type.class.getSimpleName());
+        validationClassMapper.put(java.lang.String.class, UTF8Type.class.getSimpleName());        
         validationClassMapper.put(char.class, UTF8Type.class.getSimpleName());
-
-        validationClassMapper.put(java.sql.Time.class, IntegerType.class.getSimpleName());
+        
         validationClassMapper.put(java.lang.Integer.class, IntegerType.class.getSimpleName());
-        validationClassMapper.put(int.class, IntegerType.class.getSimpleName());
-        validationClassMapper.put(java.sql.Timestamp.class, IntegerType.class.getSimpleName());
+        validationClassMapper.put(int.class, IntegerType.class.getSimpleName());       
         validationClassMapper.put(short.class, IntegerType.class.getSimpleName());
-        validationClassMapper.put(java.math.BigDecimal.class, IntegerType.class.getSimpleName());
-        validationClassMapper.put(java.sql.Date.class, IntegerType.class.getSimpleName());
-        validationClassMapper.put(java.util.Date.class, IntegerType.class.getSimpleName());
-        validationClassMapper.put(java.math.BigInteger.class, IntegerType.class.getSimpleName());
+        
+        validationClassMapper.put(java.math.BigDecimal.class, DecimalType.class.getSimpleName());
+        
+        validationClassMapper.put(java.sql.Time.class, DateType.class.getSimpleName());
+        validationClassMapper.put(java.sql.Timestamp.class, DateType.class.getSimpleName());
+        validationClassMapper.put(java.sql.Date.class, DateType.class.getSimpleName());
+        validationClassMapper.put(java.util.Date.class, DateType.class.getSimpleName());
 
         validationClassMapper.put(java.lang.Double.class, DoubleType.class.getSimpleName());
         validationClassMapper.put(double.class, DoubleType.class.getSimpleName());
 
         validationClassMapper.put(boolean.class, BooleanType.class.getSimpleName());
+        validationClassMapper.put(Boolean.class, BooleanType.class.getSimpleName());
 
+        validationClassMapper.put(java.math.BigInteger.class, LongType.class.getSimpleName());
         validationClassMapper.put(java.lang.Long.class, LongType.class.getSimpleName());
         validationClassMapper.put(long.class, LongType.class.getSimpleName());
 
         validationClassMapper.put(byte.class, BytesType.class.getSimpleName());
+        validationClassMapper.put(Byte.class, BytesType.class.getSimpleName());
 
         validationClassMapper.put(float.class, FloatType.class.getSimpleName());
+        validationClassMapper.put(Float.class, FloatType.class.getSimpleName());
     }
 
     /**

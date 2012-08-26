@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -103,7 +102,6 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         teardownInternal(persistenceUnit);
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void executeTests()
     {
@@ -130,7 +128,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             em.clear();
 //            // find by id.
             StudentEntityDef s = em.find(StudentCassandra.class, studentId1);
-//            assertOnDataTypes((StudentCassandra) s);
+            assertOnDataTypes((StudentCassandra) s);
 //
 //            // // find by name.
             assertFindByName(em, "StudentCassandra", StudentCassandra.class, "Amresh", "studentName");

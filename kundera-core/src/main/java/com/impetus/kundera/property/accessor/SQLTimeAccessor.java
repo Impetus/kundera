@@ -15,10 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
-import java.io.UnsupportedEncodingException;
 import java.sql.Time;
 
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
@@ -38,21 +36,38 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
     @Override
     public Time fromBytes(Class targetClass, byte[] b)
     {
-        String s;
+        // String s;
+        // try
+        // {
+        //
+        // if (b == null)
+        // {
+        // return null;
+        // }
+        // s = new String(b, Constants.ENCODING);
+        // }
+        // catch (UnsupportedEncodingException e)
+        // {
+        // throw new PropertyAccessException(e);
+        // }
+        // System.out.println(fromString(targetClass, s).getTime());
+        // return fromString(targetClass, s);
         try
         {
-
-            if(b == null)
+            if (b == null)
             {
                 return null;
             }
-            s = new String(b, Constants.ENCODING);
+
+            // In case date.getTime() is stored in DB.
+            LongAccessor longAccessor = new LongAccessor();
+
+            return new Time(longAccessor.fromBytes(targetClass, b));
         }
-        catch (UnsupportedEncodingException e)
+        catch (Exception e)
         {
             throw new PropertyAccessException(e);
         }
-        return fromString(targetClass, s);
     }
 
     /*
@@ -65,12 +80,31 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
     public byte[] toBytes(Object object)
     {
 
-        if(object == null)
+        // if (object == null)
+        // {
+        // return null;
+        // }
+        // Time t = (Time) object;
+        // System.out.println(t.getTime());
+        // return t.toString().getBytes();
+
+        try
         {
-            return null;
+            if (object == null)
+            {
+                return null;
+            }
+            LongAccessor longAccessor = new LongAccessor();
+            // System.out.println("In date accessor" + ((Date) date).getTime());
+            return longAccessor.toBytes(((Time) object).getTime());
+            // return DATE_FORMATTER.format(((Date)
+            // date)).getBytes(Constants.ENCODING);
         }
-        Time t = (Time) object;
-        return t.toString().getBytes();
+        catch (Exception e)
+        {
+            throw new PropertyAccessException(e);
+        }
+
     }
 
     /*
@@ -95,7 +129,7 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
     @Override
     public Time fromString(Class targetClass, String s)
     {
-        if(s == null)
+        if (s == null)
         {
             return null;
         }

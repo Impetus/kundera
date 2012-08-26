@@ -77,7 +77,10 @@ public abstract class ClientBase
     public void persist(Node node)
     {
         Object entity = node.getData();
-        String id = ObjectGraphUtils.getEntityId(node.getNodeId());
+        Object id = node.getEntityId() /*
+                                        * ObjectGraphUtils.getEntityId(node.
+                                        * getNodeId())
+                                        */;
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
         isUpdate = node.isUpdate();
         List<RelationHolder> relationHolders = getRelationHolders(node);

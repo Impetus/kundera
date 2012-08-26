@@ -16,6 +16,9 @@
 package com.impetus.client.mongodb;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -83,7 +86,18 @@ final class MongoDBDataHandler
             entity = entityClass.newInstance();
 
             // Populate primary key column
-            String rowKey = (String) document.get("_id");
+            Object rowKey = document.get("_id");
+            Class<?> rowKeyValueClass = rowKey.getClass();
+
+            Class<?> idClass = m.getIdColumn().getField().getType();
+            if (rowKeyValueClass.isAssignableFrom(Date.class))
+            {
+                rowKey = PropertyAccessorHelper.fromDate(idClass, rowKeyValueClass, rowKey);
+            }
+            else
+            {
+                rowKey = PropertyAccessorHelper.fromSourceToTargetClass(idClass, rowKeyValueClass, rowKey);
+            }
             PropertyAccessorHelper.setId(entity, m, rowKey);
 
             // Populate entity columns
@@ -230,9 +244,9 @@ final class MongoDBDataHandler
         List<Column> columns = m.getColumnsAsList();
 
         // Populate Row Key
-        String id = PropertyAccessorHelper.getId(entity, m);
-        dbObj.put("_id", id);
-        dbObj.put(m.getIdColumn().getName(), id);
+        Object id = PropertyAccessorHelper.getId(entity, m);
+        dbObj.put("_id", populateValue(id, id.getClass()));
+        dbObj.put(m.getIdColumn().getName(), populateValue(id, id.getClass()));
 
         // Populate columns
         for (Column column : columns)
@@ -335,13 +349,46 @@ final class MongoDBDataHandler
             if (valObj != null)
             {
                 dbObj.put(column.getName(), valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString()
-                        : valObj.toString())/*
-                                             * PropertyAccessorHelper.getObject(
-                                             * entity,
-                                             * column.getField()).toString())
-                                             */;
+                        : /* valObj.toString() */populateValue(valObj, column.getField().getType()))/*
+                                                                                                     * PropertyAccessorHelper
+                                                                                                     * .
+                                                                                                     * getObject
+                                                                                                     * (
+                                                                                                     * entity
+                                                                                                     * ,
+                                                                                                     * column
+                                                                                                     * .
+                                                                                                     * getField
+                                                                                                     * (
+                                                                                                     * )
+                                                                                                     * )
+                                                                                                     * .
+                                                                                                     * toString
+                                                                                                     * (
+                                                                                                     * )
+                                                                                                     * )
+                                                                                                     */;
             }
         }
+    }
+
+    /**
+     * @param valObj
+     * @return
+     */
+    public Object populateValue(Object valObj, Class clazz)
+    {
+        if (isUTF8Value(clazz))
+        {
+            return valObj.toString();
+        }
+        return valObj;
+    }
+
+    private boolean isUTF8Value(Class<?> clazz)
+    {
+        return (clazz.isAssignableFrom(BigDecimal.class))
+                || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class)));
     }
 
     /**

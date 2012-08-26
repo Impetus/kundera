@@ -30,12 +30,16 @@ import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.property.PropertyAccessor;
+import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Provides Pelops utility methods for data held in Column family based stores.
@@ -69,7 +73,7 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
      * @throws Exception
      *             the exception
      */
-    Object fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, String rowKey,
+    Object fromThriftRow(Selector selector, Class<?> clazz, EntityMetadata m, Object rowKey,
             List<String> relationNames, boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
     {
         List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
@@ -81,7 +85,8 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
             {
                 List<CounterSuperColumn> thriftCounterSuperColumns = new ArrayList<CounterSuperColumn>();
                 List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
-                rowKeys.add(ByteBufferUtil.bytes(rowKey));
+                byte[] id = PropertyAccessorHelper.toBytes(rowKey, m.getIdColumn().getField());
+                rowKeys.add(ByteBuffer.wrap(id));
                 Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = selector
                         .getColumnOrSuperColumnsFromRows(new ColumnParent(m.getTableName()), rowKeys,
                                 Selector.newColumnsPredicateAll(true, 10000), consistencyLevel);
@@ -94,8 +99,10 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
             }
             else
             {
-                List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(), rowKey,
-                        Selector.newColumnsPredicateAll(true, 10000), consistencyLevel);
+                byte[] id = PropertyAccessorHelper.toBytes(rowKey, m.getIdColumn().getField());
+
+                List<SuperColumn> thriftSuperColumns = selector.getSuperColumnsFromRow(m.getTableName(),
+                        Bytes.fromByteArray(id), Selector.newColumnsPredicateAll(true, 10000), consistencyLevel);
                 e = fromSuperColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null,
                         thriftSuperColumns, null, null), relationNames, isWrapReq);
             }
@@ -103,9 +110,9 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
         else
         {
             List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
-
-            ByteBuffer rKeyAsByte = ByteBufferUtil.bytes(rowKey);
-            rowKeys.add(ByteBufferUtil.bytes(rowKey));
+            byte[] id = PropertyAccessorHelper.toBytes(rowKey, m.getIdColumn().getField());
+            ByteBuffer rKeyAsByte = ByteBuffer.wrap(id);
+            rowKeys.add(rKeyAsByte);
 
             Map<ByteBuffer, List<ColumnOrSuperColumn>> columnOrSuperColumnsFromRow = selector
                     .getColumnOrSuperColumnsFromRows(new ColumnParent(m.getTableName()), rowKeys,
@@ -181,8 +188,7 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
         {
             for (Object rowKey : rowIds)
             {
-                Object e = fromThriftRow(selector, clazz, m, rowKey.toString(), relationNames, isWrapReq,
-                        consistencyLevel);
+                Object e = fromThriftRow(selector, clazz, m, rowKey, relationNames, isWrapReq, consistencyLevel);
                 if (e != null)
                 {
                     entities.add(e);
@@ -190,6 +196,6 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
             }
         }
         return entities;
-    }     
+    }
 
 }

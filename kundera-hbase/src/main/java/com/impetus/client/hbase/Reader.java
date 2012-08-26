@@ -43,7 +43,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> LoadData(HTable hTable, String columnFamily, String rowKey, Filter filter) throws IOException;
+    List<HBaseData> LoadData(HTable hTable, String columnFamily, Object rowKey, Filter filter) throws IOException;
 
     /**
      * Load data.
@@ -58,7 +58,7 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> LoadData(HTable hTable, String rowKey, Filter filter) throws IOException;
+    List<HBaseData> LoadData(HTable hTable, Object rowKey, Filter filter) throws IOException;
 
     /**
      * Load all.

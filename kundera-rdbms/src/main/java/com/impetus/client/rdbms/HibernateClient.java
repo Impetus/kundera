@@ -41,8 +41,6 @@ import com.impetus.client.rdbms.query.RDBMSQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -271,7 +269,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
     @Override
     public <E> List<E> getColumnsById(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            String parentId)
+            Object parentId)
     {
 
         StringBuffer sqlQuery = new StringBuffer();

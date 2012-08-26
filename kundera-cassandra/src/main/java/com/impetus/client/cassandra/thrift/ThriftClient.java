@@ -377,10 +377,10 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
     
     @Override
-    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, String pKeyColumnValue)
+    public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
     {        
        
-        byte[] rowKey = pKeyColumnValue.getBytes();
+        byte[] rowKey = pKeyColumnValue.toString().getBytes();
         
         SlicePredicate predicate = new SlicePredicate(); 
         SliceRange sliceRange = new SliceRange(); 

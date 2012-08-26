@@ -134,7 +134,7 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
     protected final void populateIdAccessorMethods(EntityMetadata metadata, Class<?> clazz, Field f)
     {
         try
-        {
+        {            
             BeanInfo info = Introspector.getBeanInfo(clazz);
 
             for (PropertyDescriptor descriptor : info.getPropertyDescriptors())

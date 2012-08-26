@@ -84,7 +84,7 @@ public class ThriftInvertedIndexHandler implements InvertedIndexHandler
                 
                 for (ThriftRow thriftRow : indexThriftyRows)
                 {
-                    byte[] rowKey = Bytes.fromUTF8(thriftRow.getId()).toByteArray();
+                    byte[] rowKey = Bytes.fromUTF8(thriftRow.getId().toString()).toByteArray();
                     
                     //Create Insertion List
                     List<Mutation> insertion_list = new ArrayList<Mutation>();

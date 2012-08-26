@@ -219,7 +219,7 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public final void unindex(EntityMetadata metadata, String id) throws LuceneIndexingException
+    public final void unindex(EntityMetadata metadata, Object id) throws LuceneIndexingException
     {
         log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
         try
@@ -460,7 +460,7 @@ public class LuceneIndexer extends DocumentIndexer
 
         Document currentDoc = null;
         Object embeddedObject = null;
-        String rowKey = null;
+        Object rowKey = null;
         try
         {
             rowKey = PropertyAccessorHelper.getId(object, metadata);

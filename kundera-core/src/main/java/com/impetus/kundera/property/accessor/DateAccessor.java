@@ -91,25 +91,26 @@ public class DateAccessor implements PropertyAccessor<Date>
      * @see com.impetus.kundera.property.PropertyAccessor#fromBytes(byte[])
      */
     @Override
-    public final Date fromBytes(Class targetClass, byte[] bytes)
+    public /*final*/ Date fromBytes(Class targetClass, byte[] bytes)
     {
         try
         {
-            if(bytes == null)
+            if (bytes == null)
             {
                 return null;
             }
-            
+
             try
             {
                 // In case date.getTime() is stored in DB.
                 LongAccessor longAccessor = new LongAccessor();
-                
+
                 return new Date(longAccessor.fromBytes(targetClass, bytes));
-            } catch(NumberFormatException nfex)
+            }
+            catch (NumberFormatException nfex)
             {
                 return getDateByPattern(new String(bytes, Constants.ENCODING));
-                
+
             }
         }
         catch (Exception e)
@@ -125,17 +126,19 @@ public class DateAccessor implements PropertyAccessor<Date>
      * com.impetus.kundera.property.PropertyAccessor#toBytes(java.lang.Object)
      */
     @Override
-    public final byte[] toBytes(Object date)
+    public /*final*/ byte[] toBytes(Object date)
     {
         try
         {
-            if(date == null)
+            if (date == null)
             {
                 return null;
             }
             LongAccessor longAccessor = new LongAccessor();
+//            System.out.println("In date accessor" + ((Date) date).getTime());
             return longAccessor.toBytes(((Date) date).getTime());
-//            return DATE_FORMATTER.format(((Date) date)).getBytes(Constants.ENCODING);
+            // return DATE_FORMATTER.format(((Date)
+            // date)).getBytes(Constants.ENCODING);
         }
         catch (Exception e)
         {
@@ -150,9 +153,9 @@ public class DateAccessor implements PropertyAccessor<Date>
      * com.impetus.kundera.property.PropertyAccessor#toString(java.lang.Object)
      */
     @Override
-    public final String toString(Object object)
+    public /*final*/ String toString(Object object)
     {
-        return object != null? object.toString():null;
+        return object != null ? object.toString() : null;
     }
 
     /*
@@ -167,7 +170,7 @@ public class DateAccessor implements PropertyAccessor<Date>
     {
         try
         {
-            if(s == null)
+            if (s == null)
             {
                 return null;
             }

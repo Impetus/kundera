@@ -46,7 +46,6 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.property.accessor.DateAccessor;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
@@ -352,13 +351,13 @@ public class CassQuery extends QueryImpl implements Query
             f = col.getField();
         }
 
-        // need to do integer.parseInt..as value will be string in case of create query.
+        // need to do integer.parseInt..as value will be string in case of
+        // create query.
         if (f != null && f.getType() != null)
         {
-            if (isId || f.getType().isAssignableFrom(String.class))
+            if (/* isId || */f.getType().isAssignableFrom(String.class))
             {
-
-                return Bytes.fromByteArray(((String)value).getBytes());
+                return Bytes.fromByteArray(((String) value).getBytes());
             }
             else if (f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
             {
@@ -366,7 +365,6 @@ public class CassQuery extends QueryImpl implements Query
             }
             else if (f.getType().equals(long.class) || f.getType().isAssignableFrom(Long.class))
             {
-
                 return Bytes.fromLong(Long.parseLong(value.toString()));
             }
             else if (f.getType().equals(boolean.class) || f.getType().isAssignableFrom(Boolean.class))
@@ -384,13 +382,19 @@ public class CassQuery extends QueryImpl implements Query
             else if (f.getType().equals(float.class) || f.getType().isAssignableFrom(Float.class))
             {
                 return Bytes.fromFloat(Float.valueOf(value.toString()));
-            } else if(f.getType().isAssignableFrom(Date.class))
+            }
+            else if (f.getType().isAssignableFrom(Date.class))
             {
                 DateAccessor dateAccessor = new DateAccessor();
                 return Bytes.fromByteArray(dateAccessor.toBytes(value));
             }
             else
             {
+                if (value.getClass().isAssignableFrom(String.class))
+                {
+                    value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
+                            value.toString());
+                }
                 return Bytes.fromByteArray(PropertyAccessorFactory.getPropertyAccessor(f).toBytes(value));
             }
         }

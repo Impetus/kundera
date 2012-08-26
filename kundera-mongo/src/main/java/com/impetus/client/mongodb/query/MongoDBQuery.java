@@ -15,10 +15,12 @@
  ******************************************************************************/
 package com.impetus.client.mongodb.query;
 
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.regex.Pattern;
 
 import javax.persistence.Query;
 
@@ -30,11 +32,10 @@ import com.impetus.client.mongodb.MongoEntityReader;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
-import com.impetus.kundera.metadata.model.Column;
-import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.KunderaQuery.SortOrder;
@@ -171,7 +172,30 @@ public class MongoDBQuery extends QueryImpl
                 // String property = getColumnName(filter.getProperty());
                 String property = filter.getProperty();
                 String condition = filter.getCondition();
-                String value = filter.getValue().toString();
+                // String value = filter.getValue().toString();
+                Object value = filter.getValue();
+                
+                // value is string but field.getType is different, then get value using 
+
+                Field f = null;
+                if (m.getIdColumn().getName().equalsIgnoreCase(property))
+                {
+                    f = m.getIdColumn().getField();
+                }
+                else
+                {
+                    f = m.getColumn(property).getField();
+                }
+                if (value.getClass().isAssignableFrom(String.class) && f != null
+                        && !f.getType().equals(value.getClass()))
+                {
+                    value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
+                            value.toString());
+                }
+
+                value = populateValue(value, value.getClass());
+                
+                
 
                 // Property, if doesn't exist in entity, may be there in a
                 // document embedded within it, so we have to check that
@@ -191,7 +215,8 @@ public class MongoDBQuery extends QueryImpl
                 }
                 else if (condition.equalsIgnoreCase("like"))
                 {
-                    query.append(property, Pattern.compile(value));
+                    // query.append(property, Pattern.compile(value));
+                    query.append(property, value);
                 }
                 else if (condition.equalsIgnoreCase(">"))
                 {
@@ -289,4 +314,25 @@ public class MongoDBQuery extends QueryImpl
 
         return 0;
     }
+
+    /**
+     * @param valObj
+     * @return
+     */
+    public Object populateValue(Object valObj, Class clazz)
+    {
+        if (isUTF8Value(clazz))
+        {
+            return valObj.toString();
+        }
+        return valObj;
+    }
+
+    private boolean isUTF8Value(Class<?> clazz)
+    {
+        return (clazz.isAssignableFrom(BigDecimal.class))
+                || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class))
+                        || (clazz.isAssignableFrom(char.class)) || (clazz.isAssignableFrom(Character.class)));
+    }
+
 }
