@@ -229,15 +229,19 @@ public final class MetaModelBuilder<X, T>
                     }
 
                     // If generic typed class is managed entity.
-                    if (attribType.isAnnotationPresent(Entity.class))
+                    if (managedTypes.get(attribType) == null)
                     {
-                        EntityType<T> entityType = new DefaultEntityType<T>((Class<T>) attribType,
-                                PersistenceType.ENTITY, null);
-                        managedTypes.put(attribType, entityType);
-                    }
-                    else
-                    {
-                        return new DefaultBasicType<T>(attribType);
+
+                        if (attribType.isAnnotationPresent(Entity.class))
+                        {
+                            EntityType<T> entityType = new DefaultEntityType<T>((Class<T>) attribType,
+                                    PersistenceType.ENTITY, null);
+                            managedTypes.put(attribType, entityType);
+                        }
+                        else
+                        {
+                            return new DefaultBasicType<T>(attribType);
+                        }
                     }
                 }
                 return (Type<T>) managedTypes.get(attribType);
