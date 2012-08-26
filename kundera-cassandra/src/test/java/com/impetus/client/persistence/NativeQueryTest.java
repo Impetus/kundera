@@ -257,6 +257,9 @@ public class NativeQueryTest
         MetamodelImpl metaModel = new MetamodelImpl();
         metaModel.addEntityMetadata(CassandraEntitySample.class, m);
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder().getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder().getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder().getMappedSuperClassTypes());
         EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
         String[] persistenceUnits = new String[] { persistenceUnit };
         new ClientFactoryConfiguraton(persistenceUnits).configure();

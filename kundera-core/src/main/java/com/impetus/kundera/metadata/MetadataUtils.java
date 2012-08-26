@@ -474,21 +474,20 @@ public class MetadataUtils
                 superColumnNameToFieldMap.put(((AbstractAttribute)attribute).getJPAColumnName(), (Field) attribute.getJavaMember());
                 if (columnNameToFieldMap != null)
                 {
-                    getAttributeOfEmbedddable(columnNameToFieldMap, metaModel, iter, attribute);
+                    getAttributeOfEmbedddable(columnNameToFieldMap, metaModel, attribute);
                 }
             }
         }
     }
 
-    private static void getAttributeOfEmbedddable(Map<String, Field> columnNameToFieldMap, Metamodel metaModel,
-            Iterator<Attribute> iter, Attribute attribute)
+    private static void getAttributeOfEmbedddable(Map<String, Field> columnNameToFieldMap, Metamodel metaModel, Attribute attribute)
     {
         EmbeddableType embeddable = metaModel.embeddable(attribute.getJavaType());
 
         Iterator<Attribute> embeddableIter = embeddable.getAttributes().iterator();
         while (embeddableIter.hasNext())
         {
-            Attribute embedAttrib = iter.next();
+            Attribute embedAttrib = embeddableIter.next();
 
             // Reason is to avoid in case embeddable attribute within
             // embeddable.

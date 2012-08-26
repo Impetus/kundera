@@ -257,7 +257,7 @@ public abstract class AbstractAttribute<X, T>
                 name = member.getName();
             }
         }
-        return name;
+        return name == null ? getName(): name;
     }
 
 }
