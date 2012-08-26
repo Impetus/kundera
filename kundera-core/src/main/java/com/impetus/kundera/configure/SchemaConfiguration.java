@@ -25,6 +25,7 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 
 /**
  * Schema configuration implementation to support ddl_schema_creation
@@ -272,7 +274,7 @@ public class SchemaConfiguration implements Configuration
                   tableInfo.addEmbeddedColumnInfo(embeddedColumnInfo);
               }
             }
-            else
+            else if(!attr.isCollection() && !((SingularAttribute)attr).isId())
             {
                 ColumnInfo columnInfo = getColumn(attr, entityMetadata.isColumnIndexable(attr.getName()));
                 if (!tableInfo.getColumnMetadatas().contains(columnInfo))
@@ -373,7 +375,7 @@ public class SchemaConfiguration implements Configuration
     private ColumnInfo getColumn(Attribute column, boolean isIndexable)
     {
         ColumnInfo columnInfo = new ColumnInfo();
-        columnInfo.setColumnName(column.getName());
+        columnInfo.setColumnName(((AbstractAttribute)column).getJPAColumnName());
         columnInfo.setIndexable(isIndexable);
         columnInfo.setType(column.getJavaType());
         return columnInfo;

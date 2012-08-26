@@ -107,7 +107,7 @@ public class MetamodelImpl implements Metamodel
             throw new IllegalArgumentException("Not a embeddable type, {class: " + paramClass + "}");
         }
         
-        return null;
+        return embeddableType;
     }
 
     /*

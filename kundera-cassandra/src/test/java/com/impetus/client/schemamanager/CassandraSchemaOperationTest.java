@@ -473,6 +473,10 @@ public class CassandraSchemaOperationTest
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder().getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder().getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder().getMappedSuperClassTypes());
+
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 
         String[] persistenceUnits = new String[] { persistenceUnit };

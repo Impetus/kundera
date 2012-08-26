@@ -134,6 +134,9 @@ public class NullableFieldAccessorTest
         m.setPersistenceUnit(persistenceUnit);
         MetamodelImpl metaModel = new MetamodelImpl();
         metaModel.addEntityMetadata(CassandraEntitySample.class, m);
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder().getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder().getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder().getMappedSuperClassTypes());
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
         new ClientFactoryConfiguraton(persistenceUnit).configure();
         EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
