@@ -17,10 +17,17 @@ package com.impetus.client.cassandra.schemamanager;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.cassandra.db.marshal.CounterColumnType;
 import org.apache.cassandra.db.marshal.UTF8Type;
@@ -52,10 +59,10 @@ import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.configure.schema.api.AbstractSchemaManager;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.Column;
-import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -744,21 +751,34 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     @Override
     public boolean validateEntity(Class clazz)
     {
+        
         boolean isvalid = false;
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
         String tableName = metadata.getTableName();
         if (csmd.isCounterColumn(tableName))
         {
             metadata.setCounterColumnType(true);
-            List<EmbeddedColumn> embeddedColumns = metadata.getEmbeddedColumnsAsList();
-            if (!embeddedColumns.isEmpty())
+//            List<EmbeddedColumn> embeddedColumns = metadata.getEmbeddedColumnsAsList();
+            Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(clazz);
+            if (!embeddables.isEmpty())
             {
-                isvalid = validateEmbeddedColumns(embeddedColumns) ? true : false;
+                isvalid = validateEmbeddedColumns(embeddables.values()) ? true : false;
             }
             else
             {
-                isvalid = validateColumns(metadata.getColumnsAsList()) ? true : false;
+                EntityType entity = metaModel.entity(clazz);
+                isvalid = validateColumns(entity.getAttributes()) ? true : false;
             }
+
+            //            if (!embeddedColumns.isEmpty())
+//            {
+//                isvalid = validateEmbeddedColumns(embeddedColumns) ? true : false;
+//            }
+//            else
+//            {
+//                isvalid = validateColumns(metadata.getColumnsAsList()) ? true : false;
+//            }
             isvalid = isvalid && validateRelations(metadata) ? true : false;
         }
         else
@@ -783,7 +803,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                     .getType().equals(ForeignKey.MANY_TO_MANY)) && relation.getMappedBy() == null)
             {
                 // validate Id column of target entity
-                validateColumn(targetEntityMetadata.getIdColumn());
+                validateColumn(targetEntityMetadata.getIdAttribute().getJavaType());
             }
             else if (relation.getType().equals(ForeignKey.ONE_TO_MANY) && relation.getMappedBy() == null)
             {
@@ -792,7 +812,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 String targetTableName = targetEntityMetadata.getTableName();
                 if (csmd.isCounterColumn(targetTableName))
                 {
-                    isValid = validateColumn(metadata.getIdColumn()) ? true : false;
+                    isValid = validateColumn(metadata.getIdAttribute().getJavaType()) ? true : false;
                 }
             }
         }
@@ -804,13 +824,18 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * 
      * @param embeddedColumns
      */
-    private boolean validateEmbeddedColumns(List<EmbeddedColumn> embeddedColumns)
+    private boolean validateEmbeddedColumns(Collection<EmbeddableType> embeddedColumns)
     {
         boolean isValid = false;
-        for (EmbeddedColumn embeddedColumn : embeddedColumns)
+        Iterator<EmbeddableType> iter = embeddedColumns.iterator();
+        while(iter.hasNext())
         {
-            isValid = validateColumns(embeddedColumn.getColumns()) ? true : false;
+            isValid = validateColumns(iter.next().getAttributes()) ? true : false;
         }
+//        for (EmbeddedColumn embeddedColumn : embeddedColumns)
+//        {
+//            isValid = validateColumns(embeddedColumn.getColumns()) ? true : false;
+//        }
         return isValid;
     }
 
@@ -819,12 +844,12 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * 
      * @param columns
      */
-    private boolean validateColumns(List<Column> columns)
+    private boolean validateColumns(Set<Attribute> attributes)
     {
         boolean isValid = true;
-        for (Column column : columns)
+        for (Attribute column : attributes)
         {
-            if (!validateColumn(column))
+            if (!validateColumn(column.getJavaType()))
             {
                 isValid = false;
                 break;
@@ -838,11 +863,11 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * 
      * @param column
      */
-    private boolean validateColumn(Column column)
+    private boolean validateColumn(Class clazz)
     {
         boolean isValid = true;
-        if (!(column.getField().getType().equals(Integer.class) || column.getField().getType().equals(int.class)
-                || column.getField().getType().equals(Long.class) || column.getField().getType().equals(long.class)))
+        if (!(clazz.equals(Integer.class) || clazz.equals(int.class)
+                || clazz.equals(Long.class) || clazz.equals(long.class)))
         {
             log.warn("Default valdation class :" + CounterColumnType.class.getSimpleName()
                     + ", For counter column type, fields of Entity should be either long type or integer type");

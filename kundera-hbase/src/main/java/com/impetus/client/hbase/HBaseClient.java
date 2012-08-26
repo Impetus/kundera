@@ -44,6 +44,7 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -420,7 +421,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     public void delete(Object entity, Object pKey)
     {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-        deleteByColumn(metadata.getTableName(), metadata.getIdColumn().getName(), pKey);
+        deleteByColumn(metadata.getTableName(), ((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName(), pKey);
     }
 
     /*

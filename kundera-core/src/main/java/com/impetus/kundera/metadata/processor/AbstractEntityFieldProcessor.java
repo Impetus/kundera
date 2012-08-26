@@ -153,34 +153,34 @@ public abstract class AbstractEntityFieldProcessor implements MetadataProcessor
         }
     }
 
-    /**
-     * Populate id column.
-     * 
-     * @param metadata
-     *            the metadata
-     * @param clazz
-     *            the clazz
-     * @param f
-     *            the f
-     */
-    protected final void populateIdColumn(EntityMetadata metadata, Class<?> clazz, Field f)
-    {
-        if (f.isAnnotationPresent(Column.class))
-        {
-            Column c = f.getAnnotation(Column.class);
-            if (!c.name().isEmpty())
-            {
-                metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(c.name(), f));
-            }
-            else
-            {
-                metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(f.getName(), f));
-            }
-        }
-        else
-        {
-            metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(f.getName(), f));
-        }
-    }
+//    /**
+//     * Populate id column.
+//     * 
+//     * @param metadata
+//     *            the metadata
+//     * @param clazz
+//     *            the clazz
+//     * @param f
+//     *            the f
+//     */
+//    protected final void populateIdColumn(EntityMetadata metadata, Class<?> clazz, Field f)
+//    {
+//        if (f.isAnnotationPresent(Column.class))
+//        {
+//            Column c = f.getAnnotation(Column.class);
+//            if (!c.name().isEmpty())
+//            {
+//                metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(c.name(), f));
+//            }
+//            else
+//            {
+//                metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(f.getName(), f));
+//            }
+//        }
+//        else
+//        {
+//            metadata.setIdColumn(new com.impetus.kundera.metadata.model.Column(f.getName(), f));
+//        }
+//    }
 
 }

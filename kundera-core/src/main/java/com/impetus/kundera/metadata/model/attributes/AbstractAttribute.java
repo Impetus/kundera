@@ -17,10 +17,17 @@ package com.impetus.kundera.metadata.model.attributes;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
+import java.util.Date;
 
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Temporal;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Type;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Abstract class for to provide generalization, abstraction to <code>Type</code> hierarchy.
@@ -31,7 +38,10 @@ import javax.persistence.metamodel.Type;
  */
 public abstract class AbstractAttribute<X, T>
 {
-    
+
+    /** The Constant log. */
+    private static final Log log = LogFactory.getLog(AbstractAttribute.class);
+
     /** The attrib type. */
     protected Type<T> attribType;
 
@@ -46,6 +56,8 @@ public abstract class AbstractAttribute<X, T>
 
     /** The member. */
     protected Field member;
+
+    private String columnName;
 
     /**
      * Instantiates a new abstract attribute.
@@ -66,6 +78,7 @@ public abstract class AbstractAttribute<X, T>
         this.persistenceAttribType = persistenceAttribType;
         this.managedType = managedType;
         this.member = member;
+        this.columnName = getValidJPAColumnName();
     }
 
     /*
@@ -191,6 +204,60 @@ public abstract class AbstractAttribute<X, T>
                 || persistenceAttribType.equals(PersistentAttributeType.MANY_TO_ONE)
                 || persistenceAttribType.equals(PersistentAttributeType.ONE_TO_MANY)
                 || persistenceAttribType.equals(PersistentAttributeType.ONE_TO_ONE);
+    }
+
+    
+    public String getJPAColumnName()
+    {
+        return columnName;
+    }
+
+
+    /**
+     * Gets the valid jpa column name.
+     * 
+     * @param entity
+     *            the entity
+     * @param f
+     *            the f
+     * @return the valid jpa column name
+     */
+    private final String getValidJPAColumnName()
+    {
+
+        String name = null;
+
+        if (member.isAnnotationPresent(Column.class))
+        {
+            Column c = member.getAnnotation(Column.class);
+            if (!c.name().isEmpty())
+            {
+                name = c.name();
+            }
+            else
+            {
+                name = member.getName();
+            }
+        }
+        else if (member.isAnnotationPresent(Basic.class))
+        {
+            name = member.getName();
+        }
+
+        if (member.isAnnotationPresent(Temporal.class))
+        {
+            if (!member.getType().equals(Date.class))
+            {
+                log.error("@Temporal must map to java.util.Date for @Entity(" + managedType.getJavaType() + "." + member.getName()
+                        + ")");
+                return name;
+            }
+            if (null == name)
+            {
+                name = member.getName();
+            }
+        }
+        return name;
     }
 
 }

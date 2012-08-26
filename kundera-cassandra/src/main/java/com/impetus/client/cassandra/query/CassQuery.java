@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.Query;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
@@ -43,6 +45,8 @@ import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -204,7 +208,7 @@ public class CassQuery extends QueryImpl implements Query
         List<IndexExpression> expr = new ArrayList<IndexExpression>();
         Map<Boolean, List<IndexClause>> idxClauses = new HashMap<Boolean, List<IndexClause>>(1);
         // check if id column are mixed with other columns or not?
-        String idColumn = m.getIdColumn().getName();
+        String idColumn = ((AbstractAttribute)m.getIdAttribute()).getJPAColumnName();
         boolean idPresent = false;
         for (Object o : getKunderaQuery().getFilterClauseQueue())
         {
@@ -321,7 +325,7 @@ public class CassQuery extends QueryImpl implements Query
     /**
      * Returns bytes value for given value.
      * 
-     * @param fieldName
+     * @param jpaFieldName
      *            field name.
      * @param m
      *            entity metadata
@@ -329,24 +333,30 @@ public class CassQuery extends QueryImpl implements Query
      *            value.
      * @return bytes value.
      */
-    private Bytes getBytesValue(String fieldName, EntityMetadata m, Object value)
+    private Bytes getBytesValue(String jpaFieldName, EntityMetadata m, Object value)
     {
-        Column idCol = m.getIdColumn();
+//        Column idCol = m.getIdColumn();
+        Attribute idCol =  m.getIdAttribute();
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        
+        EntityType entity = metaModel.entity(m.getEntityClazz());
         Field f = null;
         boolean isId = false;
-        if (idCol.getName().equals(fieldName))
+        if (((AbstractAttribute)idCol).getJPAColumnName().equals(jpaFieldName))
         {
-            f = idCol.getField();
+            f = (Field) idCol.getJavaMember();
             isId = true;
         }
         else
         {
-            Column col = m.getColumn(fieldName);
+            String fieldName = m.getFieldName(jpaFieldName);
+            Attribute col = entity.getAttribute(fieldName);
+//            Column col = m.getColumn(jpaFieldName);
             if (col == null)
             {
-                throw new QueryHandlerException("column type is null for: " + fieldName);
+                throw new QueryHandlerException("column type is null for: " + jpaFieldName);
             }
-            f = col.getField();
+            f = (Field) col.getJavaMember();
         }
 
         // need to do integer.parseInt..as value will be string in case of
@@ -395,8 +405,8 @@ public class CassQuery extends QueryImpl implements Query
         }
         else
         {
-            log.error("Error while handling data type for:" + fieldName);
-            throw new QueryHandlerException("field type is null for:" + fieldName);
+            log.error("Error while handling data type for:" + jpaFieldName);
+            throw new QueryHandlerException("field type is null for:" + jpaFieldName);
         }
     }
 }

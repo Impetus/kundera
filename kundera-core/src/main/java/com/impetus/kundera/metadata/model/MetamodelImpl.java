@@ -18,9 +18,11 @@ package com.impetus.kundera.metadata.model;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
@@ -324,5 +326,43 @@ public class MetamodelImpl implements Metamodel
             this.mappedSuperClassTypes.putAll(mappedSuperClassTypes);
         }
     }
+
+    public boolean isEmbeddable(Class embeddableClazz)
+    {
+        return embeddables != null? embeddables.containsKey(embeddableClazz):false;
+    }
+
+    public Attribute getEntityAttribute(Class clazz, String fieldName)
+    {
+        if(managedTypes != null && managedTypes.containsKey(clazz))
+        {
+            EntityType entityType = managedTypes.get(clazz);
+            return entityType.getAttribute(fieldName);
+        }
+        
+        throw new IllegalArgumentException("No entity found: " + clazz);
+    }
     
+    
+    public Map<String, EmbeddableType> getEmbeddables(Class clazz)
+    {
+        Map<String, EmbeddableType> embeddableAttibutes = new HashMap<String, EmbeddableType>(); 
+    
+        if(managedTypes != null)
+        {
+            EntityType entity = managedTypes.get(clazz);
+            Iterator<Attribute> iter =  entity.getAttributes().iterator();
+            while(iter.hasNext())
+            {
+                Attribute attribute = iter.next();
+                if(isEmbeddable(attribute.getJavaType()))
+                {
+                    embeddableAttibutes.put(attribute.getName(), embeddable(attribute.getJavaType()));
+                }
+                
+            }
+            
+        }
+        return embeddableAttibutes;
+    }
 }

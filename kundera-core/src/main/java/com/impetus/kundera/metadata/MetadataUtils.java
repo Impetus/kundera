@@ -20,11 +20,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.model.ClientMetadata;
@@ -32,8 +37,10 @@ import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.Relation.ForeignKey;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.metadata.validator.InvalidEntityDefinitionException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -58,15 +65,20 @@ public class MetadataUtils
     public static void populateColumnAndSuperColumnMaps(EntityMetadata m, Map<String, Field> columnNameToFieldMap,
             Map<String, Field> superColumnNameToFieldMap)
     {
-        for (Map.Entry<String, EmbeddedColumn> entry : m.getEmbeddedColumnsMap().entrySet())
-        {
-            EmbeddedColumn scMetadata = entry.getValue();
-            superColumnNameToFieldMap.put(scMetadata.getName(), scMetadata.getField());
-            for (Column column : entry.getValue().getColumns())
-            {
-                columnNameToFieldMap.put(column.getName(), column.getField());
-            }
-        }
+
+        getEmbeddableType(m, columnNameToFieldMap, superColumnNameToFieldMap);
+
+        // for (Map.Entry<String, EmbeddedColumn> entry :
+        // m.getEmbeddedColumnsMap().entrySet())
+        // {
+        // EmbeddedColumn scMetadata = entry.getValue();
+        // superColumnNameToFieldMap.put(scMetadata.getName(),
+        // scMetadata.getField());
+        // for (Column column : entry.getValue().getColumns())
+        // {
+        // columnNameToFieldMap.put(column.getName(), column.getField());
+        // }
+        // }
     }
 
     /**
@@ -78,12 +90,14 @@ public class MetadataUtils
      *            the super column
      * @return the map
      */
-    public static Map<String, Field> createColumnsFieldMap(EntityMetadata m, EmbeddedColumn superColumn)
+    public static Map<String, Field> createColumnsFieldMap(EntityMetadata m, EmbeddableType superColumn)
     {
         Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
-        for (Column column : superColumn.getColumns())
+        
+        Set<Attribute> attributes =  superColumn.getAttributes();
+        for (Attribute column : attributes)
         {
-            columnNameToFieldMap.put(column.getName(), column.getField());
+            columnNameToFieldMap.put(((AbstractAttribute)column).getJPAColumnName(), (Field) column.getJavaMember());
         }
         return columnNameToFieldMap;
 
@@ -98,13 +112,17 @@ public class MetadataUtils
      */
     public static Map<String, Field> createSuperColumnsFieldMap(EntityMetadata m)
     {
-        Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
-        for (Map.Entry<String, EmbeddedColumn> entry : m.getEmbeddedColumnsMap().entrySet())
-        {
-            EmbeddedColumn scMetadata = entry.getValue();
-            superColumnNameToFieldMap.put(scMetadata.getName(), scMetadata.getField());
 
-        }
+        Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
+        getEmbeddableType(m, null, superColumnNameToFieldMap);
+        // for (Map.Entry<String, EmbeddedColumn> entry :
+        // m.getEmbeddedColumnsMap().entrySet())
+        // {
+        // EmbeddedColumn scMetadata = entry.getValue();
+        // superColumnNameToFieldMap.put(scMetadata.getName(),
+        // scMetadata.getField());
+        //
+        // }
         return superColumnNameToFieldMap;
 
     }
@@ -339,8 +357,12 @@ public class MetadataUtils
 
                 Class clazz = relation.getTargetEntity();
                 EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
-                joinColumn = relation.getType().equals(ForeignKey.ONE_TO_MANY) ? parentMetadata.getIdColumn().getName()
-                        : metadata.getIdColumn().getName();
+                // joinColumn =
+                // relation.getType().equals(ForeignKey.ONE_TO_MANY) ?
+                // parentMetadata.getIdColumn().getName()
+                // : metadata.getIdColumn().getName();
+                joinColumn = relation.getType().equals(ForeignKey.ONE_TO_MANY) ? parentMetadata.getIdAttribute()
+                        .getName() : metadata.getIdAttribute().getName();
             }
             return joinColumn;
         }
@@ -362,28 +384,64 @@ public class MetadataUtils
     public static String getEnclosingEmbeddedFieldName(EntityMetadata m, String criteria, boolean viaColumnName)
     {
         String enclosingEmbeddedFieldName = null;
-        if (!m.getColumnFieldNames().contains(criteria))
+
+        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        EntityType entity = metaModel.entity(m.getEntityClazz());
+
+        try
         {
-            for (EmbeddedColumn embeddedColumn : m.getEmbeddedColumnsAsList())
+            Attribute attribute = entity.getAttribute(criteria);
+
+            if (((MetamodelImpl) metaModel).isEmbeddable(attribute.getJavaType()))
             {
-                List<Column> columns = embeddedColumn.getColumns();
-                for (Column column : columns)
+                EmbeddableType embeddable = metaModel.embeddable(attribute.getJavaType());
+                Iterator<Attribute> iter = embeddable.getAttributes().iterator();
+                while (iter.hasNext())
                 {
-                    if (viaColumnName && column.getName().equals(criteria))
+                    AbstractAttribute attrib = (AbstractAttribute) iter.next();
+
+                    if (viaColumnName && attrib.getName().equals(criteria))
                     {
-                        enclosingEmbeddedFieldName = embeddedColumn.getName();
+                        enclosingEmbeddedFieldName = attribute.getName();
                         break;
                     }
 
-                    if (!viaColumnName && column.getField().getName().equals(criteria))
+                    if (!viaColumnName && attrib.getJPAColumnName().equals(criteria))
                     {
-                        enclosingEmbeddedFieldName = embeddedColumn.getName();
+                        enclosingEmbeddedFieldName = attribute.getName();
                         break;
                     }
                 }
             }
 
         }
+        catch (IllegalArgumentException iax)
+        {
+            return null;
+        }
+        //
+        // if (!m.getColumnFieldNames().contains(criteria))
+        // {
+        // for (EmbeddedColumn embeddedColumn : m.getEmbeddedColumnsAsList())
+        // {
+        // List<Column> columns = embeddedColumn.getColumns();
+        // for (Column column : columns)
+        // {
+        // if (viaColumnName && column.getName().equals(criteria))
+        // {
+        // enclosingEmbeddedFieldName = embeddedColumn.getName();
+        // break;
+        // }
+        //
+        // if (!viaColumnName && column.getField().getName().equals(criteria))
+        // {
+        // enclosingEmbeddedFieldName = embeddedColumn.getName();
+        // break;
+        // }
+        // }
+        // }
+        //
+        // }
         return enclosingEmbeddedFieldName;
     }
 
@@ -398,5 +456,47 @@ public class MetadataUtils
      * 
      * } return enclosingEmbeddedFieldName; }
      */
+
+    private static void getEmbeddableType(EntityMetadata m, Map<String, Field> columnNameToFieldMap,
+            Map<String, Field> superColumnNameToFieldMap)
+    {
+        Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+
+        EntityType entityType = metaModel.entity(m.getEntityClazz());
+
+        Set attributes = entityType.getAttributes();
+        Iterator<Attribute> iter = attributes.iterator();
+        while (iter.hasNext())
+        {
+            Attribute attribute = iter.next();
+            if (((MetamodelImpl) metaModel).isEmbeddable(attribute.getJavaType()))
+            {
+                superColumnNameToFieldMap.put(((AbstractAttribute)attribute).getJPAColumnName(), (Field) attribute.getJavaMember());
+                if (columnNameToFieldMap != null)
+                {
+                    getAttributeOfEmbedddable(columnNameToFieldMap, metaModel, iter, attribute);
+                }
+            }
+        }
+    }
+
+    private static void getAttributeOfEmbedddable(Map<String, Field> columnNameToFieldMap, Metamodel metaModel,
+            Iterator<Attribute> iter, Attribute attribute)
+    {
+        EmbeddableType embeddable = metaModel.embeddable(attribute.getJavaType());
+
+        Iterator<Attribute> embeddableIter = embeddable.getAttributes().iterator();
+        while (embeddableIter.hasNext())
+        {
+            Attribute embedAttrib = iter.next();
+
+            // Reason is to avoid in case embeddable attribute within
+            // embeddable.
+            if (!((MetamodelImpl) metaModel).isEmbeddable(embedAttrib.getJavaType()))
+            {
+                columnNameToFieldMap.put(((AbstractAttribute)embedAttrib).getName(), (Field) embedAttrib.getJavaMember());
+            }
+        }
+    }
 
 }

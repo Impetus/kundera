@@ -19,12 +19,16 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
@@ -44,7 +48,10 @@ import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -302,7 +309,14 @@ public abstract class CassandraDataHandlerBase
 
             // Check if this is a property, or a column representing foreign
             // keys
-            com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
+//            com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
+            
+             EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit()).entity(clazz);
+            
+             String fieldName = m.getFieldName(thriftColumnName);
+             Attribute column = entityType.getAttribute(fieldName);
+             
+//             entityType.getAttribute(arg0)
             if (column != null)
             {
                 if (entity == null)
@@ -314,7 +328,8 @@ public abstract class CassandraDataHandlerBase
 
                 try
                 {
-                    PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue);
+//                    PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue);
+                    PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), thriftColumnValue);
                 }
                 catch (PropertyAccessException pae)
                 {
@@ -370,20 +385,25 @@ public abstract class CassandraDataHandlerBase
 
             // Check if this is a property, or a column representing foreign
             // keys
-            com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
+//            com.impetus.kundera.metadata.model.Column column = m.getColumn(thriftColumnName);
+            EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit()).entity(clazz);
+            
+            String fieldName = m.getFieldName(thriftColumnName);
+            Attribute column = entityType.getAttribute(fieldName);
+
             if (column != null)
             {
                 try
                 {
-                    if ((column.getField().getType().equals(Integer.class) || column.getField().getType()
+                    if ((column.getJavaType().equals(Integer.class) || column.getJavaType()
                             .equals(int.class))
                             && thriftColumnValue != null)
                     {
-                        PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue.intValue());
+                        PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), thriftColumnValue.intValue());
                     }
                     else
                     {
-                        PropertyAccessorHelper.set(entity, column.getField(), thriftColumnValue);
+                        PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), thriftColumnValue);
                     }
                 }
                 catch (PropertyAccessException pae)
@@ -529,7 +549,11 @@ public abstract class CassandraDataHandlerBase
                                 // have just one column with the same name
                                 log.debug(e.getMessage()
                                         + ". Possible case of entity column in a super column family. Will be treated as a super column.");
-                                com.impetus.kundera.metadata.model.Column col = m.getColumn(name);
+//                                com.impetus.kundera.metadata.model.Column col = m.getColumn(name);
+                                EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit()).entity(clazz);
+                                
+                                String fieldName = m.getFieldName(name);
+                                Attribute col = entityType.getAttribute(fieldName);
                                 if (col != null)
                                 {
                                     superColumnObj = CassandraUtilities.toUTF8(value);
@@ -700,7 +724,11 @@ public abstract class CassandraDataHandlerBase
                                 // have just one column with the same name
                                 log.debug(e.getMessage()
                                         + ". Possible case of entity column in a super column family. Will be treated as a super column.");
-                                com.impetus.kundera.metadata.model.Column col = m.getColumn(name);
+//                                com.impetus.kundera.metadata.model.Column col = m.getColumn(name);
+                                EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit()).entity(clazz);
+                                
+                                String fieldName = m.getFieldName(name);
+                                Attribute col = entityType.getAttribute(fieldName);
                                 if (col != null)
                                 {
                                     superColumnObj = value;
@@ -792,7 +820,12 @@ public abstract class CassandraDataHandlerBase
         }
 
         // Add columns to thrift row, only if there is no super column
-        if (m.getEmbeddedColumnsAsList().isEmpty())
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        
+        Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(m.getEntityClazz());
+        
+//        if (m.getEmbeddedColumnsAsList().isEmpty())
+        if (embeddables.isEmpty())
         {
             if (m.isCounterColumnType())
             {
@@ -816,11 +849,26 @@ public abstract class CassandraDataHandlerBase
     {
         List<ThriftRow> indexThriftRows = new ArrayList<ThriftRow>();
 
-        byte[] value = PropertyAccessorHelper.get(e, m.getIdColumn().getField());
+//        byte[] value = PropertyAccessorHelper.get(e, m.getIdColumn().getField());
+        byte[] value = PropertyAccessorHelper.get(e, (Field) m.getIdAttribute().getJavaMember());
 
-        for (EmbeddedColumn embeddedColumn : m.getEmbeddedColumnsAsList())
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        
+        Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(m.getEntityClazz());
+        
+        EntityType entityType = metaModel.entity(m.getEntityClazz());
+        
+        for(String key : embeddables.keySet())
         {
-            Object embeddedObject = PropertyAccessorHelper.getObject(e, embeddedColumn.getField());
+            EmbeddableType embeddedColumn = embeddables.get(key);
+//        }
+//            
+//        }
+//        
+//        for (EmbeddedColumn embeddedColumn : m.getEmbeddedColumnsAsList())
+//        {
+//            Object embeddedObject = PropertyAccessorHelper.getObject(e, embeddedColumn.getField());
+            Object embeddedObject = PropertyAccessorHelper.getObject(e, (Field) entityType.getAttribute(key).getJavaMember());
             if (embeddedObject == null)
             {
                 continue;
@@ -832,7 +880,8 @@ public abstract class CassandraDataHandlerBase
 
                 for (Object obj : (Collection) embeddedObject)
                 {
-                    for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
+//                    for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
+                    for(Object column : embeddedColumn.getAttributes())
                     {
 
                         // Column Value
@@ -842,7 +891,7 @@ public abstract class CassandraDataHandlerBase
                         byte[] indexColumnValue = (id + Constants.INDEX_TABLE_EC_DELIMITER + superColumnName)
                                 .getBytes();
 
-                        ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedColumn, obj, column,
+                        ThriftRow tr = constructIndexTableThriftRow(columnFamily, key, obj, (Attribute)column,
                                 indexColumnValue);
                         if (tr != null)
                         {
@@ -854,9 +903,13 @@ public abstract class CassandraDataHandlerBase
             }
             else
             {
-                for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
+//                for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
+//                {
+                for(Object column : embeddedColumn.getAttributes())
                 {
-                    ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedColumn, embeddedObject, column,
+//                    ThriftRow tr = constructIndexTableThriftRow(columnFamily, embeddedColumn, embeddedObject, column,
+//                            value);
+                    ThriftRow tr = constructIndexTableThriftRow(columnFamily, key, embeddedObject, (Attribute)column,
                             value);
                     if (tr != null)
                     {
@@ -886,11 +939,11 @@ public abstract class CassandraDataHandlerBase
      *            Name of Index Column
      * @return Instance of {@link ThriftRow}
      */
-    private ThriftRow constructIndexTableThriftRow(String columnFamily, EmbeddedColumn embeddedColumn, Object obj,
-            com.impetus.kundera.metadata.model.Column column, byte[] indexColumnValue)
+    private ThriftRow constructIndexTableThriftRow(String columnFamily, String embeddedFieldName, Object obj,
+            Attribute column, byte[] indexColumnValue)
     {
         // Column Name
-        Field columnField = column.getField();
+        Field columnField = (Field) column.getJavaMember();
         byte[] indexColumnName = PropertyAccessorHelper.get(obj, columnField);
 
         ThriftRow tr = null;
@@ -899,8 +952,8 @@ public abstract class CassandraDataHandlerBase
             // Construct Index Table Thrift Row
             tr = new ThriftRow();
             tr.setColumnFamilyName(columnFamily); // Index column-family name
-            tr.setId(embeddedColumn.getField().getName() + Constants.INDEX_TABLE_ROW_KEY_DELIMITER
-                    + column.getField().getName()); // Id
+            tr.setId(embeddedFieldName + Constants.INDEX_TABLE_ROW_KEY_DELIMITER
+                    + column.getName()); // Id
 
             Column thriftColumn = new Column();
             thriftColumn.setName(indexColumnName);
@@ -918,12 +971,16 @@ public abstract class CassandraDataHandlerBase
         List<CounterColumn> counterColumns = new ArrayList<CounterColumn>();
 
         // Iterate through each column-meta and populate that with field values
-        for (com.impetus.kundera.metadata.model.Column column : m.getColumnsAsList())
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+
+        EntityType entityType = metaModel.entity(m.getEntityClazz());
+        for(Object column : entityType.getAttributes())
+//        for (com.impetus.kundera.metadata.model.Column column : m.getColumnsAsList())
         {
-            Field field = column.getField();
+            Field field = (Field) ((Attribute)column).getJavaMember();
             if (!(field.getType().isAssignableFrom(Set.class) || field.getType().isAssignableFrom(Collection.class)))
             {
-                String name = column.getName();
+                String name = ((AbstractAttribute)column).getJPAColumnName();
                 try
                 {
                     String value = PropertyAccessorHelper.getString(e, field);
@@ -1002,9 +1059,20 @@ public abstract class CassandraDataHandlerBase
     {
 
         // Iterate through Super columns
-        for (EmbeddedColumn superColumn : m.getEmbeddedColumnsAsList())
+
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        
+        Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(m.getEntityClazz());
+EntityType entityType = metaModel.entity(m.getEntityClazz());
+        
+        for(String key : embeddables.keySet())
         {
-            Field superColumnField = superColumn.getField();
+            EmbeddableType superColumn = embeddables.get(key);
+            Attribute embeddableAttrib = entityType.getAttribute(key); 
+//        }
+//        for (EmbeddedColumn superColumn : m.getEmbeddedColumnsAsList())
+//        {
+            Field superColumnField = (Field) embeddableAttrib.getJavaMember();
             Object superColumnObject = PropertyAccessorHelper.getObject(e, superColumnField);
 
             // If Embedded object is a Collection, there will be variable number
@@ -1030,7 +1098,9 @@ public abstract class CassandraDataHandlerBase
                     int count = 0;
                     for (Object obj : (Collection) superColumnObject)
                     {
-                        superColumnName = superColumn.getName() + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
+//                        superColumnName = superColumn.getName() + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
+                        superColumnName = ((AbstractAttribute)embeddableAttrib).getJPAColumnName() + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
+                        
                         CounterSuperColumn thriftSuperColumn = buildThriftCounterSuperColumn(superColumnName,
                                 superColumn, obj);
                         tr.addCounterSuperColumn(thriftSuperColumn);
@@ -1050,7 +1120,7 @@ public abstract class CassandraDataHandlerBase
                         superColumnName = ecCacheHandler.getElementCollectionObjectName(id, obj);
                         if (superColumnName == null)
                         { // Fresh row
-                            superColumnName = superColumn.getName() + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
+                            superColumnName = ((AbstractAttribute)embeddableAttrib).getJPAColumnName() + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
                                     + (++lastEmbeddedObjectCount);
                         }
                         CounterSuperColumn thriftSuperColumn = buildThriftCounterSuperColumn(superColumnName,
@@ -1062,7 +1132,7 @@ public abstract class CassandraDataHandlerBase
             }
             else
             {
-                superColumnName = superColumn.getName();
+                superColumnName = ((AbstractAttribute)embeddableAttrib).getJPAColumnName();
                 CounterSuperColumn thriftSuperColumn = buildThriftCounterSuperColumn(superColumnName, superColumn,
                         superColumnObject);
                 tr.addCounterSuperColumn(thriftSuperColumn);
@@ -1071,15 +1141,23 @@ public abstract class CassandraDataHandlerBase
         }
     }
 
-    private CounterSuperColumn buildThriftCounterSuperColumn(String superColumnName, EmbeddedColumn superColumn,
+    private CounterSuperColumn buildThriftCounterSuperColumn(String superColumnName, EmbeddableType superColumn,
             Object counterSuperColumnObject)
     {
-
+        
+        Iterator<Attribute> iter = superColumn.getAttributes().iterator();
+        
         List<CounterColumn> thriftColumns = new ArrayList<CounterColumn>();
-        for (com.impetus.kundera.metadata.model.Column column : superColumn.getColumns())
+
+        while(iter.hasNext())
         {
-            Field field = column.getField();
-            String name = column.getName();
+            Attribute column = iter.next();
+//        }
+
+//        for (com.impetus.kundera.metadata.model.Column column : superColumn.getColumns())
+//        {
+            Field field = (Field) column.getJavaMember();
+            String name = ((AbstractAttribute)column).getJPAColumnName();
             String value = null;
             try
             {
@@ -1139,15 +1217,26 @@ public abstract class CassandraDataHandlerBase
         List<Column> columns = new ArrayList<Column>();
 
         // Iterate through each column-meta and populate that with field values
-        for (com.impetus.kundera.metadata.model.Column column : m.getColumnsAsList())
+
+
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        EntityType entityType = metaModel.entity(m.getEntityClazz());
+        
+        Iterator<Attribute> iter = entityType.getAttributes().iterator();
+        while(iter.hasNext())
         {
-            Field field = column.getField();
+            AbstractAttribute column = (AbstractAttribute) iter.next();
+//        }
+//
+//        for (com.impetus.kundera.metadata.model.Column column : m.getColumnsAsList())
+//        {
+            Field field = (Field) column.getJavaMember();
             if (field.getType().isAssignableFrom(Set.class) || field.getType().isAssignableFrom(Collection.class))
             {
             }
             else
             {
-                String name = column.getName();
+                String name = column.getJPAColumnName();
                 try
                 {
                     byte[] value = PropertyAccessorHelper.get(e, field);
@@ -1197,9 +1286,21 @@ public abstract class CassandraDataHandlerBase
             throws Exception
     {
         // Iterate through Super columns
-        for (EmbeddedColumn superColumn : m.getEmbeddedColumnsAsList())
+        
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        
+        Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(m.getEntityClazz());
+        EntityType entityType = metaModel.entity(m.getEntityClazz());
+        
+        for(String key : embeddables.keySet())
         {
-            Field superColumnField = superColumn.getField();
+            EmbeddableType superColumn = embeddables.get(key);
+            AbstractAttribute embeddableAttrib = (AbstractAttribute) entityType.getAttribute(key); 
+//        }
+//        
+//        for (EmbeddedColumn superColumn : m.getEmbeddedColumnsAsList())
+//        {
+            Field superColumnField = (Field) embeddableAttrib.getJavaMember();
             Object superColumnObject = PropertyAccessorHelper.getObject(e, superColumnField);
 
             // If Embedded object is a Collection, there will be variable number
@@ -1225,7 +1326,7 @@ public abstract class CassandraDataHandlerBase
                     int count = 0;
                     for (Object obj : (Collection) superColumnObject)
                     {
-                        superColumnName = superColumn.getName() + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
+                        superColumnName = embeddableAttrib.getJPAColumnName() + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
                         SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp, superColumn,
                                 obj);
                         tr.addSuperColumn(thriftSuperColumn);
@@ -1246,7 +1347,7 @@ public abstract class CassandraDataHandlerBase
                         superColumnName = ecCacheHandler.getElementCollectionObjectName(id, obj);
                         if (superColumnName == null)
                         { // Fresh row
-                            superColumnName = superColumn.getName() + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
+                            superColumnName = embeddableAttrib.getJPAColumnName() + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
                                     + (++lastEmbeddedObjectCount);
                         }
                         SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp, superColumn,
@@ -1264,7 +1365,7 @@ public abstract class CassandraDataHandlerBase
             }
             else
             {
-                superColumnName = superColumn.getName();
+                superColumnName = embeddableAttrib.getJPAColumnName();
                 SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp, superColumn,
                         superColumnObject);
                 tr.addSuperColumn(thriftSuperColumn);
@@ -1289,14 +1390,23 @@ public abstract class CassandraDataHandlerBase
      * @throws PropertyAccessException
      *             the property access exception
      */
-    private SuperColumn buildThriftSuperColumn(String superColumnName, long timestamp, EmbeddedColumn superColumn,
+    private SuperColumn buildThriftSuperColumn(String superColumnName, long timestamp, EmbeddableType superColumn,
             Object superColumnObject) throws PropertyAccessException
     {
         List<Column> thriftColumns = new ArrayList<Column>();
-        for (com.impetus.kundera.metadata.model.Column column : superColumn.getColumns())
+
+
+        Iterator<Attribute> iter = superColumn.getAttributes().iterator();
+
+        while(iter.hasNext())
         {
-            Field field = column.getField();
-            String name = column.getName();
+            AbstractAttribute column = (AbstractAttribute) iter.next();
+
+//        
+//        for (com.impetus.kundera.metadata.model.Column column : superColumn.getColumns())
+//        {
+            Field field = (Field) column.getJavaMember();
+            String name = column.getJPAColumnName();
             byte[] value = null;
             try
             {

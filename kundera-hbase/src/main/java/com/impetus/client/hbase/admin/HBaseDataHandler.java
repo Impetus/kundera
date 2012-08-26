@@ -24,10 +24,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,6 +59,9 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -261,12 +268,24 @@ public class HBaseDataHandler implements DataHandler
 
         // Now persist column families in the table. For HBase, embedded columns
         // are called column families
-        List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList();
 
-        for (EmbeddedColumn columnFamily : columnFamilies)
-        {
-            String columnFamilyName = columnFamily.getName();
-            Field columnFamilyField = columnFamily.getField();
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        
+//      List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
+        Map<String, EmbeddableType>  columnFamilies = metaModel.getEmbeddables(m.getEntityClazz());
+      Set<String> keys = metaModel.getEmbeddables(m.getEntityClazz()).keySet(); 
+
+      EntityType entityType = metaModel.entity(m.getEntityClazz());
+      
+//        List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList();
+          for(String key : keys)
+          {
+              EmbeddableType columnFamily = columnFamilies.get(key);
+              Attribute attribute = entityType.getAttribute(key);
+//        for (EmbeddedColumn columnFamily : columnFamilies)
+//        {
+            String columnFamilyName = ((AbstractAttribute)attribute).getJPAColumnName();
+            Field columnFamilyField = (Field) attribute.getJavaMember();
             Object columnFamilyObject = null;
             try
             {
@@ -288,7 +307,9 @@ public class HBaseDataHandler implements DataHandler
                 continue;
             }
 
-            List<Column> columns = columnFamily.getColumns();
+//            List<Column> columns = columnFamily.getColumns();
+            
+            Set<Attribute> columns  = columnFamily.getAttributes();
 
             // TODO: Handle Embedded collections differently
             // Write Column family which was Embedded collection in entity
@@ -346,7 +367,8 @@ public class HBaseDataHandler implements DataHandler
                 }
                 else
                 {
-                    hbaseWriter.writeColumn(hTable, columnFamilyName, rowId, columns.get(0), columnFamilyObject);
+//                    hbaseWriter.writeColumn(hTable, columnFamilyName, rowId, columns.get(0), columnFamilyObject);
+                    hbaseWriter.writeColumn(hTable, columnFamilyName, rowId, columns.iterator().next(), columnFamilyObject);
                 }
 
             }
@@ -354,7 +376,8 @@ public class HBaseDataHandler implements DataHandler
         }
 
         // HBase tables may have columns alongwith column families
-        List<Column> columns = m.getColumnsAsList();
+          Set<Attribute> columns = entityType.getAttributes();
+//        List<Column> columns = m.getColumnsAsList();
         if (columns != null && !columns.isEmpty())
         {
 
@@ -541,11 +564,16 @@ public class HBaseDataHandler implements DataHandler
             /*
              * Populate columns data
              */
-            List<Column> columns = m.getColumnsAsList();
-            for (Column column : columns)
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+            EntityType entityType = metaModel.entity(m.getEntityClazz());
+
+//            List<Column> columns = m.getColumnsAsList();
+            Set<Attribute> columns = entityType.getAttributes();
+//            for (Column column : columns)
+            for (Attribute column : columns)
             {
-                Field columnField = column.getField();
-                String columnName = column.getName();
+                Field columnField = (Field) column.getJavaMember();
+                String columnName = ((AbstractAttribute)column).getJPAColumnName();
 
                 for (KeyValue colData : hbaseValues)
                 {
@@ -570,10 +598,21 @@ public class HBaseDataHandler implements DataHandler
              * Set each column families, for HBase embedded columns are called
              * columns families
              */
-            List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList();
-            for (EmbeddedColumn columnFamily : columnFamilies)
+            
+//          List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
+            Map<String, EmbeddableType>  columnFamilies = metaModel.getEmbeddables(m.getEntityClazz());
+
+            Set<String> keys = columnFamilies.keySet(); 
+
+            for(String key : keys)
             {
-                Field columnFamilyFieldInEntity = columnFamily.getField();
+                EmbeddableType columnFamily = columnFamilies.get(key);
+                Attribute attribute = entityType.getAttribute(key);
+
+//            List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList();
+//            for (EmbeddedColumn columnFamily : columnFamilies)
+//            {
+                Field columnFamilyFieldInEntity = (Field) attribute.getJavaMember();
                 Class<?> columnFamilyClass = columnFamilyFieldInEntity.getType();
 
                 // Get a name->field map for columns in this column family
@@ -583,7 +622,7 @@ public class HBaseDataHandler implements DataHandler
                 if (Collection.class.isAssignableFrom(columnFamilyClass))
                 {
 
-                    Field embeddedCollectionField = columnFamily.getField();
+                    Field embeddedCollectionField = (Field) attribute.getJavaMember();
                     Object[] embeddedObjectArr = new Object[hbaseValues.size()]; // Array
                                                                                  // to
                                                                                  // hold
@@ -600,7 +639,7 @@ public class HBaseDataHandler implements DataHandler
                         // matches with column family name
                         // in the format <Collection field name>#<sequence
                         // count>
-                        if (!cfInHbase.startsWith(columnFamily.getName()))
+                        if (!cfInHbase.startsWith(key))
                         {
                             if (relationNames != null && relationNames.contains(cfInHbase))
                             {
@@ -654,7 +693,7 @@ public class HBaseDataHandler implements DataHandler
                     {
                         String cfInHbase = Bytes.toString(colData.getFamily());
 
-                        if (!cfInHbase.equals(columnFamily.getName()))
+                        if (!cfInHbase.equals(key))
                         {
                             if (relationNames != null && relationNames.contains(cfInHbase))
                             {

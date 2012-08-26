@@ -49,6 +49,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessException;
@@ -166,7 +167,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         Object result = null;
         try
         {
-            result = s.get(clazz, getKey(key, entityMetadata.getIdColumn().getField()));
+            result = s.get(clazz, getKey(key, (Field) entityMetadata.getIdAttribute().getJavaMember()));
         }
         catch (Exception e)
         {
@@ -194,7 +195,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), arg0);
 
         Object[] pKeys = getDataType(entityMetadata, arg1);
-        String id = entityMetadata.getIdColumn().getField().getName();
+        String id = ((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName();
 
         Criteria c = s.createCriteria(arg0);
 
@@ -229,7 +230,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
                 {
 
                     String updateSql = "Update " + metadata.getTableName() + " SET " + linkName + "= '" + linkValue
-                            + "' WHERE " + metadata.getIdColumn().getName() + " = '" + id + "'";
+                            + "' WHERE " + ((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName() + " = '" + id + "'";
                     s.createSQLQuery(updateSql).executeUpdate();
                 }
             }
@@ -446,7 +447,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             for (String r : relations)
             {
                 String name = MetadataUtils.getMappedName(m, m.getRelation(r));
-                if (!m.getIdColumn().getName().equalsIgnoreCase(name != null ? name : r))
+                if (!((AbstractAttribute)m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(name != null ? name : r))
                 {
                     q.addScalar(name != null ? name : r);
                 }
@@ -565,7 +566,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      */
     private Object[] getDataType(EntityMetadata entityMetadata, Object... arg1) throws PropertyAccessException
     {
-        Field idField = entityMetadata.getIdColumn().getField();
+        Field idField = (Field) entityMetadata.getIdAttribute().getJavaMember();
         PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(idField);
 
         Object[] pKeys = new Object[arg1.length];

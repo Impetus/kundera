@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Query;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +39,9 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.query.KunderaQuery;
@@ -253,7 +258,7 @@ public class HBaseQuery extends QueryImpl implements Query
          */
         void translate(KunderaQuery query, EntityMetadata m)
         {
-            String idColumn = m.getIdColumn().getName();
+            String idColumn = ((AbstractAttribute)m.getIdAttribute()).getJPAColumnName();
             boolean isIdColumn = false;
             for (Object obj : query.getFilterClauseQueue())
             {
@@ -448,9 +453,9 @@ public class HBaseQuery extends QueryImpl implements Query
      *            value.
      * @return bytes value.
      */
-    private byte[] getBytes(String fieldName, EntityMetadata m, String value)
+    private byte[] getBytes(String jpaFieldName, EntityMetadata m, String value)
     {
-        Column idCol = m.getIdColumn();
+/*        Attribute idCol = m.getIdAttribute() ;
         Field f = null;
         boolean isId = false;
         if (idCol.getName().equals(fieldName))
@@ -466,6 +471,30 @@ public class HBaseQuery extends QueryImpl implements Query
                 throw new QueryHandlerException("column type is null for: " + fieldName);
             }
             f = col.getField();
+        }
+*/
+//      Column idCol = m.getIdColumn();
+        Attribute idCol =  m.getIdAttribute();
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        
+        EntityType entity = metaModel.entity(m.getEntityClazz());
+        Field f = null;
+        boolean isId = false;
+        if (((AbstractAttribute)idCol).getJPAColumnName().equals(jpaFieldName))
+        {
+            f = (Field) idCol.getJavaMember();
+            isId = true;
+        }
+        else
+        {
+            String fieldName = m.getFieldName(jpaFieldName);
+            Attribute col = entity.getAttribute(fieldName);
+//            Column col = m.getColumn(jpaFieldName);
+            if (col == null)
+            {
+                throw new QueryHandlerException("column type is null for: " + jpaFieldName);
+            }
+            f = (Field) col.getJavaMember();
         }
 
         if (f != null && f.getType() != null)
@@ -502,14 +531,14 @@ public class HBaseQuery extends QueryImpl implements Query
             }
             else
             {
-                log.error("Error while handling data type for:" + fieldName);
+                log.error("Error while handling data type for:" + jpaFieldName);
                 throw new QueryHandlerException("unsupported data type:" + f.getType());
             }
         }
         else
         {
-            log.error("Error while handling data type for:" + fieldName);
-            throw new QueryHandlerException("field type is null for:" + fieldName);
+            log.error("Error while handling data type for:" + jpaFieldName);
+            throw new QueryHandlerException("field type is null for:" + jpaFieldName);
         }
     }
 

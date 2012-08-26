@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
@@ -40,6 +41,8 @@ import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 
 /**
  * Data handler for Thrift Clients
@@ -58,14 +61,19 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
             boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
     {
 
-        List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        
+//      List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
+      Set<String> superColumnAttribs = metaModel.getEmbeddables(m.getEntityClazz()).keySet(); 
+
+//       List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
         Object e = null;
         
         IPooledConnection conn = PelopsUtils.getCassandraConnection(m.getPersistenceUnit());
         Cassandra.Client cassandra_client = conn.getAPI();              
         cassandra_client.set_keyspace(m.getSchema());
 
-        if (!superColumnNames.isEmpty())
+        if (!superColumnAttribs.isEmpty())
         {
             if (m.isCounterColumnType())
             {

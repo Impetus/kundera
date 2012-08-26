@@ -66,6 +66,8 @@ import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
@@ -114,6 +116,7 @@ public abstract class CassandraClientBase extends ClientBase
     protected void addRelationsToThriftRow(EntityMetadata metadata, ThriftRow tf, List<RelationHolder> relations)
     {
         long timestamp = System.currentTimeMillis();
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
 
         if (relations != null)
         {
@@ -124,7 +127,8 @@ public abstract class CassandraClientBase extends ClientBase
 
                 if (linkName != null && linkValue != null)
                 {
-                    if (metadata.getEmbeddedColumnsAsList().isEmpty())
+//                    if (metadata.getEmbeddedColumnsAsList().isEmpty())
+                    if (metaModel.getEmbeddables(metadata.getEntityClazz()).isEmpty()/*metadata.getEmbeddedColumnsAsList().isEmpty()*/)
                     {
                         if (metadata.isCounterColumnType())
                         {
@@ -638,14 +642,17 @@ public abstract class CassandraClientBase extends ClientBase
             List<KeySlice> keys, CassandraDataHandler dataHandler) throws Exception
     {
         List results;
-        List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        
+//        List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
+        Set<String> superColumnAttribs = metaModel.getEmbeddables(m.getEntityClazz()).keySet(); 
         results = new ArrayList(keys.size());
         for (KeySlice key : keys)
         {
             List<ColumnOrSuperColumn> columns = key.getColumns();
             byte[] rowKey = key.getKey();
 
-            if (!superColumnNames.isEmpty())
+            if (!superColumnAttribs.isEmpty())
             {
                 Object r = null;
 

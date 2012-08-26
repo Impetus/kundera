@@ -15,10 +15,17 @@
  */
 package com.impetus.client.cassandra.index;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
+
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ConsistencyLevel;
@@ -28,8 +35,10 @@ import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.SearchResult;
-import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.DefaultSingularAttribute;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -68,8 +77,9 @@ public abstract class InvertedIndexHandlerBase
             // property is incorrectly passed as column name
 
             // Search based on Primary key
-            if (rowKey.equals(m.getIdColumn().getField().getName()) || rowKey.equals(m.getIdColumn().getName()))
-            {
+//            if (rowKey.equals(m.getIdAttribute()().getField().getName()) || rowKey.equals(m.getIdColumn().getName()))
+            if (rowKey.equals(m.getIdAttribute().getName()) || rowKey.equals(((DefaultSingularAttribute)m.getIdAttribute()).getJPAColumnName()))
+          {
 
                 searchResult.setPrimaryKey(columnName);
 
@@ -134,8 +144,7 @@ public abstract class InvertedIndexHandlerBase
                     byte[] columnValue = thriftColumn.getValue();
                     String columnValueStr = Bytes.toUTF8(columnValue);
 
-                    PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(m.getIdColumn()
-                            .getField());
+                    PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor((Field) m.getIdAttribute().getJavaMember());
                     Object value = null;
 
                     if (columnValueStr.indexOf(Constants.INDEX_TABLE_EC_DELIMITER) > 0)
@@ -154,7 +163,7 @@ public abstract class InvertedIndexHandlerBase
                     }
                     else
                     {
-                        value = accessor.fromBytes(m.getIdColumn().getField().getClass(), columnValue);
+                        value = accessor.fromBytes(m.getIdAttribute().getJavaType(), columnValue);
                         searchResult.setPrimaryKey(value);
                     }
                     searchResults.add(searchResult);
@@ -168,24 +177,36 @@ public abstract class InvertedIndexHandlerBase
 
     public void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel)
     {
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
         if (CassandraIndexHelper.isInvertedIndexingApplicable(metadata))
         {
 
             String indexColumnFamily = CassandraIndexHelper.getInvertedIndexTableName(metadata.getTableName());
-            for (EmbeddedColumn embeddedColumn : metadata.getEmbeddedColumnsAsList())
+            Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(metadata.getEntityClazz());
+//            for (EmbeddedColumn embeddedColumn : metadata.getEmbeddedColumnsAsList())
+            EntityType entityType = metaModel.entity(metadata.getEntityClazz());
+            for(String fieldName : embeddables.keySet())
             {
-                Object embeddedObject = PropertyAccessorHelper.getObject(entity, embeddedColumn.getField());
+                EmbeddableType embeddedColumn = embeddables.get(fieldName);
+                Attribute embeddedAttribute = entityType.getAttribute(fieldName);
+//                Object embeddedObject = PropertyAccessorHelper.getObject(entity, embeddedColumn.getField());
+                Object embeddedObject = PropertyAccessorHelper.getObject(entity, (Field) embeddedAttribute.getJavaMember());
+                
                 if (embeddedObject != null)
                 {
                     if (embeddedObject instanceof Collection)
                     {
                         for (Object obj : (Collection) embeddedObject)
                         {
-                            for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
+                            Iterator<Attribute> iter = embeddedColumn.getAttributes().iterator();
+                            while(iter.hasNext())
+//                            for(Attribute column : embeddedColumn.getAttributes())
+//                            for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
                             {
-                                String rowKey = embeddedColumn.getField().getName()
-                                        + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + column.getField().getName();
-                                byte[] columnName = PropertyAccessorHelper.get(obj, column.getField());
+                                Attribute attrib = iter.next();
+                                String rowKey = embeddedAttribute.getName()
+                                        + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + attrib.getName();
+                                byte[] columnName = PropertyAccessorHelper.get(obj, (Field) attrib.getJavaMember());
                                 if (columnName != null)
                                 {
                                     deleteColumn(indexColumnFamily, rowKey, columnName, metadata.getPersistenceUnit(),
@@ -198,17 +219,35 @@ public abstract class InvertedIndexHandlerBase
                     }
                     else
                     {
-                        for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
+
+                        Iterator<Attribute> iter = embeddedColumn.getAttributes().iterator();
+                        while(iter.hasNext())
+//                        for(Attribute column : embeddedColumn.getAttributes())
+//                        for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
                         {
-                            String rowKey = embeddedColumn.getField().getName()
-                                    + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + column.getField().getName();
-                            byte[] columnName = PropertyAccessorHelper.get(embeddedObject, column.getField());
+                            Attribute attrib = iter.next();
+                            String rowKey = embeddedAttribute.getName()
+                                    + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + attrib.getName();
+                            byte[] columnName = PropertyAccessorHelper.get(embeddedObject, (Field) attrib.getJavaMember());
                             if (columnName != null)
                             {
                                 deleteColumn(indexColumnFamily, rowKey, columnName, metadata.getPersistenceUnit(),
                                         consistencyLevel);
                             }
+
                         }
+                        
+//                        for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
+//                        {
+//                            String rowKey = embeddedColumn.getField().getName()
+//                                    + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + column.getField().getName();
+//                            byte[] columnName = PropertyAccessorHelper.get(embeddedObject, column.getField());
+//                            if (columnName != null)
+//                            {
+//                                deleteColumn(indexColumnFamily, rowKey, columnName, metadata.getPersistenceUnit(),
+//                                        consistencyLevel);
+//                            }
+//                        }
                     }
                 }
             }

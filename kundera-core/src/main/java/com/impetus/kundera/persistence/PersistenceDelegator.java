@@ -416,7 +416,9 @@ public class PersistenceDelegator
                     {
                         for (Object pk : jtData.getJoinTableRecords().keySet())
                         {
-                            client.deleteByColumn(jtData.getJoinTableName(), m.getIdColumn().getName(), pk);
+//                            client.deleteByColumn(jtData.getJoinTableName(), m.getIdColumn().getName(), pk);
+                            client.deleteByColumn(jtData.getJoinTableName(), m.getIdAttribute().getName(), pk);
+
                         }
                     }
                     jtData.setProcessed(true);

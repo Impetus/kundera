@@ -118,7 +118,8 @@ public class EntityResolver
         if (null == id || id.trim().isEmpty())
         {
             throw new ReaderResolverException("Missing primary key >> " + entityMetaData.getEntityClazz().getName()
-                    + "#" + entityMetaData.getIdColumn().getField().getName());
+//                    + "#" + entityMetaData.getIdColumn().getField().getName());
+                    + "#" + entityMetaData.getIdAttribute().getName());
         }
 
         // Dummy name to check if the object is already processed

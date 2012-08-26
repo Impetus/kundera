@@ -15,6 +15,7 @@
  */
 package com.impetus.client.cassandra.thrift;
 
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,12 +142,12 @@ public class ThriftDataResultHelper
      */
     public static List<Object> getRowKeys(List<KeySlice> keySlices, EntityMetadata metadata)
     {
-        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn().getField());
+        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor((Field) metadata.getIdAttribute().getJavaMember());
         List<Object> rowKeys = new ArrayList<Object>();
         for (KeySlice keySlice : keySlices)
         {
             byte[] key = keySlice.getKey();
-            Object rowKey = accessor.fromBytes(metadata.getIdColumn().getField().getType(), key);
+            Object rowKey = accessor.fromBytes(metadata.getIdAttribute().getJavaType(), key);
             rowKeys.add(rowKey);
         }
         return rowKeys;

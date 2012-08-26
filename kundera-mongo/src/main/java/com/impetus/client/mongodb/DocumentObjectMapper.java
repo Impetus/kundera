@@ -23,11 +23,13 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.metadata.model.Column;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.mongodb.BasicDBList;
@@ -57,19 +59,20 @@ public class DocumentObjectMapper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static BasicDBObject getDocumentFromObject(Object obj, List<Column> columns) throws PropertyAccessException
+    public static BasicDBObject getDocumentFromObject(Object obj, Set<Attribute> columns) throws PropertyAccessException
     {
         BasicDBObject dBObj = new BasicDBObject();
 
-        for (Column column : columns)
+//        for (Column column : columns)
+        for(Attribute column : columns)
         {
-            Field f = column.getField();
+            Field f = (Field) column.getJavaMember();
             // TODO: This is not a good logic and need to be modified
             if (f.getType().isPrimitive() || f.getType().equals(String.class) || f.getType().equals(Integer.class)
                     || f.getType().equals(Long.class) || f.getType().equals(Short.class)
                     || f.getType().equals(Float.class) || f.getType().equals(Double.class))
             {
-                Object val = PropertyAccessorHelper.getObject(obj, column.getField());
+                Object val = PropertyAccessorHelper.getObject(obj, f);
                 dBObj.put(column.getName(), val);
             }
             else
@@ -94,7 +97,7 @@ public class DocumentObjectMapper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static BasicDBObject[] getDocumentListFromCollection(Collection coll, List<Column> columns)
+    public static BasicDBObject[] getDocumentListFromCollection(Collection coll, Set<Attribute> columns)
             throws PropertyAccessException
     {
         BasicDBObject[] dBObjects = new BasicDBObject[coll.size()];
@@ -120,15 +123,16 @@ public class DocumentObjectMapper
      *            the columns
      * @return the object from document
      */
-    public static Object getObjectFromDocument(BasicDBObject documentObj, Class clazz, List<Column> columns)
+    public static Object getObjectFromDocument(BasicDBObject documentObj, Class clazz, Set<Attribute> columns)
     {
         try
         {
             Object obj = clazz.newInstance();
-            for (Column column : columns)
+//            for (Column column : columns)
+            for(Attribute column : columns)
             {
-                Object val = documentObj.get(column.getName());
-                PropertyAccessorHelper.set(obj, column.getField(), val);
+                Object val = documentObj.get(((AbstractAttribute)column).getJPAColumnName());
+                PropertyAccessorHelper.set(obj, (Field) column.getJavaMember(), val);
             }
             return obj;
 
@@ -164,7 +168,7 @@ public class DocumentObjectMapper
      * @return the collection from document list
      */
     public static Collection<?> getCollectionFromDocumentList(BasicDBList documentList, Class embeddedCollectionClass,
-            Class embeddedObjectClass, List<Column> columns)
+            Class embeddedObjectClass, Set<Attribute> columns)
     {
         Collection<Object> embeddedCollection = null;
         if (embeddedCollectionClass.equals(Set.class))

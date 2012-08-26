@@ -15,6 +15,7 @@
  */
 package com.impetus.client.cassandra.thrift;
 
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -156,7 +157,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
         try
         {            
-            byte[] rowKey = PropertyAccessorHelper.get(entity, entityMetadata.getIdColumn().getField());
+//            byte[] rowKey = PropertyAccessorHelper.get(entity, entityMetadata.getIdColumn().getField());
+            byte[] rowKey = PropertyAccessorHelper.get(entity, (Field) entityMetadata.getIdAttribute().getJavaMember());
             String columnFamily = entityMetadata.getTableName();
             // Create Insertion List
             List<Mutation> insertion_list = new ArrayList<Mutation>();
@@ -275,8 +277,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
             for (Object key : joinTableRecords.keySet())
             {
-                PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(entityMetadata.getIdColumn()
-                        .getField());
+                PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor((Field) entityMetadata.getIdAttribute().getJavaMember());
                 byte[] rowKey = accessor.toBytes(key);
 
                 Set<Object> values = joinTableRecords.get(key);

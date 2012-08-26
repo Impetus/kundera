@@ -45,6 +45,8 @@ import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 import javax.persistence.metamodel.Type.PersistenceType;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dom4j.IllegalAddException;
 
 import com.impetus.kundera.loader.MetamodelLoaderException;
@@ -74,6 +76,9 @@ import com.impetus.kundera.metadata.model.type.DefaultMappedSuperClass;
  */
 public final class MetaModelBuilder<X, T>
 {
+    /** The Constant log. */
+    private static final Log LOG = LogFactory.getLog(MetaModelBuilder.class);
+
 
     /** The managed type. */
     private AbstractManagedType<X> managedType;
@@ -195,7 +200,16 @@ public final class MetaModelBuilder<X, T>
                 return processOnEmbeddables(attribType);
 
             case ELEMENT_COLLECTION:
-                return processOnEmbeddables(attribType);
+                if(attribute != null && Collection.class.isAssignableFrom(attribType))
+                {
+                java.lang.reflect.Type[] argument = ((ParameterizedType) attribute.getGenericType())
+                .getActualTypeArguments();
+                
+                return processOnEmbeddables(getTypedClass(argument[0]));
+                } else 
+                {
+                    LOG.warn("Cannot process for : " + attribute + " as it is not a collection but annotated with @ElementCollection");
+                }
             default:
                 if (!(managedTypes.get(attribType) != null))
                 {
@@ -239,7 +253,7 @@ public final class MetaModelBuilder<X, T>
          *            the attrib type
          * @return the abstract managed type
          */
-        private <T> AbstractManagedType<T> processOnEmbeddables(Class<T> attribType)
+        private  AbstractManagedType processOnEmbeddables(Class attribType)
         {
             // Check if this embeddable type is already present in
             // collection of MetaModelBuider.

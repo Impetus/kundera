@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
@@ -40,6 +41,8 @@ import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyTy
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 
 /**
  * Provides Pelops utility methods for data held in Column family based stores.
@@ -79,11 +82,15 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
             boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(m.getPersistenceUnit()));
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        
+//      List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
+      Set<String> superColumnAttribs = metaModel.getEmbeddables(m.getEntityClazz()).keySet(); 
 
-        List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
+//        List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
         Object e = null;
 
-        if (!superColumnNames.isEmpty())
+        if (!superColumnAttribs.isEmpty())
         {
             if (m.isCounterColumnType())
             {

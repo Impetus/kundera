@@ -215,7 +215,8 @@ public class PropertyAccessorHelper
 
         // Otherwise, as Kundera currently supports only field access, access
         // the underlying Entity's id field
-        return getString(entity, metadata.getIdColumn().getField());
+//        return getString(entity, metadata.getIdColumn().getField());
+        return getString(entity, (Field) metadata.getIdAttribute().getJavaMember());
     }  
     
 
@@ -235,7 +236,8 @@ public class PropertyAccessorHelper
     {
         try
         {
-            Field idField = metadata.getIdColumn().getField();
+//            Field idField = metadata.getIdColumn().getField();
+            Field idField = (Field) metadata.getIdAttribute().getJavaMember();
             PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(idField);
             Object obj = accessor.fromString(idField.getClass(), rowKey);
 
@@ -271,7 +273,9 @@ public class PropertyAccessorHelper
     {
         try
         {
-            Field idField = metadata.getIdColumn().getField();
+//            Field idField = metadata.getIdColumn().getField();
+            Field idField = (Field) metadata.getIdAttribute().getJavaMember();
+
             PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(idField);
             Object obj = accessor.fromBytes(idField.getClass(), rowKey);
 

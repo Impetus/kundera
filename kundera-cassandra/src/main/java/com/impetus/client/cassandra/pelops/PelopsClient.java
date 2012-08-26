@@ -16,6 +16,7 @@
 
 package com.impetus.client.cassandra.pelops;
 
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -283,9 +284,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         {
             Bytes rowKey = rowIter.next();
 
-            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn()
-                    .getField());
-            Object value = accessor.fromBytes(metadata.getIdColumn().getField().getClass(), rowKey.toByteArray());
+            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor((Field) metadata.getIdAttribute().getJavaMember());
+            Object value = accessor.fromBytes(metadata.getIdAttribute().getJavaType(), rowKey.toByteArray());
 
             rowKeys.add(value);
         }

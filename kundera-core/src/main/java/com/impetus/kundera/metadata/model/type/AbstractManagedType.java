@@ -85,7 +85,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
             attributes.addAll(superClazzType.getDeclaredAttributes());
         }
 
-        return attributes.isEmpty() ? null : attributes;
+        return attributes;
     }
 
     /*
@@ -107,7 +107,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
             attributes.addAll(declaredPluralAttributes.values());
         }
 
-        return attributes.isEmpty() ? null : attributes;
+        return attributes;
     }
 
     /*
@@ -171,7 +171,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
             singularAttrib.addAll(declaredAttribSet);
         }
 
-        return singularAttrib.isEmpty() ? null : singularAttrib;
+        return singularAttrib;
     }
 
     /*
@@ -424,7 +424,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
             pluralAttributes.addAll(superClazzType.getDeclaredPluralAttributes());
         }
 
-        return pluralAttributes.isEmpty() ? null : pluralAttributes;
+        return pluralAttributes;
     }
 
     /*

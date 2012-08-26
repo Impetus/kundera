@@ -21,12 +21,15 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
 
 import org.cloner.Cloner;
 import org.hibernate.collection.AbstractPersistentCollection;
@@ -37,6 +40,7 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -110,15 +114,30 @@ public class ObjectUtils
             metadata.getWriteIdentifierMethod().invoke(target, id);
 
             // Copy Columns (in a table that doesn't have any embedded objects
-            for (Column column : metadata.getColumnsAsList())
+            
+            EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit()).entity(sourceObjectClass);
+
+            //            for (Column column : metadata.getColumnsAsList())
+//            {
+//                Field columnField = column.getField();
+//                PropertyAccessorHelper.set(target, columnField, PropertyAccessorHelper.getObject(source, columnField));
+//            }
+
+            Iterator<Attribute> iter = entityType.getAttributes().iterator();
+            while(iter.hasNext())
             {
-                Field columnField = column.getField();
+                Attribute attrib = iter.next();
+                
+                Field columnField = (Field) attrib.getJavaMember();
                 PropertyAccessorHelper.set(target, columnField, PropertyAccessorHelper.getObject(source, columnField));
             }
-
+            
             // Copy Embedded Columns, Element Collections are columns (in a
             // table that only has embedded objects)
-            for (EmbeddedColumn embeddedColumn : metadata.getEmbeddedColumnsAsList())
+           
+            //TODO: Above written code should be able to handle embedded attributes.
+            
+            /*for (EmbeddedColumn embeddedColumn : metadata.getEmbeddedColumnsAsList())
             {
                 Field embeddedColumnField = embeddedColumn.getField();
 
@@ -184,7 +203,7 @@ public class ObjectUtils
                     }
                 }
             }
-
+*/
             // Put this object into copied object map
             copiedObjectMap.put(sourceObjectClass.getName() + "#" + id, target);
 
