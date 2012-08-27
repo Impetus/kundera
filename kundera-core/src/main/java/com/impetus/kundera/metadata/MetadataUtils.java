@@ -67,18 +67,6 @@ public class MetadataUtils
     {
 
         getEmbeddableType(m, columnNameToFieldMap, superColumnNameToFieldMap);
-
-        // for (Map.Entry<String, EmbeddedColumn> entry :
-        // m.getEmbeddedColumnsMap().entrySet())
-        // {
-        // EmbeddedColumn scMetadata = entry.getValue();
-        // superColumnNameToFieldMap.put(scMetadata.getName(),
-        // scMetadata.getField());
-        // for (Column column : entry.getValue().getColumns())
-        // {
-        // columnNameToFieldMap.put(column.getName(), column.getField());
-        // }
-        // }
     }
 
     /**
@@ -476,6 +464,9 @@ public class MetadataUtils
                 {
                     getAttributeOfEmbedddable(columnNameToFieldMap, metaModel, attribute);
                 }
+            } else 
+            {
+                columnNameToFieldMap.put(((AbstractAttribute)attribute).getJPAColumnName(), (Field) attribute.getJavaMember());
             }
         }
     }
@@ -493,7 +484,7 @@ public class MetadataUtils
             // embeddable.
             if (!((MetamodelImpl) metaModel).isEmbeddable(embedAttrib.getJavaType()))
             {
-                columnNameToFieldMap.put(((AbstractAttribute)embedAttrib).getName(), (Field) embedAttrib.getJavaMember());
+                columnNameToFieldMap.put(((AbstractAttribute)embedAttrib).getJPAColumnName(), (Field) embedAttrib.getJavaMember());
             }
         }
     }

@@ -52,6 +52,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 public final class ThriftDataHandler extends CassandraDataHandlerBase implements CassandraDataHandler
 {    
 
+    
     public ThriftDataHandler()
     {        
     }
@@ -87,9 +88,9 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
                 Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = cassandra_client
                         .multiget_slice(rowKeys, new ColumnParent(m.getTableName()), predicate, consistencyLevel);
 
-                List<CounterSuperColumn> thriftCounterSuperColumns = ThriftDataResultHelper
+                List<CounterSuperColumn> thriftCounterSuperColumns = thriftTranslator
                         .transformThriftResultAndAddToList(thriftColumnOrSuperColumns,
-                                ColumnFamilyType.COUNTER_SUPER_COLUMN);
+                                ColumnFamilyType.COUNTER_SUPER_COLUMN,null);
 
                 if (thriftCounterSuperColumns != null)
                 {
@@ -108,7 +109,7 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
                         consistencyLevel);
 
                 List<SuperColumn> thriftSuperColumns = ThriftDataResultHelper.transformThriftResult(
-                        columnOrSuperColumns, ColumnFamilyType.SUPER_COLUMN);
+                        columnOrSuperColumns, ColumnFamilyType.SUPER_COLUMN,null);
 
                 e = fromSuperColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), null,
                         thriftSuperColumns, null, null), relationNames, isWrapReq);

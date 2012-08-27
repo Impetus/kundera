@@ -450,7 +450,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
 
         List<SuperColumn> superColumns = ThriftDataResultHelper.transformThriftResult(coscList,
-                ColumnFamilyType.SUPER_COLUMN);
+                ColumnFamilyType.SUPER_COLUMN,null);
         return superColumns;
     }
 
@@ -504,7 +504,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             PelopsUtils.releaseConnection(conn);
         }
 
-        List<Column> columns = ThriftDataResultHelper.transformThriftResult(results, ColumnFamilyType.COLUMN);
+        List<Column> columns = ThriftDataResultHelper.transformThriftResult(results, ColumnFamilyType.COLUMN,null);
 
         List<E> foreignKeys = dataHandler.getForeignKeysFromJoinTable(columnName, columns);
         return foreignKeys;
@@ -807,7 +807,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     List<ColumnOrSuperColumn> coscList = keySlice.getColumns();
 
                     List<Column> columns = ThriftDataResultHelper.transformThriftResult(coscList,
-                            ColumnFamilyType.COLUMN);
+                            ColumnFamilyType.COLUMN,null);
 
                     Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m, new ThriftRow(Bytes.toUTF8(key),
                             m.getTableName(), columns, null, null, null), relationNames, isRelational);
@@ -863,7 +863,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     if (m.getType().isSuperColumnFamilyMetadata())
                     {
                         Map<Bytes, List<CounterSuperColumn>> qCounterSuperColumnResults = ThriftDataResultHelper
-                                .transformThriftResult(ColumnFamilyType.COUNTER_SUPER_COLUMN, ks);
+                                .transformThriftResult(ColumnFamilyType.COUNTER_SUPER_COLUMN, ks,null);
 
                         entities = new ArrayList<Object>(qCounterSuperColumnResults.size());
 
@@ -873,7 +873,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     {
 
                         Map<Bytes, List<CounterColumn>> qCounterColumnResults = ThriftDataResultHelper
-                                .transformThriftResult(ColumnFamilyType.COUNTER_COLUMN, ks);
+                                .transformThriftResult(ColumnFamilyType.COUNTER_COLUMN, ks,null);
 
                         entities = new ArrayList<Object>(qCounterColumnResults.size());
 
@@ -888,7 +888,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                             slicePredicate, keyRange, consistencyLevel);
 
                     Map<Bytes, List<Column>> qResults = ThriftDataResultHelper.transformThriftResult(
-                            ColumnFamilyType.COLUMN, keySlices);
+                            ColumnFamilyType.COLUMN, keySlices,null);
 
                     entities = new ArrayList<Object>(qResults.size());
                     populateData(m, qResults, entities, isRelation, relations, dataHandler);
@@ -903,7 +903,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                             ix, slicePredicate, consistencyLevel);
 
                     Map<Bytes, List<Column>> qResults = ThriftDataResultHelper.transformThriftResult(
-                            ColumnFamilyType.COLUMN, keySlices);
+                            ColumnFamilyType.COLUMN, keySlices,null);
                     // iterate through complete map and
                     populateData(m, qResults, entities, isRelation, relations, dataHandler);
                 }

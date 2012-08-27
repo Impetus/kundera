@@ -21,24 +21,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.cassandra.thrift.Column;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
+
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.thrift.TBase;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
-import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
-import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
 import com.impetus.client.cassandra.thrift.ThriftRow;
+import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -77,17 +78,15 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
      *             the exception
      */
 
-    @Override
+   /* @Override
     public Object fromThriftRow(Class<?> clazz, EntityMetadata m, String rowKey, List<String> relationNames,
             boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(m.getPersistenceUnit()));
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
         
-//      List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
       Set<String> superColumnAttribs = metaModel.getEmbeddables(m.getEntityClazz()).keySet(); 
 
-//        List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
         Object e = null;
 
         if (!superColumnAttribs.isEmpty())
@@ -171,7 +170,32 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
             }
         }
         return e;
+    }*/
+    
+    @Override
+    public Object fromThriftRow(Class<?> clazz, EntityMetadata m, String rowKey, List<String> relationNames,
+            boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
+    {
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(m.getPersistenceUnit()));
+
+        List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>(1);
+        rowKeys.add(ByteBufferUtil.bytes(rowKey));
+        
+        Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = selector
+        .getColumnOrSuperColumnsFromRows(new ColumnParent(m.getTableName()), rowKeys,
+                Selector.newColumnsPredicateAll(true, 10000), consistencyLevel);
+
+        ThriftRow tr = new ThriftRow();
+        tr.setId(rowKey);
+        tr.setColumnFamilyName(m.getTableName());
+
+        tr = thriftTranslator.translateToThriftRow(thriftColumnOrSuperColumns,
+                m.isCounterColumnType(), m.getType(),tr);
+        
+        return populateEntity(tr,m,relationNames,isWrapReq);
     }
+    
+    
 
     /** Translation Methods */
 

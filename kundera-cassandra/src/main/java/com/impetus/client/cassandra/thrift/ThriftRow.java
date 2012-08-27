@@ -51,6 +51,7 @@ public class ThriftRow
     /**
      * default constructor.
      */
+
     public ThriftRow()
     {
         columns = new ArrayList<Column>();
