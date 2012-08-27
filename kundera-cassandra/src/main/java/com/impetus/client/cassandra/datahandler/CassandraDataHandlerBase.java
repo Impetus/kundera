@@ -1238,10 +1238,10 @@ public abstract class CassandraDataHandlerBase
                 } else if(m.getType().equals(Type.SUPER_COLUMN_FAMILY))
                 {
                     
-                    prepareSuperColumn(tr, m, value, name);
+                    prepareSuperColumn(tr, m, value, name, timestamp2);
                 } else 
                 {
-                    prepareColumn(tr, m, value, name);
+                    prepareColumn(tr, m, value, name,timestamp2);
                 }
                 
 
@@ -1250,7 +1250,7 @@ public abstract class CassandraDataHandlerBase
 
     }
 
-    private void prepareColumn(ThriftRow tr, EntityMetadata m, String value, byte[] name)
+    private void prepareColumn(ThriftRow tr, EntityMetadata m, String value, byte[] name, long timestamp)
     {
         if (m.isCounterColumnType())
         {
@@ -1259,12 +1259,12 @@ public abstract class CassandraDataHandlerBase
         }
         else
         {
-            Column column = prepareColumn(value, name);
+            Column column = prepareColumn(value, name,timestamp);
             tr.addColumn(column);
         }
     }
 
-    private void prepareSuperColumn(ThriftRow tr, EntityMetadata m, String value, byte[] name)
+    private void prepareSuperColumn(ThriftRow tr, EntityMetadata m, String value, byte[] name, long timestamp)
     {
         if(m.isCounterColumnType())
         {
@@ -1279,7 +1279,7 @@ public abstract class CassandraDataHandlerBase
         {
             SuperColumn superCol = new SuperColumn();
             superCol.setName(name);
-            Column column = prepareColumn(value, name);
+            Column column = prepareColumn(value, name,timestamp);
             List<Column> subColumn = new ArrayList<Column>();
             subColumn.add(column);
             superCol.setColumns(subColumn);
@@ -1288,11 +1288,12 @@ public abstract class CassandraDataHandlerBase
         }
     }
 
-    private Column prepareColumn(String value, byte[] name)
+    private Column prepareColumn(String value, byte[] name, long timestamp)
     {
         Column column = new Column();
         column.setName(name);
         column.setValue(value.getBytes());
+        column.setTimestamp(timestamp);
         return column;
     }
 
