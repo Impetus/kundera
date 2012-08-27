@@ -171,8 +171,10 @@ public class ThriftDataResultHelper
             if (columnFamilyType.equals(Type.SUPER_COLUMN_FAMILY))
             {
                 columnType = ColumnFamilyType.COUNTER_SUPER_COLUMN;
+            } else
+            {
+                columnType = ColumnFamilyType.COUNTER_COLUMN;
             }
-            columnType = ColumnFamilyType.COUNTER_COLUMN;
         }
         else if (columnFamilyType.equals(Type.SUPER_COLUMN_FAMILY))
         {

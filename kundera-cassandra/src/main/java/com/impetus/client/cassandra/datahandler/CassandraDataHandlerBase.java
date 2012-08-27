@@ -27,6 +27,7 @@ import java.util.StringTokenizer;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.PluralAttribute;
@@ -1031,6 +1032,10 @@ public abstract class CassandraDataHandlerBase
         Collection embeddedCollection = null;
         Field embeddedCollectionField = null;
 
+        boolean mappingProcessed=false;
+        Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
+        Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
+
         for(SuperColumn superColumn : tr.getSuperColumns())
         {
             String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, superColumn.getName());
@@ -1040,10 +1045,10 @@ public abstract class CassandraDataHandlerBase
             Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
             // Get a name->field map for super-columns
-            Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
-            Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
-            MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
-
+            if(!mappingProcessed)
+            {
+                MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
+            }
 
                 if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
                 {
@@ -1070,6 +1075,7 @@ public abstract class CassandraDataHandlerBase
                 }
         }
 
+        mappingProcessed=false;
         
         for(CounterColumn counterColumn : tr.getCounterColumns())
         {
@@ -1085,9 +1091,12 @@ public abstract class CassandraDataHandlerBase
             Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
 
             // Get a name->field map for super-columns
-            Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
-            Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
-            MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
+            // Get a name->field map for super-columns
+            if(!mappingProcessed)
+            {
+                MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
+                mappingProcessed = true;
+            }
 
 
                 if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
@@ -1102,7 +1111,7 @@ public abstract class CassandraDataHandlerBase
 
                     Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
 
-                    scrollOverCounterSuperColumn(m, relationNames, isWrapReq, relations, entityType, counterSuperColumn,embeddedObject);
+                    scrollOverCounterSuperColumn(m, relationNames, isWrapReq, relations, entityType, counterSuperColumn,embeddedObject, columnNameToFieldMap);
                     embeddedCollection.add(embeddedObject);
 
                     // Add this embedded object to cache
@@ -1111,7 +1120,17 @@ public abstract class CassandraDataHandlerBase
                 }
                 else
                 {
-                    scrollOverCounterSuperColumn(m, relationNames, isWrapReq, relations, entityType, counterSuperColumn, entity);
+                    if (superColumnNameToFieldMap.containsKey(scName))
+                    {
+                        Field field = superColumnNameToFieldMap.get(scName);
+                        Object embeddedObj = field.getType().newInstance();
+//                        column
+                        scrollOverCounterSuperColumn(m, relationNames, isWrapReq, relations, entityType, counterSuperColumn, embeddedObj,columnNameToFieldMap);
+                        PropertyAccessorHelper.set(entity, field, embeddedObj);            
+                    } else 
+                    {
+                        scrollOverCounterSuperColumn(m, relationNames, isWrapReq, relations, entityType, counterSuperColumn, entity);
+                    }
                 }            
         }
         
@@ -1156,6 +1175,19 @@ public abstract class CassandraDataHandlerBase
         }
     }
 
+
+    private void scrollOverCounterSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
+            Map<String, Object> relations, EntityType entityType, CounterSuperColumn superColumn, Object embeddedObject, Map<String, Field> superColumnFieldMap)
+    {
+        for (CounterColumn column : superColumn.getColumns())
+        {
+            String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
+            LongAccessor accessor = new LongAccessor();
+            byte[] thriftColumnValue = accessor.toBytes(column.getValue());
+            PropertyAccessorHelper.set(embeddedObject, superColumnFieldMap.get(thriftColumnName), thriftColumnValue);
+        }
+    }
+
     
     private void onColumn(Column column, EntityMetadata m, Object entity, EntityType entityType,List<String> relationNames,boolean isWrapReq,Map<String, Object> relations)
     {
@@ -1172,12 +1204,12 @@ public abstract class CassandraDataHandlerBase
 
             String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
             LongAccessor accessor = new LongAccessor();
-            byte[] thriftColumnValue = accessor.toBytes(column.getValue());
+            String thriftColumnValue = new Long(column.getValue()).toString();
             populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue);
     }
 
     private void populateViaThrift(EntityMetadata m, Object entity, EntityType entityType, List<String> relationNames,
-            Map<String, Object> relations, String thriftColumnName, byte[] thriftColumnValue)
+            Map<String, Object> relations, String thriftColumnName, Object thriftColumnValue)
     {
         if (thriftColumnValue != null)
         {
@@ -1188,7 +1220,13 @@ public abstract class CassandraDataHandlerBase
             {
                 try
                 {
-                    PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), thriftColumnValue);
+                    if(thriftColumnValue.getClass().isAssignableFrom(String.class))
+                    {
+                        PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), (String) thriftColumnValue);
+                    } else
+                    {
+                        PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(), (byte[]) thriftColumnValue);
+                    }
                 }
                 catch (PropertyAccessException pae)
                 {
@@ -1201,7 +1239,7 @@ public abstract class CassandraDataHandlerBase
             if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
             {
                 // relations = new HashMap<String, Object>();
-                String value = PropertyAccessorFactory.STRING.fromBytes(String.class, thriftColumnValue);
+                String value = PropertyAccessorFactory.STRING.fromBytes(String.class, (byte[]) thriftColumnValue);
                 relations.put(thriftColumnName, value);
                 // prepare EnhanceEntity and return it
             }
