@@ -17,6 +17,8 @@ package com.impetus.client.cassandra.thrift;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,15 +49,19 @@ import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
+import org.scale7.cassandra.pelops.ColumnOrSuperColumnHelper;
 import org.scale7.cassandra.pelops.Selector;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraUtilities;
+import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
+import com.impetus.client.cassandra.datahandler.DataHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.query.CassQuery;
@@ -809,8 +815,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     List<Column> columns = ThriftDataResultHelper.transformThriftResult(coscList,
                             ColumnFamilyType.COLUMN,null);
 
-                    Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m, new ThriftRow(Bytes.toUTF8(key),
-                            m.getTableName(), columns, null, null, null), relationNames, isRelational);
+                    Object e = dataHandler.populateEntity(new ThriftRow(Bytes.toUTF8(key),
+                            m.getTableName(), columns, new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0)), m,relationNames, isRelational);
                     if (e != null)
                     {
                         entities.add(e);
@@ -860,25 +866,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
                     List<KeySlice> ks = cassandra_client.get_range_slices(new ColumnParent(m.getTableName()),
                             slicePredicate, keyRange, consistencyLevel);
-                    if (m.getType().isSuperColumnFamilyMetadata())
-                    {
-                        Map<Bytes, List<CounterSuperColumn>> qCounterSuperColumnResults = ThriftDataResultHelper
-                                .transformThriftResult(ColumnFamilyType.COUNTER_SUPER_COLUMN, ks,null);
-
-                        entities = new ArrayList<Object>(qCounterSuperColumnResults.size());
-
-                        populateDataForSuperCounter(m, qCounterSuperColumnResults, entities, isRelation, relations);
-                    }
-                    else
-                    {
-
-                        Map<Bytes, List<CounterColumn>> qCounterColumnResults = ThriftDataResultHelper
-                                .transformThriftResult(ColumnFamilyType.COUNTER_COLUMN, ks,null);
-
-                        entities = new ArrayList<Object>(qCounterColumnResults.size());
-
-                        populateDataForCounter(m, qCounterColumnResults, entities, isRelation, relations, dataHandler);
-                    }
+                    entities = onCounterColumn(m, isRelation, relations, ks);
 
                 }
                 else
@@ -891,7 +879,8 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                             ColumnFamilyType.COLUMN, keySlices,null);
 
                     entities = new ArrayList<Object>(qResults.size());
-                    populateData(m, qResults, entities, isRelation, relations, dataHandler);
+
+                    computeEntityViaColumns(m, isRelation, relations, entities, qResults);
                 }
             }
             else
@@ -905,7 +894,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                     Map<Bytes, List<Column>> qResults = ThriftDataResultHelper.transformThriftResult(
                             ColumnFamilyType.COLUMN, keySlices,null);
                     // iterate through complete map and
-                    populateData(m, qResults, entities, isRelation, relations, dataHandler);
+                    entities = new ArrayList<Object>(qResults.size());
+
+                    computeEntityViaColumns(m, isRelation, relations, entities, qResults);
                 }
             }
         }
@@ -977,6 +968,15 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
             Queue<FilterClause> filterClauseQueue)
     {
         return invertedIndexHandler.search(m, filterClauseQueue, getPersistenceUnit(), consistencyLevel);
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.CassandraClientBase#getDataHandler()
+     */
+    @Override
+    protected CassandraDataHandler getDataHandler()
+    {
+        return dataHandler;
     }
 
 }

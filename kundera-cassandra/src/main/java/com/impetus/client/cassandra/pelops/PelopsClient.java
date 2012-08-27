@@ -59,6 +59,8 @@ import org.scale7.cassandra.pelops.pool.IThriftPool;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.CassandraClientBase;
+import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
+import com.impetus.client.cassandra.datahandler.DataHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.client.cassandra.thrift.ThriftRow;
@@ -570,56 +572,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                     List<KeySlice> ks = thriftClient.get_range_slices(new ColumnParent(m.getTableName()),
                             slicePredicate, selector.newKeyRange("", "", maxResult), consistencyLevel);
                     connection.release();
-                    if (m.getType().isSuperColumnFamilyMetadata())
-                    {
-                        Map<Bytes, List<CounterSuperColumn>> qCounterSuperColumnResults = ColumnOrSuperColumnHelper
-                                .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_SUPER_COLUMN);
-                        entities = new ArrayList<Object>(qCounterSuperColumnResults.size());
-
-//                        populateDataForSuperCounter(m, qCounterSuperColumnResults, entities, isRelation, relations);
-
-                        for(Bytes key : qCounterSuperColumnResults.keySet())
-                        {
-                            List<CounterSuperColumn> counterSuperColumns = qCounterSuperColumnResults.get(key);
-                            try
-                            {
-                                ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(),Charset.forName("UTF-8")), m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0), counterSuperColumns);
-                                entities.add(dataHandler.populateEntity(tr, m, relations, isRelation));
-                            }
-                            catch (CharacterCodingException ccex)
-                            {
-                                log.error("Error during executing find, Caused by :" + ccex.getMessage());
-                                throw new PersistenceException(ccex);
-                            }
-                            
-                        }
-                        
-                    }
-                    else
-                    {
-
-                        Map<Bytes, List<CounterColumn>> qCounterColumnResults = ColumnOrSuperColumnHelper
-                                .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_COLUMN);
-                        entities = new ArrayList<Object>(qCounterColumnResults.size());
-
-//                        populateDataForCounter(m, qCounterColumnResults, entities, isRelation, relations, dataHandler);
-                        for(Bytes key : qCounterColumnResults.keySet())
-                        {
-                            List<CounterColumn> counterColumns = qCounterColumnResults.get(key);
-                            try
-                            {
-                                ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(),Charset.forName("UTF-8")), m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0), counterColumns, new ArrayList<CounterSuperColumn>(0));
-                                entities.add(dataHandler.populateEntity(tr, m, relations, isRelation));
-                            }
-                            catch (CharacterCodingException ccex)
-                            {
-                                log.error("Error during executing find, Caused by :" + ccex.getMessage());
-                                throw new PersistenceException(ccex);
-                            }
-                            
-                        }
-                    }
-
+                    entities = onCounterColumn(m, isRelation, relations, ks);
                 }
                 catch (InvalidRequestException irex)
                 {
@@ -670,25 +623,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return entities;
     }
 
-    private void computeEntityViaColumns(EntityMetadata m, boolean isRelation, List<String> relations,
-            List<Object> entities, Map<Bytes, List<Column>> qResults)
-    {
-        for(Bytes key : qResults.keySet())
-        {
-            List<Column> columns = qResults.get(key);
-            try
-            {
-                ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(),Charset.forName("UTF-8")), m.getTableName(), columns, new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
-                entities.add(dataHandler.populateEntity(tr, m, relations, isRelation));
-            }
-            catch (CharacterCodingException ccex)
-            {
-                log.error("Error during executing find, Caused by :" + ccex.getMessage());
-                throw new PersistenceException(ccex);
-            }
-            
-        }
-    }
 
     /**
      * Find.
@@ -772,6 +706,14 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         {
             log.warn("Please provide resonable consistency Level");
         }
+    }
+    /* (non-Javadoc)
+     * @see com.impetus.client.cassandra.CassandraClientBase#getDataHandler()
+     */
+    @Override
+    protected CassandraDataHandler getDataHandler()
+    {
+        return dataHandler;
     }
 
 }

@@ -164,8 +164,8 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
 
                 }
 
-                e = fromColumnThriftRow(clazz, m, new ThriftRow(rowKey, m.getTableName(), thriftColumns, null, null,
-                        null), relationNames, isWrapReq);
+                e = populateEntity(new ThriftRow(rowKey, m.getTableName(), thriftColumns, new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
+                        new ArrayList<CounterSuperColumn>(0)), m, relationNames, isWrapReq);
             }
         }
         
@@ -186,13 +186,6 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
     public <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception
     {
         return super.fromThriftRow(clazz, m, tr);
-    }
-
-    @Override
-    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
-            List<String> relationNames, boolean isWrapperReq) throws Exception
-    {
-        return super.fromColumnThriftRow(clazz, m, thriftRow, relationNames, isWrapperReq);
     }
 
     @Override

@@ -39,9 +39,6 @@ public interface CassandraDataHandler
     Object fromThriftRow(Class<?> clazz, EntityMetadata m, String rowKey, List<String> relationNames,
             boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception;
 
-    Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow, List<String> relationNames,
-            boolean isWrapperReq) throws Exception;
-
     Object fromCounterColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
             List<String> relationNames, boolean isWrapperReq) throws Exception;
 

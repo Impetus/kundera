@@ -27,7 +27,6 @@ import java.util.StringTokenizer;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.PluralAttribute;
@@ -59,7 +58,6 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
-import com.impetus.kundera.property.accessor.LongAccessor;
 
 /**
  * Base class for all Cassandra Data Handlers
@@ -205,7 +203,7 @@ public abstract class CassandraDataHandlerBase
      * @throws Exception
      *             the exception
      */
-    Object populateEmbeddedObject(SuperColumn sc, EntityMetadata m) throws Exception
+    private Object populateEmbeddedObject(SuperColumn sc, EntityMetadata m) throws Exception
     {
         Field embeddedCollectionField = null;
         Object embeddedObject = null;
@@ -276,92 +274,6 @@ public abstract class CassandraDataHandlerBase
             }
         }
         return embeddedObject;
-    }
-
-    /**
-     * Fetches data held in Thrift row columns and populates to Entity objects.
-     * 
-     * @param clazz
-     *            the clazz
-     * @param m
-     *            the m
-     * @param thriftRow
-     *            the cr
-     * @param relationNames
-     *            the relation names
-     * @param isWrapperReq
-     *            the is wrapper req
-     * @return the e
-     * @throws Exception
-     *             the exception
-     */
-    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
-            List<String> relationNames, boolean isWrapperReq) throws Exception
-    {
-
-        // Instantiate a new instance
-        Object entity = null;
-        Map<String, Object> relations = new HashMap<String, Object>();
-
-        for (Column c : thriftRow.getColumns())
-        {
-
-            String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, c.getName());
-            byte[] thriftColumnValue = c.getValue();
-
-            if (null == thriftColumnValue)
-            {
-                continue;
-            }
-
-            // Check if this is a property, or a column representing foreign
-            // keys
-            // com.impetus.kundera.metadata.model.Column column =
-            // m.getColumn(thriftColumnName);
-
-            EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getMetamodel(m.getPersistenceUnit()).entity(clazz);
-
-            String fieldName = m.getFieldName(thriftColumnName);
-
-            Attribute column = fieldName != null ? entityType.getAttribute(fieldName) : null;
-
-            // entityType.getAttribute(arg0)
-            if (column != null)
-            {
-                if (entity == null)
-                {
-                    entity = clazz.newInstance();
-                    // Set row-key
-                    PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
-                }
-
-                try
-                {
-                    // PropertyAccessorHelper.set(entity, column.getField(),
-                    // thriftColumnValue);
-                    PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), thriftColumnValue);
-                }
-                catch (PropertyAccessException pae)
-                {
-                    log.warn(pae.getMessage());
-                }
-            }
-            else
-            {
-                if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
-                {
-                    // relations = new HashMap<String, Object>();
-                    String value = PropertyAccessorFactory.STRING.fromBytes(String.class, thriftColumnValue);
-                    relations.put(thriftColumnName, value);
-                    // prepare EnhanceEntity and return it
-                }
-            }
-        }
-
-        return isWrapperReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, thriftRow.getId(),
-                relations) : entity;
-        // return new EnhanceEntity(entity, thriftRow.getId(), relations);
     }
 
     public Object fromCounterColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
