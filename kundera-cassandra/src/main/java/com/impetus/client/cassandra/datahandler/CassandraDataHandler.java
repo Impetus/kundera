@@ -51,4 +51,5 @@ public interface CassandraDataHandler
     Object fromCounterSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr, List<String> relationNames,
             boolean isWrapReq) throws Exception;
 
+    Object populateEntity(ThriftRow tr,EntityMetadata m,List<String> relationNames,boolean isWrapReq);
 }

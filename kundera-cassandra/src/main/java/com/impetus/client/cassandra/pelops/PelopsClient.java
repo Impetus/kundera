@@ -18,6 +18,8 @@ package com.impetus.client.cassandra.pelops;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -42,6 +44,7 @@ import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
@@ -573,7 +576,24 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                                 .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_SUPER_COLUMN);
                         entities = new ArrayList<Object>(qCounterSuperColumnResults.size());
 
-                        populateDataForSuperCounter(m, qCounterSuperColumnResults, entities, isRelation, relations);
+//                        populateDataForSuperCounter(m, qCounterSuperColumnResults, entities, isRelation, relations);
+
+                        for(Bytes key : qCounterSuperColumnResults.keySet())
+                        {
+                            List<CounterSuperColumn> counterSuperColumns = qCounterSuperColumnResults.get(key);
+                            try
+                            {
+                                ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(),Charset.forName("UTF-8")), m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0), counterSuperColumns);
+                                entities.add(dataHandler.populateEntity(tr, m, relations, isRelation));
+                            }
+                            catch (CharacterCodingException ccex)
+                            {
+                                log.error("Error during executing find, Caused by :" + ccex.getMessage());
+                                throw new PersistenceException(ccex);
+                            }
+                            
+                        }
+                        
                     }
                     else
                     {
@@ -582,7 +602,22 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
                                 .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_COLUMN);
                         entities = new ArrayList<Object>(qCounterColumnResults.size());
 
-                        populateDataForCounter(m, qCounterColumnResults, entities, isRelation, relations, dataHandler);
+//                        populateDataForCounter(m, qCounterColumnResults, entities, isRelation, relations, dataHandler);
+                        for(Bytes key : qCounterColumnResults.keySet())
+                        {
+                            List<CounterColumn> counterColumns = qCounterColumnResults.get(key);
+                            try
+                            {
+                                ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(),Charset.forName("UTF-8")), m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0), counterColumns, new ArrayList<CounterSuperColumn>(0));
+                                entities.add(dataHandler.populateEntity(tr, m, relations, isRelation));
+                            }
+                            catch (CharacterCodingException ccex)
+                            {
+                                log.error("Error during executing find, Caused by :" + ccex.getMessage());
+                                throw new PersistenceException(ccex);
+                            }
+                            
+                        }
                     }
 
                 }
@@ -615,7 +650,9 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
                 entities = new ArrayList<Object>(qResults.size());
 
-                populateData(m, qResults, entities, isRelation, relations, dataHandler);
+                computeEntityViaColumns(m, isRelation, relations, entities, qResults);
+//                populateData(m, qResults, entities, isRelation, relations, dataHandler);
+                
             }
         }
         else
@@ -625,11 +662,32 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             {
                 Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
                         consistencyLevel);
-                // iterate through complete map and
-                populateData(m, qResults, entities, isRelation, relations, dataHandler);
+                computeEntityViaColumns(m, isRelation, relations, entities, qResults);
+//                // iterate through complete map and
+//                populateData(m, qResults, entities, isRelation, relations, dataHandler);
             }
         }
         return entities;
+    }
+
+    private void computeEntityViaColumns(EntityMetadata m, boolean isRelation, List<String> relations,
+            List<Object> entities, Map<Bytes, List<Column>> qResults)
+    {
+        for(Bytes key : qResults.keySet())
+        {
+            List<Column> columns = qResults.get(key);
+            try
+            {
+                ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(),Charset.forName("UTF-8")), m.getTableName(), columns, new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
+                entities.add(dataHandler.populateEntity(tr, m, relations, isRelation));
+            }
+            catch (CharacterCodingException ccex)
+            {
+                log.error("Error during executing find, Caused by :" + ccex.getMessage());
+                throw new PersistenceException(ccex);
+            }
+            
+        }
     }
 
     /**

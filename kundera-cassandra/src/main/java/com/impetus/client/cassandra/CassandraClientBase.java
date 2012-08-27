@@ -16,7 +16,9 @@
 package com.impetus.client.cassandra;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +59,7 @@ import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
+import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.ClientBase;
@@ -647,11 +650,20 @@ public abstract class CassandraClientBase extends ClientBase
 //        List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
         Set<String> superColumnAttribs = metaModel.getEmbeddables(m.getEntityClazz()).keySet(); 
         results = new ArrayList(keys.size());
+     
+        ThriftDataResultHelper dataGenerator = new ThriftDataResultHelper();
         for (KeySlice key : keys)
         {
             List<ColumnOrSuperColumn> columns = key.getColumns();
-            byte[] rowKey = key.getKey();
-
+            ByteBuffer rowKey = ByteBuffer.wrap(key.getKey());
+            Map<ByteBuffer, List<ColumnOrSuperColumn>> data = new HashMap<ByteBuffer, List<ColumnOrSuperColumn>>(1);
+            data.put(rowKey, columns);
+            ThriftRow tr = new ThriftRow();
+            tr.setId(ByteBufferUtil.string(rowKey, Charset.forName("UTF-8")));
+            tr.setColumnFamilyName(m.getTableName());
+            tr = dataGenerator.translateToThriftRow(data, m.isCounterColumnType(), m.getType(), tr);
+            results.add(dataHandler.populateEntity(tr, m, relations, isWrapReq));
+/*
             if (!superColumnAttribs.isEmpty())
             {
                 Object r = null;
@@ -715,7 +727,7 @@ public abstract class CassandraClientBase extends ClientBase
                     results.add(r);
                 }
             }
-        }
+*/        }
         return results;
     }
 

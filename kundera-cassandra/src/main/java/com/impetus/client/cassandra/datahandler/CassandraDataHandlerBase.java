@@ -1011,20 +1011,20 @@ public abstract class CassandraDataHandlerBase
     }
 
   
-    protected Object populateEntity(ThriftRow tr,EntityMetadata m,List<String> relationNames,boolean isWrapReq)
+    public Object populateEntity(ThriftRow tr,EntityMetadata m,List<String> relationNames,boolean isWrapReq)
     {
         Map<String, Object> relations = new HashMap<String, Object>();
         Object entity = null;
         try
         {
-            entity =m.getEntityClazz().newInstance();
+//            entity =m.getEntityClazz().newInstance();
         
-        PropertyAccessorHelper.setId(entity, m, tr.getId());
 
         EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit()).entity(m.getEntityClazz());
 
         for(Column column : tr.getColumns())
         {
+            entity = initialize(tr, m, entity);
             onColumn(column, m, entity, entityType,relationNames,isWrapReq,relations);
         }
         
@@ -1038,6 +1038,8 @@ public abstract class CassandraDataHandlerBase
 
         for(SuperColumn superColumn : tr.getSuperColumns())
         {
+            entity = initialize(tr, m, entity);
+
             String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, superColumn.getName());
             String scNamePrefix = null;
 
@@ -1071,6 +1073,18 @@ public abstract class CassandraDataHandlerBase
                 }
                 else
                 {
+                    if (superColumnNameToFieldMap.containsKey(scName))
+                    {
+                        Field field = superColumnNameToFieldMap.get(scName);
+                        Object embeddedObj = field.getType().newInstance();
+//                        column
+                        scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn, embeddedObj,columnNameToFieldMap);
+                        PropertyAccessorHelper.set(entity, field, embeddedObj);            
+                    } else 
+                    {
+                        scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn, entity);
+                    }
+
                     scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn, entity);
                 }
         }
@@ -1079,11 +1093,13 @@ public abstract class CassandraDataHandlerBase
         
         for(CounterColumn counterColumn : tr.getCounterColumns())
         {
+            initialize(tr, m, entity);
             onCounterColumn(counterColumn, m, entity, entityType,relationNames,isWrapReq,relations);
         }
         
         for(CounterSuperColumn counterSuperColumn : tr.getCounterSuperColumns())
         {
+            entity = initialize(tr, m, entity);
             String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, counterSuperColumn.getName());
             String scNamePrefix = null;
 
@@ -1156,6 +1172,18 @@ public abstract class CassandraDataHandlerBase
 
     }
 
+    private Object initialize(ThriftRow tr, EntityMetadata m, Object entity) throws InstantiationException,
+            IllegalAccessException
+    {
+        if(entity == null)
+        {
+            entity = m.getEntityClazz().newInstance();
+            PropertyAccessorHelper.setId(entity, m, tr.getId());
+        }
+        
+        return entity;
+    }
+
     private void scrollOverSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
             Map<String, Object> relations, EntityType entityType, SuperColumn superColumn, Object embeddedObject)
     {
@@ -1182,8 +1210,18 @@ public abstract class CassandraDataHandlerBase
         for (CounterColumn column : superColumn.getColumns())
         {
             String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-            LongAccessor accessor = new LongAccessor();
-            byte[] thriftColumnValue = accessor.toBytes(column.getValue());
+            String thriftColumnValue = new Long(column.getValue()).toString();
+            PropertyAccessorHelper.set(embeddedObject, superColumnFieldMap.get(thriftColumnName), thriftColumnValue);
+        }
+    }
+
+    private void scrollOverSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
+            Map<String, Object> relations, EntityType entityType, SuperColumn superColumn, Object embeddedObject, Map<String, Field> superColumnFieldMap)
+    {
+        for (Column column : superColumn.getColumns())
+        {
+            String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
+            byte[] thriftColumnValue = column.getValue();
             PropertyAccessorHelper.set(embeddedObject, superColumnFieldMap.get(thriftColumnName), thriftColumnValue);
         }
     }
@@ -1191,8 +1229,6 @@ public abstract class CassandraDataHandlerBase
     
     private void onColumn(Column column, EntityMetadata m, Object entity, EntityType entityType,List<String> relationNames,boolean isWrapReq,Map<String, Object> relations)
     {
-//        Map<String, Object> relations = new HashMap<String, Object>();
-
             String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
             byte[] thriftColumnValue = column.getValue();
             populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue);
@@ -1200,10 +1236,7 @@ public abstract class CassandraDataHandlerBase
 
     private void onCounterColumn(CounterColumn column, EntityMetadata m, Object entity, EntityType entityType,List<String> relationNames,boolean isWrapReq,Map<String, Object> relations)
     {
-//        Map<String, Object> relations = new HashMap<String, Object>();
-
             String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-            LongAccessor accessor = new LongAccessor();
             String thriftColumnValue = new Long(column.getValue()).toString();
             populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue);
     }
