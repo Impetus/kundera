@@ -122,7 +122,6 @@ public final class EntityMetadata
     // Whether it contains One-To-Many relationship
     private boolean isParent;
 
-//    private Map<String, String> fieldToColMap = new HashMap<String, String>();
 
     /** The log. */
     private static Log log = LogFactory.getLog(EntityMetadata.class);
