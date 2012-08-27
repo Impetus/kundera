@@ -27,6 +27,7 @@ import java.util.StringTokenizer;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.PluralAttribute;
@@ -906,9 +907,9 @@ public abstract class CassandraDataHandlerBase
             if (!attribute.getName().equals(m.getIdAttribute().getName()))
             {
                 Field field = (Field) ((Attribute) attribute).getJavaMember();
-                byte[] value = PropertyAccessorHelper.get(e, field);
                 byte[] name = PropertyAccessorFactory.STRING
                         .toBytes(((AbstractAttribute) attribute).getJPAColumnName());
+                Object value = getColumnValue(m, e, field);
 
                 // if attribute is embeddable.
 
@@ -917,19 +918,34 @@ public abstract class CassandraDataHandlerBase
                 {
                     onEmbeddable(timestamp2, tr, m, e, id, attribute);
                 }
-                else if (m.getType().equals(Type.SUPER_COLUMN_FAMILY))
-                {
-
-                    prepareSuperColumn(tr, m, value, name, timestamp2);
-                }
                 else
                 {
-                    prepareColumn(tr, m, value, name, timestamp2);
-                }
+                    if (m.getType().equals(Type.SUPER_COLUMN_FAMILY))
+                    {
 
+                        prepareSuperColumn(tr, m, value, name, timestamp2);
+                    }
+                    else
+                    {
+                        prepareColumn(tr, m, value, name, timestamp2);
+                    }
+                }
             }
         }
 
+    }
+
+    private Object getColumnValue(EntityMetadata m, Object e, Field field)
+    {
+        Object value;
+        if(!m.isCounterColumnType())
+         {
+            value = PropertyAccessorHelper.get(e, field);
+         } else
+         {
+             value = PropertyAccessorHelper.getString(e, field);
+         }
+        return value;
     }
 
     /**
@@ -941,18 +957,18 @@ public abstract class CassandraDataHandlerBase
      * @param name the name
      * @param timestamp the timestamp
      */
-    private void prepareColumn(ThriftRow tr, EntityMetadata m, byte[] value, byte[] name, long timestamp)
+    private void prepareColumn(ThriftRow tr, EntityMetadata m, Object value, byte[] name, long timestamp)
     {
         if (value != null)
         {
             if (m.isCounterColumnType())
             {
-                CounterColumn counterColumn = prepareCounterColumn(value, name);
+                CounterColumn counterColumn = prepareCounterColumn((String)value, name);
                 tr.addCounterColumn(counterColumn);
             }
             else
             {
-                Column column = prepareColumn(value, name, timestamp);
+                Column column = prepareColumn((byte[])value, name, timestamp);
                 tr.addColumn(column);
             }
         }
@@ -967,7 +983,7 @@ public abstract class CassandraDataHandlerBase
      * @param name the name
      * @param timestamp the timestamp
      */
-    private void prepareSuperColumn(ThriftRow tr, EntityMetadata m, byte[] value, byte[] name, long timestamp)
+    private void prepareSuperColumn(ThriftRow tr, EntityMetadata m, Object value, byte[] name, long timestamp)
     {
         if (value != null)
         {
@@ -975,7 +991,7 @@ public abstract class CassandraDataHandlerBase
             {
                 CounterSuperColumn counterSuper = new CounterSuperColumn();
                 counterSuper.setName(name);
-                CounterColumn counterColumn = prepareCounterColumn(value, name);
+                CounterColumn counterColumn = prepareCounterColumn((String)value, name);
                 List<CounterColumn> subCounterColumn = new ArrayList<CounterColumn>();
                 subCounterColumn.add(counterColumn);
                 counterSuper.setColumns(subCounterColumn);
@@ -985,7 +1001,7 @@ public abstract class CassandraDataHandlerBase
             {
                 SuperColumn superCol = new SuperColumn();
                 superCol.setName(name);
-                Column column = prepareColumn(value, name, timestamp);
+                Column column = prepareColumn((byte[])value, name, timestamp);
                 List<Column> subColumn = new ArrayList<Column>();
                 subColumn.add(column);
                 superCol.setColumns(subColumn);
@@ -1019,12 +1035,12 @@ public abstract class CassandraDataHandlerBase
      * @param name the name
      * @return the counter column
      */
-    private CounterColumn prepareCounterColumn(byte[] value, byte[] name)
+    private CounterColumn prepareCounterColumn(String value, byte[] name)
     {
         CounterColumn counterColumn = new CounterColumn();
         counterColumn.setName(name);
         LongAccessor accessor = new LongAccessor();
-        counterColumn.setValue(accessor.fromBytes(LongAccessor.class, value));
+        counterColumn.setValue(accessor.fromString(LongAccessor.class, value));
         return counterColumn;
     }
 
