@@ -87,27 +87,4 @@ final class PelopsDataHandler extends CassandraDataHandlerBase implements Cassan
     {
         return super.fromThriftRow(clazz, m, tr);
     }
-
-
-    @Override
-    public Object fromCounterColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
-            List<String> relationNames, boolean isWrapperReq) throws Exception
-    {
-        return super.fromCounterColumnThriftRow(clazz, m, thriftRow, relationNames, isWrapperReq);
-    }
-
-    @Override
-    public Object fromSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr, List<String> relationNames,
-            boolean isWrapReq) throws Exception
-    {
-        return super.fromSuperColumnThriftRow(clazz, m, tr, relationNames, isWrapReq);
-    }
-
-    @Override
-    public Object fromCounterSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr,
-            List<String> relationNames, boolean isWrapReq) throws Exception
-    {
-        return super.fromCounterSuperColumnThriftRow(clazz, m, tr, relationNames, isWrapReq);
-    }
-
 }

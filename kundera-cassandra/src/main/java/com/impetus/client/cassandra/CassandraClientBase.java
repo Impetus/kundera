@@ -498,73 +498,7 @@ public abstract class CassandraClientBase extends ClientBase
         return entities;
     }
 
-    /**
-     * Populate data.
-     * 
-     * @param m
-     *            the m
-     * @param qResults
-     *            the q results
-     * @param entities
-     *            the entities
-     * @param isRelational
-     *            the is relational
-     * @param relationNames
-     *            the relation names
-     */
-    protected void populateDataForCounter(EntityMetadata m, Map<Bytes, List<CounterColumn>> qCounterResults,
-            List<Object> entities, boolean isRelational, List<String> relationNames, CassandraDataHandler dataHandler)
-    {
-        Iterator<Bytes> rowIter = qCounterResults.keySet().iterator();
-        while (rowIter.hasNext())
-        {
-            Bytes rowKey = rowIter.next();
-            List<CounterColumn> counterColumns = qCounterResults.get(rowKey);
-            try
-            {
-                Object e = dataHandler.fromCounterColumnThriftRow(m.getEntityClazz(), m,
-                        new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), null, null, counterColumns,
-                                null), relationNames, isRelational);
-                if (e != null)
-                {
-                    entities.add(e);
-                }
-            }
-            catch (IllegalStateException e)
-            {
-                throw new KunderaException(e);
-            }
-            catch (Exception e)
-            {
-                throw new KunderaException(e);
-            }
-        }
-    }
-
-    /**
-     * @param m
-     * @param qCounterResults
-     * @param entities
-     * @param isRelational
-     * @param relationNames
-     */
-    protected void populateDataForSuperCounter(EntityMetadata m, Map<Bytes, List<CounterSuperColumn>> qCounterResults,
-            List<Object> entities, boolean isRelational, List<String> relationNames)
-    {
-        Set<Bytes> primaryKeys = qCounterResults.keySet();
-
-        if (primaryKeys != null && !primaryKeys.isEmpty())
-        {
-            Object[] rowIds = new Object[primaryKeys.size()];
-            int i = 0;
-            for (Bytes b : primaryKeys)
-            {
-                rowIds[i] = Bytes.toUTF8(b.toByteArray());
-                i++;
-            }
-            entities.addAll(findAll(m.getEntityClazz(), rowIds));
-        }
-    }
+    
 
     public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField,
             CassandraDataHandler dataHandler)
@@ -604,8 +538,6 @@ public abstract class CassandraClientBase extends ClientBase
 
                     Object entity = dataHandler.populateEntity(thriftRow, entityMetadata, relationalField, relationalField != null && !relationalField.isEmpty());
                     
-//                    fromColumnThriftRow(clazz, entityMetadata, thriftRow, relationalField,
-//                            relationalField != null && !relationalField.isEmpty());
                     if (entity != null)
                     {
                         returnedEntities.add(entity);
