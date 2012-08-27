@@ -57,6 +57,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.property.accessor.LongAccessor;
 
 /**
  * Base class for all Cassandra Data Handlers.
@@ -905,7 +906,7 @@ public abstract class CassandraDataHandlerBase
             if (!attribute.getName().equals(m.getIdAttribute().getName()))
             {
                 Field field = (Field) ((Attribute) attribute).getJavaMember();
-                String value = PropertyAccessorHelper.getString(e, field);
+                byte[] value = PropertyAccessorHelper.get(e, field);
                 byte[] name = PropertyAccessorFactory.STRING
                         .toBytes(((AbstractAttribute) attribute).getJPAColumnName());
 
@@ -940,17 +941,20 @@ public abstract class CassandraDataHandlerBase
      * @param name the name
      * @param timestamp the timestamp
      */
-    private void prepareColumn(ThriftRow tr, EntityMetadata m, String value, byte[] name, long timestamp)
+    private void prepareColumn(ThriftRow tr, EntityMetadata m, byte[] value, byte[] name, long timestamp)
     {
-        if (m.isCounterColumnType())
+        if (value != null)
         {
-            CounterColumn counterColumn = prepareCounterColumn(value, name);
-            tr.addCounterColumn(counterColumn);
-        }
-        else
-        {
-            Column column = prepareColumn(value, name, timestamp);
-            tr.addColumn(column);
+            if (m.isCounterColumnType())
+            {
+                CounterColumn counterColumn = prepareCounterColumn(value, name);
+                tr.addCounterColumn(counterColumn);
+            }
+            else
+            {
+                Column column = prepareColumn(value, name, timestamp);
+                tr.addColumn(column);
+            }
         }
     }
 
@@ -963,28 +967,31 @@ public abstract class CassandraDataHandlerBase
      * @param name the name
      * @param timestamp the timestamp
      */
-    private void prepareSuperColumn(ThriftRow tr, EntityMetadata m, String value, byte[] name, long timestamp)
+    private void prepareSuperColumn(ThriftRow tr, EntityMetadata m, byte[] value, byte[] name, long timestamp)
     {
-        if (m.isCounterColumnType())
+        if (value != null)
         {
-            CounterSuperColumn counterSuper = new CounterSuperColumn();
-            counterSuper.setName(name);
-            CounterColumn counterColumn = prepareCounterColumn(value, name);
-            List<CounterColumn> subCounterColumn = new ArrayList<CounterColumn>();
-            subCounterColumn.add(counterColumn);
-            counterSuper.setColumns(subCounterColumn);
-            tr.addCounterSuperColumn(counterSuper);
-        }
-        else
-        {
-            SuperColumn superCol = new SuperColumn();
-            superCol.setName(name);
-            Column column = prepareColumn(value, name, timestamp);
-            List<Column> subColumn = new ArrayList<Column>();
-            subColumn.add(column);
-            superCol.setColumns(subColumn);
-            tr.addSuperColumn(superCol);
+            if (m.isCounterColumnType())
+            {
+                CounterSuperColumn counterSuper = new CounterSuperColumn();
+                counterSuper.setName(name);
+                CounterColumn counterColumn = prepareCounterColumn(value, name);
+                List<CounterColumn> subCounterColumn = new ArrayList<CounterColumn>();
+                subCounterColumn.add(counterColumn);
+                counterSuper.setColumns(subCounterColumn);
+                tr.addCounterSuperColumn(counterSuper);
+            }
+            else
+            {
+                SuperColumn superCol = new SuperColumn();
+                superCol.setName(name);
+                Column column = prepareColumn(value, name, timestamp);
+                List<Column> subColumn = new ArrayList<Column>();
+                subColumn.add(column);
+                superCol.setColumns(subColumn);
+                tr.addSuperColumn(superCol);
 
+            }
         }
     }
 
@@ -996,11 +1003,11 @@ public abstract class CassandraDataHandlerBase
      * @param timestamp the timestamp
      * @return the column
      */
-    private Column prepareColumn(String value, byte[] name, long timestamp)
+    private Column prepareColumn(byte[] value, byte[] name, long timestamp)
     {
         Column column = new Column();
         column.setName(name);
-        column.setValue(value.getBytes());
+        column.setValue(value);
         column.setTimestamp(timestamp);
         return column;
     }
@@ -1012,11 +1019,12 @@ public abstract class CassandraDataHandlerBase
      * @param name the name
      * @return the counter column
      */
-    private CounterColumn prepareCounterColumn(String value, byte[] name)
+    private CounterColumn prepareCounterColumn(byte[] value, byte[] name)
     {
         CounterColumn counterColumn = new CounterColumn();
         counterColumn.setName(name);
-        counterColumn.setValue(new Long(value));
+        LongAccessor accessor = new LongAccessor();
+        counterColumn.setValue(accessor.fromBytes(LongAccessor.class, value));
         return counterColumn;
     }
 
