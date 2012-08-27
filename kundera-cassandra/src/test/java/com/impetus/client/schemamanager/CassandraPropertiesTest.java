@@ -196,6 +196,9 @@ public class CassandraPropertiesTest
         metaModel.addEntityMetadata(Doctor.class, m);
 
         appMetadata.getMetamodelMap().put(pu, metaModel);
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder().getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder().getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder().getMappedSuperClassTypes());
 
         KunderaMetadata.INSTANCE.addClientMetadata(pu, clientMetadata);
         CassandraPropertyReader reader = new CassandraPropertyReader();

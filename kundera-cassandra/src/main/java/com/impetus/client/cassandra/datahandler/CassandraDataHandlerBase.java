@@ -598,7 +598,7 @@ public abstract class CassandraDataHandlerBase
 
             for (CounterColumn counterColumn : tr.getCounterColumns())
             {
-                initialize(tr, m, entity);
+                entity = initialize(tr, m, entity);
                 onCounterColumn(counterColumn, m, entity, entityType, relationNames, isWrapReq, relations);
             }
 
