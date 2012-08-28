@@ -135,7 +135,6 @@ public class DateAccessor implements PropertyAccessor<Date>
                 return null;
             }
             LongAccessor longAccessor = new LongAccessor();
-//            System.out.println("In date accessor" + ((Date) date).getTime());
             return longAccessor.toBytes(((Date) date).getTime());
             // return DATE_FORMATTER.format(((Date)
             // date)).getBytes(Constants.ENCODING);

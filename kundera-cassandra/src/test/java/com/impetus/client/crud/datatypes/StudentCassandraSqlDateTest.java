@@ -559,7 +559,6 @@ public class StudentCassandraSqlDateTest extends Base
             }
             else
             {
-                System.out.println(student.getId().getTime());
                 Assert.assertEquals(((Date)getRandomValue(Date.class)).getTime(), student.getId().getTime());
                 Assert.assertEquals(getRandomValue(short.class), student.getAge());
                 Assert.assertEquals(getRandomValue(String.class), student.getName());

@@ -73,7 +73,6 @@ public class SQLDateAccessor implements PropertyAccessor<Date>
                 return null;
             }
             LongAccessor longAccessor = new LongAccessor();
-            // System.out.println("In date accessor" + ((Date) date).getTime());
             return longAccessor.toBytes(((Date) object).getTime());
             // return DATE_FORMATTER.format(((Date)
             // date)).getBytes(Constants.ENCODING);

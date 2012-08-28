@@ -15,21 +15,18 @@ public class DateDataGenerator implements DataGenerator<Date>
     @Override
     public Date randomValue()
     {
-        // System.out.println("In date generator random" + DATE.getTime());
         return DATE;
     }
 
     @Override
     public Date maxValue()
     {
-        // System.out.println("In date generator max" + MAX_DATE.getTime());
         return MAX_DATE;
     }
 
     @Override
     public Date minValue()
     {
-        // System.out.println("In date generator min" + MIN_DATE.getTime());
         return MIN_DATE;
     }
 

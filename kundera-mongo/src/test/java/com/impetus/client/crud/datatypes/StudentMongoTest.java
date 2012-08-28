@@ -116,8 +116,6 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
 
         // find by without where clause.
         assertFindWithoutWhereClause(em, "StudentMongo", StudentMongo.class);
-        
-        
 
         // Query on Date.
         String query = "Select s from StudentMongo s where s.enrolmentDate =:enrolmentDate";
@@ -178,20 +176,6 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         Assert.assertEquals(10, results.get(0).getAge());
         Assert.assertEquals('A', results.get(0).getSemester());
 
-        // // query on byte (digitalSignature)
-        //
-        // query =
-        // "Select s from StudentMongo s where s.digitalSignature =?1";
-        // q = em.createQuery(query);
-        // q.setParameter(1, 50);
-        // results = q.getResultList();
-        // Assert.assertNotNull(results);
-        // Assert.assertEquals(2,results.size());
-        // Assert.assertEquals(true, results.get(0).isExceptional());
-        // Assert.assertEquals(50, results.get(0).getDigitalSignature());
-        // Assert.assertEquals(50, results.get(1).getDigitalSignature());
-        //
-
         // query on float (percentage)
         query = "Select s from StudentMongo s where s.percentage =?1";
         q = em.createQuery(query);
@@ -213,6 +197,178 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         Assert.assertEquals(false, results.get(0).isExceptional());
         Assert.assertEquals(163.76765654, results.get(0).getHeight());
 
+        // query on cgpa.
+        query = "Select s from StudentMongo s where s.cgpa =?1";
+        q = em.createQuery(query);
+        q.setParameter(1, (short) 8);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+        Assert.assertEquals(8, results.get(0).getCgpa());
+
+        // query on yearsSpent.
+        Integer i = new Integer(3);
+        query = "Select s from StudentMongo s where s.yearsSpent = 3";
+        q = em.createQuery(query);
+        // q.setParameter(1, new Integer(3));
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+        Assert.assertEquals(i, results.get(0).getYearsSpent());
+
+        // query on yearsSpent.
+        query = "Select s from StudentMongo s where s.yearsSpent =?1";
+        q = em.createQuery(query);
+        q.setParameter(1, new Integer(3));
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+        Assert.assertEquals(new Integer(3), results.get(0).getYearsSpent());
+
+        // query on digitalSignature.
+        query = "Select s from StudentMongo s where s.digitalSignature =?1";
+        q = em.createQuery(query);
+        q.setParameter(1, (byte) 50);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+        Assert.assertEquals(true, results.get(0).isExceptional());
+        Assert.assertEquals((byte) 50, results.get(0).getDigitalSignature());
+
+        // query on cpga and digitalSignature.
+        query = "Select s from StudentMongo s where s.cgpa =?1 and s.digitalSignature >= ?2 and s.digitalSignature <= ?3";
+        q = em.createQuery(query);
+        q.setParameter(1, (short) 8);
+        q.setParameter(2, (byte) 5);
+        q.setParameter(3, (byte) 50);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+        Assert.assertEquals(true, results.get(1).isExceptional());
+        Assert.assertEquals((short) 8, results.get(0).getCgpa());
+        Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
+        Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+
+        // query on cpga and digitalSignature parameter appended with String
+        // .
+        query = "Select s from StudentMongo s where s.cgpa = 8 and s.digitalSignature >= 5 and s.digitalSignature <= 50";
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+        Assert.assertEquals(true, results.get(1).isExceptional());
+        Assert.assertEquals((short) 8, results.get(0).getCgpa());
+        Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
+        Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+
+        // query on cpga and digitalSignature.
+        query = "Select s from StudentMongo s where s.digitalSignature >= ?2 and s.digitalSignature <= ?3 and s.cgpa =?1";
+        q = em.createQuery(query);
+        q.setParameter(1, (short) 8);
+        q.setParameter(2, (byte) 5);
+        q.setParameter(3, (byte) 50);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+        Assert.assertEquals(true, results.get(1).isExceptional());
+        Assert.assertEquals((short) 8, results.get(0).getCgpa());
+        Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
+        Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+
+        // query on percentage and height.
+        query = "Select s from StudentMongo s where s.percentage >= ?2 and s.percentage <= ?3 and s.height =?1";
+        q = em.createQuery(query);
+        q.setParameter(1, 163.76765654);
+        q.setParameter(2, 61.6f);
+        q.setParameter(3, 69.6f);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+        Assert.assertEquals((short) 8, results.get(0).getCgpa());
+        Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
+        Assert.assertEquals(61.6f, results.get(0).getPercentage());
+        Assert.assertEquals(163.76765654, results.get(0).getHeight());
+        
+        
+        // query on percentage and height parameter appended in string.
+        query = "Select s from StudentMongo s where s.percentage >= 61.6 and s.percentage <= 69.6 and s.height = 163.76765654";
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+        Assert.assertEquals((short) 8, results.get(0).getCgpa());
+        Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
+        Assert.assertEquals(61.6f, results.get(0).getPercentage());
+        Assert.assertEquals(163.76765654, results.get(0).getHeight());
+        
+        
+        // query on cpga and uniqueId.
+        query = "Select s from StudentMongo s where s.cgpa =?1 and s.uniqueId >= ?2 and s.uniqueId <= ?3";
+        q = em.createQuery(query);
+        q.setParameter(1, (short) 8);
+        q.setParameter(2, 78575785897L);
+        q.setParameter(3, 78575785899L);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+        Assert.assertEquals(true, results.get(1).isExceptional());
+        Assert.assertEquals((short) 8, results.get(0).getCgpa());
+        Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
+        Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+        Assert.assertEquals(78575785897L, results.get(0).getUniqueId());
+        Assert.assertEquals(78575785898L, results.get(1).getUniqueId());
+
+        // query on cpga and semester.
+        query = "Select s from StudentMongo s where s.cgpa =?1 and s.semester >= ?2 and s.semester < ?3";
+        q = em.createQuery(query);
+        q.setParameter(1, (short) 8);
+        q.setParameter(2, 'A');
+        q.setParameter(3, 'C');
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());        
+        Assert.assertEquals((short) 8, results.get(0).getCgpa());
+        Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
+        Assert.assertEquals(78575785897L, results.get(0).getUniqueId());
+        Assert.assertEquals(10, results.get(0).getAge());
+
+
+        // query on cpga and semester with appending in string.
+        query = "Select s from StudentMongo s where s.cgpa = 8 and s.semester >= A and s.semester <= C";
+        q = em.createQuery(query);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+        Assert.assertEquals(true, results.get(1).isExceptional());
+        Assert.assertEquals((short) 8, results.get(0).getCgpa());
+        Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
+        Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
+        Assert.assertEquals(78575785897L, results.get(0).getUniqueId());
+        Assert.assertEquals(78575785898L, results.get(1).getUniqueId());
+        Assert.assertEquals(10, results.get(0).getAge());
+        Assert.assertEquals(20, results.get(1).getAge());
+        Assert.assertEquals(15, results.get(2).getAge());
+
+        // query on invalid cpga and uniqueId.
+        query = "Select s from StudentMongo s where s.cgpa =?1 and s.uniqueId >= ?2 and s.uniqueId <= ?3";
+        q = em.createQuery(query);
+        q.setParameter(1, (short) 2);
+        q.setParameter(2, 78575785897L);
+        q.setParameter(3, 78575785899L);
+        results = q.getResultList();
+        Assert.assertNull(results);
+
         // query on big integer.
         query = "Select s from StudentMongo s where s.bigInteger =?1";
         q = em.createQuery(query);
@@ -227,8 +383,7 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         q.setParameter(1, new BigInteger("1234567823"));
         results = q.getResultList();
         Assert.assertNull(results);
-        
-        
+
     }
 
     /**

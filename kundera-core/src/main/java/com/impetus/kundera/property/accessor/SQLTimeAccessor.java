@@ -50,7 +50,6 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
         // {
         // throw new PropertyAccessException(e);
         // }
-        // System.out.println(fromString(targetClass, s).getTime());
         // return fromString(targetClass, s);
         try
         {
@@ -85,7 +84,6 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
         // return null;
         // }
         // Time t = (Time) object;
-        // System.out.println(t.getTime());
         // return t.toString().getBytes();
 
         try
@@ -95,7 +93,6 @@ public class SQLTimeAccessor implements PropertyAccessor<Time>
                 return null;
             }
             LongAccessor longAccessor = new LongAccessor();
-            // System.out.println("In date accessor" + ((Date) date).getTime());
             return longAccessor.toBytes(((Time) object).getTime());
             // return DATE_FORMATTER.format(((Date)
             // date)).getBytes(Constants.ENCODING);

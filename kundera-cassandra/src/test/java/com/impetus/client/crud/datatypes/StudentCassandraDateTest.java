@@ -120,8 +120,7 @@ public class StudentCassandraDateTest extends Base
     {
         EntityManager em = emf.createEntityManager();
 
-        StudentCassandraDate studentMax = em.find(StudentCassandraDate.class, getMaxValue(Date.class));
-        System.out.println(((Date) getMaxValue(Date.class)).getTime());
+        StudentCassandraDate studentMax = em.find(StudentCassandraDate.class, getMaxValue(Date.class));       
         Assert.assertNotNull(studentMax);
         Assert.assertEquals(getMaxValue(short.class), studentMax.getAge());
         Assert.assertEquals(getMaxValue(String.class), studentMax.getName());
@@ -155,7 +154,6 @@ public class StudentCassandraDateTest extends Base
         Assert.assertNotNull(student);
         Assert.assertEquals(getMaxValue(short.class), student.getAge());
         Assert.assertEquals(getMaxValue(String.class), student.getName());
-        System.out.println(student.getId().getTime());
         student.setName("Kuldeep");
         em.merge(student);
         if (!useSameEm)
@@ -559,7 +557,6 @@ public class StudentCassandraDateTest extends Base
             }
             else
             {
-                System.out.println(student.getId().getTime());
                 Assert.assertEquals(((Date) getRandomValue(Date.class)).getTime(), student.getId().getTime());
                 Assert.assertEquals(getRandomValue(short.class), student.getAge());
                 Assert.assertEquals(getRandomValue(String.class), student.getName());

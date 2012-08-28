@@ -74,7 +74,6 @@ public class CassandraUtilities
         }
         else if (clazz.equals(long.class) || clazz.isAssignableFrom(Long.class))
         {
-
             return Bytes.fromLong(Long.parseLong(value.toString()));
         }
         else if (clazz.equals(boolean.class) || clazz.isAssignableFrom(Boolean.class))
@@ -100,6 +99,10 @@ public class CassandraUtilities
         }
         else
         {
+            if (value.getClass().isAssignableFrom(String.class))
+            {
+                value = PropertyAccessorFactory.getPropertyAccessor(clazz).fromString(clazz, value.toString());
+            }
             return Bytes.fromByteArray(PropertyAccessorFactory.getPropertyAccessor(clazz).toBytes(value));
         }
     }
