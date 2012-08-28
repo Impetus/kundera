@@ -27,6 +27,7 @@ import javax.persistence.Query;
 import junit.framework.Assert;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,7 +39,7 @@ import com.impetus.client.twitter.entities.User;
  */
 public class UserRoleTest
 {
-    
+
     /** The em. */
     private EntityManager em;
 
@@ -51,7 +52,7 @@ public class UserRoleTest
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("mongoTest");
         em = emf.createEntityManager();
     }
-    
+
     /**
      * Test association.
      */
@@ -61,13 +62,13 @@ public class UserRoleTest
         Role rol = new Role();
         rol.setRolId(1);
         rol.setName("Administrador");
-        User u =  new User();
+        User u = new User();
         u.setAge(15);
         u.setEmail("usuario1@infos.com");
         u.setName("usuario1");
         u.setUserId(1);
         u.setLastName("apellido1");
-        User u2 =  new User();
+        User u2 = new User();
         u2.setAge(17);
         u2.setEmail("usuario2@infos.com");
         u2.setName("usuario2");
@@ -80,42 +81,62 @@ public class UserRoleTest
         users.add(u2);
         rol.setSegUsuarioList(users);
         em.persist(rol);
-        
+
     }
-    
+
     /**
      * Test findby role.
      */
     @Test
     public void testFindbyRole()
     {
+        testPersist();
         String query = "Select r from Role r";
         Query q = em.createQuery(query);
         List<Role> roles = q.getResultList();
         Assert.assertNotNull(roles);
         Assert.assertEquals(1, roles.size());
     }
-    
+
     /**
      * Test findby user.
      */
     @Test
     public void testFindbyUser()
     {
-        String query = "Select u from User u";
-        Query q = em.createQuery(query);
-        List<User> users = q.getResultList();
+        testPersist();
+        List<User> users = getAllUsers();
         Assert.assertNotNull(users);
         Assert.assertEquals(2, users.size());
     }
-    
+
     /**
      * Tear down.
      */
     @After
     public void tearDown()
     {
+        Role rol = em.find(Role.class, 1);
+        if (rol != null)
+        {
+            em.remove(rol);
+        }
+
+
         em.close();
+
         em = null;
+    }
+
+
+    /**
+     * @return
+     */
+    private List<User> getAllUsers()
+    {
+        String query = "Select u from User u";
+        Query q = em.createQuery(query);
+        List<User> users = q.getResultList();
+        return users;
     }
 }

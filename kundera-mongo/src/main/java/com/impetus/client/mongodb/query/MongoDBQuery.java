@@ -144,6 +144,7 @@ public class MongoDBQuery extends QueryImpl
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             throw new QueryHandlerException(e);
         }
 
@@ -217,11 +218,13 @@ public class MongoDBQuery extends QueryImpl
                 // documentName.embeddedDocumentName.column, remove below if
                 // block once this is decided
 
-//                String enclosingDocumentName = MetadataUtils.getEnclosingEmbeddedFieldName(m, property, true);
-//                if (enclosingDocumentName != null)
-//                {
-//                    property = enclosingDocumentName + "." + property;
-//                }
+                // String enclosingDocumentName =
+                // MetadataUtils.getEnclosingEmbeddedFieldName(m, property,
+                // true);
+                // if (enclosingDocumentName != null)
+                // {
+                // property = enclosingDocumentName + "." + property;
+                // }
 
                 if (condition.equals("="))
                 {

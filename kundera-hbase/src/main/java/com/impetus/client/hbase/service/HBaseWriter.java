@@ -23,6 +23,7 @@ import java.util.Set;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,20 +63,23 @@ public class HBaseWriter implements Writer
         for (Attribute column : columns)
         // for (Column column : columns)
         {
-            String qualifier = ((AbstractAttribute) column).getJPAColumnName();
-            try
+            if (!column.isCollection() && !((SingularAttribute) column).isId())
             {
-                Object o = PropertyAccessorHelper.getObject(columnFamilyObj, (Field)column.getJavaMember());
-                byte[] value = HBaseUtils.getBytes(o);
-                if (value != null)
+                String qualifier = ((AbstractAttribute) column).getJPAColumnName();
+                try
                 {
-                    p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), value);
-                }
+                    Object o = PropertyAccessorHelper.getObject(columnFamilyObj, (Field) column.getJavaMember());
+                    byte[] value = HBaseUtils.getBytes(o);
+                    if (value != null)
+                    {
+                        p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), value);
+                    }
 
-            }
-            catch (PropertyAccessException e1)
-            {
-                throw new IOException(e1);
+                }
+                catch (PropertyAccessException e1)
+                {
+                    throw new IOException(e1);
+                }
             }
         }
         htable.put(p);
@@ -96,17 +100,20 @@ public class HBaseWriter implements Writer
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
         for (Attribute column : columns)
-        // for (Column column : columns)
         {
-            String qualifier = ((AbstractAttribute) column).getJPAColumnName();
-            try
+            if (!column.isCollection() && !((SingularAttribute) column).isId())
             {
-                byte[] qualValInBytes = Bytes.toBytes(qualifier);
-                p.add(qualValInBytes, qualValInBytes, System.currentTimeMillis(), HBaseUtils.getBytes(PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember())));
-            }
-            catch (PropertyAccessException e1)
-            {
-                throw new IOException(e1);
+                String qualifier = ((AbstractAttribute) column).getJPAColumnName();
+                try
+                {
+                    byte[] qualValInBytes = Bytes.toBytes(qualifier);
+                    p.add(qualValInBytes, qualValInBytes, System.currentTimeMillis(), HBaseUtils
+                            .getBytes(PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember())));
+                }
+                catch (PropertyAccessException e1)
+                {
+                    throw new IOException(e1);
+                }
             }
         }
         htable.put(p);

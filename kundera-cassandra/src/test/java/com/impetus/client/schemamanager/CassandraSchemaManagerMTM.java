@@ -54,6 +54,10 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
  */
 public class CassandraSchemaManagerMTM
 {
+    private static final String keyspace = "KunderaCassandraExamples";
+
+    private static final String pu = "cassandra";
+
     /** The configuration. */
     private SchemaConfiguration configuration;
 
@@ -70,7 +74,7 @@ public class CassandraSchemaManagerMTM
     @Before
     public void setUp() throws Exception
     {
-        configuration = new SchemaConfiguration("cassandra");
+        configuration = new SchemaConfiguration(pu);
         CassandraCli.cassandraSetUp();
         CassandraCli cli = new CassandraCli();
         client = cli.getClient();
@@ -84,11 +88,11 @@ public class CassandraSchemaManagerMTM
     {
         try
         {
-            client.system_drop_keyspace("KunderaCassandraExamples");
+            client.system_drop_keyspace(keyspace);
         }
         catch (InvalidRequestException irex)
         {
-            Assert.assertTrue(!CassandraCli.keyspaceExist("KunderaCassandraExamples"));
+            Assert.assertTrue(!CassandraCli.keyspaceExist(keyspace));
         }
     }
 
@@ -101,12 +105,10 @@ public class CassandraSchemaManagerMTM
 
             schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
             schemaManager.exportSchema();
-            Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCassandraExamples"));
-            Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonnelUniMToM",
-                    "KunderaCassandraExamples"));
-            Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityHabitatUniMToM",
-                    "KunderaCassandraExamples"));
-            Assert.assertTrue(CassandraCli.columnFamilyExist("PERSONNEL_ADDRESS", "KunderaCassandraExamples"));
+            Assert.assertTrue(CassandraCli.keyspaceExist(keyspace));
+            Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonnelUniMToM", keyspace));
+            Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityHabitatUniMToM", keyspace));
+            Assert.assertTrue(CassandraCli.columnFamilyExist("PERSONNEL_ADDRESS", keyspace));
         }
         catch (InvalidEntityDefinitionException iedex)
         {
@@ -126,13 +128,12 @@ public class CassandraSchemaManagerMTM
     private EntityManagerFactoryImpl getEntityManagerFactory(String property)
     {
         Map<String, Object> props = new HashMap<String, Object>();
-        String persistenceUnit = "cassandra";
-        props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
+        props.put(Constants.PERSISTENCE_UNIT_NAME, pu);
         props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,
                 "com.impetus.client.cassandra.pelops.PelopsClientFactory");
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCassandraExamples");
+        props.put(PersistenceProperties.KUNDERA_KEYSPACE, keyspace);
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
         if (useLucene)
         {
@@ -140,18 +141,18 @@ public class CassandraSchemaManagerMTM
         }
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(persistenceUnit);
+        puMetadata.setPersistenceUnitName(pu);
         Properties p = new Properties();
         p.putAll(props);
         puMetadata.setProperties(p);
         Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put("cassandra", puMetadata);
+        metadata.put(pu, puMetadata);
         appMetadata.addPersistenceUnitMetadata(metadata);
 
         Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
 
         List<String> pus = new ArrayList<String>();
-        pus.add(persistenceUnit);
+        pus.add(pu);
         clazzToPu.put(CassandraEntityPersonnelUniMToM.class.getName(), pus);
         clazzToPu.put(CassandraEntityHabitatUniMToM.class.getName(), pus);
 
@@ -164,15 +165,15 @@ public class CassandraSchemaManagerMTM
         processor.process(CassandraEntityPersonnelUniMToM.class, m);
         processor.process(CassandraEntityHabitatUniMToM.class, m1);
 
-        m.setPersistenceUnit(persistenceUnit);
+        m.setPersistenceUnit(pu);
 
         MetamodelImpl metaModel = new MetamodelImpl();
         metaModel.addEntityMetadata(CassandraEntityPersonnelUniMToM.class, m);
         metaModel.addEntityMetadata(CassandraEntityHabitatUniMToM.class, m1);
 
-        appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
+        appMetadata.getMetamodelMap().put(pu, metaModel);
 
-        new ClientFactoryConfiguraton(persistenceUnit).configure();
+        new ClientFactoryConfiguraton(pu).configure();
         configuration.configure();
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
