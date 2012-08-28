@@ -24,6 +24,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import sun.security.util.BigInt;
+
 import junit.framework.Assert;
 
 import com.impetus.client.crud.BaseTest;
@@ -160,19 +162,19 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
     protected void onInsert(E instance) throws InstantiationException, IllegalAccessException
     {
 
-        em.persist(prepareData((Long) studentId1, 78575785897L, "Amresh", true, 10, 'C', (byte) 5, (short) 8,
-                (float) 69.6, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
+        em.persist(prepareData((Long) studentId1, 78575785897L, "Amresh", false, 10, 'A', (byte) 5, (short) 8,
+                (float) 61.6, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
                         978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, bigInteger, calendar,
                 ((E) instance.getClass().newInstance())));
 
-        em.persist(prepareData((Long) studentId2, 78575785897L, "Amresh", true, 20, 'C', (byte) 5, (short) 8,
-                (float) 69.6, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
-                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, bigInteger, calendar,
+        em.persist(prepareData((Long) studentId2, 78575785898L, "Amresh", true, 20, 'C', (byte) 5, (short) 8,
+                (float) 69.6, 163.76765655, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
+                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, new BigInteger("1234567810"), calendar,
                 ((E) instance.getClass().newInstance())));
 
-        em.persist(prepareData((Long) studentId3, 78575785897L, "Amresh", true, 15, 'C', (byte) 5, (short) 8,
-                (float) 69.6, 163.76765654, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
-                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, bigInteger, calendar,
+        em.persist(prepareData((Long) studentId3, 78575785899L, "Amresh", true, 15, 'C', (byte) 5, (short) 8,
+                (float) 69.6, 163.76765656, enrolmentDate, enrolmentTime, joiningDateAndTime, new Integer(3), new Long(
+                        978423946455l), 135434.89, newSqlDate, sqlTime, sqlTimestamp, bigDecimal, new BigInteger("1234567811"), calendar,
                 ((E) instance.getClass().newInstance())));
 
     }
@@ -235,7 +237,7 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
             java.sql.Timestamp sqlTimestamp, BigDecimal bigDecimal, BigInteger bigInteger, Calendar calendar, E o)
     {
         o.setStudentId((Long) studentId);
-        o.setUniqueId(78575785897L);
+        o.setUniqueId(uniqueId);
         o.setStudentName(studentName);
         o.setExceptional(isExceptional);
         o.setAge(age);
@@ -274,12 +276,12 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
         Assert.assertEquals(((Long) studentId1).longValue(), s.getStudentId());
         Assert.assertEquals(78575785897L, s.getUniqueId());
         Assert.assertEquals("Amresh", s.getStudentName());
-        Assert.assertEquals(true, s.isExceptional());
+        Assert.assertEquals(false, s.isExceptional());
         Assert.assertEquals(10, s.getAge());
-        Assert.assertEquals('C', s.getSemester());
+        Assert.assertEquals('A', s.getSemester());
         Assert.assertEquals((byte) 5, s.getDigitalSignature());
         Assert.assertEquals((short) 8, s.getCgpa());
-        Assert.assertEquals((float) 69.6, s.getPercentage());
+        Assert.assertEquals((float) 61.6, s.getPercentage());
         Assert.assertEquals(163.76765654, s.getHeight());
 
         Assert.assertEquals(enrolmentDate.getDate(), s.getEnrolmentDate().getDate());
