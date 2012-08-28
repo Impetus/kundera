@@ -195,11 +195,11 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
         // query on float (percentage)
         query = "Select s from StudentMongo s where s.percentage =?1";
         q = em.createQuery(query);
-        q.setParameter(1, 61.6);
+        q.setParameter(1, 61.6f);
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
-        Assert.assertEquals(true, results.get(0).isExceptional());
+        Assert.assertEquals(false, results.get(0).isExceptional());
         Assert.assertEquals(61.6f, results.get(0).getPercentage());
 
         // query on double (height)

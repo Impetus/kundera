@@ -209,7 +209,7 @@ public class MongoDBQuery extends QueryImpl
                             value.toString());
                 }
 
-//                value = populateValue(value, value.getClass());
+                value = populateValue(value, value.getClass());
 
                 // Property, if doesn't exist in entity, may be there in a
                 // document embedded within it, so we have to check that
