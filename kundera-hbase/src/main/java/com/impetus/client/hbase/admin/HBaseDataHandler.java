@@ -266,10 +266,6 @@ public class HBaseDataHandler implements DataHandler
 
         HTable hTable = gethTable(tableName);
 
-        // Now persist column families in the table. For HBase, embedded columns
-        // are called column families
-//        List<EmbeddedColumn> columnFamilies = m.getEmbeddedColumnsAsList();
-
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
         
 //      List<String> superColumnNames = m.getEmbeddedColumnFieldNames();

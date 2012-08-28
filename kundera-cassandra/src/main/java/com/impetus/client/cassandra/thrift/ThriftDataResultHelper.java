@@ -27,6 +27,7 @@ import org.apache.cassandra.thrift.KeySlice;
 import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 
@@ -52,35 +53,48 @@ public class ThriftDataResultHelper
      * type is determined by {@link ColumnFamilyType}
      */
     public static <T> List<T> transformThriftResult(List<ColumnOrSuperColumn> coscList,
-            ColumnFamilyType columnFamilyType)
+            ColumnFamilyType columnFamilyType, ThriftRow row)
     {
         List result = new ArrayList(coscList.size());
         for (ColumnOrSuperColumn cosc : coscList)
         {
-            result.add(transformThriftResult(cosc, columnFamilyType));
+            result.add(transformThriftResult(cosc, columnFamilyType, row));
         }
         return result;
     }
 
-    public static <T> T transformThriftResult(ColumnOrSuperColumn cosc, ColumnFamilyType columnFamilyType)
+    public static <T> T transformThriftResult(ColumnOrSuperColumn cosc, ColumnFamilyType columnFamilyType, ThriftRow row)
     {
         Object output = null;
         switch (columnFamilyType)
         {
         case COLUMN:
             output = cosc.column;
+            if (row != null)
+            {
+                row.addColumn(cosc.column);
+            }
             break;
 
         case SUPER_COLUMN:
             output = cosc.super_column;
+            row.addSuperColumn(cosc.super_column);
             break;
 
         case COUNTER_COLUMN:
             output = cosc.counter_column;
+            if (row != null)
+            {
+                row.addCounterColumn(cosc.counter_column);
+            }
             break;
 
         case COUNTER_SUPER_COLUMN:
             output = cosc.counter_super_column;
+            if (row != null)
+            {
+                row.addCounterSuperColumn(cosc.counter_super_column);
+            }
             break;
         }
         return (T) output;
@@ -91,21 +105,21 @@ public class ThriftDataResultHelper
      * type is determined by {@link ColumnFamilyType}
      */
     public static <T> Map<ByteBuffer, List<T>> transformThriftResult(
-            Map<ByteBuffer, List<ColumnOrSuperColumn>> coscResultMap, ColumnFamilyType columnFamilyType)
+            Map<ByteBuffer, List<ColumnOrSuperColumn>> coscResultMap, ColumnFamilyType columnFamilyType, ThriftRow row)
     {
 
         Map<ByteBuffer, List<T>> output = new HashMap<ByteBuffer, List<T>>();
 
         for (ByteBuffer key : coscResultMap.keySet())
         {
-            output.put(key, (List<T>) transformThriftResult(coscResultMap.get(key), columnFamilyType));
+            output.put(key, (List<T>) transformThriftResult(coscResultMap.get(key), columnFamilyType, row));
         }
 
         return output;
     }
 
     public static <T> Map<Bytes, List<T>> transformThriftResult(ColumnFamilyType columnFamilyType,
-            List<KeySlice> keySlices)
+            List<KeySlice> keySlices, ThriftRow row)
     {
 
         Map<Bytes, List<T>> output = new HashMap<Bytes, List<T>>();
@@ -113,7 +127,7 @@ public class ThriftDataResultHelper
         for (KeySlice keySlice : keySlices)
         {
             output.put(Bytes.fromByteArray(keySlice.getKey()),
-                    (List<T>) transformThriftResult(keySlice.getColumns(), columnFamilyType));
+                    (List<T>) transformThriftResult(keySlice.getColumns(), columnFamilyType, row));
         }
 
         return output;
@@ -123,8 +137,8 @@ public class ThriftDataResultHelper
      * Transforms data retrieved as result via thrift to a List whose content
      * type is determined by {@link ColumnFamilyType}
      */
-    public static <T> List<T> transformThriftResultAndAddToList(
-            Map<ByteBuffer, List<ColumnOrSuperColumn>> coscResultMap, ColumnFamilyType columnFamilyType)
+    public <T> List<T> transformThriftResultAndAddToList(Map<ByteBuffer, List<ColumnOrSuperColumn>> coscResultMap,
+            ColumnFamilyType columnFamilyType, ThriftRow row)
     {
 
         List<ColumnOrSuperColumn> coscList = new ArrayList<ColumnOrSuperColumn>();
@@ -134,7 +148,40 @@ public class ThriftDataResultHelper
             coscList.addAll(list);
         }
 
-        return transformThriftResult(coscList, columnFamilyType);
+        return transformThriftResult(coscList, columnFamilyType, row);
+    }
+
+    /**
+     * Translates into thrift row.
+     * 
+     * @param coscResultMap
+     * @param isCounterType
+     * @param columnFamilyType
+     * @param row
+     * @return
+     */
+    public ThriftRow translateToThriftRow(Map<ByteBuffer, List<ColumnOrSuperColumn>> coscResultMap,
+            boolean isCounterType, Type columnFamilyType, ThriftRow row)
+    {
+        ColumnFamilyType columnType = ColumnFamilyType.COLUMN;
+
+        if (isCounterType)
+        {
+            if (columnFamilyType.equals(Type.SUPER_COLUMN_FAMILY))
+            {
+                columnType = ColumnFamilyType.COUNTER_SUPER_COLUMN;
+            }
+            else
+            {
+                columnType = ColumnFamilyType.COUNTER_COLUMN;
+            }
+        }
+        else if (columnFamilyType.equals(Type.SUPER_COLUMN_FAMILY))
+        {
+            columnType = ColumnFamilyType.SUPER_COLUMN;
+        }
+        transformThriftResultAndAddToList(coscResultMap, columnType, row);
+        return row;
     }
 
     /**
@@ -142,7 +189,8 @@ public class ThriftDataResultHelper
      */
     public static List<Object> getRowKeys(List<KeySlice> keySlices, EntityMetadata metadata)
     {
-        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor((Field) metadata.getIdAttribute().getJavaMember());
+        PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor((Field) metadata.getIdAttribute()
+                .getJavaMember());
         List<Object> rowKeys = new ArrayList<Object>();
         for (KeySlice keySlice : keySlices)
         {

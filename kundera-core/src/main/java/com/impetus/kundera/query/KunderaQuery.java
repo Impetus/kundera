@@ -736,15 +736,6 @@ public class KunderaQuery
         }
 
         /**
-         * @param property
-         *            the property to set
-         */
-        public void setProperty(String property)
-        {
-            this.property = property;
-        }
-
-        /**
          * @return the value
          */
         public String getValue()

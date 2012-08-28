@@ -319,9 +319,6 @@ public class LuceneIndexer extends DocumentIndexer
      */
     public void indexDocument(EntityMetadata metadata, Document document)
     {
-
-        // log.debug("Indexing document: " + document + " for " +
-        // metadata.getDBType() + " in file system using Lucene");
         log.debug("Indexing document: " + document + " for in file system using Lucene");
 
         IndexWriter w = getIndexWriter();
@@ -484,6 +481,7 @@ public class LuceneIndexer extends DocumentIndexer
 
         if (metadata.getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY))
         {
+
             MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                     metadata.getPersistenceUnit());
 
@@ -562,96 +560,6 @@ public class LuceneIndexer extends DocumentIndexer
                             embeddableAttribute);
                 }
             }
-
-            //
-            // for (String embeddedColumnName : embeddedColumnMap.keySet())
-            // {
-            // EmbeddedColumn embeddedColumn =
-            // embeddedColumnMap.get(embeddedColumnName);
-            // try
-            // {
-            //
-            // embeddedObject = PropertyAccessorHelper.getObject(object,
-            // embeddedColumn.getField());
-            //
-            // // If embeddedObject is not set, no point of indexing, move
-            // // to next super column
-            // if (embeddedObject == null)
-            // {
-            // continue;
-            // }
-            // if (embeddedObject instanceof Collection<?>)
-            // {
-            // ElementCollectionCacheManager ecCacheHandler =
-            // ElementCollectionCacheManager.getInstance();
-            // // Check whether it's first time insert or updation
-            // if (ecCacheHandler.isCacheEmpty())
-            // { // First time
-            // // insert
-            // int count = 0;
-            // for (Object obj : (Collection<?>) embeddedObject)
-            // {
-            // String elementCollectionObjectName = embeddedColumnName
-            // + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
-            //
-            // currentDoc = prepareDocumentForSuperColumn(metadata, object,
-            // elementCollectionObjectName, parentId, clazz);
-            // indexSuperColumn(metadata, object, currentDoc, obj,
-            // embeddedColumn);
-            // count++;
-            // }
-            // }
-            // else
-            // {
-            // // Updation, Check whether this object is already in
-            // // cache, which means we already have an embedded
-            // // column
-            // // Otherwise we need to generate a fresh embedded
-            // // column name
-            // int lastEmbeddedObjectCount =
-            // ecCacheHandler.getLastElementCollectionObjectCount(rowKey);
-            // for (Object obj : (Collection<?>) embeddedObject)
-            // {
-            // String elementCollectionObjectName =
-            // ecCacheHandler.getElementCollectionObjectName(
-            // rowKey, obj);
-            // if (elementCollectionObjectName == null)
-            // { // Fresh
-            // // row
-            // elementCollectionObjectName = embeddedColumnName
-            // + Constants.EMBEDDED_COLUMN_NAME_DELIMITER +
-            // (++lastEmbeddedObjectCount);
-            // }
-            //
-            // currentDoc = prepareDocumentForSuperColumn(metadata, object,
-            // elementCollectionObjectName, parentId, clazz);
-            // indexSuperColumn(metadata, object, currentDoc, obj,
-            // embeddedColumn);
-            // }
-            // }
-            //
-            // }
-            // else
-            // {
-            // currentDoc = prepareDocumentForSuperColumn(metadata, object,
-            // embeddedColumnName, parentId,
-            // clazz);
-            // indexSuperColumn(metadata, object, currentDoc,
-            // metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject
-            // : object,
-            // embeddedColumn);
-            // }
-            // }
-            // catch (PropertyAccessException e)
-            // {
-            // log.error("Error while accesing embedded Object:" +
-            // embeddedColumnName);
-            // throw new
-            // LuceneIndexingException("Error while accesing embedded Object:" +
-            // embeddedColumnName, e);
-            // }
-
-            // }
         }
         else
         {

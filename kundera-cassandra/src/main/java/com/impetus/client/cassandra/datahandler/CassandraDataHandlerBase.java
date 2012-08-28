@@ -40,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.client.cassandra.common.CassandraUtilities;
+import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
@@ -47,7 +48,6 @@ import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.MetadataUtils;
-import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -57,9 +57,10 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.property.accessor.LongAccessor;
 
 /**
- * Base class for all Cassandra Data Handlers
+ * Base class for all Cassandra Data Handlers.
  * 
  * @author amresh.singh
  */
@@ -68,6 +69,9 @@ public abstract class CassandraDataHandlerBase
 
     /** The log. */
     private static Log log = LogFactory.getLog(CassandraDataHandlerBase.class);
+
+    /** The thrift translator. */
+    protected ThriftDataResultHelper thriftTranslator = new ThriftDataResultHelper();
 
     /**
      * From thrift row.
@@ -168,6 +172,25 @@ public abstract class CassandraDataHandlerBase
         return e;
     }
 
+    /**
+     * From thrift row.
+     * 
+     * @param clazz
+     *            the clazz
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param consistencyLevel
+     *            the consistency level
+     * @param rowIds
+     *            the row ids
+     * @return the list
+     * @throws Exception
+     *             the exception
+     */
     public List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames, boolean isWrapReq,
             ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception
     {
@@ -186,6 +209,25 @@ public abstract class CassandraDataHandlerBase
         return entities;
     }
 
+    /**
+     * From thrift row.
+     * 
+     * @param clazz
+     *            the clazz
+     * @param m
+     *            the m
+     * @param rowKey
+     *            the row key
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param consistencyLevel
+     *            the consistency level
+     * @return the object
+     * @throws Exception
+     *             the exception
+     */
     public abstract Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
             boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception;
 
@@ -200,7 +242,7 @@ public abstract class CassandraDataHandlerBase
      * @throws Exception
      *             the exception
      */
-    Object populateEmbeddedObject(SuperColumn sc, EntityMetadata m) throws Exception
+    private Object populateEmbeddedObject(SuperColumn sc, EntityMetadata m) throws Exception
     {
         Field embeddedCollectionField = null;
         Object embeddedObject = null;
@@ -274,530 +316,6 @@ public abstract class CassandraDataHandlerBase
     }
 
     /**
-     * Fetches data held in Thrift row columns and populates to Entity objects.
-     * 
-     * @param clazz
-     *            the clazz
-     * @param m
-     *            the m
-     * @param thriftRow
-     *            the cr
-     * @param relationNames
-     *            the relation names
-     * @param isWrapperReq
-     *            the is wrapper req
-     * @return the e
-     * @throws Exception
-     *             the exception
-     */
-    public Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
-            List<String> relationNames, boolean isWrapperReq) throws Exception
-    {
-
-        // Instantiate a new instance
-        Object entity = null;
-        Map<String, Object> relations = new HashMap<String, Object>();
-
-        for (Column c : thriftRow.getColumns())
-        {
-
-            String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, c.getName());
-            byte[] thriftColumnValue = c.getValue();
-
-            if (null == thriftColumnValue)
-            {
-                continue;
-            }
-
-            // Check if this is a property, or a column representing foreign
-            // keys
-            // com.impetus.kundera.metadata.model.Column column =
-            // m.getColumn(thriftColumnName);
-
-            EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getMetamodel(m.getPersistenceUnit()).entity(clazz);
-
-            String fieldName = m.getFieldName(thriftColumnName);
-
-            Attribute column = fieldName != null ? entityType.getAttribute(fieldName) : null;
-
-            // entityType.getAttribute(arg0)
-            if (column != null)
-            {
-                if (entity == null)
-                {
-                    entity = clazz.newInstance();
-                    // Set row-key
-                    PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
-                }
-
-                try
-                {
-                    // PropertyAccessorHelper.set(entity, column.getField(),
-                    // thriftColumnValue);
-                    PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), thriftColumnValue);
-                }
-                catch (PropertyAccessException pae)
-                {
-                    log.warn(pae.getMessage());
-                }
-            }
-            else
-            {
-                if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
-                {
-                    // relations = new HashMap<String, Object>();
-                    String value = PropertyAccessorFactory.STRING.fromBytes(String.class, thriftColumnValue);
-                    relations.put(thriftColumnName, value);
-                    // prepare EnhanceEntity and return it
-                }
-            }
-        }
-
-        return isWrapperReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, thriftRow.getId(),
-                relations) : entity;
-        // return new EnhanceEntity(entity, thriftRow.getId(), relations);
-    }
-
-    public Object fromCounterColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
-            List<String> relationNames, boolean isWrapperReq) throws Exception
-    {
-        // Instantiate a new instance
-        Object entity = null;
-        Map<String, Object> relations = new HashMap<String, Object>();
-
-        // Set row-key.
-        // PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
-        // PropertyAccessorHelper.set(entity, m.getIdColumn().getField(),
-        // thriftRow.getId());
-
-        // Iterate through each column
-        for (CounterColumn c : thriftRow.getCounterColumns())
-        {
-            if (entity == null)
-            {
-                entity = clazz.newInstance();
-                // Set row-key
-                PropertyAccessorHelper.setId(entity, m, thriftRow.getId());
-            }
-
-            String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, c.getName());
-            Long thriftColumnValue = c.getValue();
-
-            if (null == thriftColumnValue)
-            {
-                continue;
-            }
-
-            // Check if this is a property, or a column representing foreign
-            // keys
-            // com.impetus.kundera.metadata.model.Column column =
-            // m.getColumn(thriftColumnName);
-            EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getMetamodel(m.getPersistenceUnit()).entity(clazz);
-
-            String fieldName = m.getFieldName(thriftColumnName);
-            Attribute column = entityType.getAttribute(fieldName);
-
-            if (column != null)
-            {
-                try
-                {
-                    if ((column.getJavaType().equals(Integer.class) || column.getJavaType().equals(int.class))
-                            && thriftColumnValue != null)
-                    {
-                        PropertyAccessorHelper
-                                .set(entity, (Field) column.getJavaMember(), thriftColumnValue.intValue());
-                    }
-                    else
-                    {
-                        PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), thriftColumnValue);
-                    }
-                }
-                catch (PropertyAccessException pae)
-                {
-                    log.warn(pae.getMessage());
-                }
-            }
-            else
-            {
-                if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
-                {
-                    // relations = new HashMap<String, Object>();
-                    String value = thriftColumnValue.toString();
-                    relations.put(thriftColumnName, value);
-                    // prepare EnhanceEntity and return it
-                }
-            }
-        }
-
-        return isWrapperReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, thriftRow.getId(),
-                relations) : entity;
-    }
-
-    /**
-     * Fetches data held in Thrift row super columns and populates to Entity
-     * objects.
-     * 
-     * @param clazz
-     *            the clazz
-     * @param m
-     *            the m
-     * @param tr
-     *            the tr
-     * @param relationNames
-     *            the relation names
-     * @param isWrapReq
-     *            the is wrap req
-     * @return the object
-     * @throws Exception
-     *             the exception
-     */
-    public Object fromSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr, List<String> relationNames,
-            boolean isWrapReq) throws Exception
-    {
-
-        // Instantiate a new instance
-        Object entity = null;
-
-        // Map to hold property-name=>foreign-entity relations
-        Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
-
-        // Get a name->field map for super-columns
-        Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
-        Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
-        MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
-
-        // Add all super columns to entity
-        Collection embeddedCollection = null;
-        Field embeddedCollectionField = null;
-        Map<String, Object> relations = new HashMap<String, Object>();
-
-        for (SuperColumn sc : tr.getSuperColumns())
-        {
-            if (entity == null)
-            {
-                entity = clazz.newInstance();
-                // Set row-key
-                PropertyAccessorHelper.setId(entity, m, tr.getId());
-            }
-            String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, sc.getName());
-            String scNamePrefix = null;
-
-            // If this super column is variable in number (name#sequence
-            // format)
-            if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
-            {
-                scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
-                embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
-
-                if (embeddedCollection == null)
-                {
-                    embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
-                }
-
-                Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
-
-                for (Column column : sc.getColumns())
-                {
-                    String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-                    byte[] value = column.getValue();
-                    if (value == null)
-                    {
-                        continue;
-                    }
-
-                    Field columnField = columnNameToFieldMap.get(name);
-                    if (columnField != null)
-                    {
-                        PropertyAccessorHelper.set(embeddedObject, columnField, value);
-                    }
-                    else if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(name))
-                    {
-                        String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(String.class, value);
-                        relations.put(name, valueAsStr);
-                    }
-                }
-                embeddedCollection.add(embeddedObject);
-
-                // Add this embedded object to cache
-                ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(),
-                        embeddedObject, scName);
-            }
-            else
-            {
-                // For embedded super columns, create embedded entities and
-                // add them to parent entity
-                Field superColumnField = superColumnNameToFieldMap.get(scName);
-                Object superColumnObj = null;
-                if (superColumnField != null
-                        || (relationNames != null && !relationNames.isEmpty() && relationNames.contains(scName)))
-                {
-
-                    Class superColumnClass = superColumnField != null ? superColumnField.getType() : null;
-                    superColumnObj = superColumnClass != null ? superColumnClass.newInstance() : null;
-                    for (Column column : sc.getColumns())
-                    {
-                        String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-                        byte[] value = column.getValue();
-                        Field columnField = columnNameToFieldMap.get(name);
-                        if (columnField != null)
-                        {
-                            try
-                            {
-                                PropertyAccessorHelper.set(superColumnObj, columnField, value);
-                            }
-                            catch (PropertyAccessException e)
-                            {
-                                // This is an entity column to be retrieved
-                                // in a
-                                // super column family. It's stored as a
-                                // super
-                                // column that would
-                                // have just one column with the same name
-                                log.debug(e.getMessage()
-                                        + ". Possible case of entity column in a super column family. Will be treated as a super column.");
-                                // com.impetus.kundera.metadata.model.Column col
-                                // = m.getColumn(name);
-                                EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                                        .getMetamodel(m.getPersistenceUnit()).entity(clazz);
-
-                                String fieldName = m.getFieldName(name);
-                                Attribute col = entityType.getAttribute(fieldName);
-                                if (col != null)
-                                {
-                                    superColumnObj = CassandraUtilities.toUTF8(value);
-                                }
-                            }
-
-                        }
-                        else
-                        {
-                            String valueAsStr = PropertyAccessorFactory.STRING.fromBytes(String.class, value);
-                            relations.put(name, valueAsStr);
-                        }
-                    }
-                }
-
-                if (superColumnField != null)
-                {
-                    PropertyAccessorHelper.set(entity, superColumnField, superColumnObj);
-                }
-            }
-        }
-
-        // }
-
-        if (embeddedCollection != null && !embeddedCollection.isEmpty())
-        {
-            PropertyAccessorHelper.set(entity, embeddedCollectionField, embeddedCollection);
-        }
-
-        // EnhancedEntity e = EntityResolver.getEnhancedEntity(entity,
-        // tr.getId(), foreignKeysMap);
-        return isWrapReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, tr.getId(), relations)
-                : entity;
-        // return new EnhanceEntity(entity, tr.getId(), relations);
-    }
-
-    public Object fromCounterSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr,
-            List<String> relationNames, boolean isWrapReq) throws Exception
-    {
-
-        // Instantiate a new instance
-        Object entity = null;
-
-        // Map to hold property-name=>foreign-entity relations
-        Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
-
-        // Get a name->field map for super-columns
-        Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
-        Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
-        MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
-
-        // Add all super columns to entity
-        Collection embeddedCollection = null;
-        Field embeddedCollectionField = null;
-        Map<String, Object> relations = new HashMap<String, Object>();
-
-        for (CounterSuperColumn sc : tr.getCounterSuperColumns())
-        {
-            if (entity == null)
-            {
-                entity = clazz.newInstance();
-                // Set row-key
-                PropertyAccessorHelper.setId(entity, m, tr.getId());
-            }
-            String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, sc.getName());
-            String scNamePrefix = null;
-
-            // If this super column is variable in number (name#sequence
-            // format)
-            if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
-            {
-                scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
-                embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
-
-                if (embeddedCollection == null)
-                {
-                    embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
-                }
-
-                Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
-
-                for (CounterColumn column : sc.getColumns())
-                {
-                    String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-                    Long value = column.getValue();
-                    if (value == null)
-                    {
-                        continue;
-                    }
-
-                    Field columnField = columnNameToFieldMap.get(name);
-                    if (columnField != null)
-                    {
-                        if ((columnField.getType().equals(Integer.class) || columnField.getType().equals(int.class))
-                                && value != null)
-                        {
-                            int colValue = value.intValue();
-                            PropertyAccessorHelper.set(embeddedObject, columnField, colValue);
-                        }
-                        else
-                        {
-                            PropertyAccessorHelper.set(embeddedObject, columnField, value);
-                        }
-                        // PropertyAccessorHelper.set(embeddedObject,
-                        // columnField, value);
-                    }
-                    else if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(name))
-                    {
-                        String valueAsStr = value.toString();
-                        relations.put(name, valueAsStr);
-                    }
-                }
-                embeddedCollection.add(embeddedObject);
-
-                // Add this embedded object to cache
-                ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(),
-                        embeddedObject, scName);
-            }
-            else
-            {
-                // For embedded super columns, create embedded entities and
-                // add them to parent entity
-                Field superColumnField = superColumnNameToFieldMap.get(scName);
-                Object superColumnObj = null;
-                if (superColumnField != null
-                        || (relationNames != null && !relationNames.isEmpty() && relationNames.contains(scName)))
-                {
-                    Class superColumnClass = superColumnField != null ? superColumnField.getType() : null;
-
-                    for (CounterColumn column : sc.getColumns())
-                    {
-                        String name = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
-                        Long value = column.getValue();
-                        Field columnField = columnNameToFieldMap.get(name);
-                        columnField = columnField == null ? columnNameToFieldMap.get(superColumnField.getName())
-                                : columnField;
-                        if (columnField != null)
-                        {
-                            try
-                            {
-                                if ((columnField.getType().equals(Integer.class) || columnField.getType().equals(
-                                        int.class))
-                                        && value != null)
-                                {
-                                    int colValue = value.intValue();
-                                    superColumnObj = populateColumnValue(superColumnClass, colValue, columnField);
-                                    /*
-                                     * if(superColumnClass.isPrimitive()) {
-                                     * superColumnObj = colValue; } else {
-                                     * superColumnObj =
-                                     * PropertyAccessorHelper.getObject
-                                     * (superColumnClass);
-                                     * PropertyAccessorHelper
-                                     * .set(superColumnObj, columnField,
-                                     * colValue); }
-                                     */}
-                                else
-                                {
-                                    superColumnObj = populateColumnValue(superColumnClass, value, columnField);
-                                }
-
-                            }
-                            catch (PropertyAccessException e)
-                            {
-                                // This is an entity column to be retrieved
-                                // in a
-                                // super column family. It's stored as a
-                                // super
-                                // column that would
-                                // have just one column with the same name
-                                log.debug(e.getMessage()
-                                        + ". Possible case of entity column in a super column family. Will be treated as a super column.");
-                                // com.impetus.kundera.metadata.model.Column col
-                                // = m.getColumn(name);
-                                EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                                        .getMetamodel(m.getPersistenceUnit()).entity(clazz);
-
-                                String fieldName = m.getFieldName(name);
-                                Attribute col = entityType.getAttribute(fieldName);
-                                if (col != null)
-                                {
-                                    superColumnObj = value;
-                                }
-                            }
-
-                        }
-                        else
-                        {
-                            String valueAsStr = value.toString();
-                            relations.put(name, valueAsStr);
-                        }
-                    }
-                }
-
-                if (superColumnField != null)
-                {
-                    PropertyAccessorHelper.set(entity, superColumnField, superColumnObj);
-                }
-            }
-        }
-
-        if (embeddedCollection != null && !embeddedCollection.isEmpty())
-        {
-            PropertyAccessorHelper.set(entity, embeddedCollectionField, embeddedCollection);
-        }
-
-        // EnhancedEntity e = EntityResolver.getEnhancedEntity(entity,
-        // tr.getId(), foreignKeysMap);
-        return isWrapReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, tr.getId(), relations)
-                : entity;
-    }
-
-    /**
-     * @param superColumnClass
-     * @param value
-     * @param columnField
-     * @return
-     */
-    private Object populateColumnValue(Class superColumnClass, Object value, Field columnField)
-    {
-        Object superColumnObj;
-        if (superColumnClass.isPrimitive())
-        {
-            superColumnObj = value;
-        }
-        else
-        {
-            superColumnObj = PropertyAccessorHelper.getObject(superColumnClass);
-            PropertyAccessorHelper.set(superColumnObj, columnField, value);
-        }
-        return superColumnObj;
-    }
-
-    /**
      * Helper method to convert @Entity to ThriftRow.
      * 
      * @param e
@@ -825,16 +343,20 @@ public abstract class CassandraDataHandlerBase
         long timestamp = System.currentTimeMillis();
         // Add super columns to thrift row
         onColumnOrSuperColumnThriftRow(timestamp, tr, m, e, id);
-
-        // }
-
-        // Add relations entities as Foreign keys to a new super column created
-        // internally
-        // addRelationshipsToThriftRow(timestamp, tr, e, m);
-
         return tr;
     }
 
+    /**
+     * To index thrift row.
+     * 
+     * @param e
+     *            the e
+     * @param m
+     *            the m
+     * @param columnFamily
+     *            the column family
+     * @return the list
+     */
     public List<ThriftRow> toIndexThriftRow(Object e, EntityMetadata m, String columnFamily)
     {
         List<ThriftRow> indexThriftRows = new ArrayList<ThriftRow>();
@@ -860,7 +382,6 @@ public abstract class CassandraDataHandlerBase
             {
                 continue;
             }
-
             if (embeddedObject instanceof Collection)
             {
                 ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
@@ -915,12 +436,12 @@ public abstract class CassandraDataHandlerBase
     }
 
     /**
-     * Constructs Thrift Tow (each record) for Index Table
+     * Constructs Thrift Tow (each record) for Index Table.
      * 
      * @param columnFamily
      *            Column family Name for Index Table
-     * @param embeddedColumn
-     *            Instance of {@link EmbeddedColumn}
+     * @param embeddedFieldName
+     *            the embedded field name
      * @param obj
      *            Embedded Object instance
      * @param column
@@ -1003,6 +524,458 @@ public abstract class CassandraDataHandlerBase
         return foreignKeys;
     }
 
+    /**
+     * Populate entity.
+     * 
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @return the object
+     */
+    public Object populateEntity(ThriftRow tr, EntityMetadata m, List<String> relationNames, boolean isWrapReq)
+    {
+        Map<String, Object> relations = new HashMap<String, Object>();
+        Object entity = null;
+        try
+        {
+            // entity =m.getEntityClazz().newInstance();
+
+            EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getMetamodel(m.getPersistenceUnit()).entity(m.getEntityClazz());
+
+            for (Column column : tr.getColumns())
+            {
+                entity = initialize(tr, m, entity);
+                onColumn(column, m, entity, entityType, relationNames, isWrapReq, relations);
+            }
+
+            // Add all super columns to entity
+            Collection embeddedCollection = null;
+            Field embeddedCollectionField = null;
+
+            boolean mappingProcessed = false;
+            Map<String, Field> columnNameToFieldMap = new HashMap<String, Field>();
+            Map<String, Field> superColumnNameToFieldMap = new HashMap<String, Field>();
+
+            for (SuperColumn superColumn : tr.getSuperColumns())
+            {
+                entity = initialize(tr, m, entity);
+
+                String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, superColumn.getName());
+                String scNamePrefix = null;
+
+                // Map to hold property-name=>foreign-entity relations
+                Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+
+                // Get a name->field map for super-columns
+                if (!mappingProcessed)
+                {
+                    MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
+                }
+
+                if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
+                {
+                    scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
+                    embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
+
+                    if (embeddedCollection == null)
+                    {
+                        embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
+                    }
+
+                    Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
+
+                    scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn,
+                            embeddedObject);
+                    embeddedCollection.add(embeddedObject);
+
+                    // Add this embedded object to cache
+                    ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(),
+                            embeddedObject, scName);
+                }
+                else
+                {
+                    if (superColumnNameToFieldMap.containsKey(scName))
+                    {
+                        Field field = superColumnNameToFieldMap.get(scName);
+                        Object embeddedObj = field.getType().newInstance();
+                        // column
+                        scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn,
+                                embeddedObj, columnNameToFieldMap);
+                        PropertyAccessorHelper.set(entity, field, embeddedObj);
+                    }
+                    else
+                    {
+                        scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn, entity);
+                    }
+
+                    scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn, entity);
+                }
+            }
+
+            mappingProcessed = false;
+
+            for (CounterColumn counterColumn : tr.getCounterColumns())
+            {
+                entity = initialize(tr, m, entity);
+                onCounterColumn(counterColumn, m, entity, entityType, relationNames, isWrapReq, relations);
+            }
+
+            for (CounterSuperColumn counterSuperColumn : tr.getCounterSuperColumns())
+            {
+                entity = initialize(tr, m, entity);
+                String scName = PropertyAccessorFactory.STRING.fromBytes(String.class, counterSuperColumn.getName());
+                String scNamePrefix = null;
+
+                // Map to hold property-name=>foreign-entity relations
+                Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+
+                // Get a name->field map for super-columns
+                // Get a name->field map for super-columns
+                if (!mappingProcessed)
+                {
+                    MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
+                    mappingProcessed = true;
+                }
+
+                if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
+                {
+                    scNamePrefix = MetadataUtils.getEmbeddedCollectionPrefix(scName);
+                    embeddedCollectionField = superColumnNameToFieldMap.get(scNamePrefix);
+
+                    if (embeddedCollection == null)
+                    {
+                        embeddedCollection = MetadataUtils.getEmbeddedCollectionInstance(embeddedCollectionField);
+                    }
+
+                    Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
+
+                    scrollOverCounterSuperColumn(m, relationNames, isWrapReq, relations, entityType,
+                            counterSuperColumn, embeddedObject, columnNameToFieldMap);
+                    embeddedCollection.add(embeddedObject);
+
+                    // Add this embedded object to cache
+                    ElementCollectionCacheManager.getInstance().addElementCollectionCacheMapping(tr.getId(),
+                            embeddedObject, scName);
+                }
+                else
+                {
+                    if (superColumnNameToFieldMap.containsKey(scName))
+                    {
+                        Field field = superColumnNameToFieldMap.get(scName);
+                        Object embeddedObj = field.getType().newInstance();
+                        // column
+                        scrollOverCounterSuperColumn(m, relationNames, isWrapReq, relations, entityType,
+                                counterSuperColumn, embeddedObj, columnNameToFieldMap);
+                        PropertyAccessorHelper.set(entity, field, embeddedObj);
+                    }
+                    else
+                    {
+                        scrollOverCounterSuperColumn(m, relationNames, isWrapReq, relations, entityType,
+                                counterSuperColumn, entity);
+                    }
+                }
+            }
+
+            if (embeddedCollection != null && !embeddedCollection.isEmpty())
+            {
+                PropertyAccessorHelper.set(entity, embeddedCollectionField, embeddedCollection);
+            }
+
+        }
+        catch (InstantiationException iex)
+        {
+            log.error("Eror while retrieving data, Caused by:" + iex.getMessage());
+            throw new PersistenceException(iex);
+        }
+        catch (IllegalAccessException iaex)
+        {
+            log.error("Eror while retrieving data, Caused by:" + iaex.getMessage());
+            throw new PersistenceException(iaex);
+        }
+
+        return isWrapReq && relations != null && !relations.isEmpty() ? new EnhanceEntity(entity, tr.getId(), relations)
+                : entity;
+
+    }
+
+    /**
+     * Initialize.
+     * 
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @return the object
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
+     */
+    private Object initialize(ThriftRow tr, EntityMetadata m, Object entity) throws InstantiationException,
+            IllegalAccessException
+    {
+        if (entity == null)
+        {
+            entity = m.getEntityClazz().newInstance();
+            PropertyAccessorHelper.setId(entity, m, tr.getId());
+        }
+
+        return entity;
+    }
+
+    /**
+     * Scroll over super column.
+     * 
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
+     * @param entityType
+     *            the entity type
+     * @param superColumn
+     *            the super column
+     * @param embeddedObject
+     *            the embedded object
+     */
+    private void scrollOverSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
+            Map<String, Object> relations, EntityType entityType, SuperColumn superColumn, Object embeddedObject)
+    {
+        for (Column column : superColumn.getColumns())
+        {
+            onColumn(column, m, embeddedObject, entityType, relationNames, isWrapReq, relations);
+        }
+    }
+
+    /**
+     * Scroll over counter super column.
+     * 
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
+     * @param entityType
+     *            the entity type
+     * @param superColumn
+     *            the super column
+     * @param embeddedObject
+     *            the embedded object
+     */
+    private void scrollOverCounterSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
+            Map<String, Object> relations, EntityType entityType, CounterSuperColumn superColumn, Object embeddedObject)
+    {
+        for (CounterColumn column : superColumn.getColumns())
+        {
+            onCounterColumn(column, m, embeddedObject, entityType, relationNames, isWrapReq, relations);
+        }
+    }
+
+    /**
+     * Scroll over counter super column.
+     * 
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
+     * @param entityType
+     *            the entity type
+     * @param superColumn
+     *            the super column
+     * @param embeddedObject
+     *            the embedded object
+     * @param superColumnFieldMap
+     *            the super column field map
+     */
+    private void scrollOverCounterSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
+            Map<String, Object> relations, EntityType entityType, CounterSuperColumn superColumn,
+            Object embeddedObject, Map<String, Field> superColumnFieldMap)
+    {
+        for (CounterColumn column : superColumn.getColumns())
+        {
+            String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
+            String thriftColumnValue = new Long(column.getValue()).toString();
+            PropertyAccessorHelper.set(embeddedObject, superColumnFieldMap.get(thriftColumnName), thriftColumnValue);
+        }
+    }
+
+    /**
+     * Scroll over super column.
+     * 
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
+     * @param entityType
+     *            the entity type
+     * @param superColumn
+     *            the super column
+     * @param embeddedObject
+     *            the embedded object
+     * @param superColumnFieldMap
+     *            the super column field map
+     */
+    private void scrollOverSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
+            Map<String, Object> relations, EntityType entityType, SuperColumn superColumn, Object embeddedObject,
+            Map<String, Field> superColumnFieldMap)
+    {
+        for (Column column : superColumn.getColumns())
+        {
+            String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
+            byte[] thriftColumnValue = column.getValue();
+            PropertyAccessorHelper.set(embeddedObject, superColumnFieldMap.get(thriftColumnName), thriftColumnValue);
+        }
+    }
+
+    /**
+     * On column.
+     * 
+     * @param column
+     *            the column
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @param entityType
+     *            the entity type
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
+     */
+    private void onColumn(Column column, EntityMetadata m, Object entity, EntityType entityType,
+            List<String> relationNames, boolean isWrapReq, Map<String, Object> relations)
+    {
+        String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
+        byte[] thriftColumnValue = column.getValue();
+        populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue);
+    }
+
+    /**
+     * On counter column.
+     * 
+     * @param column
+     *            the column
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @param entityType
+     *            the entity type
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
+     */
+    private void onCounterColumn(CounterColumn column, EntityMetadata m, Object entity, EntityType entityType,
+            List<String> relationNames, boolean isWrapReq, Map<String, Object> relations)
+    {
+        String thriftColumnName = PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName());
+        String thriftColumnValue = new Long(column.getValue()).toString();
+        populateViaThrift(m, entity, entityType, relationNames, relations, thriftColumnName, thriftColumnValue);
+    }
+
+    /**
+     * Populate via thrift.
+     * 
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @param entityType
+     *            the entity type
+     * @param relationNames
+     *            the relation names
+     * @param relations
+     *            the relations
+     * @param thriftColumnName
+     *            the thrift column name
+     * @param thriftColumnValue
+     *            the thrift column value
+     */
+    private void populateViaThrift(EntityMetadata m, Object entity, EntityType entityType, List<String> relationNames,
+            Map<String, Object> relations, String thriftColumnName, Object thriftColumnValue)
+    {
+        if (thriftColumnValue != null)
+        {
+            String fieldName = m.getFieldName(thriftColumnName);
+            Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
+            if (attribute != null)
+            {
+                try
+                {
+                    if (thriftColumnValue.getClass().isAssignableFrom(String.class))
+                    {
+                        PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(),
+                                (String) thriftColumnValue);
+                    }
+                    else
+                    {
+                        PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(),
+                                (byte[]) thriftColumnValue);
+                    }
+                }
+                catch (PropertyAccessException pae)
+                {
+                    log.warn(pae.getMessage());
+                }
+            }
+        }
+        else
+        {
+            // populate relation.
+            if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
+            {
+                // relations = new HashMap<String, Object>();
+                String value = PropertyAccessorFactory.STRING.fromBytes(String.class, (byte[]) thriftColumnValue);
+                relations.put(thriftColumnName, value);
+                // prepare EnhanceEntity and return it
+            }
+
+        }
+    }
+
+    /**
+     * On column or super column thrift row.
+     * 
+     * @param timestamp2
+     *            the timestamp2
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param e
+     *            the e
+     * @param id
+     *            the id
+     */
+
     private void onColumnOrSuperColumnThriftRow(long timestamp2, ThriftRow tr, EntityMetadata m, Object e, Object id)
     {
 
@@ -1019,9 +992,9 @@ public abstract class CassandraDataHandlerBase
             if (!attribute.getName().equals(m.getIdAttribute().getName()))
             {
                 Field field = (Field) ((Attribute) attribute).getJavaMember();
-                Object value = PropertyAccessorHelper.getObject(e, field);
                 byte[] name = PropertyAccessorFactory.STRING
                         .toBytes(((AbstractAttribute) attribute).getJPAColumnName());
+                Object value = getColumnValue(m, e, field);
 
                 // if attribute is embeddable.
 
@@ -1030,85 +1003,167 @@ public abstract class CassandraDataHandlerBase
                 {
                     onEmbeddable(timestamp2, tr, m, e, id, attribute);
                 }
-                else if (m.getType().equals(Type.SUPER_COLUMN_FAMILY))
-                {
-
-                    prepareSuperColumn(tr, m, value, name, timestamp2);
-                }
                 else
                 {
-                    prepareColumn(tr, m, value, name, timestamp2);
-                }
+                    if (m.getType().equals(Type.SUPER_COLUMN_FAMILY))
+                    {
 
+                        prepareSuperColumn(tr, m, value, name, timestamp2);
+                    }
+                    else
+                    {
+                        prepareColumn(tr, m, value, name, timestamp2);
+                    }
+                }
             }
         }
 
     }
 
+    private Object getColumnValue(EntityMetadata m, Object e, Field field)
+    {
+        Object value;
+        if (!m.isCounterColumnType())
+        {
+            value = PropertyAccessorHelper.get(e, field);
+        }
+        else
+        {
+            value = PropertyAccessorHelper.getString(e, field);
+        }
+        return value;
+    }
+
+    /**
+     * Prepare column.
+     * 
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param value
+     *            the value
+     * @param name
+     *            the name
+     * @param timestamp
+     *            the timestamp
+     */
     private void prepareColumn(ThriftRow tr, EntityMetadata m, Object value, byte[] name, long timestamp)
     {
-        if (m.isCounterColumnType())
+        if (value != null)
         {
-            CounterColumn counterColumn = prepareCounterColumn(value, name);
-            tr.addCounterColumn(counterColumn);
-        }
-        else
-        {
-            Column column = prepareColumn(value, name, timestamp);
-            tr.addColumn(column);
+            if (m.isCounterColumnType())
+            {
+                CounterColumn counterColumn = prepareCounterColumn((String) value, name);
+                tr.addCounterColumn(counterColumn);
+            }
+            else
+            {
+                Column column = prepareColumn((byte[]) value, name, timestamp);
+                tr.addColumn(column);
+            }
         }
     }
 
+    /**
+     * Prepare super column.
+     * 
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param value
+     *            the value
+     * @param name
+     *            the name
+     * @param timestamp
+     *            the timestamp
+     */
     private void prepareSuperColumn(ThriftRow tr, EntityMetadata m, Object value, byte[] name, long timestamp)
     {
-        if (m.isCounterColumnType())
+        if (value != null)
         {
-            CounterSuperColumn counterSuper = new CounterSuperColumn();
-            counterSuper.setName(name);
-            CounterColumn counterColumn = prepareCounterColumn(value, name);
-            List<CounterColumn> subCounterColumn = new ArrayList<CounterColumn>();
-            subCounterColumn.add(counterColumn);
-            counterSuper.setColumns(subCounterColumn);
-            tr.addCounterSuperColumn(counterSuper);
-        }
-        else
-        {
-            SuperColumn superCol = new SuperColumn();
-            superCol.setName(name);
-            Column column = prepareColumn(value, name, timestamp);
-            List<Column> subColumn = new ArrayList<Column>();
-            subColumn.add(column);
-            superCol.setColumns(subColumn);
-            tr.addSuperColumn(superCol);
+            if (m.isCounterColumnType())
+            {
+                CounterSuperColumn counterSuper = new CounterSuperColumn();
+                counterSuper.setName(name);
+                CounterColumn counterColumn = prepareCounterColumn((String) value, name);
+                List<CounterColumn> subCounterColumn = new ArrayList<CounterColumn>();
+                subCounterColumn.add(counterColumn);
+                counterSuper.setColumns(subCounterColumn);
+                tr.addCounterSuperColumn(counterSuper);
+            }
+            else
+            {
+                SuperColumn superCol = new SuperColumn();
+                superCol.setName(name);
+                Column column = prepareColumn((byte[]) value, name, timestamp);
+                List<Column> subColumn = new ArrayList<Column>();
+                subColumn.add(column);
+                superCol.setColumns(subColumn);
+                tr.addSuperColumn(superCol);
 
+            }
         }
     }
 
-    private Column prepareColumn(Object value, byte[] name, long timestamp)
+    // private void onColumnOrSuperColumnThriftRow(long timestamp2, ThriftRow
+    // tr, EntityMetadata m, Object e, Object id)
+
+    /**
+     * Prepare column.
+     * 
+     * @param value
+     *            the value
+     * @param name
+     *            the name
+     * @param timestamp
+     *            the timestamp
+     * @return the column
+     */
+    private Column prepareColumn(byte[] value, byte[] name, long timestamp)
     {
-        byte[] byteValue = value != null ? PropertyAccessorHelper.getBytes(value) : null;
         Column column = new Column();
         column.setName(name);
-        column.setValue(byteValue);
+        column.setValue(value);
         column.setTimestamp(timestamp);
         return column;
     }
 
-    private CounterColumn prepareCounterColumn(Object value, byte[] name)
+    /**
+     * Prepare counter column.
+     * 
+     * @param value
+     *            the value
+     * @param name
+     *            the name
+     * @return the counter column
+     */
+    private CounterColumn prepareCounterColumn(String value, byte[] name)
     {
         CounterColumn counterColumn = new CounterColumn();
         counterColumn.setName(name);
-        counterColumn.setValue(new Long(value.toString()));
+        LongAccessor accessor = new LongAccessor();
+        counterColumn.setValue(accessor.fromString(LongAccessor.class, value));
         return counterColumn;
     }
 
     /**
+     * 
+     * On embeddable.
+     * 
      * @param timestamp2
+     *            the timestamp2
      * @param tr
+     *            the tr
      * @param m
+     *            the m
      * @param e
+     *            the e
      * @param id
-     * @param attribute
+     *            the id
+     * @param embeddableAttrib
+     *            the embeddable attrib
      */
     private void onEmbeddable(long timestamp2, ThriftRow tr, EntityMetadata m, Object e, Object id,
             Attribute embeddableAttrib)
@@ -1197,9 +1252,26 @@ public abstract class CassandraDataHandlerBase
             }
 
         }
-
     }
 
+    /**
+     * Builds the thrift super column.
+     * 
+     * @param timestamp2
+     *            the timestamp2
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param id
+     *            the id
+     * @param superColumn
+     *            the super column
+     * @param superColumnName
+     *            the super column name
+     * @param obj
+     *            the obj
+     */
     private void buildThriftSuperColumn(long timestamp2, ThriftRow tr, EntityMetadata m, Object id,
             EmbeddableType superColumn, String superColumnName, Object obj)
     {
@@ -1215,6 +1287,17 @@ public abstract class CassandraDataHandlerBase
         }
     }
 
+    /**
+     * Builds the thrift counter super column.
+     * 
+     * @param superColumnName
+     *            the super column name
+     * @param superColumn
+     *            the super column
+     * @param counterSuperColumnObject
+     *            the counter super column object
+     * @return the counter super column
+     */
     private CounterSuperColumn buildThriftCounterSuperColumn(String superColumnName, EmbeddableType superColumn,
             Object counterSuperColumnObject)
     {
@@ -1267,148 +1350,6 @@ public abstract class CassandraDataHandlerBase
         return thriftSuperColumn;
 
     }
-
-    /* *//**
-     * Adds the columns to thrift row.
-     * 
-     * @param timestamp
-     *            the timestamp
-     * @param tr
-     *            the tr
-     * @param m
-     *            the m
-     * @param e
-     *            the e
-     * @throws Exception
-     *             the exception
-     */
-    /*
-     * private void addColumnsToThriftRow(long timestamp, ThriftRow tr,
-     * EntityMetadata m, Object e, boolean isSuper) throws Exception {
-     * List<Column> columns = new ArrayList<Column>();
-     * 
-     * // Iterate through each column-meta and populate that with field values
-     * 
-     * MetamodelImpl metaModel = (MetamodelImpl)
-     * KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-     * m.getPersistenceUnit()); EntityType entityType =
-     * metaModel.entity(m.getEntityClazz());
-     * 
-     * Iterator<Attribute> iter = entityType.getAttributes().iterator(); while
-     * (iter.hasNext()) { AbstractAttribute column = (AbstractAttribute)
-     * iter.next(); // } // // for (com.impetus.kundera.metadata.model.Column
-     * column : // m.getColumnsAsList()) // { if
-     * (!metaModel.isEmbeddable(((Attribute) column).getJavaType())) { Field
-     * field = (Field) column.getJavaMember(); if
-     * (field.getType().isAssignableFrom(Set.class) ||
-     * field.getType().isAssignableFrom(Collection.class)) { } else { String
-     * name = column.getJPAColumnName(); try { byte[] value =
-     * PropertyAccessorHelper.get(e, field); if (value != null) { if (!isSuper)
-     * { Column col = new Column();
-     * col.setName(PropertyAccessorFactory.STRING.toBytes(name));
-     * col.setValue(value); col.setTimestamp(timestamp); columns.add(col); }
-     * else { SuperColumn superColumn = new SuperColumn();
-     * superColumn.setName(PropertyAccessorFactory
-     * .STRING.toBytes(field.getName())); Column col = new Column();
-     * col.setName(PropertyAccessorFactory.STRING.toBytes(name));
-     * col.setValue(value); col.setTimestamp(timestamp); List<Column> subColumn
-     * = new ArrayList<Column>(); subColumn.add(col);
-     * superColumn.setColumns(subColumn); tr.addSuperColumn(superColumn); } }
-     * else { log.debug("skipping column :" + name +
-     * " as value is not provided!"); } } catch (PropertyAccessException exp) {
-     * log.warn(exp.getMessage()); } } } } tr.setColumns(columns);
-     * 
-     * }
-     */
-
-    /**
-     * Adds the super columns to thrift row.
-     * 
-     * @param timestamp
-     *            the timestamp
-     * @param client
-     *            the client
-     * @param tr
-     *            the tr
-     * @param m
-     *            the m
-     * @param e
-     *            the e
-     * @param id
-     *            the id
-     * @throws Exception
-     *             the exception
-     */
-    /*
-     * private void addSuperColumnsToThriftRow(long timestamp, ThriftRow tr,
-     * EntityMetadata m, Object e, String id) throws Exception { // Iterate
-     * through Super columns
-     * 
-     * MetamodelImpl metaModel = (MetamodelImpl)
-     * KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-     * m.getPersistenceUnit());
-     * 
-     * Map<String, EmbeddableType> embeddables =
-     * metaModel.getEmbeddables(m.getEntityClazz()); EntityType entityType =
-     * metaModel.entity(m.getEntityClazz());
-     * 
-     * for (String key : embeddables.keySet()) { EmbeddableType superColumn =
-     * embeddables.get(key); AbstractAttribute embeddableAttrib =
-     * (AbstractAttribute) entityType.getAttribute(key); // } // // for
-     * (EmbeddedColumn superColumn : m.getEmbeddedColumnsAsList()) // { Field
-     * superColumnField = (Field) embeddableAttrib.getJavaMember(); Object
-     * superColumnObject = PropertyAccessorHelper.getObject(e,
-     * superColumnField);
-     * 
-     * // If Embedded object is a Collection, there will be variable number //
-     * of super columns one for each object in collection. // Key for each super
-     * column will be of the format "<Embedded object // field name>#<Unique
-     * sequence number>
-     * 
-     * // On the other hand, if embedded object is not a Collection, it // would
-     * simply be embedded as ONE super column. String superColumnName = null; if
-     * (superColumnObject == null) { continue; } if (superColumnObject
-     * instanceof Collection) {
-     * 
-     * ElementCollectionCacheManager ecCacheHandler =
-     * ElementCollectionCacheManager.getInstance();
-     * 
-     * // Check whether it's first time insert or updation if
-     * (ecCacheHandler.isCacheEmpty()) { // First time insert int count = 0; for
-     * (Object obj : (Collection) superColumnObject) { superColumnName =
-     * embeddableAttrib.getJPAColumnName() +
-     * Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count; SuperColumn
-     * thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp,
-     * superColumn, obj); tr.addSuperColumn(thriftSuperColumn);
-     * ecCacheHandler.addElementCollectionCacheMapping(id, obj,
-     * superColumnName);
-     * 
-     * count++; } } else { // Updation, Check whether this object is already in
-     * cache, // which means we already have a super column // Otherwise we need
-     * to generate a fresh embedded column // name int lastEmbeddedObjectCount =
-     * ecCacheHandler.getLastElementCollectionObjectCount(id); for (Object obj :
-     * (Collection) superColumnObject) { superColumnName =
-     * ecCacheHandler.getElementCollectionObjectName(id, obj); if
-     * (superColumnName == null) { // Fresh row superColumnName =
-     * embeddableAttrib.getJPAColumnName() +
-     * Constants.EMBEDDED_COLUMN_NAME_DELIMITER + (++lastEmbeddedObjectCount); }
-     * SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName,
-     * timestamp, superColumn, obj); tr.addSuperColumn(thriftSuperColumn);
-     * ecCacheHandler.addElementCollectionCacheMapping(id, obj,
-     * superColumnName); }
-     * 
-     * // TODO: Why are we not clearing EC Cache as in // HBaseDataHandler //
-     * Clear embedded collection cache for GC // ecCacheHandler.clearCache(); }
-     * 
-     * } else { superColumnName = embeddableAttrib.getJPAColumnName();
-     * SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName,
-     * timestamp, superColumn, superColumnObject);
-     * tr.addSuperColumn(thriftSuperColumn); }
-     * 
-     * }
-     * 
-     * }
-     */
 
     /**
      * Builds the thrift super column.

@@ -193,7 +193,9 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
 
         BasicDBObject query = new BasicDBObject();
+
         query.put(((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName(), handler.populateValue(key, key.getClass()));
+
 
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
@@ -318,7 +320,9 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 
         // Find the DBObject to remove first
         BasicDBObject query = new BasicDBObject();
+
         query.put(((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName(), handler.populateValue(pKey, pKey.getClass()));
+
 
         dbCollection.remove(query);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());

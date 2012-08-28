@@ -479,6 +479,7 @@ public class MetaModelBuilderTest
         CollectionAttribute<? super X, ?> collectionAttribute = (CollectionAttribute<? super X, ?>) managedType
                 .getCollection("association", AssociationEntity.class);
         Assert.assertNotNull(collectionAttribute);
+        
 
         // assert with invalid collection type class.
         try

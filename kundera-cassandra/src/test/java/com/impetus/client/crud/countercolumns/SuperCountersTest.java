@@ -133,7 +133,8 @@ public class SuperCountersTest
 
         Query q = em.createQuery(deleteQuery);
         q.executeUpdate();
-
+        
+        em.clear();
         SuperCounters counter2 = new SuperCounters();
         counter2 = em.find(SuperCounters.class, id1);
         Assert.assertNull(counter2);

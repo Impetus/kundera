@@ -26,6 +26,8 @@ import java.util.Queue;
 import java.util.regex.Pattern;
 
 import javax.persistence.Query;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +40,9 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -178,17 +183,24 @@ public class MongoDBQuery extends QueryImpl
                 String condition = filter.getCondition();
                 // String value = filter.getValue().toString();
                 Object value = filter.getValue();
-                
-                // value is string but field.getType is different, then get value using 
+
+                // value is string but field.getType is different, then get
+                // value using
 
                 Field f = null;
-                if (m.getIdColumn().getName().equalsIgnoreCase(property))
+
+                if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(property))
                 {
-                    f = m.getIdColumn().getField();
+                    f = (Field) m.getIdAttribute().getJavaMember();
                 }
                 else
                 {
-                    f = m.getColumn(property).getField();
+                    MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                            .getMetamodel(m.getPersistenceUnit());
+
+                    EntityType entity = metaModel.entity(m.getEntityClazz());
+                    String fieldName = m.getFieldName(property);
+                    f = (Field) entity.getAttribute(fieldName).getJavaMember();
                 }
                 if (value.getClass().isAssignableFrom(String.class) && f != null
                         && !f.getType().equals(value.getClass()))
@@ -197,9 +209,7 @@ public class MongoDBQuery extends QueryImpl
                             value.toString());
                 }
 
-                value = populateValue(value, value.getClass());
-                
-                
+//                value = populateValue(value, value.getClass());
 
                 // Property, if doesn't exist in entity, may be there in a
                 // document embedded within it, so we have to check that
@@ -336,7 +346,8 @@ public class MongoDBQuery extends QueryImpl
     {
         return (clazz.isAssignableFrom(BigDecimal.class))
                 || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class))
-                        || (clazz.isAssignableFrom(char.class)) || (clazz.isAssignableFrom(Character.class))|| (clazz.isAssignableFrom(Calendar.class)) || (clazz.isAssignableFrom(GregorianCalendar.class)));
+                        || (clazz.isAssignableFrom(char.class)) || (clazz.isAssignableFrom(Character.class))
+                        || (clazz.isAssignableFrom(Calendar.class)) || (clazz.isAssignableFrom(GregorianCalendar.class)));
     }
 
 }

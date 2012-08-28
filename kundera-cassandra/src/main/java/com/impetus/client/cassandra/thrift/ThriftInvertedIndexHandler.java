@@ -211,7 +211,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             PelopsUtils.releaseConnection(conn);
         }
 
-        List<Column> allThriftColumns = ThriftDataResultHelper.transformThriftResult(coscList, ColumnFamilyType.COLUMN);
+        List<Column> allThriftColumns = ThriftDataResultHelper.transformThriftResult(coscList, ColumnFamilyType.COLUMN,null);
 
         for (Column column : allThriftColumns)
         {
@@ -273,7 +273,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
             PelopsUtils.releaseConnection(conn);
         }
 
-        Column thriftColumn = ThriftDataResultHelper.transformThriftResult(cosc, ColumnFamilyType.COLUMN);
+        Column thriftColumn = ThriftDataResultHelper.transformThriftResult(cosc, ColumnFamilyType.COLUMN,null);
         return thriftColumn;
     }
 

@@ -58,5 +58,10 @@ public class LongAccessorTest
         Long l = 49L;
         bytes = longAccessor.toBytes(l);
         Assert.assertEquals(l,longAccessor.fromBytes(LongAccessor.class, bytes));
+        
+        l = 12l;
+        bytes = longAccessor.toBytes(l);
+        Assert.assertEquals(l, (Long)longAccessor.fromBytes(LongAccessor.class, bytes));
+        
     }
 }

@@ -55,10 +55,10 @@ public class HBaseWriter implements Writer
 
     @Override
     public void writeColumns(HTable htable, String columnFamily, Object rowKey, Set<Attribute> columns,
+
             Object columnFamilyObj) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
-
         for (Attribute column : columns)
         // for (Column column : columns)
         {
@@ -67,7 +67,6 @@ public class HBaseWriter implements Writer
             {
                 Object o = PropertyAccessorHelper.getObject(columnFamilyObj, (Field)column.getJavaMember());
                 byte[] value = HBaseUtils.getBytes(o);
-
                 if (value != null)
                 {
                     p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), value);
@@ -83,11 +82,9 @@ public class HBaseWriter implements Writer
     }
 
     @Override
-    public void writeColumn(HTable htable, String columnFamily, Object rowKey, Attribute column, Object columnObj)
-            throws IOException
+    public void writeColumn(HTable htable, String columnFamily, Object rowKey, Attribute column, Object columnObj) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
-
         p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(((AbstractAttribute) column).getJPAColumnName()),
                 Bytes.toBytes(columnObj.toString()));
 
@@ -98,7 +95,6 @@ public class HBaseWriter implements Writer
     public void writeColumns(HTable htable, Object rowKey, Set<Attribute> columns, Object entity) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
-
         for (Attribute column : columns)
         // for (Column column : columns)
         {
@@ -106,8 +102,7 @@ public class HBaseWriter implements Writer
             try
             {
                 byte[] qualValInBytes = Bytes.toBytes(qualifier);
-                p.add(qualValInBytes, qualValInBytes, System.currentTimeMillis(),
-                        HBaseUtils.getBytes(PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember())));
+                p.add(qualValInBytes, qualValInBytes, System.currentTimeMillis(), HBaseUtils.getBytes(PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember())));
             }
             catch (PropertyAccessException e1)
             {

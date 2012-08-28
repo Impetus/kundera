@@ -35,7 +35,6 @@ import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.SearchResult;
-import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
