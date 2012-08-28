@@ -79,6 +79,10 @@ public abstract class TwinAssociation extends AssociationBase
                 switchPersistenceUnits(c);
                 insert();
                 find();
+                findPersonByIdColumn();
+                findPersonByName();
+                findAddressByIdColumn();
+                findAddressByStreet();
                 update();
                 remove();
             }
@@ -91,18 +95,27 @@ public abstract class TwinAssociation extends AssociationBase
         }
     }
 
-    /**
-     * All unit test cases must implement it.
-     */
-    protected abstract void find();
-
-    /**
-     * All unit test cases must implement it.
-     */
+    /** Insert person with address */
     protected abstract void insert();
 
+    /** Find person by ID */
+    protected abstract void find();
+    
+    /** Find person by ID using query */
+    protected abstract void findPersonByIdColumn();
+    
+    /** Find person by name using query */
+    protected abstract void findPersonByName();
+    
+    /** Find Address by ID using query */
+    protected abstract void findAddressByIdColumn();
+    
+    /** Find Address by street using query */
+    protected abstract void findAddressByStreet();    
+
+    /** Update Person*/
     protected abstract void update();
 
+    /** Remove Person */
     protected abstract void remove();
-
 }

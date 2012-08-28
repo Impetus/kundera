@@ -39,7 +39,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.kundera.tests.cli.CassandraCli;
+import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatUniMTo1;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatUniMToM;
+import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUniMTo1;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUniMToM;
 
 /**
@@ -155,33 +157,51 @@ public class MTMUniAssociationTest extends TwinAssociation
     {
 
         PersonnelUniMToM person1 = (PersonnelUniMToM) dao.findPerson(PersonnelUniMToM.class, "unimanytomany_1");
-        Assert.assertNotNull(person1);
-        Assert.assertEquals("unimanytomany_1", person1.getPersonId());
-        Assert.assertEquals("Amresh", person1.getPersonName());
-
-        Set<HabitatUniMToM> addresses1 = person1.getAddresses();
-        Assert.assertNotNull(addresses1);
-        Assert.assertFalse(addresses1.isEmpty());
-        Assert.assertEquals(2, addresses1.size());
-        HabitatUniMToM address11 = (HabitatUniMToM) addresses1.toArray()[0];
-        Assert.assertNotNull(address11);
-        HabitatUniMToM address12 = (HabitatUniMToM) addresses1.toArray()[1];
-        Assert.assertNotNull(address12);
+        assertPerson1(person1);
 
         PersonnelUniMToM person2 = (PersonnelUniMToM) dao.findPerson(PersonnelUniMToM.class, "unimanytomany_2");
-        Assert.assertNotNull(person2);
+        assertPerson2(person2);
+    }    
+    
 
-        Assert.assertEquals("unimanytomany_2", person2.getPersonId());
-        Assert.assertEquals("Vivek", person2.getPersonName());
+    @Override
+    protected void findPersonByIdColumn()
+    {
+        // Find Person 1
+        PersonnelUniMToM p1 = (PersonnelUniMToM) dao.findPersonByIdColumn(PersonnelUniMToM.class, "unimanytomany_1");
+        assertPerson1(p1);
 
-        Set<HabitatUniMToM> addresses2 = person2.getAddresses();
-        Assert.assertNotNull(addresses2);
-        Assert.assertFalse(addresses2.isEmpty());
-        Assert.assertEquals(2, addresses2.size());
-        HabitatUniMToM address21 = (HabitatUniMToM) addresses2.toArray()[0];
-        Assert.assertNotNull(address21);
-        HabitatUniMToM address22 = (HabitatUniMToM) addresses2.toArray()[1];
-        Assert.assertNotNull(address22);
+        // Find Person 2
+        PersonnelUniMToM p2 = (PersonnelUniMToM) dao.findPersonByIdColumn(PersonnelUniMToM.class, "unimanytomany_2");
+        assertPerson2(p2);
+    }
+
+    @Override
+    protected void findPersonByName()
+    {
+        List<PersonnelUniMToM> persons = dao.findPersonByName(PersonnelUniMToM.class, "Amresh");    
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 1);
+        assertPerson1(persons.get(0));
+    }
+
+    @Override
+    protected void findAddressByIdColumn()
+    {
+        HabitatUniMToM a = (HabitatUniMToM) dao.findAddressByIdColumn(HabitatUniMToM.class, "unimanytomany_a");    
+        assertAddressForPerson1(a);
+    }
+
+    @Override
+    protected void findAddressByStreet()
+    {
+        List<HabitatUniMToM> adds = dao.findAddressByStreet(HabitatUniMToM.class, "AAAAAAAAAAAAA");  
+        Assert.assertNotNull(adds);
+        Assert.assertFalse(adds.isEmpty());
+        Assert.assertTrue(adds.size() == 1);
+        
+        assertAddressForPerson1(adds.get(0));
     }
 
     @Override
@@ -246,6 +266,71 @@ public class MTMUniAssociationTest extends TwinAssociation
         tearDownInternal();
     }
 
+    /**
+     * @param person1
+     */
+    private void assertPerson1(PersonnelUniMToM person1)
+    {
+        Assert.assertNotNull(person1);
+        Assert.assertEquals("unimanytomany_1", person1.getPersonId());
+        Assert.assertEquals("Amresh", person1.getPersonName());
+
+        Set<HabitatUniMToM> addresses1 = person1.getAddresses();
+        Assert.assertNotNull(addresses1);
+        Assert.assertFalse(addresses1.isEmpty());
+        Assert.assertEquals(2, addresses1.size());
+        HabitatUniMToM address11 = (HabitatUniMToM) addresses1.toArray()[0];        
+        assertAddressForPerson1(address11);
+        HabitatUniMToM address12 = (HabitatUniMToM) addresses1.toArray()[1];
+        assertAddressForPerson1(address12);
+    }
+    
+    
+    /**
+     * @param person2
+     */
+    private void assertPerson2(PersonnelUniMToM person2)
+    {
+        Assert.assertNotNull(person2);
+
+        Assert.assertEquals("unimanytomany_2", person2.getPersonId());
+        Assert.assertEquals("Vivek", person2.getPersonName());
+
+        Set<HabitatUniMToM> addresses2 = person2.getAddresses();
+        Assert.assertNotNull(addresses2);
+        Assert.assertFalse(addresses2.isEmpty());
+        Assert.assertEquals(2, addresses2.size());
+        HabitatUniMToM address21 = (HabitatUniMToM) addresses2.toArray()[0];
+        assertAddressForPerson2(address21);
+        HabitatUniMToM address22 = (HabitatUniMToM) addresses2.toArray()[1];
+        assertAddressForPerson2(address22);
+    }
+    
+    
+
+    /**
+     * @param address11
+     */
+    private void assertAddressForPerson1(HabitatUniMToM address)
+    {
+        Assert.assertNotNull(address);
+        Assert.assertTrue("unimanytomany_a".equals(address.getAddressId()) || "unimanytomany_b".equals(address.getAddressId()));
+        Assert.assertTrue("AAAAAAAAAAAAA".equals(address.getStreet()) || "BBBBBBBBBBBBBBB".equals(address.getStreet()));
+    } 
+    
+    /**
+     * @param address12
+     */
+    private void assertAddressForPerson2(HabitatUniMToM address)
+    {
+        Assert.assertNotNull(address);
+        
+        Assert.assertTrue("unimanytomany_b".equals(address.getAddressId()) || "unimanytomany_c".equals(address.getAddressId()));
+        Assert.assertTrue("CCCCCCCCCCC".equals(address.getStreet()) || "BBBBBBBBBBBBBBB".equals(address.getStreet()));       
+
+    }
+    
+  
     @Override
     protected void loadDataForPERSONNEL() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
