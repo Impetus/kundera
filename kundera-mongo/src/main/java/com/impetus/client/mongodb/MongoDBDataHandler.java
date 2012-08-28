@@ -101,7 +101,10 @@ final class MongoDBDataHandler
             for(Attribute column : columns)
 //            for (Column column : columns)
             {
-                setColumnValue(document, entity, column);
+                if(!m.getIdAttribute().getName().equals(column.getName()))
+                {
+                    setColumnValue(document, entity, column);
+                }
             }
 
             // Populate @Embedded objects and collections
@@ -223,7 +226,7 @@ final class MongoDBDataHandler
         }
         else
         {
-            PropertyAccessorHelper.set(entity, (Field)column.getJavaMember(), document.get(column.getName()).toString());
+            PropertyAccessorHelper.set(entity, (Field)column.getJavaMember(), document.get(((AbstractAttribute)column).getJPAColumnName()).toString());
         }
     }
 
@@ -349,13 +352,13 @@ final class MongoDBDataHandler
             {
                 basicDBList.add(o);
             }
-            dbObj.put(column.getName(), basicDBList);
+            dbObj.put(((AbstractAttribute)column).getJPAColumnName(), basicDBList);
         }
         else if (column.getJavaType().isAssignableFrom(Map.class))
         {
             Map mapObj = (Map) PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
             BasicDBObjectBuilder builder = BasicDBObjectBuilder.start(mapObj);
-            dbObj.put(column.getName(), builder.get());
+            dbObj.put(((AbstractAttribute)column).getJPAColumnName(), builder.get());
         }
         else
         {
@@ -363,7 +366,7 @@ final class MongoDBDataHandler
             Object valObj = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
             if (valObj != null)
             {
-                dbObj.put(column.getName(), valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString()
+                dbObj.put(((AbstractAttribute)column).getJPAColumnName(), valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString()
                         : valObj.toString())/*
                                              * PropertyAccessorHelper.getObject(
                                              * entity,

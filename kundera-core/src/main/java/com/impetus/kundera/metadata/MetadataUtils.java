@@ -381,7 +381,10 @@ public class MetadataUtils
         while(strToken.hasMoreElements())
         {
             embeddableAttributeName = strToken.nextToken();
-            embeddedFieldName = strToken.nextToken();
+            if(strToken.countTokens() > 1)
+            {
+                embeddedFieldName = strToken.nextToken();
+            }
         }
         
         
