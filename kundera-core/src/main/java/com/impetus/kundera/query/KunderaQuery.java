@@ -432,14 +432,21 @@ public class KunderaQuery
 
                 // String columnName = getColumnNameFromFieldName(metadata,
                 // property);
+                String columnName = null;
+                try
+                {
                 Metamodel metaModel =  KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(getPersistenceUnit());
 //                String columnName = metadata.getColumnName(property);
-                String columnName = ((AbstractAttribute)metaModel.entity(entityClass).getAttribute(property)).getJPAColumnName();
+                    columnName = ((AbstractAttribute)metaModel.entity(entityClass).getAttribute(property)).getJPAColumnName();
+                }catch(IllegalArgumentException iaex)
+                {
+                    logger.warn("No column found by this name : " + property + "checking for embeddedfield" );
+                }
                 // where condition may be for search within embedded object
                 if (columnName == null && property.indexOf(".") > 0)
                 {
                     String enclosingEmbeddedField = MetadataUtils.getEnclosingEmbeddedFieldName(metadata,
-                            property.substring(property.indexOf(".") + 1, property.length()), false);
+                            property, true);
                     if (enclosingEmbeddedField != null)
                     {
                         columnName = property;
@@ -528,7 +535,9 @@ public class KunderaQuery
 
     private void filterJPAParameterInfo(Type type, String name, String fieldName)
     {
-        Attribute entityAttribute = ((MetamodelImpl)KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(persistenceUnit)).getEntityAttribute(entityClass, fieldName);
+        String attributeName = getAttributeName(fieldName);
+
+        Attribute entityAttribute = ((MetamodelImpl)KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(persistenceUnit)).getEntityAttribute(entityClass, attributeName);
         Class fieldType = entityAttribute.getJavaType();
         
         if (type.equals(Type.INDEXED))
@@ -539,6 +548,16 @@ public class KunderaQuery
         {
             typedParameter.addJPAParameter(new JPAParameter(name, null, fieldType));
         }
+    }
+
+    private String getAttributeName(String fieldName)
+    {
+        String attributeName = fieldName;
+        if(fieldName.indexOf(".") != -1)
+        {
+            attributeName = fieldName.substring(0,fieldName.indexOf("."));
+        }
+        return attributeName;
     }
 
     /**

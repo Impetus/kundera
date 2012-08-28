@@ -20,9 +20,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.hibernate.mapping.Map;
 
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.proxy.EnhancedEntity;
@@ -491,5 +494,21 @@ public class PropertyAccessorHelper
     public static Object getObject(Class clazz, byte[] b)
     {
         return PropertyAccessorFactory.getPropertyAccessor(clazz).fromBytes(clazz, b);
+    }
+   
+    public static final Collection getCollectionInstance(Field collectionField)
+    {
+        if (collectionField != null)
+        {
+            if (collectionField.getType().isAssignableFrom(List.class))
+            {
+                return new ArrayList();
+            }
+            else if (collectionField.getType().isAssignableFrom(Set.class))
+            {
+                return new HashSet();
+            }
+        }
+        return null;
     }
 }

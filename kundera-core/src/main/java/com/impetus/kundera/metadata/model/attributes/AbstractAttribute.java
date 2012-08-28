@@ -20,7 +20,9 @@ import java.lang.reflect.Member;
 import java.util.Date;
 
 import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.JoinColumn;
 import javax.persistence.Temporal;
 import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 import javax.persistence.metamodel.ManagedType;
@@ -234,16 +236,8 @@ public abstract class AbstractAttribute<X, T>
             {
                 name = c.name();
             }
-            else
-            {
-                name = member.getName();
-            }
-        }
-        else if (member.isAnnotationPresent(Basic.class))
-        {
-            name = member.getName();
-        }
 
+        }
         if (member.isAnnotationPresent(Temporal.class))
         {
             if (!member.getType().equals(Date.class))
@@ -252,9 +246,19 @@ public abstract class AbstractAttribute<X, T>
                         + ")");
                 return name;
             }
-            if (null == name)
+        } else if(member.isAnnotationPresent(JoinColumn.class))
+        {
+            JoinColumn c = member.getAnnotation(JoinColumn.class);
+            if(!c.name().isEmpty())
             {
-                name = member.getName();
+                name = c.name();
+            }
+        } else if(member.isAnnotationPresent(CollectionTable.class))
+        {
+            CollectionTable c = member.getAnnotation(CollectionTable.class);
+            if(!c.name().isEmpty())
+            {
+                name = c.name();
             }
         }
         return name == null ? getName(): name;

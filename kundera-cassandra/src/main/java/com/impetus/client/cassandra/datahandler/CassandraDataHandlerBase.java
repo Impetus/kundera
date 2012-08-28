@@ -576,6 +576,7 @@ public abstract class CassandraDataHandlerBase
                 if (!mappingProcessed)
                 {
                     MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
+                    mappingProcessed = true;
                 }
 
                 if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
@@ -591,7 +592,13 @@ public abstract class CassandraDataHandlerBase
                     Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
 
                     scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn,
-                            embeddedObject);
+                            embeddedObject, columnNameToFieldMap);
+
+                    Collection collection = PropertyAccessorHelper.getCollectionInstance(embeddedCollectionField);
+                    collection.add(embeddedObject);
+
+                    PropertyAccessorHelper.set(entity, embeddedCollectionField, collection);
+
                     embeddedCollection.add(embeddedObject);
 
                     // Add this embedded object to cache
@@ -614,7 +621,6 @@ public abstract class CassandraDataHandlerBase
                         scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn, entity);
                     }
 
-                    scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn, entity);
                 }
             }
 
@@ -922,35 +928,39 @@ public abstract class CassandraDataHandlerBase
     private void populateViaThrift(EntityMetadata m, Object entity, EntityType entityType, List<String> relationNames,
             Map<String, Object> relations, String thriftColumnName, Object thriftColumnValue)
     {
-        if (thriftColumnValue != null)
+        if (relationNames == null || !relationNames.contains(thriftColumnName))
         {
-            String fieldName = m.getFieldName(thriftColumnName);
-            Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
-            if (attribute != null)
+            if (thriftColumnValue != null)
             {
-                try
+                String fieldName = m.getFieldName(thriftColumnName);
+                Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
+
+                if (attribute != null)
                 {
-                    if (thriftColumnValue.getClass().isAssignableFrom(String.class))
+                    try
                     {
-                        PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(),
-                                (String) thriftColumnValue);
+                        if (thriftColumnValue.getClass().isAssignableFrom(String.class))
+                        {
+                            PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(),
+                                    (String) thriftColumnValue);
+                        }
+                        else
+                        {
+                            PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(),
+                                    (byte[]) thriftColumnValue);
+                        }
                     }
-                    else
+                    catch (PropertyAccessException pae)
                     {
-                        PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(),
-                                (byte[]) thriftColumnValue);
+                        log.warn(pae.getMessage());
                     }
-                }
-                catch (PropertyAccessException pae)
-                {
-                    log.warn(pae.getMessage());
                 }
             }
         }
         else
         {
             // populate relation.
-            if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
+            if (relationNames != null && relationNames.contains(thriftColumnName))
             {
                 // relations = new HashMap<String, Object>();
                 String value = PropertyAccessorFactory.STRING.fromBytes(String.class, (byte[]) thriftColumnValue);
@@ -989,12 +999,11 @@ public abstract class CassandraDataHandlerBase
         Set<Attribute> attributes = entityType.getAttributes();
         for (Attribute attribute : attributes)
         {
-            if (!attribute.getName().equals(m.getIdAttribute().getName()))
+            if (!attribute.getName().equals(m.getIdAttribute().getName()) && !attribute.isAssociation())
             {
                 Field field = (Field) ((Attribute) attribute).getJavaMember();
                 byte[] name = PropertyAccessorFactory.STRING
                         .toBytes(((AbstractAttribute) attribute).getJPAColumnName());
-                Object value = getColumnValue(m, e, field);
 
                 // if attribute is embeddable.
 
@@ -1005,6 +1014,8 @@ public abstract class CassandraDataHandlerBase
                 }
                 else
                 {
+                    Object value = getColumnValue(m, e, field);
+
                     if (m.getType().equals(Type.SUPER_COLUMN_FAMILY))
                     {
 
@@ -1172,85 +1183,86 @@ public abstract class CassandraDataHandlerBase
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
-        Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(m.getEntityClazz());
+        // Map<String, EmbeddableType> embeddables =
+        // metaModel.getEmbeddables(m.getEntityClazz());
 
-        for (String key : embeddables.keySet())
+        EmbeddableType superColumn = metaModel.embeddable(((AbstractAttribute) embeddableAttrib).getBindableJavaType());
+
+        // for (String key : embeddables.keySet())
+        // {
+
+        // EmbeddableType superColumn = embeddables.get(key);
+        Field superColumnField = (Field) embeddableAttrib.getJavaMember();
+        Object superColumnObject = PropertyAccessorHelper.getObject(e, superColumnField);
+
+        // If Embedded object is a Collection, there will be variable number
+        // of super columns one for each object in collection.
+        // Key for each super column will be of the format "<Embedded object
+        // field name>#<Unique sequence number>
+
+        // On the other hand, if embedded object is not a Collection, it
+        // would simply be embedded as ONE super column.
+        String superColumnName = null;
+        /*
+         * if (superColumnObject == null) { continue; }
+         */
+        if (superColumnObject != null && superColumnObject instanceof Collection)
         {
-            EmbeddableType superColumn = embeddables.get(key);
-            Field superColumnField = (Field) embeddableAttrib.getJavaMember();
-            Object superColumnObject = PropertyAccessorHelper.getObject(e, superColumnField);
 
-            // If Embedded object is a Collection, there will be variable number
-            // of super columns one for each object in collection.
-            // Key for each super column will be of the format "<Embedded object
-            // field name>#<Unique sequence number>
+            ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
 
-            // On the other hand, if embedded object is not a Collection, it
-            // would simply be embedded as ONE super column.
-            String superColumnName = null;
-            if (superColumnObject == null)
-            {
-                continue;
-            }
-            if (superColumnObject instanceof Collection)
-            {
-
-                ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
-
-                // Check whether it's first time insert or updation
-                if (ecCacheHandler.isCacheEmpty())
-                { // First time insert
-                    int count = 0;
-                    for (Object obj : (Collection) superColumnObject)
-                    {
-                        // superColumnName = superColumn.getName() +
-                        // Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
-                        superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName()
-                                + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
-
-                        if (m.isCounterColumnType())
-                        {
-                            CounterSuperColumn thriftSuperColumn = buildThriftCounterSuperColumn(superColumnName,
-                                    superColumn, obj);
-                            tr.addCounterSuperColumn(thriftSuperColumn);
-                        }
-                        else
-                        {
-                            SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp2,
-                                    superColumn, obj);
-                            tr.addSuperColumn(thriftSuperColumn);
-                        }
-                        ecCacheHandler.addElementCollectionCacheMapping(id, obj, superColumnName);
-                        count++;
-                    }
-                }
-                else
+            // Check whether it's first time insert or updation
+            if (ecCacheHandler.isCacheEmpty())
+            { // First time insert
+                int count = 0;
+                for (Object obj : (Collection) superColumnObject)
                 {
-                    // Updation, Check whether this object is already in cache,
-                    // which means we already have a super column
-                    // Otherwise we need to generate a fresh embedded column
-                    // name
-                    int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(id);
-                    for (Object obj : (Collection) superColumnObject)
-                    {
-                        superColumnName = ecCacheHandler.getElementCollectionObjectName(id, obj);
-                        if (superColumnName == null)
-                        { // Fresh row
-                            superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName()
-                                    + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + (++lastEmbeddedObjectCount);
-                        }
-                        buildThriftSuperColumn(timestamp2, tr, m, id, superColumn, superColumnName, obj);
-                        ecCacheHandler.addElementCollectionCacheMapping(id, obj, superColumnName);
-                    }
-                }
+                    // superColumnName = superColumn.getName() +
+                    // Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
+                    superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName()
+                            + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
 
+                    if (m.isCounterColumnType())
+                    {
+                        CounterSuperColumn thriftSuperColumn = buildThriftCounterSuperColumn(superColumnName,
+                                superColumn, obj);
+                        tr.addCounterSuperColumn(thriftSuperColumn);
+                    }
+                    else
+                    {
+                        SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp2,
+                                superColumn, obj);
+                        tr.addSuperColumn(thriftSuperColumn);
+                    }
+                    ecCacheHandler.addElementCollectionCacheMapping(id, obj, superColumnName);
+                    count++;
+                }
             }
             else
             {
-                superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName();
-                buildThriftSuperColumn(timestamp2, tr, m, id, superColumn, superColumnName, superColumnObject);
+                // Updation, Check whether this object is already in cache,
+                // which means we already have a super column
+                // Otherwise we need to generate a fresh embedded column
+                // name
+                int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(id);
+                for (Object obj : (Collection) superColumnObject)
+                {
+                    superColumnName = ecCacheHandler.getElementCollectionObjectName(id, obj);
+                    if (superColumnName == null)
+                    { // Fresh row
+                        superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName()
+                                + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + (++lastEmbeddedObjectCount);
+                    }
+                    buildThriftSuperColumn(timestamp2, tr, m, id, superColumn, superColumnName, obj);
+                    ecCacheHandler.addElementCollectionCacheMapping(id, obj, superColumnName);
+                }
             }
 
+        }
+        else
+        {
+            superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName();
+            buildThriftSuperColumn(timestamp2, tr, m, id, superColumn, superColumnName, superColumnObject);
         }
     }
 

@@ -283,26 +283,6 @@ public class SchemaConfiguration implements Configuration
                 }
             }
         }
-        
-//        for (Column column : entityMetadata.getColumnsAsList())
-//        {
-//            ColumnInfo columnInfo = getColumn(column);
-//            if (!tableInfo.getColumnMetadatas().contains(columnInfo))
-//            {
-//                tableInfo.addColumnInfo(columnInfo);
-//            }
-//        }
-//
-//        // Added embedded column infos to table info.
-//
-//        for (EmbeddedColumn embeddedColumn : entityMetadata.getEmbeddedColumnsAsList())
-//        {
-//            EmbeddedColumnInfo embeddedColumnInfo = getEmbeddedColumn(embeddedColumn);
-//            if (!tableInfo.getEmbeddedColumnMetadatas().contains(embeddedColumnInfo))
-//            {
-//                tableInfo.addEmbeddedColumnInfo(embeddedColumnInfo);
-//            }
-//        }
     }
 
     /**
@@ -356,11 +336,6 @@ public class SchemaConfiguration implements Configuration
             Attribute attr = iter.next();
             columns.add(getColumn(attr, entityMetadata.isColumnIndexable(attr.getName())));
         }
-//        
-//        for (Column column : embeddedColumn.getColumns())
-//        {
-//            columns.add(getColumn(column));
-//        }
         embeddedColumnInfo.setColumns(columns);
         return embeddedColumnInfo;
     }
