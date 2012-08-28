@@ -40,8 +40,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.metadata.model.Column;
-import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -113,9 +111,39 @@ final class MongoDBDataHandler
             for (Attribute column : columns)
             // for (Column column : columns)
             {
-                if(!m.getIdAttribute().getName().equals(column.getName()))
+                if(!column.isAssociation())
                 {
                     setColumnValue(document, entity, column);
+                } else
+                {
+                    if (relations != null)
+                    {
+                        EnhanceEntity e = null;
+                        Map<String, Object> relationValue = new HashMap<String, Object>();
+                        for (String r : relations)
+                        {
+                            if (relationValue == null)
+                            {
+                                relationValue = new HashMap<String, Object>();
+                            }
+                            if (r != null && !r.equals(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()))
+                            {
+                                Object colValue = document.get(r);
+                                relationValue.put(r, colValue);
+                            }
+                            else
+                            {
+                                relationValue.put(r, null);
+                            }
+
+                        }
+
+                        if (!relationValue.isEmpty())
+                        {
+                            e = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationValue);
+                            return e;
+                        }
+                    }
                 }
             }
 
@@ -171,34 +199,7 @@ final class MongoDBDataHandler
 
             }
 
-            if (relations != null)
-            {
-                EnhanceEntity e = null;
-                Map<String, Object> relationValue = new HashMap<String, Object>();
-                for (String r : relations)
-                {
-                    if (relationValue == null)
-                    {
-                        relationValue = new HashMap<String, Object>();
-                    }
-                    if (r != null && !r.equals(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()))
-                    {
-                        Object colValue = document.get(r);
-                        relationValue.put(r, colValue);
-                    }
-                    else
-                    {
-                        relationValue.put(r, null);
-                    }
-
-                }
-
-                if (!relationValue.isEmpty())
-                {
-                    e = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationValue);
-                    return e;
-                }
-            }
+           
             return entity;
 
         }
@@ -300,7 +301,10 @@ final class MongoDBDataHandler
         {
             try
             {
-                extractEntityField(entity, dbObj, column);
+                if(!column.isAssociation())
+                {
+                    extractEntityField(entity, dbObj, column);
+                }
             }
             catch (PropertyAccessException e1)
             {

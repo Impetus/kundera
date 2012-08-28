@@ -144,6 +144,7 @@ public class MongoDBQuery extends QueryImpl
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             throw new QueryHandlerException(e);
         }
 
