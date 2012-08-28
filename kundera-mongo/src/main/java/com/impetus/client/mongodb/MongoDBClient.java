@@ -16,6 +16,7 @@
 package com.impetus.client.mongodb;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -194,8 +195,10 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 
         BasicDBObject query = new BasicDBObject();
 
-        query.put(((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName(), handler.populateValue(key, key.getClass()));
-
+        query.put(
+                ((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),
+                key instanceof Calendar ? ((Calendar) key).getTime().toString() : handler.populateValue(key,
+                        key.getClass()));
 
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
@@ -232,7 +235,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 
         BasicDBObject query = new BasicDBObject();
 
-        query.put(((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName(), new BasicDBObject("$in", getString(keys)));
+        query.put(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), new BasicDBObject("$in",
+                getString(keys)));
 
         DBCursor cursor = dbCollection.find(query);
 
@@ -321,8 +325,8 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         // Find the DBObject to remove first
         BasicDBObject query = new BasicDBObject();
 
-        query.put(((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName(), handler.populateValue(pKey, pKey.getClass()));
-
+        query.put(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(),
+                handler.populateValue(pKey, pKey.getClass()));
 
         dbCollection.remove(query);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
@@ -476,7 +480,10 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
             BasicDBObject query = new BasicDBObject();
 
             // Why can't we put "_id" here?
-            query.put("_id", handler.populateValue(id, id.getClass()));
+            query.put(
+                    "_id",
+                    id instanceof Calendar ? ((Calendar) id).getTime().toString() : handler.populateValue(id,
+                            id.getClass()));
             dbCollection.findAndModify(query, document);
         }
         else

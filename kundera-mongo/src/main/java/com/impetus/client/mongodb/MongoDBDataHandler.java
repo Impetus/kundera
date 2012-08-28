@@ -97,9 +97,9 @@ final class MongoDBDataHandler
             Class<?> rowKeyValueClass = rowKey.getClass();
 
             Class<?> idClass = m.getIdAttribute().getJavaType();
-            
+
             rowKey = populateValue(rowKey, idClass);
-            
+
             rowKey = getTranslatedObject(rowKey, rowKeyValueClass, idClass);
             PropertyAccessorHelper.setId(entity, m, rowKey);
 
@@ -249,16 +249,19 @@ final class MongoDBDataHandler
      */
     private void setColumnValue(DBObject document, Object entity, Attribute column)
     {
-        Object value = document.get(column.getName());
-        if (column.getJavaType().isAssignableFrom(Map.class))
+        Object value = document.get(((AbstractAttribute) column).getJPAColumnName());
+        if (value != null)
         {
-            PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), ((BasicDBObject) value).toMap());
-        }
-        else
-        {
-            value = populateValue(value, value.getClass());
-            value = getTranslatedObject(value, value.getClass(), column.getJavaType());
-            PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), value);
+            if (column.getJavaType().isAssignableFrom(Map.class))
+            {
+                PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), ((BasicDBObject) value).toMap());
+            }
+            else
+            {
+                value = populateValue(value, value.getClass());
+                value = getTranslatedObject(value, value.getClass(), column.getJavaType());
+                PropertyAccessorHelper.set(entity, (Field) column.getJavaMember(), value);
+            }
         }
     }
 
@@ -287,7 +290,8 @@ final class MongoDBDataHandler
         // Populate Row Key
 
         Object id = PropertyAccessorHelper.getId(entity, m);
-        dbObj.put("_id", populateValue(id, id.getClass()));
+        dbObj.put("_id",
+                id instanceof Calendar ? ((Calendar) id).getTime().toString() : populateValue(id, id.getClass()));
         dbObj.put(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName(), populateValue(id, id.getClass()));
 
         // Populate columns
@@ -387,13 +391,13 @@ final class MongoDBDataHandler
             {
                 basicDBList.add(o);
             }
-            dbObj.put(column.getName(), basicDBList);
+            dbObj.put(((AbstractAttribute) column).getJPAColumnName(), basicDBList);
         }
         else if (column.getJavaType().isAssignableFrom(Map.class))
         {
             Map mapObj = (Map) PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
             BasicDBObjectBuilder builder = BasicDBObjectBuilder.start(mapObj);
-            dbObj.put(column.getName(), builder.get());
+            dbObj.put(((AbstractAttribute) column).getJPAColumnName(), builder.get());
         }
         else
         {
@@ -401,26 +405,23 @@ final class MongoDBDataHandler
             Object valObj = PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember());
             if (valObj != null)
             {
-                dbObj.put(column.getName(), valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString()
-                        : /* valObj.toString() */populateValue(valObj, column.getJavaType()))/*
-                                                                                              * PropertyAccessorHelper
-                                                                                              * .
-                                                                                              * getObject
-                                                                                              * (
-                                                                                              * entity
-                                                                                              * ,
-                                                                                              * column
-                                                                                              * .
-                                                                                              * getField
-                                                                                              * (
-                                                                                              * )
-                                                                                              * )
-                                                                                              * .
-                                                                                              * toString
-                                                                                              * (
-                                                                                              * )
-                                                                                              * )
-                                                                                              */;
+                dbObj.put(
+                        ((AbstractAttribute) column).getJPAColumnName(),
+                        valObj instanceof Calendar ? ((Calendar) valObj).getTime().toString() : /*
+                                                                                                 * valObj
+                                                                                                 * .
+                                                                                                 * toString
+                                                                                                 * (
+                                                                                                 * )
+                                                                                                 */populateValue(
+                                valObj, column.getJavaType()))/*
+                                                               * PropertyAccessorHelper
+                                                               * . getObject (
+                                                               * entity , column
+                                                               * . getField ( )
+                                                               * ) . toString (
+                                                               * ) )
+                                                               */;
             }
         }
     }

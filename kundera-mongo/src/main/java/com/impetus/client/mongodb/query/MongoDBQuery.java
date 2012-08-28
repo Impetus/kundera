@@ -209,19 +209,18 @@ public class MongoDBQuery extends QueryImpl
                             value.toString());
                 }
 
-//                value = populateValue(value, value.getClass());
-
+                value = populateValue(value, value.getClass());
                 // Property, if doesn't exist in entity, may be there in a
                 // document embedded within it, so we have to check that
                 // TODO: Query should actually be in a format
                 // documentName.embeddedDocumentName.column, remove below if
                 // block once this is decided
 
-                String enclosingDocumentName = MetadataUtils.getEnclosingEmbeddedFieldName(m, property, true);
-                if (enclosingDocumentName != null)
-                {
-                    property = enclosingDocumentName + "." + property;
-                }
+//                String enclosingDocumentName = MetadataUtils.getEnclosingEmbeddedFieldName(m, property, true);
+//                if (enclosingDocumentName != null)
+//                {
+//                    property = enclosingDocumentName + "." + property;
+//                }
 
                 if (condition.equals("="))
                 {
