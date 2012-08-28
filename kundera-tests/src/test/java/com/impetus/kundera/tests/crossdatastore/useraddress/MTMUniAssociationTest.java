@@ -39,9 +39,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.kundera.tests.cli.CassandraCli;
-import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatUniMTo1;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatUniMToM;
-import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUniMTo1;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUniMToM;
 
 /**

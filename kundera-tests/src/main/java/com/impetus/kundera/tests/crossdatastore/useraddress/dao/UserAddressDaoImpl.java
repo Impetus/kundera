@@ -21,8 +21,6 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUni1To1FK;
-
 public class UserAddressDaoImpl extends BaseDao
 {
     private String persistenceUnit;

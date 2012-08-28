@@ -104,7 +104,6 @@ public class OTOBiAssociationTest extends TwinAssociation
     {
         // Find Person
         PersonnelBi1To1FK p = (PersonnelBi1To1FK) dao.findPerson(PersonnelBi1To1FK.class, "bionetoonefk_1");
-
         assertPersonnel(p);
     }
     
@@ -113,21 +112,36 @@ public class OTOBiAssociationTest extends TwinAssociation
     @Override
     protected void findPersonByIdColumn()
     {
+        PersonnelBi1To1FK p = (PersonnelBi1To1FK) dao.findPersonByIdColumn(PersonnelBi1To1FK.class, "bionetoonefk_1");    
+        assertPersonnel(p);   
     }
 
     @Override
     protected void findPersonByName()
     {
+        List<PersonnelBi1To1FK> persons = dao.findPersonByName(PersonnelBi1To1FK.class, "Amresh");
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 1);
+        assertPersonnel(persons.get(0));
     }
 
     @Override
     protected void findAddressByIdColumn()
     {
+        /*HabitatBi1To1FK a = (HabitatBi1To1FK) dao.findAddressByIdColumn(HabitatBi1To1FK.class, "bionetoonefk_a");    
+        assertAddress(a);*/
     }
 
     @Override
     protected void findAddressByStreet()
     {
+        /*List<HabitatBi1To1FK> adds = dao.findAddressByStreet(HabitatBi1To1FK.class, "123, New street");  
+        Assert.assertNotNull(adds);
+        Assert.assertFalse(adds.isEmpty());
+        Assert.assertTrue(adds.size() == 1);
+        
+        assertAddress(adds.get(0));*/
     }
 
     @Override
@@ -179,6 +193,14 @@ public class OTOBiAssociationTest extends TwinAssociation
         Assert.assertEquals("Amresh", p.getPersonName());
 
         HabitatBi1To1FK address = p.getAddress();
+        assertAddress(address);
+    }
+
+    /**
+     * @param address
+     */
+    private void assertAddress(HabitatBi1To1FK address)
+    {
         Assert.assertNotNull(address);
         Assert.assertEquals("bionetoonefk_a", address.getAddressId());
         Assert.assertEquals("123, New street", address.getStreet());
