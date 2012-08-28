@@ -122,4 +122,6 @@ public interface NodeStateContext
 
     public void setPersistenceCache(PersistenceCache persistenceCache);
 
+    public Object getEntityId();
+    
 }

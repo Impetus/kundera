@@ -34,6 +34,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.Writer;
+import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -53,19 +54,19 @@ public class HBaseWriter implements Writer
     private static Log log = LogFactory.getLog(HBaseWriter.class);
 
     @Override
-    public void writeColumns(HTable htable, String columnFamily, String rowKey, Set<Attribute> columns,
+    public void writeColumns(HTable htable, String columnFamily, Object rowKey, Set<Attribute> columns,
+
             Object columnFamilyObj) throws IOException
     {
-        Put p = new Put(Bytes.toBytes(rowKey));
-
-        for(Attribute column : columns)
-//        for (Column column : columns)
+        Put p = new Put(HBaseUtils.getBytes(rowKey));
+        for (Attribute column : columns)
+        // for (Column column : columns)
         {
-            String qualifier = ((AbstractAttribute)column).getJPAColumnName();
+            String qualifier = ((AbstractAttribute) column).getJPAColumnName();
             try
             {
-                byte[] value = PropertyAccessorHelper.get(columnFamilyObj, (Field) column.getJavaMember());
-
+                Object o = PropertyAccessorHelper.getObject(columnFamilyObj, (Field)column.getJavaMember());
+                byte[] value = HBaseUtils.getBytes(o);
                 if (value != null)
                 {
                     p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), value);
@@ -81,34 +82,27 @@ public class HBaseWriter implements Writer
     }
 
     @Override
-    public void writeColumn(HTable htable, String columnFamily, String rowKey, Attribute column, Object columnObj)
-            throws IOException
+    public void writeColumn(HTable htable, String columnFamily, Object rowKey, Attribute column, Object columnObj) throws IOException
     {
-        Put p = new Put(Bytes.toBytes(rowKey));
-
-        p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(((AbstractAttribute)column).getJPAColumnName()), Bytes.toBytes(columnObj.toString()));
+        Put p = new Put(HBaseUtils.getBytes(rowKey));
+        p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(((AbstractAttribute) column).getJPAColumnName()),
+                Bytes.toBytes(columnObj.toString()));
 
         htable.put(p);
     }
 
     @Override
-    public void writeColumns(HTable htable, String rowKey, Set<Attribute> columns, Object entity) throws IOException
+    public void writeColumns(HTable htable, Object rowKey, Set<Attribute> columns, Object entity) throws IOException
     {
-        Put p = new Put(Bytes.toBytes(rowKey));
-
-        for(Attribute column : columns)
-//        for (Column column : columns)
+        Put p = new Put(HBaseUtils.getBytes(rowKey));
+        for (Attribute column : columns)
+        // for (Column column : columns)
         {
-            String qualifier = ((AbstractAttribute)column).getJPAColumnName();
+            String qualifier = ((AbstractAttribute) column).getJPAColumnName();
             try
             {
-
                 byte[] qualValInBytes = Bytes.toBytes(qualifier);
-                p.add(qualValInBytes, qualValInBytes, System.currentTimeMillis(),
-                        PropertyAccessorHelper.get(entity, (Field) column.getJavaMember()));
-                // p.add(Bytes.toBytes(qualifier), System.currentTimeMillis(),
-                // PropertyAccessorHelper.get(entity, column.getField()));
-
+                p.add(qualValInBytes, qualValInBytes, System.currentTimeMillis(), HBaseUtils.getBytes(PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember())));
             }
             catch (PropertyAccessException e1)
             {
@@ -126,17 +120,18 @@ public class HBaseWriter implements Writer
 
         for (String columnName : columns.keySet())
         {
-            p.add(Bytes.toBytes(Constants.JOIN_COLUMNS_FAMILY_NAME), Bytes.toBytes(columnName), columns.get(columnName)
-                    .getBytes());
+            p.add(Bytes.toBytes(Constants.JOIN_COLUMNS_FAMILY_NAME), Bytes.toBytes(columnName),
+                    Bytes.toBytes(columns.get(columnName))
+            /* .getBytes() */);
         }
         htable.put(p);
     }
 
     @Override
-    public void writeRelations(HTable htable, String rowKey, boolean containsEmbeddedObjectsOnly,
+    public void writeRelations(HTable htable, Object rowKey, boolean containsEmbeddedObjectsOnly,
             List<RelationHolder> relations) throws IOException
     {
-        Put p = new Put(Bytes.toBytes(rowKey));
+        Put p = new Put(HBaseUtils.getBytes(rowKey));
 
         for (RelationHolder r : relations)
         {
@@ -211,11 +206,13 @@ public class HBaseWriter implements Writer
      * com.impetus.client.hbase.Writer#delete(org.apache.hadoop.hbase.client
      * .HTable, java.lang.String, java.lang.String)
      */
-    public void delete(HTable hTable, String rowKey, String columnFamily)
+    public void delete(HTable hTable, Object rowKey, String columnFamily)
     {
         try
         {
-            byte[] rowBytes = Bytes.toBytes(rowKey);
+            /* = Bytes.toBytes(rowKey) */;
+            // rowBytes = PropertyAccessorHelper.getBytes(rowKey);
+            byte[] rowBytes = HBaseUtils.getBytes(rowKey);
             Delete delete = new Delete(rowBytes);
 
             hTable.delete(delete);

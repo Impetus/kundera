@@ -27,7 +27,6 @@ import java.util.StringTokenizer;
 
 import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.Attribute.PersistentAttributeType;
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.PluralAttribute;
@@ -200,7 +199,7 @@ public abstract class CassandraDataHandlerBase
         {
             for (Object rowKey : rowIds)
             {
-                Object e = fromThriftRow(clazz, m, rowKey.toString(), relationNames, isWrapReq, consistencyLevel);
+                Object e = fromThriftRow(clazz, m, rowKey, relationNames, isWrapReq, consistencyLevel);
                 if (e != null)
                 {
                     entities.add(e);
@@ -229,7 +228,7 @@ public abstract class CassandraDataHandlerBase
      * @throws Exception
      *             the exception
      */
-    public abstract Object fromThriftRow(Class<?> clazz, EntityMetadata m, String rowKey, List<String> relationNames,
+    public abstract Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
             boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception;
 
     /**
@@ -331,7 +330,7 @@ public abstract class CassandraDataHandlerBase
      * @throws Exception
      *             the exception
      */
-    public ThriftRow toThriftRow(Object e, String id, EntityMetadata m, String columnFamily) throws Exception
+    public ThriftRow toThriftRow(Object e, Object id, EntityMetadata m, String columnFamily) throws Exception
     {
         // timestamp to use in thrift column objects
         // long timestamp = System.currentTimeMillis();
@@ -383,7 +382,6 @@ public abstract class CassandraDataHandlerBase
             {
                 continue;
             }
-
             if (embeddedObject instanceof Collection)
             {
                 ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
@@ -932,7 +930,6 @@ public abstract class CassandraDataHandlerBase
     {
         if (relationNames == null || !relationNames.contains(thriftColumnName))
         {
-
             if (thriftColumnValue != null)
             {
                 String fieldName = m.getFieldName(thriftColumnName);
@@ -988,7 +985,8 @@ public abstract class CassandraDataHandlerBase
      * @param id
      *            the id
      */
-    private void onColumnOrSuperColumnThriftRow(long timestamp2, ThriftRow tr, EntityMetadata m, Object e, String id)
+
+    private void onColumnOrSuperColumnThriftRow(long timestamp2, ThriftRow tr, EntityMetadata m, Object e, Object id)
     {
 
         // Iterate through Super columns
@@ -1120,6 +1118,9 @@ public abstract class CassandraDataHandlerBase
         }
     }
 
+    // private void onColumnOrSuperColumnThriftRow(long timestamp2, ThriftRow
+    // tr, EntityMetadata m, Object e, Object id)
+
     /**
      * Prepare column.
      * 
@@ -1159,6 +1160,7 @@ public abstract class CassandraDataHandlerBase
     }
 
     /**
+     * 
      * On embeddable.
      * 
      * @param timestamp2
@@ -1174,7 +1176,7 @@ public abstract class CassandraDataHandlerBase
      * @param embeddableAttrib
      *            the embeddable attrib
      */
-    private void onEmbeddable(long timestamp2, ThriftRow tr, EntityMetadata m, Object e, String id,
+    private void onEmbeddable(long timestamp2, ThriftRow tr, EntityMetadata m, Object e, Object id,
             Attribute embeddableAttrib)
     {
 
@@ -1262,7 +1264,6 @@ public abstract class CassandraDataHandlerBase
             superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName();
             buildThriftSuperColumn(timestamp2, tr, m, id, superColumn, superColumnName, superColumnObject);
         }
-
     }
 
     /**
@@ -1283,7 +1284,7 @@ public abstract class CassandraDataHandlerBase
      * @param obj
      *            the obj
      */
-    private void buildThriftSuperColumn(long timestamp2, ThriftRow tr, EntityMetadata m, String id,
+    private void buildThriftSuperColumn(long timestamp2, ThriftRow tr, EntityMetadata m, Object id,
             EmbeddableType superColumn, String superColumnName, Object obj)
     {
         if (m.isCounterColumnType())

@@ -49,9 +49,18 @@ public class ShortAccessor implements PropertyAccessor<Short>
     @Override
     public byte[] toBytes(Object object)
     {
+        Short s = null;
         if (object != null)
         {
-            Short s = (Short) object;
+
+            if (object.getClass().isAssignableFrom(String.class))
+            {
+                s = Short.valueOf(object.toString());
+            }
+            else
+            {
+                s = (Short) object;
+            }
             return new byte[] { (byte) ((s >> 8) & 0xff), (byte) ((s >> 0) & 0xff), };
         }
         return null;
@@ -82,7 +91,7 @@ public class ShortAccessor implements PropertyAccessor<Short>
         try
         {
 
-            if(s == null)
+            if (s == null)
             {
                 return null;
             }

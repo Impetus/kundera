@@ -35,6 +35,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.HBaseClient;
 import com.impetus.client.hbase.HBaseEntityReader;
+import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
@@ -159,7 +160,7 @@ public class HBaseQuery extends QueryImpl implements Query
         Map<Boolean, Filter> filter = translator.getFilter();
         if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
         {
-            if (filter == null)
+            if (filter == null && !translator.isFindById)
             {
                 // means complete scan without where clause, scan all records.
                 // findAll.
@@ -177,7 +178,7 @@ public class HBaseQuery extends QueryImpl implements Query
             {
                 // means WHERE clause is present.
 
-                if (filter.values() != null && !filter.values().isEmpty())
+                if (filter != null && filter.values() != null && !filter.values().isEmpty())
                 {
                     ((HBaseClient) client).setFilter(filter.values().iterator().next());
                 }
@@ -245,7 +246,7 @@ public class HBaseQuery extends QueryImpl implements Query
         private boolean isFindById;
 
         /* row key value. */
-        String rowKey;
+        Object rowKey;
 
         /**
          * Translates kundera query into collection of to be applied HBase
@@ -258,7 +259,7 @@ public class HBaseQuery extends QueryImpl implements Query
          */
         void translate(KunderaQuery query, EntityMetadata m)
         {
-            String idColumn = ((AbstractAttribute)m.getIdAttribute()).getJPAColumnName();
+            String idColumn = ((AbstractAttribute) m.getIdAttribute()).getJPAColumnName();
             boolean isIdColumn = false;
             for (Object obj : query.getFilterClauseQueue())
             {
@@ -268,7 +269,7 @@ public class HBaseQuery extends QueryImpl implements Query
                 {
                     String condition = ((FilterClause) obj).getCondition();
                     String name = ((FilterClause) obj).getProperty();
-                    String value = ((FilterClause) obj).getValue() != null ? ((FilterClause) obj).getValue().toString() : null;
+                    Object value = ((FilterClause) obj).getValue();
                     if (!isIdColumn && idColumn.equalsIgnoreCase(name))
                     {
                         isIdColumn = true;
@@ -322,13 +323,15 @@ public class HBaseQuery extends QueryImpl implements Query
          * @param m
          *            entity metadata.
          */
-        private void onParseFilter(String condition, String name, String value, boolean isIdColumn, EntityMetadata m)
+        private void onParseFilter(String condition, String name, Object value, boolean isIdColumn, EntityMetadata m)
         {
             CompareOp operator = getOperator(condition, isIdColumn);
             byte[] valueInBytes = getBytes(name, m, value);
             if (!isIdColumn)
             {
-                Filter f = new SingleColumnValueFilter(name.getBytes(), name.getBytes(), operator, valueInBytes);
+                // Filter f = new SingleColumnValueFilter(name.getBytes(),
+                // name.getBytes(), operator, valueInBytes);
+                Filter f = new SingleColumnValueFilter(Bytes.toBytes(name), Bytes.toBytes(name), operator, valueInBytes);
                 addToFilter(f);
             }
             else
@@ -343,7 +346,7 @@ public class HBaseQuery extends QueryImpl implements Query
                 }
                 else if (operator.equals(CompareOp.EQUAL))
                 {
-                    rowKey = value;
+                    rowKey = getBytes(m.getIdAttribute().getName(), m, value);
                     endRow = null;
                     isFindById = true;
                 }
@@ -442,45 +445,16 @@ public class HBaseQuery extends QueryImpl implements Query
         }
     }
 
-    /**
-     * Returns bytes value for given value.
-     * 
-     * @param fieldName
-     *            field name.
-     * @param m
-     *            entity metadata
-     * @param value
-     *            value.
-     * @return bytes value.
-     */
-    private byte[] getBytes(String jpaFieldName, EntityMetadata m, String value)
+    private byte[] getBytes(String jpaFieldName, EntityMetadata m, Object value)
     {
-/*        Attribute idCol = m.getIdAttribute() ;
-        Field f = null;
-        boolean isId = false;
-        if (idCol.getName().equals(fieldName))
-        {
-            f = idCol.getField();
-            isId = true;
-        }
-        else
-        {
-            Column col = m.getColumn(fieldName);
-            if (col == null)
-            {
-                throw new QueryHandlerException("column type is null for: " + fieldName);
-            }
-            f = col.getField();
-        }
-*/
-//      Column idCol = m.getIdColumn();
-        Attribute idCol =  m.getIdAttribute();
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
-        
+        Attribute idCol = m.getIdAttribute();
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+
         EntityType entity = metaModel.entity(m.getEntityClazz());
         Field f = null;
         boolean isId = false;
-        if (((AbstractAttribute)idCol).getJPAColumnName().equals(jpaFieldName))
+        if (((AbstractAttribute) idCol).getJPAColumnName().equals(jpaFieldName))
         {
             f = (Field) idCol.getJavaMember();
             isId = true;
@@ -489,7 +463,7 @@ public class HBaseQuery extends QueryImpl implements Query
         {
             String fieldName = m.getFieldName(jpaFieldName);
             Attribute col = entity.getAttribute(fieldName);
-//            Column col = m.getColumn(jpaFieldName);
+            // Column col = m.getColumn(jpaFieldName);
             if (col == null)
             {
                 throw new QueryHandlerException("column type is null for: " + jpaFieldName);
@@ -499,41 +473,7 @@ public class HBaseQuery extends QueryImpl implements Query
 
         if (f != null && f.getType() != null)
         {
-            if (isId || f.getType().isAssignableFrom(String.class))
-            {
-
-                return Bytes.toBytes(value.trim());
-            }
-            else if (f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
-            {
-                return Bytes.toBytes(Integer.parseInt(value));
-            }
-            else if (f.getType().equals(long.class) || f.getType().isAssignableFrom(Long.class))
-            {
-
-                return Bytes.toBytes(Long.parseLong(value));
-            }
-            else if (f.getType().equals(boolean.class) || f.getType().isAssignableFrom(Boolean.class))
-            {
-                return Bytes.toBytes(Boolean.valueOf(value));
-            }
-            else if (f.getType().equals(double.class) || f.getType().isAssignableFrom(Double.class))
-            {
-                return Bytes.toBytes(Double.valueOf(value));
-            }
-            else if (f.getType().isAssignableFrom(java.util.UUID.class))
-            {
-                return Bytes.toBytes(value);
-            }
-            else if (f.getType().equals(float.class) || f.getType().isAssignableFrom(Float.class))
-            {
-                return Bytes.toBytes(Float.valueOf(value));
-            }
-            else
-            {
-                log.error("Error while handling data type for:" + jpaFieldName);
-                throw new QueryHandlerException("unsupported data type:" + f.getType());
-            }
+            return HBaseUtils.getBytes(value, f.getType());
         }
         else
         {
@@ -541,5 +481,4 @@ public class HBaseQuery extends QueryImpl implements Query
             throw new QueryHandlerException("field type is null for:" + jpaFieldName);
         }
     }
-
 }

@@ -99,7 +99,8 @@ public class ManagedState extends NodeState
         Client client = nodeStateContext.getClient();
         Class<?> nodeDataClass = nodeStateContext.getDataClass();
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass);
-        String entityId = ObjectGraphUtils.getEntityId(nodeStateContext.getNodeId());
+//        Object entityId = ObjectGraphUtils.getEntityId(nodeStateContext.getNodeId());
+        Object entityId = nodeStateContext.getEntityId();
 
         Object nodeData = null; // Node data
 

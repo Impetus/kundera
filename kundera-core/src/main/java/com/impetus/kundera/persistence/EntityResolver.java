@@ -112,10 +112,10 @@ public class EntityResolver
             return;
         }
 
-        String id = PropertyAccessorHelper.getId(object, entityMetaData);
+        Object id = PropertyAccessorHelper.getId(object, entityMetaData);
 
         // Ensure that @Id is set
-        if (null == id || id.trim().isEmpty())
+        if (null == id /*|| id.trim().isEmpty()*/)
         {
             throw new ReaderResolverException("Missing primary key >> " + entityMetaData.getEntityClazz().getName()
 //                    + "#" + entityMetaData.getIdColumn().getField().getName());
@@ -133,7 +133,7 @@ public class EntityResolver
         LOG.debug("Resolving >> " + mapKeyForEntity);
 
         // Map to hold property-name=>foreign-entity relations
-        Map<String, Set<String>> foreignKeysMap = new HashMap<String, Set<String>>();
+        Map<String, Set<Object>> foreignKeysMap = new HashMap<String, Set<Object>>();
 
         // Save to map
         entities.put(mapKeyForEntity, getEnhancedEntity(object, id, foreignKeysMap));
@@ -166,9 +166,9 @@ public class EntityResolver
                 if (relation.isUnary())
                 {
                     // Unary relation will have single target object.
-                    String targetId = PropertyAccessorHelper.getId(value, relMetadata);
+                    Object targetId = PropertyAccessorHelper.getId(value, relMetadata);
 
-                    Set<String> foreignKeys = new HashSet<String>();
+                    Set<Object> foreignKeys = new HashSet<Object>();
 
                     foreignKeys.add(targetId);
                     // put to map
@@ -186,12 +186,12 @@ public class EntityResolver
                     @SuppressWarnings("unchecked")
                     Collection collection = (Collection) value;
 
-                    Set<String> foreignKeys = new HashSet<String>();
+                    Set<Object> foreignKeys = new HashSet<Object>();
 
                     // Iterate over each Object and get the @Id
                     for (Object o_ : collection)
                     {
-                        String targetId = PropertyAccessorHelper.getId(o_, relMetadata);
+                        Object targetId = PropertyAccessorHelper.getId(o_, relMetadata);
 
                         foreignKeys.add(targetId);
 
@@ -225,7 +225,7 @@ public class EntityResolver
      *            the foreign key map
      * @return the enhanced entity
      */
-    public static EnhancedEntity getEnhancedEntity(Object entity, String id, Map<String, Set<String>> foreignKeyMap)
+    public static EnhancedEntity getEnhancedEntity(Object entity, Object id, Map<String, Set<Object>> foreignKeyMap)
     {
         return KunderaMetadataManager.getEntityEnhancerFactory().getProxy(entity, id, foreignKeyMap);
     }

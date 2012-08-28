@@ -31,7 +31,7 @@ import org.apache.cassandra.thrift.SuperColumn;
 public class ThriftRow
 {
     /** Id of the row. */
-    private String id;
+    private Object id;
 
     /** name of the family. */
     private String columnFamilyName;
@@ -72,7 +72,7 @@ public class ThriftRow
      * @param superColumns
      *            the super columns
      */
-    public ThriftRow(String id, String columnFamilyName, List<Column> columns, List<SuperColumn> superColumns,
+    public ThriftRow(Object id, String columnFamilyName, List<Column> columns, List<SuperColumn> superColumns,
             List<CounterColumn> counterColumns, List<CounterSuperColumn> counterSuperColumns)
     {
         this.id = id;
@@ -111,7 +111,7 @@ public class ThriftRow
     /**
      * @return the id
      */
-    public String getId()
+    public Object getId()
     {
         return id;
     }
@@ -120,7 +120,7 @@ public class ThriftRow
      * @param id
      *            the id to set
      */
-    public void setId(String id)
+    public void setId(Object id)
     {
         this.id = id;
     }

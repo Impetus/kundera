@@ -81,12 +81,18 @@ public class CharAccessor implements PropertyAccessor<Character>
     {
         try
         {
-            if (s == null || s.length() != 1)
+            if (s == null)
             {
                 throw new PropertyAccessException("Can't convert String " + s + " to character");
             }
-
-            Character c = s.charAt(0);
+            
+            Character c = null;
+            if(s.length() == 1) {
+                c = s.charAt(0);
+            } else {
+                c = Character.MIN_VALUE;
+            }          
+            
             return c;
         }
         catch (NumberFormatException e)

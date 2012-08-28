@@ -26,62 +26,85 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 
 /**
  * Defines low level translation methods for Cassandra.
- *
+ * 
  * @author amresh.singh
  */
 public interface CassandraDataHandler
 {
-    
+
     /**
      * From thrift row.
-     *
-     * @param <E> the element type
-     * @param clazz the clazz
-     * @param m the m
-     * @param tr the tr
+     * 
+     * @param <E>
+     *            the element type
+     * @param clazz
+     *            the clazz
+     * @param m
+     *            the m
+     * @param tr
+     *            the tr
      * @return the e
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception;
 
     /**
      * From thrift row.
-     *
-     * @param clazz the clazz
-     * @param m the m
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
-     * @param consistencyLevel the consistency level
-     * @param rowIds the row ids
+     * 
+     * @param clazz
+     *            the clazz
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param consistencyLevel
+     *            the consistency level
+     * @param rowIds
+     *            the row ids
      * @return the list
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames, boolean isWrapReq,
             ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception;
 
     /**
      * From thrift row.
-     *
-     * @param clazz the clazz
-     * @param m the m
-     * @param rowKey the row key
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
-     * @param consistencyLevel the consistency level
+     * 
+     * @param clazz
+     *            the clazz
+     * @param m
+     *            the m
+     * @param rowKey
+     *            the row key
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param consistencyLevel
+     *            the consistency level
      * @return the object
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
-    Object fromThriftRow(Class<?> clazz, EntityMetadata m, String rowKey, List<String> relationNames,
+    Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
             boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception;
 
     /**
      * Populate entity.
-     *
-     * @param tr the tr
-     * @param m the m
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
+     * 
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
      * @return the object
      */
-    Object populateEntity(ThriftRow tr,EntityMetadata m,List<String> relationNames,boolean isWrapReq);
+    Object populateEntity(ThriftRow tr, EntityMetadata m, List<String> relationNames, boolean isWrapReq);
 }

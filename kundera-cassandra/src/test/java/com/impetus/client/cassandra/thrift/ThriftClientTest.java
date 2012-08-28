@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.thrift.entities.PersonMToM;
+import com.impetus.client.persistence.CassandraCli;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
@@ -33,6 +34,7 @@ public class ThriftClientTest
     @Before
     public void setUp() throws Exception
     {
+        CassandraCli.cassandraSetUp();
         emf = Persistence.createEntityManagerFactory(persistenceUnit);
         em = emf.createEntityManager();
         Map<String, Client> clients = (Map<String, Client>) em.getDelegate();

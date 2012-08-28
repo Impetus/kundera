@@ -258,9 +258,9 @@ public abstract class DocumentIndexer implements Indexer
         {
 
             Field luceneField;
-            String id;
+            Object id;
             id = PropertyAccessorHelper.getId(object, metadata);
-            luceneField = new Field(ENTITY_ID_FIELD, id, Field.Store.YES, Field.Index.ANALYZED);
+            luceneField = new Field(ENTITY_ID_FIELD, id.toString(), Field.Store.YES, Field.Index.ANALYZED);
             // luceneField.set
             // adding class
             // namespace
@@ -342,7 +342,7 @@ public abstract class DocumentIndexer implements Indexer
      * 
      * @return the kundera id
      */
-    protected String getKunderaId(EntityMetadata metadata, String id)
+    protected String getKunderaId(EntityMetadata metadata, Object id)
     {
         return metadata.getEntityClazz().getCanonicalName() + DELIMETER + id;
     }

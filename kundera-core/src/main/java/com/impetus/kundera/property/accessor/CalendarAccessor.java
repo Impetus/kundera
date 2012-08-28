@@ -15,14 +15,11 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import com.impetus.kundera.Constants;
-import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
 /**
@@ -44,23 +41,16 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
     @Override
     public Calendar fromBytes(Class targetClass, byte[] b)
     {
-        String s;
-        try
+        Calendar cal = Calendar.getInstance();
+        Date d = new Date();        
+        if (b == null)
         {
-            if(b == null)
-            {
-                return null;
-            }
-            String s1 = new String(b);
-            s = new String(b, Constants.ENCODING);
+            return null;
         }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new PropertyAccessException(e);
-        }
-
-        return fromString(targetClass, s);
-
+        LongAccessor longAccessor = new LongAccessor();
+        d.setTime(longAccessor.fromBytes(targetClass, b));
+        cal.setTime(d);
+        return cal;
     }
 
     /*
@@ -72,12 +62,15 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
     @Override
     public byte[] toBytes(Object object)
     {
-        if(object == null)
+        if (object == null)
         {
             return null;
         }
         Calendar cal = (Calendar) object;
-        return DateAccessor.getFormattedObect(cal.getTime().toString()).getBytes();
+        // return
+        // DateAccessor.getFormattedObect(cal.getTime().toString()).getBytes();
+        LongAccessor longAccessor = new LongAccessor();
+        return longAccessor.toBytes(cal.getTime().getTime());
     }
 
     /*
@@ -103,7 +96,7 @@ public class CalendarAccessor implements PropertyAccessor<Calendar>
     @Override
     public Calendar fromString(Class targetClass, String s)
     {
-        if(s == null)
+        if (s == null)
         {
             return null;
         }

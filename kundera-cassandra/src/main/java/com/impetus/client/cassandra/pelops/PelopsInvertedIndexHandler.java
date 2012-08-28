@@ -30,6 +30,7 @@ import org.scale7.cassandra.pelops.Mutator;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.Selector;
 
+import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
@@ -68,7 +69,7 @@ public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
             for (ThriftRow thriftRow : indexThriftyRows)
             {
-                mutator.writeColumns(indexColumnFamily, Bytes.fromUTF8(thriftRow.getId()),
+                mutator.writeColumns(indexColumnFamily, CassandraUtilities.toBytes(thriftRow.getId(),thriftRow.getId().getClass()),
                         Arrays.asList(thriftRow.getColumns().toArray(new Column[0])));
 
             }

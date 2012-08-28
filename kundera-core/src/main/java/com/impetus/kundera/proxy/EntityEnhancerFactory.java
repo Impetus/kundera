@@ -37,5 +37,5 @@ public interface EntityEnhancerFactory
      *            the foreign key map
      * @return the proxy
      */
-    public EnhancedEntity getProxy(final Object entity, final String id, final Map<String, Set<String>> foreignKeyMap);
+    public EnhancedEntity getProxy(final Object entity, final Object id, final Map<String, Set<Object>> foreignKeyMap);
 }

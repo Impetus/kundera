@@ -30,7 +30,7 @@ public class EnhanceEntity
     private Object entity;
 
     /** The entity id. */
-    private String entityId;
+    private Object entityId;
 
     /** The relations. */
     private Map<String, Object> relations;
@@ -50,7 +50,7 @@ public class EnhanceEntity
      * @param relations
      *            the relations
      */
-    public EnhanceEntity(Object entity, String entityId, Map<String, Object> relations)
+    public EnhanceEntity(Object entity, Object entityId, Map<String, Object> relations)
     {
         super();
         this.entity = entity;
@@ -84,7 +84,7 @@ public class EnhanceEntity
      * 
      * @return the entityId
      */
-    public String getEntityId()
+    public Object getEntityId()
     {
         return entityId;
     }
@@ -95,7 +95,7 @@ public class EnhanceEntity
      * @param entityId
      *            the entityId to set
      */
-    public void setEntityId(String entityId)
+    public void setEntityId(Object entityId)
     {
         this.entityId = entityId;
     }

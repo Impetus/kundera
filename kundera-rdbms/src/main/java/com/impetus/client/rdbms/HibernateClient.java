@@ -272,7 +272,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
     @Override
     public <E> List<E> getColumnsById(String joinTableName, String joinColumnName, String inverseJoinColumnName,
-            String parentId)
+            Object parentId)
     {
 
         StringBuffer sqlQuery = new StringBuffer();

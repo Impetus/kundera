@@ -42,7 +42,7 @@ public class ObjectGraphUtils
 
     }
 
-    public static String getEntityId(String nodeId)
+    public static Object getEntityId(String nodeId)
     {
 
         return nodeId.substring(nodeId.indexOf(Constants.NODE_ID_SEPARATOR) + 1, nodeId.length());

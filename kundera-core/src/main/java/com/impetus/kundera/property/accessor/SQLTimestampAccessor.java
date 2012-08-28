@@ -15,10 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.property.accessor;
 
-import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessor;
 
@@ -39,20 +37,36 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
     public Timestamp fromBytes(Class targetClass, byte[] b)
     {
 
-        String s;
+        // String s;
+        // try
+        // {
+        // if(b == null)
+        // {
+        // return null;
+        // }
+        // s = new String(b, Constants.ENCODING);
+        // }
+        // catch (UnsupportedEncodingException e)
+        // {
+        // throw new PropertyAccessException(e);
+        // }
+        // return fromString(targetClass, s);
         try
         {
-            if(b == null)
+            if (b == null)
             {
                 return null;
             }
-            s = new String(b, Constants.ENCODING);
+
+            // In case date.getTime() is stored in DB.
+            LongAccessor longAccessor = new LongAccessor();
+
+            return new Timestamp(longAccessor.fromBytes(targetClass, b));
         }
-        catch (UnsupportedEncodingException e)
+        catch (Exception e)
         {
             throw new PropertyAccessException(e);
         }
-        return fromString(targetClass, s);
     }
 
     /*
@@ -64,12 +78,28 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
     @Override
     public byte[] toBytes(Object object)
     {
-        if(object == null)
+        // if(object == null)
+        // {
+        // return null;
+        // }
+        // Timestamp t = (Timestamp) object;
+        // return t.toString().getBytes();
+        try
         {
-            return null;
+            if (object == null)
+            {
+                return null;
+            }
+            LongAccessor longAccessor = new LongAccessor();
+            // System.out.println("In date accessor" + ((Date) date).getTime());
+            return longAccessor.toBytes(((Timestamp) object).getTime());
+            // return DATE_FORMATTER.format(((Date)
+            // date)).getBytes(Constants.ENCODING);
         }
-        Timestamp t = (Timestamp) object;
-        return t.toString().getBytes();
+        catch (Exception e)
+        {
+            throw new PropertyAccessException(e);
+        }
     }
 
     /*
@@ -94,7 +124,7 @@ public class SQLTimestampAccessor implements PropertyAccessor<Timestamp>
     @Override
     public Timestamp fromString(Class targetClass, String s)
     {
-        if(s == null)
+        if (s == null)
         {
             return null;
         }

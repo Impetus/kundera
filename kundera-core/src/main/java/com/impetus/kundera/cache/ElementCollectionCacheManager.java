@@ -71,18 +71,18 @@ public class ElementCollectionCacheManager
      * Mapping between Row Key and (Map of element collection objects and
      * element collection object name).
      */
-    private static Map<String, Map<Object, String>> elementCollectionCache;
+    private static Map<Object, Map<Object, String>> elementCollectionCache;
 
     /**
      * Gets the element collection cache.
      * 
      * @return the elementCollectionCache
      */
-    public Map<String, Map<Object, String>> getElementCollectionCache()
+    public Map<Object, Map<Object, String>> getElementCollectionCache()
     {
         if (this.elementCollectionCache == null)
         {
-            this.elementCollectionCache = new HashMap<String, Map<Object, String>>();
+            this.elementCollectionCache = new HashMap<Object, Map<Object, String>>();
         }
         return this.elementCollectionCache;
     }
@@ -107,7 +107,7 @@ public class ElementCollectionCacheManager
      * @param elementCollObjectName
      *            the element coll object name
      */
-    public void addElementCollectionCacheMapping(String rowKey, Object elementCollectionObject,
+    public void addElementCollectionCacheMapping(Object rowKey, Object elementCollectionObject,
             String elementCollObjectName)
     {
         Map embeddedObjectMap = new HashMap<Object, String>();
@@ -131,7 +131,7 @@ public class ElementCollectionCacheManager
      *            the element collection object
      * @return the element collection object name
      */
-    public String getElementCollectionObjectName(String rowKey, Object elementCollectionObject)
+    public String getElementCollectionObjectName(Object rowKey, Object elementCollectionObject)
     {
         if (getElementCollectionCache().isEmpty() || getElementCollectionCache().get(rowKey) == null)
         {
@@ -173,7 +173,7 @@ public class ElementCollectionCacheManager
      *            the row key
      * @return the last element collection object count
      */
-    public int getLastElementCollectionObjectCount(String rowKey)
+    public int getLastElementCollectionObjectCount(Object rowKey)
     {
         if (getElementCollectionCache().get(rowKey) == null)
         {

@@ -29,6 +29,7 @@ import org.apache.hadoop.hbase.filter.Filter;
 
 import com.impetus.client.hbase.HBaseData;
 import com.impetus.client.hbase.Reader;
+import com.impetus.client.hbase.utils.HBaseUtils;
 
 /**
  * Implmentation class for HBase for <code>Reader</code> interface.
@@ -47,7 +48,7 @@ public class HBaseReader implements Reader
      */
     @SuppressWarnings("unused")
     @Override
-    public List<HBaseData> LoadData(HTable hTable, String columnFamily, String rowKey, Filter filter)
+    public List<HBaseData> LoadData(HTable hTable, String columnFamily, Object rowKey, Filter filter)
             throws IOException
     {
         List<HBaseData> results = null;
@@ -62,12 +63,14 @@ public class HBaseReader implements Reader
         else
         {
             // only in case of find by id
-            Scan scan = null; 
-            if(rowKey != null)
+            Scan scan = null;
+            if (rowKey != null)
             {
-                Get g = new Get(rowKey.getBytes());
+                byte[] rowKeyBytes = HBaseUtils.getBytes(rowKey);
+                Get g = new Get(rowKeyBytes);
                 scan = new Scan(g);
-            } else
+            }
+            else
             {
                 scan = new Scan();
             }
@@ -89,7 +92,7 @@ public class HBaseReader implements Reader
      * .HTable, java.lang.String)
      */
     @Override
-    public List<HBaseData> LoadData(HTable hTable, String rowKey, Filter filter) throws IOException
+    public List<HBaseData> LoadData(HTable hTable, Object rowKey, Filter filter) throws IOException
     {
         return LoadData(hTable, null, rowKey, filter);
     }

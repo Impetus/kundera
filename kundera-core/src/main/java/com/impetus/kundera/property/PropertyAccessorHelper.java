@@ -205,7 +205,7 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static String getId(Object entity, EntityMetadata metadata)
+    public static Object getId(Object entity, EntityMetadata metadata)
     {
 
         // If an Entity has been wrapped in a Proxy, we can call the Proxy
@@ -218,10 +218,9 @@ public class PropertyAccessorHelper
 
         // Otherwise, as Kundera currently supports only field access, access
         // the underlying Entity's id field
-//        return getString(entity, metadata.getIdColumn().getField());
-        return getString(entity, (Field) metadata.getIdAttribute().getJavaMember());
-    }  
-    
+
+        return getObject(entity, (Field) metadata.getIdAttribute().getJavaMember());
+    }
 
     /**
      * Sets Primary Key (Row key) into entity field that was annotated with @Id.
@@ -235,16 +234,19 @@ public class PropertyAccessorHelper
      * @throws PropertyAccessException
      *             the property access exception
      */
-    public static void setId(Object entity, EntityMetadata metadata, String rowKey)
+    public static void setId(Object entity, EntityMetadata metadata, Object rowKey)
     {
         try
         {
-//            Field idField = metadata.getIdColumn().getField();
-            Field idField = (Field) metadata.getIdAttribute().getJavaMember();
-            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(idField);
-            Object obj = accessor.fromString(idField.getClass(), rowKey);
 
-            metadata.getWriteIdentifierMethod().invoke(entity, obj);
+            // Field idField = metadata.getIdColumn().getField();
+            // Field idField = (Field)
+            // metadata.getIdAttribute().getJavaMember();
+            // PropertyAccessor<?> accessor =
+            // PropertyAccessorFactory.getPropertyAccessor(idField);
+            // Object obj = accessor.fromString(idField.getClass(), rowKey);
+
+            metadata.getWriteIdentifierMethod().invoke(entity, rowKey);
         }
         catch (IllegalArgumentException iarg)
         {
@@ -276,7 +278,6 @@ public class PropertyAccessorHelper
     {
         try
         {
-//            Field idField = metadata.getIdColumn().getField();
             Field idField = (Field) metadata.getIdAttribute().getJavaMember();
 
             PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(idField);
@@ -449,20 +450,65 @@ public class PropertyAccessorHelper
         return accessor.getInstance(clazz);
     }
 
+    public static final byte[] toBytes(Object o, Field f)
+    {
+        PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(f);
+        return accessor.toBytes(o);
+    }
+
+    public static final byte[] toBytes(Object o, Class c)
+    {
+        PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(c);
+        return accessor.toBytes(o);
+    }
+
+    public static Object fromSourceToTargetClass(Class<?> targetClass, Class<?> sourceClass, Object o)
+    {
+        if (!targetClass.equals(sourceClass))
+        {
+            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(sourceClass);
+            String s = accessor.toString(o);
+            accessor = PropertyAccessorFactory.getPropertyAccessor(targetClass);
+            return accessor.fromString(targetClass, s);
+        }
+        return o;
+    }
+
+    public static Object fromDate(Class<?> targetClass, Class<?> sourceClass, Object o)
+    {
+        if (!targetClass.equals(sourceClass))
+        {
+            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(sourceClass);
+            byte[] b = accessor.toBytes(o);
+            accessor = PropertyAccessorFactory.getPropertyAccessor(targetClass);
+            return accessor.fromBytes(targetClass, b);
+        }
+        return o;
+    }
+
+    public static byte[] getBytes(Object o)
+    {
+        return PropertyAccessorFactory.getPropertyAccessor(o.getClass()).toBytes(o);
+    }
+
+    public static Object getObject(Class clazz, byte[] b)
+    {
+        return PropertyAccessorFactory.getPropertyAccessor(clazz).fromBytes(clazz, b);
+    }
+   
     public static final Collection getCollectionInstance(Field collectionField)
     {
-        if(collectionField != null)
+        if (collectionField != null)
         {
-            if(collectionField.getType().isAssignableFrom(List.class))
+            if (collectionField.getType().isAssignableFrom(List.class))
             {
                 return new ArrayList();
-            } else if(collectionField.getType().isAssignableFrom(Set.class))
+            }
+            else if (collectionField.getType().isAssignableFrom(Set.class))
             {
                 return new HashSet();
             }
         }
-        
         return null;
     }
-
 }

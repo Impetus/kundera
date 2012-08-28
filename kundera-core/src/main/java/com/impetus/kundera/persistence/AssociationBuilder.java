@@ -81,7 +81,7 @@ final class AssociationBuilder
         // delegator.getMetadata(relation.getTargetEntity());
 
         Client pClient = delegator.getClient(entityMetadata);
-        String entityId = PropertyAccessorHelper.getId(entity, entityMetadata);
+        Object entityId = PropertyAccessorHelper.getId(entity, entityMetadata);
         List<?> foreignKeys = pClient.getColumnsById(joinTableName, joinColumnName, inverseJoinColumnName, entityId);
 
         List childrenEntities = new ArrayList();
@@ -99,7 +99,7 @@ final class AssociationBuilder
             if (isBidirectionalRelation && obj != null)
             {
 
-                String columnValue = PropertyAccessorHelper.getId(obj, childMetadata);
+                Object columnValue = PropertyAccessorHelper.getId(obj, childMetadata);
                 Object[] pKeys = pClient.findIdsByColumn(joinTableName, joinColumnName, inverseJoinColumnName,
                         columnValue, entityMetadata.getEntityClazz());
                 List parents = delegator.find(entity.getClass(), pKeys);
@@ -160,7 +160,7 @@ final class AssociationBuilder
                 }
                 else
                 {
-                    String childId = PropertyAccessorHelper.getId(child, childMetadata);
+                    Object childId = PropertyAccessorHelper.getId(child, childMetadata);
                     EntityMetadata reverseEntityMetadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
                     populateRelationViaQuery(child, pd, childId, reverseRelation, relation.getJoinColumnName(),
                             reverseEntityMetadata);
@@ -177,7 +177,7 @@ final class AssociationBuilder
      * @param relation
      * @param relationName
      */
-    void populateRelationViaQuery(Object entity, PersistenceDelegator pd, String entityId, Relation relation,
+    void populateRelationViaQuery(Object entity, PersistenceDelegator pd, Object entityId, Relation relation,
             String relationName, EntityMetadata childMetadata)
     {
         Class<?> childClass = relation.getTargetEntity();
@@ -248,7 +248,7 @@ final class AssociationBuilder
 
                 String nodeId = ObjectGraphUtils.getNodeId(childId, childMetadata.getEntityClazz());
                 Node node = new Node(nodeId, childMetadata.getEntityClazz(), new ManagedState(),
-                        pd.getPersistenceCache());
+                        pd.getPersistenceCache(),childId);
                 node.setData(child);
                 node.setPersistenceDelegator(pd);
                 mainCache.addNodeToCache(node);
@@ -278,7 +278,7 @@ final class AssociationBuilder
     /**
      * Retrieves associated entities via running query into Lucene indexing.
      */
-    private List getAssociatedEntitiesFromLucene(Object entity, String entityId, Class<?> childClass, Client childClient)
+    private List getAssociatedEntitiesFromLucene(Object entity, Object entityId, Class<?> childClass, Client childClient)
     {
         List associatedEntities;
         // Lucene query, where entity class is child class, parent class is

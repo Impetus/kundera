@@ -207,7 +207,7 @@ public class PersistenceDelegator
         if (node == null || node.isDirty())
         {
 
-            node = new Node(nodeId, entityClass, new ManagedState(), getPersistenceCache());
+            node = new Node(nodeId, entityClass, new ManagedState(), getPersistenceCache(),primaryKey);
             node.setClient(getClient(entityMetadata));
             node.setPersistenceDelegator(this);
 
@@ -615,7 +615,7 @@ public class PersistenceDelegator
      *            the metadata
      * @return the id
      */
-    public String getId(Object entity, EntityMetadata metadata)
+    public Object getId(Object entity, EntityMetadata metadata)
     {
         try
         {

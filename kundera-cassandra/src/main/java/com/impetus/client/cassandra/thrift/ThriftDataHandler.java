@@ -15,12 +15,14 @@
  */
 package com.impetus.client.cassandra.thrift;
 
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
@@ -38,6 +40,9 @@ import com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
  * Data handler for Thrift Clients
@@ -46,37 +51,48 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  */
 /**
  * @author vivek.mishra
- *
+ * 
  */
 public final class ThriftDataHandler extends CassandraDataHandlerBase implements CassandraDataHandler
-{    
+{
 
-    
     public ThriftDataHandler()
-    {        
+    {
     }
 
-    /* (non-Javadoc)
-     * @see com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase#fromThriftRow(java.lang.Class, com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String, java.util.List, boolean, org.apache.cassandra.thrift.ConsistencyLevel)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.client.cassandra.datahandler.CassandraDataHandlerBase#
+     * fromThriftRow(java.lang.Class,
+     * com.impetus.kundera.metadata.model.EntityMetadata, java.lang.String,
+     * java.util.List, boolean, org.apache.cassandra.thrift.ConsistencyLevel)
      */
     @Override
-    public Object fromThriftRow(Class<?> clazz, EntityMetadata m, String rowKey, List<String> relationNames,
+    public Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
             boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception
     {
 
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+
+        // List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
+        Set<String> superColumnAttribs = metaModel.getEmbeddables(m.getEntityClazz()).keySet();
+
+        // List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
+
         Object e = null;
-        
+
         IPooledConnection conn = PelopsUtils.getCassandraConnection(m.getPersistenceUnit());
-        Cassandra.Client cassandra_client = conn.getAPI();              
+        Cassandra.Client cassandra_client = conn.getAPI();
         cassandra_client.set_keyspace(m.getSchema());
 
         SlicePredicate predicate = new SlicePredicate();
         predicate.setSlice_range(new SliceRange(Bytes.EMPTY.getBytes(), Bytes.EMPTY.getBytes(), true, 10000));
 
-        ByteBuffer key = ByteBuffer.wrap(rowKey.getBytes());
-        List<ColumnOrSuperColumn> columnOrSuperColumns = cassandra_client.get_slice(
-                key, new ColumnParent(m.getTableName()), predicate,
-                consistencyLevel);
+        ByteBuffer key = ByteBuffer.wrap(PropertyAccessorHelper.toBytes(rowKey, m.getIdAttribute().getJavaType()));
+        List<ColumnOrSuperColumn> columnOrSuperColumns = cassandra_client.get_slice(key,
+                new ColumnParent(m.getTableName()), predicate, consistencyLevel);
 
         Map<ByteBuffer, List<ColumnOrSuperColumn>> thriftColumnOrSuperColumns = new HashMap<ByteBuffer, List<ColumnOrSuperColumn>>();
         thriftColumnOrSuperColumns.put(key, columnOrSuperColumns);
@@ -90,7 +106,6 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
     {
         return super.fromThriftRow(clazz, m, tr);
     }
-
 
     /**
      * @param m
@@ -109,13 +124,12 @@ public final class ThriftDataHandler extends CassandraDataHandlerBase implements
         {
             ThriftRow tr = new ThriftRow();
             tr.setColumnFamilyName(m.getTableName());
-            tr.setId(ByteBufferUtil.string(key, Charset.forName("UTF-8")));
+            tr.setId(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), key.array()));
             tr = dataGenerator.translateToThriftRow(columnOrSuperColumnsFromRow, m.isCounterColumnType(), m.getType(),
                     tr);
             e = populateEntity(tr, m, relationNames, isWrapReq);
         }
         return e;
     }
-
 
 }

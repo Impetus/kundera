@@ -325,6 +325,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         CfDef cfDef = new CfDef();
         cfDef.name = "STUDENT";
         cfDef.keyspace = "KunderaExamples";
+        cfDef.setKey_validation_class("LongType");
 
         ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("UNIQUE_ID".getBytes()), "LongType");
         columnDef2.index_type = IndexType.KEYS;
@@ -387,7 +388,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         columnDef17.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef17);
 
-        ColumnDef columnDef18 = new ColumnDef(ByteBuffer.wrap("CALENDAR".getBytes()), "UTF8Type");
+        ColumnDef columnDef18 = new ColumnDef(ByteBuffer.wrap("CALENDAR".getBytes()), "DateType");
         columnDef18.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef18);
 

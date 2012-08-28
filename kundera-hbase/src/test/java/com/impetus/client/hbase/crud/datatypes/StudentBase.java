@@ -20,19 +20,17 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import junit.framework.Assert;
+
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 
-import junit.framework.Assert;
-
 import com.impetus.client.hbase.crud.BaseTest;
-import com.impetus.client.hbase.junits.HBaseCli;
 
 /**
  * The Class StudentBase.

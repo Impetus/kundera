@@ -15,12 +15,19 @@
  ******************************************************************************/
 package com.impetus.client.mongodb.query;
 
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Queue;
 import java.util.regex.Pattern;
 
 import javax.persistence.Query;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,8 +40,12 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.KunderaQuery.SortOrder;
@@ -115,7 +126,6 @@ public class MongoDBQuery extends QueryImpl
             log.error("Error during executing query, Caused by:" + e.getMessage());
             throw new QueryHandlerException(e);
         }
-
     }
 
     @Override
@@ -171,7 +181,35 @@ public class MongoDBQuery extends QueryImpl
                 // String property = getColumnName(filter.getProperty());
                 String property = filter.getProperty();
                 String condition = filter.getCondition();
-                String value = filter.getValue().toString();
+                // String value = filter.getValue().toString();
+                Object value = filter.getValue();
+
+                // value is string but field.getType is different, then get
+                // value using
+
+                Field f = null;
+
+                if (((AbstractAttribute) m.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(property))
+                {
+                    f = (Field) m.getIdAttribute().getJavaMember();
+                }
+                else
+                {
+                    MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                            .getMetamodel(m.getPersistenceUnit());
+
+                    EntityType entity = metaModel.entity(m.getEntityClazz());
+                    String fieldName = m.getFieldName(property);
+                    f = (Field) entity.getAttribute(fieldName).getJavaMember();
+                }
+                if (value.getClass().isAssignableFrom(String.class) && f != null
+                        && !f.getType().equals(value.getClass()))
+                {
+                    value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
+                            value.toString());
+                }
+
+//                value = populateValue(value, value.getClass());
 
                 // Property, if doesn't exist in entity, may be there in a
                 // document embedded within it, so we have to check that
@@ -191,7 +229,8 @@ public class MongoDBQuery extends QueryImpl
                 }
                 else if (condition.equalsIgnoreCase("like"))
                 {
-                    query.append(property, Pattern.compile(value));
+                    // query.append(property, Pattern.compile(value));
+                    query.append(property, value);
                 }
                 else if (condition.equalsIgnoreCase(">"))
                 {
@@ -289,4 +328,26 @@ public class MongoDBQuery extends QueryImpl
 
         return 0;
     }
+
+    /**
+     * @param valObj
+     * @return
+     */
+    public Object populateValue(Object valObj, Class clazz)
+    {
+        if (isUTF8Value(clazz))
+        {
+            return valObj.toString();
+        }
+        return valObj;
+    }
+
+    private boolean isUTF8Value(Class<?> clazz)
+    {
+        return (clazz.isAssignableFrom(BigDecimal.class))
+                || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class))
+                        || (clazz.isAssignableFrom(char.class)) || (clazz.isAssignableFrom(Character.class))
+                        || (clazz.isAssignableFrom(Calendar.class)) || (clazz.isAssignableFrom(GregorianCalendar.class)));
+    }
+
 }

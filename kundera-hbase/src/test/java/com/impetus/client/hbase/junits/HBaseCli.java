@@ -177,6 +177,19 @@ public class HBaseCli
         }
     }
 
+    public void dropTable(String tableName)
+    {
+        try
+        {
+            utility.getHBaseAdmin().disableTable(tableName);
+            utility.getHBaseAdmin().deleteTable(tableName);
+        }
+        catch (IOException e)
+        {
+            logger.error(e.getMessage());
+        }
+    }
+
     /**
      * Destroys cluster.
      */

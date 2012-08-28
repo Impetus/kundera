@@ -108,7 +108,7 @@ public class ObjectGraphBuilder
 
         if (nodeInPersistenceCache == null)
         {
-            node = new Node(nodeId, nodeDataCopy, initialNodeState, persistenceCache);
+            node = new Node(nodeId, nodeDataCopy, initialNodeState, persistenceCache,id);
 
         }
         else
@@ -258,7 +258,7 @@ public class ObjectGraphBuilder
         // pk.toString();
     }
 
-    public static String getEntityId(String nodeId)
+    public static Object getEntityId(String nodeId)
     {
 
         return nodeId.substring(nodeId.indexOf(Constants.NODE_ID_SEPARATOR) + 1, nodeId.length());

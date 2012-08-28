@@ -64,7 +64,7 @@ public class LuceneQueryUtils
      *            the entity clazz
      * @return query lucene query.
      */
-    public static String getQuery(String clazzFieldName, String clazzName, String idFieldName, String idFieldValue,
+    public static String getQuery(String clazzFieldName, String clazzName, String idFieldName, Object idFieldValue,
             String entityClazz)
     {
         StringBuffer sb = new StringBuffer("+");

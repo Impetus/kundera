@@ -228,7 +228,7 @@ public class LuceneIndexer extends DocumentIndexer
     }
 
     @Override
-    public final void unindex(EntityMetadata metadata, String id) throws LuceneIndexingException
+    public final void unindex(EntityMetadata metadata, Object id) throws LuceneIndexingException
     {
         log.debug("Unindexing @Entity[" + metadata.getEntityClazz().getName() + "] for key:" + id);
         try
@@ -319,8 +319,6 @@ public class LuceneIndexer extends DocumentIndexer
      */
     public void indexDocument(EntityMetadata metadata, Document document)
     {
-
-//        log.debug("Indexing document: " + document + " for " + metadata.getDBType() + " in file system using Lucene");
         log.debug("Indexing document: " + document + " for in file system using Lucene");
 
         IndexWriter w = getIndexWriter();
@@ -405,14 +403,12 @@ public class LuceneIndexer extends DocumentIndexer
     @Override
     public void flush()
     {
-/*        if (w != null)
-        {
-
-            // w.commit();
-            // w.close();
-            // index.copy(index, FSDirectory.open(getIndexDirectory()),
-            // false);
-        }*/
+        /*
+         * if (w != null) {
+         * 
+         * // w.commit(); // w.close(); // index.copy(index,
+         * FSDirectory.open(getIndexDirectory()), // false); }
+         */
     }
 
     @Override
@@ -470,7 +466,7 @@ public class LuceneIndexer extends DocumentIndexer
 
         Document currentDoc = null;
         Object embeddedObject = null;
-        String rowKey = null;
+        Object rowKey = null;
         try
         {
             rowKey = PropertyAccessorHelper.getId(object, metadata);
@@ -485,22 +481,27 @@ public class LuceneIndexer extends DocumentIndexer
 
         if (metadata.getType().equals(EntityMetadata.Type.SUPER_COLUMN_FAMILY))
         {
-            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
-       
+
+            MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                    metadata.getPersistenceUnit());
+
             Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(metadata.getEntityClazz());
-            
-//            Map<String, EmbeddedColumn> embeddedColumnMap = metadata.getEmbeddedColumnsMap();
+
+            // Map<String, EmbeddedColumn> embeddedColumnMap =
+            // metadata.getEmbeddedColumnsMap();
 
             Iterator<String> iter = embeddables.keySet().iterator();
-            
-            while(iter.hasNext())
+
+            while (iter.hasNext())
             {
-//            for(EmbeddableType embeddableAttribute : embeddables.values())
-//            {
+                // for(EmbeddableType embeddableAttribute :
+                // embeddables.values())
+                // {
                 String attributeName = iter.next();
                 EmbeddableType embeddableAttribute = embeddables.get(attributeName);
                 EntityType entityType = metaModel.entity(metadata.getEntityClazz());
-                embeddedObject = PropertyAccessorHelper.getObject(object, (Field) entityType.getAttribute(attributeName).getJavaMember());
+                embeddedObject = PropertyAccessorHelper.getObject(object, (Field) entityType
+                        .getAttribute(attributeName).getJavaMember());
 
                 if (embeddedObject == null)
                 {
@@ -519,8 +520,8 @@ public class LuceneIndexer extends DocumentIndexer
                             String elementCollectionObjectName = attributeName
                                     + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
 
-                            currentDoc = prepareDocumentForSuperColumn(metadata, object,
-                                    elementCollectionObjectName, parentId, clazz);
+                            currentDoc = prepareDocumentForSuperColumn(metadata, object, elementCollectionObjectName,
+                                    parentId, clazz);
                             indexSuperColumn(metadata, object, currentDoc, obj, embeddableAttribute);
                             count++;
                         }
@@ -535,17 +536,17 @@ public class LuceneIndexer extends DocumentIndexer
                         int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(rowKey);
                         for (Object obj : (Collection<?>) embeddedObject)
                         {
-                            String elementCollectionObjectName = ecCacheHandler.getElementCollectionObjectName(
-                                    rowKey, obj);
+                            String elementCollectionObjectName = ecCacheHandler.getElementCollectionObjectName(rowKey,
+                                    obj);
                             if (elementCollectionObjectName == null)
                             { // Fresh
                               // row
-                                elementCollectionObjectName = attributeName
-                                        + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + (++lastEmbeddedObjectCount);
+                                elementCollectionObjectName = attributeName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
+                                        + (++lastEmbeddedObjectCount);
                             }
 
-                            currentDoc = prepareDocumentForSuperColumn(metadata, object,
-                                    elementCollectionObjectName, parentId, clazz);
+                            currentDoc = prepareDocumentForSuperColumn(metadata, object, elementCollectionObjectName,
+                                    parentId, clazz);
                             indexSuperColumn(metadata, object, currentDoc, obj, embeddableAttribute);
                         }
                     }
@@ -553,90 +554,12 @@ public class LuceneIndexer extends DocumentIndexer
                 }
                 else
                 {
-                    currentDoc = prepareDocumentForSuperColumn(metadata, object, attributeName, parentId,
-                            clazz);
+                    currentDoc = prepareDocumentForSuperColumn(metadata, object, attributeName, parentId, clazz);
                     indexSuperColumn(metadata, object, currentDoc,
                             metaModel.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object,
-                                    embeddableAttribute);
+                            embeddableAttribute);
                 }
             }
-            
-//            
-//            for (String embeddedColumnName : embeddedColumnMap.keySet())
-//            {
-//                EmbeddedColumn embeddedColumn = embeddedColumnMap.get(embeddedColumnName);
-//                try
-//                {
-//
-//                    embeddedObject = PropertyAccessorHelper.getObject(object, embeddedColumn.getField());
-//
-//                    // If embeddedObject is not set, no point of indexing, move
-//                    // to next super column
-//                    if (embeddedObject == null)
-//                    {
-//                        continue;
-//                    }
-//                    if (embeddedObject instanceof Collection<?>)
-//                    {
-//                        ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
-//                        // Check whether it's first time insert or updation
-//                        if (ecCacheHandler.isCacheEmpty())
-//                        { // First time
-//                          // insert
-//                            int count = 0;
-//                            for (Object obj : (Collection<?>) embeddedObject)
-//                            {
-//                                String elementCollectionObjectName = embeddedColumnName
-//                                        + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
-//
-//                                currentDoc = prepareDocumentForSuperColumn(metadata, object,
-//                                        elementCollectionObjectName, parentId, clazz);
-//                                indexSuperColumn(metadata, object, currentDoc, obj, embeddedColumn);
-//                                count++;
-//                            }
-//                        }
-//                        else
-//                        {
-//                            // Updation, Check whether this object is already in
-//                            // cache, which means we already have an embedded
-//                            // column
-//                            // Otherwise we need to generate a fresh embedded
-//                            // column name
-//                            int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(rowKey);
-//                            for (Object obj : (Collection<?>) embeddedObject)
-//                            {
-//                                String elementCollectionObjectName = ecCacheHandler.getElementCollectionObjectName(
-//                                        rowKey, obj);
-//                                if (elementCollectionObjectName == null)
-//                                { // Fresh
-//                                  // row
-//                                    elementCollectionObjectName = embeddedColumnName
-//                                            + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + (++lastEmbeddedObjectCount);
-//                                }
-//
-//                                currentDoc = prepareDocumentForSuperColumn(metadata, object,
-//                                        elementCollectionObjectName, parentId, clazz);
-//                                indexSuperColumn(metadata, object, currentDoc, obj, embeddedColumn);
-//                            }
-//                        }
-//
-//                    }
-//                    else
-//                    {
-//                        currentDoc = prepareDocumentForSuperColumn(metadata, object, embeddedColumnName, parentId,
-//                                clazz);
-//                        indexSuperColumn(metadata, object, currentDoc,
-//                                metadata.isEmbeddable(embeddedObject.getClass()) ? embeddedObject : object,
-//                                embeddedColumn);
-//                    }
-//                }
-//                catch (PropertyAccessException e)
-//                {
-//                    log.error("Error while accesing embedded Object:" + embeddedColumnName);
-//                    throw new LuceneIndexingException("Error while accesing embedded Object:" + embeddedColumnName, e);
-//                }
-
-//            }
         }
         else
         {

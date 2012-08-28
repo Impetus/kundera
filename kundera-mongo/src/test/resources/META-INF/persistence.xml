@@ -8,7 +8,7 @@
 	<persistence-unit name="mongoTest">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<property name="kundera.nodes" value="192.168.145.168" /> 
+			<property name="kundera.nodes" value="localhost" />
 			<!-- <property name="kundera.nodes" value="localhost" /> -->
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaExamples" />
@@ -18,15 +18,16 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-<!-- 			<property name="kundera.client.property" value="kundera-mongo.properties" />
- -->		</properties>
+			<!-- <property name="kundera.client.property" value="kundera-mongo.properties" 
+				/> -->
+		</properties>
 	</persistence-unit>
 
 
 	<persistence-unit name="validAuthenticationMongoPu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<property name="kundera.nodes" value="192.168.145.168" />
+			<property name="kundera.nodes" value="localhost" />
 			<!-- <property name="kundera.nodes" value="localhost" /> -->
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaAuthTests" />
@@ -45,7 +46,7 @@
 	<persistence-unit name="invalidAuthenticationMongoPu">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<property name="kundera.nodes" value="192.168.145.168" />
+			<property name="kundera.nodes" value="localhost" />
 			<!-- <property name="kundera.nodes" value="localhost" /> -->
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaAuthTests" />
@@ -59,6 +60,23 @@
 			<property name="kundera.password" value="invalid" />
 		</properties>
 	</persistence-unit>
+
+	<persistence-unit name="MongoDataTypeTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+			<property name="kundera.nodes" value="localhost" />
+			<property name="kundera.port" value="27017" />
+			<property name="kundera.keyspace" value="KunderaMongoDataType" />
+			<property name="kundera.dialect" value="mongodb" />
+			<!-- <property name="kundera.ddl.auto.prepare" value="create-drop"/> -->
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.mongodb.MongoDBClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+		</properties>
+	</persistence-unit>
+
 
 </persistence>
 

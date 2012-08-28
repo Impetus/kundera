@@ -151,7 +151,6 @@ public class ThriftDataResultHelper
         return transformThriftResult(coscList, columnFamilyType, row);
     }
 
-   
     /**
      * Translates into thrift row.
      * 
@@ -171,7 +170,8 @@ public class ThriftDataResultHelper
             if (columnFamilyType.equals(Type.SUPER_COLUMN_FAMILY))
             {
                 columnType = ColumnFamilyType.COUNTER_SUPER_COLUMN;
-            } else
+            }
+            else
             {
                 columnType = ColumnFamilyType.COUNTER_COLUMN;
             }

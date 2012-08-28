@@ -52,6 +52,7 @@ import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexingException;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
@@ -95,7 +96,7 @@ public class ThriftInvertedIndexHandler extends InvertedIndexHandlerBase impleme
 
                 for (ThriftRow thriftRow : indexThriftyRows)
                 {
-                    byte[] rowKey = Bytes.fromUTF8(thriftRow.getId()).toByteArray();
+                    byte[] rowKey = PropertyAccessorHelper.toBytes(thriftRow.getId(),thriftRow.getId().getClass());
 
                     // Create Insertion List
                     List<Mutation> insertion_list = new ArrayList<Mutation>();

@@ -15,6 +15,7 @@
  */
 package com.impetus.client.cassandra;
 
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
@@ -59,8 +60,8 @@ import org.scale7.cassandra.pelops.ColumnOrSuperColumnHelper;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
+import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
-import com.impetus.client.cassandra.datahandler.DataHandler;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
 import com.impetus.client.cassandra.thrift.ThriftRow;
@@ -76,6 +77,7 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
@@ -112,8 +114,8 @@ public abstract class CassandraClientBase extends ClientBase
         return col;
     }
 
-
-    protected List<Object> onCounterColumn(EntityMetadata m, boolean isRelation, List<String> relations, List<KeySlice> ks)
+    protected List<Object> onCounterColumn(EntityMetadata m, boolean isRelation, List<String> relations,
+            List<KeySlice> ks)
     {
         List<Object> entities;
         if (m.getType().isSuperColumnFamilyMetadata())
@@ -122,14 +124,17 @@ public abstract class CassandraClientBase extends ClientBase
                     .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_SUPER_COLUMN);
             entities = new ArrayList<Object>(qCounterSuperColumnResults.size());
 
-//                        populateDataForSuperCounter(m, qCounterSuperColumnResults, entities, isRelation, relations);
+            // populateDataForSuperCounter(m, qCounterSuperColumnResults,
+            // entities, isRelation, relations);
 
-            for(Bytes key : qCounterSuperColumnResults.keySet())
+            for (Bytes key : qCounterSuperColumnResults.keySet())
             {
                 List<CounterSuperColumn> counterSuperColumns = qCounterSuperColumnResults.get(key);
                 try
                 {
-                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(),Charset.forName("UTF-8")), m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0), counterSuperColumns);
+                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(), Charset.forName("UTF-8")),
+                            m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0),
+                            new ArrayList<CounterColumn>(0), counterSuperColumns);
                     entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
                 }
                 catch (CharacterCodingException ccex)
@@ -137,24 +142,27 @@ public abstract class CassandraClientBase extends ClientBase
                     log.error("Error during executing find, Caused by :" + ccex.getMessage());
                     throw new PersistenceException(ccex);
                 }
-                
+
             }
-            
+
         }
         else
         {
 
-            Map<Bytes, List<CounterColumn>> qCounterColumnResults = ColumnOrSuperColumnHelper
-                    .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_COLUMN);
+            Map<Bytes, List<CounterColumn>> qCounterColumnResults = ColumnOrSuperColumnHelper.transformKeySlices(ks,
+                    ColumnOrSuperColumnHelper.COUNTER_COLUMN);
             entities = new ArrayList<Object>(qCounterColumnResults.size());
 
-//                        populateDataForCounter(m, qCounterColumnResults, entities, isRelation, relations, dataHandler);
-            for(Bytes key : qCounterColumnResults.keySet())
+            // populateDataForCounter(m, qCounterColumnResults, entities,
+            // isRelation, relations, dataHandler);
+            for (Bytes key : qCounterColumnResults.keySet())
             {
                 List<CounterColumn> counterColumns = qCounterColumnResults.get(key);
                 try
                 {
-                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(),Charset.forName("UTF-8")), m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0), counterColumns, new ArrayList<CounterSuperColumn>(0));
+                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(), Charset.forName("UTF-8")),
+                            m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0), counterColumns,
+                            new ArrayList<CounterSuperColumn>(0));
                     entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
                 }
                 catch (CharacterCodingException ccex)
@@ -162,30 +170,23 @@ public abstract class CassandraClientBase extends ClientBase
                     log.error("Error during executing find, Caused by :" + ccex.getMessage());
                     throw new PersistenceException(ccex);
                 }
-                
+
             }
         }
         return entities;
     }
 
-
     protected void computeEntityViaColumns(EntityMetadata m, boolean isRelation, List<String> relations,
             List<Object> entities, Map<Bytes, List<Column>> qResults)
     {
-        for(Bytes key : qResults.keySet())
+        for (Bytes key : qResults.keySet())
         {
             List<Column> columns = qResults.get(key);
-            try
-            {
-                ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(),Charset.forName("UTF-8")), m.getTableName(), columns, new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
-                entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
-            }
-            catch (CharacterCodingException ccex)
-            {
-                log.error("Error during executing find, Caused by :" + ccex.getMessage());
-                throw new PersistenceException(ccex);
-            }
-            
+            ThriftRow tr = new ThriftRow(PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(),
+                    key.toByteArray()), m.getTableName(), columns, new ArrayList<SuperColumn>(0),
+                    new ArrayList<CounterColumn>(0), new ArrayList<CounterSuperColumn>(0));
+            entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
+
         }
     }
 
@@ -199,7 +200,8 @@ public abstract class CassandraClientBase extends ClientBase
     protected void addRelationsToThriftRow(EntityMetadata metadata, ThriftRow tf, List<RelationHolder> relations)
     {
         long timestamp = System.currentTimeMillis();
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit());
 
         if (relations != null)
         {
@@ -210,8 +212,18 @@ public abstract class CassandraClientBase extends ClientBase
 
                 if (linkName != null && linkValue != null)
                 {
-//                    if (metadata.getEmbeddedColumnsAsList().isEmpty())
-                    if (metaModel.getEmbeddables(metadata.getEntityClazz()).isEmpty()/*metadata.getEmbeddedColumnsAsList().isEmpty()*/)
+                    // if (metadata.getEmbeddedColumnsAsList().isEmpty())
+                    if (metaModel.getEmbeddables(metadata.getEntityClazz()).isEmpty()/*
+                                                                                      * metadata
+                                                                                      * .
+                                                                                      * getEmbeddedColumnsAsList
+                                                                                      * (
+                                                                                      * )
+                                                                                      * .
+                                                                                      * isEmpty
+                                                                                      * (
+                                                                                      * )
+                                                                                      */)
                     {
                         if (metadata.isCounterColumnType())
                         {
@@ -277,9 +289,11 @@ public abstract class CassandraClientBase extends ClientBase
         try
         {
             conn = PelopsUtils.getCassandraConnection(metadata.getPersistenceUnit());
-            Cassandra.Client cassandra_client = conn.getAPI();              
+            Cassandra.Client cassandra_client = conn.getAPI();
             cassandra_client.set_keyspace(metadata.getSchema());
-            cassandra_client.remove_counter(ByteBuffer.wrap(pKey.toString().getBytes()), path, consistencyLevel);
+            cassandra_client.remove_counter(
+                    (CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType())).getBytes(), path,
+                    consistencyLevel);
 
         }
         catch (InvalidRequestException ire)
@@ -427,7 +441,7 @@ public abstract class CassandraClientBase extends ClientBase
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
         List<String> relationNames = entityMetadata.getRelationNames();
-        return find(entityClass, entityMetadata, rowId != null ? rowId.toString() : null, relationNames);
+        return find(entityClass, entityMetadata, rowId, relationNames);
     }
 
     public <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
@@ -458,8 +472,7 @@ public abstract class CassandraClientBase extends ClientBase
         List<Object> result = null;
         try
         {
-            result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata,
-                    rowId != null ? rowId.toString() : null);
+            result = (List<Object>) find(clazz, relationNames, relationNames != null, metadata, rowId);
         }
         catch (Exception e)
         {
@@ -498,8 +511,6 @@ public abstract class CassandraClientBase extends ClientBase
         return entities;
     }
 
-    
-
     public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField,
             CassandraDataHandler dataHandler)
     {
@@ -511,9 +522,9 @@ public abstract class CassandraClientBase extends ClientBase
         try
         {
             conn = PelopsUtils.getCassandraConnection(entityMetadata.getPersistenceUnit());
-            Cassandra.Client cassandra_client = conn.getAPI();           
+            Cassandra.Client cassandra_client = conn.getAPI();
             cassandra_client.set_keyspace(entityMetadata.getSchema());
-            
+
             result = cassandra_client.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
                     org.apache.cassandra.thrift.Compression.NONE);
             if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
@@ -532,12 +543,14 @@ public abstract class CassandraClientBase extends ClientBase
                     }
                     else
                     {
-                        thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(), new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
+                        thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
+                                new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
                                 new ArrayList<CounterSuperColumn>(0));
                     }
 
-                    Object entity = dataHandler.populateEntity(thriftRow, entityMetadata, relationalField, relationalField != null && !relationalField.isEmpty());
-                    
+                    Object entity = dataHandler.populateEntity(thriftRow, entityMetadata, relationalField,
+                            relationalField != null && !relationalField.isEmpty());
+
                     if (entity != null)
                     {
                         returnedEntities.add(entity);
@@ -610,7 +623,7 @@ public abstract class CassandraClientBase extends ClientBase
                 int i = 0;
                 for (Bytes b : primaryKeys)
                 {
-                    rowIds[i] = Bytes.toUTF8(b.toByteArray());
+                    rowIds[i] = PropertyAccessorHelper.getObject(b, (Field) m.getIdAttribute().getJavaMember());
                     i++;
                 }
                 entities.addAll(findAll(m.getEntityClazz(), rowIds));
@@ -622,16 +635,21 @@ public abstract class CassandraClientBase extends ClientBase
             Iterator<Bytes> rowIter = qResults.keySet().iterator();
             while (rowIter.hasNext())
             {
-                Bytes rowKey = rowIter.next();                
+                Bytes rowKey = rowIter.next();
                 List<Column> columns = qResults.get(rowKey);
                 try
                 {
-                    Object e = dataHandler.populateEntity(new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
-                                    new ArrayList<CounterSuperColumn>(0)), m,relationNames, isRelational);
+                    Object id = PropertyAccessorHelper
+                            .getObject(m.getIdAttribute().getJavaType(), rowKey.toByteArray());
 
-                    //                    Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m,
-//                            new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), columns, null, null,
-//                                    null), relationNames, isRelational);
+                    Object e = dataHandler.populateEntity(new ThriftRow(id, m.getTableName(), columns,
+                            new ArrayList<SuperColumn>(0), new ArrayList<CounterColumn>(0),
+                            new ArrayList<CounterSuperColumn>(0)), m, relationNames, isRelational);
+
+                    // Object e = dataHandler
+                    // .fromColumnThriftRow(m.getEntityClazz(), m, new
+                    // ThriftRow(id, m.getTableName(), columns,
+                    // null, null, null), relationNames, isRelational);
                     if (e != null)
                     {
                         entities.add(e);
@@ -662,89 +680,29 @@ public abstract class CassandraClientBase extends ClientBase
             List<KeySlice> keys, CassandraDataHandler dataHandler) throws Exception
     {
         List results;
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
-        
-//        List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
-        Set<String> superColumnAttribs = metaModel.getEmbeddables(m.getEntityClazz()).keySet(); 
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                m.getPersistenceUnit());
+
+        // List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
+        Set<String> superColumnAttribs = metaModel.getEmbeddables(m.getEntityClazz()).keySet();
         results = new ArrayList(keys.size());
-     
+
         ThriftDataResultHelper dataGenerator = new ThriftDataResultHelper();
         for (KeySlice key : keys)
         {
             List<ColumnOrSuperColumn> columns = key.getColumns();
-            ByteBuffer rowKey = ByteBuffer.wrap(key.getKey());
+
+            byte[] rowKey = key.getKey();
+
+            Object id = PropertyAccessorHelper.getObject(m.getIdAttribute().getJavaType(), rowKey);
             Map<ByteBuffer, List<ColumnOrSuperColumn>> data = new HashMap<ByteBuffer, List<ColumnOrSuperColumn>>(1);
-            data.put(rowKey, columns);
+            data.put(ByteBuffer.wrap(rowKey), columns);
             ThriftRow tr = new ThriftRow();
-            tr.setId(ByteBufferUtil.string(rowKey, Charset.forName("UTF-8")));
+            tr.setId(id);
             tr.setColumnFamilyName(m.getTableName());
             tr = dataGenerator.translateToThriftRow(data, m.isCounterColumnType(), m.getType(), tr);
             results.add(dataHandler.populateEntity(tr, m, relations, isWrapReq));
-/*
-            if (!superColumnAttribs.isEmpty())
-            {
-                Object r = null;
-
-                if (m.isCounterColumnType())
-                {
-                    List<CounterSuperColumn> superCounterColumns = new ArrayList<CounterSuperColumn>(columns.size());
-                    for (ColumnOrSuperColumn supCol : columns)
-                    {
-                        superCounterColumns.add(supCol.getCounter_super_column());
-                    }
-                    r = dataHandler.fromCounterSuperColumnThriftRow(m.getEntityClazz(), m, new ThriftRow(new String(
-                            rowKey), m.getTableName(), null, null, null, superCounterColumns), relations, isWrapReq);
-                }
-                else
-                {
-                    List<SuperColumn> superColumns = new ArrayList<SuperColumn>(columns.size());
-                    for (ColumnOrSuperColumn supCol : columns)
-                    {
-                        superColumns.add(supCol.getSuper_column());
-                    }
-
-                    r = dataHandler.fromSuperColumnThriftRow(m.getEntityClazz(), m,
-                            new ThriftRow(new String(rowKey), m.getTableName(), null, superColumns, null, null),
-                            relations, isWrapReq);
-                }
-                if (r != null)
-                {
-                    results.add(r);
-                }
-                // List<SuperColumn> superCol = columns.
-            }
-            else
-            {
-                Object r = null;
-                if (m.isCounterColumnType())
-                {
-                    List<CounterColumn> cols = new ArrayList<CounterColumn>(columns.size());
-                    for (ColumnOrSuperColumn supCol : columns)
-                    {
-                        cols.add(supCol.getCounter_column());
-                    }
-
-                    r = dataHandler.fromCounterColumnThriftRow(m.getEntityClazz(), m, new ThriftRow(new String(rowKey),
-                            m.getTableName(), null, null, cols, null), relations, isWrapReq);
-                }
-                else
-                {
-                    List<Column> cols = new ArrayList<Column>(columns.size());
-                    for (ColumnOrSuperColumn supCol : columns)
-                    {
-                        cols.add(supCol.getColumn());
-                    }
-
-                    r = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m,
-                            new ThriftRow(new String(rowKey), m.getTableName(), cols, null, null, null), relations,
-                            isWrapReq);
-                }
-                if (r != null)
-                {
-                    results.add(r);
-                }
-            }
-*/        }
+        }
         return results;
     }
 

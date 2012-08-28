@@ -15,12 +15,19 @@
  */
 package com.impetus.client.cassandra.common;
 
+import java.lang.reflect.Field;
 import java.nio.charset.Charset;
+import java.util.Date;
 import java.util.Properties;
+import java.util.UUID;
+
+import org.scale7.cassandra.pelops.Bytes;
 
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.property.accessor.DateAccessor;
 
 /**
  * Provides utilities methods
@@ -42,6 +49,59 @@ public class CassandraUtilities
         Properties props = persistenceUnitMetadata.getProperties();
         String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
         return keyspace;
+    }
+
+    public static Bytes toBytes(Object value, Field f)
+    {
+        return toBytes(value, f.getType());
+
+    }
+
+    /**
+     * @param value
+     * @param f
+     * @return
+     */
+    public static Bytes toBytes(Object value, Class<?> clazz)
+    {
+        if (clazz.isAssignableFrom(String.class))
+        {
+            return Bytes.fromByteArray(((String) value).getBytes());
+        }
+        else if (clazz.equals(int.class) || clazz.isAssignableFrom(Integer.class))
+        {
+            return Bytes.fromInt(Integer.parseInt(value.toString()));
+        }
+        else if (clazz.equals(long.class) || clazz.isAssignableFrom(Long.class))
+        {
+
+            return Bytes.fromLong(Long.parseLong(value.toString()));
+        }
+        else if (clazz.equals(boolean.class) || clazz.isAssignableFrom(Boolean.class))
+        {
+            return Bytes.fromBoolean(Boolean.valueOf(value.toString()));
+        }
+        else if (clazz.equals(double.class) || clazz.isAssignableFrom(Double.class))
+        {
+            return Bytes.fromDouble(Double.valueOf(value.toString()));
+        }
+        else if (clazz.isAssignableFrom(java.util.UUID.class))
+        {
+            return Bytes.fromUuid(UUID.fromString(value.toString()));
+        }
+        else if (clazz.equals(float.class) || clazz.isAssignableFrom(Float.class))
+        {
+            return Bytes.fromFloat(Float.valueOf(value.toString()));
+        }
+        else if (clazz.isAssignableFrom(Date.class))
+        {
+            DateAccessor dateAccessor = new DateAccessor();
+            return Bytes.fromByteArray(dateAccessor.toBytes(value));
+        }
+        else
+        {
+            return Bytes.fromByteArray(PropertyAccessorFactory.getPropertyAccessor(clazz).toBytes(value));
+        }
     }
 
 }
