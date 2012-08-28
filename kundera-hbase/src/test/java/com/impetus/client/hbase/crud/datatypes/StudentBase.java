@@ -40,9 +40,9 @@ import com.impetus.client.hbase.crud.BaseTest;
  */
 public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
 {
-    public static final boolean RUN_IN_EMBEDDED_MODE = false;
+    public static final boolean RUN_IN_EMBEDDED_MODE = true;
 
-    public static final boolean AUTO_MANAGE_SCHEMA = false;
+    public static final boolean AUTO_MANAGE_SCHEMA = true;
 
     /** The emf. */
     protected EntityManagerFactory emf;

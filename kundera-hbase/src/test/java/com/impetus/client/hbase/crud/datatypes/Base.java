@@ -5,10 +5,10 @@ import com.impetus.kundera.datatypes.datagenerator.DataGeneratorFactory;
 
 public abstract class Base
 {
-    public static final boolean RUN_IN_EMBEDDED_MODE = false;
+    public static final boolean RUN_IN_EMBEDDED_MODE = true;
 
-    public static final boolean AUTO_MANAGE_SCHEMA = false;
-    
+    public static final boolean AUTO_MANAGE_SCHEMA = true;
+
     DataGenerator<?> dataGenerator;
 
     DataGeneratorFactory factory = new DataGeneratorFactory();

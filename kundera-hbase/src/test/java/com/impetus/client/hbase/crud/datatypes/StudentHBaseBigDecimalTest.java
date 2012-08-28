@@ -22,7 +22,7 @@ public class StudentHBaseBigDecimalTest extends Base
     private static final String table = "StudentHBaseBigDecimal";
 
     private HBaseCli cli;
-    
+
     private EntityManagerFactory emf;
 
     @Before

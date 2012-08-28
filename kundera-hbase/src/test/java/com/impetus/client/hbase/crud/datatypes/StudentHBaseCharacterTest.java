@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.hbase.crud.datatypes.entities.StudentHBaseCharacter;
+import com.impetus.client.hbase.junits.HBaseCli;
 
 public class StudentHBaseCharacterTest extends Base
 {
@@ -21,6 +22,9 @@ public class StudentHBaseCharacterTest extends Base
     private static final String keyspace = "KunderaHbaseDataType";
 
     private EntityManagerFactory emf;
+    private static final String table = "StudentHBaseCharacter";
+
+    private HBaseCli cli;
 
     @Before
     public void setUp() throws Exception
@@ -556,20 +560,25 @@ public class StudentHBaseCharacterTest extends Base
 
     public void startCluster()
     {
+        cli = new HBaseCli();
+        cli.startCluster();
     }
 
     public void stopCluster()
     {
-        // TODO Auto-generated method stub
-
+        cli.stopCluster();
     }
 
     public void createSchema()
     {
+        cli.createTable(table);
+        cli.addColumnFamily(table, "NAME");
+        cli.addColumnFamily(table, "AGE");
     }
 
     public void dropSchema()
     {
+        cli.dropTable(table);
     }
 
 }
