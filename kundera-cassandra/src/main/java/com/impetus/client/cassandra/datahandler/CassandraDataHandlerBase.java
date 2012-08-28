@@ -62,7 +62,7 @@ import com.impetus.kundera.property.accessor.LongAccessor;
 
 /**
  * Base class for all Cassandra Data Handlers.
- *
+ * 
  * @author amresh.singh
  */
 public abstract class CassandraDataHandlerBase
@@ -175,15 +175,22 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * From thrift row.
-     *
-     * @param clazz the clazz
-     * @param m the m
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
-     * @param consistencyLevel the consistency level
-     * @param rowIds the row ids
+     * 
+     * @param clazz
+     *            the clazz
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param consistencyLevel
+     *            the consistency level
+     * @param rowIds
+     *            the row ids
      * @return the list
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     public List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames, boolean isWrapReq,
             ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception
@@ -205,15 +212,22 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * From thrift row.
-     *
-     * @param clazz the clazz
-     * @param m the m
-     * @param rowKey the row key
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
-     * @param consistencyLevel the consistency level
+     * 
+     * @param clazz
+     *            the clazz
+     * @param m
+     *            the m
+     * @param rowKey
+     *            the row key
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param consistencyLevel
+     *            the consistency level
      * @return the object
-     * @throws Exception the exception
+     * @throws Exception
+     *             the exception
      */
     public abstract Object fromThriftRow(Class<?> clazz, EntityMetadata m, String rowKey, List<String> relationNames,
             boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception;
@@ -335,10 +349,13 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * To index thrift row.
-     *
-     * @param e the e
-     * @param m the m
-     * @param columnFamily the column family
+     * 
+     * @param e
+     *            the e
+     * @param m
+     *            the m
+     * @param columnFamily
+     *            the column family
      * @return the list
      */
     public List<ThriftRow> toIndexThriftRow(Object e, EntityMetadata m, String columnFamily)
@@ -422,12 +439,17 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * Constructs Thrift Tow (each record) for Index Table.
-     *
-     * @param columnFamily Column family Name for Index Table
-     * @param embeddedFieldName the embedded field name
-     * @param obj Embedded Object instance
-     * @param column Instance of {@link Column}
-     * @param indexColumnValue Name of Index Column
+     * 
+     * @param columnFamily
+     *            Column family Name for Index Table
+     * @param embeddedFieldName
+     *            the embedded field name
+     * @param obj
+     *            Embedded Object instance
+     * @param column
+     *            Instance of {@link Column}
+     * @param indexColumnValue
+     *            Name of Index Column
      * @return Instance of {@link ThriftRow}
      */
     private ThriftRow constructIndexTableThriftRow(String columnFamily, String embeddedFieldName, Object obj,
@@ -506,11 +528,15 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * Populate entity.
-     *
-     * @param tr the tr
-     * @param m the m
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
+     * 
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
      * @return the object
      */
     public Object populateEntity(ThriftRow tr, EntityMetadata m, List<String> relationNames, boolean isWrapReq)
@@ -552,6 +578,7 @@ public abstract class CassandraDataHandlerBase
                 if (!mappingProcessed)
                 {
                     MetadataUtils.populateColumnAndSuperColumnMaps(m, columnNameToFieldMap, superColumnNameToFieldMap);
+                    mappingProcessed = true;
                 }
 
                 if (scName.indexOf(Constants.EMBEDDED_COLUMN_NAME_DELIMITER) != -1)
@@ -567,7 +594,13 @@ public abstract class CassandraDataHandlerBase
                     Object embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
 
                     scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn,
-                            embeddedObject);
+                            embeddedObject, columnNameToFieldMap);
+
+                    Collection collection = PropertyAccessorHelper.getCollectionInstance(embeddedCollectionField);
+                    collection.add(embeddedObject);
+
+                    PropertyAccessorHelper.set(entity, embeddedCollectionField, collection);
+
                     embeddedCollection.add(embeddedObject);
 
                     // Add this embedded object to cache
@@ -590,7 +623,6 @@ public abstract class CassandraDataHandlerBase
                         scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn, entity);
                     }
 
-                    scrollOverSuperColumn(m, relationNames, isWrapReq, relations, entityType, superColumn, entity);
                 }
             }
 
@@ -682,13 +714,18 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * Initialize.
-     *
-     * @param tr the tr
-     * @param m the m
-     * @param entity the entity
+     * 
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
      * @return the object
-     * @throws InstantiationException the instantiation exception
-     * @throws IllegalAccessException the illegal access exception
+     * @throws InstantiationException
+     *             the instantiation exception
+     * @throws IllegalAccessException
+     *             the illegal access exception
      */
     private Object initialize(ThriftRow tr, EntityMetadata m, Object entity) throws InstantiationException,
             IllegalAccessException
@@ -704,14 +741,21 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * Scroll over super column.
-     *
-     * @param m the m
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
-     * @param relations the relations
-     * @param entityType the entity type
-     * @param superColumn the super column
-     * @param embeddedObject the embedded object
+     * 
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
+     * @param entityType
+     *            the entity type
+     * @param superColumn
+     *            the super column
+     * @param embeddedObject
+     *            the embedded object
      */
     private void scrollOverSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
             Map<String, Object> relations, EntityType entityType, SuperColumn superColumn, Object embeddedObject)
@@ -724,14 +768,21 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * Scroll over counter super column.
-     *
-     * @param m the m
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
-     * @param relations the relations
-     * @param entityType the entity type
-     * @param superColumn the super column
-     * @param embeddedObject the embedded object
+     * 
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
+     * @param entityType
+     *            the entity type
+     * @param superColumn
+     *            the super column
+     * @param embeddedObject
+     *            the embedded object
      */
     private void scrollOverCounterSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
             Map<String, Object> relations, EntityType entityType, CounterSuperColumn superColumn, Object embeddedObject)
@@ -744,15 +795,23 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * Scroll over counter super column.
-     *
-     * @param m the m
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
-     * @param relations the relations
-     * @param entityType the entity type
-     * @param superColumn the super column
-     * @param embeddedObject the embedded object
-     * @param superColumnFieldMap the super column field map
+     * 
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
+     * @param entityType
+     *            the entity type
+     * @param superColumn
+     *            the super column
+     * @param embeddedObject
+     *            the embedded object
+     * @param superColumnFieldMap
+     *            the super column field map
      */
     private void scrollOverCounterSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
             Map<String, Object> relations, EntityType entityType, CounterSuperColumn superColumn,
@@ -768,15 +827,23 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * Scroll over super column.
-     *
-     * @param m the m
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
-     * @param relations the relations
-     * @param entityType the entity type
-     * @param superColumn the super column
-     * @param embeddedObject the embedded object
-     * @param superColumnFieldMap the super column field map
+     * 
+     * @param m
+     *            the m
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
+     * @param entityType
+     *            the entity type
+     * @param superColumn
+     *            the super column
+     * @param embeddedObject
+     *            the embedded object
+     * @param superColumnFieldMap
+     *            the super column field map
      */
     private void scrollOverSuperColumn(EntityMetadata m, List<String> relationNames, boolean isWrapReq,
             Map<String, Object> relations, EntityType entityType, SuperColumn superColumn, Object embeddedObject,
@@ -792,14 +859,21 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * On column.
-     *
-     * @param column the column
-     * @param m the m
-     * @param entity the entity
-     * @param entityType the entity type
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
-     * @param relations the relations
+     * 
+     * @param column
+     *            the column
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @param entityType
+     *            the entity type
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
      */
     private void onColumn(Column column, EntityMetadata m, Object entity, EntityType entityType,
             List<String> relationNames, boolean isWrapReq, Map<String, Object> relations)
@@ -811,14 +885,21 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * On counter column.
-     *
-     * @param column the column
-     * @param m the m
-     * @param entity the entity
-     * @param entityType the entity type
-     * @param relationNames the relation names
-     * @param isWrapReq the is wrap req
-     * @param relations the relations
+     * 
+     * @param column
+     *            the column
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @param entityType
+     *            the entity type
+     * @param relationNames
+     *            the relation names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
      */
     private void onCounterColumn(CounterColumn column, EntityMetadata m, Object entity, EntityType entityType,
             List<String> relationNames, boolean isWrapReq, Map<String, Object> relations)
@@ -830,48 +911,59 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * Populate via thrift.
-     *
-     * @param m the m
-     * @param entity the entity
-     * @param entityType the entity type
-     * @param relationNames the relation names
-     * @param relations the relations
-     * @param thriftColumnName the thrift column name
-     * @param thriftColumnValue the thrift column value
+     * 
+     * @param m
+     *            the m
+     * @param entity
+     *            the entity
+     * @param entityType
+     *            the entity type
+     * @param relationNames
+     *            the relation names
+     * @param relations
+     *            the relations
+     * @param thriftColumnName
+     *            the thrift column name
+     * @param thriftColumnValue
+     *            the thrift column value
      */
     private void populateViaThrift(EntityMetadata m, Object entity, EntityType entityType, List<String> relationNames,
             Map<String, Object> relations, String thriftColumnName, Object thriftColumnValue)
     {
-        if (thriftColumnValue != null)
+        if (relationNames == null || !relationNames.contains(thriftColumnName))
         {
-            String fieldName = m.getFieldName(thriftColumnName);
-            Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
 
-            if (attribute != null)
+            if (thriftColumnValue != null)
             {
-                try
+                String fieldName = m.getFieldName(thriftColumnName);
+                Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
+
+                if (attribute != null)
                 {
-                    if (thriftColumnValue.getClass().isAssignableFrom(String.class))
+                    try
                     {
-                        PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(),
-                                (String) thriftColumnValue);
+                        if (thriftColumnValue.getClass().isAssignableFrom(String.class))
+                        {
+                            PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(),
+                                    (String) thriftColumnValue);
+                        }
+                        else
+                        {
+                            PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(),
+                                    (byte[]) thriftColumnValue);
+                        }
                     }
-                    else
+                    catch (PropertyAccessException pae)
                     {
-                        PropertyAccessorHelper.set(entity, (Field) attribute.getJavaMember(),
-                                (byte[]) thriftColumnValue);
+                        log.warn(pae.getMessage());
                     }
-                }
-                catch (PropertyAccessException pae)
-                {
-                    log.warn(pae.getMessage());
                 }
             }
         }
         else
         {
             // populate relation.
-            if (relationNames != null && !relationNames.isEmpty() && relationNames.contains(thriftColumnName))
+            if (relationNames != null && relationNames.contains(thriftColumnName))
             {
                 // relations = new HashMap<String, Object>();
                 String value = PropertyAccessorFactory.STRING.fromBytes(String.class, (byte[]) thriftColumnValue);
@@ -884,12 +976,17 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * On column or super column thrift row.
-     *
-     * @param timestamp2 the timestamp2
-     * @param tr the tr
-     * @param m the m
-     * @param e the e
-     * @param id the id
+     * 
+     * @param timestamp2
+     *            the timestamp2
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param e
+     *            the e
+     * @param id
+     *            the id
      */
     private void onColumnOrSuperColumnThriftRow(long timestamp2, ThriftRow tr, EntityMetadata m, Object e, String id)
     {
@@ -909,7 +1006,6 @@ public abstract class CassandraDataHandlerBase
                 Field field = (Field) ((Attribute) attribute).getJavaMember();
                 byte[] name = PropertyAccessorFactory.STRING
                         .toBytes(((AbstractAttribute) attribute).getJPAColumnName());
-                Object value = getColumnValue(m, e, field);
 
                 // if attribute is embeddable.
 
@@ -920,6 +1016,8 @@ public abstract class CassandraDataHandlerBase
                 }
                 else
                 {
+                    Object value = getColumnValue(m, e, field);
+
                     if (m.getType().equals(Type.SUPER_COLUMN_FAMILY))
                     {
 
@@ -938,24 +1036,30 @@ public abstract class CassandraDataHandlerBase
     private Object getColumnValue(EntityMetadata m, Object e, Field field)
     {
         Object value;
-        if(!m.isCounterColumnType())
-         {
+        if (!m.isCounterColumnType())
+        {
             value = PropertyAccessorHelper.get(e, field);
-         } else
-         {
-             value = PropertyAccessorHelper.getString(e, field);
-         }
+        }
+        else
+        {
+            value = PropertyAccessorHelper.getString(e, field);
+        }
         return value;
     }
 
     /**
      * Prepare column.
-     *
-     * @param tr the tr
-     * @param m the m
-     * @param value the value
-     * @param name the name
-     * @param timestamp the timestamp
+     * 
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param value
+     *            the value
+     * @param name
+     *            the name
+     * @param timestamp
+     *            the timestamp
      */
     private void prepareColumn(ThriftRow tr, EntityMetadata m, Object value, byte[] name, long timestamp)
     {
@@ -963,12 +1067,12 @@ public abstract class CassandraDataHandlerBase
         {
             if (m.isCounterColumnType())
             {
-                CounterColumn counterColumn = prepareCounterColumn((String)value, name);
+                CounterColumn counterColumn = prepareCounterColumn((String) value, name);
                 tr.addCounterColumn(counterColumn);
             }
             else
             {
-                Column column = prepareColumn((byte[])value, name, timestamp);
+                Column column = prepareColumn((byte[]) value, name, timestamp);
                 tr.addColumn(column);
             }
         }
@@ -976,12 +1080,17 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * Prepare super column.
-     *
-     * @param tr the tr
-     * @param m the m
-     * @param value the value
-     * @param name the name
-     * @param timestamp the timestamp
+     * 
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param value
+     *            the value
+     * @param name
+     *            the name
+     * @param timestamp
+     *            the timestamp
      */
     private void prepareSuperColumn(ThriftRow tr, EntityMetadata m, Object value, byte[] name, long timestamp)
     {
@@ -991,7 +1100,7 @@ public abstract class CassandraDataHandlerBase
             {
                 CounterSuperColumn counterSuper = new CounterSuperColumn();
                 counterSuper.setName(name);
-                CounterColumn counterColumn = prepareCounterColumn((String)value, name);
+                CounterColumn counterColumn = prepareCounterColumn((String) value, name);
                 List<CounterColumn> subCounterColumn = new ArrayList<CounterColumn>();
                 subCounterColumn.add(counterColumn);
                 counterSuper.setColumns(subCounterColumn);
@@ -1001,7 +1110,7 @@ public abstract class CassandraDataHandlerBase
             {
                 SuperColumn superCol = new SuperColumn();
                 superCol.setName(name);
-                Column column = prepareColumn((byte[])value, name, timestamp);
+                Column column = prepareColumn((byte[]) value, name, timestamp);
                 List<Column> subColumn = new ArrayList<Column>();
                 subColumn.add(column);
                 superCol.setColumns(subColumn);
@@ -1013,10 +1122,13 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * Prepare column.
-     *
-     * @param value the value
-     * @param name the name
-     * @param timestamp the timestamp
+     * 
+     * @param value
+     *            the value
+     * @param name
+     *            the name
+     * @param timestamp
+     *            the timestamp
      * @return the column
      */
     private Column prepareColumn(byte[] value, byte[] name, long timestamp)
@@ -1030,9 +1142,11 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * Prepare counter column.
-     *
-     * @param value the value
-     * @param name the name
+     * 
+     * @param value
+     *            the value
+     * @param name
+     *            the name
      * @return the counter column
      */
     private CounterColumn prepareCounterColumn(String value, byte[] name)
@@ -1046,13 +1160,19 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * On embeddable.
-     *
-     * @param timestamp2 the timestamp2
-     * @param tr the tr
-     * @param m the m
-     * @param e the e
-     * @param id the id
-     * @param embeddableAttrib the embeddable attrib
+     * 
+     * @param timestamp2
+     *            the timestamp2
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param e
+     *            the e
+     * @param id
+     *            the id
+     * @param embeddableAttrib
+     *            the embeddable attrib
      */
     private void onEmbeddable(long timestamp2, ThriftRow tr, EntityMetadata m, Object e, String id,
             Attribute embeddableAttrib)
@@ -1061,99 +1181,107 @@ public abstract class CassandraDataHandlerBase
         MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
                 m.getPersistenceUnit());
 
-        Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(m.getEntityClazz());
+        // Map<String, EmbeddableType> embeddables =
+        // metaModel.getEmbeddables(m.getEntityClazz());
 
-        for (String key : embeddables.keySet())
+        EmbeddableType superColumn = metaModel.embeddable(((AbstractAttribute) embeddableAttrib).getBindableJavaType());
+
+        // for (String key : embeddables.keySet())
+        // {
+
+        // EmbeddableType superColumn = embeddables.get(key);
+        Field superColumnField = (Field) embeddableAttrib.getJavaMember();
+        Object superColumnObject = PropertyAccessorHelper.getObject(e, superColumnField);
+
+        // If Embedded object is a Collection, there will be variable number
+        // of super columns one for each object in collection.
+        // Key for each super column will be of the format "<Embedded object
+        // field name>#<Unique sequence number>
+
+        // On the other hand, if embedded object is not a Collection, it
+        // would simply be embedded as ONE super column.
+        String superColumnName = null;
+        /*
+         * if (superColumnObject == null) { continue; }
+         */
+        if (superColumnObject != null && superColumnObject instanceof Collection)
         {
-            EmbeddableType superColumn = embeddables.get(key);
-            Field superColumnField = (Field) embeddableAttrib.getJavaMember();
-            Object superColumnObject = PropertyAccessorHelper.getObject(e, superColumnField);
 
-            // If Embedded object is a Collection, there will be variable number
-            // of super columns one for each object in collection.
-            // Key for each super column will be of the format "<Embedded object
-            // field name>#<Unique sequence number>
+            ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
 
-            // On the other hand, if embedded object is not a Collection, it
-            // would simply be embedded as ONE super column.
-            String superColumnName = null;
-            if (superColumnObject == null)
-            {
-                continue;
-            }
-            if (superColumnObject instanceof Collection)
-            {
-
-                ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
-
-                // Check whether it's first time insert or updation
-                if (ecCacheHandler.isCacheEmpty())
-                { // First time insert
-                    int count = 0;
-                    for (Object obj : (Collection) superColumnObject)
-                    {
-                        // superColumnName = superColumn.getName() +
-                        // Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
-                        superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName()
-                                + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
-
-                        if (m.isCounterColumnType())
-                        {
-                            CounterSuperColumn thriftSuperColumn = buildThriftCounterSuperColumn(superColumnName,
-                                    superColumn, obj);
-                            tr.addCounterSuperColumn(thriftSuperColumn);
-                        }
-                        else
-                        {
-                            SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp2,
-                                    superColumn, obj);
-                            tr.addSuperColumn(thriftSuperColumn);
-                        }
-                        ecCacheHandler.addElementCollectionCacheMapping(id, obj, superColumnName);
-                        count++;
-                    }
-                }
-                else
+            // Check whether it's first time insert or updation
+            if (ecCacheHandler.isCacheEmpty())
+            { // First time insert
+                int count = 0;
+                for (Object obj : (Collection) superColumnObject)
                 {
-                    // Updation, Check whether this object is already in cache,
-                    // which means we already have a super column
-                    // Otherwise we need to generate a fresh embedded column
-                    // name
-                    int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(id);
-                    for (Object obj : (Collection) superColumnObject)
-                    {
-                        superColumnName = ecCacheHandler.getElementCollectionObjectName(id, obj);
-                        if (superColumnName == null)
-                        { // Fresh row
-                            superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName()
-                                    + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + (++lastEmbeddedObjectCount);
-                        }
-                        buildThriftSuperColumn(timestamp2, tr, m, id, superColumn, superColumnName, obj);
-                        ecCacheHandler.addElementCollectionCacheMapping(id, obj, superColumnName);
-                    }
-                }
+                    // superColumnName = superColumn.getName() +
+                    // Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
+                    superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName()
+                            + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
 
+                    if (m.isCounterColumnType())
+                    {
+                        CounterSuperColumn thriftSuperColumn = buildThriftCounterSuperColumn(superColumnName,
+                                superColumn, obj);
+                        tr.addCounterSuperColumn(thriftSuperColumn);
+                    }
+                    else
+                    {
+                        SuperColumn thriftSuperColumn = buildThriftSuperColumn(superColumnName, timestamp2,
+                                superColumn, obj);
+                        tr.addSuperColumn(thriftSuperColumn);
+                    }
+                    ecCacheHandler.addElementCollectionCacheMapping(id, obj, superColumnName);
+                    count++;
+                }
             }
             else
             {
-                superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName();
-                buildThriftSuperColumn(timestamp2, tr, m, id, superColumn, superColumnName, superColumnObject);
+                // Updation, Check whether this object is already in cache,
+                // which means we already have a super column
+                // Otherwise we need to generate a fresh embedded column
+                // name
+                int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(id);
+                for (Object obj : (Collection) superColumnObject)
+                {
+                    superColumnName = ecCacheHandler.getElementCollectionObjectName(id, obj);
+                    if (superColumnName == null)
+                    { // Fresh row
+                        superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName()
+                                + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + (++lastEmbeddedObjectCount);
+                    }
+                    buildThriftSuperColumn(timestamp2, tr, m, id, superColumn, superColumnName, obj);
+                    ecCacheHandler.addElementCollectionCacheMapping(id, obj, superColumnName);
+                }
             }
 
+        }
+        else
+        {
+            superColumnName = ((AbstractAttribute) embeddableAttrib).getJPAColumnName();
+            buildThriftSuperColumn(timestamp2, tr, m, id, superColumn, superColumnName, superColumnObject);
         }
 
     }
 
     /**
      * Builds the thrift super column.
-     *
-     * @param timestamp2 the timestamp2
-     * @param tr the tr
-     * @param m the m
-     * @param id the id
-     * @param superColumn the super column
-     * @param superColumnName the super column name
-     * @param obj the obj
+     * 
+     * @param timestamp2
+     *            the timestamp2
+     * @param tr
+     *            the tr
+     * @param m
+     *            the m
+     * @param id
+     *            the id
+     * @param superColumn
+     *            the super column
+     * @param superColumnName
+     *            the super column name
+     * @param obj
+     *            the obj
      */
     private void buildThriftSuperColumn(long timestamp2, ThriftRow tr, EntityMetadata m, String id,
             EmbeddableType superColumn, String superColumnName, Object obj)
@@ -1172,10 +1300,13 @@ public abstract class CassandraDataHandlerBase
 
     /**
      * Builds the thrift counter super column.
-     *
-     * @param superColumnName the super column name
-     * @param superColumn the super column
-     * @param counterSuperColumnObject the counter super column object
+     * 
+     * @param superColumnName
+     *            the super column name
+     * @param superColumn
+     *            the super column
+     * @param counterSuperColumnObject
+     *            the counter super column object
      * @return the counter super column
      */
     private CounterSuperColumn buildThriftCounterSuperColumn(String superColumnName, EmbeddableType superColumn,
