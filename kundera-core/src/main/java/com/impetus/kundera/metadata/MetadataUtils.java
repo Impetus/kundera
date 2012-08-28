@@ -394,7 +394,7 @@ public class MetadataUtils
 
             if (((MetamodelImpl) metaModel).isEmbeddable(((AbstractAttribute)attribute).getBindableJavaType()))
             {
-                EmbeddableType embeddable = metaModel.embeddable(attribute.getJavaType());
+                EmbeddableType embeddable = metaModel.embeddable(((AbstractAttribute)attribute).getBindableJavaType());
                 Iterator<Attribute> iter = embeddable.getAttributes().iterator();
                 while (iter.hasNext())
                 {

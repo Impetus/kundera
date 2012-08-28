@@ -28,6 +28,8 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
 
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
+
 /**
  * The Class MetamodelImpl.
  * 
@@ -355,9 +357,9 @@ public class MetamodelImpl implements Metamodel
             while(iter.hasNext())
             {
                 Attribute attribute = iter.next();
-                if(isEmbeddable(attribute.getJavaType()))
+                if(isEmbeddable(((AbstractAttribute)attribute).getBindableJavaType()))
                 {
-                    embeddableAttibutes.put(attribute.getName(), embeddable(attribute.getJavaType()));
+                    embeddableAttibutes.put(attribute.getName(), embeddable(((AbstractAttribute)attribute).getBindableJavaType()));
                 }
                 
             }

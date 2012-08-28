@@ -20,6 +20,7 @@ import java.lang.reflect.Member;
 import java.util.Date;
 
 import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.JoinColumn;
 import javax.persistence.Temporal;
@@ -248,6 +249,13 @@ public abstract class AbstractAttribute<X, T>
         } else if(member.isAnnotationPresent(JoinColumn.class))
         {
             JoinColumn c = member.getAnnotation(JoinColumn.class);
+            if(!c.name().isEmpty())
+            {
+                name = c.name();
+            }
+        } else if(member.isAnnotationPresent(CollectionTable.class))
+        {
+            CollectionTable c = member.getAnnotation(CollectionTable.class);
             if(!c.name().isEmpty())
             {
                 name = c.name();
