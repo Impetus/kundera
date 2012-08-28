@@ -58,7 +58,7 @@ public class PersonMongoTest extends BaseTest
      * On insert mongo.
      */
     @Test
-    public void onInsertMongo()
+    public void onInsertMongo() throws Exception
     {
         Object p1 = prepareMongoInstance("1", 10);
         Object p2 = prepareMongoInstance("2", 20);
@@ -69,6 +69,7 @@ public class PersonMongoTest extends BaseTest
         col.put("1", p1);
         col.put("2", p2);
         col.put("3", p3);
+        em.clear();
         PersonMongo p = findById(PersonMongo.class, "1", em);
         Assert.assertNotNull(p);
         Assert.assertEquals("vivek", p.getPersonName());
@@ -94,7 +95,7 @@ public class PersonMongoTest extends BaseTest
      * On merge mongo.
      */
     @Test
-    public void onMergeMongo()
+    public void onMergeMongo() throws Exception
     {
         Object p1 = prepareMongoInstance("1", 10);
         Object p2 = prepareMongoInstance("2", 20);
