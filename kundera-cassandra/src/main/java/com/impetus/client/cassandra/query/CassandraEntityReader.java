@@ -210,7 +210,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
         try
         {
-            result = ((CassandraClientBase) client).findByRange(minValue, maxVal, m, false, null);
+            result = ((CassandraClientBase) client).findByRange(minValue, maxVal, m, m.getRelationNames() != null && !m.getRelationNames().isEmpty(), m.getRelationNames());
         }
         catch (Exception e)
         {
