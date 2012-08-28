@@ -15,10 +15,8 @@
  */
 package com.impetus.client.cassandra.thrift;
 
-import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +29,6 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.cassandra.utils.ByteBufferUtil;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
