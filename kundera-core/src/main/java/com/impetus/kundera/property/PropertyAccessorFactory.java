@@ -22,6 +22,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -86,6 +87,7 @@ public class PropertyAccessorFactory
         map.put(Time.class, new SQLTimeAccessor());
         map.put(Timestamp.class, new SQLTimestampAccessor());
         map.put(Calendar.class, new CalendarAccessor());
+        map.put(GregorianCalendar.class, new CalendarAccessor());
 
         // Accessors for Math classes
         map.put(BigInteger.class, new BigIntegerAccessor());

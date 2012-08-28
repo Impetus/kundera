@@ -74,8 +74,6 @@ public interface NodeStateContext
     void setDirty(boolean dirty);
 
     boolean isHeadNode();
-    
-    Object getEntityId();
 
     // void setHeadNode(boolean isHeadNode);
 
@@ -124,4 +122,6 @@ public interface NodeStateContext
 
     public void setPersistenceCache(PersistenceCache persistenceCache);
 
+    public Object getEntityId();
+    
 }

@@ -96,7 +96,8 @@ public class RemovedState extends NodeState
         Client client = nodeStateContext.getClient();
 
         Node node = (Node) nodeStateContext;
-        Object entityId =  node.getEntityId()/*ObjectGraphUtils.getEntityId(node.getNodeId())*/;
+//        String entityId = ObjectGraphUtils.getEntityId(node.getNodeId());
+        Object entityId = node.getEntityId();;
         client.delete(node.getData(), entityId);
 
         // Since node is flushed, mark it as NOT dirty

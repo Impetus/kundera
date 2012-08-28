@@ -15,12 +15,8 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model.type;
 
-import java.util.Map;
-
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.ManagedType;
-import javax.persistence.metamodel.PluralAttribute;
-import javax.persistence.metamodel.SingularAttribute;
 
 /**
 *  TODO::::: comments required.
@@ -38,11 +34,9 @@ public class DefaultEmbeddableType<X> extends AbstractManagedType<X> implements 
      * @param declaredPluralAttributes
      */
     public DefaultEmbeddableType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
-            ManagedType<? super X> superClazzType, Map<String, SingularAttribute<X, ?>> declaredSingluarAttribs,
-            Map<String, PluralAttribute<X, ?, ?>> declaredPluralAttributes)
+            ManagedType<? super X> superClazzType)
     {
-        super(clazz, persistenceType, superClazzType, declaredSingluarAttribs, declaredPluralAttributes);
-        // TODO Auto-generated constructor stub
+        super(clazz, persistenceType, superClazzType);
     }
 
 }

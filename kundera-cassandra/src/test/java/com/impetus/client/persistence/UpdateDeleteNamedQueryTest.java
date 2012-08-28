@@ -160,6 +160,11 @@ public class UpdateDeleteNamedQueryTest
         metaModel.addEntityMetadata(CassandraEntitySample.class, m);
         metaModel.addEntityNameToClassMapping("CassandraEntitySample", CassandraEntitySample.class);
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
+
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder().getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder().getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder().getMappedSuperClassTypes());
+
         CassandraPropertyReader reader = new CassandraPropertyReader();
         reader.read(persistenceUnit);
         String[] persistenceUnits = new String[] { persistenceUnit };

@@ -27,16 +27,19 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
- * This interface defines methods for operation on inverted indexes 
+ * This interface defines methods for operation on inverted indexes
+ * 
  * @author amresh.singh
  */
 public interface InvertedIndexHandler
 {
-    
-    void writeToInvertedIndexTable(Node node, EntityMetadata entityMetadata, String persistenceUnit, ConsistencyLevel consistencyLevel, CassandraDataHandler cdHandler);
-    
-    List<SearchResult> getSearchResults(EntityMetadata m, Queue<FilterClause> filterClauseQueue, String persistenceUnit, ConsistencyLevel consistencyLevel);
-    
-    void deleteRecordsFromIndexTable(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel);
+
+    void write(Node node, EntityMetadata entityMetadata, String persistenceUnit, ConsistencyLevel consistencyLevel,
+            CassandraDataHandler cdHandler);
+
+    List<SearchResult> search(EntityMetadata m, Queue<FilterClause> filterClauseQueue, String persistenceUnit,
+            ConsistencyLevel consistencyLevel);
+
+    void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel);
 
 }

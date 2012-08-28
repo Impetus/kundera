@@ -37,16 +37,16 @@ import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
- * A factory of {@link ThriftClient}
- * Currently it uses Pelops for Connection pooling. Need to replace it with our own pooling.
- * Most of the code is borrowed from {@link PelopsClientFactory} 
+ * A factory of {@link ThriftClient} Currently it uses Pelops for Connection
+ * pooling. Need to replace it with our own pooling. Most of the code is
+ * borrowed from {@link PelopsClientFactory}
+ * 
  * @author amresh.singh
  */
 public class ThriftClientFactory extends GenericClientFactory
 {
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(ThriftClientFactory.class);
-
 
     @Override
     public SchemaManager getSchemaManager()
@@ -67,7 +67,7 @@ public class ThriftClientFactory extends GenericClientFactory
 
     @Override
     public void initialize()
-    {       
+    {
         reader = new CassandraEntityReader();
         propertyReader = new CassandraPropertyReader();
         propertyReader.read(getPersistenceUnit());
@@ -111,6 +111,6 @@ public class ThriftClientFactory extends GenericClientFactory
     public boolean isThreadSafe()
     {
         return false;
-    }   
+    }
 
 }

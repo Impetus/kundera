@@ -16,6 +16,11 @@
 package com.impetus.kundera.index;
 
 import java.io.CharArrayReader;
+import java.util.Iterator;
+import java.util.Set;
+
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.LetterTokenizer;
@@ -170,17 +175,28 @@ public abstract class DocumentIndexer implements Indexer
      *            the super column
      */
     protected void indexSuperColumn(EntityMetadata metadata, Object object, Document currentDoc, Object embeddedObject,
-            EmbeddedColumn superColumn)
+            EmbeddableType superColumn)
     {
 
         // Add all super column fields into document
-        for (Column col : superColumn.getColumns())
+        Set<Attribute> attributes = superColumn.getAttributes();
+        Iterator<Attribute> iter = attributes.iterator();
+        while(iter.hasNext())
         {
-            java.lang.reflect.Field field = col.getField();
+            Attribute attr = iter.next();
+            java.lang.reflect.Field field = (java.lang.reflect.Field) attr.getJavaMember();
             String colName = field.getName();
             String indexName = metadata.getIndexName();
             addFieldToDocument(embeddedObject, currentDoc, field, colName, indexName);
+            
         }
+//        for (Column col : superColumn.getColumns())
+//        {
+//            java.lang.reflect.Field field = col.getField();
+//            String colName = field.getName();
+//            String indexName = metadata.getIndexName();
+//            addFieldToDocument(embeddedObject, currentDoc, field, colName, indexName);
+//        }
         // Add all entity fields to document
         addEntityFieldsToDocument(metadata, object, currentDoc);
 

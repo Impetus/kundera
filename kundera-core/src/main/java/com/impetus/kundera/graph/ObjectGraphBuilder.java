@@ -78,7 +78,7 @@ public class ObjectGraphBuilder
             return null;
         }
         Object id = PropertyAccessorHelper.getId(entity, entityMetadata);
-        String nodeId = ObjectGraphUtils.getNodeId(id, entity.getClass());
+        String nodeId = ObjectGraphUtils.getNodeId(id, entity);
 
         // If this node is already there in graph (may happen for bidirectional
         // relationship, do nothing and return null)
@@ -108,7 +108,7 @@ public class ObjectGraphBuilder
 
         if (nodeInPersistenceCache == null)
         {
-            node = new Node(nodeId, nodeDataCopy, initialNodeState, persistenceCache, id);
+            node = new Node(nodeId, nodeDataCopy, initialNodeState, persistenceCache,id);
 
         }
         else
@@ -258,7 +258,7 @@ public class ObjectGraphBuilder
         // pk.toString();
     }
 
-    public static String getEntityId(String nodeId)
+    public static Object getEntityId(String nodeId)
     {
 
         return nodeId.substring(nodeId.indexOf(Constants.NODE_ID_SEPARATOR) + 1, nodeId.length());

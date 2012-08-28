@@ -207,7 +207,7 @@ public class PersistenceDelegator
         if (node == null || node.isDirty())
         {
 
-            node = new Node(nodeId, entityClass, new ManagedState(), getPersistenceCache(), primaryKey);
+            node = new Node(nodeId, entityClass, new ManagedState(), getPersistenceCache(),primaryKey);
             node.setClient(getClient(entityMetadata));
             node.setPersistenceDelegator(this);
 
@@ -372,7 +372,6 @@ public class PersistenceDelegator
                         EntityMetadata metadata = getMetadata(node.getDataClass());
                         node.setClient(getClient(metadata));
 
-//                       System.out.println(((Date)node.getEntityId()).getTime());
                         node.flush();
 
                         // Update Link value for all nodes attached to this one
@@ -384,7 +383,7 @@ public class PersistenceDelegator
                             for (NodeLink parentNodeLink : parents.keySet())
                             {
                                 parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
-                                       node.getEntityId()/* ObjectGraphUtils.getEntityId(node.getNodeId())*/);
+                                        ObjectGraphUtils.getEntityId(node.getNodeId()));
                             }
                         }
 
@@ -393,7 +392,7 @@ public class PersistenceDelegator
                             for (NodeLink childNodeLink : children.keySet())
                             {
                                 childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
-                                        node.getEntityId()/* ObjectGraphUtils.getEntityId(node.getNodeId())*/);
+                                        ObjectGraphUtils.getEntityId(node.getNodeId()));
                             }
                         }
                     }
@@ -417,7 +416,9 @@ public class PersistenceDelegator
                     {
                         for (Object pk : jtData.getJoinTableRecords().keySet())
                         {
-                            client.deleteByColumn(m.getSchema(), jtData.getJoinTableName(), m.getIdColumn().getName(), pk);
+//                            client.deleteByColumn(jtData.getJoinTableName(), m.getIdColumn().getName(), pk);
+                            client.deleteByColumn(jtData.getJoinTableName(), m.getIdAttribute().getName(), pk);
+
                         }
                     }
                     jtData.setProcessed(true);

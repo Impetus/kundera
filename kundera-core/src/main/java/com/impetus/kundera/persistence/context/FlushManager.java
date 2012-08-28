@@ -442,7 +442,8 @@ public class FlushManager
                     {
                         if (node.getOriginalNode() == null)
                         {
-                            Object entityId =  node.getEntityId()/* ObjectGraphUtils.getEntityId(node.getNodeId())*/;
+//                            String entityId = ObjectGraphUtils.getEntityId(node.getNodeId());
+                            Object entityId = node.getEntityId();
                             client.delete(node.getData(), entityId);
                         }
                         else
@@ -530,7 +531,8 @@ public class FlushManager
                 {
                     for (Object pk : jtData.getJoinTableRecords().keySet())
                     {
-                        client.deleteByColumn(m.getSchema(), jtData.getJoinTableName(), m.getIdColumn().getName(), pk);
+//                        client.deleteByColumn(jtData.getJoinTableName(), m.getIdColumn().getName(), pk);
+                        client.deleteByColumn(jtData.getJoinTableName(), m.getIdAttribute().getName(), pk);
                     }
                 }
                 else if (OPERATION.DELETE.equals(jtData.getOperation()))

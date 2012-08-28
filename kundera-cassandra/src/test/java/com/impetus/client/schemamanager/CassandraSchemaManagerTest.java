@@ -276,6 +276,10 @@ public class CassandraSchemaManagerTest
         metaModel.addEntityMetadata(CassandraEntityPersonBi1ToM.class, m16);
         metaModel.addEntityMetadata(CassandraEntityPersonBiMTo1.class, m17);
 
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder().getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder().getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder().getMappedSuperClassTypes());
+
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 
         new ClientFactoryConfiguraton(persistenceUnit).configure();

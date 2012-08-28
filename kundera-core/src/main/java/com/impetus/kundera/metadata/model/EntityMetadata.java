@@ -24,11 +24,11 @@ import java.util.Map;
 
 import javax.persistence.JoinColumn;
 import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.client.DBType;
 import com.impetus.kundera.persistence.event.CallbackMethod;
 
 /**
@@ -67,12 +67,18 @@ public final class EntityMetadata
 
     private boolean isCounterColumnType = false;
 
+    private SingularAttribute idAttribute;
+    
+    private List<String> colToBeIndexed;
+    
+    private Map<String, String> jpaColumnMapping = new HashMap<String, String>();
+    
     /*
      * Fields related metadata properties
      */
 
-    /** Column that keeps row identifier. */
-    private Column idColumn;
+//    /** Column that keeps row identifier. */
+//    private Column idColumn;
 
     /** The read identifier method. */
     private Method readIdentifierMethod;
@@ -80,11 +86,11 @@ public final class EntityMetadata
     /** The write identifier method. */
     private Method writeIdentifierMethod;
 
-    /** Maps of column name and their metadata. */
-    private Map<String, Column> columnsMap = new HashMap<String, Column>();
+//    /** Maps of column name and their metadata. */
+//    private Map<String, Column> columnsMap = new HashMap<String, Column>();
 
     /** Map of embedded column names and their metadata. */
-    private Map<String, EmbeddedColumn> embeddedColumnsMap = new HashMap<String, EmbeddedColumn>();
+//    private Map<String, EmbeddedColumn> embeddedColumnsMap = new HashMap<String, EmbeddedColumn>();
 
     /** The index prperties. */
     private List<PropertyIndex> indexPrperties = new ArrayList<PropertyIndex>();
@@ -96,14 +102,14 @@ public final class EntityMetadata
     private Map<Class<?>, List<? extends CallbackMethod>> callbackMethodsMap = new HashMap<Class<?>, List<? extends CallbackMethod>>();
 
     // TODO: Unused, remove this
-    /** The embeddable collection. */
-    private List<Class<?>> embeddableCollection = new ArrayList<Class<?>>();
+//    /** The embeddable collection. */
+//    private List<Class<?>> embeddableCollection = new ArrayList<Class<?>>();
 
     /** Relationship map, key=>property name, value=>relation. */
     private Map<String, Relation> relationsMap = new HashMap<String, Relation>();
 
-    /** The db type. */
-    private DBType dbType;
+//    /** The db type. */
+//    private DBType dbType;
 
     /** type. */
     private Type type;
@@ -116,7 +122,6 @@ public final class EntityMetadata
     // Whether it contains One-To-Many relationship
     private boolean isParent;
 
-    private Map<String, String> fieldToColMap = new HashMap<String, String>();
 
     /** The log. */
     private static Log log = LogFactory.getLog(EntityMetadata.class);
@@ -296,29 +301,29 @@ public final class EntityMetadata
     {
         this.persistenceUnit = persistenceUnit;
     }
-
-    /**
-     * Gets the id column.
-     * 
-     * @return the idColumn
-     */
-    public Column getIdColumn()
-    {
-        return idColumn;
-    }
-
-    /**
-     * Sets the id column.
-     * 
-     * @param idColumn
-     *            the idColumn to set
-     */
-    public void setIdColumn(Column idColumn)
-    {
-        this.idColumn = idColumn;
-        fieldToColMap.put(idColumn.getField().getName(), idColumn.getName());
-
-    }
+//
+//    /**
+//     * Gets the id column.
+//     * 
+//     * @return the idColumn
+//     */
+//    public Column getIdColumn()
+//    {
+//        return idColumn;
+//    }
+//
+//    /**
+//     * Sets the id column.
+//     * 
+//     * @param idColumn
+//     *            the idColumn to set
+//     */
+//    public void setIdColumn(Column idColumn)
+//    {
+//        this.idColumn = idColumn;
+//        fieldToColMap.put(idColumn.getField().getName(), idColumn.getName());
+//
+//    }
 
     /**
      * Gets the read identifier method.
@@ -362,38 +367,38 @@ public final class EntityMetadata
         this.writeIdentifierMethod = writeIdentifierMethod;
     }
 
-    /**
-     * Gets the columns map.
-     * 
-     * @return the columns map
-     */
-    public Map<String, Column> getColumnsMap()
-    {
-        return columnsMap;
-    }
+//    /**
+//     * Gets the columns map.
+//     * 
+//     * @return the columns map
+//     */
+//    public Map<String, Column> getColumnsMap()
+//    {
+//        return columnsMap;
+//    }
 
-    /**
-     * Gets the super columns map.
-     * 
-     * @return the super columns map
-     */
-    public Map<String, EmbeddedColumn> getEmbeddedColumnsMap()
-    {
-        return embeddedColumnsMap;
-    }
+//    /**
+//     * Gets the super columns map.
+//     * 
+//     * @return the super columns map
+//     */
+//    public Map<String, EmbeddedColumn> getEmbeddedColumnsMap()
+//    {
+//        return embeddedColumnsMap;
+//    }
 
-    /**
-     * Gets the column.
-     * 
-     * @param key
-     *            the key
-     * 
-     * @return the column
-     */
-    public Column getColumn(String key)
-    {
-        return columnsMap.get(key);
-    }
+//    /**
+//     * Gets the column.
+//     * 
+//     * @param key
+//     *            the key
+//     * 
+//     * @return the column
+//     */
+//    public Column getColumn(String key)
+//    {
+//        return columnsMap.get(key);
+//    }
 
     /**
      * Gets the super column.
@@ -403,81 +408,81 @@ public final class EntityMetadata
      * 
      * @return the super column
      */
-    public EmbeddedColumn getEmbeddedColumn(String key)
-    {
-        return embeddedColumnsMap.get(key);
-    }
+//    public EmbeddedColumn getEmbeddedColumn(String key)
+//    {
+//        return embeddedColumnsMap.get(key);
+//    }
 
-    /**
-     * Gets the columns as list.
-     * 
-     * @return the columns as list
-     */
-    public List<Column> getColumnsAsList()
-    {
-        return new ArrayList<Column>(columnsMap.values());
-    }
+//    /**
+//     * Gets the columns as list.
+//     * 
+//     * @return the columns as list
+//     */
+//    public List<Column> getColumnsAsList()
+//    {
+//        return new ArrayList<Column>(columnsMap.values());
+//    }
 
     /**
      * Gets the super columns as list.
      * 
      * @return the super columns as list
      */
-    public List<EmbeddedColumn> getEmbeddedColumnsAsList()
-    {
-        return new ArrayList<EmbeddedColumn>(embeddedColumnsMap.values());
-    }
+//    public List<EmbeddedColumn> getEmbeddedColumnsAsList()
+//    {
+//        return new ArrayList<EmbeddedColumn>(embeddedColumnsMap.values());
+//    }
 
-    /**
-     * Gets the column field names.
-     * 
-     * @return the column field names
-     */
-    public List<String> getColumnFieldNames()
-    {
-        return new ArrayList<String>(columnsMap.keySet());
-    }
+//    /**
+//     * Gets the column field names.
+//     * 
+//     * @return the column field names
+//     */
+//    public List<String> getColumnFieldNames()
+//    {
+//        return new ArrayList<String>(columnsMap.keySet());
+//    }
 
     /**
      * Gets the super column field names.
      * 
      * @return the super column field names
      */
-    public List<String> getEmbeddedColumnFieldNames()
-    {
-        return new ArrayList<String>(embeddedColumnsMap.keySet());
-    }
+//    public List<String> getEmbeddedColumnFieldNames()
+//    {
+//        return new ArrayList<String>(embeddedColumnsMap.keySet());
+//    }
 
-    /**
-     * Adds the column.
-     * 
-     * @param key
-     *            the key
-     * @param column
-     *            the column
-     */
-    public void addColumn(String key, Column column)
-    {
-        columnsMap.put(key, column);
-        fieldToColMap.put(column.getField().getName(), key);
-    }
+//    /**
+//     * Adds the column.
+//     * 
+//     * @param key
+//     *            the key
+//     * @param column
+//     *            the column
+//     */
+//    public void addColumn(String key, Column column)
+//    {
+//        columnsMap.put(key, column);
+//        fieldToColMap.put(column.getField().getName(), key);
+//    }
 
-    /**
-     * Adds the super column.
-     * 
-     * @param key
-     *            the key
-     * @param embeddedColumn
-     *            the super column
-     */
-    public void addEmbeddedColumn(String key, EmbeddedColumn embeddedColumn)
-    {
-        embeddedColumnsMap.put(key, embeddedColumn);
-        for (Column col : embeddedColumn.getColumns())
-        {
-            fieldToColMap.put(col.getField().getName(), col.getName());
-        }
-    }
+//    /**
+//     * Adds the super column.
+//     * 
+//     * @param key
+//     *            the key
+//     * @param embeddedColumn
+//     *            the super column
+//     */
+//    public void addEmbeddedColumn(String key, EmbeddedColumn embeddedColumn)
+//    {
+//        embeddedColumnsMap.put(key, embeddedColumn);
+//        for (Column col : embeddedColumn.getColumns())
+//        {
+//            fieldToColMap.put(col.getField().getName(), col.getName());
+//        }
+//    }
 
     /**
      * Adds the index property.
@@ -619,10 +624,10 @@ public final class EntityMetadata
      *            the field class
      * @return true, if is embeddable
      */
-    public boolean isEmbeddable(Class<?> fieldClass)
-    {
-        return embeddableCollection.contains(fieldClass);
-    }
+//    public boolean isEmbeddable(Class<?> fieldClass)
+//    {
+//        return embeddableCollection.contains(fieldClass);
+//    }
 
     /**
      * Adds the to embed collection.
@@ -630,13 +635,13 @@ public final class EntityMetadata
      * @param fieldClass
      *            the field class
      */
-    public void addToEmbedCollection(Class<?> fieldClass)
-    {
-        if (!embeddableCollection.contains(fieldClass))
-        {
-            embeddableCollection.add(fieldClass);
-        }
-    }
+//    public void addToEmbedCollection(Class<?> fieldClass)
+//    {
+//        if (!embeddableCollection.contains(fieldClass))
+//        {
+//            embeddableCollection.add(fieldClass);
+//        }
+//    }
 
     /**
      * Checks if is cacheable.
@@ -673,45 +678,45 @@ public final class EntityMetadata
         builder.append("\tTable: " + tableName + ", \n");
         builder.append("\tKeyspace: " + schema + ",\n");
         builder.append("\tPersistence Unit: " + persistenceUnit + ",\n");
-        builder.append("\tId: " + idColumn.getName() + ",\n");
+        builder.append("\tId: " + idAttribute.getName() + ",\n");
         builder.append("\tReadIdMethod: " + readIdentifierMethod.getName() + ",\n");
         builder.append("\tWriteIdMethod: " + writeIdentifierMethod.getName() + ",\n");
         builder.append("\tCacheable: " + cacheable + ",\n");
 
-        if (!columnsMap.isEmpty())
-        {
-            builder.append("\tColumns (");
-            for (Column col : columnsMap.values())
-            {
-                if (start++ != 0)
-                {
-                    builder.append(", ");
-                }
-                builder.append(col.getName());
-            }
-            builder.append("),\n");
-        }
+//        if (!columnsMap.isEmpty())
+//        {
+//            builder.append("\tColumns (");
+//            for (Column col : columnsMap.values())
+//            {
+//                if (start++ != 0)
+//                {
+//                    builder.append(", ");
+//                }
+//                builder.append(col.getName());
+//            }
+//            builder.append("),\n");
+//        }
 
-        if (!embeddedColumnsMap.isEmpty())
-        {
-            builder.append("\tEmbedded Columns (\n");
-            for (EmbeddedColumn col : embeddedColumnsMap.values())
-            {
-                builder.append("\t\t" + col.getName() + "(");
-
-                start = 0;
-                for (Column c : col.getColumns())
-                {
-                    if (start++ != 0)
-                    {
-                        builder.append(", ");
-                    }
-                    builder.append(c.getName());
-                }
-                builder.append(")\n");
-            }
-            builder.append("\t),\n");
-        }
+//        if (!embeddedColumnsMap.isEmpty())
+//        {
+//            builder.append("\tEmbedded Columns (\n");
+//            for (EmbeddedColumn col : embeddedColumnsMap.values())
+//            {
+//                builder.append("\t\t" + col.getName() + "(");
+//
+//                start = 0;
+//                for (Column c : col.getColumns())
+//                {
+//                    if (start++ != 0)
+//                    {
+//                        builder.append(", ");
+//                    }
+//                    builder.append(c.getName());
+//                }
+//                builder.append(")\n");
+//            }
+//            builder.append("\t),\n");
+//        }
 
         if (!indexPrperties.isEmpty())
         {
@@ -763,26 +768,26 @@ public final class EntityMetadata
         return builder.toString();
     }
 
-    /**
-     * Gets the dB type.
-     * 
-     * @return the dB type
-     */
-    public DBType getDBType()
-    {
-        return dbType;
-    }
-
-    /**
-     * Sets the dB type.
-     * 
-     * @param type
-     *            the new dB type
-     */
-    public void setDBType(DBType type)
-    {
-        this.dbType = type;
-    }
+//    /**
+//     * Gets the dB type.
+//     * 
+//     * @return the dB type
+//     */
+//    public DBType getDBType()
+//    {
+//        return dbType;
+//    }
+//
+//    /**
+//     * Sets the dB type.
+//     * 
+//     * @param type
+//     *            the new dB type
+//     */
+//    public void setDBType(DBType type)
+//    {
+//        this.dbType = type;
+//    }
 
     /**
      * Getter method for isRelatedViaJoinTable.
@@ -827,48 +832,41 @@ public final class EntityMetadata
         return relationNames;
     }
 
-    /**
-     * Returns mapped class of field type.
-     * 
-     * @param fieldName
-     *            field name.
-     * @return mapped class of field.
-     */
-    public Class<?> getFieldType(String fieldName)
-    {
-        if (fieldToColMap.isEmpty() || columnsMap.isEmpty())
-        {
-            log.warn("No column found mapped for:" + fieldName);
-            return null;
-        }
-        String columnName  =  fieldToColMap.get(fieldName);
-        if(this.idColumn != null && this.idColumn.getName().equals(columnName))
-        {
-            return this.idColumn.getField().getType();
-        } else 
-        {
-            return columnsMap.get(fieldToColMap.get(fieldName)).getField().getType();
-        }
-    }
+//    /**
+//     * Returns mapped class of field type.
+//     * 
+//     * @param fieldName
+//     *            field name.
+//     * @return mapped class of field.
+//     */
+//    public Class<?> getFieldType(String fieldName)
+//    {
+//        if (fieldToColMap.isEmpty() || columnsMap.isEmpty())
+//        {
+//            log.warn("No column found mapped for:" + fieldName);
+//            return null;
+//        }
+//        return columnsMap.get(fieldToColMap.get(fieldName)).getField().getType();
+//    }
 
-    /**
-     * Returns mapped column name.
-     * 
-     * @param fieldName
-     *            column field name.
-     * 
-     * @return mapped column name(e.g. actual name represented by
-     *         {@link Column.name}
-     */
-    public String getColumnName(String fieldName)
-    {
-        if (fieldToColMap.isEmpty())
-        {
-            log.warn("No column found mapped for:" + fieldName);
-        }
-
-        return fieldToColMap.get(fieldName);
-    }
+//    /**
+//     * Returns mapped column name.
+//     * 
+//     * @param fieldName
+//     *            column field name.
+//     * 
+//     * @return mapped column name(e.g. actual name represented by
+//     *         {@link Column.name}
+//     */
+//    public String getColumnName(String fieldName)
+//    {
+//        if (fieldToColMap.isEmpty())
+//        {
+//            log.warn("No column found mapped for:" + fieldName);
+//        }
+//
+//        return fieldToColMap.get(fieldName);
+//    }
 
     /**
      * Method to add specific relation name for given relational field.
@@ -883,7 +881,7 @@ public final class EntityMetadata
             String relationName = getJoinColumnName(rField.getProperty());
             if (rField.getProperty().isAnnotationPresent(PrimaryKeyJoinColumn.class))
             {
-                relationName = this.getIdColumn().getName();
+                relationName = this.getIdAttribute().getName();
             }
 
             addToRelationNameCollection(relationName);
@@ -942,5 +940,57 @@ public final class EntityMetadata
     public void setCounterColumnType(boolean isCounterColumnType)
     {
         this.isCounterColumnType = isCounterColumnType;
+    }
+
+    /**
+     * @return the idAttribute
+     */
+    public SingularAttribute getIdAttribute()
+    {
+        return idAttribute;
+    }
+
+    /**
+     * @param idAttribute the idAttribute to set
+     */
+    public void setIdAttribute(SingularAttribute idAttribute)
+    {
+        this.idAttribute = idAttribute;
+    }
+
+    /**
+     * @return the colToBeIndexed
+     */
+    public List<String> getColToBeIndexed()
+    {
+        return colToBeIndexed;
+    }
+
+    /**
+     * @param colToBeIndexed the colToBeIndexed to set
+     */
+    public void setColToBeIndexed(List<String> colToBeIndexed)
+    {
+        this.colToBeIndexed = colToBeIndexed;
+    }
+
+    /**
+     * Checks if is indexable.
+     * 
+     * @return true, if is indexable
+     */
+    public boolean isColumnIndexable(String columnName)
+    {
+        return getColToBeIndexed() != null && getColToBeIndexed().contains(columnName);
+    }
+
+    public void addJPAColumnMapping(String jpaColumnName, String fieldName)
+    {
+        jpaColumnMapping.put(jpaColumnName, fieldName);
+    }
+
+    public String getFieldName(String jpaColumnName)
+    {
+        return jpaColumnMapping.get(jpaColumnName);
     }
 }

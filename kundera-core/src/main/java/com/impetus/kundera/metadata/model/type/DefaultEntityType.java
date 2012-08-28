@@ -15,12 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model.type;
 
-import java.util.Map;
-import java.util.Set;
-
 import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.PluralAttribute;
-import javax.persistence.metamodel.SingularAttribute;
 
 /**
 *  TODO::::: comments required.
@@ -29,6 +24,7 @@ import javax.persistence.metamodel.SingularAttribute;
 public class DefaultEntityType<X> extends AbstractIdentifiableType<X> implements EntityType<X>
 {
 
+    
 
     /**
      * @param clazz
@@ -41,15 +37,9 @@ public class DefaultEntityType<X> extends AbstractIdentifiableType<X> implements
      * @param idClassAttributes
      */
     public DefaultEntityType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
-            AbstractIdentifiableType<? super X> superClazzType,
-            Map<String, SingularAttribute<X, ?>> declaredSingluarAttribs,
-            Map<String, PluralAttribute<X, ?, ?>> declaredPluralAttributes,
-            SingularAttribute<? super X, ?> idAttribute, boolean isIdClass,
-            Set<SingularAttribute<? super X, ?>> idClassAttributes)
+            AbstractIdentifiableType<? super X> superClazzType)
     {
-        super(clazz, persistenceType, superClazzType, declaredSingluarAttribs, declaredPluralAttributes, idAttribute,
-                isIdClass, idClassAttributes);
-        // TODO Auto-generated constructor stub
+        super(clazz, persistenceType, superClazzType);
     }
 
     /* (non-Javadoc)
@@ -58,7 +48,6 @@ public class DefaultEntityType<X> extends AbstractIdentifiableType<X> implements
     @Override
     public javax.persistence.metamodel.Bindable.BindableType getBindableType()
     {
-        // TODO Auto-generated method stub
         return BindableType.ENTITY_TYPE;
     }
 
@@ -68,8 +57,7 @@ public class DefaultEntityType<X> extends AbstractIdentifiableType<X> implements
     @Override
     public Class<X> getBindableJavaType()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return super.getJavaType();
     }
 
     /* (non-Javadoc)
@@ -78,8 +66,7 @@ public class DefaultEntityType<X> extends AbstractIdentifiableType<X> implements
     @Override
     public String getName()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return getBindableJavaType().getSimpleName();
     }
 
 }

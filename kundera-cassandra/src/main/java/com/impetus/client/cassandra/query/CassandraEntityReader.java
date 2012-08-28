@@ -28,7 +28,7 @@ import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.client.cassandra.pelops.PelopsClient;
+import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -114,7 +114,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                 if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
                 {
 
-                    ls = ((PelopsClient) client).find(m, relationNames, this.conditions.get(isRowKeyQuery), 100);
+                    ls = ((CassandraClientBase) client).find(m, relationNames, this.conditions.get(isRowKeyQuery), 100);
 
                 }
                 else
@@ -124,8 +124,8 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
                     try
                     {
-                        ls = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(), relationNames,
-                                true, m, rSet.toArray(new String[] {}));
+                        ls = (List<EnhanceEntity>) ((CassandraClientBase) client).find(m.getEntityClazz(),
+                                relationNames, true, m, rSet.toArray(new String[] {}));
                     }
                     catch (Exception e)
                     {
@@ -141,7 +141,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
                     // in case need to search on secondry columns and it is not
                     // set
                     // to true!
-                    ls = ((PelopsClient) client).find(this.conditions.get(isRowKeyQuery), m, true, null, 100);
+                    ls = ((CassandraClientBase) client).find(this.conditions.get(isRowKeyQuery), m, true, null, 100);
                 }
                 else
                 {
@@ -210,7 +210,7 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
 
         try
         {
-            result = ((PelopsClient) client).findByRange(minValue, maxVal, m, false, null);
+            result = ((CassandraClientBase) client).findByRange(minValue, maxVal, m, false, null);
         }
         catch (Exception e)
         {
@@ -227,35 +227,41 @@ public class CassandraEntityReader extends AbstractEntityReader implements Entit
         List<Object> primaryKeys = new ArrayList<Object>();
 
         String columnFamilyName = m.getTableName() + Constants.INDEX_TABLE_SUFFIX;
-        searchResults = ((PelopsClient) client).searchInInvertedIndex(columnFamilyName, m, filterClauseQueue);        
-        
+        searchResults = ((CassandraClientBase) client).searchInInvertedIndex(columnFamilyName, m, filterClauseQueue);
+
         Map<String, String> embeddedColumns = new HashMap<String, String>();
-        for(SearchResult searchResult : searchResults)
+        for (SearchResult searchResult : searchResults)
         {
-            if(searchResult.getEmbeddedColumnValues() != null) {
-                for(String embeddedColVal : searchResult.getEmbeddedColumnValues()) {
-                    if(embeddedColVal != null) {
+            if (searchResult.getEmbeddedColumnValues() != null)
+            {
+                for (String embeddedColVal : searchResult.getEmbeddedColumnValues())
+                {
+                    if (embeddedColVal != null)
+                    {
                         StringBuilder strBuilder = new StringBuilder(embeddedColVal);
                         strBuilder.append("|");
                         strBuilder.append(searchResult.getPrimaryKey().toString());
-                        embeddedColumns.put(strBuilder.toString(),searchResult.getPrimaryKey().toString());
-                    }                    
-                }  
-            }                       
+                        embeddedColumns.put(strBuilder.toString(), searchResult.getPrimaryKey().toString());
+                    }
+                }
+            }
         }
-        
+
         List<EnhanceEntity> enhanceEntityList = null;
-        if(embeddedColumns != null && ! embeddedColumns.isEmpty()) {
+        if (embeddedColumns != null && !embeddedColumns.isEmpty())
+        {
             enhanceEntityList = client.find(m.getEntityClazz(), embeddedColumns);
-        } else {
+        }
+        else
+        {
             for (SearchResult searchResult : searchResults)
             {
                 primaryKeys.add(searchResult.getPrimaryKey());
             }
-            enhanceEntityList = (List<EnhanceEntity>) ((PelopsClient) client).find(m.getEntityClazz(),
+            enhanceEntityList = (List<EnhanceEntity>) ((CassandraClientBase) client).find(m.getEntityClazz(),
                     m.getRelationNames(), true, m, primaryKeys.toArray(new String[] {}));
-        }      
-        
+        }
+
         return enhanceEntityList;
     }
 

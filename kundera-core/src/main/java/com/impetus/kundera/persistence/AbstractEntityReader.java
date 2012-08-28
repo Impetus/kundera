@@ -63,7 +63,6 @@ public class AbstractEntityReader
     {
         try
         {
-//            primaryKey.getClass();
             Object o = client.find(m.getEntityClazz(), primaryKey);
 
             if (o == null)

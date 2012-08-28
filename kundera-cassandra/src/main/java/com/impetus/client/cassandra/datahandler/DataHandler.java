@@ -16,7 +16,8 @@
 package com.impetus.client.cassandra.datahandler;
 
 /**
- * Defines low level database methods for Cassandra 
+ * Defines low level database methods for Cassandra
+ * 
  * @author amresh.singh
  */
 public interface DataHandler

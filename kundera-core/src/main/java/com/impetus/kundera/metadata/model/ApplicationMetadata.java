@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.configure.schema.SchemaMetadata;
+import com.impetus.kundera.metadata.processor.MetaModelBuilder;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
@@ -48,7 +49,9 @@ public class ApplicationMetadata
     private static Log logger = LogFactory.getLog(EntityManagerFactoryImpl.class);
 
     private SchemaMetadata schemaMetadata = new SchemaMetadata();
-
+    
+    private  MetaModelBuilder metaModelBuilder = new MetaModelBuilder();
+    
     /**
      * Collection instance to hold clazz's full name to persistence unit
      * mapping. Valid Assumption: 1 class can belong to 1 pu only. Reason is @table
@@ -351,4 +354,13 @@ public class ApplicationMetadata
         return schemaMetadata;
     }
 
+    /**
+     * @return the metaModelBuilder
+     */
+    public MetaModelBuilder getMetaModelBuilder()
+    {
+        return metaModelBuilder;
+    }
+
+    
 }

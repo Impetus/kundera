@@ -84,7 +84,6 @@ public abstract class BaseTest
     protected <E extends Object> void assertFindByName(EntityManager em, String clazz, E e, String name,
             String fieldName)
     {
-
         String query = "Select p from " + clazz + " p where p." + fieldName + " = " + name;
         // // find by name.
         Query q = em.createQuery(query);
@@ -92,7 +91,6 @@ public abstract class BaseTest
         Assert.assertNotNull(results);
         Assert.assertFalse(results.isEmpty());
         Assert.assertEquals(3, results.size());
-
     }
 
     /**

@@ -34,8 +34,6 @@ public class DefaultMapAttribute<X, K, V> extends AbstractPluralAttribute<X, V, 
         MapAttribute<X, K, V>
 {
 
-    private Class<K> keyClazz;
-
     private Type<K> keyType;
 
     /**
@@ -47,10 +45,9 @@ public class DefaultMapAttribute<X, K, V> extends AbstractPluralAttribute<X, V, 
      */
     public DefaultMapAttribute(Type<V> attribType, String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
-            ManagedType<X> managedType, Field member, Class<Map<K, V>> clazz, Class<K> keyClazz, Type<K> keyType)
+            ManagedType<X> managedType, Field member, Class<Map<K, V>> clazz, Type<K> keyType)
     {
         super(attribType, attribName, persistenceAttribType, managedType, member, clazz);
-        this.keyClazz = keyClazz;
         this.keyType = keyType;
     }
 
@@ -62,7 +59,7 @@ public class DefaultMapAttribute<X, K, V> extends AbstractPluralAttribute<X, V, 
     @Override
     public Class<K> getKeyJavaType()
     {
-        return this.keyClazz;
+        return this.keyType.getJavaType();
     }
 
     /*

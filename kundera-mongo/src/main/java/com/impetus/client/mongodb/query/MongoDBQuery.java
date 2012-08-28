@@ -19,8 +19,11 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Queue;
+import java.util.regex.Pattern;
 
 import javax.persistence.Query;
 
@@ -32,6 +35,8 @@ import com.impetus.client.mongodb.MongoEntityReader;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
+import com.impetus.kundera.metadata.model.Column;
+import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -116,7 +121,6 @@ public class MongoDBQuery extends QueryImpl
             log.error("Error during executing query, Caused by:" + e.getMessage());
             throw new QueryHandlerException(e);
         }
-
     }
 
     @Override
@@ -332,7 +336,7 @@ public class MongoDBQuery extends QueryImpl
     {
         return (clazz.isAssignableFrom(BigDecimal.class))
                 || (clazz.isAssignableFrom(BigInteger.class) || (clazz.isAssignableFrom(String.class))
-                        || (clazz.isAssignableFrom(char.class)) || (clazz.isAssignableFrom(Character.class)));
+                        || (clazz.isAssignableFrom(char.class)) || (clazz.isAssignableFrom(Character.class))|| (clazz.isAssignableFrom(Calendar.class)) || (clazz.isAssignableFrom(GregorianCalendar.class)));
     }
 
 }

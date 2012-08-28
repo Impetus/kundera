@@ -89,7 +89,7 @@ public class Node implements NodeStateContext
 
     public Node(String nodeId, Object data, PersistenceCache pc, Object primaryKey)
     {
-        initializeNode(nodeId, data,primaryKey);
+        initializeNode(nodeId, data, primaryKey);
         setPersistenceCache(pc);
 
         // Initialize current node state to transient state
@@ -112,8 +112,9 @@ public class Node implements NodeStateContext
         }
 
     }
-    
-   public Node(String nodeId, Class<?> nodeDataClass, NodeState initialNodeState, PersistenceCache pc,Object primaryKey)
+
+    public Node(String nodeId, Class<?> nodeDataClass, NodeState initialNodeState, PersistenceCache pc,
+            Object primaryKey)
     {
         this.nodeId = nodeId;
         this.dataClass = nodeDataClass;
@@ -608,7 +609,8 @@ public class Node implements NodeStateContext
     @Override
     public Node clone()
     {
-        Node cloneCopy = new Node(this.nodeId, ObjectUtils.deepCopy(this.getData()), this.persistenceCache, this.entityId);
+        Node cloneCopy = new Node(this.nodeId, ObjectUtils.deepCopy(this.getData()), this.persistenceCache,
+                this.entityId);
         cloneCopy.setChildren(this.children);
         cloneCopy.setParents(this.parents);
         cloneCopy.setDataClass(this.dataClass);

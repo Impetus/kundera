@@ -115,13 +115,11 @@ public class EntityResolver
         Object id = PropertyAccessorHelper.getId(object, entityMetaData);
 
         // Ensure that @Id is set
-//        if(id.){
-//            
-//        }
-        if (null == id || ((id.getClass().isAssignableFrom(String.class) && id.toString().trim().isEmpty())))
+        if (null == id /*|| id.trim().isEmpty()*/)
         {
             throw new ReaderResolverException("Missing primary key >> " + entityMetaData.getEntityClazz().getName()
-                    + "#" + entityMetaData.getIdColumn().getField().getName());
+//                    + "#" + entityMetaData.getIdColumn().getField().getName());
+                    + "#" + entityMetaData.getIdAttribute().getName());
         }
 
         // Dummy name to check if the object is already processed

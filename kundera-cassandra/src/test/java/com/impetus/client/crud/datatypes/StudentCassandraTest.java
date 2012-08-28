@@ -102,6 +102,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         teardownInternal(persistenceUnit);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void executeTests()
     {
@@ -126,34 +127,36 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         {
             onInsert(new StudentCassandra());
             em.clear();
-//            // find by id.
+            // // find by id.
             StudentEntityDef s = em.find(StudentCassandra.class, studentId1);
-            assertOnDataTypes((StudentCassandra) s);
-//
-//            // // find by name.
+            // assertOnDataTypes((StudentCassandra) s);
+            //
+            // // // find by name.
             assertFindByName(em, "StudentCassandra", StudentCassandra.class, "Amresh", "studentName");
-//
-//            // find by Id
-//            // assertFindByGTId(em, "StudentCassandra", StudentCassandra.class,
-//            // "12345677", "studentId");
-//
-//            // find by name and age.
+            //
+            // // find by Id
+            // // assertFindByGTId(em, "StudentCassandra",
+            // StudentCassandra.class,
+            // // "12345677", "studentId");
+            //
+            // // find by name and age.
             assertFindByNameAndAge(em, "StudentCassandra", StudentCassandra.class, "Amresh", "10", "studentName");
-//
-//            // find by name, age clause
+            //
+            // // find by name, age clause
             assertFindByNameAndAgeGTAndLT(em, "StudentCassandra", StudentCassandra.class, "Amresh", "10", "20",
                     "studentName");
-//            //
-//            // // find by between clause
+            // //
+            // // // find by between clause
             assertFindByNameAndAgeBetween(em, "StudentCassandra", StudentCassandra.class, "Amresh", "10", "15",
                     "studentName");
-//
-//            // find by Range.
-//            assertFindByRange(em, "StudentCassandra", StudentCassandra.class, "12345677", "12345678", "studentId");
-//
-//            // find by without where clause.
+            //
+            // // find by Range.
+            // assertFindByRange(em, "StudentCassandra", StudentCassandra.class,
+            // "12345677", "12345678", "studentId");
+            //
+            // // find by without where clause.
             assertFindWithoutWhereClause(em, "StudentCassandra", StudentCassandra.class);
-//            
+            //
 
             // Query on Date.
             String query = "Select s from StudentCassandra s where s.enrolmentDate =:enrolmentDate";
@@ -161,109 +164,109 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             q.setParameter("enrolmentDate", enrolmentDate);
             List<StudentCassandra> results = q.getResultList();
             Assert.assertNotNull(results);
-            Assert.assertEquals(3,results.size());
+            Assert.assertEquals(3, results.size());
 
             // Query on long.
-            /*String*/ query = "Select s from StudentCassandra s where s.uniqueId =?1";
-            /*Query */q = em.createQuery(query);
+            /* String */query = "Select s from StudentCassandra s where s.uniqueId =?1";
+            /* Query */q = em.createQuery(query);
             q.setParameter(1, 78575785897L);
-            
-            /*List<StudentCassandra>*/ results = q.getResultList();
+
+            /* List<StudentCassandra> */results = q.getResultList();
             Assert.assertNotNull(results);
-            Assert.assertEquals(1,results.size());
+            Assert.assertEquals(1, results.size());
             Assert.assertEquals(78575785897L, results.get(0).getUniqueId());
-            
+
             // Assert on boolean.
             query = "Select s from StudentCassandra s where s.isExceptional =?1";
             q = em.createQuery(query);
             q.setParameter(1, true);
             results = q.getResultList();
             Assert.assertNotNull(results);
-            Assert.assertEquals(2,results.size());
+            Assert.assertEquals(2, results.size());
             Assert.assertEquals(true, results.get(0).isExceptional());
-            
+
             // with false.
             query = "Select s from StudentCassandra s where s.isExceptional =?1";
             q = em.createQuery(query);
             q.setParameter(1, false);
             results = q.getResultList();
             Assert.assertNotNull(results);
-            Assert.assertEquals(1,results.size());
+            Assert.assertEquals(1, results.size());
             Assert.assertEquals(false, results.get(0).isExceptional());
-            
+
             // query on int.
-            
+
             query = "Select s from StudentCassandra s where s.age =?1";
             q = em.createQuery(query);
             q.setParameter(1, 10);
             results = q.getResultList();
             Assert.assertNotNull(results);
-            Assert.assertEquals(1,results.size());
+            Assert.assertEquals(1, results.size());
             Assert.assertEquals(false, results.get(0).isExceptional());
             Assert.assertEquals(10, results.get(0).getAge());
-            
+
             // query on char (semester)
-            
+
             query = "Select s from StudentCassandra s where s.semester =?1";
             q = em.createQuery(query);
             q.setParameter(1, 'A');
             results = q.getResultList();
             Assert.assertNotNull(results);
-            Assert.assertEquals(1,results.size());
+            Assert.assertEquals(1, results.size());
             Assert.assertEquals(false, results.get(0).isExceptional());
             Assert.assertEquals(10, results.get(0).getAge());
             Assert.assertEquals('A', results.get(0).getSemester());
-            
-//            // query on byte (digitalSignature)
-//            
-//            query = "Select s from StudentCassandra s where s.digitalSignature =?1";
-//            q = em.createQuery(query);
-//            q.setParameter(1, 50);
-//            results = q.getResultList();
-//            Assert.assertNotNull(results);
-//            Assert.assertEquals(2,results.size());
-//            Assert.assertEquals(true, results.get(0).isExceptional());
-//            Assert.assertEquals(50, results.get(0).getDigitalSignature());
-//            Assert.assertEquals(50, results.get(1).getDigitalSignature());
-//           
-            
+
+            // // query on byte (digitalSignature)
+            //
+            // query =
+            // "Select s from StudentCassandra s where s.digitalSignature =?1";
+            // q = em.createQuery(query);
+            // q.setParameter(1, 50);
+            // results = q.getResultList();
+            // Assert.assertNotNull(results);
+            // Assert.assertEquals(2,results.size());
+            // Assert.assertEquals(true, results.get(0).isExceptional());
+            // Assert.assertEquals(50, results.get(0).getDigitalSignature());
+            // Assert.assertEquals(50, results.get(1).getDigitalSignature());
+            //
+
             // query on float (percentage)
             query = "Select s from StudentCassandra s where s.percentage =?1";
             q = em.createQuery(query);
             q.setParameter(1, 61.6);
             results = q.getResultList();
             Assert.assertNotNull(results);
-            Assert.assertEquals(1,results.size());
+            Assert.assertEquals(1, results.size());
             Assert.assertEquals(true, results.get(0).isExceptional());
             Assert.assertEquals(61.6f, results.get(0).getPercentage());
-            
+
             // query on double (height)
-            
+
             query = "Select s from StudentCassandra s where s.height =?1";
             q = em.createQuery(query);
             q.setParameter(1, 163.76765654);
             results = q.getResultList();
             Assert.assertNotNull(results);
-            Assert.assertEquals(1,results.size());
+            Assert.assertEquals(1, results.size());
             Assert.assertEquals(false, results.get(0).isExceptional());
             Assert.assertEquals(163.76765654, results.get(0).getHeight());
 
-            
             // query on big integer.
             query = "Select s from StudentCassandra s where s.bigInteger =?1";
             q = em.createQuery(query);
             q.setParameter(1, bigInteger);
             results = q.getResultList();
             Assert.assertNotNull(results);
-            Assert.assertEquals(1,results.size());
+            Assert.assertEquals(1, results.size());
             Assert.assertEquals(false, results.get(0).isExceptional());
             Assert.assertEquals(163.76765654, results.get(0).getHeight());
-            
+
             // invalid.
             q.setParameter(1, new BigInteger("1234567823"));
             results = q.getResultList();
             Assert.assertNull(results);
-            
+
         }
         catch (Exception e)
         {
@@ -322,6 +325,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         CfDef cfDef = new CfDef();
         cfDef.name = "STUDENT";
         cfDef.keyspace = "KunderaExamples";
+        cfDef.key_validation_class = "LongType";
 
         ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("UNIQUE_ID".getBytes()), "LongType");
         columnDef2.index_type = IndexType.KEYS;

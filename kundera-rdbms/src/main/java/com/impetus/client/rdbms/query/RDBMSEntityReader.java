@@ -25,6 +25,10 @@ import java.util.Queue;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EmbeddableType;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -39,7 +43,9 @@ import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.AbstractEntityReader;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.EntityReaderException;
@@ -224,6 +230,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
     public String getSqlQueryFromJPA(EntityMetadata entityMetadata, List<String> relations, Set<String> primaryKeys)
     {
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        Metamodel metaModel = appMetadata.getMetamodel(entityMetadata.getPersistenceUnit());
         if (appMetadata.isNative(jpaQuery))
         {
             return jpaQuery;
@@ -235,21 +242,28 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
 
         queryBuilder.append(aliasName);
         queryBuilder.append(".");
-        queryBuilder.append(entityMetadata.getIdColumn().getName());
+        queryBuilder.append(((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName());
 
-        for (String column : entityMetadata.getColumnFieldNames())
+        EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
+        Set<Attribute> attributes = entityType.getAttributes();
+        for(Attribute field : attributes)
+//            
+//        for (String column : entityMetadata.getColumnFieldNames())
         {
             queryBuilder.append(", ");
             queryBuilder.append(aliasName);
             queryBuilder.append(".");
-            queryBuilder.append(column);
+            queryBuilder.append(field.getName());
         }
 
         // Handle embedded columns, add them to list.
-        List<EmbeddedColumn> embeddedColumns = entityMetadata.getEmbeddedColumnsAsList();
-        for (EmbeddedColumn embeddedCol : embeddedColumns)
+//        List<EmbeddedColumn> embeddedColumns = entityMetadata.getEmbeddedColumnsAsList();
+        Map<String, EmbeddableType> embeddedColumns = ((MetamodelImpl)metaModel).getEmbeddables(entityMetadata.getEntityClazz());
+        for (EmbeddableType embeddedCol : embeddedColumns.values())
         {
-            for (Column column : embeddedCol.getColumns())
+            Set<Attribute> embeddedAttributes = embeddedCol.getAttributes();
+//            for (Column column : embeddedCol.getColumns())
+            for (Attribute column : embeddedAttributes)
             {
                 queryBuilder.append(", ");
                 queryBuilder.append(aliasName);
@@ -263,7 +277,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             for (String relation : relations)
             {
                 String r = MetadataUtils.getMappedName(entityMetadata, entityMetadata.getRelation(relation));
-                if (!entityMetadata.getIdColumn().getName().equalsIgnoreCase(r != null ? r : relation))
+                if (!((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName().equalsIgnoreCase(r != null ? r : relation))
                 {
                     queryBuilder.append(", ");
                     queryBuilder.append(aliasName);
@@ -304,7 +318,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                     FilterClause clause = ((FilterClause) o);
                     // String fieldName = getColumnName(clause.getProperty());
                     String fieldName = clause.getProperty();
-                    boolean isString = isStringProperty(entityMetadata, fieldName);
+                    boolean isString = isStringProperty(entityType, fieldName, entityMetadata);
 
                     // queryBuilder.append(StringUtils.replace(clause.getProperty(),
                     // clause.getProperty().substring(0,
@@ -336,12 +350,12 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
 
             queryBuilder.append(aliasName);
             queryBuilder.append(".");
-            queryBuilder.append(entityMetadata.getIdColumn().getName());
+            queryBuilder.append(((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName());
             queryBuilder.append(" ");
             queryBuilder.append("IN(");
             int count = 0;
-            Column col = entityMetadata.getIdColumn();
-            boolean isString = col.getField().getType().isAssignableFrom(String.class);
+            Attribute col = entityMetadata.getIdAttribute();
+            boolean isString = col.getJavaType().isAssignableFrom(String.class);
             for (String key : primaryKeys)
             {
                 appendStringPrefix(queryBuilder, isString);
@@ -463,16 +477,13 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
      *            the field name
      * @return true, if is string property
      */
-    private boolean isStringProperty(EntityMetadata m, String fieldName)
+    private boolean isStringProperty(EntityType entityType, String jpaColumnName, EntityMetadata m)
     {
-        Column col = m.getColumn(fieldName);
-        if (col != null)
-        {
-            Field f = col.getField();
+        String fieldName = m.getFieldName(jpaColumnName);
+        Attribute col = entityType.getAttribute(fieldName);
+//        Column col = m.getColumn(fieldName);
+
+            Field f = (Field) col.getJavaMember();
             return f != null ? f.getType().isAssignableFrom(String.class) : false;
-        }
-
-        return false;
-
     }
 }

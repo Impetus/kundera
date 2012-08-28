@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
-import java.util.Date;
 import java.util.Map;
 
 import javax.naming.Context;
@@ -184,7 +183,6 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     {
         checkClosed();
         checkTransactionNeeded();
-        
         // TODO Check for validity also as per JPA
         if (primaryKey == null)
         {

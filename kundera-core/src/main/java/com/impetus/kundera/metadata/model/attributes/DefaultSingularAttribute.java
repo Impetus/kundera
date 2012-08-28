@@ -18,8 +18,6 @@ package com.impetus.kundera.metadata.model.attributes;
 import java.lang.reflect.Field;
 
 import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
@@ -41,6 +39,7 @@ public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> impl
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(DefaultSingularAttribute.class);
     
+    private boolean isId;
     /**
      * @param attribName
      * @param persistenceAttribType
@@ -50,9 +49,10 @@ public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> impl
      */
     public DefaultSingularAttribute(String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType, Field member,
-            Type<T> attribType, ManagedType<X> managedType)
+            Type<T> attribType, ManagedType<X> managedType, boolean isId)
     {
         super(attribType,attribName,persistenceAttribType,managedType,member);
+        this.isId = isId;
     }
     
 
@@ -82,7 +82,7 @@ public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> impl
     @Override
     public boolean isId()
     {
-        return member.isAnnotationPresent(Id.class) || member.isAnnotationPresent(IdClass.class) ;
+        return isId;
     }
 
     /* (non-Javadoc)

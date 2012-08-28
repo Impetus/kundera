@@ -15,11 +15,40 @@
  */
 package com.impetus.client.cassandra.datahandler;
 
+import java.util.List;
+
+import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.SuperColumn;
+
+import com.impetus.client.cassandra.thrift.ThriftRow;
+import com.impetus.kundera.db.DataRow;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+
 /**
- * Defines low level database methods for Cassandra 
+ * Defines low level translation methods for Cassandra
+ * 
  * @author amresh.singh
  */
 public interface CassandraDataHandler
 {
+    <E> E fromThriftRow(Class<E> clazz, EntityMetadata m, DataRow<SuperColumn> tr) throws Exception;
+
+    List<Object> fromThriftRow(Class<?> clazz, EntityMetadata m, List<String> relationNames, boolean isWrapReq,
+            ConsistencyLevel consistencyLevel, Object... rowIds) throws Exception;
+
+    Object fromThriftRow(Class<?> clazz, EntityMetadata m, Object rowKey, List<String> relationNames,
+            boolean isWrapReq, ConsistencyLevel consistencyLevel) throws Exception;
+
+    Object fromColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow, List<String> relationNames,
+            boolean isWrapperReq) throws Exception;
+
+    Object fromCounterColumnThriftRow(Class<?> clazz, EntityMetadata m, ThriftRow thriftRow,
+            List<String> relationNames, boolean isWrapperReq) throws Exception;
+
+    Object fromSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr, List<String> relationNames,
+            boolean isWrapReq) throws Exception;
+
+    Object fromCounterSuperColumnThriftRow(Class clazz, EntityMetadata m, ThriftRow tr, List<String> relationNames,
+            boolean isWrapReq) throws Exception;
 
 }

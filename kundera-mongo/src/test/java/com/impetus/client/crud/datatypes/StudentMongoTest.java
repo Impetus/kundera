@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.client.crud.datatypes;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import javax.persistence.Query;
@@ -115,6 +116,119 @@ public class StudentMongoTest extends StudentBase<StudentMongo>
 
         // find by without where clause.
         assertFindWithoutWhereClause(em, "StudentMongo", StudentMongo.class);
+        
+        
+
+        // Query on Date.
+        String query = "Select s from StudentMongo s where s.enrolmentDate =:enrolmentDate";
+        Query q = em.createQuery(query);
+        q.setParameter("enrolmentDate", enrolmentDate);
+        List<StudentMongo> results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(3, results.size());
+
+        // Query on long.
+        /* String */query = "Select s from StudentMongo s where s.uniqueId =?1";
+        /* Query */q = em.createQuery(query);
+        q.setParameter(1, 78575785897L);
+
+        /* List<StudentMongo> */results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(78575785897L, results.get(0).getUniqueId());
+
+        // Assert on boolean.
+        query = "Select s from StudentMongo s where s.isExceptional =?1";
+        q = em.createQuery(query);
+        q.setParameter(1, true);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(2, results.size());
+        Assert.assertEquals(true, results.get(0).isExceptional());
+
+        // with false.
+        query = "Select s from StudentMongo s where s.isExceptional =?1";
+        q = em.createQuery(query);
+        q.setParameter(1, false);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+
+        // query on int.
+
+        query = "Select s from StudentMongo s where s.age =?1";
+        q = em.createQuery(query);
+        q.setParameter(1, 10);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+        Assert.assertEquals(10, results.get(0).getAge());
+
+        // query on char (semester)
+
+        query = "Select s from StudentMongo s where s.semester =?1";
+        q = em.createQuery(query);
+        q.setParameter(1, 'A');
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+        Assert.assertEquals(10, results.get(0).getAge());
+        Assert.assertEquals('A', results.get(0).getSemester());
+
+        // // query on byte (digitalSignature)
+        //
+        // query =
+        // "Select s from StudentMongo s where s.digitalSignature =?1";
+        // q = em.createQuery(query);
+        // q.setParameter(1, 50);
+        // results = q.getResultList();
+        // Assert.assertNotNull(results);
+        // Assert.assertEquals(2,results.size());
+        // Assert.assertEquals(true, results.get(0).isExceptional());
+        // Assert.assertEquals(50, results.get(0).getDigitalSignature());
+        // Assert.assertEquals(50, results.get(1).getDigitalSignature());
+        //
+
+        // query on float (percentage)
+        query = "Select s from StudentMongo s where s.percentage =?1";
+        q = em.createQuery(query);
+        q.setParameter(1, 61.6);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(true, results.get(0).isExceptional());
+        Assert.assertEquals(61.6f, results.get(0).getPercentage());
+
+        // query on double (height)
+
+        query = "Select s from StudentMongo s where s.height =?1";
+        q = em.createQuery(query);
+        q.setParameter(1, 163.76765654);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+        Assert.assertEquals(163.76765654, results.get(0).getHeight());
+
+        // query on big integer.
+        query = "Select s from StudentMongo s where s.bigInteger =?1";
+        q = em.createQuery(query);
+        q.setParameter(1, bigInteger);
+        results = q.getResultList();
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.size());
+        Assert.assertEquals(false, results.get(0).isExceptional());
+        Assert.assertEquals(163.76765654, results.get(0).getHeight());
+
+        // invalid.
+        q.setParameter(1, new BigInteger("1234567823"));
+        results = q.getResultList();
+        Assert.assertNull(results);
+        
+        
     }
 
     /**

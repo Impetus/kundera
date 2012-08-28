@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.query;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -31,6 +32,7 @@ import javax.persistence.Parameter;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
+import javax.persistence.metamodel.Attribute;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
@@ -45,6 +47,7 @@ import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.type.DefaultEntityType;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -506,37 +509,54 @@ public abstract class QueryImpl implements Query
      */
     private void onDeleteOrUpdate(List results)
     {
-        if (results != null)
-        {
-            if (!kunderaQuery.isUpdateClause())
-            {
-                // then case of delete
-                for (Object result : results)
-                {
-                    persistenceDelegeator.remove(result);
-                }
-            }
-            else
-            {
-                EntityMetadata entityMetadata = getEntityMetadata();
-                for (Object result : results)
-                {
-                    for (UpdateClause c : kunderaQuery.getUpdateClauseQueue())
-                    {
-                        String columnName = c.getProperty();
-                        columnName = entityMetadata.getColumnName(columnName);
-                        Column column = entityMetadata.getColumn(columnName);
 
-                        if (column != null)
-                        {
-                            PropertyAccessorHelper.set(result, column.getField(), c.getValue());
-                        }
+        if (!kunderaQuery.isUpdateClause())
+        {
+            // then case of delete
+            for (Object result : results)
+            {
+                persistenceDelegeator.remove(result);
+            }
+        }
+        else
+        {
+            EntityMetadata entityMetadata = getEntityMetadata();
+            for (Object result : results)
+            {
+                for (UpdateClause c : kunderaQuery.getUpdateClauseQueue())
+                {
+                    String columnName = c.getProperty();
+                    try
+                    {
+
+                        DefaultEntityType entityType = (DefaultEntityType) KunderaMetadata.INSTANCE
+                                .getApplicationMetadata().getMetamodel(entityMetadata.getPersistenceUnit())
+                                .entity(entityMetadata.getEntityClazz());
+
+                        // That will always be attribute name.
+
+                        Attribute attribute = entityType.getAttribute(columnName);
+
+                        // TODO : catch column name.
+
+                        // Column column = entityMetadata.getColumn(columnName);
+                        //
+                        // if (column != null)
+                        // {
+                        PropertyAccessorHelper.set(result, (Field) attribute.getJavaMember(), c.getValue());
+                        // }
                         persistenceDelegeator.merge(result);
                     }
-
+                    catch (IllegalArgumentException iax)
+                    {
+                        log.error("Invalid column name: " + columnName + " for class : "
+                                + entityMetadata.getEntityClazz());
+                        throw new QueryHandlerException("Error while executing query: " + iax);
+                    }
                 }
             }
         }
+
     }
 
     /************************* Methods from {@link Query} interface *******************************/

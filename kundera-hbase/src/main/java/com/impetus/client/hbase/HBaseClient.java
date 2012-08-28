@@ -44,6 +44,7 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -109,8 +110,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
             {
                 return null;
             }
-            results = handler.readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId,
-                    relationNames);
+            results = handler
+                    .readData(tableName, entityMetadata.getEntityClazz(), entityMetadata, rowId, relationNames);
             if (results != null)
             {
                 enhancedEntity = results.get(0);
@@ -311,7 +312,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     public void setFilter(Filter filter)
     {
         ((HBaseDataHandler) handler).setFilter(filter);
-    }    
+    }
 
     /**
      * On persist.
@@ -396,13 +397,12 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
 
     }
 
-    
-    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
-    {             
+    public void deleteByColumn(String tableName, String columnName, Object columnValue)
+    {
         try
         {
             handler.deleteRow(columnValue, tableName);
-            
+
         }
         catch (IOException e)
         {
@@ -421,7 +421,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     public void delete(Object entity, Object pKey)
     {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-        deleteByColumn(metadata.getSchema(), metadata.getTableName(), metadata.getIdColumn().getName(), pKey);
+        deleteByColumn(metadata.getTableName(), ((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName(), pKey);
     }
 
     /*

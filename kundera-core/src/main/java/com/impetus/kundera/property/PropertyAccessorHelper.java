@@ -215,7 +215,7 @@ public class PropertyAccessorHelper
 
         // Otherwise, as Kundera currently supports only field access, access
         // the underlying Entity's id field
-        return getObject(entity, metadata.getIdColumn().getField());
+        return getObject(entity, (Field) metadata.getIdAttribute().getJavaMember());
     }
 
     /**
@@ -272,7 +272,9 @@ public class PropertyAccessorHelper
     {
         try
         {
-            Field idField = metadata.getIdColumn().getField();
+            // Field idField = metadata.getIdColumn().getField();
+            Field idField = (Field) metadata.getIdAttribute().getJavaMember();
+
             PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(idField);
             Object obj = accessor.fromBytes(idField.getClass(), rowKey);
 
@@ -449,6 +451,12 @@ public class PropertyAccessorHelper
         return accessor.toBytes(o);
     }
 
+    public static final byte[] toBytes(Object o, Class c)
+    {
+        PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(c);
+        return accessor.toBytes(o);
+    }
+
     public static Object fromSourceToTargetClass(Class<?> targetClass, Class<?> sourceClass, Object o)
     {
         if (!targetClass.equals(sourceClass))
@@ -459,7 +467,7 @@ public class PropertyAccessorHelper
             return accessor.fromString(targetClass, s);
         }
         return o;
-    }   
+    }
 
     public static Object fromDate(Class<?> targetClass, Class<?> sourceClass, Object o)
     {
@@ -477,5 +485,9 @@ public class PropertyAccessorHelper
     {
         return PropertyAccessorFactory.getPropertyAccessor(o.getClass()).toBytes(o);
     }
-    
+
+    public static Object getObject(Class clazz, byte[] b)
+    {
+        return PropertyAccessorFactory.getPropertyAccessor(clazz).fromBytes(clazz, b);
+    }
 }

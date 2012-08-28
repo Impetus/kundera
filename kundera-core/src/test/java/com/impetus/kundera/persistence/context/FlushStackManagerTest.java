@@ -463,7 +463,9 @@ public class FlushStackManagerTest
     {
         for (Node hn : pc.getMainCache().getHeadNodes())
         {
+
             hn.setDirty(true);
+
         }
 
         for (Node node : pc.getMainCache().getAllNodes())

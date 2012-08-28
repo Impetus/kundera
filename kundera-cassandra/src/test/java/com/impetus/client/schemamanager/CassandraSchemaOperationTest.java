@@ -309,7 +309,7 @@ public class CassandraSchemaOperationTest
         {
             List<String> errors = new ArrayList<String>();
             errors.add("Column AGE does not exist in column family CassandraEntitySimple");
-            errors.add("column PERSON_NAME does not exist in column family CassandraEntitySimple");
+            errors.add("Column PERSON_NAME does not exist in column family CassandraEntitySimple");
             // errors.add("column family " + "CassandraEntitySimple " +
             // " does not exist in keyspace "
             // + "KunderaCassandraExamples" + "");
@@ -405,9 +405,9 @@ public class CassandraSchemaOperationTest
         {
             List<String> errors = new ArrayList<String>();
             errors.add("Column AGE does not exist in column family CassandraEntitySimple");
-            errors.add("column PERSON_NAME does not exist in column family CassandraEntitySimple");
+            errors.add("Column PERSON_NAME does not exist in column family CassandraEntitySimple");
             errors.add("column family CassandraEntitySimple does not exist in keyspace KunderaCoreExmples");
-            Assert.assertTrue(errors.contains(sgex.getMessage()));
+            Assert.assertTrue(errors.contains(sgex.getMessage().trim()));
         }
     }
 
@@ -472,6 +472,10 @@ public class CassandraSchemaOperationTest
         metaModel.addEntityMetadata(CassandraEntitySimple.class, m);
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
+
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder().getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder().getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder().getMappedSuperClassTypes());
 
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 

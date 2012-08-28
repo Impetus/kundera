@@ -19,13 +19,15 @@ import java.nio.charset.Charset;
 
 /**
  * Provides utilities methods
+ * 
  * @author amresh.singh
  */
 public class Utilities
 {
-    
-    public static String toUTF8(byte[] value) {
-        return value == null ? null : new String(value, Charset.forName("UTF-8")); 
+
+    public static String toUTF8(byte[] value)
+    {
+        return value == null ? null : new String(value, Charset.forName("UTF-8"));
     }
 
 }

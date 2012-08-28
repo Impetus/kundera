@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.metamodel.Attribute;
+
 import org.apache.hadoop.hbase.client.HTable;
 
 import com.impetus.kundera.db.RelationHolder;
@@ -49,7 +51,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumn(HTable htable, String columnFamily, Object rowKey, Column column, Object columnObj)
+    void writeColumn(HTable htable, String columnFamily, Object rowKey, Attribute column, Object columnObj)
             throws IOException;
 
     /**
@@ -69,7 +71,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTable htable, String columnFamily, Object rowKey, List<Column> columns, Object columnFamilyObj)
+    void writeColumns(HTable htable, String columnFamily, Object rowKey, Set<Attribute> columns, Object columnFamilyObj)
             throws IOException;
 
     /**
@@ -87,7 +89,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTable htable, Object rowKey, List<Column> columns, Object entity) throws IOException;
+    void writeColumns(HTable htable, Object rowKey, Set<Attribute> columns, Object entity) throws IOException;
 
     /**
      * Write relations.

@@ -16,6 +16,7 @@
 
 package com.impetus.client.cassandra.pelops;
 
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,25 +28,19 @@ import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
-import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.CounterSuperColumn;
-import org.apache.cassandra.thrift.CqlResult;
-import org.apache.cassandra.thrift.CqlRow;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeySlice;
-import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
@@ -60,13 +55,13 @@ import org.scale7.cassandra.pelops.pool.IThriftPool;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.CassandraClientBase;
+import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
-import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
@@ -77,7 +72,6 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
@@ -99,7 +93,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
     /** The data handler. */
     private PelopsDataHandler dataHandler;
-    
+
     /** Handler for Inverted indexing */
     private InvertedIndexHandler invertedIndexHandler;
 
@@ -127,14 +121,13 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         this.invertedIndexHandler = new PelopsInvertedIndexHandler();
         this.reader = reader;
     }
-    
+
     @Override
     public final Object find(Class entityClass, Object rowId)
     {
         return super.find(entityClass, rowId);
     }
 
-    
     @Override
     public final <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
     {
@@ -165,13 +158,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             throw new PersistenceException("PelopsClient is closed.");
         }
 
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-
         List entities = null;
         try
         {
-            entities = dataHandler.fromThriftRow(selector, entityClass, metadata, relationNames, isWrapReq,
-                    consistencyLevel, rowIds);
+            entities = dataHandler.fromThriftRow(entityClass, metadata, relationNames, isWrapReq, consistencyLevel,
+                    rowIds);
         }
         catch (Exception e)
         {
@@ -180,37 +171,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
         return entities;
     }
-
-
-    @Override
-    public <E> List<E> find(Class<E> entityClass, Map<String, String> superColumnMap)
-    {
-        List<E> entities = null;
-        try
-        {
-            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(getPersistenceUnit(), entityClass);
-            entities = new ArrayList<E>();
-            for (String superColumnName : superColumnMap.keySet())
-            {
-                String entityId = superColumnMap.get(superColumnName);
-                List<SuperColumn> superColumnList = loadSuperColumns(entityMetadata.getSchema(),
-                        entityMetadata.getTableName(), entityId,
-                        new String[] { superColumnName.substring(0, superColumnName.indexOf("|")) });
-                E e = (E) dataHandler.fromThriftRow(entityMetadata.getEntityClazz(), entityMetadata,
-                        new DataRow<SuperColumn>(entityId, entityMetadata.getTableName(), superColumnList));
-                if (e != null)
-                {
-                    entities.add(e);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            throw new KunderaException(e);
-        }
-        return entities;
-    }
-
 
     @Override
     public void delete(Object entity, Object pKey)
@@ -221,28 +181,23 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
         if (metadata.isCounterColumnType())
-        {
-            Cassandra.Client cassandra_client = PelopsUtils.getCassandraClient(getPersistenceUnit());
-            deleteRecordFromCounterColumnFamily(pKey, metadata, consistencyLevel, cassandra_client);
+        {            
+            deleteRecordFromCounterColumnFamily(pKey, metadata, consistencyLevel);
         }
         else
         {
-            byte[] rowKey = PropertyAccessorHelper.get(entity, metadata.getIdColumn().getField());
             RowDeletor rowDeletor = Pelops.createRowDeletor(PelopsUtils.generatePoolName(getPersistenceUnit()));
-            rowDeletor.deleteRow(metadata.getTableName(), Bytes.fromByteArray(rowKey), consistencyLevel);
+            rowDeletor.deleteRow(metadata.getTableName(), CassandraUtilities.toBytes(pKey, metadata.getIdAttribute().getJavaType()), consistencyLevel);
 
         }
 
         // Delete from Lucene if applicable
         getIndexManager().remove(metadata, entity, pKey.toString());
-        
-        // Delete from Inverted Index if applicable        
-        invertedIndexHandler.deleteRecordsFromIndexTable(entity, metadata, consistencyLevel);
-        
+
+        // Delete from Inverted Index if applicable
+        invertedIndexHandler.delete(entity, metadata, consistencyLevel);
+
     }
-
-    
-
 
     @Override
     public final void close()
@@ -292,7 +247,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
     }
 
-
     @Override
     public <E> List<E> getColumnsById(String joinTableName, String joinColumnName, String inverseJoinColumnName,
             Object parentId)
@@ -304,14 +258,6 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         List<E> foreignKeys = dataHandler.getForeignKeysFromJoinTable(inverseJoinColumnName, columns);
         return foreignKeys;
     }
-
-    public List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
-            Queue<FilterClause> filterClauseQueue)
-    {
-        return  invertedIndexHandler.getSearchResults(m, filterClauseQueue,
-                getPersistenceUnit(), consistencyLevel);        
-    }
-
 
     @Override
     public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
@@ -338,9 +284,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         {
             Bytes rowKey = rowIter.next();
 
-            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(metadata.getIdColumn()
-                    .getField());
-            Object value = accessor.fromBytes(metadata.getIdColumn().getField().getClass(), rowKey.toByteArray());
+            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor((Field) metadata.getIdAttribute().getJavaMember());
+            Object value = accessor.fromBytes(metadata.getIdAttribute().getJavaType(), rowKey.toByteArray());
 
             rowKeys.add(value);
         }
@@ -352,9 +297,8 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return null;
     }
 
-
     // Incorrect
-    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
+    public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
 
         if (!isOpen())
@@ -366,214 +310,10 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         rowDeletor.deleteRow(tableName, columnValue.toString(), consistencyLevel);
     }
 
-    /**
-     * Find.
-     * 
-     * @param ixClause
-     *            the ix clause
-     * @param m
-     *            the m
-     * @param isRelation
-     *            the is relation
-     * @param relations
-     *            the relations
-     * @return the list
-     */
-    public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
-            int maxResult)
+    @Override
+    public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
-        // ixClause can be 0,1 or more!
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-
-        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
-
-        List<Object> entities = null;
-        if (ixClause.isEmpty())
-        {
-            if (m.isCounterColumnType())
-            {
-                IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit()));
-                // thrift.get
-                IPooledConnection connection = thrift.getConnection();
-                org.apache.cassandra.thrift.Cassandra.Client thriftClient = connection.getAPI();
-                try
-                {
-                    List<KeySlice> ks = thriftClient.get_range_slices(new ColumnParent(m.getTableName()),
-                            slicePredicate, selector.newKeyRange("", "", maxResult), consistencyLevel);
-                    if (m.getType().isSuperColumnFamilyMetadata())
-                    {
-                        Map<Bytes, List<CounterSuperColumn>> qCounterSuperColumnResults = ColumnOrSuperColumnHelper
-                                .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_SUPER_COLUMN);
-                        entities = new ArrayList<Object>(qCounterSuperColumnResults.size());
-
-                        populateDataForSuperCounter(m, qCounterSuperColumnResults, entities, isRelation, relations);
-                    }
-                    else
-                    {
-
-                        Map<Bytes, List<CounterColumn>> qCounterColumnResults = ColumnOrSuperColumnHelper
-                                .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_COLUMN);
-                        entities = new ArrayList<Object>(qCounterColumnResults.size());
-
-                        populateDataForCounter(m, qCounterColumnResults, entities, isRelation, relations);
-                    }
-
-                }
-                catch (InvalidRequestException irex)
-                {
-                    log.error("Error during executing find, Caused by :" + irex.getMessage());
-                    throw new PersistenceException(irex);
-                }
-                catch (UnavailableException uex)
-                {
-                    log.error("Error during executing find, Caused by :" + uex.getMessage());
-                    throw new PersistenceException(uex);
-                }
-                catch (TimedOutException tex)
-                {
-                    log.error("Error during executing find, Caused by :" + tex.getMessage());
-                    throw new PersistenceException(tex);
-                }
-                catch (TException tex)
-                {
-                    log.error("Error during executing find, Caused by :" + tex.getMessage());
-                    throw new PersistenceException(tex);
-                }
-            }
-            else
-            {
-
-                Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(),
-                        selector.newKeyRange("", "", maxResult), slicePredicate, consistencyLevel);
-
-                // selector.getCounterColumnsFromRows(m.getTableName(),
-                // selector.newKeyRange("", "", maxResult), slicePredicate,
-                // consistencyLevel);
-                // selector.getCounterColumnsFromRows
-                entities = new ArrayList<Object>(qResults.size());
-
-                populateData(m, qResults, entities, isRelation, relations);
-            }
-        }
-        else
-        {
-            entities = new ArrayList<Object>();
-            for (IndexClause ix : ixClause)
-            {
-                Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
-                        consistencyLevel);
-                // iterate through complete map and
-                populateData(m, qResults, entities, isRelation, relations);
-            }
-        }
-        return entities;
-    }
-
-    /**
-     * Find by range.
-     * 
-     * @param minVal
-     *            the min val
-     * @param maxVal
-     *            the max val
-     * @param m
-     *            the m
-     * @param isWrapReq
-     *            the is wrap req
-     * @param relations
-     *            the relations
-     * @return the list
-     * @throws Exception
-     *             the exception
-     */
-    public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations)
-            throws Exception
-    {
-        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-
-        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
-        List<Object> entities = null;
-        List<KeySlice> keys = selector.getKeySlices(new ColumnParent(m.getTableName()), selector.newKeyRange(
-                minVal != null ? Bytes.fromByteArray(minVal) : Bytes.fromUTF8(""),
-                maxVal != null ? Bytes.fromByteArray(maxVal) : Bytes.fromUTF8(""), 10000), slicePredicate,
-                consistencyLevel);
-
-        List<String> superColumnNames = m.getEmbeddedColumnFieldNames();
-
-        List results = null;
-        if (keys != null)
-        {
-            results = new ArrayList(keys.size());
-            for (KeySlice key : keys)
-            {
-                List<ColumnOrSuperColumn> columns = key.getColumns();
-                byte[] rowKey = key.getKey();
-                
-                PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(m.getIdColumn().getField());
-                Object id = accessor.fromBytes(m.getIdColumn().getField().getType(), rowKey);
-
-                if (!superColumnNames.isEmpty())
-                {
-                    Object r = null;
-
-                    if (m.isCounterColumnType())
-                    {
-                        List<CounterSuperColumn> superCounterColumns = new ArrayList<CounterSuperColumn>(columns.size());
-                        for (ColumnOrSuperColumn supCol : columns)
-                        {
-                            superCounterColumns.add(supCol.getCounter_super_column());
-                        }
-                        r = dataHandler.fromCounterSuperColumnThriftRow(m.getEntityClazz(), m, new ThriftRow(id, m.getTableName(), null, null, null, superCounterColumns),
-                                relations, isWrapReq);
-                    }
-                    else
-                    {
-                        List<SuperColumn> superColumns = new ArrayList<SuperColumn>(columns.size());
-                        for (ColumnOrSuperColumn supCol : columns)
-                        {
-                            superColumns.add(supCol.getSuper_column());
-                        }
-
-                        r = dataHandler.fromSuperColumnThriftRow(m.getEntityClazz(), m, new ThriftRow(id, m.getTableName(), null, superColumns, null, null), relations, isWrapReq);
-                    }
-                    if (r != null)
-                    {
-                        results.add(r);
-                    }
-                    // List<SuperColumn> superCol = columns.
-                }
-                else
-                {
-                    Object r = null;
-                    if (m.isCounterColumnType())
-                    {
-                        List<CounterColumn> cols = new ArrayList<CounterColumn>(columns.size());
-                        for (ColumnOrSuperColumn supCol : columns)
-                        {
-                            cols.add(supCol.getCounter_column());
-                        }
-
-                        r = dataHandler.fromCounterColumnThriftRow(m.getEntityClazz(), m, new ThriftRow(id, m.getTableName(), null, null, cols, null), relations, isWrapReq);
-                    }
-                    else
-                    {
-                        List<Column> cols = new ArrayList<Column>(columns.size());
-                        for (ColumnOrSuperColumn supCol : columns)
-                        {
-                            cols.add(supCol.getColumn());
-                        }
-
-                        r = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m, new ThriftRow(id, m.getTableName(), cols, null, null, null), relations, isWrapReq);
-                    }
-                    if (r != null)
-                    {
-                        results.add(r);
-                    }
-                }
-            }
-        }
-
-        return results;
+        return super.find(entityClass, embeddedColumnMap, dataHandler);
     }
 
     /*
@@ -604,8 +344,291 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         }
         entities = new ArrayList<Object>(qResults.size());
         // iterate through complete map and
-        populateData(m, qResults, entities, false, null);
+        populateData(m, qResults, entities, false, null, dataHandler);
 
+        return entities;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#getReader()
+     */
+    @Override
+    public EntityReader getReader()
+    {
+        return reader;
+    }
+
+    @Override
+    public Class<CassQuery> getQueryImplementor()
+    {
+        return CassQuery.class;
+    }
+
+    @Override
+    protected void onPersist(EntityMetadata metadata, Object entity, Object id, List<RelationHolder> rlHolders)
+    {
+
+        if (!isOpen())
+        {
+            throw new PersistenceException("PelopsClient is closed.");
+        }
+
+        // check for counter column
+        if (isUpdate && metadata.isCounterColumnType())
+        {
+            throw new UnsupportedOperationException(" Merge is not permitted on counter column! ");
+        }
+
+        ThriftRow tf = null;
+        try
+        {
+            String columnFamily = metadata.getTableName();
+            tf = dataHandler.toThriftRow(entity, id, metadata, columnFamily);
+            timestamp = System.currentTimeMillis();
+        }
+        catch (Exception e)
+        {
+            log.error("Error during persist, Caused by:" + e.getMessage());
+            throw new KunderaException(e);
+        }
+
+        addRelationsToThriftRow(metadata, tf, rlHolders);
+
+        Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        if (metadata.isCounterColumnType())
+        {
+            List<CounterColumn> thriftCounterColumns = tf.getCounterColumns();
+            List<CounterSuperColumn> thriftCounterSuperColumns = tf.getCounterSuperColumns();
+            if (thriftCounterColumns != null && !thriftCounterColumns.isEmpty())
+            {
+                mutator.writeCounterColumns(metadata.getTableName(), CassandraUtilities.toBytes(tf.getId(),tf.getId().getClass()),
+                        Arrays.asList(tf.getCounterColumns().toArray(new CounterColumn[0])));
+            }
+
+            if (thriftCounterSuperColumns != null && !thriftCounterSuperColumns.isEmpty())
+            {
+                for (CounterSuperColumn sc : thriftCounterSuperColumns)
+                {
+                    mutator.writeSubCounterColumns(metadata.getTableName(), CassandraUtilities.toBytes(tf.getId(),tf.getId().getClass()),
+                            Bytes.fromByteArray(sc.getName()), sc.getColumns());
+                }
+            }
+        }
+        else
+        {
+            List<Column> thriftColumns = tf.getColumns();
+            List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
+            if (thriftColumns != null && !thriftColumns.isEmpty())
+            {
+                // Bytes.fromL
+                mutator.writeColumns(metadata.getTableName(), CassandraUtilities.toBytes(tf.getId(),tf.getId().getClass()),
+                        Arrays.asList(tf.getColumns().toArray(new Column[0])));
+            }
+
+            if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
+            {
+                for (SuperColumn sc : thriftSuperColumns)
+                {
+                    mutator.writeSubColumns(metadata.getTableName(), CassandraUtilities.toBytes(tf.getId(),tf.getId().getClass()), Bytes.fromByteArray(sc.getName()),
+                            sc.getColumns());
+                }
+            }
+        }
+
+        mutator.execute(consistencyLevel);
+        tf = null;
+    }
+
+    /**
+     * Indexes @Embedded and @ElementCollection objects of this entity to a
+     * separate column family
+     */
+    @Override
+    protected void indexNode(Node node, EntityMetadata entityMetadata)
+    {
+        // Index to lucene if applicable
+        super.indexNode(node, entityMetadata);
+
+        // Write to inverted index table if applicable
+        invertedIndexHandler.write(node, entityMetadata, getPersistenceUnit(), consistencyLevel, dataHandler);
+    }
+
+    /**
+     * Load super columns.
+     * 
+     * @param keyspace
+     *            the keyspace
+     * @param columnFamily
+     *            the column family
+     * @param rowId
+     *            the row id
+     * @param superColumnNames
+     *            the super column names
+     * @return the list
+     */
+
+    @Override
+    public final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
+            String... superColumnNames)
+    {
+        if (!isOpen())
+            throw new PersistenceException("PelopsClient is closed.");
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>();
+        rowKeys.add(ByteBuffer.wrap(rowId.getBytes()));
+
+        // Pelops.getDbConnPool("").getConnection().getAPI().
+
+        // selector.getColumnOrSuperColumnsFromRows(new
+        // ColumnParent(columnFamily),rowKeys ,
+        // Selector.newColumnsPredicate(superColumnNames), consistencyLevel);
+        return selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames),
+                consistencyLevel);
+    }
+
+    /** Query related methods */
+
+    /**
+     * Method to execute cql query and return back entity/enhance entities.
+     * 
+     * @param cqlQuery
+     *            cql query to be executed.
+     * @param clazz
+     *            entity class.
+     * @param relationalField
+     *            collection for relational fields.
+     * @return list of objects.
+     * 
+     */
+    @Override
+    public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField)
+    {
+        IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit()));
+        // thrift.get
+        IPooledConnection connection = thrift.getConnection();
+        try
+        {
+            org.apache.cassandra.thrift.Cassandra.Client cassandra_client = connection.getAPI();
+            return super.executeQuery(cqlQuery, clazz, relationalField, dataHandler);
+
+        }
+        finally
+        {
+            try
+            {
+                if (connection != null)
+                {
+                    connection.release();
+                }
+            }
+            catch (Exception e)
+            {
+                log.warn("Releasing connection for native CQL query failed", e);
+            }
+        }
+    }
+
+    /**
+     * Find.
+     * 
+     * @param ixClause
+     *            the ix clause
+     * @param m
+     *            the m
+     * @param isRelation
+     *            the is relation
+     * @param relations
+     *            the relations
+     * @return the list
+     */
+    @Override
+    public List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
+            int maxResult)
+    {
+        // ixClause can be 0,1 or more!
+        Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
+
+        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
+
+        List<Object> entities = null;
+        if (ixClause.isEmpty())
+        {
+            if (m.isCounterColumnType())
+            {  
+                
+                try
+                {
+                    IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit()));
+                    // thrift.get
+                    IPooledConnection connection = thrift.getConnection();
+                    org.apache.cassandra.thrift.Cassandra.Client thriftClient = connection.getAPI();
+                    List<KeySlice> ks = thriftClient.get_range_slices(new ColumnParent(m.getTableName()),
+                            slicePredicate, selector.newKeyRange("", "", maxResult), consistencyLevel);
+                    connection.release();
+                    if (m.getType().isSuperColumnFamilyMetadata())
+                    {
+                        Map<Bytes, List<CounterSuperColumn>> qCounterSuperColumnResults = ColumnOrSuperColumnHelper
+                                .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_SUPER_COLUMN);
+                        entities = new ArrayList<Object>(qCounterSuperColumnResults.size());
+
+                        populateDataForSuperCounter(m, qCounterSuperColumnResults, entities, isRelation, relations);
+                    }
+                    else
+                    {
+
+                        Map<Bytes, List<CounterColumn>> qCounterColumnResults = ColumnOrSuperColumnHelper
+                                .transformKeySlices(ks, ColumnOrSuperColumnHelper.COUNTER_COLUMN);
+                        entities = new ArrayList<Object>(qCounterColumnResults.size());
+
+                        populateDataForCounter(m, qCounterColumnResults, entities, isRelation, relations, dataHandler);
+                    }
+
+                }
+                catch (InvalidRequestException irex)
+                {
+                    log.error("Error during executing find, Caused by :" + irex.getMessage());
+                    throw new PersistenceException(irex);
+                }
+                catch (UnavailableException uex)
+                {
+                    log.error("Error during executing find, Caused by :" + uex.getMessage());
+                    throw new PersistenceException(uex);
+                }
+                catch (TimedOutException tex)
+                {
+                    log.error("Error during executing find, Caused by :" + tex.getMessage());
+                    throw new PersistenceException(tex);
+                }
+                catch (TException tex)
+                {
+                    log.error("Error during executing find, Caused by :" + tex.getMessage());
+                    throw new PersistenceException(tex);
+                }
+            }
+            else
+            {
+
+                Map<Bytes, List<Column>> qResults = selector.getColumnsFromRows(m.getTableName(),
+                        selector.newKeyRange("", "", maxResult), slicePredicate, consistencyLevel);
+
+                entities = new ArrayList<Object>(qResults.size());
+
+                populateData(m, qResults, entities, isRelation, relations, dataHandler);
+            }
+        }
+        else
+        {
+            entities = new ArrayList<Object>();
+            for (IndexClause ix : ixClause)
+            {
+                Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(m.getTableName(), ix, slicePredicate,
+                        consistencyLevel);
+                // iterate through complete map and
+                populateData(m, qResults, entities, isRelation, relations, dataHandler);
+            }
+        }
         return entities;
     }
 
@@ -626,404 +649,49 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         return (List<EnhanceEntity>) find(conditions, m, true, relationNames, maxResult);
     }
 
-    
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getReader()
-     */
-    @Override
-    public EntityReader getReader()
-    {
-        return reader;
-    }
-
     /**
-     * Method to execute cql query and return back entity/enhance entities.
+     * Find by range.
      * 
-     * @param cqlQuery
-     *            cql query to be executed.
-     * @param clazz
-     *            entity class.
-     * @param relationalField
-     *            collection for relational fields.
-     * @return list of objects.
-     * 
-     */
-    public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField)
-    {
-        IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        // thrift.get
-        IPooledConnection connection = thrift.getConnection();
-        try
-        {
-            org.apache.cassandra.thrift.Cassandra.Client thriftClient = connection.getAPI();
-
-            EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(clazz);
-            CqlResult result = null;
-            List returnedEntities = null;
-            try
-            {
-                result = thriftClient.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
-                        org.apache.cassandra.thrift.Compression.NONE);
-                if (result != null && (result.getRows() != null || result.getRowsSize() > 0))
-                {
-                    returnedEntities = new ArrayList<Object>(result.getRowsSize());
-                    Iterator<CqlRow> iter = result.getRowsIterator();
-                    while (iter.hasNext())
-                    {
-                        CqlRow row = iter.next();
-                        String rowKey = Bytes.toUTF8(row.getKey());
-                        ThriftRow thriftRow = null;
-                        if (entityMetadata.isCounterColumnType())
-                        {
-                            log.info("Native query is not permitted on counter column returning null ");
-                            return null;
-                        }
-                        else
-                        {
-                            thriftRow = new ThriftRow(rowKey, entityMetadata.getTableName(), row.getColumns(),
-                                    null, null, null);
-                        }
-
-                        Object entity = dataHandler.fromColumnThriftRow(clazz, entityMetadata, thriftRow, relationalField,
-                                relationalField != null && !relationalField.isEmpty());
-                        if (entity != null)
-                        {
-                            returnedEntities.add(entity);
-                        }
-                    }
-                }
-            }
-            catch (InvalidRequestException e)
-            {
-                log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-                throw new PersistenceException(e);
-            }
-            catch (UnavailableException e)
-            {
-                log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-                throw new PersistenceException(e);
-            }
-            catch (TimedOutException e)
-            {
-                log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-                throw new PersistenceException(e);
-            }
-            catch (SchemaDisagreementException e)
-            {
-                log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-                throw new PersistenceException(e);
-            }
-            catch (TException e)
-            {
-                log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-                throw new PersistenceException(e);
-            }
-            catch (Exception e)
-            {
-                log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
-                throw new PersistenceException(e);
-            }
-            return returnedEntities;
-        }
-        finally
-        {
-            try
-            {
-                if (connection != null)
-                {
-                    connection.release();
-                }
-            }
-            catch (Exception e)
-            {
-                log.warn("Releasing connection for native CQL query failed", e);
-            }
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#getQueryImplementor()
-     */
-    @Override
-    public Class<CassQuery> getQueryImplementor()
-    {
-        return CassQuery.class;
-    }
-
-    @Override
-    protected void onPersist(EntityMetadata metadata, Object entity, Object id, List<RelationHolder> rlHolders)
-    {
-        
-        if (!isOpen())
-        {
-            throw new PersistenceException("PelopsClient is closed.");
-        }
-
-        // check for counter column
-        if (isUpdate && metadata.isCounterColumnType())
-        {
-            throw new UnsupportedOperationException(" Merge is not permitted on counter column! ");
-        }
-
-        ThriftRow tf = null;
-        try
-        {
-            String columnFamily = metadata.getTableName();
-            tf = dataHandler.toThriftRow(entity, id, metadata, columnFamily);
-            timestamp = System.currentTimeMillis();            
-        }
-        catch (Exception e)
-        {
-            log.error("Error during persist, Caused by:" + e.getMessage());
-            throw new KunderaException(e);
-        }
-
-        addRelationsToThriftRow(metadata, tf, rlHolders);
-
-        Mutator mutator = Pelops.createMutator(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        
-        
-        
-        byte[] rowKey = PropertyAccessorHelper.get(entity, metadata.getIdColumn().getField());
-        
-        if (metadata.isCounterColumnType())
-        {
-            List<CounterColumn> thriftCounterColumns = tf.getCounterColumns();
-            List<CounterSuperColumn> thriftCounterSuperColumns = tf.getCounterSuperColumns();
-            if (thriftCounterColumns != null && !thriftCounterColumns.isEmpty())
-            {
-                mutator.writeCounterColumns(metadata.getTableName(), Bytes.fromByteArray(rowKey),
-                        Arrays.asList(tf.getCounterColumns().toArray(new CounterColumn[0])));
-                
-            }
-
-            if (thriftCounterSuperColumns != null && !thriftCounterSuperColumns.isEmpty())
-            {
-                for (CounterSuperColumn sc : thriftCounterSuperColumns)
-                {
-                    mutator.writeSubCounterColumns(metadata.getTableName(), Bytes.fromByteArray(rowKey),
-                            Bytes.fromByteArray(sc.getName()), sc.getColumns());
-                }
-            }
-        }
-        else
-        {
-            List<Column> thriftColumns = tf.getColumns();
-            List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
-            if (thriftColumns != null && !thriftColumns.isEmpty())
-            {
-                // Bytes.fromL
-                mutator.writeColumns(metadata.getTableName(), Bytes.fromByteArray(rowKey),
-                        Arrays.asList(tf.getColumns().toArray(new Column[0])));
-            }
-
-            if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
-            {
-                for (SuperColumn sc : thriftSuperColumns)
-                {
-                    mutator.writeSubColumns(metadata.getTableName(), Bytes.fromByteArray(rowKey), Bytes.fromByteArray(sc.getName()),
-                            sc.getColumns());
-                }
-            }
-        }
-
-        mutator.execute(consistencyLevel);
-        tf = null;
-    }
-
-    /**
-     * Indexes @Embedded and @ElementCollection objects of this entity to a
-     * separate column family
-     */
-    @Override
-    protected void indexNode(Node node, EntityMetadata entityMetadata)
-    {
-        //Index to lucene if applicable
-        super.indexNode(node, entityMetadata);
-
-        //Write to inverted index table if applicable
-        invertedIndexHandler.writeToInvertedIndexTable(node, entityMetadata, getPersistenceUnit(), consistencyLevel, dataHandler);
-    }
-      
-
-    
-
-    /**
-     * Populate data.
-     * 
+     * @param minVal
+     *            the min val
+     * @param maxVal
+     *            the max val
      * @param m
      *            the m
-     * @param qResults
-     *            the q results
-     * @param entities
-     *            the entities
-     * @param isRelational
-     *            the is relational
-     * @param relationNames
-     *            the relation names
-     */
-    private void populateData(EntityMetadata m, Map<Bytes, List<Column>> qResults, List<Object> entities,
-            boolean isRelational, List<String> relationNames)
-    {
-        if (m.getType().isSuperColumnFamilyMetadata())
-        {
-            Set<Bytes> primaryKeys = qResults.keySet();
-
-            if (primaryKeys != null && !primaryKeys.isEmpty())
-            {
-                Object[] rowIds = new Object[primaryKeys.size()];
-                int i = 0;
-                for (Bytes b : primaryKeys)
-                {
-                    rowIds[i] = Bytes.toUTF8(b.toByteArray());
-                    i++;
-                }
-                entities.addAll(findAll(m.getEntityClazz(), rowIds));
-            }
-
-        }
-        else
-        {
-            Iterator<Bytes> rowIter = qResults.keySet().iterator();
-            while (rowIter.hasNext())
-            {
-                Bytes rowKey = rowIter.next();
-                
-                
-                
-                //String str = Bytes.toUTF8(rowKey.toByteArray());
-                
-                PropertyAccessor accessor = PropertyAccessorFactory.getPropertyAccessor(m.getIdColumn().getField());
-                Object id = accessor.fromBytes(m.getIdColumn().getField().getType(), rowKey.toByteArray());
-                
-                List<Column> columns = qResults.get(rowKey);
-                try
-                {
-                    Object e = dataHandler.fromColumnThriftRow(m.getEntityClazz(), m,
-                            new ThriftRow(id, m.getTableName(), columns, null,
-                                    null, null), relationNames, isRelational);
-                    if (e != null)
-                    {
-                        entities.add(e);
-                    }
-                }
-                catch (IllegalStateException e)
-                {
-                    throw new KunderaException(e);
-                }
-                catch (Exception e)
-                {
-                    throw new KunderaException(e);
-                }
-            }
-        }
-
-    }
-
-    /**
-     * Populate data.
-     * 
-     * @param m
-     *            the m
-     * @param qResults
-     *            the q results
-     * @param entities
-     *            the entities
-     * @param isRelational
-     *            the is relational
-     * @param relationNames
-     *            the relation names
-     */
-    private void populateDataForCounter(EntityMetadata m, Map<Bytes, List<CounterColumn>> qCounterResults,
-            List<Object> entities, boolean isRelational, List<String> relationNames)
-    {
-        Iterator<Bytes> rowIter = qCounterResults.keySet().iterator();
-        while (rowIter.hasNext())
-        {
-            Bytes rowKey = rowIter.next();
-            List<CounterColumn> counterColumns = qCounterResults.get(rowKey);
-            try
-            {
-                Object e = dataHandler.fromCounterColumnThriftRow(m.getEntityClazz(), m,
-                        new ThriftRow(Bytes.toUTF8(rowKey.toByteArray()), m.getTableName(), null, null,
-                                counterColumns, null), relationNames, isRelational);
-                if (e != null)
-                {
-                    entities.add(e);
-                }
-            }
-            catch (IllegalStateException e)
-            {
-                throw new KunderaException(e);
-            }
-            catch (Exception e)
-            {
-                throw new KunderaException(e);
-            }
-        }
-    }
-
-    /**
-     * @param m
-     * @param qCounterResults
-     * @param entities
-     * @param isRelational
-     * @param relationNames
-     */
-    private void populateDataForSuperCounter(EntityMetadata m, Map<Bytes, List<CounterSuperColumn>> qCounterResults,
-            List<Object> entities, boolean isRelational, List<String> relationNames)
-    {
-        Set<Bytes> primaryKeys = qCounterResults.keySet();
-
-        if (primaryKeys != null && !primaryKeys.isEmpty())
-        {
-            Object[] rowIds = new Object[primaryKeys.size()];
-            int i = 0;
-            for (Bytes b : primaryKeys)
-            {
-                rowIds[i] = Bytes.toUTF8(b.toByteArray());
-                i++;
-            }
-            entities.addAll(findAll(m.getEntityClazz(), rowIds));
-        }
-    }
-
-    
-
-    /**
-     * Load super columns.
-     * 
-     * @param keyspace
-     *            the keyspace
-     * @param columnFamily
-     *            the column family
-     * @param rowId
-     *            the row id
-     * @param superColumnNames
-     *            the super column names
+     * @param isWrapReq
+     *            the is wrap req
+     * @param relations
+     *            the relations
      * @return the list
+     * @throws Exception
+     *             the exception
      */
-    private final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
-            String... superColumnNames)
+    @Override
+    public List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq, List<String> relations)
+            throws Exception
     {
-        if (!isOpen())
-            throw new PersistenceException("PelopsClient is closed.");
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        List<ByteBuffer> rowKeys = new ArrayList<ByteBuffer>();
-        rowKeys.add(ByteBuffer.wrap(rowId.getBytes()));
-        
-        //Pelops.getDbConnPool("").getConnection().getAPI().
 
-        // selector.getColumnOrSuperColumnsFromRows(new
-        // ColumnParent(columnFamily),rowKeys ,
-        // Selector.newColumnsPredicate(superColumnNames), consistencyLevel);
-        return selector.getSuperColumnsFromRow(columnFamily, rowId, Selector.newColumnsPredicate(superColumnNames),
+        SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, Integer.MAX_VALUE);
+        List<Object> entities = null;
+        List<KeySlice> keys = selector.getKeySlices(new ColumnParent(m.getTableName()), selector.newKeyRange(
+                minVal != null ? Bytes.fromByteArray(minVal) : Bytes.fromUTF8(""),
+                maxVal != null ? Bytes.fromByteArray(maxVal) : Bytes.fromUTF8(""), 10000), slicePredicate,
                 consistencyLevel);
+
+        List results = null;
+        if (keys != null)
+        {
+            results = populateEntitiesFromKeySlices(m, isWrapReq, relations, keys, dataHandler);
+        }
+
+        return results;
+    }
+
+    public List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,
+            Queue<FilterClause> filterClauseQueue)
+    {
+        return invertedIndexHandler.search(m, filterClauseQueue, getPersistenceUnit(), consistencyLevel);
     }
 
     /**
@@ -1047,4 +715,5 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             log.warn("Please provide resonable consistency Level");
         }
     }
+
 }

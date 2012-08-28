@@ -248,7 +248,7 @@ final class AssociationBuilder
 
                 String nodeId = ObjectGraphUtils.getNodeId(childId, childMetadata.getEntityClazz());
                 Node node = new Node(nodeId, childMetadata.getEntityClazz(), new ManagedState(),
-                        pd.getPersistenceCache(), childId);
+                        pd.getPersistenceCache(),childId);
                 node.setData(child);
                 node.setPersistenceDelegator(pd);
                 mainCache.addNodeToCache(node);

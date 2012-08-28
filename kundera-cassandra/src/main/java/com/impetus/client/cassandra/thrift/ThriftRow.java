@@ -25,6 +25,7 @@ import org.apache.cassandra.thrift.SuperColumn;
 
 /**
  * Utility class that represents a row in Cassandra DB.
+ * 
  * @author amresh.singh
  */
 public class ThriftRow
@@ -95,7 +96,6 @@ public class ThriftRow
         }
     }
 
-    
     /**
      * Adds the column.
      * 
@@ -105,7 +105,7 @@ public class ThriftRow
     public void addColumn(Column column)
     {
         columns.add(column);
-    }    
+    }
 
     /**
      * @return the id
@@ -116,7 +116,8 @@ public class ThriftRow
     }
 
     /**
-     * @param id the id to set
+     * @param id
+     *            the id to set
      */
     public void setId(Object id)
     {
@@ -132,7 +133,8 @@ public class ThriftRow
     }
 
     /**
-     * @param columnFamilyName the columnFamilyName to set
+     * @param columnFamilyName
+     *            the columnFamilyName to set
      */
     public void setColumnFamilyName(String columnFamilyName)
     {
@@ -148,7 +150,8 @@ public class ThriftRow
     }
 
     /**
-     * @param columns the columns to set
+     * @param columns
+     *            the columns to set
      */
     public void setColumns(List<Column> columns)
     {
@@ -164,7 +167,8 @@ public class ThriftRow
     }
 
     /**
-     * @param superColumns the superColumns to set
+     * @param superColumns
+     *            the superColumns to set
      */
     public void setSuperColumns(List<SuperColumn> superColumns)
     {

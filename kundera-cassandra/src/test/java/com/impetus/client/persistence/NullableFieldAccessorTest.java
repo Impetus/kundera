@@ -33,6 +33,8 @@ import org.junit.Test;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.configure.ClientFactoryConfiguraton;
+import com.impetus.kundera.configure.Configurator;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -132,7 +134,11 @@ public class NullableFieldAccessorTest
         m.setPersistenceUnit(persistenceUnit);
         MetamodelImpl metaModel = new MetamodelImpl();
         metaModel.addEntityMetadata(CassandraEntitySample.class, m);
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder().getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder().getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder().getMappedSuperClassTypes());
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
+        new ClientFactoryConfiguraton(persistenceUnit).configure();
         EntityManagerFactoryImpl emf = new EntityManagerFactoryImpl(persistenceUnit, props);
         return emf;
     }

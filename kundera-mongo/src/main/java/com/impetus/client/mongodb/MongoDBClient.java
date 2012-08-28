@@ -32,6 +32,7 @@ import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.mongodb.BasicDBObject;
@@ -192,7 +193,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         DBCollection dbCollection = mongoDb.getCollection(entityMetadata.getTableName());
 
         BasicDBObject query = new BasicDBObject();
-        query.put(entityMetadata.getIdColumn().getName(), handler.populateValue(key, key.getClass()));
+        query.put(((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName(), handler.populateValue(key, key.getClass()));
 
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
@@ -229,7 +230,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 
         BasicDBObject query = new BasicDBObject();
 
-        query.put(entityMetadata.getIdColumn().getName(), new BasicDBObject("$in", getString(keys)));
+        query.put(((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName(), new BasicDBObject("$in", getString(keys)));
 
         DBCursor cursor = dbCollection.find(query);
 
@@ -317,7 +318,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 
         // Find the DBObject to remove first
         BasicDBObject query = new BasicDBObject();
-        query.put(entityMetadata.getIdColumn().getName(), handler.populateValue(pKey, pKey.getClass()));
+        query.put(((AbstractAttribute)entityMetadata.getIdAttribute()).getJPAColumnName(), handler.populateValue(pKey, pKey.getClass()));
 
         dbCollection.remove(query);
         getIndexManager().remove(entityMetadata, entity, pKey.toString());
@@ -436,7 +437,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
      * @see com.impetus.kundera.client.Client#deleteByColumn(java.lang.String,
      * java.lang.String, java.lang.Object)
      */
-    public void deleteByColumn(String schemaName, String tableName, String columnName, Object columnValue)
+    public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
         DBCollection dbCollection = mongoDb.getCollection(tableName);
         BasicDBObject query = new BasicDBObject();

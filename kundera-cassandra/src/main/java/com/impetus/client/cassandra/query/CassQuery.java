@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.Query;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
@@ -34,6 +36,10 @@ import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
 
+import sun.util.calendar.CalendarUtils;
+
+import com.impetus.client.cassandra.CassandraClientBase;
+import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
 import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.kundera.client.Client;
@@ -43,6 +49,8 @@ import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
 import com.impetus.kundera.property.PropertyAccessorFactory;
@@ -99,7 +107,7 @@ public class CassQuery extends QueryImpl implements Query
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         if (appMetadata.isNative(getJPAQuery()))
         {
-            result = ((PelopsClient) client).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
+            result = ((CassandraClientBase) client).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
         }
         else
         {
@@ -110,7 +118,8 @@ public class CassQuery extends QueryImpl implements Query
                 boolean isRowKeyQuery = ixClause.keySet().iterator().next();
                 if (!isRowKeyQuery)
                 {
-                    result = ((PelopsClient) client).find(ixClause.get(isRowKeyQuery), m, false, null, maxResult);
+                    result = ((CassandraClientBase) client)
+                            .find(ixClause.get(isRowKeyQuery), m, false, null, maxResult);
                 }
                 else
                 {
@@ -135,7 +144,8 @@ public class CassQuery extends QueryImpl implements Query
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         if (appMetadata.isNative(getJPAQuery()))
         {
-            ls = (List<EnhanceEntity>) ((PelopsClient) client).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
+            ls = (List<EnhanceEntity>) ((CassandraClientBase) client).executeQuery(getJPAQuery(), m.getEntityClazz(),
+                    null);
         }
         else
         {
@@ -174,7 +184,8 @@ public class CassQuery extends QueryImpl implements Query
         EntityMetadata m = getEntityMetadata();
         if (KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(getJPAQuery()))
         {
-            ((PelopsClient) persistenceDelegeator.getClient(m)).executeQuery(getJPAQuery(), m.getEntityClazz(), null);
+            ((CassandraClientBase) persistenceDelegeator.getClient(m)).executeQuery(getJPAQuery(), m.getEntityClazz(),
+                    null);
         }
         else if (kunderaQuery.isDeleteUpdate())
         {
@@ -201,7 +212,7 @@ public class CassQuery extends QueryImpl implements Query
         List<IndexExpression> expr = new ArrayList<IndexExpression>();
         Map<Boolean, List<IndexClause>> idxClauses = new HashMap<Boolean, List<IndexClause>>(1);
         // check if id column are mixed with other columns or not?
-        String idColumn = m.getIdColumn().getName();
+        String idColumn = ((AbstractAttribute)m.getIdAttribute()).getJPAColumnName();
         boolean idPresent = false;
         for (Object o : getKunderaQuery().getFilterClauseQueue())
         {
@@ -304,11 +315,6 @@ public class CassQuery extends QueryImpl implements Query
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.query.QueryImpl#getReader()
-     */
     @Override
     protected EntityReader getReader()
     {
@@ -323,7 +329,7 @@ public class CassQuery extends QueryImpl implements Query
     /**
      * Returns bytes value for given value.
      * 
-     * @param fieldName
+     * @param jpaFieldName
      *            field name.
      * @param m
      *            entity metadata
@@ -331,77 +337,42 @@ public class CassQuery extends QueryImpl implements Query
      *            value.
      * @return bytes value.
      */
-    private Bytes getBytesValue(String fieldName, EntityMetadata m, Object value)
+    private Bytes getBytesValue(String jpaFieldName, EntityMetadata m, Object value)
     {
-        Column idCol = m.getIdColumn();
+//        Column idCol = m.getIdColumn();
+        Attribute idCol =  m.getIdAttribute();
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(m.getPersistenceUnit());
+        
+        EntityType entity = metaModel.entity(m.getEntityClazz());
         Field f = null;
         boolean isId = false;
-        if (idCol.getName().equals(fieldName))
+        if (((AbstractAttribute)idCol).getJPAColumnName().equals(jpaFieldName))
         {
-            f = idCol.getField();
+            f = (Field) idCol.getJavaMember();
             isId = true;
         }
         else
         {
-            Column col = m.getColumn(fieldName);
+            String fieldName = m.getFieldName(jpaFieldName);
+            Attribute col = entity.getAttribute(fieldName);
+//            Column col = m.getColumn(jpaFieldName);
             if (col == null)
             {
-                throw new QueryHandlerException("column type is null for: " + fieldName);
+                throw new QueryHandlerException("column type is null for: " + jpaFieldName);
             }
-            f = col.getField();
+            f = (Field) col.getJavaMember();
         }
 
         // need to do integer.parseInt..as value will be string in case of
         // create query.
         if (f != null && f.getType() != null)
         {
-            if (/* isId || */f.getType().isAssignableFrom(String.class))
-            {
-                return Bytes.fromByteArray(((String) value).getBytes());
-            }
-            else if (f.getType().equals(int.class) || f.getType().isAssignableFrom(Integer.class))
-            {
-                return Bytes.fromInt(Integer.parseInt(value.toString()));
-            }
-            else if (f.getType().equals(long.class) || f.getType().isAssignableFrom(Long.class))
-            {
-                return Bytes.fromLong(Long.parseLong(value.toString()));
-            }
-            else if (f.getType().equals(boolean.class) || f.getType().isAssignableFrom(Boolean.class))
-            {
-                return Bytes.fromBoolean(Boolean.valueOf(value.toString()));
-            }
-            else if (f.getType().equals(double.class) || f.getType().isAssignableFrom(Double.class))
-            {
-                return Bytes.fromDouble(Double.valueOf(value.toString()));
-            }
-            else if (f.getType().isAssignableFrom(java.util.UUID.class))
-            {
-                return Bytes.fromUuid(UUID.fromString(value.toString()));
-            }
-            else if (f.getType().equals(float.class) || f.getType().isAssignableFrom(Float.class))
-            {
-                return Bytes.fromFloat(Float.valueOf(value.toString()));
-            }
-            else if (f.getType().isAssignableFrom(Date.class))
-            {
-                DateAccessor dateAccessor = new DateAccessor();
-                return Bytes.fromByteArray(dateAccessor.toBytes(value));
-            }
-            else
-            {
-                if (value.getClass().isAssignableFrom(String.class))
-                {
-                    value = PropertyAccessorFactory.getPropertyAccessor(f).fromString(f.getType().getClass(),
-                            value.toString());
-                }
-                return Bytes.fromByteArray(PropertyAccessorFactory.getPropertyAccessor(f).toBytes(value));
-            }
+            return CassandraUtilities.toBytes(value,f);
         }
         else
         {
-            log.error("Error while handling data type for:" + fieldName);
-            throw new QueryHandlerException("field type is null for:" + fieldName);
+            log.error("Error while handling data type for:" + jpaFieldName);
+            throw new QueryHandlerException("field type is null for:" + jpaFieldName);
         }
     }
 }

@@ -30,6 +30,8 @@ import java.util.regex.Pattern;
 
 import javax.persistence.Parameter;
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.Metamodel;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -41,6 +43,7 @@ import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 
 /**
  * The Class KunderaQuery.
@@ -429,8 +432,9 @@ public class KunderaQuery
 
                 // String columnName = getColumnNameFromFieldName(metadata,
                 // property);
-                String columnName = metadata.getColumnName(property);
-
+                Metamodel metaModel =  KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(getPersistenceUnit());
+//                String columnName = metadata.getColumnName(property);
+                String columnName = ((AbstractAttribute)metaModel.entity(entityClass).getAttribute(property)).getJPAColumnName();
                 // where condition may be for search within embedded object
                 if (columnName == null && property.indexOf(".") > 0)
                 {
@@ -524,7 +528,9 @@ public class KunderaQuery
 
     private void filterJPAParameterInfo(Type type, String name, String fieldName)
     {
-        Class fieldType = KunderaMetadataManager.getEntityMetadata(entityClass).getFieldType(fieldName);
+        Attribute entityAttribute = ((MetamodelImpl)KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(persistenceUnit)).getEntityAttribute(entityClass, fieldName);
+        Class fieldType = entityAttribute.getJavaType();
+        
         if (type.equals(Type.INDEXED))
         {
             typedParameter.addJPAParameter(new JPAParameter(null, Integer.valueOf(name), fieldType));

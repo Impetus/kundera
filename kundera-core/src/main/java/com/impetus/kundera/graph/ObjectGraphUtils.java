@@ -16,11 +16,6 @@
 package com.impetus.kundera.graph;
 
 import com.impetus.kundera.Constants;
-import com.impetus.kundera.KunderaException;
-import com.impetus.kundera.metadata.KunderaMetadataManager;
-import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.property.PropertyAccessor;
-import com.impetus.kundera.property.PropertyAccessorFactory;
 
 /**
  * Provides utility methods for object graph
@@ -29,22 +24,16 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
  */
 public class ObjectGraphUtils
 {
-    // public static String getNodeId(Object pk, Object nodeData)
-    // {
-    // StringBuffer strBuffer = new StringBuffer(nodeData.getClass().getName());
-    // strBuffer.append(Constants.NODE_ID_SEPARATOR);
-    // strBuffer.append(pk);
-    // return strBuffer.toString();
-    // }
+    public static String getNodeId(Object pk, Object nodeData)
+    {
+        StringBuffer strBuffer = new StringBuffer(nodeData.getClass().getName());
+        strBuffer.append(Constants.NODE_ID_SEPARATOR);
+        strBuffer.append(pk);
+        return strBuffer.toString();
+    }
 
     public static String getNodeId(Object pk, Class<?> objectClass)
     {
-        //
-        // EntityMetadata m =
-        // KunderaMetadataManager.getEntityMetadata(objectClass);
-        //
-        // PropertyAccessor accesor =
-        // PropertyAccessorFactory.getPropertyAccessor(m.getIdColumn().getField());
 
         StringBuffer strBuffer = new StringBuffer(objectClass.getName());
         strBuffer.append(Constants.NODE_ID_SEPARATOR);
@@ -53,21 +42,10 @@ public class ObjectGraphUtils
 
     }
 
-    /*
-     * public static Object getEntityId(String nodeId) { String entityIdStr =
-     * nodeId.substring(nodeId.indexOf(Constants.NODE_ID_SEPARATOR) + 1,
-     * nodeId.length()); String entityClassStr = nodeId.substring(0,
-     * nodeId.indexOf(Constants.NODE_ID_SEPARATOR)); Class entityClass = null;
-     * try { entityClass = Class.forName(entityClassStr); } catch
-     * (ClassNotFoundException e) { throw new KunderaException(e); }
-     * 
-     * EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
-     * PropertyAccessor accesor =
-     * PropertyAccessorFactory.getPropertyAccessor(m.getIdColumn().getField());
-     * return accesor.fromString(m.getIdColumn().getField().getType(),
-     * entityIdStr);
-     * 
-     * }
-     */
+    public static Object getEntityId(String nodeId)
+    {
+
+        return nodeId.substring(nodeId.indexOf(Constants.NODE_ID_SEPARATOR) + 1, nodeId.length());
+    }
 
 }
