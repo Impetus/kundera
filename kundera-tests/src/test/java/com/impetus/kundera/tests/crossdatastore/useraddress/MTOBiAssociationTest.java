@@ -69,16 +69,6 @@ public class MTOBiAssociationTest extends TwinAssociation
         setUpInternal();
     }
 
-    /**
-     * Test insert.
-     */
-
-    // @Test
-    public void dummyTest()
-    {
-
-    }
-
     @Test
     public void testCRUD()
     {
@@ -112,6 +102,27 @@ public class MTOBiAssociationTest extends TwinAssociation
         col.add(person2);
         col.add(address);
 
+    }   
+    
+
+    @Override
+    protected void findPersonByIdColumn()
+    {
+    }
+
+    @Override
+    protected void findPersonByName()
+    {
+    }
+
+    @Override
+    protected void findAddressByIdColumn()
+    {
+    }
+
+    @Override
+    protected void findAddressByStreet()
+    {
     }
 
     @Override

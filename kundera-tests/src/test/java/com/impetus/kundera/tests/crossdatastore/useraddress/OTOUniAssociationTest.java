@@ -134,23 +134,50 @@ public class OTOUniAssociationTest extends TwinAssociation
         // Find Person
         try
         {
-            PersonnelUni1To1FK p = (PersonnelUni1To1FK) dao.findPerson(PersonnelUni1To1FK.class, "unionetoonefk_1");
-            Assert.assertNotNull(p);
-            Assert.assertEquals("unionetoonefk_1", p.getPersonId());
-            Assert.assertEquals("Amresh", p.getPersonName());
-
-            HabitatUni1To1FK add = p.getAddress();
-            Assert.assertNotNull(add);
-            Assert.assertNotNull(add.getAddressId());
-            Assert.assertEquals("unionetoonefk_a", add.getAddressId());
-            Assert.assertEquals("123, New street", add.getStreet());
+            PersonnelUni1To1FK p = (PersonnelUni1To1FK) dao.findPerson(PersonnelUni1To1FK.class, "unionetoonefk_1");            
+            assertPersonBeforeUpdate(p);
         }
         catch (Exception e)
         {
             e.printStackTrace();
             Assert.fail();
         }
+    }   
+
+    @Override
+    protected void findPersonByIdColumn()
+    {
+        PersonnelUni1To1FK p = (PersonnelUni1To1FK) dao.findPersonByIdColumn(PersonnelUni1To1FK.class, "unionetoonefk_1");    
+        assertPersonBeforeUpdate(p);   
     }
+
+    
+
+    @Override
+    protected void findPersonByName()
+    {
+        List<PersonnelUni1To1FK> persons = dao.findPersonByName(PersonnelUni1To1FK.class, "Amresh");
+        assertPersons(persons);
+    }
+
+    @Override
+    protected void findAddressByIdColumn()
+    {
+        HabitatUni1To1FK a = (HabitatUni1To1FK) dao.findAddressByIdColumn(HabitatUni1To1FK.class, "unionetoonefk_a");    
+        assertAddressBeforeUpdate(a);   
+    }
+
+    @Override
+    protected void findAddressByStreet()
+    {
+        List<HabitatUni1To1FK> adds = dao.findAddressByStreet(HabitatUni1To1FK.class, "123, New street");  
+        Assert.assertNotNull(adds);
+        Assert.assertFalse(adds.isEmpty());
+        Assert.assertTrue(adds.size() == 1);
+        
+        assertAddressBeforeUpdate(adds.get(0));
+    }
+
 
     protected void update()
     {
@@ -170,11 +197,7 @@ public class OTOUniAssociationTest extends TwinAssociation
 
             PersonnelUni1To1FK pAfterMerge = (PersonnelUni1To1FK) dao.findPerson(PersonnelUni1To1FK.class,
                     "unionetoonefk_1");
-            Assert.assertNotNull(pAfterMerge);
-            Assert.assertEquals("Saurabh", pAfterMerge.getPersonName());
-            HabitatUni1To1FK addressAfterMerge = pAfterMerge.getAddress();
-            Assert.assertNotNull(addressAfterMerge);
-            Assert.assertEquals("Brand New Street", addressAfterMerge.getStreet());
+            assertPersonAfterUpdate(pAfterMerge);
         }
         catch (Exception e)
         {
@@ -182,6 +205,7 @@ public class OTOUniAssociationTest extends TwinAssociation
             Assert.fail();
         }
     }
+   
 
     protected void remove()
     {
@@ -302,6 +326,53 @@ public class OTOUniAssociationTest extends TwinAssociation
         }
         CassandraCli.client.set_keyspace("KunderaTests");
 
+    }
+    
+    /**
+     * @param p
+     */
+    private void assertPersonBeforeUpdate(PersonnelUni1To1FK p)
+    {
+        Assert.assertNotNull(p);
+        Assert.assertEquals("unionetoonefk_1", p.getPersonId());
+        Assert.assertEquals("Amresh", p.getPersonName());
+
+        assertAddressBeforeUpdate(p.getAddress());
+    }
+
+    /**
+     * @param p
+     */
+    private void assertAddressBeforeUpdate(HabitatUni1To1FK add)
+    {       
+        Assert.assertNotNull(add);
+        Assert.assertNotNull(add.getAddressId());
+        Assert.assertEquals("unionetoonefk_a", add.getAddressId());
+        Assert.assertEquals("123, New street", add.getStreet());
+    }   
+    
+    /**
+     * @param pAfterMerge
+     */
+    private void assertPersonAfterUpdate(PersonnelUni1To1FK pAfterMerge)
+    {
+        Assert.assertNotNull(pAfterMerge);
+        Assert.assertEquals("Saurabh", pAfterMerge.getPersonName());
+        HabitatUni1To1FK addressAfterMerge = pAfterMerge.getAddress();
+        Assert.assertNotNull(addressAfterMerge);
+        Assert.assertEquals("Brand New Street", addressAfterMerge.getStreet());
+    }
+    
+    /**
+     * @param persons
+     */
+    private void assertPersons(List<PersonnelUni1To1FK> persons)
+    {
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 1);
+        PersonnelUni1To1FK person = persons.get(0);
+        assertPersonBeforeUpdate(person);
     }
 
 }

@@ -81,15 +81,6 @@ public class MTMBiAssociationTest extends TwinAssociation
         setUpInternal();
     }
 
-    /**
-     * Test insert.
-     */
-
-    @Test
-    public void dummyTest()
-    {
-
-    }
 
     @Test
     public void testCRUD()
@@ -178,6 +169,27 @@ public class MTMBiAssociationTest extends TwinAssociation
         HabitatBiMToM address22 = (HabitatBiMToM) addresses2.toArray()[1];
         Assert.assertNotNull(address22);
 
+    }   
+    
+
+    @Override
+    protected void findPersonByIdColumn()
+    {
+    }
+
+    @Override
+    protected void findPersonByName()
+    {
+    }
+
+    @Override
+    protected void findAddressByIdColumn()
+    {
+    }
+
+    @Override
+    protected void findAddressByStreet()
+    {
     }
 
     @Override

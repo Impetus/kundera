@@ -122,6 +122,28 @@ public class OTMBiAssociationTest extends TwinAssociation
         assertPerson(p);
 
     }
+    
+    
+
+    @Override
+    protected void findPersonByIdColumn()
+    {
+    }
+
+    @Override
+    protected void findPersonByName()
+    {
+    }
+
+    @Override
+    protected void findAddressByIdColumn()
+    {
+    }
+
+    @Override
+    protected void findAddressByStreet()
+    {
+    }
 
     @Override
     protected void update()

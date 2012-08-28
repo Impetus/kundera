@@ -21,6 +21,8 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUni1To1FK;
+
 public class UserAddressDaoImpl extends BaseDao
 {
     private String persistenceUnit;
@@ -90,7 +92,60 @@ public class UserAddressDaoImpl extends BaseDao
         EntityManager em = getEntityManager(persistenceUnit);
         Query q = em.createQuery("select p from " + className + " p");
         List<?> persons = q.getResultList();
+        closeEntityManager();
         return persons;
+    }
+    
+    public Object findPersonByIdColumn(Class entityClass, String personId)
+    {
+        EntityManager em = getEntityManager(persistenceUnit);
+        String query = "Select p from " + entityClass.getSimpleName() + " p where p.personId = " + personId;
+        Query q = em.createQuery(query);
+        List persons = q.getResultList();
+        closeEntityManager();
+        assert persons != null;
+        assert ! persons.isEmpty();
+        assert persons.size() == 1;
+        
+        return persons.get(0);
+    }
+
+    public List findPersonByName(Class entityClass, String personName)
+    {
+        EntityManager em = getEntityManager(persistenceUnit);
+        String query = "Select p from " + entityClass.getSimpleName() + " p where p.personName = " + personName;
+        Query q = em.createQuery(query);
+        List persons = q.getResultList();
+        closeEntityManager();       
+        
+        return persons;
+    }
+
+
+    public Object findAddressByIdColumn(Class entityClass, String addressId)
+    {
+        EntityManager em = getEntityManager(persistenceUnit);
+        String query = "Select a from " + entityClass.getSimpleName() + " a where a.addressId = " + addressId;
+        Query q = em.createQuery(query);
+        List addresses = q.getResultList();
+        closeEntityManager();
+        assert addresses != null;
+        assert ! addresses.isEmpty();
+        assert addresses.size() == 1;
+        
+        return addresses.get(0);
+    }
+
+
+    public List findAddressByStreet(Class entityClass, String street)
+    {
+        EntityManager em = getEntityManager(persistenceUnit);
+        String query = "Select a from " + entityClass.getSimpleName() + " a where a.street = " + street;
+        Query q = em.createQuery(query);
+        List addresses = q.getResultList();
+        closeEntityManager();       
+        
+        return addresses;
     }
 
 }
