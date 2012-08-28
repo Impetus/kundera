@@ -904,7 +904,7 @@ public abstract class CassandraDataHandlerBase
         Set<Attribute> attributes = entityType.getAttributes();
         for (Attribute attribute : attributes)
         {
-            if (!attribute.getName().equals(m.getIdAttribute().getName()))
+            if (!attribute.getName().equals(m.getIdAttribute().getName()) && !attribute.isAssociation())
             {
                 Field field = (Field) ((Attribute) attribute).getJavaMember();
                 byte[] name = PropertyAccessorFactory.STRING
