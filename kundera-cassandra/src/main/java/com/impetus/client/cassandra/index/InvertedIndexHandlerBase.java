@@ -222,8 +222,6 @@ public abstract class InvertedIndexHandlerBase
 
                         Iterator<Attribute> iter = embeddedColumn.getAttributes().iterator();
                         while(iter.hasNext())
-//                        for(Attribute column : embeddedColumn.getAttributes())
-//                        for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
                         {
                             Attribute attrib = iter.next();
                             String rowKey = embeddedAttribute.getName()
@@ -236,18 +234,6 @@ public abstract class InvertedIndexHandlerBase
                             }
 
                         }
-                        
-//                        for (com.impetus.kundera.metadata.model.Column column : embeddedColumn.getColumns())
-//                        {
-//                            String rowKey = embeddedColumn.getField().getName()
-//                                    + Constants.INDEX_TABLE_ROW_KEY_DELIMITER + column.getField().getName();
-//                            byte[] columnName = PropertyAccessorHelper.get(embeddedObject, column.getField());
-//                            if (columnName != null)
-//                            {
-//                                deleteColumn(indexColumnFamily, rowKey, columnName, metadata.getPersistenceUnit(),
-//                                        consistencyLevel);
-//                            }
-//                        }
                     }
                 }
             }

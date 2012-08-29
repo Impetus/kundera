@@ -17,11 +17,9 @@ package com.impetus.client.cassandra.query;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.persistence.Query;
 import javax.persistence.metamodel.Attribute;
@@ -36,25 +34,19 @@ import org.apache.commons.logging.LogFactory;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Selector;
 
-import sun.util.calendar.CalendarUtils;
-
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.index.CassandraIndexHelper;
-import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
-import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.PersistenceDelegator;
-import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.property.accessor.DateAccessor;
 import com.impetus.kundera.query.KunderaQuery;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 import com.impetus.kundera.query.QueryHandlerException;

@@ -129,10 +129,12 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             em.clear();
             // // find by id.
             StudentEntityDef s = em.find(StudentCassandra.class, studentId1);
-            // assertOnDataTypes((StudentCassandra) s);
+            assertOnDataTypes((StudentCassandra) s);
+            em.clear();
             //
             // // // find by name.
             assertFindByName(em, "StudentCassandra", StudentCassandra.class, "Amresh", "studentName");
+            em.clear();
             //
             // // find by Id
             // // assertFindByGTId(em, "StudentCassandra",
@@ -141,14 +143,17 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             //
             // // find by name and age.
             assertFindByNameAndAge(em, "StudentCassandra", StudentCassandra.class, "Amresh", "10", "studentName");
+            em.clear();
             //
             // // find by name, age clause
             assertFindByNameAndAgeGTAndLT(em, "StudentCassandra", StudentCassandra.class, "Amresh", "10", "20",
                     "studentName");
+            em.clear();
             // //
             // // // find by between clause
             assertFindByNameAndAgeBetween(em, "StudentCassandra", StudentCassandra.class, "Amresh", "10", "15",
                     "studentName");
+            em.clear();
             //
             // // find by Range.
             // assertFindByRange(em, "StudentCassandra", StudentCassandra.class,
@@ -156,6 +161,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             //
             // // find by without where clause.
             assertFindWithoutWhereClause(em, "StudentCassandra", StudentCassandra.class);
+            em.clear();
             //
 
             // Query on Date.
@@ -175,7 +181,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertNotNull(results);
             Assert.assertEquals(1, results.size());
             Assert.assertEquals(78575785897L, results.get(0).getUniqueId());
-
+            em.clear();
             // Assert on boolean.
             query = "Select s from StudentCassandra s where s.isExceptional =?1";
             q = em.createQuery(query);
@@ -184,7 +190,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertNotNull(results);
             Assert.assertEquals(2, results.size());
             Assert.assertEquals(true, results.get(0).isExceptional());
-
+            em.clear();
             // with false.
             query = "Select s from StudentCassandra s where s.isExceptional =?1";
             q = em.createQuery(query);
@@ -193,7 +199,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertNotNull(results);
             Assert.assertEquals(1, results.size());
             Assert.assertEquals(false, results.get(0).isExceptional());
-
+            em.clear();
             // query on int.
 
             query = "Select s from StudentCassandra s where s.age =?1";
@@ -204,7 +210,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertEquals(1, results.size());
             Assert.assertEquals(false, results.get(0).isExceptional());
             Assert.assertEquals(10, results.get(0).getAge());
-
+            em.clear();
             // query on char (semester)
 
             query = "Select s from StudentCassandra s where s.semester =?1";
@@ -216,7 +222,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertEquals(false, results.get(0).isExceptional());
             Assert.assertEquals(10, results.get(0).getAge());
             Assert.assertEquals('A', results.get(0).getSemester());
-
+            em.clear();
             // query on float (percentage)
             query = "Select s from StudentCassandra s where s.percentage =?1";
             q = em.createQuery(query);
@@ -226,7 +232,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertEquals(1, results.size());
             Assert.assertEquals(true, results.get(0).isExceptional());
             Assert.assertEquals(61.6f, results.get(0).getPercentage());
-
+            em.clear();
             // query on double (height)
 
             query = "Select s from StudentCassandra s where s.height =?1";
@@ -237,7 +243,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertEquals(1, results.size());
             Assert.assertEquals(false, results.get(0).isExceptional());
             Assert.assertEquals(163.76765654, results.get(0).getHeight());
-
+            em.clear();
             // query on cgpa.
             query = "Select s from StudentCassandra s where s.cgpa =?1";
             q = em.createQuery(query);
@@ -247,7 +253,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertEquals(3, results.size());
             Assert.assertEquals(false, results.get(0).isExceptional());
             Assert.assertEquals(8, results.get(0).getCgpa());
-
+            em.clear();
             // query on yearsSpent.
             Integer i = new Integer(3);
             query = "Select s from StudentCassandra s where s.yearsSpent = 3";
@@ -258,7 +264,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertEquals(3, results.size());
             Assert.assertEquals(false, results.get(0).isExceptional());
             Assert.assertEquals(i, results.get(0).getYearsSpent());
-
+            em.clear();
             // query on yearsSpent.
             query = "Select s from StudentCassandra s where s.yearsSpent =?1";
             q = em.createQuery(query);
@@ -268,7 +274,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertEquals(3, results.size());
             Assert.assertEquals(false, results.get(0).isExceptional());
             Assert.assertEquals(new Integer(3), results.get(0).getYearsSpent());
-
+            em.clear();
             // query on digitalSignature.
             query = "Select s from StudentCassandra s where s.digitalSignature =?1";
             q = em.createQuery(query);
@@ -278,7 +284,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertEquals(2, results.size());
             Assert.assertEquals(true, results.get(0).isExceptional());
             Assert.assertEquals((byte) 50, results.get(0).getDigitalSignature());
-
+            em.clear();
             // query on cpga and digitalSignature.
             query = "Select s from StudentCassandra s where s.cgpa =?1 and s.digitalSignature >= ?2 and s.digitalSignature <= ?3";
             q = em.createQuery(query);
@@ -293,22 +299,20 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertEquals((short) 8, results.get(0).getCgpa());
             Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
             Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
-
+            em.clear();
             // query on cpga and digitalSignature.
-            query = "Select s from StudentCassandra s where s.digitalSignature >= ?2 and s.digitalSignature <= ?3 and s.cgpa =?1";
+            query = "Select s from StudentCassandra s where s.digitalSignature = ?2 and s.cgpa >= ?3 and s.cgpa <=?1";
             q = em.createQuery(query);
             q.setParameter(1, (short) 8);
             q.setParameter(2, (byte) 5);
-            q.setParameter(3, (byte) 50);
+            q.setParameter(3, (short) 4);
             results = q.getResultList();
             Assert.assertNotNull(results);
-            Assert.assertEquals(3, results.size());
-            Assert.assertEquals(false, results.get(0).isExceptional());
-            Assert.assertEquals(true, results.get(1).isExceptional());
+            Assert.assertEquals(1, results.size());
+            Assert.assertEquals(false, results.get(0).isExceptional());            
             Assert.assertEquals((short) 8, results.get(0).getCgpa());
             Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
-            Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
-
+            em.clear();
             // query on percentage and height.
             query = "Select s from StudentCassandra s where s.percentage >= ?2 and s.percentage <= ?3 and s.height =?1";
             q = em.createQuery(query);
@@ -323,10 +327,10 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
             Assert.assertEquals(69.3f, results.get(0).getPercentage());
             Assert.assertEquals(163.76765654, results.get(0).getHeight());
-
+            em.clear();
             // query on percentage and height parameter appended in string.
             query = "Select s from StudentCassandra s where s.percentage >= 61.6 and s.percentage <= 69.3 and s.height = 163.76765654";
-            q = em.createQuery(query);           
+            q = em.createQuery(query);
             results = q.getResultList();
             Assert.assertNotNull(results);
             Assert.assertEquals(1, results.size());
@@ -335,7 +339,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
             Assert.assertEquals(69.3f, results.get(0).getPercentage());
             Assert.assertEquals(163.76765654, results.get(0).getHeight());
-
+            em.clear();
             // query on cpga and digitalSignature parameter appended with String
             // .
             query = "Select s from StudentCassandra s where s.cgpa = 8 and s.digitalSignature >= 5 and s.digitalSignature <= 50";
@@ -348,7 +352,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertEquals((short) 8, results.get(0).getCgpa());
             Assert.assertEquals((byte) 5, results.get(0).getDigitalSignature());
             Assert.assertEquals((byte) 50, results.get(1).getDigitalSignature());
-
+            em.clear();
             // query on cpga and uniqueId.
             query = "Select s from StudentCassandra s where s.cgpa =?1 and s.uniqueId >= ?2 and s.uniqueId <= ?3";
             q = em.createQuery(query);
@@ -400,7 +404,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             Assert.assertEquals(78575785898L, results.get(1).getUniqueId());
             Assert.assertEquals(10, results.get(0).getAge());
             Assert.assertEquals(20, results.get(1).getAge());
-
+            em.clear();
             // query on invalid cpga and uniqueId.
             query = "Select s from StudentCassandra s where s.cgpa =?1 and s.uniqueId >= ?2 and s.uniqueId <= ?3";
             q = em.createQuery(query);
@@ -409,7 +413,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
             q.setParameter(3, 78575785899L);
             results = q.getResultList();
             Assert.assertNull(results);
-
+            em.clear();
             // query on big integer.
             query = "Select s from StudentCassandra s where s.bigInteger =?1";
             q = em.createQuery(query);
@@ -490,7 +494,7 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         ColumnDef columnDef3 = new ColumnDef(ByteBuffer.wrap("STUDENT_NAME".getBytes()), "UTF8Type");
         columnDef3.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef3);
-        ColumnDef columnDef4 = new ColumnDef(ByteBuffer.wrap("IS_EXCEPTIONAL".getBytes()), "IntegerType");
+        ColumnDef columnDef4 = new ColumnDef(ByteBuffer.wrap("IS_EXCEPTIONAL".getBytes()), "BooleanType");
         columnDef4.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef4);
 
@@ -498,11 +502,11 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         columnDef5.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef5);
 
-        ColumnDef columnDef6 = new ColumnDef(ByteBuffer.wrap("SEMESTER".getBytes()), "IntegerType");
+        ColumnDef columnDef6 = new ColumnDef(ByteBuffer.wrap("SEMESTER".getBytes()), "UTF8Type");
         columnDef6.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef6);
 
-        ColumnDef columnDef7 = new ColumnDef(ByteBuffer.wrap("DIGITAL_SIGNATURE".getBytes()), "IntegerType");
+        ColumnDef columnDef7 = new ColumnDef(ByteBuffer.wrap("DIGITAL_SIGNATURE".getBytes()), "BytesType");
         columnDef7.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef7);
 
@@ -510,11 +514,11 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         columnDef8.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef8);
 
-        ColumnDef columnDef9 = new ColumnDef(ByteBuffer.wrap("PERCENTAGE".getBytes()), "IntegerType");
+        ColumnDef columnDef9 = new ColumnDef(ByteBuffer.wrap("PERCENTAGE".getBytes()), "FloatType");
         columnDef9.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef9);
 
-        ColumnDef columnDef10 = new ColumnDef(ByteBuffer.wrap("HEIGHT".getBytes()), "IntegerType");
+        ColumnDef columnDef10 = new ColumnDef(ByteBuffer.wrap("HEIGHT".getBytes()), "DoubleType");
         columnDef10.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef10);
 
@@ -522,26 +526,26 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         columnDef11.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef11);
 
-        ColumnDef columnDef12 = new ColumnDef(ByteBuffer.wrap("ROLL_NUMBER".getBytes()), "IntegerType");
+        ColumnDef columnDef12 = new ColumnDef(ByteBuffer.wrap("ROLL_NUMBER".getBytes()), "LongType");
         columnDef12.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef12);
 
-        ColumnDef columnDef13 = new ColumnDef(ByteBuffer.wrap("SQL_DATE".getBytes()), "IntegerType");
+        ColumnDef columnDef13 = new ColumnDef(ByteBuffer.wrap("SQL_DATE".getBytes()), "DateType");
         columnDef13.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef13);
 
-        ColumnDef columnDef14 = new ColumnDef(ByteBuffer.wrap("SQL_TIMESTAMP".getBytes()), "IntegerType");
+        ColumnDef columnDef14 = new ColumnDef(ByteBuffer.wrap("SQL_TIMESTAMP".getBytes()), "DateType");
         columnDef14.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef14);
 
-        ColumnDef columnDef15 = new ColumnDef(ByteBuffer.wrap("SQL_TIME".getBytes()), "IntegerType");
+        ColumnDef columnDef15 = new ColumnDef(ByteBuffer.wrap("SQL_TIME".getBytes()), "DateType");
         columnDef15.index_type = IndexType.KEYS;
 
         ColumnDef columnDef16 = new ColumnDef(ByteBuffer.wrap("BIG_INT".getBytes()), "IntegerType");
         columnDef16.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef16);
 
-        ColumnDef columnDef17 = new ColumnDef(ByteBuffer.wrap("BIG_DECIMAL".getBytes()), "IntegerType");
+        ColumnDef columnDef17 = new ColumnDef(ByteBuffer.wrap("BIG_DECIMAL".getBytes()), "DecimalType");
         columnDef17.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef17);
 
@@ -549,19 +553,19 @@ public class StudentCassandraTest extends StudentBase<StudentCassandra>
         columnDef18.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef18);
 
-        ColumnDef columnDef19 = new ColumnDef(ByteBuffer.wrap("MONTHLY_FEE".getBytes()), "IntegerType");
+        ColumnDef columnDef19 = new ColumnDef(ByteBuffer.wrap("MONTHLY_FEE".getBytes()), "DoubleType");
         columnDef19.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef19);
 
-        ColumnDef columnDef20 = new ColumnDef(ByteBuffer.wrap("ENROLMENT_DATE".getBytes()), "BytesType");
+        ColumnDef columnDef20 = new ColumnDef(ByteBuffer.wrap("ENROLMENT_DATE".getBytes()), "DateType");
         columnDef20.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef20);
 
-        ColumnDef columnDef21 = new ColumnDef(ByteBuffer.wrap("ENROLMENT_TIME".getBytes()), "IntegerType");
+        ColumnDef columnDef21 = new ColumnDef(ByteBuffer.wrap("ENROLMENT_TIME".getBytes()), "DateType");
         columnDef21.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef21);
 
-        ColumnDef columnDef22 = new ColumnDef(ByteBuffer.wrap("JOINING_DATE_TIME".getBytes()), "IntegerType");
+        ColumnDef columnDef22 = new ColumnDef(ByteBuffer.wrap("JOINING_DATE_TIME".getBytes()), "DateType");
         columnDef22.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef22);
 

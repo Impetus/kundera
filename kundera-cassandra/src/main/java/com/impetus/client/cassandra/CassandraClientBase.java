@@ -346,6 +346,7 @@ public abstract class CassandraClientBase extends ClientBase
             CfDef columnFamilyDefToUpdate = null;
             boolean isUpdatable = false;
             // boolean isNew=false;
+
             for (CfDef cfDef : cfDefs)
             {
                 if (cfDef.getName().equals(tableName))
@@ -356,6 +357,10 @@ public abstract class CassandraClientBase extends ClientBase
                 }
             }
 
+            if (columnFamilyDefToUpdate == null)
+            {
+                throw new PersistenceException("Join table does not exist in database");
+            }
             // //create a column family, in case it is not already available.
             // if(columnFamilyDefToUpdate == null)
             // {

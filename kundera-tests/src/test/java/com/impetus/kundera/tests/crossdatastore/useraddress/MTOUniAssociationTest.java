@@ -58,12 +58,9 @@ public class MTOUniAssociationTest extends TwinAssociation
         {
             CassandraCli.cassandraSetUp();
         }
-        else
+        if (AUTO_MANAGE_SCHEMA)
         {
-            if (AUTO_MANAGE_SCHEMA)
-            {
-                CassandraCli.initClient();
-            }
+            CassandraCli.initClient();
         }
 
         List<Class> clazzz = new ArrayList<Class>(2);
@@ -133,13 +130,12 @@ public class MTOUniAssociationTest extends TwinAssociation
         PersonnelUniMTo1 p2 = (PersonnelUniMTo1) dao.findPerson(PersonnelUniMTo1.class, "unimanytoone_2");
         assertPerson2(p2);
 
-    }  
-    
+    }
 
     @Override
     protected void findPersonByIdColumn()
     {
-        PersonnelUniMTo1 p = (PersonnelUniMTo1) dao.findPersonByIdColumn(PersonnelUniMTo1.class, "unimanytoone_1");    
+        PersonnelUniMTo1 p = (PersonnelUniMTo1) dao.findPersonByIdColumn(PersonnelUniMTo1.class, "unimanytoone_1");
         assertPerson1(p);
     }
 
@@ -157,18 +153,18 @@ public class MTOUniAssociationTest extends TwinAssociation
     @Override
     protected void findAddressByIdColumn()
     {
-        HabitatUniMTo1 a = (HabitatUniMTo1) dao.findAddressByIdColumn(HabitatUniMTo1.class, "unimanytoone_a");    
+        HabitatUniMTo1 a = (HabitatUniMTo1) dao.findAddressByIdColumn(HabitatUniMTo1.class, "unimanytoone_a");
         assertAddress(a);
     }
 
     @Override
     protected void findAddressByStreet()
     {
-        List<HabitatUniMTo1> adds = dao.findAddressByStreet(HabitatUniMTo1.class, "AAAAAAAAAAAAA");  
+        List<HabitatUniMTo1> adds = dao.findAddressByStreet(HabitatUniMTo1.class, "AAAAAAAAAAAAA");
         Assert.assertNotNull(adds);
         Assert.assertFalse(adds.isEmpty());
         Assert.assertTrue(adds.size() == 1);
-        
+
         assertAddress(adds.get(0));
     }
 
@@ -222,7 +218,7 @@ public class MTOUniAssociationTest extends TwinAssociation
     {
         tearDownInternal();
     }
-    
+
     /**
      * @param p2
      */
@@ -236,8 +232,6 @@ public class MTOUniAssociationTest extends TwinAssociation
         assertAddress(add2);
     }
 
-    
-
     /**
      * @param p1
      */
@@ -250,7 +244,7 @@ public class MTOUniAssociationTest extends TwinAssociation
         HabitatUniMTo1 add = p1.getAddress();
         assertAddress(add);
     }
-    
+
     /**
      * @param add2
      */

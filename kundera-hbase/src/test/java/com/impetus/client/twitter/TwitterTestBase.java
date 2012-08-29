@@ -17,10 +17,9 @@ package com.impetus.client.twitter;
 
 import java.util.List;
 
-import org.apache.thrift.TException;
-import org.junit.Assert;
-
 import junit.framework.TestCase;
+
+import org.junit.Assert;
 
 import com.impetus.client.hbase.crud.LuceneCleanupUtilities;
 import com.impetus.client.twitter.dao.Twitter;
@@ -38,9 +37,9 @@ import com.impetus.client.twitter.entities.UserHBase;
  */
 public abstract class TwitterTestBase extends TestCase
 {
-    public static final boolean RUN_IN_EMBEDDED_MODE = true;
+    public static final boolean RUN_IN_EMBEDDED_MODE = false;
 
-    public static final boolean AUTO_MANAGE_SCHEMA = true;
+    public static final boolean AUTO_MANAGE_SCHEMA = false;
 
     /** The user id1. */
     String userId1;

@@ -52,13 +52,7 @@ public class TwingoTest extends TwitterTestBase
      */
 
     @Test
-    public void testDummy()
-    {
-
-    }
-
-    // @Test
-    public void onExecute()
+    public void testOnExecute()
     {
         executeTestSuite();
     }
