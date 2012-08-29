@@ -180,6 +180,15 @@ public abstract class TwitterTestBase extends TestCase
         UserMongo user1AfterRemoval = twitter.findUserById(userId1);
         Assert.assertNull(user1AfterRemoval);
 
+        UserMongo user2 = twitter.findUserById(userId2);
+        //TODO: this needs to uncomment only after fixing update issue on associations
+//        assertUpdatedUser1(user1);
+
+        twitter.removeUser(user2);
+
+        UserMongo user2AfterRemoval = twitter.findUserById(userId2);
+        Assert.assertNull(user2AfterRemoval);
+
         twitter.closeEntityManager();
 
     }
