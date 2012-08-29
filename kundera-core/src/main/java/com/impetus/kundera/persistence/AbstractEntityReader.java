@@ -99,53 +99,59 @@ public class AbstractEntityReader
 
         for (Relation relation : m.getRelations())
         {
-            // Check whether that relation is already populated or not, before proceeding further.
+            // Check whether that relation is already populated or not, before
+            // proceeding further.
             Field f = relation.getProperty();
-            
-            if(PropertyAccessorHelper.getObject(entity, f) == null)
-            {
-            
-            if (relation.isRelatedViaJoinTable())
-            {
-                // M-M relationship. Relationship entities are always fetched
-                // from Join Table.
 
-                // First, Save this entity to persistence cache
-                PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);
-                associationBuilder.populateRelationFromJoinTable(entity, m, pd, relation);
-            }
-            else
+            if (PropertyAccessorHelper.getObject(entity, f) == null)
             {
-                String relationName = MetadataUtils.getMappedName(m, relation);
-                Object relationValue = relationsMap != null ? relationsMap.get(relationName) : null;
 
-                Class<?> childClass = relation.getTargetEntity();
-                EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(childClass);
-
-                if (relationValue != null)
+                if (relation.isRelatedViaJoinTable())
                 {
-                    // 1-1 or M-1 relationship, because ID is held at this side
-                    // of entity and hence
-                    // relationship entities would be retrieved from database
-                    // based on these IDs already available
-                    associationBuilder.populateRelationFromValue(entity, pd, relation, relationValue, childMetadata);
+                    // M-M relationship. Relationship entities are always
+                    // fetched
+                    // from Join Table.
 
+                    // First, Save this entity to persistence cache
+                    PersistenceCacheManager.addEntityToPersistenceCache(entity, pd, entityId);
+                    associationBuilder.populateRelationFromJoinTable(entity, m, pd, relation);
                 }
                 else
                 {
-                    // 1-M relationship, since ID is stored at other side of
-                    // entity and as a result relation value will be null
-                    // This requires running query (either Lucene or Native
-                    // based on secondary indexes supported by underlying
-                    // database)
-                    // Running query returns all those associated entities that
-                    // hold parent entity ID as foreign key
-                    associationBuilder.populateRelationViaQuery(entity, pd, entityId, relation, relationName,
-                            childMetadata);
+                    String relationName = MetadataUtils.getMappedName(m, relation);
+                    Object relationValue = relationsMap != null ? relationsMap.get(relationName) : null;
+
+                    Class<?> childClass = relation.getTargetEntity();
+                    EntityMetadata childMetadata = KunderaMetadataManager.getEntityMetadata(childClass);
+
+                    if (relationValue != null)
+                    {
+                        // 1-1 or M-1 relationship, because ID is held at this
+                        // side
+                        // of entity and hence
+                        // relationship entities would be retrieved from
+                        // database
+                        // based on these IDs already available
+                        associationBuilder
+                                .populateRelationFromValue(entity, pd, relation, relationValue, childMetadata);
+
+                    }
+                    else
+                    {
+                        // 1-M relationship, since ID is stored at other side of
+                        // entity and as a result relation value will be null
+                        // This requires running query (either Lucene or Native
+                        // based on secondary indexes supported by underlying
+                        // database)
+                        // Running query returns all those associated entities
+                        // that
+                        // hold parent entity ID as foreign key
+                        associationBuilder.populateRelationViaQuery(entity, pd, entityId, relation, relationName,
+                                childMetadata);
+                    }
+
                 }
 
-            }
-            
             }
 
         }

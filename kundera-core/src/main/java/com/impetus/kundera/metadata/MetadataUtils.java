@@ -348,8 +348,9 @@ public class MetadataUtils
                 // relation.getType().equals(ForeignKey.ONE_TO_MANY) ?
                 // parentMetadata.getIdColumn().getName()
                 // : metadata.getIdColumn().getName();
-                joinColumn = relation.getType().equals(ForeignKey.ONE_TO_MANY) ? parentMetadata.getIdAttribute()
-                        .getName() : metadata.getIdAttribute().getName();
+                
+                joinColumn = relation.getType().equals(ForeignKey.ONE_TO_MANY) ? ((AbstractAttribute)parentMetadata.getIdAttribute())
+                        .getJPAColumnName() : ((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName();
             }
             return joinColumn;
         }
