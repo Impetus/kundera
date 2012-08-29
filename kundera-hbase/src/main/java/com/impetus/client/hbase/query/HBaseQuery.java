@@ -454,7 +454,7 @@ public class HBaseQuery extends QueryImpl implements Query
         EntityType entity = metaModel.entity(m.getEntityClazz());
         Field f = null;
         boolean isId = false;
-        if (((AbstractAttribute) idCol).getJPAColumnName().equals(jpaFieldName))
+        if (idCol.getName().equals(jpaFieldName))
         {
             f = (Field) idCol.getJavaMember();
             isId = true;

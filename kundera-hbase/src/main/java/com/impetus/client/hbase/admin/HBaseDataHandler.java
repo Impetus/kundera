@@ -592,6 +592,8 @@ public class HBaseDataHandler implements DataHandler
             // for (Column column : columns)
             for (Attribute column : columns)
             {
+                if(!column.getName().equals(m.getIdAttribute().getName()))
+                {
                 Field columnField = (Field) column.getJavaMember();
                 String columnName = ((AbstractAttribute) column).getJPAColumnName();
 
@@ -600,19 +602,19 @@ public class HBaseDataHandler implements DataHandler
                     String hbaseColumn = Bytes.toString(colData.getFamily());
                     // String colName = getColumnName(hbaseColumn);
                     String colName = hbaseColumn;
-                    if (colName != null && colName.equalsIgnoreCase(columnName.toLowerCase()))
+                    if (relationNames != null && relationNames.contains(colName))
+                    {
+                        relations.put(colName, Bytes.toString(colData.getValue()));
+                    }
+                    else  if (colName != null && colName.equalsIgnoreCase(columnName.toLowerCase()))
                     {
                         byte[] hbaseColumnValue = colData.getValue();
                         PropertyAccessorHelper.set(entity, columnField,
                                 HBaseUtils.fromBytes(hbaseColumnValue, columnField.getType()));
 
                     }
-                    else if (relationNames != null && relationNames.contains(colName))
-                    {
-                        relations.put(colName, Bytes.toString(colData.getValue()));
-                    }
                 }
-
+                }
             }
 
             /*
