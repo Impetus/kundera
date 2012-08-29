@@ -31,10 +31,14 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.filter.Filter;
+import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
+import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
+import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
 import com.impetus.client.hbase.query.HBaseQuery;
+import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
@@ -433,7 +437,14 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     @Override
     public List<Object> findByRelation(String colName, String colValue, Class entityClazz)
     {
-        throw new UnsupportedOperationException("Method not supported");
+        CompareOp operator = HBaseUtils.getOperator("=", false);
+        
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
+        
+        byte[] valueInBytes = HBaseUtils.getBytes(colValue);
+        Filter f = new SingleColumnValueFilter(Bytes.toBytes(colName), Bytes.toBytes(colName), operator, valueInBytes);
+        return ((HBaseDataHandler)handler).scanData(f, m.getTableName(), entityClazz, m);
+//        reader.set   
     }
 
     /*

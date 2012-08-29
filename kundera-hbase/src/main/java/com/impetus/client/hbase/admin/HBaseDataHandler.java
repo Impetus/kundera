@@ -983,4 +983,39 @@ public class HBaseDataHandler implements DataHandler
             columns.add(column);
         }
     }
+
+    public List scanData(Filter f, final String tableName, Class clazz, EntityMetadata m)
+    {
+        List returnedResults = new ArrayList();
+        try
+        {
+            List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null);
+            if(results != null)
+            {
+                for(HBaseData row : results)
+                {
+                    Object entity = clazz.newInstance();
+                    returnedResults.add(populateEntityFromHbaseData(entity, row, m, new String(row.getRowKey()), null));
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (InstantiationException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IllegalAccessException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        return returnedResults;
+        
+    }
 }
