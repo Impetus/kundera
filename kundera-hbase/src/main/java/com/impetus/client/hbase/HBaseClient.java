@@ -443,7 +443,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
         
         byte[] valueInBytes = HBaseUtils.getBytes(colValue);
         Filter f = new SingleColumnValueFilter(Bytes.toBytes(colName), Bytes.toBytes(colName), operator, valueInBytes);
-        return ((HBaseDataHandler)handler).scanData(f, m.getTableName(), entityClazz, m);
+        return ((HBaseDataHandler)handler).scanData(f, m.getTableName(), entityClazz, m, colName);
 //        reader.set   
     }
 

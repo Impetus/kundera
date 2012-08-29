@@ -99,6 +99,8 @@ public class HBaseWriter implements Writer
     public void writeColumns(HTable htable, Object rowKey, Set<Attribute> columns, Object entity) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
+        
+        boolean present=false;
         for (Attribute column : columns)
         {
             if (!column.isCollection() && !((SingularAttribute) column).isId())
@@ -109,6 +111,7 @@ public class HBaseWriter implements Writer
                     byte[] qualValInBytes = Bytes.toBytes(qualifier);
                     p.add(qualValInBytes, qualValInBytes, System.currentTimeMillis(), HBaseUtils
                             .getBytes(PropertyAccessorHelper.getObject(entity, (Field) column.getJavaMember())));
+                    present = true;
                 }
                 catch (PropertyAccessException e1)
                 {
@@ -116,7 +119,10 @@ public class HBaseWriter implements Writer
                 }
             }
         }
-        htable.put(p);
+        if(present)
+        {
+            htable.put(p);
+        }
     }
 
     @Override
@@ -125,13 +131,19 @@ public class HBaseWriter implements Writer
 
         Put p = new Put(Bytes.toBytes(rowKey));
 
+        boolean isPresent = false;
         for (String columnName : columns.keySet())
         {
             p.add(Bytes.toBytes(Constants.JOIN_COLUMNS_FAMILY_NAME), Bytes.toBytes(columnName),
-                    Bytes.toBytes(columns.get(columnName))
-            /* .getBytes() */);
+                    Bytes.toBytes(columns.get(columnName)));
+                    isPresent = true;
+//            /* .getBytes() */);
         }
-        htable.put(p);
+        
+        if(isPresent)
+        {
+            htable.put(p);
+        }
     }
 
     @Override
@@ -140,6 +152,7 @@ public class HBaseWriter implements Writer
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
 
+        boolean isPresent = false;
         for (RelationHolder r : relations)
         {
             if (r != null)
@@ -148,6 +161,7 @@ public class HBaseWriter implements Writer
                 {
                     p.add(Bytes.toBytes(r.getRelationName()), Bytes.toBytes(r.getRelationName()),
                             Bytes.toBytes(r.getRelationValue()));
+                    isPresent = true;
                 }
                 else
                 {
@@ -156,12 +170,16 @@ public class HBaseWriter implements Writer
                     // p.add(Bytes.toBytes(r.getRelationName()),
                     // System.currentTimeMillis(),
                     // Bytes.toBytes(r.getRelationValue()));
+                    isPresent = true;
                 }
 
             }
         }
 
-        htable.put(p);
+        if(isPresent)
+        {
+            htable.put(p);
+        }
     }
 
     // TODO: Scope of performance improvement in this code
@@ -174,6 +192,8 @@ public class HBaseWriter implements Writer
         // Checking if foreign key column family exists
         Get g = new Get(Bytes.toBytes(rowKey));
         Result r = hTable.get(g);
+
+        boolean isPresent = false;
 
         for (Map.Entry<String, Set<String>> entry : foreignKeyMap.entrySet())
         {
@@ -191,16 +211,21 @@ public class HBaseWriter implements Writer
             {
                 p.add(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes.toBytes(property),
                         Bytes.toBytes(keys));
+                isPresent = true;
             }
             else
             {
                 p.add(Bytes.toBytes(Constants.FOREIGN_KEY_EMBEDDED_COLUMN_NAME), Bytes.toBytes(property),
                         Bytes.toBytes(existingForeignKey + Constants.FOREIGN_KEY_SEPARATOR + keys));
+                isPresent = true;
             }
 
         }
 
-        hTable.put(p);
+        if(isPresent)
+        {
+            hTable.put(p);
+        }
     }
 
     /**

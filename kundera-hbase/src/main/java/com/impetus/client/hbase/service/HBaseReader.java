@@ -26,6 +26,7 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.Filter;
+import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.HBaseData;
 import com.impetus.client.hbase.Reader;
@@ -105,7 +106,7 @@ public class HBaseReader implements Reader
      * .HTable, org.apache.hadoop.hbase.filter.Filter, byte[], byte[])
      */
     @Override
-    public List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow) throws IOException
+    public List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily) throws IOException
     {
         List<HBaseData> results = null;
         Scan s = null;
@@ -125,6 +126,10 @@ public class HBaseReader implements Reader
         if (filter != null)
         {
             s.setFilter(filter);
+        }
+        if(columnFamily != null)
+        {
+            s.addFamily(Bytes.toBytes(columnFamily));
         }
 
         ResultScanner scanner = hTable.getScanner(s);
