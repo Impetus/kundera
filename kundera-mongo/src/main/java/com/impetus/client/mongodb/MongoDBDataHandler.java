@@ -332,7 +332,7 @@ final class MongoDBDataHandler
      * @param valObj
      * @return
      */
-    public Object populateValue(Object valObj, Class clazz)
+    Object populateValue(Object valObj, Class clazz)
     {
         if (isUTF8Value(clazz))
         {
@@ -356,7 +356,7 @@ final class MongoDBDataHandler
      *            the filter property
      * @return the column name
      */
-    String getColumnName(String filterProperty)
+   private String getColumnName(String filterProperty)
     {
         StringTokenizer st = new StringTokenizer(filterProperty, ".");
         String columnName = "";
@@ -368,52 +368,7 @@ final class MongoDBDataHandler
         return columnName;
     }
 
-    /**
-     * Gets the enclosing document name.
-     * 
-     * @param m
-     *            the m
-     * @param columnName
-     *            the column name
-     * @return the enclosing document name
-     */
-    String getEnclosingDocumentName(EntityMetadata m, String columnName)
-    {
-        String enclosingDocumentName = null;
-
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                m.getPersistenceUnit());
-        EntityType entityType = metaModel.entity(m.getEntityClazz());
-
-        try
-        {
-            Attribute attrib = entityType.getAttribute(columnName);
-            Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(m.getEntityClazz());
-
-            for (String key : embeddables.keySet())
-            {
-                EmbeddableType superColumn = embeddables.get(key);
-                // List<Column> columns = superColumn.getColumns();
-                Set<Attribute> columns = superColumn.getAttributes();
-
-                for (Attribute column : columns)
-                {
-                    if (((AbstractAttribute) column).getJPAColumnName().equals(columnName))
-                    {
-                        enclosingDocumentName = key;
-                        break;
-                    }
-                }
-
-            }
-        }
-        catch (IllegalArgumentException iax)
-        {
-            log.info("No column found for: " + columnName + " returning null");
-            return null;
-        }
-        return enclosingDocumentName;
-    }
+   
 
     /**
      * Retrieves A collection of embedded object within a document that match a
