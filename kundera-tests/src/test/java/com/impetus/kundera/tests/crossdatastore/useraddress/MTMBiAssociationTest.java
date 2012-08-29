@@ -141,45 +141,36 @@ public class MTMBiAssociationTest extends TwinAssociation
     protected void find()
     {
         PersonnelBiMToM person1 = (PersonnelBiMToM) dao.findPerson(PersonnelBiMToM.class, "bimanytomany_1");
-        Assert.assertNotNull(person1);
-        Assert.assertEquals("bimanytomany_1", person1.getPersonId());
-        Assert.assertEquals("Amresh", person1.getPersonName());
-
-        Set<HabitatBiMToM> addresses1 = person1.getAddresses();
-        Assert.assertNotNull(addresses1);
-        Assert.assertFalse(addresses1.isEmpty());
-        Assert.assertEquals(2, addresses1.size());
-        HabitatBiMToM address11 = (HabitatBiMToM) addresses1.toArray()[0];
-        Assert.assertNotNull(address11);
-        HabitatBiMToM address12 = (HabitatBiMToM) addresses1.toArray()[1];
-        Assert.assertNotNull(address12);
+        assertPerson1(person1);
 
         PersonnelBiMToM person2 = (PersonnelBiMToM) dao.findPerson(PersonnelBiMToM.class, "bimanytomany_2");
-        Assert.assertNotNull(person2);
+        assertPerson2(person2);
 
-        Assert.assertEquals("bimanytomany_2", person2.getPersonId());
-        Assert.assertEquals("Vivek", person2.getPersonName());
+    }
 
-        Set<HabitatBiMToM> addresses2 = person2.getAddresses();
-        Assert.assertNotNull(addresses2);
-        Assert.assertFalse(addresses2.isEmpty());
-        Assert.assertEquals(2, addresses2.size());
-        HabitatBiMToM address21 = (HabitatBiMToM) addresses2.toArray()[0];
-        Assert.assertNotNull(address21);
-        HabitatBiMToM address22 = (HabitatBiMToM) addresses2.toArray()[1];
-        Assert.assertNotNull(address22);
-
-    }   
+    
     
 
     @Override
     protected void findPersonByIdColumn()
     {
+        // Find Person 1
+        PersonnelBiMToM p1 = (PersonnelBiMToM) dao.findPersonByIdColumn(PersonnelBiMToM.class, "bimanytomany_1");
+        assertPerson1(p1);
+
+        // Find Person 2
+        PersonnelBiMToM p2 = (PersonnelBiMToM) dao.findPersonByIdColumn(PersonnelBiMToM.class, "bimanytomany_2");
+        assertPerson2(p2);
     }
 
     @Override
     protected void findPersonByName()
     {
+        List<PersonnelBiMToM> persons = dao.findPersonByName(PersonnelBiMToM.class, "Amresh");    
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 1);
+        assertPerson1(persons.get(0));
     }
 
     @Override
@@ -213,6 +204,45 @@ public class MTMBiAssociationTest extends TwinAssociation
     {
         tearDownInternal();
     }
+    
+    /**
+     * @param person2
+     */
+    private void assertPerson2(PersonnelBiMToM person2)
+    {
+        Assert.assertNotNull(person2);
+
+        Assert.assertEquals("bimanytomany_2", person2.getPersonId());
+        Assert.assertEquals("Vivek", person2.getPersonName());
+
+        Set<HabitatBiMToM> addresses2 = person2.getAddresses();
+        Assert.assertNotNull(addresses2);
+        Assert.assertFalse(addresses2.isEmpty());
+        Assert.assertEquals(2, addresses2.size());
+        HabitatBiMToM address21 = (HabitatBiMToM) addresses2.toArray()[0];
+        Assert.assertNotNull(address21);
+        HabitatBiMToM address22 = (HabitatBiMToM) addresses2.toArray()[1];
+        Assert.assertNotNull(address22);
+    }
+
+    /**
+     * @param person1
+     */
+    private void assertPerson1(PersonnelBiMToM person1)
+    {
+        Assert.assertNotNull(person1);
+        Assert.assertEquals("bimanytomany_1", person1.getPersonId());
+        Assert.assertEquals("Amresh", person1.getPersonName());
+
+        Set<HabitatBiMToM> addresses1 = person1.getAddresses();
+        Assert.assertNotNull(addresses1);
+        Assert.assertFalse(addresses1.isEmpty());
+        Assert.assertEquals(2, addresses1.size());
+        HabitatBiMToM address11 = (HabitatBiMToM) addresses1.toArray()[0];
+        Assert.assertNotNull(address11);
+        HabitatBiMToM address12 = (HabitatBiMToM) addresses1.toArray()[1];
+        Assert.assertNotNull(address12);
+    }   
 
     @Override
     protected void loadDataForPERSONNEL() throws TException, InvalidRequestException, UnavailableException,

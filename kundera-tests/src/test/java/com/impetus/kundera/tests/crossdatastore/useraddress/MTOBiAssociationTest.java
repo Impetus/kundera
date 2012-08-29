@@ -41,6 +41,7 @@ import org.junit.Test;
 import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatBiMTo1;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelBiMTo1;
+import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelBiMTo1;
 
 public class MTOBiAssociationTest extends TwinAssociation
 {
@@ -104,15 +105,38 @@ public class MTOBiAssociationTest extends TwinAssociation
 
     }   
     
+    @Override
+    protected void find()
+    {
+        // Find Person 1
+        PersonnelBiMTo1 p1 = (PersonnelBiMTo1) dao.findPerson(PersonnelBiMTo1.class, "bimanytoone_1");
+        assertPerson1(p1);
+
+        // Find Person 2
+        PersonnelBiMTo1 p2 = (PersonnelBiMTo1) dao.findPerson(PersonnelBiMTo1.class, "bimanytoone_2");
+        assertPerson2(p2);
+
+    }
+
+    
+    
 
     @Override
     protected void findPersonByIdColumn()
     {
+        PersonnelBiMTo1 p = (PersonnelBiMTo1) dao.findPersonByIdColumn(PersonnelBiMTo1.class, "bimanytoone_1");    
+        assertPerson1(p);
     }
 
     @Override
     protected void findPersonByName()
     {
+        List<PersonnelBiMTo1> persons = dao.findPersonByName(PersonnelBiMTo1.class, "Amresh");
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 1);
+        PersonnelBiMTo1 person = persons.get(0);
+        assertPerson1(person);
     }
 
     @Override
@@ -123,28 +147,23 @@ public class MTOBiAssociationTest extends TwinAssociation
     @Override
     protected void findAddressByStreet()
     {
+    }    
+
+    @Override
+    protected void update()
+    {
     }
 
     @Override
-    protected void find()
+    protected void remove()
     {
-        // Find Person 1
-        PersonnelBiMTo1 p1 = (PersonnelBiMTo1) dao.findPerson(PersonnelBiMTo1.class, "bimanytoone_1");
-        Assert.assertNotNull(p1);
-        Assert.assertEquals("bimanytoone_1", p1.getPersonId());
-        Assert.assertEquals("Amresh", p1.getPersonName());
-
-        HabitatBiMTo1 add = p1.getAddress();
-        Assert.assertNotNull(add);
-
-        Assert.assertEquals("bimanytoone_b", add.getAddressId());
-        Set<PersonnelBiMTo1> people = add.getPeople();
-        Assert.assertNotNull(people);
-        Assert.assertFalse(people.isEmpty());
-        Assert.assertEquals(2, people.size());
-
-        // Find Person 2
-        PersonnelBiMTo1 p2 = (PersonnelBiMTo1) dao.findPerson(PersonnelBiMTo1.class, "bimanytoone_2");
+    }
+    
+    /**
+     * @param p2
+     */
+    private void assertPerson2(PersonnelBiMTo1 p2)
+    {
         Assert.assertNotNull(p2);
         Assert.assertEquals("bimanytoone_2", p2.getPersonId());
         Assert.assertEquals("Vivek", p2.getPersonName());
@@ -157,17 +176,25 @@ public class MTOBiAssociationTest extends TwinAssociation
         Assert.assertNotNull(people2);
         Assert.assertFalse(people2.isEmpty());
         Assert.assertEquals(2, people2.size());
-
     }
 
-    @Override
-    protected void update()
+    /**
+     * @param p1
+     */
+    private void assertPerson1(PersonnelBiMTo1 p1)
     {
-    }
+        Assert.assertNotNull(p1);
+        Assert.assertEquals("bimanytoone_1", p1.getPersonId());
+        Assert.assertEquals("Amresh", p1.getPersonName());
 
-    @Override
-    protected void remove()
-    {
+        HabitatBiMTo1 add = p1.getAddress();
+        Assert.assertNotNull(add);
+
+        Assert.assertEquals("bimanytoone_b", add.getAddressId());
+        Set<PersonnelBiMTo1> people = add.getPeople();
+        Assert.assertNotNull(people);
+        Assert.assertFalse(people.isEmpty());
+        Assert.assertEquals(2, people.size());
     }
 
     /**
