@@ -41,7 +41,7 @@ public class TwibaseTest extends TwitterTestBase
     @Test
     public void testOnExecute()
     {
-         executeTestSuite();
+        executeTestSuite();
     }
 
     @Override
@@ -53,19 +53,19 @@ public class TwibaseTest extends TwitterTestBase
     @Override
     void startServer()
     {
-        // if (!cli.isStarted())
-        // {
-        // cli.startCluster();
-        // }
+        if (!cli.isStarted())
+        {
+            cli.startCluster();
+        }
     }
 
     @Override
     void stopServer()
     {
-        // if (cli.isStarted())
-        // {
-        // cli.stopCluster();
-        // }
+        if (cli.isStarted())
+        {
+            cli.stopCluster();
+        }
     }
 
     @Override

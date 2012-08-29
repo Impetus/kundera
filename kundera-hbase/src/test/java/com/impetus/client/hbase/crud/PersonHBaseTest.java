@@ -65,11 +65,7 @@ public class PersonHBaseTest extends BaseTest
         col = new java.util.HashMap<Object, Object>();
     }
 
-    // @Test
-    // public void testDummy()
-    // {
-    // // just to fix CI issue. TO BE DELETED!!!
-    // }
+
     @Test
     public void onInsertHbase() throws Exception
     {
