@@ -18,7 +18,7 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="index.home.dir" value="./lucene" />
+			<!-- <property name="index.home.dir" value="./lucene" /> -->
 		</properties>
 
 	</persistence-unit>
@@ -94,7 +94,7 @@
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
 			<property name="kundera.nodes" value="192.168.145.168" />
-<!-- 			 <property name="kundera.nodes" value="localhost" /> -->
+			 <!-- <property name="kundera.nodes" value="localhost" /> -->
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaTests" />
 			<property name="kundera.dialect" value="mongodb" />
