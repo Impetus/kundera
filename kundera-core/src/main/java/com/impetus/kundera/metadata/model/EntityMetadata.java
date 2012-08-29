@@ -73,12 +73,6 @@ public final class EntityMetadata
     
     private Map<String, String> jpaColumnMapping = new HashMap<String, String>();
     
-    /*
-     * Fields related metadata properties
-     */
-
-//    /** Column that keeps row identifier. */
-//    private Column idColumn;
 
     /** The read identifier method. */
     private Method readIdentifierMethod;
@@ -86,11 +80,6 @@ public final class EntityMetadata
     /** The write identifier method. */
     private Method writeIdentifierMethod;
 
-//    /** Maps of column name and their metadata. */
-//    private Map<String, Column> columnsMap = new HashMap<String, Column>();
-
-    /** Map of embedded column names and their metadata. */
-//    private Map<String, EmbeddedColumn> embeddedColumnsMap = new HashMap<String, EmbeddedColumn>();
 
     /** The index prperties. */
     private List<PropertyIndex> indexPrperties = new ArrayList<PropertyIndex>();
@@ -101,15 +90,9 @@ public final class EntityMetadata
     /** The callback methods map. */
     private Map<Class<?>, List<? extends CallbackMethod>> callbackMethodsMap = new HashMap<Class<?>, List<? extends CallbackMethod>>();
 
-    // TODO: Unused, remove this
-//    /** The embeddable collection. */
-//    private List<Class<?>> embeddableCollection = new ArrayList<Class<?>>();
 
     /** Relationship map, key=>property name, value=>relation. */
     private Map<String, Relation> relationsMap = new HashMap<String, Relation>();
-
-//    /** The db type. */
-//    private DBType dbType;
 
     /** type. */
     private Type type;
