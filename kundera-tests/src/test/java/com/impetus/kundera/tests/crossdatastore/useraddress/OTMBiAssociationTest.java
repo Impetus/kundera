@@ -128,11 +128,19 @@ public class OTMBiAssociationTest extends TwinAssociation
     @Override
     protected void findPersonByIdColumn()
     {
+        PersonnelBi1ToM p = (PersonnelBi1ToM) dao.findPersonByIdColumn(PersonnelBi1ToM.class, "bionetomany_1");    
+        assertPerson(p);  
     }
 
     @Override
     protected void findPersonByName()
     {
+        List<PersonnelBi1ToM> persons = dao.findPersonByName(PersonnelBi1ToM.class, "Amresh");
+        Assert.assertNotNull(persons);
+        Assert.assertFalse(persons.isEmpty());
+        Assert.assertTrue(persons.size() == 1);
+        PersonnelBi1ToM person = persons.get(0);
+        assertPerson(person);
     }
 
     @Override
