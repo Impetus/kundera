@@ -17,21 +17,22 @@ package com.impetus.kundera.metadata.model.type;
 
 import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.ManagedType;
+import javax.persistence.metamodel.Type;
 
 /**
-*  TODO::::: comments required.
+* Default implementation of {@link EmbeddableType}
+ * 
+ * <code> DefaultEmbeddableType</code> implements <code>EmbeddableType</code> interface, invokes constructor with
+ * PersistenceType.EMBEDDABLE. Default implementation of {@link Type} interface is provided by {@link AbstractType}
+
  * @author vivek.mishra
- *
+ * @param <X>  Embeddable generic java type.
  */
 public class DefaultEmbeddableType<X> extends AbstractManagedType<X> implements EmbeddableType<X>
 {
 
     /**
-     * @param clazz
-     * @param persistenceType
-     * @param superClazzType
-     * @param declaredSingluarAttribs
-     * @param declaredPluralAttributes
+     * Default constructor using fields. 
      */
     public DefaultEmbeddableType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
             ManagedType<? super X> superClazzType)

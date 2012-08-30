@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 
 import javax.persistence.Column;
 import javax.persistence.metamodel.ManagedType;
+import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
@@ -27,11 +28,13 @@ import org.apache.commons.logging.LogFactory;
 
 
 /**
- *  TODO::::: comments required.
- * @author vivek.mishra
+ * Implementation class for <code> {@link SetAttribute} </code> interface.
+ * Offers metadata information implementation for collection attribute as per jpa.
  *
- * @param <X>
- * @param <T>
+ * @author vivek.mishra
+ * 
+ * @param <X>     managed type.
+ * @param <T>     attribute type.
  */
 
 public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> implements SingularAttribute<X, T>
@@ -39,13 +42,17 @@ public class DefaultSingularAttribute<X, T> extends AbstractAttribute<X, T> impl
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(DefaultSingularAttribute.class);
     
+    /** Attribute is an id?*/
     private boolean isId;
+   
+    
+    
     /**
-     * @param attribName
-     * @param persistenceAttribType
-     * @param member
-     * @param attribType
-     * @param managedType
+     * @param attribName                       attribute name.
+     * @param persistenceAttribType            persistent attribute type.
+     * @param member                           attribute's java member.. 
+     * @param attribType                       attribute type. 
+     * @param managedType                      managed type. 
      */
     public DefaultSingularAttribute(String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType, Field member,

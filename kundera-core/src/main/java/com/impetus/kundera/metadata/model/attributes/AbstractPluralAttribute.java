@@ -19,15 +19,19 @@ import java.lang.reflect.Field;
 
 import javax.persistence.metamodel.Bindable.BindableType;
 import javax.persistence.metamodel.ManagedType;
+import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.PluralAttribute.CollectionType;
 import javax.persistence.metamodel.Type;
 
+
 /**
- * TODO::::: comments required.
+ * Abstract class to provide generalisation to <code> {@link PluralAttribute} </code> interface.
  * 
  * @author vivek.mishra
- * 
- * @param <E>
+ *
+ * @param <X>      managed entity java type.
+ * @param <E>      attribute's java type.
+ * @param <T>      Collection type of plural attributes.  
  */
 public abstract class AbstractPluralAttribute<X,E,T> extends AbstractAttribute<X,E>
 {
@@ -35,13 +39,15 @@ public abstract class AbstractPluralAttribute<X,E,T> extends AbstractAttribute<X
     private Class<T> collectionClazz;
 
     /**
-     * @param attribType
-     * @param attribName
-     * @param persistenceAttribType
-     * @param managedType
-     * @param member
+     * Constructor with fields.
+     * 
+     * @param attribType                     attribute type
+     * @param attribName                     attribute field's name
+     * @param persistenceAttribType          persistent attribute type
+     * @param managedType                    type of managed entity.
+     * @param member                         java member.
      */
-    public AbstractPluralAttribute(Type<E> attribType, String attribName,
+    AbstractPluralAttribute(Type<E> attribType, String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
             ManagedType<X> managedType, Field member, Class<T> clazz)
     {

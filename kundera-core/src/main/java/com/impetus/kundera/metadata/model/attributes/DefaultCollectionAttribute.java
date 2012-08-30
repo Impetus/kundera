@@ -25,23 +25,27 @@ import javax.persistence.metamodel.Type;
 
 
 /**
- * TODO::::: comments required.
+ * Implementation class for <code> {@link CollectionAttribute} </code> interface.
+ * Offers metadata information implementation for collection attribute as per jpa.
  * 
  * @author vivek.mishra
  * 
- * @param <X>
- * @param <E>
+ * @param <X>      Managed type
+ * @param <E>      collection's attribute type
  */
 public class DefaultCollectionAttribute<X, E> extends AbstractPluralAttribute<X, E, Collection<E>> implements
         CollectionAttribute<X, E>
 {
 
     /**
-     * @param attribType
-     * @param attribName
-     * @param persistenceAttribType
-     * @param managedType
-     * @param member
+   /**
+     * Constructor using fields.
+     * 
+     * @param attribType                       attribute type
+     * @param attribName                       attribute name   
+     * @param persistenceAttribType            persistent attribute type.
+     * @param managedType                      managed type
+     * @param member                           attribute's java member. 
      */
     public DefaultCollectionAttribute(Type<E> attribType, String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,

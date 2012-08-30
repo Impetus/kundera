@@ -16,20 +16,23 @@
 package com.impetus.kundera.metadata.model.type;
 
 import javax.persistence.metamodel.MappedSuperclassType;
+import javax.persistence.metamodel.Type;
 
-/**
- * TODO::::: comments required.
+
+ /**
+* Default implementation of {@link MappedSuperclassType}
  * 
+ * <code> DefaultMappedSuperClass</code> implements <code>MappedSuperclassType</code> interface, invokes constructor with
+ * PersistenceType.MAPPED_SUPERCLASS. Default implementation of {@link Type} interface is provided by {@link AbstractType}
+
  * @author vivek.mishra
- * 
+ * @param <X>  Embeddable generic java type.
  */
 public class DefaultMappedSuperClass<X> extends AbstractIdentifiableType<X> implements MappedSuperclassType<X>
 {
 
     /**
-     * @param clazz
-     * @param persistenceType
-     * @param superClazzType
+     * Default constructor using fields.
      */
     public DefaultMappedSuperClass(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
             AbstractIdentifiableType<? super X> superClazzType)

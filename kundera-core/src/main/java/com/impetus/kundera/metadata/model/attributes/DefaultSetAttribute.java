@@ -25,23 +25,26 @@ import javax.persistence.metamodel.Type;
 
 
 /**
- * TODO::::: comments required.
+ * Implementation class for <code> {@link SetAttribute} </code> interface.
+ * Offers metadata information implementation for collection attribute as per jpa.
  * 
  * @author vivek.mishra
  * 
- * @param <X>
- * @param <E>
+ * @param <X> managed type
+ * @param <E> attribute type in set
  */
 public class DefaultSetAttribute<X, E> extends AbstractPluralAttribute<X, E, Set<E>> implements SetAttribute<X, E>
 {
 
     
     /**
-     * @param attribType
-     * @param attribName
-     * @param persistenceAttribType
-     * @param managedType
-     * @param member
+     * Constructor using fields.
+     * 
+     * @param attribType                       attribute type
+     * @param attribName                       attribute name   
+     * @param persistenceAttribType            persistent attribute type.
+     * @param managedType                      managed type
+     * @param member                           attribute's java member. 
      */
     public DefaultSetAttribute(Type<E> attribType, String attribName, 
                                javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
