@@ -440,7 +440,7 @@ public class KunderaQuery
                     columnName = ((AbstractAttribute)metaModel.entity(entityClass).getAttribute(property)).getJPAColumnName();
                 }catch(IllegalArgumentException iaex)
                 {
-                    logger.warn("No column found by this name : " + property + "checking for embeddedfield" );
+                    logger.info("No column found by this name : " + property + " checking for embeddedfield" );
                 }
                 // where condition may be for search within embedded object
                 if (columnName == null && property.indexOf(".") > 0)
