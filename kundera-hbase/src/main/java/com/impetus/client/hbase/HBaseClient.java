@@ -31,6 +31,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.filter.Filter;
+import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -425,7 +427,8 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     public void delete(Object entity, Object pKey)
     {
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entity.getClass());
-        deleteByColumn(metadata.getTableName(), ((AbstractAttribute)metadata.getIdAttribute()).getJPAColumnName(), pKey);
+        deleteByColumn(metadata.getTableName(), ((AbstractAttribute) metadata.getIdAttribute()).getJPAColumnName(),
+                pKey);
     }
 
     /*
@@ -438,13 +441,13 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     public List<Object> findByRelation(String colName, String colValue, Class entityClazz)
     {
         CompareOp operator = HBaseUtils.getOperator("=", false);
-        
+
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
-        
+
         byte[] valueInBytes = HBaseUtils.getBytes(colValue);
         Filter f = new SingleColumnValueFilter(Bytes.toBytes(colName), Bytes.toBytes(colName), operator, valueInBytes);
-        return ((HBaseDataHandler)handler).scanData(f, m.getTableName(), entityClazz, m, colName);
-//        reader.set   
+        return ((HBaseDataHandler) handler).scanData(f, m.getTableName(), entityClazz, m, colName);
+        // reader.set
     }
 
     /*
@@ -479,7 +482,23 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
     public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
             Class entityClazz)
     {
-        throw new UnsupportedOperationException("Method not supported.");
-    }
+        CompareOp operator = HBaseUtils.getOperator("=", false);
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
 
+        byte[] valueInBytes = HBaseUtils.getBytes(columnValue);
+        Filter f = new SingleColumnValueFilter(Bytes.toBytes(columnName), Bytes.toBytes(columnName), operator,
+                valueInBytes);
+        KeyOnlyFilter keyFilter = new KeyOnlyFilter();
+        FilterList filterList = new FilterList(f, keyFilter);
+        try
+        {
+            return handler.scanRowyKeys(filterList, tableName, Constants.JOIN_COLUMNS_FAMILY_NAME,columnName + "_" + columnValue);
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

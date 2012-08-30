@@ -44,8 +44,8 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.filter.Filter;
+import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.hsqldb.lib.HashSet;
 
 import com.impetus.client.hbase.HBaseData;
 import com.impetus.client.hbase.Reader;
@@ -58,7 +58,6 @@ import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.MetadataUtils;
-import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -246,7 +245,7 @@ public class HBaseDataHandler implements DataHandler
         List<String> relationNames = m.getRelationNames();
         // Load raw data from HBase
         hTable = gethTable(tableName);
-        List<HBaseData> results = hbaseReader.loadAll(hTable, filter, startRow, endRow,null);
+        List<HBaseData> results = hbaseReader.loadAll(hTable, filter, startRow, endRow, null);
         output = onRead(tableName, clazz, m, output, hTable, entity, relationNames, results);
 
         return output;
@@ -393,7 +392,8 @@ public class HBaseDataHandler implements DataHandler
 
         for (HBaseDataWrapper wrapper : persistentData)
         {
-            hbaseWriter.writeColumns(hTable, wrapper.getColumnFamily(), wrapper.getRowKey(), wrapper.getColumns(), wrapper.getEntity());
+            hbaseWriter.writeColumns(hTable, wrapper.getColumnFamily(), wrapper.getRowKey(), wrapper.getColumns(),
+                    wrapper.getEntity());
 
         }
         // if (columns != null && !columns.isEmpty())
@@ -592,9 +592,9 @@ public class HBaseDataHandler implements DataHandler
             // for (Column column : columns)
             for (Attribute column : columns)
             {
-                Class javaType = ((AbstractAttribute)column).getBindableJavaType();
-                String key = ((AbstractAttribute)column).getJPAColumnName();
-                if(metaModel.isEmbeddable(javaType))
+                Class javaType = ((AbstractAttribute) column).getBindableJavaType();
+                String key = ((AbstractAttribute) column).getJPAColumnName();
+                if (metaModel.isEmbeddable(javaType))
                 {
 
                     EmbeddableType columnFamily = metaModel.embeddable(javaType);
@@ -605,7 +605,8 @@ public class HBaseDataHandler implements DataHandler
                     // Get a name->field map for columns in this column family
                     Map<String, Field> columnNameToFieldMap = MetadataUtils.createColumnsFieldMap(m, columnFamily);
 
-                    // Column family can be either @Embedded or @EmbeddedCollection
+                    // Column family can be either @Embedded or
+                    // @EmbeddedCollection
                     if (Collection.class.isAssignableFrom(columnFamilyClass))
                     {
 
@@ -622,7 +623,8 @@ public class HBaseDataHandler implements DataHandler
                         for (KeyValue colData : hbaseValues)
                         {
                             String cfInHbase = Bytes.toString(colData.getFamily());
-                            // Only populate those data from Hbase into entity that
+                            // Only populate those data from Hbase into entity
+                            // that
                             // matches with column family name
                             // in the format <Collection field name>#<sequence
                             // count>
@@ -642,13 +644,16 @@ public class HBaseDataHandler implements DataHandler
                             {
                                 prevCFNameCounter = cfNameCounter;
 
-                                // Fresh embedded object for the next column family
+                                // Fresh embedded object for the next column
+                                // family
                                 // in collection
-                                embeddedObject = MetadataUtils.getEmbeddedGenericObjectInstance(embeddedCollectionField);
+                                embeddedObject = MetadataUtils
+                                        .getEmbeddedGenericObjectInstance(embeddedCollectionField);
                             }
 
                             // Set Hbase data into the embedded object
-                            setHBaseDataIntoObject(colData, columnFamilyFieldInEntity, columnNameToFieldMap, embeddedObject);
+                            setHBaseDataIntoObject(colData, columnFamilyFieldInEntity, columnNameToFieldMap,
+                                    embeddedObject);
 
                             embeddedObjectArr[cfNameCounter] = embeddedObject;
 
@@ -718,33 +723,32 @@ public class HBaseDataHandler implements DataHandler
 
                     }
 
-                   
-                } else if(!column.getName().equals(m.getIdAttribute().getName()))
-                {
-                Field columnField = (Field) column.getJavaMember();
-                String columnName = ((AbstractAttribute) column).getJPAColumnName();
-
-                for (KeyValue colData : hbaseValues)
-                {
-                    String hbaseColumn = Bytes.toString(colData.getFamily());
-                    // String colName = getColumnName(hbaseColumn);
-                    String colName = hbaseColumn;
-                    if (relationNames != null && relationNames.contains(colName))
-                    {
-                        relations.put(colName, Bytes.toString(colData.getValue()));
-                    }
-                    else  if (colName != null && colName.equalsIgnoreCase(columnName.toLowerCase()))
-                    {
-                        byte[] hbaseColumnValue = colData.getValue();
-                        PropertyAccessorHelper.set(entity, columnField,
-                                HBaseUtils.fromBytes(hbaseColumnValue, columnField.getType()));
-
-                    }
                 }
+                else if (!column.getName().equals(m.getIdAttribute().getName()))
+                {
+                    Field columnField = (Field) column.getJavaMember();
+                    String columnName = ((AbstractAttribute) column).getJPAColumnName();
+
+                    for (KeyValue colData : hbaseValues)
+                    {
+                        String hbaseColumn = Bytes.toString(colData.getFamily());
+                        // String colName = getColumnName(hbaseColumn);
+                        String colName = hbaseColumn;
+                        if (relationNames != null && relationNames.contains(colName))
+                        {
+                            relations.put(colName, Bytes.toString(colData.getValue()));
+                        }
+                        else if (colName != null && colName.equalsIgnoreCase(columnName.toLowerCase()))
+                        {
+                            byte[] hbaseColumnValue = colData.getValue();
+                            PropertyAccessorHelper.set(entity, columnField,
+                                    HBaseUtils.fromBytes(hbaseColumnValue, columnField.getType()));
+
+                        }
+                    }
                 }
             }
 
-            
             if (!relations.isEmpty())
             {
                 return new EnhanceEntity(entity, rowKey, relations);
@@ -901,14 +905,13 @@ public class HBaseDataHandler implements DataHandler
             {
                 puthTable(hTable);
             }
-
         }
         return output;
     }
 
     /**
      * @author vivek.mishra
-     *
+     * 
      */
     private class HBaseDataWrapper
     {
@@ -978,13 +981,14 @@ public class HBaseDataHandler implements DataHandler
         List returnedResults = new ArrayList();
         try
         {
-            List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null,qualifier);
-            if(results != null)
+            List<HBaseData> results = hbaseReader.loadAll(gethTable(tableName), f, null, null, qualifier);
+            if (results != null)
             {
-                for(HBaseData row : results)
+                for (HBaseData row : results)
                 {
                     Object entity = clazz.newInstance();
-                    returnedResults.add(populateEntityFromHbaseData(entity, row, m, new String(row.getRowKey()), m.getRelationNames()));
+                    returnedResults.add(populateEntityFromHbaseData(entity, row, m, new String(row.getRowKey()),
+                            m.getRelationNames()));
                 }
             }
         }
@@ -1003,8 +1007,15 @@ public class HBaseDataHandler implements DataHandler
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
         return returnedResults;
-        
+    }
+
+    @Override
+    public Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName)
+            throws IOException
+    {
+        HTable hTable = null;
+        hTable = gethTable(tableName);
+        return hbaseReader.scanRowyKeys(hTable, filterList, columnFamilyName, columnName);
     }
 }
