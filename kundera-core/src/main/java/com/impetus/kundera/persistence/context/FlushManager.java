@@ -172,8 +172,8 @@ public class FlushManager
                         {
                             String joinColumnName = (String) jtmd.getJoinColumns().toArray()[0];
                             String inverseJoinColumnName = (String) jtmd.getInverseJoinColumns().toArray()[0];
-                            Object entityId = ObjectGraphBuilder.getEntityId(node.getNodeId());
-                            Object childId = ObjectGraphBuilder.getEntityId(childNode.getNodeId());
+                            Object entityId = node.getEntityId(); /*ObjectGraphBuilder.getEntityId(node.getNodeId());*/
+                            Object childId = childNode.getEntityId();/*ObjectGraphBuilder.getEntityId(childNode.getNodeId());*/
 
                             Set<Object> childValues = new HashSet<Object>();
                             childValues.add(childId);

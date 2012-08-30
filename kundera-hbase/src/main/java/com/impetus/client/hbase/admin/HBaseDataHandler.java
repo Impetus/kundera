@@ -471,6 +471,8 @@ public class HBaseDataHandler implements DataHandler
                                 && hbaseColumn.startsWith(inverseJoinColumnName))
                         {
                             byte[] val = colData.getValue();
+                            
+                            // TODO : Because no attribute class is present, so cannot be done.
                             String hbaseColumnValue = Bytes.toString(val);
 
                             foreignKeys.add((E) hbaseColumnValue);
@@ -630,7 +632,7 @@ public class HBaseDataHandler implements DataHandler
                             {
                                 if (relationNames != null && relationNames.contains(cfInHbase))
                                 {
-                                    relations.put(cfInHbase, Bytes.toString(colData.getValue()));
+                                    relations.put(cfInHbase, getObjectFromByteArray(entityType, colData.getValue(), cfInHbase, m));/*Bytes.toString(colData.getValue()))*/
                                 }
                                 continue;
 
@@ -684,7 +686,7 @@ public class HBaseDataHandler implements DataHandler
                             {
                                 if (relationNames != null && relationNames.contains(cfInHbase))
                                 {
-                                    relations.put(cfInHbase, Bytes.toString(colData.getValue()));
+                                    relations.put(cfInHbase, getObjectFromByteArray(entityType, colData.getValue(), cfInHbase, m))/*Bytes.toString(colData.getValue()))*/;
                                 }
                                 continue;
 
@@ -709,7 +711,7 @@ public class HBaseDataHandler implements DataHandler
                                 }
                                 else
                                 {
-                                    columnFamilyObj = Bytes.toString(columnValue);
+                                    columnFamilyObj = getObjectFromByteArray(entityType, columnValue, cfInHbase, m)/*Bytes.toString(columnValue)*/;
                                 }
                             }
 
@@ -731,7 +733,7 @@ public class HBaseDataHandler implements DataHandler
                     String colName = hbaseColumn;
                     if (relationNames != null && relationNames.contains(colName))
                     {
-                        relations.put(colName, Bytes.toString(colData.getValue()));
+                        relations.put(colName, getObjectFromByteArray(entityType, colData.getValue(), colName, m))/*Bytes.toString(colData.getValue()))*/;
                     }
                     else  if (colName != null && colName.equalsIgnoreCase(columnName.toLowerCase()))
                     {
@@ -799,7 +801,7 @@ public class HBaseDataHandler implements DataHandler
             }
             else
             {
-                columnFamilyObj = Bytes.toString(columnValue);
+                columnFamilyObj =  HBaseUtils.fromBytes(columnValue, columnFamilyObj.getClass());/*getObBytes.toString(columnValue);*/
             }
         }
 
@@ -1007,4 +1009,22 @@ public class HBaseDataHandler implements DataHandler
         return returnedResults;
         
     }
+
+
+    private Object getObjectFromByteArray(EntityType entityType, byte[] value, String jpaColumnName, EntityMetadata m)
+    {
+        if(jpaColumnName != null)
+        {
+            String fieldName = m.getFieldName(jpaColumnName);
+            if(fieldName != null)
+            {
+                Attribute attribute = entityType.getAttribute(fieldName);
+                return PropertyAccessorHelper.getObject(attribute.getJavaType(), value);
+            }
+        }
+        
+        log.warn("No value found for : " + jpaColumnName + " returning null");
+        return null;
+    }
+
 }

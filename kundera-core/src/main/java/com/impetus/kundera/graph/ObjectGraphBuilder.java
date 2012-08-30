@@ -62,6 +62,28 @@ public class ObjectGraphBuilder
         return objectGraph;
     }
 
+
+    public static String getNodeId(Object pk, Object nodeData)
+    {
+        StringBuffer strBuffer = new StringBuffer(nodeData.getClass().getName());
+        strBuffer.append(Constants.NODE_ID_SEPARATOR);
+        strBuffer.append(pk);
+        return strBuffer.toString();
+    }
+
+    public static String getNodeId(Object pk, Class<?> objectClass)
+    {
+
+        StringBuffer strBuffer = new StringBuffer(objectClass.getName());
+        strBuffer.append(Constants.NODE_ID_SEPARATOR);
+        strBuffer.append(pk);
+        return strBuffer.toString();
+
+        // return objectClass.getName() + Constants.NODE_ID_SEPARATOR +
+        // pk.toString();
+    }
+
+
     /**
      * Constructs and returns {@link Node} representation for a given entity
      * object. Output is fully constructed graph with relationships embedded.
@@ -237,31 +259,4 @@ public class ObjectGraphBuilder
 
         return linkProperties;
     }
-
-    public static String getNodeId(Object pk, Object nodeData)
-    {
-        StringBuffer strBuffer = new StringBuffer(nodeData.getClass().getName());
-        strBuffer.append(Constants.NODE_ID_SEPARATOR);
-        strBuffer.append(pk);
-        return strBuffer.toString();
-    }
-
-    public static String getNodeId(Object pk, Class<?> objectClass)
-    {
-
-        StringBuffer strBuffer = new StringBuffer(objectClass.getName());
-        strBuffer.append(Constants.NODE_ID_SEPARATOR);
-        strBuffer.append(pk);
-        return strBuffer.toString();
-
-        // return objectClass.getName() + Constants.NODE_ID_SEPARATOR +
-        // pk.toString();
-    }
-
-    public static Object getEntityId(String nodeId)
-    {
-
-        return nodeId.substring(nodeId.indexOf(Constants.NODE_ID_SEPARATOR) + 1, nodeId.length());
-    }
-
 }

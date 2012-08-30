@@ -72,6 +72,7 @@ import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessor;
 import com.impetus.kundera.property.PropertyAccessorFactory;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.KunderaQuery.FilterClause;
 
 /**
@@ -325,7 +326,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      * java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
      */
     @Override
-    public List<Object> findByRelation(String colName, String colValue, Class clazz)
+    public List<Object> findByRelation(String colName, Object colValue, Class clazz)
     {
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(clazz);
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
@@ -333,7 +334,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         List<Object> entities = null;
         IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000,
-                Selector.newIndexExpression(colName, IndexOperator.EQ, Bytes.fromByteArray(colValue.getBytes())));
+                Selector.newIndexExpression(colName, IndexOperator.EQ, Bytes.fromByteArray(PropertyAccessorHelper.getBytes(colValue))));
         Map<Bytes, List<Column>> qResults;
         try
         {

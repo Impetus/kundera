@@ -182,7 +182,7 @@ public interface Client<Q extends Query>
      *            the entity class
      * @return the list list of entities.
      */
-    List<Object> findByRelation(String colName, String colValue, Class entityClazz);
+    List<Object> findByRelation(String colName, Object colValue, Class entityClazz);
 
     /**
      * Returns entity reader instance bind to specific client.
