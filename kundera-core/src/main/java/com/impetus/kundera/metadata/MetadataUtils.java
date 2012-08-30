@@ -380,7 +380,8 @@ public class MetadataUtils
         while(strToken.hasMoreElements())
         {
             embeddableAttributeName = strToken.nextToken();
-            if(strToken.countTokens() > 1)
+            
+            if(strToken.countTokens() > 0)
             {
                 embeddedFieldName = strToken.nextToken();
             }

@@ -266,9 +266,14 @@ public class OTOUniAssociationTest extends TwinAssociation
         // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
-        ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
-        columnDef.setIndex_type(IndexType.KEYS);
-        cfDef.addToColumn_metadata(columnDef);
+        ColumnDef columnDefPersonName = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
+        columnDefPersonName.index_type = IndexType.KEYS;
+
+        ColumnDef columnDefAddressId = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "UTF8Type");
+        columnDefAddressId.index_type = IndexType.KEYS;
+
+        cfDef.addToColumn_metadata(columnDefPersonName);
+        cfDef.addToColumn_metadata(columnDefAddressId);
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(cfDef);
