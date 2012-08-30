@@ -99,8 +99,11 @@ public class ObjectUtils
             {
                 return null;
             }
+            EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit()).entity(sourceObjectClass);
 
-            Object id = metadata.getReadIdentifierMethod().invoke(source);
+            // May break for mapped super class. 
+            
+            Object id = PropertyAccessorHelper.getId(source, metadata);
 
             Object copiedObjectInMap = copiedObjectMap.get(sourceObjectClass.getName() + "#" + id);
             if (copiedObjectInMap != null)
@@ -108,20 +111,9 @@ public class ObjectUtils
                 return copiedObjectInMap;
             }
 
-            target = sourceObjectClass.newInstance();
-
-            // Copy ID field
-            metadata.getWriteIdentifierMethod().invoke(target, id);
-
             // Copy Columns (in a table that doesn't have any embedded objects
             
-            EntityType entityType = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit()).entity(sourceObjectClass);
-
-            //            for (Column column : metadata.getColumnsAsList())
-//            {
-//                Field columnField = column.getField();
-//                PropertyAccessorHelper.set(target, columnField, PropertyAccessorHelper.getObject(source, columnField));
-//            }
+            target = sourceObjectClass.newInstance();
 
             Iterator<Attribute> iter = entityType.getAttributes().iterator();
             while(iter.hasNext())
