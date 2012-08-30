@@ -17,8 +17,6 @@ package com.impetus.client.cassandra.thrift;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,19 +47,16 @@ import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.thrift.TException;
 import org.scale7.cassandra.pelops.Bytes;
-import org.scale7.cassandra.pelops.ColumnOrSuperColumnHelper;
 import org.scale7.cassandra.pelops.Selector;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.CassandraClientBase;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
-import com.impetus.client.cassandra.datahandler.DataHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.query.CassQuery;
@@ -122,12 +117,18 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         this.reader = reader;
     }
 
+    /**
+     * Persists and indexes a {@link Node} to database
+     */
     @Override
     public void persist(Node node)
     {
         super.persist(node);
     }
 
+    /**
+     * Persists a {@link Node} to database
+     */
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
@@ -140,7 +141,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         // check for counter column
         if (isUpdate && entityMetadata.isCounterColumnType())
         {
-            throw new UnsupportedOperationException(" Merge is not permitted on counter column! ");
+            throw new UnsupportedOperationException("Merge is not permitted on counter column");
         }
 
         ThriftRow tf = null;
@@ -152,7 +153,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
         catch (Exception e)
         {
-            log.error("Error during persist, Caused by:" + e.getMessage());
+            log.error("Error during persisting record, Details:" + e.getMessage());
             throw new KunderaException(e);
         }
 
@@ -242,22 +243,22 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
         catch (InvalidRequestException e)
         {
-            log.error(e.getMessage());
+            log.error("Error while persisting record. Details: " + e.getMessage());
             throw new KunderaException(e);
         }
         catch (TException e)
         {
-            log.error(e.getMessage());
+            log.error("Error while persisting record. Details: " + e.getMessage());
             throw new KunderaException(e);
         }
         catch (UnavailableException e)
         {
-            log.error(e.getMessage());
+            log.error("Error while persisting record. Details: " + e.getMessage());
             throw new KunderaException(e);
         }
         catch (TimedOutException e)
         {
-            log.error(e.getMessage());
+            log.error("Error while persisting record. Details: " + e.getMessage());
             throw new KunderaException(e);
         }
         finally
@@ -267,6 +268,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
     }
 
+    /**
+     * Persists a Join table record set into database
+     */
     @Override
     public void persistJoinTable(JoinTableData joinTableData)
     {
@@ -350,6 +354,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         }
     }
 
+    /**
+     * Indexes a {@link Node} to database
+     */
     @Override
     protected void indexNode(Node node, EntityMetadata entityMetadata)
     {
@@ -361,18 +368,27 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
     }
 
+    /**
+     * Finds an entity from database
+     */
     @Override
     public Object find(Class entityClass, Object key)
     {
         return super.find(entityClass, key);
     }
 
+    /**
+     * Finds a {@link List} of entities from database
+     */
     @Override
     public <E> List<E> findAll(Class<E> entityClass, Object... keys)
     {
         return super.findAll(entityClass, keys);
     }
 
+    /**
+     * Finds a {@link List} of entities from database
+     */
     @Override
     public final List find(Class entityClass, List<String> relationNames, boolean isWrapReq, EntityMetadata metadata,
             Object... rowIds)
@@ -397,14 +413,20 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return entities;
     }
 
+    /**
+     * Finds a {@link List} of entities from database for given super columns 
+     */
     @Override
     public <E> List<E> find(Class<E> entityClass, Map<String, String> embeddedColumnMap)
     {
         return super.find(entityClass, embeddedColumnMap, dataHandler);
     }
 
+    /**
+     * Loads super columns from database
+     */
     @Override
-    public final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
+    protected final List<SuperColumn> loadSuperColumns(String keyspace, String columnFamily, String rowId,
             String... superColumnNames)
     {
         if (!isOpen())
@@ -463,6 +485,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return superColumns;
     }
 
+    /**
+     * Retrieves column for a given primary key
+     */
     @Override
     public <E> List<E> getColumnsById(String tableName, String pKeyColumnName, String columnName, Object pKeyColumnValue)
     {
@@ -519,6 +544,9 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         return foreignKeys;
     }
 
+    /**
+     * Retrieves IDs for a given column
+     */
     @Override
     public Object[] findIdsByColumn(String tableName, String pKeyName, String columnName, Object columnValue,
             Class entityClazz)

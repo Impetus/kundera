@@ -34,12 +34,34 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
 public interface InvertedIndexHandler
 {
 
+    /**
+     * Writes a record into inverted index table.
+     * @param node
+     * @param entityMetadata
+     * @param persistenceUnit
+     * @param consistencyLevel
+     * @param cdHandler
+     */
     void write(Node node, EntityMetadata entityMetadata, String persistenceUnit, ConsistencyLevel consistencyLevel,
             CassandraDataHandler cdHandler);
 
+    /**
+     * Searches records from Inverted index table.
+     * @param m
+     * @param filterClauseQueue
+     * @param persistenceUnit
+     * @param consistencyLevel
+     * @return
+     */
     List<SearchResult> search(EntityMetadata m, Queue<FilterClause> filterClauseQueue, String persistenceUnit,
             ConsistencyLevel consistencyLevel);
 
+    /**
+     * Deletes a record from inverted index table.
+     * @param entity
+     * @param metadata
+     * @param consistencyLevel
+     */
     void delete(Object entity, EntityMetadata metadata, ConsistencyLevel consistencyLevel);
 
 }

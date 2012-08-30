@@ -15,38 +15,18 @@
  */
 package com.impetus.client.cassandra.common;
 
-import org.apache.cassandra.thrift.Column;
-
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.property.PropertyAccessException;
-import com.impetus.kundera.property.PropertyAccessorFactory;
 
 /**
  * Provides functionalities related to indexing in cassandra
  * 
  * @author amresh.singh
  */
-public class CassandraIndexHelper
+public final class CassandraIndexHelper
 {
-
-    /**
-     * Generates Secondary index name for a given column on a table
-     * 
-     * @param tableName
-     * @param column
-     * @return
-     * @throws PropertyAccessException
-     */
-    public static String getSecondaryIndexName(String tableName, Column column) throws PropertyAccessException
-    {
-        String indexName = tableName + "_" + PropertyAccessorFactory.STRING.fromBytes(String.class, column.getName())
-                + "_idx";
-        return indexName;
-    }
-
     /**
      * Generates inverted index table name for a given table
      * 
