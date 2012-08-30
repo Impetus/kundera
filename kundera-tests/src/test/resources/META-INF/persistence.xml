@@ -17,12 +17,13 @@
 				value="com.impetus.client.cassandra.pelops.PelopsClientFactory" />
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
-			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />			
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<!-- <property name="index.home.dir" value="./lucene" /> -->
 		</properties>
-
 	</persistence-unit>
 
-	<persistence-unit name="secIdxAddCassandraJTA" transaction-type="JTA">
+	<persistence-unit name="secIdxAddCassandraJTA"
+		transaction-type="JTA">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
 			<property name="kundera.nodes" value="localhost" />
@@ -38,12 +39,12 @@
 			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->
 		</properties>
 	</persistence-unit>
-	
-		<persistence-unit name="addMongoJTA" transaction-type="JTA">
+
+	<persistence-unit name="addMongoJTA" transaction-type="JTA">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
 			<property name="kundera.nodes" value="192.168.145.168" />
-			 <!-- <property name="kundera.nodes" value="localhost" /> -->
+			<!-- <property name="kundera.nodes" value="localhost" /> -->
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaTests" />
 			<property name="kundera.dialect" value="mongodb" />
@@ -54,7 +55,7 @@
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
 		</properties>
 	</persistence-unit>
-	
+
 
 	<persistence-unit name="secIdxAddCassandra">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
@@ -84,7 +85,7 @@
 			<property name="kundera.cache.provider.class"
 				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
 			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
-			<property name="index.home.dir" value="/home/impadmin/lucene" />
+			<!-- <property name="index.home.dir" value="/home/impadmin/lucene" /> -->
 			<!-- <property name="kundera.ddl.auto.prepare" value="create" /> -->
 		</properties>
 	</persistence-unit>
@@ -92,8 +93,8 @@
 	<persistence-unit name="addMongo">
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
-			<property name="kundera.nodes" value="192.168.145.168" />
-<!-- 			 <property name="kundera.nodes" value="localhost" /> -->
+			<!-- <property name="kundera.nodes" value="192.168.145.168" /> -->
+			<property name="kundera.nodes" value="localhost" />
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="KunderaTests" />
 			<property name="kundera.dialect" value="mongodb" />
@@ -116,7 +117,8 @@
 				value="true" /> -->
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
 			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" />
-			<property name="hibernate.connection.url" value="jdbc:mysql://192.168.145.168:3306/KunderaTests" />
+			<property name="hibernate.connection.url"
+				value="jdbc:mysql://192.168.145.168:3306/KunderaTests" />
 			<property name="hibernate.connection.username" value="root" />
 			<property name="hibernate.connection.password" value="impetus" />
 			<property name="hibernate.current_session_context_class"
@@ -135,13 +137,14 @@
 			<property name="hibernate.format_sql" value="true" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
 			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" />
-			<!--<property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/Pickr" />-->
-			<property name="hibernate.connection.url" value="jdbc:mysql://192.168.145.168:3306/Pickr" />			
+			<!--<property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/Pickr" 
+				/> -->
+			<property name="hibernate.connection.url" value="jdbc:mysql://192.168.145.168:3306/Pickr" />
 			<property name="hibernate.connection.username" value="root" />
 			<property name="hibernate.connection.password" value="impetus" />
 			<property name="hibernate.current_session_context_class"
 				value="org.hibernate.context.ThreadLocalSessionContext" />
-<!--			<property name="index.home.dir" value="./lucene" />-->
+			<!-- <property name="index.home.dir" value="./lucene" /> -->
 		</properties>
 	</persistence-unit>
 	<persistence-unit name="piccandra">
@@ -176,7 +179,7 @@
 		<provider>com.impetus.kundera.KunderaPersistence</provider>
 		<properties>
 			<property name="kundera.nodes" value="192.168.145.168" />
-<!--			<property name="kundera.nodes" value="localhost" />-->
+			<!-- <property name="kundera.nodes" value="localhost" /> -->
 			<property name="kundera.port" value="27017" />
 			<property name="kundera.keyspace" value="Pickr" />
 			<property name="kundera.dialect" value="mongodb" />

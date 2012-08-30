@@ -287,7 +287,7 @@ public class PersistenceDelegator
         List<?> entities = new ArrayList();
         Client childClient = getClient(childMetadata);
 
-        entities = childClient.findByRelation(joinColumnName, entityId.toString(), childClass);
+        entities = childClient.findByRelation(joinColumnName, entityId, childClass);
 
         if (entities == null)
             return null;

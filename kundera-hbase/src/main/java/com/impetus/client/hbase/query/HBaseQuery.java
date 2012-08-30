@@ -158,6 +158,18 @@ public class HBaseQuery extends QueryImpl implements Query
         QueryTranslator translator = new QueryTranslator();
         translator.translate(getKunderaQuery(), m);
         Map<Boolean, Filter> filter = translator.getFilter();
+        if (translator.isFindById)
+        {
+            List results = new ArrayList();
+
+            Object output = client.find(m.getEntityClazz(), translator.rowKey);
+            if (output != null)
+            {
+                results.add(output);
+                return results;
+            }
+
+        }
         if (MetadataUtils.useSecondryIndex(m.getPersistenceUnit()))
         {
             if (filter == null && !translator.isFindById)
@@ -188,23 +200,7 @@ public class HBaseQuery extends QueryImpl implements Query
 
                 // else setFilter to client and invoke new method. find by
                 // query if isFindById is false! else invoke findById
-
-                if (translator.isFindById)
-                {
-                    List results = new ArrayList();
-
-                    Object output = client.find(m.getEntityClazz(), translator.rowKey);
-                    if (output != null)
-                    {
-                        results.add(output);
-                        return results;
-                    }
-
-                }
-                else
-                {
                     return ((HBaseClient) client).findByQuery(m.getEntityClazz(), m);
-                }
             }
         }
         else
@@ -212,7 +208,7 @@ public class HBaseQuery extends QueryImpl implements Query
             List results = null;
             return populateUsingLucene(m, client, results);
         }
-        return null;
+//        return null;
     }
 
     /**
@@ -325,7 +321,8 @@ public class HBaseQuery extends QueryImpl implements Query
          */
         private void onParseFilter(String condition, String name, Object value, boolean isIdColumn, EntityMetadata m)
         {
-            CompareOp operator = getOperator(condition, isIdColumn);
+            CompareOp operator = HBaseUtils.getOperator(condition, isIdColumn);
+            
             byte[] valueInBytes = getBytes(name, m, value);
             if (!isIdColumn)
             {
@@ -396,54 +393,9 @@ public class HBaseQuery extends QueryImpl implements Query
             filterList.add(f);
 
         }
-
-        /**
-         * Gets the operator.
-         * 
-         * @param condition
-         *            the condition
-         * @param idPresent
-         *            the id present
-         * @return the operator
-         */
-        private CompareOp getOperator(String condition, boolean idPresent)
-        {
-            if (/* !idPresent && */condition.equals("="))
-            {
-                return CompareOp.EQUAL;
-            }
-            else if (/* !idPresent && */condition.equals(">"))
-            {
-                return CompareOp.GREATER;
-            }
-            else if (/* !idPresent && */condition.equals("<"))
-            {
-                return CompareOp.LESS;
-            }
-            else if (condition.equals(">="))
-            {
-                return CompareOp.GREATER_OR_EQUAL;
-            }
-            else if (condition.equals("<="))
-            {
-                return CompareOp.LESS_OR_EQUAL;
-            }
-            else
-            {
-                if (!idPresent)
-                {
-                    throw new UnsupportedOperationException(" Condition " + condition + " is not suported in  hbase!");
-                }
-                else
-                {
-                    throw new UnsupportedOperationException(" Condition " + condition
-                            + " is not suported for query on row key!");
-
-                }
-            }
-
-        }
     }
+
+       
 
     private byte[] getBytes(String jpaFieldName, EntityMetadata m, Object value)
     {
@@ -454,7 +406,7 @@ public class HBaseQuery extends QueryImpl implements Query
         EntityType entity = metaModel.entity(m.getEntityClazz());
         Field f = null;
         boolean isId = false;
-        if (((AbstractAttribute) idCol).getJPAColumnName().equals(jpaFieldName))
+        if (idCol.getName().equals(jpaFieldName))
         {
             f = (Field) idCol.getJavaMember();
             isId = true;

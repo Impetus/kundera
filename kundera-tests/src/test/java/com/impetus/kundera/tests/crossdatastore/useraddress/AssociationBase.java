@@ -53,11 +53,11 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.dao.UserAddressDaoIm
  */
 public abstract class AssociationBase
 {
-    public static final boolean RUN_IN_EMBEDDED_MODE = true;
+    public static final boolean RUN_IN_EMBEDDED_MODE = false;
 
-    public static final boolean AUTO_MANAGE_SCHEMA = true;
+    public static final boolean AUTO_MANAGE_SCHEMA = false;
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "rdbms" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { /*"addCassandra", "addMongo", "rdbms",*/ "addHbase" };
 
     // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
     // "addCassandra"};
@@ -78,7 +78,7 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-    private String persistenceUnits = "addCassandra,addMongo,rdbms";
+    private String persistenceUnits = "addCassandra,addMongo,rdbms,addHbase";
 
     // private String persistenceUnits = "addCassandra,rdbms";
 
@@ -206,7 +206,7 @@ public abstract class AssociationBase
                 mAdd.setSchema(schema != null ? schema : "test");
                 // mAdd.setSchema(schema)
 
-                log.warn("persistence unit:" + pu + "class::" + clazz.getCanonicalName());
+                log.warn("persistence unit:" + pu + " and class:" + clazz.getCanonicalName());
             }
         }
 

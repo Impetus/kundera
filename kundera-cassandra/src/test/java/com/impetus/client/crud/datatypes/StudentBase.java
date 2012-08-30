@@ -274,12 +274,12 @@ public abstract class StudentBase<E extends StudentEntityDef> extends BaseTest
         Assert.assertEquals(((Long) studentId1).longValue(), s.getStudentId());
         Assert.assertEquals(78575785897L, s.getUniqueId());
         Assert.assertEquals("Amresh", s.getStudentName());
-        Assert.assertEquals(true, s.isExceptional());
+        Assert.assertEquals(false, s.isExceptional());
         Assert.assertEquals(10, s.getAge());
-        Assert.assertEquals('C', s.getSemester());
+        Assert.assertEquals('A', s.getSemester());
         Assert.assertEquals((byte) 5, s.getDigitalSignature());
         Assert.assertEquals((short) 8, s.getCgpa());
-        Assert.assertEquals((float) 69.6, s.getPercentage());
+        Assert.assertEquals((float) 69.3, s.getPercentage());
         Assert.assertEquals(163.76765654, s.getHeight());
 
         Assert.assertEquals(enrolmentDate.getDate(), s.getEnrolmentDate().getDate());

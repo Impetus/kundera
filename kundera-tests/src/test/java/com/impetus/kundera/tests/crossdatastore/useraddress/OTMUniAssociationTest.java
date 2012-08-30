@@ -58,12 +58,10 @@ public class OTMUniAssociationTest extends TwinAssociation
         {
             CassandraCli.cassandraSetUp();
         }
-        else
+
+        if (AUTO_MANAGE_SCHEMA)
         {
-            if (AUTO_MANAGE_SCHEMA)
-            {
-                CassandraCli.initClient();
-            }
+            CassandraCli.initClient();
         }
 
         List<Class> clazzz = new ArrayList<Class>(2);
@@ -126,13 +124,13 @@ public class OTMUniAssociationTest extends TwinAssociation
         // Find Person
         PersonnelUni1ToM p = (PersonnelUni1ToM) dao.findPerson(PersonnelUni1ToM.class, "unionetomany_1");
         assertPerson(p);
-    }   
+    }
 
     @Override
     protected void findPersonByIdColumn()
     {
-        PersonnelUni1ToM p = (PersonnelUni1ToM) dao.findPersonByIdColumn(PersonnelUni1ToM.class, "unionetomany_1");    
-        assertPerson(p);  
+        PersonnelUni1ToM p = (PersonnelUni1ToM) dao.findPersonByIdColumn(PersonnelUni1ToM.class, "unionetomany_1");
+        assertPerson(p);
     }
 
     @Override
@@ -149,7 +147,7 @@ public class OTMUniAssociationTest extends TwinAssociation
     @Override
     protected void findAddressByIdColumn()
     {
-        HabitatUni1ToM a = (HabitatUni1ToM) dao.findAddressByIdColumn(HabitatUni1ToM.class, "unionetomany_a");    
+        HabitatUni1ToM a = (HabitatUni1ToM) dao.findAddressByIdColumn(HabitatUni1ToM.class, "unionetomany_a");
         Assert.assertNotNull(a);
         Assert.assertEquals("unionetomany_a", a.getAddressId());
         Assert.assertEquals("AAAAAAAAAAAAA", a.getStreet());
@@ -158,11 +156,11 @@ public class OTMUniAssociationTest extends TwinAssociation
     @Override
     protected void findAddressByStreet()
     {
-        List<HabitatUni1ToM> adds = dao.findAddressByStreet(HabitatUni1ToM.class, "AAAAAAAAAAAAA");  
+        List<HabitatUni1ToM> adds = dao.findAddressByStreet(HabitatUni1ToM.class, "AAAAAAAAAAAAA");
         Assert.assertNotNull(adds);
         Assert.assertFalse(adds.isEmpty());
         Assert.assertTrue(adds.size() == 1);
-        
+
         HabitatUni1ToM a = adds.get(0);
         Assert.assertNotNull(a);
         Assert.assertEquals("unionetomany_a", a.getAddressId());
@@ -191,8 +189,6 @@ public class OTMUniAssociationTest extends TwinAssociation
             Assert.fail();
         }
     }
-
-    
 
     @Override
     protected void remove()
@@ -226,7 +222,7 @@ public class OTMUniAssociationTest extends TwinAssociation
         tearDownInternal();
 
     }
-    
+
     /**
      * @param p
      */
@@ -246,7 +242,7 @@ public class OTMUniAssociationTest extends TwinAssociation
             Assert.assertNotNull(address.getStreet());
         }
     }
-    
+
     /**
      * 
      */
@@ -261,7 +257,6 @@ public class OTMUniAssociationTest extends TwinAssociation
             Assert.assertEquals("Brand New Street", address.getStreet());
         }
     }
-    
 
     @Override
     protected void loadDataForPERSONNEL() throws TException, InvalidRequestException, UnavailableException,

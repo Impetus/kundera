@@ -253,7 +253,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
             queryBuilder.append(", ");
             queryBuilder.append(aliasName);
             queryBuilder.append(".");
-            queryBuilder.append(field.getName());
+            queryBuilder.append(((AbstractAttribute)field).getJPAColumnName());
         }
 
         // Handle embedded columns, add them to list.
@@ -268,7 +268,7 @@ public class RDBMSEntityReader extends AbstractEntityReader implements EntityRea
                 queryBuilder.append(", ");
                 queryBuilder.append(aliasName);
                 queryBuilder.append(".");
-                queryBuilder.append(column.getName());
+                queryBuilder.append(((AbstractAttribute)column).getJPAColumnName());
             }
         }
 

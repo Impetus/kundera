@@ -1,23 +1,16 @@
 package com.impetus.client.hbase.utils;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
-
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.util.Bytes;
 
-import com.impetus.kundera.metadata.model.Column;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.metadata.model.KunderaMetadata;
-import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.property.PropertyAccessorFactory;
-import com.impetus.kundera.query.QueryHandlerException;
 
-public class HBaseUtils
+public final class HBaseUtils
 {
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseUtils.class);
@@ -189,4 +182,52 @@ public class HBaseUtils
             return PropertyAccessorFactory.getPropertyAccessor(clazz).fromBytes(clazz, b);
         }
     }
+
+    /**
+     * Gets the operator.
+     * 
+     * @param condition
+     *            the condition
+     * @param idPresent
+     *            the id present
+     * @return the operator
+     */
+    public static CompareOp getOperator(String condition, boolean idPresent)
+    {
+        if (/* !idPresent && */condition.equals("="))
+        {
+            return CompareOp.EQUAL;
+        }
+        else if (/* !idPresent && */condition.equals(">"))
+        {
+            return CompareOp.GREATER;
+        }
+        else if (/* !idPresent && */condition.equals("<"))
+        {
+            return CompareOp.LESS;
+        }
+        else if (condition.equals(">="))
+        {
+            return CompareOp.GREATER_OR_EQUAL;
+        }
+        else if (condition.equals("<="))
+        {
+            return CompareOp.LESS_OR_EQUAL;
+        }
+        else
+        {
+            if (!idPresent)
+            {
+                throw new UnsupportedOperationException(" Condition " + condition + " is not suported in  hbase!");
+            }
+            else
+            {
+                throw new UnsupportedOperationException(" Condition " + condition
+                        + " is not suported for query on row key!");
+
+            }
+        }
+
+    }
+
 }

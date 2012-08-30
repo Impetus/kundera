@@ -75,6 +75,6 @@ public interface Reader
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow) throws IOException;
+    List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily) throws IOException;
 
 }

@@ -134,7 +134,7 @@ public class OTOUniAssociationTest extends TwinAssociation
         // Find Person
         try
         {
-            PersonnelUni1To1FK p = (PersonnelUni1To1FK) dao.findPerson(PersonnelUni1To1FK.class, "unionetoonefk_1");            
+            PersonnelUni1To1FK p = (PersonnelUni1To1FK) dao.findPerson(PersonnelUni1To1FK.class, "unionetoonefk_1");
             assertPersonBeforeUpdate(p);
         }
         catch (Exception e)
@@ -142,16 +142,15 @@ public class OTOUniAssociationTest extends TwinAssociation
             e.printStackTrace();
             Assert.fail();
         }
-    }   
+    }
 
     @Override
     protected void findPersonByIdColumn()
     {
-        PersonnelUni1To1FK p = (PersonnelUni1To1FK) dao.findPersonByIdColumn(PersonnelUni1To1FK.class, "unionetoonefk_1");    
-        assertPersonBeforeUpdate(p);   
+        PersonnelUni1To1FK p = (PersonnelUni1To1FK) dao.findPersonByIdColumn(PersonnelUni1To1FK.class,
+                "unionetoonefk_1");
+        assertPersonBeforeUpdate(p);
     }
-
-    
 
     @Override
     protected void findPersonByName()
@@ -163,21 +162,20 @@ public class OTOUniAssociationTest extends TwinAssociation
     @Override
     protected void findAddressByIdColumn()
     {
-        HabitatUni1To1FK a = (HabitatUni1To1FK) dao.findAddressByIdColumn(HabitatUni1To1FK.class, "unionetoonefk_a");    
-        assertAddressBeforeUpdate(a);   
+        HabitatUni1To1FK a = (HabitatUni1To1FK) dao.findAddressByIdColumn(HabitatUni1To1FK.class, "unionetoonefk_a");
+        assertAddressBeforeUpdate(a);
     }
 
     @Override
     protected void findAddressByStreet()
     {
-        List<HabitatUni1To1FK> adds = dao.findAddressByStreet(HabitatUni1To1FK.class, "123, New street");  
+        List<HabitatUni1To1FK> adds = dao.findAddressByStreet(HabitatUni1To1FK.class, "123, New street");
         Assert.assertNotNull(adds);
         Assert.assertFalse(adds.isEmpty());
         Assert.assertTrue(adds.size() == 1);
-        
+
         assertAddressBeforeUpdate(adds.get(0));
     }
-
 
     protected void update()
     {
@@ -205,7 +203,6 @@ public class OTOUniAssociationTest extends TwinAssociation
             Assert.fail();
         }
     }
-   
 
     protected void remove()
     {
@@ -334,7 +331,7 @@ public class OTOUniAssociationTest extends TwinAssociation
         CassandraCli.client.set_keyspace("KunderaTests");
 
     }
-    
+
     /**
      * @param p
      */
@@ -351,13 +348,13 @@ public class OTOUniAssociationTest extends TwinAssociation
      * @param p
      */
     private void assertAddressBeforeUpdate(HabitatUni1To1FK add)
-    {       
+    {
         Assert.assertNotNull(add);
         Assert.assertNotNull(add.getAddressId());
         Assert.assertEquals("unionetoonefk_a", add.getAddressId());
         Assert.assertEquals("123, New street", add.getStreet());
-    }   
-    
+    }
+
     /**
      * @param pAfterMerge
      */
@@ -369,7 +366,7 @@ public class OTOUniAssociationTest extends TwinAssociation
         Assert.assertNotNull(addressAfterMerge);
         Assert.assertEquals("Brand New Street", addressAfterMerge.getStreet());
     }
-    
+
     /**
      * @param persons
      */
