@@ -579,15 +579,15 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     }
 
     @Override
-    public List<Object> findByRelation(String colName, String colValue, Class entityClazz)
+    public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         List<Object> entities = null;
 
-        IndexExpression ie = new IndexExpression(Bytes.fromUTF8(colName).getBytes(), IndexOperator.EQ, Bytes.fromUTF8(
-                colValue).getBytes());
+        IndexExpression ie = new IndexExpression(Bytes.fromUTF8(colName).getBytes(), IndexOperator.EQ,
+                ByteBuffer.wrap(PropertyAccessorHelper.getBytes(colValue)));
         IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, ie);
         ColumnParent columnParent = new ColumnParent(m.getTableName());
 

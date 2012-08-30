@@ -462,7 +462,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
      * @see com.impetus.kundera.client.Client#find(java.lang.String,
      * java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
      */
-    public List<Object> findByRelation(String colName, String colValue, Class entityClazz)
+    public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
         String tableName = m.getTableName();
