@@ -25,29 +25,34 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Abstract implementation for <code>IdentifiableType</code>
- * 
+ * Abstract implementation for <code>IdentifiableType</code>.
+ *
+ * @param <X> the generic type
  * @author vivek.mishra
- * 
  */
 public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X> implements IdentifiableType<X>
 {
+    
+    /** The id attribute. */
     private SingularAttribute<? super X, ?> idAttribute;
 
+    /** The is id class. */
     private boolean isIdClass;
 
+    /** The id class attributes. */
     private Set<SingularAttribute<? super X, ?>> idClassAttributes;
 
+    /** The log. */
     private static Log log = LogFactory.getLog(AbstractIdentifiableType.class);
 
     /**
-     * @param clazz
-     * @param persistenceType
-     * @param superClazzType
-     * @param declaredSingluarAttribs
-     * @param declaredPluralAttributes
+     * Instantiates a new abstract identifiable type.
+     *
+     * @param clazz the clazz
+     * @param persistenceType the persistence type
+     * @param superClazzType the super clazz type
      */
-    public AbstractIdentifiableType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
+    AbstractIdentifiableType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
             AbstractIdentifiableType<? super X> superClazzType)
     {
         super(clazz, persistenceType, superClazzType);
@@ -89,11 +94,7 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
 
     }
 
-    private void onError()
-    {
-        throw new IllegalArgumentException(
-                "id attribute of the given type is not declared in the identifiable type or if the identifiable type has an id class(e.g. @IdClass is in use)");
-    }
+   
 
     /*
      * (non-Javadoc)
@@ -209,6 +210,13 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
         return getSupertype().getIdType();
     }
 
+    /**
+     * Adds the id attribute.
+     *
+     * @param idAttribute the id attribute
+     * @param isIdClass the is id class
+     * @param idClassAttributes the id class attributes
+     */
     public void addIdAttribute(SingularAttribute<? super X, ?> idAttribute, boolean isIdClass,
             Set<SingularAttribute<? super X, ?>> idClassAttributes)
     {
@@ -216,5 +224,14 @@ public abstract class AbstractIdentifiableType<X> extends AbstractManagedType<X>
         this.idAttribute = idAttribute;
         this.isIdClass = isIdClass;
         this.idClassAttributes = idClassAttributes;
+    }
+
+    /**
+     * On error.
+     */
+    private void onError()
+    {
+        throw new IllegalArgumentException(
+                "id attribute of the given type is not declared in the identifiable type or if the identifiable type has an id class(e.g. @IdClass is in use)");
     }
 }

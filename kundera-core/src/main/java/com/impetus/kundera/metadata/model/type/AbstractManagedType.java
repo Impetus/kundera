@@ -58,7 +58,7 @@ public abstract class AbstractManagedType<X> extends AbstractType<X> implements 
      * @param declaredSingluarAttribs the declared singluar attribs
      * @param declaredPluralAttributes the declared plural attributes
      */
-    public AbstractManagedType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
+    AbstractManagedType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
             ManagedType<? super X> superClazzType)
     {
         super(clazz, persistenceType);

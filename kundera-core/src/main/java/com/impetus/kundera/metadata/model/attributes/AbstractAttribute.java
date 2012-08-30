@@ -19,7 +19,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.util.Date;
 
-import javax.persistence.Basic;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.JoinColumn;
@@ -32,7 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Abstract class for to provide generalization, abstraction to <code>Type</code> hierarchy.
+ * Abstract class for to provide generalisation, abstraction to <code>Type</code> hierarchy.
  *
  * @param <X> the generic mananged entitytype
  * @param <T> the generic attribute type
@@ -59,6 +58,7 @@ public abstract class AbstractAttribute<X, T>
     /** The member. */
     protected Field member;
 
+    /** Column name */
     private String columnName;
 
     /**
@@ -70,7 +70,7 @@ public abstract class AbstractAttribute<X, T>
      * @param managedType the managed type
      * @param member the member
      */
-    public AbstractAttribute(Type<T> attribType, String attribName,
+    AbstractAttribute(Type<T> attribType, String attribName,
             javax.persistence.metamodel.Attribute.PersistentAttributeType persistenceAttribType,
             ManagedType<X> managedType, Field member)
     {
@@ -88,12 +88,6 @@ public abstract class AbstractAttribute<X, T>
      * 
      * @see javax.persistence.metamodel.Bindable#getBindableType()
      */
-
-    /**
-     * Gets the bindable type.
-     *
-     * @return the bindable type
-     */
     public abstract javax.persistence.metamodel.Bindable.BindableType getBindableType();
 
     /*
@@ -101,24 +95,12 @@ public abstract class AbstractAttribute<X, T>
      * 
      * @see javax.persistence.metamodel.Attribute#isCollection()
      */
-
-    /**
-     * Checks if is collection.
-     *
-     * @return true, if is collection
-     */
     public abstract boolean isCollection();
 
     /*
      * (non-Javadoc)
      * 
      * @see javax.persistence.metamodel.Bindable#getBindableJavaType()
-     */
-
-    /**
-     * Gets the bindable java type.
-     *
-     * @return the bindable java type
      */
     public Class<T> getBindableJavaType()
     {
@@ -129,12 +111,6 @@ public abstract class AbstractAttribute<X, T>
      * (non-Javadoc)
      * 
      * @see javax.persistence.metamodel.Attribute#getName()
-     */
-
-    /**
-     * Gets the name.
-     *
-     * @return the name
      */
     public String getName()
     {
@@ -147,11 +123,6 @@ public abstract class AbstractAttribute<X, T>
      * @see javax.persistence.metamodel.Attribute#getPersistentAttributeType()
      */
 
-    /**
-     * Gets the persistent attribute type.
-     *
-     * @return the persistent attribute type
-     */
     public javax.persistence.metamodel.Attribute.PersistentAttributeType getPersistentAttributeType()
     {
         return persistenceAttribType;
@@ -161,12 +132,6 @@ public abstract class AbstractAttribute<X, T>
      * (non-Javadoc)
      * 
      * @see javax.persistence.metamodel.Attribute#getDeclaringType()
-     */
-
-    /**
-     * Gets the declaring type.
-     *
-     * @return the declaring type
      */
     public ManagedType<X> getDeclaringType()
     {
@@ -178,12 +143,6 @@ public abstract class AbstractAttribute<X, T>
      * 
      * @see javax.persistence.metamodel.Attribute#getJavaMember()
      */
-
-    /**
-     * Gets the java member.
-     *
-     * @return the java member
-     */
     public Member getJavaMember()
     {
         return member;
@@ -194,12 +153,6 @@ public abstract class AbstractAttribute<X, T>
      * 
      * @see javax.persistence.metamodel.Attribute#isAssociation()
      */
-
-    /**
-     * Checks if is association.
-     *
-     * @return true, if is association
-     */
     public boolean isAssociation()
     {
         return persistenceAttribType.equals(PersistentAttributeType.MANY_TO_MANY)
@@ -208,7 +161,12 @@ public abstract class AbstractAttribute<X, T>
                 || persistenceAttribType.equals(PersistentAttributeType.ONE_TO_ONE);
     }
 
-    
+
+    /**
+     * Returns assigned jpa column name.
+     * 
+     * @return column name        jpa column name.
+     */
     public String getJPAColumnName()
     {
         return columnName;

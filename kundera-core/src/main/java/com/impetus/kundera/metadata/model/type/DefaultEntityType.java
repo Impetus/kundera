@@ -15,26 +15,25 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model.type;
 
+import javax.persistence.metamodel.BasicType;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Type;
 
 /**
-*  TODO::::: comments required.
- * @author vivek.mishra *
+* Default implementation of {@link EntityType}
+ * 
+ * <code> DefaultEmbeddableType</code> implements <code>EntityType</code> interface, invokes constructor with
+ * PersistenceType.ENTITY. Default implementation of {@link Type} interface is provided by {@link AbstractType}
+
+ * @author vivek.mishra
+ * @param <X>  Entity generic java type.
  */
+
 public class DefaultEntityType<X> extends AbstractIdentifiableType<X> implements EntityType<X>
 {
 
-    
-
     /**
-     * @param clazz
-     * @param persistenceType
-     * @param superClazzType
-     * @param declaredSingluarAttribs
-     * @param declaredPluralAttributes
-     * @param idAttribute
-     * @param isIdClass
-     * @param idClassAttributes
+     * Default constructor using fields. 
      */
     public DefaultEntityType(Class<X> clazz, javax.persistence.metamodel.Type.PersistenceType persistenceType,
             AbstractIdentifiableType<? super X> superClazzType)

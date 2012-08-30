@@ -22,6 +22,7 @@ import javax.persistence.metamodel.Type;
  * Implements <code> Type</code> interface of MetaModel API.
  *
  * @param <X> the generic type
+ * 
  * @author vivek.mishra
  */
 public abstract class AbstractType<X> implements Type<X>
@@ -39,7 +40,7 @@ public abstract class AbstractType<X> implements Type<X>
      * @param clazz the clazz
      * @param persistenceType the persistence type
      */
-    public AbstractType(Class<X> clazz,PersistenceType persistenceType)
+    AbstractType(Class<X> clazz,PersistenceType persistenceType)
     {
         this.clazzType = clazz;
         this.persistenceType = persistenceType;
