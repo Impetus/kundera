@@ -41,7 +41,6 @@ import org.junit.Test;
 import com.impetus.kundera.tests.cli.CassandraCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatBiMTo1;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelBiMTo1;
-import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelBiMTo1;
 
 public class MTOBiAssociationTest extends TwinAssociation
 {
@@ -225,7 +224,7 @@ public class MTOBiAssociationTest extends TwinAssociation
         columnDef.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef);
 
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "IntegerType");
+        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "UTF8Type");
         columnDef1.index_type = IndexType.KEYS;
         cfDef.addToColumn_metadata(columnDef1);
 

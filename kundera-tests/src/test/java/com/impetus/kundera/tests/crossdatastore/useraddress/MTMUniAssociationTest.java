@@ -346,9 +346,6 @@ public class MTMUniAssociationTest extends TwinAssociation
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
         cfDef.addToColumn_metadata(columnDef);
 
-        ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "IntegerType");
-        cfDef.addToColumn_metadata(columnDef1);
-
         // ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID"
         // .getBytes()), "IntegerType");
         // cfDef.addToColumn_metadata(columnDef2);
@@ -401,10 +398,6 @@ public class MTMUniAssociationTest extends TwinAssociation
         columnDef1.index_type = IndexType.KEYS;
         cfDef2.addToColumn_metadata(columnDef1);
 
-        ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "IntegerType");
-        columnDef2.index_type = IndexType.KEYS;
-        cfDef2.addToColumn_metadata(columnDef2);
-
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         cfDefs.add(cfDef2);
 
@@ -443,6 +436,14 @@ public class MTMUniAssociationTest extends TwinAssociation
             CfDef cfDef2 = new CfDef();
             cfDef2.name = "PERSONNEL_ADDRESS";
             cfDef2.keyspace = "KunderaTests";
+            
+            ColumnDef columnDef1 = new ColumnDef(ByteBuffer.wrap("PERSON_ID".getBytes()), "UTF8Type");
+            columnDef1.index_type = IndexType.KEYS;
+            cfDef2.addToColumn_metadata(columnDef1);
+            
+            ColumnDef columnDef2 = new ColumnDef(ByteBuffer.wrap("ADDRESS_ID".getBytes()), "UTF8Type");
+            columnDef2.index_type = IndexType.KEYS;
+            cfDef2.addToColumn_metadata(columnDef2);
 
             List<CfDef> cfDefss = ksDef.getCf_defs();
             CassandraCli.client.set_keyspace("KunderaTests");
