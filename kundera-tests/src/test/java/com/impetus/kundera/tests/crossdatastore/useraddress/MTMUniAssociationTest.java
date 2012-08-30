@@ -323,7 +323,8 @@ public class MTMUniAssociationTest extends TwinAssociation
     {
         Assert.assertNotNull(address);
         
-        Assert.assertTrue("unimanytomany_b".equals(address.getAddressId()) || "unimanytomany_c".equals(address.getAddressId()));
+        Assert.assertTrue(
+                "unimanytomany_b".equals(address.getAddressId()) || "unimanytomany_b".equals(address.getAddressId()) || "unimanytomany_c".equals(address.getAddressId()));
         Assert.assertTrue("CCCCCCCCCCC".equals(address.getStreet()) || "BBBBBBBBBBBBBBB".equals(address.getStreet()));       
 
     }

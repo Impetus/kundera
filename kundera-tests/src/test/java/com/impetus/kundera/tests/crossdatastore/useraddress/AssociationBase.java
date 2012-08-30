@@ -57,7 +57,10 @@ public abstract class AssociationBase
 
     public static final boolean AUTO_MANAGE_SCHEMA = false;
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { /*"addCassandra", "addMongo", "rdbms",*/ "addHbase" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { /*"addCassandra", "addMongo",*//*
+                                                                                                 * "rdbms"
+                                                                                                 * ,
+                                                                                                 */"addHbase" };
 
     // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
     // "addCassandra"};
@@ -184,9 +187,9 @@ public abstract class AssociationBase
                 }
                 else if (client.equalsIgnoreCase("com.impetus.client.hbase.HBaseClientFactory"))
                 {
-                    if (!HBaseCli.isStarted() && RUN_IN_EMBEDDED_MODE)
+                    if (RUN_IN_EMBEDDED_MODE)
                     {
-                        HBaseCli.startCluster();
+                        
                         HBaseCli.createTable("PERSONNEL");
                         HBaseCli.addColumnFamily("PERSONNEL", "PERSON_NAME");
                         HBaseCli.addColumnFamily("PERSONNEL", "ADDRESS_ID");
@@ -235,12 +238,7 @@ public abstract class AssociationBase
             CleanupUtilities.cleanLuceneDirectory(pu);
         }
 
-        dao.closeEntityManagerFactory();
-
-        if (RUN_IN_EMBEDDED_MODE)
-        {
-            HBaseCli.stopCluster();
-        }
+        dao.closeEntityManagerFactory();      
 
     }
 

@@ -32,11 +32,13 @@ import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.kundera.tests.cli.CassandraCli;
+import com.impetus.kundera.tests.cli.HBaseCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.HabitatUni1To1FK;
 import com.impetus.kundera.tests.crossdatastore.useraddress.entities.PersonnelUni1To1FK;
 
@@ -70,6 +72,8 @@ public class OTOUniAssociationTest extends TwinAssociation
     @BeforeClass
     public static void init() throws Exception
     {
+        HBaseCli cli = new HBaseCli();
+        cli.startCluster();
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelUni1To1FK.class);
         clazzz.add(HabitatUni1To1FK.class);
@@ -235,6 +239,21 @@ public class OTOUniAssociationTest extends TwinAssociation
 
     }
 
+    /**
+     * Tear down.
+     * 
+     * @throws Exception
+     *             the exception
+     */
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception
+    {
+        if (RUN_IN_EMBEDDED_MODE)
+        {
+            HBaseCli.stopCluster();
+        }
+    }
+
     @Override
     public void loadDataForPERSONNEL() throws InvalidRequestException, TException, SchemaDisagreementException
     {
@@ -248,6 +267,7 @@ public class OTOUniAssociationTest extends TwinAssociation
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("UTF8Type");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
+        columnDef.setIndex_type(IndexType.KEYS);
         cfDef.addToColumn_metadata(columnDef);
 
         List<CfDef> cfDefs = new ArrayList<CfDef>();

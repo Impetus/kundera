@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.hbase.filter.FilterList;
+
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 
@@ -153,4 +155,7 @@ public interface DataHandler
      *             Signals that an I/O exception has occurred.
      */
     void deleteRow(Object rowKey, String tableName) throws IOException;
+
+    Object[] scanRowyKeys(FilterList filterList, String tableName, String columnFamilyName, String columnName)
+            throws IOException;
 }

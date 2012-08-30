@@ -30,11 +30,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTablePool;
+import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
-import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.admin.DataHandler;
@@ -431,14 +431,12 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
                 pKey);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.kundera.client.Client#find(java.lang.String,
-     * java.lang.String, com.impetus.kundera.metadata.model.EntityMetadata)
+    
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.client.Client#findByRelation(java.lang.String, java.lang.Object, java.lang.Class)
      */
     @Override
-    public List<Object> findByRelation(String colName, String colValue, Class entityClazz)
+    public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
         CompareOp operator = HBaseUtils.getOperator("=", false);
 

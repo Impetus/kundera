@@ -108,7 +108,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
             {
                 BasicDBObject dbObj = new BasicDBObject();
                 dbObj.put(joinColumnName, joinColumnValue);
-                dbObj.put(invJoinColumnName, (String) childId);
+                dbObj.put(invJoinColumnName, childId);
                 documents.add(dbObj);
             }
         }
@@ -236,7 +236,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         BasicDBObject query = new BasicDBObject();
 
         query.put(((AbstractAttribute) entityMetadata.getIdAttribute()).getJPAColumnName(), new BasicDBObject("$in",
-                getString(keys)));
+                keys));
 
         DBCursor cursor = dbCollection.find(query);
 
@@ -405,7 +405,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
      *            the m
      * @return the list
      */
-    public List<Object> findByRelation(String colName, String colValue, Class entityClazz)
+    public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
     {
         EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClazz);
         // you got column name and column value.

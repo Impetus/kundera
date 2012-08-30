@@ -77,4 +77,5 @@ public interface Reader
      */
     List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily) throws IOException;
 
+    Object[] scanRowyKeys(final HTable hTable, final Filter filter, final String columnFamilyName, final String columnName);
 }

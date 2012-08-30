@@ -40,15 +40,15 @@ import org.slf4j.LoggerFactory;
 public class HBaseCli
 {
     /** The utility. */
-    public HBaseTestingUtility utility;
+    public static HBaseTestingUtility utility;
 
-    public Boolean isStarted = false;
+    public static Boolean isStarted = false;
 
     private static final Logger logger = LoggerFactory.getLogger(HBaseCli.class);
 
-    private File zkDir;
+    private static File zkDir;
 
-    private File masterDir;
+    private static File masterDir;
 
     private MiniZooKeeperCluster zkCluster;
 
@@ -193,7 +193,7 @@ public class HBaseCli
     /**
      * Destroys cluster.
      */
-    public void stopCluster(String... tableName)
+    public static void stopCluster(String... tableName)
     {
         try
         {
