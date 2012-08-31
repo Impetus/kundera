@@ -48,8 +48,6 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
  */
 public class PelopsInvertedIndexHandler extends InvertedIndexHandlerBase implements InvertedIndexHandler
 {
-    private static Log log = LogFactory.getLog(PelopsInvertedIndexHandler.class);
-
     @Override
     public void write(Node node, EntityMetadata entityMetadata, String persistenceUnit,
             ConsistencyLevel consistencyLevel, CassandraDataHandler cdHandler)

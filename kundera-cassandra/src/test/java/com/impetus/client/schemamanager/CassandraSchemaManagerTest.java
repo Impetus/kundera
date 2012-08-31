@@ -35,6 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
+import com.impetus.client.persistence.CassandraEntitySample;
 import com.impetus.client.schemamanager.entites.CassandraEntityAddressBi1To1FK;
 import com.impetus.client.schemamanager.entites.CassandraEntityAddressBi1To1PK;
 import com.impetus.client.schemamanager.entites.CassandraEntityAddressBi1ToM;
@@ -51,7 +52,6 @@ import com.impetus.client.schemamanager.entites.CassandraEntityPersonUni1To1;
 import com.impetus.client.schemamanager.entites.CassandraEntityPersonUni1To1PK;
 import com.impetus.client.schemamanager.entites.CassandraEntityPersonUni1ToM;
 import com.impetus.client.schemamanager.entites.CassandraEntityPersonUniMto1;
-import com.impetus.client.schemamanager.entites.CassandraEntitySimple;
 import com.impetus.client.schemamanager.entites.CassandraEntitySuper;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
@@ -126,7 +126,7 @@ public class CassandraSchemaManagerTest
     {
         getEntityManagerFactory();
         Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySimple", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("users", "KunderaCoreExmples"));
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySuper", "KunderaCoreExmples"));
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUni1To1", "KunderaCoreExmples"));
         Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUniMTo1", "KunderaCoreExmples"));
@@ -177,7 +177,7 @@ public class CassandraSchemaManagerTest
 
         List<String> pus = new ArrayList<String>();
         pus.add(persistenceUnit);
-        clazzToPu.put(CassandraEntitySimple.class.getName(), pus);
+        clazzToPu.put(CassandraEntitySample.class.getName(), pus);
         clazzToPu.put(CassandraEntitySuper.class.getName(), pus);
         clazzToPu.put(CassandraEntityAddressUni1To1.class.getName(), pus);
         clazzToPu.put(CassandraEntityAddressUni1ToM.class.getName(), pus);
@@ -198,7 +198,7 @@ public class CassandraSchemaManagerTest
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(CassandraEntitySimple.class);
+        EntityMetadata m = new EntityMetadata(CassandraEntitySample.class);
         EntityMetadata m1 = new EntityMetadata(CassandraEntitySuper.class);
         EntityMetadata m2 = new EntityMetadata(CassandraEntityAddressUni1To1.class);
         EntityMetadata m3 = new EntityMetadata(CassandraEntityAddressUni1ToM.class);
@@ -218,7 +218,7 @@ public class CassandraSchemaManagerTest
         EntityMetadata m17 = new EntityMetadata(CassandraEntityPersonBiMTo1.class);
 
         TableProcessor processor = new TableProcessor();
-        processor.process(CassandraEntitySimple.class, m);
+        processor.process(CassandraEntitySample.class, m);
         processor.process(CassandraEntitySuper.class, m1);
         processor.process(CassandraEntityAddressUni1To1.class, m2);
         processor.process(CassandraEntityAddressUni1ToM.class, m3);
@@ -257,7 +257,7 @@ public class CassandraSchemaManagerTest
         m17.setPersistenceUnit(persistenceUnit);
 
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(CassandraEntitySimple.class, m);
+        metaModel.addEntityMetadata(CassandraEntitySample.class, m);
         metaModel.addEntityMetadata(CassandraEntitySuper.class, m1);
         metaModel.addEntityMetadata(CassandraEntityAddressUni1To1.class, m2);
         metaModel.addEntityMetadata(CassandraEntityAddressUni1ToM.class, m3);
@@ -276,9 +276,9 @@ public class CassandraSchemaManagerTest
         metaModel.addEntityMetadata(CassandraEntityPersonBi1ToM.class, m16);
         metaModel.addEntityMetadata(CassandraEntityPersonBiMTo1.class, m17);
 
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder().getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder().getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder().getMappedSuperClassTypes());
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 

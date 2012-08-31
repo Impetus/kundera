@@ -136,10 +136,6 @@ public class MetamodelConfiguration implements Configuration
             classesToScan = puMetadata.getManagedClassNames();
             managedURLs = puMetadata.getManagedURLs();
             client = puMetadata.getClient();
-//            if (managedURLs != null)
-//            {
-//                resources = managedURLs.toArray(new URL[] {});
-//            }
         }
 
         /*
@@ -224,10 +220,11 @@ public class MetamodelConfiguration implements Configuration
         ((MetamodelImpl) metamodel).setEntityMetadataMap(entityMetadataMap);
         appMetadata.getMetamodelMap().put(persistenceUnit, metamodel);
         appMetadata.setClazzToPuMap(puToClazzMap);
+        
         // assign JPA metamodel.
-        ((MetamodelImpl) metamodel).assignEmbeddables(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder().getEmbeddables());
-        ((MetamodelImpl) metamodel).assignManagedTypes(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder().getManagedTypes());
-        ((MetamodelImpl) metamodel).assignMappedSuperClass(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder().getMappedSuperClassTypes());
+        ((MetamodelImpl) metamodel).assignEmbeddables(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder(persistenceUnit).getEmbeddables());
+        ((MetamodelImpl) metamodel).assignManagedTypes(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder(persistenceUnit).getManagedTypes());
+        ((MetamodelImpl) metamodel).assignMappedSuperClass(KunderaMetadata.INSTANCE.getApplicationMetadata().getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
         validateEntityForClientSpecificProperty(classes, persistenceUnit);
         

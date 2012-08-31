@@ -442,6 +442,12 @@ public abstract class CassandraClientBase extends ClientBase
         }
     }
 
+    /**
+     * Finds an entiry from database
+     * @param entityClass
+     * @param rowId
+     * @return
+     */
     public Object find(Class entityClass, Object rowId)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
@@ -449,6 +455,13 @@ public abstract class CassandraClientBase extends ClientBase
         return find(entityClass, entityMetadata, rowId, relationNames);
     }
 
+    /**
+     * Finds a {@link List} of entities from database
+     * @param <E>
+     * @param entityClass
+     * @param rowIds
+     * @return
+     */
     public <E> List<E> findAll(Class<E> entityClass, Object... rowIds)
     {
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
@@ -516,6 +529,14 @@ public abstract class CassandraClientBase extends ClientBase
         return entities;
     }
 
+    /**
+     * Executes Query
+     * @param cqlQuery
+     * @param clazz
+     * @param relationalField
+     * @param dataHandler
+     * @return
+     */
     public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField,
             CassandraDataHandler dataHandler)
     {
@@ -723,7 +744,7 @@ public abstract class CassandraClientBase extends ClientBase
     public abstract List find(List<IndexClause> ixClause, EntityMetadata m, boolean isRelation, List<String> relations,
             int maxResult);
 
-    public abstract List findByRange(byte[] minVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq,
+    public abstract List findByRange(byte[] muinVal, byte[] maxVal, EntityMetadata m, boolean isWrapReq,
             List<String> relations) throws Exception;
 
     public abstract List<SearchResult> searchInInvertedIndex(String columnFamilyName, EntityMetadata m,

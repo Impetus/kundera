@@ -239,26 +239,12 @@ public class PropertyAccessorHelper
         try
         {
 
-            // Field idField = metadata.getIdColumn().getField();
-            // Field idField = (Field)
-            // metadata.getIdAttribute().getJavaMember();
-            // PropertyAccessor<?> accessor =
-            // PropertyAccessorFactory.getPropertyAccessor(idField);
-            // Object obj = accessor.fromString(idField.getClass(), rowKey);
-
-            metadata.getWriteIdentifierMethod().invoke(entity, rowKey);
+             Field idField = (Field) metadata.getIdAttribute().getJavaMember();
+             set(entity, idField, rowKey);
         }
         catch (IllegalArgumentException iarg)
         {
             throw new PropertyAccessException(iarg);
-        }
-        catch (IllegalAccessException iacc)
-        {
-            throw new PropertyAccessException(iacc);
-        }
-        catch (InvocationTargetException ite)
-        {
-            throw new PropertyAccessException(ite);
         }
     }
 
@@ -280,22 +266,16 @@ public class PropertyAccessorHelper
         {
             Field idField = (Field) metadata.getIdAttribute().getJavaMember();
 
-            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(idField);
-            Object obj = accessor.fromBytes(idField.getClass(), rowKey);
-
-            metadata.getWriteIdentifierMethod().invoke(entity, obj);
+//            PropertyAccessor<?> accessor = PropertyAccessorFactory.getPropertyAccessor(idField);
+//            Object obj = accessor.fromBytes(idField.getClass(), rowKey);
+//
+//            metadata.getWriteIdentifierMethod().invoke(entity, obj);
+//            
+            set(entity, idField, rowKey);
         }
         catch (IllegalArgumentException iarg)
         {
             throw new PropertyAccessException(iarg);
-        }
-        catch (IllegalAccessException iacc)
-        {
-            throw new PropertyAccessException(iacc);
-        }
-        catch (InvocationTargetException ite)
-        {
-            throw new PropertyAccessException(ite);
         }
     }
 

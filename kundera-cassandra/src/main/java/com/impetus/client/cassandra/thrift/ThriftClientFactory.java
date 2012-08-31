@@ -45,8 +45,6 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  */
 public class ThriftClientFactory extends GenericClientFactory
 {
-    /** The logger. */
-    private static Logger logger = LoggerFactory.getLogger(ThriftClientFactory.class);
 
     @Override
     public SchemaManager getSchemaManager()

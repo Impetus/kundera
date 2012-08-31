@@ -135,9 +135,9 @@ public class CassandraSchemaManagerValidateEntityTest
         MetamodelImpl metaModel = new MetamodelImpl();
         metaModel.addEntityMetadata(ValidCounterColumnFamily.class, m);
         metaModel.addEntityMetadata(InvalidCounterColumnEntity.class, m1);
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder().getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder().getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder().getMappedSuperClassTypes());
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
         // EntityManagerFactoryImpl emf = new

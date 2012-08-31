@@ -50,8 +50,10 @@ public class ApplicationMetadata
 
     private SchemaMetadata schemaMetadata = new SchemaMetadata();
     
-    private  MetaModelBuilder metaModelBuilder = new MetaModelBuilder();
-    
+//    private  MetaModelBuilder metaModelBuilder = new MetaModelBuilder();
+
+    private  Map<String,MetaModelBuilder> metaModelBuilder = new ConcurrentHashMap<String, MetaModelBuilder>();
+
     /**
      * Collection instance to hold clazz's full name to persistence unit
      * mapping. Valid Assumption: 1 class can belong to 1 pu only. Reason is @table
@@ -357,9 +359,17 @@ public class ApplicationMetadata
     /**
      * @return the metaModelBuilder
      */
-    public MetaModelBuilder getMetaModelBuilder()
+    public MetaModelBuilder getMetaModelBuilder(String persistenceUnit)
     {
-        return metaModelBuilder;
+        if(metaModelBuilder.containsKey(persistenceUnit))
+        {
+            return metaModelBuilder.get(persistenceUnit); 
+        } else
+        {
+            MetaModelBuilder builder = new MetaModelBuilder();
+            metaModelBuilder.put(persistenceUnit, builder);
+            return builder;
+        }
     }
 
     

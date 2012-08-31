@@ -27,6 +27,7 @@ import javax.persistence.metamodel.EmbeddableType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
+import javax.persistence.metamodel.StaticMetamodel;
 
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 
@@ -38,6 +39,7 @@ import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
  * 
  * @author vivek.mishra
  */
+@StaticMetamodel(value=MetamodelImpl.class)
 public class MetamodelImpl implements Metamodel
 {
 
