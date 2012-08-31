@@ -179,9 +179,9 @@ public class CassandraSchemaManagerMTMTest
         metaModel.addEntityMetadata(CassandraEntityPersonnelUniMToM.class, m);
         metaModel.addEntityMetadata(CassandraEntityHabitatUniMToM.class, m1);
 
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder().getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder().getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder().getMappedSuperClassTypes());
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_persistenceUnit).getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_persistenceUnit).getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(_persistenceUnit).getMappedSuperClassTypes());
 
         appMetadata.getMetamodelMap().put(_persistenceUnit, metaModel);
 

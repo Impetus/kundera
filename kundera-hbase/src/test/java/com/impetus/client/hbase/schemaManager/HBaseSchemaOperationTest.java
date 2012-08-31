@@ -356,9 +356,9 @@ public class HBaseSchemaOperationTest
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
 
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder().getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder().getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder().getMappedSuperClassTypes());
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 

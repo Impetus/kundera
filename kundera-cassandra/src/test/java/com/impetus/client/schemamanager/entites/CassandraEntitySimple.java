@@ -24,7 +24,7 @@ import javax.persistence.Table;
  * The Class CassandraEntitySimple.
  */
 @Entity
-@Table(name = "CassandraEntitySimple", schema = "KunderaCoreExmples@cassandra")
+@Table(name = "CassandraEntitySimple", schema = "KunderaCoreExmples@CassandraSchemaOperationTest")
 public class CassandraEntitySimple
 {
 

@@ -77,7 +77,7 @@ public class CassandraPropertiesTest
     /**
      * persistence unit pu.
      */
-    private String pu = "CassandraPropertiesTest";
+    private String pu = "secIdxCassandra";
 
     /**
      * useLucene
@@ -196,9 +196,9 @@ public class CassandraPropertiesTest
         metaModel.addEntityMetadata(Doctor.class, m);
 
         appMetadata.getMetamodelMap().put(pu, metaModel);
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder().getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder().getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder().getMappedSuperClassTypes());
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(pu).getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(pu).getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(pu).getMappedSuperClassTypes());
 
         KunderaMetadata.INSTANCE.addClientMetadata(pu, clientMetadata);
         CassandraPropertyReader reader = new CassandraPropertyReader();

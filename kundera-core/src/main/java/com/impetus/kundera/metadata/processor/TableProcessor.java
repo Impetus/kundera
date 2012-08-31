@@ -126,7 +126,7 @@ public class TableProcessor extends AbstractEntityFieldProcessor
         // process for metamodelImpl
 
         MetaModelBuilder<X, T> metaModelBuilder = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getMetaModelBuilder();
+                .getMetaModelBuilder(metadata.getPersistenceUnit());
         metaModelBuilder.process(clazz);
 
         for (Field f : clazz.getDeclaredFields())
