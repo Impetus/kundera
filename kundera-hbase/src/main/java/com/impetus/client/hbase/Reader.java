@@ -77,5 +77,20 @@ public interface Reader
      */
     List<HBaseData> loadAll(HTable hTable, Filter filter, byte[] startRow, byte[] endRow, String columnFamily) throws IOException;
 
-    Object[] scanRowyKeys(final HTable hTable, final Filter filter, final String columnFamilyName, final String columnName);
+    /**
+     * Scan row keys.
+     * 
+     * @param hTable
+     *            the h table
+     * @param filter
+     *            the filter
+     * @param columnFamilyName
+     *            the columnFamily Name
+     * @param columnName
+     *            the column Name
+     * @return object array
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
+    Object[] scanRowKeys(final HTable hTable, final Filter filter, final String columnFamilyName, final String columnName);
 }

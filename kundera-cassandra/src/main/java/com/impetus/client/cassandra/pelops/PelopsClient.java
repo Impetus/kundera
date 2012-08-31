@@ -233,17 +233,20 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             for (Object value : values)
             {
                 Column column = new Column();
-                column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName + "_" + (String) value));
-                column.setValue(PropertyAccessorFactory.STRING.toBytes((String) value));
+                column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName + "_" + value.toString()));
+                // column.setValue(PropertyAccessorFactory.STRING.toBytes((String)
+                // value));
+                column.setValue(PropertyAccessorHelper.getBytes(value));
                 column.setTimestamp(System.currentTimeMillis());
 
                 columns.add(column);
             }
 
             createIndexesOnColumns(joinTableName, poolName, columns);
-            String pk = (String) key;
+            Object pk = key;
 
-            mutator.writeColumns(joinTableName, Bytes.fromUTF8(pk), Arrays.asList(columns.toArray(new Column[0])));
+            mutator.writeColumns(joinTableName, Bytes.fromByteArray(PropertyAccessorHelper.getBytes(pk)),
+                    Arrays.asList(columns.toArray(new Column[0])));
             mutator.execute(consistencyLevel);
         }
 
@@ -254,7 +257,9 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             Object parentId)
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        List<Column> columns = selector.getColumnsFromRow(joinTableName, Bytes.fromUTF8(parentId.toString()),
+//        List<Column> columns = selector.getColumnsFromRow(joinTableName, Bytes.fromUTF8(parentId.toString()),
+//                Selector.newColumnsPredicateAll(true, 10), consistencyLevel);
+        List<Column> columns = selector.getColumnsFromRow(joinTableName, Bytes.fromByteArray(PropertyAccessorHelper.getBytes(parentId)),
                 Selector.newColumnsPredicateAll(true, 10), consistencyLevel);
 
         List<E> foreignKeys = dataHandler.getForeignKeysFromJoinTable(inverseJoinColumnName, columns);
@@ -333,8 +338,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
 
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         List<Object> entities = null;
-        IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000,
-                Selector.newIndexExpression(colName, IndexOperator.EQ, Bytes.fromByteArray(PropertyAccessorHelper.getBytes(colValue))));
+        IndexClause ix = Selector.newIndexClause(
+                Bytes.EMPTY,
+                10000,
+                Selector.newIndexExpression(colName, IndexOperator.EQ,
+                        Bytes.fromByteArray(PropertyAccessorHelper.getBytes(colValue))));
         Map<Bytes, List<Column>> qResults;
         try
         {

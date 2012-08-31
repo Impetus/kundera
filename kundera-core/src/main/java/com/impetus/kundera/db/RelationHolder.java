@@ -27,7 +27,7 @@ public class RelationHolder
     private String relationName;
 
     /** The relation value. */
-    private String relationValue;
+    private Object relationValue;
 
     /**
      * Instantiates a new relation holder.
@@ -37,7 +37,7 @@ public class RelationHolder
      * @param relationValue
      *            the relation value
      */
-    public RelationHolder(String relationName, String relationValue)
+    public RelationHolder(String relationName, Object relationValue)
     {
         this.relationName = relationName;
         this.relationValue = relationValue;
@@ -58,7 +58,7 @@ public class RelationHolder
      * 
      * @return the relationValue
      */
-    public String getRelationValue()
+    public Object getRelationValue()
     {
         return relationValue;
     }

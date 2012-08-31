@@ -105,11 +105,11 @@ public abstract class CassandraClientBase extends ClientBase
      * @throws PropertyAccessException
      *             the property access exception
      */
-    protected Column populateFkey(String rlName, String rlValue, long timestamp) throws PropertyAccessException
+    protected Column populateFkey(String rlName, Object rlValue, long timestamp) throws PropertyAccessException
     {
         Column col = new Column();
         col.setName(PropertyAccessorFactory.STRING.toBytes(rlName));
-        col.setValue(rlValue.getBytes());
+        col.setValue(PropertyAccessorHelper.getBytes(rlValue));
         col.setTimestamp(timestamp);
         return col;
     }
@@ -208,7 +208,7 @@ public abstract class CassandraClientBase extends ClientBase
             for (RelationHolder rh : relations)
             {
                 String linkName = rh.getRelationName();
-                String linkValue = rh.getRelationValue();
+                Object linkValue = rh.getRelationValue();
 
                 if (linkName != null && linkValue != null)
                 {
@@ -266,11 +266,11 @@ public abstract class CassandraClientBase extends ClientBase
      * @param rlValue
      * @return
      */
-    private CounterColumn populateCounterFkey(String rlName, String rlValue)
+    private CounterColumn populateCounterFkey(String rlName, Object rlValue)
     {
         CounterColumn counterCol = new CounterColumn();
         counterCol.setName(PropertyAccessorFactory.STRING.toBytes(rlName));
-        counterCol.setValue(new Long(rlValue));
+        counterCol.setValue((Long)rlValue);
         return counterCol;
     }
 

@@ -108,7 +108,7 @@ public interface DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeJoinTableData(String tableName, String rowId, Map<String, String> columns) throws IOException;
+    void writeJoinTableData(String tableName, Object rowId, Map<String, Object> columns) throws IOException;
 
     /**
      * Retrieves a list of foreign keys from the join table for a given row key.

@@ -102,7 +102,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         for (Object key : joinTableRecords.keySet())
         {
             Set<Object> values = joinTableRecords.get(key);
-            String joinColumnValue = (String) key;
+            Object joinColumnValue = key;
 
             for (Object childId : values)
             {

@@ -47,6 +47,7 @@ import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata.Type;
@@ -960,10 +961,13 @@ public abstract class CassandraDataHandlerBase
         else
         {
             // populate relation.
-            if (relationNames != null && relationNames.contains(thriftColumnName))
+            if (relationNames != null && relationNames.contains(thriftColumnName) && thriftColumnValue != null) 
             {
-                // relations = new HashMap<String, Object>();
-                String value = PropertyAccessorFactory.STRING.fromBytes(String.class, (byte[]) thriftColumnValue);
+                String fieldName = m.getFieldName(thriftColumnName);
+                Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
+                
+                EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute.getJavaType());
+                Object value = PropertyAccessorHelper.getObject(relationMetadata.getIdAttribute().getJavaType(),(byte[]) thriftColumnValue);
                 relations.put(thriftColumnName, value);
                 // prepare EnhanceEntity and return it
             }

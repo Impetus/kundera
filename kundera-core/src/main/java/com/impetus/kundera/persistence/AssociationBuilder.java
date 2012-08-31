@@ -139,7 +139,7 @@ final class AssociationBuilder
     {
         Class<?> childClass = relation.getTargetEntity();
 
-        Object child = pd.find(childClass, relationValue.toString());
+        Object child = pd.find(childClass, relationValue);
         child = child != null && child instanceof EnhanceEntity ? ((EnhanceEntity) child).getEntity() : child;
 
         if (child != null)

@@ -139,7 +139,7 @@ public interface Writer
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    void writeColumns(HTable htable, String rowKey, Map<String, String> columns) throws IOException;
+    void writeColumns(HTable htable, Object rowKey, Map<String, Object> columns) throws IOException;
 
     /**
      * Delete.

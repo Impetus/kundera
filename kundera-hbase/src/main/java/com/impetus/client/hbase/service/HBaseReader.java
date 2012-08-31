@@ -174,7 +174,7 @@ public class HBaseReader implements Reader
     }
 
     @Override
-    public Object[] scanRowyKeys(final HTable hTable, final Filter filter, final String columnFamilyName,
+    public Object[] scanRowKeys(final HTable hTable, final Filter filter, final String columnFamilyName,
             final String columnName)
     {
         List<Object> rowKeys = new ArrayList<Object>();

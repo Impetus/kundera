@@ -360,12 +360,12 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
         for (Object key : joinTableRecords.keySet())
         {
             Set<Object> values = joinTableRecords.get(key);
-            String joinColumnValue = (String) key;
+            Object joinColumnValue = key;
 
-            Map<String, String> columns = new HashMap<String, String>();
+            Map<String, Object> columns = new HashMap<String, Object>();
             for (Object childValue : values)
             {
-                String invJoinColumnValue = (String) childValue;
+                Object invJoinColumnValue = childValue;
                 columns.put(invJoinColumnName + "_" + invJoinColumnValue, invJoinColumnValue);
             }
 

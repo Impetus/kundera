@@ -272,7 +272,7 @@ final class MongoDBDataHandler
         {
             for (RelationHolder rh : relations)
             {
-                dbObj.put(rh.getRelationName(), rh.getRelationValue());
+                dbObj.put(rh.getRelationName(), populateValue(rh.getRelationValue(),rh.getRelationValue().getClass()));
             }
         }
 

@@ -74,7 +74,7 @@ public class IndexManager
      * @param entity
      *            the entity
      */
-    public final void update(EntityMetadata metadata, Object entity, String parentId, Class<?> clazz)
+    public final void update(EntityMetadata metadata, Object entity, Object parentId, Class<?> clazz)
     {
 
         try
@@ -89,7 +89,7 @@ public class IndexManager
                     indexer.unindex(metadata, id);
                     indexer.flush();
                 }
-                indexer.index(metadata, entity, parentId, clazz);
+                indexer.index(metadata, entity, parentId.toString(), clazz);
             }
         }
         catch (PropertyAccessException e)

@@ -50,7 +50,7 @@ public class UserAddressDaoImpl extends BaseDao
         closeEntityManager();
     }
 
-    public Object findPerson(Class entityClass, String personId)
+    public Object findPerson(Class entityClass, Object personId)
     {
         em = getEntityManager(persistenceUnit);
         Object personnel = em.find(entityClass, personId);
@@ -94,7 +94,7 @@ public class UserAddressDaoImpl extends BaseDao
         return persons;
     }
     
-    public Object findPersonByIdColumn(Class entityClass, String personId)
+    public Object findPersonByIdColumn(Class entityClass, Object personId)
     {
         EntityManager em = getEntityManager(persistenceUnit);
         String query = "Select p from " + entityClass.getSimpleName() + " p where p.personId = " + personId;
@@ -120,7 +120,7 @@ public class UserAddressDaoImpl extends BaseDao
     }
 
 
-    public Object findAddressByIdColumn(Class entityClass, String addressId)
+    public Object findAddressByIdColumn(Class entityClass, Object addressId)
     {
         EntityManager em = getEntityManager(persistenceUnit);
         String query = "Select a from " + entityClass.getSimpleName() + " a where a.addressId = " + addressId;
