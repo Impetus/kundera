@@ -75,6 +75,8 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
 
     private URL rootUrl;
 
+    private String schemaVersion;
+
     /*
      * (non-Javadoc)
      * 
@@ -108,15 +110,15 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         this.transactionType = transactionType;
     }
 
-    /**
-     * Gets the provider.
-     * 
-     * @return the provider
-     */
-    public String getProvider()
-    {
-        return provider;
-    }
+    // /**
+    // * Gets the provider.
+    // *
+    // * @return the provider
+    // */
+    // public String getProvider()
+    // {
+    // return provider;
+    // }
 
     /**
      * Sets the provider.
@@ -263,7 +265,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     @Override
     public String getPersistenceProviderClassName()
     {
-        return null;
+        return provider;
     }
 
     /*
@@ -413,7 +415,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     @Override
     public String getPersistenceXMLSchemaVersion()
     {
-        return null;
+        return schemaVersion;
     }
 
     /*
@@ -424,7 +426,8 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     @Override
     public ClassLoader getClassLoader()
     {
-        return null;
+        // TODO: vivek need to review for OSGI model.
+        return Thread.currentThread().getContextClassLoader();
     }
 
     /*
@@ -540,5 +543,10 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         }
 
         return client;
+    }
+
+    public void setXmlSchemaVersion(String xmlSchemaVersion)
+    {
+        this.schemaVersion = xmlSchemaVersion;
     }
 }

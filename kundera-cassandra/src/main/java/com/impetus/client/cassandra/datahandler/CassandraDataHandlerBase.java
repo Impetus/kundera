@@ -512,6 +512,12 @@ public abstract class CassandraDataHandlerBase
 
                 if (thriftColumnName != null && thriftColumnName.startsWith(inverseJoinColumnName))
                 {
+
+                    // EntityMetadata relationMetadata =
+                    // KunderaMetadataManager.getEntityMetadata(attribute.getJavaType());
+                    // Object value =
+                    // PropertyAccessorHelper.getObject(relationMetadata.getIdAttribute().getJavaType(),(byte[])
+                    // thriftColumnValue);
                     String val = PropertyAccessorFactory.STRING.fromBytes(String.class, thriftColumnValue);
                     foreignKeys.add((E) val);
                 }
@@ -961,13 +967,14 @@ public abstract class CassandraDataHandlerBase
         else
         {
             // populate relation.
-            if (relationNames != null && relationNames.contains(thriftColumnName) && thriftColumnValue != null) 
+            if (relationNames != null && relationNames.contains(thriftColumnName) && thriftColumnValue != null)
             {
                 String fieldName = m.getFieldName(thriftColumnName);
                 Attribute attribute = fieldName != null ? entityType.getAttribute(fieldName) : null;
-                
+
                 EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute.getJavaType());
-                Object value = PropertyAccessorHelper.getObject(relationMetadata.getIdAttribute().getJavaType(),(byte[]) thriftColumnValue);
+                Object value = PropertyAccessorHelper.getObject(relationMetadata.getIdAttribute().getJavaType(),
+                        (byte[]) thriftColumnValue);
                 relations.put(thriftColumnName, value);
                 // prepare EnhanceEntity and return it
             }

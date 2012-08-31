@@ -226,7 +226,11 @@ public class PersistenceXMLLoader
         {
             throw e;
         }
+        doc.getXmlVersion();
         Element top = doc.getDocumentElement();
+
+        String versionName = top.getAttribute("version");
+
         NodeList children = top.getChildNodes();
         ArrayList<PersistenceUnitMetadata> units = new ArrayList<PersistenceUnitMetadata>();
 
@@ -242,6 +246,7 @@ public class PersistenceXMLLoader
                 {
                     PersistenceUnitMetadata metadata = parsePersistenceUnit(element);
                     metadata.setPersistenceUnitRootUrl(getPersistenceRootUrl(url));
+                    metadata.setXmlSchemaVersion(versionName);
                     units.add(metadata);
                 }
             }
