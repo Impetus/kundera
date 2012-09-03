@@ -21,8 +21,8 @@ package com.impetus.client.cassandra.common;
  */
 public interface CassandraConstants
 {
-    public static final String CQL_VERSION_2_0 = "2.0";
-    public static final String CQL_VERSION_3_0 = "3.0";
+    public static final String CQL_VERSION_2_0 = "2.0.0";
+    public static final String CQL_VERSION_3_0 = "3.0.0";
     
     
 

@@ -521,29 +521,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     @Override
     public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField)
     {
-        IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        // thrift.get
-        IPooledConnection connection = thrift.getConnection();
-        try
-        {
-            org.apache.cassandra.thrift.Cassandra.Client cassandra_client = connection.getAPI();            
-            return super.executeQuery(cqlQuery, clazz, relationalField, dataHandler);
-
-        }
-        finally
-        {
-            try
-            {
-                if (connection != null)
-                {
-                    connection.release();
-                }
-            }
-            catch (Exception e)
-            {
-                log.warn("Releasing connection for native CQL query failed", e);
-            }
-        }
+        return super.executeQuery(cqlQuery, clazz, relationalField, dataHandler);        
     }
 
     /**

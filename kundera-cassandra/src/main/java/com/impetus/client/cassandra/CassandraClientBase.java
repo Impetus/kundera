@@ -554,6 +554,7 @@ public abstract class CassandraClientBase extends ClientBase
             conn = PelopsUtils.getCassandraConnection(entityMetadata.getPersistenceUnit());
             Cassandra.Client cassandra_client = conn.getAPI();
             cassandra_client.set_keyspace(entityMetadata.getSchema());
+            cassandra_client.set_cql_version(getCqlVersion());
 
             result = cassandra_client.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
                     org.apache.cassandra.thrift.Compression.NONE);
@@ -590,7 +591,7 @@ public abstract class CassandraClientBase extends ClientBase
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());            
             throw new PersistenceException(e);
         }
         catch (UnavailableException e)
@@ -734,6 +735,23 @@ public abstract class CassandraClientBase extends ClientBase
             results.add(dataHandler.populateEntity(tr, m, relations, isWrapReq));
         }
         return results;
+    } 
+    
+
+    /**
+     * @return the cqlVersion
+     */
+    protected String getCqlVersion()
+    {
+        return cqlVersion;
+    }
+
+    /**
+     * @param cqlVersion the cqlVersion to set
+     */
+    public void setCqlVersion(String cqlVersion)
+    {
+        this.cqlVersion = cqlVersion;
     }
 
     public abstract List find(Class entityClass, List<String> relationNames, boolean isWrapReq,

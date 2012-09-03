@@ -1,18 +1,18 @@
-/*******************************************************************************
- * * Copyright 2012 Impetus Infotech.
- *  *
- *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  * you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *
- *  * Unless required by applicable law or agreed to in writing, software
- *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  * See the License for the specific language governing permissions and
- *  * limitations under the License.
- ******************************************************************************/
+/**
+ * Copyright 2012 Impetus Infotech.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.impetus.client.persistence;
 
 import java.util.ArrayList;
@@ -31,10 +31,12 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
+import com.impetus.client.cassandra.pelops.PelopsClient;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -44,19 +46,15 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.processor.TableProcessor;
 import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.persistence.EntityManagerImpl;
-import com.impetus.kundera.query.QueryImpl;
 
 /**
- * Junit test case for NativeQuery support.
- * 
- * @author vivek.mishra
- * 
+ * <Prove description of functionality provided by this Type> 
+ * @author amresh.singh
  */
-public class NativeQueryTest
+public class NativeQueryCQLV3Test
 {
-
-    // /** The schema. */
-    private final String schema = "KunderaExamples";
+    
+    private final String schema = "kunderaexamples";
 
     /**
      * Sets the up.
@@ -70,85 +68,15 @@ public class NativeQueryTest
         CassandraCli.cassandraSetUp();
         CassandraCli.createKeySpace(schema);
     }
-
-    /**
-     * Test create native query.
-     */
-    @Test
-    public void testCreateNativeQuery()
-    {
-        EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
-                PersistenceContextType.EXTENDED);
-        String nativeSql = "Select * from Cassandra c";
-        
-        QueryImpl q = (QueryImpl) em.createNativeQuery(nativeSql, CassandraEntitySample.class);
-        Assert.assertEquals(nativeSql, q.getJPAQuery());
-        Assert.assertEquals(true, KunderaMetadata.INSTANCE.getApplicationMetadata().isNative(nativeSql));
-    }
     
-    /**
-     * Test execute native create keyspace query.
-     */
-    @Test
-    public void testExecutNativeQuery()
-    {
-        EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        // String nativeSql = "CREATE KEYSPACE " + schema
-        // +
-        // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
-        String useNativeSql = "USE " + schema;
-
-        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
-                PersistenceContextType.EXTENDED);
-        // Query q = em.createNativeQuery(nativeSql,
-        // CassandraEntitySample.class);
-        // // q.getResultList();
-        // q.executeUpdate();
-        Query q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
-        // q.getResultList();
-        q.executeUpdate();
-        Assert.assertTrue(CassandraCli.keyspaceExist(schema));
-        Assert.assertFalse(CassandraCli.keyspaceExist("invalidSchema"));
-    }
-
-    /**
-     * Native queries should not leak connections. Pelops pool fails providing a
-     * connection if we don't call {@link IPooledConnection#release()}
-     */
-    @Test
-    public void testReleasesNativeQueryConnection()
-    {
-        EntityManagerFactoryImpl emf = getEntityManagerFactory();
-        // String nativeSql = "CREATE KEYSPACE "
-        // + schema
-        // +
-        // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
-        // String useNativeSql = "USE test";
-        String useNativeSql = "USE " + schema;
-
-        EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
-                PersistenceContextType.EXTENDED);
-        // Query q = em.createNativeQuery(nativeSql,
-        // CassandraEntitySample.class);
-        // // q.getResultList();
-        // q.executeUpdate();
-
-        // won't be able to loop if connections are leaked
-        for (int i = 0; i < 30; i++)
-        {
-            Query q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
-            // q.getResultList();
-            q.executeUpdate();
-        }
-    }
-
     /**
      * Test create insert column family query.
      */
     @Test
-    public void testCreateInsertColumnFamilyQuery()
+    public void testCreateInsertColumnFamilyQueryVersion3()
     {
+        // CassandraCli.dropKeySpace("KunderaExamples");
+        
         // String nativeSql = "CREATE KEYSPACE " + schema
         // +
         // " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
@@ -157,39 +85,44 @@ public class NativeQueryTest
         EntityManagerFactoryImpl emf = getEntityManagerFactory();
         EntityManager em = new EntityManagerImpl(emf, PersistenceUnitTransactionType.RESOURCE_LOCAL,
                 PersistenceContextType.EXTENDED);
+        
+        Map<String, Client> clientMap = (Map<String, Client>) em.getDelegate();
+        PelopsClient pc = (PelopsClient)clientMap.get("cassandra");
+        pc.setCqlVersion(CassandraConstants.CQL_VERSION_3_0);
+        
         // Query q = em.createNativeQuery(nativeSql,
-        // CassandraEntitySample.class);
+        // CassandraEntity.class);
         // // q.getResultList();
         // q.executeUpdate();
-        Query q = em.createNativeQuery(useNativeSql, CassandraEntitySample.class);
+        Query q = em.createNativeQuery(useNativeSql, CassandraEntity.class);
         // q.getResultList();
         q.executeUpdate();
         // create column family
         String colFamilySql = "CREATE COLUMNFAMILY users (key varchar PRIMARY KEY,full_name varchar, birth_date int,state varchar)";
-        q = em.createNativeQuery(colFamilySql, CassandraEntitySample.class);
+        q = em.createNativeQuery(colFamilySql, CassandraEntity.class);
         // q.getResultList();
         q.executeUpdate();
         Assert.assertTrue(CassandraCli.columnFamilyExist("users", "test"));
 
         // Add indexes
         String idxSql = "CREATE INDEX ON users (birth_date)";
-        q = em.createNativeQuery(idxSql, CassandraEntitySample.class);
+        q = em.createNativeQuery(idxSql, CassandraEntity.class);
         // q.getResultList();
         q.executeUpdate();
         idxSql = "CREATE INDEX ON users (state)";
-        q = em.createNativeQuery(idxSql, CassandraEntitySample.class);
+        q = em.createNativeQuery(idxSql, CassandraEntity.class);
         // q.getResultList();
         q.executeUpdate();
         // insert users.
         String insertSql = "INSERT INTO users (key, full_name, birth_date, state) VALUES ('bsanderson', 'Brandon Sanderson', 1975, 'UT')";
-        q = em.createNativeQuery(insertSql, CassandraEntitySample.class);
+        q = em.createNativeQuery(insertSql, CassandraEntity.class);
         // q.getResultList();
         q.executeUpdate();
         // select key and state
         String selectSql = "SELECT key, state FROM users";
 
-        q = em.createNativeQuery(selectSql, CassandraEntitySample.class);
-        List<CassandraEntitySample> results = q.getResultList();
+        q = em.createNativeQuery(selectSql, CassandraEntity.class);
+        List<CassandraEntity> results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
         Assert.assertEquals("bsanderson", results.get(0).getKey());
@@ -198,16 +131,16 @@ public class NativeQueryTest
 
         // insert users.
         insertSql = "INSERT INTO users (key, full_name, birth_date, state) VALUES ('prothfuss', 'Patrick Rothfuss', 1973, 'WI')";
-        q = em.createNativeQuery(insertSql, CassandraEntitySample.class);
+        q = em.createNativeQuery(insertSql, CassandraEntity.class);
         q.getResultList();
 
         insertSql = "INSERT INTO users (key, full_name, birth_date, state) VALUES ('htayler', 'Howard Tayler', 1968, 'UT')";
-        q = em.createNativeQuery(insertSql, CassandraEntitySample.class);
+        q = em.createNativeQuery(insertSql, CassandraEntity.class);
         q.getResultList();
 
         // select all
         String selectAll = "SELECT * FROM users WHERE state='UT' AND birth_date > 1970";
-        q = em.createNativeQuery(selectAll, CassandraEntitySample.class);
+        q = em.createNativeQuery(selectAll, CassandraEntity.class);
         results = q.getResultList();
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.size());
@@ -218,9 +151,6 @@ public class NativeQueryTest
 
     }
     
-    
-    
-
     /**
      * Gets the entity manager factory.
      * 
@@ -235,7 +165,7 @@ public class NativeQueryTest
                 "com.impetus.client.cassandra.pelops.PelopsClientFactory");
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaExamples");
+        props.put(PersistenceProperties.KUNDERA_KEYSPACE, schema);
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
         puMetadata.setPersistenceUnitName(persistenceUnit);
@@ -250,16 +180,16 @@ public class NativeQueryTest
 
         List<String> pus = new ArrayList<String>();
         pus.add(persistenceUnit);
-        clazzToPu.put(CassandraEntitySample.class.getName(), pus);
+        clazzToPu.put(CassandraEntity.class.getName(), pus);
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(CassandraEntitySample.class);
+        EntityMetadata m = new EntityMetadata(CassandraEntity.class);
         TableProcessor processor = new TableProcessor();
-        processor.process(CassandraEntitySample.class, m);
+        processor.process(CassandraEntity.class, m);
         m.setPersistenceUnit(persistenceUnit);
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(CassandraEntitySample.class, m);
+        metaModel.addEntityMetadata(CassandraEntity.class, m);
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
         metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
         metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
@@ -269,7 +199,7 @@ public class NativeQueryTest
         new ClientFactoryConfiguraton(persistenceUnits).configure();
         return emf;
     }
-
+    
     /**
      * Tear down.
      * 
