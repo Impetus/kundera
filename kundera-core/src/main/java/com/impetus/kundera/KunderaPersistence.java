@@ -22,7 +22,6 @@ import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.ProviderUtil;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +40,8 @@ public class KunderaPersistence implements PersistenceProvider
 
     /** The logger. */
     private static Logger logger = LoggerFactory.getLogger(KunderaPersistence.class);
+    
+    private final ProviderUtil providerUtil;
 
     /**
      * Instantiates a new kundera persistence.
@@ -50,6 +51,8 @@ public class KunderaPersistence implements PersistenceProvider
         // Load Core
         logger.info("Loading Core");
         new CoreLoader().load();
+        
+        this.providerUtil = new KunderaPersistenceProviderUtil();
     }
 
     @Override
@@ -94,21 +97,18 @@ public class KunderaPersistence implements PersistenceProvider
 
         String[] persistenceUnits = persistenceUnit.split(Constants.PERSISTENCE_UNIT_SEPARATOR);
 
-        // (new ApplicationLoader()).load(persistenceUnits);
-
         new Configurator(persistenceUnits).configure();
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
+     * Returns Persistence Provider util 
      * @see javax.persistence.spi.PersistenceProvider#getProviderUtil()
      */
     @Override
     public ProviderUtil getProviderUtil()
     {
-        throw new NotImplementedException("TODO");
+        return this.providerUtil;
     }
 
 }
