@@ -59,6 +59,7 @@ import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.client.cassandra.thrift.ThriftRow;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -233,7 +234,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             for (Object value : values)
             {
                 Column column = new Column();
-                column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName + "_" + value.toString()));
+                column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + value.toString()));
                 // column.setValue(PropertyAccessorFactory.STRING.toBytes((String)
                 // value));
                 column.setValue(PropertyAccessorHelper.getBytes(value));
@@ -278,7 +279,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         IndexClause ix = Selector.newIndexClause(
                 Bytes.EMPTY,
                 10000,
-                Selector.newIndexExpression(columnName + "_" + childIdStr, IndexOperator.EQ,
+                Selector.newIndexExpression(columnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr, IndexOperator.EQ,
                         Bytes.fromByteArray(childIdStr.getBytes())));
 
         Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(tableName, ix, slicePredicate, consistencyLevel);
@@ -525,7 +526,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         IPooledConnection connection = thrift.getConnection();
         try
         {
-            org.apache.cassandra.thrift.Cassandra.Client cassandra_client = connection.getAPI();
+            org.apache.cassandra.thrift.Cassandra.Client cassandra_client = connection.getAPI();            
             return super.executeQuery(cqlQuery, clazz, relationalField, dataHandler);
 
         }

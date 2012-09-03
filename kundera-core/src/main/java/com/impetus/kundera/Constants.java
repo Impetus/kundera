@@ -34,6 +34,10 @@ public final class Constants
 
     /** The Constant ENCODING. */
     public static final String ENCODING = "utf-8";
+    
+    /** UTF-8 character set */
+    public static final String CHARSET_UTF8 = "UTF-8";
+    
 
     /** The Constant SEPARATOR. */
     public final static String FOREIGN_KEY_SEPARATOR = "~";
@@ -73,6 +77,8 @@ public final class Constants
      * join columns.
      */
     public final static String JOIN_COLUMNS_FAMILY_NAME = "JoinColumns";
+    
+    public final static String JOIN_COLUMN_NAME_SEPARATOR = "_";
 
     public final static String NODE_ID_SEPARATOR = "$";
 

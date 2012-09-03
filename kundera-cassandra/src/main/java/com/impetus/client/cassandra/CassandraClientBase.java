@@ -60,11 +60,13 @@ import org.scale7.cassandra.pelops.ColumnOrSuperColumnHelper;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
 import com.impetus.client.cassandra.thrift.ThriftRow;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -91,6 +93,8 @@ public abstract class CassandraClientBase extends ClientBase
 
     /** log for this class. */
     private static Log log = LogFactory.getLog(CassandraClientBase.class);
+    
+    private String cqlVersion = CassandraConstants.CQL_VERSION_2_0;
 
     /**
      * Populates foreign key as column.
@@ -132,7 +136,7 @@ public abstract class CassandraClientBase extends ClientBase
                 List<CounterSuperColumn> counterSuperColumns = qCounterSuperColumnResults.get(key);
                 try
                 {
-                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(), Charset.forName("UTF-8")),
+                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(), Charset.forName(Constants.CHARSET_UTF8)),
                             m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0),
                             new ArrayList<CounterColumn>(0), counterSuperColumns);
                     entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
@@ -160,7 +164,7 @@ public abstract class CassandraClientBase extends ClientBase
                 List<CounterColumn> counterColumns = qCounterColumnResults.get(key);
                 try
                 {
-                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(), Charset.forName("UTF-8")),
+                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(), Charset.forName(Constants.CHARSET_UTF8)),
                             m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0), counterColumns,
                             new ArrayList<CounterSuperColumn>(0));
                     entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));

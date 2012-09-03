@@ -61,6 +61,7 @@ import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper.ColumnFamilyType;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
@@ -300,7 +301,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
                 for (Object value : values)
                 {
                     Column column = new Column();
-                    column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName + "_" + (String) value));
+                    column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + (String) value));
                     column.setValue(PropertyAccessorFactory.STRING.toBytes((String) value));
                     column.setTimestamp(System.currentTimeMillis());
 
@@ -554,7 +555,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
         SlicePredicate slicePredicate = Selector.newColumnsPredicateAll(false, 10000);
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(entityClazz);
         String childIdStr = (String) columnValue;
-        IndexExpression ie = new IndexExpression(Bytes.fromUTF8(columnName + "_" + childIdStr).getBytes(),
+        IndexExpression ie = new IndexExpression(Bytes.fromUTF8(columnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr).getBytes(),
                 IndexOperator.EQ, Bytes.fromUTF8(childIdStr).getBytes());
         IndexClause ix = Selector.newIndexClause(Bytes.EMPTY, 10000, ie);
 
