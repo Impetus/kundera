@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import org.scale7.cassandra.pelops.Bytes;
 
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -39,7 +40,7 @@ public class CassandraUtilities
 
     public static String toUTF8(byte[] value)
     {
-        return value == null ? null : new String(value, Charset.forName("UTF-8"));
+        return value == null ? null : new String(value, Charset.forName(Constants.CHARSET_UTF8));
     }
 
     public static String getKeyspace(String persistenceUnit)

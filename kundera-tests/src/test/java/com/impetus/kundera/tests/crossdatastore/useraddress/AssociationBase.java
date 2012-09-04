@@ -53,14 +53,14 @@ import com.impetus.kundera.tests.crossdatastore.useraddress.dao.UserAddressDaoIm
  */
 public abstract class AssociationBase
 {
-    public static final boolean RUN_IN_EMBEDDED_MODE = false;
+    public static final boolean RUN_IN_EMBEDDED_MODE = true;
 
-    public static final boolean AUTO_MANAGE_SCHEMA = false;
+    public static final boolean AUTO_MANAGE_SCHEMA = true;
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { /*"addCassandra", "addMongo",*//*
-                                                                                                 * "rdbms"
-                                                                                                 * ,
-                                                                                                 */"addHbase" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo"/*
+                                                                                                * ,
+                                                                                                * "addHbase"
+                                                                                                */, "rdbms" };
 
     // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
     // "addCassandra"};
@@ -189,7 +189,7 @@ public abstract class AssociationBase
                 {
                     if (RUN_IN_EMBEDDED_MODE)
                     {
-                        
+
                         HBaseCli.createTable("PERSONNEL");
                         HBaseCli.addColumnFamily("PERSONNEL", "PERSON_NAME");
                         HBaseCli.addColumnFamily("PERSONNEL", "ADDRESS_ID");
@@ -238,7 +238,7 @@ public abstract class AssociationBase
             CleanupUtilities.cleanLuceneDirectory(pu);
         }
 
-        dao.closeEntityManagerFactory();      
+        dao.closeEntityManagerFactory();
 
     }
 

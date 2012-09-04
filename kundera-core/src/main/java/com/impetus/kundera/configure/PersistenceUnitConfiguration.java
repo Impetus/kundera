@@ -153,18 +153,16 @@ public class PersistenceUnitConfiguration implements Configuration
                 }
 
                 // check for provider
-                if (metadata.getProvider() == null
-                        || PROVIDER_IMPLEMENTATION_NAME.equalsIgnoreCase(metadata.getProvider()))
+                if (metadata.getPersistenceProviderClassName() == null
+                        || PROVIDER_IMPLEMENTATION_NAME.equalsIgnoreCase(metadata.getPersistenceProviderClassName()))
                 {
                     persistenceUnitMap.put(metadata.getPersistenceUnitName(), metadata);
                 }
 
                 // add to check for duplicate persistence unit.
-                persistenceUnitNames.add(metadata.getPersistenceUnitName());
+                persistenceUnitNames.add(metadata.getPersistenceUnitName());                
             }
         }
-
         return persistenceUnitMap;
-
     }
 }

@@ -202,6 +202,10 @@ public class SchemaConfigurationTest
         metaModel.addEntityMetadata(CoreEntityPersonUni1ToM.class, m7);
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
+
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
     }

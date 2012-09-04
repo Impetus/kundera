@@ -37,7 +37,7 @@ import com.impetus.kundera.entity.photographer.PhotographerBi_1_M_1_M;
  */
 
 @Entity
-@Table(name = "ALBUM", schema = "Pickr")
+@Table(name = "ALBUM", schema = "Pickr@kunderatest")
 public class AlbumBi_1_M_1_M
 {
     @Id

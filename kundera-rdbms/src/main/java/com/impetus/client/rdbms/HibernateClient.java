@@ -225,7 +225,7 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
             for (RelationHolder rh : relationHolders)
             {
                 String linkName = rh.getRelationName();
-                String linkValue = rh.getRelationValue();
+                Object linkValue = rh.getRelationValue();
                 if (linkName != null && linkValue != null)
                 {
 

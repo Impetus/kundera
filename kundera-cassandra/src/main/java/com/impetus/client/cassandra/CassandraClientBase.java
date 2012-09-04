@@ -61,11 +61,13 @@ import org.scale7.cassandra.pelops.ColumnOrSuperColumnHelper;
 import org.scale7.cassandra.pelops.Pelops;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
 import com.impetus.client.cassandra.thrift.ThriftRow;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientBase;
@@ -96,6 +98,8 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
 
     /** log for this class. */
     private static Log log = LogFactory.getLog(CassandraClientBase.class);
+    
+    private String cqlVersion = CassandraConstants.CQL_VERSION_2_0;
 
     private ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
 
@@ -117,11 +121,11 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
      * @throws PropertyAccessException
      *             the property access exception
      */
-    protected Column populateFkey(String rlName, String rlValue, long timestamp) throws PropertyAccessException
+    protected Column populateFkey(String rlName, Object rlValue, long timestamp) throws PropertyAccessException
     {
         Column col = new Column();
         col.setName(PropertyAccessorFactory.STRING.toBytes(rlName));
-        col.setValue(rlValue.getBytes());
+        col.setValue(PropertyAccessorHelper.getBytes(rlValue));
         col.setTimestamp(timestamp);
         return col;
     }
@@ -144,7 +148,7 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
                 List<CounterSuperColumn> counterSuperColumns = qCounterSuperColumnResults.get(key);
                 try
                 {
-                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(), Charset.forName("UTF-8")),
+                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(), Charset.forName(Constants.CHARSET_UTF8)),
                             m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0),
                             new ArrayList<CounterColumn>(0), counterSuperColumns);
                     entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
@@ -172,7 +176,7 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
                 List<CounterColumn> counterColumns = qCounterColumnResults.get(key);
                 try
                 {
-                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(), Charset.forName("UTF-8")),
+                    ThriftRow tr = new ThriftRow(ByteBufferUtil.string(key.getBytes(), Charset.forName(Constants.CHARSET_UTF8)),
                             m.getTableName(), new ArrayList<Column>(0), new ArrayList<SuperColumn>(0), counterColumns,
                             new ArrayList<CounterSuperColumn>(0));
                     entities.add(getDataHandler().populateEntity(tr, m, relations, isRelation));
@@ -220,7 +224,7 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
             for (RelationHolder rh : relations)
             {
                 String linkName = rh.getRelationName();
-                String linkValue = rh.getRelationValue();
+                Object linkValue = rh.getRelationValue();
 
                 if (linkName != null && linkValue != null)
                 {
@@ -278,11 +282,11 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
      * @param rlValue
      * @return
      */
-    private CounterColumn populateCounterFkey(String rlName, String rlValue)
+    private CounterColumn populateCounterFkey(String rlName, Object rlValue)
     {
         CounterColumn counterCol = new CounterColumn();
         counterCol.setName(PropertyAccessorFactory.STRING.toBytes(rlName));
-        counterCol.setValue(new Long(rlValue));
+        counterCol.setValue((Long)rlValue);
         return counterCol;
     }
 
@@ -565,6 +569,7 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
             conn = PelopsUtils.getCassandraConnection(entityMetadata.getPersistenceUnit());
             Cassandra.Client cassandra_client = conn.getAPI();
             cassandra_client.set_keyspace(entityMetadata.getSchema());
+            cassandra_client.set_cql_version(getCqlVersion());
 
             result = cassandra_client.execute_cql_query(ByteBufferUtil.bytes(cqlQuery),
                     org.apache.cassandra.thrift.Compression.NONE);
@@ -601,7 +606,7 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
         }
         catch (InvalidRequestException e)
         {
-            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());
+            log.error("Error while executing native CQL query Caused by:" + e.getLocalizedMessage());            
             throw new PersistenceException(e);
         }
         catch (UnavailableException e)
@@ -745,6 +750,23 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
             results.add(dataHandler.populateEntity(tr, m, relations, isWrapReq));
         }
         return results;
+    } 
+    
+
+    /**
+     * @return the cqlVersion
+     */
+    protected String getCqlVersion()
+    {
+        return cqlVersion;
+    }
+
+    /**
+     * @param cqlVersion the cqlVersion to set
+     */
+    public void setCqlVersion(String cqlVersion)
+    {
+        this.cqlVersion = cqlVersion;
     }
 
     public void setConsistencyLevel(ConsistencyLevel cLevel)

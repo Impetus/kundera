@@ -102,7 +102,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         for (Object key : joinTableRecords.keySet())
         {
             Set<Object> values = joinTableRecords.get(key);
-            String joinColumnValue = (String) key;
+            Object joinColumnValue = key;
 
             for (Object childId : values)
             {
@@ -490,32 +490,5 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         {
             dbCollection.insert(document);
         }
-
-    }
-
-    /**
-     * Gets the string.
-     * 
-     * @param pKeys
-     *            the keys
-     * @return the string
-     */
-    private String[] getString(Object[] pKeys)
-    {
-
-        if (pKeys != null)
-        {
-            String[] arr = new String[pKeys.length];
-            int counter = 0;
-            for (Object o : pKeys)
-            {
-                arr[counter++] = o.toString();
-            }
-
-            return arr;
-        }
-
-        return null;
-    }
-
+    }    
 }

@@ -25,7 +25,7 @@ import javax.persistence.Table;
  * The Class CassandraEntitySuper.
  */
 @Entity
-@Table(name = "CassandraEntitySuper", schema = "KunderaCoreExmples@cassandra")
+@Table(name = "CassandraEntitySuper", schema = "CassandraSchemaManagerTest@CassandraSchemaManager")
 public class CassandraEntitySuper
 {
 

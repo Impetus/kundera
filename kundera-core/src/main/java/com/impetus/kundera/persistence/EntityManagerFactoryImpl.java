@@ -35,6 +35,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.KunderaPersistenceUnitUtil;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.cache.CacheException;
 import com.impetus.kundera.cache.CacheProvider;
@@ -75,6 +76,9 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
 
     // Transaction type
     PersistenceUnitTransactionType transactionType;
+    
+    
+    private final KunderaPersistenceUnitUtil util;
 
     /**
      * This one is generally called via the PersistenceProvider.
@@ -137,6 +141,8 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         {
             this.transactionType = txTypes.iterator().next();
         }
+        
+        this.util = new KunderaPersistenceUnitUtil();
 
         logger.info("EntityManagerFactory created for persistence unit : " + persistenceUnit);
     }
@@ -240,15 +246,18 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory
         return cacheProvider.getCache(Constants.KUNDERA_SECONDARY_CACHE_NAME);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
+     * Returns {@link PersistenceUnitUtil} 
      * @see javax.persistence.EntityManagerFactory#getPersistenceUnitUtil()
      */
     @Override
     public PersistenceUnitUtil getPersistenceUnitUtil()
     {
-        throw new NotImplementedException("TODO");
+        if(! isOpen())
+        {
+            throw new IllegalStateException("EntityManagerFactory is closed");
+        }        
+        return this.util;
     }
 
     /**

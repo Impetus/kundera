@@ -24,7 +24,7 @@ import javax.persistence.Table;
  * The Class CassandraEntityAddressUni1To1.
  */
 @Entity
-@Table(name = "CassandraEntityAddressUni1To1", schema = "KunderaCoreExmples@cassandra")
+@Table(name = "CassandraEntityAddressUni1To1", schema = "CassandraSchemaManagerTest@CassandraSchemaManager")
 public class CassandraEntityAddressUni1To1
 {
 

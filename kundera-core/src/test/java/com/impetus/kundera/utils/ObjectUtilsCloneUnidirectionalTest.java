@@ -16,7 +16,10 @@
 package com.impetus.kundera.utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import junit.framework.Assert;
 
@@ -26,6 +29,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.kundera.Constants;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.MetamodelConfiguration;
 import com.impetus.kundera.configure.PersistenceUnitConfiguration;
 import com.impetus.kundera.entity.PersonalDetail;
@@ -34,7 +39,13 @@ import com.impetus.kundera.entity.album.AlbumUni_1_M_1_M;
 import com.impetus.kundera.entity.photo.PhotoUni_1_M_1_M;
 import com.impetus.kundera.entity.photographer.PhotographerUni_1_M_1_M;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.metadata.processor.TableProcessor;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * Test case for {@link ObjectUtils} for cloning for unidirectional object
@@ -43,6 +54,11 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
  */
 public class ObjectUtilsCloneUnidirectionalTest
 {
+    private final String _persistenceUnit = "kunderatest";
+
+    private final String kundera_client = "com.impetus.client.rdbms.RDBMSClientFactory";
+
+    private String _keyspace = "kunderatest";
 
     /** The log. */
     private static Logger log = LoggerFactory.getLogger(ObjectUtils.class);
@@ -57,8 +73,9 @@ public class ObjectUtilsCloneUnidirectionalTest
     public void setUp() throws Exception
     {
         // configurator.configure();
-        new PersistenceUnitConfiguration("kunderatest").configure();
-        new MetamodelConfiguration("kunderatest").configure();
+//        new PersistenceUnitConfiguration("kunderatest").configure();
+//        new MetamodelConfiguration("kunderatest").configure();
+        getEntityManagerFactory(null);
     }
 
     /**
@@ -68,8 +85,6 @@ public class ObjectUtilsCloneUnidirectionalTest
     public void tearDown() throws Exception
     {
     }
-
-    
 
     @Test
     public void testPhotographer()
@@ -105,8 +120,8 @@ public class ObjectUtilsCloneUnidirectionalTest
         assertOriginalObjectValues(a3);
 
     }
-    
-    //@Test
+
+    // @Test
     public void testBulkCopyUsingDeepCloner()
     {
         int n = 100000;
@@ -120,7 +135,7 @@ public class ObjectUtilsCloneUnidirectionalTest
         log.info("Time taken by Deep Cloner for " + n + " records:" + (t2 - t1));
     }
 
-    //@Test
+    // @Test
     public void testBulkCopyUsingKunderaCloner()
     {
         int n = 100000;
@@ -279,5 +294,68 @@ public class ObjectUtilsCloneUnidirectionalTest
                 Assert.assertFalse(photo1 == photo2);
             }
         }
+    }
+
+    /**
+     * Gets the entity manager factory.
+     * 
+     * @param useLucene
+     * @param property
+     * 
+     * @return the entity manager factory
+     */
+    private EntityManagerFactoryImpl getEntityManagerFactory(String property)
+    {
+        Map<String, Object> props = new HashMap<String, Object>();
+        props.put(Constants.PERSISTENCE_UNIT_NAME, _persistenceUnit);
+        props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY, kundera_client);
+        props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
+        props.put(PersistenceProperties.KUNDERA_PORT, "9160");
+        props.put(PersistenceProperties.KUNDERA_KEYSPACE, _keyspace);
+//        props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, property);
+
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+        PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
+        puMetadata.setPersistenceUnitName(_persistenceUnit);
+        Properties p = new Properties();
+        p.putAll(props);
+        puMetadata.setProperties(p);
+        Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
+        metadata.put(_persistenceUnit, puMetadata);
+        appMetadata.addPersistenceUnitMetadata(metadata);
+
+        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
+
+        List<String> pus = new ArrayList<String>();
+        pus.add(_persistenceUnit);
+        clazzToPu.put(PhotographerUni_1_M_1_M.class.getName(), pus);
+        clazzToPu.put(AlbumUni_1_M_1_M.class.getName(), pus);
+        clazzToPu.put(PhotoUni_1_M_1_M.class.getName(), pus);
+        appMetadata.setClazzToPuMap(clazzToPu);
+
+        EntityMetadata m = new EntityMetadata(PhotographerUni_1_M_1_M.class);
+        EntityMetadata m1 = new EntityMetadata(AlbumUni_1_M_1_M.class);
+        EntityMetadata m2 = new EntityMetadata(PhotoUni_1_M_1_M.class);
+
+        TableProcessor processor = new TableProcessor();
+        processor.process(PhotographerUni_1_M_1_M.class, m);
+        processor.process(AlbumUni_1_M_1_M.class, m1);
+        processor.process(PhotoUni_1_M_1_M.class, m2);
+
+        m.setPersistenceUnit(_persistenceUnit);
+
+        MetamodelImpl metaModel = new MetamodelImpl();
+        metaModel.addEntityMetadata(PhotographerUni_1_M_1_M.class, m);
+        metaModel.addEntityMetadata(AlbumUni_1_M_1_M.class, m1);
+        metaModel.addEntityMetadata(PhotoUni_1_M_1_M.class, m2);
+
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_persistenceUnit).getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_persistenceUnit).getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(_persistenceUnit).getMappedSuperClassTypes());
+
+        appMetadata.getMetamodelMap().put(_persistenceUnit, metaModel);
+
+        return null;
     }
 }

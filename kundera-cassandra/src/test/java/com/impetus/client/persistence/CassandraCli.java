@@ -59,9 +59,6 @@ public final class CassandraCli
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(CassandraCli.class);
 
-    /** The tr. */
-    private static TTransport tr;
-
     /**
      * Cassandra set up.
      * 
@@ -98,11 +95,9 @@ public final class CassandraCli
      */
     public static void createKeySpace(String keyspaceName)
     {
-        String nativeSql = "CREATE KEYSPACE " + keyspaceName
-                + " with strategy_class = 'SimpleStrategy' and strategy_options:replication_factor=1";
         try
         {
-            KsDef ks_Def = client.describe_keyspace(keyspaceName);
+            client.describe_keyspace(keyspaceName);
         }
         catch (NotFoundException e)
         {

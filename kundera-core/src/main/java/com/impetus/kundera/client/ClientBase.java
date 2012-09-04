@@ -104,7 +104,7 @@ public abstract class ClientBase
             for (NodeLink parentNodeLink : parents.keySet())
             {
                 String linkName = (String) parentNodeLink.getLinkProperty(LinkProperty.LINK_NAME);
-                String linkValue = (String) parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
+                Object linkValue = parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
                 boolean isSharedByPrimaryKey = (Boolean) parentNodeLink
                         .getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
                 Relation.ForeignKey multiplicity = parentNodeLink.getMultiplicity();
@@ -124,7 +124,7 @@ public abstract class ClientBase
             for (NodeLink childNodeLink : children.keySet())
             {
                 String linkName = (String) childNodeLink.getLinkProperty(LinkProperty.LINK_NAME);
-                String linkValue = (String) childNodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
+                Object linkValue = childNodeLink.getLinkProperty(LinkProperty.LINK_VALUE);
                 boolean isSharedByPrimaryKey = (Boolean) childNodeLink
                         .getLinkProperty(LinkProperty.IS_SHARED_BY_PRIMARY_KEY);
                 Relation.ForeignKey multiplicity = childNodeLink.getMultiplicity();
@@ -154,7 +154,7 @@ public abstract class ClientBase
                 for (NodeLink parentNodeLink : parents.keySet())
                 {
                     indexManager.update(entityMetadata, node.getData(),
-                            (String) parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
+                            parentNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
                             parents.get(parentNodeLink).getDataClass());
                 }
 
@@ -168,7 +168,7 @@ public abstract class ClientBase
                     if (childNodeLink.getMultiplicity().equals(ForeignKey.MANY_TO_ONE))
                     {
                         indexManager.update(entityMetadata, node.getData(),
-                                (String) childNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
+                                childNodeLink.getLinkProperty(LinkProperty.LINK_VALUE),
                                 children.get(childNodeLink).getDataClass());
                     }
                     else

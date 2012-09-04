@@ -57,7 +57,7 @@ public class HBaseWriter implements Writer
     @Override
     public void writeColumns(HTable htable, String columnFamily, Object rowKey, Set<Attribute> columns,
 
-            Object columnFamilyObj) throws IOException
+    Object columnFamilyObj) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
         for (Attribute column : columns)
@@ -86,7 +86,8 @@ public class HBaseWriter implements Writer
     }
 
     @Override
-    public void writeColumn(HTable htable, String columnFamily, Object rowKey, Attribute column, Object columnObj) throws IOException
+    public void writeColumn(HTable htable, String columnFamily, Object rowKey, Attribute column, Object columnObj)
+            throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
         p.add(Bytes.toBytes(columnFamily), Bytes.toBytes(((AbstractAttribute) column).getJPAColumnName()),
@@ -99,8 +100,8 @@ public class HBaseWriter implements Writer
     public void writeColumns(HTable htable, Object rowKey, Set<Attribute> columns, Object entity) throws IOException
     {
         Put p = new Put(HBaseUtils.getBytes(rowKey));
-        
-        boolean present=false;
+
+        boolean present = false;
         for (Attribute column : columns)
         {
             if (!column.isCollection() && !((SingularAttribute) column).isId())
@@ -119,28 +120,28 @@ public class HBaseWriter implements Writer
                 }
             }
         }
-        if(present)
+        if (present)
         {
             htable.put(p);
         }
     }
 
     @Override
-    public void writeColumns(HTable htable, String rowKey, Map<String, String> columns) throws IOException
+    public void writeColumns(HTable htable, Object rowKey, Map<String, Object> columns) throws IOException
     {
 
-        Put p = new Put(Bytes.toBytes(rowKey));
+        Put p = new Put(HBaseUtils.getBytes(rowKey));
 
         boolean isPresent = false;
         for (String columnName : columns.keySet())
         {
             p.add(Bytes.toBytes(Constants.JOIN_COLUMNS_FAMILY_NAME), Bytes.toBytes(columnName),
-                    Bytes.toBytes(columns.get(columnName)));
-                    isPresent = true;
-//            /* .getBytes() */);
+                    HBaseUtils.getBytes(columns.get(columnName)));
+            isPresent = true;
+            // /* .getBytes() */);
         }
-        
-        if(isPresent)
+
+        if (isPresent)
         {
             htable.put(p);
         }
@@ -160,13 +161,13 @@ public class HBaseWriter implements Writer
                 if (containsEmbeddedObjectsOnly)
                 {
                     p.add(Bytes.toBytes(r.getRelationName()), Bytes.toBytes(r.getRelationName()),
-                            Bytes.toBytes(r.getRelationValue()));
+                            PropertyAccessorHelper.getBytes(r.getRelationValue()));
                     isPresent = true;
                 }
                 else
                 {
                     p.add(Bytes.toBytes(r.getRelationName()), Bytes.toBytes(r.getRelationName()),
-                            System.currentTimeMillis(), Bytes.toBytes(r.getRelationValue()));
+                            System.currentTimeMillis(), PropertyAccessorHelper.getBytes(r.getRelationValue()));
                     // p.add(Bytes.toBytes(r.getRelationName()),
                     // System.currentTimeMillis(),
                     // Bytes.toBytes(r.getRelationValue()));
@@ -176,7 +177,7 @@ public class HBaseWriter implements Writer
             }
         }
 
-        if(isPresent)
+        if (isPresent)
         {
             htable.put(p);
         }
@@ -222,7 +223,7 @@ public class HBaseWriter implements Writer
 
         }
 
-        if(isPresent)
+        if (isPresent)
         {
             hTable.put(p);
         }

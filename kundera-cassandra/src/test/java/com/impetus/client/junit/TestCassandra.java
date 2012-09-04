@@ -36,10 +36,6 @@ import com.impetus.client.persistence.CassandraCli;
  */
 public class TestCassandra
 {
-
-    /** The manager. */
-    private EntityManager manager;
-
     /** The logger. */
     private static Logger logger = Logger.getLogger(TestCassandra.class);
 
@@ -61,12 +57,13 @@ public class TestCassandra
     @Test
     public void testUUID()
     {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("cass_pu");
         UUID key = UUID.randomUUID();
         CassandraUUIDEntity entity = new CassandraUUIDEntity();
         entity.setAge(10);
         entity.setName("vivek");
         entity.setUuidKey(key);
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("cass_pu");
+
         EntityManager em = emf.createEntityManager();
         em.persist(entity);
         CassandraUUIDEntity result = em.find(CassandraUUIDEntity.class, key);
@@ -86,7 +83,6 @@ public class TestCassandra
     public void tearDown() throws Exception
     {
         logger.info("destroying");
-        CassandraCli.dropKeySpace("UUIDSample");
+        CassandraCli.dropKeySpace("UUIDCassandra");
     }
-
 }

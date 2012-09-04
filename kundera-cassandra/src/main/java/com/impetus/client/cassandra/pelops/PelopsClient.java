@@ -59,6 +59,7 @@ import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
 import com.impetus.client.cassandra.query.CassQuery;
 import com.impetus.client.cassandra.thrift.ThriftRow;
+import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.EnhanceEntity;
@@ -234,18 +235,20 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             for (Object value : values)
             {
                 Column column = new Column();
-                column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName + "_" + (String) value));
-                column.setValue(PropertyAccessorFactory.STRING.toBytes((String) value));
+                column.setName(PropertyAccessorFactory.STRING.toBytes(invJoinColumnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + value.toString()));
+                // column.setValue(PropertyAccessorFactory.STRING.toBytes((String)
+                // value));
+                column.setValue(PropertyAccessorHelper.getBytes(value));
                 column.setTimestamp(System.currentTimeMillis());
 
                 columns.add(column);
             }
 
             createIndexesOnColumns(joinTableName, poolName, columns);
-            String pk = (String) key;
+//            Object pk = key;
 
-            mutator.writeColumns(joinTableName, Bytes.fromUTF8(pk), Arrays.asList(columns.toArray(new Column[0])));
-            mutator.execute(getConsistencyLevel());
+            mutator.writeColumns(joinTableName, Bytes.fromByteArray(PropertyAccessorHelper.getBytes(key)),
+                    Arrays.asList(columns.toArray(new Column[0])));
         }
 
     }
@@ -255,7 +258,9 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
             Object parentId)
     {
         Selector selector = Pelops.createSelector(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        List<Column> columns = selector.getColumnsFromRow(joinTableName, Bytes.fromUTF8(parentId.toString()),
+//        List<Column> columns = selector.getColumnsFromRow(joinTableName, Bytes.fromUTF8(parentId.toString()),
+//                Selector.newColumnsPredicateAll(true, 10), consistencyLevel);
+        List<Column> columns = selector.getColumnsFromRow(joinTableName, Bytes.fromByteArray(PropertyAccessorHelper.getBytes(parentId)),
                 Selector.newColumnsPredicateAll(true, 10), getConsistencyLevel());
 
         List<E> foreignKeys = dataHandler.getForeignKeysFromJoinTable(inverseJoinColumnName, columns);
@@ -274,7 +279,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
         IndexClause ix = Selector.newIndexClause(
                 Bytes.EMPTY,
                 10000,
-                Selector.newIndexExpression(columnName + "_" + childIdStr, IndexOperator.EQ,
+                Selector.newIndexExpression(columnName + Constants.JOIN_COLUMN_NAME_SEPARATOR + childIdStr, IndexOperator.EQ,
                         Bytes.fromByteArray(childIdStr.getBytes())));
 
         Map<Bytes, List<Column>> qResults = selector.getIndexedColumns(tableName, ix, slicePredicate,
@@ -518,29 +523,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     @Override
     public List executeQuery(String cqlQuery, Class clazz, List<String> relationalField)
     {
-        IThriftPool thrift = Pelops.getDbConnPool(PelopsUtils.generatePoolName(getPersistenceUnit()));
-        // thrift.get
-        IPooledConnection connection = thrift.getConnection();
-        try
-        {
-            org.apache.cassandra.thrift.Cassandra.Client cassandra_client = connection.getAPI();
-            return super.executeQuery(cqlQuery, clazz, relationalField, dataHandler);
-
-        }
-        finally
-        {
-            try
-            {
-                if (connection != null)
-                {
-                    connection.release();
-                }
-            }
-            catch (Exception e)
-            {
-                log.warn("Releasing connection for native CQL query failed", e);
-            }
-        }
+        return super.executeQuery(cqlQuery, clazz, relationalField, dataHandler);        
     }
 
     /**

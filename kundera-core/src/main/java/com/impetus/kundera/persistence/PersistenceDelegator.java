@@ -91,7 +91,7 @@ public class PersistenceDelegator
     private FlushModeType flushMode = FlushModeType.AUTO;
 
     private ObjectGraphBuilder graphBuilder;
-    
+
     private PersistenceValidator validator;
 
     private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
@@ -137,13 +137,15 @@ public class PersistenceDelegator
      * while flushing)
      */
     public void persist(Object e)
-    {       
-        //Validate entity
-        if(! validator.isValidEntityObject(e)) {
-            throw new IllegalArgumentException("Entity object is invalid, operation failed. Please check previous log message for details");
-        }        
-        
-        EntityMetadata metadata = getMetadata(e.getClass());        
+    {
+        // Validate entity
+        if (!validator.isValidEntityObject(e))
+        {
+            throw new IllegalArgumentException(
+                    "Entity object is invalid, operation failed. Please check previous log message for details");
+        }
+
+        EntityMetadata metadata = getMetadata(e.getClass());
         // Invoke Pre-Persist Events
         getEventDispatcher().fireEventListeners(metadata, e, PrePersist.class);
 
@@ -213,7 +215,7 @@ public class PersistenceDelegator
         if (node == null || node.isDirty())
         {
 
-            node = new Node(nodeId, entityClass, new ManagedState(), getPersistenceCache(),primaryKey);
+            node = new Node(nodeId, entityClass, new ManagedState(), getPersistenceCache(), primaryKey);
             node.setClient(getClient(entityMetadata));
             node.setPersistenceDelegator(this);
 
@@ -388,8 +390,7 @@ public class PersistenceDelegator
                         {
                             for (NodeLink parentNodeLink : parents.keySet())
                             {
-                                parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
-                                        ObjectGraphUtils.getEntityId(node.getNodeId()));
+                                parentNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, node.getEntityId());
                             }
                         }
 
@@ -397,8 +398,7 @@ public class PersistenceDelegator
                         {
                             for (NodeLink childNodeLink : children.keySet())
                             {
-                                childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE,
-                                        ObjectGraphUtils.getEntityId(node.getNodeId()));
+                                childNodeLink.addLinkProperty(LinkProperty.LINK_VALUE, node.getEntityId());
                             }
                         }
                     }
@@ -422,7 +422,8 @@ public class PersistenceDelegator
                     {
                         for (Object pk : jtData.getJoinTableRecords().keySet())
                         {
-//                            client.deleteByColumn(jtData.getJoinTableName(), m.getIdColumn().getName(), pk);
+                            // client.deleteByColumn(jtData.getJoinTableName(),
+                            // m.getIdColumn().getName(), pk);
                             client.deleteByColumn(jtData.getJoinTableName(), m.getIdAttribute().getName(), pk);
 
                         }

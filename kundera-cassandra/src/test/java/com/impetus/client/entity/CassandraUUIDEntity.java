@@ -30,7 +30,6 @@ import javax.persistence.Table;
 @Table(name = "uuidsample", schema = "UUIDCassandra@cass_pu")
 public class CassandraUUIDEntity
 {
-
     @Id
     @Column(name = "uuidKey")
     private UUID uuidKey;
