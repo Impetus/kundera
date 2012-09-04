@@ -16,7 +16,9 @@
 package com.impetus.kundera.utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -26,15 +28,48 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.configure.MetamodelConfiguration;
 import com.impetus.kundera.configure.PersistenceUnitConfiguration;
 import com.impetus.kundera.entity.PersonalDetail;
 import com.impetus.kundera.entity.Tweet;
+import com.impetus.kundera.entity.album.AlbumBi_1_1_1_1;
 import com.impetus.kundera.entity.album.AlbumBi_1_M_1_M;
+import com.impetus.kundera.entity.album.AlbumUni_1_1_1_1;
+import com.impetus.kundera.entity.album.AlbumUni_1_1_1_M;
+import com.impetus.kundera.entity.album.AlbumUni_1_1_M_1;
+import com.impetus.kundera.entity.album.AlbumUni_1_M_1_M;
+import com.impetus.kundera.entity.album.AlbumUni_1_M_M_M;
+import com.impetus.kundera.entity.album.AlbumUni_M_1_1_M;
+import com.impetus.kundera.entity.album.AlbumUni_M_M_1_1;
+import com.impetus.kundera.entity.album.AlbumUni_M_M_M_M;
+import com.impetus.kundera.entity.photo.PhotoBi_1_1_1_1;
 import com.impetus.kundera.entity.photo.PhotoBi_1_M_1_M;
+import com.impetus.kundera.entity.photo.PhotoUni_1_1_1_1;
+import com.impetus.kundera.entity.photo.PhotoUni_1_1_1_M;
+import com.impetus.kundera.entity.photo.PhotoUni_1_1_M_1;
+import com.impetus.kundera.entity.photo.PhotoUni_1_M_1_M;
+import com.impetus.kundera.entity.photo.PhotoUni_1_M_M_M;
+import com.impetus.kundera.entity.photo.PhotoUni_M_1_1_M;
+import com.impetus.kundera.entity.photo.PhotoUni_M_M_1_1;
+import com.impetus.kundera.entity.photo.PhotoUni_M_M_M_M;
+import com.impetus.kundera.entity.photographer.PhotographerBi_1_1_1_1;
 import com.impetus.kundera.entity.photographer.PhotographerBi_1_M_1_M;
+import com.impetus.kundera.entity.photographer.PhotographerUni_1_1_1_1;
+import com.impetus.kundera.entity.photographer.PhotographerUni_1_1_1_M;
+import com.impetus.kundera.entity.photographer.PhotographerUni_1_1_M_1;
+import com.impetus.kundera.entity.photographer.PhotographerUni_1_M_1_M;
+import com.impetus.kundera.entity.photographer.PhotographerUni_1_M_M_M;
+import com.impetus.kundera.entity.photographer.PhotographerUni_M_1_1_M;
+import com.impetus.kundera.entity.photographer.PhotographerUni_M_M_1_1;
+import com.impetus.kundera.entity.photographer.PhotographerUni_M_M_M_M;
+import com.impetus.kundera.graph.BillingCounter;
+import com.impetus.kundera.graph.Store;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.processor.TableProcessor;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 
 /**
  * Test case for {@link ObjectUtils} for cloning for bidirectional object
@@ -49,6 +84,8 @@ public class ObjectUtilsCloneBidirectionalTest
     // Configurator configurator = new Configurator("kunderatest");
     EntityMetadata metadata;
 
+    private String _persistenceUnit = "kunderatest";
+
     /**
      * @throws java.lang.Exception
      */
@@ -56,8 +93,9 @@ public class ObjectUtilsCloneBidirectionalTest
     public void setUp() throws Exception
     {
         // configurator.configure();
+        getEntityManagerFactory();
         new PersistenceUnitConfiguration("kunderatest").configure();
-        new MetamodelConfiguration("kunderatest").configure();
+        // new MetamodelConfiguration("kunderatest").configure();
     }
 
     /**
@@ -258,4 +296,58 @@ public class ObjectUtilsCloneBidirectionalTest
         }
     }
 
+    /**
+     * Gets the entity manager factory.
+     * 
+     * @param useLucene
+     * @param property
+     * 
+     * @return the entity manager factory
+     */
+    private EntityManagerFactoryImpl getEntityManagerFactory()
+    {
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+
+        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
+
+        List<String> pus = new ArrayList<String>();
+        pus.add(_persistenceUnit);
+
+        clazzToPu.put(Store.class.getName(), pus);
+        clazzToPu.put(BillingCounter.class.getName(), pus);
+        clazzToPu.put(PhotographerBi_1_M_1_M.class.getName(), pus);
+        clazzToPu.put(AlbumBi_1_M_1_M.class.getName(), pus);
+        clazzToPu.put(PhotoBi_1_M_1_M.class.getName(), pus);
+
+        appMetadata.setClazzToPuMap(clazzToPu);
+
+        EntityMetadata m = new EntityMetadata(Store.class);
+        EntityMetadata m1 = new EntityMetadata(BillingCounter.class);
+        EntityMetadata m11 = new EntityMetadata(PhotographerBi_1_M_1_M.class);
+        EntityMetadata m12 = new EntityMetadata(AlbumBi_1_M_1_M.class);
+        EntityMetadata m13 = new EntityMetadata(PhotoBi_1_M_1_M.class);
+
+        TableProcessor processor = new TableProcessor();
+        processor.process(Store.class, m);
+        processor.process(BillingCounter.class, m1);
+        processor.process(PhotographerBi_1_M_1_M.class, m11);
+        processor.process(AlbumBi_1_M_1_M.class, m12);
+        processor.process(PhotoBi_1_M_1_M.class, m13);
+
+        m.setPersistenceUnit(_persistenceUnit);
+
+        MetamodelImpl metaModel = new MetamodelImpl();
+        metaModel.addEntityMetadata(Store.class, m);
+        metaModel.addEntityMetadata(BillingCounter.class, m1);
+        metaModel.addEntityMetadata(PhotographerBi_1_M_1_M.class, m11);
+        metaModel.addEntityMetadata(AlbumBi_1_M_1_M.class, m12);
+        metaModel.addEntityMetadata(PhotoBi_1_M_1_M.class, m13);
+
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_persistenceUnit).getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_persistenceUnit).getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(_persistenceUnit).getMappedSuperClassTypes());
+
+        appMetadata.getMetamodelMap().put(_persistenceUnit, metaModel);
+        return null;
+    }
 }

@@ -15,6 +15,13 @@
  */
 package com.impetus.kundera.persistence.context;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import junit.framework.Assert;
 
 import org.junit.After;
@@ -23,6 +30,7 @@ import org.junit.Test;
 
 import com.impetus.kundera.configure.MetamodelConfiguration;
 import com.impetus.kundera.configure.PersistenceUnitConfiguration;
+import com.impetus.kundera.entity.PersonnelDTO;
 import com.impetus.kundera.entity.album.AlbumUni_1_1_1_1;
 import com.impetus.kundera.entity.album.AlbumUni_1_1_1_M;
 import com.impetus.kundera.entity.album.AlbumUni_1_1_M_1;
@@ -53,6 +61,12 @@ import com.impetus.kundera.graph.ObjectGraph;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.graph.Store;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.processor.TableProcessor;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.persistence.context.EventLog.EventType;
 
 /**
@@ -66,6 +80,8 @@ public class FlushStackManagerTest
 
     ObjectGraphBuilder graphBuilder;
 
+    private String _persistenceUnit = "kunderatest";
+
     // Configurator configurator = new Configurator("kunderatest");
 
     /**
@@ -74,11 +90,11 @@ public class FlushStackManagerTest
     @Before
     public void setUp() throws Exception
     {
+        getEntityManagerFactory();
+        new PersistenceUnitConfiguration("kunderatest").configure();
+        // new MetamodelConfiguration("kunderatest").configure();
         pc = new PersistenceCache();
         graphBuilder = new ObjectGraphBuilder(pc);
-
-        new PersistenceUnitConfiguration("kunderatest").configure();
-        new MetamodelConfiguration("kunderatest").configure();
     }
 
     /**
@@ -461,17 +477,168 @@ public class FlushStackManagerTest
      */
     private void markAllNodeAsDirty()
     {
-        for (Node hn : pc.getMainCache().getHeadNodes())
+        if (pc.getMainCache() != null)
         {
+            Set<Node> headNodes = pc.getMainCache().getHeadNodes();
+            if (headNodes != null)
+            {
 
-            hn.setDirty(true);
+                for (Node hn : headNodes)
+                {
+                    if (hn != null)
+                        hn.setDirty(true);
 
-        }
+                }
+            }
 
-        for (Node node : pc.getMainCache().getAllNodes())
-        {
-            node.setDirty(true);
+            Collection<Node> allNodes = pc.getMainCache().getAllNodes();
+            if (allNodes != null)
+            {
+                for (Node node : allNodes)
+                {
+                    if (node != null)
+                        node.setDirty(true);
+                }
+            }
         }
     }
 
+    /**
+     * Gets the entity manager factory.
+     * 
+     * @param useLucene
+     * @param property
+     * 
+     * @return the entity manager factory
+     */
+    private EntityManagerFactoryImpl getEntityManagerFactory()
+    {
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+
+        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
+
+        List<String> pus = new ArrayList<String>();
+        pus.add(_persistenceUnit);
+
+        clazzToPu.put(Store.class.getName(), pus);
+        clazzToPu.put(BillingCounter.class.getName(), pus);
+        clazzToPu.put(PhotographerUni_1_1_1_1.class.getName(), pus);
+        clazzToPu.put(AlbumUni_1_1_1_1.class.getName(), pus);
+        clazzToPu.put(PhotoUni_1_1_1_1.class.getName(), pus);
+        clazzToPu.put(PhotographerUni_1_1_1_M.class.getName(), pus);
+        clazzToPu.put(AlbumUni_1_1_1_M.class.getName(), pus);
+        clazzToPu.put(PhotoUni_1_1_1_M.class.getName(), pus);
+        clazzToPu.put(PhotographerUni_1_1_M_1.class.getName(), pus);
+        clazzToPu.put(AlbumUni_1_1_M_1.class.getName(), pus);
+        clazzToPu.put(PhotoUni_1_1_M_1.class.getName(), pus);
+        clazzToPu.put(PhotographerUni_1_M_1_M.class.getName(), pus);
+        clazzToPu.put(AlbumUni_1_M_1_M.class.getName(), pus);
+        clazzToPu.put(PhotoUni_1_M_1_M.class.getName(), pus);
+        clazzToPu.put(PhotographerUni_1_M_M_M.class.getName(), pus);
+        clazzToPu.put(AlbumUni_1_M_M_M.class.getName(), pus);
+        clazzToPu.put(PhotoUni_1_M_M_M.class.getName(), pus);
+        clazzToPu.put(PhotographerUni_M_1_1_M.class.getName(), pus);
+        clazzToPu.put(AlbumUni_M_1_1_M.class.getName(), pus);
+        clazzToPu.put(PhotoUni_M_1_1_M.class.getName(), pus);
+        clazzToPu.put(PhotographerUni_M_M_1_1.class.getName(), pus);
+        clazzToPu.put(AlbumUni_M_M_1_1.class.getName(), pus);
+        clazzToPu.put(PhotoUni_M_M_1_1.class.getName(), pus);
+        clazzToPu.put(PhotographerUni_M_M_M_M.class.getName(), pus);
+        clazzToPu.put(AlbumUni_M_M_M_M.class.getName(), pus);
+        clazzToPu.put(PhotoUni_M_M_M_M.class.getName(), pus);
+
+        appMetadata.setClazzToPuMap(clazzToPu);
+
+        EntityMetadata m = new EntityMetadata(Store.class);
+        EntityMetadata m1 = new EntityMetadata(BillingCounter.class);
+        EntityMetadata m2 = new EntityMetadata(PhotographerUni_1_1_1_1.class);
+        EntityMetadata m3 = new EntityMetadata(AlbumUni_1_1_1_1.class);
+        EntityMetadata m4 = new EntityMetadata(PhotoUni_1_1_1_1.class);
+        EntityMetadata m5 = new EntityMetadata(PhotographerUni_1_1_1_M.class);
+        EntityMetadata m6 = new EntityMetadata(AlbumUni_1_1_1_M.class);
+        EntityMetadata m7 = new EntityMetadata(PhotoUni_1_1_1_M.class);
+        EntityMetadata m8 = new EntityMetadata(PhotographerUni_1_1_M_1.class);
+        EntityMetadata m9 = new EntityMetadata(AlbumUni_1_1_M_1.class);
+        EntityMetadata m10 = new EntityMetadata(PhotoUni_1_1_M_1.class);
+        EntityMetadata m11 = new EntityMetadata(PhotographerUni_1_M_1_M.class);
+        EntityMetadata m12 = new EntityMetadata(AlbumUni_1_M_1_M.class);
+        EntityMetadata m13 = new EntityMetadata(PhotoUni_1_M_1_M.class);
+        EntityMetadata m14 = new EntityMetadata(PhotographerUni_1_M_M_M.class);
+        EntityMetadata m15 = new EntityMetadata(AlbumUni_1_M_M_M.class);
+        EntityMetadata m16 = new EntityMetadata(PhotoUni_1_M_M_M.class);
+        EntityMetadata m17 = new EntityMetadata(PhotographerUni_M_1_1_M.class);
+        EntityMetadata m18 = new EntityMetadata(AlbumUni_M_1_1_M.class);
+        EntityMetadata m19 = new EntityMetadata(PhotoUni_M_1_1_M.class);
+        EntityMetadata m20 = new EntityMetadata(PhotographerUni_M_M_1_1.class);
+        EntityMetadata m21 = new EntityMetadata(AlbumUni_M_M_1_1.class);
+        EntityMetadata m22 = new EntityMetadata(PhotoUni_M_M_1_1.class);
+        EntityMetadata m23 = new EntityMetadata(PhotographerUni_M_M_M_M.class);
+        EntityMetadata m24 = new EntityMetadata(AlbumUni_M_M_M_M.class);
+        EntityMetadata m25 = new EntityMetadata(PhotoUni_M_M_M_M.class);
+
+        TableProcessor processor = new TableProcessor();
+        processor.process(Store.class, m);
+        processor.process(BillingCounter.class, m1);
+        processor.process(PhotographerUni_1_1_1_1.class, m2);
+        processor.process(AlbumUni_1_1_1_1.class, m3);
+        processor.process(PhotoUni_1_1_1_1.class, m4);
+        processor.process(PhotographerUni_1_1_1_M.class, m5);
+        processor.process(AlbumUni_1_1_1_M.class, m6);
+        processor.process(PhotoUni_1_1_1_M.class, m7);
+        processor.process(PhotographerUni_1_1_M_1.class, m8);
+        processor.process(AlbumUni_1_1_M_1.class, m9);
+        processor.process(PhotoUni_1_1_M_1.class, m10);
+        processor.process(PhotographerUni_1_M_1_M.class, m11);
+        processor.process(AlbumUni_1_M_1_M.class, m12);
+        processor.process(PhotoUni_1_M_1_M.class, m13);
+        processor.process(PhotographerUni_1_M_M_M.class, m14);
+        processor.process(AlbumUni_1_M_M_M.class, m15);
+        processor.process(PhotoUni_1_M_M_M.class, m16);
+        processor.process(PhotographerUni_M_1_1_M.class, m17);
+        processor.process(AlbumUni_M_1_1_M.class, m18);
+        processor.process(PhotoUni_M_1_1_M.class, m19);
+        processor.process(PhotographerUni_M_M_1_1.class, m20);
+        processor.process(AlbumUni_M_M_1_1.class, m21);
+        processor.process(PhotoUni_M_M_1_1.class, m22);
+        processor.process(PhotographerUni_M_M_M_M.class, m23);
+        processor.process(AlbumUni_M_M_M_M.class, m24);
+        processor.process(PhotoUni_M_M_M_M.class, m25);
+
+        m.setPersistenceUnit(_persistenceUnit);
+
+        MetamodelImpl metaModel = new MetamodelImpl();
+        metaModel.addEntityMetadata(Store.class, m);
+        metaModel.addEntityMetadata(BillingCounter.class, m1);
+        metaModel.addEntityMetadata(PhotographerUni_1_1_1_1.class, m2);
+        metaModel.addEntityMetadata(AlbumUni_1_1_1_1.class, m3);
+        metaModel.addEntityMetadata(PhotoUni_1_1_1_1.class, m4);
+        metaModel.addEntityMetadata(PhotographerUni_1_1_1_M.class, m5);
+        metaModel.addEntityMetadata(AlbumUni_1_1_1_M.class, m6);
+        metaModel.addEntityMetadata(PhotoUni_1_1_1_M.class, m7);
+        metaModel.addEntityMetadata(PhotographerUni_1_1_M_1.class, m8);
+        metaModel.addEntityMetadata(AlbumUni_1_1_M_1.class, m9);
+        metaModel.addEntityMetadata(PhotoUni_1_1_M_1.class, m10);
+        metaModel.addEntityMetadata(PhotographerUni_1_M_1_M.class, m11);
+        metaModel.addEntityMetadata(AlbumUni_1_M_1_M.class, m12);
+        metaModel.addEntityMetadata(PhotoUni_1_M_1_M.class, m13);
+        metaModel.addEntityMetadata(PhotographerUni_1_M_M_M.class, m14);
+        metaModel.addEntityMetadata(AlbumUni_1_M_M_M.class, m15);
+        metaModel.addEntityMetadata(PhotoUni_1_M_M_M.class, m16);
+        metaModel.addEntityMetadata(PhotographerUni_M_1_1_M.class, m17);
+        metaModel.addEntityMetadata(AlbumUni_M_1_1_M.class, m18);
+        metaModel.addEntityMetadata(PhotoUni_M_1_1_M.class, m19);
+        metaModel.addEntityMetadata(PhotographerUni_M_M_1_1.class, m20);
+        metaModel.addEntityMetadata(AlbumUni_M_M_1_1.class, m21);
+        metaModel.addEntityMetadata(PhotoUni_M_M_1_1.class, m22);
+        metaModel.addEntityMetadata(PhotographerUni_M_M_M_M.class, m23);
+        metaModel.addEntityMetadata(AlbumUni_M_M_M_M.class, m24);
+        metaModel.addEntityMetadata(PhotoUni_M_M_M_M.class, m25);
+
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_persistenceUnit).getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_persistenceUnit).getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(_persistenceUnit).getMappedSuperClassTypes());
+
+        appMetadata.getMetamodelMap().put(_persistenceUnit, metaModel);
+        return null;
+    }
 }

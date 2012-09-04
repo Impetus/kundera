@@ -65,6 +65,7 @@ public class TableProcessorTest
         final String native_query2 = "Select native2 from TestEntity native2 where native2.field = :field";
 
         EntityMetadata metadata = new EntityMetadata(EntitySample.class);
+        metadata.setPersistenceUnit("rdbms");
         TableProcessor tableProcessor = new TableProcessor();
         tableProcessor.process(EntitySample.class, metadata);
 

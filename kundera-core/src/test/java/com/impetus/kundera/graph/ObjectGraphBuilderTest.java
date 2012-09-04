@@ -15,6 +15,9 @@
  */
 package com.impetus.kundera.graph;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
@@ -22,8 +25,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.configure.MetamodelConfiguration;
 import com.impetus.kundera.configure.PersistenceUnitConfiguration;
+import com.impetus.kundera.metadata.model.ApplicationMetadata;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.processor.TableProcessor;
+import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
 import com.impetus.kundera.persistence.context.PersistenceCache;
 
 /**
@@ -35,6 +43,8 @@ public class ObjectGraphBuilderTest
 {
     ObjectGraphBuilder graphBuilder;
 
+    private String _persistenceUnit = "kunderatest";
+
     // Configurator configurator = new Configurator("kunderatest");
 
     /**
@@ -45,8 +55,9 @@ public class ObjectGraphBuilderTest
     {
         // configurator.configure();
 
+        getEntityManagerFactory();
         new PersistenceUnitConfiguration("kunderatest").configure();
-        new MetamodelConfiguration("kunderatest").configure();
+        // new MetamodelConfiguration("kunderatest").configure();
 
         PersistenceCache persistenceCache = new PersistenceCache();
 
@@ -100,4 +111,45 @@ public class ObjectGraphBuilderTest
     {
     }
 
+    /**
+     * Gets the entity manager factory.
+     * 
+     * @param useLucene
+     * @param property
+     * 
+     * @return the entity manager factory
+     */
+    private EntityManagerFactoryImpl getEntityManagerFactory()
+    {
+        ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
+
+        Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
+
+        List<String> pus = new ArrayList<String>();
+        pus.add(_persistenceUnit);
+        clazzToPu.put(Store.class.getName(), pus);
+        clazzToPu.put(BillingCounter.class.getName(), pus);
+
+        appMetadata.setClazzToPuMap(clazzToPu);
+
+        EntityMetadata m = new EntityMetadata(Store.class);
+        EntityMetadata m1 = new EntityMetadata(BillingCounter.class);
+
+        TableProcessor processor = new TableProcessor();
+        processor.process(Store.class, m);
+        processor.process(BillingCounter.class, m1);
+
+        m.setPersistenceUnit(_persistenceUnit);
+
+        MetamodelImpl metaModel = new MetamodelImpl();
+        metaModel.addEntityMetadata(Store.class, m);
+        metaModel.addEntityMetadata(BillingCounter.class, m1);
+
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_persistenceUnit).getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_persistenceUnit).getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(_persistenceUnit).getMappedSuperClassTypes());
+
+        appMetadata.getMetamodelMap().put(_persistenceUnit, metaModel);
+        return null;
+    }
 }

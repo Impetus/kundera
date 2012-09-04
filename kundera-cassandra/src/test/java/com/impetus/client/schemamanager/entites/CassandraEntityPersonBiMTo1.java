@@ -32,7 +32,7 @@ import org.hibernate.annotations.LazyCollectionOption;
  * The Class CassandraEntityPersonBiMTo1.
  */
 @Entity
-@Table(name = "CassandraEntityPersonBiMTo1", schema = "KunderaCoreExmples@cassandra")
+@Table(name = "CassandraEntityPersonBiMTo1", schema = "CassandraSchemaManagerTest@CassandraSchemaManager")
 public class CassandraEntityPersonBiMTo1
 {
 

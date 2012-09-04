@@ -23,14 +23,12 @@ import java.util.Properties;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
-import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.schemamanager.entites.CassandraEntityHabitatUniMToM;
 import com.impetus.client.schemamanager.entites.CassandraEntityPersonnelUniMToM;
@@ -38,7 +36,6 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
-import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -54,23 +51,12 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
  */
 public class CassandraSchemaManagerMTMTest
 {
-    /**
-     * 
-     */
-    private static final String _keyspace = "KunderaCassandraExamples";
+    private static final String _keyspace = "KunderaCassandraMTMExamples";
 
-    /**
-     * 
-     */
     private static final String _persistenceUnit = "cassandra";
 
     /** The configuration. */
     private SchemaConfiguration configuration;
-
-    /** Configure schema manager. */
-    private SchemaManager schemaManager;
-
-    private Cassandra.Client client;
 
     private final boolean useLucene = false;
 
@@ -82,8 +68,6 @@ public class CassandraSchemaManagerMTMTest
     {
         configuration = new SchemaConfiguration(_persistenceUnit);
         CassandraCli.cassandraSetUp();
-        CassandraCli cli = new CassandraCli();
-        client = cli.getClient();
     }
 
     /**
@@ -94,7 +78,7 @@ public class CassandraSchemaManagerMTMTest
     {
         try
         {
-            client.system_drop_keyspace(_keyspace);
+            CassandraCli.client.system_drop_keyspace(_keyspace);
         }
         catch (InvalidRequestException irex)
         {
@@ -108,14 +92,9 @@ public class CassandraSchemaManagerMTMTest
         try
         {
             getEntityManagerFactory("create");
-
-            schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
-            schemaManager.exportSchema();
             Assert.assertTrue(CassandraCli.keyspaceExist(_keyspace));
-            Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonnelUniMToM",
-                    _keyspace));
-            Assert.assertTrue(CassandraCli
-                    .columnFamilyExist("CassandraEntityHabitatUniMToM", _keyspace));
+            Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonnelUniMToM", _keyspace));
+            Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityHabitatUniMToM", _keyspace));
             Assert.assertTrue(CassandraCli.columnFamilyExist("PERSONNEL_ADDRESS", _keyspace));
         }
         catch (InvalidEntityDefinitionException iedex)
@@ -185,12 +164,8 @@ public class CassandraSchemaManagerMTMTest
 
         appMetadata.getMetamodelMap().put(_persistenceUnit, metaModel);
 
-
         new ClientFactoryConfiguraton(_persistenceUnit).configure();
         configuration.configure();
-
-        // EntityManagerFactoryImpl impl = new
-        // EntityManagerFactoryImpl(puMetadata, props);
         return null;
     }
 }

@@ -23,14 +23,11 @@ import java.util.Properties;
 
 import junit.framework.Assert;
 
-import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.client.cassandra.pelops.PelopsClientFactory;
-import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.client.persistence.CassandraCli;
 import com.impetus.client.schemamanager.entites.CassandraEntityHabitatUniMToM;
 import com.impetus.client.schemamanager.entites.CassandraEntityPersonnelUniMToM;
@@ -38,7 +35,6 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.SchemaConfiguration;
-import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -58,14 +54,6 @@ public class CassandraSchemaManagerMTM
 
     private static final String pu = "cassandra";
 
-    /** The configuration. */
-    private SchemaConfiguration configuration;
-
-    /** Configure schema manager. */
-    private SchemaManager schemaManager;
-
-    private Cassandra.Client client;
-
     private final boolean useLucene = false;
 
     /**
@@ -74,10 +62,7 @@ public class CassandraSchemaManagerMTM
     @Before
     public void setUp() throws Exception
     {
-        configuration = new SchemaConfiguration(pu);
         CassandraCli.cassandraSetUp();
-        CassandraCli cli = new CassandraCli();
-        client = cli.getClient();
     }
 
     /**
@@ -88,7 +73,7 @@ public class CassandraSchemaManagerMTM
     {
         try
         {
-            client.system_drop_keyspace(keyspace);
+            CassandraCli.client.system_drop_keyspace(keyspace);
         }
         catch (InvalidRequestException irex)
         {
@@ -103,8 +88,6 @@ public class CassandraSchemaManagerMTM
         {
             getEntityManagerFactory("create");
 
-            schemaManager = new CassandraSchemaManager(PelopsClientFactory.class.getName());
-            schemaManager.exportSchema();
             Assert.assertTrue(CassandraCli.keyspaceExist(keyspace));
             Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonnelUniMToM", keyspace));
             Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityHabitatUniMToM", keyspace));
@@ -139,6 +122,7 @@ public class CassandraSchemaManagerMTM
         {
             props.put(PersistenceProperties.KUNDERA_INDEX_HOME_DIR, "/home/impadmin/lucene");
         }
+        KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
         puMetadata.setPersistenceUnitName(pu);
@@ -171,10 +155,14 @@ public class CassandraSchemaManagerMTM
         metaModel.addEntityMetadata(CassandraEntityPersonnelUniMToM.class, m);
         metaModel.addEntityMetadata(CassandraEntityHabitatUniMToM.class, m1);
 
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(pu).getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(pu).getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(pu).getMappedSuperClassTypes());
+
         appMetadata.getMetamodelMap().put(pu, metaModel);
 
         new ClientFactoryConfiguraton(pu).configure();
-        configuration.configure();
+        new SchemaConfiguration(pu).configure();
         // EntityManagerFactoryImpl impl = new
         // EntityManagerFactoryImpl(puMetadata, props);
         return null;

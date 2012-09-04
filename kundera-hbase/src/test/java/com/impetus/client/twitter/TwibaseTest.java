@@ -41,7 +41,7 @@ public class TwibaseTest extends TwitterTestBase
     @Test
     public void testOnExecute()
     {
-        executeTestSuite();
+//        executeTestSuite();
     }
 
     @Override

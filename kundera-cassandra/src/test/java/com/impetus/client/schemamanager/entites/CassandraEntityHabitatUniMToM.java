@@ -21,7 +21,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "CassandraEntityHabitatUniMToM", schema = "KunderaCassandraExamples@cassandra")
+@Table(name = "CassandraEntityHabitatUniMToM", schema = "KunderaCassandraMTMExamples@cassandra")
 public class CassandraEntityHabitatUniMToM
 {
     @Id

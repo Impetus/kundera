@@ -34,7 +34,7 @@ import javax.persistence.Table;
  */
 
 @Entity
-@Table(name = "STORE", schema = "KunderaTest")
+@Table(name = "STORE", schema = "KunderaTest@kunderatest")
 public class Store
 {
     @Id

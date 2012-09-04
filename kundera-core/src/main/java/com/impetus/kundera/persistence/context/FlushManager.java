@@ -89,8 +89,11 @@ public class FlushManager
      */
     public void buildFlushStack(Node headNode, EventType eventType)
     {
-        headNode.setTraversed(false);
-        addNodesToFlushStack(headNode, eventType);
+        if(headNode != null)
+        {
+            headNode.setTraversed(false);
+            addNodesToFlushStack(headNode, eventType);
+        }
     }
 
     /**

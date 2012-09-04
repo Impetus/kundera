@@ -66,6 +66,7 @@ public class NativeQueryCQLV3Test
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
+        CassandraCli.dropKeySpace("KunderaExamples");
         CassandraCli.createKeySpace(schema);
     }
     

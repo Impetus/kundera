@@ -35,7 +35,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
-import com.impetus.client.persistence.CassandraEntitySample;
 import com.impetus.client.schemamanager.entites.CassandraEntityAddressBi1To1FK;
 import com.impetus.client.schemamanager.entites.CassandraEntityAddressBi1To1PK;
 import com.impetus.client.schemamanager.entites.CassandraEntityAddressBi1ToM;
@@ -74,9 +73,9 @@ import com.impetus.kundera.persistence.EntityManagerFactoryImpl;
  */
 public class CassandraSchemaManagerTest
 {
+    private static final String _PU = "CassandraSchemaManager";
 
-    /** The configuration. */
-    private SchemaConfiguration configuration;
+    private static final String _KEYSPACE = "CassandraSchemaManagerTest";
 
     /**
      * Sets the up.
@@ -88,7 +87,6 @@ public class CassandraSchemaManagerTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        configuration = new SchemaConfiguration("cassandra");
     }
 
     /**
@@ -100,8 +98,7 @@ public class CassandraSchemaManagerTest
     @After
     public void tearDown() throws Exception
     {
-        CassandraCli cli = new CassandraCli();
-        cli.getClient().system_drop_keyspace("KunderaCoreExmples");
+        CassandraCli.client.system_drop_keyspace(_KEYSPACE);
     }
 
     /**
@@ -121,29 +118,28 @@ public class CassandraSchemaManagerTest
      *             the schema disagreement exception
      */
     @Test
-    public void testSchemaOperation() throws IOException, TException, InvalidRequestException, UnavailableException,
+    public void schemaOperation() throws IOException, TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
         getEntityManagerFactory();
-        Assert.assertTrue(CassandraCli.keyspaceExist("KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("users", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySuper", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUni1To1", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUniMTo1", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUni1ToM", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUniMto1", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUni1ToM", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUni1To1", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUni1To1PK", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUni1To1PK", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBi1To1FK", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBi1To1PK", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBi1ToM", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBiMTo1", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1To1FK", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1To1PK", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1ToM", "KunderaCoreExmples"));
-        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBiMTo1", "KunderaCoreExmples"));
+        Assert.assertTrue(CassandraCli.keyspaceExist(_KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntitySuper", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUni1To1", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUniMTo1", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUni1ToM", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUniMto1", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUni1ToM", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUni1To1", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonUni1To1PK", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressUni1To1PK", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBi1To1FK", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBi1To1PK", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBi1ToM", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityPersonBiMTo1", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1To1FK", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1To1PK", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBi1ToM", _KEYSPACE));
+        Assert.assertTrue(CassandraCli.columnFamilyExist("CassandraEntityAddressBiMTo1", _KEYSPACE));
     }
 
     /**
@@ -154,30 +150,28 @@ public class CassandraSchemaManagerTest
     private EntityManagerFactoryImpl getEntityManagerFactory()
     {
         Map<String, Object> props = new HashMap<String, Object>();
-        String persistenceUnit = "cassandra";
-        props.put(Constants.PERSISTENCE_UNIT_NAME, persistenceUnit);
+        props.put(Constants.PERSISTENCE_UNIT_NAME, _PU);
         props.put(PersistenceProperties.KUNDERA_CLIENT_FACTORY,
                 "com.impetus.client.cassandra.pelops.PelopsClientFactory");
         props.put(PersistenceProperties.KUNDERA_NODES, "localhost");
         props.put(PersistenceProperties.KUNDERA_PORT, "9160");
-        props.put(PersistenceProperties.KUNDERA_KEYSPACE, "KunderaCoreExmples");
+        props.put(PersistenceProperties.KUNDERA_KEYSPACE, _KEYSPACE);
         props.put(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE, "create");
         KunderaMetadata.INSTANCE.setApplicationMetadata(null);
         ApplicationMetadata appMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata();
         PersistenceUnitMetadata puMetadata = new PersistenceUnitMetadata();
-        puMetadata.setPersistenceUnitName(persistenceUnit);
+        puMetadata.setPersistenceUnitName(_PU);
         Properties p = new Properties();
         p.putAll(props);
         puMetadata.setProperties(p);
         Map<String, PersistenceUnitMetadata> metadata = new HashMap<String, PersistenceUnitMetadata>();
-        metadata.put(persistenceUnit, puMetadata);
+        metadata.put(_PU, puMetadata);
         appMetadata.addPersistenceUnitMetadata(metadata);
 
         Map<String, List<String>> clazzToPu = new HashMap<String, List<String>>();
 
         List<String> pus = new ArrayList<String>();
-        pus.add(persistenceUnit);
-        clazzToPu.put(CassandraEntitySample.class.getName(), pus);
+        pus.add(_PU);
         clazzToPu.put(CassandraEntitySuper.class.getName(), pus);
         clazzToPu.put(CassandraEntityAddressUni1To1.class.getName(), pus);
         clazzToPu.put(CassandraEntityAddressUni1ToM.class.getName(), pus);
@@ -198,7 +192,6 @@ public class CassandraSchemaManagerTest
 
         appMetadata.setClazzToPuMap(clazzToPu);
 
-        EntityMetadata m = new EntityMetadata(CassandraEntitySample.class);
         EntityMetadata m1 = new EntityMetadata(CassandraEntitySuper.class);
         EntityMetadata m2 = new EntityMetadata(CassandraEntityAddressUni1To1.class);
         EntityMetadata m3 = new EntityMetadata(CassandraEntityAddressUni1ToM.class);
@@ -218,7 +211,6 @@ public class CassandraSchemaManagerTest
         EntityMetadata m17 = new EntityMetadata(CassandraEntityPersonBiMTo1.class);
 
         TableProcessor processor = new TableProcessor();
-        processor.process(CassandraEntitySample.class, m);
         processor.process(CassandraEntitySuper.class, m1);
         processor.process(CassandraEntityAddressUni1To1.class, m2);
         processor.process(CassandraEntityAddressUni1ToM.class, m3);
@@ -237,27 +229,25 @@ public class CassandraSchemaManagerTest
         processor.process(CassandraEntityPersonBi1ToM.class, m16);
         processor.process(CassandraEntityPersonBiMTo1.class, m17);
 
-        m.setPersistenceUnit(persistenceUnit);
-        m1.setPersistenceUnit(persistenceUnit);
-        m2.setPersistenceUnit(persistenceUnit);
-        m3.setPersistenceUnit(persistenceUnit);
-        m4.setPersistenceUnit(persistenceUnit);
-        m5.setPersistenceUnit(persistenceUnit);
-        m6.setPersistenceUnit(persistenceUnit);
-        m7.setPersistenceUnit(persistenceUnit);
-        m8.setPersistenceUnit(persistenceUnit);
-        m9.setPersistenceUnit(persistenceUnit);
-        m10.setPersistenceUnit(persistenceUnit);
-        m11.setPersistenceUnit(persistenceUnit);
-        m12.setPersistenceUnit(persistenceUnit);
-        m13.setPersistenceUnit(persistenceUnit);
-        m14.setPersistenceUnit(persistenceUnit);
-        m15.setPersistenceUnit(persistenceUnit);
-        m16.setPersistenceUnit(persistenceUnit);
-        m17.setPersistenceUnit(persistenceUnit);
+        m1.setPersistenceUnit(_PU);
+        m2.setPersistenceUnit(_PU);
+        m3.setPersistenceUnit(_PU);
+        m4.setPersistenceUnit(_PU);
+        m5.setPersistenceUnit(_PU);
+        m6.setPersistenceUnit(_PU);
+        m7.setPersistenceUnit(_PU);
+        m8.setPersistenceUnit(_PU);
+        m9.setPersistenceUnit(_PU);
+        m10.setPersistenceUnit(_PU);
+        m11.setPersistenceUnit(_PU);
+        m12.setPersistenceUnit(_PU);
+        m13.setPersistenceUnit(_PU);
+        m14.setPersistenceUnit(_PU);
+        m15.setPersistenceUnit(_PU);
+        m16.setPersistenceUnit(_PU);
+        m17.setPersistenceUnit(_PU);
 
         MetamodelImpl metaModel = new MetamodelImpl();
-        metaModel.addEntityMetadata(CassandraEntitySample.class, m);
         metaModel.addEntityMetadata(CassandraEntitySuper.class, m1);
         metaModel.addEntityMetadata(CassandraEntityAddressUni1To1.class, m2);
         metaModel.addEntityMetadata(CassandraEntityAddressUni1ToM.class, m3);
@@ -276,15 +266,16 @@ public class CassandraSchemaManagerTest
         metaModel.addEntityMetadata(CassandraEntityPersonBi1ToM.class, m16);
         metaModel.addEntityMetadata(CassandraEntityPersonBiMTo1.class, m17);
 
-        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
-        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
-        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(_PU).getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(_PU).getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(_PU).getMappedSuperClassTypes());
 
-        appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
+        appMetadata.getMetamodelMap().put(_PU, metaModel);
 
-        new ClientFactoryConfiguraton(persistenceUnit).configure();
-        configuration.configure();
-        EntityManagerFactoryImpl impl = new EntityManagerFactoryImpl(puMetadata, props);
-        return impl;
+        new ClientFactoryConfiguraton(_PU).configure();
+        new SchemaConfiguration(_PU).configure();
+        // EntityManagerFactoryImpl impl = new
+        // EntityManagerFactoryImpl(puMetadata, props);
+        return null;
     }
 }
