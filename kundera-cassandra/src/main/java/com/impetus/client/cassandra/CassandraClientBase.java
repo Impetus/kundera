@@ -46,6 +46,7 @@ import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.KsDef;
+import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -66,15 +67,19 @@ import com.impetus.client.cassandra.pelops.PelopsUtils;
 import com.impetus.client.cassandra.thrift.ThriftDataResultHelper;
 import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.KunderaException;
+import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
+import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
+import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorFactory;
 import com.impetus.kundera.property.PropertyAccessorHelper;
@@ -86,11 +91,18 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
  * 
  * @author amresh.singh
  */
-public abstract class CassandraClientBase extends ClientBase
+public abstract class CassandraClientBase extends ClientBase implements Batcher
 {
 
     /** log for this class. */
     private static Log log = LogFactory.getLog(CassandraClientBase.class);
+
+    private ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
+
+    private List<Node> nodes = new ArrayList<Node>();
+
+    /** The closed. */
+    private boolean closed = false;
 
     /**
      * Populates foreign key as column.
@@ -444,6 +456,7 @@ public abstract class CassandraClientBase extends ClientBase
 
     /**
      * Finds an entiry from database
+     * 
      * @param entityClass
      * @param rowId
      * @return
@@ -457,6 +470,7 @@ public abstract class CassandraClientBase extends ClientBase
 
     /**
      * Finds a {@link List} of entities from database
+     * 
      * @param <E>
      * @param entityClass
      * @param rowIds
@@ -531,6 +545,7 @@ public abstract class CassandraClientBase extends ClientBase
 
     /**
      * Executes Query
+     * 
      * @param cqlQuery
      * @param clazz
      * @param relationalField
@@ -732,6 +747,40 @@ public abstract class CassandraClientBase extends ClientBase
         return results;
     }
 
+    public void setConsistencyLevel(ConsistencyLevel cLevel)
+    {
+        if (cLevel != null)
+        {
+            this.consistencyLevel = cLevel;
+        }
+        else
+        {
+            log.warn("Please provide resonable consistency Level");
+        }
+    }
+
+    public void close()
+    {
+        nodes.clear();
+        nodes = null;
+        closed = true;
+    }
+
+    /**
+     * Checks if is open.
+     * 
+     * @return true, if is open
+     */
+    protected final boolean isOpen()
+    {
+        return !closed;
+    }
+
+    protected ConsistencyLevel getConsistencyLevel()
+    {
+        return consistencyLevel;
+    }
+
     public abstract List find(Class entityClass, List<String> relationNames, boolean isWrapReq,
             EntityMetadata metadata, Object... rowIds);
 
@@ -754,4 +803,195 @@ public abstract class CassandraClientBase extends ClientBase
             List<IndexClause> conditions, int maxResult);
 
     protected abstract CassandraDataHandler getDataHandler();
+
+    protected abstract void delete(Object entity, Object pKey);
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera
+     * .graph.Node)
+     */
+    @Override
+    public void addBatch(Node node)
+    {
+        if (node != null)
+        {
+            nodes.add(node);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.persistence.api.Batcher#executeBatch()
+     */
+    @Override
+    public void executeBatch()
+    {
+        String persistenceUnit = null;
+        IPooledConnection conn = null;
+
+        Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
+
+        try
+        {
+            for (Node node : nodes)
+            {
+                Object entity = node.getData();
+                Object id = node.getEntityId();
+                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                persistenceUnit = metadata.getPersistenceUnit();
+                isUpdate = node.isUpdate();
+                List<RelationHolder> relationHolders = getRelationHolders(node);
+                mutationMap = prepareMutation(metadata, entity, id, relationHolders, mutationMap);
+                indexNode(node, metadata);
+            }
+
+            // Write Mutation map to database
+            conn = PelopsUtils.getCassandraConnection(persistenceUnit);
+            PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getPersistenceUnitMetadata(persistenceUnit);
+            Cassandra.Client cassandra_client = conn.getAPI();
+            cassandra_client.set_keyspace(puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE));
+
+            cassandra_client.batch_mutate(mutationMap, consistencyLevel);
+
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error while persisting record. Details: " + e.getMessage());
+            throw new KunderaException(e);
+        }
+        catch (TException e)
+        {
+            log.error("Error while persisting record. Details: " + e.getMessage());
+            throw new KunderaException(e);
+        }
+        catch (UnavailableException e)
+        {
+            log.error("Error while persisting record. Details: " + e.getMessage());
+            throw new KunderaException(e);
+        }
+        catch (TimedOutException e)
+        {
+            log.error("Error while persisting record. Details: " + e.getMessage());
+            throw new KunderaException(e);
+        }
+        finally
+        {
+            PelopsUtils.releaseConnection(conn);
+        }
+
+    }
+
+    /**
+     * @param metadata
+     * @param entity
+     * @param id
+     * @param relationHolders
+     */
+    protected Map<ByteBuffer, Map<String, List<Mutation>>> prepareMutation(EntityMetadata entityMetadata, Object entity,
+            Object id, List<RelationHolder> relationHolders, Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap)
+    {
+
+        if (!isOpen())
+        {
+            throw new PersistenceException("ThriftClient is closed.");
+        }
+
+        // check for counter column
+        if (isUpdate && entityMetadata.isCounterColumnType())
+        {
+            throw new UnsupportedOperationException("Merge is not permitted on counter column");
+        }
+
+        ThriftRow tf = null;
+        try
+        {
+            String columnFamily = entityMetadata.getTableName();
+            tf = getDataHandler().toThriftRow(entity, id.toString(), entityMetadata, columnFamily);
+            Long timestamp = System.currentTimeMillis();
+        }
+        catch (Exception e)
+        {
+            log.error("Error during persisting record, Details:" + e.getMessage());
+            throw new KunderaException(e);
+        }
+
+        addRelationsToThriftRow(entityMetadata, tf, relationHolders);
+
+        byte[] rowKey = PropertyAccessorHelper.get(entity, (Field) entityMetadata.getIdAttribute().getJavaMember());
+        String columnFamily = entityMetadata.getTableName();
+        // Create Insertion List
+        List<Mutation> insertion_list = new ArrayList<Mutation>();
+
+        /*********** Handling for counter column family ************/
+
+        if (entityMetadata.isCounterColumnType())
+        {
+            List<CounterColumn> thriftCounterColumns = tf.getCounterColumns();
+            List<CounterSuperColumn> thriftCounterSuperColumns = tf.getCounterSuperColumns();
+
+            if (thriftCounterColumns != null && !thriftCounterColumns.isEmpty())
+            {
+                for (CounterColumn column : thriftCounterColumns)
+                {
+                    Mutation mut = new Mutation();
+                    mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setCounter_column(column));
+                    insertion_list.add(mut);
+                }
+            }
+
+            if (thriftCounterSuperColumns != null && !thriftCounterSuperColumns.isEmpty())
+            {
+                for (CounterSuperColumn sc : thriftCounterSuperColumns)
+                {
+                    Mutation mut = new Mutation();
+                    mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setCounter_super_column(sc));
+                    insertion_list.add(mut);
+                }
+            }
+        }
+
+        else
+        /********* Handling for column family and super column family *********/
+        {
+            List<Column> thriftColumns = tf.getColumns();
+            List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
+
+            // Populate Insertion list for columns
+            if (thriftColumns != null && !thriftColumns.isEmpty())
+            {
+
+                for (Column column : thriftColumns)
+                {
+                    Mutation mut = new Mutation();
+                    mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setColumn(column));
+                    insertion_list.add(mut);
+                }
+            }
+
+            // Populate Insertion list for super columns
+            if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
+            {
+                for (SuperColumn superColumn : thriftSuperColumns)
+                {
+                    Mutation mut = new Mutation();
+                    mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setSuper_column(superColumn));
+                    insertion_list.add(mut);
+                }
+            }
+        }
+
+        // Create Mutation Map
+        Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
+        columnFamilyValues.put(columnFamily, insertion_list);
+        Bytes b = CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass());
+        mutationMap.put(b.getBytes(), columnFamilyValues);
+
+        return mutationMap;
+    }
+
 }

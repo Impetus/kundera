@@ -541,4 +541,16 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
 
         return client;
     }
+
+
+    public boolean isBatch()
+    {
+        return true;
+    }
+    
+    public int getBatchSize()
+    {
+        return 0;
+    }
+    
 }
