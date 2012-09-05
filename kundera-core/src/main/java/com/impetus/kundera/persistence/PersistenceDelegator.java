@@ -817,7 +817,9 @@ public class PersistenceDelegator
         return clientMap;
     }
 
-
+    /**
+     * Executes batch.
+     */
     private void execute()
     {
         for (Client client : clientMap.values())
@@ -832,6 +834,9 @@ public class PersistenceDelegator
         }
     }
 
+    /**
+     *  On flusing join table data
+     */
     private void flushJoinTableData()
     {
         Map<String, JoinTableData> joinTableDataMap = flushManager.getJoinTableDataMap();
@@ -858,7 +863,9 @@ public class PersistenceDelegator
     }
     
     /**
-     * @param properties
+     * Populates client specific properties.
+     * 
+     * @param properties map of properties.
      */
     public void populateClientProperties(Map properties)
     {       

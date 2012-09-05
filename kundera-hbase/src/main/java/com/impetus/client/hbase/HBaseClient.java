@@ -521,8 +521,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             throw new KunderaException(e);
         }
     }
-
-<<<<<<< HEAD
     /* (non-Javadoc)
      * @see com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera.graph.Node)
      */
@@ -629,6 +627,12 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
 
     }
 
+    /**
+     * Add records to data wrapper.
+     * @param columnWrapper          column wrapper
+     * @param embeddableData         embeddable data
+     * @param dataSet                data collection set
+     */
     private void addRecords(HBaseDataWrapper columnWrapper, List<HBaseDataWrapper> embeddableData,
             List<HBaseDataWrapper> dataSet)
     {
@@ -639,8 +643,6 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             dataSet.addAll(embeddableData);
         }
     }
-<<<<<<< HEAD
-
 
     /**
      * Check on batch limit.
@@ -654,7 +656,4 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
         }
     }
 
-
-=======
->>>>>>> d183c5b497b1938a52677709b15da07a65cbc45a
 }
