@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
@@ -608,7 +609,14 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
             }
         }
+
         return collections;
+    }    
+
+    @Override
+    public ClientPropertiesSetter getClientPropertiesSetter()
+    {
+        return new MongoClientPropertiesSetter();
     }
 
 

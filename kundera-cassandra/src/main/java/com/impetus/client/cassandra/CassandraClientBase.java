@@ -106,13 +106,15 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
 
     /** The closed. */
     private boolean closed = false;
-
+    
+    /** list of nodes for batch processing. */
     private List<Node> nodes = new ArrayList<Node>();
 
+    /** batch size */
     private int batchSize;
     
     /**
-     * 
+     *  constructor using fields. 
      */
     protected CassandraClientBase(String persistenceUnit)
     {
@@ -120,7 +122,6 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
         batchSize = puMetadata.getBatchSize();
 
     }
-
 
     /**
      * Populates foreign key as column.
@@ -764,8 +765,8 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
             results.add(dataHandler.populateEntity(tr, m, relations, isWrapReq));
         }
         return results;
-    } 
-    
+    }  
+
 
     /**
      * @return the cqlVersion

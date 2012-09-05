@@ -39,6 +39,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.client.ClientResolverException;
 import com.impetus.kundera.graph.Node;
@@ -855,5 +856,24 @@ public class PersistenceDelegator
         }
         joinTableDataMap.clear(); // All Join table operation
     }
+    
+    /**
+     * @param properties
+     */
+    public void populateClientProperties(Map properties)
+    {       
+        if(properties != null && ! properties.isEmpty())
+        {
+            Map<String, Client> clientMap = getDelegate();
+            if(clientMap != null && ! clientMap.isEmpty())
+            {
+                for(Client client : clientMap.values())
+                {
+                    ClientPropertiesSetter cps = client.getClientPropertiesSetter();                    
+                    if(cps != null) cps.populateClientProperties(client, properties);                   
+                }
+            }            
+        }
+    }   
 
 }
