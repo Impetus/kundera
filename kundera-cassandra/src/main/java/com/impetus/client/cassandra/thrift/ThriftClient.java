@@ -107,6 +107,7 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
 
     public ThriftClient(IndexManager indexManager, EntityReader reader, String persistenceUnit)
     {
+        super(persistenceUnit);
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
         this.dataHandler = new ThriftDataHandler();
@@ -129,108 +130,6 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-
-/*        if (!isOpen())
-        {
-            throw new PersistenceException("ThriftClient is closed.");
-        }
-
-        // check for counter column
-        if (isUpdate && entityMetadata.isCounterColumnType())
-        {
-            throw new UnsupportedOperationException("Merge is not permitted on counter column");
-        }
-
-        ThriftRow tf = null;
-        try
-        {
-            String columnFamily = entityMetadata.getTableName();
-            tf = dataHandler.toThriftRow(entity, id.toString(), entityMetadata, columnFamily);
-            timestamp = System.currentTimeMillis();
-        }
-        catch (Exception e)
-        {
-            log.error("Error during persisting record, Details:" + e.getMessage());
-            throw new KunderaException(e);
-        }
-
-        addRelationsToThriftRow(entityMetadata, tf, rlHolders);
-
-        IPooledConnection conn = null;
-
-        try
-
-        {
-            byte[] rowKey = PropertyAccessorHelper.get(entity, (Field) entityMetadata.getIdAttribute().getJavaMember());
-            String columnFamily = entityMetadata.getTableName();
-            // Create Insertion List
-            List<Mutation> insertion_list = new ArrayList<Mutation>();
-
-            *//*********** Handling for counter column family ************//*
-
-            if (entityMetadata.isCounterColumnType())
-            {
-                List<CounterColumn> thriftCounterColumns = tf.getCounterColumns();
-                List<CounterSuperColumn> thriftCounterSuperColumns = tf.getCounterSuperColumns();
-
-                if (thriftCounterColumns != null && !thriftCounterColumns.isEmpty())
-                {
-                    for (CounterColumn column : thriftCounterColumns)
-                    {
-                        Mutation mut = new Mutation();
-                        mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setCounter_column(column));
-                        insertion_list.add(mut);
-                    }
-                }
-
-                if (thriftCounterSuperColumns != null && !thriftCounterSuperColumns.isEmpty())
-                {
-                    for (CounterSuperColumn sc : thriftCounterSuperColumns)
-                    {
-                        Mutation mut = new Mutation();
-                        mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setCounter_super_column(sc));
-                        insertion_list.add(mut);
-                    }
-                }
-            }
-            
-            else
-            *//********* Handling for column family and super column family *********//*
-            {
-                List<Column> thriftColumns = tf.getColumns();
-                List<SuperColumn> thriftSuperColumns = tf.getSuperColumns();
-
-                // Populate Insertion list for columns
-                if (thriftColumns != null && !thriftColumns.isEmpty())
-                {
-
-                    for (Column column : thriftColumns)
-                    {
-                        Mutation mut = new Mutation();
-                        mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setColumn(column));
-                        insertion_list.add(mut);
-                    }
-                }
-
-                // Populate Insertion list for super columns
-                if (thriftSuperColumns != null && !thriftSuperColumns.isEmpty())
-                {
-                    for (SuperColumn superColumn : thriftSuperColumns)
-                    {
-                        Mutation mut = new Mutation();
-                        mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setSuper_column(superColumn));
-                        insertion_list.add(mut);
-                    }
-                }
-            }
-
-            // Create Mutation Map
-            Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
-            columnFamilyValues.put(columnFamily, insertion_list);
-            Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
-            Bytes b = CassandraUtilities.toBytes(tf.getId(), tf.getId().getClass());
-            mutationMap.put(b.getBytes(), columnFamilyValues);
-*/
         IPooledConnection conn = null;
         try
         {

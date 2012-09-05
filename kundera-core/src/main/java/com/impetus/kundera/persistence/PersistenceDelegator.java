@@ -52,6 +52,7 @@ import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.lifecycle.states.TransientState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.EventLog.EventType;
 import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.FlushStack;
@@ -104,12 +105,6 @@ public class PersistenceDelegator
     FlushManager flushManager = new FlushManager();
 
     private boolean enableFlush;
-    
-    
-    private boolean isBatch;
-    
-    private int batchSize;
-    
 
     /**
      * Instantiates a new persistence delegator.
@@ -380,7 +375,19 @@ public class PersistenceDelegator
                         EntityMetadata metadata = getMetadata(node.getDataClass());
                         node.setClient(getClient(metadata));
 
-                        node.flush();
+                        if (node.getClient().getClass().isAssignableFrom(Batcher.class)
+                                && ((Batcher) (node.getClient())).getBatchSize() > 0)
+                        {
+                            ((Batcher) (node.getClient())).addBatch(node);
+                        }
+                        else if (flushMode.equals(FlushModeType.AUTO) || enableFlush)
+                        {
+                            node.flush();
+                        }
+                        else
+                        {
+                            fs.push(node);
+                        }
 
                         // Update Link value for all nodes attached to this one
                         Map<NodeLink, Node> parents = node.getParents();
@@ -405,33 +412,16 @@ public class PersistenceDelegator
 
                 }
 
-                // TODO : This needs to be look for different
-                // permutation/combination
-                // Flush Join Table data into database
-                Map<String, JoinTableData> joinTableDataMap = flushManager.getJoinTableDataMap();
-                for (JoinTableData jtData : joinTableDataMap.values())
+                if (flushMode.equals(FlushModeType.AUTO) || enableFlush)
                 {
-                    EntityMetadata m = KunderaMetadataManager.getEntityMetadata(jtData.getEntityClass());
-                    Client client = getClient(m);
 
-                    if (OPERATION.INSERT.equals(jtData.getOperation()))
-                    {
-                        client.persistJoinTable(jtData);
-                    }
-                    else if (OPERATION.DELETE.equals(jtData.getOperation()))
-                    {
-                        for (Object pk : jtData.getJoinTableRecords().keySet())
-                        {
-                            // client.deleteByColumn(jtData.getJoinTableName(),
-                            // m.getIdColumn().getName(), pk);
-                            client.deleteByColumn(jtData.getJoinTableName(), m.getIdAttribute().getName(), pk);
-
-                        }
-                    }
-                    jtData.setProcessed(true);
+                    // TODO : This needs to be look for different
+                    // permutation/combination
+                    // Flush Join Table data into database
+                    flushJoinTableData();
+                    // performed,
                 }
-                joinTableDataMap.clear(); // All Join table operation performed,
-                                          // clear it.
+                // clear it.
 
             }
 
@@ -443,8 +433,7 @@ public class PersistenceDelegator
      */
     private boolean applyFlush()
     {
-
-        return flushMode.equals(FlushModeType.AUTO) ? true : enableFlush;
+        return flushMode.equals(FlushModeType.AUTO) || enableFlush;
     }
 
     public <E> E merge(E e)
@@ -491,22 +480,24 @@ public class PersistenceDelegator
 
         return (E) node.getData();
     }
-    
+
     /**
-     * Remove the given entity from the persistence context, causing a managed entity to become detached.
-     */    
+     * Remove the given entity from the persistence context, causing a managed
+     * entity to become detached.
+     */
     public void detach(Object entity)
     {
-        if(entity == null) {
+        if (entity == null)
+        {
             throw new IllegalArgumentException("Entity is null, can't detach it");
         }
-        EntityMetadata metadata = getMetadata(entity.getClass());             
+        EntityMetadata metadata = getMetadata(entity.getClass());
         Object primaryKey = getId(entity, metadata);
-        
+
         String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entity.getClass());
-        
-        Node node = getPersistenceCache().getMainCache().getNodeFromCache(nodeId);        
-        node.detach();        
+
+        Node node = getPersistenceCache().getMainCache().getNodeFromCache(nodeId);
+        node.detach();
     }
 
     /**
@@ -594,28 +585,30 @@ public class PersistenceDelegator
         getPersistenceCache().clean();
 
     }
-    
+
     /**
-     * Check if the instance is a managed entity instance belonging
-     * to the current persistence context. 
-     */ 
+     * Check if the instance is a managed entity instance belonging to the
+     * current persistence context.
+     */
     public final boolean contains(Object entity)
     {
-        if(entity == null) {
+        if (entity == null)
+        {
             throw new IllegalArgumentException("Entity is null, can't check whether it's in persistence context");
         }
-        EntityMetadata metadata = getMetadata(entity.getClass());             
+        EntityMetadata metadata = getMetadata(entity.getClass());
         Object primaryKey = getId(entity, metadata);
-        
+
         String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entity.getClass());
-        
+
         Node node = getPersistenceCache().getMainCache().getNodeFromCache(nodeId);
-        if(node != null && node.isInState(ManagedState.class)) {
+        if (node != null && node.isInState(ManagedState.class))
+        {
             return true;
         }
         return false;
-    }   
-    
+    }
+
     /**
      * Refresh the state of the instance from the database, overwriting changes
      * made to the entity, if any.
@@ -631,20 +624,20 @@ public class PersistenceDelegator
         {
             throw new KunderaException("Unable to load entity metadata for :" + entity.getClass());
         }
-        
+
         Object primaryKey = getId(entity, entityMetadata);
         String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entity.getClass());
 
         MainCache mainCache = (MainCache) getPersistenceCache().getMainCache();
         Node node = mainCache.getNodeFromCache(nodeId);
-        
-        if(node != null) {
+
+        if (node != null)
+        {
             node.refresh();
         }
-        
-        lock.readLock().unlock();        
+
+        lock.readLock().unlock();
     }
-    
 
     /**
      * Gets the metadata.
@@ -761,15 +754,13 @@ public class PersistenceDelegator
 
     public void commit()
     {
-        if (!flushMode.equals(FlushModeType.AUTO))
-        {
             enableFlush = true;
             flush();
+            execute();
             isTransactionInProgress = false;
             enableFlush = false;
             flushManager.commit();
             flushManager.clearFlushStack();
-        }
     }
 
     public void rollback()
@@ -778,7 +769,6 @@ public class PersistenceDelegator
         flushManager.rollback(this);
         flushManager.clearFlushStack();
         getPersistenceCache().clean();
-
     }
 
     public boolean getRollbackOnly()
@@ -827,5 +817,43 @@ public class PersistenceDelegator
     }
 
 
-    
+    private void execute()
+    {
+        for (Client client : clientMap.values())
+        {
+            if (client.getClass().isAssignableFrom(Batcher.class))
+            {
+                if (((Batcher) client).executeBatch() > 0)
+                {
+                    flushJoinTableData();
+                }
+            }
+        }
+    }
+
+    private void flushJoinTableData()
+    {
+        Map<String, JoinTableData> joinTableDataMap = flushManager.getJoinTableDataMap();
+        for (JoinTableData jtData : joinTableDataMap.values())
+        {
+            EntityMetadata m = KunderaMetadataManager.getEntityMetadata(jtData.getEntityClass());
+            Client client = getClient(m);
+
+            if (OPERATION.INSERT.equals(jtData.getOperation()))
+            {
+                client.persistJoinTable(jtData);
+            }
+            else if (OPERATION.DELETE.equals(jtData.getOperation()))
+            {
+                for (Object pk : jtData.getJoinTableRecords().keySet())
+                {
+                    client.deleteByColumn(jtData.getJoinTableName(), m.getIdAttribute().getName(), pk);
+
+                }
+            }
+            jtData.setProcessed(true);
+        }
+        joinTableDataMap.clear(); // All Join table operation
+    }
+
 }

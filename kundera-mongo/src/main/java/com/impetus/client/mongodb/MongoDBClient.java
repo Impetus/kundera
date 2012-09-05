@@ -36,6 +36,7 @@ import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
 import com.impetus.kundera.persistence.api.Batcher;
@@ -71,6 +72,9 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     /** The log. */
     private static Log log = LogFactory.getLog(MongoDBClient.class);
 
+    private List<Node> nodes = new ArrayList<Node>();
+
+    private int batchSize;
     /**
      * Instantiates a new mongo db client.
      * 
@@ -90,6 +94,9 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         this.reader = reader;
         this.persistenceUnit = persistenceUnit;
         handler = new MongoDBDataHandler();
+        
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+        batchSize = puMetadata.getBatchSize();
     }
 
     @Override
@@ -477,30 +484,56 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         onFlushCollection(collections);
     }
 
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera.graph.Node)
+     */
+    public void addBatch(Node node)
+    {
+        if (node != null)
+        {
+            nodes.add(node);
+        }
+
+        onBatchLimit();
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.persistence.api.Batcher#getBatchSize()
+     */
+    @Override
+    public int getBatchSize()
+    {
+        return batchSize;
+    }
+
+    
     /*
      * (non-Javadoc)
      * 
      * @see com.impetus.kundera.persistence.api.Batcher#executeBatch()
      */
     @Override
-    public void executeBatch()
+    public int executeBatch()
     {
         Map<String, List<DBObject>> collections = new HashMap<String, List<DBObject>>();
         for (Node node : nodes)
         {
-            // delete can not be executed in batch
-            if (node.isInState(RemovedState.class))
+            if (node.isDirty())
             {
-                delete(node.getData(), node.getEntityId());
-            } else
-            {
-                
+                // delete can not be executed in batch
+                if (node.isInState(RemovedState.class))
+                {
+                    delete(node.getData(), node.getEntityId());
+                }
+                else
+                {
 
-            List<RelationHolder> relationHolders = getRelationHolders(node);
-            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-            collections = onPersist(collections, node.getEntityId(), node.getData(), metadata, relationHolders,
-                    node.isUpdate());
-            indexNode(node, metadata);
+                    List<RelationHolder> relationHolders = getRelationHolders(node);
+                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                    collections = onPersist(collections, node.getEntityId(), node.getData(), metadata, relationHolders,
+                            node.isUpdate());
+                    indexNode(node, metadata);
+                }
             }
         }
 
@@ -508,7 +541,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         {
             onFlushCollection(collections);
         }
-
+        return collections.size();
     }
 
     /**
@@ -577,4 +610,19 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         }
         return collections;
     }
+
+
+    /**
+     * Check on batch limit.
+     */
+    private void onBatchLimit()
+    {
+        if(batchSize > 0 && batchSize == nodes.size())
+        {
+            executeBatch();
+            nodes.clear();
+        }
+    }
+
+
 }

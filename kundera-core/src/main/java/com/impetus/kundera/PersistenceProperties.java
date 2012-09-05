@@ -79,4 +79,6 @@ public interface PersistenceProperties
     public static final String KUNDERA_USERNAME = "kundera.username";
 
     public static final String KUNDERA_PASSWORD = "kundera.password";
+    
+    public static final String KUNDERA_BATCH_SIZE = "kundera.batch.size";
 }

@@ -118,6 +118,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
      */
     public PelopsClient(IndexManager indexManager, EntityReader reader, String persistenceUnit)
     {
+        super(persistenceUnit);
         this.persistenceUnit = persistenceUnit;
         this.indexManager = indexManager;
         this.dataHandler = new PelopsDataHandler();

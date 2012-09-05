@@ -76,7 +76,6 @@ import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.lifecycle.states.NodeState;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -107,6 +106,21 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
 
     /** The closed. */
     private boolean closed = false;
+
+    private List<Node> nodes = new ArrayList<Node>();
+
+    private int batchSize;
+    
+    /**
+     * 
+     */
+    protected CassandraClientBase(String persistenceUnit)
+    {
+        PersistenceUnitMetadata puMetadata = KunderaMetadataManager.getPersistenceUnitMetadata(persistenceUnit);
+        batchSize = puMetadata.getBatchSize();
+
+    }
+
 
     /**
      * Populates foreign key as column.
@@ -829,13 +843,38 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
     protected abstract void delete(Object entity, Object pKey);
 
 
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera.graph.Node)
+     */
+    public void addBatch(Node node)
+    {
+
+        if (node != null)
+        {
+            nodes.add(node);
+        }
+
+        onBatchLimit();
+    }
+
+    /* (non-Javadoc)
+     * @see com.impetus.kundera.persistence.api.Batcher#getBatchSize()
+     */
+    @Override
+    public int getBatchSize()
+    {
+        return batchSize;
+    }
+
+    
     /*
      * (non-Javadoc)
      * 
      * @see com.impetus.kundera.persistence.api.Batcher#executeBatch()
      */
     @Override
-    public void executeBatch()
+    public int executeBatch()
     {
         String persistenceUnit = null;
         IPooledConnection conn = null;
@@ -846,22 +885,25 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
         {
             for (Node node : nodes)
             {
-                Object entity = node.getData();
-                Object id = node.getEntityId();
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-                persistenceUnit = metadata.getPersistenceUnit();
-                isUpdate = node.isUpdate();
-                
-                // delete can not be executed in batch
-                if (node.isInState(RemovedState.class))
+                if (node.isDirty())
                 {
-                    delete(entity, id);
-                }
-                else
-                {
-                    List<RelationHolder> relationHolders = getRelationHolders(node);
-                    mutationMap = prepareMutation(metadata, entity, id, relationHolders, mutationMap);
-                    indexNode(node, metadata);
+                    Object entity = node.getData();
+                    Object id = node.getEntityId();
+                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+                    persistenceUnit = metadata.getPersistenceUnit();
+                    isUpdate = node.isUpdate();
+
+                    // delete can not be executed in batch
+                    if (node.isInState(RemovedState.class))
+                    {
+                        delete(entity, id);
+                    }
+                    else
+                    {
+                        List<RelationHolder> relationHolders = getRelationHolders(node);
+                        mutationMap = prepareMutation(metadata, entity, id, relationHolders, mutationMap);
+                        indexNode(node, metadata);
+                    }
                 }
             }
 
@@ -877,6 +919,7 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
 
                 cassandra_client.batch_mutate(mutationMap, consistencyLevel);
             }
+            return mutationMap.size();
         }
         catch (InvalidRequestException e)
         {
@@ -1011,6 +1054,19 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
         mutationMap.put(b.getBytes(), columnFamilyValues);
 
         return mutationMap;
+    }
+
+
+    /**
+     * Check on batch limit.
+     */
+    private void onBatchLimit()
+    {
+        if(batchSize > 0 && batchSize == nodes.size())
+        {
+            executeBatch();
+            nodes.clear();
+        }
     }
 
 }

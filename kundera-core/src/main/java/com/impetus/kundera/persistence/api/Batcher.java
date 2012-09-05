@@ -34,6 +34,8 @@ public interface Batcher
     /**
      * 
      */
-    void executeBatch();
+    int executeBatch();
+    
+    int getBatchSize();
 
 }

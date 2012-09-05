@@ -48,8 +48,6 @@ public abstract class ClientBase
 
     protected boolean isUpdate;
 
-    protected List<Node> nodes = new ArrayList<Node>();
-
     /*
      * (non-Javadoc)
      * 
@@ -182,15 +180,6 @@ public abstract class ClientBase
             {
                 indexManager.update(entityMetadata, node.getData(), null, null);
             }
-        }
-    }
-
-
-    public void addBatch(Node node)
-    {
-        if (node != null)
-        {
-            nodes.add(node);
         }
     }
 

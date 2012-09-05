@@ -549,9 +549,9 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
      * 
      * @return true, if pu consists batch.size property.
      */
-    public boolean isBatch()
+    private boolean isBatch()
     {
-        return true;
+        return getProperty(PersistenceProperties.KUNDERA_BATCH_SIZE) != null;
     }
     
     /**
@@ -561,6 +561,16 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
      */
     public int getBatchSize()
     {
+        if(isBatch())
+        {
+            String batchSize = getProperty(PersistenceProperties.KUNDERA_BATCH_SIZE);
+            int batch_Size = Integer.valueOf(batchSize);
+            if(batch_Size == 0)
+            {
+                throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0");
+            }
+        }
+        
         return 0;
     }
 }
