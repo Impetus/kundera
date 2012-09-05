@@ -103,8 +103,6 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
 
     private ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
 
-    private List<Node> nodes = new ArrayList<Node>();
-
     /** The closed. */
     private boolean closed = false;
 
@@ -828,21 +826,6 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
 
     protected abstract void delete(Object entity, Object pKey);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.kundera.persistence.api.Batcher#addBatch(com.impetus.kundera
-     * .graph.Node)
-     */
-    @Override
-    public void addBatch(Node node)
-    {
-        if (node != null)
-        {
-            nodes.add(node);
-        }
-    }
 
     /*
      * (non-Javadoc)

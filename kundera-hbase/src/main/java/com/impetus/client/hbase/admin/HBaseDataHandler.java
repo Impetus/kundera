@@ -50,10 +50,12 @@ import org.apache.hadoop.hbase.util.Bytes;
 import com.impetus.client.hbase.HBaseData;
 import com.impetus.client.hbase.Reader;
 import com.impetus.client.hbase.Writer;
+import com.impetus.client.hbase.admin.HBaseDataHandler.HBaseDataWrapper;
 import com.impetus.client.hbase.service.HBaseReader;
 import com.impetus.client.hbase.service.HBaseWriter;
 import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.cache.ElementCollectionCacheManager;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
@@ -275,7 +277,6 @@ public class HBaseDataHandler implements DataHandler
 
         EntityType entityType = metaModel.entity(m.getEntityClazz());
 
-        Map<String, Set<Attribute>> dataCollection = new HashMap<String, Set<Attribute>>();
         Set<Attribute> attributes = entityType.getAttributes();
 
         Map<String, Object> relationValue = null;
@@ -283,98 +284,7 @@ public class HBaseDataHandler implements DataHandler
         HBaseDataWrapper columnWrapper = new HBaseDataWrapper(rowId, new java.util.HashSet<Attribute>(), entity, null);
         List<HBaseDataWrapper> persistentData = new ArrayList<HBaseDataHandler.HBaseDataWrapper>(attributes.size());
 
-        for (Attribute column : attributes)
-        {
-            String fieldName = ((AbstractAttribute) column).getJPAColumnName();
-
-            Class javaType = ((AbstractAttribute) column).getBindableJavaType();
-            if (metaModel.isEmbeddable(javaType))
-            {
-                String columnFamilyName = ((AbstractAttribute) column).getJPAColumnName();
-                Field columnFamilyField = (Field) column.getJavaMember();
-                Object columnFamilyObject = null;
-                try
-                {
-                    columnFamilyObject = PropertyAccessorHelper.getObject(entity, columnFamilyField);
-                }
-                catch (PropertyAccessException e1)
-                {
-                    log.error("Error while getting " + columnFamilyName + " field from entity " + entity);
-                    return;
-                }
-
-                if (columnFamilyObject == null)
-                {
-                    continue;
-                }
-
-                Set<Attribute> columns = metaModel.embeddable(javaType).getAttributes();
-                if (column.isCollection())
-                {
-                    String dynamicCFName = null;
-
-                    ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
-                    // Check whether it's first time insert or updation
-                    if (ecCacheHandler.isCacheEmpty())
-                    { // First time insert
-                        int count = 0;
-                        for (Object obj : (Collection) columnFamilyObject)
-                        {
-                            dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
-                            addColumnFamilyToTable(tableName, dynamicCFName);
-
-                            persistentData.add(new HBaseDataWrapper(rowId, columns, obj, dynamicCFName));
-                            count++;
-                        }
-
-                    }
-                    else
-                    {
-                        // Updation
-                        // Check whether this object is already in cache, which
-                        // means we already have a column family with that name
-                        // Otherwise we need to generate a fresh column family
-                        // name
-                        int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(rowId);
-                        for (Object obj : (Collection) columnFamilyObject)
-                        {
-                            dynamicCFName = ecCacheHandler.getElementCollectionObjectName(rowId, obj);
-                            if (dynamicCFName == null)
-                            { // Fresh row
-                                dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
-                                        + (++lastEmbeddedObjectCount);
-
-                            }
-                            addColumnFamilyToTable(tableName, dynamicCFName);
-                            persistentData.add(new HBaseDataWrapper(rowId, columns, obj, dynamicCFName));
-                        }
-
-                        // Clear embedded collection cache for GC
-                        ecCacheHandler.clearCache();
-                    }
-
-                }
-                else
-                {
-                    // Write Column family which was Embedded object in entity
-                    if (columnFamilyField.isAnnotationPresent(Embedded.class))
-                    {
-                        persistentData.add(new HBaseDataWrapper(rowId, columns, columnFamilyObject, columnFamilyName));
-                    }
-                    else
-                    {
-                        persistentData.add(new HBaseDataWrapper(rowId, columns, columnFamilyObject, columnFamilyName));
-                    }
-
-                }
-
-            }
-            else if (!column.isAssociation())
-            {
-                columnWrapper.addColumn(column);
-
-            }
-        }
+        preparePersistentData(tableName, entity, rowId, metaModel, attributes, columnWrapper, persistentData);
 
         hbaseWriter.writeColumns(hTable, columnWrapper.getRowKey(), columnWrapper.getColumns(), entity);
 
@@ -496,7 +406,7 @@ public class HBaseDataHandler implements DataHandler
      * @throws IOException
      *             Signals that an I/O exception has occurred.
      */
-    private HTable gethTable(final String tableName) throws IOException
+    public HTable gethTable(final String tableName) throws IOException
     {
         return (HTable) hTablePool.getTable(tableName);
     }
@@ -885,7 +795,7 @@ public class HBaseDataHandler implements DataHandler
      * @author vivek.mishra
      * 
      */
-    private class HBaseDataWrapper
+    public static class HBaseDataWrapper
     {
         Object rowKey;
 
@@ -901,7 +811,7 @@ public class HBaseDataHandler implements DataHandler
          * @param entity
          * @param columnFamily
          */
-        private HBaseDataWrapper(Object rowKey, Set<Attribute> columns, Object entity, String columnFamily)
+        public HBaseDataWrapper(Object rowKey, Set<Attribute> columns, Object entity, String columnFamily)
         {
             super();
             this.rowKey = rowKey;
@@ -913,7 +823,7 @@ public class HBaseDataHandler implements DataHandler
         /**
          * @return the rowKey
          */
-        private Object getRowKey()
+        public Object getRowKey()
         {
             return rowKey;
         }
@@ -921,7 +831,7 @@ public class HBaseDataHandler implements DataHandler
         /**
          * @return the columns
          */
-        private Set<Attribute> getColumns()
+        public Set<Attribute> getColumns()
         {
             return columns;
         }
@@ -929,7 +839,7 @@ public class HBaseDataHandler implements DataHandler
         /**
          * @return the entity
          */
-        private Object getEntity()
+        public Object getEntity()
         {
             return entity;
         }
@@ -937,12 +847,12 @@ public class HBaseDataHandler implements DataHandler
         /**
          * @return the columnFamily
          */
-        private String getColumnFamily()
+        public String getColumnFamily()
         {
             return columnFamily;
         }
 
-        private void addColumn(Attribute column)
+        public void addColumn(Attribute column)
         {
             columns.add(column);
         }
@@ -1009,6 +919,135 @@ public class HBaseDataHandler implements DataHandler
 
         log.warn("No value found for : " + jpaColumnName + " returning null");
         return null;
+    }
+
+
+
+    /**
+     * 
+     * @param tableName
+     * @param entity
+     * @param rowId
+     * @param metaModel
+     * @param attributes
+     * @param columnWrapper
+     * @param persistentData
+     * @return
+     * @throws IOException
+     */
+    public void  preparePersistentData(String tableName, Object entity, Object rowId, MetamodelImpl metaModel,
+            Set<Attribute> attributes, HBaseDataWrapper columnWrapper, List<HBaseDataWrapper> persistentData)
+            throws IOException
+    {
+        for (Attribute column : attributes)
+        {
+            String fieldName = ((AbstractAttribute) column).getJPAColumnName();
+
+            Class javaType = ((AbstractAttribute) column).getBindableJavaType();
+            if (metaModel.isEmbeddable(javaType))
+            {
+                String columnFamilyName = ((AbstractAttribute) column).getJPAColumnName();
+                Field columnFamilyField = (Field) column.getJavaMember();
+                Object columnFamilyObject = null;
+                try
+                {
+                    columnFamilyObject = PropertyAccessorHelper.getObject(entity, columnFamilyField);
+                }
+                catch (PropertyAccessException e1)
+                {
+                    log.error("Error while getting " + columnFamilyName + " field from entity " + entity);
+                    throw new KunderaException(e1);
+                }
+
+                if (columnFamilyObject != null)
+                {
+                    // continue;
+                    // }
+
+                    Set<Attribute> columns = metaModel.embeddable(javaType).getAttributes();
+                    if (column.isCollection())
+                    {
+                        String dynamicCFName = null;
+
+                        ElementCollectionCacheManager ecCacheHandler = ElementCollectionCacheManager.getInstance();
+                        // Check whether it's first time insert or updation
+                        if (ecCacheHandler.isCacheEmpty())
+                        { // First time insert
+                            int count = 0;
+                            for (Object obj : (Collection) columnFamilyObject)
+                            {
+                                dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER + count;
+                                addColumnFamilyToTable(tableName, dynamicCFName);
+
+                                persistentData.add(new HBaseDataWrapper(rowId, columns, obj, dynamicCFName));
+                                count++;
+                            }
+
+                        }
+                        else
+                        {
+                            // Updation
+                            // Check whether this object is already in cache,
+                            // which
+                            // means we already have a column family with that
+                            // name
+                            // Otherwise we need to generate a fresh column
+                            // family
+                            // name
+                            int lastEmbeddedObjectCount = ecCacheHandler.getLastElementCollectionObjectCount(rowId);
+                            for (Object obj : (Collection) columnFamilyObject)
+                            {
+                                dynamicCFName = ecCacheHandler.getElementCollectionObjectName(rowId, obj);
+                                if (dynamicCFName == null)
+                                { // Fresh row
+                                    dynamicCFName = columnFamilyName + Constants.EMBEDDED_COLUMN_NAME_DELIMITER
+                                            + (++lastEmbeddedObjectCount);
+
+                                }
+                                addColumnFamilyToTable(tableName, dynamicCFName);
+                                persistentData.add(new HBaseDataWrapper(rowId, columns, obj, dynamicCFName));
+                            }
+
+                            // Clear embedded collection cache for GC
+                            ecCacheHandler.clearCache();
+                        }
+
+                    }
+                    else
+                    {
+                        // Write Column family which was Embedded object in
+                        // entity
+                        if (columnFamilyField.isAnnotationPresent(Embedded.class))
+                        {
+                            persistentData.add(new HBaseDataWrapper(rowId, columns, columnFamilyObject,
+                                    columnFamilyName));
+                        }
+                        else
+                        {
+                            persistentData.add(new HBaseDataWrapper(rowId, columns, columnFamilyObject,
+                                    columnFamilyName));
+                        }
+
+                    }
+                }
+            }
+            else if (!column.isAssociation())
+            {
+                columnWrapper.addColumn(column);
+
+            }
+        }
+        
+    }
+
+    /**
+     * @param data
+     * @throws IOException 
+     */
+    public void batch_insert(Map<HTable, List<HBaseDataWrapper>> data) throws IOException
+    {
+        hbaseWriter.persistRows(data);
+        
     }
 
 }

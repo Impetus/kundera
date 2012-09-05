@@ -77,6 +77,11 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
 
     private String schemaVersion;
 
+    public PersistenceUnitMetadata()
+    {
+        
+    }
+    
     public PersistenceUnitMetadata(String xmlSchemaVersion, URL rootUrl)
     {
         this.schemaVersion = xmlSchemaVersion;

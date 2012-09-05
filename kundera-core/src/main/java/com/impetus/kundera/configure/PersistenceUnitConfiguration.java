@@ -89,7 +89,7 @@ public class PersistenceUnitConfiguration implements Configuration
                 if (!metadatas.containsKey(persistenceUnit))
                 {
                     log.error("Unconfigured persistence unit: " + persistenceUnit
-                            + "please validate with persistence.xml");
+                            + " please validate with persistence.xml");
                     throw new IllegalArgumentException("Invalid persistence unit: " + persistenceUnit + " provided");
                 }
                 metadatas.get(persistenceUnit);

@@ -17,6 +17,7 @@ package com.impetus.client.mongodb;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +31,13 @@ import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -47,7 +50,7 @@ import com.mongodb.DBObject;
  * 
  * @author impetusopensource
  */
-public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
+public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher
 {
 
     /** The is connected. */
@@ -468,13 +471,67 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
     @Override
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
-        String documentName = entityMetadata.getTableName();
-        DBCollection dbCollection = mongoDb.getCollection(documentName);
+        Map<String, List<DBObject>> collections = new HashMap<String, List<DBObject>>();
+        collections = onExecute(collections, entity, id, entityMetadata, rlHolders, isUpdate);
+        onFlushCollection(collections);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.persistence.api.Batcher#executeBatch()
+     */
+    @Override
+    public void executeBatch()
+    {
+        Map<String, List<DBObject>> collections = new HashMap<String, List<DBObject>>();
+        for (Node node : nodes)
+        {
+            List<RelationHolder> relationHolders = getRelationHolders(node);
+            EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+            collections = onExecute(collections, node.getEntityId(), node.getData(), metadata, relationHolders,
+                    node.isUpdate());
+            indexNode(node, metadata);
+        }
+
+        onFlushCollection(collections);
+
+    }
+
+    /**
+     * On collections flush.
+     * 
+     * @param collections collection containing records to be inserted in mongo db.
+     */
+    private void onFlushCollection(Map<String, List<DBObject>> collections)
+    {
+        for (String tableName : collections.keySet())
+        {
+            DBCollection dbCollection = mongoDb.getCollection(tableName);
+            dbCollection.insert(collections.get(tableName));
+        }
+    }
+
+    /**
+     * Executes on list of entities to be persisted.
+     * 
+     * @param collections  collection containing list of db objects.
+     * @param entity       entity in question. 
+     * @param id           entity id.
+     * @param metadata     entity metadata 
+     * @param relationHolders relation holders.
+     * @param isUpdate        if it is an update 
+     * @return                collection of DB objects.
+     */
+    private Map<String, List<DBObject>> onExecute(Map<String, List<DBObject>> collections, Object entity, Object id,
+            EntityMetadata metadata, List<RelationHolder> relationHolders, boolean isUpdate)
+    {
+        persistenceUnit = metadata.getPersistenceUnit();
+        String documentName = metadata.getTableName();
         DBObject document = null;
         document = new BasicDBObject();
 
-        // TODO: Still we need to see why mongo updates other values to NULL.
-        document = handler.getDocumentFromEntity(document, entityMetadata, entity, rlHolders);
+        document = handler.getDocumentFromEntity(document, metadata, entity, relationHolders);
         if (isUpdate)
         {
             BasicDBObject query = new BasicDBObject();
@@ -484,11 +541,29 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
                     "_id",
                     id instanceof Calendar ? ((Calendar) id).getTime().toString() : handler.populateValue(id,
                             id.getClass()));
+            DBCollection dbCollection = mongoDb.getCollection(documentName);
             dbCollection.findAndModify(query, document);
         }
         else
         {
-            dbCollection.insert(document);
+            // a db collection can have multiple records..
+            // and we can have a collection of records as well.
+            List<DBObject> dbStatements = null;
+            if (collections.containsKey(documentName))
+            {
+                dbStatements = collections.get(documentName);
+                dbStatements.add(document);
+            }
+            else
+            {
+                dbStatements = new ArrayList<DBObject>();
+                dbStatements.add(document);
+                collections.put(documentName, dbStatements);
+
+            }
         }
-    }    
+
+        return collections;
+
+    }
 }

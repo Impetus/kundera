@@ -37,7 +37,7 @@ import com.impetus.kundera.metadata.model.Relation.ForeignKey;
  * @author amresh
  * 
  */
-public abstract class ClientBase
+public abstract class ClientBase 
 {
 
     /** The index manager. */
@@ -47,6 +47,8 @@ public abstract class ClientBase
     protected String persistenceUnit;
 
     protected boolean isUpdate;
+
+    protected List<Node> nodes = new ArrayList<Node>();
 
     /*
      * (non-Javadoc)
@@ -76,7 +78,6 @@ public abstract class ClientBase
     public void persist(Node node)
     {
         Object entity = node.getData();
-//        String id = ObjectGraphUtils.getEntityId(node.getNodeId());
         Object id = node.getEntityId();
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
         isUpdate = node.isUpdate();
@@ -181,6 +182,15 @@ public abstract class ClientBase
             {
                 indexManager.update(entityMetadata, node.getData(), null, null);
             }
+        }
+    }
+
+
+    public void addBatch(Node node)
+    {
+        if (node != null)
+        {
+            nodes.add(node);
         }
     }
 
