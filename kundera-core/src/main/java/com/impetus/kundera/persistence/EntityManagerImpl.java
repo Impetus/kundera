@@ -314,15 +314,20 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         closed = true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#contains(java.lang.Object)
-     */
+    /**
+    * Check if the instance is a managed entity instance belonging
+    * to the current persistence context.
+    * @param entity
+    * @return boolean indicating if entity is in persistence context
+    * @throws IllegalArgumentException if not an entity
+    * @see javax.persistence.EntityManager#contains(java.lang.Object)
+    */   
     @Override
     public final boolean contains(Object entity)
     {
-        return false;
+        checkClosed();
+        
+        return getPersistenceDelegator().contains(entity);
     }
 
     /*
@@ -478,16 +483,29 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
+     * Refresh the state of the instance from the database, overwriting changes
+     * made to the entity, if any.
+     * @param entity
+     * @throws IllegalArgumentException if the instance is not an entity or the entity is not managed
+     * @throws TransactionRequiredException if invoked on a container-managed entity manager of type
+     *  PersistenceContextType.TRANSACTION and there is no transaction
+     * @throws EntityNotFoundException if the entity no longer exists in the database
      * @see javax.persistence.EntityManager#refresh(java.lang.Object)
      */
     @Override
     public final void refresh(Object entity)
     {
+        checkClosed();
+        
         checkTransactionNeeded();
-        throw new NotImplementedException("TODO");
+        
+        if(! getPersistenceDelegator().contains(entity)) 
+        {
+            throw new IllegalArgumentException("This is not a valid or managed entity, can't be refreshed");
+        }
+        
+        getPersistenceDelegator().refresh(entity);       
     }
 
     /*
@@ -552,16 +570,23 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         throw new NotImplementedException("TODO");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /**
+     * Remove the given entity from the persistence context, causing a managed
+     * entity to become detached. Unflushed changes made to the entity if any
+     * (including removal of the entity), will not be synchronized to the
+     * database. Entities which previously referenced the detached entity will
+     * continue to reference it. 
+     * @param entity
+     * @throws IllegalArgumentException
+     *             if the instance is not an entity
      * @see javax.persistence.EntityManager#detach(java.lang.Object)
      */
     @Override
-    public void detach(Object paramObject)
+    public void detach(Object entity)
     {
-        throw new NotImplementedException("TODO");
-
+        checkClosed();
+        
+        getPersistenceDelegator().detach(entity);
     }
 
     /*

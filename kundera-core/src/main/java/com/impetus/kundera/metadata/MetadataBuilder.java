@@ -110,14 +110,13 @@ public class MetadataBuilder
         for (MetadataProcessor processor : metadataProcessors)
         {
             // in case it is not intend for current persistence unit.
-            checkForRDBMS(metadata);
-            
-            processor.process(clazz, metadata);
-            metadata = belongsToPersistenceUnit(metadata);
-            if (metadata == null)
-            {
-                break;
-            }
+                checkForRDBMS(metadata);
+                processor.process(clazz, metadata);
+                metadata = belongsToPersistenceUnit(metadata);
+                if (metadata == null)
+                {
+                    break;
+                }
         }
 
         return metadata;
@@ -125,12 +124,11 @@ public class MetadataBuilder
 
     private void checkForRDBMS(EntityMetadata metadata )
     {
-        if (metadata.getPersistenceUnit() == null && Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client))
+        if (Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client))
         {
             // no more "null" as persistence unit for RDBMS scenarios!
             metadata.setPersistenceUnit(persistenceUnit);
         }
-        
     }
 
     /**
@@ -149,11 +147,6 @@ public class MetadataBuilder
                 || metadata.getPersistenceUnit() != null && !metadata.getPersistenceUnit().equals(persistenceUnit))
         {
             metadata = null;
-        }
-        else if (metadata.getPersistenceUnit() == null && Constants.RDBMS_CLIENT_FACTORY.equalsIgnoreCase(client))
-        {
-            // no more "null" as persistence unit for RDBMS scenarios!
-            metadata.setPersistenceUnit(persistenceUnit);
         }
         return metadata;
     }

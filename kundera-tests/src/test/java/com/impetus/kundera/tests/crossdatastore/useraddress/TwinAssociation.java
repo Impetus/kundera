@@ -15,14 +15,22 @@
  ******************************************************************************/
 package com.impetus.kundera.tests.crossdatastore.useraddress;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
+
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
+import com.impetus.kundera.metadata.model.type.AbstractManagedType;
 
 /**
  * The Class TwinAssociation.
@@ -74,6 +82,27 @@ public abstract class TwinAssociation extends AssociationBase
     {
         try
         {
+            Metamodel metaModel = null;
+            for(int i = 0 ;i < ALL_PUs_UNDER_TEST.length ; i++)
+            {
+                metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(ALL_PUs_UNDER_TEST[i]);
+                
+                for(int i1=0;i1<ALL_PUs_UNDER_TEST.length ; i1++)
+                {
+                    if(i != i1)
+                    {
+                        Map<Class<?>, EntityType<?>> original = getManagedTypes((MetamodelImpl) metaModel);
+                        
+                        Metamodel m = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(ALL_PUs_UNDER_TEST[i1]);
+                        Map<Class<?>, EntityType<?>> copy = getManagedTypes((MetamodelImpl) m);
+                        original.putAll(copy);
+                        
+                    }
+                }
+                
+            }
+           
+            
             for (Map<Class, String> c : combinations)
             {
                 switchPersistenceUnits(c);
@@ -118,4 +147,37 @@ public abstract class TwinAssociation extends AssociationBase
 
     /** Remove Person */
     protected abstract void remove();
+
+
+    private Map<Class<?>, EntityType<?>> getManagedTypes(MetamodelImpl metaModel )
+    {
+        try
+        {
+            Field managedTypesFields = metaModel.getClass().getDeclaredField("entityTypes");
+            if (!managedTypesFields.isAccessible())
+            {
+                managedTypesFields.setAccessible(true);
+            }
+
+            return ((Map<Class<?>, EntityType<?>>) managedTypesFields.get(metaModel));
+        }
+        catch (SecurityException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (NoSuchFieldException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (IllegalArgumentException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        catch (IllegalAccessException e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        return null;
+    }
+
 }

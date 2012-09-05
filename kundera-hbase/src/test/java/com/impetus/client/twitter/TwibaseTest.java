@@ -32,7 +32,7 @@ public class TwibaseTest extends TwitterTestBase
     @Override
     protected void setUp() throws Exception
     {
-         setUpInternal("hbaseTest");
+//         setUpInternal("hbaseTest");
     }
 
     /**
@@ -47,7 +47,7 @@ public class TwibaseTest extends TwitterTestBase
     @Override
     protected void tearDown() throws Exception
     {
-         tearDownInternal();
+//         tearDownInternal();
     }
 
     @Override
