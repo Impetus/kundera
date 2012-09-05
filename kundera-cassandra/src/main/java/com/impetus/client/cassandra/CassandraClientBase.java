@@ -76,6 +76,8 @@ import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
 import com.impetus.kundera.graph.Node;
+import com.impetus.kundera.lifecycle.states.NodeState;
+import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -849,20 +851,32 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
                 EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
                 persistenceUnit = metadata.getPersistenceUnit();
                 isUpdate = node.isUpdate();
-                List<RelationHolder> relationHolders = getRelationHolders(node);
-                mutationMap = prepareMutation(metadata, entity, id, relationHolders, mutationMap);
-                indexNode(node, metadata);
+                
+                // delete can not be executed in batch
+                if (node.isInState(RemovedState.class))
+                {
+                    delete(entity, id);
+                }
+                else
+                {
+                    List<RelationHolder> relationHolders = getRelationHolders(node);
+                    mutationMap = prepareMutation(metadata, entity, id, relationHolders, mutationMap);
+                    indexNode(node, metadata);
+                }
             }
 
             // Write Mutation map to database
-            conn = PelopsUtils.getCassandraConnection(persistenceUnit);
-            PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                    .getPersistenceUnitMetadata(persistenceUnit);
-            Cassandra.Client cassandra_client = conn.getAPI();
-            cassandra_client.set_keyspace(puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE));
+            
+            if (!mutationMap.isEmpty())
+            {
+                conn = PelopsUtils.getCassandraConnection(persistenceUnit);
+                PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                        .getPersistenceUnitMetadata(persistenceUnit);
+                Cassandra.Client cassandra_client = conn.getAPI();
+                cassandra_client.set_keyspace(puMetadata.getProperty(PersistenceProperties.KUNDERA_KEYSPACE));
 
-            cassandra_client.batch_mutate(mutationMap, consistencyLevel);
-
+                cassandra_client.batch_mutate(mutationMap, consistencyLevel);
+            }
         }
         catch (InvalidRequestException e)
         {

@@ -33,6 +33,7 @@ import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
@@ -487,14 +488,26 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         Map<String, List<DBObject>> collections = new HashMap<String, List<DBObject>>();
         for (Node node : nodes)
         {
+            // delete can not be executed in batch
+            if (node.isInState(RemovedState.class))
+            {
+                delete(node.getData(), node.getEntityId());
+            } else
+            {
+                
+
             List<RelationHolder> relationHolders = getRelationHolders(node);
             EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
             collections = onExecute(collections, node.getEntityId(), node.getData(), metadata, relationHolders,
                     node.isUpdate());
             indexNode(node, metadata);
+            }
         }
 
-        onFlushCollection(collections);
+        if(!collections.isEmpty())
+        {
+            onFlushCollection(collections);
+        }
 
     }
 

@@ -52,6 +52,7 @@ import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
@@ -528,40 +529,50 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
                 HTable hTable = null;
                 Object rowKey = node.getEntityId();
                 Object entity = node.getData();
-                EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-
-                HBaseDataWrapper columnWrapper = new HBaseDataHandler.HBaseDataWrapper(rowKey,
-                        new java.util.HashSet<Attribute>(), entity, null);
-
-                MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
-                        .getMetamodel(metadata.getPersistenceUnit());
-
-                EntityType entityType = metaModel.entity(node.getDataClass());
-
-                List<HBaseDataWrapper> embeddableData = new ArrayList<HBaseDataHandler.HBaseDataWrapper>();
-                // List<HBaseDataWrapper> columnWrapper = new
-                // ArrayList<HBaseDataHandler.HBaseDataWrapper>();
-
-                hTable = ((HBaseDataHandler) handler).gethTable(metadata.getTableName());
-                ((HBaseDataHandler) handler).preparePersistentData(metadata.getTableName(), entity, rowKey, metaModel,
-                        entityType.getAttributes(), columnWrapper, embeddableData);
-
-                List<HBaseDataWrapper> dataSet = null;
-                if (data.containsKey(hTable))
+                if (node.isInState(RemovedState.class))
                 {
-                    dataSet = data.get(metadata.getTableName());
-                    addRecords(columnWrapper, embeddableData, dataSet);
-
+                    delete(entity, rowKey);
                 }
                 else
                 {
-                    dataSet = new ArrayList<HBaseDataHandler.HBaseDataWrapper>();
-                    addRecords(columnWrapper, embeddableData, dataSet);
-                    data.put(hTable, dataSet);
+                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+
+                    HBaseDataWrapper columnWrapper = new HBaseDataHandler.HBaseDataWrapper(rowKey,
+                            new java.util.HashSet<Attribute>(), entity, null);
+
+                    MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                            .getMetamodel(metadata.getPersistenceUnit());
+
+                    EntityType entityType = metaModel.entity(node.getDataClass());
+
+                    List<HBaseDataWrapper> embeddableData = new ArrayList<HBaseDataHandler.HBaseDataWrapper>();
+                    // List<HBaseDataWrapper> columnWrapper = new
+                    // ArrayList<HBaseDataHandler.HBaseDataWrapper>();
+
+                    hTable = ((HBaseDataHandler) handler).gethTable(metadata.getTableName());
+                    ((HBaseDataHandler) handler).preparePersistentData(metadata.getTableName(), entity, rowKey,
+                            metaModel, entityType.getAttributes(), columnWrapper, embeddableData);
+
+                    List<HBaseDataWrapper> dataSet = null;
+                    if (data.containsKey(hTable))
+                    {
+                        dataSet = data.get(metadata.getTableName());
+                        addRecords(columnWrapper, embeddableData, dataSet);
+
+                    }
+                    else
+                    {
+                        dataSet = new ArrayList<HBaseDataHandler.HBaseDataWrapper>();
+                        addRecords(columnWrapper, embeddableData, dataSet);
+                        data.put(hTable, dataSet);
+                    }
                 }
             }
-            
-            ((HBaseDataHandler) handler).batch_insert(data);
+
+            if(!data.isEmpty())
+            {
+                ((HBaseDataHandler) handler).batch_insert(data);
+            }
         }
         catch (IOException e)
         {
