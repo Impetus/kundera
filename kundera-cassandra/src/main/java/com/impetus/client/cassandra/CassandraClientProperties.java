@@ -13,44 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.client.hbase;
+package com.impetus.client.cassandra;
 
 import java.util.Map;
 
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.hbase.filter.Filter;
+
 
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 
 /**
- * HBase implementation of {@link ClientPropertiesSetter}  
+ * Cassandra implementation of {@link ClientPropertiesSetter} 
  * @author amresh.singh
  */
-public class HBaseClientPropertiesSetter implements ClientPropertiesSetter
+public class CassandraClientProperties
 {
     /** log for this class. */
-    private static Log log = LogFactory.getLog(HBaseClientPropertiesSetter.class);
+    private static Log log = LogFactory.getLog(CassandraClientProperties.class);
     
-    private static final String FILTER = "hbase.filter";
+    private static final String CONSISTENCY_LEVEL = "cassandra.consistency.level";
+    private static final String CQL_VERSION = "cassandra.cql.version";
+    
 
-    @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
-        HBaseClient hbaseClient = (HBaseClient) client;
+        CassandraClientBase cassandraClientBase = (CassandraClientBase) client;
         
         if (properties != null)
         {
             for (String key : properties.keySet())
             {
                 Object value = properties.get(key);
-                if (key.equals(FILTER) && value instanceof Filter)
+                if (key.equals(CONSISTENCY_LEVEL) && value instanceof ConsistencyLevel)
                 {
-                    hbaseClient.setFilter((Filter)value);
+                    cassandraClientBase.setConsistencyLevel((ConsistencyLevel) value);
+                }
+                else if(key.equals(CQL_VERSION) && value instanceof String)
+                {
+                    cassandraClientBase.setCqlVersion((String) value);
                 }
 
-                // Add more
+                // Add more properties as needed
 
                 else
                 {
@@ -61,7 +67,7 @@ public class HBaseClientPropertiesSetter implements ClientPropertiesSetter
             }
         }
         
+        
     }
-    
 
 }

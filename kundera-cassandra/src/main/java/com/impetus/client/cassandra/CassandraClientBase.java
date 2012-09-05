@@ -70,7 +70,9 @@ import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.DataRow;
 import com.impetus.kundera.db.RelationHolder;
@@ -94,7 +96,7 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
  * 
  * @author amresh.singh
  */
-public abstract class CassandraClientBase extends ClientBase implements Batcher
+public abstract class CassandraClientBase extends ClientBase implements Batcher, ClientPropertiesSetter
 {
 
     /** log for this class. */
@@ -1069,5 +1071,11 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher
             nodes.clear();
         }
     }
+    
+    @Override
+    public void populateClientProperties(Client client, Map<String, Object> properties)
+    {
+        new CassandraClientProperties().populateClientProperties(client, properties);
+    }  
 
 }

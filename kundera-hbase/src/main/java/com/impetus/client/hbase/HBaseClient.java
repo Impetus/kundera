@@ -71,7 +71,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author impetus
  */
-public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batcher
+public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batcher, ClientPropertiesSetter
 {
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseClient.class);
@@ -542,15 +542,7 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
     public int getBatchSize()
     {
         return batchSize;
-    }
-
-    @Override
-    public ClientPropertiesSetter getClientPropertiesSetter()
-    {
-        return new HBaseClientPropertiesSetter();
-    }  
-
-    
+    }   
 
     /*
      * (non-Javadoc)
@@ -655,5 +647,12 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batch
             nodes.clear();
         }
     }
+
+    @Override
+    public void populateClientProperties(Client client, Map<String, Object> properties)
+    {
+        new HBaseClientProperties().populateClientProperties(client, properties);
+    } 
+    
 
 }

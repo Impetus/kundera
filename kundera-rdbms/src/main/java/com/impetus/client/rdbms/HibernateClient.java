@@ -42,8 +42,6 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
-import com.impetus.kundera.graph.Node;
-import com.impetus.kundera.graph.ObjectGraphBuilder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
@@ -62,7 +60,7 @@ import com.impetus.kundera.property.PropertyAccessorFactory;
  * 
  * @author vivek.mishra
  */
-public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
+public class HibernateClient extends ClientBase implements Client<RDBMSQuery>, ClientPropertiesSetter
 {
 
     /** The conf. */
@@ -581,9 +579,9 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
     }
 
     @Override
-    public ClientPropertiesSetter getClientPropertiesSetter()
+    public void populateClientProperties(Client client, Map<String, Object> properties)
     {
-        return new RDBMSClientPropertiesSetter();
+        new RDBMSClientProperties().populateClientProperties(client, properties);
     }  
-
+    
 }

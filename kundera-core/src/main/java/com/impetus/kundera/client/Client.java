@@ -197,7 +197,6 @@ public interface Client<Q extends Query>
      * 
      * @return class instance of configured query interface.
      */
-    Class<Q> getQueryImplementor();
+    Class<Q> getQueryImplementor();   
     
-    ClientPropertiesSetter getClientPropertiesSetter();
 }

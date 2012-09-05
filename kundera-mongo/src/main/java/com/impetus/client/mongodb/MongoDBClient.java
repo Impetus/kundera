@@ -53,7 +53,7 @@ import com.mongodb.DBObject;
  * 
  * @author impetusopensource
  */
-public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher
+public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher, ClientPropertiesSetter
 {
 
     /** The is connected. */
@@ -613,13 +613,6 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
         return collections;
     }    
 
-    @Override
-    public ClientPropertiesSetter getClientPropertiesSetter()
-    {
-        return new MongoClientPropertiesSetter();
-    }
-
-
     /**
      * Check on batch limit.
      */
@@ -631,6 +624,12 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             nodes.clear();
         }
     }
+
+    @Override
+    public void populateClientProperties(Client client, Map<String, Object> properties)
+    {
+        new MongoClientProperties().populateClientProperties(client, properties);
+    }  
 
 
 }

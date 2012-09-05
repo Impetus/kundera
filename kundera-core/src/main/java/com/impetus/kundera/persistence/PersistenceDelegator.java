@@ -876,8 +876,13 @@ public class PersistenceDelegator
             {
                 for(Client client : clientMap.values())
                 {
-                    ClientPropertiesSetter cps = client.getClientPropertiesSetter();                    
-                    if(cps != null) cps.populateClientProperties(client, properties);                   
+                    if(client instanceof ClientPropertiesSetter)
+                    {
+                        ClientPropertiesSetter cps = (ClientPropertiesSetter) client;                   
+                        cps.populateClientProperties(client, properties);
+                    }
+                    
+                                       
                 }
             }            
         }

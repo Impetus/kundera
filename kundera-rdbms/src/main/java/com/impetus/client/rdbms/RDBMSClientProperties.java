@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.impetus.client.mongodb;
+package com.impetus.client.rdbms;
 
 import java.util.Map;
 
@@ -24,22 +24,21 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 
 /**
- * MongoDB implementation of {@link ClientPropertiesSetter} 
+ * RDBMS implementation of {@link ClientPropertiesSetter}  
  * @author amresh.singh
  */
-public class MongoClientPropertiesSetter implements ClientPropertiesSetter
+public class RDBMSClientProperties implements ClientPropertiesSetter
 {
     /** log for this class. */
-    private static Log log = LogFactory.getLog(MongoClientPropertiesSetter.class);
+    private static Log log = LogFactory.getLog(RDBMSClientProperties.class);
 
     @Override
     public void populateClientProperties(Client client, Map<String, Object> properties)
     {
-        MongoDBClient mongoDBClient = (MongoDBClient) client;
+        HibernateClient hibernateClient = (HibernateClient) client;
         
+        //Nothing to do as of now
         
     }
-    
-    
 
 }
