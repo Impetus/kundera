@@ -473,7 +473,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
     protected void onPersist(EntityMetadata entityMetadata, Object entity, Object id, List<RelationHolder> rlHolders)
     {
         Map<String, List<DBObject>> collections = new HashMap<String, List<DBObject>>();
-        collections = onExecute(collections, entity, id, entityMetadata, rlHolders, isUpdate);
+        collections = onPersist(collections, entity, id, entityMetadata, rlHolders, isUpdate);
         onFlushCollection(collections);
     }
 
@@ -498,7 +498,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
             List<RelationHolder> relationHolders = getRelationHolders(node);
             EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-            collections = onExecute(collections, node.getEntityId(), node.getData(), metadata, relationHolders,
+            collections = onPersist(collections, node.getEntityId(), node.getData(), metadata, relationHolders,
                     node.isUpdate());
             indexNode(node, metadata);
             }
@@ -536,7 +536,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
      * @param isUpdate        if it is an update 
      * @return                collection of DB objects.
      */
-    private Map<String, List<DBObject>> onExecute(Map<String, List<DBObject>> collections, Object entity, Object id,
+    private Map<String, List<DBObject>> onPersist(Map<String, List<DBObject>> collections, Object entity, Object id,
             EntityMetadata metadata, List<RelationHolder> relationHolders, boolean isUpdate)
     {
         persistenceUnit = metadata.getPersistenceUnit();
