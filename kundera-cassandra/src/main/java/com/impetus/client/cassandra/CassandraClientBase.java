@@ -95,6 +95,8 @@ public abstract class CassandraClientBase extends ClientBase
     private static Log log = LogFactory.getLog(CassandraClientBase.class);
     
     private String cqlVersion = CassandraConstants.CQL_VERSION_2_0;
+    
+    protected ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
 
     /**
      * Populates foreign key as column.
@@ -737,6 +739,17 @@ public abstract class CassandraClientBase extends ClientBase
         return results;
     } 
     
+    public void setConsistencyLevel(ConsistencyLevel cLevel)
+    {
+        if (cLevel != null)
+        {
+            this.consistencyLevel = cLevel;
+        }
+        else
+        {
+            log.warn("Please provide resonable consistency Level");
+        }
+    }    
 
     /**
      * @return the cqlVersion

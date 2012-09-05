@@ -45,6 +45,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.index.IndexManager;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -499,4 +500,12 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
         }
         return null;
     }
+
+    @Override
+    public ClientPropertiesSetter getClientPropertiesSetter()
+    {
+        return new HBaseClientPropertiesSetter();
+    }
+    
+    
 }

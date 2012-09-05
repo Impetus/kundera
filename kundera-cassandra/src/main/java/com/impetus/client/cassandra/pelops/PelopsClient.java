@@ -54,6 +54,7 @@ import org.scale7.cassandra.pelops.pool.IThriftPool;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.CassandraClientBase;
+import com.impetus.client.cassandra.CassandraClientPropertiesSetter;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
@@ -62,6 +63,7 @@ import com.impetus.client.cassandra.thrift.ThriftRow;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
@@ -83,9 +85,7 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
  * @since 0.1
  */
 public class PelopsClient extends CassandraClientBase implements Client<CassQuery>
-{
-
-    private ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
+{  
 
     /** log for this class. */
     private static Log log = LogFactory.getLog(PelopsClient.class);
@@ -685,18 +685,7 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     {
         return !closed;
     }
-
-    public void setConsistencyLevel(ConsistencyLevel cLevel)
-    {
-        if (cLevel != null)
-        {
-            this.consistencyLevel = cLevel;
-        }
-        else
-        {
-            log.warn("Please provide resonable consistency Level");
-        }
-    }
+    
 
     /*
      * (non-Javadoc)
@@ -708,5 +697,11 @@ public class PelopsClient extends CassandraClientBase implements Client<CassQuer
     {
         return dataHandler;
     }
+
+    @Override
+    public ClientPropertiesSetter getClientPropertiesSetter()
+    {
+        return new CassandraClientPropertiesSetter();
+    }  
 
 }

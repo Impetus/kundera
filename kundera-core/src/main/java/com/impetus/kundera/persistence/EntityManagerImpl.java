@@ -15,13 +15,16 @@
  ******************************************************************************/
 package com.impetus.kundera.persistence;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
 import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
@@ -42,6 +45,7 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.cache.Cache;
+import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
@@ -170,98 +174,25 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     {
         this(factory, transactionType, persistenceContextType);
         this.properties = properties;
-    }
+        
+        getPersistenceDelegator().populateClientProperties(this.properties);
+    }  
+    
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#find(java.lang.Class,
-     * java.lang.Object)
+    /**
+     * Make an instance managed and persistent. 
+     * @param entity
+     * @throws EntityExistsException
+     *             if the entity already exists. (If the entity already exists,
+     *             the EntityExistsException may be thrown when the persist
+     *             operation is invoked, or the EntityExistsException or another
+     *             PersistenceException may be thrown at flush or commit time.)
+     * @throws IllegalArgumentException
+     *             if the instance is not an entity
+     * @throws TransactionRequiredException
+     *             if invoked on a container-managed entity manager of type 
+     *             PersistenceContextType.TRANSACTION and there is no transaction
      */
-    @Override
-    public final <E> E find(Class<E> entityClass, Object primaryKey)
-    {
-        checkClosed();
-        checkTransactionNeeded();
-        // TODO Check for validity also as per JPA
-        if (primaryKey == null)
-        {
-            throw new IllegalArgumentException("PrimaryKey value must not be null for object you want to find.");
-        }
-
-        E e = getPersistenceDelegator().find(entityClass, primaryKey);
-
-        if (e == null)
-            return null;
-
-        // Set this returned entity as head node if applicable
-        String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entityClass);
-        CacheBase mainCache = getPersistenceDelegator().getPersistenceCache().getMainCache();
-        Node node = mainCache.getNodeFromCache(nodeId);
-        if (node != null && node.getParents() == null && !mainCache.getHeadNodes().contains(node))
-        {
-            mainCache.addHeadNode(node);
-        }
-
-        // Return a deep copy of this entity
-        return (E) ObjectUtils.deepCopy((Object) e);
-    }
-
-    @Override
-    public final void remove(Object e)
-    {
-        checkClosed();
-        checkTransactionNeeded();
-
-        // TODO Check for validity also as per JPA
-        if (e == null)
-        {
-            throw new IllegalArgumentException("Entity to be removed must not be null.");
-        }
-
-        try
-        {
-            getPersistenceDelegator().remove(e);
-        }
-        catch (Exception ex)
-        {
-            // on rollback.
-            getPersistenceDelegator().rollback();
-            throw new KunderaException(ex);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#merge(java.lang.Object)
-     */
-    @Override
-    public final <E> E merge(E e)
-    {
-        checkClosed();
-        checkTransactionNeeded();
-
-        if (e == null)
-        {
-            getPersistenceDelegator().rollback();
-            throw new IllegalArgumentException("Entity to be merged must not be null.");
-        }
-
-        try
-        {
-            return getPersistenceDelegator().merge(e);
-        }
-        catch (Exception ex)
-        {
-            // on Rollback
-            getPersistenceDelegator().rollback();
-
-            throw new KunderaException(ex);
-        }
-
-    }
-
     @Override
     public final void persist(Object e)
     {
@@ -279,6 +210,178 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
             throw new KunderaException(ex);
         }
     }
+    
+    /**
+     * Merge the state of the given entity into the current persistence context.
+     * @param entity
+     * @return the managed instance that the state was merged to
+     * @throws IllegalArgumentException if instance is not an entity or is a removed entity
+     * @throws TransactionRequiredException if invoked on a container-managed entity manager of type
+     *         PersistenceContextType.TRANSACTION and there is no transaction
+     * @see javax.persistence.EntityManager#merge(java.lang.Object)
+     */
+     @Override
+     public final <E> E merge(E e)
+     {
+         checkClosed();
+         checkTransactionNeeded();
+
+         if (e == null)
+         {
+             getPersistenceDelegator().rollback();
+             throw new IllegalArgumentException("Entity to be merged must not be null.");
+         }
+
+         try
+         {
+             return getPersistenceDelegator().merge(e);
+         }
+         catch (Exception ex)
+         {
+             // on Rollback
+             getPersistenceDelegator().rollback();
+
+             throw new KunderaException(ex);
+         }
+     }
+     
+     /**
+      * Remove the entity instance.
+      * @param entity
+      * @throws IllegalArgumentException
+      *             if the instance is not an entity or is a detached entity
+      * @throws TransactionRequiredException
+      *             if invoked on a container-managed entity manager of type    
+      *             PersistenceContextType.TRANSACTION and there is no transaction
+      */
+     @Override
+     public final void remove(Object e)
+     {
+         checkClosed();
+         checkTransactionNeeded();
+
+         // TODO Check for validity also as per JPA
+         if (e == null)
+         {
+             throw new IllegalArgumentException("Entity to be removed must not be null.");
+         }
+
+         try
+         {
+             getPersistenceDelegator().remove(e);
+         }
+         catch (Exception ex)
+         {
+             // on rollback.
+             getPersistenceDelegator().rollback();
+             throw new KunderaException(ex);
+         }
+     }   
+     
+     /**
+      * Find by primary key. Search for an entity of the specified class and
+      * primary key. If the entity instance is contained in the persistence
+      * context it is returned from there. 
+      * @param entityClass
+      * @param primaryKey
+      * @return the found entity instance or null if the entity does not exist
+      * @throws IllegalArgumentException
+      *             if the first argument does not denote an entity type or the second argument is
+      *             is not a valid type for that entity’s primary key or is null
+      * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object)
+      */   
+     
+     @Override
+     public final <E> E find(Class<E> entityClass, Object primaryKey)
+     {
+         checkClosed();
+         checkTransactionNeeded();
+         // TODO Check for validity also as per JPA
+         if (primaryKey == null)
+         {
+             throw new IllegalArgumentException("PrimaryKey value must not be null for object you want to find.");
+         }
+
+         E e = getPersistenceDelegator().find(entityClass, primaryKey);
+
+         if (e == null)
+             return null;
+
+         // Set this returned entity as head node if applicable
+         String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entityClass);
+         CacheBase mainCache = getPersistenceDelegator().getPersistenceCache().getMainCache();
+         Node node = mainCache.getNodeFromCache(nodeId);
+         if (node != null && node.getParents() == null && !mainCache.getHeadNodes().contains(node))
+         {
+             mainCache.addHeadNode(node);
+         }
+
+         // Return a deep copy of this entity
+         return (E) ObjectUtils.deepCopy((Object) e);
+     }
+     
+     /**
+      * Find by primary key, using the specified properties. Search for an entity
+      * of the specified class and primary key. If the entity instance is
+      * contained in the persistence context it is returned from there. If a
+      * vendor-specific property or hint is not recognized, it is silently
+      * ignored.
+      * @param entityClass
+      * @param primaryKey
+      * @param properties
+      *            standard and vendor-specific properties and hints
+      * @return the found entity instance or null if the entity does not exist
+      * @throws IllegalArgumentException
+      *             if the first argument does not denote an entity type or the second argument is 
+      *             is not a valid type for that entity’s primary key or is null
+      * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object, java.util.Map)
+      */
+     @Override
+     public <T> T find(Class<T> entityClass, Object primaryKey, Map<String, Object> properties)
+     {
+         checkClosed();
+         checkTransactionNeeded();
+         
+         if (primaryKey == null)
+         {
+             throw new IllegalArgumentException("PrimaryKey value must not be null for object you want to find.");
+         }
+         
+         //Store current properties in a variable for post-find reset
+         Map<String, Object> currentProperties = getProperties();
+         
+         //Populate properties in client
+         getPersistenceDelegator().populateClientProperties(properties);         
+         T result = find(entityClass, primaryKey);
+                  
+         //Reset Client properties
+         getPersistenceDelegator().populateClientProperties(currentProperties);         
+         return result;
+     }
+     
+     /*
+      * (non-Javadoc)
+      * 
+      * @see javax.persistence.EntityManager#find(java.lang.Class,
+      * java.lang.Object, javax.persistence.LockModeType)
+      */
+     @Override
+     public <T> T find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType)
+     {
+         throw new NotImplementedException("Lock mode type currently not supported by Kundera");
+     }
+
+     /*
+      * (non-Javadoc)
+      * 
+      * @see javax.persistence.EntityManager#find(java.lang.Class,
+      * java.lang.Object, javax.persistence.LockModeType, java.util.Map)
+      */
+     @Override
+     public <T> T find(Class<T> arg0, Object arg1, LockModeType arg2, Map<String, Object> arg3)
+     {
+         throw new NotImplementedException("Lock mode type currently not supported by Kundera");
+     }
 
     /*
      * (non-Javadoc)
@@ -296,7 +399,6 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         {
             persistenceDelegator.clear();
         }
-
     }
 
     @Override
@@ -381,7 +483,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public final Query createNativeQuery(String sqlString)
     {
-        throw new NotImplementedException("Please use createNativeQuery(String sqlString, Class resultClass) instead. ");
+        throw new NotImplementedException("Please use createNativeQuery(String sqlString, Class resultClass) instead.");
     }
 
     /*
@@ -415,7 +517,8 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public final Query createNativeQuery(String sqlString, String resultSetMapping)
     {
-        throw new NotImplementedException("TODO");
+        throw new NotImplementedException("ResultSetMapping currently not supported by Kundera. " +
+        		"Please use createNativeQuery(String sqlString, Class resultClass) instead.");
     }
 
     /*
@@ -427,7 +530,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public final <T> T getReference(Class<T> entityClass, Object primaryKey)
     {
-        throw new NotImplementedException("TODO");
+        throw new NotImplementedException("getReference currently not supported by Kundera");
     }
 
     @Override
@@ -480,7 +583,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public final void lock(Object entity, LockModeType lockMode)
     {
-        throw new NotImplementedException("TODO");
+        throw new NotImplementedException("lock currently not supported by Kundera");
     }
 
     /**
@@ -507,18 +610,43 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         
         getPersistenceDelegator().refresh(entity);       
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#find(java.lang.Class,
-     * java.lang.Object, javax.persistence.LockModeType)
+    
+    /**
+     * Refresh the state of the instance from the database, using the specified
+     * properties, and overwriting changes made to the entity, if any. If a
+     * vendor-specific property or hint is not recognized, it is silently
+     * ignored. 
+     * @param entity
+     * @param properties
+     *            standard and vendor-specific properties  and hints
+     * @throws IllegalArgumentException
+     *             if the instance is not an entity or the entity is not managed
+     * @throws TransactionRequiredException
+     *             if invoked on a container-managed entity manager of type    
+     *             PersistenceContextType.TRANSACTION and there is no transaction
+     * @throws EntityNotFoundException
+     *             if the entity no longer  exists in the database
+     * @see javax.persistence.EntityManager#refresh(java.lang.Object,
+     *      java.util.Map)
      */
     @Override
-    public <T> T find(Class<T> paramClass, Object paramObject, LockModeType paramLockModeType)
+    public void refresh(Object entity, Map<String, Object> properties)
     {
-        throw new NotImplementedException("TODO");
+        //Store current properties in a variable for post-find reset
+        Map<String, Object> currentProperties = getProperties();
+        
+        //Populate properties in client
+        getPersistenceDelegator().populateClientProperties(properties);       
+        
+        
+        //Refresh state of entity
+        refresh(entity);
+                 
+        //Reset Client properties
+        getPersistenceDelegator().populateClientProperties(currentProperties);
     }
+
+    
 
     /*
      * (non-Javadoc)
@@ -529,21 +657,9 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public void lock(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
     {
-        throw new NotImplementedException("TODO");
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#refresh(java.lang.Object,
-     * java.util.Map)
-     */
-    @Override
-    public void refresh(Object paramObject, Map<String, Object> paramMap)
-    {
-        throw new NotImplementedException("TODO");
-
-    }
+        throw new NotImplementedException("lock currently not supported by Kundera");
+    }    
+    
 
     /*
      * (non-Javadoc)
@@ -554,7 +670,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public void refresh(Object paramObject, LockModeType paramLockModeType)
     {
-        throw new NotImplementedException("TODO");
+        throw new NotImplementedException("Lock mode type currently not supported by Kundera");
 
     }
 
@@ -567,7 +683,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public void refresh(Object paramObject, LockModeType paramLockModeType, Map<String, Object> paramMap)
     {
-        throw new NotImplementedException("TODO");
+        throw new NotImplementedException("LockModeType currently not supported by Kundera");
     }
 
     /**
@@ -597,20 +713,29 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public LockModeType getLockMode(Object paramObject)
     {
-        throw new NotImplementedException("TODO");
+        throw new NotImplementedException("Lock mode type currently not supported by Kundera");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#setProperty(java.lang.String,
-     * java.lang.Object)
+    
+    /**
+     * Set an entity manager property or hint. If a vendor-specific property or
+     * hint is not recognized, it is silently ignored. 
+     * @param propertyName
+     *            name of property or hint
+     * @param value
+     * @throws IllegalArgumentException
+     *             if the second argument is not valid for the implementation
+     * @see javax.persistence.EntityManager#setProperty(java.lang.String, java.lang.Object)          
      */
     @Override
     public void setProperty(String paramString, Object paramObject)
     {
-        throw new NotImplementedException("TODO");
-
+        if(getProperties() == null) {
+            this.properties = new HashMap<String, Object>();
+        }
+        
+        this.properties.put(paramString, paramObject);        
+        getPersistenceDelegator().populateClientProperties(this.properties);
     }
 
     /*
@@ -623,7 +748,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public <T> TypedQuery<T> createQuery(CriteriaQuery<T> paramCriteriaQuery)
     {
-        throw new NotImplementedException("TODO");
+        throw new NotImplementedException("Criteria Query currently not supported by Kundera");
     }
 
     /*
@@ -635,7 +760,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public <T> TypedQuery<T> createQuery(String paramString, Class<T> paramClass)
     {
-        throw new NotImplementedException("TODO");
+        throw new NotImplementedException("Criteria Query currently not supported by Kundera");
     }
 
     /*
@@ -647,7 +772,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public <T> TypedQuery<T> createNamedQuery(String paramString, Class<T> paramClass)
     {
-        throw new NotImplementedException("TODO");
+        throw new NotImplementedException("Criteria Query currently not supported by Kundera");
     }
 
     /*
@@ -658,7 +783,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     @Override
     public <T> T unwrap(Class<T> paramClass)
     {
-        throw new NotImplementedException("TODO");
+        throw new NotImplementedException("unwrap currently not supported by Kundera");
     }
 
     @Override
@@ -668,10 +793,11 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         persistenceDelegator.setFlushMode(flushMode);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#getProperties()
+    /**
+     * Get the properties and hints and associated values that are in effect for
+     * the entity manager. Changing the contents of the map does not change the
+     * configuration in effect. 
+     * @return map of properties and hints in effect
      */
     @Override
     public Map<String, Object> getProperties()
@@ -810,31 +936,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
         persistenceDelegator.rollback();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#find(java.lang.Class,
-     * java.lang.Object, java.util.Map)
-     */
-    @Override
-    public <T> T find(Class<T> arg0, Object arg1, Map<String, Object> arg2)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see javax.persistence.EntityManager#find(java.lang.Class,
-     * java.lang.Object, javax.persistence.LockModeType, java.util.Map)
-     */
-    @Override
-    public <T> T find(Class<T> arg0, Object arg1, LockModeType arg2, Map<String, Object> arg3)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
+    
 
     // ///////////////////////////////////////////////////////////////////////
     /** Methods from {@link EntityTransaction} interface */

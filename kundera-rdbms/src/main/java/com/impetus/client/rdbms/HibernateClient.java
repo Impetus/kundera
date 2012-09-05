@@ -40,6 +40,7 @@ import org.hibernate.criterion.Restrictions;
 import com.impetus.client.rdbms.query.RDBMSQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
+import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraphBuilder;
@@ -578,5 +579,11 @@ public class HibernateClient extends ClientBase implements Client<RDBMSQuery>
 
         return pKeys;
     }
+
+    @Override
+    public ClientPropertiesSetter getClientPropertiesSetter()
+    {
+        return new RDBMSClientPropertiesSetter();
+    }  
 
 }

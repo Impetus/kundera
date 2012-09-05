@@ -55,6 +55,7 @@ import org.scale7.cassandra.pelops.Selector;
 import org.scale7.cassandra.pelops.pool.IThriftPool.IPooledConnection;
 
 import com.impetus.client.cassandra.CassandraClientBase;
+import com.impetus.client.cassandra.CassandraClientPropertiesSetter;
 import com.impetus.client.cassandra.common.CassandraUtilities;
 import com.impetus.client.cassandra.datahandler.CassandraDataHandler;
 import com.impetus.client.cassandra.index.InvertedIndexHandler;
@@ -65,6 +66,7 @@ import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.db.SearchResult;
@@ -88,8 +90,7 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
  * @author amresh.singh
  */
 public class ThriftClient extends CassandraClientBase implements Client<CassQuery>
-{
-    private ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
+{   
 
     /** log for this class. */
     private static Log log = LogFactory.getLog(ThriftClient.class);
@@ -1015,5 +1016,12 @@ public class ThriftClient extends CassandraClientBase implements Client<CassQuer
     {
         return dataHandler;
     }
+
+    @Override
+    public ClientPropertiesSetter getClientPropertiesSetter()
+    {
+        return new CassandraClientPropertiesSetter();
+    }  
+    
 
 }
