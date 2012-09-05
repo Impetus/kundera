@@ -17,8 +17,10 @@ package com.impetus.kundera.rest.resources;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
@@ -61,6 +63,8 @@ import com.sun.jersey.test.framework.JerseyTest;
  */
 public class CRUDResourceTest extends JerseyTest
 {
+    private static final String _KEYSPACE = "KunderaExamples";
+
     private static Log log = LogFactory.getLog(CRUDResourceTest.class);
 
     static String mediaType = MediaType.APPLICATION_XML;
@@ -98,7 +102,7 @@ public class CRUDResourceTest extends JerseyTest
 
         if (AUTO_MANAGE_SCHEMA)
         {
-            CassandraCli.createKeySpace("KunderaExamples");
+            CassandraCli.dropKeySpace(_KEYSPACE.toLowerCase());
             loadData();
         }
 
@@ -124,7 +128,7 @@ public class CRUDResourceTest extends JerseyTest
 
         if (AUTO_MANAGE_SCHEMA)
         {
-            CassandraCli.dropKeySpace("KunderaExamples");
+            CassandraCli.dropKeySpace(_KEYSPACE);
         }
     }
 
@@ -327,13 +331,13 @@ public class CRUDResourceTest extends JerseyTest
         KsDef ksDef = null;
         CfDef user_Def = new CfDef();
         user_Def.name = "BOOK";
-        user_Def.keyspace = "KunderaExamples";
+        user_Def.keyspace = _KEYSPACE;
         user_Def.setComparator_type("UTF8Type");
         user_Def.setDefault_validation_class("UTF8Type");
 
         CfDef person_Def = new CfDef();
         person_Def.name = "PERSONNEL";
-        person_Def.keyspace = "KunderaExamples";
+        person_Def.keyspace = _KEYSPACE;
         // cfDef.column_type = "Super";
         person_Def.setComparator_type("UTF8Type");
         person_Def.setDefault_validation_class("UTF8Type");
@@ -342,7 +346,7 @@ public class CRUDResourceTest extends JerseyTest
 
         CfDef address_Def = new CfDef();
         address_Def.name = "ADDRESS";
-        address_Def.keyspace = "KunderaExamples";
+        address_Def.keyspace = _KEYSPACE;
 
         ColumnDef street = new ColumnDef(ByteBuffer.wrap("STREET".getBytes()), "UTF8Type");
         street.index_type = IndexType.KEYS;
@@ -359,8 +363,8 @@ public class CRUDResourceTest extends JerseyTest
 
         try
         {
-            ksDef = CassandraCli.client.describe_keyspace("KunderaExamples");
-            CassandraCli.client.set_keyspace("KunderaExamples");
+            ksDef = CassandraCli.client.describe_keyspace(_KEYSPACE);
+            CassandraCli.client.set_keyspace(_KEYSPACE);
 
             List<CfDef> cfDefn = ksDef.getCf_defs();
 
@@ -391,11 +395,13 @@ public class CRUDResourceTest extends JerseyTest
         catch (NotFoundException e)
         {
 
-            ksDef = new KsDef("KunderaExamples", "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-            ksDef.setReplication_factor(1);
+            ksDef = new KsDef(_KEYSPACE, "org.apache.cassandra.locator.SimpleStrategy", cfDefs);
+            Map<String, String> strategy_options = new HashMap<String, String>();
+            strategy_options.put("replication_factor", "1");
+            ksDef.setStrategy_options(strategy_options);
             CassandraCli.client.system_add_keyspace(ksDef);
         }
 
-        CassandraCli.client.set_keyspace("KunderaExamples");
+        CassandraCli.client.set_keyspace(_KEYSPACE);
     }
 }

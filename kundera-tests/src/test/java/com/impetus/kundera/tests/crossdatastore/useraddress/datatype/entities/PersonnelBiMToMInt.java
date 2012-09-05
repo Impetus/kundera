@@ -28,7 +28,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "PERSONNEL", schema = "KunderaTests")
+@Table(name = "PERSONNEL", schema = "KunderaTests@addCassandra")
 public class PersonnelBiMToMInt
 {
     @Id

@@ -413,7 +413,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
 
         BasicDBObject query = new BasicDBObject();
 
-        query.put(colName, colValue);
+        query.put(colName, handler.populateValue(colValue, colValue.getClass()));
 
         DBCursor cursor = dbCollection.find(query);
         DBObject fetchedDocument = null;
@@ -490,5 +490,5 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>
         {
             dbCollection.insert(document);
         }
-    }    
+    }
 }

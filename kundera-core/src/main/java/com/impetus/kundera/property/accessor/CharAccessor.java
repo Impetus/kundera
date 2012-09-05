@@ -53,7 +53,15 @@ public class CharAccessor implements PropertyAccessor<Character>
         {
             return null;
         }
-        Character data = (Character) object;
+        Character data = null;
+        if(object.getClass().isAssignableFrom(String.class))
+        {
+            data = ((String)object).charAt(0);
+        } else
+        {
+            data = (Character) object;
+        }
+        
         return new byte[] { (byte) ((data >> 8) & 0xff), (byte) ((data >> 0) & 0xff), };
     }
 

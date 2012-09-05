@@ -26,7 +26,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "PERSONNEL", schema = "hibernatepoc")
+@Table(name = "PERSONNEL", schema = "hibernatepoc@addCassandra")
 public class PersonnelUni1To1PK
 {
     @Id

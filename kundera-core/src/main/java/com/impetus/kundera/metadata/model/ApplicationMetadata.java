@@ -361,6 +361,7 @@ public class ApplicationMetadata
      */
     public MetaModelBuilder getMetaModelBuilder(String persistenceUnit)
     {
+
         if(metaModelBuilder.containsKey(persistenceUnit))
         {
             return metaModelBuilder.get(persistenceUnit); 
