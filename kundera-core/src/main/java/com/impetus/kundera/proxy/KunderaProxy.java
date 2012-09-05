@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.kundera.proxy;
 
+
 /**
  * Marker interface for proxies.
  * 
@@ -22,5 +23,8 @@ package com.impetus.kundera.proxy;
  */
 public interface KunderaProxy
 {
+    public abstract Object writeReplace();
+
+    public abstract LazyInitializer getKunderaLazyInitializer();
 
 }

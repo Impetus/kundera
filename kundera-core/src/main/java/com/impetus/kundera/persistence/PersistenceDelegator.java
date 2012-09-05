@@ -33,6 +33,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Query;
+import javax.persistence.TransactionRequiredException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -485,6 +486,23 @@ public class PersistenceDelegator
 
         return (E) node.getData();
     }
+    
+    /**
+     * Remove the given entity from the persistence context, causing a managed entity to become detached.
+     */    
+    public void detach(Object entity)
+    {
+        if(entity == null) {
+            throw new IllegalArgumentException("Entity is null, can't detach it");
+        }
+        EntityMetadata metadata = getMetadata(entity.getClass());             
+        Object primaryKey = getId(entity, metadata);
+        
+        String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entity.getClass());
+        
+        Node node = getPersistenceCache().getMainCache().getNodeFromCache(nodeId);        
+        node.detach();        
+    }
 
     /**
      * Gets the client.
@@ -594,6 +612,57 @@ public class PersistenceDelegator
         getPersistenceCache().clean();
 
     }
+    
+    /**
+     * Check if the instance is a managed entity instance belonging
+     * to the current persistence context. 
+     */ 
+    public final boolean contains(Object entity)
+    {
+        if(entity == null) {
+            throw new IllegalArgumentException("Entity is null, can't check whether it's in persistence context");
+        }
+        EntityMetadata metadata = getMetadata(entity.getClass());             
+        Object primaryKey = getId(entity, metadata);
+        
+        String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entity.getClass());
+        
+        Node node = getPersistenceCache().getMainCache().getNodeFromCache(nodeId);
+        if(node != null && node.isInState(ManagedState.class)) {
+            return true;
+        }
+        return false;
+    }   
+    
+    /**
+     * Refresh the state of the instance from the database, overwriting changes
+     * made to the entity, if any.
+     */
+    public final void refresh(Object entity)
+    {
+        // Locking as it might read from persistence context.
+        lock.readLock().lock();
+
+        EntityMetadata entityMetadata = getMetadata(entity.getClass());
+
+        if (entityMetadata == null)
+        {
+            throw new KunderaException("Unable to load entity metadata for :" + entity.getClass());
+        }
+        
+        Object primaryKey = getId(entity, entityMetadata);
+        String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entity.getClass());
+
+        MainCache mainCache = (MainCache) getPersistenceCache().getMainCache();
+        Node node = mainCache.getNodeFromCache(nodeId);
+        
+        if(node != null) {
+            node.refresh();
+        }
+        
+        lock.readLock().unlock();        
+    }
+    
 
     /**
      * Gets the metadata.

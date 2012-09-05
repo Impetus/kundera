@@ -66,8 +66,22 @@ public class ManagedState extends NodeState
     @Override
     public void handleRefresh(NodeStateContext nodeStateContext)
     {
-        // TODO: Refresh entity state from the database
+        // Refresh entity state from the database
+        // Fetch Node data from Client
+        Client client = nodeStateContext.getClient();
+        Class<?> nodeDataClass = nodeStateContext.getDataClass();
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass);
+        Object entityId = nodeStateContext.getEntityId();   
 
+        EntityReader reader = client.getReader();
+        EnhanceEntity ee = reader.findById(entityId, entityMetadata, client);
+        
+        if (ee != null && ee.getEntity() != null)
+        {
+            Object nodeData = ee.getEntity();
+            nodeStateContext.setData(nodeData);
+        }   
+        
         // Cascade refresh operation for all related entities for whom
         // cascade=ALL or REFRESH
         recursivelyPerformOperation(nodeStateContext, OPERATION.REFRESH);
@@ -99,7 +113,6 @@ public class ManagedState extends NodeState
         Client client = nodeStateContext.getClient();
         Class<?> nodeDataClass = nodeStateContext.getDataClass();
         EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(nodeDataClass);
-//        Object entityId = ObjectGraphUtils.getEntityId(nodeStateContext.getNodeId());
         Object entityId = nodeStateContext.getEntityId();
 
         Object nodeData = null; // Node data
