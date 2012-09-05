@@ -24,6 +24,7 @@ import javax.persistence.metamodel.Attribute;
 
 import org.apache.hadoop.hbase.client.HTable;
 
+import com.impetus.client.hbase.admin.HBaseDataHandler.HBaseDataWrapper;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.metadata.model.Column;
 
@@ -152,4 +153,12 @@ public interface Writer
      *            the column family
      */
     void delete(HTable hTable, Object rowKey, String columnFamily);
+
+    /**
+     * method to perform batch insert/update.
+     * 
+     * @param rows  data rows
+     * @throws IOException  throws io exception.
+     */
+    void persistRows(Map<HTable,List<HBaseDataWrapper>> rows) throws IOException;
 }

@@ -33,7 +33,6 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
 import javax.persistence.Query;
-import javax.persistence.TransactionRequiredException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -106,6 +105,12 @@ public class PersistenceDelegator
     FlushManager flushManager = new FlushManager();
 
     private boolean enableFlush;
+    
+    
+    private boolean isBatch;
+    
+    private int batchSize;
+    
 
     /**
      * Instantiates a new persistence delegator.
@@ -515,7 +520,6 @@ public class PersistenceDelegator
     public Client getClient(EntityMetadata m)
     {
 
-        //
         // // Persistence Unit used to retrieve client
         String persistenceUnit = m.getPersistenceUnit();
         //
@@ -524,28 +528,6 @@ public class PersistenceDelegator
         {
             throw new ClientResolverException("No client configured for persistenceUnit" + persistenceUnit);
         }
-        // // single persistence unit given and entity is annotated with '@'.
-        // // validate persistence unit given is same
-        //
-        // // If client has already been created, return it, or create it and
-        // put
-        // // it into client map
-        // if (clientMap == null || clientMap.isEmpty())
-        // {
-        // clientMap = new HashMap<String, Client>();
-        // client = ClientResolver.discoverClient(persistenceUnit);
-        // clientMap.put(persistenceUnit, client);
-        //
-        // }
-        // else if (clientMap.get(persistenceUnit) == null)
-        // {
-        // client = ClientResolver.discoverClient(persistenceUnit);
-        // clientMap.put(persistenceUnit, client);
-        // }
-        // else
-        // {
-        // client = clientMap.get(persistenceUnit);
-        // }
 
         return client;
     }
@@ -863,4 +845,5 @@ public class PersistenceDelegator
             }            
         }
     }   
+
 }

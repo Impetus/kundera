@@ -125,29 +125,30 @@ public class TableProcessor extends AbstractEntityFieldProcessor
 
         // process for metamodelImpl
 
-        MetaModelBuilder<X, T> metaModelBuilder = KunderaMetadata.INSTANCE.getApplicationMetadata()
-                .getMetaModelBuilder(metadata.getPersistenceUnit());
-        metaModelBuilder.process(clazz);
-
-        for (Field f : clazz.getDeclaredFields())
+        if (metadata.getPersistenceUnit() != null)
         {
-            // construct metamodel.
-            metaModelBuilder.construct(clazz, f);
+            MetaModelBuilder<X, T> metaModelBuilder = KunderaMetadata.INSTANCE.getApplicationMetadata()
+                    .getMetaModelBuilder(metadata.getPersistenceUnit());
+            metaModelBuilder.process(clazz);
 
-            // on id attribute.
+            for (Field f : clazz.getDeclaredFields())
+            {
+                // construct metamodel.
+                metaModelBuilder.construct(clazz, f);
 
-            onIdAttribute(metaModelBuilder, metadata, clazz, f);
+                // on id attribute.
 
-            // determine if it is a column family or super column family.
+                onIdAttribute(metaModelBuilder, metadata, clazz, f);
 
-            onFamilyType(metadata, clazz, f);
+                // determine if it is a column family or super column family.
 
-            onJPAColumnMapping(metaModelBuilder, metadata, f);
+                onFamilyType(metadata, clazz, f);
 
-            
+                onJPAColumnMapping(metaModelBuilder, metadata, f);
 
-            /* Scan for Relationship field */
-            addRelationIntoMetadata(clazz, f, metadata);
+                /* Scan for Relationship field */
+                addRelationIntoMetadata(clazz, f, metadata);
+            }
         }
 
     }

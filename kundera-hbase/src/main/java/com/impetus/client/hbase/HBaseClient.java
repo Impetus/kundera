@@ -25,10 +25,13 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
@@ -39,6 +42,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import com.impetus.client.hbase.admin.DataHandler;
 import com.impetus.client.hbase.admin.HBaseDataHandler;
+import com.impetus.client.hbase.admin.HBaseDataHandler.HBaseDataWrapper;
 import com.impetus.client.hbase.query.HBaseQuery;
 import com.impetus.client.hbase.utils.HBaseUtils;
 import com.impetus.kundera.Constants;
@@ -47,12 +51,17 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
+import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
+import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.persistence.EntityReader;
+import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 
@@ -61,7 +70,7 @@ import com.impetus.kundera.property.PropertyAccessorHelper;
  * 
  * @author impetus
  */
-public class HBaseClient extends ClientBase implements Client<HBaseQuery>
+public class HBaseClient extends ClientBase implements Client<HBaseQuery>, Batcher
 {
     /** the log used by this class. */
     private static Log log = LogFactory.getLog(HBaseClient.class);
@@ -432,9 +441,11 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
                 pKey);
     }
 
-    
-    /* (non-Javadoc)
-     * @see com.impetus.kundera.client.Client#findByRelation(java.lang.String, java.lang.Object, java.lang.Class)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.client.Client#findByRelation(java.lang.String,
+     * java.lang.Object, java.lang.Class)
      */
     @Override
     public List<Object> findByRelation(String colName, Object colValue, Class entityClazz)
@@ -491,21 +502,102 @@ public class HBaseClient extends ClientBase implements Client<HBaseQuery>
         FilterList filterList = new FilterList(f, keyFilter);
         try
         {
-            return handler.scanRowyKeys(filterList, tableName, Constants.JOIN_COLUMNS_FAMILY_NAME,columnName + "_" + columnValue);
+            return handler.scanRowyKeys(filterList, tableName, Constants.JOIN_COLUMNS_FAMILY_NAME, columnName + "_"
+                    + columnValue);
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error while executing findIdsByColumn(), Caused by: " + e.getMessage());
+            throw new KunderaException(e);
         }
-        return null;
     }
 
-    @Override
+   @Override
     public ClientPropertiesSetter getClientPropertiesSetter()
     {
         return new HBaseClientPropertiesSetter();
+    }  
+    
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.kundera.persistence.api.Batcher#executeBatch()
+     */
+    @Override
+    public void executeBatch()
+    {
+
+        Map<HTable, List<HBaseDataWrapper>> data = new HashMap<HTable, List<HBaseDataWrapper>>();
+
+        try
+        {
+            for (Node node : nodes)
+            {
+                HTable hTable = null;
+                Object rowKey = node.getEntityId();
+                Object entity = node.getData();
+                if (node.isInState(RemovedState.class))
+                {
+                    delete(entity, rowKey);
+                }
+                else
+                {
+                    EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
+
+                    HBaseDataWrapper columnWrapper = new HBaseDataHandler.HBaseDataWrapper(rowKey,
+                            new java.util.HashSet<Attribute>(), entity, null);
+
+                    MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata()
+                            .getMetamodel(metadata.getPersistenceUnit());
+
+                    EntityType entityType = metaModel.entity(node.getDataClass());
+
+                    List<HBaseDataWrapper> embeddableData = new ArrayList<HBaseDataHandler.HBaseDataWrapper>();
+                    // List<HBaseDataWrapper> columnWrapper = new
+                    // ArrayList<HBaseDataHandler.HBaseDataWrapper>();
+
+                    hTable = ((HBaseDataHandler) handler).gethTable(metadata.getTableName());
+                    ((HBaseDataHandler) handler).preparePersistentData(metadata.getTableName(), entity, rowKey,
+                            metaModel, entityType.getAttributes(), columnWrapper, embeddableData);
+
+                    List<HBaseDataWrapper> dataSet = null;
+                    if (data.containsKey(hTable))
+                    {
+                        dataSet = data.get(metadata.getTableName());
+                        addRecords(columnWrapper, embeddableData, dataSet);
+
+                    }
+                    else
+                    {
+                        dataSet = new ArrayList<HBaseDataHandler.HBaseDataWrapper>();
+                        addRecords(columnWrapper, embeddableData, dataSet);
+                        data.put(hTable, dataSet);
+                    }
+                }
+            }
+
+            if(!data.isEmpty())
+            {
+                ((HBaseDataHandler) handler).batch_insert(data);
+            }
+        }
+        catch (IOException e)
+        {
+            log.error("Error while executing batch insert/update, Caused by: " + e.getMessage());
+            throw new KunderaException(e);
+        }
+
     }
-    
-    
+
+    private void addRecords(HBaseDataWrapper columnWrapper, List<HBaseDataWrapper> embeddableData,
+            List<HBaseDataWrapper> dataSet)
+    {
+        dataSet.add(columnWrapper);
+
+        if (!embeddableData.isEmpty())
+        {
+            dataSet.addAll(embeddableData);
+        }
+    }
 }

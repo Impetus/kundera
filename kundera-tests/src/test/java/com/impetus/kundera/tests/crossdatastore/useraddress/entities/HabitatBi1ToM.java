@@ -24,7 +24,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "ADDRESS", schema = "KunderaTests")
+@Table(name = "ADDRESS", schema = "KunderaTests@addCassandra")
 public class HabitatBi1ToM
 {
     @Id

@@ -213,7 +213,7 @@ public class PersistenceXMLLoader
      * @throws Exception
      *             the exception
      */
-    public static List<PersistenceUnitMetadata> findPersistenceUnits(URL url,
+    public static List<PersistenceUnitMetadata> findPersistenceUnits(final URL url,
             PersistenceUnitTransactionType defaultTransactionType) throws InvalidConfigurationException
     {
 
@@ -244,9 +244,8 @@ public class PersistenceXMLLoader
                 // look for "persistence-unit" element
                 if (tag.equals("persistence-unit"))
                 {
-                    PersistenceUnitMetadata metadata = parsePersistenceUnit(element);
-                    metadata.setPersistenceUnitRootUrl(getPersistenceRootUrl(url));
-                    metadata.setXmlSchemaVersion(versionName);
+                    PersistenceUnitMetadata metadata = parsePersistenceUnit(url, element, versionName );
+//                    metadata.setPersistenceUnitRootUrl(getPersistenceRootUrl(url));
                     units.add(metadata);
                 }
             }
@@ -263,9 +262,9 @@ public class PersistenceXMLLoader
      * @throws Exception
      *             the exception
      */
-    private static PersistenceUnitMetadata parsePersistenceUnit(Element top)
+    private static PersistenceUnitMetadata parsePersistenceUnit(final URL url, Element top, final String versionName)
     {
-        PersistenceUnitMetadata metadata = new PersistenceUnitMetadata();
+        PersistenceUnitMetadata metadata = new PersistenceUnitMetadata(versionName, getPersistenceRootUrl(url));
 
         String puName = top.getAttribute("name");
         if (!isEmpty(puName))

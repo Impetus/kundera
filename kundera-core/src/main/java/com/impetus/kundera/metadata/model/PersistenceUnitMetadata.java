@@ -77,6 +77,16 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
 
     private String schemaVersion;
 
+    public PersistenceUnitMetadata()
+    {
+        
+    }
+    
+    public PersistenceUnitMetadata(String xmlSchemaVersion, URL rootUrl)
+    {
+        this.schemaVersion = xmlSchemaVersion;
+        this.rootUrl = rootUrl;
+    }
     /*
      * (non-Javadoc)
      * 
@@ -488,17 +498,6 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
     }
 
     /**
-     * Setter for persistence unit root url
-     * 
-     * @param url
-     *            persistence unit root url.
-     */
-    public void setPersistenceUnitRootUrl(URL url)
-    {
-        this.rootUrl = url;
-    }
-
-    /**
      * Adds jar file URL.
      * 
      * @param jarFile
@@ -545,8 +544,23 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
         return client;
     }
 
-    public void setXmlSchemaVersion(String xmlSchemaVersion)
+    /**
+     * Returns true, if pu is specified with batch size.
+     * 
+     * @return true, if pu consists batch.size property.
+     */
+    public boolean isBatch()
     {
-        this.schemaVersion = xmlSchemaVersion;
+        return true;
+    }
+    
+    /**
+     * Return batch.size value.
+     * 
+     * @return integer value for batch size.
+     */
+    public int getBatchSize()
+    {
+        return 0;
     }
 }

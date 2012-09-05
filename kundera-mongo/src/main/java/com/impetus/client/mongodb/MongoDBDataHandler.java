@@ -39,6 +39,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.db.RelationHolder;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
@@ -94,7 +95,7 @@ final class MongoDBDataHandler
             Class<?> rowKeyValueClass = rowKey.getClass();
 
             Class<?> idClass = m.getIdAttribute().getJavaType();
-            
+
             Map<String, Object> relationValue = null;
 
             rowKey = populateValue(rowKey, idClass);
@@ -112,7 +113,7 @@ final class MongoDBDataHandler
 
             for (Attribute column : columns)
             {
-                String fieldName = ((AbstractAttribute)column).getJPAColumnName();
+                String fieldName = ((AbstractAttribute) column).getJPAColumnName();
 
                 Class javaType = ((AbstractAttribute) column).getBindableJavaType();
                 if (metaModel.isEmbeddable(javaType))
@@ -130,16 +131,26 @@ final class MongoDBDataHandler
                         relationValue = new HashMap<String, Object>();
                     }
 
-                    if (relations.contains(fieldName) && !fieldName.equals(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()))
+                    if (relations.contains(fieldName)
+                            && !fieldName.equals(((AbstractAttribute) m.getIdAttribute()).getJPAColumnName()))
                     {
                         Object colValue = document.get(fieldName);
+                        if (colValue != null)
+                        {
+                           String colFieldName = m.getFieldName(fieldName);
+                            Attribute attribute = colFieldName != null ? entityType.getAttribute(colFieldName) : null;
+                            EntityMetadata relationMetadata = KunderaMetadataManager.getEntityMetadata(attribute
+                                    .getJavaType());
+                            colValue = getTranslatedObject(colValue, colValue.getClass(), relationMetadata
+                                    .getIdAttribute().getJavaType());
+                        }
                         relationValue.put(fieldName, colValue);
                     }
 
                 }
             }
 
-            if (relationValue !=null && !relationValue.isEmpty())
+            if (relationValue != null && !relationValue.isEmpty())
             {
                 EnhanceEntity e = new EnhanceEntity(entity, PropertyAccessorHelper.getId(entity, m), relationValue);
                 return e;
@@ -272,7 +283,7 @@ final class MongoDBDataHandler
         {
             for (RelationHolder rh : relations)
             {
-                dbObj.put(rh.getRelationName(), populateValue(rh.getRelationValue(),rh.getRelationValue().getClass()));
+                dbObj.put(rh.getRelationName(), populateValue(rh.getRelationValue(), rh.getRelationValue().getClass()));
             }
         }
 
@@ -356,7 +367,7 @@ final class MongoDBDataHandler
      *            the filter property
      * @return the column name
      */
-   private String getColumnName(String filterProperty)
+    private String getColumnName(String filterProperty)
     {
         StringTokenizer st = new StringTokenizer(filterProperty, ".");
         String columnName = "";
@@ -367,8 +378,6 @@ final class MongoDBDataHandler
 
         return columnName;
     }
-
-   
 
     /**
      * Retrieves A collection of embedded object within a document that match a
@@ -552,9 +561,10 @@ final class MongoDBDataHandler
         }
         else
         {
-            embeddedDocumentObject =  document.get(((AbstractAttribute) column)
-                    .getJPAColumnName());
-            PropertyAccessorHelper.set(entity, embeddedField, DocumentObjectMapper.getObjectFromDocument((BasicDBObject) embeddedDocumentObject, ((AbstractAttribute)column).getBindableJavaType(), embeddable.getAttributes()));
+            embeddedDocumentObject = document.get(((AbstractAttribute) column).getJPAColumnName());
+            PropertyAccessorHelper.set(entity, embeddedField, DocumentObjectMapper.getObjectFromDocument(
+                    (BasicDBObject) embeddedDocumentObject, ((AbstractAttribute) column).getBindableJavaType(),
+                    embeddable.getAttributes()));
         }
     }
 }

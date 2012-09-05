@@ -107,4 +107,15 @@ public interface CassandraDataHandler
      * @return the object
      */
     Object populateEntity(ThriftRow tr, EntityMetadata m, List<String> relationNames, boolean isWrapReq);
+    
+    
+    /**
+     * @param e
+     * @param id
+     * @param m
+     * @param columnFamily
+     * @return
+     * @throws Exception
+     */
+    ThriftRow toThriftRow(Object e, Object id, EntityMetadata m, String columnFamily) throws Exception;
 }

@@ -38,7 +38,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.impetus.kundera.tests.cli.CassandraCli;
-import com.impetus.kundera.tests.cli.HBaseCli;
 import com.impetus.kundera.tests.crossdatastore.useraddress.TwinAssociation;
 import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.HabitatUni1To1FKInteger;
 import com.impetus.kundera.tests.crossdatastore.useraddress.datatype.entities.PersonnelUni1To1FKInt;
@@ -77,8 +76,8 @@ public class OTOUniAssociationIntTest extends TwinAssociation
     {
         if (RUN_IN_EMBEDDED_MODE)
         {
-            HBaseCli cli = new HBaseCli();
-            cli.startCluster();
+//            HBaseCli cli = new HBaseCli();
+//            cli.startCluster();
         }
         List<Class> clazzz = new ArrayList<Class>(2);
         clazzz.add(PersonnelUni1To1FKInt.class);
@@ -256,7 +255,7 @@ public class OTOUniAssociationIntTest extends TwinAssociation
     {
         if (RUN_IN_EMBEDDED_MODE)
         {
-            HBaseCli.stopCluster();
+//            HBaseCli.stopCluster();
         }
     }
 
@@ -269,7 +268,6 @@ public class OTOUniAssociationIntTest extends TwinAssociation
         CfDef cfDef = new CfDef();
         cfDef.name = "PERSONNEL";
         cfDef.keyspace = "KunderaTests";
-        // cfDef.column_type = "Super";
         cfDef.setComparator_type("UTF8Type");
         cfDef.setDefault_validation_class("IntegerType");
         ColumnDef columnDef = new ColumnDef(ByteBuffer.wrap("PERSON_NAME".getBytes()), "UTF8Type");
@@ -313,7 +311,6 @@ public class OTOUniAssociationIntTest extends TwinAssociation
     public void loadDataForHABITAT() throws TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-
         KsDef ksDef = null;
         CfDef cfDef2 = new CfDef();
         cfDef2.name = "ADDRESS";
@@ -333,12 +330,9 @@ public class OTOUniAssociationIntTest extends TwinAssociation
             List<CfDef> cfDefss = ksDef.getCf_defs();
             for (CfDef cfDef : cfDefss)
             {
-
                 if (cfDef.getName().equalsIgnoreCase("ADDRESS"))
                 {
-
                     CassandraCli.client.system_drop_column_family("ADDRESS");
-
                 }
             }
             CassandraCli.client.system_add_column_family(cfDef2);
@@ -348,7 +342,6 @@ public class OTOUniAssociationIntTest extends TwinAssociation
             addKeyspace(ksDef, cfDefs);
         }
         CassandraCli.client.set_keyspace("KunderaTests");
-
     }
 
     /**

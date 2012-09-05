@@ -13,42 +13,27 @@
  *  * See the License for the specific language governing permissions and
  *  * limitations under the License.
  ******************************************************************************/
-package com.impetus.kundera.tests.crossdatastore.useraddress.entities;
+package com.impetus.kundera.persistence.api;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import com.impetus.kundera.graph.Node;
 
-@Entity
-@Table(name = "ADDRESS", schema = "KunderaTests@addCassandra")
-public class HabitatUni1ToM
+/**
+ * API to handler batch operations. Batch scheduler will be responsible 
+ * @author vivek.mishra
+ *
+ */
+public interface Batcher
 {
-    @Id
-    @Column(name = "ADDRESS_ID")
-    private String addressId;
 
-    @Column(name = "STREET")
-    private String street;
-
-    public String getAddressId()
-    {
-        return addressId;
-    }
-
-    public void setAddressId(String addressId)
-    {
-        this.addressId = addressId;
-    }
-
-    public String getStreet()
-    {
-        return street;
-    }
-
-    public void setStreet(String street)
-    {
-        this.street = street;
-    }
+    /**
+     * 
+     * @param node
+     */
+    void addBatch(Node node);
+    
+    /**
+     * 
+     */
+    void executeBatch();
 
 }

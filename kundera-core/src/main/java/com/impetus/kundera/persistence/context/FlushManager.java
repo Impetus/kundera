@@ -29,8 +29,6 @@ import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.NodeLink;
 import com.impetus.kundera.graph.NodeLink.LinkProperty;
-import com.impetus.kundera.graph.ObjectGraphBuilder;
-import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.lifecycle.states.ManagedState;
 import com.impetus.kundera.lifecycle.states.RemovedState;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -42,7 +40,6 @@ import com.impetus.kundera.persistence.context.EventLog.EventType;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData;
 import com.impetus.kundera.persistence.context.jointable.JoinTableData.OPERATION;
 
-// TODO: Auto-generated Javadoc
 /**
  * Provides utility methods for managing Flush Stack.
  * 
@@ -312,17 +309,6 @@ public class FlushManager
     public Map<String, JoinTableData> getJoinTableDataMap()
     {
         return joinTableDataMap;
-    }
-
-    /**
-     * Sets the join table data map.
-     * 
-     * @param joinTableDataMap
-     *            the joinTableDataMap to set
-     */
-    public void setJoinTableDataMap(Map<String, JoinTableData> joinTableDataMap)
-    {
-        this.joinTableDataMap = joinTableDataMap;
     }
 
     /**

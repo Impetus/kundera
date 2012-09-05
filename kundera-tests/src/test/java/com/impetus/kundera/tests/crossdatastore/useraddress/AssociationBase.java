@@ -57,10 +57,8 @@ public abstract class AssociationBase
 
     public static final boolean AUTO_MANAGE_SCHEMA = true;
 
-    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo"/*
-                                                                                                * ,
-                                                                                                * "addHbase"
-                                                                                                */, "rdbms" };
+    public static final String[] ALL_PUs_UNDER_TEST = new String[] { "addCassandra", "addMongo", "addHbase"
+    /* , "rdbms" */};
 
     // public static final String[] ALL_PUs_UNDER_TEST = new String[] {
     // "addCassandra"};
@@ -81,7 +79,7 @@ public abstract class AssociationBase
 
     protected List<Object> col = new ArrayList<Object>();
 
-    private String persistenceUnits = "addCassandra,addMongo,rdbms,addHbase";
+    private String persistenceUnits = "rdbms,addCassandra,addMongo,addHbase";
 
     // private String persistenceUnits = "addCassandra,rdbms";
 
@@ -148,6 +146,7 @@ public abstract class AssociationBase
                 String pu = entityPuCol.get(clazz);
                 // EntityMetadata mAdd = KunderaMetadataManager
                 // .getEntityMetadata(clazz);
+
                 Map<String, Metamodel> metaModels = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodelMap();
                 EntityMetadata mAdd = null;
                 for (Metamodel m : metaModels.values())
@@ -187,7 +186,7 @@ public abstract class AssociationBase
                 }
                 else if (client.equalsIgnoreCase("com.impetus.client.hbase.HBaseClientFactory"))
                 {
-                    if (RUN_IN_EMBEDDED_MODE)
+                    if (!RUN_IN_EMBEDDED_MODE)
                     {
 
                         HBaseCli.createTable("PERSONNEL");
