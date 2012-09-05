@@ -61,11 +61,7 @@ public class TransientState extends NodeState
     @Override
     public void handleRefresh(NodeStateContext nodeStateContext)
     {
-        // Ignored, Entity will remain in the Transient state
-
-        // Cascade refresh operation for all related entities for whom
-        // cascade=ALL or REFRESH
-        recursivelyPerformOperation(nodeStateContext, OPERATION.REFRESH);
+        throw new IllegalArgumentException("Refresh operation not allowed in Transient state");
     }
 
     @Override

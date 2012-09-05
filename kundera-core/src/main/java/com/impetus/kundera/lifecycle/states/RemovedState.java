@@ -57,11 +57,7 @@ public class RemovedState extends NodeState
     @Override
     public void handleRefresh(NodeStateContext nodeStateContext)
     {
-        // Ignored, entity will remain in removed state
-
-        // Cascade refresh operation for all related entities for whom
-        // cascade=ALL or REFRESH
-        recursivelyPerformOperation(nodeStateContext, OPERATION.REFRESH);
+        throw new IllegalArgumentException("Refresh operation not allowed in Removed state");
     }
 
     @Override

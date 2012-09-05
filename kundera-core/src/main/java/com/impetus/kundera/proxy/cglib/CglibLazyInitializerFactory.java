@@ -43,13 +43,6 @@ import com.impetus.kundera.proxy.LazyInitializerFactory;
  */
 public class CglibLazyInitializerFactory implements LazyInitializerFactory
 {
-
-    /*
-     * @see
-     * com.impetus.kundera.proxy.LazyInitializerFactory#getProxy(java.lang.String
-     * , java.lang.Class, java.lang.reflect.Method, java.lang.reflect.Method,
-     * java.lang.String, com.impetus.kundera.ejb.EntityManagerImpl)
-     */
     /*
      * (non-Javadoc)
      * 
