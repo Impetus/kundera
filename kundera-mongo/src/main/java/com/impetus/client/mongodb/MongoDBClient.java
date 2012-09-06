@@ -531,7 +531,7 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
 
                     List<RelationHolder> relationHolders = getRelationHolders(node);
                     EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(node.getDataClass());
-                    collections = onPersist(collections, node.getEntityId(), node.getData(), metadata, relationHolders,
+                    collections = onPersist(collections,node.getData(), node.getEntityId(), metadata, relationHolders,
                             node.isUpdate());
                     indexNode(node, metadata);
                 }
