@@ -448,8 +448,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
     public final void flush()
     {
         checkClosed();
-        doCommit();
-        // persistenceDelegator.flush();
+         persistenceDelegator.doFlush();
     }
 
     /*
@@ -571,7 +570,6 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
             throw new TransactionRequiredException("No transaction in progress");
         }
 
-        // throw new NotImplementedException("TODO");
     }
 
     /*

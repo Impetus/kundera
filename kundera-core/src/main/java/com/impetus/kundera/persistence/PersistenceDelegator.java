@@ -376,6 +376,7 @@ public class PersistenceDelegator
                         EntityMetadata metadata = getMetadata(node.getDataClass());
                         node.setClient(getClient(metadata));
 
+                        // if batch size is defined.
                         if (node.getClient().getClass().isAssignableFrom(Batcher.class)
                                 && ((Batcher) (node.getClient())).getBatchSize() > 0)
                         {
@@ -384,10 +385,6 @@ public class PersistenceDelegator
                         else if (flushMode.equals(FlushModeType.AUTO) || enableFlush)
                         {
                             node.flush();
-                        }
-                        else
-                        {
-                            fs.push(node);
                         }
 
                         // Update Link value for all nodes attached to this one
@@ -427,14 +424,6 @@ public class PersistenceDelegator
             }
 
         }
-    }
-
-    /**
-     * @return
-     */
-    private boolean applyFlush()
-    {
-        return flushMode.equals(FlushModeType.AUTO) || enableFlush;
     }
 
     public <E> E merge(E e)
@@ -755,15 +744,23 @@ public class PersistenceDelegator
 
     public void commit()
     {
+        doFlush();
+        execute();
+        isTransactionInProgress = false;
+    }
+
+    /**
+     * On explicit call from em.flush().
+     */
+    public void doFlush()
+    {
             enableFlush = true;
             flush();
             execute();
-            isTransactionInProgress = false;
             enableFlush = false;
             flushManager.commit();
             flushManager.clearFlushStack();
     }
-
     public void rollback()
     {
         isTransactionInProgress = false;
@@ -882,5 +879,17 @@ public class PersistenceDelegator
             }            
         }
     }   
+
+
+
+    /**
+     * Returns true, if flush mode is AUTO and not running within transaction || running within transaction and commit is invoked.
+     * 
+     * @return boolean value.
+     */
+    private boolean applyFlush()
+    {
+        return (!isTransactionInProgress && flushMode.equals(FlushModeType.AUTO)) || enableFlush;
+    }
 
 }

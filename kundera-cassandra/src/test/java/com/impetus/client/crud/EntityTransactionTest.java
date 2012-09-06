@@ -97,7 +97,7 @@ public class EntityTransactionTest extends BaseTest
     public void onRollback() throws IOException, TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        em.setFlushMode(FlushModeType.COMMIT);
+//        em.setFlushMode(FlushModeType.COMMIT);
         em.getTransaction().begin();
 
         Object p1 = prepareData("1", 10);
@@ -140,7 +140,7 @@ public class EntityTransactionTest extends BaseTest
     public void onCommit() throws IOException, TException, InvalidRequestException, UnavailableException,
             TimedOutException, SchemaDisagreementException
     {
-        em.setFlushMode(FlushModeType.COMMIT);
+//        em.setFlushMode(FlushModeType.COMMIT);
 
         em.getTransaction().begin();
 
@@ -229,7 +229,7 @@ public class EntityTransactionTest extends BaseTest
         em.clear();
         // persist with 1 em
         EntityManager em1 = emf.createEntityManager();
-        em1.setFlushMode(FlushModeType.COMMIT);
+//        em1.setFlushMode(FlushModeType.COMMIT);
         em1.getTransaction().begin();
         Object p3 = prepareData("4", 15);
         em1.persist(p3);
@@ -262,7 +262,7 @@ public class EntityTransactionTest extends BaseTest
     public void rollBackWithMultiTransactions()
     {
         EntityManager em1 = emf.createEntityManager();
-        em1.setFlushMode(FlushModeType.COMMIT);
+//        em1.setFlushMode(FlushModeType.COMMIT);
 
         // Begin transaction.
         em1.getTransaction().begin();
@@ -274,7 +274,7 @@ public class EntityTransactionTest extends BaseTest
 
         // another em instance
         EntityManager em2 = emf.createEntityManager();
-        em2.setFlushMode(FlushModeType.COMMIT);
+//        em2.setFlushMode(FlushModeType.COMMIT);
 
         // begin transaction.
         em2.getTransaction().begin();
