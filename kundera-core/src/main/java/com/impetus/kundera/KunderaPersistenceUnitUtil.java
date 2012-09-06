@@ -16,30 +16,58 @@
 package com.impetus.kundera;
 
 import javax.persistence.PersistenceUnitUtil;
+import javax.persistence.spi.LoadState;
+
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 
 /**
- * {@link PersistenceUnitUtil} for {@link KunderaPersistence} 
+ * {@link PersistenceUnitUtil} for {@link KunderaPersistence}
+ * 
  * @author amresh.singh
  */
 public class KunderaPersistenceUnitUtil implements PersistenceUnitUtil
 {
+    private transient PersistenceUtilHelper.MetadataCache cache;
 
-    @Override
-    public boolean isLoaded(Object paramObject, String paramString)
+    public KunderaPersistenceUnitUtil(PersistenceUtilHelper.MetadataCache cache)
     {
-        return false;
+        this.cache = cache;
     }
 
     @Override
-    public boolean isLoaded(Object paramObject)
+    public boolean isLoaded(Object entity, String attributeName)
     {
-        return false;
+        LoadState state = PersistenceUtilHelper.isLoadedWithoutReference(entity, attributeName, this.cache);
+        if (state == LoadState.LOADED)
+        {
+            return true;
+        }
+        if (state == LoadState.NOT_LOADED)
+        {
+            return false;
+        }
+        return (PersistenceUtilHelper.isLoadedWithReference(entity, attributeName, this.cache) != LoadState.NOT_LOADED);
     }
 
     @Override
-    public Object getIdentifier(Object paramObject)
+    public boolean isLoaded(Object entity)
     {
-        return null;
-    } 
+        return (PersistenceUtilHelper.isLoaded(entity) != LoadState.NOT_LOADED);
+    }
+
+    @Override
+    public Object getIdentifier(Object entity)
+    {
+        Class<?> entityClass = entity.getClass();
+        EntityMetadata entityMetadata = KunderaMetadataManager.getEntityMetadata(entityClass);
+
+        if (entityMetadata == null)
+        {
+            throw new IllegalArgumentException(entityClass + " is not an entity");
+        }
+        return PropertyAccessorHelper.getId(entityClass, entityMetadata);
+    }
 
 }
