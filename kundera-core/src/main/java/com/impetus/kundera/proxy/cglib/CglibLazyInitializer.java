@@ -402,6 +402,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
      * 
      * @return the implementation
      */
+    @Override
     public final Object getImplementation()
     {
         initialize();
@@ -441,5 +442,10 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     {
         this.unwrap = unwrap;
     }
+
+    @Override
+    public void setImplementation(Object paramObject)
+    {
+    } 
 
 }

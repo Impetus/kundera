@@ -101,4 +101,8 @@ public interface LazyInitializer
      * @return true, if is unwrap
      */
     public boolean isUnwrap();
+    
+    public abstract Object getImplementation();
+
+    public abstract void setImplementation(Object paramObject);
 }

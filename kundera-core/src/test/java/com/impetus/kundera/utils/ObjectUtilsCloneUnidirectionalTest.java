@@ -31,8 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.configure.MetamodelConfiguration;
-import com.impetus.kundera.configure.PersistenceUnitConfiguration;
 import com.impetus.kundera.entity.PersonalDetail;
 import com.impetus.kundera.entity.Tweet;
 import com.impetus.kundera.entity.album.AlbumUni_1_M_1_M;

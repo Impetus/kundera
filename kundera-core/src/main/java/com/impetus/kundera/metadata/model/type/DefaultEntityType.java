@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model.type;
 
-import javax.persistence.metamodel.BasicType;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Type;
 

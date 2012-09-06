@@ -15,10 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.processor;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.util.Date;
 
@@ -30,9 +26,7 @@ import javax.persistence.Temporal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.loader.MetamodelLoaderException;
 import com.impetus.kundera.metadata.MetadataProcessor;
-import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.validator.EntityValidator;
 
 /**

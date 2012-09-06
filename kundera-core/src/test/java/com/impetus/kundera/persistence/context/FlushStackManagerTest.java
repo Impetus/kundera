@@ -28,9 +28,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.configure.MetamodelConfiguration;
 import com.impetus.kundera.configure.PersistenceUnitConfiguration;
-import com.impetus.kundera.entity.PersonnelDTO;
 import com.impetus.kundera.entity.album.AlbumUni_1_1_1_1;
 import com.impetus.kundera.entity.album.AlbumUni_1_1_1_M;
 import com.impetus.kundera.entity.album.AlbumUni_1_1_M_1;

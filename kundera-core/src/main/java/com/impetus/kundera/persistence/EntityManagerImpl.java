@@ -45,7 +45,6 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.cache.Cache;
-import com.impetus.kundera.client.Client;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.graph.ObjectGraphUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;

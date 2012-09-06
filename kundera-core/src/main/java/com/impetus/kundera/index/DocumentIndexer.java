@@ -32,8 +32,6 @@ import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.impetus.kundera.metadata.model.Column;
-import com.impetus.kundera.metadata.model.EmbeddedColumn;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.PropertyIndex;
 import com.impetus.kundera.property.PropertyAccessException;
