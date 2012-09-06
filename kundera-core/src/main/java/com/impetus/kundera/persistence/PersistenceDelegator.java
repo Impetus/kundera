@@ -784,6 +784,35 @@ public class PersistenceDelegator
         return isTransactionInProgress;
     }
 
+    
+    /**
+     * Populates client specific properties.
+     * 
+     * @param properties map of properties.
+     */
+    public void populateClientProperties(Map properties)
+    {       
+        if(properties != null && ! properties.isEmpty())
+        {
+            Map<String, Client> clientMap = getDelegate();
+            if(clientMap != null && ! clientMap.isEmpty())
+            {
+                for(Client client : clientMap.values())
+                {
+                    if(client instanceof ClientPropertiesSetter)
+                    {
+                        ClientPropertiesSetter cps = (ClientPropertiesSetter) client;                   
+                        cps.populateClientProperties(client, properties);
+                    }
+                    
+                                       
+                }
+            }            
+        }
+    }   
+
+
+
     /**
      * Pre load client specific to persistence unit.
      * 
@@ -858,34 +887,6 @@ public class PersistenceDelegator
         }
         joinTableDataMap.clear(); // All Join table operation
     }
-    
-    /**
-     * Populates client specific properties.
-     * 
-     * @param properties map of properties.
-     */
-    public void populateClientProperties(Map properties)
-    {       
-        if(properties != null && ! properties.isEmpty())
-        {
-            Map<String, Client> clientMap = getDelegate();
-            if(clientMap != null && ! clientMap.isEmpty())
-            {
-                for(Client client : clientMap.values())
-                {
-                    if(client instanceof ClientPropertiesSetter)
-                    {
-                        ClientPropertiesSetter cps = (ClientPropertiesSetter) client;                   
-                        cps.populateClientProperties(client, properties);
-                    }
-                    
-                                       
-                }
-            }            
-        }
-    }   
-
-
 
     /**
      * Returns true, if flush mode is AUTO and not running within transaction || running within transaction and commit is invoked.
