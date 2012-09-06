@@ -24,6 +24,6 @@ import java.util.Map;
 public interface ClientPropertiesSetter
 {   
     
-    public void populateClientProperties(Client client, Map<String, Object> properties);   
+    void populateClientProperties(Client client, Map<String, Object> properties);   
 
 }

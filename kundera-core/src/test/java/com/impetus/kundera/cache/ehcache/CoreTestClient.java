@@ -95,8 +95,7 @@ public class CoreTestClient implements Client<LuceneQuery>
     @Override
     public void deleteByColumn(String tableName, String columnName, Object columnValue)
     {
-        // TODO Auto-generated method stub
-        
+        // TODO Auto-generated method stub        
     }
 
     @Override
@@ -118,14 +117,6 @@ public class CoreTestClient implements Client<LuceneQuery>
     {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    @Override
-    public ClientPropertiesSetter getClientPropertiesSetter()
-    {
-        return null;
-    }
-    
-    
+    }   
 
 }
