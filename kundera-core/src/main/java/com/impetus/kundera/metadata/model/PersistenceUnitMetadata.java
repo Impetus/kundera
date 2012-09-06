@@ -569,6 +569,7 @@ public class PersistenceUnitMetadata implements PersistenceUnitInfo
             {
                 throw new IllegalArgumentException("kundera.batch.size property must be numeric and > 0");
             }
+            return batch_Size;
         }
         
         return 0;

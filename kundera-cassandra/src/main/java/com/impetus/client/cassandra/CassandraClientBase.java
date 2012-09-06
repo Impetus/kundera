@@ -96,7 +96,7 @@ import com.impetus.kundera.query.KunderaQuery.FilterClause;
  * 
  * @author amresh.singh
  */
-public abstract class CassandraClientBase extends ClientBase implements Batcher, ClientPropertiesSetter
+public abstract class CassandraClientBase extends ClientBase implements ClientPropertiesSetter
 {
 
     /** log for this class. */
@@ -864,7 +864,6 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher,
     /* (non-Javadoc)
      * @see com.impetus.kundera.persistence.api.Batcher#getBatchSize()
      */
-    @Override
     public int getBatchSize()
     {
         return batchSize;
@@ -876,7 +875,6 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher,
      * 
      * @see com.impetus.kundera.persistence.api.Batcher#executeBatch()
      */
-    @Override
     public int executeBatch()
     {
         String persistenceUnit = null;
@@ -922,7 +920,6 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher,
 
                 cassandra_client.batch_mutate(mutationMap, consistencyLevel);
             }
-            return mutationMap.size();
         }
         catch (InvalidRequestException e)
         {
@@ -949,6 +946,7 @@ public abstract class CassandraClientBase extends ClientBase implements Batcher,
             PelopsUtils.releaseConnection(conn);
         }
 
+        return mutationMap.size();
     }
 
     /**

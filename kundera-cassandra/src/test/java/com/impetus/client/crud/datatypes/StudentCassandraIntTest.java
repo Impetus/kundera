@@ -41,7 +41,8 @@ public class StudentCassandraIntTest extends Base
     {
         if (RUN_IN_EMBEDDED_MODE)
         {
-            startCluster();
+            CassandraCli.initClient();
+//            startCluster();
         }
         if (AUTO_MANAGE_SCHEMA)
         {
@@ -60,7 +61,7 @@ public class StudentCassandraIntTest extends Base
         }
         if (RUN_IN_EMBEDDED_MODE)
         {
-            stopCluster();
+//            stopCluster();
         }
     }
 
@@ -612,7 +613,7 @@ public class StudentCassandraIntTest extends Base
             CfDef cfDef = new CfDef();
             cfDef.name = "StudentCassandraInt";
             cfDef.keyspace = keyspace;
-//            cfDef.setKey_validation_class("IntegerType");
+            cfDef.setKey_validation_class("IntegerType");
 
             ColumnDef name = new ColumnDef(ByteBuffer.wrap("NAME".getBytes()), "UTF8Type");
             name.index_type = IndexType.KEYS;

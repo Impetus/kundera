@@ -21,8 +21,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.impetus.kundera.annotations.Index;
-
-// TODO: Auto-generated Javadoc
 /**
  * The Class Person.
  */

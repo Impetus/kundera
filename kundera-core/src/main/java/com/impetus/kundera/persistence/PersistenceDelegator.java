@@ -364,6 +364,7 @@ public class PersistenceDelegator
 
             if (fs != null)
             {
+                boolean isBatch = false;
                 while (!fs.isEmpty())
                 {
                     Node node = fs.pop();
@@ -377,9 +378,10 @@ public class PersistenceDelegator
                         node.setClient(getClient(metadata));
 
                         // if batch size is defined.
-                        if (node.getClient().getClass().isAssignableFrom(Batcher.class)
+                        if ((node.getClient() instanceof Batcher)
                                 && ((Batcher) (node.getClient())).getBatchSize() > 0)
                         {
+                            isBatch = true;
                             ((Batcher) (node.getClient())).addBatch(node);
                         }
                         else if (flushMode.equals(FlushModeType.AUTO) || enableFlush)
@@ -410,7 +412,7 @@ public class PersistenceDelegator
 
                 }
 
-                if (flushMode.equals(FlushModeType.AUTO) || enableFlush)
+                if (!isBatch)
                 {
 
                     // TODO : This needs to be look for different
@@ -550,6 +552,7 @@ public class PersistenceDelegator
      */
     public final void close()
     {
+        doFlush();
         eventDispatcher = null;
 
         // Close all clients created in this session
@@ -850,7 +853,7 @@ public class PersistenceDelegator
     {
         for (Client client : clientMap.values())
         {
-            if (client.getClass().isAssignableFrom(Batcher.class))
+            if (client instanceof Batcher)
             {
                 if (((Batcher) client).executeBatch() > 0)
                 {
