@@ -17,9 +17,15 @@ package com.impetus.kundera.configure.schema.api;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.configure.KunderaClientProperties;
+import com.impetus.kundera.configure.KunderaClientProperties.DataStore.Connection;
+import com.impetus.kundera.configure.KunderaClientProperties.DataStore.Schema;
+import com.impetus.kundera.configure.KunderaPropertyReader;
+import com.impetus.kundera.configure.KunderaClientProperties.DataStore;
 import com.impetus.kundera.configure.schema.TableInfo;
 import com.impetus.kundera.metadata.MetadataUtils;
 import com.impetus.kundera.metadata.model.ApplicationMetadata;
@@ -59,6 +65,10 @@ public abstract class AbstractSchemaManager
 
     /** The use secondry index variable. */
     protected boolean useSecondryIndex = false;
+
+    protected List<Schema> schemas = null;
+
+    protected Connection conn = null;
 
     /**
      * Initialise with configured client factory.
@@ -100,6 +110,22 @@ public abstract class AbstractSchemaManager
                 // get type of schema of operation.
                 operation = puMetadata.getProperty(PersistenceProperties.KUNDERA_DDL_AUTO_PREPARE);
 
+                KunderaClientProperties kProperties = appMetadata.getSchemaMetadata().getConfigurationProperties()
+                        .get(pu);
+
+                List<DataStore> dataStores = kProperties != null ? kProperties.getDatastores() : null;
+                if (dataStores != null)
+                {
+                    for (DataStore dataStore : dataStores)
+                    {
+                        if (dataStore != null && dataStore.getName() != null
+                                && puMetadata.getClient().contains(dataStore.getName()))
+                        {
+                            schemas = dataStore.getSchemas();
+                            conn = dataStore.getConnection();
+                        }
+                    }
+                }
                 // invoke handle operation.
                 if (operation != null && initiateClient())
                 {

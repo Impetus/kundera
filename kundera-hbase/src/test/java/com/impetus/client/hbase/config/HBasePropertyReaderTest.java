@@ -22,8 +22,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import javax.persistence.Persistence;
-
 import junit.framework.Assert;
 
 import org.apache.commons.logging.Log;
@@ -33,7 +31,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.impetus.kundera.Constants;
+import com.impetus.client.hbase.HBaseConstants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.configure.ClientFactoryConfiguraton;
 import com.impetus.kundera.configure.PersistenceUnitConfiguration;
@@ -92,9 +90,9 @@ public class HBasePropertyReaderTest
         if (inStream != null)
         {
             properties.load(inStream);
-            port = properties.getProperty(Constants.ZOOKEEPER_PORT);
-            host = properties.getProperty(Constants.ZOOKEEPER_HOST);
-            String cfDefs = properties.getProperty(Constants.CF_DEFS);
+            port = properties.getProperty(HBaseConstants.ZOOKEEPER_PORT);
+            host = properties.getProperty(HBaseConstants.ZOOKEEPER_HOST);
+            String cfDefs = properties.getProperty(HBaseConstants.CF_DEFS);
             if (cfDefs != null)
             {
 

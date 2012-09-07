@@ -92,23 +92,23 @@ public final class Constants
 
     public final static String INDEX_TABLE_EC_DELIMITER = "@SuperColumn:";
 
-    public final static String INVERTED_INDEXING_ENABLED = "inverted.indexing.enabled";
+//    public final static String INVERTED_INDEXING_ENABLED = "inverted.indexing.enabled";
 
-    public final static String ZOOKEEPER_PORT = "zookeeper_port";
+//    public final static String ZOOKEEPER_PORT = "zookeeper_port";
+//
+//    public final static String ZOOKEEPER_HOST = "zookeeper_host";
 
-    public final static String ZOOKEEPER_HOST = "zookeeper_host";
-
-    public final static String PLACEMENT_STRATEGY = "placement_strategy";
-
-    public final static String REPLICATION_FACTOR = "replication_factor";
-
-    public final static String CF_DEFS = "cf_defs";
-
-    public final static String DATA_CENTERS = "datacenters";
-
-    public final static String CONNECTIONS = "mongodb.servers";
-
-    public final static String SOCKET_TIMEOUT = "socket.timeout";
-
-    public final static String READ_PREFERENCE = "read.preference";
+//    public final static String PLACEMENT_STRATEGY = "placement_strategy";
+//
+//    public final static String REPLICATION_FACTOR = "replication_factor";
+//
+//    public final static String CF_DEFS = "cf_defs";
+//
+//    public final static String DATA_CENTERS = "datacenters";
+//
+//    public final static String CONNECTIONS = "mongodb.servers";
+//
+//    public final static String SOCKET_TIMEOUT = "socket.timeout";
+//
+//    public final static String READ_PREFERENCE = "read.preference";
 }

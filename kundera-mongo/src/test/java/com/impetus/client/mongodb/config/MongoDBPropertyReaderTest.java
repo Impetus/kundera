@@ -32,6 +32,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.mongodb.MongoDBConstants;
 import com.impetus.client.mongodb.config.MongoDBPropertyReader.MongoDBSchemaMetadata;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
@@ -100,7 +101,7 @@ public class MongoDBPropertyReaderTest
             try
             {
                 properties.load(inStream);
-                String readPreference = properties.getProperty(Constants.READ_PREFERENCE);
+                String readPreference = properties.getProperty(MongoDBConstants.READ_PREFERENCE);
                 if (readPreference != null)
                 {
                     if (readPreference.equalsIgnoreCase("primary"))
@@ -116,9 +117,9 @@ public class MongoDBPropertyReaderTest
                         log.warn("Incorrect Read Preference specified. Only primary/ secondary allowed");
                     }
                 }
-                timeOut = Integer.parseInt(properties.getProperty(Constants.SOCKET_TIMEOUT));
+                timeOut = Integer.parseInt(properties.getProperty(MongoDBConstants.SOCKET_TIMEOUT));
 
-                parseConnectionString(properties.getProperty(Constants.CONNECTIONS));
+                parseConnectionString(properties.getProperty(MongoDBConstants.CONNECTIONS));
 
                 Assert.assertEquals(timeOut, dbSchemaMetadata.getSocketTimeOut());
                 Assert.assertEquals(this.readPreference, dbSchemaMetadata.getReadPreference());

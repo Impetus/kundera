@@ -178,7 +178,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @throws TException
      * @throws InterruptedException
      */
-            
+
     private void addTablesToKeyspace(List<TableInfo> tableInfos, KsDef ksDef) throws InvalidRequestException,
             SchemaDisagreementException, TException, InterruptedException
     {
@@ -232,7 +232,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
      * @throws SchemaDisagreementException
      * @throws TException
      */
-    private void dropInvertedIndexTable(TableInfo tableInfo) 
+    private void dropInvertedIndexTable(TableInfo tableInfo)
     {
         boolean indexTableRequired = CassandraPropertyReader.csmd.isInvertedIndexingEnabled()
                 && !tableInfo.getEmbeddedColumnMetadatas().isEmpty();
@@ -254,7 +254,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             {
                 e.printStackTrace();
             }
-            
+
         }
     }
 
@@ -542,30 +542,28 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         else
         {
-            for (String dataCeneteName : csmd.getDataCenters().keySet())
+            for (String dataCenterName : csmd.getDataCenters().keySet())
             {
-                strategy_options.put(dataCeneteName, csmd.getDataCenters().get(dataCeneteName));
+                strategy_options.put(dataCenterName, csmd.getDataCenters().get(dataCenterName));
             }
         }
         ksDef.setStrategy_options(strategy_options);
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         for (TableInfo tableInfo : tableInfos)
         {
-
-            cfDefs.add(getTableMetadata(tableInfo));            
-            
-            
+            cfDefs.add(getTableMetadata(tableInfo));
         }
         ksDef.setCf_defs(cfDefs);
         try
         {
             createKeyspace(ksDef);
-            
-            //Recreate Inverted Index Table if applicable
-            /*for(TableInfo tableInfo : tableInfos) {
-                dropInvertedIndexTable(tableInfo);
-                createInvertedIndexTable(tableInfo);
-            }*/
+
+            // Recreate Inverted Index Table if applicable
+            /*
+             * for(TableInfo tableInfo : tableInfos) {
+             * dropInvertedIndexTable(tableInfo);
+             * createInvertedIndexTable(tableInfo); }
+             */
         }
         catch (InvalidRequestException e)
         {
@@ -581,7 +579,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         {
             log.error("Error while creating schema in cassandra, Caused by:" + e.getMessage());
             throw new SchemaGenerationException(e, "Cassandra", databaseName);
-        } 
+        }
 
     }
 
@@ -751,15 +749,17 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     @Override
     public boolean validateEntity(Class clazz)
     {
-        
+
         boolean isvalid = false;
         EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(metadata.getPersistenceUnit());
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit());
         String tableName = metadata.getTableName();
         if (csmd.isCounterColumn(tableName))
         {
             metadata.setCounterColumnType(true);
-//            List<EmbeddedColumn> embeddedColumns = metadata.getEmbeddedColumnsAsList();
+            // List<EmbeddedColumn> embeddedColumns =
+            // metadata.getEmbeddedColumnsAsList();
             Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(clazz);
             if (!embeddables.isEmpty())
             {
@@ -771,14 +771,16 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 isvalid = validateColumns(entity.getAttributes()) ? true : false;
             }
 
-            //            if (!embeddedColumns.isEmpty())
-//            {
-//                isvalid = validateEmbeddedColumns(embeddedColumns) ? true : false;
-//            }
-//            else
-//            {
-//                isvalid = validateColumns(metadata.getColumnsAsList()) ? true : false;
-//            }
+            // if (!embeddedColumns.isEmpty())
+            // {
+            // isvalid = validateEmbeddedColumns(embeddedColumns) ? true :
+            // false;
+            // }
+            // else
+            // {
+            // isvalid = validateColumns(metadata.getColumnsAsList()) ? true :
+            // false;
+            // }
             isvalid = isvalid && validateRelations(metadata) ? true : false;
         }
         else
@@ -828,14 +830,15 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         boolean isValid = false;
         Iterator<EmbeddableType> iter = embeddedColumns.iterator();
-        while(iter.hasNext())
+        while (iter.hasNext())
         {
             isValid = validateColumns(iter.next().getAttributes()) ? true : false;
         }
-//        for (EmbeddedColumn embeddedColumn : embeddedColumns)
-//        {
-//            isValid = validateColumns(embeddedColumn.getColumns()) ? true : false;
-//        }
+        // for (EmbeddedColumn embeddedColumn : embeddedColumns)
+        // {
+        // isValid = validateColumns(embeddedColumn.getColumns()) ? true :
+        // false;
+        // }
         return isValid;
     }
 
@@ -866,8 +869,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private boolean validateColumn(Class clazz)
     {
         boolean isValid = true;
-        if (!(clazz.equals(Integer.class) || clazz.equals(int.class)
-                || clazz.equals(Long.class) || clazz.equals(long.class)))
+        if (!(clazz.equals(Integer.class) || clazz.equals(int.class) || clazz.equals(Long.class) || clazz
+                .equals(long.class)))
         {
             log.warn("Default valdation class :" + CounterColumnType.class.getSimpleName()
                     + ", For counter column type, fields of Entity should be either long type or integer type");

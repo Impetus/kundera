@@ -29,6 +29,7 @@ import com.impetus.client.cassandra.query.CassandraEntityReader;
 import com.impetus.client.cassandra.schemamanager.CassandraSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.configure.KunderaPropertyReader;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
@@ -49,6 +50,9 @@ public class PelopsClientFactory extends GenericClientFactory
         reader = new CassandraEntityReader();
         propertyReader = new CassandraPropertyReader();
         propertyReader.read(getPersistenceUnit());
+        // KunderaPropertyReader kunderaPropertyReader = new
+        // KunderaPropertyReader();
+        // kunderaPropertyReader.parseXML(getPersistenceUnit());
     }
 
     @Override

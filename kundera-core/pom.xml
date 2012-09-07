@@ -89,6 +89,13 @@
 			<version>1.0.0.B1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+			<version>1.4.3</version>
+		</dependency>
+
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.easymock</groupId>

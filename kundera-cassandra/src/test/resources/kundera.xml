@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kunderaClientProperties>
+	<datastores>
+		<dataStore>
+			<name>mongo</name>
+			<connection>
+				<properties>
+					<property name="readPreference" value="primary"></property>
+					<property name="connectionTimeOut" value="100000"></property>
+				</properties>
+				<servers>
+					<server>
+						<host>192.168.145.168</host>
+						<port>27017</port>
+					</server>
+					<server>
+						<host>192.168.145.167</host>
+						<port>27018</port>
+					</server>
+				</servers>
+			</connection>
+		</dataStore>
+		<dataStore>
+			<name>cassandra</name>
+			<schemas>
+				<schema>
+					<name>KunderaExamples</name>
+					<properties>
+						<property name="strategyClass" value="SimpleStrategy"></property>
+						<property name="replcation_factor" value="1" />
+						<property name="comparator" value="UTF8Type"></property>
+					</properties>
+					<dataCenters>
+						<dataCenter>
+							<name>DC1</name>
+							<value>3</value>
+						</dataCenter>
+						<dataCenter>
+							<name>DC2</name>
+							<value>2</value>
+						</dataCenter>
+					</dataCenters>
+					<tables>
+						<table>
+							<name>counters</name>
+							<properties>
+								<property name="inverted_indexing_enabled" value="true"></property>
+								<property name="default_validation_class" value="CounterColumnType"></property>
+								<property name="key_validation_class" value="LongType"></property>
+							</properties>
+						</table>
+					</tables>
+				</schema>
+			</schemas>
+		</dataStore>
+		<dataStore>
+			<name>hbase</name>
+			<connection>
+				<properties>
+					<property name="hbase.zookeeper.quorum" value="localhost"></property>
+					<property name="hbase.zookeeper.property.clientPort"
+						value="2181"></property>
+				</properties>
+			</connection>
+			<schemas>
+				<schema>
+					<name>USERXYZ</name>
+					<tables>
+						<table>
+							<name>age</name>
+							<properties>
+								<property name="TTL" value="12345678" />
+								<property name="VERSIONS" value="6" />
+								<property name="MIN_VERSIONS" value="3" />
+								<property name="COMPRESSION" value="GZ" />
+								<property name="COMPRESSION_COMPACT" value="GZ" />
+							</properties>
+						</table>
+						<table>
+							<name>address</name>
+							<properties>
+								<property name="TTL" value="1234567" />
+								<property name="VERSIONS" value="5" />
+								<property name="MIN_VERSIONS" value="2" />
+								<property name="COMPRESSION" value="GZ" />
+								<property name="COMPRESSION_COMPACT" value="GZ" />
+							</properties>
+						</table>
+					</tables>
+				</schema>
+			</schemas>
+		</dataStore>
+	</datastores>
+</kunderaClientProperties>

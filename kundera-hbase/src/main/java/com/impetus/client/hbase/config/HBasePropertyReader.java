@@ -26,11 +26,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.io.hfile.Compression;
 
+import com.impetus.client.hbase.HBaseConstants;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.configure.KunderaClientProperties;
 import com.impetus.kundera.configure.PropertyReader;
+import com.impetus.kundera.configure.KunderaClientProperties.DataStore;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
@@ -68,7 +72,8 @@ public class HBasePropertyReader implements PropertyReader
         String propertyName = puMetadata != null ? puMetadata
                 .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
 
-        InputStream inStream = propertyName != null ? Thread.currentThread().getContextClassLoader().getResourceAsStream(propertyName) : null;
+        InputStream inStream = propertyName != null ? Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(propertyName) : null;
         if (inStream != null)
         {
             try
@@ -95,10 +100,10 @@ public class HBasePropertyReader implements PropertyReader
      */
     private void readProperties(Properties properties)
     {
-        hsmd.setZookeeperPort(properties.getProperty(Constants.ZOOKEEPER_PORT));
-        hsmd.setZookeeperHost(properties.getProperty(Constants.ZOOKEEPER_HOST));
+        hsmd.setZookeeperPort(properties.getProperty(HBaseConstants.ZOOKEEPER_PORT));
+        hsmd.setZookeeperHost(properties.getProperty(HBaseConstants.ZOOKEEPER_HOST));
 
-        hsmd.addColumnFamilyProperty(properties.getProperty(Constants.CF_DEFS));
+        hsmd.addColumnFamilyProperty(properties.getProperty(HBaseConstants.CF_DEFS));
     }
 
     public class HBaseSchemaMetadata
@@ -219,5 +224,6 @@ public class HBasePropertyReader implements PropertyReader
                 getColumnFamilyProperties().put(tokens.get(tokenNames[0]), familyProperties);
             }
         }
+
     }
 }

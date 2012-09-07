@@ -16,14 +16,25 @@
 package com.impetus.client.cassandra.common;
 
 /**
- * Holds constants for kundera-cassandra module 
+ * Holds constants for kundera-cassandra module
+ * 
  * @author amresh.singh
  */
 public interface CassandraConstants
 {
     public static final String CQL_VERSION_2_0 = "2.0.0";
+
     public static final String CQL_VERSION_3_0 = "3.0.0";
-    
-    
+
+    // properties to set during creation of keyspace.
+    public final static String PLACEMENT_STRATEGY = "placement_strategy";
+
+    public final static String REPLICATION_FACTOR = "replication_factor";
+
+    public final static String CF_DEFS = "cf_defs";
+
+    public final static String DATA_CENTERS = "datacenters";
+
+    public final static String INVERTED_INDEXING_ENABLED = "inverted.indexing.enabled";
 
 }
