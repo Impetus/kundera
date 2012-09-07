@@ -129,7 +129,12 @@ public final class HBaseUtils
      */
     public static byte[] getBytes(Object o)
     {
-        return getBytes(o, o.getClass());
+        if(o != null)
+        {
+            return getBytes(o, o.getClass());
+        }
+        
+        return null;
     }
 
     public static Object fromBytes(EntityMetadata m, byte[] b)

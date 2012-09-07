@@ -572,7 +572,7 @@ public final class MetaModelBuilder<X, T>
             return getTypedClass(upperBound);
         }
 
-        throw new IllegalAddException("Error while finding generic class for :" + type);
+        throw new IllegalArgumentException("Error while finding generic class for :" + type);
     }
 
     /**

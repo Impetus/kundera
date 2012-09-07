@@ -78,5 +78,25 @@
 	</persistence-unit>
 
 
+	<persistence-unit name="MongoBatchTest">
+		<provider>com.impetus.kundera.KunderaPersistence</provider>
+		<properties>
+ 			<property name="kundera.nodes" value="192.168.145.168" />
+<!--  			<property name="kundera.nodes" value="localhost" /> -->
+			<property name="kundera.port" value="27017" />
+			<property name="kundera.keyspace" value="KunderaMongoDataType" />
+			<property name="kundera.dialect" value="mongodb" />
+			<!-- <property name="kundera.ddl.auto.prepare" value="create-drop"/> -->
+			<property name="kundera.client.lookup.class"
+				value="com.impetus.client.mongodb.MongoDBClientFactory" />
+			<property name="kundera.cache.provider.class"
+				value="com.impetus.kundera.cache.ehcache.EhCacheProvider" />
+			<property name="kundera.cache.config.resource" value="/ehcache-test.xml" />
+			<property name="kundera.batch.size" value="5" /> 
+			
+		</properties>
+	</persistence-unit>
+
+
 </persistence>
 
