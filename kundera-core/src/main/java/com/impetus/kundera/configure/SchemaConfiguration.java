@@ -16,6 +16,7 @@
 package com.impetus.kundera.configure;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.annotations.Index;
 import com.impetus.kundera.client.ClientResolver;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
@@ -254,6 +256,7 @@ public class SchemaConfiguration implements Configuration
         // Add columns to table info.
         Metamodel metaModel = KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(entityMetadata.getPersistenceUnit());
         EntityType entityType = metaModel.entity(entityMetadata.getEntityClazz());
+        List<String> columns = getIndexDefs(entityMetadata);
 
         Set attributes = entityType.getAttributes();
         
@@ -274,13 +277,33 @@ public class SchemaConfiguration implements Configuration
             }
             else if(!attr.isCollection() && !((SingularAttribute)attr).isId())
             {
-                ColumnInfo columnInfo = getColumn(attr, entityMetadata.isColumnIndexable(attr.getName()));
+                ColumnInfo columnInfo = getColumn(attr, columns != null ? columns.contains(((AbstractAttribute)attr).getJPAColumnName()/*entityMetadata.isColumnIndexable(attr.getName())*/) : false);
                 if (!tableInfo.getColumnMetadatas().contains(columnInfo))
                 {
                     tableInfo.addColumnInfo(columnInfo);
                 }
             }
         }
+    }
+
+    /**
+     * Returns list of indexed columns
+     * 
+     * @param entityMetadata entity metadata
+     * @return list of indexed columns
+     */
+    private List<String> getIndexDefs(EntityMetadata entityMetadata)
+    {
+        List<String> columns = null;
+        if(entityMetadata.getEntityClazz().isAnnotationPresent(Index.class))
+        {
+            Index indexes = entityMetadata.getEntityClazz().getAnnotation(Index.class);
+            if(indexes.index())
+            {
+                columns = Arrays.asList(indexes.columns());
+            }
+        }
+        return columns;
     }
 
     /**
