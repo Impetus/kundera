@@ -17,6 +17,7 @@ package com.impetus.client.crud;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,10 +29,14 @@ import javax.persistence.Persistence;
 import junit.framework.Assert;
 
 import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnDef;
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexType;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
+import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.TimedOutException;
@@ -42,6 +47,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.impetus.client.persistence.CassandraCli;
+import com.impetus.kundera.Constants;
+import com.impetus.kundera.client.Client;
+import com.impetus.kundera.property.PropertyAccessorFactory;
 
 /**
  * Test case to perform simple CRUD operation.(insert, delete, merge, and
@@ -58,6 +66,8 @@ import com.impetus.client.persistence.CassandraCli;
  */
 public class PersonCassandraTest extends BaseTest
 {
+    private static final String SEC_IDX_CASSANDRA_TEST = "secIdxCassandraTest";
+
     /** The emf. */
     private static EntityManagerFactory emf;
 
@@ -77,7 +87,7 @@ public class PersonCassandraTest extends BaseTest
     public void setUp() throws Exception
     {
         CassandraCli.cassandraSetUp();
-        emf = Persistence.createEntityManagerFactory("secIdxCassandraTest");
+        emf = Persistence.createEntityManagerFactory(SEC_IDX_CASSANDRA_TEST);
         em = emf.createEntityManager();
         col = new java.util.HashMap<Object, Object>();
     }
@@ -146,6 +156,68 @@ public class PersonCassandraTest extends BaseTest
         em.merge(p);
 
         assertOnMerge(em, "PersonCassandra", PersonCassandra.class, "vivek", "newvivek", "personName");
+    }
+    
+    @Test
+    public void onRefreshCassandra() throws Exception
+    {
+        // cassandraSetUp();
+        // CassandraCli.cassandraSetUp();
+        CassandraCli.createKeySpace("KunderaExamples");
+        loadData();
+
+        Object p1 = prepareData("1", 10);
+        Object p2 = prepareData("2", 20);
+        Object p3 = prepareData("3", 15);
+        em.persist(p1);
+        em.persist(p2);
+        em.persist(p3);
+        col.put("1", p1);
+        col.put("2", p2);
+        col.put("3", p3);
+
+        //Check for contains
+        Object pp1 = prepareData("1", 10);
+        Object pp2 = prepareData("2", 20);
+        Object pp3 = prepareData("3", 15);
+        Assert.assertTrue(em.contains(pp1));
+        Assert.assertTrue(em.contains(pp2));
+        Assert.assertTrue(em.contains(pp3));
+        
+        //Check for detach
+        em.detach(pp1);
+        em.detach(pp2);
+        Assert.assertFalse(em.contains(pp1));
+        Assert.assertFalse(em.contains(pp2));
+        Assert.assertTrue(em.contains(pp3));
+        
+        //Modify value in database directly, refresh and then check PC
+        em.clear();
+        em = emf.createEntityManager();
+        Object o1 = em.find(PersonCassandra.class, "1");
+        
+        // Create Insertion List
+        List<Mutation> insertionList = new ArrayList<Mutation>();
+        List<Column> columns = new ArrayList<Column>();
+        Column column = new Column();
+        column.setName(PropertyAccessorFactory.STRING.toBytes("PERSON_NAME"));
+        column.setValue(PropertyAccessorFactory.STRING.toBytes("Amry"));
+        column.setTimestamp(System.currentTimeMillis());
+        columns.add(column);
+        Mutation mut = new Mutation();
+        mut.setColumn_or_supercolumn(new ColumnOrSuperColumn().setColumn(column));
+        insertionList.add(mut);
+        // Create Mutation Map
+        Map<String, List<Mutation>> columnFamilyValues = new HashMap<String, List<Mutation>>();
+        columnFamilyValues.put("PERSON", insertionList);
+        Map<ByteBuffer, Map<String, List<Mutation>>> mulationMap = new HashMap<ByteBuffer, Map<String, List<Mutation>>>();
+        mulationMap.put(ByteBuffer.wrap("1".getBytes()), columnFamilyValues);
+        CassandraCli.client.batch_mutate(mulationMap, ConsistencyLevel.ONE);       
+        
+        em.refresh(o1);
+        Object oo1 = em.find(PersonCassandra.class, "1");
+        Assert.assertTrue(em.contains(o1));
+        Assert.assertEquals("Amry", ((PersonCassandra)oo1).getPersonName());        
     }
 
     /**
