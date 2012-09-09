@@ -23,8 +23,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.impetus.kundera.client.EnhanceEntity;
 import com.impetus.kundera.metadata.model.EntityMetadata;
-import com.impetus.kundera.proxy.EnhancedEntity;
 import com.impetus.kundera.utils.ReflectUtils;
 
 /**
@@ -206,10 +206,10 @@ public class PropertyAccessorHelper
 
         // If an Entity has been wrapped in a Proxy, we can call the Proxy
         // classes' getId() method
-        if (entity instanceof EnhancedEntity)
+        if (entity instanceof EnhanceEntity)
         {
 
-            return ((EnhancedEntity) entity).getId();
+            return ((EnhanceEntity) entity).getEntityId();
         }
 
         // Otherwise, as Kundera currently supports only field access, access

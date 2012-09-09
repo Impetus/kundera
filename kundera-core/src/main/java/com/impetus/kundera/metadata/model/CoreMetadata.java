@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.impetus.kundera.metadata.model;
 
-import com.impetus.kundera.proxy.EntityEnhancerFactory;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
 
 /**
@@ -26,32 +25,9 @@ import com.impetus.kundera.proxy.LazyInitializerFactory;
 public class CoreMetadata
 {
 
-    /** The enhanced proxy factory. */
-    private EntityEnhancerFactory enhancedProxyFactory;
-
     /** The lazy initializer factory. */
     private LazyInitializerFactory lazyInitializerFactory;
-
-    /**
-     * Gets the enhanced proxy factory.
-     * 
-     * @return the enhanced proxy factory
-     */
-    public EntityEnhancerFactory getEnhancedProxyFactory()
-    {
-        return enhancedProxyFactory;
-    }
-
-    /**
-     * Sets the enhanced proxy factory.
-     * 
-     * @param enhancedProxyFactory
-     *            the new enhanced proxy factory
-     */
-    public void setEnhancedProxyFactory(EntityEnhancerFactory enhancedProxyFactory)
-    {
-        this.enhancedProxyFactory = enhancedProxyFactory;
-    }
+   
 
     /**
      * Gets the lazy initializer factory.

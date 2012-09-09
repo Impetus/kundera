@@ -24,7 +24,6 @@ import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
-import com.impetus.kundera.proxy.EntityEnhancerFactory;
 import com.impetus.kundera.proxy.LazyInitializerFactory;
 
 /**
@@ -148,26 +147,6 @@ public class KunderaMetadataManager
                 + "persistence unit. Returning null value.");
         return null;
 
-    }
-
-    /**
-     * Gets the lazy initializer factory.
-     * 
-     * @return the lazy initializer factory
-     */
-    public static LazyInitializerFactory getLazyInitializerFactory()
-    {
-        return KunderaMetadata.INSTANCE.getCoreMetadata().getLazyInitializerFactory();
-    }
-
-    /**
-     * Gets the entity enhancer factory.
-     * 
-     * @return the entity enhancer factory
-     */
-    public static EntityEnhancerFactory getEntityEnhancerFactory()
-    {
-        return KunderaMetadata.INSTANCE.getCoreMetadata().getEnhancedProxyFactory();
     }
 
 }

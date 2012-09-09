@@ -79,8 +79,8 @@ public abstract class AbstractFieldInterceptor implements FieldInterceptor, Seri
             initializing = true;
             try
             {
-                /*result = ((LazyPropertyInitializer) session.getFactory().getEntityPersister(entityName))
-                        .initializeLazyProperty(fieldName, target, session);*/
+               /* result = ((LazyPropertyInitializer) session.getFactory().getEntityPersister(entityName))
+                        .initializeLazyProperty(fieldName, target);*/
                 result = null;
             }
             finally

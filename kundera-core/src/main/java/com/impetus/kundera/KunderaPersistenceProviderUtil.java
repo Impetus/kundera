@@ -41,8 +41,7 @@ public class KunderaPersistenceProviderUtil implements ProviderUtil
      * If a provider cannot determine the load state, this method returns
      * LoadState.UNKNOWN. The provider's implementation of this method must not
      * obtain a reference to an attribute value, as this could trigger the
-     * loading of entity state if the entity has been provided by a different
-     * provider. 
+     * loading of entity state if the entity has been provided by a different provider. 
      * @param entity
      * @param attributeName
      *            name of attribute whose load status is to be determined
