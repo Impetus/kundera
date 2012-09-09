@@ -163,7 +163,7 @@ public class CglibFieldInterceptorImpl extends AbstractFieldInterceptor implemen
     }
 
     public String toString() {
-        return "FieldInterceptorImpl(" +
+        return "CglibFieldInterceptorImpl(" +
             "entityName=" + getEntityName() +
             ",dirty=" + isDirty() +
             ",uninitializedFields=" + getUninitializedFields() +

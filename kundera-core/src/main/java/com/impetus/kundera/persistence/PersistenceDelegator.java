@@ -591,6 +591,11 @@ public class PersistenceDelegator
         }
         EntityMetadata metadata = getMetadata(entity.getClass());
         Object primaryKey = getId(entity, metadata);
+        
+        if(primaryKey == null)
+        {
+            throw new IllegalArgumentException("Primary key not set into entity");
+        }
 
         String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entity.getClass());
 
@@ -619,6 +624,12 @@ public class PersistenceDelegator
         }
 
         Object primaryKey = getId(entity, entityMetadata);
+        
+        if(primaryKey == null)
+        {
+            throw new IllegalArgumentException("Primary key not set into entity");
+        }
+        
         String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entity.getClass());
 
         MainCache mainCache = (MainCache) getPersistenceCache().getMainCache();
@@ -811,6 +822,8 @@ public class PersistenceDelegator
                                        
                 }
             }            
+        } else {
+            log.debug("Can't set Client properties as None/ Null was supplied");
         }
     }   
 

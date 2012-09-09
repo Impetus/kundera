@@ -224,10 +224,6 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
     }
 
     /*
-     * @see net.sf.cglib.proxy.InvocationHandler#invoke(java.lang.Object,
-     * java.lang.reflect.Method, java.lang.Object[])
-     */
-    /*
      * (non-Javadoc)
      * 
      * @see net.sf.cglib.proxy.InvocationHandler#invoke(java.lang.Object,
@@ -243,8 +239,7 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
             int params = args.length;
 
             if (params == 0)
-            {
-
+            {               
                 if (isUninitialized() && method.equals(getIdentifierMethod))
                 {
                     return getIdentifier();
@@ -254,7 +249,6 @@ public final class CglibLazyInitializer implements LazyInitializer, InvocationHa
                 {
                     return this;
                 }
-
             }
 
             Object target = getImplementation();
