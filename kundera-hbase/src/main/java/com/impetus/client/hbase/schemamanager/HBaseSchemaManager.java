@@ -17,6 +17,7 @@ package com.impetus.client.hbase.schemamanager;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -26,11 +27,14 @@ import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.TableNotFoundException;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.config.HBaseColumnFamilyProperties;
 import com.impetus.client.hbase.config.HBasePropertyReader;
+import com.impetus.kundera.configure.KunderaClientProperties.DataStore.Schema;
+import com.impetus.kundera.configure.KunderaClientProperties.DataStore.Schema.Table;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
@@ -56,6 +60,10 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
      * logger used for logging statement.
      */
     private static final Logger logger = LoggerFactory.getLogger(HBaseSchemaManager.class);
+
+    // private Properties schemaProperties;
+
+    private List<Table> tables;
 
     /**
      * Initialises HBase schema manager
@@ -323,6 +331,14 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
         hadoopConf.set("hbase.master", host + ":" + port);
         hadoopConf.set("hbase.zookeeper.quorum", HBasePropertyReader.hsmd.getZookeeperHost());
         hadoopConf.set("hbase.zookeeper.property.clientPort", HBasePropertyReader.hsmd.getZookeeperPort());
+
+        if (conn != null && conn.getProperties() != null)
+        {
+            String zookeeperHost = conn.getProperties().getProperty("hbase.zookeeper.quorum");
+            String zookeeperPort = conn.getProperties().getProperty("hbase.zookeeper.property.clientPort");
+            hadoopConf.set("hbase.zookeeper.quorum", zookeeperHost != null ? zookeeperHost : host);
+            hadoopConf.set("hbase.zookeeper.property.clientPort", zookeeperPort != null ? zookeeperPort : "2181");
+        }
         HBaseConfiguration conf = new HBaseConfiguration(hadoopConf);
         try
         {
@@ -351,6 +367,18 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     {
         HTableDescriptor hTableDescriptor = new HTableDescriptor(tableInfo.getTableName());
 
+        Properties tableProperties = null;
+        if (schemas != null && !schemas.isEmpty())
+        {
+            for (Schema s : schemas)
+            {
+                if (s.getName() != null && s.getName().equalsIgnoreCase(tableInfo.getTableName()))
+                {
+                    tableProperties = s.getSchemaProperties();
+                    tables = s.getTables();
+                }
+            }
+        }
         if (tableInfo.getColumnMetadatas() != null)
         {
             for (ColumnInfo columnInfo : tableInfo.getColumnMetadatas())
@@ -369,6 +397,15 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
                 hTableDescriptor.addFamily(hColumnDescriptor);
             }
         }
+
+        if (tableProperties != null)
+        {
+            for (Object o : tableProperties.keySet())
+            {
+                hTableDescriptor
+                        .setValue(Bytes.toBytes(o.toString()), Bytes.toBytes(tableProperties.get(o).toString()));
+            }
+        }
         return hTableDescriptor;
     }
 
@@ -383,6 +420,23 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             hColumnDescriptor.setMinVersions(familyProperties.getMinVersion());
             hColumnDescriptor.setCompactionCompressionType(familyProperties.getAlgorithm());
             hColumnDescriptor.setCompressionType(familyProperties.getAlgorithm());
+        }
+
+        if (tables != null && !tables.isEmpty())
+        {
+            for (Table t : tables)
+            {
+                Properties columnProperties = t.getProperties();
+                if (t.getName() != null && t.getName().equalsIgnoreCase(hColumnDescriptor.getNameAsString())
+                        && columnProperties != null)
+                {
+                    for (Object o : columnProperties.keySet())
+                    {
+                        hColumnDescriptor.setValue(Bytes.toBytes(o.toString()),
+                                Bytes.toBytes(columnProperties.get(o).toString()));
+                    }
+                }
+            }
         }
     }
 

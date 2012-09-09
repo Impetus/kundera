@@ -28,11 +28,14 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.impetus.kundera.Constants;
+import com.impetus.client.mongodb.MongoDBConstants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.configure.KunderaClientProperties;
+import com.impetus.kundera.configure.KunderaClientProperties.DataStore;
 import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 import com.mongodb.ReadPreference;
 
@@ -65,15 +68,16 @@ public class MongoDBPropertyReader implements PropertyReader
         String propertyName = puMetadata != null ? puMetadata
                 .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
 
-        InputStream inStream = propertyName != null ? Thread.currentThread().getContextClassLoader().getResourceAsStream(propertyName) : null;
+        InputStream inStream = propertyName != null ? Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(propertyName) : null;
         if (inStream != null)
         {
             try
             {
                 properties.load(inStream);
-                msmd = new MongoDBSchemaMetadata(properties.getProperty(Constants.CONNECTIONS));
-                msmd.setSocketTimeOut(properties.getProperty(Constants.SOCKET_TIMEOUT));
-                msmd.setReadPreference(properties.getProperty(Constants.READ_PREFERENCE));
+                msmd = new MongoDBSchemaMetadata(properties.getProperty(MongoDBConstants.CONNECTIONS));
+                msmd.setSocketTimeOut(properties.getProperty(MongoDBConstants.SOCKET_TIMEOUT));
+                msmd.setReadPreference(properties.getProperty(MongoDBConstants.READ_PREFERENCE));
             }
             catch (IOException e)
             {
@@ -288,6 +292,6 @@ public class MongoDBPropertyReader implements PropertyReader
                 builder.append(port);
                 return builder.toString();
             }
-        }
+        }      
     }
 }

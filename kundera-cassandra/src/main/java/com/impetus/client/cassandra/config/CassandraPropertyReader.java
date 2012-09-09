@@ -28,12 +28,15 @@ import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.schemamanager.CassandraValidationClassMapper;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
+import com.impetus.kundera.configure.KunderaClientProperties;
+import com.impetus.kundera.configure.KunderaClientProperties.DataStore;
 import com.impetus.kundera.configure.PropertyReader;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
 
 /**
@@ -49,8 +52,6 @@ public class CassandraPropertyReader implements PropertyReader
     private Log log = LogFactory.getLog(CassandraPropertyReader.class);
 
     /** csmd instance of CassandraSchemaMetadata */
-    // private CassandraSchemaMetadata csmd =
-    // CassandraValidationClassMapper.getCSMetadata();;
 
     public static CassandraSchemaMetadata csmd;
 
@@ -71,13 +72,6 @@ public class CassandraPropertyReader implements PropertyReader
 
             InputStream inStream = propertyName != null ? Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream(propertyName) : null;
-
-            // if (inStream == null)
-            // {
-            // inStream = propertyName != null ?
-            // this.getClass().getClassLoader().getResourceAsStream(propertyName)
-            // : null;
-            // }
 
             if (inStream != null)
             {
@@ -106,7 +100,7 @@ public class CassandraPropertyReader implements PropertyReader
      */
     private void readColumnFamilySpecificProperties(Properties properties)
     {
-        String cf_defs = properties.getProperty(Constants.CF_DEFS);
+        String cf_defs = properties.getProperty(CassandraConstants.CF_DEFS);
         csmd.addCf_defs(cf_defs);
     }
 
@@ -120,21 +114,21 @@ public class CassandraPropertyReader implements PropertyReader
     private void readKeyspaceSpecificProprerties(Properties properties)
     {
 
-        String placementStrategy = properties.getProperty(Constants.PLACEMENT_STRATEGY);
+        String placementStrategy = properties.getProperty(CassandraConstants.PLACEMENT_STRATEGY);
         csmd.setPlacement_strategy(placementStrategy);
 
         if (csmd.getPlacement_strategy().equalsIgnoreCase(SimpleStrategy.class.getName()))
         {
-            String replicationFactor = properties.getProperty(Constants.REPLICATION_FACTOR);
+            String replicationFactor = properties.getProperty(CassandraConstants.REPLICATION_FACTOR);
             csmd.setReplication_factor(replicationFactor);
         }
         else
         {
-            String dataCenters = properties.getProperty(Constants.DATA_CENTERS);
+            String dataCenters = properties.getProperty(CassandraConstants.DATA_CENTERS);
             csmd.addDataCenter(dataCenters);
         }
 
-        String invertedIndexingEnabled = properties.getProperty(Constants.INVERTED_INDEXING_ENABLED);
+        String invertedIndexingEnabled = properties.getProperty(CassandraConstants.INVERTED_INDEXING_ENABLED);
         if (invertedIndexingEnabled != null)
         {
             if ("true".equalsIgnoreCase(invertedIndexingEnabled))

@@ -34,6 +34,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.pelops.PelopsClientFactory;
 import com.impetus.client.persistence.CassandraCli;
@@ -119,8 +120,8 @@ public class CassandraPropertiesTest
             InputStream inStream = puMetadata != null ? ClassLoader.getSystemResourceAsStream(puMetadata
                     .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY)) : null;
             properties.load(inStream);
-            String expected_replication = properties.getProperty(Constants.REPLICATION_FACTOR);
-            String expected_strategyClass = properties.getProperty(Constants.PLACEMENT_STRATEGY);
+            String expected_replication = properties.getProperty(CassandraConstants.REPLICATION_FACTOR);
+            String expected_strategyClass = properties.getProperty(CassandraConstants.PLACEMENT_STRATEGY);
 
             KsDef ksDef = client.describe_keyspace(keyspace);
             Assert.assertEquals(expected_replication, ksDef.strategy_options.get("replication_factor"));

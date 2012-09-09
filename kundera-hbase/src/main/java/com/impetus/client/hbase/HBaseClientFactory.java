@@ -24,6 +24,7 @@ import com.impetus.client.hbase.config.HBasePropertyReader;
 import com.impetus.client.hbase.schemamanager.HBaseSchemaManager;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.configure.KunderaPropertyReader;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.GenericClientFactory;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
@@ -33,20 +34,20 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  * HBaseClientFactory, instantiates client for HBase
  */
 public class HBaseClientFactory extends GenericClientFactory
-{    
+{
 
     /** The conf. */
     private HBaseConfiguration conf;
 
     /** The h table pool. */
-    private HTablePool hTablePool;   
+    private HTablePool hTablePool;
 
     /** The Constant DEFAULT_POOL_SIZE. */
     private static final int DEFAULT_POOL_SIZE = 100;
 
     /** The pool size. */
     private int poolSize;
-    
+
     @Override
     public void initialize()
     {
@@ -69,6 +70,9 @@ public class HBaseClientFactory extends GenericClientFactory
         propertyReader = new HBasePropertyReader();
         propertyReader.read(getPersistenceUnit());
 
+//        KunderaPropertyReader kunderaPropertyReader = new KunderaPropertyReader();
+//        kunderaPropertyReader.parseXML(getPersistenceUnit());
+
         Configuration hadoopConf = new Configuration();
         hadoopConf.set("hbase.master", node + ":" + port);
         hadoopConf.set("hbase.zookeeper.quorum", HBasePropertyReader.hsmd.getZookeeperHost());
@@ -81,14 +85,12 @@ public class HBaseClientFactory extends GenericClientFactory
         // schemaManager.exportSchema();
     }
 
-
     @Override
     protected Object createPoolOrConnection()
     {
         hTablePool = new HTablePool(conf, poolSize);
         return hTablePool;
     }
-
 
     @Override
     protected Client instantiateClient(String persistenceUnit)

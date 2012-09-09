@@ -33,8 +33,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.config.CassandraPropertyReader.CassandraSchemaMetadata;
-import com.impetus.kundera.Constants;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -99,9 +99,9 @@ public class CassandraPropertyReaderTest
         if (inStream != null)
         {
             properties.load(inStream);
-            replication = properties.getProperty(Constants.REPLICATION_FACTOR);
-            strategy = properties.getProperty(Constants.PLACEMENT_STRATEGY);
-            String dataCenters = properties.getProperty(Constants.DATA_CENTERS);
+            replication = properties.getProperty(CassandraConstants.REPLICATION_FACTOR);
+            strategy = properties.getProperty(CassandraConstants.PLACEMENT_STRATEGY);
+            String dataCenters = properties.getProperty(CassandraConstants.DATA_CENTERS);
             if (dataCenters != null)
             {
                 StringTokenizer stk = new StringTokenizer(dataCenters, ",");
@@ -115,7 +115,7 @@ public class CassandraPropertyReaderTest
                 }
             }
 
-            String cf_defs = properties.getProperty(Constants.CF_DEFS);
+            String cf_defs = properties.getProperty(CassandraConstants.CF_DEFS);
             if (cf_defs != null)
             {
                 StringTokenizer stk = new StringTokenizer(cf_defs, ",");

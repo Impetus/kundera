@@ -28,8 +28,11 @@ import com.impetus.client.mongodb.config.MongoDBPropertyReader;
 import com.impetus.client.mongodb.config.MongoDBPropertyReader.MongoDBSchemaMetadata;
 import com.impetus.client.mongodb.config.MongoDBPropertyReader.MongoDBSchemaMetadata.MongoDBConnection;
 import com.impetus.client.mongodb.schemamanager.MongoDBSchemaManager;
+import com.impetus.client.mongodb.utils.MongoDBUtils;
 import com.impetus.kundera.PersistenceProperties;
 import com.impetus.kundera.client.Client;
+import com.impetus.kundera.configure.KunderaClientProperties.DataStore;
+import com.impetus.kundera.configure.KunderaClientProperties.DataStore.Connection.Server;
 import com.impetus.kundera.configure.schema.api.SchemaManager;
 import com.impetus.kundera.loader.ClientLoaderException;
 import com.impetus.kundera.loader.GenericClientFactory;
@@ -48,16 +51,15 @@ import com.mongodb.ServerAddress;
 public class MongoDBClientFactory extends GenericClientFactory
 {
     /** The logger. */
-    private static Logger logger = LoggerFactory.getLogger(MongoDBClientFactory.class);    
+    private static Logger logger = LoggerFactory.getLogger(MongoDBClientFactory.class);
 
     /** The mongo db. */
-    private DB mongoDB;    
-    
+    private DB mongoDB;
 
     @Override
     public void initialize()
-    {      
-        reader = new MongoEntityReader();        
+    {
+        reader = new MongoEntityReader();
         propertyReader = new MongoDBPropertyReader();
         propertyReader.read(getPersistenceUnit());
     }
@@ -68,7 +70,6 @@ public class MongoDBClientFactory extends GenericClientFactory
         mongoDB = getConnection();
         return mongoDB;
     }
-
 
     @Override
     protected Client instantiateClient(String persistenceUnit)
@@ -84,10 +85,10 @@ public class MongoDBClientFactory extends GenericClientFactory
     private DB getConnection()
     {
 
-        PersistenceUnitMetadata persistenceUnitMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
+        PersistenceUnitMetadata puMetadata = KunderaMetadata.INSTANCE.getApplicationMetadata()
                 .getPersistenceUnitMetadata(getPersistenceUnit());
 
-        Properties props = persistenceUnitMetadata.getProperties();
+        Properties props = puMetadata.getProperties();
         String contactNode = (String) props.get(PersistenceProperties.KUNDERA_NODES);
         String defaultPort = (String) props.get(PersistenceProperties.KUNDERA_PORT);
         String keyspace = (String) props.get(PersistenceProperties.KUNDERA_KEYSPACE);
@@ -118,6 +119,23 @@ public class MongoDBClientFactory extends GenericClientFactory
                 mongo = new Mongo(contactNode, Integer.parseInt(defaultPort));
                 mo = mongo.getMongoOptions();
             }
+
+            // setting server property.
+
+            DataStore dataStore = MongoDBUtils.getDataStoreInfo(getPersistenceUnit());
+            List<Server> servers = dataStore != null && dataStore.getConnection() != null ? dataStore.getConnection()
+                    .getServers() : null;
+            if (servers != null && !servers.isEmpty())
+            {
+                for (Server server : servers)
+                {
+                    addrs.add(new ServerAddress(server.getHost(), Integer.parseInt(server.getPort())));
+                }
+            }
+            Properties p = dataStore != null && dataStore.getConnection() != null ? dataStore.getConnection()
+                    .getProperties() : null;
+
+            MongoDBUtils.populateMongoOptions(mo, p);
 
             if (!StringUtils.isEmpty(poolSize))
             {
@@ -213,7 +231,6 @@ public class MongoDBClientFactory extends GenericClientFactory
 
         if (!authenticate)
         {
-
             errMsg = "Authentication failed, invalid 'kundera.username' :" + userName + "and 'kundera.password' :"
                     + password + " provided";
             throw new KunderaAuthenticationException(errMsg);
