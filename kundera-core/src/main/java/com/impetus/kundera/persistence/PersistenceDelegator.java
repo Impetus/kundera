@@ -55,6 +55,7 @@ import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.EntityMetadata;
 import com.impetus.kundera.persistence.api.Batcher;
 import com.impetus.kundera.persistence.context.EventLog.EventType;
+import com.impetus.kundera.persistence.context.CacheBase;
 import com.impetus.kundera.persistence.context.FlushManager;
 import com.impetus.kundera.persistence.context.FlushStack;
 import com.impetus.kundera.persistence.context.MainCache;
@@ -65,6 +66,7 @@ import com.impetus.kundera.persistence.event.EntityEventDispatcher;
 import com.impetus.kundera.property.PropertyAccessException;
 import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.query.QueryResolver;
+import com.impetus.kundera.utils.ObjectUtils;
 
 /**
  * The Class PersistenceDelegator.
@@ -176,6 +178,27 @@ public class PersistenceDelegator
         getEventDispatcher().fireEventListeners(metadata, e, PostPersist.class);
         log.debug("Data persisted successfully for entity : " + e.getClass());
     }
+    
+    public <E> E findById(Class<E> entityClass, Object primaryKey)
+    {
+        E e = find(entityClass, primaryKey);
+
+        if (e == null)
+            return null;
+
+        // Set this returned entity as head node if applicable
+        String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entityClass);
+        CacheBase mainCache = getPersistenceCache().getMainCache();
+        Node node = mainCache.getNodeFromCache(nodeId);
+        if (node != null && node.getParents() == null && !mainCache.getHeadNodes().contains(node))
+        {
+            mainCache.addHeadNode(node);
+        }
+
+        // Return a deep copy of this entity
+        return (E) ObjectUtils.deepCopy((Object) e);
+    }
+    
 
     /**
      * Finds an entity from persistence cache, if not there, fetches from

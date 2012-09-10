@@ -45,6 +45,7 @@ import com.impetus.kundera.metadata.model.MetamodelImpl;
 import com.impetus.kundera.metadata.model.Relation;
 import com.impetus.kundera.metadata.model.attributes.AbstractAttribute;
 import com.impetus.kundera.property.PropertyAccessorHelper;
+import com.impetus.kundera.proxy.KunderaProxy;
 
 /**
  * Provides utility methods for operation on objects
@@ -279,6 +280,12 @@ public class ObjectUtils
 
                 if (sourceRelationObject != null && !(sourceRelationObject instanceof AbstractPersistentCollection))
                 {
+                    if(sourceRelationObject instanceof KunderaProxy)
+                    {
+                        PropertyAccessorHelper.set(target, relationField, sourceRelationObject);
+                        continue;
+                    }
+                    
                     Object targetRelationObject = null;
 
                     Class<?> relationObjectClass = relation.getProperty().getType();

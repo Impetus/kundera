@@ -114,7 +114,7 @@ public class PersistenceUtilHelper
     {
         // for sure we don't instrument and for sure it's not a lazy proxy
         Object object = get(proxy, property, cache);
-        return isLoaded(object);
+        return isLoaded(proxy);
     }
 
     private static Object get(Object proxy, String property, MetadataCache cache)

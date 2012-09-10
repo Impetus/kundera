@@ -301,22 +301,7 @@ public class EntityManagerImpl implements EntityManager, EntityTransaction, Reso
              throw new IllegalArgumentException("PrimaryKey value must not be null for object you want to find.");
          }
 
-         E e = getPersistenceDelegator().find(entityClass, primaryKey);
-
-         if (e == null)
-             return null;
-
-         // Set this returned entity as head node if applicable
-         String nodeId = ObjectGraphUtils.getNodeId(primaryKey, entityClass);
-         CacheBase mainCache = getPersistenceDelegator().getPersistenceCache().getMainCache();
-         Node node = mainCache.getNodeFromCache(nodeId);
-         if (node != null && node.getParents() == null && !mainCache.getHeadNodes().contains(node))
-         {
-             mainCache.addHeadNode(node);
-         }
-
-         // Return a deep copy of this entity
-         return (E) ObjectUtils.deepCopy((Object) e);
+         return getPersistenceDelegator().findById(entityClass, primaryKey);
      }
      
      /**

@@ -53,12 +53,11 @@ public class CglibLazyInitializerFactory implements LazyInitializerFactory
      */
     @Override
     public KunderaProxy getProxy(String entityName, Class<?> persistentClass, Method getIdentifierMethod,
-            Method setIdentifierMethod, String id, PersistenceDelegator persistenceDelegator)
+            Method setIdentifierMethod, Object id, PersistenceDelegator pd)
     {
 
         return (KunderaProxy) CglibLazyInitializer.getProxy(entityName, persistentClass,
-                new Class[] { KunderaProxy.class }, getIdentifierMethod, setIdentifierMethod, id, persistenceDelegator);
-
+                new Class[] { KunderaProxy.class }, getIdentifierMethod, setIdentifierMethod, id, pd);
     }
 
 }

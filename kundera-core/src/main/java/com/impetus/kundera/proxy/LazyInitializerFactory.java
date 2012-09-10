@@ -17,6 +17,7 @@ package com.impetus.kundera.proxy;
 
 import java.lang.reflect.Method;
 
+import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
 import com.impetus.kundera.persistence.PersistenceDelegator;
@@ -51,6 +52,6 @@ public interface LazyInitializerFactory
      *             the persistence exception
      */
     KunderaProxy getProxy(final String entityName, final Class<?> persistentClass, final Method getIdentifierMethod,
-            final Method setIdentifierMethod, final String id, final PersistenceDelegator persistenceDelegator);
+            final Method setIdentifierMethod, final Object id, final PersistenceDelegator pd);
 
 }

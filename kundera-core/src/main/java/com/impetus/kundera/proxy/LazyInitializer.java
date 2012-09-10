@@ -40,7 +40,7 @@ public interface LazyInitializer
      * 
      * @return The identifier value.
      */
-    public String getIdentifier();
+    public Object getIdentifier();
 
     /**
      * Set the identifier value for the enity our owning proxy represents.
@@ -48,7 +48,7 @@ public interface LazyInitializer
      * @param id
      *            The identifier value.
      */
-    public void setIdentifier(String id);
+    public void setIdentifier(Object id);
 
     /**
      * The entity-name of the entity our owning proxy represents.
