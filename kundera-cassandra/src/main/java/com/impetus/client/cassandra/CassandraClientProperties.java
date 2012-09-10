@@ -21,7 +21,6 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientPropertiesSetter;
 
@@ -29,7 +28,7 @@ import com.impetus.kundera.client.ClientPropertiesSetter;
  * Cassandra implementation of {@link ClientPropertiesSetter} 
  * @author amresh.singh
  */
-public class CassandraClientProperties
+class CassandraClientProperties
 {
     /** log for this class. */
     private static Log log = LogFactory.getLog(CassandraClientProperties.class);
@@ -58,12 +57,7 @@ public class CassandraClientProperties
 
                 // Add more properties as needed
 
-                else
-                {
-                    log.warn("Can't set property/ hint named "
-                            + key
-                            + " for Cassandra. Reason: Invalid property name or value. This would be ignored by Kundera.");
-                }
+                
             }
         }
         

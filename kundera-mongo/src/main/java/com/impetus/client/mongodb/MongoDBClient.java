@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import com.impetus.client.mongodb.query.MongoDBQuery;
 import com.impetus.kundera.client.Client;
 import com.impetus.kundera.client.ClientBase;
-import com.impetus.kundera.client.ClientPropertiesSetter;
 import com.impetus.kundera.db.RelationHolder;
 import com.impetus.kundera.graph.Node;
 import com.impetus.kundera.index.IndexManager;
@@ -53,7 +52,7 @@ import com.mongodb.DBObject;
  * 
  * @author impetusopensource
  */
-public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher, ClientPropertiesSetter
+public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, Batcher
 {
 
     /** The is connected. */
@@ -624,12 +623,4 @@ public class MongoDBClient extends ClientBase implements Client<MongoDBQuery>, B
             nodes.clear();
         }
     }
-
-    @Override
-    public void populateClientProperties(Client client, Map<String, Object> properties)
-    {
-        new MongoClientProperties().populateClientProperties(client, properties);
-    }  
-
-
 }

@@ -28,7 +28,7 @@ import com.impetus.kundera.client.ClientPropertiesSetter;
  * HBase implementation of {@link ClientPropertiesSetter}  
  * @author amresh.singh
  */
-public class HBaseClientProperties
+class HBaseClientProperties
 {
     /** log for this class. */
     private static Log log = LogFactory.getLog(HBaseClientProperties.class);
@@ -50,13 +50,7 @@ public class HBaseClientProperties
                 }
 
                 // Add more
-
-                else
-                {
-                    log.warn("Can't set property/ hint named "
-                            + key
-                            + " for Cassandra. Reason: Invalid property name or value. This would be ignored by Kundera.");
-                }
+               
             }
         }
         
