@@ -39,8 +39,6 @@ public final class Configurator
      */
     private List<Configuration> configurer = new ArrayList<Configuration>(2);
 
-    private String[] pus;
-
     /**
      * Constructor using fields.
      * 
@@ -48,7 +46,6 @@ public final class Configurator
      */
     public Configurator(String... persistenceUnits)
     {
-        this.pus = persistenceUnits;
         configurer.add(new PersistenceUnitConfiguration(persistenceUnits));
         configurer.add(new ClientFactoryConfiguraton(persistenceUnits));
         configurer.add(new MetamodelConfiguration(persistenceUnits));

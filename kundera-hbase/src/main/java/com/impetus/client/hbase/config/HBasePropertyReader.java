@@ -30,9 +30,11 @@ import com.impetus.client.hbase.HBaseConstants;
 import com.impetus.kundera.Constants;
 import com.impetus.kundera.KunderaException;
 import com.impetus.kundera.PersistenceProperties;
-import com.impetus.kundera.configure.KunderaClientProperties;
+import com.impetus.kundera.configure.ClientProperties;
+import com.impetus.kundera.configure.AbstractPropertyReader;
 import com.impetus.kundera.configure.PropertyReader;
-import com.impetus.kundera.configure.KunderaClientProperties.DataStore;
+import com.impetus.kundera.configure.ClientProperties.DataStore;
+import com.impetus.kundera.configure.AbstractPropertyReader.PropertyType;
 import com.impetus.kundera.metadata.KunderaMetadataManager;
 import com.impetus.kundera.metadata.model.KunderaMetadata;
 import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
@@ -44,7 +46,7 @@ import com.impetus.kundera.metadata.model.PersistenceUnitMetadata;
  * @author kuldeep.mishra
  * 
  */
-public class HBasePropertyReader implements PropertyReader
+public class HBasePropertyReader extends AbstractPropertyReader implements PropertyReader
 {
 
     private static Log log = LogFactory.getLog(HBasePropertyReader.class);
@@ -71,26 +73,33 @@ public class HBasePropertyReader implements PropertyReader
         hsmd.onInitialize();
         String propertyName = puMetadata != null ? puMetadata
                 .getProperty(PersistenceProperties.KUNDERA_CLIENT_PROPERTY) : null;
-
-        InputStream inStream = propertyName != null ? Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream(propertyName) : null;
-        if (inStream != null)
+        if (propertyName != null && PropertyType.isXml(propertyName))
         {
-            try
+            hsmd.setClientProperties(parseXML(propertyName));
+        }
+        else if (propertyName != null && PropertyType.isProperties(propertyName))
+        {
+            InputStream inStream = propertyName != null ? Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream(propertyName) : null;
+            if (inStream != null)
             {
-                properties.load(inStream);
-                readProperties(properties);
-            }
-            catch (IOException e)
-            {
-                log.warn("error in loading properties , caused by :" + e.getMessage());
-                throw new KunderaException(e);
+                try
+                {
+                    properties.load(inStream);
+                    readProperties(properties);
+                }
+                catch (IOException e)
+                {
+                    log.warn("error in loading properties , caused by :" + e.getMessage());
+                    throw new KunderaException(e);
+                }
             }
         }
         else
         {
             log.warn("No property file found in class path, kundera will use default property");
         }
+
     }
 
     /**
@@ -118,6 +127,8 @@ public class HBasePropertyReader implements PropertyReader
          */
         private String zookeeperHost;
 
+        private ClientProperties clientProperties;
+
         /**
          * 
          */
@@ -133,6 +144,23 @@ public class HBasePropertyReader implements PropertyReader
          * It holds all property related to columnFamily.
          */
         private Map<String, HBaseColumnFamilyProperties> columnFamilyProperties;
+
+        /**
+         * @return the clientProperties
+         */
+        public ClientProperties getClientProperties()
+        {
+            return clientProperties;
+        }
+
+        /**
+         * @param clientProperties
+         *            the clientProperties to set
+         */
+        private void setClientProperties(ClientProperties clientProperties)
+        {
+            this.clientProperties = clientProperties;
+        }
 
         /**
          * @return the zookeeper_port

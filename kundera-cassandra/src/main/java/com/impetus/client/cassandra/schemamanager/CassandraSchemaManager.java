@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -31,6 +32,7 @@ import javax.persistence.metamodel.EntityType;
 
 import org.apache.cassandra.db.marshal.CounterColumnType;
 import org.apache.cassandra.db.marshal.UTF8Type;
+import org.apache.cassandra.locator.NetworkTopologyStrategy;
 import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
@@ -50,9 +52,13 @@ import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.impetus.client.cassandra.common.CassandraConstants;
 import com.impetus.client.cassandra.config.CassandraPropertyReader;
 import com.impetus.client.cassandra.config.CassandraPropertyReader.CassandraSchemaMetadata;
 import com.impetus.kundera.Constants;
+import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
+import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.DataCenter;
+import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
 import com.impetus.kundera.configure.schema.TableInfo;
@@ -75,6 +81,7 @@ import com.impetus.kundera.property.PropertyAccessException;
  */
 public class CassandraSchemaManager extends AbstractSchemaManager implements SchemaManager
 {
+
     /**
      * Cassandra client variable holds the client.
      */
@@ -89,6 +96,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     // String>();
 
     private CassandraSchemaMetadata csmd = CassandraPropertyReader.csmd;
+
+    private List<Table> tables;
 
     /**
      * Instantiates a new cassandra schema manager.
@@ -111,6 +120,88 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     public void exportSchema()
     {
         super.exportSchema();
+    }
+
+    /**
+     * drop schema method drop the table from keyspace.
+     * 
+     */
+    public void dropSchema()
+    {
+        if (operation != null && operation.equalsIgnoreCase("create-drop"))
+        {
+            try
+            {
+                cassandra_client.set_keyspace(databaseName);
+                for (TableInfo tableInfo : tableInfos)
+                {
+                    cassandra_client.system_drop_column_family(tableInfo.getTableName());
+                }
+            }
+            catch (InvalidRequestException e)
+            {
+                log.error("Error during dropping schema in cassandra, Caused by:" + e.getMessage());
+                throw new SchemaGenerationException(e, "Cassandra");
+            }
+            catch (TException e)
+            {
+                log.error("Error during dropping schema in cassandra, Caused by:" + e.getMessage());
+                throw new SchemaGenerationException(e, "Cassandra");
+            }
+            catch (SchemaDisagreementException e)
+            {
+                log.error("Error during dropping schema in cassandra, Caused by:" + e.getMessage());
+                throw new SchemaGenerationException(e, "Cassandra");
+            }
+        }
+        cassandra_client = null;
+    }
+
+    /**
+     * validates entity for CounterColumnType.
+     */
+    @Override
+    public boolean validateEntity(Class clazz)
+    {
+
+        boolean isvalid = false;
+        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
+        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
+                metadata.getPersistenceUnit());
+        String tableName = metadata.getTableName();
+        if (csmd.isCounterColumn(tableName))
+        {
+            metadata.setCounterColumnType(true);
+            // List<EmbeddedColumn> embeddedColumns =
+            // metadata.getEmbeddedColumnsAsList();
+            Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(clazz);
+            if (!embeddables.isEmpty())
+            {
+                isvalid = validateEmbeddedColumns(embeddables.values()) ? true : false;
+            }
+            else
+            {
+                EntityType entity = metaModel.entity(clazz);
+                isvalid = validateColumns(entity.getAttributes()) ? true : false;
+            }
+
+            // if (!embeddedColumns.isEmpty())
+            // {
+            // isvalid = validateEmbeddedColumns(embeddedColumns) ? true :
+            // false;
+            // }
+            // else
+            // {
+            // isvalid = validateColumns(metadata.getColumnsAsList()) ? true :
+            // false;
+            // }
+            isvalid = isvalid && validateRelations(metadata) ? true : false;
+        }
+        else
+        {
+            return true;
+        }
+        return isvalid;
     }
 
     /**
@@ -166,6 +257,112 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             throw new SchemaGenerationException("Error occurred while creating " + databaseName, ie, "Cassandra",
                     databaseName);
         }
+    }
+
+    /**
+     * update method update schema and table for the list of tableInfos
+     * 
+     * @param tableInfos
+     *            list of TableInfos.
+     */
+    protected void update(List<TableInfo> tableInfos)
+    {
+        try
+        {
+            KsDef ksDef = cassandra_client.describe_keyspace(databaseName);
+            updateTables(tableInfos, ksDef);
+        }
+        catch (NotFoundException e)
+        {
+            createKeyspaceAndTables(tableInfos);
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error occurred while updating " + databaseName + " Caused by :" + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while updating " + databaseName, e, "Cassandra",
+                    databaseName);
+        }
+        catch (TException e)
+        {
+            log.error("Error occurred while updating " + databaseName + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while updating " + databaseName, e, "Cassandra",
+                    databaseName);
+        }
+        catch (SchemaDisagreementException e)
+        {
+            log.error("Error occurred while updating " + databaseName + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while updating " + databaseName, e, "Cassandra",
+                    databaseName);
+        }
+    }
+
+    /**
+     * validate method validate schema and table for the list of tableInfos.
+     * 
+     * @param tableInfos
+     *            list of TableInfos.
+     */
+    protected void validate(List<TableInfo> tableInfos)
+    {
+        try
+        {
+            KsDef ksDef = cassandra_client.describe_keyspace(databaseName);
+            onValidateTables(tableInfos, ksDef);
+        }
+        catch (NotFoundException e)
+        {
+            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
+                    databaseName);
+        }
+        catch (InvalidRequestException e)
+        {
+            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
+                    databaseName);
+        }
+        catch (TException e)
+        {
+            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
+            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
+                    databaseName);
+        }
+    }
+
+    /**
+     * initiate client method initiates the client.
+     * 
+     * @return boolean value ie client started or not.
+     * 
+     */
+    protected boolean initiateClient()
+    {
+        if (cassandra_client == null)
+        {
+            TSocket socket = new TSocket(host, Integer.parseInt(port));
+            TTransport transport = new TFramedTransport(socket);
+            TProtocol protocol = new TBinaryProtocol(transport);
+            cassandra_client = new Cassandra.Client(protocol);
+            try
+            {
+                if (!socket.isOpen())
+                {
+                    socket.open();
+                }
+            }
+            catch (TTransportException e)
+            {
+                log.error("Error while opening socket , Caused by:" + e.getMessage());
+                throw new SchemaGenerationException(e, "Cassandra");
+            }
+            catch (NumberFormatException e)
+            {
+                log.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
+                throw new SchemaGenerationException(e, "Cassandra");
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -255,76 +452,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
                 e.printStackTrace();
             }
 
-        }
-    }
-
-    /**
-     * update method update schema and table for the list of tableInfos
-     * 
-     * @param tableInfos
-     *            list of TableInfos.
-     */
-    protected void update(List<TableInfo> tableInfos)
-    {
-        try
-        {
-            KsDef ksDef = cassandra_client.describe_keyspace(databaseName);
-            updateTables(tableInfos, ksDef);
-        }
-        catch (NotFoundException e)
-        {
-            createKeyspaceAndTables(tableInfos);
-        }
-        catch (InvalidRequestException e)
-        {
-            log.error("Error occurred while updating " + databaseName + " Caused by :" + e.getMessage());
-            throw new SchemaGenerationException("Error occurred while updating " + databaseName, e, "Cassandra",
-                    databaseName);
-        }
-        catch (TException e)
-        {
-            log.error("Error occurred while updating " + databaseName + e.getMessage());
-            throw new SchemaGenerationException("Error occurred while updating " + databaseName, e, "Cassandra",
-                    databaseName);
-        }
-        catch (SchemaDisagreementException e)
-        {
-            log.error("Error occurred while updating " + databaseName + e.getMessage());
-            throw new SchemaGenerationException("Error occurred while updating " + databaseName, e, "Cassandra",
-                    databaseName);
-        }
-    }
-
-    /**
-     * validate method validate schema and table for the list of tableInfos.
-     * 
-     * @param tableInfos
-     *            list of TableInfos.
-     */
-    protected void validate(List<TableInfo> tableInfos)
-    {
-        try
-        {
-            KsDef ksDef = cassandra_client.describe_keyspace(databaseName);
-            onValidateTables(tableInfos, ksDef);
-        }
-        catch (NotFoundException e)
-        {
-            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
-            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
-                    databaseName);
-        }
-        catch (InvalidRequestException e)
-        {
-            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
-            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
-                    databaseName);
-        }
-        catch (TException e)
-        {
-            log.error("Error occurred while validating " + databaseName + " Caused by:" + e.getMessage());
-            throw new SchemaGenerationException("Error occurred while validating " + databaseName, e, "Cassandra",
-                    databaseName);
         }
     }
 
@@ -440,7 +567,6 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private void updateTables(List<TableInfo> tableInfos, KsDef ksDef) throws InvalidRequestException, TException,
             SchemaDisagreementException
     {
-
         cassandra_client.set_keyspace(databaseName);
         for (TableInfo tableInfo : tableInfos)
         {
@@ -535,18 +661,8 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     {
         KsDef ksDef = new KsDef(databaseName, csmd.getPlacement_strategy(), null);
         Map<String, String> strategy_options = new HashMap<String, String>();
-        if (csmd.getPlacement_strategy().equalsIgnoreCase(SimpleStrategy.class.getName())
-                || csmd.getPlacement_strategy().equalsIgnoreCase(SimpleStrategy.class.getSimpleName()))
-        {
-            strategy_options.put("replication_factor", csmd.getReplication_factor());
-        }
-        else
-        {
-            for (String dataCenterName : csmd.getDataCenters().keySet())
-            {
-                strategy_options.put(dataCenterName, csmd.getDataCenters().get(dataCenterName));
-            }
-        }
+        setProperties(ksDef, strategy_options);
+
         ksDef.setStrategy_options(strategy_options);
         List<CfDef> cfDefs = new ArrayList<CfDef>();
         for (TableInfo tableInfo : tableInfos)
@@ -584,6 +700,87 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     }
 
     /**
+     * @param ksDef
+     * @param strategy_options
+     */
+    private void setProperties(KsDef ksDef, Map<String, String> strategy_options)
+    {
+        if (getDataStore("Cassandra", CassandraPropertyReader.csmd.getClientProperties()) != null)
+        {
+            if (schemas != null && !schemas.isEmpty())
+            {
+                for (Schema schema : schemas)
+                {
+                    if (schema.getName() != null && schema.getName().equalsIgnoreCase(databaseName))
+                    {
+                        tables = schema.getTables();
+                        setKeyspaceProperties(ksDef, schema.getSchemaProperties(), strategy_options,
+                                schema.getDataCenters());
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (csmd.getPlacement_strategy().equalsIgnoreCase(SimpleStrategy.class.getName())
+                    || csmd.getPlacement_strategy().equalsIgnoreCase(SimpleStrategy.class.getSimpleName()))
+            {
+                strategy_options.put("replication_factor", csmd.getReplication_factor());
+            }
+            else
+            {
+                for (String dataCenterName : csmd.getDataCenters().keySet())
+                {
+                    strategy_options.put(dataCenterName, csmd.getDataCenters().get(dataCenterName));
+                }
+            }
+        }
+    }
+
+    /**
+     * @param ksDef
+     * @param schemaProperties
+     * @param strategyOptions
+     */
+    private void setKeyspaceProperties(KsDef ksDef, Properties schemaProperties, Map<String, String> strategyOptions,
+            List<DataCenter> dcs)
+    {
+        if (schemaProperties != null)
+        {
+            String placementStrategy = schemaProperties.getProperty(CassandraConstants.PLACEMENT_STRATEGY);
+            if (placementStrategy != null
+                    && (placementStrategy.equalsIgnoreCase(SimpleStrategy.class.getSimpleName()) || placementStrategy
+                            .equalsIgnoreCase(SimpleStrategy.class.getName())))
+            {
+                String replicationFactor = schemaProperties.getProperty(CassandraConstants.REPLICATION_FACTOR);
+                strategyOptions.put("replication_factor", replicationFactor != null ? replicationFactor
+                        : CassandraConstants.DEFAULT_REPLICATION_FACTOR);
+            }
+            else if (placementStrategy != null
+                    && (placementStrategy.equalsIgnoreCase(NetworkTopologyStrategy.class.getSimpleName()) || placementStrategy
+                            .equalsIgnoreCase(NetworkTopologyStrategy.class.getName())))
+            {
+                if (dcs != null && !dcs.isEmpty())
+                {
+                    for (DataCenter dc : dcs)
+                    {
+                        strategyOptions.put(dc.getName(), dc.getValue());
+                    }
+                }
+            }
+            else
+            {
+                placementStrategy = SimpleStrategy.class.getName();
+                strategyOptions.put("replication_factor", CassandraConstants.DEFAULT_REPLICATION_FACTOR);
+            }
+            ksDef.setStrategy_class(placementStrategy);
+
+            ksDef.setDurable_writes(Boolean.parseBoolean(schemaProperties
+                    .getProperty(CassandraConstants.DURABLE_WRITES)));
+        }
+    }
+
+    /**
      * create keyspace method create keyspace for given ksDef.
      * 
      * @param ksDef
@@ -609,11 +806,16 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         cfDef.setName(tableInfo.getTableName());
         cfDef.setKey_validation_class(CassandraValidationClassMapper.getValidationClass(tableInfo.getTableIdType()));
 
+        Properties cFProperties = getColumnFamilyProperties(tableInfo);
+        String defaultValidationClass = null;
+
         if (tableInfo.getType() != null && tableInfo.getType().equals(Type.COLUMN_FAMILY.name()))
 
         {
+            defaultValidationClass = cFProperties != null ? cFProperties
+                    .getProperty(CassandraConstants.DEFAULT_VALIDATION_CLASS) : null;
             cfDef.setColumn_type("Standard");
-            if (csmd.isCounterColumn(tableInfo.getTableName()))
+            if (isCounterColumnType(tableInfo, defaultValidationClass))
             {
                 cfDef.setDefault_validation_class(CounterColumnType.class.getSimpleName());
             }
@@ -641,13 +843,45 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
         }
         else if (tableInfo.getType() != null)
         {
-            if (csmd.isCounterColumn(tableInfo.getTableName()))
+            if (isCounterColumnType(tableInfo, defaultValidationClass))
             {
                 cfDef.setDefault_validation_class(CounterColumnType.class.getSimpleName());
             }
             cfDef.setColumn_type("Super");
         }
+        setColumnFamilyProperties(cfDef, cFProperties);
         return cfDef;
+    }
+
+    /**
+     * @param tableInfo
+     * @param defaultValidationClass
+     * @return
+     */
+    private boolean isCounterColumnType(TableInfo tableInfo, String defaultValidationClass)
+    {
+        return (csmd != null && csmd.isCounterColumn(tableInfo.getTableName()))
+                || (defaultValidationClass != null && (defaultValidationClass.equalsIgnoreCase(CounterColumnType.class
+                        .getSimpleName()) || defaultValidationClass.equalsIgnoreCase(CounterColumnType.class.getName())));
+    }
+
+    /**
+     * @param tableInfo
+     */
+    private Properties getColumnFamilyProperties(TableInfo tableInfo)
+    {
+        if (tables != null)
+        {
+            for (Table table : tables)
+            {
+                if (table != null && table.getName() != null
+                        && table.getName().equalsIgnoreCase(tableInfo.getTableName()))
+                {
+                    return table.getProperties();
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -658,6 +892,7 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
     private enum ColumnFamilyType
     {
         Standard, Super;
+
         private static ColumnFamilyType getInstanceOf(String type)
         {
             if (type.equals(Type.COLUMN_FAMILY.name()))
@@ -666,128 +901,9 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             }
             else
             {
-
                 return ColumnFamilyType.Super;
             }
         }
-    }
-
-    /**
-     * drop schema method drop the table from keyspace.
-     * 
-     */
-    public void dropSchema()
-    {
-        if (operation != null && operation.equalsIgnoreCase("create-drop"))
-        {
-            try
-            {
-                cassandra_client.set_keyspace(databaseName);
-                for (TableInfo tableInfo : tableInfos)
-                {
-                    cassandra_client.system_drop_column_family(tableInfo.getTableName());
-                }
-            }
-            catch (InvalidRequestException e)
-            {
-                log.error("Error during dropping schema in cassandra, Caused by:" + e.getMessage());
-                throw new SchemaGenerationException(e, "Cassandra");
-            }
-            catch (TException e)
-            {
-                log.error("Error during dropping schema in cassandra, Caused by:" + e.getMessage());
-                throw new SchemaGenerationException(e, "Cassandra");
-            }
-            catch (SchemaDisagreementException e)
-            {
-                log.error("Error during dropping schema in cassandra, Caused by:" + e.getMessage());
-                throw new SchemaGenerationException(e, "Cassandra");
-            }
-        }
-        cassandra_client = null;
-    }
-
-    /**
-     * initiate client method initiates the client.
-     * 
-     * @return boolean value ie client started or not.
-     * 
-     */
-    protected boolean initiateClient()
-    {
-        if (cassandra_client == null)
-        {
-            TSocket socket = new TSocket(host, Integer.parseInt(port));
-            TTransport transport = new TFramedTransport(socket);
-            TProtocol protocol = new TBinaryProtocol(transport);
-            cassandra_client = new Cassandra.Client(protocol);
-            try
-            {
-                if (!socket.isOpen())
-                {
-                    socket.open();
-                }
-            }
-            catch (TTransportException e)
-            {
-                log.error("Error while opening socket , Caused by:" + e.getMessage());
-                throw new SchemaGenerationException(e, "Cassandra");
-            }
-            catch (NumberFormatException e)
-            {
-                log.error("Error during creating schema in cassandra, Caused by:" + e.getMessage());
-                throw new SchemaGenerationException(e, "Cassandra");
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * validates entity for CounterColumnType.
-     */
-    @Override
-    public boolean validateEntity(Class clazz)
-    {
-
-        boolean isvalid = false;
-        EntityMetadata metadata = KunderaMetadataManager.getEntityMetadata(clazz);
-        MetamodelImpl metaModel = (MetamodelImpl) KunderaMetadata.INSTANCE.getApplicationMetadata().getMetamodel(
-                metadata.getPersistenceUnit());
-        String tableName = metadata.getTableName();
-        if (csmd.isCounterColumn(tableName))
-        {
-            metadata.setCounterColumnType(true);
-            // List<EmbeddedColumn> embeddedColumns =
-            // metadata.getEmbeddedColumnsAsList();
-            Map<String, EmbeddableType> embeddables = metaModel.getEmbeddables(clazz);
-            if (!embeddables.isEmpty())
-            {
-                isvalid = validateEmbeddedColumns(embeddables.values()) ? true : false;
-            }
-            else
-            {
-                EntityType entity = metaModel.entity(clazz);
-                isvalid = validateColumns(entity.getAttributes()) ? true : false;
-            }
-
-            // if (!embeddedColumns.isEmpty())
-            // {
-            // isvalid = validateEmbeddedColumns(embeddedColumns) ? true :
-            // false;
-            // }
-            // else
-            // {
-            // isvalid = validateColumns(metadata.getColumnsAsList()) ? true :
-            // false;
-            // }
-            isvalid = isvalid && validateRelations(metadata) ? true : false;
-        }
-        else
-        {
-            return true;
-        }
-        return isvalid;
     }
 
     /**
@@ -877,5 +993,147 @@ public class CassandraSchemaManager extends AbstractSchemaManager implements Sch
             return isValid = false;
         }
         return isValid;
+    }
+
+    /**
+     * @param cfDef
+     * @param cFProperties
+     */
+    private void setColumnFamilyProperties(CfDef cfDef, Properties cFProperties)
+    {
+        if (cfDef != null && cFProperties != null)
+        {
+            String keyValidationClass = cFProperties.getProperty(CassandraConstants.KEY_VALIDATION_CLASS);
+            if (keyValidationClass != null)
+            {
+                cfDef.setKey_validation_class(keyValidationClass);
+            }
+
+            String compactionStrategy = cFProperties.getProperty(CassandraConstants.COMPACTION_STRATEGY);
+            if (compactionStrategy != null)
+            {
+                cfDef.setCompaction_strategy(compactionStrategy);
+            }
+
+            String comparatorType = cFProperties.getProperty(CassandraConstants.COMPARATOR_TYPE);
+            if (comparatorType != null)
+            {
+                cfDef.setComparator_type(comparatorType);
+            }
+
+            String subComparatorType = cFProperties.getProperty(CassandraConstants.SUB_COMPARATOR_TYPE);
+            if (subComparatorType != null && ColumnFamilyType.valueOf(cfDef.getColumn_type()) == ColumnFamilyType.Super)
+            {
+                cfDef.setSubcomparator_type(subComparatorType);
+            }
+            String replicateOnWrite = cFProperties.getProperty(CassandraConstants.REPLICATE_ON_WRITE);
+            cfDef.setReplicate_on_write(Boolean.parseBoolean(replicateOnWrite));
+            String maxCompactionThreshold = cFProperties.getProperty(CassandraConstants.MAX_COMPACTION_THRESHOLD);
+            if (maxCompactionThreshold != null)
+            {
+                try
+                {
+                    cfDef.setMax_compaction_threshold(Integer.parseInt(maxCompactionThreshold));
+                }
+                catch (NumberFormatException nfe)
+                {
+                    log.error("Max_Compaction_Threshold should be numeric type");
+                    throw new SchemaGenerationException(nfe);
+                }
+            }
+            String minCompactionThreshold = cFProperties.getProperty(CassandraConstants.MIN_COMPACTION_THRESHOLD);
+            if (minCompactionThreshold != null)
+            {
+                try
+                {
+                    cfDef.setMin_compaction_threshold(Integer.parseInt(minCompactionThreshold));
+                }
+                catch (NumberFormatException nfe)
+                {
+                    log.error("Min_Compaction_Threshold should be numeric type");
+                    throw new SchemaGenerationException(nfe);
+                }
+            }
+
+            String comment = cFProperties.getProperty(CassandraConstants.COMMENT);
+            if (comment != null)
+            {
+                cfDef.setComment(comment);
+            }
+
+            String id = cFProperties.getProperty(CassandraConstants.ID);
+            if (id != null)
+            {
+                try
+                {
+                    cfDef.setId(Integer.parseInt(id));
+                }
+                catch (NumberFormatException nfe)
+                {
+                    log.error("Id should be numeric type");
+                    throw new SchemaGenerationException(nfe);
+                }
+            }
+
+            String gcGraceSeconds = cFProperties.getProperty(CassandraConstants.GC_GRACE_SECONDS);
+            if (gcGraceSeconds != null)
+            {
+                try
+                {
+                    cfDef.setGc_grace_seconds(Integer.parseInt(gcGraceSeconds));
+                }
+                catch (NumberFormatException nfe)
+                {
+                    log.error("GC_GRACE_SECONDS should be numeric type");
+                    throw new SchemaGenerationException(nfe);
+                }
+            }
+
+            String caching = cFProperties.getProperty(CassandraConstants.CACHING);
+            if (caching != null)
+            {
+                cfDef.setCaching(caching);
+            }
+
+            String bloomFilterFpChance = cFProperties.getProperty(CassandraConstants.BLOOM_FILTER_FP_CHANCE);
+            if (bloomFilterFpChance != null)
+            {
+                try
+                {
+                    cfDef.setBloom_filter_fp_chance(Double.parseDouble(bloomFilterFpChance));
+                }
+                catch (NumberFormatException nfe)
+                {
+                    log.error("BLOOM_FILTER_FP_CHANCE should be double type");
+                    throw new SchemaGenerationException(nfe);
+                }
+            }
+            String readRepairChance = cFProperties.getProperty(CassandraConstants.READ_REPAIR_CHANCE);
+            if (readRepairChance != null)
+            {
+                try
+                {
+                    cfDef.setRead_repair_chance(Double.parseDouble(readRepairChance));
+                }
+                catch (NumberFormatException nfe)
+                {
+                    log.error("READ_REPAIR_CHANCE should be double type");
+                    throw new SchemaGenerationException(nfe);
+                }
+            }
+            String dclocalReadRepairChance = cFProperties.getProperty(CassandraConstants.DCLOCAL_READ_REPAIR_CHANCE);
+            if (dclocalReadRepairChance != null)
+            {
+                try
+                {
+                    cfDef.setDclocal_read_repair_chance(Double.parseDouble(dclocalReadRepairChance));
+                }
+                catch (NumberFormatException nfe)
+                {
+                    log.error("READ_REPAIR_CHANCE should be double type");
+                    throw new SchemaGenerationException(nfe);
+                }
+            }
+        }
     }
 }

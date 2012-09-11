@@ -1,0 +1,106 @@
+/**
+ * 
+ */
+package com.impetus.client.cassandra.config;
+
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
+import junit.framework.Assert;
+
+import org.apache.cassandra.db.marshal.BytesType;
+import org.apache.cassandra.db.marshal.UTF8Type;
+import org.apache.cassandra.locator.SimpleStrategy;
+import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.KsDef;
+import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.thrift.TException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.impetus.client.persistence.CassandraCli;
+
+/**
+ * @author Kuldeep Mishra
+ * 
+ */
+public class CassandraSchemaGenerationUsingXmlTest
+{
+    private EntityManagerFactory emf;
+
+    private String keyspaceName = "KunderaCassandraXmlTest";
+
+    /**
+     * @throws java.lang.Exception
+     */
+    @Before
+    public void setUp() throws Exception
+    {
+        CassandraCli.cassandraSetUp();
+        emf = Persistence.createEntityManagerFactory("CassandraXmlPropertyTest");
+    }
+
+    /**
+     * @throws java.lang.Exception
+     */
+    @After
+    public void tearDown() throws Exception
+    {
+        emf.close();
+        CassandraCli.dropKeySpace(keyspaceName);
+
+    }
+
+    @Test
+    public void test()
+    {
+        try
+        {
+            KsDef ksDef = CassandraCli.client.describe_keyspace(keyspaceName);
+
+            Assert.assertNotNull(ksDef);
+            Assert.assertEquals(keyspaceName, ksDef.getName());
+            Assert.assertEquals(SimpleStrategy.class.getName(), ksDef.getStrategy_class());
+            Assert.assertEquals("1", ksDef.getStrategy_options().get("replication_factor"));
+            Assert.assertTrue(ksDef.isDurable_writes());
+            Assert.assertNotNull(ksDef.getCf_defs());
+            Assert.assertNotNull(ksDef.getStrategy_options());
+            Assert.assertEquals(1, ksDef.getCf_defsSize());
+
+            for (CfDef cfDef : ksDef.getCf_defs())
+            {
+                Assert.assertNotNull(cfDef);
+                Assert.assertEquals("USERXYZ", cfDef.getName());
+                Assert.assertEquals(keyspaceName, cfDef.getKeyspace());
+                Assert.assertEquals("Standard", cfDef.getColumn_type());
+                Assert.assertEquals("User Column Family", cfDef.getComment());
+                Assert.assertEquals(UTF8Type.class.getName(), cfDef.getComparator_type());
+                Assert.assertNull(cfDef.getSubcomparator_type());
+                Assert.assertEquals(2, cfDef.getColumn_metadataSize());
+                Assert.assertEquals(BytesType.class.getName(), cfDef.getDefault_validation_class());
+                Assert.assertTrue(cfDef.isReplicate_on_write());
+                Assert.assertEquals(16, cfDef.getMin_compaction_threshold());
+                Assert.assertEquals(64, cfDef.getMax_compaction_threshold());
+            }
+
+        }
+        catch (NotFoundException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (InvalidRequestException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (TException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+}

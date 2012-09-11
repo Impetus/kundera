@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<kunderaClientProperties>
+<clientProperties>
 	<datastores>
 		<dataStore>
 			<name>mongo</name>
 			<connection>
 				<properties>
-					<property name="readPreference" value="primary"></property>
-					<property name="connectionTimeOut" value="100000"></property>
+					<property name="read.preference" value="primary"></property>
+					<property name="socket.timeout" value="100000"></property>
 				</properties>
 				<servers>
 					<server>
@@ -24,11 +24,11 @@
 			<name>cassandra</name>
 			<schemas>
 				<schema>
-					<name>KunderaExamples</name>
+					<name>KunderaCassandraXmlTest</name>
 					<properties>
-						<property name="strategyClass" value="SimpleStrategy"></property>
-						<property name="replcation_factor" value="1" />
-						<property name="comparator" value="UTF8Type"></property>
+						<property name="strategy.class" value="SimpleStrategy" />
+						<property name="replcation.factor" value="1" />
+						<property name="durable.writes" value="true" />
 					</properties>
 					<dataCenters>
 						<dataCenter>
@@ -42,11 +42,15 @@
 					</dataCenters>
 					<tables>
 						<table>
-							<name>counters</name>
+							<name>USERXYZ</name>
 							<properties>
-								<property name="inverted_indexing_enabled" value="true"></property>
-								<property name="default_validation_class" value="CounterColumnType"></property>
-								<property name="key_validation_class" value="LongType"></property>
+								<property name="default.validation.class" value="UTF8Type"></property>
+								<property name="key.validation.class" value="UTF8Type"></property>
+								<property name="comment" value="User Column Family"></property>
+								<property name="max.compaction.threshold" value="64"></property>
+								<property name="min.compaction.threshold" value="16"></property>
+								<property name="replicate.on.write" value="true"></property>
+								<property name="comparator.type" value="UTF8Type"></property>
 							</properties>
 						</table>
 					</tables>
@@ -91,4 +95,4 @@
 			</schemas>
 		</dataStore>
 	</datastores>
-</kunderaClientProperties>
+</clientProperties>

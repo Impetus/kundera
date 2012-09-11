@@ -1,6 +1,7 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-         <parent>
+	<parent>
 		<groupId>com.impetus</groupId>
 		<artifactId>kundera</artifactId>
 		<version>2.0.8-SNAPSHOT</version>
@@ -52,7 +53,7 @@
 			<id>morphia.googlecode.com</id>
 			<name>Morphia Repo at Google Code</name>
 			<url>http://morphia.googlecode.com/svn/mavenrepo</url>
-		</repository>		
+		</repository>
 		<repository>
 			<id>sonatype-nexus</id>
 			<name>Kundera Public Repository</name>
@@ -130,11 +131,11 @@
 
 	<dependencies>
 
-                <dependency>
+		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.6</version>
-                        <scope>test</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-collections</groupId>
@@ -232,7 +233,7 @@
 			<groupId>javassist</groupId>
 			<artifactId>javassist</artifactId>
 			<version>3.9.0.GA</version>
-		</dependency>		
+		</dependency>
 
 		<!-- Cassandra Dependencies -->
 		<dependency>
@@ -291,7 +292,13 @@
 		</dependency>
 
 		<!-- Kundera Dependencies -->
-
+		<dependency>
+			<groupId>com.impetus.core</groupId>
+			<artifactId>kundera-core</artifactId>
+			<version>2.0.8-SNAPSHOT</version>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.impetus.client</groupId>
 			<artifactId>kundera-cassandra</artifactId>
@@ -320,14 +327,9 @@
 			<scope>test</scope>
 		</dependency>
 
-<!-- 		<dependency>
-			<groupId>org.apache.openejb</groupId>
-			<artifactId>openejb-core</artifactId>
-			<version>3.1</version>
-			<scope>test</scope>
-		</dependency>
-
- -->		<dependency>
+		<!-- <dependency> <groupId>org.apache.openejb</groupId> <artifactId>openejb-core</artifactId> 
+			<version>3.1</version> <scope>test</scope> </dependency> -->
+		<dependency>
 			<groupId>directory-naming</groupId>
 			<artifactId>naming-java</artifactId>
 			<version>0.8</version>
@@ -348,13 +350,13 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>	
-			        <version>2.5</version>
-    				<configuration>
-        			  <forkMode>once</forkMode>
-        			   <argLine>-Xms256m -Xmx512m</argLine>
-    				</configuration>
-					<dependencies>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<forkMode>once</forkMode>
+					<argLine>-Xms256m -Xmx512m</argLine>
+				</configuration>
+				<dependencies>
 					<dependency>
 						<groupId>org.apache.maven.surefire</groupId>
 						<artifactId>surefire-junit47</artifactId>

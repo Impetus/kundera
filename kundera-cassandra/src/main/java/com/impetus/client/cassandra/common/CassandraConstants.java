@@ -27,14 +27,52 @@ public interface CassandraConstants
     public static final String CQL_VERSION_3_0 = "3.0.0";
 
     // properties to set during creation of keyspace.
-    public final static String PLACEMENT_STRATEGY = "placement_strategy";
+    public static final String PLACEMENT_STRATEGY = "strategy.class";
 
-    public final static String REPLICATION_FACTOR = "replication_factor";
+    public static final String REPLICATION_FACTOR = "replication.factor";
 
-    public final static String CF_DEFS = "cf_defs";
+    public static final String CF_DEFS = "cf.defs";
 
-    public final static String DATA_CENTERS = "datacenters";
+    public static final String DATA_CENTERS = "datacenters";
 
-    public final static String INVERTED_INDEXING_ENABLED = "inverted.indexing.enabled";
+    public static final String INVERTED_INDEXING_ENABLED = "inverted.indexing.enabled";
 
+    /**
+     * 
+     */
+    public static final String DEFAULT_REPLICATION_FACTOR = "1";
+
+    public static final String DURABLE_WRITES = "durable.writes";
+
+    // properties to set during creation of column family.
+
+    public static final String DEFAULT_VALIDATION_CLASS = "default.validation.class";
+
+    public static final String KEY_VALIDATION_CLASS = "key.validation.class";
+
+    public static final String COMPARATOR_TYPE = "comparator.type";
+
+    public static final String SUB_COMPARATOR_TYPE = "sub.comparator.type";
+
+    public static final String REPLICATE_ON_WRITE = "replicate.on.write";
+
+    public static final String COMPACTION_STRATEGY = "compaction.strategy";
+
+    public static final String MAX_COMPACTION_THRESHOLD = "max.compaction.threshold";
+
+    public static final String MIN_COMPACTION_THRESHOLD = "min.compaction.threshold";
+
+    public static final String COMMENT = "comment";
+
+    public static final String ID = "id";
+
+    public static final String CACHING = "caching";
+
+    public static final String BLOOM_FILTER_FP_CHANCE = "bloom.filter.fp.chance";
+
+    public static final String GC_GRACE_SECONDS = "gc.grace.seconds";
+
+    public static final String READ_REPAIR_CHANCE = "read.repair.chance";
+
+    public static final String DCLOCAL_READ_REPAIR_CHANCE = "dclocal.read.repair.chance";
 }

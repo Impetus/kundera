@@ -56,7 +56,7 @@ public class SchemaGenerationUsingPropertyTest
     /** The configuration. */
     private static SchemaConfiguration configuration;
 
-    private final boolean useLucene = true;
+    private final boolean useLucene = false;
 
     private static HBaseAdmin admin;
 
@@ -179,6 +179,10 @@ public class SchemaGenerationUsingPropertyTest
         metaModel.addEntityMetadata(HBaseEntity.class, m);
 
         appMetadata.getMetamodelMap().put(persistenceUnit, metaModel);
+        
+        metaModel.assignManagedTypes(appMetadata.getMetaModelBuilder(persistenceUnit).getManagedTypes());
+        metaModel.assignEmbeddables(appMetadata.getMetaModelBuilder(persistenceUnit).getEmbeddables());
+        metaModel.assignMappedSuperClass(appMetadata.getMetaModelBuilder(persistenceUnit).getMappedSuperClassTypes());
 
         KunderaMetadata.INSTANCE.addClientMetadata(persistenceUnit, clientMetadata);
 

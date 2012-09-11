@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import com.impetus.client.hbase.config.HBaseColumnFamilyProperties;
 import com.impetus.client.hbase.config.HBasePropertyReader;
-import com.impetus.kundera.configure.KunderaClientProperties.DataStore.Schema;
-import com.impetus.kundera.configure.KunderaClientProperties.DataStore.Schema.Table;
+import com.impetus.kundera.configure.ClientProperties.DataStore.Schema;
+import com.impetus.kundera.configure.ClientProperties.DataStore.Schema.Table;
 import com.impetus.kundera.configure.schema.ColumnInfo;
 import com.impetus.kundera.configure.schema.EmbeddedColumnInfo;
 import com.impetus.kundera.configure.schema.SchemaGenerationException;
@@ -366,7 +366,7 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
     private HTableDescriptor getTableMetaData(TableInfo tableInfo)
     {
         HTableDescriptor hTableDescriptor = new HTableDescriptor(tableInfo.getTableName());
-
+        getDataStore("hbase", HBasePropertyReader.hsmd.getClientProperties());
         Properties tableProperties = null;
         if (schemas != null && !schemas.isEmpty())
         {
@@ -411,7 +411,26 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
 
     private void setColumnFamilyProperties(HColumnDescriptor hColumnDescriptor, String tableName)
     {
-        if (HBasePropertyReader.hsmd.getColumnFamilyProperties().containsKey(tableName))
+        if (dataStore != null)
+        {
+            if (tables != null && !tables.isEmpty())
+            {
+                for (Table t : tables)
+                {
+                    Properties columnProperties = t.getProperties();
+                    if (t.getName() != null && t.getName().equalsIgnoreCase(hColumnDescriptor.getNameAsString())
+                            && columnProperties != null)
+                    {
+                        for (Object o : columnProperties.keySet())
+                        {
+                            hColumnDescriptor.setValue(Bytes.toBytes(o.toString()),
+                                    Bytes.toBytes(columnProperties.get(o).toString()));
+                        }
+                    }
+                }
+            }
+        }
+        else if (HBasePropertyReader.hsmd.getColumnFamilyProperties().containsKey(tableName))
         {
             HBaseColumnFamilyProperties familyProperties = HBasePropertyReader.hsmd.getColumnFamilyProperties().get(
                     tableName);
@@ -422,22 +441,6 @@ public class HBaseSchemaManager extends AbstractSchemaManager implements SchemaM
             hColumnDescriptor.setCompressionType(familyProperties.getAlgorithm());
         }
 
-        if (tables != null && !tables.isEmpty())
-        {
-            for (Table t : tables)
-            {
-                Properties columnProperties = t.getProperties();
-                if (t.getName() != null && t.getName().equalsIgnoreCase(hColumnDescriptor.getNameAsString())
-                        && columnProperties != null)
-                {
-                    for (Object o : columnProperties.keySet())
-                    {
-                        hColumnDescriptor.setValue(Bytes.toBytes(o.toString()),
-                                Bytes.toBytes(columnProperties.get(o).toString()));
-                    }
-                }
-            }
-        }
     }
 
     @Override
