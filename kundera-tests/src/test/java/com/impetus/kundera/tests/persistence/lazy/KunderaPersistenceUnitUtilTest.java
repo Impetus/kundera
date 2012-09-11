@@ -1,7 +1,5 @@
 package com.impetus.kundera.tests.persistence.lazy;
 
-import static org.junit.Assert.fail;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -27,7 +25,6 @@ public class KunderaPersistenceUnitUtilTest
         em = emf.createEntityManager();
         util = emf.getPersistenceUnitUtil();
     }
-
     @After
     public void tearDown() throws Exception
     {

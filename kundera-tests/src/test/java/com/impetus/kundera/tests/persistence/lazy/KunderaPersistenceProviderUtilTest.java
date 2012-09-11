@@ -141,13 +141,14 @@ public class KunderaPersistenceProviderUtilTest
             //Find entity
             em = emf.createEntityManager();            
             Photographer p = em.find(Photographer.class, 1);
+            Album album2 = p.getAlbum();
             
             //Load state before field referred
             LoadState loadStateWithoutReference = util.isLoadedWithoutReference(p, "album");
             Assert.assertEquals(LoadState.NOT_LOADED, loadStateWithoutReference);
             
             //Load state after field referred
-            Album album2 = p.getAlbum();
+            
             album2.getAlbumName();
             loadStateWithoutReference = util.isLoadedWithoutReference(p, "album");
             Assert.assertEquals(LoadState.LOADED, loadStateWithoutReference);            

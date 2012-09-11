@@ -33,79 +33,52 @@ import javax.persistence.spi.LoadState;
 
 import org.hibernate.collection.PersistentCollection;
 
-import com.impetus.kundera.intercept.FieldInterceptionHelper;
-import com.impetus.kundera.intercept.FieldInterceptor;
+import com.impetus.kundera.metadata.KunderaMetadataManager;
+import com.impetus.kundera.metadata.model.EntityMetadata;
+import com.impetus.kundera.metadata.model.Relation;
+import com.impetus.kundera.property.PropertyAccessorHelper;
 import com.impetus.kundera.proxy.KunderaProxy;
-import com.impetus.kundera.proxy.LazyInitializer;
 
 /**
  * Helper for {@link PersistenceUtil}
  */
 public class PersistenceUtilHelper
-{
-    public static LoadState isLoadedWithoutReference(Object proxy, String property, MetadataCache cache)
-    {
-        Object entity;
-        if (proxy instanceof KunderaProxy)
-        {
-            LazyInitializer li = ((KunderaProxy) proxy).getKunderaLazyInitializer();
-            if (li.isUninitialized())
-            {
-                return LoadState.NOT_LOADED;
-            }
-            else
-            {
-                entity = li.getImplementation();
-            }
-        }
-        else
-        {
-            entity = proxy;
-        }
-
-        FieldInterceptor interceptor = FieldInterceptionHelper.extractFieldInterceptor(entity);
-        final boolean isInitialized = interceptor == null || interceptor.isInitialized(property);
-        LoadState state;
-        if (isInitialized && interceptor != null)
-        {
-            // property is loaded according to bytecode enhancement, but is
-            // it loaded as far as association?
-            // it's ours, we can read
-            state = isLoaded(get(entity, property, cache));
-            // it's ours so we know it's loaded
-            if (state == LoadState.UNKNOWN)
-                state = LoadState.LOADED;
-        }
-        else if (interceptor != null && (!isInitialized))
-        {
-            state = LoadState.NOT_LOADED;
-        }
-        else
-        { // interceptor == null
-          // property is loaded according to bytecode enhancement, but is
-          // it loaded as far as association?
-          // it's ours, we can read
-            state = isLoaded(get(entity, property, cache));
-            // it's ours so we know it's loaded
-            if (state == LoadState.UNKNOWN)
-                state = LoadState.LOADED;
-        }
-
-        return state;
-
-    }
+{ 
 
     public static LoadState isLoadedWithReference(Object proxy, String property, MetadataCache cache)
     {
-        // for sure we don't instrument and for sure it's not a lazy proxy
-        Object object = get(proxy, property, cache);
-        return isLoaded(object);
+        return isLoaded(get(proxy, property, cache));
+    }
+    
+    public static LoadState isLoadedWithoutReference(Object proxy, String property, MetadataCache cache)
+    {       
+        Class<?> entityClass = proxy.getClass();
+        EntityMetadata m = KunderaMetadataManager.getEntityMetadata(entityClass);
+
+        Relation relation = m.getRelation(property);
+        Object relValue = PropertyAccessorHelper.getObject(proxy, relation.getProperty());
+        if (relValue == null)
+        {
+            return LoadState.NOT_LOADED;
+        }
+        else if (relValue instanceof KunderaProxy)
+        {
+
+            LoadState state = isLoaded(get(proxy, property, cache));
+            if (state == LoadState.UNKNOWN)
+                state = LoadState.LOADED;
+            return state;
+        }
+        else
+        {
+            return LoadState.LOADED;
+        }   
+
     }
 
     private static Object get(Object proxy, String property, MetadataCache cache)
     {
         final Class<?> clazz = proxy.getClass();
-
         try
         {
             Member member = cache.getMember(clazz, property);
@@ -139,8 +112,12 @@ public class PersistenceUtilHelper
     }
 
     public static LoadState isLoaded(Object o)
-    {
-        if (o instanceof KunderaProxy)
+    { 
+        if(o == null)
+        {
+            return LoadState.NOT_LOADED;
+        }        
+        else if (o instanceof KunderaProxy)
         {
             final boolean isInitialized = !((KunderaProxy) o).getKunderaLazyInitializer().isUninitialized();
             return isInitialized ? LoadState.LOADED : LoadState.NOT_LOADED;
