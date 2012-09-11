@@ -41,7 +41,7 @@ public class FieldInterceptionHelper
     }
 
     public static boolean isInstrumented(Object entity) {
-        return entity != null && isInstrumented( entity.getClass() );
+        return entity != null && isInstrumented(entity.getClass() );
     }
 
     public static FieldInterceptor extractFieldInterceptor(Object entity) {

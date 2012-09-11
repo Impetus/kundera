@@ -67,7 +67,7 @@ public class KunderaPersistenceUnitUtil implements PersistenceUnitUtil
         {
             throw new IllegalArgumentException(entityClass + " is not an entity");
         }
-        return PropertyAccessorHelper.getId(entityClass, entityMetadata);
+        return PropertyAccessorHelper.getId(entity, entityMetadata);
     }
 
 }

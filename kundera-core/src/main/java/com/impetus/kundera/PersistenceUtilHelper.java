@@ -46,7 +46,6 @@ public class PersistenceUtilHelper
     public static LoadState isLoadedWithoutReference(Object proxy, String property, MetadataCache cache)
     {
         Object entity;
-        boolean sureFromUs = false;
         if (proxy instanceof KunderaProxy)
         {
             LazyInitializer li = ((KunderaProxy) proxy).getKunderaLazyInitializer();
@@ -58,63 +57,49 @@ public class PersistenceUtilHelper
             {
                 entity = li.getImplementation();
             }
-            sureFromUs = true;
         }
         else
         {
             entity = proxy;
         }
 
-        // we are instrumenting but we can't assume we are the only ones
-        if (FieldInterceptionHelper.isInstrumented(entity))
+        FieldInterceptor interceptor = FieldInterceptionHelper.extractFieldInterceptor(entity);
+        final boolean isInitialized = interceptor == null || interceptor.isInitialized(property);
+        LoadState state;
+        if (isInitialized && interceptor != null)
         {
-            FieldInterceptor interceptor = FieldInterceptionHelper.extractFieldInterceptor(entity);
-            final boolean isInitialized = interceptor == null || interceptor.isInitialized(property);
-            LoadState state;
-            if (isInitialized && interceptor != null)
-            {
-                // property is loaded according to bytecode enhancement, but is
-                // it loaded as far as association?
-                // it's ours, we can read
-                state = isLoaded(get(entity, property, cache));
-                // it's ours so we know it's loaded
-                if (state == LoadState.UNKNOWN)
-                    state = LoadState.LOADED;
-            }
-            else if (interceptor != null && (!isInitialized))
-            {
-                state = LoadState.NOT_LOADED;
-            }
-            else if (sureFromUs)
-            { // interceptor == null
-                // property is loaded according to bytecode enhancement, but is
-                // it loaded as far as association?
-                // it's ours, we can read
-                state = isLoaded(get(entity, property, cache));
-                // it's ours so we know it's loaded
-                if (state == LoadState.UNKNOWN)
-                    state = LoadState.LOADED;
-            }
-            else
-            {
-                state = LoadState.UNKNOWN;
-            }
-
-            return state;
+            // property is loaded according to bytecode enhancement, but is
+            // it loaded as far as association?
+            // it's ours, we can read
+            state = isLoaded(get(entity, property, cache));
+            // it's ours so we know it's loaded
+            if (state == LoadState.UNKNOWN)
+                state = LoadState.LOADED;
+        }
+        else if (interceptor != null && (!isInitialized))
+        {
+            state = LoadState.NOT_LOADED;
         }
         else
-        {
-            // can't do sureFromUs ? LoadState.LOADED : LoadState.UNKNOWN;
-            // is that an association?
-            return LoadState.UNKNOWN;
+        { // interceptor == null
+          // property is loaded according to bytecode enhancement, but is
+          // it loaded as far as association?
+          // it's ours, we can read
+            state = isLoaded(get(entity, property, cache));
+            // it's ours so we know it's loaded
+            if (state == LoadState.UNKNOWN)
+                state = LoadState.LOADED;
         }
+
+        return state;
+
     }
 
     public static LoadState isLoadedWithReference(Object proxy, String property, MetadataCache cache)
     {
         // for sure we don't instrument and for sure it's not a lazy proxy
         Object object = get(proxy, property, cache);
-        return isLoaded(proxy);
+        return isLoaded(object);
     }
 
     private static Object get(Object proxy, String property, MetadataCache cache)

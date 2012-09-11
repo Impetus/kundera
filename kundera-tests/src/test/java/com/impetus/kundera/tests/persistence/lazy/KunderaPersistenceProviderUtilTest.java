@@ -20,6 +20,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.spi.LoadState;
 
+import junit.framework.Assert;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +31,7 @@ import com.impetus.kundera.KunderaPersistenceProviderUtil;
 
 /**
  * @author amresh.singh
+ * Test case for {@link KunderaPersistenceProviderUtil}
  * Script for running this test case
  *         drop keyspace Pickr;
  *         create keyspace Pickr;
@@ -52,8 +55,7 @@ public class KunderaPersistenceProviderUtilTest
     EntityManager em;
     
    KunderaPersistence kp = new KunderaPersistence();
-   KunderaPersistenceProviderUtil util = new KunderaPersistenceProviderUtil(kp);
-    
+   KunderaPersistenceProviderUtil util = new KunderaPersistenceProviderUtil(kp);    
     
 
     /**
@@ -72,16 +74,15 @@ public class KunderaPersistenceProviderUtilTest
     @After
     public void tearDown() throws Exception
     {
-    }
-
-    /**
-     * Test method for {@link com.impetus.kundera.KunderaPersistenceProviderUtil#isLoadedWithoutReference(java.lang.Object, java.lang.String)}.
-     */
-    @Test
-    public void testIsLoadedWithoutReference()
-    {
-        
-    }
+        if(em != null)
+        {
+            em.close();
+        }
+        if(emf != null)
+        {
+            emf.close();
+        }       
+    }    
 
     /**
      * Test method for {@link com.impetus.kundera.KunderaPersistenceProviderUtil#isLoadedWithReference(java.lang.Object, java.lang.String)}.
@@ -91,35 +92,71 @@ public class KunderaPersistenceProviderUtilTest
     {
         try
         {
+            //Persist entity
             Photographer photographer = new Photographer();
             photographer.setPhotographerId(1);
             photographer.setPhotographerName("Amresh");
             Album album = new Album("album1", "My Vacation", "Vacation pics");
-            photographer.setAlbum(album);           
-            
+            photographer.setAlbum(album);     
             em.persist(photographer);   
             em.close();
             
-            em = emf.createEntityManager();
-            
+            //Find entity
+            em = emf.createEntityManager();            
             Photographer p = em.find(Photographer.class, 1);
+            
+            //Load state before field referred
+            LoadState loadStateWithReference = util.isLoadedWithReference(p, "album");           
+            Assert.assertEquals(LoadState.NOT_LOADED, loadStateWithReference);
+            
+            //Load state after field referred
             Album album2 = p.getAlbum();
-            LoadState loadStateWithReference = util.isLoadedWithReference(album2, "albumName");
-            LoadState loadStateWithoutReference = util.isLoadedWithoutReference(album2, "albumName");           
-            System.out.println(loadStateWithReference + ", " + loadStateWithoutReference);    
-            
-            
             album2.getAlbumName();
-            loadStateWithReference = util.isLoadedWithReference(album2, "albumName");
-            loadStateWithoutReference = util.isLoadedWithoutReference(album2, "albumName");           
-            System.out.println(loadStateWithReference + ", " + loadStateWithoutReference);
-            
-            
+            loadStateWithReference = util.isLoadedWithReference(p, "album");
+            Assert.assertEquals(LoadState.LOADED, loadStateWithReference);            
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            Assert.fail(e.getMessage());
         }
+    }
+    
+    /**
+     * Test method for {@link com.impetus.kundera.KunderaPersistenceProviderUtil#isLoadedWithoutReference(java.lang.Object, java.lang.String)}.
+     */
+    @Test
+    public void testIsLoadedWithoutReference()
+    {
+        try
+        {
+            //Persist entity
+            Photographer photographer = new Photographer();
+            photographer.setPhotographerId(1);
+            photographer.setPhotographerName("Amresh");
+            Album album = new Album("album1", "My Vacation", "Vacation pics");
+            photographer.setAlbum(album);     
+            em.persist(photographer);   
+            em.close();
+            
+            //Find entity
+            em = emf.createEntityManager();            
+            Photographer p = em.find(Photographer.class, 1);
+            
+            //Load state before field referred
+            LoadState loadStateWithoutReference = util.isLoadedWithoutReference(p, "album");
+            Assert.assertEquals(LoadState.NOT_LOADED, loadStateWithoutReference);
+            
+            //Load state after field referred
+            Album album2 = p.getAlbum();
+            album2.getAlbumName();
+            loadStateWithoutReference = util.isLoadedWithoutReference(p, "album");
+            Assert.assertEquals(LoadState.LOADED, loadStateWithoutReference);            
+        }
+        catch (Exception e)
+        {
+            Assert.fail(e.getMessage());
+        }
+        
     }
 
     /**
@@ -128,8 +165,34 @@ public class KunderaPersistenceProviderUtilTest
     @Test
     public void testIsLoaded()
     {
-        
+        try
+        {
+            //Persist entity
+            Photographer photographer = new Photographer();
+            photographer.setPhotographerId(1);
+            photographer.setPhotographerName("Amresh");
+            Album album = new Album("album1", "My Vacation", "Vacation pics");
+            photographer.setAlbum(album);     
+            em.persist(photographer);   
+            em.close();
+            
+            //Find entity
+            em = emf.createEntityManager();            
+            Photographer p = em.find(Photographer.class, 1);
+            Album album2 = p.getAlbum();
+            
+            //Load state before field referred
+            LoadState loadState = util.isLoaded(album2);           
+            Assert.assertEquals(LoadState.NOT_LOADED, loadState);
+            
+            //Load state after field referred            
+            album2.getAlbumName();
+            loadState = util.isLoaded(album2);            
+            Assert.assertEquals(LoadState.LOADED, loadState);            
+        }
+        catch (Exception e)
+        {
+            Assert.fail(e.getMessage());
+        }        
     } 
-
-
 }

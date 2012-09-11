@@ -60,7 +60,7 @@ public class KunderaPersistenceProviderUtil implements ProviderUtil
      * has been provided by itself and that either the entity attributes with
      * FetchType EAGER have not been loaded or that the state of the specified
      * attribute has not been loaded, this method returns LoadState.NOT_LOADED.
-     * If the provider cannot determine the load state, his method returns LoadState.UNKNOWN.
+     * If the provider cannot determine the load state, this method returns LoadState.UNKNOWN.
      * The provider's implementation of this method is permitted to obtain a reference to 
      * the attribute value. (This access is safe because providers which might trigger the loading of
      * the attribute state will have already been determined by
